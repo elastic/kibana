@@ -33,6 +33,7 @@ type CapturedFlyoutOnClose = EuiFlyoutProps['onClose'];
 
 let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
 let latestFlyoutKey: number | undefined;
+let latestFlyoutSession: EuiFlyoutProps['session'];
 
 jest.mock('@elastic/eui', () => {
   const ReactActual = jest.requireActual('react') as typeof import('react');
@@ -46,6 +47,7 @@ jest.mock('@elastic/eui', () => {
         if (props['data-test-subj'] === 'composeDiscoverFlyout') {
           latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
           latestFlyoutKey = (props as { 'data-flyout-key'?: number })['data-flyout-key'];
+          latestFlyoutSession = props.session;
         }
         return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
       }
@@ -412,6 +414,7 @@ describe('ComposeDiscoverFlyout', () => {
     jest.mocked(getFlyoutManagerStore).mockImplementation(() => actual.getFlyoutManagerStore());
     latestFlyoutOnClose = undefined;
     latestFlyoutKey = undefined;
+    latestFlyoutSession = undefined;
     sandboxFlyoutProps = undefined;
     yamlRuleFormProps = undefined;
     readCommittedQuery = undefined;
@@ -556,6 +559,40 @@ describe('ComposeDiscoverFlyout', () => {
     it('shows "Edit rule" in edit mode when the name is empty', () => {
       renderFlyout({ mode: 'edit' });
       expect(screen.getByText('Edit rule')).toBeInTheDocument();
+    });
+
+    it('keeps edit and clone off the managed session so the title can follow the rule name', () => {
+      renderFlyout({
+        mode: 'edit',
+        ruleId: 'rule-1',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          version: 1,
+          metadata: { name: 'CPU high', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: { base: 'FROM logs-* | LIMIT 1' },
+          created_by: { profile_uid: 'test' },
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: { profile_uid: 'test' },
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      expect(latestFlyoutSession).toBe('never');
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+
+      expect(screen.getByText('Edit changed')).toBeInTheDocument();
+      expect(latestFlyoutSession).toBe('never');
+      expect(latestFlyoutKey).toBe(0);
+    });
+
+    it('starts a managed session for create so the form can stack on the picker', () => {
+      renderFlyout({ mode: 'create' });
+      expect(latestFlyoutSession).toBe('start');
     });
 
     it('shows "Clone rule" in clone mode', () => {
@@ -995,6 +1032,20 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout({});
 
       expect(screen.queryByTestId('composeDiscoverCancel')).not.toBeInTheDocument();
+    });
+
+    it('keeps an edited form mounted when edit mode is dismissed', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose, mode: 'edit' });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      const keyAfterEdit = latestFlyoutKey;
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+      expect(latestFlyoutKey).toBe(keyAfterEdit);
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
     });
 
     it('shows the confirmation modal when the form is dirty and the X button is clicked', () => {

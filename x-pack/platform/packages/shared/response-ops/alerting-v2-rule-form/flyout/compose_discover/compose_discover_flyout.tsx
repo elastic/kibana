@@ -458,11 +458,14 @@ export function ComposeDiscoverFlyout({
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
   /*
-   * EuiFlyout with session="start" calls closeAllFlyouts() (or goBack()) before
-   * onClose. Remounting via flyoutKey re-registers this flyout so it stays on
-   * top of a stacked picker while the unsaved-changes modal is open. Form state
-   * is preserved because FormProvider sits above the flyout.
+   * Create joins an EUI session so it can stack on the option picker. That
+   * session calls closeAllFlyouts() before onClose, so the flyout has to
+   * remount to stay up while the unsaved-changes modal is open.
+   * Edit and clone stay unmanaged. A managed session re-registers whenever
+   * flyoutMenuProps.title changes, which tears the session down on every
+   * rule-name keystroke, and the remount drops in-progress fields.
    */
+  const isManagedFlyoutSession = mode === 'create';
   const { flyoutKey, reregister } = useEuiFlyoutReregister();
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
@@ -539,10 +542,13 @@ export function ComposeDiscoverFlyout({
   const suspendingCloseRef = useRef(false);
 
   const restoreFlyoutAfterEuiClose = useCallback(() => {
+    if (!isManagedFlyoutSession) {
+      return;
+    }
     suspendingCloseRef.current = true;
     reopenChildRef.current = yamlModeRef.current || childOpenRef.current;
     reregister();
-  }, [reregister]);
+  }, [isManagedFlyoutSession, reregister]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -1414,9 +1420,9 @@ export function ComposeDiscoverFlyout({
           <EuiFlyout
             key={flyoutKey}
             type="overlay"
-            session="start"
-            historyKey={historyKey}
-            flyoutMenuProps={{ title }}
+            session={isManagedFlyoutSession ? 'start' : 'never'}
+            historyKey={isManagedFlyoutSession ? historyKey : undefined}
+            flyoutMenuProps={isManagedFlyoutSession ? { title } : undefined}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
             size={STACKED_FLYOUT_SIZE}
