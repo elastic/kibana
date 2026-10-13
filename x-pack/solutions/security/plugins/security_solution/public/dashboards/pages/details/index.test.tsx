@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { Router } from '@kbn/shared-ux-router';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { DashboardView } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
+import { SiemSearchBar } from '../../../common/components/search_bar';
+import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -36,6 +40,26 @@ jest.mock('../../components/dashboard_renderer', () => ({
     )),
 }));
 
+jest.mock('../../hooks/use_dashboard_renderer', () => ({
+  useDashboardRenderer: jest.fn(() => ({
+    dashboardContainer: undefined,
+    dashboardInternalApi: undefined,
+    handleDashboardLoaded: jest.fn(),
+  })),
+}));
+
+jest.mock('../../../common/components/search_bar', () => ({
+  SiemSearchBar: jest.fn(() => null),
+}));
+
+jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
+  return {
+    ...actual,
+    getESQLAdHocDataview: jest.fn(),
+  };
+});
+
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {
@@ -58,12 +82,35 @@ const mockHistory = {
   listen: jest.fn(),
 };
 
+const emptyRenderer = {
+  dashboardContainer: undefined,
+  dashboardInternalApi: undefined,
+  handleDashboardLoaded: jest.fn(),
+};
+
+const lensPanel = (esql: string) => ({
+  attributes: {
+    state: {
+      datasourceStates: {
+        textBased: {
+          layers: {
+            layer: { query: { esql } },
+          },
+        },
+      },
+    },
+  },
+});
+
 describe('DashboardView', () => {
   beforeEach(() => {
     (useCapabilities as unknown as jest.Mock).mockReturnValue({
       show: true,
       showWriteControls: true,
     });
+    (useDashboardRenderer as jest.Mock).mockReturnValue(emptyRenderer);
+    (getESQLAdHocDataview as jest.Mock).mockReset();
+    (SiemSearchBar as jest.Mock).mockClear();
   });
   test('render when no error state', () => {
     const { queryByTestId } = render(
@@ -102,6 +149,74 @@ describe('DashboardView', () => {
 
     expect(queryByTestId(`dashboard-view-wrapper`)).toHaveStyle({
       'min-height': `calc(100vh - 140px)`,
+    });
+  });
+
+  test('passes click-time data views from panel queries to the search bar', async () => {
+    const templateDataViewId = 'd6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da';
+    const panels: Record<string, object> = {
+      panelA: lensPanel('FROM filebeat-* | STATS count = COUNT(*)'),
+      panelB: lensPanel('FROM winlogbeat-* | STATS count = COUNT(*)'),
+    };
+    const dataViews$ = new BehaviorSubject([{ id: templateDataViewId }]);
+    const dashboardContainer = {
+      dataViews$,
+      children$: new BehaviorSubject({ panelA: {}, panelB: {} }),
+      getDashboardPanelFromId: (panelId: string) => ({
+        type: 'lens',
+        serializedState: panels[panelId],
+      }),
+    };
+    (getESQLAdHocDataview as jest.Mock).mockImplementation(
+      async ({ query }: { query: string }) => ({
+        id: `click:${query}`,
+      })
+    );
+    (useDashboardRenderer as jest.Mock).mockReturnValue({
+      dashboardContainer,
+      dashboardInternalApi: undefined,
+      handleDashboardLoaded: jest.fn(),
+    });
+
+    const { rerender } = render(
+      <Router history={mockHistory}>
+        <DashboardView initialViewMode={'view'} />
+      </Router>,
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() => {
+      expect(SiemSearchBar).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          additionalDataViews: [{ id: 'click:FROM filebeat-*' }, { id: 'click:FROM winlogbeat-*' }],
+        }),
+        expect.anything()
+      );
+    });
+    expect(getESQLAdHocDataview).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM filebeat-*' })
+    );
+    expect(getESQLAdHocDataview).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM winlogbeat-*' })
+    );
+    const passedViews = (SiemSearchBar as jest.Mock).mock.lastCall[0].additionalDataViews as Array<{
+      id: string;
+    }>;
+    expect(passedViews.map((view) => view.id)).not.toContain(templateDataViewId);
+
+    (useDashboardRenderer as jest.Mock).mockReturnValue(emptyRenderer);
+    // initialViewMode must change so React.memo does not skip the update.
+    rerender(
+      <Router history={mockHistory}>
+        <DashboardView initialViewMode={'edit'} />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(SiemSearchBar).toHaveBeenLastCalledWith(
+        expect.objectContaining({ additionalDataViews: undefined }),
+        expect.anything()
+      );
     });
   });
 });
