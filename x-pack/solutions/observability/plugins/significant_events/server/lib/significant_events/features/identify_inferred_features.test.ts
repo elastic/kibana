@@ -25,7 +25,7 @@ const mockExecuteFeatureIdentificationAgent = jest.mocked(executeFeatureIdentifi
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
   uuid: `uuid-${overrides.type ?? 'technology'}-${id}`,
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   type: 'technology',
   subtype: 'library',
   title: id,
@@ -131,7 +131,7 @@ describe('findSimilarFeatures', () => {
 
     const result = await findSimilarFeatures({
       kiClient,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       args: {
         candidate_id: 'okta-sdk',
         title: 'Okta SDK',
@@ -173,7 +173,7 @@ describe('findSimilarFeatures', () => {
 
     const result = await findSimilarFeatures({
       kiClient,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       args: {
         candidate_id: 'tech-x',
         title: 'Tech X',
@@ -194,7 +194,7 @@ describe('findSimilarFeatures', () => {
     await expect(
       findSimilarFeatures({
         kiClient,
-        streamName: 'logs.test',
+        sourceId: 'logs.test',
         args: {
           candidate_id: 'okta',
           title: 'Okta',
@@ -211,8 +211,7 @@ describe('buildTelemetry', () => {
     run_id: 'run-1',
     connector_id: 'connector-1',
     iteration: 1,
-    stream_name: 'logs.test',
-    stream_type: 'wired' as const,
+    source_id: 'logs.test',
     docs_count: 20,
     excluded_features_count: 2,
     total_filters: 5,
@@ -274,7 +273,7 @@ describe('identifyInferredFeatures', () => {
       connectorId: 'connector-1',
       logger: loggerMock.create(),
       signal: new AbortController().signal,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       streamType: 'wired',
       definition: { name: 'logs.test' },
       runId: 'run-1',
