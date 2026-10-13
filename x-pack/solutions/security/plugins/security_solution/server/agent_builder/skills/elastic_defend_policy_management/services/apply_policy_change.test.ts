@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, StartServicesAccessor } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -87,9 +87,9 @@ const createWriteDeps = () => {
   const endpointAppContextService = createMockEndpointAppContextService();
   const request = httpServerMock.createKibanaRequest();
   const soClient = { sentinel: 'request-scoped-so-client' };
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) } },
-  ]) as unknown as StartServicesAccessor;
+  jest
+    .spyOn(endpointAppContextService.savedObjects, 'createRequestScopedSoClient')
+    .mockReturnValue(soClient as never);
 
   endpointAppContextService.getEndpointAuthz.mockResolvedValue(
     getEndpointAuthzInitialStateMock({
@@ -122,7 +122,6 @@ const createWriteDeps = () => {
   return {
     deps: {
       endpointAppContextService,
-      getStartServices,
       request,
       spaceId: SPACE_ID,
     } satisfies ApplyPolicyChangeDependencies,

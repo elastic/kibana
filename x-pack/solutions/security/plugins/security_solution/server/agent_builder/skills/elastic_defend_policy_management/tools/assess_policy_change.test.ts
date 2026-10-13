@@ -6,7 +6,6 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
@@ -41,9 +40,6 @@ jest.mock('../services/assess_change', () => ({
 }));
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn(async () => [
-  { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-]) as unknown as StartServicesAccessor;
 const mockedAssessChange = jest.mocked(assessChange);
 
 const MIXED_STATUS: Readonly<Record<string, number>> = {
@@ -183,7 +179,6 @@ const getResult = async (
 ) => {
   const tool = createAssessPolicyChangeTool({
     endpointAppContextService: options.endpointAppContextService ?? createAuthorizedService(),
-    getStartServices,
   });
   const result = await tool.handler(params, options.ctx ?? createContext());
   if (!('results' in result)) {
@@ -201,13 +196,11 @@ describe('createAssessPolicyChangeTool', () => {
     const endpointAppContextService = createAuthorizedService();
     const tool = createAssessPolicyChangeTool({
       endpointAppContextService,
-      getStartServices,
     });
 
     expect(mockedCreatePolicyTool).toHaveBeenCalledWith(
       expect.objectContaining({
         endpointAppContextService,
-        getStartServices,
         id: ASSESS_POLICY_CHANGE_TOOL_ID,
         schema: assessPolicyChangeSchema,
         maxResultTokens: 12_000,

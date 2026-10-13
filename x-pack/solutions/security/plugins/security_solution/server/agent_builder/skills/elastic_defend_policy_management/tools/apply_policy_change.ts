@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { assessPolicyChangeParamsSchema } from '../domain/impact';
 import { POLICY_IDENTIFIER_MAX_LENGTH, policyIdentifierInputSchema } from '../domain/input_schemas';
@@ -53,14 +52,11 @@ export type ApplyPolicyChangeInput = z.infer<typeof applyPolicyChangeSchema>;
 
 export const createApplyPolicyChangeTool = ({
   endpointAppContextService,
-  getStartServices,
 }: {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
 }): BuiltinSkillBoundedTool<typeof applyPolicyChangeSchema> =>
   createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: APPLY_POLICY_CHANGE_TOOL_ID,
     description:
       'Apply one previously assessed change set to one Elastic Defend endpoint policy in the current space after the user confirms the rendered change card. ' +
@@ -79,7 +75,6 @@ export const createApplyPolicyChangeTool = ({
         const params = applyPolicyChangeSchema.parse(toolParams);
         const service = createEndpointPolicyManagementService({
           endpointAppContextService,
-          getStartServices,
           request: context.request,
           spaceId: context.spaceId,
         });

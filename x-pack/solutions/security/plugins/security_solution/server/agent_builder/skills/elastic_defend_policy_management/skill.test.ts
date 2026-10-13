@@ -116,13 +116,10 @@ const INLINE_TOOL_IDS = [
 
 const createSkill = () => {
   const endpointAppContextService = createMockEndpointAppContext().service;
-  const getStartServices = jest.fn();
   return {
     endpointAppContextService,
-    getStartServices,
     skill: createElasticDefendPolicyManagementSkill({
       endpointAppContextService,
-      getStartServices,
     }),
   };
 };
