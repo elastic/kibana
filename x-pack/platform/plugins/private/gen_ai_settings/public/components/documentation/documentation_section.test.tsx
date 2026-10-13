@@ -757,42 +757,42 @@ describe('DocumentationSection', () => {
 
       renderComponent(mockProductDocBase, true);
 
-        await waitFor(() => {
-          expect(screen.getByTestId('documentation-update-elastic_documents')).toBeInTheDocument();
-        });
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-update-elastic_documents')).toBeInTheDocument();
+      });
 
-        fireEvent.click(screen.getByTestId('documentation-update-elastic_documents'));
+      fireEvent.click(screen.getByTestId('documentation-update-elastic_documents'));
 
-        await waitFor(() => {
-          expect(screen.getByTestId('documentation-updating-elastic_documents')).toHaveTextContent(
-            'Updating'
-          );
-        });
-        expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
-
-        phase = 'installing';
-        pollers.forEach((poll) => poll());
-
-        await waitFor(() => {
-          expect(screen.getByText('Not installed')).toBeInTheDocument();
-        });
+      await waitFor(() => {
         expect(screen.getByTestId('documentation-updating-elastic_documents')).toHaveTextContent(
           'Updating'
         );
-        expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+      });
+      expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
 
-        phase = 'done';
-        pollers.forEach((poll) => poll());
+      phase = 'installing';
+      pollers.forEach((poll) => poll());
 
-        await waitFor(() => {
-          expect(
-            screen.queryByTestId('documentation-updating-elastic_documents')
-          ).not.toBeInTheDocument();
-          expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-            title: 'Elastic documentation updated successfully',
-          });
+      await waitFor(() => {
+        expect(screen.getByText('Not installed')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('documentation-updating-elastic_documents')).toHaveTextContent(
+        'Updating'
+      );
+      expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+
+      phase = 'done';
+      pollers.forEach((poll) => poll());
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('documentation-updating-elastic_documents')
+        ).not.toBeInTheDocument();
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: 'Elastic documentation updated successfully',
         });
-        expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
       expect(
         screen.queryByTestId('documentation-update-elastic_documents')
       ).not.toBeInTheDocument();
