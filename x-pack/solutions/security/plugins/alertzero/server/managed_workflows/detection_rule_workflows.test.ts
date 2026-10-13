@@ -1420,6 +1420,65 @@ describe('detection rule workflows', () => {
         );
       });
 
+      // The gate is a hand-written table of rule type by change type, evaluated here
+      // rather than string-matched so a dropped or misspelled cell fails the test.
+      // Saved query rules carry no inline query and machine learning rules none at
+      // all; an exception cannot be previewed on an ES|QL rule, which has no filters.
+      describe('backtest gate', () => {
+        const evaluateGate = (
+          type: string,
+          changeType: string,
+          exceptionFilter: { error: null; output: { filters: unknown[] } } | { error: string }
+        ) => {
+          const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
+          const expression = String(support.with?.supported).trim().slice(3, -2).trim();
+          return createWorkflowLiquidEngine().evalValueSync(expression, {
+            steps: {
+              fetch_rule: { error: null, output: { type, enabled: true } },
+              diagnose_rule: { output: { structured_output: { change_type: changeType } } },
+              build_exception_filter: exceptionFilter,
+            },
+          });
+        };
+        const builtFilter = { error: null, output: { filters: [{ bool: {} }] } };
+
+        it.each([
+          ['query', { query: true, exception: true, threshold: false, schedule: true }],
+          ['eql', { query: true, exception: true, threshold: false, schedule: true }],
+          ['esql', { query: true, exception: false, threshold: false, schedule: true }],
+          ['new_terms', { query: true, exception: true, threshold: false, schedule: true }],
+          ['threat_match', { query: true, exception: true, threshold: false, schedule: true }],
+          ['threshold', { query: true, exception: true, threshold: true, schedule: true }],
+          ['saved_query', { query: false, exception: false, threshold: false, schedule: false }],
+          [
+            'machine_learning',
+            { query: false, exception: false, threshold: false, schedule: false },
+          ],
+        ])('decides each change type on a %s rule', (type, expected) => {
+          for (const [changeType, supported] of Object.entries(expected)) {
+            expect([changeType, evaluateGate(type, changeType, builtFilter)]).toEqual([
+              changeType,
+              supported,
+            ]);
+          }
+        });
+
+        it.each(['risk_score', 'manual'])('never previews a %s change', (changeType) => {
+          expect(evaluateGate('query', changeType, builtFilter)).toBe(false);
+        });
+
+        // Falling back to the rule's own filters would backtest the unchanged rule.
+        it('withholds the exception backtest when the filter was not built', () => {
+          expect(evaluateGate('query', 'exception', { error: 'boom' })).toBe(false);
+          expect(
+            evaluateGate('query', 'exception', {
+              error: null,
+              output: { filters: null as unknown as unknown[] },
+            })
+          ).toBe(false);
+        });
+      });
+
       it('bounds direct review inputs', () => {
         const [trigger] = review.triggers as unknown as Array<{
           inputs: { properties: Record<string, Record<string, unknown>> };
