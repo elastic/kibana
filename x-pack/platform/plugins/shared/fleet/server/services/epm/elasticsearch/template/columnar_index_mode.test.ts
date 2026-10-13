@@ -9,8 +9,10 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Installation, RegistryDataStream, TemplateMap } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 
 import {
+  isLogsdbColumnarActive,
   resolveColumnarIndexModes,
   resolveLogsdbColumnarIndexMode,
   stripColumnarIncompatibleMappings,
@@ -113,7 +115,11 @@ describe('resolveLogsdbColumnarIndexMode', () => {
 
   it('follows an explicit user choice', () => {
     expect(
-      resolveLogsdbColumnarIndexMode({ readiness: 'opt_in', userChoice: true, isNewDataStream: false })
+      resolveLogsdbColumnarIndexMode({
+        readiness: 'opt_in',
+        userChoice: true,
+        isNewDataStream: false,
+      })
     ).toEqual('logsdb_columnar');
     expect(
       resolveLogsdbColumnarIndexMode({
@@ -285,5 +291,49 @@ describe('resolveColumnarIndexModes', () => {
     });
 
     expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
+  });
+});
+
+describe('isLogsdbColumnarActive', () => {
+  const indexTemplate = (id: string) => ({ id, type: ElasticsearchAssetType.indexTemplate });
+
+  it('is true when a logs index template of the installation is on logsdb_columnar', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getIndexTemplate.mockImplementation(
+      async ({ name }: any) =>
+        ({
+          index_templates: [
+            {
+              name,
+              index_template: {
+                index_patterns: [],
+                template: {
+                  settings: { index: name === 'logs-pkg.b' ? { mode: 'logsdb_columnar' } : {} },
+                },
+              },
+            },
+          ],
+        } as any)
+    );
+
+    await expect(
+      isLogsdbColumnarActive(esClient, [
+        indexTemplate('logs-pkg.a'),
+        indexTemplate('logs-pkg.b'),
+        indexTemplate('metrics-pkg.c'),
+        { id: 'logs-pkg.a@package', type: ElasticsearchAssetType.componentTemplate },
+      ])
+    ).resolves.toBe(true);
+    expect(esClient.indices.getIndexTemplate).toHaveBeenCalledTimes(2);
+  });
+
+  it('is false when no logs index template is on logsdb_columnar', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getIndexTemplate.mockResponse({ index_templates: [] } as any);
+
+    await expect(isLogsdbColumnarActive(esClient, [indexTemplate('logs-pkg.a')])).resolves.toBe(
+      false
+    );
+    await expect(isLogsdbColumnarActive(esClient, [])).resolves.toBe(false);
   });
 });

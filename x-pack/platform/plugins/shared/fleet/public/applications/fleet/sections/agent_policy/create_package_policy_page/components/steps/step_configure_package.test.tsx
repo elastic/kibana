@@ -481,6 +481,15 @@ describe('StepConfigurePackage', () => {
       expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
     });
 
+    it('starts from the mode the installation uses when the user has not chosen', () => {
+      // An `opt_in` -> `default` upgrade leaves the existing data streams on LogsDB.
+      declareReadiness('default');
+      (packageInfo as any).installationInfo = { logsdb_columnar_active: false };
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
+    });
+
     it('reflects the pending choice carried by the policy', () => {
       declareReadiness();
       packagePolicy.package = {

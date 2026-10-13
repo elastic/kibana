@@ -110,12 +110,14 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         .map((dataStream) => dataStream.dataset),
     [packageInfo]
   );
-  // The pending choice wins, then the one stored on the installation, then the package default.
+  // The pending choice wins, then the one stored on the installation, then the mode the
+  // installation uses today, and for a new installation the package default.
   const installationInfo =
     'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
   const isColumnarIndexModeEnabled =
     packagePolicy.package?.logsdb_columnar ??
     installationInfo?.logsdb_columnar_enabled ??
+    installationInfo?.logsdb_columnar_active ??
     columnarReadyDataStreams.some(
       (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'default'
     );

@@ -717,6 +717,11 @@ export type InstallationInfo = {
   created_at?: string;
   updated_at?: string;
   namespaces?: string[];
+  /**
+   * Whether a logs data stream of the installation currently uses the `logsdb_columnar` index
+   * mode. Only set by the package info API, for packages that declare columnar readiness.
+   */
+  logsdb_columnar_active?: boolean;
 } & Omit<
   Installation,
   | 'package_assets'
@@ -893,7 +898,7 @@ export interface Installation {
    * The user's choice for the `logsdb_columnar` index mode, stored once per installation and
    * applied to every logs data stream of the package that declares columnar readiness.
    * `undefined` means the user has not chosen; the package's `default` readiness then applies
-   * to new installations only.
+   * to the data streams that are new to the installation only.
    */
   logsdb_columnar_enabled?: boolean;
   /** Namespaces opted in for namespace-level customization for this package. */

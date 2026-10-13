@@ -15,7 +15,13 @@ import {
   isLogsdbColumnarReady,
 } from '../../../../../common/services';
 import type { ColumnarPackageInfo } from '../../../../../common/services/columnar_index_mode';
-import type { Installation, RegistryDataStream, TemplateMap } from '../../../../types';
+import type {
+  EsAssetReference,
+  Installation,
+  RegistryDataStream,
+  TemplateMap,
+} from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../../constants';
 
 /**
@@ -154,6 +160,27 @@ export async function getCurrentIndexModes(
   );
 
   return new Map(entries.filter((entry) => entry !== undefined));
+}
+
+/**
+ * Whether a logs index template of the installation currently carries the `logsdb_columnar`
+ * index mode. Without a stored user choice, this is the only way to tell whether the package
+ * defaults put the installation on columnar.
+ */
+export async function isLogsdbColumnarActive(
+  esClient: ElasticsearchClient,
+  installedEs: EsAssetReference[] = []
+): Promise<boolean> {
+  const templateNames = installedEs
+    .filter(
+      ({ type, id }) => type === ElasticsearchAssetType.indexTemplate && id.startsWith('logs-')
+    )
+    .map(({ id }) => id);
+  if (templateNames.length === 0) {
+    return false;
+  }
+  const currentIndexModes = await getCurrentIndexModes(esClient, templateNames);
+  return [...currentIndexModes.values()].includes(LOGSDB_COLUMNAR_INDEX_MODE);
 }
 
 /**
