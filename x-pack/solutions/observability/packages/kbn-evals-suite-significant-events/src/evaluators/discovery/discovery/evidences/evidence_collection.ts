@@ -32,7 +32,7 @@ const hasQuietNoQueryDisposition = (signal: SignalEntry): boolean =>
 /**
  * Rules the dataset expects inside an active event, when it declares expected events. A rule outside
  * them (a benign or unbacked detection) is correctly never written, so it owes no signal; whether an
- * event was wrongly written for it is graded by `mechanism_present_correctness`.
+ * event was wrongly written for it is graded by `status_correctness`.
  */
 const ruleUuidsInExpectedActiveEvents = (
   expectedEvents: NonNullable<
