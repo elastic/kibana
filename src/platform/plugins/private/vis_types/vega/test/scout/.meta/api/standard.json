@@ -1,5 +1,5 @@
 {
-  "sha1": "208b66ef12e9c5a231f10f044e29b0757dcc6a1e",
+  "sha1": "8d2df870dc72b3684ce21bf0945826bd01b53533",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -452,7 +452,7 @@
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/search_vega.spec.ts",
         "line": 85,
-        "column": 16
+        "column": 21
       }
     },
     {
@@ -471,8 +471,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/search_vega.spec.ts",
-        "line": 94,
-        "column": 67
+        "line": 98,
+        "column": 22
       }
     },
     {
@@ -491,8 +491,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/api/tests/search_vega.spec.ts",
-        "line": 104,
-        "column": 51
+        "line": 109,
+        "column": 5
       }
     },
     {
