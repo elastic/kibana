@@ -80,6 +80,13 @@ export {
   buildWorkerUrl,
 } from './constants';
 
+export {
+  SECURITY_ROLE_API_VERSION,
+  WORKER_ROLE_DEFINITIONS,
+  buildSecurityRoleUrl,
+} from './worker_roles';
+export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
+
 export type {
   ScanFailureWorker,
   ScanFailuresResponse,
@@ -95,6 +102,7 @@ export type {
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  ActionSubjectKind,
   JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';

@@ -12,9 +12,12 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
+import { createAlsoRaisedByAppender } from '../../services/watches/hunt/packaging/converge_on_live_proposal';
+import { createInvestigationOpenChecker } from '../../services/watches/hunt/packaging/check_investigation_open';
 import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
 import { createExistingProposalsCounter } from '../../services/watches/hunt/packaging/check_existing_proposals';
 import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
+import { createProposalSlotResolver } from '../../services/watches/hunt/packaging/resolve_proposal_slot';
 import {
   PackageReportIdentityError,
   runPackageReport,
@@ -28,7 +31,7 @@ import {
 export interface PackageReportStepDependencies {
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
-  /** For the existing-Proposals dedup guard; see `RunPackageReportDeps['countExistingProposals']`. */
+  /** For the Proposals look-ups: the settlement baseline, each finding's slot, and the converge revision. */
   getHuntServices: () => HuntServices;
   /**
    * Context Engine gate. When false, every coverage subject is skipped with reason `disabled`
@@ -43,7 +46,10 @@ export interface PackageReportStepDependencies {
    * bound to the space the step runs in. Defaults to treating every host as unenrolled when not
    * provided (e.g. no Fleet plugin).
    */
-  getResolveHostEnrollment?: (spaceId: string) => RunPackageReportDeps['resolveHostEnrollment'];
+  getResolveHostEnrollment?: (
+    spaceId: string,
+    esClient: ElasticsearchClient
+  ) => RunPackageReportDeps['resolveHostEnrollment'];
   /**
    * Defaults to the real `mget`-backed rehydrator built from the step's own scoped client, so
    * the calling user's privileges apply. Overridable for tests and Fleet-less deployments.
@@ -105,7 +111,7 @@ export const getPackageReportStepDefinition = ({
 
         const listRespondActions: RunPackageReportDeps['listRespondActions'] = async (sid) => {
           try {
-            const listed = await getActionsService().list(sid, request, ['respond']);
+            const listed = await getActionsService().list(sid, request, ['respond', 'investigate']);
             return { ok: true, actions: listed.actions };
           } catch {
             return { ok: false, reason: 'catalog_error' };
@@ -118,13 +124,30 @@ export const getPackageReportStepDefinition = ({
           isContextEngineEnabled: () => isContextEngineEnabled(request),
         });
 
-        const rehydrateProcessSelectors = getRehydrateProcessSelectors(
-          context.contextManager.getScopedEsClient(),
-          logger
-        );
+        const scopedEsClient = context.contextManager.getScopedEsClient();
+        const rehydrateProcessSelectors = getRehydrateProcessSelectors(scopedEsClient, logger);
 
         const countExistingProposals = createExistingProposalsCounter({
           proposalsService: getHuntServices().getProposalsService(),
+          spaceId,
+          request,
+          logger,
+        });
+        const resolveProposalSlot = createProposalSlotResolver({
+          proposalsService: getHuntServices().getProposalsService(),
+          privileges: getHuntServices().getProposalPrivileges(),
+          isInvestigationOpen: createInvestigationOpenChecker({
+            conversationClient: client,
+            logger,
+          }),
+          investigationConversationId: input.investigationConversationId,
+          spaceId,
+          request,
+          logger,
+        });
+        const appendAlsoRaisedBy = createAlsoRaisedByAppender({
+          proposalsService: getHuntServices().getProposalsService(),
+          privileges: getHuntServices().getProposalPrivileges(),
           spaceId,
           request,
           logger,
@@ -153,9 +176,11 @@ export const getPackageReportStepDefinition = ({
           deps: {
             listRespondActions,
             writeCoverageKis,
-            resolveHostEnrollment: getResolveHostEnrollment(spaceId),
+            resolveHostEnrollment: getResolveHostEnrollment(spaceId, scopedEsClient),
             rehydrateProcessSelectors,
             countExistingProposals,
+            resolveProposalSlot,
+            appendAlsoRaisedBy,
             getEsReportContextClient: getInternalEsClient,
             logger,
             hasOpenProposal,

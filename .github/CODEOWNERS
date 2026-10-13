@@ -2723,6 +2723,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/solarwinds_platform/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/ssf/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/threatq/** @elastic/workflows-eng
@@ -2996,6 +2997,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/** @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/references @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
@@ -3892,6 +3895,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/shared/flaky-fix-guidelines.md @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-review-reminder.yml @elastic/appex-qa
+/.github/scripts/ @elastic/apps-dx
 /.github/scripts/flaky_fix_review_reminder* @elastic/appex-qa
 /.github/scripts/bundle_size_limits_comment* @elastic/kibana-operations
 /.github/aw/ @elastic/kibana-operations

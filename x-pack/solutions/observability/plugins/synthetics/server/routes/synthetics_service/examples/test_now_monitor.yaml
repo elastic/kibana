@@ -1,0 +1,56 @@
+responses:
+  200:
+    description: Test run triggered successfully.
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - testRunId
+          properties:
+            testRunId:
+              type: string
+              description: Unique identifier for the triggered test run.
+            errors:
+              type: array
+              description: Array of errors encountered while triggering the test, one per service location.
+              items:
+                type: object
+                required:
+                  - locationId
+                  - error
+                properties:
+                  locationId:
+                    type: string
+                    description: Identifier of the service location where the error occurred.
+                  error:
+                    type: object
+                    required:
+                      - status
+                      - reason
+                      - failed_monitors
+                    properties:
+                      status:
+                        type: integer
+                        description: HTTP status code returned by the agent.
+                      reason:
+                        type: string
+                        description: Human-readable explanation of the failure.
+                      failed_monitors:
+                        description: Optional list of monitors that failed at the location.
+                        nullable: true
+                        type: array
+                        items:
+                          type: object
+        examples:
+          testNowMonitorResponseExample1:
+            value:
+              testRunId: 2bd506e5-4f9a-4aa6-a019-7988500afba0
+              errors:
+                - locationId: us_central_staging
+                  error:
+                    status: 401
+                    reason: no auth credentials provided
+                    failed_monitors: null
+  404:
+    description: Monitor not found.
