@@ -13,7 +13,8 @@ import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 /**
  * Migration recommendation: MIXED. See individual tests. Most are already covered by Jest in
- * kbn-esql-editor; keep a single Scout smoke test for the error flow in the ES|QL / Discover suite.
+ * kbn-esql-editor; move the error flow (one smoke test) and the prettify button to the ES|QL / Discover
+ * Scout suite.
  */
 
 // eslint-disable-next-line import/no-default-export
@@ -30,9 +31,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO JEST, then DELETE. Add an RTL test for the button
-     * (QueryWrapComponent) and a use_query_actions test for onPrettifyQuery; only the CMD+I keybinding
-     * is covered today (custom_editor_commands.test.ts).
+     * Migration recommendation: MIGRATE TO SCOUT (its own short test).
+     * Only the CMD+I keybinding is covered in Jest today (custom_editor_commands.test.ts); mocking the
+     * button, the Monaco model and the prettifier is more setup than one end-to-end check with the real
+     * editor.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
      */
     it('should prettify query when clicking the format button', async () => {
       await esql.setEsqlEditorQuery(

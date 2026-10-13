@@ -104,8 +104,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO JEST, then DELETE. Add an RTL test for inserting the picked
-     * date into the query (esql_editor.tsx); not covered today.
+     * Migration recommendation: MIGRATE TO SCOUT (as part of the single widget test). Needs the real
+     * Monaco suggest widget plus the date picker popup; jsdom cannot cover that wiring.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
      */
     it('should open timepicker and insert date when selecting a day', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| WHERE @timestamp > `);
