@@ -70,6 +70,7 @@ jest.mock('@kbn/core-di-browser', () => {
         http: { basePath: { prepend: (p: string) => p } },
         notifications: {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+          tours: { isEnabled: () => false },
         },
       };
 
