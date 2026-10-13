@@ -113,6 +113,38 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
+  it('openHostFlyout persists resolved mode in the descriptor and omits the default single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+
+    result.current.openHostFlyout({ hostName: 'host-1', entityId: 'entity-1', mode: 'resolved' });
+    expect(mockWriteOnOpen).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: FLYOUT_DESCRIPTOR_KIND.host, mode: 'resolved' })
+    );
+
+    result.current.openHostFlyout({ hostName: 'host-1', entityId: 'entity-1', mode: 'single' });
+    expect(mockWriteOnOpen.mock.calls.at(-1)?.[0].mode).toBeUndefined();
+  });
+
+  it('openEntityFlyout forwards resolved mode to the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+
+    result.current.openEntityFlyout({
+      engineType: 'user',
+      entityId: 'entity-1',
+      entityName: 'alice',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.user,
+      userName: 'alice',
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+  });
+
   it('openHostFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openHostFlyoutAsChild({ hostName: 'host-1' });
