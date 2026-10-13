@@ -16,6 +16,7 @@
 const Fs = require('fs');
 const Path = require('path');
 const { slugifyId } = require('./slugify_id');
+const { addReasoningEffortVariants, parseModelGroups } = require('./connector_matching');
 
 function parseArgs(argv, { defaults = {} } = {}) {
   const out = { ...defaults };
@@ -61,6 +62,39 @@ function die(message) {
   process.exit(1);
 }
 
+/**
+ * One definition per discovered EIS model, plus a `<id>-effort-<level>` variant for every
+ * `eis/<model>@<level>` in `requestedModelGroups` (EVAL_MODEL_GROUPS), so a run can evaluate the
+ * same endpoint at several reasoning efforts.
+ */
+function buildEisConnectors(
+  models,
+  { connectorIdPrefix = 'eis-', requestedModelGroups = [] } = {}
+) {
+  const connectors = {};
+  for (const m of models) {
+    const inferenceId = m && typeof m === 'object' ? m.inferenceId : undefined;
+    const modelId = m && typeof m === 'object' ? m.modelId : undefined;
+
+    if (typeof inferenceId !== 'string' || typeof modelId !== 'string' || !modelId) {
+      continue;
+    }
+
+    const connectorId = `${connectorIdPrefix}${slugifyId(modelId)}`;
+    connectors[connectorId] = {
+      name: `EIS ${modelId}`,
+      inferenceId,
+      provider: 'elastic',
+      taskType: 'chat_completion',
+      // For selection/metadata only; not used to route requests (inferenceId does that).
+      providerConfig: {
+        model_id: modelId,
+      },
+    };
+  }
+  return addReasoningEffortVariants(connectors, requestedModelGroups);
+}
+
 function main() {
   const argv = parseArgs(process.argv.slice(2), {
     defaults: {
@@ -90,27 +124,10 @@ function main() {
     die(`No EIS models found in ${modelsPath}`);
   }
 
-  const connectors = {};
-  for (const m of models) {
-    const inferenceId = m && typeof m === 'object' ? m.inferenceId : undefined;
-    const modelId = m && typeof m === 'object' ? m.modelId : undefined;
-
-    if (typeof inferenceId !== 'string' || typeof modelId !== 'string' || !modelId) {
-      continue;
-    }
-
-    const connectorId = `${connectorIdPrefix}${slugifyId(modelId)}`;
-    connectors[connectorId] = {
-      name: `EIS ${modelId}`,
-      inferenceId,
-      provider: 'elastic',
-      taskType: 'chat_completion',
-      // For selection/metadata only; not used to route requests (inferenceId does that).
-      providerConfig: {
-        model_id: modelId,
-      },
-    };
-  }
+  const connectors = buildEisConnectors(models, {
+    connectorIdPrefix,
+    requestedModelGroups: parseModelGroups(process.env.EVAL_MODEL_GROUPS || ''),
+  });
 
   const json = JSON.stringify(connectors);
   if (format === 'json') {
@@ -125,4 +142,8 @@ function main() {
   process.stdout.write(`${Buffer.from(json, 'utf8').toString('base64')}\n`);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { buildEisConnectors };
