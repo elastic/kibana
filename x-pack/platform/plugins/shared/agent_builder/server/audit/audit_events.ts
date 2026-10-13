@@ -202,10 +202,7 @@ export function toolAuditEvent({
 export interface ConversationAuditEventParams extends CommonAuditEventParams {
   conversationId?: string;
   agentId?: string;
-  /**
-   * The principal the event is attributed to when the audit logger cannot resolve one from the
-   * request, as with an un-enriched fake request.
-   */
+  /** Attribution when the audit logger cannot resolve a user from the request. */
   user?: UserIdAndName;
 }
 

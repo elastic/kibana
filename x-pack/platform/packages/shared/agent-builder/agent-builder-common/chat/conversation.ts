@@ -585,11 +585,10 @@ export interface ConversationRoundAuthor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
-  /** The kind of Kibana principal. Absent for external authors and for pre-existing rounds. */
+  /** Absent for external authors and older rounds. */
   type?: UserPrincipalType;
 }
 
-/** Display name for a round author or timeline event actor: full name, else username. */
 export const getConversationRoundAuthorDisplayName = (
   author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/** A person, or a machine identity such as an Elasticsearch service account. */
 export type UserPrincipalType = 'user' | 'service_account';
 
 export interface UserIdAndName {
@@ -13,22 +12,15 @@ export interface UserIdAndName {
   id?: string;
   /** username */
   username: string;
-  /** The kind of principal. Treat an absent value as `'user'`. */
+  /** Absent means `'user'`. */
   type?: UserPrincipalType;
 }
 
-/**
- * Prefixes of the synthetic stable ids given to principals without a user profile. They keep such
- * ids distinguishable from profile uids, and contain no comma so they survive uid batching.
- */
+// Stable ids for principals without a user profile. No commas: `bulkGet` joins uids into one list.
 export const SERVICE_ACCOUNT_ID_PREFIX = 'service_account:';
 export const REALM_USER_ID_PREFIX = 'realm:';
 
-/**
- * Whether `id` is a user profile uid rather than a synthetic id for a principal without a profile.
- * Never pass a synthetic id to `userProfile.bulkGet`: the batch resolves as a unit, so one
- * unresolvable uid drops the profiles of every real user in it.
- */
+// `bulkGet` resolves a batch as one unit: one synthetic id would drop every real user's profile in it.
 export const isUserProfileId = (id: string | undefined): id is string =>
   id !== undefined &&
   !id.startsWith(SERVICE_ACCOUNT_ID_PREFIX) &&

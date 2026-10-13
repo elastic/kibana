@@ -169,8 +169,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
-        // The principal type travels with the owner: a Task Manager run authenticates with a
-        // derived key that no longer reports a service account's realm.
         owner: {
           id: owner.id,
           username: owner.username,

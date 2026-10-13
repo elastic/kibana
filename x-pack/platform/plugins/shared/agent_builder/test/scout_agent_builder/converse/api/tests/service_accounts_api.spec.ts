@@ -140,7 +140,6 @@ apiTest.describe('Agent Builder — service accounts', { tag: STATEFUL_ONLY }, (
 
       const appended = await apiClient.post(CHAT_CONVERSE, {
         headers: asServiceAccount,
-        // `trigger_mode: never` needs no LLM connector.
         body: { trigger_mode: 'never', conversation_id: id, input: 'automated update' },
         responseType: 'json',
       });
@@ -287,7 +286,6 @@ apiTest.describe('Agent Builder — service accounts', { tag: STATEFUL_ONLY }, (
         expect(asAdminRun).toHaveStatusCode(200);
         expect(JSON.stringify(asAdminRun.body)).toContain(marker);
 
-        // The role grants Agent Builder access and nothing on indices.
         const asServiceAccountRun = await apiClient.post(EXECUTE_TOOL_PATH, {
           headers: { ...asServiceAccount, ...VERSION_HEADER },
           body,

@@ -37,8 +37,7 @@ interface StableUserIdAuthUser {
  * otherwise encode realm type/name with the username so same-username
  * principals in different realms remain distinct.
  *
- * The `realm:` prefix is one of the two synthetic forms `isUserProfileId` keys off to keep such
- * ids out of user profile lookups; service accounts get the other, in `getUserFromRequest`.
+ * The `realm:` prefix keeps synthetic ids distinguishable from profile uids.
  */
 export const toStableUserId = async ({
   authUser,
@@ -124,10 +123,7 @@ const resolveApiKeyOwnerProfileUid = async ({
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
  * back to the ES `_security/_authenticate` API for the username only.
  *
- * Service accounts are recognised first, through `security.authc.getPrincipal`, which classifies
- * both Elasticsearch and UIAM accounts and the fake requests Kibana minted for one. Their stable
- * id is the account id the security plugin reports, so it is the same whichever way the account
- * reached Kibana.
+ * Service accounts are recognised first, through `security.authc.getPrincipal`.
  */
 export const getUserFromRequest = async ({
   request,

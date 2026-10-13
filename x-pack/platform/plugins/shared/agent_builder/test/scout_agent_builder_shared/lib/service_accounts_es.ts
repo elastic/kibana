@@ -21,11 +21,8 @@ export interface TestServiceAccount {
   authHeader: { Authorization: string };
 }
 
-/**
- * Goes straight to Elasticsearch rather than through `POST /internal/security/service_account`:
- * that route needs `xpack.security.serviceAccounts.enabled` in the shared server config and
- * leaves an encrypted credential saved object behind, and the resulting account is the same.
- */
+// Created in Elasticsearch directly: Kibana's route also writes an encrypted credential saved
+// object that would need cleaning up, and the account is the same either way.
 export async function createServiceAccountWithToken(
   esClient: EsClient,
   { name, roles }: { name: string; roles: string[] }
@@ -50,8 +47,7 @@ export async function createServiceAccountWithToken(
   };
 }
 
-// Token first: a forced account delete can leave it behind, and a lingering token blocks
-// recreating the name.
+// Token first: a forced account delete can leave it behind and block reuse of the name.
 export async function deleteServiceAccount(esClient: EsClient, name: string): Promise<void> {
   await esClient.transport.request(
     {
