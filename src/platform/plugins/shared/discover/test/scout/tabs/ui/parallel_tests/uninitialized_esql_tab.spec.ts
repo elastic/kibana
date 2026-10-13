@@ -131,7 +131,7 @@ spaceTest.describe(
       await discover.waitUntilSearchingHasFinished();
 
       await expect(discover.getRecommendedQueries()).toBeHidden();
-      expect(await discover.getEsqlQueryValue()).toContain('STATS count = COUNT(*)');
+      expect(await discover.getEsqlQueryValue()).toContain('| STATS count = COUNT(*');
       await expect(discover.getErrorCalloutTitle()).toBeHidden();
       expect(await discover.getHitCount()).toBe('1');
     });
