@@ -17,14 +17,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { VcuRange } from '../../../common/vcu_estimate';
-import { ILLUSTRATIVE_USD_PER_VCU_HOUR } from '../../../common/vcu_estimate';
+import type { VcuRange } from '../../common/vcu_estimate';
+import { ILLUSTRATIVE_USD_PER_VCU_HOUR } from '../../common/vcu_estimate';
 
-interface ProfileEstimateProps {
-  /** Omitted while the profile has invalid values. */
+interface CostEstimateProps {
+  title: string;
+  /** Context under the title, such as what the estimate covers. */
+  subtitle?: string;
+  /** Omitted while there's nothing to estimate. */
   estimate?: VcuRange;
-  /** The saved profile's estimate, when editing, so changes can show how they compare. */
-  savedEstimate?: VcuRange;
+  /** A baseline to compare against, such as the saved profile or today's rules. */
+  comparison?: VcuRange;
+  /** Replaces the values while `estimate` is omitted. */
+  unavailableText: string;
 }
 
 // Rounds to the displayed precision, so comparisons and deltas match what users see. Per-GB values
@@ -48,8 +53,8 @@ const formatUsd = (usd: number): string =>
 const formatCost = (vcus: number): string => {
   const usd = vcus * ILLUSTRATIVE_USD_PER_VCU_HOUR;
   if (usd > 0 && usd < 0.01) {
-    return i18n.translate('xpack.boost.profileEstimate.costBelowOneCent', {
-      defaultMessage: 'under {amount}',
+    return i18n.translate('xpack.boost.costEstimate.costBelowOneCent', {
+      defaultMessage: '<{amount}',
       values: { amount: formatUsd(0.01) },
     });
   }
@@ -68,13 +73,13 @@ const CostLine = ({ end, vcus }: { end: keyof VcuRange; vcus: number }) => {
   const cost = <strong>{formatCost(vcus)}</strong>;
   return end === 'atRest' ? (
     <FormattedMessage
-      id="xpack.boost.profileEstimate.atRestCost"
+      id="xpack.boost.costEstimate.atRestCost"
       defaultMessage="{cost} <label>at rest</label>"
       values={{ cost, label: renderLabel }}
     />
   ) : (
     <FormattedMessage
-      id="xpack.boost.profileEstimate.atPeakCost"
+      id="xpack.boost.costEstimate.atPeakCost"
       defaultMessage="{cost} <label>at peak</label>"
       values={{ cost, label: renderLabel }}
     />
@@ -82,7 +87,7 @@ const CostLine = ({ end, vcus }: { end: keyof VcuRange; vcus: number }) => {
 };
 
 const getVcusText = (vcus: number): string =>
-  i18n.translate('xpack.boost.profileEstimate.vcus', {
+  i18n.translate('xpack.boost.costEstimate.vcus', {
     defaultMessage: '{value} {count, plural, one {VCU} other {VCUs}}',
     values: { value: formatVcus(vcus), count: vcus },
   });
@@ -100,20 +105,20 @@ const ChangeIndicator = ({ vcus, savedVcus }: ChangeIndicatorProps) => {
   const delta = formatVcus(deltaVcus);
   const savedCost = formatCost(savedVcus);
   const difference = isHigher
-    ? i18n.translate('xpack.boost.profileEstimate.increase', {
+    ? i18n.translate('xpack.boost.costEstimate.increase', {
         defaultMessage: '+{cost} (+{delta} {count, plural, one {VCU} other {VCUs}})',
         values: { cost, delta, count: deltaVcus },
       })
-    : i18n.translate('xpack.boost.profileEstimate.decrease', {
+    : i18n.translate('xpack.boost.costEstimate.decrease', {
         defaultMessage: '−{cost} (−{delta} {count, plural, one {VCU} other {VCUs}})',
         values: { cost, delta, count: deltaVcus },
       });
   const description = isHigher
-    ? i18n.translate('xpack.boost.profileEstimate.higherThanSaved', {
+    ? i18n.translate('xpack.boost.costEstimate.higherThanSaved', {
         defaultMessage: 'Up {cost} from {savedCost}',
         values: { cost, savedCost },
       })
-    : i18n.translate('xpack.boost.profileEstimate.lowerThanSaved', {
+    : i18n.translate('xpack.boost.costEstimate.lowerThanSaved', {
         defaultMessage: 'Down {cost} from {savedCost}',
         values: { cost, savedCost },
       });
@@ -135,16 +140,16 @@ const ChangeIndicator = ({ vcus, savedVcus }: ChangeIndicatorProps) => {
 interface EstimateValueProps {
   end: keyof VcuRange;
   estimate: VcuRange;
-  savedEstimate?: VcuRange;
+  comparison?: VcuRange;
 }
 
 /** One end of the range: the cost and its label, any change indicator, and the VCUs below. */
-const EstimateValue = ({ end, estimate, savedEstimate }: EstimateValueProps) => {
+const EstimateValue = ({ end, estimate, comparison }: EstimateValueProps) => {
   const vcus = roundVcus(estimate[end]);
-  const savedVcus = savedEstimate && roundVcus(savedEstimate[end]);
+  const savedVcus = comparison && roundVcus(comparison[end]);
 
   return (
-    <div data-test-subj={`boostProfileEstimate-${end}`}>
+    <div data-test-subj={`boostCostEstimate-${end}`}>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -165,7 +170,14 @@ const EstimateValue = ({ end, estimate, savedEstimate }: EstimateValueProps) => 
 };
 
 /** The profile's illustrative hourly cost and VCU range, updated as the form changes. */
-export const ProfileEstimate = ({ estimate, savedEstimate }: ProfileEstimateProps) => {
+/** An illustrative hourly cost and VCU range, with changes against an optional comparison. */
+export const CostEstimate = ({
+  title,
+  subtitle,
+  estimate,
+  comparison,
+  unavailableText,
+}: CostEstimateProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -178,17 +190,13 @@ export const ProfileEstimate = ({ estimate, savedEstimate }: ProfileEstimateProp
       // Matches the height of the small buttons below the divider, so both halves of the footer
       // are the same height.
       css={{ minBlockSize: euiTheme.size.xl }}
-      data-test-subj="boostProfileEstimate"
+      data-test-subj="boostCostEstimate"
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.boost.profileEstimate.title', {
-                  defaultMessage: 'Search cost / GB / hour',
-                })}
-              </strong>
+              <strong>{title}</strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -198,17 +206,22 @@ export const ProfileEstimate = ({ estimate, savedEstimate }: ProfileEstimateProp
               // A flex anchor sizes to the icon, so the row's flex alignment centers it. The default
               // inline-block anchor gets a line box from the inherited font, which offsets the icon.
               display="flex"
-              content={i18n.translate('xpack.boost.profileEstimate.disclaimer', {
+              content={i18n.translate('xpack.boost.costEstimate.disclaimer', {
                 defaultMessage:
                   'Actual usage varies with query load and your data. Costs use an illustrative rate of {rate} per VCU-hour. This is an estimate and may not represent actual pricing.',
                 values: { rate: formatUsd(ILLUSTRATIVE_USD_PER_VCU_HOUR) },
               })}
-              aria-label={i18n.translate('xpack.boost.profileEstimate.disclaimerLabel', {
+              aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
                 defaultMessage: 'About this estimate',
               })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {subtitle && (
+          <EuiText size="xs" color="subdued">
+            {subtitle}
+          </EuiText>
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div aria-live="polite">
@@ -222,7 +235,7 @@ export const ProfileEstimate = ({ estimate, savedEstimate }: ProfileEstimateProp
               css={{ gap: euiTheme.size.base }}
             >
               <EuiFlexItem grow={false}>
-                <EstimateValue end="atRest" estimate={estimate} savedEstimate={savedEstimate} />
+                <EstimateValue end="atRest" estimate={estimate} comparison={comparison} />
               </EuiFlexItem>
               {/* Decorative divider, as tall as the values beside it; EUI has no vertical rule. */}
               <EuiFlexItem
@@ -231,14 +244,12 @@ export const ProfileEstimate = ({ estimate, savedEstimate }: ProfileEstimateProp
                 css={{ alignSelf: 'stretch', borderInlineStart: euiTheme.border.thin }}
               />
               <EuiFlexItem grow={false}>
-                <EstimateValue end="atPeak" estimate={estimate} savedEstimate={savedEstimate} />
+                <EstimateValue end="atPeak" estimate={estimate} comparison={comparison} />
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
             <EuiText size="s" color={euiTheme.colors.textDisabled}>
-              {i18n.translate('xpack.boost.profileEstimate.unavailable', {
-                defaultMessage: 'Enter valid values above to see an estimate',
-              })}
+              {unavailableText}
             </EuiText>
           )}
         </div>

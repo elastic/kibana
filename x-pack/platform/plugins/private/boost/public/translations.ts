@@ -20,3 +20,7 @@ export const PROVISIONING_NOTE = i18n.translate('xpack.boost.provisioningNote', 
 export const LEARN_MORE_LABEL = i18n.translate('xpack.boost.learnMoreLink', {
   defaultMessage: 'Learn more',
 });
+
+export const ESTIMATE_UNAVAILABLE = i18n.translate('xpack.boost.estimateUnavailable', {
+  defaultMessage: 'Enter valid values above to see an estimate',
+});

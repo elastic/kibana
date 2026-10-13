@@ -103,6 +103,8 @@ export type DataSourceType = 'index' | 'data_stream';
 export interface BoostDataSource {
   name: string;
   type: DataSourceType;
+  /** Stored size, or 0 when Elasticsearch doesn't report one. */
+  size_in_bytes: number;
 }
 
 export interface BoostState {

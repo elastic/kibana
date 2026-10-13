@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
 import {
@@ -44,8 +44,11 @@ import {
 } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfileType, BoostRule } from '../../../common/types';
 import { BOOST_DOCS_URL } from '../../doc_links';
+import { estimateRuleImpact } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
-import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
+import { ESTIMATE_UNAVAILABLE, LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
+import { CostEstimate } from '../cost_estimate';
+import { FullWidthDivider } from '../profiles/full_width_divider';
 import {
   useBoostState,
   useCreateRule,
@@ -100,6 +103,23 @@ const PATTERN_HELP: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
+// Both boost flyouts share this width.
+export const FLYOUT_WIDTH = 520;
+
+const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.ruleForm.managedBadge', {
+  defaultMessage: 'Managed',
+});
+
+const formatSize = (bytes: number): string =>
+  i18n.translate('xpack.boost.ruleForm.sizeInGb', {
+    defaultMessage: '{size} GB',
+    values: {
+      size: new Intl.NumberFormat(i18n.getLocale(), {
+        maximumFractionDigits: bytes < 1e9 ? 2 : 1,
+      }).format(bytes / 1e9),
+    },
+  });
+
 const SELECT_PROFILE_FIRST = i18n.translate('xpack.boost.ruleForm.selectProfileFirst', {
   defaultMessage: 'Select a boost profile to choose targets.',
 });
@@ -124,6 +144,20 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
       : createEmptyRuleDraft(initialProfileName)
   );
   const [showErrors, setShowErrors] = useState(false);
+  // The last profile picked from the list, restored if the field is left empty or unmatched.
+  const [lastProfileName, setLastProfileName] = useState(
+    () => rule?.boost_profile ?? initialProfileName ?? ''
+  );
+  // Remounting the picker clears text typed into it, which it otherwise keeps after a restore.
+  const [profileFieldKey, setProfileFieldKey] = useState(0);
+  // Text typed into the picker, which it shows in place of the selected profile's name.
+  const profileSearchRef = useRef('');
+  // Set while the picker clears its search after a selection, which isn't the user editing.
+  const isSelectingProfileRef = useRef(false);
+  // A remount drops that pending clear, so a fresh picker has nothing to skip.
+  useEffect(() => {
+    isSelectingProfileRef.current = false;
+  }, [profileFieldKey]);
   const { mutate: createRule, isLoading: isCreating } = useCreateRule();
   const { mutate: updateRule, isLoading: isUpdating } = useUpdateRule();
   const { mutate: updateDefaultRule, isLoading: isUpdatingDefault } = useUpdateDefaultRule();
@@ -137,7 +171,8 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const isDefaultRule = rule?.is_builtin ?? false;
   const { profiles, rules, data_sources: dataSources } = state;
   const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
-  const type = profilesByName.get(draft.profileName)?.type;
+  // While the user types in the profile field, targets keep the last profile's type.
+  const type = profilesByName.get(draft.profileName || lastProfileName)?.type;
   // Wording for the disabled target controls until a profile sets the type.
   const targetType = type ?? 'indices';
   // A default rule keeps its type, so it only offers profiles of that type.
@@ -191,14 +226,49 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
     isGroupLabelOption: true,
     options: profiles
       .filter((profile) => profile.type === profileType)
-      .map(({ name }) => ({ label: name, value: name })),
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(({ name, is_builtin: isBuiltin }) => ({
+        label: name,
+        value: name,
+        append: isBuiltin ? <EuiBadge>{MANAGED_BADGE_LABEL}</EuiBadge> : undefined,
+      })),
   }));
 
   const onProfileChange = ([selected]: Array<EuiComboBoxOptionOption<string>>) => {
-    const profileName = selected?.value ?? '';
+    // Backspace removes the selection, but it's kept while the field has text so the list still
+    // checks it; onProfileSearchChange clears it once the field is empty.
+    if (!selected?.value) {
+      return;
+    }
+    const profileName = selected.value;
+    isSelectingProfileRef.current = true;
     const nextType = profilesByName.get(profileName)?.type;
+    setLastProfileName(profileName);
     // Picked names only make sense for one type, so switching type clears them.
     updateDraft({ profileName, picked: nextType === type ? draft.picked : [] });
+  };
+
+  // An empty field would show the selected name again, so emptying it clears the selection.
+  const onProfileSearchChange = (searchValue: string) => {
+    profileSearchRef.current = searchValue;
+    if (isSelectingProfileRef.current) {
+      isSelectingProfileRef.current = false;
+      return;
+    }
+    if (!searchValue) {
+      setDraft((current) => ({ ...current, profileName: '' }));
+    }
+  };
+
+  // Leaving the field empty, or with text that matches no profile, restores the last profile. Text
+  // that matches one exactly selects it, which the picker does after this.
+  const onProfileBlur = () => {
+    if (draft.profileName && !profileSearchRef.current) {
+      return;
+    }
+    profileSearchRef.current = '';
+    updateDraft({ profileName: lastProfileName });
+    setProfileFieldKey(profileFieldKey + 1);
   };
 
   // What the pattern reaches, and whether a higher-ranked rule still wins each target.
@@ -221,6 +291,21 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
             };
           })
       : [];
+
+  // The cost change across everything this rule gains or gives up.
+  const hasValidTargets =
+    isDefaultRule || (draft.mode === 'pattern' ? !errors.pattern : draft.picked.length > 0);
+  const impact =
+    type && hasValidTargets
+      ? estimateRuleImpact({
+          dataSources,
+          rules,
+          profiles,
+          nextRule: draftRule,
+          currentRule: rule,
+        })
+      : undefined;
+  const hasImpact = impact !== undefined && impact.dataSourceCount > 0;
 
   const getCurrentRuleName = (dataSource: BoostDataSource) =>
     resolveRule(dataSource, rules, profilesByName)?.name;
@@ -271,7 +356,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   return (
     <EuiFlyout
       onClose={onClose}
-      size="m"
+      size={FLYOUT_WIDTH}
       paddingSize="m"
       aria-labelledby={titleId}
       ownFocus
@@ -351,14 +436,19 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
           fullWidth
         >
           <EuiComboBox<string>
+            key={profileFieldKey}
             compressed
             fullWidth
             singleSelection={{ asPlainText: true }}
+            // A rule always needs a profile, so there's no clear button; see onProfileBlur.
+            isClearable={false}
+            onBlur={onProfileBlur}
             options={profileOptions}
             selectedOptions={
               draft.profileName ? [{ label: draft.profileName, value: draft.profileName }] : []
             }
             onChange={onProfileChange}
+            onSearchChange={onProfileSearchChange}
             isInvalid={Boolean(visibleErrors.profile)}
             isDisabled={isSaving}
             data-test-subj="boostRuleProfile"
@@ -574,6 +664,32 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
+        <CostEstimate
+          title={i18n.translate('xpack.boost.ruleForm.estimateTitle', {
+            defaultMessage: 'Search cost / hour',
+          })}
+          subtitle={
+            hasImpact && type
+              ? i18n.translate('xpack.boost.ruleForm.estimateSubtitle', {
+                  defaultMessage: '{targets} · {size}',
+                  values: {
+                    targets: formatDataSourceCount(type, impact.dataSourceCount),
+                    size: formatSize(impact.sizeInBytes),
+                  },
+                })
+              : undefined
+          }
+          estimate={hasImpact ? impact.next : undefined}
+          comparison={hasImpact ? impact.current : undefined}
+          unavailableText={
+            impact
+              ? i18n.translate('xpack.boost.ruleForm.estimateNoMatches', {
+                  defaultMessage: 'Nothing matches these targets yet',
+                })
+              : ESTIMATE_UNAVAILABLE
+          }
+        />
+        <FullWidthDivider margin="s" />
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

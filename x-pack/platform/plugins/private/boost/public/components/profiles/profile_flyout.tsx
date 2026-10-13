@@ -29,13 +29,13 @@ import { MAX_BOOST, MIN_BOOST } from '../../../common/constants';
 import type { BoostProfile, BoostProfileType } from '../../../common/types';
 import { BOOST_DOCS_URL } from '../../doc_links';
 import { useBoostServices } from '../../hooks/use_boost_services';
-import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
+import { ESTIMATE_UNAVAILABLE, LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { useCreateProfile, useUpdateProfile } from '../../hooks/use_boost_state';
 import { CardLabel } from '../card_label';
 import { PROFILE_TYPE_LABELS } from '../format';
 import { PresetCards } from '../preset_cards';
 import type { PresetOption } from '../preset_options';
-import { RuleFlyout } from '../rules/rule_flyout';
+import { FLYOUT_WIDTH, RuleFlyout } from '../rules/rule_flyout';
 import { BoostRangeInputs } from './boost_range_inputs';
 import { FormSection, FormSubsection } from './form_section';
 import { FullWidthDivider } from './full_width_divider';
@@ -50,7 +50,7 @@ import {
   hasDraftErrors,
 } from './profile_draft';
 import { PROFILE_NAME_ERROR_MESSAGES } from './profile_messages';
-import { ProfileEstimate } from './profile_estimate';
+import { CostEstimate } from '../cost_estimate';
 
 interface ProfileFlyoutProps {
   /** The custom profile to edit. */
@@ -194,7 +194,7 @@ export const ProfileFlyout = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      size="m"
+      size={FLYOUT_WIDTH}
       paddingSize="m"
       aria-labelledby={titleId}
       ownFocus
@@ -392,9 +392,13 @@ export const ProfileFlyout = ({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <ProfileEstimate
+        <CostEstimate
+          title={i18n.translate('xpack.boost.profileForm.estimateTitle', {
+            defaultMessage: 'Search cost / GB / hour',
+          })}
           estimate={getDraftEstimate(draft)}
-          savedEstimate={profile && getDraftEstimate(draftFromProfile(profile))}
+          comparison={profile && getDraftEstimate(draftFromProfile(profile))}
+          unavailableText={ESTIMATE_UNAVAILABLE}
         />
         <FullWidthDivider margin="s" />
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>

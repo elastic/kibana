@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { BoostProfile, BoostProfileInput, BoostRule, BoostDataSource } from './types';
+import { parseMaxAge, toMaxAgeHours } from './validation';
+import { resolveRule } from './resolution';
+
 // Placeholder model for the prototype. Real estimates will come from Elasticsearch, which knows the
 // resource curves and the project's data. These constants are illustrative, not pricing.
 
@@ -104,5 +108,105 @@ export const estimateDataStreamsVcuRange = ({
       };
     },
     { atRest: 0, atPeak: 0 }
+  );
+};
+
+const BYTES_PER_GB = 1e9;
+
+const maxAgeDays = (maxAge: string | undefined): number => {
+  const parsed = parseMaxAge(maxAge);
+  return parsed ? toMaxAgeHours(parsed) / 24 : 0;
+};
+
+/** Estimates a saved profile's search VCUs per GB of the data it applies to. */
+export const estimateProfileVcuRange = (profile: BoostProfile | BoostProfileInput): VcuRange => {
+  if (profile.type === 'indices') {
+    return estimateIndicesVcuRange({
+      minBoost: profile.min_boost,
+      maxBoost: profile.max_boost,
+      extraCopy: profile.high_availability === 'one_extra_copy',
+      prewarm: profile.prewarm,
+      pinned: profile.pinned,
+    });
+  }
+  const { recent, standard, background } = profile;
+  return estimateDataStreamsVcuRange({
+    recent: {
+      minBoost: recent.min_boost,
+      maxBoost: recent.max_boost,
+      maxAgeDays: maxAgeDays(recent.max_age),
+    },
+    standard: {
+      minBoost: standard.min_boost,
+      maxBoost: standard.max_boost,
+      maxAgeDays: maxAgeDays(standard.max_age),
+    },
+    background: { minBoost: background.min_boost, maxBoost: background.max_boost },
+  });
+};
+
+export interface RuleImpact {
+  /** The data sources whose applied rule changes, and their total size. */
+  dataSourceCount: number;
+  sizeInBytes: number;
+  /** Total search VCUs for those data sources today, and with the rule change. */
+  current: VcuRange;
+  next: VcuRange;
+}
+
+interface RuleImpactInput {
+  dataSources: readonly BoostDataSource[];
+  rules: readonly BoostRule[];
+  profiles: readonly BoostProfile[];
+  /** The rule as it would be saved. */
+  nextRule: BoostRule;
+  /** The rule as it's saved today, when editing. */
+  currentRule?: BoostRule;
+}
+
+const addRange = (total: VcuRange, range: VcuRange, sizeGb: number): VcuRange => ({
+  atRest: total.atRest + range.atRest * sizeGb,
+  atPeak: total.atPeak + range.atPeak * sizeGb,
+});
+
+/**
+ * Estimates what creating or editing a rule does to search VCUs: for every data source it gains or
+ * loses, the total under today's rules and under the changed rules.
+ */
+export const estimateRuleImpact = ({
+  dataSources,
+  rules,
+  profiles,
+  nextRule,
+  currentRule,
+}: RuleImpactInput): RuleImpact => {
+  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
+  // Matched by name, since callers may pass a copy of the saved rule.
+  const nextRules = [...rules.filter(({ name }) => name !== currentRule?.name), nextRule];
+  const rangeFor = (rule: BoostRule | undefined): VcuRange | undefined => {
+    const profile = rule && profilesByName.get(rule.boost_profile);
+    return profile && estimateProfileVcuRange(profile);
+  };
+  const zero: VcuRange = { atRest: 0, atPeak: 0 };
+
+  return dataSources.reduce<RuleImpact>(
+    (impact, dataSource) => {
+      const appliedNow = resolveRule(dataSource, rules, profilesByName);
+      const appliedNext = resolveRule(dataSource, nextRules, profilesByName);
+      const isAffected =
+        (currentRule !== undefined && appliedNow?.name === currentRule.name) ||
+        appliedNext === nextRule;
+      if (!isAffected) {
+        return impact;
+      }
+      const sizeGb = dataSource.size_in_bytes / BYTES_PER_GB;
+      return {
+        dataSourceCount: impact.dataSourceCount + 1,
+        sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
+        current: addRange(impact.current, rangeFor(appliedNow) ?? zero, sizeGb),
+        next: addRange(impact.next, rangeFor(appliedNext) ?? zero, sizeGb),
+      };
+    },
+    { dataSourceCount: 0, sizeInBytes: 0, current: zero, next: zero }
   );
 };

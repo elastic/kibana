@@ -42,8 +42,16 @@ const rule = (name: string, patterns: string | string[], priority = 0): BoostRul
   is_builtin: false,
 });
 
-const index = (name: string): BoostDataSource => ({ name, type: 'index' });
-const dataStream = (name: string): BoostDataSource => ({ name, type: 'data_stream' });
+const index = (name: string, size = 0): BoostDataSource => ({
+  name,
+  type: 'index',
+  size_in_bytes: size,
+});
+const dataStream = (name: string): BoostDataSource => ({
+  name,
+  type: 'data_stream',
+  size_in_bytes: 0,
+});
 
 describe('matchesIndexPattern', () => {
   it('matches exact names and `*` wildcards', () => {

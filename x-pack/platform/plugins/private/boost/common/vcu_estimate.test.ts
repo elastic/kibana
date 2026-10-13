@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import { estimateDataStreamsVcuRange, estimateIndicesVcuRange } from './vcu_estimate';
+import {
+  BUILTIN_PROFILES,
+  DEFAULT_SIMPLE_MODE_DEFAULTS,
+  createDefaultRules,
+  translateSimpleDefaults,
+} from './presets';
+import type { BoostDataSource, BoostProfile, BoostRule } from './types';
+import {
+  estimateDataStreamsVcuRange,
+  estimateIndicesVcuRange,
+  estimateProfileVcuRange,
+  estimateRuleImpact,
+} from './vcu_estimate';
 
 const base = { minBoost: 1, maxBoost: 4, extraCopy: false, prewarm: false, pinned: false };
 
@@ -71,5 +83,67 @@ describe('estimateDataStreamsVcuRange', () => {
 
     expect(boosted.atRest).toBeCloseTo(unboosted.atRest);
     expect(boosted.atPeak).toBeGreaterThan(unboosted.atPeak);
+  });
+});
+
+describe('estimateRuleImpact', () => {
+  const fast: BoostProfile = {
+    name: 'fast',
+    type: 'indices',
+    is_builtin: false,
+    min_boost: 4,
+    max_boost: 5000,
+    high_availability: 'none',
+    prewarm: false,
+    pinned: false,
+  };
+  const profiles = [...BUILTIN_PROFILES, fast];
+  const defaultRules = createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS));
+  const performant = estimateProfileVcuRange(
+    BUILTIN_PROFILES.find(({ name }) => name === 'elastic-performant') ?? fast
+  );
+  const index = (name: string, gb: number): BoostDataSource => ({
+    name,
+    type: 'index',
+    size_in_bytes: gb * 1e9,
+  });
+  const dataSources = [index('products', 10), index('users', 2), index('archive', 50)];
+  const rule = (patterns: string[]): BoostRule => ({
+    name: 'fast-rule',
+    index_patterns: patterns,
+    boost_profile: 'fast',
+    priority: 0,
+    is_builtin: false,
+  });
+
+  it('compares the cost of the data a new rule takes over', () => {
+    const impact = estimateRuleImpact({
+      dataSources,
+      rules: defaultRules,
+      profiles,
+      nextRule: rule(['products']),
+    });
+
+    expect(impact.dataSourceCount).toBe(1);
+    expect(impact.sizeInBytes).toBe(10e9);
+    expect(impact.current.atRest).toBeCloseTo(performant.atRest * 10);
+    expect(impact.next.atRest).toBeCloseTo(estimateProfileVcuRange(fast).atRest * 10);
+  });
+
+  it('counts data an edited rule gives up, which falls back to another rule', () => {
+    const currentRule = rule(['products', 'users']);
+    const impact = estimateRuleImpact({
+      dataSources,
+      rules: [...defaultRules, currentRule],
+      profiles,
+      nextRule: rule(['products']),
+      // A copy, as the rules table passes it.
+      currentRule: { ...currentRule },
+    });
+
+    expect(impact.dataSourceCount).toBe(2);
+    expect(impact.next.atRest).toBeCloseTo(
+      estimateProfileVcuRange(fast).atRest * 10 + performant.atRest * 2
+    );
   });
 });
