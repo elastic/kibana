@@ -7,7 +7,7 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { DEFAULT_GROUPING_MODE } from '../constants';
+import { DEFAULT_GROUPING } from '../constants';
 import {
   DispatchOutcome,
   DispatchPlan,
@@ -202,8 +202,7 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     name: 'Test policy',
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
-    groupBy: [],
-    groupingMode: DEFAULT_GROUPING_MODE,
+    grouping: DEFAULT_GROUPING,
     ...overrides,
   };
 }

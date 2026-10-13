@@ -24,6 +24,7 @@ import {
   ChatEventType,
   ConversationAccessControlMode,
   ConversationOriginType,
+  EventActorType,
   TimelineEventType,
   isRequestAbortedError,
   type ChatAgentEvent,
@@ -243,6 +244,46 @@ describe('handleAgentExecution', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     generateTitleMock.mockReturnValue(of('Generated title'));
+  });
+
+  it('forwards structured output settings on a standalone run', async () => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm-1', message_content: '' },
+      } as ChatAgentEvent)
+    );
+    const outputSchema = {
+      type: 'object',
+      properties: { summary: { type: 'string' } },
+    };
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.standalone,
+        agentId: 'test-agent',
+        agentParams: {
+          nextInput: { message: 'summarize' },
+          structuredOutput: true,
+          outputSchema,
+        },
+      } as never,
+      deps: createDeps({ conversationClient }),
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        structuredOutput: true,
+        outputSchema,
+        executionMode: AgentExecutionMode.standalone,
+      })
+    );
   });
 
   it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
@@ -1582,7 +1623,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
     const abortController = new AbortController();
     deps.agentService.getRegistry.mockImplementation(async () => {
-      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      abortController.abort({
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      });
       throw new Error('AbortError');
     });
 
@@ -1610,7 +1654,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionAborted]);
     const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
     expect(write.events.at(-1)!.data).toMatchObject({
-      aborted_by: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+      aborted_by: {
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      },
     });
   });
 
