@@ -111,7 +111,14 @@ export const createLensEmbeddableFactory = (
         searchContextConfig.api,
         isTextBasedLanguage,
         services,
-        parentApi
+        parentApi,
+        {
+          ...titleManager.api,
+          defaultTitle$: dashboardConfig.api.defaultTitle$,
+          defaultDescription$: dashboardConfig.api.defaultDescription$,
+          timeRange$: searchContextConfig.api.timeRange$,
+          setTimeRange: searchContextConfig.api.setTimeRange,
+        }
       );
 
       const integrationsConfig = initializeIntegrations(getLatestState);

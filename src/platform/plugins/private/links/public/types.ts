@@ -18,7 +18,10 @@ import type {
   PublishesWritableTitle,
   SupportsJsonExport,
 } from '@kbn/presentation-publishing';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  HasPanelSettingsInEditFlyout,
+} from '@kbn/embeddable-plugin/public';
 import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
@@ -48,6 +51,7 @@ export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   PublishesWritableTitle &
   HasEditCapabilities &
   HasLibraryTransforms<LinksByReferenceState, LinksByValueState> &
+  HasPanelSettingsInEditFlyout &
   SupportsJsonExport;
 
 export type ResolvedLink = Link & {

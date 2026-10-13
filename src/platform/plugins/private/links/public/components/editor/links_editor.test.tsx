@@ -19,6 +19,32 @@ import type { ResolvedLink } from '../../types';
 import { LinksStrings } from '../links_strings';
 import type { LinksEditorProps } from './links_editor';
 import LinksEditor from './links_editor';
+import { BehaviorSubject } from 'rxjs';
+
+jest.mock('@kbn/embeddable-plugin/public', () => ({
+  ...jest.requireActual('@kbn/embeddable-plugin/public'),
+  // stub of the lazy loaded sections, lets the tests change the panel title
+  PanelSettingsFlyoutSections: ({
+    updateState,
+  }: {
+    updateState: (update: { title: string }) => void;
+  }) => (
+    <button data-test-subj="panelSettingsStub" onClick={() => updateState({ title: 'New title' })}>
+      change title
+    </button>
+  ),
+}));
+
+const createPanelSettingsApi = () => ({
+  title$: new BehaviorSubject<string | undefined>('Old title'),
+  hideTitle$: new BehaviorSubject<boolean | undefined>(undefined),
+  description$: new BehaviorSubject<string | undefined>(undefined),
+  hideBorder$: new BehaviorSubject<boolean | undefined>(undefined),
+  setTitle: jest.fn(),
+  setHideTitle: jest.fn(),
+  setDescription: jest.fn(),
+  setHideBorder: jest.fn(),
+});
 
 describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [
@@ -118,5 +144,21 @@ describe('LinksEditor', () => {
     await userEvent.click(saveButton);
     expect(onAddToDashboard).toHaveBeenCalledTimes(1);
     expect(onAddToDashboard).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
+  });
+  describe('panel settings', () => {
+    test('are not shown when creating a panel', async () => {
+      renderEditor();
+      expect(screen.queryByTestId('panelSettingsStub')).not.toBeInTheDocument();
+    });
+
+    test('are applied when saving the panel', async () => {
+      const panelSettingsApi = createPanelSettingsApi();
+      const onAddToDashboard = jest.fn();
+      renderEditor({ initialLinks: someLinks, panelSettingsApi, onAddToDashboard });
+      await userEvent.click(screen.getByTestId('panelSettingsStub'));
+      await userEvent.click(screen.getByTestId('links--panelEditor--saveBtn'));
+      expect(panelSettingsApi.setTitle).toHaveBeenCalledWith('New title');
+      expect(onAddToDashboard).toHaveBeenCalled();
+    });
   });
 });

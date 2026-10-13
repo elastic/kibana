@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasDrilldowns } from '@kbn/embeddable-plugin/public';
+import type { HasDrilldowns, HasPanelSettingsInEditFlyout } from '@kbn/embeddable-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
@@ -20,6 +20,7 @@ export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableState> &
   PublishesWritableTitle &
   HasEditCapabilities &
   HasSupportedTriggers &
+  HasPanelSettingsInEditFlyout &
   HasDrilldowns;
 
 export type { ImageConfig } from '../server';

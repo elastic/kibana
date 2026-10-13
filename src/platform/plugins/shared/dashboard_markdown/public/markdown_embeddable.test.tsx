@@ -39,6 +39,34 @@ jest.mock('./markdown_client/markdown_client', () => {
   };
 });
 
+// render the settings flyout content in place of the dashboard flyout
+const mockFlyoutContainer = document.createElement('div');
+jest.mock('@kbn/presentation-util', () => ({
+  openLazyFlyout: jest.fn(({ loadContent }) => {
+    const { render: renderFlyout } = jest.requireActual('@testing-library/react');
+    loadContent({ closeFlyout: jest.fn(), ariaLabelledBy: 'flyoutTitle' }).then(
+      (content: React.ReactElement) => renderFlyout(content, { container: mockFlyoutContainer })
+    );
+    return { onClose: new Promise(() => {}) };
+  }),
+}));
+
+jest.mock('@kbn/embeddable-plugin/public', () => ({
+  ...jest.requireActual('@kbn/embeddable-plugin/public'),
+  PanelEditFlyout: ({
+    panelOptions,
+    onApplyPanelOptions,
+  }: {
+    panelOptions: React.ReactNode;
+    onApplyPanelOptions: () => void;
+  }) => (
+    <div>
+      {panelOptions}
+      <button onClick={onApplyPanelOptions}>Apply and close</button>
+    </div>
+  ),
+}));
+
 const defaultByValueState = {
   content: '[click here](https://example.com)',
   settings: {
@@ -277,7 +305,7 @@ describe('MarkdownEmbeddable', () => {
       expect(link).toHaveAttribute('target', '_self');
     });
 
-    it('toggles link target via the settings popover in edit mode', async () => {
+    it('toggles link target via the settings flyout in edit mode', async () => {
       const { embeddable } = await renderEmbeddable({
         content: '[click here](https://example.com)',
         settings: { open_links_in_new_tab: true },
@@ -291,13 +319,15 @@ describe('MarkdownEmbeddable', () => {
         await embeddable.api.onEdit();
       });
 
-      // Open the settings popover and toggle the switch off
+      // Open the settings flyout, toggle the switch off and apply
       await userEvent.click(screen.getByRole('button', { name: /Settings/i }));
+      document.body.appendChild(mockFlyoutContainer);
       const toggle = await screen.findByRole('switch');
       expect(toggle).toBeChecked();
       await userEvent.click(toggle);
+      await userEvent.click(screen.getByRole('button', { name: 'Apply and close' }));
 
-      // Discard to exit edit mode (settings changes are applied immediately, not via Apply)
+      // Discard to exit edit mode, the settings are applied from the flyout
       await userEvent.click(screen.getByRole('button', { name: /Discard/i }));
 
       // Links should now open in the same tab

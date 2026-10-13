@@ -68,12 +68,12 @@ export const FlyoutWrapper = ({
           {/* Header row 1: Title + close (same onCancel as footer Cancel) */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
+              <EuiTitle size="s" data-test-subj="inlineEditingFlyoutLabel">
                 <h2>
                   <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      {i18n.translate('xpack.lens.config.showVisualizationLabel', {
-                        defaultMessage: 'Configuration',
+                      {i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                        defaultMessage: 'Edit visualization',
                       })}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

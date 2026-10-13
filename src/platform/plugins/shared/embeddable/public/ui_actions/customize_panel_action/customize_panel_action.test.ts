@@ -48,6 +48,31 @@ describe('Customize panel action', () => {
     expect(await action.isCompatible(context)).toBe(true);
   });
 
+  describe('panels with their settings in the edit flyout', () => {
+    const withSettingsInEditFlyout = (hasSettings: boolean, viewMode: ViewMode) => ({
+      embeddable: {
+        ...context.embeddable,
+        viewMode$: new BehaviorSubject<ViewMode>(viewMode),
+        timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+        filters$: new BehaviorSubject<Filter[] | undefined>([]),
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+        hasPanelSettingsInEditFlyout: () => hasSettings,
+      },
+    });
+
+    it('is incompatible in edit mode', async () => {
+      expect(await action.isCompatible(withSettingsInEditFlyout(true, 'edit'))).toBe(false);
+    });
+
+    it('is compatible in edit mode when the edit flyout is not available', async () => {
+      expect(await action.isCompatible(withSettingsInEditFlyout(false, 'edit'))).toBe(true);
+    });
+
+    it('is still compatible in view mode to customize the time range', async () => {
+      expect(await action.isCompatible(withSettingsInEditFlyout(true, 'view'))).toBe(true);
+    });
+  });
+
   it('is incompatible when context lacks necessary functions', async () => {
     const emptyContext = {
       embeddable: {},

@@ -96,6 +96,7 @@ export const getImageEmbeddableFactory = () => {
                 closeFlyout,
                 ariaLabelledBy,
                 initialImageConfig: imageConfig$.getValue(),
+                panelSettingsApi: titleManager.api,
                 onSave: (newImageConfig: ImageConfig) => {
                   imageConfig$.next(newImageConfig);
                 },
@@ -104,6 +105,8 @@ export const getImageEmbeddableFactory = () => {
           });
         },
         isEditingEnabled: () => true,
+        // the panel settings are part of the image editor flyout
+        hasPanelSettingsInEditFlyout: () => true,
         getTypeDisplayName: () =>
           i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
             defaultMessage: 'image',

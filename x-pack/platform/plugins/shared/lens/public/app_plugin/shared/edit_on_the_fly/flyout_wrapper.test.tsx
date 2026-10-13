@@ -78,11 +78,11 @@ describe('Flyout wrapper', () => {
 
     it('should show the only a single and consistent title no matter the context', async () => {
       const component = mountFlyoutWrapper();
-      expect(screen.getByText('Configuration')).toBeInTheDocument();
+      expect(screen.getByText('Edit visualization')).toBeInTheDocument();
       component.rerender({ isNewPanel: true });
-      expect(screen.getByText('Configuration')).toBeInTheDocument();
+      expect(screen.getByText('Edit visualization')).toBeInTheDocument();
       component.rerender({ isNewPanel: false, isReadOnly: true });
-      expect(screen.getByText('Configuration')).toBeInTheDocument();
+      expect(screen.getByText('Edit visualization')).toBeInTheDocument();
     });
 
     it('should call onCancel when the header close button is clicked', async () => {
