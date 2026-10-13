@@ -83,13 +83,11 @@ describe('ConversationServiceImpl', () => {
       await createService({ agents, auditLogService }).getScopedClient({ request });
 
       const { onConversationCreated } = createClientMock.mock.calls[0][0];
-      const user = { id: 'profile-1', username: 'jane' };
-      onConversationCreated!({ conversationId: 'conv-1', agentId: 'agent-1', user });
+      onConversationCreated!({ conversationId: 'conv-1', agentId: 'agent-1' });
 
       expect(auditLogService.logConversationCreated).toHaveBeenCalledWith(request, {
         conversationId: 'conv-1',
         agentId: 'agent-1',
-        user,
       });
     });
 

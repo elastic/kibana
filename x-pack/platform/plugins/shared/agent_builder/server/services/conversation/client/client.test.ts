@@ -4827,44 +4827,7 @@ describe('ConversationClient', () => {
       expect(onConversationCreated).toHaveBeenCalledWith({
         conversationId: 'conversation-1',
         agentId: 'agent-1',
-        user: { id: 'user-1', username: 'test-user', type: undefined },
       });
-    });
-
-    it('reports a refused creation with the error', async () => {
-      const onConversationCreated = jest.fn();
-      const notifyingClient = createClient({
-        space: testSpace,
-        logger: loggerMock.create(),
-        esClient: mockRawEsClient as unknown as ElasticsearchClient,
-        agentRegistry: agentRegistry as unknown as AgentRegistry,
-        conversationEvents: mockConversationEvents,
-        user: { id: 'user-1', username: 'test-user', isAdmin: false },
-        onConversationCreated,
-      });
-      mockEsClient.index.mockRejectedValueOnce(
-        Object.assign(new Error('conflict'), { meta: { statusCode: 409 } })
-      );
-
-      await expect(
-        notifyingClient.create(
-          {
-            id: 'conversation-1',
-            agent_id: 'agent-1',
-            title: 'T',
-            rounds: [],
-          },
-          { source: 'http_api' }
-        )
-      ).rejects.toThrow();
-
-      expect(onConversationCreated).toHaveBeenCalledWith(
-        expect.objectContaining({
-          conversationId: 'conversation-1',
-          agentId: 'agent-1',
-          error: expect.any(Error),
-        })
-      );
     });
 
     it('does not fail the write when the listener throws', async () => {

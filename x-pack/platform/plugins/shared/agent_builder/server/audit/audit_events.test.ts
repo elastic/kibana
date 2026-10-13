@@ -132,24 +132,6 @@ describe('Agent Builder audit event builders', () => {
       });
     });
 
-    it('names a service account and carries it as fallback attribution', () => {
-      const event = conversationAuditEvent({
-        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
-        conversationId: 'conv-1',
-        user: {
-          id: 'service_account:kibana/automation',
-          username: 'kibana/automation',
-          type: 'service_account',
-        },
-      });
-
-      expect(event.message).toBe('Service account has created conversation [id=conv-1]');
-      expect(event.user).toEqual({
-        id: 'service_account:kibana/automation',
-        name: 'kibana/automation',
-      });
-    });
-
     it('records a failure when creation errored', () => {
       const event = conversationAuditEvent({
         action: AgentBuilderAuditAction.CONVERSATION_CREATE,

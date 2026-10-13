@@ -6,7 +6,6 @@
  */
 
 import type { EcsEvent } from '@kbn/core/server';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { AuditEvent } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
 
@@ -202,15 +201,12 @@ export function toolAuditEvent({
 export interface ConversationAuditEventParams extends CommonAuditEventParams {
   conversationId?: string;
   agentId?: string;
-  /** Attribution when the audit logger cannot resolve a user from the request. */
-  user?: UserIdAndName;
 }
 
 export function conversationAuditEvent({
   action,
   conversationId,
   agentId,
-  user,
   outcome,
   error,
 }: ConversationAuditEventParams): AuditEvent {
@@ -223,13 +219,12 @@ export function conversationAuditEvent({
     doc = `conversation [agent=${agentId}]`;
   }
 
-  const subject = user?.type === 'service_account' ? 'Service account' : 'User';
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `${subject} is ${progressive} ${doc}`
-    : `${subject} has ${past} ${doc}`;
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
 
   const type = eventTypes[action];
 
@@ -241,7 +236,6 @@ export function conversationAuditEvent({
       type: type ? [type] : undefined,
       outcome: outcome ?? (error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS),
     },
-    ...(user ? { user: { ...(user.id ? { id: user.id } : {}), name: user.username } } : {}),
     error: error && {
       code: error.name,
       message: error.message,

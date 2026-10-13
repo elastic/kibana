@@ -25,7 +25,6 @@ import type {
 import {
   type ConversationEvent,
   type CurrentUser,
-  type UserIdAndName,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
@@ -264,12 +263,7 @@ interface ConversationListEsResponse {
   };
 }
 
-export type OnConversationCreated = (params: {
-  conversationId: string;
-  agentId: string;
-  user: UserIdAndName;
-  error?: Error;
-}) => void;
+export type OnConversationCreated = (params: { conversationId: string; agentId: string }) => void;
 
 export const createClient = ({
   space,
@@ -737,20 +731,6 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
-    // Not done at the route layer: converse creates conversations implicitly too.
-    const notifyCreated = (error?: Error) => {
-      try {
-        this.onConversationCreated?.({
-          conversationId: id,
-          agentId: conversation.agent_id,
-          user: { id: this.user.id, username: this.user.username, type: this.user.type },
-          ...(error ? { error } : {}),
-        });
-      } catch (notifyError) {
-        this.logger.warn(`Failed to notify creation of conversation "${id}": ${notifyError}`);
-      }
-    };
-
     let indexed: { _seq_no?: number; _primary_term?: number };
     try {
       indexed = await this.storage.getClient().index({
@@ -760,11 +740,11 @@ class ConversationClientImpl implements ConversationClient {
         refresh: true,
       });
     } catch (error) {
-      const failure = isVersionConflictError(error)
-        ? createConversationAlreadyExistsError({ conversationId: id })
-        : error;
-      notifyCreated(failure instanceof Error ? failure : new Error(String(failure)));
-      throw failure;
+      if (isVersionConflictError(error)) {
+        throw createConversationAlreadyExistsError({ conversationId: id });
+      }
+
+      throw error;
     }
 
     if (indexed._seq_no === undefined || indexed._primary_term === undefined) {
@@ -783,7 +763,11 @@ class ConversationClientImpl implements ConversationClient {
         source,
       })
     );
-    notifyCreated();
+    try {
+      this.onConversationCreated?.({ conversationId: id, agentId: conversation.agent_id });
+    } catch (error) {
+      this.logger.warn(`Failed to notify creation of conversation "${id}": ${error}`);
+    }
 
     return this.get(id);
   }
