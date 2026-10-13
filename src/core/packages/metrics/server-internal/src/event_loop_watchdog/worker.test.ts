@@ -150,6 +150,16 @@ describe('runWatchdogWorker (debugger sampling)', () => {
     }
   );
 
+  it('disconnects when the debugger cannot be fully enabled (pauses not skipped)', async () => {
+    failOn.add('Debugger.setSkipAllPauses');
+    start();
+    await sleep(50);
+    expect(disconnect).toHaveBeenCalled();
+    expect(logs.map(({ message }) => message)).toContain(
+      'Event loop stack sampling disabled: could not enable the debugger: Debugger.setSkipAllPauses failed'
+    );
+  });
+
   it('disconnects when an unrequested pause cannot be resumed', async () => {
     start();
     await sleep(50);

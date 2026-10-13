@@ -162,7 +162,8 @@ export const runWatchdogWorker = (
         }
       );
     })
-    .catch((error) => log('warn', `Event loop stack sampling unavailable: ${error.message}`));
+    // Partially enabled (e.g. pauses not skipped): tear the session down.
+    .catch((error) => disable(`could not enable the debugger: ${error.message}`));
 
   let capture: Capture | undefined;
   let lastCaptureAtUs = -Infinity;
