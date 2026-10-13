@@ -20,7 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const security = getService('security');
 
-  describe('tooltip filter actions', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/296159
+  describe.skip('tooltip filter actions', () => {
     before(async () => {
       await security.testUser.setRoles([
         'test_logstash_reader',
