@@ -37,8 +37,6 @@ export interface LayoutPanel {
   isNew: boolean;
   /** Existing panel whose content was edited in this call, so its size may no longer fit. */
   contentChanged: boolean;
-  /** Sized explicitly in this call; the layout keeps its size. */
-  fixedSize: boolean;
 }
 
 /** A section as an item of the top-level container. */
@@ -79,6 +77,12 @@ const rowItemSchema = z.object({
     .min(1)
     .max(GRID_COLUMNS)
     .describe('Panel width in grid columns. Ignored for sections.'),
+  userSized: z
+    .boolean()
+    .optional()
+    .describe(
+      'True when `w` and the row `h` follow a size the user asked for in instructions or rules.'
+    ),
 });
 
 const rowSchema = z.object({

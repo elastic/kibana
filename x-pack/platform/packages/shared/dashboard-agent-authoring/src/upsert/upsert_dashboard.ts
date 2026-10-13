@@ -302,14 +302,14 @@ const applyPanel = ({
   plan: PanelPlan;
   attempt?: Extract<PanelContentAttempt, { type: 'success' }>;
 }): DashboardAttachmentData => {
-  const { id, section, size } = item;
+  const { id, section } = item;
 
   if (!existingPanel) {
     if (!attempt) {
       return dashboardData;
     }
     // Positioned by the layout step once every change is applied.
-    const grid = { x: 0, y: 0, ...(size ?? getDefaultPanelSize(attempt.panelContent)) };
+    const grid = { x: 0, y: 0, ...getDefaultPanelSize(attempt.panelContent) };
     return appendPanelsToDashboard({
       dashboardData,
       panelsToAdd: [{ id, ...attempt.panelContent, grid }],
@@ -320,7 +320,6 @@ const applyPanel = ({
   const transformPanel = (panel: AttachmentPanel): AttachmentPanel => ({
     ...panel,
     ...(attempt ? attempt.panelContent : {}),
-    grid: { ...panel.grid, ...size },
   });
 
   const currentSectionId = getSectionIdByPanelId(dashboardData).get(id);
@@ -520,17 +519,13 @@ export const executeDashboardUpsert = async ({
   const attempts = await Promise.all(plans.map((plan) => plan.resolveContent?.()));
 
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
-  const fixedSizePanelIds = new Set<string>();
   const editedPanelIds = new Set<string>();
   plans.forEach((plan, planIndex) => {
     const attempt = attempts[planIndex];
-    const { id, size } = plan.item;
+    const { id } = plan.item;
     if (attempt?.type === 'failure') {
       failures.push({ ...attempt.failure, identifier: id });
       return;
-    }
-    if (size) {
-      fixedSizePanelIds.add(id);
     }
     if (plan.existingPanel && attempt) {
       editedPanelIds.add(id);
@@ -563,7 +558,6 @@ export const executeDashboardUpsert = async ({
   nextDashboardData = await arrangeDashboardLayout({
     originalDashboardData,
     dashboardData: nextDashboardData,
-    fixedSizePanelIds,
     editedPanelIds,
     instructions: upsert.layout,
     authoringNotesByPanelId: new Map(

@@ -8,19 +8,9 @@
 import { z } from '@kbn/zod/v4';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { controlInputSchema } from '../controls';
-import { GRID_COLUMNS } from '../layout';
 import { upsertPanelContentSchema } from '../operations/panels';
 
 const idSchema = z.string().min(1).max(256);
-
-const panelSizeSchema = z
-  .object({
-    w: z.number().int().min(1).max(GRID_COLUMNS).describe('Width in grid columns, out of 48.'),
-    h: z.number().int().min(1).max(100).describe('Height in grid rows.'),
-  })
-  .describe(
-    'Explicit panel size. Set it only when the user asks for a specific size (e.g. "make it full width" or "make it bigger"); otherwise the layout step sizes the panel. Positions always come from the layout step.'
-  );
 
 const upsertSectionSchema = z.object({
   id: idSchema.describe(
@@ -51,9 +41,8 @@ const upsertPanelSchema = z.object({
   content: upsertPanelContentSchema
     .optional()
     .describe(
-      'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move or resize the panel.'
+      'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move the panel.'
     ),
-  size: panelSizeSchema.optional(),
 });
 
 /**
@@ -87,7 +76,7 @@ export const upsertDashboardSchema = z.object({
     .max(100)
     .optional()
     .describe(
-      'Panels to create, edit, move, or resize, by id. Panels you leave out stay unchanged.'
+      'Panels to create, edit, or move between sections, by id. Panels you leave out stay unchanged.'
     ),
   controls: z
     .array(controlInputSchema)
@@ -102,7 +91,7 @@ export const upsertDashboardSchema = z.object({
     .max(1000)
     .optional()
     .describe(
-      'Layout instructions from the user, e.g. "put the metrics in one row" or "move the error chart next to the latency chart". Arranges the whole dashboard again, and is remembered for later calls until the user asks for a different arrangement. Omit it otherwise: new, moved, and removed panels are placed automatically.'
+      'Layout and size instructions from the user, e.g. "put the metrics in one row", "move the error chart next to the latency chart", or "make the table full width". Arranges the whole dashboard again, and is remembered for later calls until the user asks for a different arrangement. Omit it otherwise: new, moved, and removed panels are placed automatically.'
     ),
   remove: z
     .array(idSchema)
