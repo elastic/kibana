@@ -29,22 +29,30 @@ import {
  *
  * Emits one row per entity with `has_severe_alert`: whether any of its alerts is high
  * or critical severity.
+ *
+ * Pass `bucketExpression` (for example `DATE_DIFF("hour", @timestamp, NOW()) / 6`) to keep
+ * @timestamp and emit one row per (`bucket`, entity) instead, for the sparkline series. Without it
+ * the output is unchanged.
  */
 const KEEP_COLUMNS = '_ea_entity_id, `kibana.alert.severity`';
 
-export const buildAlertEuidPipeline = (): string[] => {
+/** The column that holds the bucket of an alert when `bucketExpression` is given. */
+export const ALERT_BUCKET_COLUMN = 'bucket';
+
+export const buildAlertEuidPipeline = (bucketExpression?: string): string[] => {
+  const keepColumns = bucketExpression ? `${KEEP_COLUMNS}, @timestamp` : KEEP_COLUMNS;
   const derivedSteps = [
     'WHERE `kibana.alert.entity.id` IS NULL',
     ...buildPerTypeEuidEvals(),
     evalGuardedTypedEuids('_ea_entity_id'),
-    `| KEEP ${KEEP_COLUMNS}`,
+    `| KEEP ${keepColumns}`,
   ];
 
   const fork = [
     '| FORK (',
     '    WHERE `kibana.alert.entity.id` IS NOT NULL',
     '    | EVAL _ea_entity_id = `kibana.alert.entity.id`',
-    `    | KEEP ${KEEP_COLUMNS}`,
+    `    | KEEP ${keepColumns}`,
     '  )',
     '  (',
     indentForkBranch(derivedSteps.join('\n')),
@@ -56,9 +64,12 @@ export const buildAlertEuidPipeline = (): string[] => {
     '| MV_EXPAND _ea_entity_id',
     '| WHERE _ea_entity_id IS NOT NULL',
     '| EVAL is_severe_alert = `kibana.alert.severity` IN ("high", "critical")',
+    ...(bucketExpression ? [`| EVAL ${ALERT_BUCKET_COLUMN} = ${bucketExpression}`] : []),
     // Rename only after STATS to avoid STATS BY grouping on the mapped entity.id field
     // in the alerts index rather than our computed EUID column.
-    '| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id',
+    `| STATS has_severe_alert = MAX(is_severe_alert) BY ${
+      bucketExpression ? `${ALERT_BUCKET_COLUMN}, ` : ''
+    }_ea_entity_id`,
     '| RENAME _ea_entity_id AS `entity.id`',
   ];
 };
