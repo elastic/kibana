@@ -6,11 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
-import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import type { TimeRange, EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
@@ -21,6 +17,7 @@ import {
   watchlistedSeriesColumn,
 } from '../queries/entities_with_alerts_series_query';
 import { readSeriesDots } from '../queries/tile_series_window';
+import { getTileTrend, useTileSeriesQuery } from './use_tile_series_query';
 
 interface AlertBasedTilesSeriesOptions {
   spaceId: string;
@@ -33,19 +30,6 @@ interface AlertBasedTilesSeriesOptions {
   severeAlertsCount: number;
   watchlistedCount: number;
 }
-
-interface AlertBasedTilesSeries {
-  severe: number[];
-  watchlisted: number[];
-}
-
-/** The series moves by one dot per step, so a result is kept for an hour. */
-const SERIES_STALE_TIME_MS = 60 * 60_000;
-
-const withLiveCount = (dots: number[], liveCount: number): number[] => [
-  ...dots.slice(0, -1),
-  liveCount,
-];
 
 /**
  * The sparkline dots of the Entities with alerts and Watchlisted tiles for the selected range,
@@ -66,7 +50,6 @@ export const useAlertBasedTilesSeries = ({
   watchlistedTrend: number[] | undefined;
   isTrendLoading: boolean;
 } => {
-  const { data } = useKibana().services;
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
   const index = resolvedIndex?.indexName;
@@ -84,39 +67,33 @@ export const useAlertBasedTilesSeries = ({
     [index, spaceId, timeRange, entityFilters]
   );
 
-  const {
-    data: series,
+  const { series, isFetching, isError } = useTileSeriesQuery({
+    tileKey: 'alertBasedTilesSeries',
+    query,
+    enabled: !skip && isReady && !isIndexLoading,
+    parse: (raw: ESQLSearchResponse) => ({
+      severe: readSeriesDots(raw, timeRange, severeAlertsSeriesColumn),
+      watchlisted: readSeriesDots(raw, timeRange, watchlistedSeriesColumn),
+    }),
+  });
+
+  const state = {
+    skip,
     isFetching,
     isError,
-  } = useQuery<AlertBasedTilesSeries | undefined, SecurityAppError>(
-    ['alertBasedTilesSeries', query],
-    async ({ signal }) => {
-      if (!query) return undefined;
-      const result = await lastValueFrom(
-        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
-      );
-      const raw = result.rawResponse as unknown as ESQLSearchResponse;
-      return {
-        severe: readSeriesDots(raw, timeRange, severeAlertsSeriesColumn),
-        watchlisted: readSeriesDots(raw, timeRange, watchlistedSeriesColumn),
-      };
-    },
-    {
-      enabled: !skip && isReady && !isIndexLoading && Boolean(query),
-      keepPreviousData: true,
-      staleTime: SERIES_STALE_TIME_MS,
-      refetchOnWindowFocus: false,
-      retry: 1,
-    }
-  );
-
-  const hasSeries = series !== undefined && !isFetching;
-  // Once the index has loaded, a missing one means the query can never run.
-  const isUnavailable = !skip && !isIndexLoading && !index;
+    // Once the index has loaded, a missing one means the query can never run.
+    isUnavailable: !skip && !isIndexLoading && !index,
+  };
+  const alerts = getTileTrend({ ...state, dots: series?.severe, liveCount: severeAlertsCount });
+  const watchlisted = getTileTrend({
+    ...state,
+    dots: series?.watchlisted,
+    liveCount: watchlistedCount,
+  });
 
   return {
-    alertsTrend: hasSeries ? withLiveCount(series.severe, severeAlertsCount) : undefined,
-    watchlistedTrend: hasSeries ? withLiveCount(series.watchlisted, watchlistedCount) : undefined,
-    isTrendLoading: !skip && !hasSeries && !isError && !isUnavailable,
+    alertsTrend: alerts.trend,
+    watchlistedTrend: watchlisted.trend,
+    isTrendLoading: alerts.isTrendLoading,
   };
 };
