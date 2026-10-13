@@ -95,6 +95,8 @@ export const RuleDetailsAppHeader = React.memo<RuleDetailsAppHeaderProps>(
           menu={menu}
           docLink={docLinks.links.securitySolution.manageDetectionRules}
           spacing="largeBleed"
+          // Pinned by RuleDetailsStickyHeader together with the alerts search bar.
+          sticky={false}
         />
         {snooze.modal}
       </>

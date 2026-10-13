@@ -86,6 +86,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { RuleDetailsAppHeader } from './rule_details_app_header';
+import { RuleDetailsStickyHeader } from './rule_details_sticky_header';
 import { SecurityPageName } from '../../../../app/types';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -128,7 +129,6 @@ import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { FiltersGlobal } from '../../../../common/components/filters_global';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -588,22 +588,35 @@ export const RuleDetailsPage = connector(
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <RuleCustomizationsContextProvider rule={rule}>
-            <RuleDetailsAppHeader
-              rule={rule}
-              ruleId={ruleId}
-              ruleLoading={ruleLoading}
-              isExistingRule={isExistingRule}
-              hasActionsPrivileges={hasActionsPrivileges}
-              createdBy={createdBy}
-              updatedBy={updatedBy}
-              tabs={pageTabs}
-              refreshRule={refreshRule}
-              onRuleEnabledChange={handleOnChangeEnabledRule}
-              startMlJobsIfNeeded={startMlJobsIfNeeded}
-              showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
-              showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-              confirmDeletion={confirmDeletion}
-            />
+            <RuleDetailsStickyHeader>
+              <RuleDetailsAppHeader
+                rule={rule}
+                ruleId={ruleId}
+                ruleLoading={ruleLoading}
+                isExistingRule={isExistingRule}
+                hasActionsPrivileges={hasActionsPrivileges}
+                createdBy={createdBy}
+                updatedBy={updatedBy}
+                tabs={pageTabs}
+                refreshRule={refreshRule}
+                onRuleEnabledChange={handleOnChangeEnabledRule}
+                startMlJobsIfNeeded={startMlJobsIfNeeded}
+                showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+                confirmDeletion={confirmDeletion}
+              />
+              {canReadAlerts && (
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
+                  <EuiSpacer size="s" />
+                  <SiemSearchBar
+                    dataView={dataView}
+                    displayStyle="inPage"
+                    id={InputsModelId.global}
+                  />
+                  <EuiSpacer size="s" />
+                </Route>
+              )}
+            </RuleDetailsStickyHeader>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <NeedAdminForUpdateRulesCallOut />
               <MissingDetectionsPrivilegesCallOut />
@@ -696,9 +709,6 @@ export const RuleDetailsPage = connector(
                   {canReadAlerts && (
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
-                        <FiltersGlobal>
-                          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-                        </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                           <EuiFlexItem grow={false}>
