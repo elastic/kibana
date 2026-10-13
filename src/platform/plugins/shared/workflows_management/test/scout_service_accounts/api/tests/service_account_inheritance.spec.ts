@@ -175,7 +175,8 @@ apiTest.describe(
       apiClient: ApiClientFixture,
       parent: string,
       targetId: string,
-      allowedIds: string[]
+      allowedIds: string[] | undefined,
+      allowedTags?: string[]
     ) => {
       const saved = await apiClient.get(`api/workflows/workflow/${workflowId(parent)}`, {
         headers,
@@ -191,9 +192,11 @@ apiTest.describe(
         )
         .replace(
           `workflow-id: ${JSON.stringify(targetId)}`,
-          `workflow-id: '{{ variables.action_workflow_id }}'\n      allowed-workflow-ids: ${JSON.stringify(
-            allowedIds
-          )}`
+          [
+            "workflow-id: '{{ variables.action_workflow_id }}'",
+            ...(allowedIds ? [`allowed-workflow-ids: ${JSON.stringify(allowedIds)}`] : []),
+            ...(allowedTags ? [`allowed-workflow-tags: ${JSON.stringify(allowedTags)}`] : []),
+          ].join('\n      ')
         );
       const updated = await apiClient.put(`api/workflows/managed/workflow/${workflowId(parent)}`, {
         headers: getContext().headers,
@@ -252,6 +255,94 @@ apiTest.describe(
             'another-managed-action',
           ]);
           const failed = await wait(apiClient, await run(apiClient, parent), 'failed', headers);
+          expect(JSON.stringify(failed.stepExecutions)).toContain('not approved');
+          await expectNoChildren(apiClient, workflowId(child));
+        }
+      );
+    }
+
+    const prepareTagDelegation = async (
+      apiClient: ApiClientFixture,
+      asynchronous: boolean,
+      childTags: string[]
+    ) => {
+      const { readOnlyAccountId } = getContext();
+      const child = await install(apiClient);
+      const saved = await apiClient.get(`api/workflows/workflow/${workflowId(child)}`, {
+        headers,
+        responseType: 'json',
+      });
+      expect(saved).toHaveStatusCode(200);
+      const yaml = `${saved.body.yaml}\ntags: ${JSON.stringify(childTags)}\n`;
+      const updated = await apiClient.put(`api/workflows/managed/workflow/${workflowId(child)}`, {
+        headers: getContext().headers,
+        body: { yaml },
+        responseType: 'json',
+      });
+      expect(updated, JSON.stringify(updated.body)).toHaveStatusCode(200);
+      // Ordinary workflow editors cannot opt a managed child into delegation.
+      const forbidden = await apiClient.put(`api/workflows/workflow/${workflowId(child)}`, {
+        headers: editorHeaders,
+        body: { yaml },
+        responseType: 'json',
+      });
+      expect(forbidden).toHaveStatusCode(403);
+      const parent = await install(apiClient, {
+        serviceAccountId: readOnlyAccountId,
+        childWorkflowId: workflowId(child),
+        runAsMode: 'inherit',
+        waitForInput: true,
+        asynchronous,
+      });
+      await configureDynamicChild(apiClient, parent, workflowId(child), undefined, [
+        'auto-approvable',
+      ]);
+      return { child, parent };
+    };
+
+    for (const asynchronous of [false, true]) {
+      apiTest(
+        `${asynchronous ? 'async' : 'sync'} tag-authorized child inherits after approval`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(150_000);
+          const { readOnlyAccountId, wait } = getContext();
+          const { parent } = await prepareTagDelegation(apiClient, asynchronous, [
+            'action',
+            'auto-approvable',
+          ]);
+          const paused = await wait(
+            apiClient,
+            await run(apiClient, parent),
+            'waiting_for_input',
+            headers
+          );
+          await resume(apiClient, paused);
+          const finished = await wait(apiClient, paused.id, 'completed', headers);
+          const childRun = await childExecution(apiClient, finished);
+          const completedChild = await wait(apiClient, childRun.id, 'completed', headers);
+          expect(authenticatedAs(completedChild)).toContain(readOnlyAccountId);
+          expect(completedChild.effectiveIdentity?.inheritedFrom?.workloadId).toBe(
+            workflowId(parent)
+          );
+        }
+      );
+
+      apiTest(
+        `${
+          asynchronous ? 'async' : 'sync'
+        } tag-authorized child without matching tags never starts`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(150_000);
+          const { wait } = getContext();
+          const { child, parent } = await prepareTagDelegation(apiClient, asynchronous, ['action']);
+          const paused = await wait(
+            apiClient,
+            await run(apiClient, parent),
+            'waiting_for_input',
+            headers
+          );
+          await resume(apiClient, paused);
+          const failed = await wait(apiClient, paused.id, 'failed', headers);
           expect(JSON.stringify(failed.stepExecutions)).toContain('not approved');
           await expectNoChildren(apiClient, workflowId(child));
         }

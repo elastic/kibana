@@ -1028,7 +1028,22 @@ export const WorkflowExecuteStepInputSchema = z.object({
     .max(100)
     .optional()
     .describe(
-      'Literal child workflow IDs permitted to receive the parent service account. Required for a templated workflow-id with inherit or override; checked against the saved parent definition.'
+      'Literal child workflow IDs permitted to receive the parent service account. A templated workflow-id with inherit or override requires allowed-workflow-ids or allowed-workflow-tags; checked against the saved parent definition.'
+    )
+    .meta({ doNotSuggest: true }),
+  'allowed-workflow-tags': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow tags must be literal tags')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal tags permitting managed children to receive the parent service account. At least one must match the saved child definition. When IDs are also supplied, both restrictions must pass.'
     )
     .meta({ doNotSuggest: true }),
   inputs: z.record(z.string(), z.unknown()).optional(),
