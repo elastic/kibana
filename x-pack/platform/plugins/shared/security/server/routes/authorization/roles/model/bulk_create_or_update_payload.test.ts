@@ -61,17 +61,17 @@ describe('getBulkCreateOrUpdatePayloadSchema', () => {
 
   it('should throw an error when too many roles are provided', () => {
     const roles = Object.fromEntries(
-      Array.from({ length: 101 }, (_, i) => [`role${i}`, { kibana: [] }])
+      Array.from({ length: 5001 }, (_, i) => [`role${i}`, { kibana: [] }])
     );
 
     expect(() => bulkCreateOrUpdatePayloadSchema.validate({ roles })).toThrowError(
-      '[roles]: cannot contain more than 100 roles'
+      '[roles]: cannot contain more than 5000 roles'
     );
   });
 
   it('should accept the maximum number of roles', () => {
     const roles = Object.fromEntries(
-      Array.from({ length: 100 }, (_, i) => [`role${i}`, { kibana: [] }])
+      Array.from({ length: 5000 }, (_, i) => [`role${i}`, { kibana: [] }])
     );
 
     expect(() => bulkCreateOrUpdatePayloadSchema.validate({ roles })).not.toThrow();
