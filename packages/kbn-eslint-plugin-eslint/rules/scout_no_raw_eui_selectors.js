@@ -75,13 +75,10 @@ module.exports = {
     schema: [],
   },
 
-  create(context) {
-    const entries = getEntries();
-    if (entries.length === 0) return {};
-
+  createOnce(context) {
     /** @param {string} value @param {import('estree').Node} node */
     function checkStringValue(value, node) {
-      const entry = findMatch(value, entries);
+      const entry = findMatch(value, getEntries());
       if (!entry) return;
       context.report({
         node,
@@ -94,6 +91,8 @@ module.exports = {
     }
 
     return {
+      // Nothing to check when the installed helpers export no selectors.
+      before: () => getEntries().length > 0,
       CallExpression(node) {
         const { callee } = node;
         if (

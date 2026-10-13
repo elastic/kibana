@@ -38,6 +38,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
+  const monacoEditor = getService('monacoEditor');
 
   const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share, exports } =
     getPageObjects([
@@ -182,8 +183,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // EUI drops the option click under load, and the filter text setElement leaves behind makes
       // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
       const expected = name.trim().toLowerCase();
-      await retry.tryWithRetries(
-        `select [${name}] from [${testTargetId}]`,
+      await retry.try(
         async () => {
           await this.selectOptionFromComboBox(testTargetId, name);
           await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
@@ -192,8 +192,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
             return committed.trim().toLowerCase() === expected;
           });
         },
-        { retryCount: 3, timeout: 60_000 },
-        async () => comboBox.clearInputField(testTargetId)
+        {
+          description: `select [${name}] from [${testTargetId}]`,
+          timeout: 60_000,
+          onFailureBlock: async () => comboBox.clearInputField(testTargetId),
+        }
       );
     },
 
@@ -274,25 +277,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
-        // Close too early discards the operation→field transition. Do not wait on the
-        // combobox input: setElement types `field` as a filter before the option is
-        // clicked. data-selected-field is the committed option display name and
-        // updates only after insertOrReplaceColumn. Independent of aria-invalid
-        // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
-        // Re-select on failure because EUI drops the option click under load, and the filter text
-        // setElement leaves behind makes both its own check and the input read back as `field`.
-        await retry.tryWithRetries(
-          `configureDimension - select field [${field}]`,
-          async () => {
-            await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
-            await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
-              const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-              const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-              return committedLabel === field;
-            });
-          },
-          { retryCount: 3, timeout: 60_000 },
-          async () => comboBox.clearInputField('indexPattern-dimension-field')
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-dimension-field',
+          'data-selected-field',
+          field
         );
       }
 
@@ -826,7 +814,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `input[data-test-subj="${testSubj}"][type='number']`
       );
       await numericInput.click();
-      await numericInput.clearValue();
+      // These inputs are controlled by React state, so the clear has to arrive as real key events
+      await numericInput.clearValueWithKeyboard();
       return numericInput;
     },
 
@@ -2099,13 +2088,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async typeFormula(formula: string) {
-      await find.byCssSelector('.monaco-editor');
-      await find.clickByCssSelectorWhenNotDisabledWithoutRetry('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(formula);
+      await monacoEditor.setCodeEditorValueByCssSelector(
+        '[data-test-subj="lnsFormulaEditor"]',
+        formula
+      );
       // Debounce time for formula
       await common.sleep(300);
+    },
+
+    /**
+     * Simulate typing text in the formula editor (triggers Monaco's type command).
+     */
+    async simulateTypingInFormula(text: string) {
+      await monacoEditor.simulateTyping('lnsFormulaEditor', text);
+      await common.sleep(100);
+    },
+
+    /**
+     * Simulate pressing a key in the formula editor.
+     */
+    async simulateKeyInFormula(key: string) {
+      await this.simulateTypingInFormula(key);
     },
 
     async expectFormulaText(formula: string) {

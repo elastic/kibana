@@ -93,7 +93,10 @@ describe('RuleExecutorWorkflowSubscriber', () => {
     it('forwards a succeeded event as the reshaped workflow payload under the acting request', async () => {
       subscriber.start();
 
-      await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, { request });
+      await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
@@ -107,7 +110,10 @@ describe('RuleExecutorWorkflowSubscriber', () => {
     it('forwards a failed event as { rule: { id, spaceId }, error }', async () => {
       subscriber.start();
 
-      await handlerFor(bus, RULE_EXECUTION_FAILED_EVENT_TYPE)(failedEvent, { request });
+      await handlerFor(bus, RULE_EXECUTION_FAILED_EVENT_TYPE)(failedEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
       expect(mockEmitEvent).toHaveBeenCalledWith(RuleExecutionFailedTriggerId, {
@@ -121,7 +127,7 @@ describe('RuleExecutorWorkflowSubscriber', () => {
 
       await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(
         { ...succeededEvent, payload: { ...succeededEvent.payload, ruleEventsGenerated: 0 } },
-        { request }
+        { request, origin: 'user' }
       );
 
       expect(mockEmitEvent).not.toHaveBeenCalled();
@@ -133,7 +139,10 @@ describe('RuleExecutorWorkflowSubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, { request })
+        handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, {
+          request,
+          origin: 'user',
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);

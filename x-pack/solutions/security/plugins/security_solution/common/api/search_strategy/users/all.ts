@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UsersQueries } from '../model/factory_query_type';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
@@ -17,13 +17,15 @@ export enum UsersFields {
   lastSeen = 'lastSeen',
 }
 
-export const usersSchema = requestOptionsPaginatedSchema.extend({
-  sort: sort.removeDefault().extend({
-    field: z.enum([UsersFields.name, UsersFields.lastSeen]),
-  }),
-  timerange,
-  factoryQueryType: z.literal(UsersQueries.users),
-});
+export const usersSchema = lazySchema(() =>
+  requestOptionsPaginatedSchema.extend({
+    sort: sort.removeDefault().extend({
+      field: z.enum([UsersFields.name, UsersFields.lastSeen]),
+    }),
+    timerange,
+    factoryQueryType: z.literal(UsersQueries.users),
+  })
+);
 
 export type UsersRequestOptionsInput = z.input<typeof usersSchema>;
 

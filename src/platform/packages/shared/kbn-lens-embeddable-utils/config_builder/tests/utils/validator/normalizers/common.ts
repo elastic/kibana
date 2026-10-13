@@ -53,11 +53,6 @@ import { toApiFieldSettings } from '../../../../transforms/columns/field_setting
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const COMMON_STATE_IGNORE_PATHS = [
-  // TODO: check missing properties striped out in transforms
-  'state.datasourceStates.formBased.layers.*.indexPatternId',
-  'state.datasourceStates.formBased.currentIndexPatternId',
-  // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
-  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
@@ -473,7 +468,12 @@ const normalizeReferences = <T extends LensAttributes>(
           (filterRefNames.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
         );
       })
-      // ignore current index pattern reference
+      // `indexpattern-datasource-current-indexpattern` is not read by name. The 7.10 migration
+      // and by-value builders emit it. `extractReferences` and the transform do not.
+      // `getUsedDataViews` and the XY first-`index-pattern` fallback use the id. On every
+      // integration panel this reference is first and the next one has the same id, so dropping
+      // it changes neither.`toAPIFormat` does not apply that annotation fallback.
+      // The editor always writes `xy-visualization-layer-*`, so it is not reproducible from the UI.
       .filter((reference) => {
         return !(
           reference.type === 'index-pattern' &&
@@ -1386,6 +1386,15 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             // apply defaults
             layer.sampling = layer.sampling ?? LENS_SAMPLING_DEFAULT_VALUE;
 
+            // `indexPatternId` is a runtime-only `FormBasedLayer` field, omitted from
+            // `FormBasedPersistedState`, that leaked into by-value panels.
+            // - `extractReferences` moves it onto the `indexpattern-datasource-layer-*` reference.
+            // - `resolveDataViewId` prefers the same reference and falls back to this inline id
+            //   only when the reference is absent.
+            if ('indexPatternId' in layer) {
+              delete layer.indexPatternId;
+            }
+
             // remove empty incompleteColumns
             if (Object.keys(layer.incompleteColumns ?? {}).length === 0) {
               delete layer.incompleteColumns;
@@ -1494,6 +1503,13 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
             }
           }
+
+          // `currentIndexPatternId` is a runtime-only `FormBasedPrivateState` field that leaked into
+          // by-value panels. `loadInitialState` recomputes it. The transform never emits it.
+          if ('currentIndexPatternId' in ds) {
+            delete ds.currentIndexPatternId;
+          }
+
           return ds;
         }
       ),
