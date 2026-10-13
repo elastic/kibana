@@ -365,6 +365,13 @@ const setArtifacts = (
 
 // ─── Execution ────────────────────────────────────────────────────────────────
 
+const warnOnBackingIndices = (warnings: string[], esqlQuery: string, queryName: string): void => {
+  const backingIndices = findBackingIndices(esqlQuery);
+  if (backingIndices.length > 0) {
+    warnings.push(formatBackingIndexWarning(backingIndices, queryName));
+  }
+};
+
 export const executeRuleOperations = async (
   data: Partial<RuleAttachmentData>,
   operations: RuleOperation[],
@@ -425,10 +432,7 @@ export const executeRuleOperations = async (
       case 'set_query': {
         const rootQuery = getRootEsqlQuery(op.query);
 
-        const backingIndices = findBackingIndices(rootQuery);
-        if (backingIndices.length > 0) {
-          warnings.push(formatBackingIndexWarning(backingIndices));
-        }
+        warnOnBackingIndices(warnings, rootQuery, 'The rule query');
 
         let resolvedTimeField: string | null | undefined;
         if (esClient) {
@@ -487,6 +491,9 @@ export const executeRuleOperations = async (
       }
 
       case 'set_recovery': {
+        if (op.recovery.strategy === recoveryStrategy.query) {
+          warnOnBackingIndices(warnings, op.recovery.query, 'The recovery query');
+        }
         next = { ...next, recovery: op.recovery };
 
         // A recovering delay is inert under `manual` and the write API rejects
@@ -524,6 +531,9 @@ export const executeRuleOperations = async (
         break;
       }
       case 'set_no_data':
+        if ('query' in op.no_data && op.no_data.query) {
+          warnOnBackingIndices(warnings, op.no_data.query, 'The no-data query');
+        }
         next = { ...next, no_data: op.no_data };
         break;
 

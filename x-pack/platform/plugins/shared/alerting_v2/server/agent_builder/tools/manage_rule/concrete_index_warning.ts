@@ -48,14 +48,17 @@ export const findBackingIndices = (esqlQuery: string): ConcreteIndexMatch[] =>
  * Worded as an instruction for the model: the code cannot tell whether the user
  * asked for this index on purpose, the model can.
  */
-export const formatBackingIndexWarning = (matches: ConcreteIndexMatch[]): string => {
+export const formatBackingIndexWarning = (
+  matches: ConcreteIndexMatch[],
+  queryName: string = 'The query'
+): string => {
   const details = matches
     .map(({ index, dataStream }) => `\`${index}\` (data stream \`${dataStream}\`)`)
     .join(', ');
   return (
-    `The query targets a data stream backing index: ${details}. Backing indices change on ` +
+    `${queryName} targets a data stream backing index: ${details}. Backing indices change on ` +
     `every rollover, so the rule will stop matching new data. If the user explicitly asked for ` +
-    `this index, keep it and tell them about the risk. Otherwise call \`set_query\` again using ` +
+    `this index, keep it and tell them about the risk. Otherwise call the operation again using ` +
     `the data stream name or a wildcard pattern instead.`
   );
 };

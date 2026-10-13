@@ -91,6 +91,17 @@ describe('formatBackingIndexWarning', () => {
     ]);
 
     expect(warning).toContain('explicitly asked');
-    expect(warning).toContain('call `set_query` again');
+    expect(warning).toContain('call the operation again');
+  });
+
+  it('uses the given query name and defaults to a generic one', () => {
+    const matches = [
+      { index: '.ds-logs-a-default-2026.06.11-000001', dataStream: 'logs-a-default' },
+    ];
+
+    expect(formatBackingIndexWarning(matches, 'The recovery query')).toMatch(
+      /^The recovery query targets/
+    );
+    expect(formatBackingIndexWarning(matches)).toMatch(/^The query targets/);
   });
 });

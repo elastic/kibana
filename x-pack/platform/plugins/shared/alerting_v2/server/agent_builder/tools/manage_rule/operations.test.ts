@@ -382,6 +382,60 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('backing indices in recovery and no-data queries', () => {
+    const backingIndexQuery =
+      'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)';
+
+    it('warns for a recovery query that targets a backing index', async () => {
+      const result = await executeRuleOperations({}, [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'query', query: backingIndexQuery },
+        },
+      ]);
+
+      expect(result.data.recovery).toEqual({ strategy: 'query', query: backingIndexQuery });
+      expect(result.warnings).toEqual([expect.stringMatching(/^The recovery query targets/)]);
+    });
+
+    it('warns for a no-data query that targets a backing index', async () => {
+      const result = await executeRuleOperations({}, [
+        { operation: 'set_no_data', no_data: { strategy: 'keep_last', query: backingIndexQuery } },
+      ]);
+
+      expect(result.data.no_data).toEqual({ strategy: 'keep_last', query: backingIndexQuery });
+      expect(result.warnings).toEqual([expect.stringMatching(/^The no-data query targets/)]);
+    });
+
+    it('reports each affected query separately', async () => {
+      const result = await executeRuleOperations({}, [
+        { operation: 'set_query', query: { base: backingIndexQuery } },
+        { operation: 'set_recovery', recovery: { strategy: 'query', query: backingIndexQuery } },
+        { operation: 'set_no_data', no_data: { strategy: 'resolve', query: backingIndexQuery } },
+      ]);
+
+      expect(result.warnings).toEqual([
+        expect.stringMatching(/^The rule query targets/),
+        expect.stringMatching(/^The recovery query targets/),
+        expect.stringMatching(/^The no-data query targets/),
+      ]);
+    });
+
+    it('does not warn for wildcard queries or strategies without their own query', async () => {
+      const result = await executeRuleOperations({}, [
+        { operation: 'set_recovery', recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' } },
+        { operation: 'set_no_data', no_data: { strategy: 'keep_last', query: 'FROM logs-* | LIMIT 1' } },
+      ]);
+      expect(result.warnings).toBeUndefined();
+
+      const withoutOwnQuery = await executeRuleOperations({}, [
+        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
+        { operation: 'set_no_data', no_data: { strategy: 'ignore' } },
+      ]);
+      expect(withoutOwnQuery.warnings).toBeUndefined();
+    });
+  });
+
   describe('set_query with a breach segment', () => {
     it('validates the base query alone in the LIMIT 0 call', async () => {
       const esClient = createMockEsClient();
