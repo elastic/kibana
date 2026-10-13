@@ -110,10 +110,6 @@ export {
   getLogsdbColumnarReadiness,
   isLogsdbColumnarReady,
 } from './columnar_index_mode';
-export {
-  EXPERIMENTAL_INDEXING_FEATURES,
-  sanitizeExperimentalDataStreamFeatures,
-} from './experimental_data_stream_features';
 
 export * from './file_storage';
 export {

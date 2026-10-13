@@ -107,7 +107,6 @@ import {
   isNamespaceAllowedByPrefixes,
 } from '../../services/spaces/policy_namespaces';
 import { PolicyNamespaceValidationError } from '../../../common/errors';
-import { sanitizeExperimentalDataStreamFeatures } from '../../../common/services';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -906,9 +905,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       version: attributes.version,
       verification_status: attributes.verification_status,
       verification_key_id: attributes.verification_key_id,
-      experimental_data_stream_features: sanitizeExperimentalDataStreamFeatures(
-        attributes.experimental_data_stream_features
-      ),
+      experimental_data_stream_features: attributes.experimental_data_stream_features,
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
       latest_executed_state: attributes.latest_executed_state,
       previous_version: attributes.previous_version,
