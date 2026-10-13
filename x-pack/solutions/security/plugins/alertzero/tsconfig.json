@@ -71,6 +71,7 @@
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/context-engine-plugin",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/task-manager-plugin"
   ]
 }
