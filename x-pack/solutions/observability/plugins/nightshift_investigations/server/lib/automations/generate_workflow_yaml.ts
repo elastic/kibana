@@ -323,18 +323,24 @@ function buildSlackRowCondition(row: SlackRow): string {
  * The message filter as one unquoted wildcard term. A quoted value is compared for equality with
  * the whole field by the in-memory evaluator, so it cannot express "contains". Wildcards are case
  * sensitive.
- *
- * Known limit: the KQL grammar ends an unquoted value at "not" followed by whitespace, including
- * the end of a word such as "cannot", so a filter containing that sub-phrase produces a condition
- * that does not parse. It is not handled here yet.
  */
 function buildMessageFilterTerms(messageFilter: string): string {
   return `event.text: *${escapeKqlWildcardTerm(messageFilter)}*`;
 }
 
-// Escapes KQL syntax characters and the `and` and `or` keywords so they stay literal text.
+/**
+ * Escapes KQL syntax characters, and writes every whitespace character as a unicode escape.
+ *
+ * The KQL grammar ends an unquoted value at "not" followed by whitespace, including the end of a
+ * word such as "cannot", and `\not` cannot escape it because the grammar reads `\n` first. The
+ * keywords `and` and `or` are also only recognised between whitespace characters. An escaped
+ * whitespace character is never seen as whitespace by those rules, but still parses to the same
+ * character, so the phrase stays literal text and keeps its order.
+ */
 function escapeKqlWildcardTerm(text: string): string {
-  return text.replace(/[\\():<>"*{}]/g, '\\$&').replace(/\b(or|and)\b/gi, '\\$1');
+  return text
+    .replace(/[\\():<>"*{}]/g, '\\$&')
+    .replace(/[ \t\r\n ]/g, (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`);
 }
 
 function cleanValues(values: string[] | undefined): string[] {

@@ -329,9 +329,22 @@ describe('generateWorkflowYaml', () => {
         ['backslashes', 'path\\to'],
         ['braces', '{x}'],
         ['and and or', 'this and that or the other'],
+        ['"not" ending a word', 'cannot connect'],
+        ['"not" as a word', 'do not touch'],
+        ['"not" in capitals', 'DO NOT touch'],
+        ['"not" at the start', 'not healthy'],
+        ['"not" in the middle of a word', 'knot tie'],
+        ['tabs and non-breaking spaces', 'a\tb c'],
       ])('treats %s in the filter as literal text', (_label, text) => {
         expect(matches(filtered(text), { text: `before ${text} after` })).toBe(true);
         expect(matches(filtered(text), { text: 'unrelated' })).toBe(false);
+      });
+
+      it('keeps the words around "not" together and in order', () => {
+        const automation = filtered('not healthy');
+        expect(matches(automation, { text: 'the pod is not healthy' })).toBe(true);
+        expect(matches(automation, { text: 'healthy, not ready' })).toBe(false);
+        expect(matches(automation, { text: 'healthy not' })).toBe(false);
       });
 
       it('ANDs the filter with the channel and user filters', () => {
