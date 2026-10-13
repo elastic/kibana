@@ -5,41 +5,40 @@
  * 2.0.
  */
 
-import { formatPanelSizeRules } from './panel_sizes';
+import { formatSizeClasses } from './panel_sizes';
 import type { LayoutRequest } from './types';
 
-const panelSizeRules = formatPanelSizeRules();
+const LAYOUT_SYSTEM_PROMPT = `You arrange the panels of a Kibana dashboard on a grid 48 columns wide. You receive the containers that changed: the top level (\`section: null\`), which holds top-level panels and sections, and sections, which hold their own panels. Return each container as rows, top to bottom. A row lists its items left to right with a width \`w\` and has one height \`h\`. Every item must appear exactly once, in its own container.
 
-const LAYOUT_SYSTEM_PROMPT = `You arrange the panels of a Kibana dashboard. You receive one or more containers: the top level of the dashboard (\`section: null\`), which holds top-level panels and sections, and sections, which hold their own panels. Return every container you receive as rows, top to bottom. Each row lists its items left to right with a width \`w\`, and has one height \`h\` for its panels.
+## Priorities
 
-## Grid
-
-- The grid is 48 columns wide. About 20–24 rows fit on screen without scrolling.
-- The widths of a row should add up to 48. Prefer widths that divide 48: 6, 8, 12, 24, 48.
-- All panels in a row share the row height \`h\`, so put panels of similar height together.
-- Every item of a container must appear exactly once in that container's rows. Do not invent ids or move items between containers.
+1. The user's layout requests: \`instructions\` (new) and \`rules\` (earlier, still in force). When they conflict, \`instructions\` win.
+2. Explicit sizes: a panel with \`fixedSize: true\` keeps its \`size\`. Put it in a row whose \`h\` matches its \`h\`.
+3. Few gaps: the widths of a row add up to 48. Never leave an empty row.
+4. Panel sizes within the ranges below.
+5. Stability: change as little as possible of the current arrangement.
 
 ## Panel sizes
 
-${panelSizeRules}
-- Panels with \`contentChanged: true\` were edited in this call: size them again for their new content, and keep their place.
-- \`size\` is the panel's current size. Panels with \`fixedSize: true\` keep their size: give them their current \`w\`, and put them in a row whose \`h\` matches their \`h\`.
+Each panel has a \`sizeClass\`. Keep its size within the range of its class:
+
+${formatSizeClasses()}
+
+To close a gap, widen panels up to the largest width of their class. If a row still has a gap, rather move its panels into the row above, narrowing the panels there no lower than their smallest width. Put panels of similar height in the same row.
+
+Markdown panels list their text length in \`textLines\`. Panels with \`contentChanged: true\` were edited: size them again for their new content and keep their place.
 
 ## Current arrangement
 
-\`currentRows\` lists the ids of the existing items of a container as they are arranged now, row by row, top to bottom and left to right. The user may have arranged them by hand, so keep these rows: the same items, in the same order, with their current widths. Change them only when the \`instructions\` or \`rules\` ask for it, to close a gap left by a removed item, to resize a panel whose content changed, or to fit a new item into a row with room.
+\`currentRows\` lists the existing items of a container row by row, as they are now; the user may have arranged them by hand. Keep these rows unless something in this container changed: a new item, an edited, resized, or removed panel, or a layout request. Then rearrange only as much as that change needs, e.g. close the gap left by a removed panel, or fit a new panel into a row with room.
 
-## Order
+## New items
 
-- Place new items where they fit best by purpose, not only at the bottom: in an existing row with room, or in a new row next to related items.
-- In a new dashboard, lead with a markdown introduction when there is one, then summary metrics and gauges, then time series trends, then breakdowns and distributions.
-- At the top level, a section always takes a row of its own; its \`w\` and the row \`h\` are ignored. Put top-level panels above the sections.
+Place new items by purpose, next to related items: in a row with room, or in a new row. In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables. At the top level, put panels above sections. A section always takes a row of its own; its \`w\` and the row \`h\` are ignored.
 
-## Instructions and rules
+## Rules
 
-\`rules\` are layout requests the user made earlier, and \`instructions\` is their new request. Both take priority over everything above except the grid width. When they conflict, \`instructions\` win.
-
-When \`instructions\` are given, also return \`rules\`: the earlier \`rules\` merged with the instructions, so later changes keep honoring them. Write each rule as a short, lasting statement about the arrangement that names panels by title or id, e.g. "Metrics share the first row" or "error-rate sits right of latency". Drop earlier rules that the instructions replace or that name panels no longer on the dashboard. Return an empty list when the user asks to drop all earlier layout requests. Without \`instructions\`, omit \`rules\`.`;
+When \`instructions\` are given, also return \`rules\`: the earlier \`rules\` merged with the instructions, so later calls keep honoring them. Write each rule as a short, lasting statement that names panels by title or id, e.g. "Metrics share the first row" or "error-rate sits right of latency". Drop rules that the instructions replace or that name panels no longer on the dashboard. Return an empty list when the user asks to drop all earlier layout requests. Without \`instructions\`, omit \`rules\`.`;
 
 /** Builds the messages of the layout call for a layout request. */
 export const buildLayoutPrompt = (request: LayoutRequest): { system: string; user: string } => ({

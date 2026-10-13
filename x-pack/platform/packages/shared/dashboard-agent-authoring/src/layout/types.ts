@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { SizeClassName } from './panel_sizes';
 
 export const GRID_COLUMNS = 48;
 
@@ -27,6 +28,8 @@ export interface LayoutPanel {
   title?: string;
   /** One-sentence description of what the panel shows, when the panel was authored this turn. */
   authoringNote?: string;
+  /** Size class that bounds the panel size, when the panel type has one. */
+  sizeClass?: SizeClassName;
   size: PanelSize;
   /** Lines the text of a markdown panel takes at full width. */
   textLines?: number;

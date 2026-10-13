@@ -1487,7 +1487,7 @@ describe('executeDashboardUpsert', () => {
         expected: {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: 'new text', settings: { open_links_in_new_tab: true } },
-          grid: { x: 0, y: 0, w: 24, h: 4 },
+          grid: { x: 0, y: 0, w: 48, h: 3 },
         },
       },
       {

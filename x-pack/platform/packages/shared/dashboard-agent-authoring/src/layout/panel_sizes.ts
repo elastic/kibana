@@ -17,87 +17,107 @@ import {
 import { lensPanelKind, vegaPanelKind } from '../operations/panels/vis';
 import { GRID_COLUMNS, type PanelSize } from './types';
 
-interface PanelSizeRule {
-  /** Name in the layout prompt, e.g. "Pie". */
-  label: string;
-  embeddableType: string;
-  /** Lens chart types the rule applies to. Without them, it applies to every panel of the type. */
-  chartTypes?: readonly string[];
-  /** Size of a panel placed without one. */
-  defaultSize: PanelSize;
-  /** Sizing rule for the layout model. */
-  rule: string;
-}
-
-const DEFAULT_SIZE: PanelSize = { w: 24, h: 10 };
-
 /** Characters of markdown text that fit on one line of a full-width panel. */
 const MARKDOWN_CHARACTERS_PER_LINE = 150;
 /** Rows a markdown panel needs around its text. */
 const MARKDOWN_PADDING_ROWS = 2;
-const MARKDOWN_MIN_HEIGHT = 3;
-const MARKDOWN_MAX_HEIGHT = 10;
+
+export interface SizeBounds {
+  min: PanelSize;
+  max: PanelSize;
+}
+
+interface SizeClass extends SizeBounds {
+  /** Panels of the class, as the layout prompt names them. */
+  label: string;
+  /** Extra guidance for the layout model. */
+  note?: string;
+}
+
+const SIZE_CLASSES = {
+  metric: {
+    label: 'Lens metrics',
+    min: { w: 8, h: 4 },
+    max: { w: 16, h: 6 },
+    note: '3–6 per row. Never full width.',
+  },
+  compact: {
+    label: 'Lens gauges, pies, and donuts',
+    min: { w: 12, h: 8 },
+    max: { w: 16, h: 10 },
+  },
+  chart: {
+    label: 'Lens bar charts, heatmaps, tag clouds, treemaps, waffles, mosaics, and region maps',
+    min: { w: 16, h: 10 },
+    max: { w: 24, h: 14 },
+  },
+  trend: {
+    label: 'Lens line and area charts',
+    min: { w: 24, h: 10 },
+    max: { w: GRID_COLUMNS, h: 14 },
+    note: 'The main trend may be full width.',
+  },
+  table: {
+    label: 'Lens data tables',
+    min: { w: 24, h: 12 },
+    max: { w: GRID_COLUMNS, h: 16 },
+    note: 'Prefer full width.',
+  },
+  wide: {
+    label: 'Vega, custom content, and ML panels',
+    min: { w: 24, h: 10 },
+    max: { w: GRID_COLUMNS, h: 16 },
+  },
+  markdown: {
+    label: 'Markdown',
+    min: { w: 24, h: 3 },
+    max: { w: GRID_COLUMNS, h: 10 },
+    note: `\`h\` fits the text: \`textLines\` + ${MARKDOWN_PADDING_ROWS} at \`w: 48\`, about twice the text lines at \`w: 24\`; usually 4–6. Give it a row of its own.`,
+  },
+} as const satisfies Record<string, SizeClass>;
+
+export type SizeClassName = keyof typeof SIZE_CLASSES;
+
+interface PanelSizeRule {
+  embeddableType: string;
+  /** Lens chart types the rule applies to. Without them, it applies to every panel of the type. */
+  chartTypes?: readonly string[];
+  sizeClass: SizeClassName;
+  /** Size of a panel placed without one. */
+  defaultSize: PanelSize;
+}
+
+const DEFAULT_SIZE: PanelSize = { w: 24, h: 10 };
+
+const lensRule = (
+  chartTypes: readonly string[] | undefined,
+  sizeClass: SizeClassName,
+  defaultSize: PanelSize
+): PanelSizeRule => ({
+  embeddableType: lensPanelKind.embeddableType,
+  ...(chartTypes ? { chartTypes } : {}),
+  sizeClass,
+  defaultSize,
+});
 
 /** Chart-type rules come before the rule of their embeddable type, so they match first. */
 const PANEL_SIZE_RULES: readonly PanelSizeRule[] = [
+  lensRule([SupportedChartType.Metric, 'legacy_metric'], 'metric', { w: 12, h: 5 }),
+  lensRule([SupportedChartType.Gauge], 'compact', { w: 12, h: 8 }),
+  lensRule([SupportedChartType.Pie, 'donut'], 'compact', { w: 12, h: 10 }),
+  lensRule([SupportedChartType.Datatable], 'table', { w: GRID_COLUMNS, h: 12 }),
+  lensRule(undefined, 'chart', DEFAULT_SIZE),
+  { embeddableType: vegaPanelKind.embeddableType, sizeClass: 'wide', defaultSize: DEFAULT_SIZE },
   {
-    label: 'Metric',
-    embeddableType: lensPanelKind.embeddableType,
-    chartTypes: [SupportedChartType.Metric, 'legacy_metric'],
-    defaultSize: { w: 12, h: 5 },
-    rule: 'small, `w` 6, 8, or 12 and `h` 5–6. Put 4–8 metrics in one row. Never make metrics full width.',
-  },
-  {
-    label: 'Gauge',
-    embeddableType: lensPanelKind.embeddableType,
-    chartTypes: [SupportedChartType.Gauge],
-    defaultSize: { w: 12, h: 8 },
-    rule: '`w: 12, h: 8`, up to 4 per row.',
-  },
-  {
-    label: 'Pie',
-    embeddableType: lensPanelKind.embeddableType,
-    chartTypes: [SupportedChartType.Pie, 'donut'],
-    defaultSize: { w: 12, h: 10 },
-    rule: '`w: 12, h: 10`.',
-  },
-  {
-    label: 'Data table',
-    embeddableType: lensPanelKind.embeddableType,
-    chartTypes: [SupportedChartType.Datatable],
-    defaultSize: { w: GRID_COLUMNS, h: 12 },
-    rule: '`w: 24–48, h: 12–16`, preferably full width.',
-  },
-  {
-    label: 'XY, heatmap, tag cloud, treemap, waffle, mosaic, and other Lens charts',
-    embeddableType: lensPanelKind.embeddableType,
-    defaultSize: DEFAULT_SIZE,
-    rule: '`w: 24, h: 10`. The primary time series may be full width.',
-  },
-  {
-    label: 'Vega',
-    embeddableType: vegaPanelKind.embeddableType,
-    defaultSize: DEFAULT_SIZE,
-    rule: '`w: 24–48, h: 10–16`. Faceted or layered charts may be full width.',
-  },
-  {
-    label: 'Markdown',
-    embeddableType: markdownPanelKind.embeddableType,
-    defaultSize: { w: GRID_COLUMNS, h: 6 },
-    rule: `\`w: 24–48\`. \`h\` fits the text: \`textLines\` + ${MARKDOWN_PADDING_ROWS} at \`w: 48\`, twice the text lines at \`w: 24\`, between ${MARKDOWN_MIN_HEIGHT} and ${MARKDOWN_MAX_HEIGHT}.`,
-  },
-  {
-    label: 'Custom content',
     embeddableType: customContentPanelKind.embeddableType,
+    sizeClass: 'wide',
     defaultSize: { w: GRID_COLUMNS, h: 12 },
-    rule: '`w: 24–48`. A single card or one short row of cards `h: 6–8`; a list or table `h: 10–16`; a multi-part layout or a drawn chart `h: 16–20`.',
   },
   ...[anomalyChartsPanelKind, anomalySwimlanePanelKind, singleMetricViewerPanelKind].map(
-    ({ embeddableType, label }) => ({
-      label: `ML ${label}`,
+    ({ embeddableType }): PanelSizeRule => ({
       embeddableType,
+      sizeClass: 'wide',
       defaultSize: { w: GRID_COLUMNS, h: 12 },
-      rule: '`w: 48, h: 12`.',
     })
   ),
 ];
@@ -109,6 +129,18 @@ export const getLensChartType = ({ type, config }: PanelContentFields): string |
   type === lensPanelKind.embeddableType && typeof config.type === 'string'
     ? config.type
     : undefined;
+
+/** Whether a Lens XY panel draws lines or areas, which makes it a trend. */
+const isLensTrend = ({ config }: PanelContentFields): boolean =>
+  Array.isArray(config.layers) &&
+  config.layers.some(
+    (layer: unknown) =>
+      typeof layer === 'object' &&
+      layer !== null &&
+      'type' in layer &&
+      typeof layer.type === 'string' &&
+      (layer.type === 'line' || layer.type.startsWith('area'))
+  );
 
 /** Lines the text of a markdown panel takes at full width, or undefined for other panels. */
 export const getMarkdownTextLines = ({ type, config }: PanelContentFields): number | undefined => {
@@ -123,9 +155,33 @@ export const getMarkdownTextLines = ({ type, config }: PanelContentFields): numb
 
 /** Height that fits markdown text of `textLines` full-width lines in a panel `w` columns wide. */
 export const getMarkdownHeight = (textLines: number, w: number): number => {
+  const { min, max } = SIZE_CLASSES.markdown;
   const h = Math.ceil((textLines * GRID_COLUMNS) / w) + MARKDOWN_PADDING_ROWS;
-  return Math.min(Math.max(h, MARKDOWN_MIN_HEIGHT), MARKDOWN_MAX_HEIGHT);
+  return Math.min(Math.max(h, min.h), max.h);
 };
+
+const findSizeRule = (panel: PanelContentFields): PanelSizeRule | undefined => {
+  const chartType = getLensChartType(panel);
+  return PANEL_SIZE_RULES.find(
+    ({ embeddableType, chartTypes }) =>
+      embeddableType === panel.type &&
+      (!chartTypes || (chartType !== undefined && chartTypes.includes(chartType)))
+  );
+};
+
+/** Size class of a panel, or undefined for panel types without one. */
+export const getPanelSizeClass = (panel: PanelContentFields): SizeClassName | undefined => {
+  if (panel.type === markdownPanelKind.embeddableType) {
+    return 'markdown';
+  }
+  if (getLensChartType(panel) === SupportedChartType.XY && isLensTrend(panel)) {
+    return 'trend';
+  }
+  return findSizeRule(panel)?.sizeClass;
+};
+
+/** Smallest and largest size of a panel of a size class. */
+export const getSizeBounds = (sizeClass: SizeClassName): SizeBounds => SIZE_CLASSES[sizeClass];
 
 /** Default size of a panel placed without a size. */
 export const getDefaultPanelSize = (panel: PanelContentFields): PanelSize => {
@@ -133,16 +189,18 @@ export const getDefaultPanelSize = (panel: PanelContentFields): PanelSize => {
   if (textLines !== undefined) {
     return { w: GRID_COLUMNS, h: getMarkdownHeight(textLines, GRID_COLUMNS) };
   }
-  const chartType = getLensChartType(panel);
-  return (
-    PANEL_SIZE_RULES.find(
-      ({ embeddableType, chartTypes }) =>
-        embeddableType === panel.type &&
-        (!chartTypes || (chartType !== undefined && chartTypes.includes(chartType)))
-    )?.defaultSize ?? DEFAULT_SIZE
-  );
+  return findSizeRule(panel)?.defaultSize ?? DEFAULT_SIZE;
 };
 
-/** Sizing rules for the layout prompt, one line each. */
-export const formatPanelSizeRules = (): string =>
-  PANEL_SIZE_RULES.map(({ label, rule }) => `- ${label}: ${rule}`).join('\n');
+const formatRange = (min: number, max: number): string =>
+  min === max ? `${min}` : `${min}–${max}`;
+
+/** Size classes for the layout prompt, one line each. */
+export const formatSizeClasses = (): string =>
+  Object.entries(SIZE_CLASSES)
+    .map(([name, sizeClass]: [string, SizeClass]) => {
+      const { label, min, max, note } = sizeClass;
+      const sizes = `\`w: ${formatRange(min.w, max.w)}, h: ${formatRange(min.h, max.h)}\``;
+      return `- \`${name}\` (${label}): ${sizes}.${note ? ` ${note}` : ''}`;
+    })
+    .join('\n');
