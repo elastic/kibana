@@ -103,7 +103,7 @@ i18n.detectBrowserLocale: false
 i18n.allowLocaleCookie: false
 ```
 
-`i18n.detectBrowserLocale: false` stops {{kib}} from reading the browser's language. `i18n.allowLocaleCookie: false` stops existing `KBN_LOCALE` cookies, which may already hold the detected language, from overriding the default. Users who already saved a language in their profile keep it.
+`i18n.detectBrowserLocale: false` stops {{kib}} from reading the browser's language. `i18n.allowLocaleCookie: false` stops existing `KBN_LOCALE` cookies, which might already hold the detected language, from overriding the default. Users who already saved a language in their profile keep it.
 
 If you can't upgrade to the latest 9.5.x patch yet, set `i18n.locales: ["en"]` to restore the previous English-only behavior. This also turns off per-user language selection.
 
