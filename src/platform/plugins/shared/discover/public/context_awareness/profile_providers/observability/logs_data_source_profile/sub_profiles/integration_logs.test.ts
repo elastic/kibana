@@ -28,7 +28,10 @@ const profileProviderServices = createProfileProviderSharedServicesMock();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 
 describe('createIntegrationLogsDataSourceProfileProviders', () => {
-  const providers = createIntegrationLogsDataSourceProfileProviders(logsDataSourceProfileProvider);
+  const providers = createIntegrationLogsDataSourceProfileProviders(
+    logsDataSourceProfileProvider,
+    profileProviderServices.uiSettings
+  );
 
   // Helper to get the expected columns for each profile
   const expectedColumnsMap: Record<string, Array<{ name: string; width?: number }>> = {
@@ -150,11 +153,7 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
   });
 
   describe('Classic navigation (SolutionType.Default)', () => {
-    const resolveInClassic = (
-      profileId: string,
-      indexPattern: string,
-      allowSolutionProfiles?: boolean
-    ) => {
+    const resolveInClassic = (profileId: string, indexPattern: string) => {
       const provider = providers.find((candidate) => candidate.profileId === profileId);
       if (!provider) {
         throw new Error(`Missing provider ${profileId}`);
@@ -166,7 +165,6 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
         rootContext: {
           profileId: 'classic-nav-root-profile',
           solutionType: SolutionType.Default,
-          allowSolutionProfiles,
         },
         dataSource: createEsqlDataSource(),
         query: { esql: `FROM ${indexPattern}` },
@@ -193,11 +191,12 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
     });
 
     it('does not activate when solution profiles are disabled in Classic', async () => {
+      jest.spyOn(profileProviderServices.uiSettings, 'get').mockReturnValueOnce(false);
+
       expect(
         await resolveInClassic(
           'observability-nginx-access-logs-data-source-profile',
-          'logs-nginx.access-*',
-          false
+          'logs-nginx.access-*'
         )
       ).toEqual({ isMatch: false });
     });

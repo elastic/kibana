@@ -10,13 +10,9 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
 import type { DocumentProfileProvider } from '../../../profiles';
-import {
-  areSolutionProfilesAllowed,
-  DataSourceCategory,
-  DocumentType,
-  SolutionType,
-} from '../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { isSolutionProfilesInClassicEnabled } from '../../is_solution_profiles_in_classic_enabled';
 import { createGetDocViewer } from './accessors';
 import type { LogOverviewContext } from '../logs_data_source_profile/profile';
 import { isLogsDataSourceContext } from '../logs_data_source_profile/profile';
@@ -46,7 +42,7 @@ export const createObservabilityLogDocumentProfileProvider = (
     // `audit-logs` and `filebeat-*` stay on the default flyout, mirroring the data source profile.
     if (
       solutionType === SolutionType.Default &&
-      (!areSolutionProfilesAllowed(rootContext) ||
+      (!isSolutionProfilesInClassicEnabled(services.uiSettings) ||
         dataSourceContext.category !== DataSourceCategory.Logs)
     ) {
       return { isMatch: false };

@@ -202,12 +202,12 @@ describe('logDocumentProfileProvider', () => {
   });
 
   it('does not match in Classic when solution profiles are disabled', () => {
+    jest.spyOn(mockServices.uiSettings, 'get').mockReturnValueOnce(false);
     expect(
       logDocumentProfileProvider.resolve({
         rootContext: {
           profileId: 'classic-nav-root-profile',
           solutionType: SolutionType.Default,
-          allowSolutionProfiles: false,
         },
         dataSourceContext: DATA_SOURCE_CONTEXT,
         record: buildMockRecord('another-index', {

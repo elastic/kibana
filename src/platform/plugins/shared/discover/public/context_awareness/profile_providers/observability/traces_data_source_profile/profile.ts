@@ -9,12 +9,12 @@
 
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import {
-  areSolutionProfilesAllowed,
   SolutionType,
   DataSourceCategory,
   type DataSourceProfileProvider,
 } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { isSolutionProfilesInClassicEnabled } from '../../is_solution_profiles_in_classic_enabled';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import {
   getCellRenderers,
@@ -30,6 +30,7 @@ export const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID =
 
 export const createTracesDataSourceProfileProvider = ({
   apmContextService,
+  uiSettings,
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
@@ -40,10 +41,11 @@ export const createTracesDataSourceProfileProvider = ({
     getDeepAnalysisPlaybook,
   },
   resolve: (params) => {
+    const { solutionType } = params.rootContext;
     if (
-      (params.rootContext.solutionType === SolutionType.Observability ||
-        params.rootContext.solutionType === SolutionType.Default) &&
-      areSolutionProfilesAllowed(params.rootContext) &&
+      (solutionType === SolutionType.Observability ||
+        (solutionType === SolutionType.Default &&
+          isSolutionProfilesInClassicEnabled(uiSettings))) &&
       apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
       (params.dataSource?.type === DataSourceType.DataView ||
         isValidNonTransformationalESQLQuery(params.query))

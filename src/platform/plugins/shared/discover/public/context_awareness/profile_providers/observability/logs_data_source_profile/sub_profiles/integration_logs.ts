@@ -8,6 +8,7 @@
  */
 
 import { APACHE_ERROR_LOGS_PROFILE, KUBERNETES_CONTAINER_LOGS_PROFILE } from '@kbn/discover-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { CreateGetDefaultAppStateParams } from '../accessors';
 import type { LogsDataSourceProfileProvider } from '../profile';
 import { CLIENT_IP_COLUMN, HOST_NAME_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
@@ -96,13 +97,14 @@ const integrationLogsProfileProviders: IntegrationLogsProfileProvider[] = [
     defaultAppState: {
       defaultColumns: [LOG_LEVEL_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN],
     },
-    // Windows logs are also Security-relevant, so keep them out of Classic auto-detection.
+    // This integration is also Security-relevant, so keep it out of Classic auto-detection.
     enabledInClassicNav: false,
   },
 ];
 
 export const createIntegrationLogsDataSourceProfileProviders = (
-  logsDataSourceProfileProvider: LogsDataSourceProfileProvider
+  logsDataSourceProfileProvider: LogsDataSourceProfileProvider,
+  uiSettings: IUiSettingsClient
 ) => {
   return integrationLogsProfileProviders.map(
     ({ profileId, baseIndexPattern, defaultAppState, recommendedFields, enabledInClassicNav }) =>
@@ -118,7 +120,7 @@ export const createIntegrationLogsDataSourceProfileProviders = (
               }
             : {}),
         },
-        resolve: createResolve(baseIndexPattern, { enabledInClassicNav }),
+        resolve: createResolve(baseIndexPattern, uiSettings, { enabledInClassicNav }),
       })
   );
 };

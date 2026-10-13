@@ -8,6 +8,7 @@
  */
 
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { createProfileProviderSharedServicesMock } from '../../../../__mocks__';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../../profiles';
@@ -24,7 +25,7 @@ describe('createResolve', () => {
   const RESOLUTION_MISMATCH = {
     isMatch: false,
   };
-  const resolve = createResolve('valid');
+  const resolve = createResolve('valid', createProfileProviderSharedServicesMock().uiSettings);
 
   // Params whose data view resolves to the given concrete indices.
   const resolvedParams = (
@@ -102,6 +103,20 @@ describe('createResolve', () => {
     expect(
       resolve(
         resolvedParams({ profileId: 'other-root-profile', solutionType: SolutionType.Security }, [
+          'valid',
+        ])
+      )
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('does not match in Classic when solution profiles are disabled', () => {
+    const services = createProfileProviderSharedServicesMock();
+    jest.spyOn(services.uiSettings, 'get').mockReturnValue(false);
+    const disabledResolve = createResolve('valid', services.uiSettings);
+
+    expect(
+      disabledResolve(
+        resolvedParams({ profileId: 'other-root-profile', solutionType: SolutionType.Default }, [
           'valid',
         ])
       )

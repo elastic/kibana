@@ -51,12 +51,12 @@ describe('createSecurityDataSourceProfileProvider', () => {
   });
 
   it('does not match in Classic navigation when solution profiles are disabled', async () => {
+    jest.spyOn(services.uiSettings, 'get').mockReturnValueOnce(false);
     await expect(
       provider.resolve({
         rootContext: {
           profileId: 'root',
           solutionType: SolutionType.Default,
-          allowSolutionProfiles: false,
         },
         dataSource: createDataViewDataSource({ dataViewId: 'security-solution-default' }),
         dataView: createStubIndexPattern({

@@ -8,22 +8,23 @@
  */
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
-import { areSolutionProfilesAllowed, DataSourceCategory, SolutionType } from '../../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
+import { isSolutionProfilesInClassicEnabled } from '../../../is_solution_profiles_in_classic_enabled';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
 export interface CreateResolveOptions {
   /**
-   * Whether the integration resolves in Classic navigation. Defaults to true; set false for
-   * integrations whose data is also claimed by another solution (e.g. Windows logs are
-   * Security-relevant), so Classic only activates them under explicit Observability navigation.
+   * Whether or not the sub-profile should resolve in Classic navigation.
    */
   enabledInClassicNav?: boolean;
 }
 
 export const createResolve = (
   baseIndexPattern: string,
+  uiSettings: IUiSettingsClient,
   { enabledInClassicNav = true }: CreateResolveOptions = {}
 ): LogsDataSourceProfileProvider['resolve'] => {
   const testIndexPattern = testPatternAgainstAllowedList([
@@ -34,9 +35,11 @@ export const createResolve = (
     const { solutionType } = params.rootContext;
     const isSupportedSolutionType =
       solutionType === SolutionType.Observability ||
-      (enabledInClassicNav && solutionType === SolutionType.Default);
+      (enabledInClassicNav &&
+        solutionType === SolutionType.Default &&
+        isSolutionProfilesInClassicEnabled(uiSettings));
 
-    if (!isSupportedSolutionType || !areSolutionProfilesAllowed(params.rootContext)) {
+    if (!isSupportedSolutionType) {
       return { isMatch: false };
     }
 

@@ -291,18 +291,18 @@ solution profiles in Classic on or off. It
 is not added to the Serverless allowlist, so it only appears in stateful (where Classic
 navigation exists).
 
-The classic root profile (`common/classic_nav_root_profile/profile.ts`) reads the setting
-once and exposes it as `RootContext.allowSolutionProfiles`. Every `Default` branch then calls
-the shared `areSolutionProfilesAllowed(rootContext)` guard (`profiles/root_profile.ts`), which
-is always true outside Classic and, in Classic, false only when the setting is disabled. Because
-the value is read at root resolution, toggling it takes effect on page reload. The base Classic
-behaviors (e.g. the "All logs" ad hoc data view) are **not** gated by this setting.
+Each solution provider's `Default` branch keeps its own `solutionType === Default` check and
+reads the setting through the shared `isSolutionProfilesInClassicEnabled(uiSettings)` helper
+(`profile_providers/is_solution_profiles_in_classic_enabled.ts`) — so a solution profile resolves
+in Classic only when the setting is on. The value comes from the in-memory `uiSettings` cache, so
+toggling it takes effect on page reload. The base Classic behaviors (e.g. the "All logs" ad hoc
+data view) are **not** gated by this setting.
 
 ## Guardrails
 
 - **Search stays generic** — see above.
 - **Classic solution features are opt-out** — the `discover:enableSolutionProfilesInClassic`
-  setting gates every `Default` branch via `areSolutionProfilesAllowed`.
+  setting gates every `Default` branch via `isSolutionProfilesInClassicEnabled`.
 - **Mixed data is not claimed by Security** — the "every source must be Security"
   rule in `containsOnlySecuritySourcePatterns` (Classic only).
 - **Logs flyout tracks the data source in Classic** — the Log overview tab only resolves

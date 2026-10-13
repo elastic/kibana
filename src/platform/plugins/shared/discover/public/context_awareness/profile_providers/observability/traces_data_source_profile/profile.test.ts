@@ -149,12 +149,12 @@ describe('tracesDataSourceProfileProvider', () => {
   });
 
   it('should NOT match in Classic when solution profiles are disabled', () => {
+    jest.spyOn(mockServices.uiSettings, 'get').mockReturnValueOnce(false);
     expect(
       tracesDataSourceProfileProvider.resolve({
         rootContext: {
           profileId: 'classic-nav-root-profile',
           solutionType: SolutionType.Default,
-          allowSolutionProfiles: false,
         },
         dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
         dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,

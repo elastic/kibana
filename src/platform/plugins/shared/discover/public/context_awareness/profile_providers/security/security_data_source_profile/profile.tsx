@@ -10,8 +10,9 @@
 import type { FunctionComponent } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataSourceProfileProvider } from '../../../profiles';
-import { areSolutionProfilesAllowed, DataSourceCategory, SolutionType } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { isSolutionProfilesInClassicEnabled } from '../../is_solution_profiles_in_classic_enabled';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
 import { createDefaultSecuritySolutionAppStateGetter } from '../accessors/get_default_app_state';
@@ -77,7 +78,7 @@ export const createSecurityDataSourceProfileProvider = (
 
       if (
         solutionType === SolutionType.Default &&
-        (!areSolutionProfilesAllowed(params.rootContext) ||
+        (!isSolutionProfilesInClassicEnabled(services.uiSettings) ||
           (!isSecurityDataViewId(params.dataView?.id) &&
             !containsOnlySecuritySourcePatterns(
               params.dataView?.matchedIndices,
