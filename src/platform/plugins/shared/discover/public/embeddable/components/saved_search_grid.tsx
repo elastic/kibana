@@ -14,7 +14,6 @@ import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
-  type DataTableColumnsMeta,
   type UnifiedDataTableProps,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
@@ -26,7 +25,7 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor, type CellRenderersSearchContext } from '../../context_awareness';
 
 export interface InlineEditing {
   isActive: boolean;
@@ -50,6 +49,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   initialDocViewerTabId: string | undefined;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
+  searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
 }
 
@@ -60,6 +60,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     enableDocumentViewer,
     inlineEditing,
     interceptedWarnings,
+    searchContext,
     flyoutMenuTrailingActions,
     ...gridProps
   } = props;
@@ -67,19 +68,14 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
 
   const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      columnsMeta?: DataTableColumnsMeta
-    ) => (
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnsMeta={columnsMeta}
+        dataSource={props.dataSource}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
@@ -97,6 +93,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     [
       setExpandedDoc,
       props.dataView,
+      props.dataSource,
       props.docViewerRef,
       props.filters,
       props.initialDocViewerTabId,
@@ -114,10 +111,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       getRenderCustomToolbarWithElements({
         leftSide:
           typeof props.totalHitCount === 'number' ? (
-            <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
+            <TotalDocuments
+              totalHitCount={props.totalHitCount}
+              isEsqlMode={props.dataSource?.kind === 'esql'}
+            />
           ) : undefined,
       }),
-    [props.totalHitCount, props.isPlainRecord]
+    [props.totalHitCount, props.dataSource]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -133,12 +133,16 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
+      searchContext,
+      isDataLoading: props.loadingState === DiscoverGridLoadingState.loading,
     });
   }, [
     getCellRenderersAccessor,
     props.dataView,
     props.services.storage,
     props.configRowHeight,
+    props.loadingState,
+    searchContext,
     gridProps.dataGridDensityState,
     gridProps.rowHeightState,
   ]);
@@ -152,7 +156,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DiscoverGrid
         {...gridProps}
-        isPaginationEnabled={!gridProps.isPlainRecord}
+        isPaginationEnabled={gridProps.dataSource?.kind !== 'esql'}
         totalHits={props.totalHitCount}
         setExpandedDoc={props.setExpandedDoc}
         expandedDoc={props.expandedDoc}

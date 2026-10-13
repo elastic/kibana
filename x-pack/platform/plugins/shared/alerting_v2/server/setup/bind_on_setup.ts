@@ -23,12 +23,13 @@ import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
+import { registerAlertingV2ManagedWorkflowOwner } from '../lib/workflow_extensions/managed_workflows';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
-import { alertingAdvancedSettings } from '../settings/advanced_settings';
+import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -55,7 +56,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
-    uiSettingsSetup.registerGlobal(alertingAdvancedSettings);
+    registerAlertingAdvancedSettings(uiSettingsSetup);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
@@ -72,6 +73,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     const workflowsExtensionsSetup = container.get(
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
+    registerAlertingV2ManagedWorkflowOwner(workflowsExtensionsSetup);
     registerTriggerDefinitions(workflowsExtensionsSetup);
 
     const getAlertEventsClient = (request: KibanaRequest) =>

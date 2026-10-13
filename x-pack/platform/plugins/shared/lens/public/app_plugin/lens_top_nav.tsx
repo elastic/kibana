@@ -56,6 +56,7 @@ import {
   refreshIndexPatternsList,
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
+import { isSaveAndReturn } from './app_helpers';
 import { changeIndexPattern } from '../state_management/lens_slice';
 import type { ShareableConfiguration } from './share_action';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
@@ -648,13 +649,8 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
-  // Opened from a container view (e.g. Dashboard "Edit visualization in Lens"), not from a library listing page.
-  const isComingFromDashboardView = Boolean(
-    incomingState?.originatingApp &&
-      incomingState.originatingApp !== 'visualize' &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/')
-  );
+  const isSaveAndReturnMode =
+    isSaveAndReturn(incomingState) && incomingState?.originatingApp !== 'visualize';
 
   const appMenuConfig = useMemo<AppMenuConfig>(() => {
     const contextFromEmbeddable =
@@ -666,7 +662,7 @@ export const LensTopNavMenu = ({
       initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) && isComingFromDashboardView;
+      !(showReplaceInDashboard || showReplaceInCanvas) && isSaveAndReturnMode;
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -724,6 +720,9 @@ export const LensTopNavMenu = ({
         exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
       const sharingData = {
         datatables,
+        // Export missing values the way the visualization renders them: `-` for tables,
+        // `(null)` for charts.
+        missingValueDisplay: lensInspector.getInspectorAdapters().tables?.missingValueDisplay,
         csvEnabled,
         reportingDisabled: !csvEnabled,
         title: title || defaultLensTitle,
@@ -956,7 +955,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isComingFromDashboardView),
+          visible: Boolean(isSaveAndReturnMode),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -1030,7 +1029,7 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput?.ref_id,
 
-    isComingFromDashboardView,
+    isSaveAndReturnMode,
     activeData,
     isSaveable,
     application,
@@ -1356,7 +1355,7 @@ export const LensTopNavMenu = ({
 
   // Explicit back overrides breadcrumb fallback and mirrors Cancel → redirectToOrigin.
   const back = useMemo<AppHeaderBack | undefined>(() => {
-    if (!isComingFromDashboardView || !redirectToOrigin || !incomingState?.originatingApp) {
+    if (!isSaveAndReturnMode || !redirectToOrigin || !incomingState?.originatingApp) {
       return undefined;
     }
 
@@ -1371,7 +1370,7 @@ export const LensTopNavMenu = ({
       label: getOriginatingAppName() ?? incomingState.originatingApp,
     };
   }, [
-    isComingFromDashboardView,
+    isSaveAndReturnMode,
     redirectToOrigin,
     incomingState?.originatingApp,
     incomingState?.originatingPath,

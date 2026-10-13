@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { RESOLUTION_RULE_KINDS, RESOLUTION_RULE_IDS } from '../../../../../common';
 
 export const EntityResolutionRuleTypeName = 'entity-resolution-rule';
 
-export const EntityResolutionRuleAttributes = z.object({
-  id: z.nativeEnum(RESOLUTION_RULE_IDS),
-  kind: z.nativeEnum(RESOLUTION_RULE_KINDS),
-  managed: z.boolean(),
-  enabled: z.boolean(),
-});
+export const EntityResolutionRuleAttributes = lazySchema(() =>
+  z.object({
+    id: z.nativeEnum(RESOLUTION_RULE_IDS),
+    kind: z.nativeEnum(RESOLUTION_RULE_KINDS),
+    managed: z.boolean(),
+    enabled: z.boolean(),
+  })
+);
 export type EntityResolutionRuleAttributes = z.infer<typeof EntityResolutionRuleAttributes>;

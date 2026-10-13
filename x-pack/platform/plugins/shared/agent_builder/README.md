@@ -80,6 +80,15 @@ Tools can come from multiple sources:
 - workflow: A tool that executes a workflow.
 - mcp: A tool provided by an external MCP (Model Context Protocol) server.
 
+### HTTP API tools
+
+Agents reach the Elasticsearch and Kibana HTTP APIs through a set of internal tools:
+
+- `describe_api`: the parameter schema, method, and path of one operation.
+- `describe_api_type`: the full definition of a shared type `describe_api` only stubbed.
+- `execute_api`: the call itself, on behalf of the current user.
+- `discover_apis` (gated by `agentBuilder:apiDiscovery`): a searchable listing of every operation a target exposes.
+
 ### Registering a tool
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
@@ -143,6 +152,11 @@ input of the step:
   }
 }
 ```
+
+In a conversation, the grant can widen when a delegating agent requests destructive APIs for a
+sub-agent through `run_subagent`, and the user is asked once to approve them before it starts. That
+approval covers only the delegated execution, so a sub-agent can hold access the parent run was not
+configured with, though never more than the delegating user could exercise themselves.
 
 ### Error handling
 

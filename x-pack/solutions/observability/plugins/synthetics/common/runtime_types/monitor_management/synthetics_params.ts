@@ -5,55 +5,16 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const SyntheticsParamsReadonlyCodec = t.intersection([
-  t.interface({
-    id: t.string,
-    key: t.string,
-  }),
-  t.partial({
-    description: t.string,
-    tags: t.array(t.string),
-    namespaces: t.array(t.string),
-  }),
-]);
-
-export const SyntheticsParamsReadonlyCodecList = t.array(SyntheticsParamsReadonlyCodec);
-
-export type SyntheticsParamsReadonly = t.TypeOf<typeof SyntheticsParamsReadonlyCodec>;
-
-export const SyntheticsParamsCodec = t.intersection([
+import type { SchemaOutput } from '../schema_output';
+import type {
   SyntheticsParamsReadonlyCodec,
-  t.interface({ value: t.string }),
-]);
+  SyntheticsParamsCodec,
+  DeleteParamsResponseCodec,
+  SyntheticsParamRequestCodec,
+} from '../schemas/synthetics_params';
 
-export type SyntheticsParams = t.TypeOf<typeof SyntheticsParamsCodec>;
-
-export type SyntheticsParamSOAttributes = t.TypeOf<typeof SyntheticsParamsCodec>;
-
-export const DeleteParamsResponseCodec = t.intersection([
-  t.interface({
-    id: t.string,
-    deleted: t.boolean,
-  }),
-  t.partial({
-    error: t.string,
-  }),
-]);
-
-export type DeleteParamsResponse = t.TypeOf<typeof DeleteParamsResponseCodec>;
-
-export const SyntheticsParamRequestCodec = t.intersection([
-  t.interface({
-    key: t.string,
-    value: t.string,
-  }),
-  t.partial({
-    description: t.string,
-    tags: t.array(t.string),
-    share_across_spaces: t.boolean,
-  }),
-]);
-
-export type SyntheticsParamRequest = t.TypeOf<typeof SyntheticsParamRequestCodec>;
+export type SyntheticsParamsReadonly = SchemaOutput<typeof SyntheticsParamsReadonlyCodec>;
+export type SyntheticsParams = SchemaOutput<typeof SyntheticsParamsCodec>;
+export type SyntheticsParamSOAttributes = SchemaOutput<typeof SyntheticsParamsCodec>;
+export type DeleteParamsResponse = SchemaOutput<typeof DeleteParamsResponseCodec>;
+export type SyntheticsParamRequest = SchemaOutput<typeof SyntheticsParamRequestCodec>;

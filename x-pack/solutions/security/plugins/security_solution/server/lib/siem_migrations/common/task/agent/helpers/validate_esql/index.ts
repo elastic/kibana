@@ -5,4 +5,4 @@
  * 2.0.
  */
 export { getValidateEsql } from './validation';
-export type { GetValidateEsqlParams } from './validation';
+export type { GetValidateEsqlParams, ValidateEsqlInput, ValidateEsqlOutput } from './validation';

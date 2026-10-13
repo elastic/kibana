@@ -23,6 +23,12 @@ describe('securityFeatures', () => {
       ]);
     });
 
+    it('registers the service accounts management entry', () => {
+      expect(serviceAccountsFeature.management).toEqual({
+        security: ['service_accounts'],
+      });
+    });
+
     it('declares the `service_accounts.save` capability', () => {
       const capabilities = uiCapabilitiesForFeatures(
         [],

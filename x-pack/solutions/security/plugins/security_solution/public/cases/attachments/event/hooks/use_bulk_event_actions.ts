@@ -8,10 +8,11 @@
 import { useCallback, useMemo } from 'react';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { APP_ID } from '../../../../../common';
-import { useKibana } from '../../../../common/lib/kibana';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import type { CustomBulkAction } from '../../../../../common/types';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import { BULK_ADD_TO_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
+import { useCanAttachToCase } from '../../hooks/use_can_attach_to_case';
+import { useKibana } from '../../../../common/lib/kibana';
 import { generateEventAttachmentWithoutOwner } from '../utils';
 
 /**
@@ -39,45 +40,28 @@ export const useBulkAddEventsToCaseActions = ({
     services: { cases: casesService },
   } = useKibana();
 
-  const userCasesPermissions = useMemo(() => {
-    return casesService?.helpers.canUseCases([APP_ID]);
-  }, [casesService]);
-  const CasesContext = useMemo(() => casesService?.ui.getCasesContext(), [casesService]);
-  const isCasesContextAvailable = Boolean(casesService && CasesContext);
+  const canAttach = useCanAttachToCase();
+  const CasesContext = useMemo(() => casesService.ui.getCasesContext(), [casesService]);
+  const isCasesContextAvailable = Boolean(CasesContext);
 
   const onSuccess = useCallback(() => {
     clearSelection();
   }, [clearSelection]);
 
-  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
+  const selectCaseModal = casesService.hooks.useCasesAddToExistingCaseModal({
     onSuccess,
   });
 
   return useMemo(() => {
-    return isCasesContextAvailable &&
-      createCaseFlyout &&
-      selectCaseModal &&
-      userCasesPermissions?.create &&
-      userCasesPermissions?.read
+    return isCasesContextAvailable && selectCaseModal && canAttach
       ? [
           {
-            label: ADD_TO_NEW_CASE,
-            key: 'attach-new-case',
-            'data-test-subj': 'attach-new-case',
+            label: ADD_TO_CASE,
+            key: BULK_ADD_TO_CASE_ACTION_ID,
+            'data-test-subj': BULK_ADD_TO_CASE_ACTION_ID,
+            groupId: 'cases',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_NEW_CASE,
-            onClick: (events: TimelineItem[] = []) =>
-              createCaseFlyout.open({
-                attachments: timelineItemsToCaseEventAttachment(events),
-              }),
-          },
-          {
-            label: ADD_TO_EXISTING_CASE,
-            key: 'attach-existing-case',
-            disableOnQuery: true,
-            disabledLabel: ADD_TO_EXISTING_CASE,
-            'data-test-subj': 'attach-existing-case',
+            disabledLabel: ADD_TO_CASE,
             onClick: (events: TimelineItem[] = []) =>
               selectCaseModal.open({
                 getAttachments: (): CaseAttachmentWithoutOwner[] =>
@@ -86,11 +70,5 @@ export const useBulkAddEventsToCaseActions = ({
           },
         ]
       : [];
-  }, [
-    createCaseFlyout,
-    isCasesContextAvailable,
-    selectCaseModal,
-    userCasesPermissions?.create,
-    userCasesPermissions?.read,
-  ]);
+  }, [isCasesContextAvailable, selectCaseModal, canAttach]);
 };

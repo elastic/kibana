@@ -13,13 +13,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
   selectEditorYaml,
   selectEditorYamlDocument,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import {
   buildBranchConnectors,
   buildInnerRailSegments,

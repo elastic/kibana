@@ -10,14 +10,21 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
-import { entityStoreMetrics } from '../../monitor/metrics';
+import type { ExtractionAttributes } from '../../monitor/metrics';
+import { buildExtractionAttributes, entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   GatedEntityDefinition,
   ManagedEntityDefinition,
   ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import {
+  getEntityDefinition,
+  supportsNonPrioritySampling,
+  type EntityDefinitionOptions,
+} from '../../../common/domain/definitions/registry';
+import { resolveSamplingRate } from './sampling';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
   buildLogPaginationCursorProbeEsql,
@@ -37,7 +44,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
-import { getMergedConfig } from '../config';
+import { getMergedConfig, type MergedLogExtractionConfig } from '../config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { executeEsqlQueryRetryingRemoteResources } from '../../infra/elasticsearch/remote_resource_not_supported';
@@ -55,11 +62,14 @@ import { type LogExtractionConfig } from '../saved_objects';
 import {
   type EngineDescriptor,
   type EngineDescriptorClient,
+  type EngineError,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
+  type LogExtractionTypeOverride,
+  type NonPriorityLogExtractionTypeOverride,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import { EntityStoreNotRunningError } from '../errors';
+import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../errors';
 import type { LogExtractionInstallParams } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
@@ -69,7 +79,11 @@ const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
   paginationId: null,
   lastExecutionTimestamp: null,
   sliceEndTimestamp: null,
+  sliceSamplingRate: null,
 };
+
+const hasKeys = (value: object | undefined): boolean =>
+  value !== undefined && Object.keys(value).length > 0;
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -109,17 +123,28 @@ export interface LogsExtractionClientDependencies {
 }
 
 export class LogsExtractionClient {
-  /** Maps each extraction mode to the field holding its extraction state. single and priority share
-   * logExtractionState; nonPriority has its own field so the two processes do not overwrite each
-   * other's position. */
-  private static readonly EXTRACTION_STATE_FIELD_BY_MODE: Record<
-    ExtractionMode,
-    keyof EngineDescriptor
-  > = {
-    single: 'logExtractionState',
-    priority: 'logExtractionState',
-    nonPriority: 'nonPriorityLogExtractionState',
-  };
+  /**
+   * Maps each extraction mode to the descriptor fields holding its cursor, status and error.
+   * single and priority share the original fields; nonPriority has its own set, so the two
+   * processes never write the same key and cannot overwrite each other.
+   *
+   * Every read and write of these three must go through this map. Reading `status` directly would
+   * make stopping one process stop the other, since extraction is gated on it, and clearing
+   * `error` directly would let a non-priority success wipe a priority failure.
+   */
+  private static readonly DESCRIPTOR_FIELDS_BY_MODE = {
+    single: { state: 'logExtractionState', status: 'status', error: 'error' },
+    priority: { state: 'logExtractionState', status: 'status', error: 'error' },
+    nonPriority: {
+      state: 'nonPriorityLogExtractionState',
+      status: 'nonPriorityStatus',
+      error: 'nonPriorityError',
+    },
+  } as const satisfies Record<ExtractionMode, Record<string, keyof EngineDescriptor>>;
+
+  private get descriptorFields() {
+    return LogsExtractionClient.DESCRIPTOR_FIELDS_BY_MODE[this.extractionMode];
+  }
 
   logger: Logger;
   namespace: string;
@@ -143,40 +168,81 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
-    this.extractionMode = extractionMode ?? 'single';
+    this.extractionMode = extractionMode ?? EXTRACTION_MODE.single;
   }
 
   private extractionStatePatch(state: EngineLogExtractionState): Partial<EngineDescriptor> {
-    return {
-      [LogsExtractionClient.EXTRACTION_STATE_FIELD_BY_MODE[this.extractionMode]]: state,
-    } as Partial<EngineDescriptor>;
+    return { [this.descriptorFields.state]: state } as Partial<EngineDescriptor>;
   }
 
-  private async getLogExtractionConfigAndState(
-    type: EntityType
-  ): Promise<{ config: LogExtractionConfig; engineState: EngineLogExtractionState }> {
+  /**
+   * Attributes shared by every extraction metric this client emits. Built once per run and
+   * threaded down, so the two processes stay on separate series and `remote` reflects the
+   * index patterns actually resolved rather than a hardcoded guess.
+   */
+  private getExtractionAttributes(type: EntityType, remote: boolean): ExtractionAttributes {
+    return buildExtractionAttributes(type, this.namespace, this.extractionMode, remote);
+  }
+
+  private errorPatch(error: EngineError | null): Partial<EngineDescriptor> {
+    return { [this.descriptorFields.error]: error } as Partial<EngineDescriptor>;
+  }
+
+  private async getLogExtractionConfigAndState(type: EntityType): Promise<{
+    config: MergedLogExtractionConfig;
+    engineState: EngineLogExtractionState;
+    excludedUserNames: string[];
+  }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
-    if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
+    const status = engineDescriptor[this.descriptorFields.status];
+    if (status !== ENGINE_STATUS.STARTED) {
+      if (this.extractionMode === EXTRACTION_MODE.nonPriority && status === ENGINE_STATUS.STOPPED) {
+        throw new NonPriorityExtractionDisabledError();
+      }
       throw new EntityStoreNotRunningError();
     }
-    const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
+    const [globalOverrides, { excludedUserNames }] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.globalStateClient.findOrThrow(),
+    ]);
     const engineState =
-      this.extractionMode === 'nonPriority'
+      this.extractionMode === EXTRACTION_MODE.nonPriority
         ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
         : engineDescriptor.logExtractionState;
     return {
-      config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),
+      config: getMergedConfig(
+        type,
+        globalOverrides,
+        engineDescriptor.logExtractionConfig,
+        this.extractionMode,
+        this.extractionMode === EXTRACTION_MODE.nonPriority
+          ? engineDescriptor.nonPriorityLogExtractionConfig
+          : undefined
+      ),
       engineState,
+      excludedUserNames,
     };
   }
 
-  /** Config in effect for one entity type, without requiring the engine to be started. */
-  public async getMergedConfigForType(type: EntityType): Promise<LogExtractionConfig> {
+  /** Config in effect for one entity type and extraction process, without requiring the engine to
+   * be started. Defaults to this client's own mode. */
+  public async getMergedConfigForType(
+    type: EntityType,
+    extractionMode: ExtractionMode = this.extractionMode
+  ): Promise<MergedLogExtractionConfig> {
     const [globalOverrides, engineDescriptor] = await Promise.all([
       this.globalStateClient.findLogExtractionOverrides(),
       this.engineDescriptorClient.findOrThrow(type),
     ]);
-    return getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig);
+    return getMergedConfig(
+      type,
+      globalOverrides,
+      engineDescriptor.logExtractionConfig,
+      extractionMode,
+      extractionMode === EXTRACTION_MODE.nonPriority
+        ? engineDescriptor.nonPriorityLogExtractionConfig
+        : undefined
+    );
   }
 
   public async extractLogs(
@@ -186,12 +252,32 @@ export class LogsExtractionClient {
     this.logger.debug('starting entity extraction');
 
     let isRemote = false;
+    // Where this run resumes from, captured before any work so the error path can still report
+    // lag. Stays undefined when the engine is stopped or the non-priority process is disabled,
+    // because neither is stalled — they are idle, and an idle process must not report lag.
+    // Note: this is the raw cursor before applyMaxLagCutoff clips it. In the rare case where
+    // the checkpoint is older than lookbackPeriod AND the run fails, the error-path lag is
+    // overstated (raw age vs. effective search distance). An alert still fires correctly; only
+    // the number is larger than the cutoff distance. The success path is accurate in all cases.
+    let resumePointISO: string | undefined;
+    // Updated whenever a checkpoint is persisted mid-run; the error path uses the most-recent
+    // committed point rather than the pre-run start, so partial progress does not inflate the
+    // reported lag.
+    let lastPersistedCheckpointISO: string | undefined;
 
     try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const entityDefinition = getEntityDefinition(type, this.namespace, this.extractionMode);
+      const { config, engineState, excludedUserNames } = await this.getLogExtractionConfigAndState(
+        type
+      );
+      ({ fromDateISO: resumePointISO } = resolveMainExtractionWindow({ config, engineState }));
+      const entityDefinitionOptions: EntityDefinitionOptions = { excludedUserNames };
+      const entityDefinition = getEntityDefinition(
+        type,
+        this.namespace,
+        this.extractionMode,
+        entityDefinitionOptions
+      );
       const {
-        isRemote: resolvedIsRemote,
         count,
         pages,
         indexPatterns,
@@ -205,9 +291,14 @@ export class LogsExtractionClient {
         engineState,
         opts,
         entityDefinition,
+        onRemoteResolved: (r) => {
+          isRemote = r;
+        },
+        onCheckpointPersisted: (ts) => {
+          lastPersistedCheckpointISO = ts;
+        },
+        entityDefinitionOptions,
       });
-
-      isRemote = resolvedIsRemote;
 
       const operationResult = {
         success: true as const,
@@ -224,31 +315,127 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
+      const nextResumePointISO = lastSearchTimestamp || moment().utc().toISOString();
+
       if (logsCapDeferred) {
         // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
         // do not overwrite it — only clear any stale error.
-        await this.engineDescriptorClient.update(type, { error: null });
+        await this.engineDescriptorClient.update(type, this.errorPatch(null));
       } else {
         await this.engineDescriptorClient.update(type, {
           ...this.extractionStatePatch({
             checkpointTimestamp: null,
             paginationId: null,
-            lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
+            lastExecutionTimestamp: nextResumePointISO,
             sliceEndTimestamp: null,
+            sliceSamplingRate: null,
           }),
-          error: null,
+          ...this.errorPatch(null),
         });
       }
 
+      this.recordExtractionLag(nextResumePointISO, this.getExtractionAttributes(type, isRemote));
+
       return operationResult;
     } catch (error) {
+      // Skipped for a manual window, matching the success path: a force run neither reads nor
+      // advances the scheduled cursor, so its outcome says nothing about how far behind the
+      // engine is.
+      if (!opts?.specificWindow) {
+        // Use the most-recently committed checkpoint if the run made partial progress: it is closer
+        // to where the next run will resume than the pre-run start and avoids inflating the lag
+        // alert when a long run fails after several completed slices.
+        this.recordExtractionLag(
+          lastPersistedCheckpointISO ?? resumePointISO,
+          this.getExtractionAttributes(type, isRemote)
+        );
+      }
       return await this.handleError(error, type, isRemote);
     }
   }
 
-  public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
-    const state = await this.globalStateClient.update({ logsExtraction: params });
+  /**
+   * Distance between now and the point the next run resumes from, recorded once per run — on
+   * success, on a deferred cap, and on failure — so a process that stalls without erroring is
+   * still visible. This is the priority process's only warning signal: its `defer` cap behavior
+   * holds the cursor instead of dropping logs, so it falls behind silently.
+   *
+   * Reads the resume point rather than `checkpointTimestamp`, which a completed run nulls out.
+   * Clamped at 0 against clock skew putting the resume point in the future.
+   */
+  private recordExtractionLag(
+    resumePointISO: string | undefined,
+    metricAttributes: ExtractionAttributes
+  ): void {
+    if (!resumePointISO) return;
+    entityStoreMetrics.extractionLagMs.record(
+      Math.max(0, Date.now() - new Date(resumePointISO).getTime()),
+      metricAttributes
+    );
+  }
+
+  public async updateConfig(
+    params?: LogExtractionInstallParams,
+    excludedUserNames?: string[]
+  ): Promise<LogExtractionConfig> {
+    const state = await this.globalStateClient.update({
+      logsExtraction: params,
+      ...(excludedUserNames !== undefined ? { excludedUserNames } : {}),
+    });
     return state.logsExtraction;
+  }
+
+  /**
+   * Writes the two per entity-type override layers. `logExtraction` reaches both processes (minus
+   * the non-priority-exclusive fields), `nonPriorityOverride` only the non-priority one.
+   *
+   * Each block is handed to the saved object update as-is. `mergeForUpdate` recurses into nested
+   * plain objects, so an omitted field keeps its stored value and an incoming `null` overwrites it
+   * with `null`, which every reader treats as unset. An empty block is skipped: `{}` does not
+   * recurse, so it would replace the whole stored object instead of merging into it.
+   */
+  public async updateTypeConfig(
+    type: EntityType,
+    {
+      logExtraction,
+      nonPriorityOverride,
+    }: {
+      logExtraction?: LogExtractionTypeOverride;
+      nonPriorityOverride?: NonPriorityLogExtractionTypeOverride;
+    }
+  ): Promise<{
+    logExtractionConfig: LogExtractionTypeOverride;
+    nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride;
+  }> {
+    const patch = {
+      ...(hasKeys(logExtraction) ? { logExtractionConfig: logExtraction } : {}),
+      ...(hasKeys(nonPriorityOverride)
+        ? { nonPriorityLogExtractionConfig: nonPriorityOverride }
+        : {}),
+    };
+
+    if (Object.keys(patch).length > 0) {
+      await this.engineDescriptorClient.update(type, patch);
+    }
+
+    const descriptor = await this.engineDescriptorClient.findOrThrow(type);
+    return {
+      logExtractionConfig: descriptor.logExtractionConfig ?? {},
+      nonPriorityLogExtractionConfig: descriptor.nonPriorityLogExtractionConfig ?? {},
+    };
+  }
+
+  /** Same dependencies, different extraction process. */
+  public withExtractionMode(extractionMode: ExtractionMode): LogsExtractionClient {
+    return new LogsExtractionClient({
+      logger: this.logger,
+      namespace: this.namespace,
+      esClient: this.esClient,
+      dataViewsService: this.dataViewsService,
+      engineDescriptorClient: this.engineDescriptorClient,
+      globalStateClient: this.globalStateClient,
+      extractionMode,
+    });
   }
 
   private async runQueryAndIngestDocs({
@@ -257,12 +444,21 @@ export class LogsExtractionClient {
     engineState,
     opts,
     entityDefinition,
+    onRemoteResolved,
+    onCheckpointPersisted,
+    entityDefinitionOptions,
   }: {
     type: EntityType;
-    config: LogExtractionConfig;
+    config: MergedLogExtractionConfig;
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    // Called once remote patterns are resolved and before any fallible work begins, so the caller
+    // can propagate the flag even when runMainPath or a subsequent step throws.
+    onRemoteResolved?: (isRemote: boolean) => void;
+    // Called after each checkpoint write so the caller tracks partial progress for lag reporting.
+    onCheckpointPersisted?: (ts: string) => void;
+    entityDefinitionOptions?: EntityDefinitionOptions;
   }): Promise<{
     isRemote: boolean;
     count: number;
@@ -285,19 +481,25 @@ export class LogsExtractionClient {
       ...remoteIndexPatterns,
     ]);
 
+    const isRemote = remoteIndexPatterns.length > 0;
+    onRemoteResolved?.(isRemote);
+
     const mainResult = await this.runMainPath({
       type,
       config,
       engineState,
       opts,
       entityDefinition,
+      entityDefinitionOptions,
       latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
       indexPatterns: allIndexPatterns,
+      metricAttributes: this.getExtractionAttributes(type, isRemote),
+      onCheckpointPersisted,
     });
 
     return {
       ...mainResult,
-      isRemote: remoteIndexPatterns.length > 0,
+      isRemote,
       indexPatterns: allIndexPatterns,
     };
   }
@@ -317,16 +519,22 @@ export class LogsExtractionClient {
     engineState,
     opts,
     entityDefinition,
+    entityDefinitionOptions,
     indexPatterns,
     latestIndex,
+    metricAttributes,
+    onCheckpointPersisted,
   }: {
     type: EntityType;
-    config: LogExtractionConfig;
+    config: MergedLogExtractionConfig;
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    entityDefinitionOptions?: EntityDefinitionOptions;
     indexPatterns: string[];
     latestIndex: string;
+    metricAttributes: ExtractionAttributes;
+    onCheckpointPersisted?: (ts: string) => void;
   }): Promise<{
     count: number;
     pages: number;
@@ -337,6 +545,7 @@ export class LogsExtractionClient {
     logsProcessed: number;
   }> {
     const { docsLimit, maxLogsPerPage, maxLogsPerWindow, maxLogsPerWindowCapBehavior } = config;
+    const samplingRateOverride = config.samplingRate;
 
     if (opts?.specificWindow) {
       const { fromDateISO, toDateISO } = opts.specificWindow;
@@ -353,6 +562,12 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow,
         entityDefinition,
+        windowEndISO: toDateISO,
+        processedLogsBefore: 0,
+        samplingRateOverride,
+        metricAttributes,
+        onCheckpointPersisted,
+        entityDefinitionOptions,
       });
       let { lastSearchTimestamp } = result;
       if (result.logsCapApplied) {
@@ -360,20 +575,15 @@ export class LogsExtractionClient {
           `Entity extraction volume cap reached for entity type "${type}": processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". This is a manual (force) run — cursor is not persisted.`
         );
         entityStoreMetrics.extractionLogsCapApplied.add(1, {
-          entity_type: type,
-          namespace: this.namespace,
+          ...metricAttributes,
           behavior: maxLogsPerWindowCapBehavior,
-          remote: false,
         });
         if (maxLogsPerWindowCapBehavior === 'drop') {
           lastSearchTimestamp = toDateISO;
         }
       }
-      entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed, {
-        entity_type: type,
-        namespace: this.namespace,
-        remote: false,
-      });
+      entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed, metricAttributes);
+      this.recordLogsCapUtilization(result.logsProcessed, maxLogsPerWindow, metricAttributes);
       return {
         ...result,
         lastSearchTimestamp,
@@ -407,6 +617,7 @@ export class LogsExtractionClient {
     let totalPages = 0;
     let totalLogs = 0;
     let lastSubWindowEnd = currentFromDateISO;
+    let sampledAnySubWindow = false;
 
     let hasNextPage = true;
     while (hasNextPage) {
@@ -439,22 +650,28 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow: remainingCap,
         entityDefinition,
+        // Sampling projects density to the end of the whole run's window, not the sub-window.
+        windowEndISO: effectiveWindowEnd,
+        processedLogsBefore: totalLogs,
+        samplingRateOverride,
+        metricAttributes,
+        onCheckpointPersisted,
+        entityDefinitionOptions,
       });
 
       totalCount += subResult.count;
       totalPages += subResult.pages;
       totalLogs += subResult.logsProcessed;
       lastSubWindowEnd = subResult.lastSearchTimestamp;
+      sampledAnySubWindow = sampledAnySubWindow || subResult.sampledAnySlice;
 
       if (subResult.logsCapApplied) {
         this.logger.warn(
           `Entity extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
         );
         entityStoreMetrics.extractionLogsCapApplied.add(1, {
-          entity_type: type,
-          namespace: this.namespace,
+          ...metricAttributes,
           behavior: maxLogsPerWindowCapBehavior,
-          remote: false,
         });
         if (maxLogsPerWindowCapBehavior === 'drop') {
           this.logger.warn(
@@ -466,11 +683,9 @@ export class LogsExtractionClient {
             `Deferring remaining logs in window. Task will resume from last processed position on next run.`
           );
         }
-        entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
-          entity_type: type,
-          namespace: this.namespace,
-          remote: false,
-        });
+        entityStoreMetrics.extractionLogsProcessed.record(totalLogs, metricAttributes);
+        this.recordLogsCapUtilization(totalLogs, maxLogsPerWindow, metricAttributes);
+        this.recordSampleEligibleRun(type, sampledAnySubWindow, metricAttributes);
         return {
           count: totalCount,
           pages: totalPages,
@@ -488,11 +703,9 @@ export class LogsExtractionClient {
       currentEngineState = FRESH_ENGINE_LOG_EXTRACTION_STATE;
     }
 
-    entityStoreMetrics.extractionLogsProcessed.record(totalLogs, {
-      entity_type: type,
-      namespace: this.namespace,
-      remote: false,
-    });
+    entityStoreMetrics.extractionLogsProcessed.record(totalLogs, metricAttributes);
+    this.recordLogsCapUtilization(totalLogs, maxLogsPerWindow, metricAttributes);
+    this.recordSampleEligibleRun(type, sampledAnySubWindow, metricAttributes);
     return {
       count: totalCount,
       pages: totalPages,
@@ -502,6 +715,40 @@ export class LogsExtractionClient {
       logsCapApplied: false,
       logsProcessed: totalLogs,
     };
+  }
+
+  /**
+   * Counts scheduled runs of a sampling-capable non-priority process, labeled by whether any
+   * slice sampled. Other processes and types never record, so sampled/total reads directly as
+   * the share of eligible runs that sampled.
+   */
+  private recordSampleEligibleRun(
+    type: EntityType,
+    sampled: boolean,
+    metricAttributes: ExtractionAttributes
+  ): void {
+    if (this.extractionMode !== EXTRACTION_MODE.nonPriority || !supportsNonPrioritySampling(type)) {
+      return;
+    }
+    entityStoreMetrics.extractionSampleEligibleRuns.add(1, { ...metricAttributes, sampled });
+  }
+
+  /**
+   * Fraction of the volume cap this run consumed. `maxLogsPerWindow` of 0 disables the cap, so
+   * there is no fraction to report: recording 0 there would be indistinguishable from an idle
+   * process. Clamped at 1 because a resumed mid-slice run starts with a fresh budget and can
+   * process more than one budget in total.
+   */
+  private recordLogsCapUtilization(
+    logsProcessed: number,
+    maxLogsPerWindow: number,
+    metricAttributes: ExtractionAttributes
+  ): void {
+    if (maxLogsPerWindow <= 0) return;
+    entityStoreMetrics.extractionLogsCapUtilization.record(
+      Math.min(1, logsProcessed / maxLogsPerWindow),
+      metricAttributes
+    );
   }
 
   /**
@@ -519,6 +766,12 @@ export class LogsExtractionClient {
     maxLogsPerPage,
     maxLogsPerWindow,
     entityDefinition,
+    windowEndISO,
+    processedLogsBefore = 0,
+    samplingRateOverride,
+    metricAttributes,
+    onCheckpointPersisted,
+    entityDefinitionOptions,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -531,6 +784,14 @@ export class LogsExtractionClient {
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    /** End of the whole run's window, used to project remaining volume for sampling. */
+    windowEndISO: string;
+    /** Logs already counted against the run's budget by earlier sub-windows. */
+    processedLogsBefore?: number;
+    samplingRateOverride?: number | null;
+    metricAttributes: ExtractionAttributes;
+    onCheckpointPersisted?: (ts: string) => void;
+    entityDefinitionOptions?: EntityDefinitionOptions;
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -539,29 +800,27 @@ export class LogsExtractionClient {
     // pickSampleProbability. Computed once per loop invocation: effectiveMaxLogsPerPage is
     // fixed for the whole loop.
     const effectiveSampleProbability = pickSampleProbability(effectiveMaxLogsPerPage);
+    // Sampling policy: only the non-priority process of a capability-declaring type may sample.
+    const samplingEligible =
+      this.extractionMode === EXTRACTION_MODE.nonPriority && supportsNonPrioritySampling(type);
     let totalCount = 0;
     let totalLogs = 0;
     let pages = 0;
     let logsCapApplied = false;
     let logsCapTimestamp: string | undefined;
+    let sampledAnySlice = false;
     let state: EngineLogExtractionState = { ...initialEngineState };
 
     const onAbort = () => {
       this.logger.debug('Aborting execution mid logs extraction');
-      entityStoreMetrics.extractionTaskAborted.add(1, {
-        entity_type: type,
-        namespace: this.namespace,
-        remote: false,
-      });
+      entityStoreMetrics.extractionTaskAborted.add(1, metricAttributes);
     };
     opts?.signal?.addEventListener('abort', onAbort);
 
     // Mid-slice resume cursors from a prior interrupted run; consumed by the first outer
     // iteration only, which re-enters the interrupted slice with its exact persisted bounds.
-    const { resumeEntityPagination, resumeSliceEnd } = this.resolveMidSliceResume(
-      initialEngineState,
-      fromDateISO
-    );
+    const { resumeEntityPagination, resumeSliceEnd, resumeSamplingRate } =
+      this.resolveMidSliceResume(initialEngineState, fromDateISO);
 
     try {
       let lastLogsPages = false;
@@ -577,6 +836,7 @@ export class LogsExtractionClient {
         let entityPagination: PaginationParams | undefined;
         let bumpedCursorEnd: LogSlicePaginationParams | null = null;
         let sliceLogCount = 0;
+        const isResumingMidSlice = isFirstRunInThisCycle && resumeSliceEnd !== undefined;
 
         if (isFirstRunInThisCycle && resumeSliceEnd) {
           // Re-enter the interrupted slice with its exact persisted bounds, skipping the probe:
@@ -600,6 +860,7 @@ export class LogsExtractionClient {
             maxLogsPerPage: effectiveMaxLogsPerPage,
             sampleProbability: effectiveSampleProbability,
             opts,
+            metricAttributes,
           });
 
           if (!probe.hasLogsToProcess && effectiveSampleProbability >= 1) {
@@ -636,13 +897,39 @@ export class LogsExtractionClient {
 
         if (bumpedCursorEnd) {
           logsPageCursorEnd = bumpedCursorEnd;
-          entityStoreMetrics.extractionLogsPerPageDropped.add(1, {
-            entity_type: type,
-            namespace: this.namespace,
-            remote: false,
-          });
+          entityStoreMetrics.extractionLogsPerPageDropped.add(1, metricAttributes);
         } else {
-          totalLogs += sliceLogCount;
+          // p = 1 is not passed on: no SAMPLE stage and raw accounting.
+          let samplingRate: number | undefined;
+          if (isResumingMidSlice) {
+            // The probe is skipped on resume, leaving sliceLogCount at 0 - recomputing here would
+            // wrongly read that as "nothing left" and drop the sample. Reuse the rate pinned
+            // before the interruption instead.
+            samplingRate = resumeSamplingRate ?? undefined;
+          } else if (samplingEligible) {
+            const rate = resolveSamplingRate(
+              {
+                scannedLogs: processedLogsBefore + totalLogs,
+                sliceLogCount,
+                sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
+                sliceEndISO: logsPageCursorEnd.timestampCursor,
+                windowEndISO,
+              },
+              samplingRateOverride
+            );
+            samplingRate = rate < 1 ? rate : undefined;
+          }
+
+          // Only applied rates are recorded; unsampled slices record nothing so the histogram's
+          // distribution reflects actual sampling, not a stream of 1.0s.
+          if (samplingRate !== undefined) {
+            sampledAnySlice = true;
+            entityStoreMetrics.extractionSampleProbability.record(samplingRate, metricAttributes);
+          }
+
+          // The budget counts processed volume, letting it stretch across the whole window.
+          totalLogs +=
+            samplingRate !== undefined ? Math.ceil(sliceLogCount * samplingRate) : sliceLogCount;
 
           const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
             type,
@@ -650,6 +937,7 @@ export class LogsExtractionClient {
             indexPatterns,
             latestIndex,
             entityDefinition,
+            entityDefinitionOptions,
             docsLimit: effectiveDocsLimit,
             fromDateISO,
             toDateISO,
@@ -657,6 +945,9 @@ export class LogsExtractionClient {
             logsPageCursorEnd,
             entityPagination,
             state,
+            samplingRate,
+            metricAttributes,
+            onCheckpointPersisted,
           });
 
           totalCount += sliceIngestOutcome.addedToTotalCount;
@@ -666,6 +957,7 @@ export class LogsExtractionClient {
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        onCheckpointPersisted?.(state.checkpointTimestamp!);
         isFirstRunInThisCycle = false;
 
         const windowLogCapEnabled = maxLogsPerWindow > 0;
@@ -689,6 +981,7 @@ export class LogsExtractionClient {
       // lastSearchTimestamp; here we report where the loop actually stopped.
       lastSearchTimestamp: logsCapTimestamp ?? toDateISO,
       logsCapApplied,
+      sampledAnySlice,
     };
   }
 
@@ -705,6 +998,7 @@ export class LogsExtractionClient {
     maxLogsPerPage,
     sampleProbability,
     opts,
+    metricAttributes,
   }: {
     indexPatterns: string[];
     type: EntityType;
@@ -715,6 +1009,7 @@ export class LogsExtractionClient {
     maxLogsPerPage: number;
     sampleProbability: number;
     opts?: LogsExtractionOptions;
+    metricAttributes: ExtractionAttributes;
   }): Promise<LogPaginationCursor> {
     const probeStart = Date.now();
     const logPaginationCursorProbeResponse = await executeEsqlQueryRetryingRemoteResources({
@@ -740,11 +1035,10 @@ export class LogsExtractionClient {
           },
         }),
     });
-    entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
-      entity_type: type,
-      namespace: this.namespace,
-      remote: false,
-    });
+    entityStoreMetrics.extractionProbeQueryDurationMs.record(
+      Date.now() - probeStart,
+      metricAttributes
+    );
 
     const parsedLogPaginationCursor = parseLogPaginationCursorRow(logPaginationCursorProbeResponse);
 
@@ -772,6 +1066,7 @@ export class LogsExtractionClient {
     indexPatterns,
     latestIndex,
     entityDefinition,
+    entityDefinitionOptions,
     docsLimit,
     fromDateISO,
     toDateISO,
@@ -779,12 +1074,16 @@ export class LogsExtractionClient {
     logsPageCursorEnd,
     entityPagination,
     state: initialSliceState,
+    samplingRate,
+    metricAttributes,
+    onCheckpointPersisted,
   }: {
     type: EntityType;
     opts?: LogsExtractionOptions;
     indexPatterns: string[];
     latestIndex: string;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    entityDefinitionOptions?: EntityDefinitionOptions;
     docsLimit: number;
     fromDateISO: string;
     toDateISO: string;
@@ -792,6 +1091,9 @@ export class LogsExtractionClient {
     logsPageCursorEnd: LogSlicePaginationParams;
     entityPagination: PaginationParams | undefined;
     state: EngineLogExtractionState;
+    samplingRate?: number;
+    metricAttributes: ExtractionAttributes;
+    onCheckpointPersisted?: (ts: string) => void;
   }): Promise<{
     addedToTotalCount: number;
     addedToPageCount: number;
@@ -808,12 +1110,14 @@ export class LogsExtractionClient {
         indexPatterns,
         latestIndex,
         entityDefinition,
+        entityDefinitionOptions,
         docsLimit,
         fromDateISO,
         toDateISO,
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
+        samplingRate,
       });
 
       this.logger.debug(
@@ -833,11 +1137,10 @@ export class LogsExtractionClient {
           type,
         },
       });
-      entityStoreMetrics.extractionQueryDurationMs.record(Date.now() - queryStart, {
-        entity_type: type,
-        namespace: this.namespace,
-        remote: false,
-      });
+      entityStoreMetrics.extractionQueryDurationMs.record(
+        Date.now() - queryStart,
+        metricAttributes
+      );
 
       if (
         esqlResponse._clusters &&
@@ -857,7 +1160,7 @@ export class LogsExtractionClient {
 
       this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
       const ingestStart = Date.now();
-      await ingestEntities({
+      const { created, updated, noop } = await ingestEntities({
         esClient: this.esClient,
         esqlResponse,
         esIdField: HASHED_ID_FIELD,
@@ -865,23 +1168,15 @@ export class LogsExtractionClient {
         logger: this.logger,
         signal: opts?.signal,
         refresh: true,
-        onDropped: () =>
-          entityStoreMetrics.extractionBulkDropped.add(1, {
-            entity_type: type,
-            namespace: this.namespace,
-            remote: false,
-          }),
+        onDropped: () => entityStoreMetrics.extractionBulkDropped.add(1, metricAttributes),
       });
-      entityStoreMetrics.extractionIngestDurationMs.record(Date.now() - ingestStart, {
-        entity_type: type,
-        namespace: this.namespace,
-        remote: false,
-      });
-      entityStoreMetrics.extractionEntitiesUpserted.add(esqlResponse.values.length, {
-        entity_type: type,
-        namespace: this.namespace,
-        remote: false,
-      });
+      entityStoreMetrics.extractionIngestDurationMs.record(
+        Date.now() - ingestStart,
+        metricAttributes
+      );
+      entityStoreMetrics.extractionEntitiesCreated.add(created, metricAttributes);
+      entityStoreMetrics.extractionEntitiesUpdated.add(updated, metricAttributes);
+      entityStoreMetrics.extractionEntitiesNoop.add(noop, metricAttributes);
 
       if (pagination) {
         // Pin both slice bounds alongside the entity cursor: the id cursor is only meaningful
@@ -894,8 +1189,12 @@ export class LogsExtractionClient {
           checkpointTimestamp: logsPageCursorStart?.timestampCursor ?? fromDateISO,
           paginationId: pagination.idCursor,
           sliceEndTimestamp: logsPageCursorEnd.timestampCursor,
+          // Pinned alongside the slice bounds so a resume reuses this exact rate instead of
+          // recomputing one from a probe-less (and therefore zeroed) volume estimate.
+          sliceSamplingRate: samplingRate ?? null,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        onCheckpointPersisted?.(state.checkpointTimestamp!);
       }
     } while (pagination);
 
@@ -903,8 +1202,10 @@ export class LogsExtractionClient {
   }
 
   /**
-   * After all entity pages for a slice: clear the entity cursor and pinned slice end, and
-   * advance the log-slice cursor to the slice end.
+   * After all entity pages for a slice: clear the entity cursor, pinned slice end, and pinned
+   * sampling rate, and advance the log-slice cursor to the slice end. Clearing the rate matters:
+   * left set, a later slice's resume check would misread it as belonging to a still-interrupted
+   * slice instead of one that already completed cleanly.
    */
   private advanceEngineStateAfterLogPageCompletes(
     state: EngineLogExtractionState,
@@ -915,6 +1216,7 @@ export class LogsExtractionClient {
       checkpointTimestamp: logsPageCursorEnd.timestampCursor,
       paginationId: null,
       sliceEndTimestamp: null,
+      sliceSamplingRate: null,
     };
   }
 
@@ -930,8 +1232,12 @@ export class LogsExtractionClient {
   ): {
     resumeEntityPagination?: PaginationParams;
     resumeSliceEnd?: LogSlicePaginationParams;
+    /** Sampling rate pinned for the interrupted slice, reused as-is. `null` means the slice was
+     * unsampled; `undefined` (no resume in progress) is handled by the caller checking
+     * `resumeSliceEnd` first. */
+    resumeSamplingRate?: number | null;
   } {
-    const { paginationId, sliceEndTimestamp } = initialEngineState;
+    const { paginationId, sliceEndTimestamp, sliceSamplingRate } = initialEngineState;
     if (!paginationId) {
       return {};
     }
@@ -951,6 +1257,7 @@ export class LogsExtractionClient {
     return {
       resumeEntityPagination: { idCursor: paginationId },
       resumeSliceEnd: { timestampCursor: sliceEndTimestamp },
+      resumeSamplingRate: sliceSamplingRate,
     };
   }
 
@@ -994,6 +1301,13 @@ export class LogsExtractionClient {
     type: EntityType,
     isRemote: boolean
   ): Promise<ExtractedLogsSummary> {
+    if (error instanceof NonPriorityExtractionDisabledError) {
+      // Returned unflattened so the caller can tell a switched-off process from a broken one.
+      // Collapsing it into a generic Error made every disabled tick look like an extraction
+      // failure to the metrics layer.
+      return { success: false, isRemote, error };
+    }
+
     if (
       SavedObjectsErrorHelpers.isNotFoundError(error) ||
       error instanceof EntityStoreNotRunningError
@@ -1001,13 +1315,14 @@ export class LogsExtractionClient {
       return {
         success: false,
         isRemote,
-        error: new Error(`Entity store is not started for type ${type}`),
+        error: new EntityStoreNotRunningError(`Entity store is not started for type ${type}`),
       };
     }
 
-    await this.engineDescriptorClient.update(type, {
-      error: { message: error.message, action: 'extractLogs' },
-    });
+    await this.engineDescriptorClient.update(
+      type,
+      this.errorPatch({ message: error.message, action: 'extractLogs' })
+    );
     return { success: false, isRemote, error };
   }
 

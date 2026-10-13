@@ -36,6 +36,7 @@ import type {
   BrushTriggerEvent,
   ChartsPluginSetup,
   ClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MutableRefObject, ReactElement } from 'react';
@@ -1043,6 +1044,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   isMetricDimension?: boolean;
   layerType: LensLayerType | undefined;
   supportStaticValue: boolean;
+  /** When set, the dimension editor only offers the static value option (no quick functions or formula) */
+  staticValueOnly?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
   dataSectionExtra?: React.ReactNode;
@@ -1152,6 +1155,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
+  // restricts the dimension editor to the static value option only (used for ES|QL charts where field-based operations are unavailable)
+  staticValueOnly?: boolean;
   // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
   isMetricDimension?: boolean;
   isBreakdownDimension?: boolean;
@@ -1339,6 +1344,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent

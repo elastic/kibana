@@ -12,6 +12,11 @@ import { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { defineRoutes } from '.';
 import { inboundEventsRoute } from './inbound_events';
 import { rotateInboundIngressRoute } from './connector/rotate_inbound_ingress';
+import { createConnectorRoute } from './connector/create';
+import { getConnectorRoute } from './connector/get';
+import { getAllConnectorsRoute } from './connector/get_all';
+import { updateConnectorRoute } from './connector/update';
+import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
 
 jest.mock('./inbound_events', () => ({
   inboundEventsRoute: jest.fn(),
@@ -93,5 +98,36 @@ describe('defineRoutes', () => {
     defineRoutes(baseOpts());
     expect(inboundEventsRouteMock).not.toHaveBeenCalled();
     expect(rotateInboundIngressRouteMock).not.toHaveBeenCalled();
+  });
+
+  it('passes actionsConfigUtils to connector CRUD routes so is_inbound_events_enabled can be gated', () => {
+    const opts = baseOpts();
+    defineRoutes(opts);
+
+    expect(createConnectorRoute).toHaveBeenCalledWith(
+      opts.router,
+      opts.licenseState,
+      opts.actionsConfigUtils
+    );
+    expect(getConnectorRoute).toHaveBeenCalledWith(
+      opts.router,
+      opts.licenseState,
+      opts.actionsConfigUtils
+    );
+    expect(getAllConnectorsRoute).toHaveBeenCalledWith(
+      opts.router,
+      opts.licenseState,
+      opts.actionsConfigUtils
+    );
+    expect(updateConnectorRoute).toHaveBeenCalledWith(
+      opts.router,
+      opts.licenseState,
+      opts.actionsConfigUtils
+    );
+    expect(getAllConnectorsIncludingSystemRoute).toHaveBeenCalledWith(
+      opts.router,
+      opts.licenseState,
+      opts.actionsConfigUtils
+    );
   });
 });

@@ -10,7 +10,7 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { parse as parseYaml } from 'yaml';
+import { parseAllDocuments } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 /**
@@ -72,14 +72,21 @@ interface RawPnpmSnapshot {
 
 /** Parse pnpm-lock.yaml content into a normalized PnpmLock. */
 export function parseLockfile(content: string): PnpmLock {
-  const raw = parseYaml(content) as RawPnpmLock | undefined;
-  if (!raw || typeof raw !== 'object') {
+  const parsedDocuments = parseAllDocuments(content);
+  const parseError = parsedDocuments.flatMap((doc) => doc.errors)[0];
+  if (parseError) throw parseError;
+  const documents = parsedDocuments.map((doc) => doc.toJSON()) as RawPnpmLock[];
+
+  // The first document seems to be the package manager document,
+  // and the last document is the dependencies document.
+  const mainProjectLockDocument = documents.pop();
+  if (!mainProjectLockDocument || typeof mainProjectLockDocument !== 'object') {
     throw new Error('unable to read pnpm-lock.yaml file, please run `node scripts/kbn bootstrap`');
   }
 
-  const rootImporter = raw.importers?.['.'] ?? {};
+  const rootImporter = mainProjectLockDocument.importers?.['.'] ?? {};
   const snapshots: Record<string, PnpmSnapshot> = {};
-  for (const [key, snap] of Object.entries(raw.snapshots ?? {})) {
+  for (const [key, snap] of Object.entries(mainProjectLockDocument.snapshots ?? {})) {
     snapshots[key] = {
       dependencies: snap.dependencies,
       optionalDependencies: snap.optionalDependencies,

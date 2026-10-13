@@ -39,8 +39,12 @@ const storageSettings = {
           entries: types.nested({
             properties: {
               type: types.keyword({}),
+              // Stable user id; absent on legacy entries.
+              id: types.keyword({}),
+              // Legacy username; only present on entries written before `id` existed.
               name: types.keyword({}),
               role: types.keyword({}),
+              added_at: types.date({}),
             },
           }),
         },

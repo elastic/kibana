@@ -81,9 +81,10 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
       );
 
       if (datasetNameUsedByMultiplePolicies) {
-        throw new FleetError(
-          `Datastreams matching ${datasetName} are in use by other package policies and cannot be removed`
+        logger.info(
+          `Datastreams matching ${datasetName} are in use by other package policies, skipping removal`
         );
+        continue;
       }
 
       const { existingDataStreams } = await findDataStreamsFromDifferentPackages(

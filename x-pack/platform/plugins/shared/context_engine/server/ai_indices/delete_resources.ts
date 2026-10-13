@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isResponseError } from '@kbn/es-errors';
+import { formatErrorMessage } from '../utils/format_es_error';
 import { MAX_AI_INDICES } from '../../common/constants';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexAutomation, AiIndexDest } from '../../common/http_api/ai_indices';
@@ -95,7 +96,7 @@ export const deleteBackingStoreResource = async ({
     if (isResponseError(error) && error.statusCode === 404) {
       return null;
     }
-    const message = error instanceof Error ? error.message : String(error);
+    const message = formatErrorMessage(error);
     logger.warn(
       `Deleted AI index '${aiIndexId}', but failed to delete its backing store '${dest.value}': ${message}`
     );
@@ -153,7 +154,7 @@ export const deleteAutomationResources = async ({
 
     return [];
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = formatErrorMessage(error);
     logger.warn(
       `Deleted AI index '${aiIndexId}', but failed to delete its automations: ${message}`
     );

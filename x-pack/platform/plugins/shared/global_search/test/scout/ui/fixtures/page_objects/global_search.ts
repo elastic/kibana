@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import type { ScoutPage, Locator } from '@kbn/scout';
+
+const SEARCH_MODAL = 'globalSearchModal';
 
 export class GlobalSearch {
   constructor(private readonly page: ScoutPage) {}
 
   public get resultLabels(): Locator {
     return this.page.testSubj
-      .locator('chromeNextSearchModal')
+      .locator(SEARCH_MODAL)
       .locator('.euiSelectableTemplateSitewide__listItemTitle');
   }
 
@@ -21,11 +24,11 @@ export class GlobalSearch {
   }
 
   async openSearch() {
-    const modal = this.page.testSubj.locator('chromeNextSearchModal');
+    const modal = this.page.testSubj.locator(SEARCH_MODAL);
     if (await modal.isVisible()) {
       return;
     }
-    await this.page.testSubj.click('chromeNextGlobalHeaderSearchButton');
+    await this.page.testSubj.click(CHROME_HEADER_TEST_SUBJECTS.searchButton);
     await modal.waitFor({ state: 'visible' });
   }
 
@@ -36,7 +39,7 @@ export class GlobalSearch {
 
   async blur() {
     await this.page.keyboard.press('Escape');
-    await this.page.testSubj.locator('chromeNextSearchModal').waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator(SEARCH_MODAL).waitFor({ state: 'hidden' });
   }
 
   async searchFor(term: string, { clear = true }: { clear?: boolean } = {}) {
@@ -56,7 +59,7 @@ export class GlobalSearch {
   }
 
   async isPopoverDisplayed() {
-    return await this.page.testSubj.locator('chromeNextSearchModal').isVisible();
+    return await this.page.testSubj.locator(SEARCH_MODAL).isVisible();
   }
 
   async clickOnOption(index: number) {
@@ -66,9 +69,7 @@ export class GlobalSearch {
 
   async scrollToResult(label: string): Promise<Locator> {
     const item = this.resultLabels.filter({ hasText: label });
-    const list = this.page.testSubj
-      .locator('chromeNextSearchModal')
-      .locator('.euiSelectableList__list');
+    const list = this.page.testSubj.locator(SEARCH_MODAL).locator('.euiSelectableList__list');
 
     // EuiSelectable virtualizes rows, so off-screen labels are not in the DOM.
     // scrollIntoViewIfNeeded is a no-op until this windowing container scrolls.

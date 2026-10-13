@@ -52,7 +52,7 @@ const EsqlMissingMetadataToastText = ({ example }: { example: string }) => (
 );
 
 /**
- * Builds the doc viewer flyout header "Share direct link" action shared by the Discover app and the
+ * Builds the doc viewer flyout header "Copy link" action shared by the Discover app and the
  * saved search embeddable. When the current document is not linkable the action stays enabled but
  * explains why via a warning toast instead of copying.
  */
@@ -71,15 +71,15 @@ export const useShareDirectLinkAction = ({
   return useMemo(() => {
     const disabledReason = getExpandedDocLinkDisabledReason(linkability);
     const copyLinkLabel = i18n.translate('discover.docViews.flyout.copyLinkLabel', {
-      defaultMessage: 'Share direct link',
+      defaultMessage: 'Copy link',
     });
 
     return [
       {
-        iconType: 'share',
+        iconType: 'link',
         'aria-label': disabledReason
           ? i18n.translate('discover.docViews.flyout.copyLinkUnavailableAriaLabel', {
-              defaultMessage: 'Cannot share direct link: {reason}',
+              defaultMessage: 'Cannot copy link: {reason}',
               values: { reason: disabledReason },
             })
           : copyLinkLabel,
@@ -104,7 +104,7 @@ export const useShareDirectLinkAction = ({
 
             toastNotifications.addWarning({
               title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
-                defaultMessage: 'Cannot share direct link',
+                defaultMessage: 'Cannot copy link',
               }),
               text: metadataExample
                 ? toMountPoint(<EsqlMissingMetadataToastText example={metadataExample} />, services)

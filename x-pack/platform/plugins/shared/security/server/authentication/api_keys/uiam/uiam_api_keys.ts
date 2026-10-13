@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { timingSafeEqual } from 'crypto';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
@@ -20,8 +21,9 @@ import type {
 
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
-import { isExternalApiKey, type UiamServicePublic } from '../../../uiam';
+import { type UiamServicePublic, isExternalApiKey as userHasExternalApiKey } from '../../../uiam';
 import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
+import { toServiceAccountGrantError } from '../service_account_grant_error';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -84,7 +86,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     try {
       // External API keys must not carry client authentication (`null`). For other credentials,
       // preserve the request's secret and only default to Kibana's for internally created requests.
-      const clientAuthentication = isExternalApiKey(this.getCurrentUser(request))
+      const clientAuthentication = userHasExternalApiKey(this.getCurrentUser(request))
         ? null
         : getUiamClientAuthentication(request);
       const { id, key, description } = await this.uiam?.grantApiKey(
@@ -101,8 +103,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
       this.logger.debug('API key was granted successfully');
     } catch (e) {
-      this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-      throw e;
+      const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request));
+      // A refused service account is the caller's to fix, not a Kibana failure.
+      this.logger[serviceAccountError ? 'warn' : 'error'](
+        `Failed to grant API key: ${getDetailedErrorMessage(e)}`
+      );
+      throw serviceAccountError ?? e;
     }
 
     return result;
@@ -195,6 +201,17 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    */
   getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
     return this.uiam.getInternalCallerAttestationHeaders(credential);
+  }
+
+  isOwnClientAuthentication(value: string): boolean {
+    const own = this.uiam.getClientAuthentication().value;
+    const presented = Buffer.from(value);
+    const expected = Buffer.from(own);
+    return presented.length === expected.length && timingSafeEqual(presented, expected);
+  }
+
+  isExternalApiKey(request: KibanaRequest): boolean {
+    return userHasExternalApiKey(this.getCurrentUser(request));
   }
 
   /**

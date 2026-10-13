@@ -20,6 +20,13 @@ import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actio
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_ADD_TO_CASE_ACTION_ID,
+  ATTACK_ASSIGNEE_ACTION_IDS,
+  ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
+  ATTACK_STATUS_ACTION_IDS,
+  ATTACK_TAG_ACTION_ID,
+} from '../../../../common/constants/action_ids';
 
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
@@ -110,25 +117,30 @@ describe('AttacksGroupTakeActionItems', () => {
     });
     mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
       items: [
-        { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
-        { name: 'Mark as closed', key: 'markAsClosed' },
-        { name: 'Mark as open', key: 'markAsOpen' },
+        { name: 'Mark as acknowledged', key: ATTACK_STATUS_ACTION_IDS.markAsAcknowledged },
+        { name: 'Mark as closed', key: ATTACK_STATUS_ACTION_IDS.markAsClosed },
+        { name: 'Mark as open', key: ATTACK_STATUS_ACTION_IDS.markAsOpen },
       ],
       panels: [],
     });
     mockUseAttackAssigneesContextMenuItems.mockReturnValue({
       items: [
-        { name: 'Assign alert', key: 'assignAlert' },
-        { name: 'Unassign alert', key: 'unassignAlert' },
+        { name: 'Assign alert', key: ATTACK_ASSIGNEE_ACTION_IDS.assign },
+        { name: 'Unassign alert', key: ATTACK_ASSIGNEE_ACTION_IDS.unassignAll },
       ],
       panels: [],
     });
     mockUseAttackTagsContextMenuItems.mockReturnValue({
-      items: [{ name: 'Apply alert tags', key: 'applyAlertTags' }],
+      items: [{ name: 'Apply alert tags', key: ATTACK_TAG_ACTION_ID }],
       panels: [],
     });
     mockUseAttackInvestigateInTimelineContextMenuItems.mockReturnValue({
-      items: [{ name: 'Investigate in Timeline', key: 'investigateInTimeline' }],
+      items: [
+        {
+          name: 'Investigate in Timeline',
+          key: ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
+        },
+      ],
       panels: [],
     });
     mockUseAttackExploreInAttacksContextMenuItems.mockReturnValue({
@@ -136,7 +148,7 @@ describe('AttacksGroupTakeActionItems', () => {
     });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseAttackCaseContextMenuItems.mockReturnValue({
-      items: [],
+      items: [{ name: 'Add to case', key: ATTACK_ADD_TO_CASE_ACTION_ID }],
       panels: [],
     });
     mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
@@ -149,6 +161,27 @@ describe('AttacksGroupTakeActionItems', () => {
         },
       ],
       panels: [],
+    });
+  });
+
+  it('renders explicitly ordered action groups with icons and separators', () => {
+    const { getAllByRole, getAllByTestId } = renderAttack(mockAttack);
+
+    expect(getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
+      'Mark as acknowledged',
+      'Mark as closed',
+      'Mark as open',
+      'Assign alert',
+      'Unassign alert',
+      'Add to case',
+      'Apply alert tags',
+      'Run workflow',
+      'View in AI Assistant',
+      'Investigate in Timeline',
+    ]);
+    expect(getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(4);
+    getAllByRole('menuitem').forEach((item) => {
+      expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();
     });
   });
 

@@ -61,7 +61,7 @@ export const AgentOverview: React.FC = () => {
   const canEditAgent = useCanUpdateAgent({ agent });
   const { canUpdate: canUpdateAgentAccess } = useCanUpdateAgentAccess(agent);
 
-  const canChangeAccessControlMode = isExperimentalFeaturesEnabled && canUpdateAgentAccess;
+  const canChangeAccessControlMode = canUpdateAgentAccess;
 
   const showWorkflowSection = isWorkflowsUiEnabled(uiSettings);
 

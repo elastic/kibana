@@ -72,6 +72,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   infra_k8s_containers:
     'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_containers.ts',
   infra_k8s_pods: 'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_pods.ts',
+  infra_k8s_pods_semconv:
+    'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_pods_semconv.ts',
   infra_metrics_explorer_negative_domain:
     'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_metrics_explorer_negative_domain.ts',
   kafka_topics: 'x-pack/solutions/observability/plugins/apm/test/scenarios/kafka_topics.ts',
@@ -91,6 +93,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   missing_service_environment:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/missing_service_environment.ts',
   mobile: 'x-pack/solutions/observability/plugins/apm/test/scenarios/mobile.ts',
+  otel_exception_logs_missing_fields:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_exception_logs_missing_fields.ts',
   otel_exit_span_missing_destination:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_exit_span_missing_destination.ts',
   otel_logs_and_metrics_only:

@@ -103,11 +103,13 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   }
 
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: attributes.alertTypeId,
     ruleName: attributes.name,
     username,
+    profileUid,
     shouldUpdateApiKey: true,
     errorMessage: 'Error updating API key for rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
@@ -118,6 +120,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     ...apiKeyAttributes,
     updatedAt: new Date().toISOString(),
     updatedBy: username,
+    updatedByProfileUid: profileUid,
   });
 
   context.auditLogger?.log(

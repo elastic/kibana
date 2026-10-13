@@ -429,7 +429,9 @@ describe('registerConversationRoutes', () => {
         response()
       );
 
-      expect(updateAccessControl).toHaveBeenCalledWith('conversation-1', body);
+      expect(updateAccessControl).toHaveBeenCalledWith('conversation-1', body, {
+        source: 'http_api',
+      });
       expect(result.payload).toBe(persisted);
     });
   });
@@ -522,7 +524,8 @@ describe('POST /conversations', () => {
     const result = await createHandler!(defaultCtx, { body: {} }, defaultResponse);
 
     expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] })
+      expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] }),
+      { source: 'http_api' }
     );
     expect(mockGet).not.toHaveBeenCalled();
     expect(result.status).toBe(200);
@@ -570,7 +573,8 @@ describe('POST /conversations', () => {
       expect.objectContaining({
         title: 'My chat',
         access_control: { access_mode: 'public', entries: [] },
-      })
+      }),
+      { source: 'http_api' }
     );
   });
 
@@ -696,7 +700,8 @@ describe('POST /conversations', () => {
       expect.objectContaining({
         template_id: 'incident-response',
         metadata: { severity: 'high', services: ['checkout'] },
-      })
+      }),
+      { source: 'http_api' }
     );
   });
 
@@ -738,6 +743,134 @@ describe('POST /conversations', () => {
 
     it('accepts an empty body', () => {
       expect(() => getBodySchema().validate({})).not.toThrow();
+    });
+  });
+});
+
+describe('POST /conversations/{conversation_id}/_add_events', () => {
+  const ADD_EVENTS_PATH = `${publicApiPath}/conversations/{conversation_id}/_add_events`;
+
+  const makeRouter = (
+    onPost: (handler: (ctx: any, req: any, res: any) => Promise<any>) => void,
+    onSchema?: (versionConfig: any) => void
+  ) => ({
+    versioned: {
+      get: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+      delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+      put: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+      post: jest.fn().mockImplementation((config: { path: string }) => ({
+        addVersion: jest.fn().mockImplementation((versionConfig: any, handler: any) => {
+          if (config.path === ADD_EVENTS_PATH) {
+            onPost(handler);
+            onSchema?.(versionConfig);
+          }
+        }),
+      })),
+    },
+  });
+
+  const defaultCtx = {
+    core: Promise.resolve({}),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+  };
+
+  const defaultResponse = {
+    ok: jest.fn(({ body }: any) => ({ status: 200, payload: body })),
+    notFound: jest.fn(({ body }: any) => ({ status: 404, payload: body })),
+    forbidden: jest.fn(),
+    customError: jest.fn(({ statusCode, body }: any) => ({ status: statusCode, payload: body })),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('calls addCustomEvents with the parsed body and returns the materialized events', async () => {
+    const testEvent = {
+      type: 'text_note',
+      data: { text: 'test note' },
+    };
+    const materializedEvents = [
+      {
+        id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+        created_at: '2026-09-14T10:00:00.000Z',
+        actor: { type: 'user', id: 'u_profile_1', username: 'alice' },
+        ...testEvent,
+      },
+    ];
+    const mockAddCustomEvents = jest.fn().mockResolvedValue(materializedEvents);
+    let handler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+
+    const router = makeRouter((h) => {
+      handler = h;
+    });
+
+    registerConversationRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ addCustomEvents: mockAddCustomEvents }),
+        },
+      }),
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const requestBody = { events: [testEvent] };
+    const result = await handler!(
+      defaultCtx,
+      { params: { conversation_id: 'conv-1' }, body: requestBody },
+      defaultResponse
+    );
+
+    expect(mockAddCustomEvents).toHaveBeenCalledWith(
+      { id: 'conv-1', events: requestBody.events },
+      { source: 'http_api' }
+    );
+    expect(result.status).toBe(200);
+    expect(result.payload).toEqual({ events: materializedEvents });
+  });
+
+  describe('body schema', () => {
+    const getBodySchema = () => {
+      let capturedConfig: any;
+      const router = makeRouter(
+        () => {},
+        (versionConfig) => {
+          capturedConfig = versionConfig;
+        }
+      );
+      registerConversationRoutes({
+        router,
+        getInternalServices: jest.fn(),
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+      return capturedConfig.validate.request.body;
+    };
+
+    it('accepts a valid events array', () => {
+      expect(() =>
+        getBodySchema().validate({ events: [{ type: 'text_note', data: { text: 'hello' } }] })
+      ).not.toThrow();
+    });
+
+    it('rejects an empty events array', () => {
+      expect(() => getBodySchema().validate({ events: [] })).toThrow();
+    });
+
+    it('rejects events missing type', () => {
+      expect(() => getBodySchema().validate({ events: [{ data: { text: 'hello' } }] })).toThrow();
+    });
+
+    it('accepts data with arbitrary extra keys (opaque payload)', () => {
+      expect(() =>
+        getBodySchema().validate({
+          events: [
+            { type: 'text_note', data: { text: 'test', a: 1, b: 'two', c: { nested: true } } },
+          ],
+        })
+      ).not.toThrow();
     });
   });
 });

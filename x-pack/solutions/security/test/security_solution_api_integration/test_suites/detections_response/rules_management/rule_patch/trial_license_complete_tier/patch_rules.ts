@@ -52,6 +52,9 @@ import {
   getSomeActionsWithFrequencies,
   updateUsername,
   getCustomQueryRuleParams,
+  getNewTermsRuleParams,
+  getThreatMatchRuleParams,
+  getThresholdRuleParams,
 } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -111,6 +114,120 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it("should patch a threshold rule's threshold when `type` is included in the body", async () => {
+        await createRule(supertest, log, getThresholdRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            type: 'threshold',
+            threshold: { field: ['host.name'], value: 200 },
+          })
+          .expect(200);
+
+        expect(body.threshold).to.eql({ field: ['host.name'], value: 200 });
+      });
+
+      it("should patch a threshold rule's threshold when `type` is omitted from the body", async () => {
+        await createRule(supertest, log, getThresholdRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            threshold: { field: ['host.name'], value: 200 },
+          })
+          .expect(200);
+
+        expect(body.threshold).to.eql({ field: ['host.name'], value: 200 });
+      });
+
+      // A `type` that contradicts the existing rule's type must be rejected, not silently
+      // validated against the wrong schema.
+      it('should reject with a 400 when `type` does not match the existing rule', async () => {
+        await createRule(supertest, log, getThresholdRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ rule_id: 'rule-1', type: 'query' })
+          .expect(400);
+
+        expect(body.message).to.contain('type');
+      });
+
+      // The case reported in https://github.com/elastic/kibana/issues/287579: a type specific
+      // field patched without `type`. Covered by unit tests too, but this exercises the whole
+      // route path end to end.
+      it("should patch a new_terms rule's new_terms_fields when `type` is omitted from the body", async () => {
+        await createRule(supertest, log, getNewTermsRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            new_terms_fields: ['host.name'],
+          })
+          .expect(200);
+
+        expect(body.new_terms_fields).to.eql(['host.name']);
+      });
+
+      it("should patch a threat_match rule's threat_mapping when `type` is omitted from the body", async () => {
+        await createRule(supertest, log, getThreatMatchRuleParams({ rule_id: 'rule-1' }));
+
+        const threatMapping = [
+          {
+            entries: [
+              { field: 'host.name', type: 'mapping' as const, value: 'host.name', negate: false },
+            ],
+          },
+        ];
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ rule_id: 'rule-1', threat_mapping: threatMapping })
+          .expect(200);
+
+        expect(body.threat_mapping).to.eql(threatMapping);
+      });
+
+      // Type specific semantic validation now runs for typeless bodies as well, so a mapping
+      // that only negates is rejected instead of being applied.
+      it('should reject a typeless threat_mapping patch whose only entry is negated', async () => {
+        await createRule(supertest, log, getThreatMatchRuleParams({ rule_id: 'rule-1' }));
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            rule_id: 'rule-1',
+            threat_mapping: [
+              {
+                entries: [
+                  { field: 'host.name', type: 'mapping', value: 'host.name', negate: true },
+                ],
+              },
+            ],
+          })
+          .expect(400);
+
+        expect(body.message).to.contain(
+          'Negate mappings cannot be used as a single entry in the AND condition'
+        );
       });
 
       it('should patch a single rule property of name using a rule_id of type "machine learning"', async () => {

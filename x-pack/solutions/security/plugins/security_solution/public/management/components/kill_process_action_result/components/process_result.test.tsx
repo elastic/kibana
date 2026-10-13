@@ -171,6 +171,19 @@ describe('ProcessResult', () => {
       expect(getByTestId(testPrefix).textContent).toContain('Process cannot be killed');
       expect(getByTestId(testPrefix).textContent).not.toContain('Not killed');
     });
+
+    it('should treat a top-level `process_error` code as a failure even when no `error` is present', () => {
+      processResult = { pid: 1234, code: 'ra_kill-process_error_partial-descendants' };
+
+      const { getByTestId } = render();
+
+      expect(getByTestId(testPrefix).textContent).toContain(
+        'Failed to kill the provided process, but some descendant processes were killed'
+      );
+      // Should not fall back to the default success or failure messages
+      expect(getByTestId(testPrefix).textContent).not.toContain('Not killed');
+      expect(getByTestId(testPrefix).textContent).not.toContain('Killed');
+    });
   });
 
   describe('when `code` indicates a "not-found" condition', () => {

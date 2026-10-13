@@ -6,11 +6,11 @@
  */
 
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkDeleteActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-  RulePatchProps,
   RuleObjectId,
   RuleResponse,
   RuleToImport,
@@ -18,6 +18,7 @@ import type {
 import type {
   RuleChangesHistoryResponse,
   RestoreRuleFromHistoryResponse,
+  UnresolvedRulePatchProps,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
@@ -66,7 +67,11 @@ export interface UpdateRuleArgs {
 }
 
 export interface PatchRuleArgs {
-  rulePatch: RulePatchProps;
+  /**
+   * Type-specific fields of the patch are validated against the existing rule's type in
+   * `patchTypeSpecificParams`, so only the type-independent props are typed here.
+   */
+  rulePatch: UnresolvedRulePatchProps;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
@@ -75,13 +80,14 @@ export interface DeleteRuleArgs {
 }
 
 export interface BulkDeleteRulesArgs {
-  ruleIds: RuleObjectId[];
+  rules: RuleAlertType[];
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface BulkDeleteRulesReturn {
   rules: RuleAlertType[];
   errors: BulkOperationError[];
+  skipped: BulkDeleteActionSkipResult[];
 }
 
 export interface UpgradePrebuiltRuleArgs {

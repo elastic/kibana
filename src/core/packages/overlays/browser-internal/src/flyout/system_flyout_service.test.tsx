@@ -13,15 +13,28 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
-import { SystemFlyoutService } from './system_flyout_service';
+import { resolveResetPinnedWidth, SystemFlyoutService } from './system_flyout_service';
 import type { SystemFlyoutRef } from './system_flyout_ref';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
   OverlayFlyoutTemplateStart,
   OverlaySystemFlyoutStart,
+  SystemFlyoutSize,
 } from '@kbn/core-overlays-browser';
+import { useSystemFlyoutSize } from '@kbn/core-overlays-browser';
 import { FlyoutTemplate, useFlyoutClose } from '@kbn/flyout-template';
 import React from 'react';
+
+/** Test content that reads the reactive size and can trigger a reset from inside the flyout. */
+const SizeProbe = () => {
+  const flyoutSize = useSystemFlyoutSize();
+  return (
+    <div>
+      <span data-test-subj="flyout-size">{String(flyoutSize?.size)}</span>
+      <button type="button" data-test-subj="reset-size" onClick={() => flyoutSize?.resetSize()} />
+    </div>
+  );
+};
 
 interface FlyoutManagerEvent {
   type: 'CLOSE_SESSION';
@@ -44,32 +57,12 @@ const emitEvent = (event: FlyoutManagerEvent) => {
   eventListeners.forEach((listener) => listener(event));
 };
 
-// Minimal flyout-manager store state used to exercise the push-offset cleanup: the service
-// subscribes to state changes and reads `containerElement` to reset a stranded push offset.
-const stateListeners = new Set<() => void>();
-let mockManagerState: { containerElement: HTMLElement | null } = { containerElement: null };
-const mockManagerSubscribe = jest.fn((listener: () => void) => {
-  stateListeners.add(listener);
-  return () => {
-    stateListeners.delete(listener);
-  };
-});
-const mockManagerGetState = jest.fn(() => mockManagerState);
-
-/** Sets the manager's push container and notifies subscribers, mimicking a push flyout mounting. */
-const setManagerContainer = (containerElement: HTMLElement | null) => {
-  mockManagerState = { containerElement };
-  stateListeners.forEach((listener) => listener());
-};
-
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
     ...actual,
     getFlyoutManagerStore: jest.fn(() => ({
       subscribeToEvents: mockSubscribeToEvents,
-      subscribe: mockManagerSubscribe,
-      getState: mockManagerGetState,
     })),
   };
 });
@@ -84,19 +77,19 @@ beforeEach(() => {
   mockReactDomUnmount.mockClear();
   mockSubscribeToEvents.mockClear();
   eventListeners.clear();
-  mockManagerSubscribe.mockClear();
-  mockManagerGetState.mockClear();
-  stateListeners.clear();
-  mockManagerState = { containerElement: null };
 });
 
 /**
  * Resolve the `EuiFlyout` element the service rendered. The service wraps it in a
- * `SystemFlyoutTypeController` render-prop, so invoke that (with the seeded type) to reach it.
+ * `SystemFlyoutController` render-prop, so invoke that (with the seeded type/size) to reach it.
  */
 const getRenderedFlyout = (callIndex = 0) => {
   const controller = mockReactDomRender.mock.calls[callIndex][0].props.children;
-  return controller.props.children(controller.props.initialType ?? 'overlay');
+  return controller.props.children({
+    type: controller.props.initialType ?? 'overlay',
+    size: controller.props.initialSize,
+    onResize: jest.fn(),
+  });
 };
 
 afterEach(() => {
@@ -369,16 +362,22 @@ describe('SystemFlyoutService', () => {
       expect(ref.onClose).toBeInstanceOf(Promise);
     });
 
-    it('accepts a custom onClose handler', () => {
+    it('accepts a custom onClose handler', async () => {
       const onClose = jest.fn();
       const ref = systemFlyouts.open(<div>System flyout content</div>, {
         onClose,
       });
+      const refClosed = jest.fn();
+      ref.onClose.then(refClosed);
 
-      // The onClose handler is passed to EuiFlyout
-      // It will be called when the flyout's close button is clicked
-      expect(ref).toHaveProperty('close');
-      expect(ref).toHaveProperty('onClose');
+      const euiFlyoutElement = getRenderedFlyout();
+      euiFlyoutElement.props.onClose();
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onClose).toHaveBeenCalledWith();
+
+      await ref.onClose;
+      expect(refClosed).toHaveBeenCalledTimes(1);
     });
 
     describe('with multiple active flyouts', () => {
@@ -847,35 +846,71 @@ describe('SystemFlyoutService', () => {
       const controller = mockReactDomRender.mock.calls[0][0].props.children;
       expect(controller.props.initialType).toBeUndefined();
     });
+  });
 
-    it('clears a stranded push offset from the container when the last flyout closes', async () => {
-      const container = document.createElement('div');
-      // The service captures the manager's container element via its subscription.
-      setManagerContainer(container);
+  describe('flyout size', () => {
+    it('seeds the size controller from the "size" and "defaultSize" open options', () => {
+      systemFlyouts.open(<div>content</div>, { size: 640, defaultSize: 's' });
 
-      const ref = systemFlyouts.open(<div>content</div>, { type: 'push' });
-      // EUI leaves inline push padding on the container; simulate the stranded offset.
-      container.style.setProperty('padding-inline-end', '384px');
-
-      await ref.close();
-      await Promise.resolve(); // flush the onClose `.then`
-
-      expect(container.style.paddingInlineEnd).toBe('');
+      const controller = mockReactDomRender.mock.calls[0][0].props.children;
+      expect(controller.props.initialSize).toBe(640);
+      expect(controller.props.resetSizeTarget).toBe('s');
+      expect(getRenderedFlyout().props.size).toBe(640);
     });
 
-    it('keeps the container offset while another flyout is still open', async () => {
-      const container = document.createElement('div');
-      setManagerContainer(container);
+    it('resets to `size` when no `defaultSize` is provided', () => {
+      systemFlyouts.open(<div>content</div>, { size: 'm' });
 
-      const ref1 = systemFlyouts.open(<div>one</div>, { type: 'push' });
-      systemFlyouts.open(<div>two</div>, { type: 'push' });
-      container.style.setProperty('padding-inline-end', '384px');
-
-      await ref1.close();
-      await Promise.resolve();
-
-      // One flyout is still open, so the offset must not be cleared yet.
-      expect(container.style.paddingInlineEnd).toBe('384px');
+      const controller = mockReactDomRender.mock.calls[0][0].props.children;
+      expect(controller.props.resetSizeTarget).toBe('m');
     });
+
+    it('threads the consumer onResize through and wraps it for the flyout', () => {
+      const onResize = jest.fn();
+      systemFlyouts.open(<div>content</div>, { size: 's', onResize });
+
+      const controller = mockReactDomRender.mock.calls[0][0].props.children;
+      expect(controller.props.onResize).toBe(onResize);
+      // The flyout receives the controller's wrapper (a function), not the raw consumer callback.
+      expect(typeof getRenderedFlyout().props.onResize).toBe('function');
+    });
+
+    it('resets the live flyout size back to the default via the size context', () => {
+      systemFlyouts.open(<SizeProbe />, { size: 640, defaultSize: 's' });
+
+      const { getByTestId } = render(mockReactDomRender.mock.calls[0][0]);
+      expect(getByTestId('flyout-size')).toHaveTextContent('640');
+
+      fireEvent.click(getByTestId('reset-size'));
+
+      expect(getByTestId('flyout-size')).toHaveTextContent('s');
+    });
+  });
+});
+
+describe('resolveResetPinnedWidth', () => {
+  it('returns the dragged width when it already differs from a named target', () => {
+    expect(resolveResetPinnedWidth(800, 'm')).toBe(800);
+  });
+
+  it('returns the dragged width when it differs from a numeric target', () => {
+    expect(resolveResetPinnedWidth(900, 800)).toBe(900);
+  });
+
+  it('returns an equivalent px string when a numeric target equals the dragged width', () => {
+    // `800` and `'800px'` render the same width but are distinct prop values, so EUI still re-seeds.
+    expect(resolveResetPinnedWidth(800, 800)).toBe('800px');
+  });
+
+  it('always returns a value distinct from the reset target (so the re-seed registers)', () => {
+    const cases: Array<[number, SystemFlyoutSize]> = [
+      [800, 800],
+      [900, 800],
+      [800, 'm'],
+      [640, 640],
+    ];
+    for (const [resizedWidth, resetSizeTarget] of cases) {
+      expect(resolveResetPinnedWidth(resizedWidth, resetSizeTarget)).not.toBe(resetSizeTarget);
+    }
   });
 });

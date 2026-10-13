@@ -69,6 +69,9 @@ export interface ServiceFlyoutContextValue {
     setEnvironment: (environment: Environment) => void;
     rangeFrom: string;
     rangeTo: string;
+    /** Resolved from rangeFrom/rangeTo once at the flyout root so nested UI shares the same window. */
+    start: string;
+    end: string;
     setRange: (range: { rangeFrom: string; rangeTo: string }) => void;
     refreshToken: number;
     onRefresh: () => void;

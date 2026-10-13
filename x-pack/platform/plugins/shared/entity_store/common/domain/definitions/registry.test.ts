@@ -6,11 +6,12 @@
  */
 
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
+import { ALL_ENTITY_TYPES, entitySchema, EXTRACTION_MODE } from './entity_schema';
 import {
   getEntityDefinitionWithoutId,
   hasPriorityExtractionGate,
   resolveExtractionMode,
+  supportsNonPrioritySampling,
 } from './registry';
 
 /**
@@ -36,19 +37,32 @@ describe('hasPriorityExtractionGate', () => {
   });
 });
 
+describe('supportsNonPrioritySampling', () => {
+  it('user: returns true - declared alongside its priority gate', () => {
+    expect(supportsNonPrioritySampling('user')).toBe(true);
+  });
+
+  it.each(TYPES_WITHOUT_PRIORITY_GATE)(
+    '%s: returns false - future dual-process types must opt in explicitly',
+    (type) => {
+      expect(supportsNonPrioritySampling(type)).toBe(false);
+    }
+  );
+});
+
 describe('resolveExtractionMode', () => {
   it.each(ALL_ENTITY_TYPES)('%s: returns single when flag is off', (type) => {
-    expect(resolveExtractionMode(false, type)).toBe('single');
+    expect(resolveExtractionMode(false, type)).toBe(EXTRACTION_MODE.single);
   });
 
   it('user: returns priority when flag is on', () => {
-    expect(resolveExtractionMode(true, 'user')).toBe('priority');
+    expect(resolveExtractionMode(true, 'user')).toBe(EXTRACTION_MODE.priority);
   });
 
   it.each(TYPES_WITHOUT_PRIORITY_GATE)(
     '%s: returns single when flag is on and no priority gate is declared',
     (type) => {
-      expect(resolveExtractionMode(true, type)).toBe('single');
+      expect(resolveExtractionMode(true, type)).toBe(EXTRACTION_MODE.single);
     }
   );
 });
@@ -83,8 +97,8 @@ describe('getEntityDefinitionWithoutId', () => {
  */
 describe('user extraction modes share identity logic', () => {
   const single = getEntityDefinitionWithoutId('user');
-  const priority = getEntityDefinitionWithoutId('user', 'priority');
-  const nonPriority = getEntityDefinitionWithoutId('user', 'nonPriority');
+  const priority = getEntityDefinitionWithoutId('user', EXTRACTION_MODE.priority);
+  const nonPriority = getEntityDefinitionWithoutId('user', EXTRACTION_MODE.nonPriority);
 
   const asRecord = (definition: EntityDefinitionWithoutId) =>
     definition as unknown as Record<string, unknown>;

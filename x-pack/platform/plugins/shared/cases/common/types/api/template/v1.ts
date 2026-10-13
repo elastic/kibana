@@ -58,6 +58,11 @@ export type TemplatesFindRequest = z.infer<typeof TemplatesFindRequestSchema>;
  */
 const TemplateWithSearchMetaSchema = TemplateSchema.extend({
   fieldSearchMatches: z.boolean(),
+  /**
+   * Raw YAML definition string added by the route handler (via parseTemplate). Always present in
+   * HTTP responses; callers should prefer this over `definition` when passing to YAML utilities.
+   */
+  definitionString: z.string().optional(),
 });
 
 export type TemplateListItem = z.infer<typeof TemplateWithSearchMetaSchema>;

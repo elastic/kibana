@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import {
   alertEpisodeStatus,
@@ -17,6 +16,7 @@ import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getCannotActivateEpisodeMessage } from '../../errors/alert_error_messages';
 import type { ActionHandler } from '../handler';
 import type { AlertEventRecord } from '../types';
+import { noOpConflict } from './no_op_conflict';
 
 type ActivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -29,10 +29,10 @@ type ActivateAlertActionBody = Extract<
  * defensively-nullable status) is treated as reactivatable: user
  * intent overrides the engine's assessment.
  *
- * Failures throw `Boom.badRequest` carrying
- * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path catches that
- * (400-class) and records it as a per-item error, the single path lets it
- * propagate to the route as a 400 response.
+ * Failures throw `Boom.conflict` carrying
+ * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path records it as a
+ * per-item error, the single path lets it propagate to the route as a
+ * 409 response.
  */
 const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
   const status = alertEvent.episode_status;
@@ -40,14 +40,12 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
     return;
   }
 
-  throw Boom.badRequest(getCannotActivateEpisodeMessage(alertEvent.episode_id), {
+  throw noOpConflict({
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-    details: {
-      group_hash: alertEvent.group_hash,
-      episode_id: alertEvent.episode_id,
-      episode_status: status,
-      action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-    },
+    message: getCannotActivateEpisodeMessage(alertEvent.episode_id),
+    alertEvent,
+    actionType: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+    details: { alert_status: status },
   });
 };
 
@@ -55,8 +53,8 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
  * Handler for the user-initiated activate (reopen) action. Produces:
  *
  * 1. A synthetic `.rule-events` document that forces the episode to
- *    `active` (`status: breached`, `episode.status: active`,
- *    `@timestamp: now`), so the next read sees the reopened state
+ *    `active` (`status: breached`, `episode.status: active`, with
+ *    `@timestamp` set by ES at ingest), so the next read sees the reopened state
  *    without waiting for the next rule run. The episode keeps its
  *    original `episode_id` — activate is incident continuity, not a
  *    new firing.
@@ -82,7 +80,6 @@ export const activateHandler: ActionHandler<ActivateAlertActionBody> = {
     assertEpisodeIsActivatable(alertEvent);
 
     const ruleEvent = buildRuleEventDocument({
-      '@timestamp': new Date().toISOString(),
       rule:
         alertEvent.rule_id != null
           ? { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 }
@@ -93,7 +90,7 @@ export const activateHandler: ActionHandler<ActivateAlertActionBody> = {
       source: alertEvent.source,
       type: alertEventType.alert,
       space_id: alertEvent.space_id,
-      episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
+      alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
       severity: alertEvent.severity ?? undefined,
     });
 

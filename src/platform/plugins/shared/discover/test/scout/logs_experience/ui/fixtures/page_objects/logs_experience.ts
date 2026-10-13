@@ -65,8 +65,13 @@ export class LogsExperiencePage {
    * issue, so no query is needed and any row index is interchangeable with any other.
    */
   public async gotoDocViewerLogs() {
+    await this.gotoDataView(LOGS.SYNTH_DOCVIEWER_DATA_VIEW);
+  }
+
+  /** Shows the given data view in Discover once its grid has rendered. */
+  public async gotoDataView(dataView: string) {
     await this.discover.goto({ queryMode: 'classic' });
-    await this.discover.selectDataView(LOGS.SYNTH_DOCVIEWER_DATA_VIEW);
+    await this.discover.selectDataView(dataView);
     await this.discover.waitUntilTabIsLoaded();
     await this.dataGrid.waitForDocTableRendered();
   }

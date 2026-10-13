@@ -546,4 +546,14 @@ describe('Agent Routes - request body schemas', () => {
       /'type' was unexpected/
     );
   });
+
+  it('rejects added_at on access-control update (it is server-managed)', () => {
+    const schema = routeSchemas[`PUT:${publicApiPath}/agents/{id}/access_control`];
+    const entry = { type: 'user', id: 'u_alice', role: 'user' };
+
+    expect(() => schema.validate({ entries: [entry] })).not.toThrow();
+    expect(() =>
+      schema.validate({ entries: [{ ...entry, added_at: '2026-01-01T00:00:00.000Z' }] })
+    ).toThrow(/'added_at' was unexpected/);
+  });
 });

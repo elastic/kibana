@@ -38,7 +38,7 @@ External plugins use a flat `kibana.json` manifest. This differs from the nested
 ## Build plugin distributable [_build_plugin_distributable]
 
 ::::{warning}
-{{kib}} distributable is not shipped with `@kbn/optimizer` anymore. You need to pre-build your plugin for use in production.
+{{kib}} distributable is not shipped with `@kbn/rspack-optimizer` anymore. You need to pre-build your plugin for use in production.
 ::::
 
 

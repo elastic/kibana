@@ -120,7 +120,7 @@ export const registerUISettings = (
         defaultMessage: 'Enables the Workflow Template Library.',
       }),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       readonly: true,
       readonlyMode: 'ui',
       requiresPageReload: true,
@@ -137,7 +137,7 @@ export const registerUISettings = (
         }
       ),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       readonly: true,
       readonlyMode: 'ui',
       requiresPageReload: true,

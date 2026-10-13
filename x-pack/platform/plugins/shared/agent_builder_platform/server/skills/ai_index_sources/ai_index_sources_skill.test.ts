@@ -8,6 +8,8 @@
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { STRATEGY_CATALOG_REFERENCE_NAME } from '../context_engine_shared';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { aiIndexSourcesSkill } from './ai_index_sources_skill';
 
 describe('aiIndexSourcesSkill', () => {
@@ -25,9 +27,20 @@ describe('aiIndexSourcesSkill', () => {
     expect(aiIndexSourcesSkill.experimental).toBe(true);
   });
 
+  it('is hidden in spaces where the Context Engine is off, like the other setup skills', () => {
+    expect(aiIndexSourcesSkill.availability).toBe(contextEngineSkillAvailability);
+  });
+
   it('ships non-empty markdown content', () => {
     expect(typeof aiIndexSourcesSkill.content).toBe('string');
     expect(aiIndexSourcesSkill.content.length).toBeGreaterThan(0);
+  });
+
+  it('attaches the shared strategy catalog, where the corpus filter is now defined', () => {
+    const names = (aiIndexSourcesSkill.referencedContent ?? []).map(({ name }) => name);
+
+    expect(names).toEqual([STRATEGY_CATALOG_REFERENCE_NAME]);
+    expect(aiIndexSourcesSkill.content).toContain(`\`${STRATEGY_CATALOG_REFERENCE_NAME}\``);
   });
 
   it('binds the tools that inspecting and validating a source needs', async () => {
@@ -76,8 +89,22 @@ describe('aiIndexSourcesSkill', () => {
       expect(content).toContain('`connector`');
     });
 
-    it('carries the corpus filter, which bounds every automation reading the source', () => {
+    it('keeps where the corpus filter lives, and delegates what it is to the catalog', () => {
       expect(content).toContain('The corpus filter');
+      expect(content).toMatch(/written into\s+the ES\|QL source query/);
+      // The definition moved out; the old opening sentence would be the duplicated copy.
+      expect(content).not.toMatch(/a numeric cap \(at most 1,000 indicators\)/);
+    });
+
+    it('leaves the connector section as it was, since connectors return next milestone', () => {
+      expect(content).toContain('## Connector sources');
+      expect(content).toMatch(/You usually cannot inspect its contents/);
+      expect(content).toMatch(/Reaching it is a call, not a query/);
+    });
+
+    it('tells the agent to backquote field names and never resend a failed query unchanged', () => {
+      expect(content).toMatch(/goes in backticks/);
+      expect(content).toMatch(/never resend the same one/);
     });
 
     it('refuses a source that was never queried', () => {

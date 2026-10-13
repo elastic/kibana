@@ -30,7 +30,7 @@ const defaultFormState: AppendProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'field',
-  includeCondition: false,
+  includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: false,
 };

@@ -95,7 +95,6 @@
     "@kbn/serverless",
     "@kbn/elastic-agent-utils",
     "@kbn/dashboard-plugin",
-    "@kbn/shared-svg",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/search-types",
     "@kbn/alerting-comparators",

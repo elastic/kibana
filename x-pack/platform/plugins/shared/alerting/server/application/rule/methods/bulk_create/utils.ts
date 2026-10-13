@@ -21,10 +21,7 @@ import {
   extractReferences,
   validateActions,
 } from '../../../../rules_client/lib';
-import {
-  addMissingUiamKeyTagIfNeeded,
-  apiKeyAsRuleDomainProperties,
-} from '../../../../rules_client/common';
+import { apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import type { BulkOperationError } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
@@ -34,6 +31,7 @@ export const prepareRule = async <Params extends RuleParams>({
   context,
   actionsClient,
   username,
+  profileUid,
   id,
   rule,
   apiKeys,
@@ -69,13 +67,15 @@ export const prepareRule = async <Params extends RuleParams>({
       | Awaited<ReturnType<typeof createNewAPIKeySet>> = apiKeyAsRuleDomainProperties(
       null,
       username,
-      false
+      false,
+      profileUid
     );
     if (data.enabled) {
       apiKeyProps = await createNewAPIKeySet(context, {
         id: ruleType.id,
         ruleName: data.name,
         username,
+        profileUid,
         shouldUpdateApiKey: true,
         errorMessage: 'Error creating rule: could not create API key',
         refresh: false,
@@ -103,25 +103,18 @@ export const prepareRule = async <Params extends RuleParams>({
     const throttle = data.throttle ?? null;
     const { systemActions: _sa, actions: _a, ...restData } = data;
 
-    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-      data.tags,
-      apiKeyProps.uiamApiKey,
-      context.isServerless,
-      context.shouldGrantUiam,
-      context.apiKeyType
-    );
-
     const ruleAttributes = transformRuleDomainToRuleAttributes({
       actionsWithRefs,
       artifactsWithRefs,
       rule: {
         ...restData,
-        tags: tagsWithUiamCheck,
         ...apiKeyProps,
         enabled: data.enabled,
         id,
         createdBy: username,
         updatedBy: username,
+        createdByProfileUid: profileUid,
+        updatedByProfileUid: profileUid,
         createdAt: new Date(createTime),
         updatedAt: new Date(createTime),
         snoozeSchedule: [],

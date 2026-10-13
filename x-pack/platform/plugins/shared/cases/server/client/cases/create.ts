@@ -18,6 +18,7 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {
@@ -160,6 +161,21 @@ export const create = async (
           entities: [{ owner: query.owner, id: savedObjectID }],
         });
       }
+    }
+
+    // Default extractObservables when the caller omitted it and template expansion did not fill it.
+    // Precedence: caller-explicit > template definition > space config > owner default > false.
+    if (query.settings.extractObservables === undefined) {
+      query = {
+        ...query,
+        settings: {
+          ...query.settings,
+          extractObservables: resolveExtractObservables(
+            query.owner,
+            configurations[0]?.extractObservables
+          ),
+        },
+      };
     }
 
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI

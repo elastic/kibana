@@ -8,8 +8,7 @@
  */
 
 export * from './bin';
-export * from './build_kibana_platform_plugins';
-export * from './build_rspack_bundles_task';
+export * from './build_bundles_task';
 export * from './build_packages_task';
 export * from './clean_tasks';
 export * from './copy_legacy_source_task';
@@ -36,3 +35,5 @@ export * from './write_sha_sums_task';
 export * from './fetch_agent_versions_list';
 
 export { InstallChromium } from './install_chromium';
+
+export { CreateDistributionDefaults } from './create_distribution_defaults_task';

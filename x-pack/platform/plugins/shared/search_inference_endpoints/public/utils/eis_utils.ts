@@ -22,7 +22,7 @@ import {
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
 import { GEO_ORDER } from '../types';
-import type { RegionZoneCount } from '../types';
+import type { RegionOption } from '../types';
 
 // Inference ID prefixes for internal Elastic endpoints kept for backwards
 // compatibility that must not be surfaced in the UI.
@@ -38,6 +38,7 @@ export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCateg
   completion: 'LLM',
   text_embedding: 'Embedding',
   sparse_embedding: 'Embedding',
+  embedding: 'Embedding',
   rerank: 'Rerank',
 };
 
@@ -97,6 +98,37 @@ export const getModelMetadata = (
   return undefined;
 };
 
+const mergeModelMetadata = (
+  current: EisInferenceEndpointMetadata | undefined,
+  incoming: EisInferenceEndpointMetadata | undefined
+): EisInferenceEndpointMetadata | undefined => {
+  if (!incoming) {
+    return current;
+  }
+  if (!current) {
+    return incoming;
+  }
+
+  const currentHeuristics = current.heuristics;
+  const incomingHeuristics = incoming.heuristics;
+  const releaseDate = currentHeuristics?.release_date ?? incomingHeuristics?.release_date;
+  const endOfLifeDate = currentHeuristics?.end_of_life_date ?? incomingHeuristics?.end_of_life_date;
+  const releaseUnchanged = releaseDate === currentHeuristics?.release_date;
+  const endOfLifeUnchanged = endOfLifeDate === currentHeuristics?.end_of_life_date;
+  if (releaseUnchanged && endOfLifeUnchanged) {
+    return current;
+  }
+
+  return {
+    ...current,
+    heuristics: {
+      ...currentHeuristics,
+      ...(releaseDate ? { release_date: releaseDate } : {}),
+      ...(endOfLifeDate ? { end_of_life_date: endOfLifeDate } : {}),
+    },
+  };
+};
+
 export const getModelStatus = (
   metadata: EisInferenceEndpointMetadata | undefined
 ): EisModelStatus => {
@@ -153,9 +185,10 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
         existing.modelCreator = ep.metadata.display.model_creator;
       }
-      if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
-        existing.modelMetadata = ep.metadata;
-        existing.modelStatus = getModelStatus(ep.metadata);
+      const mergedMetadata = mergeModelMetadata(existing.modelMetadata, getModelMetadata(ep));
+      if (mergedMetadata !== existing.modelMetadata) {
+        existing.modelMetadata = mergedMetadata;
+        existing.modelStatus = getModelStatus(mergedMetadata);
       }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
@@ -176,21 +209,21 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
   return [...groups.values()];
 };
 
-export const TASK_TYPE_FILTERS: Array<{ category: TaskTypeCategory; label: string }> = [
+export const MODEL_TYPE_FILTERS: Array<{ key: TaskTypeCategory; label: string }> = [
   {
-    category: 'LLM',
+    key: 'LLM',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.llm', {
       defaultMessage: 'LLM',
     }),
   },
   {
-    category: 'Embedding',
+    key: 'Embedding',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.embedding', {
       defaultMessage: 'Embedding',
     }),
   },
   {
-    category: 'Rerank',
+    key: 'Rerank',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.rerank', {
       defaultMessage: 'Rerank',
     }),
@@ -221,6 +254,7 @@ export interface FilterCriteria {
   searchQuery: string;
   selectedTaskTypes: Set<TaskTypeCategory>;
   selectedProviders: string[];
+  selectedRegionOptions?: string[];
   showOutsideRegionPreferences?: boolean;
   showEndOfLifeModels?: boolean;
   showPreviewModels?: boolean;
@@ -232,6 +266,7 @@ export const filterGroupedModels = (
     searchQuery,
     selectedTaskTypes,
     selectedProviders,
+    selectedRegionOptions = [],
     showOutsideRegionPreferences = false,
     showEndOfLifeModels = false,
     showPreviewModels = false,
@@ -252,6 +287,12 @@ export const filterGroupedModels = (
         return false;
       }
       if (selectedProviders.length > 0 && !selectedProviders.includes(m.modelCreator)) {
+        return false;
+      }
+      if (
+        selectedRegionOptions.length > 0 &&
+        !selectedRegionOptions.some((key) => modelMatchesRegionOption(m, key))
+      ) {
         return false;
       }
       if (!showOutsideRegionPreferences) {
@@ -289,6 +330,11 @@ export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata |
   const eolDate = getModelEOLDate(metadata);
   if (!eolDate) return false;
   return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
+}
+
+export function isModelNearingEndOfLife(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!isModelDeprecated(metadata)) return false;
+  return !isModelEndOfLifeReached(metadata);
 }
 
 export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
@@ -382,79 +428,6 @@ const keepPreferredRegion = (current: CspRegion | undefined, incoming: CspRegion
   return current;
 };
 
-const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
-  const byGeo = new Map<string, Map<string, CspRegion>>();
-
-  for (const ep of endpoints) {
-    if (!isInferenceEndpointWithMetadata(ep)) continue;
-    const regions = ep.metadata.regions;
-    if (!regions) continue;
-
-    for (const region of regions) {
-      if (!isCspRegion(region)) continue;
-      const geo = region.geo ?? 'other';
-      const geoMap = byGeo.get(geo) ?? new Map<string, CspRegion>();
-      const key = regionKey(region);
-      geoMap.set(key, keepPreferredRegion(geoMap.get(key), region));
-      byGeo.set(geo, geoMap);
-    }
-  }
-
-  return new Map([...byGeo.entries()].map(([geo, geoMap]) => [geo, [...geoMap.values()]]));
-};
-
-/**
- * Collects geo codes that appear only as geo-only entries (no csp+region) across the given endpoints.
- * These indicate zone-level availability without specific region data.
- */
-const collectGeoOnlyZones = (endpoints: EisInferenceEndpoint[]): Set<string> => {
-  const geoOnly = new Set<string>();
-  for (const ep of endpoints) {
-    if (!isInferenceEndpointWithMetadata(ep)) continue;
-    const regions = ep.metadata.regions;
-    if (!regions) continue;
-    for (const region of regions) {
-      if (isCspRegion(region)) continue;
-      if (region && typeof region === 'object' && typeof region.geo === 'string') {
-        geoOnly.add(region.geo);
-      }
-    }
-  }
-  return geoOnly;
-};
-
-/**
- * Computes per-zone region availability counts for a specific model relative to
- * all EIS models, for use in the model detail flyout region badges.
- *
- */
-export const getRegionZoneCounts = (
-  modelEndpoints: EisInferenceEndpoint[],
-  allEisEndpoints: EisInferenceEndpoint[]
-): RegionZoneCount[] => {
-  const modelByGeo = collectRegionsPerGeo(modelEndpoints);
-  const allByGeo = collectRegionsPerGeo(allEisEndpoints);
-  const modelGeoOnly = collectGeoOnlyZones(modelEndpoints);
-
-  return GEO_ORDER.flatMap((geo) => {
-    const modelRegions = modelByGeo.get(geo) ?? [];
-    const modelCount = modelRegions.length;
-    const isGeoOnly = modelCount === 0 && modelGeoOnly.has(geo);
-
-    if (modelCount === 0 && !isGeoOnly) return [];
-
-    return [
-      {
-        geo,
-        modelRegions,
-        modelCount,
-        totalCount: allByGeo.get(geo)?.length ?? 0,
-        geoOnly: isGeoOnly,
-      },
-    ];
-  });
-};
-
 /**
  * Aggregates all unique CSP regions from EIS endpoint `regions` metadata.
  * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
@@ -469,7 +442,7 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
 
     for (const region of regions) {
       if (!isCspRegion(region)) continue;
-      const key = regionKey(region);
+      const key = regionKey(region).toLowerCase();
       seen.set(key, keepPreferredRegion(seen.get(key), region));
     }
   }
@@ -538,3 +511,32 @@ export const getAvailableGeos = (endpoints: EisInferenceEndpoint[]): string[] =>
   const unknownSorted = [...seen].filter((g) => !geoOrderList.includes(g)).sort();
   return [...knownOrdered, ...unknownSorted];
 };
+
+/**
+ * Returns the unique geographies, then the unique CSP regions, where the given endpoints are available.
+ */
+export const getRegionOptions = (endpoints: EisInferenceEndpoint[]): RegionOption[] => {
+  const geoOptions = getAvailableGeos(endpoints)
+    .map((geo) => geo.toLowerCase())
+    .map((geo) => {
+      const displayName = getGeoDisplayName(geo);
+      return {
+        key: `geo-${geo}`,
+        label: displayName === geo ? geo.toUpperCase() : displayName,
+      };
+    });
+  const regionOptions = getAvailableRegions(endpoints).map((region) => ({
+    key: `region-${region.csp}-${region.region}`.toLowerCase(),
+    label: getRegionDisplayName(region),
+  }));
+
+  const seenKeys = new Set<string>();
+  return [...geoOptions, ...regionOptions].filter(({ key }) => {
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
+  });
+};
+
+export const modelMatchesRegionOption = (model: GroupedModel, key: string): boolean =>
+  getRegionOptions(model.endpoints).some((option) => option.key === key);

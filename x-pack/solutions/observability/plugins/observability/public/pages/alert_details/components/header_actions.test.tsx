@@ -139,9 +139,14 @@ describe('Header Actions', () => {
   beforeEach(() => {
     useInvestigateAlertMock.mockReturnValue({
       showInvestigateAction: true,
+      showInvestigateButton: false,
+      showViewInvestigation: true,
       handleInvestigate: jest.fn(),
       isInvestigating: false,
       investigateActionLabel: 'Investigate',
+      viewInvestigationUrl: '/app/nightshift?investigationId=investigation-1',
+      viewInvestigationActionLabel: 'View investigation',
+      markInvestigationViewed: jest.fn(),
     });
     useAlertSnoozeStateMock.mockReturnValue(snoozeStateWithoutInstance);
     useAlertSnoozeMock.mockReturnValue({
@@ -212,9 +217,12 @@ describe('Header Actions', () => {
       const handleInvestigate = jest.fn();
       useInvestigateAlertMock.mockReturnValue({
         showInvestigateAction: true,
+        showInvestigateButton: true,
+        showViewInvestigation: false,
         handleInvestigate,
         isInvestigating: false,
         investigateActionLabel: 'Investigate',
+        markInvestigationViewed: jest.fn(),
       });
       const { findByTestId } = render(
         <HeaderActions
@@ -232,12 +240,89 @@ describe('Header Actions', () => {
       expect(handleInvestigate).toHaveBeenCalled();
     });
 
-    it('hides the investigate action when no investigation connector is available', async () => {
+    it('links to a completed investigation from the alert details menu', async () => {
+      const { findByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+
+      expect(await findByTestId('alertDetailsViewInvestigation')).toHaveAttribute(
+        'href',
+        '/app/nightshift?investigationId=investigation-1'
+      );
+    });
+
+    it('calls markInvestigationViewed when viewing an investigation', async () => {
+      const markInvestigationViewed = jest.fn();
       useInvestigateAlertMock.mockReturnValue({
-        showInvestigateAction: false,
+        showInvestigateAction: true,
+        showInvestigateButton: false,
+        showViewInvestigation: true,
         handleInvestigate: jest.fn(),
         isInvestigating: false,
         investigateActionLabel: 'Investigate',
+        viewInvestigationUrl: '/app/nightshift?investigationId=investigation-1',
+        viewInvestigationActionLabel: 'View investigation',
+        markInvestigationViewed,
+      });
+      const { findByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      fireEvent.click(await findByTestId('alertDetailsViewInvestigation'));
+
+      expect(markInvestigationViewed).toHaveBeenCalledTimes(1);
+    });
+
+    it('hides the view action when the alert has no completed investigation', async () => {
+      useInvestigateAlertMock.mockReturnValue({
+        showInvestigateAction: true,
+        showInvestigateButton: true,
+        showViewInvestigation: false,
+        handleInvestigate: jest.fn(),
+        isInvestigating: false,
+        investigateActionLabel: 'Investigate',
+        viewInvestigationUrl: undefined,
+        viewInvestigationActionLabel: 'View investigation',
+        markInvestigationViewed: jest.fn(),
+      });
+      const { findByTestId, queryByTestId } = render(
+        <HeaderActions
+          alert={alertWithGroupsAndTags}
+          alertIndex="alert-index"
+          alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      expect(queryByTestId('alertDetailsViewInvestigation')).not.toBeInTheDocument();
+    });
+
+    it('hides the investigate action when no investigation connector is available', async () => {
+      useInvestigateAlertMock.mockReturnValue({
+        showInvestigateAction: false,
+        showInvestigateButton: false,
+        showViewInvestigation: false,
+        handleInvestigate: jest.fn(),
+        isInvestigating: false,
+        investigateActionLabel: 'Investigate',
+        markInvestigationViewed: jest.fn(),
       });
       const { findByTestId, queryByTestId } = render(
         <HeaderActions
@@ -256,9 +341,12 @@ describe('Header Actions', () => {
     it('disables the investigate action while the request is in flight', async () => {
       useInvestigateAlertMock.mockReturnValue({
         showInvestigateAction: true,
+        showInvestigateButton: false,
+        showViewInvestigation: false,
         handleInvestigate: jest.fn(),
         isInvestigating: true,
-        investigateActionLabel: 'Investigating',
+        investigateActionLabel: 'Investigating…',
+        markInvestigationViewed: jest.fn(),
       });
       const { findByTestId } = render(
         <HeaderActions

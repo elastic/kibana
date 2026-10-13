@@ -17,10 +17,10 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   recordId: 'inv-1',
   pendingProposalCount: 1,
+  assignees: [],
   recommendedAction: 'respond',
   primaryActionLabel: 'Revoke sessions',
   events: [],
@@ -29,7 +29,10 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
 
 const renderGroup = (
   investigation: Investigation,
-  { withRecommendedAction = true }: { withRecommendedAction?: boolean } = {}
+  {
+    withRecommendedAction = true,
+    canManageEscalations = false,
+  }: { withRecommendedAction?: boolean; canManageEscalations?: boolean } = {}
 ) => {
   const onClickRecommendedAction = jest.fn();
   const onClickAction = jest.fn();
@@ -40,7 +43,9 @@ const renderGroup = (
       investigation={investigation}
       onClickRecommendedAction={withRecommendedAction ? onClickRecommendedAction : undefined}
       onClickAction={onClickAction}
+      onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
+      canManageEscalations={canManageEscalations}
     />
   );
 
@@ -93,12 +98,11 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('omits the recommended action on a decided investigation', () => {
-      // A decided proposal sits in the Closed bucket. Approving it again submits a
-      // decision the API refuses, so the item must not be there to click.
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
       openMenu();
 
       expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+      expect(screen.getByText('Copy link')).toBeInTheDocument();
     });
 
     it('omits the recommended action when no handler is wired', () => {
@@ -115,28 +119,63 @@ describe('ConversationsActionsGroup', () => {
       expect(screen.queryByText('Open in chat')).not.toBeInTheDocument();
     });
 
-    it('drops assign and close on a decided investigation', () => {
+    it('drops close on a decided investigation', () => {
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
       openMenu();
 
-      expect(screen.queryByText('Assign')).not.toBeInTheDocument();
       expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
     });
 
-    it('keeps the read-only items on a decided investigation', () => {
-      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
-      openMenu();
+    it('shows the menu trigger for a decided investigation when escalations are available', () => {
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }), {
+        canManageEscalations: true,
+      });
 
-      expect(screen.getByText('Open an incident')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Open actions menu' })).toBeInTheDocument();
     });
 
-    it('keeps assign and close while the decision is open', () => {
-      const { onClickAction } = renderGroup(makeInvestigation());
+    it('shows escalation actions when canManageEscalations is true', () => {
+      renderGroup(makeInvestigation({ recommendedAction: 'closed' }), {
+        canManageEscalations: true,
+      });
+      openMenu();
+
+      expect(screen.getByText('Open an escalation')).toBeInTheDocument();
+      expect(screen.getByText('Attach to an escalation')).toBeInTheDocument();
+    });
+
+    it('hides escalation actions when canManageEscalations is false (default)', () => {
+      // Open investigation: trigger exists, menu opens, escalation items absent.
+      renderGroup(makeInvestigation());
+      openMenu();
+
+      expect(screen.queryByText('Open an escalation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Attach to an escalation')).not.toBeInTheDocument();
+    });
+
+    it('keeps close available while the decision is open when canCloseInvestigation is true', () => {
+      const onClickAction = jest.fn();
+      renderWithKibanaRenderContext(
+        <ConversationsActionsGroup
+          investigation={makeInvestigation()}
+          onClickAction={onClickAction}
+          onOpenChat={jest.fn()}
+          onCopyLink={jest.fn()}
+          canCloseInvestigation={true}
+        />
+      );
       openMenu();
 
       fireEvent.click(screen.getByText('Close investigation'));
 
       expect(onClickAction).toHaveBeenCalledWith('close', 'inv-1');
+    });
+
+    it('hides close when canCloseInvestigation is false (default)', () => {
+      renderGroup(makeInvestigation());
+      openMenu();
+
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
     });
   });
 });

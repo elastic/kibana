@@ -491,7 +491,8 @@ export const updateConversation = ({
   return {
     ...merged,
     schema_version: CONVERSATION_SCHEMA_VERSION,
-    events: reconcileEvents(merged),
+    // `conversation.rounds` are the document's rounds at write time: what the caller could see.
+    events: reconcileEvents(merged, conversation.rounds),
   };
 };
 

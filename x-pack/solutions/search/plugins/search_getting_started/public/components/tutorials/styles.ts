@@ -10,7 +10,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 
 export const TutorialCardStyles = ({ euiTheme }: UseEuiTheme) => css`
   cursor: pointer;
-  border-radius: ${euiTheme.border.radius.medium};
+  border-radius: ${euiTheme.border.radius.panel};
   border: 1px solid ${euiTheme.colors.borderBaseSubdued};
   padding: ${euiTheme.size.base};
   &:hover {

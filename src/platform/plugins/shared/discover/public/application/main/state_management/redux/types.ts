@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
@@ -45,6 +45,12 @@ import type { DiscoverLayoutRestorableState } from '../../components/layout/disc
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
+
+/** Group path used to reconstruct a cascade leaf query for a nested-grid flyout. */
+export interface ExpandedDocCascadePath {
+  nodePath: string[];
+  nodePathMap: Record<string, string>;
+}
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -157,7 +163,6 @@ export interface DiscoverAppState {
 export interface CascadedDocumentsState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
-  columnsMeta: DataTableColumnsMeta;
   cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 
@@ -259,6 +264,7 @@ export interface TabState extends TabItem {
   };
   expandedDoc: DataTableRecord | undefined;
   expandedDocOwner: string | undefined;
+  expandedDocCascadePath: ExpandedDocCascadePath | undefined;
   renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }
@@ -277,6 +283,7 @@ export interface DiscoverInternalState {
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  draftSessionTitle: string | undefined;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];

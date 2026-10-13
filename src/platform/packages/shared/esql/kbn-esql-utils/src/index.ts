@@ -1,0 +1,138 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export {
+  getESQLAdHocDataview,
+  getESQLAdHocDataviewId,
+  getIndexForESQLQuery,
+} from './utils/get_esql_adhoc_dataview';
+export { getESQLTimeField } from './utils/get_time_field';
+export {
+  getESQLSourceInfo,
+  clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
+  buildEsqlSourceCacheKey,
+} from './utils/get_source_info';
+export type { ESQLSourceInfo, ESQLSourceInfoColumn } from './utils/get_source_info';
+export { getInitialESQLQuery } from './utils/get_initial_esql_query';
+export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
+export {
+  getLimitFromESQLQuery,
+  removeDropCommandsFromESQLQuery,
+  hasTransformationalCommand,
+  parseTimeFieldFromESQLQuery,
+  prettifyQuery,
+  retrieveMetadataColumns,
+  getQueryColumnsFromESQLQuery,
+  mapVariableToColumn,
+  getValuesFromQueryField,
+  getESQLQueryVariables,
+  fixESQLQueryWithVariables,
+  getCategorizeColumns,
+  getSparklineColumns,
+  getArgsFromRenameFunction,
+  getCategorizeField,
+  getKqlSearchQueries,
+  getRemoteClustersFromESQLQuery,
+  convertTimeseriesCommandToFrom,
+  hasOnlySourceCommand,
+  hasTimeseriesInfoCommand,
+} from './utils/query_parsing_helpers';
+export {
+  hasChangePointCommand,
+  getChangePointOutputColumnNames,
+  getChangePointSeriesColumns,
+  getChangePointByColumns,
+  buildChangePointLineDataQuery,
+  appendEntityFiltersToChangePointLineEsql,
+  formatEsqlIdentifier,
+  formatEsqlLiteral,
+  formatEsqlEntityPredicate,
+} from './utils/change_point_helpers';
+export {
+  getIndexPatternFromESQLQuery,
+  getIndexPatternsFromESQLQuery,
+  splitIndexPatternSources,
+  getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
+  getAnySourceCommandFromESQLQuery,
+} from './utils/get_index_pattern_from_query';
+export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
+export { classifyESQLSource, isSingleSource } from './utils/classify_esql_source';
+export type { ESQLSourceKind } from './utils/classify_esql_source';
+export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
+export {
+  appendToESQLQuery,
+  escapeStringValue,
+  buildJoinedFilter,
+} from './utils/append_to_query/utils';
+export { appendStatsByToQuery } from './utils/append_to_query/append_stats_by';
+export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_where';
+export { appendLimitToQuery } from './utils/append_to_query/append_limit';
+export { buildMetricsInfoQuery } from './utils/append_to_query/append_metrics_info';
+
+export {
+  getESQLQueryColumns,
+  getESQLQueryColumnsRaw,
+  getESQLResults,
+  formatESQLColumns,
+  getStartEndParams,
+  hasStartEndParams,
+  getNamedParams,
+} from './utils/run_query';
+export {
+  isESQLColumnSortable,
+  isESQLColumnGroupable,
+  isESQLFieldGroupable,
+} from './utils/esql_fields_utils';
+export { sanitazeESQLInput } from './utils/sanitaze_input';
+export { escapeEsqlColumnName } from '@kbn/esql-language';
+export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
+export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
+export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
+export {
+  type ESQLStatsQueryMeta,
+  getESQLStatsQueryMeta,
+  constructCascadeQuery,
+  appendFilteringWhereClauseForCascadeLayout,
+} from './utils/cascaded_documents_helpers';
+export {
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
+} from './utils/cascaded_documents_helpers/utils';
+export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
+export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';
+export {
+  createEsqlViewsManagementClient,
+  ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
+  EsqlViewsClientError,
+  getViewEsqlQuery,
+  MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_NAME_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
+  resolveViewColumnToIndexField,
+  validateEsqlViewName,
+  type EsqlViewNameValidationError,
+  type EsqlViewsClient,
+} from './utils/views';
+export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
+export {
+  getColumnsWithHighlights,
+  type ESQLColumnsWithHighlights,
+  type ESQLHighlightTags,
+} from './utils/get_columns_with_highlights';
+export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
+export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
+export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
+export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
+
+// Callback functions
+export * from './utils/callbacks';
+
+export { ensureApproximationLicense } from './utils/ensure_approximation_license';
