@@ -45,10 +45,12 @@ export interface AlertsInsightsProps {
   entityId?: string;
   /** Opens the originating entity flyout as a child. */
   onShowEntity?: () => void;
+  /** Scope ID of the originating page — maps to a time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}. */
+  scopeId?: string;
 }
 
 export const AlertsInsights = memo(
-  ({ entityType, value, entityId, onShowEntity }: AlertsInsightsProps) => {
+  ({ entityType, value, entityId, onShowEntity, scopeId }: AlertsInsightsProps) => {
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const onExpandAlert = useCallback(
@@ -87,6 +89,7 @@ export const AlertsInsights = memo(
                 ? entityType
                 : undefined
             }
+            scopeId={scopeId}
             onShowAlert={onExpandAlert}
           />
         </div>

@@ -20,6 +20,7 @@ import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
   SEVERITY_COUNT_FIELDS,
+  isOneOf,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
@@ -61,7 +62,7 @@ const buildAlertAggregations = (rowCondition?: string): string[] =>
   });
 
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
-  typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
+  isOneOf(ALLOWED_ENTITY_TYPES, type);
 
 // ── unstamped alert filters ───────────────────────────────────────────────────
 
