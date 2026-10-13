@@ -13,6 +13,7 @@ import {
   buildLookupJoinClause,
   buildLookback,
   getRiskScoreIndex,
+  OWN_RISK_SCORE_CONDITION,
   toList,
   compareEntityIds,
 } from './esql';
@@ -34,8 +35,9 @@ const RISK_ID_FIELD_COALESCE = `COALESCE(host.risk.id_field, user.risk.id_field,
 const RISK_SCORE_NORM_COALESCE = `COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`;
 
 /**
- * Risk score docs that can be the reference: scored in the two hours before the start of
- * the time range, and keyed by EUID. The reference score is the last of these per entity.
+ * Risk score docs that can be the reference: the entity's own scores in the two hours before
+ * the start of the time range, keyed by EUID. The reference score is the last of these per
+ * entity.
  * Risk score change is the current entity score minus the reference score.
  *
  * This is the boundary window of the risk movers tile, so its rows agree with the tile.
@@ -51,6 +53,7 @@ const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] 
   return [
     `FROM ${getRiskScoreIndex(namespace)}`,
     `| WHERE \`@timestamp\` >= ${windowStart} - ${REFERENCE_WINDOW_HOURS} hours AND \`@timestamp\` <= ${windowStart}`,
+    `| WHERE ${OWN_RISK_SCORE_CONDITION}`,
   ];
 };
 

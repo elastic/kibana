@@ -183,6 +183,7 @@ exports[`entities grid query builders enrich queries risk_score_change builds it
 Array [
   "FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE host.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR user.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\") OR service.risk.id_value IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL entity_id = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
@@ -1504,6 +1505,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -1529,6 +1531,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -1555,6 +1558,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -1581,6 +1585,7 @@ exports[`entities grid query builders sort by risk_score_change builds the sort 
 "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3659,6 +3664,7 @@ Array [
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3694,6 +3700,7 @@ FROM entities-latest-default
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3731,6 +3738,7 @@ Array [
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3759,6 +3767,7 @@ Array [
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3791,6 +3800,7 @@ FROM entities-latest-default
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3818,6 +3828,7 @@ Array [
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3850,6 +3861,7 @@ FROM entities-latest-default
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
@@ -3877,6 +3889,7 @@ Array [
   "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
+| WHERE (COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) IS NULL OR COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) != \\"resolution\\")
 | WHERE COALESCE(host.risk.id_field, user.risk.id_field, service.risk.id_field) == \\"entity.id\\"
 | EVAL \`entity.id\` = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value), score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
 | STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\`
