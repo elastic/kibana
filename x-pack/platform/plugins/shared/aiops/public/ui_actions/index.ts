@@ -10,6 +10,7 @@ import {
   ADD_PANEL_TRIGGER,
   CATEGORIZE_FIELD_TRIGGER,
   ON_OPEN_PANEL_MENU,
+  REVERSE_CATEGORIZE_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AiopsCoreSetup } from '../types';
 
@@ -22,14 +23,12 @@ export function registerAiopsUiActions(
     'create-pattern-analysis-embeddable',
     async () => {
       const { createAddPatternAnalysisEmbeddableAction } = await import('./actions');
-      const addPatternAnalysisAction = createAddPatternAnalysisEmbeddableAction(getStartServices);
-      return addPatternAnalysisAction;
+      return createAddPatternAnalysisEmbeddableAction(getStartServices);
     }
   );
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'create-change-point-chart', async () => {
     const { createAddChangePointChartAction } = await import('./actions');
-    const addChangePointChartAction = createAddChangePointChartAction(getStartServices);
-    return addChangePointChartAction;
+    return createAddChangePointChartAction(getStartServices);
   });
 
   uiActions.addTriggerActionAsync(CATEGORIZE_FIELD_TRIGGER, 'ACTION_CATEGORIZE_FIELD', async () => {
@@ -37,10 +36,18 @@ export function registerAiopsUiActions(
     return createCategorizeFieldAction(getStartServices);
   });
 
+  uiActions.addTriggerActionAsync(
+    REVERSE_CATEGORIZE_FIELD_TRIGGER,
+    'ACTION_REVERSE_CATEGORIZE_FIELD',
+    async () => {
+      const { createReverseCategorizeFieldAction } = await import('./actions');
+      return createReverseCategorizeFieldAction(getStartServices);
+    }
+  );
+
   uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'open-change-point-in-ml-app', async () => {
     const { createOpenChangePointInMlAppAction } = await import('./actions');
-    const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(getStartServices);
-    return openChangePointInMlAppAction;
+    return createOpenChangePointInMlAppAction(getStartServices);
   });
 
   uiActions.addTriggerActionAsync(
@@ -48,8 +55,7 @@ export function registerAiopsUiActions(
     'create-log-rate-analysis-embeddable',
     async () => {
       const { createAddLogRateAnalysisEmbeddableAction } = await import('./actions');
-      const addLogRateAnalysisAction = createAddLogRateAnalysisEmbeddableAction(getStartServices);
-      return addLogRateAnalysisAction;
+      return createAddLogRateAnalysisEmbeddableAction(getStartServices);
     }
   );
 }

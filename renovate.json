@@ -508,7 +508,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "isbinaryfile",
         "js-search",
         "openpgp",
         "remark-gfm",

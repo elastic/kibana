@@ -21,6 +21,7 @@ import {
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   OWNER_TO_PREFIX_MAP,
   EXTERNAL_REFERENCE_TYPE_MAP,
   PERSISTABLE_ATTACHMENT_TYPES,
@@ -411,6 +412,7 @@ describe('migration_utils', () => {
     it('is true for unified types with no legacy equivalent', () => {
       expect(isUnifiedOnlyAttachmentType(SECURITY_TIMELINE_ATTACHMENT_TYPE)).toBe(true);
       expect(isUnifiedOnlyAttachmentType(SECURITY_ENTITY_ATTACHMENT_TYPE)).toBe(true);
+      expect(isUnifiedOnlyAttachmentType(SECURITY_ATTACK_ATTACHMENT_TYPE)).toBe(true);
       expect(isUnifiedOnlyAttachmentType(DASHBOARD_ATTACHMENT_TYPE)).toBe(true);
       expect(isUnifiedOnlyAttachmentType(MAP_ATTACHMENT_TYPE)).toBe(true);
       expect(isUnifiedOnlyAttachmentType(DISCOVER_SESSION_ATTACHMENT_TYPE)).toBe(true);
