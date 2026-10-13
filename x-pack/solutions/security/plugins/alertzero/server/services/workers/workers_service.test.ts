@@ -1075,39 +1075,36 @@ describe('WorkersService', () => {
     it.each([
       ['disabled', { enabled: false }],
       ['missing', null],
-    ])(
-      'enables when the Alert Analysis workflow is %s',
-      async (_state, alertAnalysisWorkflow) => {
-        const harness = createPersistentHarness();
-        const getWorkflow = harness.management.getWorkflow as jest.Mock;
-        const defaultGetWorkflow = getWorkflow.getMockImplementation();
-        getWorkflow.mockImplementation(async (workflowId: string, ...rest: unknown[]) =>
-          workflowId === SECURITY_ALERT_ANALYSIS_WORKFLOW_ID
-            ? alertAnalysisWorkflow
-            : defaultGetWorkflow?.(workflowId, ...rest)
-        );
-        const { service } = makeService(harness);
+    ])('enables when the Alert Analysis workflow is %s', async (_state, alertAnalysisWorkflow) => {
+      const harness = createPersistentHarness();
+      const getWorkflow = harness.management.getWorkflow as jest.Mock;
+      const defaultGetWorkflow = getWorkflow.getMockImplementation();
+      getWorkflow.mockImplementation(async (workflowId: string, ...rest: unknown[]) =>
+        workflowId === SECURITY_ALERT_ANALYSIS_WORKFLOW_ID
+          ? alertAnalysisWorkflow
+          : defaultGetWorkflow?.(workflowId, ...rest)
+      );
+      const { service } = makeService(harness);
 
-        const result = await service.update(
-          TRIAGE,
-          {
-            enabled: true,
-            settings: { serviceAccountId: 'sa-1' },
-            settingsRevision: null,
-          },
-          SPACE,
-          request
-        );
+      const result = await service.update(
+        TRIAGE,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
 
-        expect(result.outcome).toBe('updated');
-        expect(harness.updateWorkflow).toHaveBeenCalledWith(
-          reportedWorkflowId(TRIAGE, SPACE),
-          { enabled: true },
-          SPACE,
-          request
-        );
-      }
-    );
+      expect(result.outcome).toBe('updated');
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        reportedWorkflowId(TRIAGE, SPACE),
+        { enabled: true },
+        SPACE,
+        request
+      );
+    });
 
     // The Worker is a scheduled sweep, so enabling it no longer attaches an action to every rule.
     // There is nothing to attach and nothing to roll back: enable is the workflow update and
