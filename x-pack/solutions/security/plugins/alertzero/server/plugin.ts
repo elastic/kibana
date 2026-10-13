@@ -220,6 +220,7 @@ export class AlertZeroPlugin
         stepsLogger
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       logger: stepsLogger,
     });
 
@@ -399,6 +400,7 @@ export class AlertZeroPlugin
 
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
+      getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };

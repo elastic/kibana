@@ -6,7 +6,7 @@
  */
 
 import type { EsqlToolConfig } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { isoDateTime, z } from '@kbn/zod/v4';
 
 export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodObject<any> {
   const schemaFields: Record<string, z.ZodTypeAny> = {};
@@ -27,7 +27,7 @@ export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodO
         field = z.boolean();
         break;
       case 'date':
-        field = z.string().datetime();
+        field = isoDateTime();
         break;
       case 'array':
         field = z.array(z.union([z.string(), z.number()]));

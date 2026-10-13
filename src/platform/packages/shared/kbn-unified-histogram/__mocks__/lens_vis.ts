@@ -12,7 +12,15 @@ import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common'
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ChartType } from '@kbn/visualization-utils';
-import { DataViewSource, type DataSource } from '@kbn/data-source';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  DataViewSource,
+  columnFromDatatableColumn,
+  registerEsqlSourceInDataViewsCache,
+  type DataSource,
+} from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
@@ -57,7 +65,6 @@ export const getLensVisMock = async ({
   filters,
   query,
   columns,
-  isPlainRecord,
   timeInterval,
   timeRange,
   breakdownField,
@@ -73,10 +80,9 @@ export const getLensVisMock = async ({
   filters: QueryParams['filters'];
   query: QueryParams['query'];
   dataView: DataView;
-  /** Defaults to a `DataViewSource` of `dataView`. */
+  /** Defaults to an `EsqlSource` for an ES|QL query (with `dataView` registered for it), else a `DataViewSource`. */
   dataSource?: DataSource;
   columns: DatatableColumn[];
-  isPlainRecord: boolean;
   timeInterval: string;
   timeRange?: TimeRange | null;
   breakdownField: DataViewField | undefined;
@@ -125,14 +131,15 @@ export const getLensVisMock = async ({
     currentSuggestionContext = state.currentSuggestionContext;
   });
 
+  const queryDataSource = dataSource ?? (await getDefaultDataSource({ query, dataView, columns }));
+
   lensService.update({
     queryParams: {
-      dataSource: dataSource ?? new DataViewSource(dataView),
+      dataSource: queryDataSource,
       query,
       filters,
       timeRange: timeRange ?? TIME_RANGE,
       columns,
-      isPlainRecord,
     },
     timeInterval,
     breakdownField,
@@ -147,4 +154,32 @@ export const getLensVisMock = async ({
     visContext,
     currentSuggestionContext,
   };
+};
+
+export const getDefaultDataSource = async ({
+  query,
+  dataView,
+  columns,
+}: {
+  query: QueryParams['query'];
+  dataView: DataView;
+  columns: DatatableColumn[];
+}): Promise<DataSource> => {
+  if (!query || !isOfAggregateQueryType(query)) {
+    return new DataViewSource(dataView);
+  }
+  const esqlSource = createMockEsqlSource(
+    columns.map(columnFromDatatableColumn),
+    columns,
+    dataView.timeFieldName,
+    query.esql
+  );
+  await registerEsqlSourceInDataViewsCache(
+    {
+      create: async () => dataView,
+      clearInstanceCache: () => {},
+    } as unknown as DataViewsPublicPluginStart,
+    esqlSource
+  );
+  return esqlSource;
 };

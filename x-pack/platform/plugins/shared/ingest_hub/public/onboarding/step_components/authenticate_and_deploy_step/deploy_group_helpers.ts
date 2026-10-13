@@ -66,8 +66,19 @@ function instanceNamespace(
 export function groupByPackage(
   originals: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>,
   duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>,
-  storedServiceVars: Record<string, ServiceVars> = {}
+  storedServiceVars: Record<string, ServiceVars> = {},
+  /**
+   * The namespace the deploy gives an instance that has none. When set, an empty namespace and an
+   * explicit one equal to it are the same namespace and share a group (and so a policy);
+   * otherwise they stay apart, as for agent-based, where an empty namespace means the namespace
+   * of the agent policy.
+   */
+  defaultNamespace?: string
 ): DeployGroup[] {
+  const resolveNamespace = (instance: ServiceInstance) => {
+    const namespace = instanceNamespace(instance, storedServiceVars);
+    return namespace || defaultNamespace || '';
+  };
   const bundled = new Map<
     string,
     {
@@ -77,8 +88,9 @@ export function groupByPackage(
   >();
   for (const member of originals) {
     const pkg = member.service.packageName;
-    const namespace = instanceNamespace(member.instance, storedServiceVars);
-    const groupId = namespace ? `${pkg}__${namespace}` : pkg;
+    const namespace = resolveNamespace(member.instance);
+    // The default namespace keeps the plain package id, so policy names do not change.
+    const groupId = namespace && namespace !== defaultNamespace ? `${pkg}__${namespace}` : pkg;
     const group = bundled.get(groupId) ?? { namespace, members: [] };
     group.members.push(member);
     bundled.set(groupId, group);
@@ -108,7 +120,7 @@ export function groupByPackage(
       instanceIds: [member.instance.instanceId],
       members: [member],
       isDuplicateGroup: true,
-      namespace: instanceNamespace(member.instance, storedServiceVars),
+      namespace: resolveNamespace(member.instance),
     });
   }
 
