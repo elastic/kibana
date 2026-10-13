@@ -65,6 +65,8 @@ export const createKiIdentificationStatusTool = ({
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
       const [source] = resolveSourcesBySlug(catalog, [slug]);
+      // A completed run's status carries stored features and queries, read as the internal user.
+      await scopedClients.sourcesClient.assertReadable(source.id);
       const status = await getKiIdentificationStatusToolHandler({
         sourceId: source.id,
         sourceSlug: source.slug,

@@ -55,6 +55,10 @@ const PROCESSED_MARKER_CHUNK_SIZE = 250;
 // Page size and write batch size of the sweep that marks a deleted source's detections processed.
 const SOURCE_SWEEP_PAGE_SIZE = 1000;
 
+// Rules whose histories are read per query, and the row cap of that read (the ES|QL maximum).
+const SOURCE_SWEEP_RULE_CHUNK_SIZE = 10;
+const ESQL_MAX_ROWS = 10_000;
+
 // Cap the per-rule detection history (flyout timeline) to the most recent N transitions so a churny
 // rule doesn't produce an unbounded scroll.
 const DETECTION_HISTORY_LIMIT = 20;
@@ -184,12 +188,14 @@ export class DetectionClient {
   }
 
   /**
-   * Marks the unprocessed latest detection of every rule of a source as processed, and returns how
-   * many it marked. A deleted source leaves its detections behind, and the discovery batch keeps
-   * offering them, so the agent writes events for a source that no longer exists.
+   * Marks every unprocessed detection of a source as processed, and returns how many it marked.
+   * A deleted source leaves its detections behind, and the discovery batch keeps offering them, so
+   * the agent writes events for a source that no longer exists. A rule can hold several
+   * unprocessed detections, and discovery falls back to the next one when the newest is processed,
+   * so the whole history of each rule is marked, not only its latest detection.
    *
    * `source_id` is stored but not mapped, so it cannot be filtered in the query: the latest
-   * detection of every rule is read and matched here.
+   * detection of every rule is read to find the source's rules, then their histories are read.
    */
   async markSourceDetectionsProcessed({
     sourceId,
@@ -198,18 +204,38 @@ export class DetectionClient {
     sourceId: string;
     processedBy: string;
   }): Promise<number> {
-    const detectionIds: string[] = [];
+    const ruleUuids = new Set<string>();
     for (let page = 1; ; page++) {
       const result = await this.findLatestPaginated({ page, perPage: SOURCE_SWEEP_PAGE_SIZE });
       for (const detection of result.hits) {
-        if (detection.source_id === sourceId && !detection.processed && detection.detection_id) {
-          detectionIds.push(detection.detection_id);
+        if (detection.source_id === sourceId && detection.rule_uuid) {
+          ruleUuids.add(detection.rule_uuid);
         }
       }
       if (page * SOURCE_SWEEP_PAGE_SIZE >= result.total) {
         break;
       }
     }
+
+    const detectionIdSet = new Set<string>();
+    const rules = [...ruleUuids];
+    for (let start = 0; start < rules.length; start += SOURCE_SWEEP_RULE_CHUNK_SIZE) {
+      const { hits } = await runFindByIdsEsqlQuery<RawDetection>({
+        esClient: this.clients.esClient,
+        space: this.clients.space,
+        index: DETECTIONS_DATA_STREAM,
+        idField: FIELD_RULE_UUID,
+        idValues: rules.slice(start, start + SOURCE_SWEEP_RULE_CHUNK_SIZE),
+        where: detectionFilter(),
+        limit: ESQL_MAX_ROWS,
+      });
+      for (const detection of await this.withDerivedProcessed(hits)) {
+        if (detection.source_id === sourceId && !detection.processed && detection.detection_id) {
+          detectionIdSet.add(detection.detection_id);
+        }
+      }
+    }
+    const detectionIds = [...detectionIdSet];
 
     const timestamp = new Date().toISOString();
     for (let start = 0; start < detectionIds.length; start += SOURCE_SWEEP_PAGE_SIZE) {

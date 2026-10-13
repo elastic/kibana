@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import {
   MAX_ID_LENGTH,
@@ -22,7 +23,7 @@ import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { StatusError } from '../../../../lib/errors/status_error';
 import { listAllSources } from '../../../utils/list_all_sources';
-import { sourceIdsArraySchema } from '../../../utils/resolve_source_ids';
+import { filterReadableSourceIds, sourceIdsArraySchema } from '../../../utils/resolve_source_ids';
 import {
   MAX_SOURCES_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
@@ -39,6 +40,13 @@ const mapStepsToSkipFlags = (
   skipFeatures: !steps.includes(KIsOnboardingStep.FeaturesIdentification),
   skipQueries: !steps.includes(KIsOnboardingStep.QueriesGeneration),
 });
+
+/**
+ * The features, queries and keep-alive output of a completed run are stored knowledge, read as the
+ * internal user. A caller who cannot read the source's data gets the status without them.
+ */
+const withoutStoredOutput = (status: KIsOnboardingStatusResult): KIsOnboardingStatusResult =>
+  omit(status, ['features', 'queries', 'keepAlive']) as KIsOnboardingStatusResult;
 
 const onboardingExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/onboarding/_execute',
@@ -176,12 +184,14 @@ const onboardingExecuteRoute = createServerRoute({
     // the caller schedule a new run right away without a step being dropped on a held slot.
     await streamsKIsOnboardingClient.waitForSourceRunsToStop({ sourceId: source.id, request });
 
-    return streamsKIsOnboardingClient.getStatus({
+    const status = await streamsKIsOnboardingClient.getStatus({
       sourceId: source.id,
       sourceSlug: source.slug,
       queryUpdatedAt: source.esql_updated_at,
       request,
     });
+    const readable = await filterReadableSourceIds([source.id], sourcesClient);
+    return readable.length > 0 ? status : withoutStoredOutput(status);
   },
 });
 
@@ -220,6 +230,8 @@ const onboardingStatusRoute = createServerRoute({
     } = params;
 
     const { source } = await sourcesClient.get(sourceId);
+    // A completed run's status carries stored features and queries, read as the internal user.
+    await sourcesClient.assertReadable(source.id);
 
     return streamsKIsOnboardingClient.getStatus({
       sourceId: source.id,

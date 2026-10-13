@@ -237,9 +237,12 @@ describe('DetectionClient.bulkCreate', () => {
 describe('DetectionClient.markSourceDetectionsProcessed', () => {
   const createSweepClient = ({
     detections,
+    history = detections,
     processedIds = [],
   }: {
     detections: Array<Record<string, unknown>>;
+    /** Every detection of the rules, what the history read answers. Defaults to the latest ones. */
+    history?: Array<Record<string, unknown>>;
     processedIds?: string[];
   }) => {
     const query = jest.fn(async (request: { query: string }) => {
@@ -248,6 +251,9 @@ describe('DetectionClient.markSourceDetectionsProcessed', () => {
       }
       if (request.query.includes('processed_by')) {
         return markerResponse(processedIds);
+      }
+      if (request.query.includes('rule_uuid IN')) {
+        return sourceResponse(history);
       }
       return sourceResponse(detections);
     });
@@ -313,5 +319,37 @@ describe('DetectionClient.markSourceDetectionsProcessed', () => {
     ).resolves.toBe(0);
 
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it('marks the older unprocessed detections of a rule, not only its latest', async () => {
+    const latest = createDetection({
+      '@timestamp': '2026-01-02T00:00:00.000Z',
+      detection_id: 'd-new',
+      rule_uuid: 'rule-1',
+      source_id: 'gone',
+    });
+    const older = createDetection({
+      '@timestamp': '2026-01-01T00:00:00.000Z',
+      detection_id: 'd-old',
+      rule_uuid: 'rule-1',
+      source_id: 'gone',
+    });
+    const { client, create } = createSweepClient({
+      detections: [latest],
+      history: [older, latest],
+      processedIds: ['d-done'],
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({ sourceId: 'gone', processedBy: 'source-deleted' })
+    ).resolves.toBe(2);
+
+    expect(create).toHaveBeenCalledWith({
+      space: 'default',
+      documents: [
+        expect.objectContaining({ detection_id: 'd-old', processed_by: 'source-deleted' }),
+        expect.objectContaining({ detection_id: 'd-new', processed_by: 'source-deleted' }),
+      ],
+    });
   });
 });

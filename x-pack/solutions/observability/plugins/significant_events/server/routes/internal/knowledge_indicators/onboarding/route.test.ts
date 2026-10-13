@@ -11,6 +11,7 @@ import {
   NightshiftModelNotFoundError,
   SignificantEventsWorkflowStatus,
 } from '@kbn/significant-events-schema';
+import { forbidden } from '@hapi/boom';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { internalKIOnboardingRoutes } from './route';
 
@@ -31,6 +32,8 @@ jest.mock('@kbn/nightshift-ai', () => ({
 const route = internalKIOnboardingRoutes['POST /internal/streams/{sourceId}/onboarding/_execute'];
 const bulkStatusRoute =
   internalKIOnboardingRoutes['POST /internal/streams/onboarding/_bulk_status'];
+const statusRoute =
+  internalKIOnboardingRoutes['GET /internal/streams/{sourceId}/onboarding/_status'];
 type HandlerParams = Parameters<typeof route.handler>[0];
 
 const makeHandlerParams = ({
@@ -267,6 +270,7 @@ describe('onboardingExecuteRoute', () => {
           get: jest.fn().mockResolvedValue({
             source: { id: 'source-a', slug: 'a', enabled: true, esql_updated_at: '2026-01-01' },
           }),
+          assertReadable: jest.fn().mockResolvedValue(undefined),
         },
       }),
       server: {},
@@ -282,5 +286,82 @@ describe('onboardingExecuteRoute', () => {
     expect(waitForSourceRunsToStop).toHaveBeenCalledWith(
       expect.objectContaining({ sourceId: 'source-a' })
     );
+  });
+
+  describe('stored output of a completed run', () => {
+    const completed = {
+      status: SignificantEventsWorkflowStatus.Completed,
+      executionId: 'exec-1',
+      features: { discovered: ['f1'] },
+      queries: { persisted: ['q1'] },
+      keepAlive: { kept: 1 },
+    };
+    const setup = ({ readable }: { readable: boolean }) => {
+      const getStatus = jest.fn().mockResolvedValue(completed);
+      const assertReadable = jest.fn(async () => {
+        if (!readable) {
+          throw forbidden('Cannot read source');
+        }
+      });
+      const base = {
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          sourcesClient: {
+            get: jest.fn().mockResolvedValue({
+              source: { id: 'source-a', slug: 'a', enabled: true, esql_updated_at: '2026-01-01' },
+            }),
+            assertReadable,
+          },
+        }),
+        server: {},
+        workflowClients: {
+          streamsKIsOnboardingClient: {
+            cancel: jest.fn(),
+            waitForSourceRunsToStop: jest.fn().mockResolvedValue(true),
+            getStatus,
+          },
+        },
+        maintenanceService: { getState: jest.fn() },
+      };
+      return { base, getStatus };
+    };
+
+    it('does not return the status of a source the caller cannot read', async () => {
+      const { base, getStatus } = setup({ readable: false });
+
+      await expect(
+        statusRoute.handler({
+          ...base,
+          params: { path: { sourceId: 'source-a' } },
+        } as unknown as Parameters<typeof statusRoute.handler>[0])
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(getStatus).not.toHaveBeenCalled();
+    });
+
+    it('returns the output of a source the caller can read', async () => {
+      const { base } = setup({ readable: true });
+
+      await expect(
+        statusRoute.handler({
+          ...base,
+          params: { path: { sourceId: 'source-a' } },
+        } as unknown as Parameters<typeof statusRoute.handler>[0])
+      ).resolves.toEqual(completed);
+    });
+
+    it('drops the stored output from the cancel response when the caller cannot read the source', async () => {
+      const { base } = setup({ readable: false });
+
+      await expect(
+        route.handler({
+          ...base,
+          params: { path: { sourceId: 'source-a' }, body: { action: 'cancel' } },
+        } as unknown as HandlerParams)
+      ).resolves.toEqual({
+        status: SignificantEventsWorkflowStatus.Completed,
+        executionId: 'exec-1',
+      });
+    });
   });
 });
