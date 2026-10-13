@@ -278,10 +278,31 @@ export const onKeyDownResizeHandler = (
 };
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
+  // to perform editor scoped theming,
+  // see https://github.com/microsoft/vscode/blob/main/build/lib/stylelint/vscode-known-variables.json for the list of available css variables
+
+  // `lightestShade` and `emptyShade` are deprecated, so we backfill them with
+  // equivalent colors from the theme.
+  const borderColor = theme.euiTheme.colors.lightestShade || theme.euiTheme.colors.borderBasePlain;
+  const bgColor = theme.euiTheme.colors.emptyShade || theme.euiTheme.colors.backgroundBasePlain;
+
   return css`
     .monaco-editor {
       --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.inline};
       --vscode-shadow-lg: ${theme.euiTheme.shadows.l.down};
+      --vscode-editor-foreground: ${theme.euiTheme.colors.textParagraph};
+      --vscode-editor-background: ${bgColor};
+      --vscode-editor-lineHighlightBackground: ${bgColor};
+      --vscode-editor-lineHighlightBorder: ${borderColor};
+      --vscode-editor-selectionHighlightBackground: ${bgColor};
+      --vscode-editor-selectionHighlightBorder: ${borderColor};
+      --vscode-editorSuggestWidget-background: ${bgColor};
+      --vscode-editorSuggestWidget-border: ${borderColor};
+      --vscode-editorSuggestWidget-focusHighlightForeground: ${bgColor};
+      --vscode-editorSuggestWidget-focusOutline: ${theme.euiTheme.colors.borderBasePlain};
+      --vscode-editorSuggestWidget-foreground: ${theme.euiTheme.colors.textParagraph};
+      --vscode-editorSuggestWidget-highlightForeground: ${theme.euiTheme.colors.primary};
+      --vscode-editorSuggestWidget-selectedBackground: ${bgColor};
     }
 
     .monaco-editor .suggest-details .scrollbar {
