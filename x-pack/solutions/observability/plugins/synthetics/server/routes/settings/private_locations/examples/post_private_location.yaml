@@ -1,0 +1,34 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postPrivateLocationRequestExample1:
+          description: Run `POST /api/synthetics/private_locations` to create a private location.
+          value:
+            label: Private Location 1
+            agentPolicyId: abcd1234
+            tags: [private, testing]
+            geo:
+              lat: 40.7128
+              lon: -74.006
+            spaces: [default]
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../oas_schemas.yaml#/getPrivateLocation'
+        examples:
+          postPrivateLocationResponseExample1:
+            value:
+              id: abcd1234
+              label: Private Location 1
+              agentPolicyId: abcd1234
+              tags: [private, testing]
+              geo:
+                lat: 40.7128
+                lon: -74.006
+              spaces: [default]
+  400:
+    description: If the `agentPolicyId` is already used by an existing private location or if the `label` already exists, the API returns a 400 Bad Request response with a corresponding error message.

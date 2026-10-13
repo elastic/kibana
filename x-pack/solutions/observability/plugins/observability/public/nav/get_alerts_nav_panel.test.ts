@@ -68,8 +68,8 @@ describe('getObservabilityAlertsLinkTitle', () => {
     expect(getObservabilityAlertsLinkTitle(false)).toBe('Alerts');
   });
 
-  it('is Alerts (V1) when alerting v2 is enabled', () => {
-    expect(getObservabilityAlertsLinkTitle(true)).toBe('Alerts (V1)');
+  it('is Alerts (Classic) when universal alerting is enabled', () => {
+    expect(getObservabilityAlertsLinkTitle(true)).toBe('Alerts (Classic)');
   });
 });
 
@@ -233,7 +233,7 @@ describe('getAlertsNavPanel', () => {
         expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
         expect.objectContaining({
           link: 'observability-overview:alerts',
-          title: 'Alerts (V1)',
+          title: 'Alerts (Classic)',
         }),
       ]);
     });
