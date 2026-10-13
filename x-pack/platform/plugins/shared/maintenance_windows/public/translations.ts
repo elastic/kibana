@@ -137,13 +137,13 @@ export const SCOPE_DESCRIPTION = i18n.translate('xpack.maintenanceWindows.scope.
 });
 
 export const ALERTS_SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.alerts.title', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'Classic Alerting',
 });
 
 export const ALERTS_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.alerts.description',
   {
-    defaultMessage: 'Suppress alert notifications during maintenance',
+    defaultMessage: 'Suppress notifications from Classic Alerting during maintenance',
   }
 );
 
@@ -157,21 +157,21 @@ export const FILTER_ALERTS_SUBTITLE = i18n.translate(
 export const ALERTING_V2_SCOPE_TITLE = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.title',
   {
-    defaultMessage: 'Episodes',
+    defaultMessage: 'Universal Alerting',
   }
 );
 
 export const ALERTING_V2_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.description',
   {
-    defaultMessage: 'Suppress alert episode notifications during maintenance',
+    defaultMessage: 'Suppress notifications from Universal Alerting during maintenance',
   }
 );
 
 export const FILTER_ALERTING_V2_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.filterEpisodesSubtitle',
   {
-    defaultMessage: 'Filter episodes',
+    defaultMessage: 'Filter alerts',
   }
 );
 
@@ -199,7 +199,7 @@ export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
 export const CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2FiltersPlaceholder',
   {
-    defaultMessage: 'Episode filters (e.g. data.host.name:"my-host" or data.severity:"low")',
+    defaultMessage: 'Search alerts (e.g. data.host.name:"my-host" or data.severity:"low")',
   }
 );
 

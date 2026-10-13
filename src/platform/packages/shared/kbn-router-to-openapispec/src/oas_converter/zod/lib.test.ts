@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod';
+import { z as z4, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import {
@@ -221,6 +221,65 @@ describe('zod', () => {
         );
 
         expect(JSON.stringify(result)).not.toContain('{"nullable":true}');
+      });
+    });
+
+    describe('Zod 4.5+ JSON Schema type arrays', () => {
+      test('maps a nullable primitive type array to nullable: true', () => {
+        const result = convert(z.object({ flag: z.boolean().nullable() }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: { flag: { type: 'boolean', nullable: true } },
+        });
+        expect(result.schema.properties!.flag).not.toHaveProperty('type', expect.any(Array));
+      });
+
+      test('maps a primitive union type array to anyOf', () => {
+        const result = convert(z.object({ value: z.union([z.string(), z.number()]) }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+          },
+        });
+        expect(result.schema.properties!.value).not.toHaveProperty('type');
+      });
+
+      test('maps a nullable primitive union type array to anyOf with nullable: true', () => {
+        const result = convert(
+          z.object({ value: z.union([z.string(), z.number()]).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: {
+              nullable: true,
+              anyOf: [{ type: 'string' }, { type: 'number' }],
+            },
+          },
+        });
+      });
+
+      test('maps type arrays nested under properties and array items', () => {
+        const result = convert(
+          z.object({
+            meta: z.object({ note: z.string().nullable() }),
+            tags: z.array(z.union([z.string(), z.number()])),
+          }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            meta: {
+              type: 'object',
+              properties: { note: { type: 'string', nullable: true } },
+            },
+            tags: {
+              type: 'array',
+              items: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+            },
+          },
+        });
       });
     });
 
@@ -633,6 +692,22 @@ describe('zod', () => {
       expect(outputStr).not.toContain('x-kbn-oas-component-id');
     });
 
+    test('component named like an Object.prototype member keeps its definition', () => {
+      const ctor = z.object({ a: z.string() });
+      registerZodV4Component(ctor, 'constructor');
+
+      const result = convert(z.object({ ctor }) as any);
+
+      expect(result.schema).toMatchObject({
+        properties: { ctor: { $ref: '#/components/schemas/constructor' } },
+      });
+      expect(Object.hasOwn(result.shared, 'constructor')).toBe(true);
+      expect(result.shared.constructor).toMatchObject({
+        type: 'object',
+        properties: { a: { type: 'string' } },
+      });
+    });
+
     test('registered schema passed directly to convert() produces $ref', () => {
       const tag = z.object({ id: z.string(), label: z.string() });
       registerZodV4Component(tag, 'Tag');
@@ -857,6 +932,70 @@ describe('zod', () => {
         expect(result.shared).toHaveProperty('AutoDiscPlain_Stream');
         expect(result.shared.AutoDiscPlain_Stream).not.toHaveProperty('discriminator');
       });
+    });
+
+    describe('lazySchema-wrapped schemas', () => {
+      type Wrap = <T extends object>(factory: () => T) => T;
+      const eager: Wrap = (factory) => factory();
+
+      const convertBoth = (build: (wrap: Wrap) => z.ZodType) => {
+        resetDefsCounter();
+        const expected = convert(build(eager) as any);
+        resetDefsCounter();
+        const actual = convert(build(lazySchema) as any);
+        return { expected, actual };
+      };
+
+      test('references an id-ed lazy schema by its stable name when its .meta() clone is also used', () => {
+        const { expected, actual } = convertBoth((wrap) => {
+          const operation = wrap(() =>
+            z.object({ op: z.string() }).meta({ id: 'LazyOperation', title: 'Operation' })
+          );
+          return z.object({
+            annotated: operation.meta({ title: 'Annotated operation' }),
+            operations: z.union([operation, z.string()]),
+          });
+        });
+
+        expect(actual).toEqual(expected);
+        expect(actual.shared).toHaveProperty('LazyOperation');
+        expect(JSON.stringify(actual.schema)).toContain('#/components/schemas/LazyOperation');
+      });
+
+      test('keeps the full component when a lazy schema and its .meta() clone are both used', () => {
+        const { expected, actual } = convertBoth((wrap) => {
+          const colorMapping = wrap(() =>
+            z
+              .union([
+                z.object({ mode: z.literal('categorical') }),
+                z.object({ mode: z.literal('gradient') }),
+              ])
+              .meta({ id: 'LazyColorMapping', title: 'Color mapping' })
+          );
+          const bucket = wrap(() =>
+            z.object({ operation: z.literal('terms') }).meta({ id: 'LazyBucket' })
+          );
+          return z.object({
+            color: z.union([colorMapping, z.literal('auto')]),
+            rows: z.array(z.object({ color: z.union([colorMapping, z.literal('auto')]) })),
+            buckets: z.array(z.union([bucket.meta({ title: 'Bucket' }), bucket])),
+          });
+        });
+
+        expect(actual).toEqual(expected);
+        expect(actual.shared.LazyColorMapping).toHaveProperty('anyOf');
+        expect(actual.shared.LazyBucket).toHaveProperty('additionalProperties', false);
+      });
+    });
+  });
+
+  test('isoDateTime converts to format date-time', () => {
+    const schema = z4.object({ createdAt: isoDateTime({ offset: true }) });
+    const result = convert(schema as any);
+
+    expect(result.schema.properties?.createdAt).toMatchObject({
+      type: 'string',
+      format: 'date-time',
     });
   });
 });

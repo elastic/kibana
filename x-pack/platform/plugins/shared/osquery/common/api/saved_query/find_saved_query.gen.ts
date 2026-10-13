@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   SavedQueryId,
@@ -59,10 +59,10 @@ export const FindSavedQueryResponse = lazySchema(() =>
           removed: RemovedOrUndefined.optional(),
           platform: PlatformOrUndefined.optional(),
           ecs_mapping: ECSMappingOrUndefined.optional(),
-          created_at: z.string().datetime().optional(),
+          created_at: isoDateTime().optional(),
           created_by: z.string().nullable().optional(),
           created_by_profile_uid: z.string().optional(),
-          updated_at: z.string().datetime().optional(),
+          updated_at: isoDateTime().optional(),
           updated_by: z.string().nullable().optional(),
           updated_by_profile_uid: z.string().optional(),
           prebuilt: z.boolean().optional(),
@@ -90,10 +90,10 @@ export const FindSavedQueryDetailResponse = lazySchema(() =>
       removed: RemovedOrUndefined.optional(),
       platform: PlatformOrUndefined.optional(),
       ecs_mapping: ECSMappingOrUndefined.optional(),
-      created_at: z.string().datetime().optional(),
+      created_at: isoDateTime().optional(),
       created_by: z.string().nullable().optional(),
       created_by_profile_uid: z.string().optional(),
-      updated_at: z.string().datetime().optional(),
+      updated_at: isoDateTime().optional(),
       updated_by: z.string().nullable().optional(),
       updated_by_profile_uid: z.string().optional(),
       prebuilt: z.boolean().optional(),

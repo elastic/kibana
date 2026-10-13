@@ -19,6 +19,9 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
+  // Migration recommendation: MIGRATE TO SCOUT (API). See individual tests.
+  // Serverless copy of src/platform/test/api_integration/apis/kql_telemetry/kql_telemetry.ts; condense into one Scout API test
+  // tagged `tags.deploymentAgnostic`.
   describe('telemetry API', () => {
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
@@ -44,6 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
+    // MIGRATE TO SCOUT (API)
+    // This and the next three tests: counter increments need the saved objects index. They are
+    // order-dependent (the first two assert counts of exactly 1), so the Scout spec must clean the
+    // `kql-telemetry` saved object first (`kbnClient.savedObjects.clean`) or assert deltas. The
+    // `basic.json` load/unload is unrelated to the route: do not port it.
+    // Target: src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts
     it('should increment the opt *in* counter in the .kibana_analytics/kql-telemetry document', async () => {
       await supertestAdminWithCookieCredentials
         .post('/internal/kql_opt_in_stats')
@@ -96,6 +105,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.success).to.be(true);
     });
 
+    // MIGRATE TO SCOUT (API)
+    // Only exercises the route schema. A schema-only unit test would change in lockstep with the schema
+    // and not catch an unintended change to the endpoint's payload contract.
+    // Target: the same Scout API test as the rest of this file.
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Promise.all([
         supertestAdminWithCookieCredentials

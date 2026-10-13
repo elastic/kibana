@@ -1,12 +1,108 @@
 {
-  "sha1": "97fad9e358088381c4bc21dc085c3e85d143551b",
+  "sha1": "d4c019e49eb9bc0356939b85975a8762abe403db",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "573fcc9ed716f81-87fcfda1cf1f296",
-      "title": "POST /internal/nightshift/investigations/{id}/_ensure acknowledges without side effects when the investigation is already running",
+      "id": "9094409a4361f3f-43b3061a5b88a7d",
+      "title": "/internal/nightshift/custom_context adds, keeps, edits and removes snippets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "9094409a4361f3f-7de094e8a9e8d67",
+      "title": "/internal/nightshift/custom_context rejects snippets over the size limits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "9094409a4361f3f-4eb95a61f406597",
+      "title": "/internal/nightshift/custom_context keeps snippets isolated per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 155,
+        "column": 7
+      }
+    },
+    {
+      "id": "9094409a4361f3f-22c6f36b3ac03c7",
+      "title": "/internal/nightshift/custom_context lets read-only users list snippets but not change them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
+      "id": "9094409a4361f3f-c85f4acc63ae68e",
+      "title": "/internal/nightshift/custom_context rejects users without any Nightshift privilege in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 185,
+        "column": 31
+      }
+    },
+    {
+      "id": "9094409a4361f3f-e7ae12e2cdfa0f9",
+      "title": "/internal/nightshift/custom_context returns 404 while Nightshift is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 201,
+        "column": 30
+      }
+    },
+    {
+      "id": "573fcc9ed716f81-3479f2ebf69bc23",
+      "title": "POST /internal/nightshift/investigations/{id}/_ensure rejects a running investigation without a matching workflow execution",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -434,6 +530,62 @@
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 229,
         "column": 7
+      }
+    },
+    {
+      "id": "04709a0df7399d2-fbf417bb9008f85",
+      "title": "Semantic Memory write routes are authorized on the server archive is refused to a reader and leaves the memory active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 61,
+        "column": 15
+      }
+    },
+    {
+      "id": "04709a0df7399d2-b74c471701b9b99",
+      "title": "Semantic Memory write routes are authorized on the server delete is refused to a reader and leaves the document in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "04709a0df7399d2-b83137dc4d0d216",
+      "title": "Semantic Memory write routes are authorized on the server delete is refused to a manager, who may archive but not configure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 82,
+        "column": 16
+      }
+    },
+    {
+      "id": "04709a0df7399d2-7348e67402db359",
+      "title": "Semantic Memory write routes are authorized on the server a manager may archive, and a reader may read the memory that survived",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 93,
+        "column": 52
       }
     },
     {

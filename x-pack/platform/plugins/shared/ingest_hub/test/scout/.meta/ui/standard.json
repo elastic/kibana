@@ -1,5 +1,5 @@
 {
-  "sha1": "a3c11165584cc881e5410e7df8b2fdb8b22883a9",
+  "sha1": "3a8986f619e2a25d892a5887071a430415a92024",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 260,
+        "line": 258,
         "column": 13
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 320,
+        "line": 318,
         "column": 16
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 366,
+        "line": 364,
         "column": 25
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 534,
+        "line": 529,
         "column": 23
       }
     },
@@ -719,8 +719,8 @@
       }
     },
     {
-      "id": "7f9cbf00b4a7ca7-3af4512cd2bfc72",
-      "title": "Onboarding SO persistence static-keys ?deploymentId= resume renders StaticKeysReplaceView",
+      "id": "7f9cbf00b4a7ca7-7e287296a5179c9",
+      "title": "Onboarding SO persistence static-keys ?deploymentId= resume renders the key form",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -728,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
-        "line": 198,
+        "line": 195,
         "column": 24
       }
     },
@@ -744,6 +744,104 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
         "line": 63,
         "column": 8
+      }
+    },
+    {
+      "id": "52853464453d623-3f20ef11fe76dae",
+      "title": "Onboarding resume with stored secrets — agent-based, static keys shows the stored keys and does not ask to re-enter credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_agent_based.spec.ts",
+        "line": 138,
+        "column": 7
+      }
+    },
+    {
+      "id": "52853464453d623-97f610f8aa28ffb",
+      "title": "Onboarding resume with stored secrets — agent-based, static keys replacing the stored keys makes Next redeploy with the new values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_agent_based.spec.ts",
+        "line": 144,
+        "column": 26
+      }
+    },
+    {
+      "id": "8507b333537c306-f73bee89d06d0ee",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys shows the stored keys as placeholders, not inputs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 194,
+        "column": 20
+      }
+    },
+    {
+      "id": "8507b333537c306-885e7387eb6bbc3",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys a settings change redeploys without retyping and sends the stored refs back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 209,
+        "column": 53
+      }
+    },
+    {
+      "id": "8507b333537c306-e8c096c72d81b38",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys replacing the keys alone redeploys, sending the new values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 232,
+        "column": 7
+      }
+    },
+    {
+      "id": "8507b333537c306-37c1e7946fe30f0",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys Keep the stored secrets goes back to the placeholders and clears the change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 279,
+        "column": 11
+      }
+    },
+    {
+      "id": "b624b3d925e730b-ae784e2698e9663",
+      "title": "Onboarding — adding a service in the same session reuses the stored keys the second service is created with the first policy secret refs, not typed keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_same_session.spec.ts",
+        "line": 65,
+        "column": 28
       }
     },
     {

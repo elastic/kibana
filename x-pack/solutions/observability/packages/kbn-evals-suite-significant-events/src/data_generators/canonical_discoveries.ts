@@ -17,29 +17,26 @@ const normalizeEventIdSegment = (value: string): string =>
     .replace(/^-+|-+$/g, '');
 
 export const canonicalDiscoveryFromGroundTruth = ({
-  streamName,
+  sourceId,
   scenarioId,
   discovery,
 }: {
-  streamName: string;
+  sourceId: string;
   scenarioId: string;
   discovery: Partial<SignificantEvent>;
 }): SignificantEvent => {
   const signals = discovery.signals ?? [];
-  const streamNames =
-    discovery.stream_names ??
+  const sourceIds =
+    discovery.source_ids ??
     Array.from(
-      new Set([
-        streamName,
-        ...signals.map((s) => s.stream_name).filter((n): n is string => Boolean(n)),
-      ])
+      new Set([sourceId, ...signals.map((s) => s.source_id).filter((n): n is string => Boolean(n))])
     );
 
   return {
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
     event_id: discovery.event_id ?? `${normalizeEventIdSegment(scenarioId)}__canonical`,
     status: discovery.status ?? 'active',
-    stream_names: streamNames,
+    source_ids: sourceIds,
     symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',
     summary: discovery.summary ?? '',
