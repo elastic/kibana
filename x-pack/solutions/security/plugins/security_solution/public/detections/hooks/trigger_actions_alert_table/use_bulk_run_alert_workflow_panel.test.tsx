@@ -146,11 +146,6 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
     mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
-    combineQueriesMock.mockReturnValue({
-      filterQuery: '{"bool":{}}',
-      kqlError: undefined,
-      baseKqlQuery: { query: '', language: 'kuery' },
-    });
     mockAlertIdSearch({ events: [], totalCount: 0 });
   });
 

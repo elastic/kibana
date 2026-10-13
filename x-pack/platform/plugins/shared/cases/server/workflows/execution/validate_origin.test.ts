@@ -575,41 +575,6 @@ describe('parseSelectedAlertPairs', () => {
   });
 });
 
-// ── documentIds rejection ────────────────────────────────────────────────────
-
-describe('rejectDocumentIdSelections', () => {
-  it.each([
-    ['no event', {}],
-    ['no documentIds', { event: {} }],
-    ['a null documentIds', { event: { documentIds: null } }],
-    ['an undefined documentIds', { event: { documentIds: undefined } }],
-  ])('allows inputs with %s', (_name, inputs) => {
-    expect(() => rejectDocumentIdSelections(inputs)).not.toThrow();
-  });
-
-  it('allows a pre-expanded documents payload, which is forwarded verbatim as before', () => {
-    expect(() =>
-      rejectDocumentIdSelections({
-        event: { triggerType: 'document', documents: [{ _id: 'doc-1', _index: 'logs' }] },
-      })
-    ).not.toThrow();
-  });
-
-  it('throws 400 for documentIds, which have no case-membership source to validate against', () => {
-    expect(() =>
-      rejectDocumentIdSelections({
-        event: { triggerType: 'document', documentIds: [{ _id: 'doc-1', _index: 'logs' }] },
-      })
-    ).toThrow(/cannot be used with a case workflow run/);
-  });
-
-  it('throws 400 even for an empty documentIds array so the shape is rejected consistently', () => {
-    expect(() => rejectDocumentIdSelections({ event: { documentIds: [] } })).toThrow(
-      /cannot be used with a case workflow run/
-    );
-  });
-});
-
 // ── cases.observables origin ──────────────────────────────────────────────────
 
 describe('cases.observables origin', () => {
@@ -807,6 +772,36 @@ describe('event attachment origin', () => {
         theCase: caseWithEvent,
       })
     ).toThrow('All selected documents must belong to the case.');
+  });
+
+  it('throws when documentIds are outside the case even if the documents are attached', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.case', caseId: 'case-1' },
+        inputs: {
+          event: {
+            documents: [{ _id: 'event-1', _index: '.ds-logs-default' }],
+            documentIds: [{ _id: 'unattached', _index: '.ds-logs-default' }],
+          },
+        },
+        theCase: caseWithEvent,
+      })
+    ).toThrow('All selected documents must belong to the case.');
+  });
+
+  it('passes when both documents and documentIds are attached to the case', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.case', caseId: 'case-1' },
+        inputs: {
+          event: {
+            documents: [{ _id: 'event-1', _index: '.ds-logs-default' }],
+            documentIds: [{ _id: 'event-1', _index: '.ds-logs-default' }],
+          },
+        },
+        theCase: caseWithEvent,
+      })
+    ).not.toThrow();
   });
 });
 
