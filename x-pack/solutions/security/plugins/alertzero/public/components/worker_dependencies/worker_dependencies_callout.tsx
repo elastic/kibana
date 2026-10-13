@@ -15,7 +15,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -36,6 +35,7 @@ import {
   useWorkerDependencyChecks,
   type DependencyStatus,
 } from './use_worker_dependency_checks';
+import { DependencySentence, type DependencySentenceId } from './dependency_sentence';
 import * as i18n from './translations';
 
 type DependencyId =
@@ -55,16 +55,33 @@ type EnableableDependencyId =
 /** `blocked` stops the Worker from doing its job; `limited` only degrades a hand-off. */
 type DependencySeverity = 'blocked' | 'limited';
 
-const DEPENDENCIES_BY_WORKER: Readonly<Record<string, readonly DependencyId[]>> = {
-  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: ['alertAnalysis'],
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: ['contextEngine', 'attackDiscoveryWorkflows'],
-  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: [
-    'contextEngine',
-    'threatIngest',
-    'threatEnrich',
+interface WorkerDependency {
+  id: DependencyId;
+  severity: DependencySeverity;
+  /** Sentence shown while the dependency is missing. */
+  sentence: DependencySentenceId;
+}
+
+const DEPENDENCIES_BY_WORKER: Readonly<Record<string, readonly WorkerDependency[]>> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: [
+    { id: 'alertAnalysis', severity: 'blocked', sentence: 'alertAnalysisOff' },
   ],
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: ['contextEngine'],
-  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: ['contextEngine', 'defend'],
+  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: [
+    { id: 'contextEngine', severity: 'limited', sentence: 'contextEngineAttack' },
+    { id: 'attackDiscoveryWorkflows', severity: 'blocked', sentence: 'attackDiscoveryOff' },
+  ],
+  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: [
+    { id: 'contextEngine', severity: 'limited', sentence: 'contextEngineHunt' },
+    { id: 'threatIngest', severity: 'limited', sentence: 'threatWorkflowOff' },
+    { id: 'threatEnrich', severity: 'limited', sentence: 'threatWorkflowOff' },
+  ],
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: [
+    { id: 'contextEngine', severity: 'blocked', sentence: 'contextEngineCoverage' },
+  ],
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: [
+    { id: 'contextEngine', severity: 'blocked', sentence: 'contextEngineEndpoint' },
+    { id: 'defend', severity: 'blocked', sentence: 'defendMissing' },
+  ],
 };
 
 const SEVERITY_ORDER: Readonly<Record<DependencyStatus, number>> = {
@@ -82,12 +99,9 @@ interface Destination {
 interface DependencyMessage {
   id: DependencyId;
   status: DependencyStatus;
-  label: string;
-  /** Verb phrase after the label, e.g. "is off". */
-  state: string;
   severity: DependencySeverity;
-  /** What the Worker can't do, e.g. "can't generate discoveries". */
-  consequence: string;
+  label: string;
+  sentence: DependencySentenceId;
   destination?: Destination;
   linkText?: string;
 }
@@ -110,9 +124,6 @@ const enableableDependencyLabel = (id: EnableableDependencyId): string => {
   }
 };
 
-const isPlainLeftClick = (event: React.MouseEvent): boolean =>
-  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
-
 interface Props {
   worker: Pick<Worker, 'id'>;
   surface: 'onboarding' | 'settings';
@@ -123,23 +134,22 @@ interface DestinationButtonProps {
   linkText: string;
 }
 
+/** A plain href; Kibana's global link redirect turns plain left clicks into in-app navigation. */
 const DestinationButton: React.FC<DestinationButtonProps> = ({ destination, linkText }) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();
   const href = application.getUrlForApp(destination.appId, { path: destination.path });
-  const onClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!isPlainLeftClick(event)) return;
-    event.preventDefault();
-    void application.navigateToApp(destination.appId, { path: destination.path });
-  };
 
   return (
-    <EuiButtonEmpty size="s" flush="right" href={href} onClick={onClick}>
+    <EuiButtonEmpty size="s" flush="right" href={href}>
       {linkText}
     </EuiButtonEmpty>
   );
 };
+
+const unverifiedSentence = (id: DependencyId): DependencySentenceId =>
+  id === 'threatIngest' || id === 'threatEnrich' ? 'unverifiedThreatWorkflow' : 'unverified';
 
 interface DependencyRowProps {
   message: DependencyMessage;
@@ -150,51 +160,39 @@ interface DependencyRowProps {
 }
 
 const DependencyRow: React.FC<DependencyRowProps> = ({
-  message: { id, status, label, state, consequence, destination, linkText },
+  message: { id, status, label, sentence, destination, linkText },
   onEnable,
   isEnabling,
   enableDisabled,
   enableFailed,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const unverified = status === 'unknown';
 
   return (
     <li data-test-subj={`alertZeroWorkerDependency-${id}`}>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
+        responsive={false}
+        css={css`
+          /* Match the action button height so rows without an action align with those that have one. */
+          min-height: ${euiTheme.size.xl};
+        `}
+      >
         <EuiFlexItem>
-          <EuiText size="s" data-test-subj={`alertZeroDependencyDescription-${id}`}>
-            {unverified ? (
-              <FormattedMessage
-                id="xpack.alertzero.workerDependencies.unverifiedRow"
-                defaultMessage="{label} {description}"
-                values={{
-                  label: <strong>{label}</strong>,
-                  description:
-                    id === 'threatIngest' || id === 'threatEnrich'
-                      ? i18n.UNVERIFIED_THREAT_WORKFLOW_DESCRIPTION
-                      : i18n.UNVERIFIED_DESCRIPTION,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.alertzero.workerDependencies.missingRow"
-                defaultMessage="{label} {state}, so {consequence}."
-                values={{
-                  label: <strong>{label}</strong>,
-                  state,
-                  consequence: (
-                    <span
-                      css={css`
-                        color: ${euiTheme.colors.textSubdued};
-                      `}
-                    >
-                      {consequence}
-                    </span>
-                  ),
-                }}
-              />
-            )}
+          <EuiText size="s" color="subdued" data-test-subj={`alertZeroDependencyDescription-${id}`}>
+            <DependencySentence
+              sentence={status === 'unknown' ? unverifiedSentence(id) : sentence}
+              label={
+                <strong
+                  css={css`
+                    color: ${euiTheme.colors.textParagraph};
+                  `}
+                >
+                  {label}
+                </strong>
+              }
+            />
           </EuiText>
           {enableFailed ? (
             <EuiText size="xs" color="danger">
@@ -303,17 +301,16 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
   };
 
   const visible = React.useMemo(() => {
-    const dependencyIds = DEPENDENCIES_BY_WORKER[worker.id] ?? [];
-    const messages: DependencyMessage[] = dependencyIds.map((id): DependencyMessage => {
+    const dependencies = DEPENDENCIES_BY_WORKER[worker.id] ?? [];
+    const messages = dependencies.map(({ id, severity, sentence }): DependencyMessage => {
       switch (id) {
         case 'contextEngine':
           return {
             id,
+            severity,
+            sentence,
             status: checks.contextEngine,
             label: i18n.CONTEXT_ENGINE_LABEL,
-            state: i18n.STATE_OFF,
-            severity: i18n.contextEngineSeverity(worker.id),
-            consequence: i18n.contextEngineConsequence(worker.id),
             destination: advancedSettingsDestination('Context Engine'),
             linkText: i18n.ADVANCED_SETTINGS_LINK_TEXT,
           };
@@ -321,42 +318,35 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           const workflowMissing = checks.alertAnalysisWorkflow === 'missing';
           return {
             id,
+            severity,
+            sentence: workflowMissing ? 'alertAnalysisWorkflowMissing' : sentence,
             status: checks.alertAnalysis,
             label: workflowMissing ? i18n.ALERT_ANALYSIS_WORKFLOW_LABEL : i18n.ALERT_ANALYSIS_LABEL,
-            state: workflowMissing ? i18n.STATE_MISSING_OR_DISABLED : i18n.STATE_OFF,
-            severity: 'blocked',
-            consequence: i18n.ALERT_ANALYSIS_CONSEQUENCE,
             destination: { appId: 'security', path: '/rules/alert_analysis_workflow' },
             linkText: i18n.ALERT_ANALYSIS_LINK_TEXT,
           };
         }
-        case 'attackDiscoveryWorkflows':
+        case 'attackDiscoveryWorkflows': {
+          const available = checks.attackDiscoveryFeatureAvailable;
           return {
             id,
-            status: checks.attackDiscoveryFeatureAvailable
-              ? checks.attackDiscoveryWorkflows
-              : 'missing',
+            severity,
+            sentence: available ? sentence : 'attackDiscoveryUnavailable',
+            status: available ? checks.attackDiscoveryWorkflows : 'missing',
             label: i18n.ATTACK_DISCOVERY_LABEL,
-            state: checks.attackDiscoveryFeatureAvailable
-              ? i18n.STATE_OFF_PLURAL
-              : i18n.STATE_UNAVAILABLE,
-            severity: 'blocked',
-            consequence: checks.attackDiscoveryFeatureAvailable
-              ? i18n.ATTACK_DISCOVERY_CONSEQUENCE
-              : i18n.ATTACK_DISCOVERY_DEPLOYMENT_CONSEQUENCE,
-            destination: checks.attackDiscoveryFeatureAvailable
+            destination: available
               ? advancedSettingsDestination('Attack Discovery Workflows')
               : undefined,
             linkText: i18n.ADVANCED_SETTINGS_LINK_TEXT,
           };
+        }
         case 'defend':
           return {
             id,
+            severity,
+            sentence,
             status: checks.defend,
             label: i18n.DEFEND_LABEL,
-            state: i18n.STATE_NOT_SET_UP,
-            severity: 'blocked',
-            consequence: i18n.DEFEND_CONSEQUENCE,
             destination: { appId: 'integrations', path: '/detail/endpoint/overview' },
             linkText: i18n.DEFEND_LINK_TEXT,
           };
@@ -368,11 +358,10 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           const status = id === 'threatIngest' ? checks.threatIngest : checks.threatEnrich;
           return {
             id,
+            severity,
+            sentence,
             status,
             label,
-            state: i18n.STATE_WORKFLOW_OFF,
-            severity: 'limited',
-            consequence: i18n.THREAT_WORKFLOW_CONSEQUENCE,
             // A missing row in the Workflows bulk response may also be unreadable. In that
             // case take the user to the list rather than linking to a possibly inaccessible ID.
             destination:
@@ -421,11 +410,6 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           li + li {
             margin-top: ${euiTheme.size.xs};
           }
-
-          /* Keep each line's text vertically centred on its 32px button. */
-          li {
-            min-height: ${euiTheme.size.xl};
-          }
         `}
       >
         {visible.map((message) => {
@@ -446,9 +430,19 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
         })}
       </ul>
       {hasUnknown ? (
-        <EuiButtonEmpty size="xs" onClick={checks.retry}>
-          {i18n.RETRY_BUTTON_LABEL}
-        </EuiButtonEmpty>
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          responsive={false}
+          css={css`
+            margin-top: ${euiTheme.size.xs};
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" flush="right" onClick={checks.retry}>
+              {i18n.RETRY_BUTTON_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : null}
     </>
   );
@@ -460,9 +454,6 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           margin-top: ${euiTheme.size.m};
           padding-top: ${euiTheme.size.s};
           border-top: ${euiTheme.border.thin};
-          /* Button hit areas add ~6px below the last line; pull it back so the
-             card's bottom padding visually matches the top. */
-          margin-bottom: -${euiTheme.size.s};
         `}
         data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`}
       >

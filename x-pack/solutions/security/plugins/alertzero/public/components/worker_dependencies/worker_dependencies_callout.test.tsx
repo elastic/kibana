@@ -358,7 +358,16 @@ describe('WorkerDependenciesCallout', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Could not enable Ingest threat feeds'
     );
-    expect(screen.getByTestId('alertZeroWorkerDependency-threatIngest')).toBeInTheDocument();
+    const item = screen.getByTestId('alertZeroWorkerDependency-threatIngest');
+    expect(item).toBeInTheDocument();
+    // The per-workflow link returns as a fallback beside the retry-able Enable button.
+    expect(within(item).getByRole('link', { name: /^Open workflow/ })).toHaveAttribute(
+      'href',
+      `/s/analyst/app/workflows/${THREAT_REPORT_WORKFLOWS[0].id}`
+    );
+    expect(
+      within(item).getByRole('button', { name: 'Enable Ingest threat feeds' })
+    ).toBeInTheDocument();
     expect(core.http.post).toHaveBeenCalledTimes(1);
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Could not enable Ingest threat feeds',
@@ -588,7 +597,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)]);
     const item = screen.getByTestId('alertZeroWorkerDependency-attackDiscoveryWorkflows');
     expect(item).toHaveTextContent(
-      'Attack Discovery workflows are unavailable for this deployment, so an administrator needs to enable them.'
+      'Attack Discovery workflows are unavailable for this deployment. Ask an administrator to enable them.'
     );
     expect(within(item).queryByRole('link')).toBeNull();
     expect(within(item).queryByRole('button')).toBeNull();
@@ -601,15 +610,11 @@ describe('WorkerDependenciesCallout', () => {
     });
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)]);
     const item = screen.getByTestId('alertZeroWorkerDependency-attackDiscoveryWorkflows');
-    const link = within(item).getByRole('link', { name: /^Open Advanced Settings/ });
-    expect(link).toHaveAttribute(
+    // A plain href: Kibana's global link redirect handles in-app navigation.
+    expect(within(item).getByRole('link', { name: /^Open Advanced Settings/ })).toHaveAttribute(
       'href',
       '/s/analyst/app/management/kibana/settings?query=Attack%20Discovery%20Workflows'
     );
-    fireEvent.click(link);
-    expect(core.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: '/kibana/settings?query=Attack%20Discovery%20Workflows',
-    });
     act(() => discoverySetting.next(true));
     expect(screen.queryByTestId('alertZeroWorkerDependency-attackDiscoveryWorkflows')).toBeNull();
   });
