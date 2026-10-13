@@ -26,6 +26,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SubscriptionAvailability } from '../common/availability';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
@@ -62,6 +63,15 @@ export type AlertTriageAttachmentServiceProvider = (
 ) => Promise<AlertTriageAttachmentService | undefined>;
 
 /**
+ * Installs threat-intel supply managed workflows owned by security_solution
+ * (global ingest/enrich plus the per-space attribute workflow) for the given
+ * space. Pushed from security_solution's `start()` so AlertZero can call it when
+ * Hunt enable finds a required TI document missing, without owning TI YAML or
+ * declaring a reverse plugin dependency.
+ */
+export type ThreatIntelSupplyWorkflowInstaller = (params: { spaceId: string }) => Promise<void>;
+
+/**
  * Soft-enable contract. Always returned from `setup()` so optional consumers
  * (e.g. security_solution threat-intel supply) can gate on `isEnabled` without
  * reading `xpack.alertzero` config themselves.
@@ -87,6 +97,14 @@ export interface AlertZeroPluginStart {
   registerAlertTriageAttachmentServiceProvider: (
     provider: AlertTriageAttachmentServiceProvider
   ) => void;
+  /**
+   * Same push pattern as {@link registerAlertTriageAttachmentServiceProvider}: security_solution
+   * registers the TI owner installer from its `start()` so Hunt ensure can install missing
+   * supply workflows without AlertZero owning those definitions.
+   */
+  registerThreatIntelSupplyWorkflowInstaller: (
+    installer: ThreatIntelSupplyWorkflowInstaller
+  ) => void;
 }
 
 export interface AlertZeroSetupDependencies {
@@ -100,6 +118,7 @@ export interface AlertZeroSetupDependencies {
 }
 
 export interface AlertZeroStartDependencies {
+  taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;

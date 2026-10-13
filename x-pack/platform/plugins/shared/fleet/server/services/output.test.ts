@@ -1427,15 +1427,8 @@ describe('Output Service', () => {
         mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
           canEncrypt: true,
         } as any);
-        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          enableOtlpOutput: true,
-        } as any);
         mockedExtractAndWriteOutputSecrets.mockResolvedValue({ output: { type: 'otlp' } } as any);
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
-      });
-
-      afterEach(() => {
-        mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
       });
 
       it('should throw if OTLP output type is not enabled', async () => {
@@ -3678,9 +3671,6 @@ describe('Output Service', () => {
 
     describe('otlp output', () => {
       beforeEach(() => {
-        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          enableOtlpOutput: true,
-        } as any);
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedExtractAndUpdateOutputSecrets.mockResolvedValue({
@@ -3688,10 +3678,6 @@ describe('Output Service', () => {
           outputUpdate: {},
         } as any);
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
-      });
-
-      afterEach(() => {
-        mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
       });
 
       it('Should throw if OTLP output type is not enabled on update', async () => {

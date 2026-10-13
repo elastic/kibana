@@ -1,0 +1,93 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postSyntheticMonitorsRequestExample1:
+          summary: HTTP monitor
+          description: Create an HTTP monitor to check a website's availability.
+          value:
+            type: http
+            name: Website Availability
+            url: https://example.com
+            tags: [website, availability]
+            locations: [united_kingdom]
+        postSyntheticMonitorsRequestExample2:
+          summary: TCP monitor
+          description: Create a TCP monitor to monitor a server's availability.
+          value:
+            type: tcp
+            name: Server Availability
+            host: example.com
+            private_locations: [my_private_location]
+        postSyntheticMonitorsRequestExample3:
+          summary: ICMP monitor
+          description: Create an ICMP monitor to perform ping checks.
+          value:
+            type: icmp
+            name: Ping Test
+            host: example.com
+            locations: [united_kingdom]
+        postSyntheticMonitorsRequestExample4:
+          summary: Browser monitor
+          description: Create a browser monitor to check a website.
+          value:
+            type: browser
+            name: Example journey
+            inline_script: "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))"
+            locations: [united_kingdom]
+responses:
+  200:
+    description: >
+      A successful response.
+      The response may include a `warnings` array when the monitor configuration has non-critical issues.
+      For example, if a browser monitor specifies a timeout but has no private locations configured, a warning is returned indicating the timeout will have no effect.
+    content:
+      application/json:
+        schema:
+          $ref: '../../oas_schemas.yaml#/monitorResponse'
+        examples:
+          postSyntheticMonitorsResponseWithWarning:
+            summary: Response with warning
+            description: A response when a browser monitor specifies a timeout but has no private locations.
+            value:
+              type: browser
+              name: Example journey
+              enabled: true
+              warnings:
+                - id: monitor-id
+                  message: 'For browser monitors, timeout is only supported on private locations. Browser monitor "Example journey" specifies a timeout and is running on public locations: "public-1, public-2". The timeout will have no effect on these locations.'
+                  publicLocationIds: [public-1, public-2]
+  400:
+    description: >
+      Bad request.
+      For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            statusCode:
+              type: integer
+              example: 400
+            error:
+              type: string
+              example: Bad Request
+            message:
+              type: string
+              example: Browser Monitor timeout is invalid
+            attributes:
+              type: object
+              properties:
+                details:
+                  type: string
+                  example: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+        examples:
+          invalidBrowserTimeout:
+            summary: Invalid browser timeout
+            description: A 400 error when a browser monitor timeout is below 30 seconds.
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: Browser Monitor timeout is invalid
+              attributes:
+                details: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.

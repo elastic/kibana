@@ -233,6 +233,56 @@ describe('useRelayAppConnection', () => {
     expect(httpPost).toHaveBeenCalledWith('/internal/significant_events/apps/slack/disconnect');
   });
 
+  it('does not poll while a workspace is awaiting confirmation, and exposes it', async () => {
+    const workspace = { tenantKey: 'T0123ABC', name: 'Acme', url: 'https://acme.slack.com/' };
+    httpGet.mockResolvedValue(
+      statusResponse(RELAY_APP_CONNECTION_STATUS.pendingConfirmation, { workspace })
+    );
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+
+    await flush();
+    await flush(POLL_INTERVAL_MS * 3);
+
+    expect(httpGet).toHaveBeenCalledTimes(1);
+    expect(result.current.workspace).toEqual(workspace);
+  });
+
+  it('confirm() posts the tenant key to the confirm route and refreshes the status', async () => {
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.pendingConfirmation));
+    httpPost.mockResolvedValue({ status: 'connected' });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+    await flush();
+
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
+    await act(async () => {
+      await result.current.confirm('T0123ABC');
+    });
+    await flush();
+
+    expect(httpPost).toHaveBeenCalledWith('/internal/significant_events/apps/slack/confirm', {
+      body: JSON.stringify({ tenantKey: 'T0123ABC' }),
+    });
+    expect(result.current.status).toBe(RELAY_APP_CONNECTION_STATUS.connected);
+  });
+
+  it('surfaces a toast error when confirm fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.pendingConfirmation));
+    httpPost.mockRejectedValue(new Error('workspace changed'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
+    await flush();
+
+    await act(async () => {
+      await result.current.confirm('T0123ABC').catch(() => undefined);
+    });
+
+    expect(addError).toHaveBeenCalledTimes(1);
+    consoleErrorSpy.mockRestore();
+  });
+
   // Regression coverage: the deadline must reset when the connection is no longer in-progress
   // so a later reconnect gets a fresh polling window instead of one capped by the
   // time remaining from the previous install's deadline.

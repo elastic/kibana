@@ -24,11 +24,12 @@ import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/significant-events-schema';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchDetections } from '../../../../hooks/use_fetch_detections';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DetectionFlyout } from './detection_flyout';
-import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
+import { FindSignificantEventsButton } from '../shared/find_significant_events_button';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { formatTimestamp } from '../../../../util/formatters';
 import { CHANGE_TYPE_LABELS } from '../shared/translations';
@@ -96,6 +97,7 @@ export const DetectionsTab = () => {
     pageSizeOptions: [10, 25, 50],
   };
 
+  const { getSourceTitle } = useSourcesById();
   const columns: Array<EuiBasicTableColumn<Detection>> = useMemo(
     () => [
       {
@@ -157,13 +159,13 @@ export const DetectionsTab = () => {
         render: (timestamp: string) => formatTimestamp(timestamp),
       },
       {
-        field: 'stream_name',
-        name: i18n.translate('xpack.significantEventsApp.detectionsTab.streamColumn', {
-          defaultMessage: 'Stream',
+        field: 'source_id',
+        name: i18n.translate('xpack.significantEventsApp.sources.detectionsTab.sourceColumn', {
+          defaultMessage: 'Source',
         }),
         width: '140px',
-        render: (streamName?: string) =>
-          streamName ? <EuiBadge color="hollow">{streamName}</EuiBadge> : null,
+        render: (sourceId?: string) =>
+          sourceId ? <EuiBadge color="hollow">{getSourceTitle(sourceId)}</EuiBadge> : null,
       },
       {
         name: (
@@ -184,7 +186,7 @@ export const DetectionsTab = () => {
         },
       },
     ],
-    [selectedDetectionId, toggleSelectedDetection]
+    [selectedDetectionId, toggleSelectedDetection, getSourceTitle]
   );
 
   return (
