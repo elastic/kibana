@@ -44,10 +44,17 @@ export const checkUntrackedNamespacesTask: TaskSignature<TaskOptions> = (
             parent.title = `Checking untracked messages inside "${rootPath}"`;
 
             for await (const extraction of extractUntrackedMessages(rootPath, ignoredDirs)) {
-              const { untrackedFilePath, extractedMessages, totalChecked, totalToCheck } =
-                extraction;
+              const {
+                untrackedFilePath,
+                extractedMessages,
+                parseError,
+                totalChecked,
+                totalToCheck,
+              } = extraction;
 
-              task.output = `[${totalChecked}/${totalToCheck}] Found ${extractedMessages.size} untracked messages in file ${untrackedFilePath}`;
+              if (extractedMessages.size > 0 || parseError) {
+                task.output = `[${totalChecked}/${totalToCheck}] Found ${extractedMessages.size} untracked messages in file ${untrackedFilePath}`;
+              }
               reportUntrackedExtraction(errorReporter, extraction);
             }
           }

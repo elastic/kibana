@@ -58,10 +58,17 @@ export const getIgnorePatternsForRoot = (rootPath: string, ignoredDirs: string[]
     .map((dir) => `${normalize(path.relative(absoluteRootPath, dir))}/**`);
 };
 
+/** True when `rootPath` is itself, or sits inside, one of the ignored directories. */
+export const isRootIgnored = (rootPath: string, ignoredDirs: string[]) => {
+  const absoluteRootPath = makeAbsolutePath(rootPath, true);
+
+  return ignoredDirs.some((dir) => absoluteRootPath.startsWith(makeAbsolutePath(dir, true)));
+};
+
 const emptyMessages = () => new Map<string, MessageDescriptor>();
 
 const extractOrCaptureParseError = (filePath: string, source: string) =>
-  extractI18nMessageDescriptors(filePath, source).then(
+  extractI18nMessageDescriptors(normalizePath(filePath), source).then(
     (extractedMessages) => ({ extractedMessages, parseError: undefined }),
     (parseError: Error) => ({ extractedMessages: emptyMessages(), parseError })
   );
@@ -71,6 +78,10 @@ export async function* extractUntrackedMessages(
   rootPath: string,
   ignoredDirs: string[]
 ): AsyncGenerator<UntrackedExtraction> {
+  if (isRootIgnored(rootPath, ignoredDirs)) {
+    return;
+  }
+
   const untrackedFiles = await globNamespacePaths(rootPath, {
     additionalIgnore: [
       ...getIgnorePatternsForRoot(rootPath, [...ignoredDirs, ...ALWAYS_IGNORED_DIRS]),

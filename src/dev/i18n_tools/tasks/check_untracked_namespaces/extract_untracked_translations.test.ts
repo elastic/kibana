@@ -13,6 +13,7 @@ import type { I18nConfig } from '../../types';
 import {
   extractUntrackedMessages,
   getIgnorePatternsForRoot,
+  isRootIgnored,
   reportUntrackedExtraction,
   REGISTRATION_HINT,
 } from './extract_untracked_translations';
@@ -50,7 +51,24 @@ describe('getIgnorePatternsForRoot', () => {
   });
 });
 
+describe('isRootIgnored', () => {
+  it('is true for a root equal to or inside an ignored directory', () => {
+    expect(isRootIgnored(path.join(fixtureRoot, 'registered'), ignoredDirs)).toBe(true);
+    expect(isRootIgnored(path.join(fixtureRoot, 'excluded', 'nested'), ignoredDirs)).toBe(true);
+  });
+
+  it('is false for a root outside every ignored directory', () => {
+    expect(isRootIgnored(fixtureRoot, ignoredDirs)).toBe(false);
+    expect(isRootIgnored(path.join(fixtureRoot, 'registered-sibling'), ignoredDirs)).toBe(false);
+  });
+});
+
 describe('extractUntrackedMessages', () => {
+  it('yields nothing when the root itself is registered or excluded', async () => {
+    expect(await collectExtractions(path.join(fixtureRoot, 'registered'), ignoredDirs)).toEqual([]);
+    expect(await collectExtractions(path.join(fixtureRoot, 'excluded'), ignoredDirs)).toEqual([]);
+  });
+
   it('skips files under registered and excluded paths and reports the rest', async () => {
     const extractions = await collectExtractions(fixtureRoot, ignoredDirs);
 
