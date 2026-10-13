@@ -32,9 +32,14 @@ export const seriesFetchHours = (timeRange: TimeRange): number => {
   return (2 * dots - 1) * stepHours;
 };
 
-/** Returns the expression that numbers buckets in whole steps back from NOW(), 0 being the newest. */
-export const buildSeriesBucketExpression = (timeRange: TimeRange): string =>
-  `DATE_DIFF("hour", @timestamp, NOW()) / ${getSeriesWindow(timeRange).stepHours}`;
+/**
+ * Returns the expression that numbers buckets in whole steps back from NOW(), 0 being the newest,
+ * from `timeField` (the alert or anomaly @timestamp, or the entity's first_seen).
+ */
+export const buildSeriesBucketExpression = (
+  timeRange: TimeRange,
+  timeField: string = '@timestamp'
+): string => `DATE_DIFF("hour", ${timeField}, NOW()) / ${getSeriesWindow(timeRange).stepHours}`;
 
 /** Returns the condition that keeps the buckets of dot `k` (0 = newest): the range ending `k` steps back. */
 export const buildSeriesDotWindow = (timeRange: TimeRange, k: number): string =>

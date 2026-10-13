@@ -36,6 +36,12 @@ describe('tile series window', () => {
     expect(SERIES_BUCKET_COLUMN).toBe('bucket');
   });
 
+  it('can number buckets from another time field, such as first_seen', () => {
+    expect(buildSeriesBucketExpression('30d', 'entity.lifecycle.first_seen')).toBe(
+      'DATE_DIFF("hour", entity.lifecycle.first_seen, NOW()) / 24'
+    );
+  });
+
   it('keeps the buckets of dot k: the range ending k steps back', () => {
     expect(buildSeriesDotWindow('24h', 0)).toBe('bucket >= 0 AND bucket <= 23');
     expect(buildSeriesDotWindow('7d', 3)).toBe('bucket >= 3 AND bucket <= 30');
