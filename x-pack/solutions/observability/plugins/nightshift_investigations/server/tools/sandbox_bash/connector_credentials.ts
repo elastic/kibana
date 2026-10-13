@@ -62,25 +62,52 @@ const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => 
   return typeof authorization === 'string' ? authorization : undefined;
 };
 
+const BASE64_PATTERN = /^[A-Za-z0-9+/]+={0,2}$/;
+const PRINTABLE_PATTERN = /^[\x20-\x7E]+$/;
+
+const decodeBasicCredentials = (encoded: string): string | undefined => {
+  if (!BASE64_PATTERN.test(encoded)) return undefined;
+  const decoded = Buffer.from(encoded, 'base64').toString('utf8');
+  return PRINTABLE_PATTERN.test(decoded) ? decoded : undefined;
+};
+
 /**
- * Secret values derived from a connector's raw `secrets`, beyond its own top-level leaves — e.g.
- * the bare API key `buildConnectorEnv` extracts out of an `Authorization: ApiKey …` header and
- * injects as `CONNECTOR_SECRET_PASSWORD`. Anything derived here must also reach every redactor
- * that guards this connector's secrets, not just the one covering a single command's own output:
- * a bare derived value never appears verbatim in the raw `secrets` object, so a redactor built
- * only from `collectSecretLeaves`-style traversal of `secrets` would miss it.
+ * Returns the redactable values inside an `Authorization` header (the fragment after the scheme and,
+ * for Basic, the decoded credentials with their user and password) that an agent could print alone.
+ */
+export const deriveAuthorizationSecretValues = (authorization: string): string[] => {
+  const separatorIndex = authorization.indexOf(' ');
+  if (separatorIndex === -1) return [];
+
+  const scheme = authorization.slice(0, separatorIndex);
+  const fragment = authorization.slice(separatorIndex + 1);
+  const candidates = [fragment];
+
+  if (scheme === 'Basic') {
+    const decoded = decodeBasicCredentials(fragment);
+    if (decoded !== undefined) {
+      const colonIndex = decoded.indexOf(':');
+      candidates.push(
+        decoded,
+        ...(colonIndex === -1 ? [] : [decoded.slice(0, colonIndex), decoded.slice(colonIndex + 1)])
+      );
+    }
+  }
+
+  return [...new Set(candidates)].filter((value) => value.length >= MIN_REDACTABLE_SECRET_LENGTH);
+};
+
+/**
+ * Secret values derived from a connector's raw `secrets`, beyond its own top-level leaves, e.g.
+ * the bare API key, token, or decoded Basic credentials inside an `Authorization` header in
+ * `secretHeaders`. Anything derived here must also reach every redactor that guards this
+ * connector's secrets, since a bare derived value never appears verbatim in the raw `secrets`.
  */
 export const deriveConnectorCredentialSecretValues = (
   secrets: Record<string, unknown>
 ): string[] => {
-  const secretValues: string[] = [];
-  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
   const authorization = readAuthorizationHeader(secrets.secretHeaders);
-  if (authorization?.startsWith('ApiKey ')) {
-    const apiKey = authorization.slice('ApiKey '.length);
-    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
-  }
-  return secretValues;
+  return authorization === undefined ? [] : deriveAuthorizationSecretValues(authorization);
 };
 
 /**
@@ -115,7 +142,13 @@ export const buildConnectorEnv = ({
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
   }
 
-  return { env, secretValues };
+  const authorization = Object.entries(headers).find(
+    ([key]) => key.toLowerCase() === 'authorization'
+  )?.[1];
+  if (authorization !== undefined)
+    secretValues.push(...deriveAuthorizationSecretValues(authorization));
+
+  return { env, secretValues: [...new Set(secretValues)] };
 };
 
 /** Redacts injected secret values (and their common encodings) from command output. */

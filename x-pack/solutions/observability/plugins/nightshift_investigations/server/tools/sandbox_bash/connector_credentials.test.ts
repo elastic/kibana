@@ -11,11 +11,12 @@ import type { SandboxCallContext } from './tool_utils';
 import {
   buildConnectorEnv,
   createConnectorCredentialResolver,
+  deriveAuthorizationSecretValues,
   redactSecrets,
 } from './connector_credentials';
 
 const CONNECTOR_ID = 'github-1';
-const BASIC_AUTHORIZATION = 'Basic dXNlcjpwYXNz';
+const BASIC_AUTHORIZATION = 'Basic ZWxhc3RpYy11c2VyOnA0c3M=';
 const BEARER_AUTHORIZATION = 'Bearer ghp_topsecrettokenvalue';
 
 const createCallContext = (
@@ -80,20 +81,40 @@ describe('buildConnectorEnv', () => {
       CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
       CONNECTOR_HEADER_X_API_KEY: 'abc',
     });
-    expect(secretValues).toEqual([BEARER_AUTHORIZATION]);
+    expect(secretValues).toEqual([BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue']);
   });
 
-  it('redacts basic-auth header values without exposing the password separately', () => {
-    const { env, secretValues } = buildConnectorEnv({
+  it('adds the values derived from the Authorization header to secretValues', () => {
+    const { secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.http',
-      config: { url: 'https://es.example.com' },
-      headers: { Authorization: BASIC_AUTHORIZATION },
+      config: {},
+      headers: { authorization: BASIC_AUTHORIZATION },
     });
 
-    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(BASIC_AUTHORIZATION);
-    expect(env.CONNECTOR_SECRET_PASSWORD).toBeUndefined();
-    expect(secretValues).toEqual([BASIC_AUTHORIZATION]);
+    expect(secretValues).toEqual([
+      BASIC_AUTHORIZATION,
+      ...deriveAuthorizationSecretValues(BASIC_AUTHORIZATION),
+    ]);
+  });
+});
+
+describe('deriveAuthorizationSecretValues', () => {
+  const encode = (value: string) => Buffer.from(value).toString('base64');
+
+  it.each([
+    ['ApiKey', 'ApiKey super-secret-key', ['super-secret-key']],
+    ['Bearer', BEARER_AUTHORIZATION, ['ghp_topsecrettokenvalue']],
+    [
+      'Basic with decoded user and password',
+      `Basic ${encode('elastic-user:p4ss:word')}`,
+      [encode('elastic-user:p4ss:word'), 'elastic-user:p4ss:word', 'elastic-user', 'p4ss:word'],
+    ],
+    ['Basic with invalid base64', 'Basic not*base64!value', ['not*base64!value']],
+    ['too-short value', 'Bearer abc', []],
+    ['no scheme', 'justatokenvalue', []],
+  ])('%s', (_name, authorization, expected) => {
+    expect(deriveAuthorizationSecretValues(authorization)).toEqual(expected);
   });
 });
 
@@ -125,7 +146,7 @@ describe('createConnectorCredentialResolver', () => {
         CONNECTOR_CONFIG_OWNER: 'elastic',
         CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
       },
-      secretValues: [BEARER_AUTHORIZATION],
+      secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
     expect(actionsClient.get).not.toHaveBeenCalled();
