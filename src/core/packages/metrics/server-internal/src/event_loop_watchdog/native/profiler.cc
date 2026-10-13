@@ -39,6 +39,9 @@ struct Request {
   std::shared_ptr<Target> target;
   uint64_t generation;
   bool start;
+  // Protected by target->mutex, including abandonment after interrupt completion.
+  bool abandoned = false;
+  v8::ProfilerId started = 0;
   std::mutex mutex;
   bool done = false;
   std::string error;
@@ -128,7 +131,8 @@ void Interrupt(Isolate*, void* data) {
   std::string json;
   {
     std::lock_guard<std::mutex> lock(target->mutex);
-    if (!target->profiler || request->generation != target->generation) {
+    if (!target->profiler || request->generation != target->generation ||
+        (request->start && request->abandoned)) {
       error = "Native capture cancelled";
     } else if (request->start) {
       if (target->active) {
@@ -140,6 +144,7 @@ void Interrupt(Isolate*, void* data) {
           error = "V8 refused native capture";
         } else {
           target->active = result.id;
+          request->started = result.id;
         }
       }
     } else if (!target->active) {
@@ -151,7 +156,7 @@ void Interrupt(Isolate*, void* data) {
         error = "V8 returned no profile";
       } else {
         JsonStream stream;
-        profile->Serialize(&stream);
+        if (!request->abandoned) profile->Serialize(&stream);
         profile->Delete();
         if (stream.overflow) error = "Native profile exceeds 16 MiB";
         else json = std::move(stream.json);
@@ -210,6 +215,38 @@ void Enqueue(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(id);
 }
 
+struct Cancellation {
+  std::shared_ptr<Target> target;
+  v8::ProfilerId profile;
+  uint64_t generation;
+};
+
+void CancelInterrupt(Isolate*, void* data) {
+  std::unique_ptr<Cancellation> cancellation(static_cast<Cancellation*>(data));
+  auto target = cancellation->target;
+  std::lock_guard<std::mutex> lock(target->mutex);
+  if (target->profiler && target->generation == cancellation->generation &&
+      target->active == cancellation->profile) Stop(*target);
+}
+
+void Abandon(const FunctionCallbackInfo<Value>& args) {
+  auto* binding = Current(args);
+  auto found = binding->requests.find(Id(args));
+  if (found == binding->requests.end()) return;
+  auto request = found->second;
+  binding->requests.erase(found);
+  auto target = request->target;
+  std::lock_guard<std::mutex> lock(target->mutex);
+  request->abandoned = true;
+  // A completed but unpolled start may already be sampling. Stop only its profile,
+  // never a subsequent capture, and never call V8 profiler APIs from the observer.
+  if (request->started && target->isolate && target->active == request->started) {
+    target->isolate->RequestInterrupt(
+        CancelInterrupt,
+        new Cancellation{target, request->started, target->generation});
+  }
+}
+
 void Poll(const FunctionCallbackInfo<Value>& args) {
   auto* isolate = args.GetIsolate();
   auto* binding = Current(args);
@@ -258,7 +295,7 @@ void Init(Local<Object> exports, Local<Value>, Local<v8::Context> context, void*
   auto data = v8::External::New(isolate, binding);
   const std::pair<const char*, v8::FunctionCallback> methods[] = {
       {"initialize", Initialize}, {"request", Enqueue}, {"poll", Poll},
-      {"cancel", Cancel}, {"dispose", Dispose}};
+      {"cancel", Cancel}, {"dispose", Dispose}, {"abandon", Abandon}};
   for (const auto& method : methods) {
     exports->Set(context, String::NewFromUtf8(isolate, method.first).ToLocalChecked(),
                  v8::Function::New(context, method.second, data).ToLocalChecked())

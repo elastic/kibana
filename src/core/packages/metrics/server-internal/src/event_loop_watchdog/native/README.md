@@ -59,7 +59,11 @@ retains its 2000ms threshold. The comparative benchmark gives both modes 400ms.
 ## Lifecycle and bounds
 
 Main thread owns initialization, cancellation, and disposal. Observer requests
-are asynchronous and polled every 5ms only while outstanding. Main-thread
+are asynchronous and polled every 5ms only while outstanding. Disconnect explicitly
+abandons outstanding native requests: pending starts are invalidated, completed
+unacknowledged starts are stopped on the target isolate by profile ID, and pending
+stops discard their export. This removes request-store entries immediately and never
+stops a newer capture. Rebuild old same-ABI addons: the loader requires this API. Main-thread
 `onExit` invalidates queued requests and stops any capture before worker restart
 or termination completes. Metadata survives normal worker restart.
 

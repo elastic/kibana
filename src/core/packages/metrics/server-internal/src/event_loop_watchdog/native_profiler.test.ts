@@ -13,6 +13,7 @@ const mockBinding = {
   poll: jest.fn(),
   cancel: jest.fn(),
   dispose: jest.fn(),
+  abandon: jest.fn(),
 };
 const mockLoadNative = jest.fn(() => mockBinding);
 jest.mock('node:module', () => ({ createRequire: () => mockLoadNative }));
@@ -139,8 +140,12 @@ describe('native profiler bridge', () => {
     mockBinding.poll.mockReturnValue(undefined);
     const callback = jest.fn();
     const session = createNativeSession({ path: '/poc/profiler.node', id: 3 });
+    mockBinding.request.mockReturnValue(19);
     session.post('Profiler.start', {}, callback);
     session.disconnect();
+    expect(mockBinding.abandon).toHaveBeenCalledWith(19);
+    session.disconnect();
+    expect(mockBinding.abandon).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(new Error('Native capture session disconnected'));
     expect(jest.getTimerCount()).toBe(0);
     session.post('Profiler.start', {}, callback);

@@ -17,6 +17,7 @@ interface NativeBinding {
   request(target: number, start: boolean): number;
   poll(request: number): string | undefined;
   cancel(target: number): void;
+  abandon(request: number): void;
   dispose(target: number): void;
 }
 
@@ -50,13 +51,20 @@ export const loadNativeProfiler = (path: string): NativeBinding => {
       throw new Error('Native watchdog addon ABI flag mismatch: ' + name);
     }
   }
-  return createRequire(__filename)(path) as NativeBinding;
+  const binding = createRequire(__filename)(path) as NativeBinding;
+  if (typeof binding.abandon !== 'function') {
+    throw new Error('Native watchdog addon lacks request abandonment; rebuild it');
+  }
+  return binding;
 };
 
 /** Adapts native interrupt requests to the existing watchdog capture orchestration. */
 export const createNativeSession = ({ path, id }: NativeTarget): InspectorSession => {
   const binding = loadNativeProfiler(path);
-  const pending = new Map<NodeJS.Timeout, (error: Error | null, result?: object) => void>();
+  const pending = new Map<
+    NodeJS.Timeout,
+    { request: number; callback: (error: Error | null, result?: object) => void }
+  >();
   let disconnected = false;
   return {
     connectToMainThread: () => {},
@@ -88,15 +96,16 @@ export const createNativeSession = ({ path, id }: NativeTarget): InspectorSessio
             callback(error);
           }
         }, 5);
-        pending.set(timer, callback);
+        pending.set(timer, { request, callback });
       } catch (error) {
         callback(error);
       }
     },
     disconnect: () => {
       disconnected = true;
-      for (const [timer, callback] of pending) {
+      for (const [timer, { request, callback }] of pending) {
         clearInterval(timer);
+        binding.abandon(request);
         callback(new Error('Native capture session disconnected'));
       }
       pending.clear();
