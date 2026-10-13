@@ -20,6 +20,7 @@ import { useGridContext } from './use_entity_grid_context';
 
 const mockFetchSortPage = jest.fn();
 const mockRunQuery = jest.fn();
+const mockFetchResolvedEntityFilterOverrides = jest.fn();
 
 jest.mock('../../../../../common/hooks/use_error_toast');
 jest.mock('./use_entity_grid_context', () => ({
@@ -33,6 +34,11 @@ jest.mock('../grid_columns', () => ({
 jest.mock('../queries/esql', () => ({
   ...jest.requireActual('../queries/esql'),
   createEsqlRunner: () => mockRunQuery,
+}));
+jest.mock('../queries/resolved_entity_values', () => ({
+  ...jest.requireActual('../queries/resolved_entity_values'),
+  fetchResolvedEntityFilterOverrides: (...args: unknown[]) =>
+    mockFetchResolvedEntityFilterOverrides(...args),
 }));
 jest.mock('./use_entity_grid_rows_enrichment', () => ({
   useEntityGridRowsEnrichment: (
@@ -100,6 +106,7 @@ describe('useEntityGridData', () => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     mockContext();
     mockRunQuery.mockResolvedValue([{ total: 40 }]);
+    mockFetchResolvedEntityFilterOverrides.mockResolvedValue({ include: ['e9'], exclude: [] });
     mockSortQueryOver(5);
   });
 
@@ -192,6 +199,94 @@ describe('useEntityGridData', () => {
       expect(result.current.rows).toHaveLength(MAX_LOADED_ROWS);
       expect(result.current.canLoadMore).toBe(false);
       expect(result.current.isAtLoadLimit).toBe(true);
+    });
+  });
+
+  describe('the entity filters on the values of the resolved entities', () => {
+    const FILTERED_OPTIONS: UseEntityGridDataOptions = {
+      ...OPTIONS,
+      entityExpression: 'asset.criticality IN ("high_impact")',
+    };
+
+    it('reads the rows and the count with the resolved entities the filters add or remove', async () => {
+      const { result } = renderGridData(FILTERED_OPTIONS);
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledTimes(1);
+      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityExpression: FILTERED_OPTIONS.entityExpression,
+        }),
+        expect.any(Function)
+      );
+      const overrides = { include: ['e9'], exclude: [] };
+      expect(mockFetchSortPage).toHaveBeenCalledWith(
+        expect.objectContaining({ resolvedEntityFilterOverrides: overrides }),
+        expect.anything()
+      );
+      expect(mockRunQuery).toHaveBeenCalledWith(expect.stringContaining('entity.id IN ("e9")'));
+    });
+
+    it('waits for the overrides before it reads anything', async () => {
+      let resolveOverrides: (overrides: {
+        include: string[];
+        exclude: string[];
+      }) => void = () => {};
+      mockFetchResolvedEntityFilterOverrides.mockReturnValue(
+        new Promise((resolve) => {
+          resolveOverrides = resolve;
+        })
+      );
+
+      const { result } = renderGridData(FILTERED_OPTIONS);
+      await waitFor(() => expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalled());
+
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+      expect(mockRunQuery).not.toHaveBeenCalled();
+
+      await act(async () => resolveOverrides({ include: [], exclude: [] }));
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+    });
+
+    it('reports the overrides it cannot read, and reads no rows', async () => {
+      const error = new Error('too many resolved entities');
+      mockFetchResolvedEntityFilterOverrides.mockRejectedValue(error);
+
+      renderGridData(FILTERED_OPTIONS);
+
+      await waitFor(() =>
+        expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), error)
+      );
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+    });
+
+    it('does not read the overrides without entity filters', async () => {
+      const { result } = renderGridData();
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+    });
+
+    it('does not read the overrides for filters on other columns', async () => {
+      const { result } = renderGridData({
+        ...OPTIONS,
+        entityExpression: 'entity.EngineMetadata.Type IN ("host")',
+      });
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+    });
+
+    it('does not read the overrides for individual rows', async () => {
+      const { result } = renderGridData({ ...FILTERED_OPTIONS, rowsMode: 'individual' });
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
     });
   });
 

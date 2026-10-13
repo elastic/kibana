@@ -15,6 +15,10 @@ import { ANOMALY_COUNT_FIELD, getEntityId, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
+import {
+  fetchResolvedEntityFilterOverrides,
+  needsResolvedEntityFilterOverrides,
+} from '../queries/resolved_entity_values';
 import { useEntityGridRowsEnrichment } from './use_entity_grid_rows_enrichment';
 import {
   buildQueryArgs,
@@ -192,12 +196,43 @@ const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOpti
 
 // ── hooks ─────────────────────────────────────────────────────────────────────
 
-const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions) =>
+const fetchFilterOverrides = (
+  context: GridContext,
+  options: UseEntityGridDataOptions,
+  signal?: AbortSignal
+) => {
+  if (!context.concreteEntityIndexName) throw new Error('entity store index not resolved');
+  const args = buildQueryArgs(context, options, context.concreteEntityIndexName, null);
+  return fetchResolvedEntityFilterOverrides(args, createEsqlRunner(context.searchService, signal));
+};
+
+/** The resolved entities the entity filters add or remove, read before any query uses them. */
+const useResolvedEntityFilterOverrides = (
+  context: GridContext,
+  options: UseEntityGridDataOptions
+) =>
+  useQuery(
+    [
+      'entity-grid',
+      getKeyScope(options),
+      'resolved-entity-filter-overrides',
+      {
+        spaceId: context.spaceId,
+        concreteEntityIndexName: context.concreteEntityIndexName,
+        entityExpression: options.entityExpression,
+      },
+    ],
+    ({ signal }) => fetchFilterOverrides(context, options, signal),
+    { enabled: !!context.concreteEntityIndexName && needsResolvedEntityFilterOverrides(options) }
+  );
+
+const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions, isReady: boolean) =>
   useInfiniteQuery(
     getRowsKey(context, options),
     ({ pageParam = null, signal }) => fetchRowsBatch(context, options, pageParam, signal),
     {
       enabled:
+        isReady &&
         getReadyContext(context) != null &&
         !(isAnomalySort(options) && context.isAnomalyJobsLoading),
       getNextPageParam: ({ nextCursor }) => nextCursor ?? undefined,
@@ -207,13 +242,17 @@ const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions) =
     }
   );
 
-const useCountQuery = (context: GridContext, options: UseEntityGridDataOptions) => {
+const useCountQuery = (
+  context: GridContext,
+  options: UseEntityGridDataOptions,
+  isReady: boolean
+) => {
   const countQuery = buildCountQuery(context, options);
   return useQuery(
     getCountKey(context, options, countQuery ?? ''),
     ({ signal }) => (countQuery ? fetchCount(context, countQuery, signal) : Promise.resolve(0)),
     // No keepPreviousData: a stale unfiltered total would show next to filtered rows.
-    { enabled: countQuery != null }
+    { enabled: isReady && countQuery != null }
   );
 };
 
@@ -244,12 +283,20 @@ const usePrefetch = (context: GridContext) =>
 export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
   const options = useMemo(() => limitPageSize(viewOptions), [viewOptions]);
   const context = useGridContext();
-  const rowsQuery = useRowsQuery(context, options);
-  const countQuery = useCountQuery(context, options);
+  const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
+  // Every query of the view waits for the overrides of its filters.
+  const isReady =
+    !needsResolvedEntityFilterOverrides(options) || resolvedEntityFilterOverrides.data != null;
+  const viewOptions = {
+    ...options,
+    resolvedEntityFilterOverrides: resolvedEntityFilterOverrides.data,
+  };
+  const rowsQuery = useRowsQuery(context, viewOptions, isReady);
+  const countQuery = useCountQuery(context, viewOptions, isReady);
   const batches = useMemo(() => rowsQuery.data?.pages ?? [], [rowsQuery.data]);
   const enrichment = useEntityGridRowsEnrichment(
     context,
-    options,
+    viewOptions,
     batches,
     rowsQuery.isPreviousData
   );
@@ -257,7 +304,11 @@ export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
   const prefetch = usePrefetch(context);
   useErrorToast(
     GRID_QUERY_ERROR_TITLE,
-    context.entitiesIndexError ?? rowsQuery.error ?? countQuery.error ?? enrichment.error
+    context.entitiesIndexError ??
+      resolvedEntityFilterOverrides.error ??
+      rowsQuery.error ??
+      countQuery.error ??
+      enrichment.error
   );
 
   return {
@@ -266,6 +317,7 @@ export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
     total: countQuery.data ?? rows.length,
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
     isFetching:
+      resolvedEntityFilterOverrides.isFetching ||
       rowsQuery.isFetching ||
       countQuery.isFetching ||
       enrichment.isFetching ||

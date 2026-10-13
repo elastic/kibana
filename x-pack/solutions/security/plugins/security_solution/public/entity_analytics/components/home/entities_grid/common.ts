@@ -126,14 +126,14 @@ export interface PageCursor {
 }
 
 /**
- * The groups with aliases whose value passes the group value filters differently from their
- * main entity's own value: the entity docs hold only the own value, so these groups are added
- * to or removed from the entities that pass on their own.
+ * The resolved entities with aliases that pass the entity filters differently from their main
+ * entity: the entity docs hold only the own value, so these are added to or removed from the
+ * entities that pass on their own.
  */
 export interface ResolvedEntityFilterOverrides {
-  /** Groups that pass, though their main entity does not. */
+  /** Resolved entities that pass, though their main entity does not. */
   include: readonly string[];
-  /** Groups that do not pass, though their main entity does. */
+  /** Resolved entities that do not pass, though their main entity does. */
   exclude: readonly string[];
 }
 
@@ -157,12 +157,10 @@ export interface QueryArgs {
    */
   entityExpression?: string;
   /**
-   * The filters on the columns that show the group's value (criticality, sources, watchlists)
-   * of resolved rows. They are written on the entity fields, so on a single entity they test its
-   * own value, and on a group (see `buildResolvedEntityValuesQuery`) the group's.
+   * What `entityExpression` needs to test the resolved entities with aliases, whose value in the
+   * criticality, sources and watchlists columns is not on their doc: see
+   * {@link ResolvedEntityFilterOverrides}.
    */
-  resolvedEntityValueExpression?: string;
-  /** What `resolvedEntityValueExpression` needs to test the groups with aliases: see {@link ResolvedEntityFilterOverrides}. */
   resolvedEntityFilterOverrides?: ResolvedEntityFilterOverrides;
   /** Extra native entity-doc fields from Fields (not catalog / not enrich). */
   keepFields?: readonly string[];

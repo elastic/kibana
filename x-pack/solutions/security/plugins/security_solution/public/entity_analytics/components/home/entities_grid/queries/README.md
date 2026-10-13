@@ -68,17 +68,19 @@ expanded group show their own.
   values of the aliases. **First seen** and **last seen**: the earliest and the latest of the
   aliases (`resolved_entity_values.ts`).
 
-Most entities are alone in their resolved entity and keep their own values, so only the resolved entities with
-aliases are read: `withResolvedEntityValues` reads them for each page of resolved rows, after the page is
-sorted. The cursor comes from the rows as sorted, so paging is not affected.
+Most entities have no aliases and keep their own values, so only the resolved entities with
+aliases are read. `findSortPageFetcher` gives every page of resolved rows the values of its resolved
+entities (`withResolvedEntityValues`), after the sort has picked the rows, so paging is not affected.
 
-The filters on criticality, sources and watchlists test the resolved entity's value (`resolvedEntityValueExpression`),
-so they are kept apart from the other entity filters. The entity docs hold only the own value, so
-before any query runs, `fetchResolvedEntityFilterOverrides` lists the resolved entities that pass differently from
-their main entity: the ones the filters add (the resolved entity passes, the main entity doesn't) and the
-ones they remove. `buildEntitiesInViewConditions` then tests the main entities on their own
-values, corrected by those two lists, so the sorts, the count and the enrichers all read the same
-rows without knowing about resolved entities.
+The entity filters test the resolved entity's value in these columns, but the entity docs hold only
+the own value. When the filters test criticality, sources or watchlists on resolved rows
+(`needsResolvedEntityFilterOverrides`), `fetchResolvedEntityFilterOverrides` runs first and lists
+the resolved entities that pass the filters differently from their main entity: the ones the
+filters add (the resolved entity passes, the main entity doesn't) and the ones they remove.
+`buildEntityFilterConditions` then tests the main entities on their own values, corrected by those
+two lists (`applyResolvedEntityFilterOverrides`), so the sorts, the count and the enrichers all
+read the same rows without knowing about resolved entities. The risk level filter needs no
+overrides: on resolved rows its text already tests the resolved entity's level.
 
 Sorting by criticality, first seen or last seen reads the resolved entities with aliases and the other
 entities apart (`fetchResolvedEntitySortPage`): the resolved entities come from the alias docs and carry the

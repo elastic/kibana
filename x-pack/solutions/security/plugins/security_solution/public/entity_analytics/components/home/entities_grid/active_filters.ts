@@ -15,7 +15,7 @@ import {
 import { RESOLVED_TO_FIELD } from './common';
 import { joinAnd } from './queries/esql';
 import type { EntityFilters, QueryArgs, RowsMode } from './common';
-import { buildEntityFilterExpressions, buildEntityFiltersQuery } from './queries/entity_filters';
+import { buildEntityFiltersExpression, buildEntityFiltersQuery } from './queries/entity_filters';
 
 /**
  * Everything that narrows the entities on the page: the search bar, the filter dropdowns,
@@ -34,30 +34,20 @@ export interface ActiveFilters {
   rowsMode: RowsMode;
 }
 
-type ActiveFiltersEsql = Pick<
-  QueryArgs,
-  'searchExpression' | 'entityExpression' | 'resolvedEntityValueExpression'
->;
+type ActiveFiltersEsql = Pick<QueryArgs, 'searchExpression' | 'entityExpression'>;
 
 export const toEsql = ({
   search,
   entityFilters,
   tileEntityIds,
   rowsMode,
-}: ActiveFilters): ActiveFiltersEsql => {
-  const { entityExpression, resolvedEntityValueExpression } = buildEntityFilterExpressions(
-    entityFilters,
-    rowsMode
-  );
-  return {
-    searchExpression: search.esql,
-    entityExpression: joinAnd(
-      entityExpression,
-      tileEntityIds == null ? undefined : buildTileWhereExpression(tileEntityIds, rowsMode)
-    ),
-    resolvedEntityValueExpression,
-  };
-};
+}: ActiveFilters): ActiveFiltersEsql => ({
+  searchExpression: search.esql,
+  entityExpression: joinAnd(
+    buildEntityFiltersExpression(entityFilters, rowsMode),
+    tileEntityIds == null ? undefined : buildTileWhereExpression(tileEntityIds, rowsMode)
+  ),
+});
 
 /** The grouping query: every filter, and only target docs for resolved rows. */
 export const toDsl = ({
@@ -68,7 +58,7 @@ export const toDsl = ({
 }: ActiveFilters): ESBoolQuery | undefined => {
   const filter: QueryDslQueryContainer[] = [
     search.dsl,
-    ...buildEntityFiltersQuery(entityFilters, rowsMode),
+    ...buildEntityFiltersQuery(entityFilters),
     tileEntityIds == null ? undefined : buildTileFilter(tileEntityIds, rowsMode),
   ].filter(isDefined);
   const mustNot = rowsMode === 'resolved' ? [{ exists: { field: RESOLVED_TO_FIELD } }] : [];

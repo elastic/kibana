@@ -12,6 +12,7 @@ import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
+import { withResolvedEntityValues } from './queries/resolved_entity_values';
 import { isOneOf } from './common';
 import type { RowsMode } from './common';
 import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/types';
@@ -66,8 +67,15 @@ export const isGridColumnId = (id: string): id is GridColumnId => GRID_COLUMN_ID
 const getQuerySpec = (id: string): ColumnQuerySpec | undefined =>
   isGridColumnId(id) ? QUERY_SPECS[id] : undefined;
 
-export const findSortPageFetcher = (id: string): SortPageFetcher | undefined =>
-  getQuerySpec(id)?.fetchSortPage;
+/** The page of a sort, with the rows of resolved entities showing the values of their aliases too. */
+export const findSortPageFetcher = (id: string): SortPageFetcher | undefined => {
+  const fetchSortPage = getQuerySpec(id)?.fetchSortPage;
+  return (
+    fetchSortPage &&
+    (async (args, ctx) =>
+      withResolvedEntityValues(await fetchSortPage(args, ctx), args, ctx.runQuery))
+  );
+};
 
 /** Sortable columns with their sort page fetcher, in grid order. */
 export const SORT_PAGE_FETCHERS: ReadonlyArray<[GridColumnId, SortPageFetcher]> = COLUMNS.flatMap(

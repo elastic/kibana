@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[
-  `buildResolvedEntityFilterOverridesQuery compares the group with its main entity on the filters, and keeps the groups that differ 1`
-] = `
+exports[`buildResolvedEntityFilterOverridesQuery compares the resolved entity with its main entity on the filters, and keeps those that differ 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -20,9 +18,7 @@ exports[
 | LIMIT 4001"
 `;
 
-exports[
-  `buildResolvedEntityValuesQuery reads the aliases of the targets, then joins the targets own values in 1`
-] = `
+exports[`buildResolvedEntityValuesQuery reads the aliases of the targets, then joins the targets own values in 1`] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:a\\", \\"host:b\\")
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)

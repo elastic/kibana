@@ -153,22 +153,34 @@ export const withResolvedEntityValues = async (
 const MAX_RESOLVED_ENTITY_FILTER_OVERRIDES = 4_000;
 
 /**
- * The resolved entities with aliases that pass `resolvedEntityValueExpression` differently from their main entity:
- * `resolved_entity_matches` is whether the resolved entity passes, where `own_matches` of the main entity is the
- * opposite. Every other group passes as its main entity does.
+ * Whether the entity filters test a column that shows the resolved entity's value: only then can
+ * a resolved entity pass them differently from its main entity.
+ */
+export const needsResolvedEntityFilterOverrides = ({
+  rowsMode,
+  entityExpression,
+}: Pick<QueryArgs, 'rowsMode' | 'entityExpression'>): boolean =>
+  rowsMode === 'resolved' &&
+  !!entityExpression &&
+  [CRITICALITY_FIELD, SOURCE_FIELD, WATCHLISTS_FIELD].some((field) =>
+    entityExpression.includes(field)
+  );
+
+/**
+ * The resolved entities with aliases that pass the entity filters differently from their main
+ * entity: `resolved_entity_matches` is whether the resolved entity passes, where `own_matches` of
+ * the main entity is the opposite. Every other resolved entity passes as its main entity does.
  */
 export const buildResolvedEntityFilterOverridesQuery = (
-  args: Required<
-    Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'resolvedEntityValueExpression'>
-  >
+  args: Required<Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'entityExpression'>>
 ): string =>
   [
     `FROM ${getEntityAlias(args.namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
     ...buildResolvedEntityAliasSteps(args),
-    `| EVAL own_matches = COALESCE(${args.resolvedEntityValueExpression}, false)`,
+    `| EVAL own_matches = COALESCE(${args.entityExpression}, false)`,
     ...buildResolvedEntityValueSteps(),
-    `| EVAL resolved_entity_matches = COALESCE(${args.resolvedEntityValueExpression}, false)`,
+    `| EVAL resolved_entity_matches = COALESCE(${args.entityExpression}, false)`,
     '| WHERE own_matches != resolved_entity_matches',
     '| KEEP `entity.id`, resolved_entity_matches',
     `| LIMIT ${MAX_RESOLVED_ENTITY_FILTER_OVERRIDES + 1}`,
@@ -176,19 +188,19 @@ export const buildResolvedEntityFilterOverridesQuery = (
 
 const EMPTY_OVERRIDES: ResolvedEntityFilterOverrides = { include: [], exclude: [] };
 
-/** Reads the corrections of the filters on the resolved entity values; none without such filters. */
+/** Reads the overrides of the entity filters; none when they don't test the resolved entity's values. */
 export const fetchResolvedEntityFilterOverrides = async (
   args: QueryArgs,
   runQuery: EsqlRunner
 ): Promise<ResolvedEntityFilterOverrides> => {
-  const { resolvedEntityValueExpression } = args;
-  if (args.rowsMode !== 'resolved' || !resolvedEntityValueExpression) return EMPTY_OVERRIDES;
+  const { entityExpression } = args;
+  if (!entityExpression || !needsResolvedEntityFilterOverrides(args)) return EMPTY_OVERRIDES;
   const rows = await runQuery(
-    buildResolvedEntityFilterOverridesQuery({ ...args, resolvedEntityValueExpression })
+    buildResolvedEntityFilterOverridesQuery({ ...args, entityExpression })
   );
   if (rows.length > MAX_RESOLVED_ENTITY_FILTER_OVERRIDES) {
     throw new Error(
-      'The filters match too many groups of entities differently from their main entity'
+      'The filters match too many resolved entities differently from their main entity'
     );
   }
   const idsOf = (matches: boolean) =>
@@ -199,20 +211,16 @@ export const fetchResolvedEntityFilterOverrides = async (
 };
 
 /**
- * The filters on the resolved entity values as one predicate on the entity docs, which hold the own
- * values: the entities that pass on their own, without the resolved entities that do not, with the resolved entities
- * that do. `undefined` without such filters.
+ * The entity filters as one predicate on the entity docs, which hold the own values: the
+ * entities that pass on their own, without the resolved entities that do not, with the resolved
+ * entities that do. Individual rows have no overrides.
  */
-export const buildResolvedEntityValueCondition = ({
-  resolvedEntityValueExpression,
-  resolvedEntityFilterOverrides,
-}: Pick<QueryArgs, 'resolvedEntityValueExpression' | 'resolvedEntityFilterOverrides'>):
-  | string
-  | undefined => {
-  if (!resolvedEntityValueExpression) return undefined;
-  const { include = [], exclude = [] } = resolvedEntityFilterOverrides ?? {};
+export const applyResolvedEntityFilterOverrides = (
+  expression: string,
+  { include = [], exclude = [] }: Partial<ResolvedEntityFilterOverrides> = {}
+): string => {
   const passing = exclude.length
-    ? `(${resolvedEntityValueExpression}) AND NOT ${ENTITY_ID_FIELD} IN (${toList(exclude)})`
-    : `(${resolvedEntityValueExpression})`;
+    ? `(${expression}) AND NOT ${ENTITY_ID_FIELD} IN (${toList(exclude)})`
+    : expression;
   return include.length ? `(${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)})` : passing;
 };

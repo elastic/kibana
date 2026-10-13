@@ -7,10 +7,11 @@
 
 import type { QueryArgs, Row } from '../common';
 import {
-  buildResolvedEntityValueCondition,
+  applyResolvedEntityFilterOverrides,
   buildResolvedEntityFilterOverridesQuery,
   buildResolvedEntityValuesQuery,
   fetchResolvedEntityFilterOverrides,
+  needsResolvedEntityFilterOverrides,
   withResolvedEntityValues,
 } from './resolved_entity_values';
 
@@ -101,24 +102,46 @@ describe('withResolvedEntityValues', () => {
   });
 });
 
+const CRITICALITY_FILTER = 'asset.criticality IN ("high_impact")';
+
+describe('needsResolvedEntityFilterOverrides', () => {
+  it.each([
+    ['criticality', CRITICALITY_FILTER],
+    ['sources', 'MV_CONTAINS(entity.source, "okta")'],
+    [
+      'watchlists',
+      'entity.EngineMetadata.Type IN ("host") AND MV_CONTAINS(entity.attributes.watchlists, "w1")',
+    ],
+  ])('is true for a filter on %s of resolved rows', (_name, entityExpression) => {
+    expect(needsResolvedEntityFilterOverrides({ rowsMode: 'resolved', entityExpression })).toBe(
+      true
+    );
+  });
+
+  it.each([
+    ['no filters', { rowsMode: 'resolved' }],
+    [
+      'a filter on other columns',
+      { rowsMode: 'resolved', entityExpression: 'entity.EngineMetadata.Type IN ("host")' },
+    ],
+    ['individual rows', { rowsMode: 'individual', entityExpression: CRITICALITY_FILTER }],
+  ] as const)('is false for %s', (_name, args) => {
+    expect(needsResolvedEntityFilterOverrides(args)).toBe(false);
+  });
+});
+
 describe('buildResolvedEntityFilterOverridesQuery', () => {
-  it('compares the group with its main entity on the filters, and keeps the groups that differ', () => {
+  it('compares the resolved entity with its main entity on the filters, and keeps those that differ', () => {
     expect(
-      buildResolvedEntityFilterOverridesQuery({
-        ...ARGS,
-        resolvedEntityValueExpression: 'asset.criticality IN ("high_impact")',
-      })
+      buildResolvedEntityFilterOverridesQuery({ ...ARGS, entityExpression: CRITICALITY_FILTER })
     ).toMatchSnapshot();
   });
 });
 
 describe('fetchResolvedEntityFilterOverrides', () => {
-  const FILTERED_ARGS: QueryArgs = {
-    ...ARGS,
-    resolvedEntityValueExpression: 'asset.criticality IN ("high_impact")',
-  };
+  const FILTERED_ARGS: QueryArgs = { ...ARGS, entityExpression: CRITICALITY_FILTER };
 
-  it('splits the groups into those the filters add and those they remove', async () => {
+  it('splits the resolved entities into those the filters add and those they remove', async () => {
     const runQuery = jest.fn(async () => [
       row('host:a', { resolved_entity_matches: true }),
       row('host:b', { resolved_entity_matches: false }),
@@ -131,76 +154,60 @@ describe('fetchResolvedEntityFilterOverrides', () => {
     });
   });
 
-  it('has no corrections, and no query, without filters on the group values', async () => {
+  it.each([
+    ['without filters', ARGS],
+    [
+      'for filters on other columns',
+      { ...ARGS, entityExpression: 'entity.EngineMetadata.Type IN ("host")' },
+    ],
+    ['for individual rows', { ...FILTERED_ARGS, rowsMode: 'individual' }],
+  ] as const)('has no overrides, and no query, %s', async (_name, args) => {
     const runQuery = jest.fn(async () => []);
 
-    expect(await fetchResolvedEntityFilterOverrides(ARGS, runQuery)).toEqual({
+    expect(await fetchResolvedEntityFilterOverrides(args, runQuery)).toEqual({
       include: [],
       exclude: [],
     });
     expect(runQuery).not.toHaveBeenCalled();
   });
 
-  it('has no corrections, and no query, for individual rows', async () => {
-    const runQuery = jest.fn(async () => []);
-
-    expect(
-      await fetchResolvedEntityFilterOverrides(
-        { ...FILTERED_ARGS, rowsMode: 'individual' },
-        runQuery
-      )
-    ).toEqual({ include: [], exclude: [] });
-    expect(runQuery).not.toHaveBeenCalled();
-  });
-
-  it('fails when too many groups differ to list them in the filter', async () => {
+  it('fails when too many resolved entities differ to list them in the filter', async () => {
     const runQuery = jest.fn(async () =>
       Array.from({ length: 4_001 }, (_, i) => row(`host:${i}`, { resolved_entity_matches: true }))
     );
 
     await expect(fetchResolvedEntityFilterOverrides(FILTERED_ARGS, runQuery)).rejects.toThrow(
-      'too many groups'
+      'too many resolved entities'
     );
   });
 });
 
-describe('buildResolvedEntityValueCondition', () => {
-  const EXPRESSION = 'asset.criticality IN ("high_impact")';
-
-  it('is nothing without filters on the group values', () => {
-    expect(buildResolvedEntityValueCondition({})).toBeUndefined();
-  });
-
-  it('is the filters themselves without corrections', () => {
-    expect(buildResolvedEntityValueCondition({ resolvedEntityValueExpression: EXPRESSION })).toBe(
-      `(${EXPRESSION})`
-    );
-  });
-
-  it('removes the groups that do not pass, though their main entity does', () => {
+describe('applyResolvedEntityFilterOverrides', () => {
+  it('is the filters themselves without overrides', () => {
+    expect(applyResolvedEntityFilterOverrides(CRITICALITY_FILTER)).toBe(CRITICALITY_FILTER);
     expect(
-      buildResolvedEntityValueCondition({
-        resolvedEntityValueExpression: EXPRESSION,
-        resolvedEntityFilterOverrides: { include: [], exclude: ['host:a'] },
-      })
-    ).toBe(`(${EXPRESSION}) AND NOT entity.id IN ("host:a")`);
+      applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, { include: [], exclude: [] })
+    ).toBe(CRITICALITY_FILTER);
   });
 
-  it('adds the groups that pass, though their main entity does not', () => {
+  it('removes the resolved entities that do not pass, though their main entity does', () => {
     expect(
-      buildResolvedEntityValueCondition({
-        resolvedEntityValueExpression: EXPRESSION,
-        resolvedEntityFilterOverrides: { include: ['host:b'], exclude: [] },
-      })
-    ).toBe(`((${EXPRESSION})) OR entity.id IN ("host:b")`);
+      applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, { include: [], exclude: ['host:a'] })
+    ).toBe(`(${CRITICALITY_FILTER}) AND NOT entity.id IN ("host:a")`);
   });
 
-  it('removes and adds groups', () => {
+  it('adds the resolved entities that pass, though their main entity does not', () => {
     expect(
-      buildResolvedEntityValueCondition({
-        resolvedEntityValueExpression: EXPRESSION,
-        resolvedEntityFilterOverrides: { include: ['host:b'], exclude: ['host:a'] },
+      applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, { include: ['host:b'], exclude: [] })
+    ).toBe(`(${CRITICALITY_FILTER}) OR entity.id IN ("host:b")`);
+  });
+
+  it('removes and adds resolved entities', () => {
+    expect(
+      applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, {
+        include: ['host:b'],
+        exclude: ['host:a'],
       })
-    ).toBe(`((${EXPRESSION}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b")`);
+    ).toBe(`((${CRITICALITY_FILTER}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b")`);
   });
 });

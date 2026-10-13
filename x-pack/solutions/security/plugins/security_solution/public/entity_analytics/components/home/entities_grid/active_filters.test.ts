@@ -52,36 +52,22 @@ describe('toEsql', () => {
     expect(toEsql(ALL)).toEqual({
       searchExpression: 'KQL("""entity.name: web-1""")',
       entityExpression:
-        'entity.EngineMetadata.Type IN ("host") AND entity.id IN ("host:a", "host:b")',
-      resolvedEntityValueExpression: 'MV_CONTAINS(entity.attributes.watchlists, "w1")',
+        'entity.EngineMetadata.Type IN ("host") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND entity.id IN ("host:a", "host:b")',
     });
   });
 
-  describe('the filters on the columns that show the value of the group', () => {
+  it('tests the risk level of a resolved entity on resolved rows, and the own level on individual rows', () => {
     const filters = {
-      ...EMPTY_ENTITY_FILTERS,
-      assetCriticality: ['high_impact'],
-      watchlists: ['w1'],
-      dataSources: ['okta'],
+      ...NONE,
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.High] },
     };
 
-    it('come apart for resolved rows, as the groups are tested for them', () => {
-      expect(toEsql({ ...NONE, entityFilters: filters })).toEqual({
-        searchExpression: undefined,
-        entityExpression: undefined,
-        resolvedEntityValueExpression:
-          'asset.criticality IN ("high_impact") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND MV_CONTAINS(entity.source, "okta")',
-      });
-    });
-
-    it('stay with the other filters for individual rows', () => {
-      expect(toEsql({ ...NONE, entityFilters: filters, rowsMode: 'individual' })).toEqual({
-        searchExpression: undefined,
-        entityExpression:
-          'asset.criticality IN ("high_impact") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND MV_CONTAINS(entity.source, "okta")',
-        resolvedEntityValueExpression: undefined,
-      });
-    });
+    expect(toEsql(filters).entityExpression).toBe(
+      'COALESCE(entity.relationships.resolution.risk.calculated_level, entity.risk.calculated_level) IN ("High")'
+    );
+    expect(toEsql({ ...filters, rowsMode: 'individual' }).entityExpression).toBe(
+      'entity.risk.calculated_level IN ("High")'
+    );
   });
 
   it('keeps the tile entities and their records in individual rows', () => {
@@ -94,22 +80,6 @@ describe('toEsql', () => {
 
   it('matches nothing for a tile without entities', () => {
     expect(toEsql({ ...NONE, tileEntityIds: [] }).entityExpression).toBe('false');
-  });
-
-  describe('the risk level filter', () => {
-    const critical = { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Critical] };
-
-    it("is on the group's level for resolved rows, or the entity's own without one", () => {
-      expect(toEsql({ ...NONE, entityFilters: critical }).entityExpression).toBe(
-        'COALESCE(entity.relationships.resolution.risk.calculated_level, entity.risk.calculated_level) IN ("Critical")'
-      );
-    });
-
-    it("is on the entity's own level for individual rows", () => {
-      expect(
-        toEsql({ ...NONE, entityFilters: critical, rowsMode: 'individual' }).entityExpression
-      ).toBe('entity.risk.calculated_level IN ("Critical")');
-    });
   });
 });
 
@@ -134,57 +104,6 @@ describe('toDsl', () => {
         must_not: [RESOLVED_ROWS_ONLY],
         should: [],
       },
-    });
-  });
-
-  describe('the risk level filter', () => {
-    const critical = { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Critical] };
-
-    it("matches the group's level, or the entity's own without one, for resolved rows", () => {
-      expect(toDsl({ ...NONE, entityFilters: critical })).toEqual({
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    terms: {
-                      'entity.relationships.resolution.risk.calculated_level': ['Critical'],
-                    },
-                  },
-                  {
-                    bool: {
-                      filter: [{ terms: { 'entity.risk.calculated_level': ['Critical'] } }],
-                      must_not: [
-                        {
-                          exists: {
-                            field: 'entity.relationships.resolution.risk.calculated_level',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-          must: [],
-          must_not: [RESOLVED_ROWS_ONLY],
-          should: [],
-        },
-      });
-    });
-
-    it("matches the entity's own level for individual rows", () => {
-      expect(toDsl({ ...NONE, entityFilters: critical, rowsMode: 'individual' })).toEqual({
-        bool: {
-          filter: [{ terms: { 'entity.risk.calculated_level': ['Critical'] } }],
-          must: [],
-          must_not: [],
-          should: [],
-        },
-      });
     });
   });
 

@@ -8,18 +8,18 @@
 import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
 import { ENTITY_TYPE_FILTER, getEntityAlias, toList } from './esql';
-import { buildResolvedEntityValueCondition } from './resolved_entity_values';
+import { applyResolvedEntityFilterOverrides } from './resolved_entity_values';
 
 // ── entities in view ─────────────────────────────────────────────────────────
 
 /** Conditions of the entity filters on entity docs, which hold the entities' own values. */
-export const buildEntityFilterConditions = (args: QueryArgs): string[] => {
-  const groupValueCondition = buildResolvedEntityValueCondition(args);
-  return [
-    ...(args.entityExpression ? [args.entityExpression] : []),
-    ...(groupValueCondition ? [groupValueCondition] : []),
-  ];
-};
+export const buildEntityFilterConditions = ({
+  entityExpression,
+  resolvedEntityFilterOverrides,
+}: QueryArgs): string[] =>
+  entityExpression
+    ? [applyResolvedEntityFilterOverrides(entityExpression, resolvedEntityFilterOverrides)]
+    : [];
 
 /** Conditions on entity docs that make them rows of the grid (rows mode and filters). */
 export const buildEntitiesInViewConditions = (args: QueryArgs): string[] => [
