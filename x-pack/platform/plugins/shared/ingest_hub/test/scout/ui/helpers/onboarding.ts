@@ -84,16 +84,23 @@ export async function expectOnboardingStepVisible(
   });
 }
 
-export async function mockAwsPackage(page: ScoutPage, response: unknown): Promise<void> {
+export async function mockPackage(
+  page: ScoutPage,
+  packageName: string,
+  response: unknown
+): Promise<void> {
   const body = JSON.stringify(response);
   // Intercept both the unversioned path and any versioned path (e.g. /aws/7.1.1) so that
   // cleanup flows calling sendGetPackageInfoByKey(name, existingVersion) don't hit the real
   // package registry and get a different manifest or time out.
   await page.route(
-    (url) => /\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(url.pathname),
+    (url) => new RegExp(`/api/fleet/epm/packages/${packageName}(/[^/]+)?$`).test(url.pathname),
     (route) => route.fulfill({ status: 200, contentType: 'application/json', body })
   );
 }
+
+export const mockAwsPackage = (page: ScoutPage, response: unknown): Promise<void> =>
+  mockPackage(page, 'aws', response);
 
 export async function navigateToOnboardingStep(
   browserAuth: BrowserAuthFixture,
@@ -101,6 +108,8 @@ export async function navigateToOnboardingStep(
   step: OnboardingStepId,
   opts: {
     selectedServiceIds: string[];
+    /** Data format to seed. Omitted leaves it unset, so the solution default applies. */
+    dataFormat?: 'ecs' | 'otel';
     globalRegion?: string;
     serviceVars?: Record<string, ServiceVars>;
     instances?: unknown[];
@@ -124,6 +133,7 @@ export async function navigateToOnboardingStep(
 ): Promise<void> {
   const {
     selectedServiceIds,
+    dataFormat,
     globalRegion = 'us-east-1',
     serviceVars = {},
     instances,
@@ -138,6 +148,7 @@ export async function navigateToOnboardingStep(
   await page.addInitScript(
     ({
       ids,
+      format,
       region,
       vars,
       insts,
@@ -151,6 +162,7 @@ export async function navigateToOnboardingStep(
       detectReviewKey,
     }: {
       ids: string[];
+      format: 'ecs' | 'otel' | undefined;
       region: string;
       vars: Record<string, ServiceVars>;
       insts: unknown[] | undefined;
@@ -174,7 +186,10 @@ export async function navigateToOnboardingStep(
       if (sessionStorage.getItem(servicesKey) !== null) {
         return;
       }
-      sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
+      sessionStorage.setItem(
+        servicesKey,
+        JSON.stringify({ selectedServiceIds: ids, ...(format ? { dataFormat: format } : {}) })
+      );
       const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
       if (insts !== undefined) settingsPayload.instances = insts;
       sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
@@ -197,6 +212,7 @@ export async function navigateToOnboardingStep(
     },
     {
       ids: selectedServiceIds,
+      format: dataFormat,
       region: globalRegion,
       vars: serviceVars,
       insts: instances,
