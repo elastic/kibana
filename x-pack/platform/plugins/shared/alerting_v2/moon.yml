@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-http-server'
+  - '@kbn/core-http-common'
   - '@kbn/logging'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
