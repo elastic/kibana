@@ -24,8 +24,8 @@ const detection = (
 
 describe('memberOutcomeOfSignal', () => {
   it.each<[string, SignalEntry, ReturnType<typeof memberOutcomeOfSignal>]>([
-    ['confirms is a breach', detection('a', 'confirms'), 'breaching'],
-    ['refutes is healthy', detection('a', 'refutes'), 'clean'],
+    ['confirms is a breach', detection('a', 'confirms'), 'breached'],
+    ['refutes is healthy', detection('a', 'refutes'), 'recovered'],
     ['inconclusive cannot be judged', detection('a', 'inconclusive'), 'no_data'],
     ['not_checked cannot be judged', detection('a', 'not_checked'), 'no_data'],
     [
@@ -33,7 +33,7 @@ describe('memberOutcomeOfSignal', () => {
       detection('a', 'off_topic', {
         evidence: { esql_query: 'FROM logs', result: 'found' },
       } as Partial<SignalEntry>),
-      'breaching',
+      'breached',
     ],
     ['a benign off-topic row cannot be judged', detection('a', 'off_topic'), 'no_data'],
     [
@@ -48,19 +48,17 @@ describe('memberOutcomeOfSignal', () => {
 
 describe('assessMembers', () => {
   it('is breaching while any member breaches', () => {
-    expect(assessMembers([detection('a', 'refutes'), detection('b', 'confirms')])).toBe(
-      'breaching'
-    );
+    expect(assessMembers([detection('a', 'refutes'), detection('b', 'confirms')])).toBe('breached');
   });
 
   it('is breaching even when another member cannot be judged', () => {
     expect(assessMembers([detection('a', 'inconclusive'), detection('b', 'confirms')])).toBe(
-      'breaching'
+      'breached'
     );
   });
 
   it('is clean only when every member is healthy', () => {
-    expect(assessMembers([detection('a', 'refutes'), detection('b', 'refutes')])).toBe('clean');
+    expect(assessMembers([detection('a', 'refutes'), detection('b', 'refutes')])).toBe('recovered');
   });
 
   it('holds when a member cannot be judged and none breaches', () => {

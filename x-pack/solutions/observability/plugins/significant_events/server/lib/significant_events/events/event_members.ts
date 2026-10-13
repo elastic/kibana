@@ -27,14 +27,14 @@ export const isBreachMemberSignal = (signal: SignalEntry): boolean => {
  */
 export const memberOutcomeOfSignal = (signal: SignalEntry): StatusOutcome | undefined => {
   if (signal.type !== 'detection') return undefined;
-  if (isBreachMemberSignal(signal)) return 'breaching';
-  return signal.verdict === 'refutes' ? 'clean' : 'no_data';
+  if (isBreachMemberSignal(signal)) return 'breached';
+  return signal.verdict === 'refutes' ? 'recovered' : 'no_data';
 };
 
 /**
- * The event's members as discovery last judged them (one latest signal per rule): any breaching
- * member keeps the event breaching, otherwise any member that cannot be judged holds it, and only
- * when every member is healthy is it clean. An event with no members cannot be assessed.
+ * The event's members as discovery last judged them (one latest signal per rule): any member that
+ * breaches makes the event `breached`, otherwise any member that cannot be judged holds it, and
+ * only when every member is healthy is it `recovered`. An event with no members cannot be assessed.
  */
 export const assessMembers = (signals: readonly SignalEntry[] | undefined): StatusOutcome => {
   const outcomes = (signals ?? []).flatMap((signal) => {
@@ -42,7 +42,7 @@ export const assessMembers = (signals: readonly SignalEntry[] | undefined): Stat
     return outcome === undefined ? [] : [outcome];
   });
 
-  if (outcomes.includes('breaching')) return 'breaching';
+  if (outcomes.includes('breached')) return 'breached';
   if (outcomes.length === 0 || outcomes.includes('no_data')) return 'no_data';
-  return 'clean';
+  return 'recovered';
 };
