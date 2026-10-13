@@ -1335,5 +1335,109 @@ describe('InferenceChatModel', () => {
 
       expect(output).toEqual({ note: 'this is way too long', extra: true });
     });
+
+    describe('when the model rejects a forced tool_choice', () => {
+      const FORCED_TOOL_CHOICE_ERROR =
+        'status [400] Bad Request: [tool_choice: type "tool" and "any" are not supported for this model.]';
+
+      const schema = {
+        type: 'object',
+        properties: { note: { type: 'string' } },
+        required: ['note'],
+      };
+
+      const extractResponse = (args: Record<string, unknown>) =>
+        createResponse({
+          content: '',
+          toolCalls: [{ toolCallId: 'id', function: { name: 'extract', arguments: args } }],
+        });
+
+      const invoke = (chatModel: InferenceChatModel) =>
+        chatModel
+          .withStructuredOutput(schema, { name: 'extract' })
+          .invoke([new HumanMessage({ content: 'extract a note' })]);
+
+      it('retries with tool_choice auto and returns the schema-valid answer', async () => {
+        const chatModel = new InferenceChatModel({ chatComplete, connector });
+        chatComplete
+          .mockRejectedValueOnce(createInferenceRequestError(FORCED_TOOL_CHOICE_ERROR, 400))
+          .mockResolvedValueOnce(extractResponse({ note: 'hello' }));
+
+        const output = await invoke(chatModel);
+
+        expect(output).toEqual({ note: 'hello' });
+        expect(chatComplete).toHaveBeenCalledTimes(2);
+        expect(chatComplete.mock.calls[0][0].toolChoice).toEqual({ function: 'extract' });
+        const retryCall = chatComplete.mock.calls[1][0];
+        expect(retryCall.toolChoice).toBe('auto');
+        expect(Object.keys(retryCall.tools ?? {})).toEqual(['extract']);
+        expect(retryCall.system).toContain('You MUST respond by calling the "extract" tool');
+      });
+
+      it('lets the output parser reject an auto-mode response without a tool call', async () => {
+        const chatModel = new InferenceChatModel({ chatComplete, connector });
+        chatComplete
+          .mockRejectedValueOnce(createInferenceRequestError(FORCED_TOOL_CHOICE_ERROR, 400))
+          .mockResolvedValueOnce(createResponse({ content: 'plain text, no tool call' }));
+
+        await expect(invoke(chatModel)).rejects.toThrow('No tool calls found in the response.');
+      });
+
+      it('throws an explicit error naming the model when the fallback is rejected too', async () => {
+        const chatModel = new InferenceChatModel({ chatComplete, connector, model: 'my-model' });
+        chatComplete.mockRejectedValue(createInferenceRequestError(FORCED_TOOL_CHOICE_ERROR, 400));
+
+        const error = await invoke(chatModel).catch((e) => e);
+
+        expect(error.message).toContain('my-model');
+        expect(error.message).toContain('forced tool_choice unsupported');
+        expect(chatComplete).toHaveBeenCalledTimes(2);
+      });
+
+      it('does not fall back on unrelated errors', async () => {
+        const chatModel = new InferenceChatModel({ chatComplete, connector });
+        chatComplete.mockRejectedValue(createInferenceRequestError('bad parameter', 401));
+
+        await expect(invoke(chatModel)).rejects.toThrow('bad parameter');
+        expect(chatComplete).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the forced tool_choice for models that accept it', async () => {
+        const chatModel = new InferenceChatModel({ chatComplete, connector });
+        chatComplete.mockResolvedValue(extractResponse({ note: 'hello' }));
+
+        const output = await invoke(chatModel);
+
+        expect(output).toEqual({ note: 'hello' });
+        expect(chatComplete).toHaveBeenCalledTimes(1);
+        expect(chatComplete.mock.calls[0][0].toolChoice).toEqual({ function: 'extract' });
+        expect(chatComplete.mock.calls[0][0].system).toBeUndefined();
+      });
+
+      it('does not fall back when tool_choice was not forced', async () => {
+        const chatModel = new InferenceChatModel({ chatComplete, connector });
+        chatComplete.mockRejectedValue(createInferenceRequestError(FORCED_TOOL_CHOICE_ERROR, 400));
+
+        await expect(chatModel.invoke('hi')).rejects.toThrow('tool_choice');
+        expect(chatComplete).toHaveBeenCalledTimes(1);
+      });
+
+      it('falls back when streaming and nothing was emitted yet', async () => {
+        const chatModel = new InferenceChatModel({ chatComplete, connector });
+        chatComplete
+          .mockRejectedValueOnce(createInferenceRequestError(FORCED_TOOL_CHOICE_ERROR, 400))
+          .mockReturnValueOnce(createStreamResponse(['hello']));
+
+        const stream = await chatModel.bindTools([], { tool_choice: 'any' }).stream('hi');
+        const chunks: string[] = [];
+        for await (const chunk of stream) {
+          chunks.push(chunk.content as string);
+        }
+
+        expect(chunks.join('')).toBe('hello');
+        expect(chatComplete).toHaveBeenCalledTimes(2);
+        expect(chatComplete.mock.calls[1][0].toolChoice).toBe('auto');
+      });
+    });
   });
 });

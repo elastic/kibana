@@ -8,3 +8,8 @@
 export { isMessageContentImageUrl, isMessageContentText } from './langchain';
 export { wrapInferenceError } from './wrap_inference_error';
 export { toAsyncIterator } from './observable_to_generator';
+export {
+  isForcedToolChoice,
+  isUnsupportedToolChoiceError,
+  getToolChoiceFallbackInstruction,
+} from './tool_choice_fallback';
