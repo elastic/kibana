@@ -11,8 +11,9 @@
  * Constants for the Security-in-Discover experience tests.
  *
  * These tests exercise the Security Solution context-awareness profile that enhances Discover's
- * document viewer flyout for security documents (alert / event / attack / IOC). The profile only activates
- * under the `security` space solution view; document type is detected purely from fields
+ * document viewer flyout for security documents (alert / event / attack / IOC). The profile activates
+ * under the `security` space solution view, and under `classic` for recognized Security sources (e.g.
+ * `.alerts-security.alerts-*`); document type is detected purely from fields
  * (`event.kind === 'signal'` → alert, the Attack Discovery rule type → attack, `event.kind`
  * present & ≠ signal → event, `event.type` includes `indicator` → IOC), so plain synthetic indices
  * are sufficient.
@@ -20,7 +21,7 @@
 
 /** Synthetic ES indices created in global setup (see ./generators). */
 export const SECURITY_INDICES = {
-  ALERTS: 'security-discover-alerts',
+  ALERTS: '.alerts-security.alerts-discover',
   EVENTS: 'security-discover-events',
   ATTACKS: 'security-discover-attacks',
   IOCS: 'security-discover-iocs',
