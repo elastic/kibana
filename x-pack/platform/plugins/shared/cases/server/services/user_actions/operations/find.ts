@@ -19,12 +19,18 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
 } from '../../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 
 import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
-import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
+import {
+  buildFilter,
+  combineFilters,
+  NodeBuilderOperators,
+  stringToKueryNode,
+} from '../../../client/utils';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -50,6 +56,7 @@ export class UserActionFinder {
     perPage,
     filter,
     authors,
+    sources,
   }: FindOptions): Promise<SavedObjectsFindResponse<UserActionTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
@@ -58,6 +65,7 @@ export class UserActionFinder {
         filter,
         UserActionFinder.buildFilter(types),
         UserActionFinder.buildAuthorFilter(authors),
+        UserActionFinder.buildSourceFilter(sources),
       ]);
 
       const userActions =
@@ -114,6 +122,7 @@ export class UserActionFinder {
     types,
     filter,
     authors,
+    sources,
     limit,
     decode,
   }: Omit<FindOptions, 'page' | 'perPage' | 'search'> & {
@@ -127,6 +136,7 @@ export class UserActionFinder {
         filter,
         UserActionFinder.buildFilter(types),
         UserActionFinder.buildAuthorFilter(authors),
+        UserActionFinder.buildSourceFilter(sources),
       ]);
 
       return await this.collectFromPIT(
@@ -266,6 +276,29 @@ export class UserActionFinder {
       operator: 'or',
       type: CASE_USER_ACTION_SAVED_OBJECT,
     });
+  }
+
+  private static buildSourceFilter(sources?: FindOptions['sources']): KueryNode | undefined {
+    if (!sources?.length) {
+      return undefined;
+    }
+
+    const typedSources = sources.filter((source) => source !== NO_ACTION_SOURCE_FILTERING_KEYWORD);
+    const includeMissing = sources.includes(NO_ACTION_SOURCE_FILTERING_KEYWORD);
+
+    const typedFilter = typedSources.length
+      ? buildFilter({
+          filters: typedSources,
+          field: 'source.type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        })
+      : undefined;
+    const missingFilter = includeMissing
+      ? stringToKueryNode(`not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.source.type: *`)
+      : undefined;
+
+    return combineFilters([typedFilter, missingFilter], NodeBuilderOperators.or);
   }
 
   private static buildGenericTypeFilter(type: UserActionType): KueryNode | undefined {

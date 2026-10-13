@@ -24,6 +24,8 @@ export interface RuleBuilderStepProps {
 export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;
   stepTitle: string;
+  /** Flyout header when creating a rule with this builder (e.g. "Create Threshold rule"). */
+  createFlyoutTitle: string;
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
   renderRecoveryStep?: (props: CustomRecoveryRenderProps) => React.ReactNode;

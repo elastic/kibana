@@ -2,14 +2,14 @@
 
 > **Prerequisite:** Read the [server-level README](../../README.md) first for the plugin-wide architecture and terminology.
 
-The director is the alert lifecycle engine. It takes alert-type rule events from the rule executor, looks up the latest known state for each `group_hash`, chooses a transition strategy, and returns enriched alert events with `episode.*` fields attached.
+The director is the alert lifecycle engine. It takes alert-type rule events from the rule executor, looks up the latest known state for each `group_hash`, chooses a transition strategy, and returns enriched alert events with `alert.*` fields attached.
 
 It runs inside the rule executor as [`DirectorStep`](../rule_executor/steps/director_step.ts). It is not a standalone Task Manager task.
 
 ## What the director owns
 
 - Mapping an incoming alert event plus prior alert state to the next episode state
-- Assigning or reusing `episode.id`
+- Assigning or reusing the episode id (`alert.id`)
 - Encapsulating lifecycle rules behind transition strategies
 
 ## What the director does not own
@@ -36,7 +36,7 @@ DirectorService
         |
         v
 Enriched alert events
-  (same events + episode.id/status/status_count)
+  (same events + alert.id/status/status_count)
 ```
 
 ## How it works
@@ -75,6 +75,8 @@ The director creates a new episode id when:
 
 Otherwise it preserves the existing episode id so the lifecycle stays correlated across runs.
 
+A new episode id is **deterministic** (uuid v5), seeded from `rule.id | group_hash | scheduled_timestamp`, not a random uuid. This matters because the director runs once per streamed batch and a single-series (ungrouped) rule emits one event per returned row — many events sharing one `group_hash` within a run, spread across batches the director processes independently against the same (empty, for a new series) prior state. A random id per event would split that one series into many episodes; seeding from the run's scheduled timestamp collapses every new-episode event of a run to the same id (within and across batches, with no shared state), while a later run that reopens the series gets a different id because the timestamp differs. A series opens at most one episode per run, so distinct episodes never collide, and the id is idempotent across task retries of the same run.
+
 ## Lifecycle concepts
 
 ### Input event status
@@ -98,7 +100,7 @@ The director writes one of these episode statuses:
 | `active` | The series is actively alerting. |
 | `recovering` | The series stopped breaching but has not fully closed yet. |
 
-`episode.status_count` tracks consecutive evaluations in the current status when a strategy needs count-based thresholds.
+`alert.status_count` tracks consecutive evaluations in the current status when a strategy needs count-based thresholds.
 
 ## Current strategies
 
@@ -117,18 +119,18 @@ The director writes one of these episode statuses:
 | `recovering` | `breached` | `active` |
 | `recovering` | `recovered` | `inactive` |
 
-`no_data` transitions depend on `rule.no_data_strategy`:
+`no_data` transitions depend on `rule.no_data.strategy`:
 
-| Current episode status | `no_data_strategy` | Next episode status |
+| Current episode status | `no_data.strategy` | Next episode status |
 | --- | --- | --- |
-| any | `'emit'` | `active` |
-| any | `'last_known_status'` | (unchanged — preserve current status) |
-| `inactive` | `'recover'` | `inactive` |
-| `pending` | `'recover'` | `inactive` |
-| `active` | `'recover'` | `inactive` |
-| `recovering` | `'recover'` | `inactive` |
+| any | `'alert'` | `active` |
+| any | `'keep_last'` | (unchanged — preserve current status) |
+| `inactive` | `'resolve'` | `inactive` |
+| `pending` | `'resolve'` | `inactive` |
+| `active` | `'resolve'` | `inactive` |
+| `recovering` | `'resolve'` | `inactive` |
 
-For `'recover'`, the episode resolves directly to `inactive` on the first no-data run.
+For `'resolve'`, the episode resolves directly to `inactive` on the first no-data run. `'ignore'` never produces a `no_data` event to begin with.
 
 ### `CountTimeframeStrategy`
 
@@ -137,7 +139,7 @@ For `'recover'`, the episode resolves directly to `inactive` on the first no-dat
 - `pending -> active`
 - `recovering -> inactive`
 
-A `no_data` event on a rule with `no_data_strategy: 'recover'` always bypasses this gating and resolves directly to `inactive`, regardless of `recovering_count` / `recovering_timeframe`.
+A `no_data` event on a rule with `no_data.strategy: 'resolve'` always bypasses this gating and resolves directly to `inactive`, regardless of `state_transition.recovering.count` / `state_transition.recovering.timeframe`.
 
 It supports:
 
@@ -145,7 +147,24 @@ It supports:
 - timeframe only
 - count + timeframe with `AND` / `OR`
 
-For timeframe evaluation, it compares the current alert event timestamp with the last stored episode timestamp.
+For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
+
+#### Count semantics
+
+A count of `N` is the number of evaluations the episode spends in the phase. The phase resolves on the evaluation after that, so with consecutive breaches:
+
+| `pending.count` | eval 1 | eval 2 | eval 3 | Becomes `active` on |
+| --- | --- | --- | --- | --- |
+| `0` | `active` | `active` | `active` | evaluation 1 |
+| `1` | `pending` | `active` | `active` | evaluation 2 |
+| `2` | `pending` | `pending` | `active` | evaluation 3 |
+| `3` | `pending` | `pending` | `pending` | evaluation 4 |
+
+`recovering.count` behaves the same way for `recovering -> inactive`.
+
+A count of `0` skips the phase, unless a `timeframe` is combined with it using `and`: then the timeframe still has to elapse, so `{ count: 0, timeframe: '5m', operator: 'and' }` holds the phase until the timeframe is met. With `or`, the count alone is enough and the phase is skipped.
+
+**Caveat:** elapsed time for an `and`-combined `timeframe` is measured against the previous evaluation's stored timestamp, not against when the phase was entered (see above), so it never accumulates past roughly one schedule interval. An `and`-combined `timeframe` therefore only resolves reliably when the rule's schedule interval is >= the timeframe; on a shorter schedule it holds the phase indefinitely. This applies to any count, not just `0`.
 
 ## When to add a new strategy
 
@@ -217,6 +236,7 @@ Example:
 ```typescript
 import { CountTimeframeStrategy } from './count_timeframe_strategy';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   buildLatestAlertEvent,
   buildStrategyStateTransitionContext,
@@ -224,7 +244,8 @@ import {
 
 describe('CountTimeframeStrategy', () => {
   it('transitions pending to active when threshold is met', () => {
-    const strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    const strategy = new CountTimeframeStrategy(loggerService);
 
     const result = strategy.getNextState(
       buildStrategyStateTransitionContext({

@@ -14,7 +14,7 @@
  * By default any package may be imported anywhere. Listing a package id under
  * `packages` restricts it.
  *
- * Load-time checks (ESLint fails hard on typos):
+ * Load-time checks (Oxlint fails hard on typos):
  * - each `packages` key must be a real package id
  * - each listed package must have a non-empty `alternative`
  * - `alwaysAllowed` and override `path` values must end with `/` and exist as
@@ -50,7 +50,7 @@ module.exports = {
 
     '@kbn/ui-chrome-layout': {
       alternative:
-        'See src/core/packages/chrome/layout/layout_overview.mdx for layout CSS variables, sizing, and the application scroll container.',
+        'See src/core/packages/chrome/layout/README.md for layout CSS variables, sizing, and the application scroll container.',
       overrides: [
         {
           path: 'src/core/packages/chrome/',
@@ -75,6 +75,17 @@ module.exports = {
         {
           path: 'src/core/packages/chrome/app-menu/app-menu/',
           reason: 'App-facing contract that re-exports the portable implementation.',
+        },
+      ],
+    },
+
+    '@kbn/ui-app-header': {
+      alternative: 'Import from @kbn/app-header instead.',
+      overrides: [
+        {
+          path: 'src/core/packages/chrome/',
+          reason:
+            'Core chrome re-exports presentation types and owns the connected app-header facade.',
         },
       ],
     },

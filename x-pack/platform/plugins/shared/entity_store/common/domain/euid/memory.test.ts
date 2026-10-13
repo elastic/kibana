@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
+import {
+  getEuidFromObject,
+  getEuidFromObjectForSearch,
+  getEntityIdentifiersFromDocument,
+} from './memory';
 
 describe('getEntityIdentifiersFromDocument', () => {
   it('returns undefined when doc is null or undefined', () => {
@@ -156,7 +160,7 @@ describe('getEuidFromObject', () => {
       ).toBe('user:a@b.com@okta');
     });
 
-    it('returns undefined when document does not satisfy IDP or non-IDP postAggFilter', () => {
+    it('returns undefined when document fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
         getEuidFromObject('user', {
           user: { email: 'a@b.com' },
@@ -276,6 +280,42 @@ describe('getEuidFromObject', () => {
     it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
       const obj = { service: { entity: { id: 'svc-e1' }, name: 'api-gateway' } };
       expect(getEuidFromObject('service', obj)).toBe('service:api-gateway');
+    });
+  });
+
+  describe('detection alerts and postAggFilter', () => {
+    // No host.id so not local, and event.kind is 'signal', so no arm of postAggFilter accepts it.
+    const oktaUser = {
+      user: { email: 'alice@example.com' },
+      event: { kind: 'signal', module: 'okta' },
+    };
+    const asAlert = (doc: object) => ({ ...doc, 'kibana.alert.rule.uuid': 'rule-1' });
+
+    it('resolves an alert on an IdP-namespace user', () => {
+      expect(getEuidFromObject('user', asAlert(oktaUser))).toBe('user:alice@example.com@okta');
+    });
+
+    it('resolves an alert nested under kibana.alert.rule as well as flattened', () => {
+      expect(
+        getEuidFromObject('user', { ...oktaUser, kibana: { alert: { rule: { uuid: 'rule-1' } } } })
+      ).toBe('user:alice@example.com@okta');
+    });
+
+    it('still rejects the same document when it is not an alert', () => {
+      expect(getEuidFromObject('user', oktaUser)).toBeUndefined();
+    });
+
+    it('still enforces documentsFilter on an alert', () => {
+      expect(
+        getEuidFromObject(
+          'user',
+          asAlert({ ...oktaUser, event: { ...oktaUser.event, outcome: 'failure' } })
+        )
+      ).toBeUndefined();
+    });
+
+    it('resolves without the gate in the search variant', () => {
+      expect(getEuidFromObjectForSearch('user', oktaUser)).toBe('user:alice@example.com@okta');
     });
   });
 });

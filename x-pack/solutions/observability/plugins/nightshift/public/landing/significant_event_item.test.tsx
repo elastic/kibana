@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SignificantEventItem } from './significant_event_item';
@@ -14,20 +15,32 @@ import { SignificantEventItem } from './significant_event_item';
 const mockEvent: SignificantEvent = {
   '@timestamp': new Date().toISOString(),
   event_id: 'evt-1',
-  event_uuid: 'evt-uuid-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['service-a'],
   title: 'Test significant event',
   summary: 'Something happened',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
+};
+
+const investigatedEvent: SignificantEvent = {
+  ...mockEvent,
+  investigations: [
+    {
+      workflow_execution_id: 'exec-1',
+      started_at: '2026-07-10T12:00:00Z',
+      completed_at: '2026-07-10T12:05:00Z',
+    },
+  ],
 };
 
 describe('SignificantEventItem', () => {
   const renderItem = (props: Partial<React.ComponentProps<typeof SignificantEventItem>> = {}) =>
     render(
       <I18nProvider>
-        <SignificantEventItem event={mockEvent} {...props} />
+        <EuiProvider>
+          <SignificantEventItem event={mockEvent} {...props} />
+        </EuiProvider>
       </I18nProvider>
     );
 
@@ -40,7 +53,7 @@ describe('SignificantEventItem', () => {
     expect(row).toHaveAttribute('tabindex', '0');
     expect(row).toHaveAttribute('data-ebt-action', 'viewSignificantEvent');
     expect(row).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
-    expect(row).toHaveAttribute('data-ebt-detail', 'open');
+    expect(row).toHaveAttribute('data-ebt-detail', 'active');
 
     fireEvent.click(row);
     expect(onClick).toHaveBeenCalledWith(mockEvent);
@@ -133,7 +146,8 @@ describe('SignificantEventItem', () => {
     expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
   });
 
-  it.each(['closed', 'dismissed'] as const)('hides the close action for %s events', (status) => {
+  it('hides the close action for inactive events', () => {
+    const status = 'inactive' as const;
     renderItem({ event: { ...mockEvent, status }, onCloseClick: jest.fn() });
 
     expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();
@@ -164,5 +178,61 @@ describe('SignificantEventItem', () => {
     const title = screen.getByText(mockEvent.title);
     expect(title.closest('a')).toBeNull();
     expect(title.closest('button')).toBeNull();
+  });
+
+  describe('investigation marker', () => {
+    it('leaves an event without investigations unlabeled', () => {
+      renderItem();
+
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
+    it('falls back to completed_at while the status is still being fetched', () => {
+      renderItem({ event: investigatedEvent });
+
+      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks a complete run as investigated', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'complete' });
+
+      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks a failed run with the failure label even though the run completed', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'failed' });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+        'Investigation failed'
+      );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks an unreadable run as unavailable', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'unavailable' });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+        'Investigation unavailable'
+      );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
+
+    it('hides the badge when the execution does not exist', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: null });
+
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigatingStatusDots')).not.toBeInTheDocument();
+    });
+
+    it('marks a pending run as investigating', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'pending' });
+
+      expect(screen.getByTestId('nightshiftInvestigatingStatusDots')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
   });
 });

@@ -5,6 +5,7 @@
   },
   "include": [
     "index.ts",
+    "test_helpers.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",
@@ -13,12 +14,14 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
+    "@kbn/alerting-plugin",
     "@kbn/apm-utils",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/actions-plugin",
     "@kbn/connector-specs",
     "@kbn/workflows",
+    "@kbn/entity-access-control",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
     "@kbn/eval-kql",

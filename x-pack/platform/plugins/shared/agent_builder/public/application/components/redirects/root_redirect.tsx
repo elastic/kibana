@@ -10,8 +10,14 @@ import { Redirect } from 'react-router-dom';
 
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { appPaths } from '../../utils/app_paths';
+import { RedirectLoading } from './redirect_loading';
 
 export const RootRedirect: React.FC = () => {
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady } = useLastAgentId();
+
+  if (!isReady) {
+    return <RedirectLoading data-test-subj="agentBuilderRootRedirectLoading" />;
+  }
+
   return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
 };

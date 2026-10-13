@@ -166,7 +166,7 @@ describe('validateToolCalls', () => {
         },
       });
     }
-    expect(() => runValidation()).not.toThrowError();
+    expect(() => runValidation()).not.toThrow();
 
     const validated = runValidation();
 

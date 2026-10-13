@@ -25,6 +25,7 @@ import {
   getNetworkApiService,
   getHostApiService,
   getUserApiService,
+  getEndpointArtifactsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -124,6 +125,12 @@ export const spaceTest = securityParallelFixtures.extend<
       extendedApiServices.user = getUserApiService({
         esClient,
         log,
+      });
+      extendedApiServices.endpointArtifacts = getEndpointArtifactsApiService({
+        kbnClient,
+        esClient,
+        log,
+        scoutSpace,
       });
 
       await use(extendedApiServices);

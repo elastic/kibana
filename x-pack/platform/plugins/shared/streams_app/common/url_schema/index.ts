@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { ENRICHMENT_URL_STATE_KEY, CANVAS_URL_STATE_KEY } from './common';
+export { ENRICHMENT_URL_STATE_KEY, CANVAS_URL_STATE_KEY, TABLE_URL_STATE_KEY } from './common';
 export * from './enrichment_url_schema';
 export * from './canvas_url_schema';
+export * from './entity_table_url_schema';

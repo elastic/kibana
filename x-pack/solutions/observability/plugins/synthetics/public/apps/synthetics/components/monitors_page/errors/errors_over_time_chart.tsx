@@ -263,7 +263,7 @@ export const ErrorsOverTimeChart = ({
       </div>
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued" textAlign="center">
-        <EuiIcon type="iInCircle" size="s" aria-hidden={true} /> {BRUSH_HINT}
+        <EuiIcon type="info" size="s" aria-hidden={true} /> {BRUSH_HINT}
       </EuiText>
     </EuiPanel>
   );

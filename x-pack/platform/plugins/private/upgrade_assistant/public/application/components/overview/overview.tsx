@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiSteps,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiLink,
-  EuiPageBody,
-  EuiPageSection,
-  EuiText,
-  EuiLoadingSpinner,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiSteps, EuiSpacer, EuiPageBody, EuiPageSection } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
@@ -31,9 +21,96 @@ import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
+import type { CloudStackVersionState } from './use_cloud_stack_version_info';
 import { useCloudStackVersionInfo } from './use_cloud_stack_version_info';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
+
+const pageTitle = i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
+  defaultMessage: 'Upgrade Assistant',
+});
+
+const releaseNotesLabel = i18n.translate(
+  'xpack.upgradeAssistant.overview.releaseHighlightsLinkText',
+  {
+    defaultMessage: 'Elastic release notes',
+  }
+);
+
+const getLatestVersionLabel = (cloudStackVersion: CloudStackVersionState): string => {
+  if (cloudStackVersion.status === 'loaded') {
+    return cloudStackVersion.latestAvailableVersion;
+  }
+
+  if (cloudStackVersion.status === 'error') {
+    return i18n.translate('xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable', {
+      defaultMessage: 'Unavailable',
+    });
+  }
+
+  return i18n.translate('xpack.upgradeAssistant.overview.latestAvailableVersionLoading', {
+    defaultMessage: 'Loading…',
+  });
+};
+
+const getOverviewDescription = (
+  cloudStackVersion: CloudStackVersionState,
+  currentVersion: string
+): string => {
+  const versionTooltip =
+    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest
+      ? i18n.translate('xpack.upgradeAssistant.overview.latestMinVersionTooltip', {
+          defaultMessage: 'Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}.',
+          values: {
+            latestVersion: cloudStackVersion.latestAvailableVersion,
+            minVersionToUpgradeToLatest: cloudStackVersion.minVersionToUpgradeToLatest,
+          },
+        })
+      : '';
+
+  const parts = [
+    i18n.translate('xpack.upgradeAssistant.overview.versionInfo', {
+      defaultMessage:
+        'Current version: {currentVersion} | Latest available version: {latestVersion} {versionTooltip}',
+      values: {
+        currentVersion,
+        latestVersion: getLatestVersionLabel(cloudStackVersion),
+        versionTooltip,
+      },
+    }),
+  ];
+
+  const canUpgradeDirectlyToLatest =
+    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest === null;
+  const directUpgradeableVersionRange =
+    cloudStackVersion.status === 'loaded' ? cloudStackVersion.directUpgradeableVersionRange : null;
+  const shouldShowDirectUpgradeRangeLine =
+    cloudStackVersion.status === 'loaded' &&
+    !canUpgradeDirectlyToLatest &&
+    directUpgradeableVersionRange !== null;
+
+  if (shouldShowDirectUpgradeRangeLine && directUpgradeableVersionRange) {
+    parts.push(
+      directUpgradeableVersionRange.min === directUpgradeableVersionRange.max
+        ? i18n.translate('xpack.upgradeAssistant.overview.directUpgradeSingle', {
+            defaultMessage: 'From your current version, you can upgrade to version {version}.',
+            values: {
+              version: directUpgradeableVersionRange.min,
+            },
+          })
+        : i18n.translate('xpack.upgradeAssistant.overview.directUpgradeRange', {
+            defaultMessage:
+              'From your current version, you can upgrade to versions {minVersion} - {maxVersion}.',
+            values: {
+              minVersion: directUpgradeableVersionRange.min,
+              maxVersion: directUpgradeableVersionRange.max,
+            },
+          })
+    );
+  }
+
+  return parts.join(' ');
+};
 
 export const Overview = () => {
   const {
@@ -74,152 +151,61 @@ export const Overview = () => {
     }));
   };
 
-  const latestVersionNode =
-    cloudStackVersion.status === 'loaded' ? (
-      <strong>{cloudStackVersion.latestAvailableVersion}</strong>
-    ) : cloudStackVersion.status === 'error' ? (
-      <strong>
-        {i18n.translate('xpack.upgradeAssistant.overview.latestAvailableVersionUnavailable', {
-          defaultMessage: 'Unavailable',
-        })}
-      </strong>
-    ) : (
-      <EuiLoadingSpinner
-        size="s"
-        aria-label={i18n.translate(
-          'xpack.upgradeAssistant.overview.latestAvailableVersionLoading',
-          {
-            defaultMessage: 'Loading latest available version',
-          }
-        )}
-      />
-    );
+  const description = useMemo(
+    () => getOverviewDescription(cloudStackVersion, currentVersion),
+    [cloudStackVersion, currentVersion]
+  );
 
-  const directUpgradeableVersionRange =
-    cloudStackVersion.status === 'loaded' ? cloudStackVersion.directUpgradeableVersionRange : null;
-
-  const versionTooltipContent =
-    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest ? (
-      <EuiIconTip
-        position="right"
-        content={
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overview.latestMinVersionTooltip"
-            defaultMessage="Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}."
-            values={{
-              latestVersion: cloudStackVersion.latestAvailableVersion,
-              minVersionToUpgradeToLatest: cloudStackVersion.minVersionToUpgradeToLatest,
-            }}
-          />
-        }
-        type="info"
-        size="s"
-      />
-    ) : null;
-
-  const canUpgradeDirectlyToLatest =
-    cloudStackVersion.status === 'loaded' && cloudStackVersion.minVersionToUpgradeToLatest === null;
-  const shouldShowDirectUpgradeRangeLine =
-    cloudStackVersion.status === 'loaded' &&
-    !canUpgradeDirectlyToLatest &&
-    directUpgradeableVersionRange !== null;
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'whatsNew',
+          label: releaseNotesLabel,
+          iconType: 'external',
+          testId: 'whatsNewLink',
+          href: docLinks.links.elasticsearch.latestReleaseHighlights,
+          target: '_blank',
+        },
+      ],
+    }),
+    [docLinks.links.elasticsearch.latestReleaseHighlights]
+  );
 
   return (
-    <EuiPageBody restrictWidth={true} data-test-subj="overview">
-      <EuiPageSection color="transparent" paddingSize="none">
-        <EuiPageHeader
-          bottomBorder
-          data-test-subj="overviewPageHeader"
-          pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
-            defaultMessage: 'Upgrade Assistant',
-          })}
-          description={
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.overview.versionInfo"
-                  defaultMessage="Current version: {currentVersion} | Latest available version: {latestVersion} {versionTooltip}"
-                  values={{
-                    currentVersion: <strong>{currentVersion}</strong>,
-                    latestVersion: latestVersionNode,
-                    versionTooltip: versionTooltipContent,
-                  }}
-                />
-              </p>
-              {shouldShowDirectUpgradeRangeLine && directUpgradeableVersionRange && (
-                <em>
-                  {directUpgradeableVersionRange.min === directUpgradeableVersionRange.max ? (
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.overview.directUpgradeSingle"
-                      defaultMessage="From your current version, you can upgrade to version {version}."
-                      values={{
-                        version: directUpgradeableVersionRange.min,
-                      }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.overview.directUpgradeRange"
-                      defaultMessage="From your current version, you can upgrade to versions {minVersion} - {maxVersion}."
-                      values={{
-                        minVersion: directUpgradeableVersionRange.min,
-                        maxVersion: directUpgradeableVersionRange.max,
-                      }}
-                    />
-                  )}
-                </em>
-              )}
-            </EuiText>
-          }
-        >
-          <EuiText>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.overview.linkToReleaseNotes"
-              defaultMessage="{linkToReleaseNotes}"
-              values={{
-                linkToReleaseNotes: (
-                  <EuiLink
-                    data-test-subj="whatsNewLink"
-                    href={docLinks.links.elasticsearch.latestReleaseHighlights}
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.overview.releaseHighlightsLinkText"
-                      defaultMessage="Elastic release notes"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </EuiPageHeader>
-        <EuiSpacer size="l" />
-        <EuiSteps
-          steps={
-            [
-              getBackupStep({
-                cloud,
-                isComplete: isStepComplete('backup'),
-                setIsComplete: setCompletedStep.bind(null, 'backup'),
-              }),
-              migrateSystemIndices &&
-                getMigrateSystemIndicesStep({
-                  docLinks,
-                  isComplete: isStepComplete('migrate_system_indices'),
-                  setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
+    <div data-test-subj="overview">
+      <AppHeader title={pageTitle} description={description} menu={menu} spacing="bleed" />
+      <EuiPageBody restrictWidth={true}>
+        <EuiPageSection color="transparent" paddingSize="none">
+          <EuiSpacer size="l" />
+          <EuiSteps
+            steps={
+              [
+                getBackupStep({
+                  cloud,
+                  isComplete: isStepComplete('backup'),
+                  setIsComplete: setCompletedStep.bind(null, 'backup'),
                 }),
-              getFixIssuesStep({
-                isComplete: isStepComplete('fix_issues'),
-                setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
-              }),
-              getLogsStep({
-                isComplete: isStepComplete('logs'),
-                setIsComplete: setCompletedStep.bind(null, 'logs'),
-              }),
-              getUpgradeStep(),
-            ].filter(Boolean) as EuiStepProps[]
-          }
-        />
-      </EuiPageSection>
-    </EuiPageBody>
+                migrateSystemIndices &&
+                  getMigrateSystemIndicesStep({
+                    docLinks,
+                    isComplete: isStepComplete('migrate_system_indices'),
+                    setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
+                  }),
+                getFixIssuesStep({
+                  isComplete: isStepComplete('fix_issues'),
+                  setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+                }),
+                getLogsStep({
+                  isComplete: isStepComplete('logs'),
+                  setIsComplete: setCompletedStep.bind(null, 'logs'),
+                }),
+                getUpgradeStep(),
+              ].filter(Boolean) as EuiStepProps[]
+            }
+          />
+        </EuiPageSection>
+      </EuiPageBody>
+    </div>
   );
 };

@@ -57,11 +57,18 @@ export const SearchRulesRequestBody = lazySchema(() =>
       /**
        * Restrict the response to only include the specified fields and necessary metadata.
        */
-      fields: z.array(z.string().max(256)).optional(),
+      fields: z
+        .array(z.string().max(256))
+        .optional()
+        .describe(
+          'Restrict the response to only include the specified fields and necessary metadata.'
+        ),
       /**
        * Structured KQL filter applied to detection rules (alert saved objects).
        */
-      filter: GranularRulesFilter.optional(),
+      filter: GranularRulesFilter.optional().describe(
+        'Structured KQL filter applied to detection rules (alert saved objects).'
+      ),
       aggregations: SearchRulesAggregations.optional(),
       search: GranularRulesSearch.optional(),
       sort_field: FindRulesSortField.optional(),
@@ -69,35 +76,55 @@ export const SearchRulesRequestBody = lazySchema(() =>
       /**
        * Page number. Ignored when `search_after` is provided.
        */
-      page: z.number().int().min(1).optional().default(1),
+      page: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .default(1)
+        .describe('Page number. Ignored when `search_after` is provided.'),
       /**
        * Page size.
        */
-      per_page: z.number().int().min(1).max(10000).optional().default(20),
+      per_page: z.number().int().min(1).max(10000).optional().default(20).describe('Page size.'),
       /**
       * For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.
 
       */
-      search_after: z.array(SearchRulesSearchAfterItem).min(1).optional(),
+      search_after: z
+        .array(SearchRulesSearchAfterItem)
+        .min(1)
+        .optional()
+        .describe(
+          "For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.\n"
+        ),
       /**
       * Filter rules to specific gap fill statuses.
 When active, the result set is capped and `search_after` is not supported. Use
 offset pagination (`page` / `per_page`) instead.
 
       */
-      gap_fill_statuses: z.array(GapFillStatus).optional(),
+      gap_fill_statuses: z
+        .array(GapFillStatus)
+        .optional()
+        .describe(
+          'Filter rules to specific gap fill statuses.\nWhen active, the result set is capped and `search_after` is not supported. Use\noffset pagination (`page` / `per_page`) instead.\n'
+        ),
       /**
        * Gap range start.
        */
-      gaps_range_start: z.string().optional(),
+      gaps_range_start: z.string().optional().describe('Gap range start.'),
       /**
        * Gap range end.
        */
-      gaps_range_end: z.string().optional(),
+      gaps_range_end: z.string().optional().describe('Gap range end.'),
       /**
        * Gap auto fill scheduler ID used to determine gap fill status for rules
        */
-      gap_auto_fill_scheduler_id: z.string().optional(),
+      gap_auto_fill_scheduler_id: z
+        .string()
+        .optional()
+        .describe('Gap auto fill scheduler ID used to determine gap fill status for rules'),
     })
     .strict()
 );
@@ -118,7 +145,12 @@ request. Only included when deep pagination applies (offset
 at or past the default 10,000-result max) or the request used `search_after`.
 
       */
-      search_after: z.array(SearchRulesSearchAfterItem).optional(),
+      search_after: z
+        .array(SearchRulesSearchAfterItem)
+        .optional()
+        .describe(
+          'Sort values of the last hit on this page, for use as `search_after` on the next\nrequest. Only included when deep pagination applies (offset\nat or past the default 10,000-result max) or the request used `search_after`.\n'
+        ),
       counts: FacetCounts.optional(),
     })
     .strict()

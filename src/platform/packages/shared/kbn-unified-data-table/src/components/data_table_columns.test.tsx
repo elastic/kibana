@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import { ROWS_HEIGHT_OPTIONS, kibanaJSON } from '../constants';
 import type { UnifiedDataTableSettingsColumn } from '../types';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(
@@ -28,13 +28,12 @@ describe('Data table columns', function () {
   describe('getEuiGridColumns', () => {
     it('returns eui grid columns showing default columns', async () => {
       const actual = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: true,
         isSortEnabled: true,
-        isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -53,13 +52,12 @@ describe('Data table columns', function () {
 
     it('returns eui grid columns with time column', async () => {
       const actual = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: columnsWithTimeCol,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -78,13 +76,12 @@ describe('Data table columns', function () {
 
     it('returns eui grid with in memory sorting', async () => {
       const actual = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: columnsWithTimeCol,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -95,11 +92,11 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-          timestamp: { type: 'date', esType: 'dateTime' },
-        },
+        dataSource: createMockEsqlSource([
+          { name: 'extension', type: 'string', source: 'index' },
+          { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+          { name: 'timestamp', type: 'date', esType: 'dateTime', source: 'index' },
+        ]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -110,13 +107,12 @@ describe('Data table columns', function () {
       it('should replace cell actions', async () => {
         const cellAction = jest.fn();
         const actual = getEuiGridColumns({
-          sourceDisplayMode: 'summary',
+          documentsDisplayMode: 'table',
           columns: columnsWithTimeCol,
           settings: {},
           dataView: dataViewWithTimefieldMock,
           isSummaryOnlyColumn: false,
           isSortEnabled: true,
-          isPlainRecord: true,
           valueToStringConverter: dataTableContextMock.valueToStringConverter,
           rowsCount: 100,
           headerRowHeightLines: 5,
@@ -127,11 +123,11 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
+          dataSource: createMockEsqlSource([
+            { name: 'extension', type: 'string', source: 'index' },
+            { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+            { name: 'timestamp', type: 'date', esType: 'dateTime', source: 'index' },
+          ]),
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'replace',
@@ -142,13 +138,12 @@ describe('Data table columns', function () {
       it('should append cell actions', async () => {
         const cellAction = jest.fn();
         const actual = getEuiGridColumns({
-          sourceDisplayMode: 'summary',
+          documentsDisplayMode: 'table',
           columns: columnsWithTimeCol,
           settings: {},
           dataView: dataViewWithTimefieldMock,
           isSummaryOnlyColumn: false,
           isSortEnabled: true,
-          isPlainRecord: true,
           valueToStringConverter: dataTableContextMock.valueToStringConverter,
           rowsCount: 100,
           headerRowHeightLines: 5,
@@ -159,11 +154,11 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
+          dataSource: createMockEsqlSource([
+            { name: 'extension', type: 'string', source: 'index' },
+            { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+            { name: 'timestamp', type: 'date', esType: 'dateTime', source: 'index' },
+          ]),
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'append',
@@ -182,14 +177,13 @@ describe('Data table columns', function () {
   describe('column tokens', () => {
     it('returns eui grid columns with tokens', async () => {
       const actual = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         showColumnTokens: true,
         columns: columnsWithTimeCol,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -208,18 +202,17 @@ describe('Data table columns', function () {
 
     it('returns eui grid columns with tokens for custom column types', async () => {
       const actual = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         showColumnTokens: true,
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
+        dataSource: createMockEsqlSource([
+          { name: 'extension', type: 'string', source: 'index' },
+          { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+        ]),
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -245,13 +238,12 @@ describe('Data table columns', function () {
         true
       ) as string[];
       const gridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: columnsNotInDataview,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -262,9 +254,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-        },
+        dataSource: createMockEsqlSource([{ name: 'extension', type: 'string', source: 'index' }]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -274,13 +264,12 @@ describe('Data table columns', function () {
 
     it('should not allow sorting on json columns', async () => {
       const gridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: ['geo.coordinates'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -291,9 +280,9 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          'geo.coordinates': { type: 'geo_point' },
-        },
+        dataSource: createMockEsqlSource([
+          { name: 'geo.coordinates', type: 'geo_point', source: 'index' },
+        ]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -303,13 +292,12 @@ describe('Data table columns', function () {
 
     it('should allow sorting on version columns', async () => {
       const gridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: ['stack_version'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -320,9 +308,9 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          stack_version: { type: 'version' as DatatableColumnType },
-        },
+        dataSource: createMockEsqlSource([
+          { name: 'stack_version', type: 'version', source: 'index' },
+        ]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -332,13 +320,12 @@ describe('Data table columns', function () {
 
     it('should allow sorting on ip columns', async () => {
       const gridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: ['ip_address'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -349,9 +336,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          ip_address: { type: 'ip' },
-        },
+        dataSource: createMockEsqlSource([{ name: 'ip_address', type: 'ip', source: 'index' }]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -359,20 +344,19 @@ describe('Data table columns', function () {
       expect(gridColumns[0].isSortable).toBe(true);
     });
 
-    it('returns eui grid with in memory sorting for text based languages and columns not on the columnsMeta', async () => {
+    it('returns eui grid with in memory sorting for text based languages and columns not in the ES|QL columns', async () => {
       const columnsNotInDataview = getVisibleColumns(
         ['var_test'],
         dataViewWithTimefieldMock,
         true
       ) as string[];
       const gridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: columnsNotInDataview,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -383,9 +367,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          var_test: { type: 'number' },
-        },
+        dataSource: createMockEsqlSource([{ name: 'var_test', type: 'number', source: 'index' }]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -395,13 +377,12 @@ describe('Data table columns', function () {
 
     it('returns columns in correct format when column customisation is provided', async () => {
       const gridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -412,10 +393,10 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
+        dataSource: createMockEsqlSource([
+          { name: 'extension', type: 'string', source: 'index' },
+          { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+        ]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -427,13 +408,12 @@ describe('Data table columns', function () {
       };
 
       const customizedGridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: true,
-        isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -445,10 +425,10 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
+        dataSource: createMockEsqlSource([
+          { name: 'extension', type: 'string', source: 'index' },
+          { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
+        ]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -460,13 +440,12 @@ describe('Data table columns', function () {
   describe('Summary column', () => {
     it('returns eui grid columns with summary column', async () => {
       const actual = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: ['_source'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: false,
-        isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -494,13 +473,12 @@ describe('Data table columns', function () {
       }));
 
       const actual = getEuiGridColumns({
-        sourceDisplayMode: 'json',
+        documentsDisplayMode: 'json',
         columns: ['_source'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
         isSummaryOnlyColumn: false,
         isSortEnabled: false,
-        isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
         headerRowHeightLines: 5,
@@ -544,7 +522,7 @@ describe('Data table columns', function () {
         test_column_3: { display: 'test_column_three' },
       } as const;
       const customizedGridColumns = getEuiGridColumns({
-        sourceDisplayMode: 'summary',
+        documentsDisplayMode: 'table',
         columns: ['test_column_1', 'test_column_2', 'test_column_4'],
         settings: { columns: mockColumnHeaders },
         dataView: dataViewWithTimefieldMock,

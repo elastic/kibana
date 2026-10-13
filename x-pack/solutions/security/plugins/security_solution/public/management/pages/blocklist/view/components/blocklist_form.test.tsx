@@ -45,50 +45,50 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.LINUX,
     field: 'file.path',
-    fieldText: 'Path, ',
-    osText: 'Linux, ',
+    fieldText: 'Path',
+    osText: 'Linux',
     isMulti: false,
   },
   {
     os: OperatingSystem.LINUX,
     field: 'file.hash.*',
-    fieldText: 'Hash, ',
-    osText: 'Linux, ',
+    fieldText: 'Hash',
+    osText: 'Linux',
     isMulti: false,
   },
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.path.caseless',
-    fieldText: 'Path, ',
-    osText: 'Windows, ',
+    fieldText: 'Path',
+    osText: 'Windows',
     isMulti: false,
   },
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.hash.*',
-    fieldText: 'Hash, ',
-    osText: 'Windows, ',
+    fieldText: 'Hash',
+    osText: 'Windows',
     isMulti: false,
   },
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.Ext.code_signature',
-    fieldText: 'Signature, ',
-    osText: 'Windows, ',
+    fieldText: 'Signature',
+    osText: 'Windows',
     isMulti: true,
   },
   {
     os: OperatingSystem.MAC,
     field: 'file.path.caseless',
-    fieldText: 'Path, ',
-    osText: 'Mac, ',
+    fieldText: 'Path',
+    osText: 'Mac',
     isMulti: false,
   },
   {
     os: OperatingSystem.MAC,
     field: 'file.hash.*',
-    fieldText: 'Hash, ',
-    osText: 'Mac, ',
+    fieldText: 'Hash',
+    osText: 'Mac',
     isMulti: false,
   },
 ];
@@ -218,8 +218,7 @@ describe('blocklist form', () => {
 
   it('should correctly default OS to windows', () => {
     render();
-    // Note: the trailing `, ` comes from screen-reader-only text
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows');
   });
 
   it('should allow user to select between 3 OSs', async () => {
@@ -247,7 +246,7 @@ describe('blocklist form', () => {
 
   it('should correctly default field to hash', () => {
     render();
-    expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash, ');
+    expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash');
   });
 
   describe.each(blocklistOperatorFieldTestCases)(
@@ -272,7 +271,7 @@ describe('blocklist form', () => {
           expect(screen.queryByTestId('blocklist-form-operator-select-single')).toBeNull();
           const element = screen.getByTestId('blocklist-form-operator-select-multi');
           expect(element).toBeTruthy();
-          expect(element.textContent).toEqual('is one of, ');
+          expect(element.textContent).toEqual('is one of');
           expect(element).not.toHaveAttribute('readonly');
         } else {
           expect(screen.queryByTestId('blocklist-form-operator-select-multi')).toBeNull();
@@ -287,7 +286,7 @@ describe('blocklist form', () => {
 
   it('should allow all 3 fields when Windows OS is selected', async () => {
     render();
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(3);
@@ -298,7 +297,7 @@ describe('blocklist form', () => {
 
   it('should only allow hash and path fields when Linux OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(2);
@@ -309,7 +308,7 @@ describe('blocklist form', () => {
 
   it('should only allow hash and path fields when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(2);
@@ -331,9 +330,50 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
+  it('should convert an entered signature value when switching operator then field', async () => {
+    const signatureValues = ['signer-a', 'signer-b'];
+    const { rerender } = render(
+      createProps({
+        item: createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry('file.Ext.code_signature', signatureValues)],
+        }),
+      })
+    );
+
+    await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByRole('option', { name: /^is$/i }));
+
+    const afterOperatorChange = onChangeSpy.mock.calls.at(-1)?.[0] as
+      | ArtifactFormComponentOnChangeCallbackProps
+      | undefined;
+    expect(afterOperatorChange?.item.entries).toEqual([
+      {
+        field: 'file.Ext.code_signature',
+        operator: ListOperatorEnum.INCLUDED,
+        type: ListOperatorTypeEnum.MATCH,
+        value: signatureValues.join(','),
+      },
+    ]);
+
+    rerender(<BlockListForm {...createProps({ item: afterOperatorChange?.item })} />);
+
+    await user.click(screen.getByTestId('blocklist-form-field-select'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByRole('option', { name: /path/i }));
+
+    const afterFieldChange = onChangeSpy.mock.calls.at(-1)?.[0] as
+      | ArtifactFormComponentOnChangeCallbackProps
+      | undefined;
+    expect(afterFieldChange?.item.entries).toEqual([
+      createEntry('file.path.caseless', signatureValues),
+    ]);
+  });
+
   it('should correctly create `file.path.caseless` when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
@@ -349,7 +389,7 @@ describe('blocklist form', () => {
 
   it('should correctly create `file.path` when Linux is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();

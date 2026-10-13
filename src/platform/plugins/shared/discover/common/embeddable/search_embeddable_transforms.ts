@@ -15,11 +15,10 @@ import { getTransformOut } from './get_transform_out';
 export type { SearchEmbeddablePanelApiState } from './types';
 
 export function getSearchEmbeddableTransforms(
-  drilldownTransforms: DrilldownTransforms,
-  isEmbeddableTransformsEnabled: () => boolean
+  drilldownTransforms: DrilldownTransforms
 ): EmbeddableTransforms<StoredSearchEmbeddableState, SearchEmbeddablePanelApiState> {
   return {
     transformIn: getTransformIn(drilldownTransforms.transformIn),
-    transformOut: getTransformOut(drilldownTransforms.transformOut, isEmbeddableTransformsEnabled),
+    transformOut: getTransformOut(drilldownTransforms.transformOut),
   };
 }

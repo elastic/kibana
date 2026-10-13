@@ -9,12 +9,10 @@ import React from 'react';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type {
-  KillProcessActionOutputContent,
-  KilledProcessDescendant,
-} from '../../../../../common/endpoint/types';
+import type { KilledProcessDescendant } from '../../../../../common/endpoint/types';
 import type { ProcessTreeProps } from './process_tree';
 import { ProcessTree } from './process_tree';
+import { endpointActionResponseCodes } from '../../endpoint_responder/lib/endpoint_action_response_codes';
 
 describe('ProcessTree', () => {
   const testPrefix = 'test';
@@ -29,11 +27,10 @@ describe('ProcessTree', () => {
     appTestContext = createAppRootMockRenderer();
     generator = new EndpointActionGenerator('test');
 
-    const response = generator.generateResponse<KillProcessActionOutputContent>({
-      EndpointActions: { data: { command: 'kill-process' } },
-    });
-
-    processList = response.EndpointActions.data.output?.content.descendants ?? [];
+    processList = generator.generateKillProcessOutputResponse(
+      {},
+      { parameters: { kill_descendants: true, pid: 234 } }
+    ).content.descendants!;
 
     render = (props = {}) =>
       (renderResult = appTestContext.render(
@@ -61,8 +58,7 @@ describe('ProcessTree', () => {
   it('should render the details for each process node', () => {
     const { getAllByTestId } = render();
 
-    expect(getAllByTestId(`${testPrefix}-456-details`)[0].textContent).toContain('456_command.exe');
-    expect(getAllByTestId(`${testPrefix}-567-details`)[0].textContent).toContain('567_command.exe');
+    expect(getAllByTestId(`${testPrefix}-456-details`)[0].textContent).toContain('PID 456');
   });
 
   it('should nest a child process under its parent', () => {
@@ -82,8 +78,9 @@ describe('ProcessTree', () => {
     // pid 654 has `was_killed: false` and an error in the generated output
     const details = getAllByTestId(`${testPrefix}-654-details`)[0].textContent ?? '';
 
-    expect(details).toContain('Not killed');
-    expect(details).toContain('process is protected');
+    expect(details).toContain(
+      endpointActionResponseCodes['ra_kill-process_descendant_error_failure']
+    );
   });
 
   it('should render only root nodes at the top level', () => {

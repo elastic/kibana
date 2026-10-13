@@ -8,7 +8,6 @@
  */
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
-import type { Dimension } from './types';
 
 export type FlyoutTabId = 'overview' | 'esql-query';
 
@@ -27,14 +26,8 @@ export interface MetricsExperienceRestorableState {
   // Pagination page index
   currentPage: number;
 
-  // User search query
-  searchTerm: string;
-
   // Fullscreen mode state
   isFullscreen: boolean;
-
-  // Selected dimensions
-  selectedDimensions: Dimension[];
 
   // Open metric details flyout state, persisted across navigation.
   flyoutState?: FlyoutState;

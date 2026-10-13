@@ -45,6 +45,8 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'web_logs_dashboard_esql_long_running',
     'web_logs_dashboard',
     'data_stress_test_lens_esql',
+    'many_series_chart_dashboard',
+    'many_points_chart_dashboard',
     'web_logs_dashboard_esql',
     'many_fields_discover_esql',
     'data_stress_test_lens',

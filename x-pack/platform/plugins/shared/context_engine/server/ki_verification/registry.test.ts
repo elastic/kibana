@@ -30,6 +30,14 @@ describe('KiVerifierRegistry', () => {
     expect(registry.getAll()).toEqual([a, b]);
   });
 
+  it('gets a verifier by id', () => {
+    const a = makeVerifier({ id: 'a' });
+    registry.register(a);
+
+    expect(registry.get('a')).toBe(a);
+    expect(registry.get('missing')).toBeUndefined();
+  });
+
   it('throws when a verifier id is registered twice', () => {
     registry.register(makeVerifier({ id: 'dup' }));
 

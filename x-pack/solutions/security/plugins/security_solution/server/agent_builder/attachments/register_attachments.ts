@@ -16,9 +16,12 @@ import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
 import { createEntityGraphAttachmentType } from './entity_graph';
 import { createEntityRiskScoreHistoryAttachmentType } from './entity_risk_score_history';
+import { createExceptionAttachmentType } from './exception';
+import { createInvestigationIocsAttachmentType } from './investigation_iocs';
+import { createInvestigationTimelineAttachmentType } from './investigation_timeline';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
-import { ALL_ATTACHMENT_TYPES as THREAT_INTELLIGENCE_ATTACHMENT_TYPES } from './threat_intelligence_attachment_types';
+import { createRuleMigrationItemsAttachmentType } from './rule_migration_items';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
@@ -42,6 +45,11 @@ export const registerAttachments = async (
   if (experimentalFeatures.riskScoreHistoryEnabled) {
     agentBuilder.attachments.registerType(createEntityRiskScoreHistoryAttachmentType());
   }
+  agentBuilder.attachments.registerType(createExceptionAttachmentType());
+  if (experimentalFeatures.endpointForensicAnalysisSkill) {
+    agentBuilder.attachments.registerType(createInvestigationTimelineAttachmentType());
+    agentBuilder.attachments.registerType(createInvestigationIocsAttachmentType());
+  }
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
 
   // Threat-intelligence attachment types. Tools that emit these are gated by
@@ -55,6 +63,13 @@ export const registerAttachments = async (
 
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
+  }
+
+  if (
+    !experimentalFeatures.siemMigrationsDisabled &&
+    experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
+  ) {
+    agentBuilder.attachments.registerType(createRuleMigrationItemsAttachmentType());
   }
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {

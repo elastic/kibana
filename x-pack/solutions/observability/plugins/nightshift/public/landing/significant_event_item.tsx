@@ -19,8 +19,9 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
 import { InvestigationStatusBadge } from '../investigation/investigation_status_badge';
+import { toInvestigationStatus } from '../common/investigation_progress_status';
 import { getStatusColor } from '../event/significant_event_status';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -31,6 +32,7 @@ import { nightshiftBackgroundTransition } from '../common/transition';
 
 export interface SignificantEventItemProps {
   event: SignificantEvent;
+  investigationRunStatus?: InvestigationRunStatus | null;
   isSelected?: boolean;
   onClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
@@ -40,6 +42,7 @@ export interface SignificantEventItemProps {
 
 export function SignificantEventItem({
   event,
+  investigationRunStatus,
   isSelected = false,
   onClick,
   onChatClick,
@@ -121,7 +124,16 @@ export function SignificantEventItem({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <InvestigationStatusBadge event={event} />
+            <InvestigationStatusBadge
+              event={event}
+              investigationStatus={
+                investigationRunStatus === null
+                  ? null
+                  : investigationRunStatus
+                  ? toInvestigationStatus(investigationRunStatus)
+                  : undefined
+              }
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -175,11 +187,11 @@ export function SignificantEventItem({
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              {onCloseClick && event.status === 'open' && (
+              {onCloseClick && event.status === 'active' && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={i18n.translate('xpack.nightshift.event.closeEventTooltip', {
-                      defaultMessage: 'Close significant event',
+                      defaultMessage: 'Mark significant event inactive',
                     })}
                     disableScreenReaderOutput
                   >
@@ -187,7 +199,7 @@ export function SignificantEventItem({
                       aria-label={i18n.translate(
                         'xpack.nightshift.event.closeEventButtonAriaLabel',
                         {
-                          defaultMessage: 'Close {eventTitle}',
+                          defaultMessage: 'Mark {eventTitle} inactive',
                           values: { eventTitle: event.title },
                         }
                       )}

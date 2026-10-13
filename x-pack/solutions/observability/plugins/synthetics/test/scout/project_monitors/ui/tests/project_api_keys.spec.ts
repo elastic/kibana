@@ -10,45 +10,49 @@ import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('ProjectAPIKeys', { tag: tags.stateful.classic }, () => {
-  test('generates API key and verifies viewer restrictions', async ({
-    pageObjects,
-    page,
-    browserAuth,
-  }, testInfo) => {
-    await test.step('login and navigate to settings', async () => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.syntheticsApp.navigateToSettings();
-    });
+test.describe(
+  'ProjectAPIKeys',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test('generates API key and verifies viewer restrictions', async ({
+      pageObjects,
+      page,
+      browserAuth,
+    }, testInfo) => {
+      await test.step('login and navigate to settings', async () => {
+        await browserAuth.loginAsAdmin();
+        await pageObjects.syntheticsApp.navigateToSettings();
+      });
 
-    await test.step('generate project API key', async () => {
-      await pageObjects.syntheticsApp.navigateToSettingsTab('Project API Keys');
-      await page.locator('button:has-text("Generate Project API key")').click();
-      await expect(
-        page.getByText(
-          'This API key will only be shown once. Please keep a copy for your own records.'
-        )
-      ).toBeVisible();
-      await expect(page.locator('strong:has-text("API key")')).toBeVisible();
-      // TODO: This test can be removed when
-      // https://github.com/elastic/kibana/issues/258482 is resolved.
-      await expectNoLegacyThemeDependency({
-        page,
-        target: page.testSubj.locator('syntheticsProjectApiKeyHelpCommands'),
-        testInfo,
-        name: 'synthetics-project-api-key-help-commands',
+      await test.step('generate project API key', async () => {
+        await pageObjects.syntheticsApp.navigateToSettingsTab('Project API Keys');
+        await page.locator('button:has-text("Generate Project API key")').click();
+        await expect(
+          page.getByText(
+            'This API key will only be shown once. Please keep a copy for your own records.'
+          )
+        ).toBeVisible();
+        await expect(page.locator('strong:has-text("API key")')).toBeVisible();
+        // TODO: This test can be removed when
+        // https://github.com/elastic/kibana/issues/258482 is resolved.
+        await expectNoLegacyThemeDependency({
+          page,
+          target: page.testSubj.locator('syntheticsProjectApiKeyHelpCommands'),
+          testInfo,
+          name: 'synthetics-project-api-key-help-commands',
+        });
+      });
+
+      await test.step('viewer cannot generate API keys', async () => {
+        await browserAuth.loginAsViewer();
+        await pageObjects.syntheticsApp.navigateToSettings();
+        await pageObjects.syntheticsApp.navigateToSettingsTab('Project API Keys');
+        const generateBtn = page.locator('button:has-text("Generate Project API key")');
+        await expect(generateBtn).toBeDisabled();
       });
     });
-
-    await test.step('viewer cannot generate API keys', async () => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.syntheticsApp.navigateToSettings();
-      await pageObjects.syntheticsApp.navigateToSettingsTab('Project API Keys');
-      const generateBtn = page.locator('button:has-text("Generate Project API key")');
-      await expect(generateBtn).toBeDisabled();
-    });
-  });
-});
+  }
+);
 
 // TODO: This test can be removed when
 // https://github.com/elastic/kibana/issues/258482 is resolved.

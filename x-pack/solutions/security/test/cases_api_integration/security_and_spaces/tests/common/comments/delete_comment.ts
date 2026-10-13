@@ -12,12 +12,17 @@ import {
   getAlertById,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/alerts';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 
 import {
   getPostCaseRequest,
   postCaseReq,
-  postCommentAlertReq,
   postCommentUserReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -294,7 +299,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentUserReq, postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedCommentReq, postUnifiedAlertReq],
           expectedHttpCode: 200,
         });
 
@@ -305,8 +310,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const caseComments = resolvedCase.case.comments!;
 
-        const userComment = caseComments?.find((comment) => comment.type === 'user');
-        const alertComment = caseComments?.find((comment) => comment.type === 'alert');
+        // `resolve` is an internal route and intentionally returns unified attachment
+        // types, not the legacy `user`/`alert` shape.
+        const userComment = caseComments?.find(
+          (comment) => comment.type === COMMENT_ATTACHMENT_TYPE
+        );
+        const alertComment = caseComments?.find(
+          (comment) => comment.type === SECURITY_ALERT_ATTACHMENT_TYPE
+        );
 
         await deleteComment({
           supertest,

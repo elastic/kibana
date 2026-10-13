@@ -1,38 +1,9 @@
 {
-  "sha1": "747ba1dbc41f4d48a6a488d185b1e29ab4fac226",
+  "sha1": "1473531ee070a23f1f0d7eed0d8006672839706d",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "b20c875016d5102-ff8cac6bb86c5ab",
-      "title": "Maintenance window create form creates a maintenance window with a custom recurring schedule",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_create.spec.ts",
-        "line": 96,
-        "column": 8
-      }
-    },
-    {
-      "id": "b20c875016d5102-ce9f05d87274a3b",
-      "title": "Maintenance window create form shows a callout when filters toggle is on and scope query is set",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_create.spec.ts",
-        "line": 120,
-        "column": 5
-      }
-    },
     {
       "id": "8daf8b16089b617-21bd727162c6236",
       "title": "Maintenance window update form updates a maintenance window",
@@ -43,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 104,
+        "line": 116,
         "column": 22
       }
     },
@@ -57,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 133,
+        "line": 144,
         "column": 5
       }
     },
@@ -71,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_window_update.spec.ts",
-        "line": 161,
+        "line": 172,
         "column": 18
       }
     },
@@ -85,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 117,
+        "line": 114,
         "column": 60
       }
     },
@@ -99,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 131,
+        "line": 128,
         "column": 13
       }
     },
@@ -113,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 156,
+        "line": 153,
         "column": 11
       }
     },
@@ -127,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 184,
+        "line": 181,
         "column": 14
       }
     },
@@ -141,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 213,
+        "line": 210,
         "column": 12
       }
     },
@@ -155,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 255,
+        "line": 252,
         "column": 16
       }
     },
@@ -169,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 307,
+        "line": 304,
         "column": 14
       }
     },
@@ -183,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/maintenance_windows/ui/tests/maintenance_windows_table.spec.ts",
-        "line": 330,
+        "line": 327,
         "column": 24
       }
     }

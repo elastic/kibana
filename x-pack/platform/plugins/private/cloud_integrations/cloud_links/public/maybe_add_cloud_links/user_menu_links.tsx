@@ -12,6 +12,7 @@ import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/pub
 import type { CoreStart } from '@kbn/core/public';
 import { AppearanceSelector } from './appearance_selector';
 import { LanguageSelector } from './language_selector';
+import { SpaceConfigurationSelector } from './space_preference_selector';
 
 export const createUserMenuLinks = async ({
   core,
@@ -83,6 +84,16 @@ export const createUserMenuLinks = async ({
       <LanguageSelector core={core} security={security} closePopover={closePopover} />
     ),
     order: 500,
+    label: '',
+    iconType: '',
+    href: '',
+  });
+
+  userMenuLinks.push({
+    content: ({ closePopover }) => (
+      <SpaceConfigurationSelector core={core} security={security} closePopover={closePopover} />
+    ),
+    order: 600,
     label: '',
     iconType: '',
     href: '',

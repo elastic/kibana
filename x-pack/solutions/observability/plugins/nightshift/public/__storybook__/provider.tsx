@@ -22,7 +22,7 @@ import {
   checkoutFeature,
   checkoutLifecycle,
   checkoutOccurrences,
-  dismissedShippingEvent,
+  inactiveShippingEvent,
   nightshiftEvents,
   inventoryEvent,
   checkoutEvent,
@@ -36,7 +36,7 @@ export type NightshiftStorybookScenario =
   | 'populated'
   | 'allClear'
   | 'openOnly'
-  | 'dismissed'
+  | 'inactive'
   | 'cachedError'
   | 'error';
 
@@ -96,8 +96,8 @@ const getEventsResponse = (
       ? [resolvedPaymentEvent]
       : scenario === 'openOnly'
       ? [checkoutEvent, inventoryEvent]
-      : scenario === 'dismissed'
-      ? [...nightshiftEvents, dismissedShippingEvent]
+      : scenario === 'inactive'
+      ? [...nightshiftEvents, inactiveShippingEvent]
       : nightshiftEvents;
 
   return {
@@ -117,11 +117,13 @@ const createServices = ({
   scenario: NightshiftStorybookScenario;
   streamFeaturesScenario: NightshiftStreamFeaturesScenario;
 }) => {
-  const closedEventUuids = new Set<string>();
+  const inactiveEventIds = new Set<string>();
   const significantEventsRepositoryClient = {
     fetch: async (
       route: string,
-      options?: { params?: { path?: { id?: string; name?: string } } }
+      options?: {
+        params?: { path?: { id?: string; name?: string }; query?: { event_id?: string } };
+      }
     ) => {
       if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
@@ -134,12 +136,13 @@ const createServices = ({
           throw new Error('The significant events request failed');
         }
         const response = getEventsResponse(scenario);
-        return {
-          ...response,
-          hits: response.hits.map((event) =>
-            closedEventUuids.has(event.event_uuid) ? { ...event, status: 'closed' as const } : event
-          ),
-        };
+        const requestedEventId = options?.params?.query?.event_id;
+        const hits = response.hits
+          .filter((event) => !requestedEventId || event.event_id === requestedEventId)
+          .map((event) =>
+            inactiveEventIds.has(event.event_id) ? { ...event, status: 'inactive' as const } : event
+          );
+        return { ...response, hits, total: hits.length };
       }
 
       if (route === 'GET /internal/significant_events/events/{id}/lifecycle') {
@@ -155,14 +158,14 @@ const createServices = ({
         return checkoutLifecycle;
       }
 
-      const eventUuid = options?.params?.path?.id;
-      if (route === 'POST /internal/significant_events/events/{id}/update' && eventUuid) {
-        closedEventUuids.add(eventUuid);
+      const eventId = options?.params?.path?.id;
+      if (route === 'POST /internal/significant_events/events/{id}/update' && eventId) {
+        inactiveEventIds.add(eventId);
         return {
-          event_uuid: eventUuid,
+          event_id: eventId,
           updated: 1,
           ignored: 0,
-          status: 'closed',
+          status: 'inactive',
         };
       }
 

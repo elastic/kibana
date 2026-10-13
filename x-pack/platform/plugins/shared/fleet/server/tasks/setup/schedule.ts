@@ -28,8 +28,9 @@ export async function scheduleSetupTask(
 
   for (let i = 0; i < tasksToSchedule.length; i++) {
     const params = tasksToSchedule[i];
+    const taskId = `${TASK_TYPE}:${params.type}`;
     await taskManagerStart.ensureScheduled({
-      id: `${TASK_TYPE}:${params.type}`,
+      id: taskId,
       scope: ['fleet'],
       params,
       taskType: TASK_TYPE,

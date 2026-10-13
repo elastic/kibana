@@ -8,7 +8,7 @@
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
-import { EuiButtonIcon, EuiCode, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiCode, EuiLoadingSpinner } from '@elastic/eui';
 
 import type {
   AttachmentType,
@@ -16,7 +16,7 @@ import type {
   CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
+import { renderAttachmentAction } from '../attachment_action';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { AttachmentV2 } from '../../../../common/types/domain';
@@ -32,6 +32,7 @@ import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_u
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
 import { AttachmentErrorCallout } from './attachment_error_callout';
 import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
+import { withActionSourceEvent } from '../action_source_event';
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
@@ -104,11 +105,12 @@ export const createRegisteredAttachmentUserActionBuilder = <
               userProfiles={userProfiles}
             />
           ),
-          event: (
+          event: withActionSourceEvent(
             <>
               {`${DEFAULT_EVENT_ATTACHMENT_TITLE} `}
               <EuiCode>{attachmentTypeId}</EuiCode>
-            </>
+            </>,
+            userAction.source
           ),
           className: `comment-${attachment.type}-not-found`,
           'data-test-subj': `comment-${attachment.type}-not-found`,
@@ -148,7 +150,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
         ),
         className,
         css: creationActivity.css,
-        event: creationActivity.event,
+        event: withActionSourceEvent(creationActivity.event, userAction.source),
         eventColor: creationActivity.eventColor,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
@@ -156,27 +158,8 @@ export const createRegisteredAttachmentUserActionBuilder = <
         timelineAvatarAriaLabel: attachmentType.getLabel(),
         actions: (
           <UserActionContentToolbar id={attachment.id}>
-            {visiblePrimaryActions.map(
-              (action) =>
-                (action.type === AttachmentActionType.BUTTON && (
-                  <EuiFlexItem
-                    grow={false}
-                    data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}`}
-                    key={`attachment-${attachmentTypeId}-${attachment.id}`}
-                  >
-                    <EuiToolTip content={action.label} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        aria-label={action.label}
-                        iconType={action.iconType}
-                        color={action.color ?? 'text'}
-                        onClick={action.onClick}
-                        data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                        key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )) ||
-                (action.type === AttachmentActionType.CUSTOM && action.render())
+            {visiblePrimaryActions.map((action) =>
+              renderAttachmentAction(action, `attachment-${attachmentTypeId}-${attachment.id}`)
             )}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}

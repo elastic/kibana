@@ -73,6 +73,9 @@ interface PageHeaderProps {
 export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+  const {
+    services: { cps },
+  } = useDataVisualizerKibana();
 
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     DVKey,
@@ -128,6 +131,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
                 disabled={false}
                 timefilter={timefilter}
                 callback={updateTimeState}
+                projectRouting={cps?.cpsManager?.getProjectRouting()}
               />
             </EuiFlexItem>
           )}

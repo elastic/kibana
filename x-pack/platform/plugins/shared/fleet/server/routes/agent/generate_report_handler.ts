@@ -11,15 +11,15 @@ import {
   type EsQuerySortValue,
   type SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { escapeQuotes, toElasticsearchQuery } from '@kbn/es-query';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
 
-import { AGENT_API_ROUTES, getSortConfig, removeSOAttributes } from '../../../common';
+import { AGENT_API_ROUTES, getSortConfig } from '../../../common';
 import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from '../../types';
 import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
-import { getSpaceAwarenessFilterForAgents } from '../../services/agents/crud';
+import { _joinFilters, getSpaceAwarenessFilterForAgents } from '../../services/agents/crud';
 
 type HandleResponseFunc = Parameters<ReportingStart['handleGenerateSystemReportRequest']>[2];
 
@@ -39,6 +39,10 @@ export const generateReportHandler: FleetRequestHandler<
   const reporting = appContextService.getReportingStart();
   if (!reporting) {
     throw new FleetError('Report generation is not available');
+  }
+
+  if (Array.isArray(agents) && agents.length === 0) {
+    throw new FleetError('At least one agent id must be provided');
   }
 
   const reportParams = await getReportParams(
@@ -113,18 +117,26 @@ const getReportParams = async (
     },
   };
 
-  const agentsQuery = Array.isArray(agents) ? `agent.id:(${agents.join(' OR ')})` : agents;
   const spaceFilter = await getSpaceAwarenessFilterForAgents(spaceId);
-  const filterQuery = spaceFilter.length
-    ? `${agentsQuery} AND (${spaceFilter.join(' AND ')})`
-    : agentsQuery;
+  // Quote and escape each agent id so KQL metacharacters in the id value are treated as
+  // literal data and cannot break out of the agent.id(...) expression.
+  const agentsQuery = Array.isArray(agents)
+    ? `agent.id:(${agents.map((id) => `"${escapeQuotes(id)}"`).join(' or ')})`
+    : agents;
+  // _joinFilters parses each filter into its own AST and combines them with an explicit
+  // `and` node. This prevents a user-supplied OR from escaping the namespace predicate
+  // through KQL operator precedence (AND binds tighter than OR).
+  const kueryNode = _joinFilters([...spaceFilter, agentsQuery]);
+  if (!kueryNode) {
+    throw new FleetError('Unable to build report filter');
+  }
 
   const sortField = getSortFieldForAPI(sortOptions?.field ?? 'enrolled_at');
   const sortOrder = (sortOptions?.direction as SortDirection) ?? SortDirection.desc;
 
   const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
 
-  const filterQueryDsl = toElasticsearchQuery(fromKueryExpression(removeSOAttributes(filterQuery)));
+  const filterQueryDsl = toElasticsearchQuery(kueryNode);
   const searchSource: SerializedSearchSourceFields = {
     query: {
       query: '',

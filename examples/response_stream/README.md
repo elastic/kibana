@@ -2,7 +2,7 @@
 
 This plugin demonstrates how to stream chunks of data to the client with just a single request.
 
-To run Kibana with the described examples, use `yarn start --run-examples`.
+To run Kibana with the described examples, use `pnpm start --run-examples`.
 
 The `response_stream` plugin demonstrates API endpoints that can stream data chunks with a single request with gzip/compression support. gzip-streams get decompressed natively by browsers. The plugin demonstrates some use cases to get you started:
 

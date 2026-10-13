@@ -13,6 +13,10 @@ const createStartContractMock = () => {
       close: jest.fn(),
       onClose: Promise.resolve(),
     }),
+    openTemplate: jest.fn().mockReturnValue({
+      close: jest.fn(),
+      onClose: Promise.resolve(),
+    }),
   };
 };
 

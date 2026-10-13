@@ -190,7 +190,6 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          color="success"
           iconType="refresh"
           onClick={reload}
           data-test-subj="reloadButton"

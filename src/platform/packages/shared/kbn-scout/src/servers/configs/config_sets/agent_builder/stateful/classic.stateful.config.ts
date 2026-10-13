@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
@@ -15,6 +17,16 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * Kept in sync with `SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT` in Agent Builder Scout shared fixtures.
  */
 const AGENT_BUILDER_GITHUB_MOCK_PORT = 18387;
+
+/**
+ * Registers two fixture SML types — one with a `getPermissions` hook and one deliberately without
+ * — so `sml_type_permissions_api.spec.ts` can assert the hook's contract end to end. No currently
+ * shipped SML type omits the hook, so without this fixture nothing exercises that path.
+ */
+const SML_TEST_TYPES_PLUGIN_PATH = `--plugin-path=${resolve(
+  REPO_ROOT,
+  'x-pack/platform/test/agent_builder_sml/plugins/sml_test_types'
+)}`;
 
 /**
  * Stateful Kibana + Elasticsearch defaults with Agent Builder test settings:
@@ -54,6 +66,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
       '--xpack.agentBuilder.tracing.scheduledDelay=500',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
+      SML_TEST_TYPES_PLUGIN_PATH,
     ],
   },
 };

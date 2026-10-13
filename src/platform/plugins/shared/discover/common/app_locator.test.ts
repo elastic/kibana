@@ -356,16 +356,16 @@ describe('Discover url generator', () => {
       exampleProfileState: {
         boxColor: 'transparent',
       },
+      metricsState: {
+        counterAggregation: 'max',
+        gaugeAggregation: 'last_value',
+        histogramPercentile: 'p90',
+      },
     });
     expect(state).toEqual({
       profileState: {
         exampleProfileState: {
           rowControlColor: 'text',
-        },
-        metricsState: {
-          counterAggregation: 'max',
-          gaugeAggregation: 'last_value',
-          histogramPercentile: 'p90',
         },
       },
     });
@@ -473,6 +473,39 @@ describe('Discover url generator', () => {
       const { _a } = getStatesFromKbnUrl(path, ['_a']);
 
       expect((_a as Record<string, unknown>).esqlApproximation).toBeUndefined();
+    });
+  });
+
+  describe('when expandedDoc is used', () => {
+    test('should include expandedDoc in appState', async () => {
+      const { locator } = await setup();
+      const expandedDoc = {
+        id: 'doc-1',
+        index: 'logs-2024.01.01',
+        routing: 'route-1',
+        extraKey: 'discarded',
+      };
+      const { path } = await locator.getLocation({
+        dataViewId,
+        expandedDoc,
+      });
+      const { _a } = getStatesFromKbnUrl(path, ['_a']);
+
+      expect((_a as Record<string, unknown>).expandedDoc).toEqual({
+        id: 'doc-1',
+        index: 'logs-2024.01.01',
+        routing: 'route-1',
+      });
+    });
+  });
+
+  describe('when expandedDoc is not used', () => {
+    test('expandedDoc should not be set in appState', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({ dataViewId });
+      const { _a } = getStatesFromKbnUrl(path, ['_a']);
+
+      expect((_a as Record<string, unknown>).expandedDoc).toBeUndefined();
     });
   });
 

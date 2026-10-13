@@ -7,9 +7,10 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import Boom from '@hapi/boom';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { createTemplatesSubClient } from './client';
-import type { Template } from '../../../common/types/domain/template/latest';
+import type { CreateTemplateInput, Template } from '../../../common/types/domain/template/latest';
 import type { TemplatesFindRequest } from '../../../common/types/api/template/v1';
 
 describe('templates client', () => {
@@ -307,6 +308,115 @@ describe('templates client', () => {
         })
       ).rejects.toThrow('no manage on target owner');
       expect(clientArgs.services.templatesService.validateWriteInput).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('usage counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const writeInput: CreateTemplateInput = {
+      name: 'Template One',
+      owner: 'securitySolution',
+      definition: '',
+    };
+
+    const createClientArgsWithCounter = () => ({
+      ...createCasesClientMockArgs(),
+      usageCounter,
+    });
+
+    it.each([
+      {
+        method: 'createTemplate' as const,
+        counterName: 'create_template',
+        call: (client: ReturnType<typeof createTemplatesSubClient>) =>
+          client.createTemplate(writeInput),
+      },
+      {
+        method: 'updateTemplate' as const,
+        counterName: 'update_template',
+        call: (client: ReturnType<typeof createTemplatesSubClient>) =>
+          client.updateTemplate('template-1', writeInput),
+      },
+      {
+        method: 'deleteTemplate' as const,
+        counterName: 'delete_template',
+        call: (client: ReturnType<typeof createTemplatesSubClient>) =>
+          client.deleteTemplate('template-1'),
+      },
+    ])('$method increments $counterName once on success', async ({ counterName, call }) => {
+      const clientArgsWithCounter = createClientArgsWithCounter();
+      const template = createTemplateSavedObject('securitySolution');
+      clientArgsWithCounter.services.templatesService.getTemplate.mockResolvedValue(template);
+      clientArgsWithCounter.services.templatesService.createTemplate.mockResolvedValue(template);
+      clientArgsWithCounter.services.templatesService.updateTemplate.mockResolvedValue(template);
+      clientArgsWithCounter.services.templatesService.deleteTemplate.mockResolvedValue(undefined);
+
+      const subClient = createTemplatesSubClient(clientArgsWithCounter);
+      await call(subClient);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName,
+        counterType: 'cases_client.rest_api',
+      });
+    });
+
+    it('increments the create counter on a failed write because the wrapper fires before the call', async () => {
+      const clientArgsWithCounter = createClientArgsWithCounter();
+      clientArgsWithCounter.authorization.ensureAuthorized.mockRejectedValueOnce(
+        Boom.forbidden('no manage')
+      );
+
+      const subClient = createTemplatesSubClient(clientArgsWithCounter);
+
+      await expect(subClient.createTemplate(writeInput)).rejects.toThrow('no manage');
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_template',
+        counterType: 'cases_client.rest_api',
+      });
+    });
+
+    it('does not increment on reads or dry-run validators', async () => {
+      const clientArgsWithCounter = createClientArgsWithCounter();
+      const template = createTemplateSavedObject('securitySolution');
+      clientArgsWithCounter.authorization.getAuthorizationFilter.mockResolvedValue({
+        filter: undefined,
+        ensureSavedObjectsAreAuthorized: () => {},
+        authorizedOwners: undefined,
+      });
+      clientArgsWithCounter.services.templatesService.getAllTemplates.mockResolvedValue({
+        templates: [],
+        page: 1,
+        perPage: 20,
+        total: 0,
+      });
+      clientArgsWithCounter.services.templatesService.getTemplate.mockResolvedValue(template);
+      clientArgsWithCounter.services.templatesService.getTags.mockResolvedValue([]);
+      clientArgsWithCounter.services.templatesService.getAuthors.mockResolvedValue([]);
+
+      const subClient = createTemplatesSubClient(clientArgsWithCounter);
+
+      await subClient.getAllTemplates(findRequest());
+      await subClient.getTemplate('template-1');
+      await subClient.getTags();
+      await subClient.getAuthors();
+      await subClient.validateCreateTemplate(writeInput);
+      await subClient.validateUpdateTemplate('template-1', writeInput);
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    });
+
+    it('does not throw when usageCounter is undefined', async () => {
+      const clientArgsWithoutCounter = createCasesClientMockArgs();
+      const template = createTemplateSavedObject('securitySolution');
+      clientArgsWithoutCounter.services.templatesService.createTemplate.mockResolvedValue(template);
+
+      const subClient = createTemplatesSubClient(clientArgsWithoutCounter);
+
+      await expect(subClient.createTemplate(writeInput)).resolves.toBe(template);
     });
   });
 });

@@ -10,26 +10,31 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { UseInvestigationStateResult } from '@kbn/investigation-output';
 import { EventFlyout } from './event_flyout';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
+const mockUseInvestigationState = jest.fn<UseInvestigationStateResult, [unknown]>();
+
 jest.mock('@kbn/investigation-output', () => ({
   // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
-  useInvestigationState: () => ({
-    status: 'complete',
-    state: undefined,
-    error: undefined,
-    conversationId: undefined,
-  }),
+  useInvestigationState: (args: unknown) => mockUseInvestigationState(args),
 }));
+
+jest.mock('../hooks/use_fetch_investigation_statuses', () => ({
+  useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
+}));
+
+let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => ({
@@ -110,6 +115,11 @@ jest.mock('../hooks/use_kibana', () => ({
         },
       },
       application: {
+        capabilities: {
+          nightshift: {
+            show: true,
+          },
+        },
         getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
       },
     },
@@ -119,19 +129,25 @@ jest.mock('../hooks/use_kibana', () => ({
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.web-frontend', 'logs.api-gateway'],
   title: 'Web latency spike across frontend and API gateway',
   summary:
     'P95 latency jumped from 120ms to 890ms on web-frontend and api-gateway services. This is a long summary that should be truncated because it exceeds three hundred characters total length when we add enough text here to push it past the limit for the show more toggle to appear in the UI component. Adding even more text to ensure we are definitely past the three hundred character maximum truncation threshold.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.92,
 };
 
 describe('EventFlyout', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
+    mockInvestigationRunStatuses = undefined;
+    mockUseInvestigationState.mockReturnValue({
+      status: 'complete',
+      state: undefined,
+      error: undefined,
+      conversationId: undefined,
+    });
     window.history.pushState({}, '', '/app/observability/nightshift');
   });
 
@@ -156,7 +172,7 @@ describe('EventFlyout', () => {
   });
 
   it('hides the investigation badge when the event has no investigations', () => {
-    renderFlyout({ event: { ...mockEvent, status: 'closed' } });
+    renderFlyout({ event: { ...mockEvent, status: 'inactive' } });
 
     expect(screen.queryByText('Needs action')).not.toBeInTheDocument();
     expect(screen.queryByText('Resolved')).not.toBeInTheDocument();
@@ -168,7 +184,7 @@ describe('EventFlyout', () => {
     renderFlyout({
       event: {
         ...mockEvent,
-        status: 'closed',
+        status: 'inactive',
         investigations: [
           {
             workflow_execution_id: 'exec-1',
@@ -260,6 +276,99 @@ describe('EventFlyout', () => {
     expect(screen.getByTestId('nightshiftInvestigationSummaryCard')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationShowDetailsButton')).toBeInTheDocument();
     expect(screen.queryByText('No investigation yet.')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['failed', 'Investigation failed', 'Failed'],
+    ['unavailable', 'Investigation unavailable', 'Unavailable'],
+  ] as const)(
+    'marks an already-completed %s investigation and withholds the details button',
+    (status, badgeLabel, summaryLabel) => {
+      mockUseInvestigationState.mockReturnValue({
+        status,
+        state: undefined,
+        error: 'The investigation did not complete.',
+        conversationId: undefined,
+      });
+
+      renderFlyout({
+        event: {
+          ...mockEvent,
+          investigations: [
+            {
+              workflow_execution_id: 'exec-1',
+              started_at: '2026-07-10T12:00:00Z',
+              completed_at: '2026-07-10T12:05:00Z',
+            },
+          ],
+        },
+      });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+        badgeLabel
+      );
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(
+        summaryLabel
+      );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it('shows no investigation when the execution does not exist', () => {
+    mockInvestigationRunStatuses = {};
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'exec-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByText('No investigation yet.')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSummaryCard')).not.toBeInTheDocument();
+    expect(mockUseInvestigationState).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: undefined, isRunning: false })
+    );
+  });
+
+  it('stops following a run with no completed_at once the API reports it failed', () => {
+    mockInvestigationRunStatuses = { 'exec-1': 'failed' };
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [{ workflow_execution_id: 'exec-1', started_at: '2026-07-10T12:00:00Z' }],
+      },
+    });
+
+    expect(mockUseInvestigationState).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'exec-1', isRunning: false })
+    );
+  });
+
+  it('still follows a run the API reports as pending', () => {
+    mockInvestigationRunStatuses = { 'exec-1': 'pending' };
+
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [{ workflow_execution_id: 'exec-1', started_at: '2026-07-10T12:00:00Z' }],
+      },
+    });
+
+    expect(mockUseInvestigationState).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'exec-1', isRunning: true })
+    );
   });
 
   it('calls onClose when flyout is closed', () => {

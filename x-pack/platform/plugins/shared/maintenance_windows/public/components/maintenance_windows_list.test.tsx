@@ -180,6 +180,6 @@ describe('MaintenanceWindowsList', () => {
       />
     );
     fireEvent.click(screen.getByTestId('refresh-button'));
-    await waitFor(() => expect(refreshData).toBeCalled());
+    await waitFor(() => expect(refreshData).toHaveBeenCalled());
   });
 });

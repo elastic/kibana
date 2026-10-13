@@ -259,7 +259,41 @@ describe('getUserFromRequest', () => {
     });
   });
 
-  it('propagates non-403 API key profile lookup failures', async () => {
+  it('treats a 404 from API key profile lookup as profile not resolvable (e.g. UIAM keys)', async () => {
+    const apiKeyId = 'api-key-id';
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+      },
+    });
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    // UIAM `essu_` keys cannot be looked up via the native `_security/api_key`
+    // endpoint: Elasticsearch responds 404 with an empty `api_keys` array.
+    esClient.security.getApiKey.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: { api_keys: [] },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: undefined,
+      username: 'shareduser',
+      isAdmin: false,
+    });
+  });
+
+  it('propagates unexpected API key profile lookup failures', async () => {
     const apiKeyId = 'api-key-id';
     const request = httpServerMock.createKibanaRequest({
       headers: {

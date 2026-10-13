@@ -56,6 +56,7 @@ export const createVisualizationAttachmentDefinition = (
           services={services}
           renderer={data.renderer}
           visualization={data.visualization}
+          esql={data.esql}
           timeRange={data.time_range ?? screenContext?.time_range}
           registerActionButtons={callbacks?.registerActionButtons}
         />

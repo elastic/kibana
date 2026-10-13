@@ -6,6 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { getUnprocessedOtelErrors } from './get_unprocessed_otel_errors';
 import { getApmTraceError } from './get_apm_trace_error';
@@ -19,6 +20,7 @@ export interface UnifiedTraceErrors {
 export async function getUnifiedTraceErrors({
   apmEventClient,
   logsClient,
+  logger,
   traceId,
   docId,
   start,
@@ -26,6 +28,7 @@ export async function getUnifiedTraceErrors({
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
+  logger: Logger;
   traceId: string;
   docId?: string;
   start: number;
@@ -35,7 +38,7 @@ export async function getUnifiedTraceErrors({
 
   const [apmErrors, unprocessedOtelErrors] = await Promise.all([
     getApmTraceError({ apmEventClient, ...commonParams }),
-    getUnprocessedOtelErrors({ logsClient, ...commonParams }),
+    getUnprocessedOtelErrors({ logsClient, logger, ...commonParams }),
   ]);
 
   return {

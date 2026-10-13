@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   };
 
-  describe('@ess @serverless @serverlessQA modifying non-customizable fields', () => {
+  describe('@ess @serverless @skipInServerlessMKI modifying non-customizable fields', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });

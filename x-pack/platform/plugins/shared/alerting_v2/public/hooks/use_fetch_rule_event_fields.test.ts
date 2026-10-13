@@ -73,16 +73,16 @@ describe('useFetchRuleEventFields', () => {
 
     const { result, rerender } = renderHook(({ matcher }) => useFetchRuleEventFields(matcher), {
       wrapper: Wrapper,
-      initialProps: { matcher: 'rule.id : "a"' },
+      initialProps: { matcher: 'alert_id: "a"' },
     });
 
     await waitFor(() => expect(mockFetchRuleEventFields).toHaveBeenCalledTimes(1));
-    expect(mockFetchRuleEventFields).toHaveBeenLastCalledWith('rule.id : "a"');
+    expect(mockFetchRuleEventFields).toHaveBeenLastCalledWith('alert_id: "a"');
 
-    rerender({ matcher: 'rule.id : "b"' });
+    rerender({ matcher: 'alert_id: "b"' });
 
     await waitFor(() => expect(mockFetchRuleEventFields).toHaveBeenCalledTimes(2));
-    expect(mockFetchRuleEventFields).toHaveBeenLastCalledWith('rule.id : "b"');
+    expect(mockFetchRuleEventFields).toHaveBeenLastCalledWith('alert_id: "b"');
     expect(result.current).toBeDefined();
   });
 });

@@ -33,10 +33,10 @@ import {
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { GetAdditionalLinks } from '@kbn/file-upload-common';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
@@ -67,7 +67,7 @@ const maxInlineSizeStyles = css`
 
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { data, http } = services;
+  const { data, http, cps } = services;
   const { euiTheme } = useEuiTheme();
 
   // Query that has been typed, but has not submitted with cmd + enter
@@ -273,6 +273,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                   setFrozenDataPreference={() => {}}
                   dataView={currentDataView}
                   query={undefined}
+                  projectRouting={cps?.cpsManager?.getProjectRouting()}
                   disabled={false}
                   timefilter={timefilter}
                 />

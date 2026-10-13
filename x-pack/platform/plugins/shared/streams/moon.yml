@@ -17,7 +17,6 @@ project:
   owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
-  - '@kbn/deeplinks-observability'
   - '@kbn/config-schema'
   - '@kbn/core-pricing-common'
   - '@kbn/core'
@@ -31,7 +30,6 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/object-utils'
   - '@kbn/alerting-plugin'
-  - '@kbn/alerting-v2-plugin'
   - '@kbn/rule-registry-plugin'
   - '@kbn/es-types'
   - '@kbn/licensing-plugin'
@@ -90,6 +88,7 @@ dependsOn:
   - '@kbn/sample-log-parser'
   - '@kbn/workflows-extensions'
   - '@kbn/agent-builder-sml-plugin'
+  - '@kbn/server-http-tools'
 tags:
   - plugin
   - prod

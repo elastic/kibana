@@ -94,6 +94,7 @@ export const mockState: SyntheticsAppState = {
   },
   overview: {
     pageState: {
+      page: 1,
       perPage: 10,
       sortOrder: 'asc',
       sortField: 'name.keyword',
@@ -482,6 +483,7 @@ function getMonitorDetailsMockSlice() {
       'filter_journeys.match': '',
       'filter_journeys.tags': [],
       ignore_https_errors: false,
+      certificate_error_spki_allowlist: [],
       throttling: {
         value: {
           download: '5',

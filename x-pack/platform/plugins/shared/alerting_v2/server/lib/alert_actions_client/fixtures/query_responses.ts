@@ -52,10 +52,12 @@ const toAlertEventRow = (record: Partial<RawAlertEventRow>): FieldValue[] => [
  * (`RawAlertEventRow`). One function covers every alert-event loader in
  * the client:
  *
- * - Single-route path (`loadLastAlertEventOrThrow`): pass one record (or
- *   omit the argument to accept defaults).
- * - Batched paths (`loadLatestAlertEvents`, `bulkLoadLatestAlertEvents`):
- *   pass an array — one entry per returned row.
+ * - Single-route paths (`loadLastSeriesAlertEventOrThrow`,
+ *   `loadLastEpisodeAlertEventOrThrow`): pass one record (or omit the
+ *   argument to accept defaults).
+ * - Batched paths (`loadLatestAlertEventsByGroupHash`,
+ *   `loadLatestAlertEventsByEpisodeId`): pass an array — one entry per
+ *   returned row.
  * - "No matches" case: pass an empty array.
  */
 export const getAlertEventESQLResponse = (
@@ -68,4 +70,43 @@ export const getAlertEventESQLResponse = (
 export const getEmptyESQLResponse = (): EsqlQueryResponse => ({
   columns: [],
   values: [],
+});
+
+/**
+ * Column order of the action-state projection in
+ * `context_loaders/load_alert_action_states.ts`.
+ */
+const ALERT_ACTION_STATE_COLUMNS: ReadonlyArray<{ name: string; type: string }> = [
+  { name: 'alert_id', type: 'keyword' },
+  { name: 'last_ack_action', type: 'keyword' },
+  { name: 'last_assignee_uid', type: 'keyword' },
+  { name: 'last_tags', type: 'keyword' },
+];
+
+/** One action-state row as the loader reads it; omitted columns are null. */
+export interface AlertActionStateRowOverrides {
+  alert_id?: string;
+  last_ack_action?: 'ack' | 'unack' | null;
+  last_assignee_uid?: string | null;
+  last_tags?: string | string[] | null;
+}
+
+/**
+ * `FieldValue` has no array variant, but a multi-valued ES|QL column does
+ * come back as a nested array — which is what `last_tags` carries.
+ */
+type EsqlCell = FieldValue | FieldValue[];
+
+const toAlertActionStateRow = (row: AlertActionStateRowOverrides): EsqlCell[] => [
+  row.alert_id ?? 'episode-1',
+  row.last_ack_action ?? null,
+  row.last_assignee_uid ?? null,
+  row.last_tags ?? null,
+];
+
+export const getAlertActionStateESQLResponse = (
+  rows: readonly AlertActionStateRowOverrides[] = []
+): EsqlQueryResponse => ({
+  columns: [...ALERT_ACTION_STATE_COLUMNS],
+  values: rows.map(toAlertActionStateRow) as EsqlQueryResponse['values'],
 });

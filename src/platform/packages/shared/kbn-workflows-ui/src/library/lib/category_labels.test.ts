@@ -20,6 +20,6 @@ describe('getCategoryLabel', () => {
   });
 
   it('should fall back to a humanized id for an unknown category', () => {
-    expect(getCategoryLabel('brand-new-category')).toBe('Brand New Category');
+    expect(getCategoryLabel('brand-new-category')).toBe('Brand new category');
   });
 });

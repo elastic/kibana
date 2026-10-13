@@ -7,60 +7,197 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const fs = require('fs');
 const ts = require('typescript');
-const path = require('path');
 
-function getImportedVariableValue(context, name, propertyName) {
-  const parent = context
-    .getAncestors()
-    .find((ancestor) => ['BlockStatement', 'Program'].includes(ancestor.type));
+const sourceFileCache = new Map();
 
-  if (!parent) return;
+function hasExportModifier(node) {
+  return node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword);
+}
 
-  const importDeclaration = parent.body.find(
-    (statement) =>
-      statement.type === 'ImportDeclaration' &&
-      statement.specifiers.some((specifier) => specifier.local.name === name)
-  );
+function unwrapExpression(expression) {
+  let unwrapped = expression;
+  while (
+    ts.isAsExpression(unwrapped) ||
+    ts.isParenthesizedExpression(unwrapped) ||
+    ts.isSatisfiesExpression(unwrapped) ||
+    ts.isTypeAssertionExpression(unwrapped)
+  ) {
+    unwrapped = unwrapped.expression;
+  }
+  return unwrapped;
+}
 
-  if (!importDeclaration) return;
-
-  const absoluteImportPath = require.resolve(importDeclaration.source.value, {
-    paths: [path.dirname(context.getFilename())],
-  });
-
-  const program = ts.createProgram([absoluteImportPath], {});
-  const sourceFile = program.getSourceFile(absoluteImportPath);
-
-  if (!sourceFile) return null;
-
-  const checker = program.getTypeChecker();
-  const symbols = checker.getExportsOfModule(sourceFile.symbol);
-  const symbol = symbols.find((s) => s.name === name);
-
-  if (!symbol) return null;
-
-  if (propertyName) {
-    const currentSymbol = checker.getTypeOfSymbolAtLocation(symbol, sourceFile);
-    const property = currentSymbol.getProperty(propertyName);
-
-    if (ts.isStringLiteral(property.valueDeclaration.initializer)) {
-      return property.valueDeclaration.initializer.text;
-    }
-
-    return null;
+function parseSourceFile(filename) {
+  if (sourceFileCache.has(filename)) {
+    return sourceFileCache.get(filename);
   }
 
-  const initializer = symbol?.valueDeclaration?.initializer;
+  try {
+    const sourceFile = ts.createSourceFile(
+      filename,
+      fs.readFileSync(filename, 'utf-8'),
+      ts.ScriptTarget.ESNext,
+      true
+    );
+    sourceFileCache.set(filename, sourceFile);
+    return sourceFile;
+  } catch {
+    return null;
+  }
+}
 
-  if (ts.isStringLiteral(initializer)) {
-    return initializer.text;
+function resolveModule(from, specifier) {
+  return ts.resolveModuleName(specifier, from, {}, ts.sys).resolvedModule?.resolvedFileName;
+}
+
+function findLocalInitializer(sourceFile, name) {
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) {
+      continue;
+    }
+
+    const declaration = statement.declarationList.declarations.find(
+      (candidate) => ts.isIdentifier(candidate.name) && candidate.name.text === name
+    );
+
+    if (declaration?.initializer) {
+      return declaration.initializer;
+    }
   }
 
   return null;
 }
 
-function validatePrivilegesNode(context, privilegesNode, scopedVariables) {
+function findExportInitializer(filename, name, seen = new Set()) {
+  if (seen.has(filename)) {
+    return null;
+  }
+  seen.add(filename);
+
+  const sourceFile = parseSourceFile(filename);
+  if (!sourceFile) {
+    return null;
+  }
+
+  for (const statement of sourceFile.statements) {
+    if (ts.isVariableStatement(statement) && hasExportModifier(statement)) {
+      const declaration = statement.declarationList.declarations.find(
+        (candidate) => ts.isIdentifier(candidate.name) && candidate.name.text === name
+      );
+      if (declaration?.initializer) {
+        return declaration.initializer;
+      }
+      continue;
+    }
+
+    if (!ts.isExportDeclaration(statement)) {
+      continue;
+    }
+
+    const exportSpecifier =
+      statement.exportClause && ts.isNamedExports(statement.exportClause)
+        ? statement.exportClause.elements.find((candidate) => candidate.name.text === name)
+        : undefined;
+
+    if (!statement.moduleSpecifier || !ts.isStringLiteral(statement.moduleSpecifier)) {
+      if (exportSpecifier) {
+        return findLocalInitializer(sourceFile, exportSpecifier.propertyName?.text ?? name);
+      }
+      continue;
+    }
+
+    const modulePath = resolveModule(sourceFile.fileName, statement.moduleSpecifier.text);
+    if (!modulePath) {
+      continue;
+    }
+
+    if (!statement.exportClause) {
+      const initializer = findExportInitializer(modulePath, name, seen);
+      if (initializer) {
+        return initializer;
+      }
+      continue;
+    }
+
+    if (exportSpecifier) {
+      return findExportInitializer(modulePath, exportSpecifier.propertyName?.text ?? name, seen);
+    }
+  }
+
+  return null;
+}
+
+function getExpressionValue(expression, propertyName) {
+  const unwrapped = unwrapExpression(expression);
+
+  if (propertyName) {
+    if (!ts.isObjectLiteralExpression(unwrapped)) {
+      return null;
+    }
+
+    const property = unwrapped.properties.find(
+      (candidate) =>
+        ts.isPropertyAssignment(candidate) &&
+        (ts.isIdentifier(candidate.name) || ts.isStringLiteral(candidate.name)) &&
+        candidate.name.text === propertyName
+    );
+
+    return property && ts.isPropertyAssignment(property)
+      ? getExpressionValue(property.initializer)
+      : null;
+  }
+
+  return ts.isStringLiteral(unwrapped) ? unwrapped.text : null;
+}
+
+function getImportedVariableValue(imports, filename, name, propertyName) {
+  const importedValue = imports.get(name);
+  if (!importedValue) {
+    return null;
+  }
+
+  const modulePath = resolveModule(filename, importedValue.source);
+  if (!modulePath) {
+    return null;
+  }
+
+  const exportedName = importedValue.name ?? propertyName;
+  if (!exportedName) {
+    return null;
+  }
+
+  const initializer = findExportInitializer(modulePath, exportedName);
+  return initializer
+    ? getExpressionValue(initializer, importedValue.name ? propertyName : undefined)
+    : null;
+}
+
+function getImports(program) {
+  const imports = new Map();
+
+  program.body.forEach((statement) => {
+    if (statement.type !== 'ImportDeclaration') {
+      return;
+    }
+
+    statement.specifiers.forEach((specifier) => {
+      if (specifier.type === 'ImportSpecifier') {
+        imports.set(specifier.local.name, {
+          source: statement.source.value,
+          name: specifier.imported.name,
+        });
+      } else if (specifier.type === 'ImportNamespaceSpecifier') {
+        imports.set(specifier.local.name, { source: statement.source.value });
+      }
+    });
+  });
+
+  return imports;
+}
+
+function validatePrivilegesNode(context, privilegesNode, scopedVariables, imports, filename) {
   ['all', 'read'].forEach((privilegeType) => {
     const privilege = privilegesNode.value.properties.find(
       (prop) =>
@@ -83,10 +220,15 @@ function validatePrivilegesNode(context, privilegesNode, scopedVariables) {
       } else if (element.type === 'Identifier') {
         valueToCheck = scopedVariables.has(element.name)
           ? scopedVariables.get(element.name)
-          : getImportedVariableValue(context, element.name);
-      } else if (element.type === 'MemberExpression') {
+          : getImportedVariableValue(imports, filename, element.name);
+      } else if (
+        element.type === 'MemberExpression' &&
+        element.object.type === 'Identifier' &&
+        element.property.type === 'Identifier'
+      ) {
         valueToCheck = getImportedVariableValue(
-          context,
+          imports,
+          filename,
           element.object.name,
           element.property.name
         );
@@ -142,8 +284,13 @@ module.exports = {
     schema: [],
   },
 
-  create(context) {
+  createOnce(context) {
+    let imports;
+
     return {
+      before() {
+        imports = getImports(context.sourceCode.ast);
+      },
       CallExpression(node) {
         const isRegisterKibanaFeatureCall =
           node.callee.type === 'MemberExpression' &&
@@ -156,7 +303,7 @@ module.exports = {
 
         const scopedVariables = new Map();
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
 
         const parent = sourceCode
           .getAncestors(node)
@@ -188,7 +335,13 @@ module.exports = {
 
           if (!privilegesProperty) return;
 
-          return validatePrivilegesNode(context, privilegesProperty, scopedVariables);
+          return validatePrivilegesNode(
+            context,
+            privilegesProperty,
+            scopedVariables,
+            imports,
+            context.filename
+          );
         }
       },
       ExportNamedDeclaration(node) {
@@ -214,7 +367,13 @@ module.exports = {
                 prop.key && prop.key.name === 'privileges' && prop.value.type === 'ObjectExpression'
             );
 
-            validatePrivilegesNode(context, privilegesProperty, new Map());
+            validatePrivilegesNode(
+              context,
+              privilegesProperty,
+              new Map(),
+              imports,
+              context.filename
+            );
           }
         });
       },

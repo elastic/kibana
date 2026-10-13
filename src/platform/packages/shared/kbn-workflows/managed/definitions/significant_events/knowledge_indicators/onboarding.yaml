@@ -83,7 +83,44 @@ triggers:
       - name: queriesMaxExistingForContext
         type: number
         description: "Max existing queries for LLM context in query generation."
+      - name: rootTriggeredBy
+        type: string
+        required: false
+        description: "Root workflow trigger type propagated by a managed driver."
 steps:
+  - name: check_budget
+    type: kibana.request
+    if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+      body:
+        group: 'ki_extraction'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
+  - name: exit_if_budget_denied
+    type: if
+    condition: '${{ steps.check_budget.output.allowed == false }}'
+    steps:
+      - name: output_budget_denied
+        type: workflow.output
+        status: cancelled
+        with:
+          streamName: '${{ inputs.streamName }}'
+          featuresSkipped: true
+          featuresConnectorUsed: ''
+          discoveredFeatures: []
+          featuresTokensUsed: { prompt: 0, completion: 0, total: 0 }
+          queriesSkipped: true
+          queriesConnectorUsed: ''
+          persistedQueries: []
+          queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
+          keepAliveRefreshed: 0
+
   # -----------------------------------------------------------------------
   # Step 0: Initialize variables.
   # -----------------------------------------------------------------------

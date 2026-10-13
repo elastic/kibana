@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart, ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { VECTOR_COUNT_ENABLED } from '../../common/constants';
 import type { DeploymentStats } from '../hooks/use_deployment_stats';
 import { formatBytes, formatNumber } from '../utils/format';
 import { STAT_TILE_LABELS } from '../constants';
@@ -14,16 +15,28 @@ import type { HomePageStatPanelProps } from './home_page_stat_panel';
 
 interface StatCardDeps {
   application: ApplicationStart;
+  chrome: ChromeStart;
   stats: DeploymentStats;
   isLoading: boolean;
 }
 
-/** Builds the full width data card, whose only action is promoted to a button. */
+type HomePageStats = Omit<HomePageStatPanelProps, 'newIndex'>;
+
+const INDEX_MANAGEMENT_NAV_LINK_ID = 'management:index_management';
+
+const showVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
+  VECTOR_COUNT_ENABLED &&
+  application.capabilities.vectordbIndexStats?.canMonitorAllIndices === true;
+
+const showIndexManagement = ({ chrome }: Pick<StatCardDeps, 'chrome'>): boolean =>
+  chrome.navLinks.has(INDEX_MANAGEMENT_NAV_LINK_ID);
+
 export const getDataCard = ({
   application,
+  chrome,
   stats,
   isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+}: StatCardDeps): HomePageStats => ({
   iconType: 'database',
   title: i18n.translate('xpack.serverlessVectordb.home.dataCard.title', {
     defaultMessage: 'Data',
@@ -43,12 +56,16 @@ export const getDataCard = ({
       value: formatNumber(stats.documentsCount),
       isLoading,
     },
-    {
-      key: 'vectors',
-      label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorCount),
-      isLoading,
-    },
+    ...(showVectorCount({ application })
+      ? [
+          {
+            key: 'vectors',
+            label: STAT_TILE_LABELS.vectors,
+            value: formatNumber(stats.vectorCount),
+            isLoading,
+          },
+        ]
+      : []),
     {
       key: 'totalSize',
       label: STAT_TILE_LABELS.totalSize,
@@ -56,27 +73,25 @@ export const getDataCard = ({
       isLoading,
     },
   ],
-  actions: [
-    {
-      key: 'viewIndices',
-      label: i18n.translate('xpack.serverlessVectordb.home.dataCard.dataManagement', {
-        defaultMessage: 'Manage data',
-      }),
-      onClick: () =>
-        application.navigateToApp('management', {
-          path: '/data/index_management/indices',
-        }),
-      testSubj: 'homePageDataCardDataManagement',
-      telemetryId: 'serverlessVectordb-home-dataCard-dataManagement',
-    },
-  ],
+  actions: showIndexManagement({ chrome })
+    ? [
+        {
+          key: 'viewIndices',
+          label: i18n.translate('xpack.serverlessVectordb.home.dataCard.dataManagement', {
+            defaultMessage: 'Manage data',
+          }),
+          onClick: () =>
+            application.navigateToApp('management', {
+              path: '/data/index_management/indices',
+            }),
+          testSubj: 'homePageDataCardDataManagement',
+          telemetryId: 'serverlessVectordb-home-dataCard-dataManagement',
+        },
+      ]
+    : [],
 });
 
-const getDashboardsCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getDashboardsCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'productDashboard',
   title: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.title', {
     defaultMessage: 'Dashboards',
@@ -100,7 +115,7 @@ const getDashboardsCard = ({
   actions: [
     {
       key: 'createDashboard',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.createDashboard', {
         defaultMessage: 'Create a dashboard',
       }),
@@ -121,11 +136,7 @@ const getDashboardsCard = ({
   ],
 });
 
-const getWorkflowsCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getWorkflowsCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'workflow',
   title: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.title', {
     defaultMessage: 'Workflows',
@@ -149,7 +160,7 @@ const getWorkflowsCard = ({
   actions: [
     {
       key: 'createWorkflow',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.createWorkflow', {
         defaultMessage: 'Create a workflow',
       }),
@@ -170,11 +181,7 @@ const getWorkflowsCard = ({
   ],
 });
 
-const getApiKeysCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getApiKeysCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'key',
   title: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.title', {
     defaultMessage: 'API Keys',
@@ -198,7 +205,7 @@ const getApiKeysCard = ({
   actions: [
     {
       key: 'createApiKey',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.createApiKey', {
         defaultMessage: 'Create an API key',
       }),
@@ -223,7 +230,7 @@ const getApiKeysCard = ({
 });
 
 /** Builds the cards rendered in a row under the data card, in display order. */
-export const getSecondaryCards = (deps: StatCardDeps): HomePageStatPanelProps[] => [
+export const getSecondaryCards = (deps: StatCardDeps): HomePageStats[] => [
   getDashboardsCard(deps),
   getWorkflowsCard(deps),
   getApiKeysCard(deps),

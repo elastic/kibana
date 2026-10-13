@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type {
-  AgentHandlerContext,
-  ScopedRunnerRunAgentParams,
-  RunAgentReturn,
+import {
+  type AgentHandlerContext,
+  type ScopedRunnerRunAgentParams,
+  type RunAgentReturn,
 } from '@kbn/agent-builder-server';
 import { getConnectorProvider } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
+import { resolveTelemetryOrigin } from '../utils/pending_round';
 import {
   createAgentEventEmitter,
   forkContextForAgentRun,
@@ -21,6 +22,7 @@ import {
   createToolProvider,
   createSkillsService,
   createFilesystemServices,
+  resolveDeploymentContext,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
@@ -43,6 +45,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolsService,
     attachmentsService,
     renderersService,
+    conversationEventsService,
     resultStore,
     skillsStore,
     attachmentStateManager,
@@ -58,21 +61,35 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     experimentalFeatures,
     projectRouting,
     conversationTemplates,
+    deductive,
+    deploymentInfo,
+    licensing,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
+  const agentRegistry = await manager.deps.agentsService.getRegistry({ request });
+  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
+  const deployment = await resolveDeploymentContext({
+    deploymentInfo,
+    request,
+    spaces,
+    licensing,
+    logger,
+  });
 
   const { filesystemService, bashService } = await createFilesystemServices({
     manager,
     experimentalFeatures,
     workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
+    persistWorkspace: manager.deps.conversationAccess === 'readWrite',
     spaceId,
   });
 
   return {
     request,
     spaceId,
+    deployment,
     defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
@@ -114,6 +131,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     renderers: renderersService,
+    conversationEvents: conversationEventsService,
     conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
@@ -121,11 +139,18 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     hooks: manager.deps.hooks,
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
+    interactivity: manager.deps.interactivity,
+    parentExecutionId: manager.deps.parentExecutionId,
+    conversationAccess: manager.deps.conversationAccess,
     subAgentExecutor: manager.deps.subAgentExecutor,
+    agentRegistry,
+    conversationClient,
+    ...(deductive ? { deductive } : {}),
     analyticsService,
     trackingService,
     filesystemService,
     bashService,
+    aiIndexResolver: manager.deps.agentsService.getAiIndexResolver(),
   };
 };
 
@@ -137,43 +162,45 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, executionId } = agentExecutionParams;
+  const { agentsService, request, modelProvider } = parentManager.deps;
+
+  const resolveAgent = async () => {
+    const agentRegistry = await agentsService.getRegistry({ request });
+    const resolvedAgent = await agentRegistry.get(agentId, { access: 'use' });
+    // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+    const agentWithOverrides = {
+      ...resolvedAgent,
+      configuration: {
+        ...resolvedAgent.configuration,
+        ...(agentParams.configurationOverrides || {}),
+      },
+    };
+    const configuration = await agentsService.resolveAgentConfiguration({
+      agent: agentWithOverrides,
+      request,
+    });
+    return { agent: resolvedAgent, effectiveConfiguration: configuration };
+  };
+
+  const [{ agent, effectiveConfiguration }, { chatModel }] = await Promise.all([
+    resolveAgent(),
+    modelProvider.getDefaultModel(),
+  ]);
+  const providerName = getConnectorProvider(chatModel.getConnector());
 
   const forkedContext = forkContextForAgentRun({
     parentContext: parentManager.context,
     agentId,
+    agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    origin: resolveTelemetryOrigin({
+      conversation: agentParams.conversation,
+      requestOrigin: agentParams.origin?.type,
+    }),
   });
   const manager = parentManager.createChild(forkedContext);
-
-  const { agentsService, request } = manager.deps;
-  const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId, { access: 'use' });
-
-  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
-  // skill_ids is treated the same as tools: a straight replace, not an intersection against
-  // the agent's stored skill_ids. Any agent using a 'type' (code configuration) brings its own
-  // base skill_ids, and that type merge runs AFTER this layer (see resolveAgentConfiguration
-  // below / mergeAgentConfiguration), re-adding the type's base skills regardless of what this
-  // override said — so intersecting here bought no real containment, it just silently dropped
-  // legitimate overrides that named an elastic-capability built-in when the agent also had a
-  // non-empty explicit skill_ids (see PR #280617 review).
-  const agentWithOverrides = {
-    ...agent,
-    configuration: {
-      ...agent.configuration,
-      ...(agentParams.configurationOverrides || {}),
-    },
-  };
-
-  const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
-    agent: agentWithOverrides,
-    request,
-  });
   manager.deps.agentConfiguration = effectiveConfiguration;
-
-  const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
-  const providerName = getConnectorProvider(chatModel.getConnector());
 
   const agentResult = await withAgentSpan(
     { agent, conversationId: agentParams.conversation?.id, providerName },

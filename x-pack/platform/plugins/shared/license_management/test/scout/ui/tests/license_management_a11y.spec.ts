@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
 // Modals and flyouts render in EUI portals outside .kbnAppWrapper.
 const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
 
-test.describe('License Management — accessibility', { tag: tags.stateful.classic }, () => {
+test.describe('License Management — accessibility', { tag: '@local-stateful-classic' }, () => {
   test('license management pages meet a11y requirements', async ({ page, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('management/stack/license_management');
-    await page.testSubj.locator('licenseText').waitFor({ state: 'visible' });
+    await page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title).waitFor({ state: 'visible' });
 
     const expectNoA11yViolations = async (exclude?: string[]) => {
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS, exclude });

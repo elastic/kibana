@@ -30,19 +30,22 @@ import { RULE_WORKFLOW_TRIGGERS, type RuleWorkflowTriggerBinding } from './trigg
 export class RuleWorkflowSubscriber {
   #subscriptions: Subscription[] = [];
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public start(): void {
     if (this.#subscriptions.length > 0) {
       this.logger.debug({
-        message: () =>
-          '[RuleWorkflowSubscriber] start() called more than once. Ignoring. Subscriptions already active.',
+        message: () => 'Subscriber start called more than once; ignoring',
       });
 
       return;
@@ -70,6 +73,16 @@ export class RuleWorkflowSubscriber {
     event: RuleEvent,
     context: AlertingPublisherContext
   ): Promise<void> {
+    // Scheduling a triggered workflow needs the caller's credentials, which an
+    // internal-user change does not have.
+    if (context.origin === 'internal') {
+      this.logger.debug({
+        message: () =>
+          `Skipping workflow trigger "${trigger.triggerId}" for rule ${event.payload.ruleId}: changed by the internal user`,
+      });
+      return;
+    }
+
     try {
       const payload = trigger.toPayload(event);
       await this.workflows.emitEvent(context.request, trigger.triggerId, payload);

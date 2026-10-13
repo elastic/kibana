@@ -7,19 +7,8 @@
 
 export interface ConversationListOptions {
   agentId?: string;
-  filters?: ConversationSearchFilters;
-}
-
-export interface ConversationExtendedFieldFilter {
-  key: string;
-  value?: string;
-  exists?: boolean;
-}
-
-export interface ConversationSearchFilters {
-  template?: {
-    id?: string;
-    version?: number;
-  };
-  extendedFields?: ConversationExtendedFieldFilter[];
+  page?: number;
+  perPage?: number;
+  sortOrder?: 'asc' | 'desc';
+  pinned?: boolean;
 }

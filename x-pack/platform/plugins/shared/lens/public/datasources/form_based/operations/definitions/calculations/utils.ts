@@ -17,7 +17,7 @@ import type {
   FormBasedLayer,
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
-import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
+import { adjustTimeScaleLabelSuffix } from '@kbn/lens-common';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import type { FieldBasedOperationErrorMessage } from '..';
 import { operationDefinitionMap } from '..';

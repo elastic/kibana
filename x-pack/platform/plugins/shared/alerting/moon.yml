@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/alerting
 dependsOn:
   - '@kbn/core'
+  - '@kbn/lock-manager'
   - '@kbn/actions-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
@@ -84,14 +85,10 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
   - '@kbn/expect'
-  - '@kbn/core-feature-flags-server-mocks'
-  - '@kbn/core-feature-flags-server'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/scout'
   - '@kbn/mock-idp-utils'
-  - '@kbn/encrypted-saved-objects-shared'
-  - '@kbn/core-analytics-server-mocks'
   - '@kbn/cps-server-utils'
   - '@kbn/cps-utils'
   - '@kbn/core-saved-objects-common'

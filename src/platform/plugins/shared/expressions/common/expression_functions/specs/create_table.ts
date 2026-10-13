@@ -10,8 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../types';
 import type { Datatable, DatatableColumn } from '../../expression_types';
-
-const MAX_CREATE_TABLE_ROWS = 10_000; // matches default ES index.max_result_window
+import { MAX_DATATABLE_ROWS } from '../../expression_types/specs/datatable';
 
 export interface CreateTableArguments {
   ids?: string[];
@@ -61,7 +60,7 @@ export const createTable: ExpressionFunctionDefinition<
       help: i18n.translate('expressions.functions.createTable.args.rowCountText', {
         defaultMessage:
           'The number of empty rows to add to the table, to be assigned a value later. Maximum {max}.',
-        values: { max: MAX_CREATE_TABLE_ROWS },
+        values: { max: MAX_DATATABLE_ROWS },
       }),
       default: 1,
       required: false,
@@ -79,11 +78,11 @@ export const createTable: ExpressionFunctionDefinition<
     });
 
     const rowCount = args.rowCount ?? 1;
-    if (!Number.isInteger(rowCount) || rowCount < 0 || rowCount > MAX_CREATE_TABLE_ROWS) {
+    if (!Number.isInteger(rowCount) || rowCount < 0 || rowCount > MAX_DATATABLE_ROWS) {
       throw new Error(
         i18n.translate('expressions.functions.createTable.rowCountErrorMessage', {
           defaultMessage: 'rowCount must be an integer between 0 and {max}.',
-          values: { max: MAX_CREATE_TABLE_ROWS },
+          values: { max: MAX_DATATABLE_ROWS },
         })
       );
     }

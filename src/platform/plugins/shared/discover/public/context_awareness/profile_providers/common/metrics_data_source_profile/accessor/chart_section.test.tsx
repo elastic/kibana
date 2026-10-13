@@ -27,11 +27,7 @@ import type { MetricsSort } from '@kbn/unified-chart-section-viewer';
 import { createChartSection } from './chart_section';
 import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
-import {
-  useAppStateSelector,
-  useCurrentTabAction,
-  useInternalStateDispatch,
-} from '../../../../../application/main/state_management/redux';
+import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
 import type { MetricsState } from '../../../../../../common/context_awareness';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from '../../../../toolkit';
@@ -40,7 +36,6 @@ import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 type UnifiedGridProps = ChartSectionProps & {
   actions: ContextAwarenessToolkitActions;
   breakdownField?: string;
-  onBreakdownFieldChange?: (fieldName?: string) => void;
   externalServices?: {
     discoverShared?: unknown;
     dataViews?: unknown;
@@ -79,12 +74,7 @@ const createFakeMetricsStateAdapter = (initialState: MetricsState) => {
 };
 
 jest.mock('../../../../../application/main/state_management/redux', () => ({
-  internalStateActions: {
-    updateAppState: jest.fn(),
-  },
   useAppStateSelector: jest.fn(),
-  useCurrentTabAction: jest.fn(),
-  useInternalStateDispatch: jest.fn(),
 }));
 
 const mockDiscoverShared = { __sentinel: 'discoverShared' };
@@ -125,9 +115,6 @@ jest.mock('../../../../../hooks/use_discover_services', () => ({
     storage: mockStorage,
   })),
 }));
-
-const mockDispatch = jest.fn();
-const mockUpdateAppStateAction = jest.fn((payload) => ({ type: 'updateAppState', payload }));
 
 const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): ChartSectionProps => {
   const fetch$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1) as UnifiedHistogramFetch$;
@@ -195,10 +182,6 @@ describe('MetricsExperienceGridWrapper', () => {
     (useAppStateSelector as jest.Mock).mockImplementation((selector) =>
       selector({ breakdownField: 'host.name' })
     );
-    jest.mocked(useInternalStateDispatch).mockReturnValue(mockDispatch);
-    (useCurrentTabAction as jest.Mock).mockReturnValue(mockUpdateAppStateAction);
-    mockDispatch.mockClear();
-    mockUpdateAppStateAction.mockClear();
   });
 
   it('should not prevent default when onFilter is provided', () => {
@@ -217,18 +200,10 @@ describe('MetricsExperienceGridWrapper', () => {
     expect(preventDefault).not.toHaveBeenCalled();
   });
 
-  it('dispatches breakdown updates from metrics grid callback', () => {
+  it('reads breakdownField from app state and passes it through to seed dimensions', () => {
     renderChartSection();
 
-    unifiedGridProps?.onBreakdownFieldChange?.('service.name');
-
-    expect(mockUpdateAppStateAction).toHaveBeenCalledWith({
-      appState: { breakdownField: 'service.name' },
-    });
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'updateAppState',
-      payload: { appState: { breakdownField: 'service.name' } },
-    });
+    expect(unifiedGridProps?.breakdownField).toBe('host.name');
   });
 
   it('forwards externalServices (discoverShared, dataViews, notifications, docLinks, scoped logger, featureFlags) to the metrics grid', () => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext, type ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
+import { ConversationOriginType, ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 import { RunnerManager } from './runner';
 import { runAgent } from './run_agent';
@@ -18,6 +19,8 @@ import {
   createScopedRunnerDepsMock,
   createMockedInternalAgent,
   createMockedAgentRegistry,
+  createEmptyConversation,
+  createRound,
 } from '../../../test_utils';
 import { createAgentHandler } from '../run_agent/create_handler';
 
@@ -71,6 +74,83 @@ describe('runAgent', () => {
 
     expect(agentClient.get).toHaveBeenCalledTimes(1);
     expect(agentClient.get).toHaveBeenCalledWith(params.agentId, { access: 'use' });
+  });
+
+  it('records the agent name on the run context stack', async () => {
+    const createChild = jest.spyOn(runnerManager, 'createChild');
+
+    await runAgent({
+      agentExecutionParams: {
+        agentId: 'test-agent',
+        agentParams: { nextInput: { message: 'bar' } },
+      },
+      parentManager: runnerManager,
+    });
+
+    const childManager = createChild.mock.results[0].value as RunnerManager;
+    expect(getAgentFromRunContext(childManager.context)).toEqual(
+      expect.objectContaining({
+        agentId: 'test-agent',
+        agentName: agent.name,
+      })
+    );
+  });
+
+  describe('origin on the run context stack', () => {
+    const runAndReadAgentEntry = async (agentParams: ScopedRunnerRunAgentParams['agentParams']) => {
+      const createChild = jest.spyOn(runnerManager, 'createChild');
+
+      await runAgent({
+        agentExecutionParams: { agentId: 'test-agent', agentParams },
+        parentManager: runnerManager,
+      });
+
+      const childManager = createChild.mock.results[0].value as RunnerManager;
+      return getAgentFromRunContext(childManager.context);
+    };
+
+    const slackRound = (status: ConversationRoundStatus) =>
+      createRound({
+        id: 'round-1',
+        status,
+        origin: { type: ConversationOriginType.Slack },
+      });
+
+    it('records the origin the request carries', async () => {
+      const entry = await runAndReadAgentEntry({
+        nextInput: { message: 'bar' },
+        origin: {
+          type: ConversationOriginType.Slack,
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        },
+      });
+
+      expect(entry).toEqual(expect.objectContaining({ origin: ConversationOriginType.Slack }));
+    });
+
+    it('falls back to the paused round origin when a resume request carries none', async () => {
+      const entry = await runAndReadAgentEntry({
+        nextInput: { prompts: {} },
+        conversation: {
+          ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+          rounds: [slackRound(ConversationRoundStatus.awaitingPrompt)],
+        },
+      });
+
+      expect(entry).toEqual(expect.objectContaining({ origin: ConversationOriginType.Slack }));
+    });
+
+    it('leaves the origin unset for a fresh round on a conversation an external system started', async () => {
+      const entry = await runAndReadAgentEntry({
+        nextInput: { message: 'bar' },
+        conversation: {
+          ...createEmptyConversation({ id: 'conversation-1', agent_id: 'test-agent' }),
+          rounds: [slackRound(ConversationRoundStatus.completed)],
+        },
+      });
+
+      expect(entry).toEqual(expect.objectContaining({ origin: undefined }));
+    });
   });
 
   it('calls the agent handler with the expected parameters', async () => {

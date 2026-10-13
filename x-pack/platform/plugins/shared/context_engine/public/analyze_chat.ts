@@ -34,7 +34,7 @@ const buildIndexSummary = (aiIndex: AiIndexHttpItem): string => {
 
 /** Builds Agent Builder `openChat` options for an Analyze & improve hand-off. */
 export const buildAnalyzeChat = ({ aiIndex }: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
-  agentId: aiIndex.feedback_agent_id,
+  agentId: aiIndex.feedback_analysis?.agent_id,
   newConversation: true,
   sessionTag: `context-engine-feedback:${aiIndex.id}`,
   attachments: [

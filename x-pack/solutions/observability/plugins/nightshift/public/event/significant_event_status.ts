@@ -17,8 +17,8 @@ export { getInvestigationProgressStatusLabel };
 /**
  * Nightshift surfaces two events buckets derived from `@kbn/significant-events-schema`
  * statuses:
- * - Needs action: `open`
- * - Resolved: `closed` and `dismissed`
+ * - Needs action: `active`
+ * - Resolved: `inactive`
  *
  * The "Investigating" / "Investigated" badge is derived separately from
  * `event.investigations` (see `getInvestigationStatusLabel`).
@@ -26,9 +26,8 @@ export { getInvestigationProgressStatusLabel };
 type StatusGroup = 'needsAction' | 'resolved';
 
 const STATUS_GROUP: Record<SignificantEventStatus, StatusGroup> = {
-  open: 'needsAction',
-  closed: 'resolved',
-  dismissed: 'resolved',
+  active: 'needsAction',
+  inactive: 'resolved',
 };
 
 export const NEEDS_ACTION_STATUSES: SignificantEventStatus[] =
@@ -61,12 +60,11 @@ export const getEventUpdatedAt = (event: SignificantEvent): string => {
   return updatedAt ?? event['@timestamp'];
 };
 
-const parseSeverityRank = (severity: string | undefined): number => {
-  if (!severity) {
-    return -1;
-  }
-  const match = /^(\d+)/.exec(severity);
-  return match ? Number.parseInt(match[1], 10) : 0;
+const SEVERITY_RANK: Record<SignificantEvent['severity'], number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
 };
 
 /**
@@ -76,7 +74,7 @@ export const byCriticalityAndUpdatedAtDesc = (
   first: SignificantEvent,
   second: SignificantEvent
 ): number =>
-  parseSeverityRank(second.severity) - parseSeverityRank(first.severity) ||
+  (SEVERITY_RANK[second.severity] ?? -1) - (SEVERITY_RANK[first.severity] ?? -1) ||
   new Date(getEventUpdatedAt(second)).getTime() - new Date(getEventUpdatedAt(first)).getTime();
 
 export const getStatusColor = (status: SignificantEventStatus): StatusColor =>
@@ -91,33 +89,11 @@ export const getLatestInvestigation = (
 
 export const isEventInvestigated = (event: Pick<SignificantEvent, 'investigations'>): boolean =>
   getLatestInvestigation(event)?.completed_at != null;
-
-const rememberedInvestigationTerminalFailures = new Map<string, 'failed' | 'unavailable'>();
-
-export const rememberInvestigationTerminalFailure = (
-  workflowExecutionId: string,
-  status: 'failed' | 'unavailable'
-): void => {
-  rememberedInvestigationTerminalFailures.set(workflowExecutionId, status);
-};
-
-export const getRememberedInvestigationTerminalFailure = (
-  workflowExecutionId: string
-): 'failed' | 'unavailable' | undefined =>
-  rememberedInvestigationTerminalFailures.get(workflowExecutionId);
-
-export const clearRememberedInvestigationTerminalFailuresForTests = (): void => {
-  rememberedInvestigationTerminalFailures.clear();
-};
-
 export const isInvestigationRunning = (
   event: Pick<SignificantEvent, 'investigations'>
 ): boolean => {
   const latestInvestigation = getLatestInvestigation(event);
-  if (latestInvestigation == null || latestInvestigation.completed_at != null) {
-    return false;
-  }
-  return !rememberedInvestigationTerminalFailures.has(latestInvestigation.workflow_execution_id);
+  return latestInvestigation != null && latestInvestigation.completed_at == null;
 };
 
 export const hasRunningInvestigations = (events: SignificantEvent[]): boolean =>

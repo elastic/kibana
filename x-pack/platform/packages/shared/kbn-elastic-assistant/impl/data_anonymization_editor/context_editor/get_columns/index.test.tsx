@@ -135,7 +135,7 @@ describe('getColumns', () => {
 
       fireEvent.click(getByTestId('allowed'));
 
-      expect(onListUpdated).toBeCalledWith([
+      expect(onListUpdated).toHaveBeenCalledWith([
         { field: 'event.category', operation: 'remove', update: 'allow' },
       ]);
     });
@@ -156,7 +156,7 @@ describe('getColumns', () => {
 
       fireEvent.click(getByTestId('allowed'));
 
-      expect(onListUpdated).toBeCalledWith([
+      expect(onListUpdated).toHaveBeenCalledWith([
         { field: 'event.category', operation: 'add', update: 'allow' },
       ]);
     });
@@ -180,7 +180,7 @@ describe('getColumns', () => {
 
       fireEvent.click(getByTestId('allowed'));
 
-      expect(onListUpdated).toBeCalledWith([
+      expect(onListUpdated).toHaveBeenCalledWith([
         { field: 'event.category', operation: 'remove', update: 'allow' },
       ]);
     });
@@ -225,7 +225,7 @@ describe('getColumns', () => {
 
       fireEvent.click(getByTestId('anonymized'));
 
-      expect(onListUpdated).toBeCalledWith([
+      expect(onListUpdated).toHaveBeenCalledWith([
         { field: 'event.category', operation: 'add', update: 'allowReplacement' },
       ]);
     });
@@ -247,7 +247,7 @@ describe('getColumns', () => {
 
       fireEvent.click(getByTestId('anonymized'));
 
-      expect(onListUpdated).toBeCalledWith([
+      expect(onListUpdated).toHaveBeenCalledWith([
         { field: 'event.category', operation: 'remove', update: 'allowReplacement' },
       ]);
     });
@@ -267,7 +267,7 @@ describe('getColumns', () => {
 
       fireEvent.click(getByTestId('anonymized'));
 
-      expect(onListUpdated).toBeCalledWith([
+      expect(onListUpdated).toHaveBeenCalledWith([
         { field: 'event.category', operation: 'add', update: 'allowReplacement' },
       ]);
     });

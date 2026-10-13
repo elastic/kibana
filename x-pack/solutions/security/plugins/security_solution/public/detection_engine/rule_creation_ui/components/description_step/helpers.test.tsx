@@ -13,6 +13,20 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
 
+// ThreatEuiFlexGroup (rendered inside buildThreatDescription results) calls
+// useMitreConfiguration, which requires Kibana context. Mock it to return empty
+// arrays so these unit tests focus on link rendering, not MITRE lookup behavior.
+jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
+  useMitreConfiguration: jest.fn().mockReturnValue({
+    tactics: [],
+    techniques: [],
+    subtechniques: [],
+    frameworkVersion: undefined,
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';

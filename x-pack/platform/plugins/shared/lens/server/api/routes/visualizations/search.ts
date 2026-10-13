@@ -29,6 +29,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
     summary: 'Search visualizations',
+    operationId: 'search-visualizations',
     description:
       'Returns a paginated list of Lens visualizations matching the optional `query` text.',
     options: {
@@ -106,7 +107,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
           }
 
           return res.ok<z.output<typeof lensSearchResponseBodySchema>>({
-            body: {
+            body: lensSearchResponseBodySchema.parse({
               data: hits.map((item) => {
                 return getLensResponseItem(builder, item);
               }),
@@ -115,7 +116,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
                 per_page: perPage,
                 total: pagination.total,
               },
-            },
+            }),
           });
         } catch (error) {
           if (isBoom(error) && error.output.statusCode === 403) {

@@ -9,6 +9,7 @@
     "server/**/*",
   ],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/licensing-plugin",
     "@kbn/utility-types",

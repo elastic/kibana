@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/deeplinks-workflows'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/ui-callout'
+  - '@kbn/react-kibana-mount'
 tags:
   - shared-browser
   - package

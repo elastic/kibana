@@ -9,10 +9,11 @@ import Boom from '@hapi/boom';
 import type {
   ActionPolicyResponse,
   CreateActionPolicyData,
+  CreateActionPolicyDataInput,
   ThrottleStrategy,
-  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -30,30 +31,25 @@ export function validateDateString(dateString: string): void {
   }
 }
 
-const normalizeNullableField = <T>(value: T | null | undefined): T | null => value ?? null;
-
-const resolveNextNullableField = <T>(
-  value: T | null | undefined,
-  existing: T | null | undefined
-): T | null => {
-  if (value !== undefined) {
-    return value;
-  }
-
-  return normalizeNullableField(existing);
-};
-
-const normalizeThrottle = (
+/**
+ * Projects a stored throttle onto the strategy variant it names. Documents written before the
+ * throttle became a discriminated union may hold keys their strategy never used, or no strategy at
+ * all; neither names a variant, so a stray interval is dropped and a block that cannot form a
+ * variant reads the same as no throttle.
+ */
+const toApiThrottle = (
   throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
-): { strategy?: ThrottleStrategy; interval: string | null } | null => {
-  if (throttle == null) return null;
-  const { strategy, interval } = throttle;
-  const keepInterval = strategy == null || needsInterval(strategy);
-  return {
-    strategy,
-    interval: keepInterval ? interval ?? null : null,
-  };
+): ActionPolicyResponse['throttle'] => {
+  const strategy = throttle?.strategy;
+  if (strategy == null) return undefined;
+  if (!needsInterval(strategy)) return { strategy };
+
+  return throttle?.interval ? { strategy, interval: throttle.interval } : undefined;
 };
+
+const toApiDescription = (
+  description: ActionPolicySavedObjectAttributes['description']
+): ActionPolicyResponse['description'] => description || undefined;
 
 export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKey: auth.apiKey,
@@ -61,14 +57,36 @@ export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKeyCreatedByUser: auth.createdByUser,
 });
 
-const toAuthResponse = (
-  attributes: Pick<ActionPolicySavedObjectAttributes, 'apiKeyOwner' | 'apiKeyCreatedByUser'>
-): ActionPolicyResponse['auth'] => {
-  return {
-    owner: attributes.apiKeyOwner,
-    created_by_user: attributes.apiKeyCreatedByUser,
-  };
-};
+/**
+ * The create-shaped view of a stored policy, so a PATCH merges against exactly the document a GET
+ * would return rather than against the `null` sentinels older documents may still hold.
+ */
+export const toPatchableActionPolicyData = (
+  attributes: ActionPolicySavedObjectAttributes
+): CreateActionPolicyDataInput => ({
+  name: attributes.name,
+  description: toApiDescription(attributes.description),
+  destinations: attributes.destinations,
+  matcher: normalizeMatcher(attributes.matcher),
+  grouping: attributes.grouping,
+  throttle: toApiThrottle(attributes.throttle),
+});
+
+/**
+ * The client-owned fields of a policy, in storage form. Shared so create and update cannot drift.
+ *
+ * A cleared field is written as `undefined`, which the full-document write drops from the document
+ * entirely. The storage schema still accepts `null` so that documents written before this
+ * convention keep validating, but nothing writes one.
+ */
+const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
+  name: data.name,
+  description: data.description,
+  destinations: data.destinations,
+  matcher: normalizeMatcher(data.matcher),
+  grouping: data.grouping,
+  throttle: data.throttle,
+});
 
 export const buildCreateActionPolicyAttributes = ({
   data,
@@ -80,22 +98,14 @@ export const buildCreateActionPolicyAttributes = ({
 }: {
   data: CreateActionPolicyData;
   auth: ApiKeyAttributes;
-  createdBy: string | null;
+  createdBy: ActionPolicySavedObjectAttributes['createdBy'];
   createdAt: string;
-  updatedBy: string | null;
+  updatedBy: ActionPolicySavedObjectAttributes['updatedBy'];
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    name: data.name,
-    description: data.description,
+    ...toStoredPolicyFields(data),
     enabled: true,
-    destinations: data.destinations,
-    matcher: data.matcher ?? null,
-    groupBy: data.group_by ?? null,
-    tags: data.tags ?? null,
-    groupingMode: data.grouping_mode ?? null,
-    throttle: normalizeThrottle(data.throttle),
-    snoozedUntil: null,
     ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,
@@ -104,61 +114,53 @@ export const buildCreateActionPolicyAttributes = ({
   };
 };
 
+/**
+ * Builds the complete next document from the already-merged and validated policy data. Server-owned
+ * fields (`enabled`, `tags`, `snoozedUntil`, audit) are never patchable, so they come from storage.
+ */
 export const buildUpdateActionPolicyAttributes = ({
   existing,
-  update,
+  data,
   auth,
   updatedBy,
   updatedAt,
 }: {
   existing: ActionPolicySavedObjectAttributes;
-  update: UpdateActionPolicyData;
+  data: CreateActionPolicyData;
   auth: ApiKeyAttributes;
-  updatedBy: string | null;
+  updatedBy: ActionPolicySavedObjectAttributes['updatedBy'];
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    name: update.name ?? existing.name,
-    description: update.description ?? existing.description,
+    ...toStoredPolicyFields(data),
     enabled: existing.enabled,
-    destinations: update.destinations ?? existing.destinations,
-    matcher: resolveNextNullableField(update.matcher, existing.matcher),
-    groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
-    tags: resolveNextNullableField(update.tags, existing.tags),
-    groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
-    throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
-    snoozedUntil: normalizeNullableField(existing.snoozedUntil),
+    tags: existing.tags ?? undefined,
+    snoozedUntil: existing.snoozedUntil ?? undefined,
     ...toApiKeyAttributes(auth),
     createdBy: existing.createdBy,
-    updatedBy,
     createdAt: existing.createdAt,
+    updatedBy,
     updatedAt,
   };
 };
 
 export const transformActionPolicySoAttributesToApiResponse = ({
   id,
-  version,
   attributes,
 }: {
   id: string;
-  version?: string;
   attributes: ActionPolicySavedObjectAttributes;
 }): ActionPolicyResponse => {
   return {
     id,
-    version,
     name: attributes.name,
-    description: attributes.description,
+    description: toApiDescription(attributes.description),
     enabled: attributes.enabled,
     destinations: attributes.destinations,
-    matcher: normalizeNullableField(attributes.matcher),
-    group_by: normalizeNullableField(attributes.groupBy),
-    tags: normalizeNullableField(attributes.tags),
-    grouping_mode: normalizeNullableField(attributes.groupingMode),
-    throttle: normalizeThrottle(attributes.throttle),
-    snoozed_until: normalizeNullableField(attributes.snoozedUntil),
-    auth: toAuthResponse(attributes),
+    matcher: normalizeMatcher(attributes.matcher),
+    grouping: attributes.grouping,
+    throttle: toApiThrottle(attributes.throttle),
+    snoozed_until: attributes.snoozedUntil ?? undefined,
     created_by: attributes.createdBy,
     created_at: attributes.createdAt,
     updated_by: attributes.updatedBy,

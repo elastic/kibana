@@ -10,8 +10,22 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { useContentListPhase } from '@kbn/content-list-provider';
+import { ALERTING_V2_ACTION_POLICIES_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import { experimentalBadge } from '../../components/experimental_badge';
+import {
+  UniversalRulesOnlyCallout,
+  universalRulesOnlyBadge,
+} from '../../components/universal_rules_only_notice';
+import {
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
+import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
+import { getCreateActionPolicyWithAgentTooltipText } from '../../components/action_policy/create_options/action_policy_create_options_panel';
+import { ActionPoliciesLicenseCallout } from '../../components/action_policy/action_policies_license_callout';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../components/action_policy/labels';
 
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
@@ -21,13 +35,17 @@ const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
 const getActionPoliciesListMenu = ({
   onCreatePolicy,
   onCreateWithAgent,
+  showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
+  isLicenseValid,
 }: {
   onCreatePolicy: () => void;
   onCreateWithAgent: () => void;
+  showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
+  isLicenseValid: boolean;
 }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'createActionPolicy',
@@ -38,27 +56,32 @@ const getActionPoliciesListMenu = ({
     run: onCreatePolicy,
     testId: 'createActionPolicyButton',
     popoverTestId: 'createActionPolicyPopoverPanel',
-    splitButtonProps: {
-      iconType: 'arrowDown',
-      secondaryButtonAriaLabel: i18n.translate(
-        'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
-        { defaultMessage: 'More create options' }
-      ),
-      items: [
-        {
-          id: 'createWithAgent',
-          label: i18n.translate('xpack.alertingV2.actionPoliciesList.createWithAgentButton', {
-            defaultMessage: 'Create with agent',
-          }),
-          iconType: 'sparkles' as const,
-          order: 0,
-          run: onCreateWithAgent,
-          testId: 'createActionPolicyWithAgentButton',
-          disableButton: createWithAgentDisabled,
-          tooltipContent: createWithAgentTooltipText,
-        },
-      ],
-    },
+    disableButton: !isLicenseValid,
+    tooltipContent: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
+    splitButtonProps: showCreateWithAgent
+      ? {
+          iconType: 'chevronSingleDown',
+          isSecondaryButtonDisabled: !isLicenseValid,
+          secondaryButtonAriaLabel: i18n.translate(
+            'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
+            { defaultMessage: 'More create options' }
+          ),
+          items: [
+            {
+              id: 'createWithAgent',
+              label: i18n.translate('xpack.alertingV2.actionPoliciesList.createWithAgentButton', {
+                defaultMessage: 'Create with agent (Experimental)',
+              }),
+              iconType: 'sparkles' as const,
+              order: 0,
+              run: onCreateWithAgent,
+              testId: 'createActionPolicyWithAgentButton',
+              disableButton: createWithAgentDisabled,
+              tooltipContent: createWithAgentTooltipText,
+            },
+          ],
+        }
+      : undefined,
   },
 });
 
@@ -66,9 +89,15 @@ export interface ActionPoliciesListHeaderProps {
   canWrite: boolean;
   onCreatePolicy: () => void;
   onCreateWithAgent: () => void;
-  createWithAgentDisabled?: boolean;
-  createWithAgentTooltipText?: string;
 }
+
+const UNIVERSAL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.actionPolicies.universalRulesOnlyCalloutBody',
+  {
+    defaultMessage:
+      'Action policies only apply to alerts from Universal rules and external alerts.',
+  }
+);
 
 /**
  * App header that reads Content List phase so the create menu stays hidden
@@ -79,11 +108,15 @@ export const ActionPoliciesListHeader = ({
   canWrite,
   onCreatePolicy,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
 }: ActionPoliciesListHeaderProps) => {
   const phase = useContentListPhase();
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
+  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
+  const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
+  const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
 
   const headerMenu = useMemo(
     () =>
@@ -91,16 +124,20 @@ export const ActionPoliciesListHeader = ({
         ? getActionPoliciesListMenu({
             onCreatePolicy,
             onCreateWithAgent,
+            showCreateWithAgent,
             createWithAgentDisabled,
             createWithAgentTooltipText,
+            isLicenseValid,
           })
         : undefined,
     [
       showHeaderMenu,
       onCreatePolicy,
       onCreateWithAgent,
+      showCreateWithAgent,
       createWithAgentDisabled,
       createWithAgentTooltipText,
+      isLicenseValid,
     ]
   );
 
@@ -109,11 +146,16 @@ export const ActionPoliciesListHeader = ({
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
-        badges={[experimentalBadge]}
+        badges={[universalRulesOnlyBadge, experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}
       />
       <EuiSpacer size="m" />
+      <UniversalRulesOnlyCallout
+        appId={ALERTING_V2_ACTION_POLICIES_APP_ID}
+        description={UNIVERSAL_RULES_ONLY_CALLOUT_BODY}
+      />
+      {canWrite && <ActionPoliciesLicenseCallout />}
     </>
   );
 };

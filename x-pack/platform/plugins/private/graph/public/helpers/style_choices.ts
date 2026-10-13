@@ -132,14 +132,14 @@ export const iconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.phone', { defaultMessage: 'Phone' }),
   },
   {
-    id: 'desktop',
+    id: 'display',
     prevName: 'fa-desktop',
     package: 'eui',
     patterns: [/host/i, /server/i],
     label: i18n.translate('xpack.graph.icon.desktop', { defaultMessage: 'Desktop' }),
   },
   {
-    id: 'lettering',
+    id: 'text',
     prevName: 'fa-font',
     package: 'eui',
     patterns: [/text/i, /title/i, /body/i, /desc/i],
@@ -205,6 +205,19 @@ export const iconChoicesByClass: Partial<Record<string, GenericIcon>> = {};
 iconChoices.forEach((icon) => {
   iconChoicesByClass[icon.id] = icon;
 });
+
+// Saved workspaces store iconClass as the EUI glyph id. Keep old names resolvable.
+const ICON_ID_ALIASES: Record<string, string> = {
+  desktop: 'display',
+  lettering: 'text',
+};
+
+for (const [alias, canonicalId] of Object.entries(ICON_ID_ALIASES)) {
+  const canonical = iconChoicesByClass[canonicalId];
+  if (canonical) {
+    iconChoicesByClass[alias] = canonical;
+  }
+}
 
 export const urlTemplateIconChoices: GenericIcon[] = [
   // Patterns are used to help default icon choices for common field names
@@ -312,12 +325,15 @@ export function isNewIcon(icon: AnyIconType | undefined): icon is GenericIcon {
   if (!hasIcon(icon)) {
     return false;
   }
-  return typeof icon !== 'string' ? 'package' in icon : iconChoices.some(({ id }) => id === icon);
+  return typeof icon !== 'string' ? 'package' in icon : icon in iconChoicesByClass;
 }
 
 export function getIcon(icon: AnyIconType): GenericIcon {
   if (isNewIcon(icon)) {
-    return typeof icon === 'string' ? iconChoicesByClass[icon]! : icon;
+    if (typeof icon === 'string') {
+      return iconChoicesByClass[icon]!;
+    }
+    return iconChoicesByClass[icon.id] ?? icon;
   }
   return getIconFromList(icon, iconChoices);
 }

@@ -11,16 +11,16 @@ import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
 import type { ConsoleParsedRequestsProvider, ParsedRequest } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import type { ErrorAnnotation } from '@kbn/monaco/src/languages/definitions/console/types';
 import {
   endsWithConsoleBodyContinuation,
   getLineRemainderWithoutConsoleComments,
   isInsideConsoleComment,
   isInsideConsoleString,
   isRequestLineWithUrl,
-} from '@kbn/monaco/src/languages/console/utils';
-import { i18n } from '@kbn/i18n';
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+} from '@kbn/monaco/src/languages/definitions/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -32,30 +32,34 @@ import type { Actions } from '../../stores/request';
 import {
   AutocompleteType,
   containsUrlParams,
-  getAutoIndentedRequests,
   getBodyCompletionItems,
-  getCurlRequest,
   getDocumentationLinkFromAutocomplete,
   getKibanaApiDocLink,
   getLineTokens,
   getMethodCompletionItems,
-  getRequestEndLineNumber,
-  getRequestStartLineNumber,
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   isRequestLineStart,
-  replaceRequestVariables,
   shouldTriggerSuggestions,
-  trackSentRequests,
-  getRequestFromEditor,
   getTripleQuoteContext,
 } from './utils';
 import type { TripleQuoteContext } from './utils';
 
-import type { AdjustedParsedRequest } from './types';
+import type { AdjustedParsedRequest, EditorRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import type { ContextValue } from '../../contexts';
-import { containsComments, removeCommentsFromData } from './utils/requests_utils';
+import {
+  containsComments,
+  getAutoIndentedRequests,
+  getCurlRequest,
+  getRequestEndLineNumber,
+  getRequestFromEditor,
+  getRequestStartLineNumber,
+  removeCommentsFromData,
+  replaceRequestVariables,
+  trackSentRequests,
+} from './utils/request';
+
 import { onlyBodyClosingTokensRegex } from './utils/constants';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
@@ -404,17 +408,24 @@ export class MonacoEditorActionsProvider {
     return selectedErrors;
   }
 
-  public async getRequests() {
-    const model = this.editor.getModel();
-    if (!model) {
-      return [];
-    }
-
-    const parsedRequests = await this.getSelectedParsedRequests();
-    const stringifiedRequests = parsedRequests.map((parsedRequest) => {
+  /**
+   * Stringifies an existing parsed selection, so callers don't have to re-parse.
+   *
+   * Each request carries the line it came from, since `getRequestFromEditor()` can return
+   * null and make the result shorter than `parsedRequests`.
+   */
+  private stringifyParsedRequests(
+    model: monaco.editor.ITextModel,
+    parsedRequests: AdjustedParsedRequest[]
+  ): Array<{ request: EditorRequest; startLineNumber: number }> {
+    const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
+    return parsedRequests.flatMap((parsedRequest) => {
       const { startLineNumber, endLineNumber } = parsedRequest;
       const requestTextFromEditor = getRequestFromEditor(model, startLineNumber, endLineNumber);
-      if (requestTextFromEditor && requestTextFromEditor.data.length > 0) {
+      if (!requestTextFromEditor) {
+        return [];
+      }
+      if (requestTextFromEditor.data.length > 0) {
         requestTextFromEditor.data = requestTextFromEditor.data.map((dataString) => {
           if (containsComments(dataString)) {
             // Comments must be removed before the request is sent since the body is
@@ -425,13 +436,23 @@ export class MonacoEditorActionsProvider {
           return collapseLiteralStrings(dataString);
         });
       }
-      return requestTextFromEditor;
+      return [
+        {
+          request: replaceRequestVariables(requestTextFromEditor, variables),
+          startLineNumber,
+        },
+      ];
     });
-    // get variables values
-    const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
-    return stringifiedRequests
-      .filter(Boolean)
-      .map((request) => replaceRequestVariables(request!, variables));
+  }
+
+  public async getRequests(): Promise<EditorRequest[]> {
+    const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
+
+    const parsedRequests = await this.getSelectedParsedRequests();
+    return this.stringifyParsedRequests(model, parsedRequests).map(({ request }) => request);
   }
 
   public async getCurl(elasticsearchBaseUrl: string): Promise<string> {
@@ -457,8 +478,11 @@ export class MonacoEditorActionsProvider {
       // Update request state immediately so the UI can reflect progress
       // even if parsing / sending the request is slow.
       dispatch({ type: 'setRequestInFlight', payload: true });
-      const allRequests = await this.getRequests();
+      const model = this.editor.getModel();
+      // Parse once: the error range below comes from `selectedRequests`, so a second parse
+      // could report errors for different lines than the ones being sent.
       const selectedRequests = await this.getSelectedParsedRequests();
+      const allRequests = model ? this.stringifyParsedRequests(model, selectedRequests) : [];
       if (selectedRequests.length) {
         const selectedErrors = await this.getErrorsBetweenLines(
           selectedRequests.at(0)!.startLineNumber,
@@ -483,11 +507,11 @@ export class MonacoEditorActionsProvider {
       const requests = allRequests
         // if any request doesnt have a method then we gonna treat it as a non-valid
         // request
-        .filter((request) => request.method)
+        .filter(({ request }) => request.method)
         // map the requests to the original line number
-        .map((request, index) => ({
+        .map(({ request, startLineNumber }) => ({
           ...request,
-          lineNumber: selectedRequests[index].startLineNumber,
+          lineNumber: startLineNumber,
         }));
 
       // If we do have requests but none have methods we are not sending the request
@@ -867,7 +891,8 @@ export class MonacoEditorActionsProvider {
         position,
         requestStartLineNumber,
         this,
-        this.getRequestStartColumn(model, request, requestStartLineNumber)
+        this.getRequestStartColumn(model, request, requestStartLineNumber),
+        { isInsideTripleQuotedString: insideTripleQuotes }
       );
       return {
         suggestions,
@@ -960,7 +985,6 @@ export class MonacoEditorActionsProvider {
     const {
       services: { notifications },
     } = context;
-    const { toasts } = notifications;
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -978,12 +1002,22 @@ export class MonacoEditorActionsProvider {
     const selectedText = this.getTextInRange(selectedRange);
     const allText = this.getTextInRange();
 
-    const autoIndentedText = getAutoIndentedRequests(
+    const { text: autoIndentedText, hasCommentFallback } = getAutoIndentedRequests(
       parsedRequests,
       selectedText,
-      allText,
-      (text) => toasts.addWarning(text)
+      allText
     );
+
+    if (hasCommentFallback) {
+      notifications.toasts.addWarning(
+        i18n.translate(
+          'console.notification.monaco.warning.commentAutoIndentFallbackWarningMessage',
+          {
+            defaultMessage: 'Some request bodies with comments could not be safely auto-indented.',
+          }
+        )
+      );
+    }
 
     this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
       {

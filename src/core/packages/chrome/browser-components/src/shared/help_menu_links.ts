@@ -39,13 +39,14 @@ export interface HelpMenuLinkItem {
   rel?: string;
   onClick?: () => void;
   isExternal?: boolean;
-  hasNewIndicator?: boolean;
+  isWhatsNew?: boolean;
   dataTestSubj?: string;
 }
 
 export interface HelpLinks {
   global: HelpMenuLinkItem[];
   default: HelpMenuLinkItem[];
+  hasUnreadNews: boolean;
   extension?: {
     label?: string;
     items: HelpMenuLinkItem[];
@@ -89,6 +90,8 @@ export const toContextMenuItem = (
     },
   } as EuiContextMenuPanelItemDescriptor);
 
+const HELP_MENU_WHATS_NEW_TEST_SUBJ = 'helpMenuWhatsNewButton';
+
 const buildNewsfeedLink = (newsfeedHandler?: () => void): ChromeHelpMenuLink[] =>
   newsfeedHandler
     ? [
@@ -98,7 +101,7 @@ const buildNewsfeedLink = (newsfeedHandler?: () => void): ChromeHelpMenuLink[] =
           }),
           iconType: 'popper',
           onClick: newsfeedHandler,
-          dataTestSubj: 'helpMenuWhatsNewButton',
+          dataTestSubj: HELP_MENU_WHATS_NEW_TEST_SUBJ,
         },
       ]
     : [];
@@ -129,7 +132,6 @@ export const buildDefaultContentLinks = ({
   helpSupportUrl: string;
   feedbackHandler?: () => void;
   newsfeedHandler?: () => void;
-  newsfeedHasNew?: boolean;
 }): ChromeHelpMenuLink[] => [
   ...buildNewsfeedLink(newsfeedHandler),
   {
@@ -192,7 +194,6 @@ export const buildHelpLinks = ({
           helpSupportUrl: helpData.supportUrl,
           feedbackHandler: helpData.feedbackHandler,
           newsfeedHandler: helpData.newsfeedHandler,
-          newsfeedHasNew: helpData.newsfeedHasNew,
         });
 
   const defaultLinks = rawDefaultLinks.map(
@@ -204,8 +205,7 @@ export const buildHelpLinks = ({
       target: href ? '_blank' : undefined,
       onClick,
       isExternal: Boolean(href),
-      hasNewIndicator:
-        dataTestSubj === 'helpMenuWhatsNewButton' && helpData.newsfeedHasNew === true,
+      isWhatsNew: dataTestSubj === HELP_MENU_WHATS_NEW_TEST_SUBJ,
       dataTestSubj,
     })
   );
@@ -233,6 +233,7 @@ export const buildHelpLinks = ({
   return {
     global,
     default: defaultLinks,
+    hasUnreadNews: helpData.newsfeedHasNew === true,
     ...(hasExtension
       ? {
           extension: {

@@ -38,22 +38,11 @@ describe('renderTemplate', () => {
     expect(content).toMatchSnapshot();
   });
 
-  test('uses IIFE instead of window.onload when useRspack is true', async () => {
-    const content = await renderTemplate({
-      ...mockParams(),
-      useRspack: true,
-    });
+  test('loads bundles from an IIFE instead of window.onload', async () => {
+    const content = await renderTemplate(mockParams());
     expect(content).not.toContain('window.onload = function');
     expect(content).toContain('(function () {');
     expect(content).toContain('})();');
-    expect(content).toMatchSnapshot();
-  });
-
-  test('uses window.onload when useRspack is false (default)', async () => {
-    const content = await renderTemplate(mockParams());
-    expect(content).toContain('window.onload = function');
-    expect(content).not.toContain('(function () {');
-    expect(content).not.toContain('})();');
   });
 
   test('includes __REACT_DEVTOOLS_GLOBAL_HOOK__ stub when useHMR is true', async () => {

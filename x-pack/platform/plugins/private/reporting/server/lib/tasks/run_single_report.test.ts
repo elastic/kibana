@@ -627,7 +627,7 @@ describe('Run Single Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    await expect(() => taskRunner.run()).rejects.toThrow('failure generating report');
 
     expect(logger.error).toHaveBeenCalledWith(
       new Error(`Saving execution error for test1 job test: Error: failure generating report`),
@@ -707,7 +707,7 @@ describe('Run Single Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('Stream failed');
+    await expect(() => taskRunner.run()).rejects.toThrow('Stream failed');
     expect(store.setReportError).not.toHaveBeenCalled();
     expect(store.setReportFailed).toHaveBeenCalledWith(
       {
@@ -903,7 +903,7 @@ describe('Run Single Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    await expect(() => taskRunner.run()).rejects.toThrow('failure generating report');
 
     expect(logger.error).toHaveBeenCalledWith(
       new Error(`Saving execution error for test1 job test: Error: failure generating report`),
@@ -1013,7 +1013,7 @@ describe('Run Single Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    await expect(() => taskRunner.run()).rejects.toThrow('failure generating report');
 
     // the status update must target the doc's current (refreshed) values, not the claim-time ones
     expect(store.setReportFailed).toHaveBeenCalledWith(

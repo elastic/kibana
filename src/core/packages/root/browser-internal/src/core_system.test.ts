@@ -503,7 +503,6 @@ describe('#start()', () => {
         application: expect.any(Object),
         chrome: expect.any(Object),
         overlays: expect.any(Object),
-        featureFlags: expect.any(Object),
         http: expect.any(Object),
         docLinks: expect.any(Object),
         customBranding: expect.any(Object),

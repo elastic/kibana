@@ -46,7 +46,7 @@ echo '--- Resolve Scout selective-testing scope'
 
 # Build the generic code-changes file (changed files + affected @kbn/ modules)
 # consumed by `scout resolve-testing-scope` below.
-ts-node "$(dirname "${0}")/resolve_selective_testing.ts" \
+node "$(dirname "${0}")/resolve_selective_testing.ts" \
   "$AFFECTED_MERGE_BASE" \
   "$CODE_CHANGES_FILE"
 
@@ -111,6 +111,7 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
   node scripts/scout create-test-tracks \
     --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-5}" \
     --targetRuntimeMinutes "${SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES:-15}" \
+    --combineShortLanes \
     --testing-scope "$TESTING_SCOPE_FILE" \
     "${TEST_TARGET_FLAGS[@]}" \
     --showMultiTrackSummary
@@ -135,7 +136,7 @@ fi
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 echo '--- Producing Scout Test Execution Steps'
-ts-node "$(dirname "${0}")/test_run_builder.ts"
+node "$(dirname "${0}")/test_run_builder.ts"
 
 echo '--- Upload scout test run order artifacts to GCS'
 if [[ -f scout_playwright_configs_scheduled.json ]]; then

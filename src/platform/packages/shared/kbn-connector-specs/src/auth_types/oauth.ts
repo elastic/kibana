@@ -31,6 +31,12 @@ const authSchema = lazySchema(() =>
         .enum(['client_secret_post', 'client_secret_basic'])
         .meta({ label: i18n.OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL, hidden: true })
         .optional(),
+      tokenType: z
+        .string()
+        .min(1)
+        .max(128)
+        .optional()
+        .meta({ label: i18n.OAUTH_TOKEN_TYPE_LABEL, hidden: true }),
     })
     .meta({ label: i18n.OAUTH_LABEL })
 );
@@ -57,6 +63,7 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
         clientId: secret.clientId,
         clientSecret: secret.clientSecret,
         tokenEndpointAuthMethod: secret.tokenEndpointAuthMethod ?? 'client_secret_post',
+        tokenType: secret.tokenType,
       });
     } catch (error) {
       throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);

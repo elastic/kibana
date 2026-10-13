@@ -10,7 +10,6 @@ import { actionPolicyResponseSchema } from './action_policy_response_schema';
 
 /** Namespaced to match `ALERTING_NAMESPACE` in `@kbn/alerting-v2-constants`. */
 export const ACTION_POLICY_ATTACHMENT_TYPE = 'platform.alerting.action_policy' as const;
-export const ACTION_POLICY_SML_TYPE = 'alerting_v2_action_policy' as const;
 
 /**
  * Data stored inside an action policy attachment.
@@ -19,7 +18,6 @@ export const ACTION_POLICY_SML_TYPE = 'alerting_v2_action_policy' as const;
  *  - User-editable policy attributes (mirrors createActionPolicyData)
  *  - Minimal server-managed fields the attachment actually consumes:
  *      id           — identity for saved policies
- *      version      — optimistic concurrency on canvas updates
  *      enabled      — status badge in formatActionPolicyDescription
  *      snoozed_until — display
  *      updated_at    — staleness check against origin_snapshot_at
@@ -35,14 +33,11 @@ export const ACTION_POLICY_SML_TYPE = 'alerting_v2_action_policy' as const;
 export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema
   .pick({
     id: true,
-    version: true,
     name: true,
     description: true,
     destinations: true,
     matcher: true,
-    group_by: true,
-    tags: true,
-    grouping_mode: true,
+    grouping: true,
     throttle: true,
     enabled: true,
     snoozed_until: true,

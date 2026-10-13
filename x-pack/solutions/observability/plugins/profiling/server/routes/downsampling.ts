@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ProfilingESClient } from '../utils/create_profiling_es_client';
+import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
+import { PROFILING_EVENTS_INDEX_BY_SCHEMA, ProfilingSchema } from '@kbn/profiling-utils';
 import type { ProjectTimeQuery } from './query';
 
 export interface DownsampledEventsIndex {
@@ -14,9 +15,9 @@ export interface DownsampledEventsIndex {
   sampleRate: number;
 }
 
-function getFullDownsampledIndex(index: string, pow: number, factor: number): string {
-  const downsampledIndexPrefix = index.replaceAll('-all', '') + '-' + factor + 'pow';
-  return downsampledIndexPrefix + pow.toString().padStart(2, '0');
+function getFullDownsampledIndex(schema: ProfilingSchema, pow: number, factor: number): string {
+  const downsampledIndex = `profiling-events-${factor}pow${pow.toString().padStart(2, '0')}`;
+  return schema === ProfilingSchema.OTEL ? `${downsampledIndex}.otel-*` : downsampledIndex;
 }
 
 // Return the index that has between targetSampleSize..targetSampleSize*samplingFactor entries.
@@ -25,14 +26,17 @@ function getFullDownsampledIndex(index: string, pow: number, factor: number): st
 // More details on how the down-sampling works can be found at the write path
 //   https://github.com/elastic/prodfiler/blob/bdcc2711c6cd7e89d63b58a17329fb9fdbabe008/pf-elastic-collector/elastic.go
 export function getSampledTraceEventsIndex(
-  index: string,
+  schema: ProfilingSchema,
   targetSampleSize: number,
   sampleCountFromInitialExp: number,
   initialExp: number
 ): DownsampledEventsIndex {
   const maxExp = 11;
   const samplingFactor = 5;
-  const fullEventsIndex: DownsampledEventsIndex = { name: index, sampleRate: 1 };
+  const fullEventsIndex: DownsampledEventsIndex = {
+    name: PROFILING_EVENTS_INDEX_BY_SCHEMA[schema],
+    sampleRate: 1,
+  };
 
   if (sampleCountFromInitialExp === 0) {
     // Take the shortcut to the full events index.
@@ -54,7 +58,7 @@ export function getSampledTraceEventsIndex(
   }
 
   return {
-    name: getFullDownsampledIndex(index, pow, samplingFactor),
+    name: getFullDownsampledIndex(schema, pow, samplingFactor),
     sampleRate: 1 / samplingFactor ** pow,
   };
 }
@@ -62,13 +66,13 @@ export function getSampledTraceEventsIndex(
 export async function findDownsampledIndex({
   logger,
   client,
-  index,
+  schema,
   filter,
   sampleSize,
 }: {
   logger: Logger;
   client: ProfilingESClient;
-  index: string;
+  schema: ProfilingSchema;
   filter: ProjectTimeQuery;
   sampleSize: number;
 }): Promise<DownsampledEventsIndex> {
@@ -78,7 +82,7 @@ export async function findDownsampledIndex({
   let sampleCountFromInitialExp = 0;
   try {
     const resp = await client.search('find_downsampled_index', {
-      index: getFullDownsampledIndex(index, initialExp, 5),
+      index: getFullDownsampledIndex(schema, initialExp, 5),
       query: filter,
       size: 0,
       track_total_hits: true,
@@ -88,5 +92,5 @@ export async function findDownsampledIndex({
     logger.error(e.message);
   }
 
-  return getSampledTraceEventsIndex(index, sampleSize, sampleCountFromInitialExp, initialExp);
+  return getSampledTraceEventsIndex(schema, sampleSize, sampleCountFromInitialExp, initialExp);
 }

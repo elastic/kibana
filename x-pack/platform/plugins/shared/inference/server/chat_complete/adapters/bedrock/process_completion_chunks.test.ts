@@ -6,7 +6,11 @@
  */
 
 import { lastValueFrom, of, toArray } from 'rxjs';
-import { processCompletionChunks } from './process_completion_chunks';
+import {
+  processCompletionChunks,
+  processConverseCompletionChunks,
+  type ConverseCompletionChunk,
+} from './process_completion_chunks';
 import type { CompletionChunk } from './types';
 
 describe('processCompletionChunks', () => {
@@ -164,6 +168,33 @@ describe('processCompletionChunks', () => {
           prompt: 1,
           total: 3,
         },
+      },
+    ]);
+  });
+
+  it('counts Converse cache read/write tokens in the prompt total and exposes cache reads as cached', async () => {
+    const chunks: ConverseCompletionChunk[] = [
+      {
+        type: 'metadata',
+        body: {
+          usage: {
+            inputTokens: 1,
+            outputTokens: 2,
+            totalTokens: 3,
+            cacheReadInputTokens: 30,
+            cacheWriteInputTokens: 4,
+          },
+          metrics: { latencyMs: 10 },
+        },
+      },
+    ];
+
+    expect(
+      await lastValueFrom(of(...chunks).pipe(processConverseCompletionChunks(), toArray()))
+    ).toEqual([
+      {
+        type: 'chatCompletionTokenCount',
+        tokens: { completion: 2, prompt: 35, total: 37, cached: 30 },
       },
     ]);
   });

@@ -198,7 +198,7 @@ export const runCli = (): void => {
   --headless <bool>       Run Chromium headless. Pass false to watch the browser. (default: true)
   --serve                 Keep the local server running after capture for manual browsing.
   --chrome-executable <path>  Path to a Chrome/Chromium executable. Defaults to Playwright's
-                          managed Chromium (installed via \`yarn kbn bootstrap\`).
+                          managed Chromium (installed via \`pnpm kbn bootstrap\`).
         `,
       },
     }

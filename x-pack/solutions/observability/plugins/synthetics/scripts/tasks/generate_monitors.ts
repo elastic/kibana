@@ -46,7 +46,7 @@ const getKibanaConnection = () => {
   const host = process.env.KIBANA_HOST ?? config.server?.host ?? flat('server.host') ?? '127.0.0.1';
   const resolvedHost = host === '0.0.0.0' ? '127.0.0.1' : host;
   const port = process.env.KIBANA_PORT ?? config.server?.port ?? flat('server.port') ?? 5601;
-  // `server.basePath` is empty when not configured; in dev mode `yarn start`
+  // `server.basePath` is empty when not configured; in dev mode `pnpm start`
   // injects a random 3-letter base path at runtime that we then have to
   // discover from a redirect (see `discoverBasePath`).
   const configBasePath: string =
@@ -147,27 +147,67 @@ const request = async (method: string, path: string, data?: any) => {
   }
 };
 
-const buildEsClient = () => {
+const redactEsNode = (node: string): string => {
   try {
-    const config = readKibanaConfig();
-    const node = config.elasticsearch?.hosts;
-    if (node) {
-      const rawUser = config.elasticsearch?.username;
-      const esUsername = isKibanaSystemUser(rawUser) || !rawUser ? 'elastic' : rawUser;
-      const esPassword = config.elasticsearch?.password;
-      const verificationMode = config.elasticsearch?.ssl?.verificationMode;
-      return new Client({
-        node: Array.isArray(node) ? node[0] : node,
-        auth: esUsername && esPassword ? { username: esUsername, password: esPassword } : undefined,
-        tls: verificationMode === 'none' ? { rejectUnauthorized: false } : undefined,
-      });
+    const parsed = new URL(node);
+    if (parsed.username || parsed.password) {
+      parsed.username = parsed.username ? '***' : '';
+      parsed.password = parsed.password ? '***' : '';
     }
+    return parsed.toString();
   } catch {
-    // fall through
+    return node.replace(/\/\/[^/@]+@/g, '//***@');
   }
+};
+
+const nodeHasUserinfo = (node: string): boolean => {
+  try {
+    const parsed = new URL(node);
+    return Boolean(parsed.username || parsed.password);
+  } catch {
+    return /\/\/[^/@]+@/.test(node);
+  }
+};
+
+const buildEsClient = () => {
+  const config = (() => {
+    try {
+      return readKibanaConfig();
+    } catch {
+      return {} as Record<string, any>;
+    }
+  })();
+  const nodeFromEnvOrConfig =
+    process.env.ES_URL ?? config.elasticsearch?.hosts ?? config['elasticsearch.hosts'];
+  const resolvedNode = Array.isArray(nodeFromEnvOrConfig)
+    ? nodeFromEnvOrConfig[0]
+    : nodeFromEnvOrConfig ?? 'http://localhost:9200';
+  const usingLocalFallback = nodeFromEnvOrConfig == null;
+  const rawUser =
+    process.env.ES_USERNAME ?? config.elasticsearch?.username ?? config['elasticsearch.username'];
+  const rawPassword =
+    process.env.ES_PASSWORD ?? config.elasticsearch?.password ?? config['elasticsearch.password'];
+  const verificationMode =
+    config.elasticsearch?.ssl?.verificationMode ?? config['elasticsearch.ssl.verificationMode'];
+  console.log(`  ES: ${redactEsNode(resolvedNode)}`);
+
+  let esAuth: { username: string; password: string } | undefined;
+  if (nodeHasUserinfo(resolvedNode)) {
+    // Credentials are already in the URL; an explicit auth object would override them.
+    esAuth = undefined;
+  } else if (rawUser || rawPassword) {
+    esAuth = {
+      username: isKibanaSystemUser(rawUser) || !rawUser ? 'elastic' : rawUser,
+      password: rawPassword ?? 'changeme',
+    };
+  } else if (usingLocalFallback) {
+    esAuth = { username: 'elastic', password: 'changeme' };
+  }
+
   return new Client({
-    node: 'http://localhost:9200',
-    auth: { username: 'elastic', password: 'changeme' },
+    node: resolvedNode,
+    auth: esAuth,
+    tls: verificationMode === 'none' ? { rejectUnauthorized: false } : undefined,
   });
 };
 
@@ -949,6 +989,7 @@ const browserMonitor = (overrides: Record<string, any>) =>
     'filter_journeys.match': '',
     'filter_journeys.tags': [],
     ignore_https_errors: false,
+    certificate_error_spki_allowlist: [],
     throttling: {
       id: 'custom',
       label: 'Custom',

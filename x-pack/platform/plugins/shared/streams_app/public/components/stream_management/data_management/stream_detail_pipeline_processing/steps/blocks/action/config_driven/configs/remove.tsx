@@ -28,7 +28,7 @@ const defaultFormState: RemoveProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'field',
-  includeCondition: false,
+  includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: true,
 };

@@ -19,6 +19,8 @@ import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 import type { AgentStatus } from '../../../common/types';
+import { agentPolicyService } from '../agent_policy';
+import { buildPolicyBaseIdsWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
 
 import { auditLoggingService } from '../audit_logging';
 
@@ -37,6 +39,17 @@ import {
 } from './crud';
 
 jest.mock('../audit_logging');
+jest.mock('../agent_policy', () => ({
+  agentPolicyService: {
+    list: jest.fn().mockResolvedValue({ items: [] }),
+    get: jest.fn().mockResolvedValue(null),
+    getByIds: jest.fn().mockResolvedValue([]),
+    getInactivityTimeouts: jest.fn().mockResolvedValue([]),
+    // fetchAllAgentPolicyIds returns an AsyncIterable<string[]>; default to empty.
+    fetchAllAgentPolicyIds: jest.fn().mockResolvedValue((async function* () {})()),
+  },
+  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
+}));
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
@@ -560,6 +573,19 @@ describe('Agents CRUD test', () => {
       expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
     });
 
+    it('should omit the status runtime mapping when includeStatusRuntimeField is false', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        includeStatusRuntimeField: false,
+      });
+      expect(searchMock.mock.calls[0][0].runtime_mappings).not.toHaveProperty('status');
+      expect(searchMock.mock.calls[0][0].query).toEqual(
+        toElasticsearchQuery(_joinFilters(['active:true'])!)
+      );
+    });
+
     describe('status filters', () => {
       beforeEach(() => {
         searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
@@ -621,6 +647,35 @@ describe('Agents CRUD test', () => {
 
         expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
           toElasticsearchQuery(_joinFilters(['status:*'])!)
+        );
+      });
+
+      it('should exclude unenrolled via active:true when the status runtime field is skipped', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: true,
+          includeStatusRuntimeField: false,
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].runtime_mappings).not.toHaveProperty('status');
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['active:true'])!)
+        );
+      });
+
+      it('should keep status filters and the runtime field when the kuery references status', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          includeStatusRuntimeField: false,
+          kuery: 'status:online',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].runtime_mappings).toHaveProperty('status');
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(
+            _joinFilters(['status:online', 'NOT (status:inactive)', 'NOT status:unenrolled'])!
+          )
         );
       });
     });
@@ -708,6 +763,131 @@ describe('Agents CRUD test', () => {
         expect(query.bool.filter[0].bool.should[0].match).toEqual({
           'agent.identifying_attributes.agent.id': 'agent1',
         });
+      });
+    });
+
+    describe('showAgentless filter', () => {
+      const agentlessPolicyIds = ['policy-agentless-1', 'policy-agentless-2'];
+
+      // Helper: build an AsyncIterable<string[]> that yields a single page of ids.
+      function makeAsyncIterable(ids: string[]) {
+        return (async function* () {
+          yield ids;
+        })();
+      }
+
+      beforeEach(() => {
+        searchMock.mockResolvedValue(getEsResponse([], 0, 'online'));
+      });
+
+      afterEach(() => {
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockReset();
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValue(
+          makeAsyncIterable([])
+        );
+      });
+
+      it('excludes agents on versioned agentless policies using policy_base_id fallback', async () => {
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          makeAsyncIterable(agentlessPolicyIds)
+        );
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        // The exclusion is injected as a must_not using `terms` queries (constant clause count)
+        // rather than KQL which would emit N individual `term` clauses per field.
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.must_not).toEqual([
+          buildPolicyBaseIdsWithFallbackEsFilter(agentlessPolicyIds),
+        ]);
+        // Verify the other filters (active + enrolled) are still applied via the filter branch.
+        const filterStr = JSON.stringify(query.bool.filter);
+        expect(filterStr).toContain('unenrolled');
+        // Explicit field check so the intent of the must_not is obvious.
+        const queryStr = JSON.stringify(query);
+        expect(queryStr).toContain('policy_base_id');
+        expect(queryStr).toContain('policy-agentless-1');
+        expect(queryStr).toContain('policy-agentless-2');
+      });
+
+      it('queries agentless policies using the unscoped SO client with spaceId *', async () => {
+        // .fleet-agents is not space-partitioned. If a space-scoped client is used to build the
+        // exclusion list, agentless policies from other spaces are missed and their agents leak
+        // through. The fix uses getInternalUserSOClientWithoutSpaceExtension() + spaceId '*'.
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          makeAsyncIterable(agentlessPolicyIds)
+        );
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        // soClientMock is wired as the withoutSpaceExtensions client in beforeEach
+        // (createAppContextStartContractMock({ withoutSpaceExtensions: soClientMock })).
+        // Assert that fetchAllAgentPolicyIds() was called with that specific unscoped client
+        // and spaceId '*' so the lookup is never silently restricted to the caller's space.
+        expect(agentPolicyService.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+          soClientMock,
+          expect.objectContaining({ spaceId: '*' })
+        );
+      });
+
+      it('excludes cross-space agentless agents even when the current space owns no agentless policies', async () => {
+        // Worst-case: current space owns zero agentless policies, but the unscoped query
+        // finds policies from other spaces. Without the unscoped client the ids.length > 0
+        // guard fails and NO filter is built, leaking every agentless agent deployment-wide.
+        const crossSpacePolicyIds = ['space-a-policy-1', 'space-a-policy-2'];
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          makeAsyncIterable(crossSpacePolicyIds)
+        );
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.must_not).toEqual([
+          buildPolicyBaseIdsWithFallbackEsFilter(crossSpacePolicyIds),
+        ]);
+      });
+
+      it('exhausts all pages from fetchAllAgentPolicyIds — policy on page 2 is still excluded', async () => {
+        // A single-page mock cannot catch regressions where only the first page is consumed.
+        // This test yields a policy ID only on the second page and asserts it still reaches
+        // the must_not filter, proving the for-await loop drains all pages.
+        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+          (async function* () {
+            yield ['policy-page-1'];
+            yield ['policy-page-2-only'];
+          })()
+        );
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(queryStr).toContain('policy-page-1');
+        expect(queryStr).toContain('policy-page-2-only');
+      });
+
+      it('adds no exclusion clause when there are no agentless policies', async () => {
+        // fetchAllAgentPolicyIds returns empty iterable by default (see afterEach reset above).
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(queryStr).not.toContain('policy_base_id');
+        expect(queryStr).not.toContain('policy_id');
       });
     });
   });
@@ -884,6 +1064,55 @@ describe('Agents CRUD test', () => {
       }
 
       expect(searchMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('should not include _source in the search body by default', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {})) {
+        // consume to trigger search
+      }
+      expect(searchMock.mock.calls[0][0]).not.toHaveProperty('_source');
+    });
+
+    it('should pass _source through when provided', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        _source: ['policy_id'],
+      })) {
+        // consume to trigger search
+      }
+      expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ _source: ['policy_id'] }));
+    });
+
+    it('should pass fetchFields through as fields param when provided', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        fetchFields: ['status'],
+      })) {
+        // consume to trigger search
+      }
+      expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ fields: ['status'] }));
+    });
+
+    it('should map agents correctly from filtered _source', async () => {
+      const mock = createEsSearchResultMock(['agent-1']);
+      mock.hits.hits[0]._source = {
+        policy_id: 'p1',
+        local_metadata: { host: { hostname: 'h1' } },
+      } as any;
+      searchMock.mockResolvedValueOnce(mock).mockResolvedValueOnce(createEsSearchResultMock([]));
+
+      const agents: Agent[] = [];
+      for await (const page of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        _source: ['policy_id', 'local_metadata.host.hostname'],
+      })) {
+        agents.push(...page);
+      }
+
+      expect(agents[0].id).toBe('agent-1');
+      expect(agents[0].policy_id).toBe('p1');
+      expect(agents[0].status).toBe('online');
+      expect((agents[0] as any).type).toBeUndefined();
     });
   });
 });

@@ -1,24 +1,9 @@
 {
-  "sha1": "0d31cac65bd430e8eae53abc1b2e9d0e1701549e",
+  "sha1": "bba4afa046870a3bd9fc004a4b22f8d55cbfd97d",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "12b5169bc361214-95d4bf5100c0857",
-      "title": "Reset profiling state after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 6,
-        "column": 1
-      }
-    },
     {
       "id": "01827b5a57152a5-eaaf5032684392c",
       "title": "Set up Profiling Resources and Data",
@@ -29,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 5,
+        "line": 6,
         "column": 1
+      }
+    },
+    {
+      "id": "c649c775b388af1-8f5df355442d174",
+      "title": "Add data page switches between the OpenTelemetry and Universal Profiling instructions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/add_data/add_data.spec.ts",
+        "line": 17,
+        "column": 20
       }
     },
     {
@@ -225,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 25
       }
     },
@@ -239,8 +238,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 21,
-        "column": 20
+        "line": 19,
+        "column": 5
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-a4f4995d739e7c8",
+      "title": "Profiling schema selector keeps the selected schema while moving across the profiling sections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 22,
+        "column": 8
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-bd5e314c3c11812",
+      "title": "Profiling schema selector recovers from a selected schema without data by selecting another schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 74,
+        "column": 14
       }
     },
     {
@@ -281,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 13,
+        "line": 14,
         "column": 20
       }
     },
@@ -295,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 28
       }
     },
@@ -309,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 49
       }
     },
@@ -323,8 +350,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 5
+      }
+    },
+    {
+      "id": "12b5169bc361214-95d4bf5100c0857",
+      "title": "Reset profiling state after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

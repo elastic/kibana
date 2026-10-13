@@ -6,12 +6,15 @@
  */
 
 import path from 'path';
+import { hunts as awsIamHunts } from '../packs/aws-iam/hunts';
 import { readNdjson } from './episodes';
 import { enrichDocForGraph } from './graph_enrichment';
 import { scriptsDataDir } from './indexing';
 import { ensureEcsSourceIp } from './packs';
 import {
   allThreatIntelSourceIds,
+  assertHistoricReportsPerPackInRange,
+  assertThreatIntelIndexExists,
   buildHistoricThreatReportDoc,
   buildPackArticleDataUrl,
   buildPackHistoricReportItemsForScenario,
@@ -25,11 +28,16 @@ import {
   resolveHistoricThreatIntelWindow,
   resolveThreatIntelPackIds,
   scenarioRssMustContain,
+  seedThreatIntelForPacks,
   THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
+  THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX,
   THREAT_INTEL_LIVE_WINDOW_MS,
   THREAT_INTEL_RSS_CURRENT_ITEMS_PER_PACK,
-  THREAT_INTEL_SUBSCRIPTION_ID,
+  THREAT_INTEL_SOURCES_INDEX,
+  THREAT_REPORTS_INDEX,
 } from './threat_intel_fixtures';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 describe('PACK_TI_SCENARIOS', () => {
   it('covers the four Technology Watch packs', () => {
@@ -41,18 +49,28 @@ describe('PACK_TI_SCENARIOS', () => {
     ]);
   });
 
+  it('gives aws-iam five scenarios and every other pack exactly one', () => {
+    expect(PACK_TI_SCENARIOS['aws-iam']).toHaveLength(5);
+    expect(PACK_TI_SCENARIOS.okta).toHaveLength(1);
+    expect(PACK_TI_SCENARIOS.kubernetes).toHaveLength(1);
+    expect(PACK_TI_SCENARIOS['github-actions']).toHaveLength(1);
+  });
+
   it('uses stable threat-intel source ids without data-generator branding', () => {
     expect(allThreatIntelSourceIds().sort()).toEqual([
+      'aws-iam-assume-role',
+      'aws-iam-behavior-only',
+      'aws-iam-clean',
+      'aws-iam-ioc-only',
       'ti-rss-aws-iam',
       'ti-rss-github-actions',
       'ti-rss-kubernetes',
       'ti-rss-okta',
     ]);
-    expect(THREAT_INTEL_SUBSCRIPTION_ID).toEqual('threat-intel-digest');
   });
 
   it('keeps fixture identity free of data-generator strings', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const blob = [
         scenario.sourceId,
         scenario.name,
@@ -65,18 +83,24 @@ describe('PACK_TI_SCENARIOS', () => {
       expect(blob.toLowerCase()).not.toContain('data-generator');
       expect(blob.toLowerCase()).not.toContain('data generator');
     }
-    expect(THREAT_INTEL_SUBSCRIPTION_ID.toLowerCase()).not.toContain('data-generator');
+  });
+
+  it('uses browsable https article URLs for every pack scenario', () => {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      const { protocol } = new URL(scenario.articleUrl);
+      expect(protocol === 'http:' || protocol === 'https:').toBe(true);
+    }
   });
 
   it('declares Hub categories and regions for historic report seeding', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       expect(scenario.categories.length).toBeGreaterThan(0);
       expect(scenario.regions.length).toBeGreaterThan(0);
     }
   });
 
   it('declares distinct historic article variants with join and narrative anchors', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       expect(scenario.historicArticles.length).toBeGreaterThanOrEqual(4);
       const titles = scenario.historicArticles.map((article) => article.title);
       expect(new Set(titles).size).toEqual(titles.length);
@@ -90,7 +114,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('builds a data:text/html article URL that embeds the scenario title and body', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const articleUrl = buildPackArticleDataUrl(scenario);
       expect(articleUrl.startsWith('data:text/html;charset=utf-8,')).toBe(true);
       const html = decodeURIComponent(articleUrl.replace(/^data:text\/html;charset=utf-8,/, ''));
@@ -101,7 +125,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('embeds join IOCs in a single-item current RSS feed without dated titles', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       const reportItems = buildPackRssCurrentReportItems({
         endMs: Date.parse('2026-07-01T00:00:00.000Z'),
       });
@@ -119,11 +143,15 @@ describe('PACK_TI_SCENARIOS', () => {
       expect(xml).toContain('-current-');
       expect(xml).not.toContain('-historic-');
       expect(xml).not.toMatch(/\(20\d{2}-\d{2}-\d{2}\)/);
+      expect(xml).toContain(scenario.articleUrl);
+      expect(xml).not.toContain('example.elastic.dev');
+      expect(xml.toLowerCase()).not.toContain('data-generator');
+      expect(xml.toLowerCase()).not.toContain('data generator');
     }
   });
 
   it('includes at least one defanged IP per pack body for discriminating extraction', () => {
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
       expect(scenario.body).toMatch(/\d+\[\.\]\d+\[\.\]\d+\[\.\]\d+/);
       expect(scenario.joinIocs.some((ioc) => ioc.type === 'ip' && Boolean(ioc.defanged))).toBe(
         true
@@ -132,7 +160,7 @@ describe('PACK_TI_SCENARIOS', () => {
   });
 
   it('uses the full kubernetes SA principal as a user join IOC (not the short nickname alone)', () => {
-    const k8s = PACK_TI_SCENARIOS.kubernetes;
+    const k8s = PACK_TI_SCENARIOS.kubernetes[0];
     expect(k8s.joinIocs).toEqual(
       expect.arrayContaining([
         {
@@ -149,16 +177,24 @@ describe('PACK_TI_SCENARIOS', () => {
 
   it('diversifies live RSS body tone so enrich can classify mixed severities', () => {
     const { okta, 'aws-iam': awsIam, kubernetes, 'github-actions': github } = PACK_TI_SCENARIOS;
+    const [primaryOkta] = okta;
+    const [primaryAwsIam] = awsIam;
+    const [primaryKubernetes] = kubernetes;
+    const [primaryGithub] = github;
     // Titles stay natural (no demo prefixes like ACTIVE INCIDENT / Research note).
-    expect(okta.title.toLowerCase()).not.toContain('active incident');
-    expect(awsIam.title.toLowerCase()).not.toContain('investigated campaign');
-    expect(kubernetes.title.toLowerCase()).not.toMatch(/^advisory:/);
-    expect(github.title.toLowerCase()).not.toContain('research note');
+    expect(primaryOkta.title.toLowerCase()).not.toContain('active incident');
+    expect(primaryAwsIam.title.toLowerCase()).not.toContain('investigated campaign');
+    expect(primaryKubernetes.title.toLowerCase()).not.toMatch(/^advisory:/);
+    expect(primaryGithub.title.toLowerCase()).not.toContain('research note');
     // Severity ladder lives in body wording for classify_severity.
-    expect(okta.body.toLowerCase()).toMatch(/ongoing breach|ransomware-adjacent|immediately/);
-    expect(awsIam.body.toLowerCase()).toMatch(/confirmed|prioritize|does not assert/);
-    expect(kubernetes.body.toLowerCase()).toMatch(/advisory|monitoring guidance|does not claim/);
-    expect(github.body.toLowerCase()).toMatch(
+    expect(primaryOkta.body.toLowerCase()).toMatch(
+      /ongoing breach|ransomware-adjacent|immediately/
+    );
+    expect(primaryAwsIam.body.toLowerCase()).toMatch(/confirmed|prioritize|does not assert/);
+    expect(primaryKubernetes.body.toLowerCase()).toMatch(
+      /advisory|monitoring guidance|does not claim/
+    );
+    expect(primaryGithub.body.toLowerCase()).toMatch(
       /background research|no immediate incident response|situational awareness/
     );
   });
@@ -196,6 +232,7 @@ describe('threat intel report timestamps', () => {
     const endMs = Date.parse('2025-07-01T00:00:00.000Z');
     const current = buildPackRssCurrentReportItems({ endMs });
     const historic = buildPackHistoricReportItemsForScenario({
+      scenario: PACK_TI_SCENARIOS.okta[0],
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -211,10 +248,11 @@ describe('threat intel report timestamps', () => {
 
 describe('buildHistoricThreatReportDoc', () => {
   it('assigns critical severity to the newest historic slot per pack', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const endMs = Date.parse('2026-07-21T18:00:00.000Z');
     const startMs = Date.parse('2026-01-01T00:00:00.000Z');
     const items = buildPackHistoricReportItemsForScenario({
+      scenario,
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -250,10 +288,11 @@ describe('buildHistoricThreatReportDoc', () => {
   });
 
   it('rotates historic article variants without date-suffix titles', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const endMs = Date.parse('2026-07-21T18:00:00.000Z');
     const startMs = Date.parse('2026-01-01T00:00:00.000Z');
     const items = buildPackHistoricReportItemsForScenario({
+      scenario,
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -288,7 +327,7 @@ describe('buildHistoricThreatReportDoc', () => {
   });
 
   it('keeps live kind on the canonical scenario title and body', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const feedUrl = buildPackRssDataUrl({
       scenario,
       reportItems: buildPackRssCurrentReportItems({
@@ -309,10 +348,11 @@ describe('buildHistoricThreatReportDoc', () => {
   });
 
   it('introduces emerging source names only on the newest historic slots', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     const endMs = Date.parse('2026-07-21T18:00:00.000Z');
     const startMs = Date.parse('2026-01-01T00:00:00.000Z');
     const items = buildPackHistoricReportItemsForScenario({
+      scenario,
       packIndex: 0,
       packCount: 4,
       startMs,
@@ -347,7 +387,7 @@ describe('buildHistoricThreatReportDoc', () => {
 
 describe('resolveHistoricSourceName', () => {
   it('keeps older slots canonical and switches to emerging near the end', () => {
-    const scenario = PACK_TI_SCENARIOS.okta;
+    const scenario = PACK_TI_SCENARIOS.okta[0];
     expect(resolveHistoricSourceName({ scenario, itemIndex: 0, reportsPerPack: 12 })).toEqual(
       scenario.name
     );
@@ -360,7 +400,7 @@ describe('resolveHistoricSourceName', () => {
   });
 
   it('makes older halves of a pack run smaller source sets than newer halves', () => {
-    const scenarios = Object.values(PACK_TI_SCENARIOS);
+    const scenarios = Object.values(PACK_TI_SCENARIOS).flat();
     const reportsPerPack = 12;
     const older = new Set<string>();
     const newer = new Set<string>();
@@ -371,7 +411,7 @@ describe('resolveHistoricSourceName', () => {
         else newer.add(name);
       }
     }
-    expect(older.size).toBe(4);
+    expect(older.size).toBe(8);
     expect(newer.size).toBeGreaterThan(older.size);
   });
 });
@@ -399,10 +439,14 @@ describe('resolveHistoricThreatIntelWindow', () => {
 });
 
 describe('pack TI join contract', () => {
-  it('places every join IOC on mustard hunt ECS fields after pack enrich', async () => {
+  it('places every env-bound join IOC on mustard hunt ECS fields after pack enrich', async () => {
     const missing: string[] = [];
 
-    for (const scenario of Object.values(PACK_TI_SCENARIOS)) {
+    const envBoundScenarios = Object.values(PACK_TI_SCENARIOS)
+      .flat()
+      .filter((scenario) => !scenario.joinIocsArticleOnly);
+
+    for (const scenario of envBoundScenarios) {
       const eventsPath = path.join(scriptsDataDir('packs', scenario.packId), 'events.ndjson');
       const raw = await readNdjson(eventsPath);
       const docs = raw.map((doc) => {
@@ -422,6 +466,302 @@ describe('pack TI join contract', () => {
 
     expect(missing).toEqual([]);
   });
+
+  it('keeps article-only join IOCs off pack ECS for every article-only scenario', async () => {
+    const articleOnlyScenarios = Object.values(PACK_TI_SCENARIOS)
+      .flat()
+      .filter((s) => s.joinIocsArticleOnly);
+    expect(new Set(articleOnlyScenarios.map((s) => s.reportIdSlug))).toEqual(
+      new Set(['aws-iam-behavior-only', 'aws-iam-clean'])
+    );
+
+    for (const scenario of articleOnlyScenarios) {
+      const eventsPath = path.join(scriptsDataDir('packs', scenario.packId), 'events.ndjson');
+      const raw = await readNdjson(eventsPath);
+      const docs = raw.map((doc) => {
+        const next = structuredClone(doc);
+        ensureEcsSourceIp(next);
+        enrichDocForGraph(next);
+        return next;
+      });
+      for (const ioc of scenario.joinIocs) {
+        const fieldValues = collectPackJoinFieldValues(docs, ioc.type);
+        expect(fieldValues.has(ioc.value)).toBe(false);
+      }
+    }
+  });
+});
+
+describe('okta process chain narrative', () => {
+  const scenario = PACK_TI_SCENARIOS.okta[0];
+  const slots = [
+    { label: 'scenario.body', body: scenario.body },
+    ...scenario.historicArticles.map((article, n) => ({
+      label: `historicArticles[${n}].body`,
+      body: article.body,
+    })),
+  ];
+
+  it('names ADMIN-WS02 and the powershell.exe to curl.exe chain in every body slot', () => {
+    const missing: string[] = [];
+    for (const { label, body } of slots) {
+      for (const token of ['ADMIN-WS02', 'powershell.exe', 'curl.exe', 'T1059.001']) {
+        if (!body.includes(token)) missing.push(`${label} missing "${token}"`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it('declares the chain in the narrative anchors and adds T1059.001 to the techniques', () => {
+    expect(scenario.narrative).toEqual(expect.arrayContaining(['powershell.exe', 'curl.exe']));
+    expect(scenario.mitre).toEqual(
+      expect.arrayContaining(['T1078.004', 'T1556', 'T1098', 'T1136.003', 'T1059.001'])
+    );
+  });
+
+  it('renders the chain into every seeded historic report body', () => {
+    scenario.historicArticles.forEach((article, itemIndex) => {
+      const doc = buildHistoricThreatReportDoc({
+        scenario,
+        item: { itemKey: `historic-${itemIndex}`, reportTimestamp: '2026-07-01T00:00:00.000Z' },
+        itemIndex,
+        reportsPerPack: 12,
+        spaceId: 'default',
+        feedUrl: 'data:application/rss+xml;charset=utf-8,',
+        kind: 'historic',
+      });
+      expect(doc.content.body_text).toContain('powershell.exe');
+      expect(doc.content.body_text).toContain('curl.exe');
+      expect(doc.content.body_text).toContain('ADMIN-WS02');
+    });
+  });
+});
+
+describe('aws-iam-clean scenario', () => {
+  const scenario = PACK_TI_SCENARIOS['aws-iam'].find((s) => s.reportIdSlug === 'aws-iam-clean')!;
+
+  it('is an article-only Tier 2 fixture on T1110.003', () => {
+    expect(scenario).toBeDefined();
+    expect(scenario.joinIocsArticleOnly).toBe(true);
+    expect(scenario.mitre).toEqual(['T1110.003']);
+  });
+
+  it('carries every scenarioRssMustContain token and a defanged IP in every slot', () => {
+    const tokens = scenarioRssMustContain(scenario);
+    const slots: Array<{ label: string; body: string }> = [
+      { label: 'scenario.body', body: scenario.body },
+      ...scenario.historicArticles.map((article, n) => ({
+        label: `historicArticles[${n}].body`,
+        body: article.body,
+      })),
+    ];
+    const missing: string[] = [];
+    for (const { label, body } of slots) {
+      for (const token of tokens) {
+        if (!body.includes(token)) missing.push(`${label} missing token "${token}"`);
+      }
+      expect(body).toMatch(/\d+\[\.\]\d+\[\.\]\d+\[\.\]\d+/);
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it('shares no mitre id with any other scenario in any pack', () => {
+    for (const other of Object.values(PACK_TI_SCENARIOS)
+      .flat()
+      .filter((s) => s !== scenario)) {
+      for (const technique of scenario.mitre) {
+        expect(other.mitre).not.toContain(technique);
+      }
+    }
+  });
+
+  it('never mentions tokens carried by other aws-iam scenarios that are absent from telemetry', () => {
+    // Static list of other-scenario decoys/anchors that are NOT on pack telemetry either,
+    // but which this scenario must not accidentally reuse (would break the "distinct decoy
+    // range" and "no cross-report correlation" properties both scenarios rely on).
+    const OTHER_SCENARIO_TOKENS = [
+      'TA-DEMO-SHADOW-ADMIN',
+      '198.51.100.40',
+      '198.51.100.41',
+      'research-analyst',
+      'WIN-ANALYST01',
+    ];
+    const blob = [scenario.body, ...scenario.historicArticles.map((a) => a.body)]
+      .join('\n')
+      .toLowerCase();
+    for (const token of OTHER_SCENARIO_TOKENS) {
+      expect(blob).not.toContain(token.toLowerCase());
+    }
+  });
+
+  // Derived (not hand-maintained) deny-list: every 4+ character segment of every leaf string
+  // value in the pack's seeded telemetry (events.ndjson + hunts.ts falsePositives), excluding
+  // metadata fields, must not appear as a substring of this scenario's prose. See the
+  // grounding-rule note on `PACK_TI_SCENARIOS['aws-iam']`'s aws-iam-clean entry: any 4+
+  // character substring of the article is a candidate grounded ES|QL LIKE fragment.
+  describe('telemetry segment deny-list (derived)', () => {
+    const METADATA_PATHS = new Set([
+      '@timestamp',
+      'ecs.version',
+      'event.id',
+      'event.kind',
+      'data_stream.type',
+      'data_stream.namespace',
+    ]);
+    // Segments that legitimately appear in telemetry only via fields an ES|QL hunt would
+    // never filter on. Exempted ONLY when every occurrence's field path is in this safe set.
+    const SAFE_PATH_SUFFIXES = [
+      'request_parameters.key',
+      'request_parameters.roleSessionName',
+      'event_type',
+    ];
+    const ALLOW_LIST = new Set(['2026', 'reports', 'source']);
+
+    const splitIntoSegments = (value: string): string[] =>
+      value
+        .split(/[^a-zA-Z0-9]+/)
+        .flatMap((run) => run.split(/(?<=[a-z0-9])(?=[A-Z])/))
+        .map((seg) => seg.toLowerCase())
+        .filter((seg) => seg.length >= 4);
+
+    const isPathSafe = (fullPath: string) =>
+      SAFE_PATH_SUFFIXES.some((suffix) => fullPath === suffix || fullPath.endsWith(`.${suffix}`));
+
+    const collectTelemetrySegmentPaths = async (): Promise<Map<string, Set<string>>> => {
+      const segmentPaths = new Map<string, Set<string>>();
+      const record = (fieldPath: string, value: unknown) => {
+        if (typeof value !== 'string') return;
+        for (const seg of splitIntoSegments(value)) {
+          const paths = segmentPaths.get(seg) ?? new Set<string>();
+          paths.add(fieldPath);
+          segmentPaths.set(seg, paths);
+        }
+      };
+      const walk = (node: unknown, fieldPath: string[]) => {
+        if (Array.isArray(node)) {
+          for (const item of node) walk(item, fieldPath);
+          return;
+        }
+        if (node && typeof node === 'object') {
+          for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+            const nextPath = [...fieldPath, key];
+            if (!METADATA_PATHS.has(nextPath.join('.'))) {
+              walk(value, nextPath);
+            }
+          }
+          return;
+        }
+        record(fieldPath.join('.'), node);
+      };
+
+      const eventsPath = path.join(scriptsDataDir('packs', 'aws-iam'), 'events.ndjson');
+      const events = await readNdjson(eventsPath);
+      for (const doc of events) walk(doc, []);
+      for (const hunt of awsIamHunts) {
+        for (const doc of hunt.falsePositives ?? []) walk(doc, []);
+      }
+
+      return segmentPaths;
+    };
+
+    const computeBannedSegments = async (): Promise<string[]> => {
+      const segmentPaths = await collectTelemetrySegmentPaths();
+      const banned: string[] = [];
+      for (const [segment, paths] of segmentPaths) {
+        const isExempt = ALLOW_LIST.has(segment) && [...paths].every(isPathSafe);
+        if (!isExempt) {
+          banned.push(segment);
+        }
+      }
+      return banned;
+    };
+
+    const assertNoBannedSegment = (bannedSegments: string[]) => {
+      const slots: Array<{ label: string; text: string }> = [
+        { label: 'scenario.body', text: scenario.body },
+        { label: 'scenario.title', text: scenario.title },
+        ...scenario.historicArticles.flatMap((article, n) => [
+          { label: `historicArticles[${n}].title`, text: article.title },
+          { label: `historicArticles[${n}].body`, text: article.body },
+        ]),
+      ];
+      const violations: string[] = [];
+      for (const { label, text } of slots) {
+        const normalized = text.toLowerCase();
+        for (const segment of bannedSegments) {
+          if (normalized.includes(segment)) {
+            violations.push(`segment "${segment}" found in ${label}`);
+          }
+        }
+      }
+      expect(violations).toEqual([]);
+    };
+
+    it('contains no seeded telemetry segment (4+ chars) in any slot', async () => {
+      const banned = await computeBannedSegments();
+      assertNoBannedSegment(banned);
+    });
+
+    it('would catch a reintroduced telemetry word (deliberate-failure check)', async () => {
+      const banned = await computeBannedSegments();
+      expect(banned).toContain('user');
+      const pollutedScenario = {
+        ...scenario,
+        historicArticles: [
+          { ...scenario.historicArticles[0], body: `${scenario.historicArticles[0].body} user` },
+          ...scenario.historicArticles.slice(1),
+        ],
+      };
+      const slots = pollutedScenario.historicArticles.map((article, n) => ({
+        label: `historicArticles[${n}].body`,
+        text: article.body,
+      }));
+      const violations: string[] = [];
+      for (const { label, text } of slots) {
+        const normalized = text.toLowerCase();
+        for (const segment of banned) {
+          if (normalized.includes(segment))
+            violations.push(`segment "${segment}" found in ${label}`);
+        }
+      }
+      expect(
+        violations.some((v) => v.includes('historicArticles[0]') && v.includes('"user"'))
+      ).toBe(true);
+    });
+  });
+
+  it('builds historic docs with the expected extracted fields and trailing techniques line', () => {
+    const items = buildPackHistoricReportItemsForScenario({
+      scenario,
+      packIndex: 0,
+      packCount: 1,
+      startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+      endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+      reportsPerPack: 12,
+    });
+    expect(items.length).toBeGreaterThan(0);
+    for (const [itemIndex, item] of items.entries()) {
+      const doc = buildHistoricThreatReportDoc({
+        scenario,
+        item,
+        itemIndex,
+        packIndex: 0,
+        reportsPerPack: 12,
+        spaceId: 'default',
+        feedUrl: 'data:text/html,stub',
+        kind: 'historic',
+      });
+      expect(doc.extracted?.ttps.techniques).toEqual(['T1110.003']);
+      expect(doc.extracted?.iocs).toEqual([
+        { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
+        { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
+        { type: 'email', value: 'signin-watch@lab-demo.test' },
+      ]);
+      expect(doc.extracted?.threat_actors).toBeUndefined();
+      expect(doc.extracted?.diamond).toBeUndefined();
+      expect(doc.content.body_text.endsWith(' Techniques: T1110.003.')).toBe(true);
+    }
+  });
 });
 
 describe('resolveThreatIntelPackIds', () => {
@@ -437,5 +777,312 @@ describe('resolveThreatIntelPackIds', () => {
 
   it('preserves an explicit pack subset', () => {
     expect(resolveThreatIntelPackIds(['okta', 'aws-iam'])).toEqual(['okta', 'aws-iam']);
+  });
+});
+
+describe('deterministic historic report ids', () => {
+  const buildAllHistoricDocs = () => {
+    const spaceId = 'default';
+    const feedUrl = 'data:text/html,stub';
+    const scenarios = Object.values(PACK_TI_SCENARIOS).flat();
+    const docs = scenarios.flatMap((scenario, packIndex) => {
+      const items = buildPackHistoricReportItemsForScenario({
+        scenario,
+        packIndex,
+        packCount: scenarios.length,
+        startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+        endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+        reportsPerPack: 12,
+      });
+      return items.map((item, itemIndex) =>
+        buildHistoricThreatReportDoc({
+          scenario,
+          item,
+          itemIndex,
+          packIndex,
+          reportsPerPack: 12,
+          spaceId,
+          feedUrl,
+          kind: 'historic',
+        })
+      );
+    });
+    return docs;
+  };
+
+  it('names guids `ti-report-<reportIdSlug>-historic-NN`, capped at 99 slots by the 2-digit NN', () => {
+    const docs = buildAllHistoricDocs();
+    const ids = docs.map((doc) => doc.lineage.source_doc_ref.id);
+    expect(ids).toContain('ti-report-aws-iam-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-assume-role-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-ioc-only-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-behavior-only-historic-01');
+    expect(ids).toContain('ti-report-aws-iam-clean-historic-01');
+    for (const id of ids) {
+      expect(id).toMatch(/^ti-report-[a-z0-9-]+-historic-\d{2}$/);
+    }
+  });
+
+  it('produces a unique id per report across all eight scenarios (guards the packId collision)', () => {
+    const ids = buildAllHistoricDocs().map((doc) => doc.lineage.source_doc_ref.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids).toHaveLength(96);
+  });
+
+  it('builds identical ids and docs from identical inputs (idempotent by construction)', () => {
+    const first = buildAllHistoricDocs();
+    const second = buildAllHistoricDocs();
+    expect(second).toEqual(first);
+  });
+});
+
+describe('per-slot correlation anchors', () => {
+  const buildAllHistoricDocsWithIds = () => {
+    const spaceId = 'default';
+    const feedUrl = 'data:text/html,stub';
+    const scenarios = Object.values(PACK_TI_SCENARIOS).flat();
+    return scenarios.flatMap((scenario, packIndex) => {
+      const items = buildPackHistoricReportItemsForScenario({
+        scenario,
+        packIndex,
+        packCount: scenarios.length,
+        startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+        endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+        reportsPerPack: 12,
+      });
+      return items.map((item, itemIndex) =>
+        buildHistoricThreatReportDoc({
+          scenario,
+          item,
+          itemIndex,
+          packIndex,
+          reportsPerPack: 12,
+          spaceId,
+          feedUrl,
+          kind: 'historic',
+        })
+      );
+    });
+  };
+
+  // Mirrors the discriminating-anchor rules in search_by_anchors.ts: a `threat_actors`
+  // entry or a hash-typed IOC value correlates two reports; every doc excludes itself.
+  const discriminatingAnchorsForDoc = (
+    doc: ReturnType<typeof buildAllHistoricDocsWithIds>[number]
+  ) => {
+    const actors = doc.extracted?.threat_actors ?? [];
+    const hashes = (doc.extracted?.iocs ?? [])
+      .filter((ioc) => ioc.type === 'hash')
+      .map((ioc) => ioc.value);
+    return { actors, hashes };
+  };
+
+  it('correlates exactly the anchored A/B pair and nothing else', () => {
+    const docs = buildAllHistoricDocsWithIds();
+    const byId = new Map(docs.map((doc) => [doc.lineage.source_doc_ref.id, doc]));
+
+    const matchesFor = (id: string) => {
+      const anchors = discriminatingAnchorsForDoc(byId.get(id)!);
+      const matches = new Set<string>();
+      for (const other of docs) {
+        const otherId = other.lineage.source_doc_ref.id;
+        if (otherId !== id) {
+          const otherAnchors = discriminatingAnchorsForDoc(other);
+          const sharesActor = anchors.actors.some((a) => otherAnchors.actors.includes(a));
+          const sharesHash = anchors.hashes.some((h) => otherAnchors.hashes.includes(h));
+          if (sharesActor || sharesHash) matches.add(otherId);
+        }
+      }
+      return matches;
+    };
+
+    const reportA = 'ti-report-aws-iam-historic-01';
+    const reportB = 'ti-report-aws-iam-assume-role-historic-01';
+    expect(matchesFor(reportA)).toEqual(new Set([reportB]));
+    expect(matchesFor(reportB)).toEqual(new Set([reportA]));
+
+    const anchoredIds = docs
+      .filter((doc) => discriminatingAnchorsForDoc(doc).actors.length > 0)
+      .map((doc) => doc.lineage.source_doc_ref.id);
+    expect(new Set(anchoredIds)).toEqual(new Set([reportA, reportB]));
+
+    for (const doc of docs) {
+      const id = doc.lineage.source_doc_ref.id;
+      if (id !== reportA && id !== reportB) {
+        expect(matchesFor(id).size).toBe(0);
+      }
+    }
+  });
+
+  it('keeps every actor string and hash IOC value scoped to only the intended pair', () => {
+    // Technique ids may legitimately overlap (okta and aws-iam both carry T1078.004);
+    // that overlap is boost-only in the gate (minimum_should_match on discriminating
+    // clauses only) and is not asserted here.
+    const docs = buildAllHistoricDocsWithIds();
+    const actorOwners = new Map<string, Set<string>>();
+    const hashOwners = new Map<string, Set<string>>();
+    for (const doc of docs) {
+      const { actors, hashes } = discriminatingAnchorsForDoc(doc);
+      for (const actor of actors) {
+        actorOwners.set(actor, (actorOwners.get(actor) ?? new Set()).add(doc.source.adapter_id));
+      }
+      for (const hash of hashes) {
+        hashOwners.set(hash, (hashOwners.get(hash) ?? new Set()).add(doc.source.adapter_id));
+      }
+    }
+    for (const owners of actorOwners.values()) {
+      expect(owners.size).toBeLessThanOrEqual(2);
+    }
+    for (const owners of hashOwners.values()) {
+      expect(owners.size).toBeLessThanOrEqual(2);
+    }
+
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      if (scenario.packId !== 'aws-iam') {
+        expect(scenario.historicAnchors).toBeUndefined();
+      }
+    }
+  });
+
+  it('never puts a hash-typed IOC into joinIocs (report-only, not a join contract)', () => {
+    for (const scenario of Object.values(PACK_TI_SCENARIOS).flat()) {
+      expect(scenario.joinIocs.some((ioc) => (ioc.type as string) === 'hash')).toBe(false);
+    }
+  });
+
+  it('names the attributed intrusion set in aws-iam canonical body text for Diamond suitability', () => {
+    // enrich_taxonomy's diamond_suitable gate requires the report itself to name an
+    // attributed actor/campaign, not just carry a threat_actors field on the extracted
+    // doc. historicAnchors.threatActors never reaches content.body_text, so the actor
+    // name must be woven into the prose directly (mirrors the okta scenario's pattern).
+    // Behavior-only has no historicAnchors: it is a Tier 2 execute fixture, not a diamond demo.
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'].filter((s) => s.historicAnchors);
+    expect(awsIamScenarios.length).toBeGreaterThan(0);
+    for (const scenario of awsIamScenarios) {
+      expect(scenario.historicAnchors?.threatActors.length).toBeGreaterThan(0);
+      const namedActor = scenario.historicAnchors!.threatActors[0];
+      expect(scenario.body).toContain(namedActor);
+    }
+  });
+
+  it('names the attributed intrusion set in the anchored historic-article body too', () => {
+    // buildHistoricThreatReportDoc renders content.body_text from historicArticles[itemIndex],
+    // not from scenario.body, whenever historicArticles is non-empty. The seeded
+    // ti-report-*-historic-01 docs (the ones the diamond-extraction demo actually reads) use
+    // historicArticles[0], so the actor name must also be woven into that slot's prose, not
+    // just scenario.body's live/RSS twin.
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'].filter((s) => s.historicAnchors);
+    expect(awsIamScenarios.length).toBeGreaterThan(0);
+    for (const scenario of awsIamScenarios) {
+      const namedActor = scenario.historicAnchors!.threatActors[0];
+      expect(scenario.historicArticles[0]?.body).toContain(namedActor);
+    }
+  });
+
+  it('uses reportIdSlug (not packId) in RSS current guids so aws-iam scenarios do not collide', () => {
+    const endMs = Date.parse('2026-07-21T00:00:00.000Z');
+    const reportItems = buildPackRssCurrentReportItems({ endMs });
+    const guids = PACK_TI_SCENARIOS['aws-iam'].map((scenario) => {
+      const dataUrl = buildPackRssDataUrl({ scenario, reportItems });
+      const encoded = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      const xml = decodeURIComponent(encoded);
+      const match = xml.match(/<guid[^>]*>([^<]+)<\/guid>/);
+      expect(match).not.toBeNull();
+      return match![1];
+    });
+    expect(guids).toEqual([
+      'ti-report-aws-iam-current-01',
+      'ti-report-aws-iam-assume-role-current-01',
+      'ti-report-aws-iam-ioc-only-current-01',
+      'ti-report-aws-iam-behavior-only-current-01',
+      'ti-report-aws-iam-clean-current-01',
+    ]);
+    expect(new Set(guids).size).toBe(guids.length);
+  });
+
+  it('seeds extracted.diamond on the anchored historic-01 doc, and nowhere else', () => {
+    const docs = buildAllHistoricDocsWithIds();
+    const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'].filter((s) => s.historicAnchors);
+    expect(awsIamScenarios.length).toBeGreaterThan(0);
+
+    for (const scenario of awsIamScenarios) {
+      const anchoredDoc = docs.find(
+        (doc) => doc.lineage.source_doc_ref.id === `ti-report-${scenario.reportIdSlug}-historic-01`
+      );
+      const diamond = anchoredDoc?.extracted?.diamond;
+      expect(diamond).toBeDefined();
+      expect(diamond?.suitable).toBe(true);
+      expect(diamond?.model_id).toBe('seeded-fixture');
+      const vertices = [
+        diamond!.adversary,
+        diamond!.capability,
+        diamond!.infrastructure,
+        diamond!.victim,
+      ];
+      expect(diamond?.signal_count).toBe(vertices.filter((v) => v.signal !== 'NONE').length);
+      expect(diamond?.adversary.summary).toContain(scenario.historicAnchors!.threatActors[0]);
+    }
+
+    for (const doc of docs) {
+      const isAnchoredSlot = awsIamScenarios.some(
+        (scenario) =>
+          doc.lineage.source_doc_ref.id === `ti-report-${scenario.reportIdSlug}-historic-01`
+      );
+      if (!isAnchoredSlot) {
+        expect(doc.extracted?.diamond).toBeUndefined();
+      }
+    }
+  });
+});
+
+describe('assertHistoricReportsPerPackInRange', () => {
+  it('returns floored values within 1..99', () => {
+    expect(assertHistoricReportsPerPackInRange(12)).toBe(12);
+    expect(assertHistoricReportsPerPackInRange(99)).toBe(99);
+    expect(assertHistoricReportsPerPackInRange(12.9)).toBe(12);
+  });
+
+  it(`rejects values above ${THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX}`, () => {
+    expect(() => assertHistoricReportsPerPackInRange(100)).toThrow(/max 99/);
+  });
+});
+
+describe('threat intel index preflight (Philippe seeding guard)', () => {
+  const silentLog = { info: () => undefined, warning: () => undefined } as unknown as ToolingLog;
+
+  it('assertThreatIntelIndexExists throws before any write when the index is missing', async () => {
+    const exists = jest.fn().mockResolvedValue(false);
+    const esClient = { indices: { exists } } as unknown as Client;
+    await expect(
+      assertThreatIntelIndexExists({ esClient, index: THREAT_REPORTS_INDEX })
+    ).rejects.toThrow(/does not exist/);
+    expect(exists).toHaveBeenCalledWith({ index: THREAT_REPORTS_INDEX });
+  });
+
+  it('seedThreatIntelForPacks does not call index/bulk when sources index is missing', async () => {
+    const exists = jest.fn().mockResolvedValue(false);
+    const index = jest.fn();
+    const bulk = jest.fn();
+    const esClient = {
+      indices: { exists },
+      index,
+      bulk,
+      deleteByQuery: jest.fn(),
+    } as unknown as Client;
+
+    await expect(
+      seedThreatIntelForPacks({
+        esClient,
+        log: silentLog,
+        packIds: ['aws-iam'],
+        startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+        endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+        spaceId: 'default',
+        historicReportsPerPack: THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
+      })
+    ).rejects.toThrow(new RegExp(THREAT_INTEL_SOURCES_INDEX));
+
+    expect(index).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
   });
 });

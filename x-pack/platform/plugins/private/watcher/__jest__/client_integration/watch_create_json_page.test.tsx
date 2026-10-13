@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { I18nProvider } from '@kbn/i18n-react';
 import '@kbn/code-editor-mock/jest_helper';
 
@@ -50,7 +51,9 @@ describe('<JsonWatchEditPage /> create route', () => {
   });
 
   test('should set the correct page title', () => {
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create advanced watch');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Create advanced watch'
+    );
   });
 
   describe('tabs', () => {

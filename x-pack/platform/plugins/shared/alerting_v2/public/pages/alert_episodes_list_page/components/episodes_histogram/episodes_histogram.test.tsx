@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { EpisodesHistogram, type EpisodesHistogramProps } from './episodes_histogram';
 import { useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
@@ -50,6 +50,7 @@ const mockServices = {
 } as any;
 
 const mockDataView = {
+  id: 'mock-data-view-id',
   fields: [],
 } as any;
 
@@ -69,6 +70,7 @@ mockUseEpisodesHistogramQuery.mockReturnValue({
   error: undefined,
   isCapHit: false,
   refetch: jest.fn(),
+  sourceErrors: [],
 });
 mockUseUnifiedHistogram.mockReturnValue({
   isInitialized: true,
@@ -86,6 +88,7 @@ afterEach(() => {
     error: undefined,
     isCapHit: false,
     refetch: jest.fn(),
+    sourceErrors: [],
   });
   mockUseUnifiedHistogram.mockReturnValue({
     isInitialized: true,
@@ -103,6 +106,7 @@ describe('EpisodesHistogram', () => {
       error: undefined,
       isCapHit: true,
       refetch: jest.fn(),
+      sourceErrors: [],
     });
     render(<EpisodesHistogram {...defaultProps} />);
     expect(screen.getByText(/Results may be incomplete/)).toBeInTheDocument();
@@ -120,8 +124,10 @@ describe('EpisodesHistogram', () => {
       error: new Error('ES|QL failed'),
       isCapHit: false,
       refetch: jest.fn(),
+      sourceErrors: [],
     });
     render(<EpisodesHistogram {...defaultProps} />);
+    expect(screen.getByTestId('episodesHistogramError')).toBeInTheDocument();
     expect(screen.getByText(/Failed to load histogram data/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
   });
@@ -129,6 +135,45 @@ describe('EpisodesHistogram', () => {
   it('renders the histogram chart when initialized', () => {
     render(<EpisodesHistogram {...defaultProps} />);
     expect(screen.getByTestId('unifiedHistogramChart')).toBeInTheDocument();
+  });
+
+  it('hides Lens chart actions', () => {
+    render(<EpisodesHistogram {...defaultProps} />);
+    expect(mockUseUnifiedHistogram).toHaveBeenCalledWith(
+      expect.objectContaining({ withLensActions: false })
+    );
+  });
+
+  it('fetches the chart with an AbortController', async () => {
+    const fetch = jest.fn();
+    mockUseUnifiedHistogram.mockReturnValue({
+      isInitialized: true,
+      api: { fetch } as any,
+      chartProps: {} as any,
+      layoutProps: {} as any,
+    });
+    render(<EpisodesHistogram {...defaultProps} />);
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith(
+        expect.objectContaining({ abortController: expect.any(AbortController) })
+      )
+    );
+  });
+
+  it('fetches the chart with an ES|QL data source matching the ES|QL query', async () => {
+    const fetch = jest.fn();
+    mockUseUnifiedHistogram.mockReturnValue({
+      isInitialized: true,
+      api: { fetch } as any,
+      chartProps: {} as any,
+      layoutProps: {} as any,
+    });
+    render(<EpisodesHistogram {...defaultProps} />);
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    const { dataSource, query } = fetch.mock.calls[0][0];
+    expect(dataSource.kind).toBe('esql');
+    expect(dataSource.query).toBe(query.esql);
+    expect(dataSource.resultColumns).toBe(mockTable.columns);
   });
 
   it('does not render the chart when not yet initialized', () => {
@@ -140,9 +185,9 @@ describe('EpisodesHistogram', () => {
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();
   });
 
-  it('renders the breakdown field selector when the chart is initialized', () => {
+  it('renders the breakdown field selector when the chart is initialized', async () => {
     render(<EpisodesHistogram {...defaultProps} />);
-    expect(screen.getByTestId('unifiedBreakdownFieldSelector')).toBeInTheDocument();
+    expect(await screen.findByTestId('unifiedBreakdownFieldSelector')).toBeInTheDocument();
   });
 
   it('does not render the breakdown field selector when dataView is undefined', () => {

@@ -77,27 +77,14 @@ apiTest.describe(
       }
     );
 
-    apiTest('accepts severity as a single query value', async ({ apiClient }) => {
-      const response = await h.getNotifications(apiClient, {
-        namespace: NAMESPACE,
-        severity: 'warning',
-      });
+    apiTest('returns severity on each item for consumers to facet on', async ({ apiClient }) => {
+      const response = await h.getNotifications(apiClient, { namespace: NAMESPACE });
       expect(response).toHaveStatusCode(200);
-      expect(ids(response.body)).toStrictEqual(['get-warning']);
-    });
 
-    apiTest('accepts severity as repeated query values', async ({ apiClient }) => {
-      const response = await h.getNotifications(apiClient, {
-        namespace: NAMESPACE,
-        severity: ['warning', 'error'],
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(ids(response.body).sort()).toStrictEqual(['get-error', 'get-warning']);
-    });
-
-    apiTest('rejects an unknown severity value', async ({ apiClient }) => {
-      const response = await h.getNotifications(apiClient, { severity: 'bogus' });
-      expect(response).toHaveStatusCode(400);
+      const bySeverity = response.body.items
+        .filter((item: { severity: string }) => item.severity === 'warning')
+        .map((item: { notification_id: string }) => item.notification_id);
+      expect(bySeverity).toStrictEqual(['get-warning']);
     });
 
     apiTest('rejects an unknown query parameter', async ({ apiClient }) => {

@@ -68,6 +68,7 @@ export const createTodoTool = ({
   description: toolDescription,
   schema: todoWriteSchema,
   tags: ['internal'],
+  excludeFromMcp: true,
   handler: async ({ todos }, context) => {
     todoStateManager.set(todos);
     context.events.sendUiEvent(TODOS_UPDATED_UI_EVENT, { todos });

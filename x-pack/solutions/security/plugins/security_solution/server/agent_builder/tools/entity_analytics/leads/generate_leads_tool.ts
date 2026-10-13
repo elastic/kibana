@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
@@ -40,16 +40,18 @@ const RISK_SCORE_CLIENT_KIBANA_VERSION = '';
 
 export const SECURITY_GENERATE_LEADS_TOOL_ID = securityTool('generate_leads');
 
-const schema = z.object({
-  connectorName: z
-    .string()
-    .min(1)
-    .optional()
-    .describe(
-      'Name or partial name of the AI connector to use for lead generation (e.g. "OpenAI", "Claude"). ' +
-        'Case-insensitive. If omitted, the previously configured connector is used.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    connectorName: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+        'Name or partial name of the AI connector to use for lead generation (e.g. "OpenAI", "Claude"). ' +
+          'Case-insensitive. If omitted, the previously configured connector is used.'
+      ),
+  })
+);
 
 interface ConnectorCandidate {
   id: string;
@@ -131,7 +133,7 @@ export const generateLeadsTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.adhoc.has_write_permissions) {
+        if (!privileges.has_write_permissions) {
           const errorMessage = 'You do not have permission to generate leads in this space.';
           telemetryTracker.recordFailure(errorMessage);
           return {
@@ -220,6 +222,10 @@ export const generateLeadsTool = (
 
         const currentEsClient = esClient.asCurrentUser;
         const crudClient = startPlugins.entityStore.createCRUDClient(currentEsClient, spaceId);
+        const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+          currentEsClient,
+          spaceId
+        );
         const riskScoreDataClient = new RiskScoreDataClient({
           logger,
           kibanaVersion: RISK_SCORE_CLIENT_KIBANA_VERSION,
@@ -255,6 +261,7 @@ export const generateLeadsTool = (
             ml,
             request,
             soClient: savedObjectsClient,
+            relationshipsClient,
           },
         });
 

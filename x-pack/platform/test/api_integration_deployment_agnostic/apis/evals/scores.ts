@@ -139,6 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               datasetId,
               datasetName,
               evaluatorName: 'correctness.factuality',
+              evaluatorVersion: '1.2.0',
               evaluatorKind: 'llm',
               evaluatorModel: perScoreModel,
             }),
@@ -180,6 +181,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(evaluators.get('correctness.factuality')?.model?.id).to.eql('judge-a');
         expect(evaluators.get('correctness.factuality')?.kind).to.eql('llm');
+      });
+
+      it('stores and returns the evaluator version', async () => {
+        const evaluators = await getStoredEvaluators();
+
+        expect(evaluators.get('correctness.factuality')?.version).to.eql('1.2.0');
       });
 
       it('leaves code evaluators unattributed instead of applying the request-level model', async () => {

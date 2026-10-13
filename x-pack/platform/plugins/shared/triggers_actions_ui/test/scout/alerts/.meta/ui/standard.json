@@ -1,8 +1,7 @@
 {
-  "sha1": "c6b86759a5674b9ae3f7554eac1c8373046b0a72",
+  "sha1": "5727c1dea6ec05110e3e12d5266061b6d1ea3b8e",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -92,15 +91,15 @@
     {
       "id": "17f0f969aaf8d9b-cf340212ea83da6",
       "title": "Rule details alerts tab filters alerts table with search bar query",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/rule_details_alerts_tab.spec.ts",
-        "line": 74,
-        "column": 15
+        "line": 76,
+        "column": 9
       }
     },
     {
@@ -375,6 +374,22 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/stack_alerts_page_roles.spec.ts",
         "line": 177,
         "column": 5
+      }
+    },
+    {
+      "id": "02b8d345de535de-46ab96f5c2988b7",
+      "title": "Stack Alerts visibility in Search project nav shows Stack Alerts under Alerts and Insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/stack_alerts_search_nav_visibility.spec.ts",
+        "line": 33,
+        "column": 41
       }
     }
   ]

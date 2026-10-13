@@ -10,6 +10,7 @@ import type {
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
 } from '../types';
+import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
 
 interface Params {
   input: AttackDiscoveryAgentBuilderExample['input'];
@@ -27,8 +28,10 @@ const baseOutput = (
   workflow: {
     stages: [],
     retrievedAlertCount: null,
+    retrievedAlertCountSource: 'none',
     passedAlertCount: null,
     validatedDiscoveryCount: null,
+    retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
   },
   ...overrides,
 });

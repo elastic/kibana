@@ -9,7 +9,11 @@ applies_to:
 
 # Databricks connector [databricks-action-type]
 
-The Databricks connector connects to the Databricks managed SQL MCP server at `https://<workspace>/api/2.0/mcp/sql` and the Databricks REST API. Agents and workflows use the connector to execute SQL statements, manage jobs and clusters, control SQL warehouses, and monitor alerts. The connector also supports other Databricks MCP servers such as Genie and AI Search by changing the server URL.
+The Databricks connector connects to the Databricks managed SQL MCP server at `https://<workspace>/api/2.0/mcp/sql` and the Databricks REST API. Agents use the connector to run SQL queries, inspect jobs, clusters, and SQL warehouses, and monitor alerts. The connector also supports other Databricks MCP servers such as Genie and AI Search by changing the server URL.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
 
 ## Create connectors in {{kib}} [define-databricks-ui]
 
@@ -38,8 +42,8 @@ The Databricks connector exposes the following actions:
 :   Execute a read-only SQL query against the Databricks SQL warehouse. Only `SELECT`, `SHOW`, `DESCRIBE`, `DESC`, `EXPLAIN`, and `WITH` statements are permitted — `INSERT`, `UPDATE`, `DELETE`, and DDL are blocked by the server (`execute_sql_read_only`). For long-running queries, returns a `statement_id` — use `pollResponse` to retrieve results.
     - `statement` (required): The read-only SQL query to execute (for example, `SELECT * FROM main.default.customers LIMIT 10` or `SHOW TABLES IN main.default`).
 
-`executeStatement`
-:   Execute a SQL statement on the Databricks SQL warehouse. Supports DML (`INSERT`, `UPDATE`, `DELETE`), DDL (`CREATE`, `ALTER`, `DROP`), `SHOW`, `DESCRIBE`, and other SQL dialects supported by Databricks SQL. Use this action only when write operations are needed — prefer `runQuery` for read-only statements. This action is available to workflows but is not exposed to AI agents. For long-running queries, returns a `statement_id` — use `pollResponse` to retrieve results.
+`executeStatement` _(not yet available)_
+:   Execute a SQL statement on the Databricks SQL warehouse. Supports DML (`INSERT`, `UPDATE`, `DELETE`), DDL (`CREATE`, `ALTER`, `DROP`), `SHOW`, `DESCRIBE`, and other SQL dialects supported by Databricks SQL. Use this action only when write operations are needed — prefer `runQuery` for read-only statements. This action is not exposed to AI agents. For long-running queries, returns a `statement_id` — use `pollResponse` to retrieve results.
     - `statement` (required): The SQL statement to execute (for example, `INSERT INTO main.default.users VALUES (1, 'Alice')`).
 
 `pollResponse`
@@ -63,16 +67,16 @@ The Databricks connector exposes the following actions:
 :   Retrieve the output of a completed task run (notebook output, return values, logs). Requires a task-level run ID from `getRun`'s `tasks[].run_id` — **not** the top-level `run_id` returned by `runJobNow` or `listRuns`. Call `getRun` first to find the task run IDs.
     - `runId` (required): A task-level run ID from `getRun`'s `tasks[].run_id`.
 
-`runJobNow` _(workflow only)_
+`runJobNow` _(not yet available)_
 :   Trigger a Databricks job run immediately. Returns a `run_id` to track progress with `getRun`.
     - `jobId` (required): The job ID to trigger.
     - `jobParameters` (optional): Key-value pairs to override job parameters (for example, `{ "env": "prod" }`).
 
-`cancelRun` _(workflow only)_
+`cancelRun` _(not yet available)_
 :   Cancel an active job run. The run must be in `PENDING` or `RUNNING` state. Cancellation is asynchronous — poll `getRun` until state is `CANCELLED`.
     - `runId` (required): The run ID to cancel.
 
-`repairRun` _(workflow only)_
+`repairRun` _(not yet available)_
 :   Re-run failed tasks in a completed job run without re-running tasks that succeeded. Returns a `repair_id`.
     - `runId` (required): The run ID to repair.
     - `rerunTasks` (optional): One or more task keys to re-run. Mutually exclusive with `rerunAllFailedTasks`.
@@ -84,11 +88,11 @@ The Databricks connector exposes the following actions:
 `listClusters`
 :   List all clusters in the workspace. Returns cluster metadata including `cluster_id`, `cluster_name`, `state` (`RUNNING`, `TERMINATED`, `PENDING`), `spark_version`, and node type.
 
-`startCluster` _(workflow only)_
+`startCluster` _(not yet available)_
 :   Start a terminated cluster. Startup is asynchronous — poll `listClusters` until state is `RUNNING`.
     - `clusterId` (required): The cluster ID (for example, `0923-164208-meows279`).
 
-`restartCluster` _(workflow only)_
+`restartCluster` _(not yet available)_
 :   Restart a running cluster. Restart is asynchronous — poll `listClusters` until state returns to `RUNNING`.
     - `clusterId` (required): The cluster ID.
 
@@ -97,11 +101,11 @@ The Databricks connector exposes the following actions:
 `listWarehouses`
 :   List all SQL warehouses in the workspace. Returns warehouse metadata including `id`, `name`, `state` (`RUNNING`, `STOPPED`, `STARTING`), `cluster_size`, and `auto_stop_mins`.
 
-`startWarehouse` _(workflow only)_
+`startWarehouse` _(not yet available)_
 :   Start a stopped SQL warehouse. Startup is asynchronous — poll `listWarehouses` until state is `RUNNING`.
     - `warehouseId` (required): The SQL warehouse ID.
 
-`stopWarehouse` _(workflow only)_
+`stopWarehouse` _(not yet available)_
 :   Stop a running SQL warehouse to save costs. Stop is asynchronous — poll `listWarehouses` until state is `STOPPED`.
     - `warehouseId` (required): The SQL warehouse ID.
 
@@ -116,10 +120,10 @@ The Databricks connector exposes the following actions:
 
 ### Utilities
 
-`listTools` (workflow-only)
+`listTools` _(not yet available)_
 :   List all tools available on the connected Databricks MCP server. Use this to discover server capabilities and verify exact tool names before using `callTool`. Different Databricks MCP servers expose different tools — the SQL server provides `execute_sql`, `execute_sql_read_only`, and `poll_sql_result`, while the Genie server provides `query_space` and `poll_response`.
 
-`callTool` (workflow-only)
+`callTool` _(not yet available)_
 :   Call any tool on the Databricks MCP server directly by name. Use this as an escape hatch for tools not yet exposed as named actions, or for tools on non-SQL Databricks MCP servers such as Genie (`query_space`) or AI Search. Use `listTools` first to discover available tool names and their arguments.
     - `name` (required): Name of the Databricks MCP tool to call (for example, `execute_sql`).
     - `arguments` (optional): Arguments to pass to the tool as a key-value map.

@@ -287,6 +287,38 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should send dynamic kafka topic verbatim without wrapping on save', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: '%{[data_stream.type]}-%{[data_stream.namespace]}',
+      auth_type: 'none',
+      version: '1.0.0',
+      compression: 'none',
+    });
+
+    mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+
+    fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+      target: { value: 'kafka output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({
+          topic: '%{[data_stream.type]}-%{[data_stream.namespace]}',
+        })
+      );
+    });
+  });
+
   it('should populate secret password input with plain text value when editing kafka output', async () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 

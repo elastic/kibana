@@ -191,7 +191,14 @@ export function createSharedServices(
       ...getAnomalyDetectorsProvider(getGuards),
       ...getModulesProvider(getGuards, getDataViews, compatibleModuleType, serverless),
       ...getResultsServiceProvider(getGuards),
-      ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
+      ...getMlSystemProvider(
+        getGuards,
+        mlLicense,
+        getSpaces,
+        cloud,
+        resolveMlCapabilities,
+        serverless
+      ),
       ...getAlertingServiceProvider(getGuards),
       ...getTrainedModelsProvider(getGuards, cloud, enabledFeatures),
     },

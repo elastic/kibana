@@ -30,14 +30,16 @@ export class WorkflowExecuteAsyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest,
-    parentDepth: number
+    parentDepth: number,
+    inheritParentIdentity: boolean,
+    parentStepName: string
   ): Promise<StrategyResult> {
     try {
       // Execute workflow without waiting
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
       const isTestRun = !!workflowExecution.isTestRun;
       const { workflowExecutionId } = await this.workflowsExecutionEngine.executeWorkflow(
-        toWorkflowExecutionEngineModel(workflow, { isTestRun }),
+        toWorkflowExecutionEngineModel(workflow, { isTestRun, isEphemeral: false }),
         {
           spaceId,
           inputs,
@@ -47,24 +49,28 @@ export class WorkflowExecuteAsyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
+          ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
         },
         request
       );
 
       this.workflowLogger.logInfo(`Started async sub-workflow execution: ${workflowExecutionId}`);
 
-      // Fetch the execution to get startedAt timestamp
+      // Fetch the execution to get its startedAt timestamp and the status it has right now.
       const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionId,
         spaceId
       );
 
-      // Return step output for the impl to persist
+      // `status` is a snapshot taken when the child was started, not a live value. It is already
+      // final when the engine refused to run the child: `skipped` (dropped by its concurrency
+      // policy) or `failed` (rejected inputs). Otherwise it is `pending`, or whatever the child
+      // has reached by now.
       const stepOutput: JsonObject = {
         workflowId: workflow.id,
         executionId: workflowExecutionId,
         awaited: false,
-        status: 'pending',
+        status: execution?.status ?? 'pending',
       };
 
       if (execution?.startedAt) {

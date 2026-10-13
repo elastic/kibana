@@ -39,6 +39,8 @@ import {
   ConfigurationPartialAttributesRt,
   ConfigurationTransformedAttributesRt,
 } from '../../common/types/configure';
+import { OWNER_INFO } from '../../../common/constants/owners';
+import type { Owner } from '../../../common/constants/types';
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
@@ -242,6 +244,14 @@ function transformToExternalModel(
     : (configuration.attributes
         .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
 
+  const ownerAutoExtractDefault =
+    OWNER_INFO[configuration.attributes.owner as Owner]?.features.observables.autoExtractDefault ??
+    false;
+  const extractObservables = configuration.attributes.extractObservables ?? ownerAutoExtractDefault;
+  const workflowTags = !configuration.attributes.workflowTags
+    ? []
+    : (configuration.attributes.workflowTags as ConfigurationTransformedAttributes['workflowTags']);
+
   return {
     ...configuration,
     attributes: {
@@ -250,6 +260,8 @@ function transformToExternalModel(
       customFields,
       templates,
       observableTypes,
+      extractObservables,
+      workflowTags,
     },
   };
 }

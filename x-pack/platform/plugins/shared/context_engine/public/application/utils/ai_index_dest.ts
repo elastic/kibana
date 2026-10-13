@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getAiIndexDest, validateAiIndexId } from '../../../common/ai_index_dest';
+export { getAiIndexDest, isIndexPattern, validateAiIndexId } from '../../../common/ai_index_dest';
 export type { AiIndexIdValidation } from '../../../common/ai_index_dest';

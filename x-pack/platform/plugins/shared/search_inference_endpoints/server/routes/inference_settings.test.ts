@@ -138,7 +138,7 @@ describe('Inference Settings API', () => {
       const error = new Error('Unexpected error');
       mockSOClient.get.mockRejectedValue(error);
 
-      await expect(mockRouter.callRoute({})).rejects.toThrowError(error);
+      await expect(mockRouter.callRoute({})).rejects.toThrow(error);
     });
 
     it('should use hidden types client', async () => {
@@ -408,7 +408,7 @@ describe('Inference Settings API', () => {
             ],
           },
         })
-      ).rejects.toThrowError(error);
+      ).rejects.toThrow(error);
     });
   });
 });

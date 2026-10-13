@@ -20,6 +20,12 @@ import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import { getResponseActionStatusTool } from '.';
+import {
+  GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
+  MAX_ACTION_ERRORS,
+  MAX_ACTION_HOSTS,
+  MAX_AGENT_STATE_ENTRIES,
+} from '../types';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -55,6 +61,11 @@ describe('getResponseActionStatusTool', () => {
     service = createMockEndpointAppContext().service;
   });
 
+  it('accepts a non-UUID caller-supplied action ID (HTTP details route allows any nonempty ID up to 256 chars)', () => {
+    const tool = getResponseActionStatusTool(service);
+    expect(() => tool.schema.parse({ actionId: 'my-custom-action-id-001' })).not.toThrow();
+  });
+
   it('returns a valid read-only builtin tool definition', () => {
     const tool = getResponseActionStatusTool(service);
     expect(tool.type).toBe(ToolType.builtin);
@@ -80,6 +91,27 @@ describe('getResponseActionStatusTool', () => {
     const denialData = results[0].data as Record<string, unknown>;
     expect(denialData.error).toBe('insufficient_privileges');
     expect(denialData.privilege).toBe('canAccessEndpointActionsLogManagement');
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
+  it('returns insufficient_privileges for an actions-log-only caller without canReadSecuritySolution', async () => {
+    // The details route requires the `securitySolution` feature privilege on
+    // top of the actions-log check; the actions-log sub-feature does not grant it.
+    service.getEndpointAuthz = jest.fn().mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canReadSecuritySolution: false,
+        canAccessEndpointActionsLogManagement: true,
+      })
+    );
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('insufficient_privileges');
+    expect(denialData.privilege).toBe('canReadSecuritySolution');
     expect(mockGetActionDetailsById).not.toHaveBeenCalled();
   });
 
@@ -130,7 +162,159 @@ describe('getResponseActionStatusTool', () => {
     expect(data.status).toBe('successful');
     expect(data.wasSuccessful).toBe(true);
     expect(data.isCompleted).toBe(true);
-    expect(mockGetActionDetailsById).toHaveBeenCalledWith(service, 'default', ACTION_ID);
+    expect(mockGetActionDetailsById).toHaveBeenCalledWith(service, 'default', ACTION_ID, {
+      // Scoped services are required for this read to fan out under CPS.
+      scoped: expect.objectContaining({ isCpsRead: expect.any(Function) }),
+    });
+  });
+
+  it('distinguishes an expired action from a failed one', async () => {
+    // `getActionStatus` (endpoint/services/actions/utils/utils.ts) reports an
+    // action that never completed and passed its expiration as
+    // `status: 'failed'` — identical to a real command failure. An expired
+    // action usually carries no `errors`, so without `isExpired` the agent
+    // reports a bare "failed" with no reason and the analyst investigates a
+    // failure that never happened instead of re-issuing the action.
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'scan',
+      status: 'failed',
+      wasSuccessful: false,
+      isCompleted: false,
+      wasCanceled: false,
+      isExpired: true,
+      hosts: { 'agent-123': { name: 'pr-272111-defend-demo' } },
+      parameters: {},
+      outputs: {},
+      errors: [],
+      startedAt: '2026-07-13T14:10:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+    expect(data.status).toBe('failed');
+    // The discriminator the model needs to say "it expired, re-run it"
+    // instead of "it failed".
+    expect(data.isExpired).toBe(true);
+    expect(data.isCompleted).toBe(false);
+  });
+
+  it('surfaces actionDetails.errors when the action failed', async () => {
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'scan',
+      status: 'failed',
+      wasSuccessful: false,
+      isCompleted: true,
+      wasCanceled: false,
+      hosts: { 'agent-123': { name: 'pr-272111-defend-demo' } },
+      parameters: {},
+      outputs: {},
+      errors: ['Endpoint command failed: scan target not found'],
+      startedAt: '2026-07-13T14:10:00.000Z',
+      completedAt: '2026-07-13T14:12:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+    expect(data.wasSuccessful).toBe(false);
+    // Without the error reason the agent can report the failure but not why
+    // it happened.
+    expect(data.errors).toEqual(['Endpoint command failed: scan target not found']);
+  });
+
+  it('bounds actionDetails.errors for a large failed fan-out', async () => {
+    // getActionCompletionInfo appends every unsuccessful agent's errors into
+    // this one array, so a failed batch can carry thousands of entries even
+    // after hosts/outputs/agentState are capped.
+    const errors = Array.from({ length: 500 }, (_, i) => `agent-${i}: command failed`);
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'scan',
+      status: 'failed',
+      wasSuccessful: false,
+      isCompleted: true,
+      wasCanceled: false,
+      hosts: { 'agent-123': { name: 'pr-272111-defend-demo' } },
+      parameters: {},
+      outputs: {},
+      errors,
+      startedAt: '2026-07-13T14:10:00.000Z',
+      completedAt: '2026-07-13T14:12:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+    expect((data.errors as unknown[]).length).toBe(MAX_ACTION_ERRORS);
+    expect(data.totalErrors).toBe(500);
+    expect(data.errorsTruncated).toBe(500 - MAX_ACTION_ERRORS);
+  });
+
+  it('bounds the hosts and per-agent state of a fan-out action', async () => {
+    // A batch action carries one entry per targeted host; forwarding them raw
+    // injects thousands of records into the model context.
+    const hosts: Record<string, unknown> = {};
+    const agentState: Record<string, unknown> = {};
+    for (let i = 0; i < 120; i++) {
+      hosts[`agent-${i}`] = { name: `host-${i}` };
+      agentState[`agent-${i}`] = { isCompleted: true, wasSuccessful: true, wasCanceled: false };
+    }
+
+    mockGetActionDetailsById.mockResolvedValue({
+      id: ACTION_ID,
+      command: 'isolate',
+      status: 'successful',
+      wasSuccessful: true,
+      isCompleted: true,
+      wasCanceled: false,
+      hosts,
+      agentState,
+      parameters: {},
+      outputs: {},
+      startedAt: '2026-07-13T14:10:00.000Z',
+      completedAt: '2026-07-13T14:12:00.000Z',
+      createdBy: 'admin',
+      agentType: 'endpoint',
+    });
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    const data = results[0].data as Record<string, unknown>;
+
+    expect(Object.keys(data.hosts as object)).toHaveLength(MAX_ACTION_HOSTS);
+    expect(data.totalHosts).toBe(120);
+    expect(data.hostsTruncated).toBe(120 - MAX_ACTION_HOSTS);
+    expect(Object.keys(data.agentState as object)).toHaveLength(MAX_AGENT_STATE_ENTRIES);
+    // Counters are scoped to the field they describe: `agentState*` for
+    // agentState, never a bare `totalAgents`/`agentsTruncated` next to `hosts`.
+    expect(data.agentStateTotal).toBe(120);
+    expect(data.agentStateTruncated).toBe(120 - MAX_AGENT_STATE_ENTRIES);
+    expect(data).not.toHaveProperty('totalAgents');
+    expect(data).not.toHaveProperty('agentsTruncated');
+  });
+
+  it('raises the tool result token budget above the default guardrail', () => {
+    const tool = getResponseActionStatusTool(service);
+
+    expect(tool.maxResultTokens).toBe(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS);
+    expect(GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS).toBeGreaterThan(20_000);
   });
 
   it('returns ToolResultType.error for unexpected lookup failures', async () => {

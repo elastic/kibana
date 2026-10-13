@@ -24,7 +24,14 @@ import {
   DISCOVER_QUERY_MODE_KEY,
 } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { EsqlSource } from '@kbn/data-source';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
+import * as resolveDataViewModule from '../../utils/resolve_data_view';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
@@ -107,6 +114,154 @@ const clearActiveDataSourceProfileState = ({
 };
 
 describe('tab_state actions', () => {
+  describe('setExpandedDoc', () => {
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+
+    // Shared setup is ES|QL, so each test declares the query mode it needs.
+    const setQuery = (
+      internalState: Awaited<ReturnType<typeof setup>>['internalState'],
+      tabId: string,
+      query: DiscoverAppState['query']
+    ) => {
+      internalState.dispatch(internalStateActions.updateAppState({ tabId, appState: { query } }));
+    };
+
+    it('should write the expanded doc reference to app state', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(expandedDoc);
+      expect(tab.appState.expandedDoc).toEqual({ id: '1', index: 'i' });
+    });
+
+    it('should clear the expanded doc reference when the flyout is closed', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBeUndefined();
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not write a reference for cascade owned flyouts', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId,
+          expandedDoc,
+          expandedDocOwner: 'cascade_node_1',
+        })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(expandedDoc);
+      expect(tab.expandedDocOwner).toBe('cascade_node_1');
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should clear the previous reference for cascade owned flyouts', async () => {
+      const { internalState, tabId } = await setup();
+      const cascadeExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMockWithTimeField);
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId,
+          expandedDoc: cascadeExpandedDoc,
+          expandedDocOwner: 'cascade_node_1',
+        })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(cascadeExpandedDoc);
+      expect(tab.expandedDocOwner).toBe('cascade_node_1');
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not write a reference for records without a stable identity', async () => {
+      const { internalState, tabId } = await setup();
+      const esqlRecord = buildDataTableRecord(
+        { _source: { message: 'no metadata' } },
+        dataViewMockWithTimeField
+      );
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: esqlRecord })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(esqlRecord);
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should write a reference for an ES|QL document carrying _id/_index', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { esql: 'FROM logs METADATA _id, _index' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+
+      expect(selectTab(internalState.getState(), tabId).appState.expandedDoc).toEqual({
+        id: '1',
+        index: 'i',
+      });
+    });
+
+    it('should not write a reference for an ES|QL document without _id/_index', async () => {
+      const { internalState, tabId } = await setup();
+      const esqlRecordWithoutMetadata = buildDataTableRecord(
+        { _source: { message: 'no metadata' } },
+        dataViewMockWithTimeField
+      );
+
+      setQuery(internalState, tabId, { esql: 'FROM logs' });
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: esqlRecordWithoutMetadata })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not write a reference for transformational ES|QL queries', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, {
+        esql: 'FROM logs METADATA _id, _index | KEEP _id, _index, host',
+      });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+
+      expect(selectTab(internalState.getState(), tabId).appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should not update app state when the reference is unchanged', async () => {
+      const { internalState, tabId } = await setup();
+      const initialAppState = selectTab(internalState.getState(), tabId).appState;
+
+      // Closing a locally owned flyout must not add URL history.
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState).toBe(initialAppState);
+    });
+  });
+
   describe('setAppState', () => {
     it('should sync snapshotsByProfileId for the current profile', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
@@ -632,12 +787,11 @@ describe('tab_state actions', () => {
 
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
-      const { internalState, runtimeStateManager, tabId, services } = await setup();
+      const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
       const storageSetSpy = jest.spyOn(services.storage, 'set');
-      let state = internalState.getState();
-      let tab = selectTab(state, tabId);
+      let tab = getCurrentTab();
       const prevProfileAppStateDefaults = tab.profileAppStateDefaults;
 
       expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
@@ -659,8 +813,15 @@ describe('tab_state actions', () => {
         rowHeight: undefined,
       });
 
+      const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      expect(getCurrentTab().appState.expandedDoc).toEqual({
+        id: '1',
+        index: 'i',
+      });
+
       // Transition to data view mode
-      internalState.dispatch(
+      await internalState.dispatch(
         internalStateActions.transitionFromESQLToDataView({
           tabId,
           dataView,
@@ -668,8 +829,7 @@ describe('tab_state actions', () => {
       );
 
       // Get the updated tab state
-      state = internalState.getState();
-      tab = selectTab(state, tabId);
+      tab = getCurrentTab();
 
       // Verify the state was updated correctly
       expect(tab.appState.query).toStrictEqual({
@@ -677,11 +837,14 @@ describe('tab_state actions', () => {
         query: '',
       });
       expect(tab.appState.columns).toEqual([]);
-      expect(tab.appState.sort).toEqual([[dataView.timeFieldName, 'desc']]);
+      // Ad-hoc DataView for FROM test-index: no persisted match. Time field comes from EsqlSource
+      // when present; this setup's source has none, so sort is empty.
+      expect(tab.appState.sort).toEqual([]);
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
-        dataViewId: dataView.id,
+        dataViewId: 'test-index-id',
       });
+      expect(getCurrentTab().appState.expandedDoc).toBeUndefined();
 
       expect(tab.profileAppStateDefaults.fieldsToReset).toBe('all');
       expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');
@@ -701,11 +864,36 @@ describe('tab_state actions', () => {
         defaultMode: 'classic',
       });
     });
+
+    it('creates an ad-hoc DataView with the ES|QL time field so Classic histogram is time-based', async () => {
+      const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
+      const esqlSource = await EsqlSource.create({
+        query: 'FROM logs-*',
+        timeFieldName: '@timestamp',
+      });
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
+
+      await internalState.dispatch(
+        internalStateActions.transitionFromESQLToDataView({
+          tabId,
+          dataView: dataViewMockWithTimeField,
+        })
+      );
+
+      expect(services.dataViews.create).toHaveBeenCalledWith({
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+      });
+      expect(getCurrentTab().appState.dataSource).toStrictEqual({
+        type: DataSourceType.DataView,
+        dataViewId: 'logs-*-id',
+      });
+    });
   });
 
   describe('transitionFromDataViewToESQL', () => {
     it('should transition from Data View mode to ES|QL mode', async () => {
-      const { internalState, runtimeStateManager, tabId, services } = await setup();
+      const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
       const storageSetSpy = jest.spyOn(services.storage, 'set');
@@ -735,8 +923,7 @@ describe('tab_state actions', () => {
         })
       );
 
-      let state = internalState.getState();
-      let tab = selectTab(state, tabId);
+      let tab = getCurrentTab();
       const prevProfileAppStateDefaults = tab.profileAppStateDefaults;
 
       expect(tab.appState.query).toStrictEqual(query);
@@ -762,6 +949,13 @@ describe('tab_state actions', () => {
         rowHeight: undefined,
       });
 
+      const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      expect(getCurrentTab().appState.expandedDoc).toEqual({
+        id: '1',
+        index: 'i',
+      });
+
       // Transition to ES|QL mode
       internalState.dispatch(
         internalStateActions.transitionFromDataViewToESQL({
@@ -771,8 +965,7 @@ describe('tab_state actions', () => {
       );
 
       // Get the updated tab state
-      state = internalState.getState();
-      tab = selectTab(state, tabId);
+      tab = getCurrentTab();
 
       // Verify the state was updated correctly
       expect(tab.appState.query).toStrictEqual({
@@ -784,6 +977,7 @@ describe('tab_state actions', () => {
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.Esql,
       });
+      expect(getCurrentTab().appState.expandedDoc).toBeUndefined();
 
       expect(tab.profileAppStateDefaults.fieldsToReset).toBe('all');
       expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');
@@ -968,5 +1162,144 @@ describe('tab_state actions', () => {
       // Verify the visContext attribute remains the same
       expect(tab.attributes.visContext).toBe(visContext);
     });
+  });
+
+  it('resolves a saved session with its control variables', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewMockWithTimeField,
+      services,
+      appStateOverrides: {
+        query: { esql: 'FROM logs-* | WHERE host == ?foo' },
+        dataSource: { type: DataSourceType.Esql },
+      },
+      attributesOverrides: { controlGroupState: mockControlState },
+    });
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(await createResolvedMockEsqlSource());
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-session',
+        tabs: [persistedTab],
+      }),
+    });
+    await toolkit.initializeSingleTab({
+      tabId: persistedTab.id,
+      skipWaitForDataFetching: true,
+    });
+
+    expect(resolveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esql: 'FROM logs-* | WHERE host == ?foo',
+        esqlVariables: [{ key: 'foo', type: 'values', value: 'bar' }],
+      })
+    );
+    expect(selectTab(toolkit.internalState.getState(), persistedTab.id).esqlVariables).toEqual([
+      { key: 'foo', type: 'values', value: 'bar' },
+    ]);
+    resolveSpy.mockRestore();
+  });
+
+  it('resolves the opening ES|QL query before the first fetch', async () => {
+    const services = createDiscoverServicesMock();
+    const uiSettingsGet = services.uiSettings.get as jest.Mock;
+    const originalGet = uiSettingsGet.getMockImplementation();
+    uiSettingsGet.mockImplementation((key: string) => {
+      if (key === ENABLE_ESQL) {
+        return true;
+      }
+      return originalGet?.(key);
+    });
+    services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+    const logsDataView = new DataView({
+      spec: {
+        id: 'logs-data-view',
+        title: 'logs*,-logstash*,filebeat-*',
+        timeFieldName: '@timestamp',
+      },
+      fieldFormats: {} as DataView['fieldFormats'],
+    });
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [logsDataView],
+    });
+    jest.spyOn(toolkit.services.dataViews, 'getDefaultDataView').mockResolvedValue(logsDataView);
+
+    const openingQuery = 'FROM logs*,-logstash*,filebeat-*';
+    const resolved = await createResolvedMockEsqlSource();
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(resolved);
+    const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
+
+    await toolkit.initializeTabs();
+    toolkit.internalState.dispatch(
+      internalStateActions.setDefaultProfileEsqlQuery({ query: openingQuery })
+    );
+    const tabId = toolkit.getCurrentTab().id;
+    await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+
+    expect(selectTab(toolkit.internalState.getState(), tabId).appState.query).toEqual({
+      esql: openingQuery,
+    });
+    expect(resolveSpy).toHaveBeenCalledTimes(1);
+    expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
+    // The profile provides the query, so no data view is loaded to derive it.
+    expect(loadDataViewSpy).not.toHaveBeenCalled();
+    expect(
+      selectTabRuntimeState(toolkit.runtimeStateManager, tabId).currentDataView$.getValue()
+    ).toBe(resolved.dataView);
+    resolveSpy.mockRestore();
+    loadDataViewSpy.mockRestore();
+  });
+
+  it('opens a saved ES|QL tab without loading a data view', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewMockWithTimeField,
+      services,
+      appStateOverrides: {
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        dataSource: { type: DataSourceType.Esql },
+      },
+    });
+    const resolved = await createResolvedMockEsqlSource();
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(resolved);
+    const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-session',
+        tabs: [persistedTab],
+      }),
+    });
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+
+    expect(loadDataViewSpy).not.toHaveBeenCalled();
+    expect(resolveSpy).toHaveBeenCalledTimes(1);
+    expect(
+      selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        persistedTab.id
+      ).currentDataSource$.getValue()
+    ).toBe(resolved.esqlSource);
+    resolveSpy.mockRestore();
+    loadDataViewSpy.mockRestore();
   });
 });

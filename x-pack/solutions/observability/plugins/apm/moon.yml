@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/i18n'
   - '@kbn/es-query'
+  - '@kbn/flyout-template'
   - '@kbn/ui-callout'
   - '@kbn/ui-theme'
   - '@kbn/synthtrace-client'
@@ -88,6 +89,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/observability-alert-details'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-plugin'
   - '@kbn/core-http-server'
   - '@kbn/profiling-plugin'
@@ -107,7 +109,6 @@ dependsOn:
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/code-editor'
-  - '@kbn/shared-svg'
   - '@kbn/shared-ux-utility'
   - '@kbn/management-settings-components-field-row'
   - '@kbn/shared-ux-markdown'
@@ -179,6 +180,9 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/lens-common'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/genai-common'
 tags:
   - plugin
   - prod

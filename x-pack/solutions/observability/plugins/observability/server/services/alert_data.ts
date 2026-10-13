@@ -53,6 +53,10 @@ const getRuleQueryIndexMap: Record<
 export class AlertData {
   constructor(private alert: Awaited<ReturnType<AlertsClient['get']>>) {}
 
+  getRawAlert() {
+    return this.alert;
+  }
+
   getRuleParameters() {
     return this.alert[ALERT_RULE_PARAMETERS];
   }

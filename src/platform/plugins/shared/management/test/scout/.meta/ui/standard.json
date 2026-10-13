@@ -1,8 +1,36 @@
 {
-  "sha1": "e301847e3f3650433848f6e4d0147497e0cb2186",
+  "sha1": "0ef784bd779f5f502987e88b9f7b6627d74415f2",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
-  "tests": []
+  "tests": [
+    {
+      "id": "ab5e730aba1cc4c-68f1e2c9c26ae48",
+      "title": "Management plugin routing opens a registered section from the sidebar and returns home",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
+        "line": 47,
+        "column": 46
+      }
+    },
+    {
+      "id": "ab5e730aba1cc4c-f74dc99860317f8",
+      "title": "Management plugin routing redirects to management home when navigating to a disabled management section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
+        "line": 70,
+        "column": 11
+      }
+    }
+  ]
 }

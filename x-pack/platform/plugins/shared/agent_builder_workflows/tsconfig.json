@@ -6,6 +6,7 @@
   "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
@@ -30,6 +31,8 @@
     "@kbn/workflows-yaml",
     "@kbn/react-query",
     "@kbn/agent-builder-workflow-gen",
-    "@kbn/security-plugin-types-server"
+    "@kbn/security-plugin-types-server",
+    "@kbn/workflows-extensions",
+    "@kbn/triggers-actions-ui-plugin"
   ]
 }

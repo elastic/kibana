@@ -14,48 +14,74 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
-import { insufficientPrivilegesResult, responseActionErrorResult } from '../types';
+import {
+  insufficientPrivilegesResult,
+  responseActionErrorResult,
+  GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
+  summarizeActionErrors,
+  summarizeActionHosts,
+  summarizeActionOutputs,
+  summarizeActionParameters,
+  summarizeAgentState,
+} from '../types';
 
 const getResponseActionStatusSchema = z.object({
   actionId: z
     .string()
-    .uuid()
+    .min(1)
+    .max(256)
     .describe(
-      'The response action ID to look up. Use the action ID returned by a prior isolate, release, scan, or running-processes action in this conversation.'
+      'Any known response-action ID — from a prior action mentioned in this conversation or from Response Actions history in the UI.'
     ),
 });
 
 /**
- * Read-only lookup for a previously dispatched response action by its action ID.
- * Mirrors `GET /api/endpoint/action/{action_id}` and is the follow-up path when
- * a write action returned `pending` because the host had not finished yet.
+ * Read-only lookup of a previously dispatched response action by its action ID.
+ * Mirrors `GET /api/endpoint/action/{action_id}`. Inspects any action from
+ * Response Actions history; it cannot dispatch or modify actions.
  */
 export const getResponseActionStatusTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinSkillBoundedTool<typeof getResponseActionStatusSchema> => {
   return {
     id: GET_RESPONSE_ACTION_STATUS_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Retrieves the current status and outputs of a previously dispatched endpoint response action by its action ID. Use this read-only lookup when the analyst asks about a prior isolate, release, scan, or running-processes action — especially when the original dispatch returned pending.',
     schema: getResponseActionStatusSchema,
+    maxResultTokens: GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
     handler: async (params, { logger, request, spaceId }) => {
       try {
-        const actionId = params.actionId as string;
+        const actionId = params.actionId;
 
-        // The HTTP details route gates this behind
+        // The HTTP details route requires the `securitySolution` feature
+        // privilege (`requiredPrivileges: ['securitySolution']`) AND
         // `withEndpointAuthz({ all: ['canAccessEndpointActionsLogManagement'] })`.
-        // The internal lookup skips that check, so assert the caller's privilege
-        // here to keep chat access from bypassing endpoint RBAC.
+        // The actions-log sub-feature alone does not grant `securitySolution`,
+        // and Agent Builder chat only requires `readAgentBuilder`, so both
+        // layers are asserted here — otherwise a role with Response Actions
+        // History: Read gets a 403 from the route but full action details
+        // (outputs, runscript params) from chat.
         const authz = await endpointAppContextService.getEndpointAuthz(request);
+        if (!authz.canReadSecuritySolution) {
+          return insufficientPrivilegesResult('canReadSecuritySolution');
+        }
         if (!authz.canAccessEndpointActionsLogManagement) {
           return insufficientPrivilegesResult('canAccessEndpointActionsLogManagement');
         }
 
+        // Build request-scoped services so these reads fan out across linked
+        // projects under CPS. `getActionDetailsById` documents `scoped` as
+        // required for that: without it the read is origin-only and an action
+        // from a linked project is reported as `action_not_found` even though
+        // Response Actions history shows it.
+        const scoped = await endpointAppContextService.asScoped(request);
+
         const actionDetails = await getActionDetailsById(
           endpointAppContextService,
           spaceId,
-          actionId
+          actionId,
+          { scoped }
         );
 
         return {
@@ -72,9 +98,40 @@ export const getResponseActionStatusTool = (
                 wasSuccessful: actionDetails.wasSuccessful,
                 isCompleted: actionDetails.isCompleted,
                 wasCanceled: actionDetails.wasCanceled,
-                hosts: actionDetails.hosts,
-                parameters: actionDetails.parameters,
-                outputs: actionDetails.outputs,
+                // `getActionStatus` maps an action that never completed and
+                // passed its expiration to `status: 'failed'` — the same status
+                // as a genuine command failure. `isExpired` is the only field
+                // that tells them apart, and an expired action usually has no
+                // `errors` either, so without it the agent reports "failed" and
+                // then has no reason to give. The analyst's next step differs
+                // completely: a failure is investigated, an expired action is
+                // simply re-issued.
+                isExpired: actionDetails.isExpired,
+                // Bounded: a fan-out action carries one entry per targeted
+                // host, so a batch isolate would otherwise inject thousands of
+                // host records into the model context. The total is reported
+                // alongside the bounded sample.
+                ...(summarizeActionHosts(actionDetails.hosts) ?? {}),
+                // Bounded: `parameters` is a flat bag but its VALUES are not
+                // small — a CrowdStrike `runscript` permits a 65,536-character
+                // `raw` script plus an 8,192-character `commandLine`, so
+                // forwarding it verbatim injects tens of thousands of
+                // characters into the conversation on every status poll.
+                // Bounded like `hosts`; the paths shortened are reported.
+                ...(summarizeActionParameters(actionDetails.parameters) ?? {}),
+                // Bounded: raw `outputs` can carry multi-MB command output and
+                // one entry per process. Summarized so a single lookup cannot
+                // exhaust the conversation context.
+                outputs: summarizeActionOutputs(actionDetails.outputs),
+                // Per-agent completion. The aggregate `status`/`wasSuccessful`
+                // fields cannot say WHICH host of a fan-out finished, which is
+                // exactly what `agentState` carries. Bounded like `hosts`.
+                ...(summarizeAgentState(actionDetails.agentState) ?? {}),
+                // Documented on ActionDetails: the error reason(s) when
+                // `wasSuccessful` is false. Bounded like `hosts`/`agentState`:
+                // a failed fan-out aggregates one error list per agent, so the
+                // raw array is unbounded even though the other fields are not.
+                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
                 startedAt: actionDetails.startedAt,
                 completedAt: actionDetails.completedAt,
                 createdBy: actionDetails.createdBy,
@@ -86,7 +143,7 @@ export const getResponseActionStatusTool = (
         };
       } catch (error) {
         if (error instanceof NotFoundError) {
-          const actionId = params.actionId as string;
+          const actionId = params.actionId;
           return {
             results: [
               {

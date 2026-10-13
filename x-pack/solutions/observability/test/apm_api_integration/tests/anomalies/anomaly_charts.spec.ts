@@ -201,6 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let latencySeries: ServiceAnomalyTimeseries | undefined;
           let throughputSeries: ServiceAnomalyTimeseries | undefined;
           let failureRateSeries: ServiceAnomalyTimeseries | undefined;
+          let lowCountSeries: ServiceAnomalyTimeseries | undefined;
           const endTimeMs = end.valueOf();
 
           beforeEach(async () => {
@@ -221,10 +222,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             failureRateSeries = allAnomalyTimeseries.find(
               (spec) => spec.type === AnomalyDetectorType.txFailureRate
             );
+            lowCountSeries = allAnomalyTimeseries.find(
+              (spec) => spec.type === AnomalyDetectorType.txLowCount
+            );
           });
 
           it('returns model plots for all detectors and job ids for the given transaction type', () => {
-            expect(allAnomalyTimeseries.length).to.eql(3);
+            expect(allAnomalyTimeseries.length).to.eql(4);
 
             expect(
               allAnomalyTimeseries.every((spec) => spec.bounds.some((bound) => bound.y0 ?? 0 > 0))
@@ -232,7 +236,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns model plots with bounds for x range within start and end', () => {
-            expect(allAnomalyTimeseries.length).to.eql(3);
+            expect(allAnomalyTimeseries.length).to.eql(4);
 
             expect(
               allAnomalyTimeseries.every((spec) =>
@@ -270,6 +274,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(failureRateSeries)).to.eql({
               type: AnomalyDetectorType.txFailureRate,
+              jobId: 'apm-tx-metrics-production',
+              serviceName: 'a',
+              environment: 'production',
+              transactionType: 'request',
+              version: 3,
+            });
+
+            expect(omitTimeseriesData(lowCountSeries)).to.eql({
+              type: AnomalyDetectorType.txLowCount,
               jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',

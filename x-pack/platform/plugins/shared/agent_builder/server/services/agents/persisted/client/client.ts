@@ -19,9 +19,16 @@ import {
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
+  getAccessControlEntryKey,
+  isAgentAccessControlRole,
+  isEntryCoveredByOwner,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   type AgentAccessControl,
+  type AgentAccessControlEntry,
   type CurrentUser,
   type ToolSelection,
+  type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { getUserFromRequest } from '../../../utils';
@@ -65,7 +72,7 @@ import {
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
   buildReadAccessFilter,
-  validateAccessControlUpdate,
+  sourceToOwner,
 } from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 
@@ -81,22 +88,24 @@ const workflowIdsEqual = (a: string[], b: string[]): boolean =>
   a.length === b.length && a.every((id, index) => id === b[index]);
 
 /**
- * Guards changes to an agent's pre-execution workflow IDs.
+ * Guards changes to an agent's workflow IDs (pre-execution or post-execution).
  */
 const assertCanConfigureWorkflows = ({
   nextWorkflowIds,
   currentWorkflowIds,
   isAdmin,
+  errorMessage,
 }: {
   nextWorkflowIds: string[] | undefined;
   currentWorkflowIds: string[] | undefined;
   isAdmin: boolean;
+  errorMessage: string;
 }): void => {
   if (isAdmin || nextWorkflowIds === undefined) {
     return;
   }
   if (!workflowIdsEqual(nextWorkflowIds, currentWorkflowIds ?? [])) {
-    throw createBadRequestError('Only administrators can configure pre-execution workflows.');
+    throw createBadRequestError(errorMessage);
   }
 };
 
@@ -453,6 +462,13 @@ class AgentClientImpl implements AgentClient {
       nextWorkflowIds: profile.configuration.workflow_ids,
       currentWorkflowIds: [],
       isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure pre-execution workflows.',
+    });
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profile.configuration.post_execution_workflow_ids,
+      currentWorkflowIds: [],
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure post-execution workflows.',
     });
 
     await this.validateAgentToolSelection(profile.configuration.tools);
@@ -512,12 +528,19 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId });
     }
 
-    // Only admins may change pre-execution workflows
+    // Only admins may change workflow configurations
     const currentConfig = source.config ?? source.configuration;
     assertCanConfigureWorkflows({
       nextWorkflowIds: profileUpdate.configuration?.workflow_ids,
       currentWorkflowIds: currentConfig?.workflow_ids,
       isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure pre-execution workflows.',
+    });
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profileUpdate.configuration?.post_execution_workflow_ids,
+      currentWorkflowIds: currentConfig?.post_execution_workflow_ids,
+      isAdmin: this.user.isAdmin,
+      errorMessage: 'Only administrators can configure post-execution workflows.',
     });
 
     if (profileUpdate.configuration?.tools) {
@@ -583,14 +606,15 @@ class AgentClientImpl implements AgentClient {
     const document = await this.getDocumentWithAccess({ agentId, access: 'manageAccessControl' });
     const source = document._source;
 
-    const validationError = validateAccessControlUpdate(update.entries);
-    if (validationError) {
-      throw createBadRequestError(validationError);
-    }
+    const currentAccessControl = normalizeAccessControl(source);
 
     const nextAccessControl: AgentAccessControl = {
-      ...normalizeAccessControl(source),
-      entries: update.entries,
+      ...currentAccessControl,
+      entries: validateAccessControlEntries({
+        entries: update.entries,
+        currentEntries: currentAccessControl.entries,
+        owner: sourceToOwner(source),
+      }),
     };
 
     const next = accessControlUpdateToEs({
@@ -672,3 +696,82 @@ class AgentClientImpl implements AgentClient {
     return getAgentDocument({ storage: this.storage, space: this.space, agentId });
   }
 }
+
+const validatePrincipal = (entry: AgentAccessControlEntry): string | undefined => {
+  const hasId = entry.id !== undefined;
+  const hasName = entry.name !== undefined;
+  if (!hasId && !hasName) {
+    return 'Each ACL entry requires a non-empty id or name';
+  }
+
+  const field = hasId ? 'id' : 'name';
+  const value = hasId ? entry.id : entry.name;
+  if (typeof value !== 'string' || value.length === 0) {
+    return `Each ACL entry requires a non-empty ${field}`;
+  }
+  if (value.length > AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
+    return `ACL principal ${field} exceeds maximum length of ${AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`;
+  }
+
+  return undefined;
+};
+
+export const validateAccessControlEntries = ({
+  entries,
+  currentEntries,
+  owner,
+}: {
+  entries: AgentAccessControlEntry[];
+  currentEntries: AgentAccessControlEntry[];
+  owner: UserIdAndName | undefined;
+}): AgentAccessControlEntry[] => {
+  if (entries.length > AGENT_ACCESS_CONTROL_MAX_ENTRIES) {
+    throw createBadRequestError(
+      `ACL entries exceed maximum of ${AGENT_ACCESS_CONTROL_MAX_ENTRIES}`
+    );
+  }
+
+  const currentByKey = new Map(
+    currentEntries.map((entry) => [getAccessControlEntryKey(entry), entry])
+  );
+
+  const now = new Date().toISOString();
+  const seen = new Set<string>();
+  const normalizedEntries: AgentAccessControlEntry[] = [];
+
+  for (const entry of entries) {
+    if (!entry || entry.type !== 'user') {
+      throw createBadRequestError('Each ACL entry requires a type of "user"');
+    }
+
+    const principalError = validatePrincipal(entry);
+    if (principalError) {
+      throw createBadRequestError(principalError);
+    }
+
+    if (!isAgentAccessControlRole(entry.role)) {
+      throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
+    }
+
+    if (isEntryCoveredByOwner(entry, owner)) {
+      continue;
+    }
+
+    const key = getAccessControlEntryKey(entry);
+
+    const current = currentByKey.get(key);
+    if (seen.has(key)) {
+      throw createBadRequestError(
+        `Duplicate ACL entry for ${entry.type} "${entry.id ?? entry.name}"`
+      );
+    }
+    seen.add(key);
+
+    normalizedEntries.push({
+      ...entry,
+      added_at: current?.added_at ?? now,
+    });
+  }
+
+  return normalizedEntries;
+};

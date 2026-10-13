@@ -39,3 +39,10 @@ export const nameSchema = z.string().min(1).max(256).optional().meta({
   title: 'Data view name',
   description: 'The name of the data view. Example: "Sample data view".',
 });
+
+export const fieldFiltersSchema = z.array(z.string().min(1).max(1000)).max(10_000).optional().meta({
+  id: 'kbn-field-filters-schema',
+  title: 'Field filters',
+  description:
+    "Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.",
+});

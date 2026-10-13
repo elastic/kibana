@@ -90,7 +90,9 @@ export const CellValue = memo(function RenderCellValue({
     if (!alert) return [];
     return Object.entries(alert).map(([field, value]) => ({
       field,
-      value: (Array.isArray(value) ? value : [value]) as string[],
+      value: (Array.isArray(value) ? value : [value]).map((v) =>
+        typeof v === 'object' && v !== null ? JSON.stringify(v) : (v as string)
+      ),
     }));
   }, [alert]);
 

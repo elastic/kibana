@@ -24,4 +24,7 @@ export {
   type InstallFormProps,
   TemplateInstallSection,
   type TemplateInstallSectionProps,
+  type TemplateInstallStep,
+  TemplateRequirements,
+  type TemplateRequirementsProps,
 } from './install_form';

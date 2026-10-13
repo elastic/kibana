@@ -13,13 +13,17 @@ import {
   DEFAULT_THRESHOLD_FORM_VALUES,
   generateId,
   getAvailableMetricLabels,
+  getSeverityValidationError,
+  hasReservedSeverityLabel,
+  isMultiSeveritySupported,
+  isSeveritySupported,
   reconcileAlertConditionMetrics,
 } from './threshold/form_types';
 import { getInvalidExpressionReferences } from './threshold/validate_metric_references';
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
 import { parseThresholdEsql } from './threshold/parse_esql';
-import { THRESHOLD_STEP_TITLE } from './threshold/translations';
+import { THRESHOLD_CREATE_FLYOUT_TITLE, THRESHOLD_STEP_TITLE } from './threshold/translations';
 
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition =>
   def as RuleBuilderDefinition;
@@ -29,6 +33,24 @@ const areAllEvaluationReferencesValid = (values: ThresholdFormValues): boolean =
   return values.evaluations.every(
     (e) => getInvalidExpressionReferences(e.expression, availableLabels).length === 0
   );
+};
+
+const isSeverityConfigValid = (values: ThresholdFormValues): boolean => {
+  // Severity must be representable by ES|QL generation, which only emits it for a single,
+  // non-reserved-label condition. Reject unsupported states explicitly.
+  if (!values.severity) return true;
+
+  if (!isSeveritySupported(values.alertConditions)) return false;
+  if (hasReservedSeverityLabel(values.stats, values.evaluations, values.groupByFields)) {
+    return false;
+  }
+  const [firstCondition] = values.alertConditions;
+  if (values.severity.mode === 'multi' && !isMultiSeveritySupported(firstCondition.comparator)) {
+    return false;
+  }
+  if (getSeverityValidationError(values.severity, firstCondition) !== null) return false;
+
+  return true;
 };
 
 const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
@@ -42,6 +64,8 @@ const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
     (c) => c.metric.trim() && c.threshold.length > 0
   );
   if (!hasValidCondition) return false;
+
+  if (!isSeverityConfigValid(values)) return false;
 
   if (values.recovery) {
     const hasValidRecovery = values.recovery.conditions.some(
@@ -65,6 +89,7 @@ const getValidatedThresholdValues = (values: ThresholdFormValues): ThresholdForm
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
   stepTitle: THRESHOLD_STEP_TITLE,
+  createFlyoutTitle: THRESHOLD_CREATE_FLYOUT_TITLE,
   createDefaultState: () => ({
     ...DEFAULT_THRESHOLD_FORM_VALUES,
     stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),

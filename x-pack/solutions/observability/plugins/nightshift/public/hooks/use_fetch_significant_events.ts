@@ -9,6 +9,7 @@ import moment from 'moment';
 import { useQuery, type QueryClient, type UseQueryResult } from '@kbn/react-query';
 import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from './use_kibana';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
 import { hasRunningInvestigations } from '../event/significant_event_status';
@@ -139,11 +140,14 @@ export const useFetchSignificantEvents = (): UseQueryResult<
   Error
 > => {
   const {
+    application,
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
+  const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
 
   return useQuery<NightshiftSignificantEventsQueryData, Error>({
     queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
+    enabled: canShow,
     queryFn: async ({ signal }) => {
       const from = moment().subtract(NIGHTSHIFT_LOOKBACK_DAYS, 'days').toISOString();
       const to = moment().toISOString();
@@ -159,7 +163,7 @@ export const useFetchSignificantEvents = (): UseQueryResult<
 
 export const markEventInvestigationCompleteInCache = (
   queryClient: QueryClient,
-  eventUuid: string,
+  eventId: string,
   completedAt: string = new Date().toISOString()
 ): void => {
   queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
@@ -171,7 +175,7 @@ export const markEventInvestigationCompleteInCache = (
 
       let changed = false;
       const hits = current.hits.map((hit) => {
-        if (hit.event_uuid !== eventUuid) {
+        if (hit.event_id !== eventId) {
           return hit;
         }
 

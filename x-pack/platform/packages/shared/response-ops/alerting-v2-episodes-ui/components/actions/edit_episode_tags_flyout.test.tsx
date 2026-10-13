@@ -51,7 +51,7 @@ describe('AlertEpisodeTagsFlyout', () => {
       wrapper: queryWrapper,
     });
 
-    expect(await screen.findByText('Edit Tags'));
+    expect(await screen.findByText('Edit alert tags'));
     expect(screen.getByText(/Total tags:\s*3/)).toBeInTheDocument();
     expect(screen.getByText(/Selected:\s*1/)).toBeInTheDocument();
     expect(screen.getByTestId('alertingEpisodeTagsFlyout-select-all')).toBeInTheDocument();

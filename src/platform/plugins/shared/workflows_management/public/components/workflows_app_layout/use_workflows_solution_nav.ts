@@ -63,7 +63,7 @@ export const useWorkflowsSolutionNav = (): SolutionNavProps | null => {
 
   return {
     name: PLUGIN_NAME,
-    icon: 'workflowsApp',
+    icon: 'workflow',
     // `SolutionNav` already renders the title, so the group stays unnamed. Nesting the links under
     // it keeps them regular weight; as root items they would be styled as section headings.
     items: [{ id: 'workflowsSideNavGroup', name: undefined, items: links }],

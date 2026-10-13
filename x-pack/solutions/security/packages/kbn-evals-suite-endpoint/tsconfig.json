@@ -20,6 +20,6 @@
     "@kbn/tooling-log",
     "@kbn/test",
     "@kbn/security-solution-plugin",
-    "@kbn/core"
+    "@kbn/fleet-plugin"
   ]
 }

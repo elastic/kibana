@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type {
   EuiDataGridCellValueElementProps,
@@ -21,6 +20,7 @@ import type { UnifiedDataTableProps } from './data_table';
 import React, { useCallback, useState } from 'react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import {
   buildDataViewMock,
   deepMockedFields,
@@ -51,8 +51,10 @@ import {
 import { render, screen, waitFor } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 import { useColumns } from '../hooks/use_data_grid_columns';
+import { UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS } from '../hooks/use_full_screen_watcher';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const mockUseDataGridColumnsCellActions = jest.fn((_prop: unknown) => []);
 
@@ -599,7 +601,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           rows: generateEsHits(dataViewMock, 10).map((hit) =>
             buildDataTableRecord(hit, dataViewMock)
           ),
@@ -647,7 +649,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           isInMemorySortEnabled: false,
           rows: generateEsHits(dataViewMock, 10).map((hit) =>
             buildDataTableRecord(hit, dataViewMock)
@@ -778,7 +780,7 @@ describe('UnifiedDataTable', () => {
 
         await renderDataTable({
           columns: ['message'],
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
         });
 
@@ -962,6 +964,22 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    it(
+      'should hide Columns and Sort toolbar controls in JSON source mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          documentsDisplayModeState: 'json',
+        });
+
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          showColumnSelector: false,
+          showSortSelector: false,
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('custom control columns', () => {
@@ -1062,8 +1080,6 @@ describe('UnifiedDataTable', () => {
         },
       };
 
-      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
-
       const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
@@ -1072,7 +1088,6 @@ describe('UnifiedDataTable', () => {
 
       await renderComponent({
         ...getProps(),
-        columnsMeta: columnsMetaOverride,
         expandedDoc,
         externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
@@ -1086,7 +1101,38 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        columnsMetaOverride
+        undefined
+      );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should give renderDocumentView the data source',
+    async () => {
+      const dataSource = await EsqlSource.create({
+        query: 'FROM test_i | EVAL testField = 1',
+        resultColumns: [{ id: 'testField', name: 'testField', meta: { type: 'number' } }],
+      });
+      const { rows } = getProps();
+      const expandedDoc = rows?.[0];
+      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+        <div data-test-subj="test-document-view">{hit.id}</div>
+      ));
+
+      await renderComponent({
+        ...getProps(),
+        dataSource,
+        expandedDoc,
+        renderDocumentView: renderDocumentViewMock,
+        setExpandedDoc: jest.fn(),
+      });
+
+      expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+        expandedDoc,
+        rows,
+        ['_source'],
+        dataSource
       );
     },
     EXTENDED_JEST_TIMEOUT
@@ -1370,7 +1416,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          sourceDisplayMode: 'json',
+          documentsDisplayModeState: 'json',
           rowHeightState: 2,
         });
 
@@ -1384,7 +1430,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          sourceDisplayMode: 'summary',
+          documentsDisplayModeState: 'table',
           rowHeightState: 2,
         });
 
@@ -1396,38 +1442,100 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'hides the "Body cell lines" display setting in JSON mode, leaving the header control',
-      async () => {
-        await renderComponent({
-          ...getProps(),
-          onUpdateRowHeight: jest.fn(),
-          onUpdateHeaderRowHeight: jest.fn(),
-          sourceDisplayMode: 'json',
-        });
-
-        await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
-        await waitForEuiPopoverOpen();
-
-        expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
-        expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
-
-    it(
       'shows the "Body cell lines" display setting in summary mode',
       async () => {
         await renderComponent({
           ...getProps(),
           onUpdateRowHeight: jest.fn(),
           onUpdateHeaderRowHeight: jest.fn(),
-          sourceDisplayMode: 'summary',
+          documentsDisplayModeState: 'table',
         });
 
         await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
         await waitForEuiPopoverOpen();
 
         expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
+  describe('full screen', () => {
+    it(
+      'applies the full screen styles to the body after switching the documents display mode',
+      async () => {
+        const props: UnifiedDataTableProps = { ...getProps(), documentsDisplayModeState: 'table' };
+        const { rerender } = await renderComponent(props);
+        // Enter and exit full screen first, so the initial data grid is watched before it's remounted
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        await waitFor(() =>
+          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        await waitFor(() =>
+          expect(document.body).not.toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+
+        rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+        await waitFor(() =>
+          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'keeps the data grid in full screen when switching the documents display mode',
+      async () => {
+        const onFullScreenChange = jest.fn();
+        const props: UnifiedDataTableProps = {
+          ...getProps(),
+          documentsDisplayModeState: 'table',
+          onFullScreenChange,
+        };
+        const { rerender } = await renderComponent(props);
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+        rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
+
+        expect(screen.getByTestId('dataGridFullScreenButton')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(onFullScreenChange).toHaveBeenCalledTimes(1);
+        expect(onFullScreenChange).toHaveBeenCalledWith(true);
+        await waitFor(() =>
+          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'removes the full screen styles from the body when exiting full screen after switching the documents display mode',
+      async () => {
+        const onFullScreenChange = jest.fn();
+        const props: UnifiedDataTableProps = {
+          ...getProps(),
+          documentsDisplayModeState: 'table',
+          onFullScreenChange,
+        };
+        const { rerender } = await renderComponent(props);
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
+
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+        expect(screen.getByTestId('dataGridFullScreenButton')).toHaveAttribute(
+          'aria-pressed',
+          'false'
+        );
+        expect(onFullScreenChange).toHaveBeenLastCalledWith(false);
+        await waitFor(() =>
+          expect(document.body).not.toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1851,6 +1959,146 @@ describe('UnifiedDataTable', () => {
 
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
     });
+
+    it('renders no pagination toolbar in singlePage mode', async () => {
+      await renderComponent({
+        ...getProps(),
+        rowsPerPageOptions: [1, 5],
+        rowsPerPageState: 1,
+        paginationMode: 'singlePage',
+      });
+
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).toBeNull();
+      expect(screen.queryByTestId('pagination-button-previous')).toBeNull();
+      expect(screen.queryByTestId('pagination-button-next')).toBeNull();
+    });
+  });
+
+  // Covers `useScrollToExpandedDoc` through the real grid rather than in isolation, since it
+  // depends on the grid's pagination and imperative API. These assert the paging half only:
+  // jsdom exposes grid pagination but not EUI's imperative virtualized scrolling API,
+  // so scrolling and retry behavior are covered by the focused hook tests instead.
+  describe('scrolling to the expanded document', () => {
+    const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const onChangePageMock = jest.fn();
+
+    beforeEach(() => {
+      onChangePageMock.mockClear();
+    });
+
+    const getPagedProps = (): UnifiedDataTableProps => ({
+      ...getProps(),
+      rows,
+      rowsPerPageOptions: [1, 5],
+      rowsPerPageState: 1,
+      onUpdatePageIndex: onChangePageMock,
+      setExpandedDoc: jest.fn(),
+      renderDocumentView: jest.fn(),
+    });
+
+    it('should page to the expanded document when it is not on the current page', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={rows[2]} />);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+
+      // Scrolling retries must not repeat the page change.
+      expect(onChangePageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should page to the expanded document once it arrives in the results', async () => {
+      const props = { ...getPagedProps(), rows: rows.slice(0, 1), expandedDoc: rows[2] };
+      const { rerender } = await renderComponent(props);
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+
+      rerender(<DataTableWithI18n {...props} rows={rows} />);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+    });
+
+    it('should not page when the expanded document is already on the current page', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={rows[0]} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page again while the same document stays expanded', async () => {
+      const props = { ...getPagedProps(), expandedDoc: rows[2] };
+      const { rerender } = await renderComponent(props);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+
+      onChangePageMock.mockClear();
+
+      // A background refetch must not pull the grid from the user's scroll position.
+      rerender(<DataTableWithI18n {...props} rows={[...rows]} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page to an expanded document again after restoring the table state', async () => {
+      const expandedDoc = rows[2];
+      const props = {
+        ...getPagedProps(),
+        expandedDoc,
+        initialState: {
+          pageIndex: 1,
+          scrolledToExpandedDocId: expandedDoc.id,
+        },
+      };
+
+      await renderComponent(props);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page when the expanded document is not part of the results', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(
+        <DataTableWithI18n
+          {...props}
+          expandedDoc={buildDataTableRecord({ _index: 'i', _id: 'not-in-results' }, dataViewMock)}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
   });
 
   describe('enableInTableSearch', () => {
@@ -1870,7 +2118,7 @@ describe('UnifiedDataTable', () => {
         const renderCustomToolbarMock = jest.fn((props) => {
           return (
             <div data-test-subj="custom-toolbar">
-              Custom layout {props.gridProps.inTableSearchControl}
+              Custom layout {props.gridProps.inTableSearchButton}
             </div>
           );
         });

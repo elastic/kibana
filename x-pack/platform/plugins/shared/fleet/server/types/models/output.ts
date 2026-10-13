@@ -15,6 +15,8 @@ import {
   kafkaSaslMechanism,
   kafkaVerificationModes,
   MAX_HOSTS,
+  otlpCompressionType,
+  otlpProtocol,
   outputType,
 } from '../../../common/constants';
 
@@ -115,15 +117,19 @@ const BaseSchema = {
   is_default_monitoring: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.maybe(schema.boolean()),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+};
+
+const BeatsBaseSchema = {
+  ...BaseSchema,
   ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
-  ssl: schema.maybe(schema.oneOf([schema.literal(null), OutputSslSchema])),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  ssl: schema.maybe(schema.oneOf([schema.literal(null), OutputSslSchema])),
   shipper: schema.maybe(schema.oneOf([schema.literal(null), OutputShipperSchema])),
-  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
@@ -133,6 +139,13 @@ const BaseSchema = {
 
 const UpdateSchema = {
   ...BaseSchema,
+  name: schema.maybe(schema.string()),
+  is_default: schema.maybe(schema.boolean()),
+  is_default_monitoring: schema.maybe(schema.boolean()),
+};
+
+const BeatsUpdateSchema = {
+  ...BeatsBaseSchema,
   name: schema.maybe(schema.string()),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
@@ -151,7 +164,7 @@ const PresetSchema = schema.oneOf([
  */
 
 export const ElasticSearchSchema = {
-  ...BaseSchema,
+  ...BeatsBaseSchema,
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
     minSize: 1,
@@ -162,13 +175,10 @@ export const ElasticSearchSchema = {
 };
 
 const ElasticSearchUpdateSchema = {
-  ...UpdateSchema,
+  ...BeatsUpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
-      minSize: 1,
-      maxSize: MAX_HOSTS,
-    })
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: MAX_HOSTS })
   ),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
@@ -215,7 +225,7 @@ const RemoteElasticSearchUpdateSchema = {
  */
 
 export const LogstashSchema = {
-  ...BaseSchema,
+  ...BeatsBaseSchema,
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
     minSize: 1,
@@ -224,7 +234,7 @@ export const LogstashSchema = {
 };
 
 const LogstashUpdateSchema = {
-  ...UpdateSchema,
+  ...BeatsUpdateSchema,
   type: schema.maybe(schema.literal(outputType.Logstash)),
   hosts: schema.maybe(
     schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
@@ -240,7 +250,7 @@ const LogstashUpdateSchema = {
 };
 
 export const KafkaSchema = {
-  ...BaseSchema,
+  ...BeatsBaseSchema,
   // Kafka does not support proxies. proxy_id is accepted to avoid breaking existing preconfigured
   // outputs but is silently cleared to null on save and never written into the compiled agent
   // policy (#267281). Marked deprecated so API consumers are not misled.
@@ -330,7 +340,7 @@ export const KafkaSchema = {
 };
 
 const KafkaUpdateSchema = {
-  ...UpdateSchema,
+  ...BeatsUpdateSchema,
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
   hosts: schema.maybe(
@@ -349,11 +359,293 @@ const KafkaUpdateSchema = {
   ),
 };
 
+/**
+ * OTLP schemas — field shapes match otelcol v0.155.0, pinned in elastic-agent/internal/edot/go.mod.
+ * Spec root: https://github.com/open-telemetry/opentelemetry-collector/blob/v0.155.0/exporter/otlpexporter/config.go
+ */
+
+// Validated against otelcol v0.155.0:
+//   gRPC: exporter/otlpexporter/config.go + go.opentelemetry.io/collector/config/configgrpc
+//   HTTP: exporter/otlphttpexporter/config.go + go.opentelemetry.io/collector/config/confighttp
+// Deliberate exclusions: auth/middlewares (extension refs), sending_queue.storage (agent-managed).
+// TLS credentials (key_pem, tpm.owner_auth, tpm.auth) are accepted only via secrets.otlp_exporter.tls.*.
+const OtlpExporterTlsSchema = schema.object({
+  insecure: schema.maybe(schema.boolean()),
+  insecure_skip_verify: schema.maybe(schema.boolean()),
+  ca_pem: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 65536 })])),
+  cert_pem: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 65536 })])),
+  ca_file: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])),
+  cert_file: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])),
+  key_file: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])),
+  include_system_ca_certs_pool: schema.maybe(schema.boolean()),
+  include_insecure_cipher_suites: schema.maybe(schema.boolean()),
+  min_version: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 10 })])),
+  max_version: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 10 })])),
+  reload_interval: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+  ),
+  server_name_override: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: 256 })])
+  ),
+  cipher_suites: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+    ])
+  ),
+  curve_preferences: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('X25519'),
+          schema.literal('P521'),
+          schema.literal('P256'),
+          schema.literal('P384'),
+        ]),
+        { maxSize: 4 }
+      ),
+    ])
+  ),
+  tpm: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        enabled: schema.maybe(schema.boolean()),
+        path: schema.maybe(
+          schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])
+        ),
+      }),
+    ])
+  ),
+});
+
+const OtlpExporterSendingQueueSchema = schema.object({
+  enabled: schema.maybe(schema.boolean()),
+  num_consumers: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+  queue_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+  sizer: schema.maybe(
+    schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')])
+  ),
+  wait_for_result: schema.maybe(schema.boolean()),
+  block_on_overflow: schema.maybe(schema.boolean()),
+  batch: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        flush_timeout: schema.maybe(
+          schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+        ),
+        min_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+        max_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+        sizer: schema.maybe(schema.oneOf([schema.literal('items'), schema.literal('bytes')])),
+        partition: schema.maybe(
+          schema.oneOf([
+            schema.literal(null),
+            schema.object({
+              metadata_keys: schema.maybe(
+                schema.oneOf([
+                  schema.literal(null),
+                  schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+                ])
+              ),
+            }),
+          ])
+        ),
+      }),
+    ])
+  ),
+});
+
+const OtlpExporterRetrySchema = schema.object({
+  enabled: schema.maybe(schema.boolean()),
+  initial_interval: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+  ),
+  randomization_factor: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+  multiplier: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+  max_interval: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+  ),
+  max_elapsed_time: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+  ),
+});
+
+const OtlpExporterBaseSchema = {
+  endpoint: schema.string({ maxLength: 2048 }),
+  headers: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 1000 })),
+    ])
+  ),
+  timeout: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])),
+  tls: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterTlsSchema])),
+  sending_queue: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterSendingQueueSchema])),
+  retry_on_failure: schema.maybe(schema.oneOf([schema.literal(null), OtlpExporterRetrySchema])),
+};
+
+const OtlpGrpcExporterSchema = schema.object(
+  {
+    ...OtlpExporterBaseSchema,
+    protocol: schema.literal(otlpProtocol.Grpc),
+    compression: schema.maybe(
+      schema.oneOf([
+        schema.literal(otlpCompressionType.Gzip),
+        schema.literal(otlpCompressionType.Snappy),
+        schema.literal(otlpCompressionType.Zstd),
+        schema.literal(otlpCompressionType.None),
+      ])
+    ),
+    balancer_name: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 256 })])
+    ),
+    keepalive: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.object({
+          time: schema.maybe(
+            schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+          ),
+          timeout: schema.maybe(
+            schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+          ),
+          permit_without_stream: schema.maybe(schema.boolean()),
+        }),
+      ])
+    ),
+    read_buffer_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+    write_buffer_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+    wait_for_ready: schema.maybe(schema.boolean()),
+    user_agent: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 256 })])
+    ),
+    authority: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 256 })])
+    ),
+  },
+  { meta: { id: 'otlp_grpc_exporter' } }
+);
+
+const OtlpHttpExporterSchema = schema.object(
+  {
+    ...OtlpExporterBaseSchema,
+    protocol: schema.literal(otlpProtocol.HttpProtobuf),
+    compression: schema.maybe(
+      schema.oneOf([
+        schema.literal(otlpCompressionType.Gzip),
+        schema.literal(otlpCompressionType.None),
+      ])
+    ),
+    encoding: schema.maybe(schema.oneOf([schema.literal('proto'), schema.literal('json')])),
+    traces_endpoint: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 2048 })])
+    ),
+    metrics_endpoint: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 2048 })])
+    ),
+    logs_endpoint: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 2048 })])
+    ),
+    profiles_endpoint: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 2048 })])
+    ),
+    read_buffer_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+    write_buffer_size: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+    proxy_url: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 2048 })])
+    ),
+    max_idle_conns: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+    max_idle_conns_per_host: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+    max_conns_per_host: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
+    idle_conn_timeout: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+    ),
+    disable_keep_alives: schema.maybe(schema.boolean()),
+    http2_read_idle_timeout: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+    ),
+    http2_ping_timeout: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: 64 })])
+    ),
+    force_attempt_http2: schema.maybe(schema.boolean()),
+    compression_params: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.object({ level: schema.maybe(schema.number()) })])
+    ),
+    cookies: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.object({ enabled: schema.maybe(schema.boolean()) }),
+      ])
+    ),
+  },
+  { meta: { id: 'otlp_http_exporter' } }
+);
+
+const OtlpExporterSchema = schema.discriminatedUnion('protocol', [
+  OtlpGrpcExporterSchema,
+  OtlpHttpExporterSchema,
+]);
+
+const OtlpGrpcExporterResponseSchema = OtlpGrpcExporterSchema.extends(
+  {},
+  { meta: { id: 'otlp_response_grpc_exporter' } }
+);
+const OtlpHttpExporterResponseSchema = OtlpHttpExporterSchema.extends(
+  {},
+  { meta: { id: 'otlp_response_http_exporter' } }
+);
+const OtlpExporterResponseSchema = schema.discriminatedUnion('protocol', [
+  OtlpGrpcExporterResponseSchema,
+  OtlpHttpExporterResponseSchema,
+]);
+
+const OtlpSecretsSchema = schema.maybe(
+  schema.object({
+    otlp_exporter: schema.maybe(
+      schema.object({
+        tls: schema.maybe(
+          schema.object({
+            key_pem: schema.maybe(secretRefSchema),
+            tpm: schema.maybe(
+              schema.object({
+                owner_auth: schema.maybe(secretRefSchema),
+                auth: schema.maybe(secretRefSchema),
+              })
+            ),
+          })
+        ),
+      })
+    ),
+  })
+);
+
+export const OtlpSchema = {
+  ...BaseSchema,
+  type: schema.literal(outputType.Otlp),
+  otlp_exporter: OtlpExporterSchema,
+  secrets: OtlpSecretsSchema,
+};
+
+const OtlpResponseSchema = {
+  ...OtlpSchema,
+  otlp_exporter: schema.maybe(OtlpExporterResponseSchema),
+};
+
+export const OtlpUpdateSchema = {
+  ...UpdateSchema,
+  type: schema.maybe(schema.literal(outputType.Otlp)),
+  otlp_exporter: schema.maybe(OtlpExporterSchema),
+  secrets: OtlpSecretsSchema,
+};
+
 export const OutputSchema = schema.discriminatedUnion('type', [
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
   schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
   schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
   schema.object({ ...KafkaSchema }, { meta: { id: 'output_kafka' } }),
+  schema.object({ ...OtlpSchema }, { meta: { id: 'output_otlp' } }),
 ]);
 
 // Separate schema for create operations: uses distinct meta IDs so OAS codegen
@@ -367,6 +659,7 @@ export const NewOutputSchema = schema.discriminatedUnion('type', [
   ),
   schema.object({ ...LogstashSchema }, { meta: { id: 'new_output_logstash' } }),
   schema.object({ ...KafkaSchema }, { meta: { id: 'new_output_kafka' } }),
+  schema.object({ ...OtlpSchema }, { meta: { id: 'new_output_otlp' } }),
 ]);
 
 const OutputResponseSharedSchema = {
@@ -392,6 +685,7 @@ export const OutputResponseItemSchema = schema
       { ...KafkaSchema, ...OutputResponseSharedSchema },
       { meta: { id: 'output_response_kafka' } }
     ),
+    schema.object({ ...OtlpResponseSchema }, { meta: { id: 'output_response_otlp' } }),
   ])
   .extendsDeep({
     unknowns: 'allow',
@@ -409,4 +703,5 @@ export const UpdateOutputSchema = schema.oneOf([
   ),
   schema.object({ ...LogstashUpdateSchema }, { meta: { id: 'update_output_logstash' } }),
   schema.object({ ...KafkaUpdateSchema }, { meta: { id: 'update_output_kafka' } }),
+  schema.object({ ...OtlpUpdateSchema }, { meta: { id: 'update_output_otlp' } }),
 ]);

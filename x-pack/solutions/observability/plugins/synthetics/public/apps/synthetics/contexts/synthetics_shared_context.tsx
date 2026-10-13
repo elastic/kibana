@@ -14,6 +14,7 @@ import type { Subject } from 'rxjs';
 import type { Store } from 'redux-v4';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { CpsProjectRoutingSync } from '../components/cps_project_routing_sync';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
 import type { SyntheticsAppProps } from './synthetics_settings_context';
@@ -21,8 +22,23 @@ import { storage, store } from '../state';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const SyntheticsSharedContext: React.FC<
-  React.PropsWithChildren<SyntheticsAppProps & { reload$?: Subject<boolean>; reduxStore?: Store }>
-> = ({ reduxStore, coreStart, setupPlugins, startPlugins, children, darkMode, reload$ }) => {
+  React.PropsWithChildren<
+    SyntheticsAppProps & {
+      reload$?: Subject<boolean>;
+      reduxStore?: Store;
+      onAutoRefresh?: () => void;
+    }
+  >
+> = ({
+  reduxStore,
+  coreStart,
+  setupPlugins,
+  startPlugins,
+  children,
+  darkMode,
+  reload$,
+  onAutoRefresh,
+}) => {
   const queryClient = new QueryClient();
 
   const spacesApi = startPlugins.spaces;
@@ -60,12 +76,15 @@ export const SyntheticsSharedContext: React.FC<
         charts: startPlugins.charts,
         uiActions: startPlugins.uiActions,
         agentBuilder: startPlugins.agentBuilder,
+        cps: startPlugins.cps,
+        licensing: startPlugins.licensing,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>
         <ReduxProvider store={reduxStore ?? store}>
           <QueryClientProvider client={queryClient}>
-            <SyntheticsRefreshContextProvider reload$={reload$}>
+            <SyntheticsRefreshContextProvider reload$={reload$} onAutoRefresh={onAutoRefresh}>
+              <CpsProjectRoutingSync />
               <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
                 <RedirectAppLinks
                   coreStart={{

@@ -53,7 +53,10 @@ export const ReadAlertsMigrationStatusRequestQuery = lazySchema(() =>
     /**
      * Maximum age of qualifying detection alerts
      */
-    from: z.string().superRefine(isValidDateMath),
+    from: z
+      .string()
+      .superRefine(isValidDateMath)
+      .describe('Maximum age of qualifying detection alerts'),
   })
 );
 export type ReadAlertsMigrationStatusRequestQuery = z.infer<

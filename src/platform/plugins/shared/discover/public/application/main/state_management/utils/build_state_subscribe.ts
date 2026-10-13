@@ -20,6 +20,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverAppState } from '../redux';
 import { isEqualState } from './state_comparators';
+import { isNonEmptyEsqlQuery } from './is_non_empty_esql_query';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -28,7 +29,8 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../common/data_sources';
-import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
+import { sendLoadingMsg, sendResetMsg } from '../../hooks/use_saved_search_messages';
+import { resolveEsqlSource } from '../../data_fetching/resolve_esql_source';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
@@ -54,6 +56,12 @@ export const buildStateSubscribe =
     const prevState = getCurrentTab().previousAppState;
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextState.query, prevState.query);
+    const queryLanguageChanged =
+      isEsqlMode !== isDataSourceType(prevState.dataSource, DataSourceType.Esql);
+    // Capture before reset() so a later ES|QL transition does not look uninitialized
+    // just because skipInitialFetch still forces getInitialFetchStatus() back to UNINITIALIZED.
+    const isUninitialized =
+      dataState.data$.main$.getValue().fetchStatus === FetchStatus.UNINITIALIZED;
 
     if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
       addLog('[appstate] subscribe $fetch ignored for es|ql', { prevState, nextState });
@@ -79,6 +87,20 @@ export const buildStateSubscribe =
       if (!isEsqlModePrev) {
         dataState.reset();
       }
+    }
+
+    if (isEsqlMode && queryChanged && isNonEmptyEsqlQuery(nextState.query)) {
+      const tabId = getCurrentTab().id;
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const previousSource = currentDataSource$.getValue();
+      const { esqlSource } = await resolveEsqlSource({
+        esql: nextState.query.esql,
+        services,
+        esqlVariables: getCurrentTab().esqlVariables,
+        timeRange: services.data.query.timefilter.timefilter.getTime(),
+        previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+      });
+      dispatch(internalStateActions.assignNextDataSource({ tabId, dataSource: esqlSource }));
     }
 
     const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
@@ -136,6 +158,23 @@ export const buildStateSubscribe =
 
     if (dataSourceChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
+      return;
+    }
+
+    if (queryLanguageChanged && isUninitialized) {
+      addLog('[appstate] subscribe fetch skipped for query language switch while uninitialized', {
+        prevState,
+        nextState,
+      });
+      // reset() uses getInitialFetchStatus() for the new language. After refresh,
+      // skipInitialFetch is gone and empty ES|QL is no longer the current query,
+      // so reset() can flip UNINITIALIZED → LOADING without starting a fetch.
+      // Re-read after await resolveEsqlSource: do not overwrite COMPLETE/ERROR
+      // that landed while the source was resolving.
+      const currentStatus = dataState.data$.main$.getValue().fetchStatus;
+      if (currentStatus === FetchStatus.LOADING) {
+        sendResetMsg(dataState.data$, FetchStatus.UNINITIALIZED);
+      }
       return;
     }
 

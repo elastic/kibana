@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
@@ -25,7 +25,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeStateApi } from '@kbn/presentation-publishing';
-import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
@@ -149,34 +148,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
             useStateFromPublishingSubject(singleMetricViewerData$);
           const [isLoading, error] = useBatchedPublishingSubjects(dataLoading$, blockingError$);
 
-          const [hasRendered, setHasRendered] = useState(false);
-          const wrapperRef = useRef<HTMLDivElement>(null);
-
-          useEffect(() => {
-            if (isLoading) {
-              setHasRendered(false);
-            }
-          }, [isLoading]);
-
-          useEffect(
-            function dispatchRenderMessages() {
-              const el = wrapperRef.current;
-              if (!el) return;
-              if (error) {
-                dispatchRenderComplete(el);
-                return;
-              }
-              if (isLoading) {
-                dispatchRenderStart(el);
-                return;
-              }
-              if (hasRendered) {
-                dispatchRenderComplete(el);
-              }
-            },
-            [isLoading, hasRendered, error]
-          );
-
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
             parentApi.executionContext,
@@ -215,14 +186,12 @@ export const getSingleMetricViewerEmbeddableFactory = (
               forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
               onForecastIdChange={api.updateForecastId}
-              wrapperRef={wrapperRef}
-              isRenderComplete={error ? true : hasRendered}
+              isRenderComplete={error ? true : !isLoading}
               onLoading={(loading) => {
                 dataLoading$.next(loading);
               }}
               onRenderComplete={() => {
                 dataLoading$.next(false);
-                setHasRendered(true);
               }}
             />
           );
