@@ -110,7 +110,9 @@ describe('getPipeline', () => {
         - echo two
   `);
 
-    expect(() => getPipeline(filename, { cancelOnGateFailure: true })).toThrow('is missing a "key"');
+    expect(() => getPipeline(filename, { cancelOnGateFailure: true })).toThrow(
+      'is missing a "key"'
+    );
   });
 
   it('verifies manually registered base.yml step keys exist', () => {
