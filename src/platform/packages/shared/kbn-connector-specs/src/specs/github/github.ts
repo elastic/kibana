@@ -107,6 +107,7 @@ export const GithubConnector: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
+        supportsSandbox: true,
         defaults: {
           authorizationUrl: 'https://github.com/login/oauth/authorize',
           tokenUrl: 'https://github.com/login/oauth/access_token',
@@ -122,6 +123,7 @@ export const GithubConnector: ConnectorSpec = {
       },
       {
         type: 'bearer',
+        supportsSandbox: true,
         defaults: {},
         overrides: {
           label: i18n.translate('core.kibanaConnectorSpecs.github.auth.bearer.label', {
