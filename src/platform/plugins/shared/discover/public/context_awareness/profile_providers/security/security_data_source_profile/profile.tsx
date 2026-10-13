@@ -72,19 +72,26 @@ export const createSecurityDataSourceProfileProvider = (
     },
     resolve: async (params) => {
       const { solutionType } = params.rootContext;
-      if (solutionType !== SolutionType.Security && solutionType !== SolutionType.Default) {
+
+      const isClassicNav = solutionType === SolutionType.Default;
+
+      if (solutionType !== SolutionType.Security && !isClassicNav) {
         return { isMatch: false };
       }
 
-      if (
-        solutionType === SolutionType.Default &&
-        (!isSolutionProfilesInClassicEnabled(services.uiSettings) ||
-          (!isSecurityDataViewId(params.dataView?.id) &&
-            !containsOnlySecuritySourcePatterns(
-              params.dataView?.matchedIndices,
-              extractIndexPatternFrom(params)
-            )))
-      ) {
+      const isSolutionProfilesInClassicDisabled = !isSolutionProfilesInClassicEnabled(
+        services.uiSettings
+      );
+
+      const isSecuritySource =
+        isSecurityDataViewId(params.dataView?.id) ||
+        containsOnlySecuritySourcePatterns(
+          params.dataView?.matchedIndices,
+          extractIndexPatternFrom(params)
+        );
+
+      // In Classic navigation, only match when Security known sources are detected.
+      if (isClassicNav && (isSolutionProfilesInClassicDisabled || !isSecuritySource)) {
         return { isMatch: false };
       }
 

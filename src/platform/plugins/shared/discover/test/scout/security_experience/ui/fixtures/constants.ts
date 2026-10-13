@@ -20,10 +20,10 @@
 
 /** Synthetic ES indices created in global setup (see ./generators). */
 export const SECURITY_INDICES = {
-  ALERTS: '.alerts-security.alerts-discover',
-  EVENTS: 'endgame-discover-events',
-  ATTACKS: '.alerts-security.attack.discovery.alerts-discover',
-  IOCS: '.siem-signals-discover-iocs',
+  ALERTS: 'security-discover-alerts',
+  EVENTS: 'security-discover-events',
+  ATTACKS: 'security-discover-attacks',
+  IOCS: 'security-discover-iocs',
 } as const;
 
 /**

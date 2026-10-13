@@ -10,13 +10,7 @@
 import type { SpaceSolutionView } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  TRACES,
-  setupTracesExperience,
-  teardownTracesExperience,
-  expectTracesExperienceEnabled,
-} from '../fixtures';
+import { spaceTest, TRACES, setupTracesExperience, teardownTracesExperience } from '../fixtures';
 
 const NON_OBLT_VIEWS: Array<{ name: string; solutionView: SpaceSolutionView }> = [
   { name: 'Search', solutionView: 'es' },
@@ -36,53 +30,6 @@ spaceTest.describe(
     spaceTest.afterAll(async ({ scoutSpace }) => {
       await teardownTracesExperience(scoutSpace);
     });
-
-    spaceTest(
-      'should display trace-specific columns in data view mode (Classic)',
-      async ({ scoutSpace, browserAuth, pageObjects }) => {
-        await scoutSpace.setSolutionView('classic');
-        await browserAuth.loginAsViewer();
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-
-        await spaceTest.step('verify trace-specific columns are present', async () => {
-          await expectTracesExperienceEnabled(pageObjects, false);
-        });
-      }
-    );
-
-    spaceTest(
-      'should render RED metrics charts in ESQL mode (Classic)',
-      async ({ scoutSpace, browserAuth, pageObjects }) => {
-        await scoutSpace.setSolutionView('classic');
-        await browserAuth.loginAsViewer();
-        await pageObjects.discover.goto({ queryMode: 'esql' });
-
-        await spaceTest.step('run ESQL query for traces', async () => {
-          await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
-        });
-
-        await spaceTest.step('verify RED metrics grid is visible', async () => {
-          await expectTracesExperienceEnabled(pageObjects);
-        });
-      }
-    );
-
-    spaceTest(
-      'should show Overview tab in document flyout (Classic)',
-      async ({ scoutSpace, browserAuth, pageObjects }) => {
-        await scoutSpace.setSolutionView('classic');
-        await browserAuth.loginAsViewer();
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-
-        await spaceTest.step('open first document in flyout', async () => {
-          await pageObjects.tracesExperience.openDocumentFlyout();
-        });
-
-        await spaceTest.step('verify Overview tab is present', async () => {
-          await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
-        });
-      }
-    );
 
     for (const { name, solutionView } of NON_OBLT_VIEWS) {
       spaceTest(

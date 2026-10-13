@@ -33,7 +33,7 @@ const SECURITY_SOURCE_PATTERNS = [
 ];
 
 /**
- * True when the given dataVIew is a recognized Security data view.
+ * True when the given dataView is a recognized Security data view.
  */
 export const isSecurityDataViewId = (dataViewId?: string): boolean =>
   Boolean(
