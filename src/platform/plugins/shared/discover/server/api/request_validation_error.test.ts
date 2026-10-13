@@ -25,12 +25,12 @@ const esqlTab = {
   data_source: { type: 'esql', query: 'FROM logs' },
 };
 
-const respondTo = (data: object, schema: z.ZodType = discoverSessionApiDataSchema) => {
+const respondTo = async (data: object, schema: z.ZodType = discoverSessionApiDataSchema) => {
   const result = schema.safeParse(data);
   if (result.success) throw new Error('Expected the session to be invalid');
 
   const response = httpServerMock.createResponseFactory();
-  onRequestValidationError(
+  await onRequestValidationError(
     { message: 'raw', source: 'body', rawError: result.error },
     httpServerMock.createKibanaRequest(),
     response
@@ -40,8 +40,8 @@ const respondTo = (data: object, schema: z.ZodType = discoverSessionApiDataSchem
 };
 
 describe('onRequestValidationError', () => {
-  it('reports only the errors of the branch selected by each tab discriminators', () => {
-    const { response, issues } = respondTo({
+  it('reports only the errors of the branch selected by each tab discriminators', async () => {
+    const { response, issues } = await respondTo({
       title: 'Session',
       tabs: [
         { ...classicTab, id: undefined, row_height: true },
@@ -67,8 +67,8 @@ describe('onRequestValidationError', () => {
     });
   });
 
-  it('selects the metrics branch from the tab type and lists every error', () => {
-    const { response } = respondTo({
+  it('selects the metrics branch from the tab type and lists every error', async () => {
+    const { response } = await respondTo({
       title: 'Session',
       tabs: [{ ...esqlTab, type: 'metrics', foo: true }],
     });
@@ -87,8 +87,8 @@ describe('onRequestValidationError', () => {
     });
   });
 
-  it('reports the whole tab when no branch matches its discriminators', () => {
-    const { response, issues } = respondTo({
+  it('reports the whole tab when no branch matches its discriminators', async () => {
+    const { response, issues } = await respondTo({
       title: 'Session',
       tabs: [{ ...classicTab, data_source: { type: 'nope' } }],
     });
@@ -101,8 +101,8 @@ describe('onRequestValidationError', () => {
     });
   });
 
-  it('selects the tab branch with the internal session schema', () => {
-    const { response } = respondTo(
+  it('selects the tab branch with the internal session schema', async () => {
+    const { response } = await respondTo(
       { title: 'Session', tabs: [{ ...esqlTab, data_source: { type: 'esql' } }] },
       discoverSessionInternalDataSchema
     );
@@ -114,18 +114,22 @@ describe('onRequestValidationError', () => {
     });
   });
 
-  it('reports errors without a field path as they are', () => {
-    const { response } = respondTo({ title: 'Session', tabs: [classicTab], unexpected: true });
+  it('reports errors without a field path as they are', async () => {
+    const { response } = await respondTo({
+      title: 'Session',
+      tabs: [classicTab],
+      unexpected: true,
+    });
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: expect.objectContaining({ message: 'Unrecognized key: "unexpected"' }),
     });
   });
 
-  it('keeps the router message for non-Zod errors', () => {
+  it('keeps the router message for non-Zod errors', async () => {
     const response = httpServerMock.createResponseFactory();
 
-    onRequestValidationError(
+    await onRequestValidationError(
       { message: '[request body]: Invalid request', source: 'body', rawError: new Error() },
       httpServerMock.createKibanaRequest(),
       response

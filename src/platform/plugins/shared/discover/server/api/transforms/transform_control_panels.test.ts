@@ -117,9 +117,10 @@ describe('control panel transforms', () => {
         expect(panels?.map(({ id }) => id)).toEqual(['good']);
         expect(warnings).toEqual([
           {
-            type: 'dropped_panel',
+            type: 'dropped_item',
             tab_id: 'tab-1',
-            panel_id: 'bad',
+            key: 'control_panels',
+            item_id: 'bad',
             message:
               'Unable to transform control panel. Error: controlGroupJson panels must be JSON objects',
           },
@@ -134,10 +135,11 @@ describe('control panel transforms', () => {
 
         expect(warnings).toEqual([
           {
-            type: 'dropped_panel',
+            type: 'dropped_item',
             tab_id: 'tab-1',
-            panel_id: 'untyped',
-            panel_config: { order: 0, variable_name: 'foo' },
+            key: 'control_panels',
+            item_id: 'untyped',
+            item_config: { order: 0, variable_name: 'foo' },
             message:
               'Unable to transform control panel. Error: controlGroupJson panels must have a type',
           },
@@ -165,11 +167,12 @@ describe('control panel transforms', () => {
         expect(panels).toBeUndefined();
         expect(warnings).toEqual([
           {
-            type: 'dropped_panel',
+            type: 'dropped_item',
             tab_id: 'tab-1',
-            panel_id: 'invalid-width',
-            panel_type: ESQL_CONTROL,
-            panel_config: {
+            key: 'control_panels',
+            item_id: 'invalid-width',
+            item_type: ESQL_CONTROL,
+            item_config: {
               order: 0,
               width: 'extra_large',
               control_type: 'STATIC_VALUES',
@@ -193,7 +196,7 @@ describe('control panel transforms', () => {
 
         expect(panels).toBeUndefined();
         expect(warnings).toEqual([
-          expect.objectContaining({ type: 'dropped_panel', tab_id: 'tab-1', panel_id: 'bad' }),
+          expect.objectContaining({ type: 'dropped_item', tab_id: 'tab-1', item_id: 'bad' }),
         ]);
       });
     });

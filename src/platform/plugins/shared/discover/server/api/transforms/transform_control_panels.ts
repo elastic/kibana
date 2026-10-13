@@ -37,10 +37,10 @@ const getDroppedPanelDetails = (panel: unknown) => {
   const { type: panelType, ...panelConfig } = panel;
 
   if (typeof panelType !== 'string') {
-    return { panel_config: panel };
+    return { item_config: panel };
   }
 
-  return { panel_type: panelType, panel_config: panelConfig };
+  return { item_type: panelType, item_config: panelConfig };
 };
 
 const createDroppedPanelWarning = (
@@ -55,9 +55,10 @@ const createDroppedPanelWarning = (
       : `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
 
   return {
-    type: 'dropped_panel',
+    type: 'dropped_item',
     tab_id: tabId,
-    panel_id: panelId,
+    key: 'control_panels',
+    item_id: panelId,
     ...getDroppedPanelDetails(panel),
     message: `Unable to transform control panel. ${reason}`,
   };
