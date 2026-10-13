@@ -49,7 +49,7 @@ export const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate
   });
 
 /**
- * Flags candidates that share an in-batch dedup identity (identity kind plus stream+rules
+ * Flags candidates that share an in-batch dedup identity (identity kind plus source+rules
  * exact-set match) or event_id (snapshot mode) as `duplicate_in_batch` errors, keeping the first
  * occurrence. Returns the remainder.
  */
@@ -64,10 +64,10 @@ export const markDuplicateKeys = (
       candidate.mode === 'dedup'
         ? [
             // Confirmed-only and all-verdict identities use different matching semantics.
-            // Keep their keys separate even when their stream and rule sets are identical.
+            // Keep their keys separate even when their source and rule sets are identical.
             candidate.confirmedOnly ? 'confirmed' : 'all',
             makeIdentity({
-              streamNames: candidate.input.stream_names,
+              sourceIds: candidate.input.source_ids,
               ruleUuids: candidate.ruleUuids,
             }),
           ].join('|')
@@ -107,15 +107,13 @@ export const fetchActiveEventsForDedup = async (
 ): Promise<SignificantEvent[]> => {
   if (dedupCandidates.length === 0) return [];
 
-  // Narrow by stream/rule only when every candidate carries one, otherwise an AND'd filter
+  // Narrow by source/rule only when every candidate carries one, otherwise an AND'd filter
   // could exclude a candidate's genuine duplicate that has no value for that field.
-  const allCandidatesHaveStreamNames = dedupCandidates.every(
-    (c) => c.input.stream_names.length > 0
-  );
+  const allCandidatesHaveSourceIds = dedupCandidates.every((c) => c.input.source_ids.length > 0);
   const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.ruleUuids.length > 0);
   const { hits } = await eventSearchClient.findLatestActive({
-    streamNames: allCandidatesHaveStreamNames
-      ? [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))]
+    sourceIds: allCandidatesHaveSourceIds
+      ? [...new Set(dedupCandidates.flatMap((c) => c.input.source_ids))]
       : undefined,
     ruleUuids: allCandidatesHaveRuleUuids
       ? [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))]
@@ -126,14 +124,14 @@ export const fetchActiveEventsForDedup = async (
 
 /**
  * Returns true when the candidate's dedup rule set is entirely contained in the corresponding
- * active-event rule set and at least one stream name is shared — meaning this detection is already
+ * active-event rule set and at least one source id is shared — meaning this detection is already
  * tracked.
  *
  * Candidates with confirmed rules compare only confirmed rules on both sides. Candidates without
  * confirmed rules retain all-verdict subset matching. A new identity rule not present in any
  * active event still produces a new event.
  *
- * Empty-rule candidates only match empty-rule events to avoid false-matching any event on stream
+ * Empty-rule candidates only match empty-rule events to avoid false-matching any event on source
  * overlap alone.
  *
  * Full rule-set coverage is deliberate. A partial overlap can span multiple active events, and
@@ -146,9 +144,9 @@ const isCoveredByActiveEvent = (
 ): boolean => {
   if (!activeStatuses.includes(ev.status)) return false;
 
-  const candidateStreamSet = new Set(candidate.input.stream_names);
-  const streamsOverlap = (ev.stream_names ?? []).some((s) => candidateStreamSet.has(s));
-  if (!streamsOverlap) return false;
+  const candidateSourceSet = new Set(candidate.input.source_ids);
+  const sourcesOverlap = (ev.source_ids ?? []).some((s) => candidateSourceSet.has(s));
+  if (!sourcesOverlap) return false;
 
   const eventRuleUuids = extractRuleUuids(
     candidate.confirmedOnly ? confirmedSignals(ev.signals) : ev.signals
@@ -161,7 +159,7 @@ const isCoveredByActiveEvent = (
 
 /**
  * Marks dedup candidates whose identity rules are a subset of an active event's corresponding
- * identity rules (with stream overlap) as `existing_active_event` in `results`. Returns the
+ * identity rules (with source overlap) as `existing_active_event` in `results`. Returns the
  * candidates that still need to be written.
  */
 export const resolveDedupSkips = (

@@ -20,20 +20,20 @@ import {
 import { css } from '@emotion/react';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import type { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { getFeaturesFromKIs } from '../../../../components/knowledge_indicators/utils/get_features_from_kis';
 import { AssetImage } from '../../../../components/asset_image';
 import { LoadingPanel } from '../../../../components/loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../../components/knowledge_indicators/knowledge_indicator_details_flyout';
 import { DeleteTableItemsModal } from '../../../../components/knowledge_indicators/delete_table_items_modal';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { getGenerateDisabledTooltip } from '../shared/translations';
-import { StreamPicker } from '../shared/stream_picker';
+import { SourcePicker } from '../shared/source_picker';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useKiGeneration } from './ki_generation_context';
 import { useKnowledgeIndicatorsTable } from './use_knowledge_indicators_table';
@@ -64,9 +64,9 @@ export function KnowledgeIndicatorsTable() {
   const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
 
   const {
-    filteredStreams,
-    isStreamsLoading,
-    generatingStreamNames,
+    sources,
+    isSourcesLoading,
+    generatingSourceIds,
     isGenerating,
     isInitialGenerationStatusLoading,
     isScheduling,
@@ -176,11 +176,7 @@ export function KnowledgeIndicatorsTable() {
 
   const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
 
-  const streamsByName = useMemo(() => {
-    const map = new Map<string, Streams.all.Definition>();
-    filteredStreams?.forEach(({ stream }) => map.set(stream.name, stream));
-    return map;
-  }, [filteredStreams]);
+  const { sourcesById, getSourceTitle } = useSourcesById();
 
   const currentIndex = filteredKnowledgeIndicators.findIndex(
     (ki) => getKnowledgeIndicatorItemId(ki) === selectedKnowledgeIndicatorId
@@ -197,12 +193,12 @@ export function KnowledgeIndicatorsTable() {
   const generationRow = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={{ width: '100%' }}>
       <EuiFlexItem css={{ minWidth: 0 }}>
-        <StreamPicker
-          streams={filteredStreams}
-          isStreamsLoading={isStreamsLoading}
-          selectedStreamNames={generationStreamNames}
-          onSelectedStreamNamesChange={setGenerationStreamNames}
-          excludedStreamNames={generatingStreamNames}
+        <SourcePicker
+          sources={sources}
+          isSourcesLoading={isSourcesLoading}
+          selectedSourceIds={generationStreamNames}
+          onSelectedSourceIdsChange={setGenerationStreamNames}
+          excludedSourceIds={generatingSourceIds}
           isDisabled={isScheduling}
           fullWidth
         />
@@ -240,7 +236,7 @@ export function KnowledgeIndicatorsTable() {
         title={GENERATION_IN_PROGRESS_TITLE}
         announceOnMount
       >
-        <p>{getGenerationInProgressDescription(generatingStreamNames)}</p>
+        <p>{getGenerationInProgressDescription(generatingSourceIds.map(getSourceTitle))}</p>
       </EuiCallOut>
     </>
   ) : null;
@@ -384,7 +380,7 @@ export function KnowledgeIndicatorsTable() {
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
           features={features}
-          stream={streamsByName.get(getKnowledgeIndicatorStreamName(selectedKnowledgeIndicator))}
+          source={sourcesById.get(getKnowledgeIndicatorSourceId(selectedKnowledgeIndicator))}
           pageIndex={currentIndex}
           pageCount={filteredKnowledgeIndicators.length}
           onSelectPage={(nextIndex) => {
