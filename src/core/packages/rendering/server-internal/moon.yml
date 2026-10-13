@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/ui-shared-deps-npm'
   - '@kbn/ui-shared-deps-src'
+  - '@kbn/translation-resilience'
   - '@kbn/core-base-server-internal'
   - '@kbn/core-injected-metadata-common-internal'
   - '@kbn/core-http-server'
