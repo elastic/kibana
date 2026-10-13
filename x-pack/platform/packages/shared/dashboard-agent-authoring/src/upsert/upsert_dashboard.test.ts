@@ -404,7 +404,7 @@ describe('executeDashboardUpsert', () => {
 
     expect(result.failures).toEqual([]);
     expect(findPanel(result.dashboardData, 'existing')?.grid).toEqual({ x: 0, y: 0, w: 24, h: 9 });
-    expect(findPanel(result.dashboardData, 'beside')?.grid).toEqual({ x: 0, y: 9, w: 16, h: 5 });
+    expect(findPanel(result.dashboardData, 'beside')?.grid).toEqual({ x: 0, y: 9, w: 12, h: 5 });
     expect(findPanel(result.dashboardData, 'below')?.grid).toEqual({ x: 0, y: 14, w: 48, h: 3 });
   });
 
@@ -728,7 +728,7 @@ describe('executeDashboardUpsert', () => {
         expect.objectContaining({
           id: 'nested-panel',
           config: nestedPanel.config,
-          grid: { x: 0, y: 0, w: 16, h: 6 },
+          grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
         expect.objectContaining({
           id: 'total-requests',
@@ -886,7 +886,7 @@ describe('executeDashboardUpsert', () => {
   });
 
   describe('moving and resizing panels', () => {
-    it('keeps a size the layout step marks as requested by the user', async () => {
+    it('applies the sizes the layout step returns', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
           title: 'Test',
@@ -901,7 +901,7 @@ describe('executeDashboardUpsert', () => {
             { section: null, rows: [{ h: 1, items: [{ id: 'section-a', w: 48 }] }] },
             {
               section: 'section-a',
-              rows: [{ h: 6, items: [{ id: 'section-panel-1', w: 12, userSized: true }] }],
+              rows: [{ h: 6, items: [{ id: 'section-panel-1', w: 12 }] }],
             },
           ],
           rules: ['section-panel-1 is 12 wide and 6 high'],
@@ -1218,7 +1218,6 @@ describe('executeDashboardUpsert', () => {
       expect(findPanel(result.dashboardData, 'panel-1')).toEqual({
         ...topLevelPanel,
         config: { type: 'bar' },
-        grid: { ...topLevelPanel.grid, y: 0 },
       });
       expect(getSection(result.dashboardData, 'section-a')?.panels).toEqual([
         { ...sectionPanel, config: { type: 'line' } },
@@ -1354,9 +1353,7 @@ describe('executeDashboardUpsert', () => {
         expect(resolvePanelContent).toHaveBeenCalledWith(
           expect.objectContaining({ renderer: 'vega', existingPanel: vegaPanel })
         );
-        expect(result.dashboardData.panels).toEqual([
-          { ...vegaPanel, config: { updated: true }, grid: { ...vegaPanel.grid, w: 48 } },
-        ]);
+        expect(result.dashboardData.panels).toEqual([{ ...vegaPanel, config: { updated: true } }]);
       });
     });
 
@@ -1491,7 +1488,7 @@ describe('executeDashboardUpsert', () => {
       name: string;
       existingPanel: AttachmentPanel;
       content: UpsertPanelContent;
-      expected: Pick<AttachmentPanel, 'type' | 'config'> & Partial<Pick<AttachmentPanel, 'grid'>>;
+      expected: Pick<AttachmentPanel, 'type' | 'config'>;
     }>([
       {
         name: 'markdown content on a markdown panel',
@@ -1500,7 +1497,6 @@ describe('executeDashboardUpsert', () => {
         expected: {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: 'new text', settings: { open_links_in_new_tab: true } },
-          grid: { x: 0, y: 0, w: 48, h: 3 },
         },
       },
       {
@@ -1518,7 +1514,6 @@ describe('executeDashboardUpsert', () => {
             title: 'Severe anomalies',
             severity_threshold: [{ min: 50 }],
           },
-          grid: { ...GRID, w: 48 },
         },
       },
       {
@@ -1532,7 +1527,6 @@ describe('executeDashboardUpsert', () => {
         expected: {
           type: 'ml_anomaly_swimlane',
           config: { job_ids: ['job-1'], swimlane_type: 'overall', severity_threshold: 75 },
-          grid: { ...GRID, w: 48 },
         },
       },
       {
@@ -1546,7 +1540,6 @@ describe('executeDashboardUpsert', () => {
         expected: {
           type: 'ml_single_metric_viewer',
           config: { job_ids: ['job-1'], selected_entities: { 'host.name': 'web-01' } },
-          grid: { ...GRID, w: 48 },
         },
       },
     ])('applies $name in place', async ({ existingPanel, content, expected }) => {
@@ -1609,7 +1602,6 @@ describe('executeDashboardUpsert', () => {
         {
           ...existingPanel,
           config: { template: '<div>Server generated</div>' },
-          grid: { ...existingPanel.grid, w: 48 },
         },
       ]);
     });

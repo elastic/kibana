@@ -77,12 +77,6 @@ const rowItemSchema = z.object({
     .min(1)
     .max(GRID_COLUMNS)
     .describe('Panel width in grid columns. Ignored for sections.'),
-  userSized: z
-    .boolean()
-    .optional()
-    .describe(
-      'True when `w` and the row `h` follow a size the user asked for in instructions or rules.'
-    ),
 });
 
 const rowSchema = z.object({

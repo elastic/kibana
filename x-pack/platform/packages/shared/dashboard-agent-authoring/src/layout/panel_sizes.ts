@@ -22,7 +22,7 @@ const MARKDOWN_CHARACTERS_PER_LINE = 150;
 /** Rows a markdown panel needs around its text. */
 const MARKDOWN_PADDING_ROWS = 2;
 
-export interface SizeBounds {
+interface SizeBounds {
   min: PanelSize;
   max: PanelSize;
 }
@@ -179,9 +179,6 @@ export const getPanelSizeClass = (panel: PanelContentFields): SizeClassName | un
   }
   return findSizeRule(panel)?.sizeClass;
 };
-
-/** Smallest and largest size of a panel of a size class. */
-export const getSizeBounds = (sizeClass: SizeClassName): SizeBounds => SIZE_CLASSES[sizeClass];
 
 /** Default size of a panel placed without a size. */
 export const getDefaultPanelSize = (panel: PanelContentFields): PanelSize => {

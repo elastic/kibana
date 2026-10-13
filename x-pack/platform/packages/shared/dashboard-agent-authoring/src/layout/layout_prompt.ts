@@ -25,9 +25,9 @@ ${formatSizeClasses()}
 
 To close a gap, widen panels up to the largest width of their class. If a row still has a gap, rather move its panels into the row above, narrowing the panels there no lower than their smallest width. Put panels of similar height in the same row.
 
-A size the user asks for may leave the range of its class. Size a relative request ("bigger", "smaller") from the panel's current \`size\`. Set \`userSized: true\` on every row item whose \`w\` and row \`h\` follow a size request, so code keeps that size; leave it out otherwise.
+A size the user asks for may leave the range of its class. Size a relative request ("bigger", "smaller") from the panel's current \`size\`.
 
-Markdown panels list their text length in \`textLines\`. Panels with \`contentChanged: true\` were edited: size them again for their new content and keep their place.
+Markdown panels list their text length in \`textLines\`; code sets the height of new and edited markdown panels. Panels with \`contentChanged: true\` were edited: size them again for their new content and keep their place.
 
 ## Current arrangement
 
