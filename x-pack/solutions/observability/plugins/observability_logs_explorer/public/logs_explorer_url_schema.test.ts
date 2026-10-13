@@ -350,6 +350,14 @@ describe('logs_explorer_url_schema', () => {
       expect(getControlOptionsFromControlsState(controls)).toBeUndefined();
     });
 
+    it.each([undefined, 'unknown'])('should return undefined when mode is %s', (mode) => {
+      const controls = {
+        namespace: { mode, selection: { type: 'exists' } },
+      } as unknown as ControlsState;
+
+      expect(getControlOptionsFromControlsState(controls)).toBeUndefined();
+    });
+
     it('should return undefined for an unknown selection type', () => {
       const controls = {
         namespace: { mode: 'include', selection: { type: 'unknown' } },

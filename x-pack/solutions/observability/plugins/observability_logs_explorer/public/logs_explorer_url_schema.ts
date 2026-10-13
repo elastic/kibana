@@ -213,7 +213,11 @@ export const getControlOptionsFromControlsState = (
   controls?: ControlsState
 ): ControlOptions | undefined => {
   const namespace = controls?.namespace;
-  if (!namespace || !isValidFilterSelection(namespace.selection)) {
+  if (
+    !namespace ||
+    (namespace.mode !== 'include' && namespace.mode !== 'exclude') ||
+    !isValidFilterSelection(namespace.selection)
+  ) {
     return undefined;
   }
   return { 'data_stream.namespace': namespace };
