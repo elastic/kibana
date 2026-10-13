@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const IdField = lazySchema(() =>
   z.enum(['host.name', 'user.name', 'service.name', 'entity.id'])
@@ -111,7 +111,7 @@ export const AssetCriticalityRecord = lazySchema(() =>
       /**
        * The time the record was created or updated.
        */
-      '@timestamp': z.string().datetime().describe('The time the record was created or updated.'),
+      '@timestamp': isoDateTime().describe('The time the record was created or updated.'),
     })
   )
 );
