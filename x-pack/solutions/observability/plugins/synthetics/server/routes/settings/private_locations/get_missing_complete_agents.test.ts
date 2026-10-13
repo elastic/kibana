@@ -57,6 +57,10 @@ describe('getMissingCompleteAgentLocations route', () => {
     const result = await run(makeContext(listAgents));
 
     expect(result).toEqual({ locations: [{ id: 'loc-2', label: 'Location 2' }] });
+    // Without the status runtime field, `showInactive: false` still returns inactive agents.
+    expect(listAgents).toHaveBeenCalledWith(
+      expect.not.objectContaining({ includeStatusRuntimeField: false })
+    );
     expect(listAgents).toHaveBeenCalledWith(expect.objectContaining({ showInactive: false }));
   });
 

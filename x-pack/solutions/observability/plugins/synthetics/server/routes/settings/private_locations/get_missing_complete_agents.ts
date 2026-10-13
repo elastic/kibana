@@ -34,7 +34,6 @@ const locationHasCompleteAgent = async (
         perPage: PER_PAGE,
         page,
         kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
-        includeStatusRuntimeField: false,
       });
     total = totalAgents ?? agents.length;
     fetched += agents.length;

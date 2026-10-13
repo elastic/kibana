@@ -35,7 +35,7 @@ interface AgentLocalMetadata {
   elastic?: { agent?: { complete?: boolean; version?: string } };
 }
 
-// elastic/elastic-agent#16841: `elastic-agent-wolfi-complete` reports `complete` from these
+// elastic/elastic-agent#16841: `elastic-agent-complete-wolfi` reports `complete` from these
 // versions on. Older Wolfi agents can't be told apart from plain `elastic-agent-wolfi`.
 const WOLFI_COMPLETE_FLAG_SINCE: Readonly<Record<string, string>> = {
   '8.19': '8.19.24',
@@ -61,7 +61,7 @@ const isWolfiWithoutCompleteFlag = ({ os, elastic }: AgentLocalMetadata): boolea
 /**
  * True when the agent can run browser monitors: it reports the
  * `elastic-agent-complete` flag, or it is an older Wolfi agent that predates
- * the flag on `elastic-agent-wolfi-complete`. Those keep the pre-flag behavior
+ * the flag on `elastic-agent-complete-wolfi`. Those keep the pre-flag behavior
  * so upgrading Kibana doesn't stop browser monitors that already run there.
  */
 export const isCompleteElasticAgent = (localMetadata: unknown): boolean => {
