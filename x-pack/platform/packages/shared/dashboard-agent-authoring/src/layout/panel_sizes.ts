@@ -44,11 +44,11 @@ const SIZE_CLASSES = {
   compact: {
     label: 'Lens gauges, pies, and donuts',
     min: { w: 12, h: 8 },
-    max: { w: 16, h: 10 },
+    max: { w: 24, h: 10 },
   },
   chart: {
     label: 'Lens bar charts, heatmaps, tag clouds, treemaps, waffles, mosaics, and region maps',
-    min: { w: 16, h: 10 },
+    min: { w: 24, h: 10 },
     max: { w: 24, h: 14 },
   },
   trend: {
@@ -67,6 +67,7 @@ const SIZE_CLASSES = {
     label: 'Vega, custom content, and ML panels',
     min: { w: 24, h: 10 },
     max: { w: GRID_COLUMNS, h: 16 },
+    note: 'Give complex Vega and custom content (multi-section layouts, layered or multi-view charts, diagrams) full width.',
   },
   markdown: {
     label: 'Markdown',
