@@ -77,12 +77,14 @@ export const buildAlertBasedTilesQuery = (
   parts.push(`| EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)`);
   parts.push(`| EVAL new_alerting_id = CASE(is_new, entity.id, null)`);
 
+  // Each row is one resolved entity (the STATS BY effective_id above), so counting the non-null ids
+  // is exact. COUNT_DISTINCT would only estimate: it is approximate above about 3,000 values.
   parts.push(`| STATS`);
-  parts.push(`    severe_alerts_count      = COUNT_DISTINCT(severe_id),`);
+  parts.push(`    severe_alerts_count      = COUNT(severe_id),`);
   parts.push(`    severe_alerts_entity_ids = VALUES(severe_id),`);
-  parts.push(`    watchlisted_count        = COUNT_DISTINCT(watchlisted_id),`);
+  parts.push(`    watchlisted_count        = COUNT(watchlisted_id),`);
   parts.push(`    watchlisted_entity_ids   = VALUES(watchlisted_id),`);
-  parts.push(`    new_alerting_count       = COUNT_DISTINCT(new_alerting_id),`);
+  parts.push(`    new_alerting_count       = COUNT(new_alerting_id),`);
   parts.push(`    new_alerting_entity_ids  = VALUES(new_alerting_id)`);
 
   return parts.join('\n');
