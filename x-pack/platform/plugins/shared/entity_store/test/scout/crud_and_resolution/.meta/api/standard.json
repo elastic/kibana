@@ -1,5 +1,5 @@
 {
-  "sha1": "660523a863cac0aaa239e983ac53b98b7241ed21",
+  "sha1": "8ce0d5215a5d6a8580a5f8f5f42e23d9ff255880",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1120,8 +1120,8 @@
       }
     },
     {
-      "id": "fc8fec24ce63075-0fd057695a50a62",
-      "title": "Entity Store Status API tests omits the nonPriority block with the dual-process flag off",
+      "id": "fc8fec24ce63075-e600f4f5de93468",
+      "title": "Entity Store Status API tests reports a null nonPriority block with the dual-process flag off",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",

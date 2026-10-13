@@ -77400,6 +77400,7 @@ paths:
                         maxLogsPerWindowCapBehavior: drop
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
+                        nonPriority: null
                         status: started
                         timeout: 59s
                         timestampField: '@timestamp'
@@ -77450,6 +77451,7 @@ paths:
                         maxLogsPerWindowCapBehavior: drop
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
+                        nonPriority: null
                         status: started
                         timeout: 59s
                         timestampField: '@timestamp'

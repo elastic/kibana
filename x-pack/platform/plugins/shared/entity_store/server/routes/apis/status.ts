@@ -79,7 +79,7 @@ type StatusEngine = Omit<
   | 'nonPriorityStatus'
   | 'nonPriorityError'
 > &
-  LegacyEngineDescriptorV1 & { nonPriority?: NonPriorityEngineStatus };
+  LegacyEngineDescriptorV1 & { nonPriority: NonPriorityEngineStatus | null };
 
 export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
@@ -148,20 +148,18 @@ function toPublicEngine(
     // getStatus resolves a non-priority config only for types that run that process: types with a
     // priority gate, with the flag on. With the flag off the non-priority task skips every run
     // without updating its stored status, so reporting it would show a stale `started`.
-    ...(nonPriorityLogsExtractionConfig
+    nonPriority: nonPriorityLogsExtractionConfig
       ? {
-          nonPriority: {
-            status: nonPriorityStatus ?? null,
-            error: nonPriorityError ?? null,
-            lastExecutionTimestamp:
-              nonPriorityLogExtractionState?.lastExecutionTimestamp ?? undefined,
-            // Read off the descriptor: this reports what was configured, not the rate
-            // getMergedConfig resolves for a run.
-            samplingRate: nonPriorityLogExtractionConfig?.samplingRate ?? null,
-            ...toLogExtractionStatusFields(nonPriorityLogsExtractionConfig),
-          },
+          status: nonPriorityStatus ?? null,
+          error: nonPriorityError ?? null,
+          lastExecutionTimestamp:
+            nonPriorityLogExtractionState?.lastExecutionTimestamp ?? undefined,
+          // Read off the descriptor: this reports what was configured, not the rate
+          // getMergedConfig resolves for a run.
+          samplingRate: nonPriorityLogExtractionConfig?.samplingRate ?? null,
+          ...toLogExtractionStatusFields(nonPriorityLogsExtractionConfig),
         }
-      : {}),
+      : null,
   };
 }
 

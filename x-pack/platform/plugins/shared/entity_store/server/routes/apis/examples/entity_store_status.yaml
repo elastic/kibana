@@ -28,6 +28,7 @@ responses:
                   timestampField: "@timestamp"
                   maxPageSearchSize: 10000
                   lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+                  nonPriority: null
                 - type: user
                   status: started
                   filter: ""
@@ -78,6 +79,7 @@ responses:
                   timestampField: "@timestamp"
                   maxPageSearchSize: 10000
                   lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+                  nonPriority: null
               excludedUserNames: []
           notInstalledExample:
             summary: "Entity Store not installed"
