@@ -72,6 +72,8 @@ export { cloudConnectorService } from './cloud_connector';
 export type { CloudConnectorServiceInterface } from './cloud_connector';
 
 export { iacProvisionerService } from './iac_provisioner';
+export { iacCallbackService } from './iac_callback';
+export type { IacCallbackReceiveResult } from './iac_callback';
 export type { IacProvisionerService } from './iac_provisioner';
 
 export * from './cloud_connectors';
