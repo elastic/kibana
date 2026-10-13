@@ -75,7 +75,7 @@ export const taskExecutionFailureThresholdSchema = schema.object(
 
 const eventLoopWatchdogSchema = schema.object({
   /** Flags the task that blocks the event loop, sampled from a watchdog worker thread. */
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   /**
    * Shortest event loop block (ms) that can flag a task. Sampling starts half a second into a
    * block, so shorter blocks cannot be attributed.

@@ -354,6 +354,23 @@ export class TaskManagerPlugin
 
     this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
+    // PoC only, remove before merging: a task that blocks the event loop for 6s, to exercise the
+    // event loop watchdog on real environments.
+    this.definitions.registerTaskDefinitions({
+      'dev:block-event-loop': {
+        title: 'Dev: block the event loop',
+        createTaskRunner: () => ({
+          async run() {
+            const blockUntil = Date.now() + 6000;
+            while (Date.now() < blockUntil) {
+              // intentionally block the event loop
+            }
+            return { state: {} };
+          },
+        }),
+      },
+    });
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
@@ -551,6 +568,17 @@ export class TaskManagerPlugin
       this.config.invalidate_api_key_task.interval
     ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
+
+    // PoC only, remove before merging: runs the blocking task above every minute.
+    taskScheduling
+      .ensureScheduled({
+        id: 'dev-block-event-loop',
+        taskType: 'dev:block-event-loop',
+        schedule: { interval: '1m' },
+        params: {},
+        state: {},
+      })
+      .catch((e) => this.logger.warn(`Could not schedule the dev blocking task: ${e}`));
 
     this.startContract = {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),

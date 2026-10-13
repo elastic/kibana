@@ -105,7 +105,7 @@ groups:
         description: |
           Enables a watchdog thread that detects when a task blocks the event loop and flags the task responsible. Sampling only happens while the event loop is already blocked.
         datatype: bool
-        default: false
+        default: true
         applies_to:
           self: preview
           ech: preview

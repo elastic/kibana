@@ -28,7 +28,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "event_loop_watchdog": Object {
-          "enabled": false,
+          "enabled": true,
           "flag_threshold_ms": 5000,
           "live_report_interval_ms": 3000,
           "min_cpu_ratio": 0.5,
@@ -104,7 +104,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "event_loop_watchdog": Object {
-          "enabled": false,
+          "enabled": true,
           "flag_threshold_ms": 5000,
           "live_report_interval_ms": 3000,
           "min_cpu_ratio": 0.5,
@@ -178,7 +178,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "event_loop_watchdog": Object {
-          "enabled": false,
+          "enabled": true,
           "flag_threshold_ms": 5000,
           "live_report_interval_ms": 3000,
           "min_cpu_ratio": 0.5,
