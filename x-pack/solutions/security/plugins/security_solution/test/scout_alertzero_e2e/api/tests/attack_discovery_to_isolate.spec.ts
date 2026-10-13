@@ -217,6 +217,24 @@ apiTest.describe(
               proposal.actionWorkflowId === actionWorkflowId && proposal.createdAt >= startedAt
           );
 
+        // Correlates a proposal with THIS run's seeded attack: the proposal that drives the
+        // isolate must reference the seeded host (agent id or host name) or one of this run's
+        // alert ids, otherwise an unrelated AlertZero run could satisfy the test.
+        const expectProposalReferencesSeededRun = (
+          label: string,
+          proposal: { actionInput?: unknown }
+        ) => {
+          const encoded = JSON.stringify(proposal.actionInput ?? {});
+          const referencesSeededRun =
+            encoded.includes(hosts.hosts[0].agentId) ||
+            encoded.includes(scenarioHost) ||
+            (scenario?.alertIds ?? []).some((alertId) => encoded.includes(alertId));
+          expect(
+            referencesSeededRun,
+            `${label} proposal must reference the seeded attack run; actionInput: ${encoded}`
+          ).toBe(true);
+        };
+
         // 2. The review of the discovered attack proposes handing off to forensics.
         const investigate = await pollUntil(
           'an Investigate (handoff to forensics) proposal',
@@ -224,6 +242,7 @@ apiTest.describe(
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
         expect(investigate.actionInput).toBeDefined();
+        expectProposalReferencesSeededRun('Investigate', investigate);
 
         // Approve exactly as the approval modal does — but only once the execution backing the
         // proposal has parked in `waiting_for_input`. Approving earlier answers 409; retrying
@@ -260,9 +279,14 @@ apiTest.describe(
           () => findPending(testData.ISOLATE_HOST_ACTION_ID),
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
+        expectProposalReferencesSeededRun('Isolate', isolate);
         await approveProposal('Isolate', isolate);
 
         // 5. The approval creates a Defend isolate action. Complete it as the agent would.
+        // The lookup requires the action to target THIS run's seeded host: its agent id is
+        // minted by seedEndpointHosts for this spec alone, so an isolate action from an
+        // unrelated AlertZero run can no longer satisfy the test.
+        const seededAgentId = hosts.hosts[0].agentId;
         const action = await pollUntil(
           'the Defend isolate action',
           async () =>
@@ -272,11 +296,36 @@ apiTest.describe(
                 '/api/endpoint/action?commands=isolate&pageSize=20'
               ),
               'list endpoint actions'
-            ).data.find((candidate) => candidate.startedAt >= startedAt),
+            ).data.find(
+              (candidate) =>
+                candidate.startedAt >= startedAt && candidate.agents.includes(seededAgentId)
+            ),
           { timeoutMs: testData.ACTION_TIMEOUT_MS }
         );
-        expect(action.agents.length).toBeGreaterThan(0);
+        expect(action.agents).toContain(seededAgentId);
         await completeHostAction({ esClient, config, action: action as never });
+
+        // 6. The simulated acknowledgement only writes Fleet/Endpoint responses; it does not
+        // mean the product observed success. Assert the action's product-observed terminal
+        // state so regressions in response processing or action-status calculation fail here.
+        await pollUntil(
+          `the isolate action ${action.id} to complete successfully`,
+          async () => {
+            const details = ok(
+              await api.public<{
+                data: { isCompleted: boolean; wasSuccessful: boolean };
+              }>('GET', `/api/endpoint/action/${action.id}`),
+              'read the isolate action details'
+            ).data;
+            if (details.isCompleted && !details.wasSuccessful) {
+              throw new Error(
+                `Isolate action ${action.id} completed unsuccessfully: ${JSON.stringify(details)}`
+              );
+            }
+            return details.isCompleted && details.wasSuccessful ? details : undefined;
+          },
+          { timeoutMs: testData.ACTION_TIMEOUT_MS }
+        );
 
         // Media capture hook (run_scout.sh's SCOUT_KEEP_STACK path, ORCA_MEDIA_EJECT=1): eject the
         // ids the off-board capture script needs and leave the seeded host in place so the live

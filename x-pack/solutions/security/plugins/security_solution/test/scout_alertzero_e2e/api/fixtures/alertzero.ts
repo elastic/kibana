@@ -63,29 +63,42 @@ export const seedAttackScenario = async (
       throw new Error(`Seeding (${op}) failed: ${JSON.stringify(response.items.slice(0, 3))}`);
     }
   };
-  await bulk(plan.alerts, 'index');
-  // Raw endpoint events live in data streams, which only accept `create`.
-  await bulk(plan.rawEvents, 'create');
+  // Removes only what this run wrote, keyed on the run marker. Shared by the failure rollback
+  // below and the returned cleanup so a partially seeded run cannot leak documents.
+  const removeSeeded = async (): Promise<void> => {
+    for (const index of AD2_SCENARIO_ALL_INDICES) {
+      await esClient
+        .deleteByQuery({
+          index,
+          conflicts: 'proceed',
+          refresh: true,
+          query: { term: { 'labels.ad_portable_seed': runMarker } },
+        })
+        .catch((error: { statusCode?: number }) => {
+          if (error.statusCode !== 404) {
+            throw error;
+          }
+        });
+    }
+  };
+
+  try {
+    await bulk(plan.alerts, 'index');
+    // Raw endpoint events live in data streams, which only accept `create`.
+    await bulk(plan.rawEvents, 'create');
+  } catch (error) {
+    // A failed bulk can still have written some documents (the raw-events bulk can fail after
+    // every alert already landed). Throwing here without a rollback would leave this function's
+    // cleanup callback unreachable — the caller never receives `scenario`, so its afterAll
+    // cannot remove the leftovers, and they can pollute later Attack Discovery runs.
+    await removeSeeded().catch(() => undefined); // best-effort; the seeding error is the real one
+    throw error;
+  }
 
   return {
     runMarker,
     alertIds: getAd2ScenarioAlertIds(scenarioKey, 'clean', runMarker),
-    cleanup: async () => {
-      for (const index of AD2_SCENARIO_ALL_INDICES) {
-        await esClient
-          .deleteByQuery({
-            index,
-            conflicts: 'proceed',
-            refresh: true,
-            query: { term: { 'labels.ad_portable_seed': runMarker } },
-          })
-          .catch((error: { statusCode?: number }) => {
-            if (error.statusCode !== 404) {
-              throw error;
-            }
-          });
-      }
-    },
+    cleanup: removeSeeded,
   };
 };
 
@@ -134,7 +147,15 @@ export const createServiceAccount = async (api: AlertZeroApi): Promise<string> =
   ).id;
 
 export const deleteServiceAccount = async (api: AlertZeroApi, id: string): Promise<void> => {
-  await api.internal('DELETE', `${SERVICE_ACCOUNT_URL}/${encodeURIComponent(id)}`);
+  const response = await api.internal('DELETE', `${SERVICE_ACCOUNT_URL}/${encodeURIComponent(id)}`);
+  // `api.internal` resolves non-2xx responses as values instead of throwing, so discarding the
+  // result would make teardown look successful while leaving the superuser account behind.
+  // A 404 means an earlier teardown already removed it; anything else fails loudly.
+  if (response.statusCode !== 200 && response.statusCode !== 404) {
+    throw new Error(
+      `Delete service account ${id} failed: ${response.statusCode} ${JSON.stringify(response.body)}`
+    );
+  }
 };
 
 /**
