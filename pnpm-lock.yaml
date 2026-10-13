@@ -1933,9 +1933,6 @@ importers:
       '@kbn/deeplinks-workflows':
         specifier: workspace:*
         version: link:src/platform/packages/shared/deeplinks/workflows
-      '@kbn/deeplinks-workplace-ai':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/deeplinks/workplace_ai
       '@kbn/default-tracer':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-default-tracer
@@ -3535,12 +3532,6 @@ importers:
       '@kbn/serverless-vectordb-settings':
         specifier: workspace:*
         version: link:src/platform/packages/shared/serverless/settings/vectordb_project
-      '@kbn/serverless-workplace-ai':
-        specifier: workspace:*
-        version: link:x-pack/solutions/workplaceai/plugins/serverless_workplace_ai
-      '@kbn/serverless-workplace-ai-settings':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/serverless/settings/workplace_ai_project
       '@kbn/service-accounts-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/security_api_integration/plugins/service_accounts
@@ -4117,9 +4108,6 @@ importers:
       '@kbn/workflows-yaml':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-yaml
-      '@kbn/workplace-ai-app':
-        specifier: workspace:*
-        version: link:x-pack/solutions/workplaceai/plugins/workplace_ai_app
       '@kbn/xstate-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-xstate-utils
@@ -4567,9 +4555,6 @@ importers:
       ipaddr.js:
         specifier: 2.3.0
         version: 2.3.0
-      isbinaryfile:
-        specifier: 4.0.2
-        version: 4.0.2
       jest-diff:
         specifier: 29.7.0
         version: 29.7.0
@@ -5954,9 +5939,6 @@ importers:
       '@kbn/test-suites-xpack-vectordb':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
-      '@kbn/test-suites-xpack-workplace-ai':
-        specifier: workspace:*
-        version: link:x-pack/solutions/workplaceai/test
       '@kbn/tooling-log':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-tooling-log
@@ -7925,8 +7907,6 @@ importers:
 
   src/platform/packages/shared/deeplinks/workflows: {}
 
-  src/platform/packages/shared/deeplinks/workplace_ai: {}
-
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
   src/platform/packages/shared/esql/kbn-esql-language: {}
@@ -8462,8 +8442,6 @@ importers:
   src/platform/packages/shared/serverless/settings/security_project: {}
 
   src/platform/packages/shared/serverless/settings/vectordb_project: {}
-
-  src/platform/packages/shared/serverless/settings/workplace_ai_project: {}
 
   src/platform/packages/shared/serverless/types: {}
 
@@ -9886,12 +9864,6 @@ importers:
   x-pack/solutions/vectordb/plugins/serverless_vectordb: {}
 
   x-pack/solutions/vectordb/test: {}
-
-  x-pack/solutions/workplaceai/plugins/serverless_workplace_ai: {}
-
-  x-pack/solutions/workplaceai/plugins/workplace_ai_app: {}
-
-  x-pack/solutions/workplaceai/test: {}
 
 packages:
 
@@ -20489,10 +20461,6 @@ packages:
 
   isarray@2.0.5:
     resolution: {integrity: sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw==}
-
-  isbinaryfile@4.0.2:
-    resolution: {integrity: sha512-C3FSxJdNrEr2F4z6uFtNzECDM5hXk+46fxaa+cwBe5/XrWSmzdG8DDgyjfX6/NRdBB21q2JXuRAzPCUs+fclnQ==}
-    engines: {node: '>= 8.0.0'}
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
@@ -39005,8 +38973,6 @@ snapshots:
   isarray@1.0.0: {}
 
   isarray@2.0.5: {}
-
-  isbinaryfile@4.0.2: {}
 
   isexe@2.0.0: {}
 
