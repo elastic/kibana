@@ -160956,6 +160956,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -161029,6 +161030,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: false
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -161082,6 +161162,34 @@ components:
           additionalProperties: false
           type: object
           properties:
+            oauth2:
+              additionalProperties: false
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: false
@@ -163287,6 +163395,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -163360,6 +163469,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: true
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -163413,6 +163601,34 @@ components:
           additionalProperties: true
           type: object
           properties:
+            oauth2:
+              additionalProperties: true
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: true
@@ -168999,6 +169215,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -169072,6 +169289,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: false
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -169125,6 +169421,34 @@ components:
           additionalProperties: false
           type: object
           properties:
+            oauth2:
+              additionalProperties: false
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: false
