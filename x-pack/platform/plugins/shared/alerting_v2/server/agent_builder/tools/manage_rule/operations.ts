@@ -355,6 +355,13 @@ async function validateEsqlQuery(
   }
 }
 
+/** Unlinking the last artifact removes the key: the rule schemas reject an empty list. */
+const setArtifacts = (
+  data: Partial<RuleAttachmentData>,
+  artifacts: RuleArtifact[]
+): Partial<RuleAttachmentData> =>
+  artifacts.length ? { ...data, artifacts } : omit(data, 'artifacts');
+
 // ─── Execution ────────────────────────────────────────────────────────────────
 
 export const executeRuleOperations = async (
@@ -564,7 +571,7 @@ export const executeRuleOperations = async (
             `A rule can have at most ${MAX_RULE_ARTIFACTS} artifacts.`
           );
         }
-        next = { ...next, artifacts };
+        next = setArtifacts(next, artifacts);
         break;
       }
 
@@ -588,7 +595,7 @@ export const executeRuleOperations = async (
             `A rule can have at most ${MAX_RULE_ARTIFACTS} artifacts.`
           );
         }
-        next = { ...next, artifacts };
+        next = setArtifacts(next, artifacts);
         break;
       }
 
