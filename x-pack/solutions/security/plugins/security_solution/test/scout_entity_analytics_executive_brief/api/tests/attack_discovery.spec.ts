@@ -27,21 +27,18 @@ import {
   waitForBriefJob,
 } from '../fixtures/brief_helpers';
 
-/** A model answer that cites the first discovery at `level` in the verdict and one assessment. */
+/** A model answer at `level` whose one assessment cites the first discovery. */
 const discoveryBrief = (level: AttentionLevel): Brief => ({
   verdict: {
     level,
     headline: 'Attack Discovery found activity worth reviewing',
     summary: 'A discovered attack is open and worth reviewing.',
-    factIds: [1],
-    linkIds: [],
   },
   assessments: {
     threats: {
       level,
       summary: 'A discovered attack is open.',
       factIds: [1],
-      linkIds: [],
     },
   },
 });
@@ -109,7 +106,7 @@ apiTest.describe(
         expect(document.job.status).toBe('succeeded');
         expect(document.metadata?.signals.attack_discoveries.status).toBe('ok');
         const discoveryIds = (document.report?.facts ?? [])
-          .filter(({ kind }) => kind === 'attack_discovery')
+          .filter(({ source }) => source?.type === 'attack_discovery')
           .map(({ source }) => source?.id)
           .sort();
         expect(discoveryIds).toStrictEqual(['ad-own', 'ad-shared']);
@@ -147,10 +144,10 @@ apiTest.describe(
         expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({
             id: 1,
-            kind: 'attack_discovery',
+            signalId: 'attack_discoveries',
             severity: 'critical',
             numbers: { alerts: 3 },
-            source: expect.objectContaining({ id: 'ad-first-run' }),
+            source: { type: 'attack_discovery', id: 'ad-first-run' },
           }),
         ]);
       }

@@ -19,24 +19,25 @@ import { checkGuardrails } from './guardrails';
 const run = (brief: Brief, evidence: Evidence = FIXTURE_EVIDENCE) =>
   checkGuardrails(brief, { index: buildEvidenceIndex(evidence), dropped: new Set() });
 
-/** A level, or a level with the fact and link ids it cites. */
-type Claim = AttentionLevel | [AttentionLevel, number[], number[]?];
+/** A level, or a level with the fact ids it cites. */
+type Claim = AttentionLevel | [AttentionLevel, number[]];
 
 const toClaim = (claim: Claim) =>
-  typeof claim === 'string'
-    ? { level: claim }
-    : { level: claim[0], factIds: claim[1], linkIds: claim[2] ?? [] };
+  typeof claim === 'string' ? { level: claim } : { level: claim[0], factIds: claim[1] };
 
 type Levels = Partial<Record<AssessmentKey, AttentionLevel>>;
 
 /**
- * The valid brief with only the given assessments, at the given levels (and cited ids, where
- * given).
+ * The valid brief at the given verdict level, with only the given assessments at the given levels
+ * (and cited ids, where given).
  */
-const brief = (verdict: Claim, assessments: Partial<Record<AssessmentKey, Claim>>): Brief => {
+const brief = (
+  verdict: AttentionLevel,
+  assessments: Partial<Record<AssessmentKey, Claim>>
+): Brief => {
   const valid = buildValidBrief();
   return {
-    verdict: { ...valid.verdict, ...toClaim(verdict) },
+    verdict: { ...valid.verdict, level: verdict },
     assessments: ASSESSMENT_KEYS.reduce<Brief['assessments']>((acc, key) => {
       const claim = assessments[key];
       return claim ? { ...acc, [key]: { ...valid.assessments[key], ...toClaim(claim) } } : acc;
@@ -60,11 +61,11 @@ const F1_WITH_CASE = withFacts((facts) => [
   ...facts,
   {
     id: 9,
-    kind: 'case',
     signalId: 'cases',
     title: 'Investigate stolen credentials',
     entityIds: [DOCKER],
     details: { status: 'in-progress' },
+    source: { type: 'case', id: 'case-1' },
   },
 ]);
 
@@ -92,21 +93,21 @@ describe('checkGuardrails', () => {
     ],
     [
       'lowers urgent to action when the severe discovery is already handled',
-      brief(['urgent', [2]], { threats: ['urgent', [2]] }),
+      brief('urgent', { threats: ['urgent', [2]] }),
       FIXTURE_EVIDENCE,
       { verdict: 'action', assessments: { threats: 'action' }, lowered: 2 },
     ],
     [
       'caps an unrated fact at action',
-      brief(['action', [1]], { threats: ['urgent', [1]] }),
+      brief('action', { threats: ['urgent', [1]] }),
       F1_UNRATED,
       { verdict: 'action', assessments: { threats: 'action' }, lowered: 1 },
     ],
     [
-      'lets the verdict rest on what its assessments cite',
-      brief(['urgent', [2]], { threats: ['urgent', [], [1]] }),
-      FIXTURE_EVIDENCE,
-      { verdict: 'urgent', assessments: { threats: 'urgent' }, lowered: 0 },
+      'lowers a verdict without assessments to clear',
+      brief('watch', {}),
+      F1_ACKNOWLEDGED,
+      { verdict: 'clear', assessments: {}, lowered: 1 },
     ],
   ])('level ceiling: %s', (_name, input, evidence, expected) => {
     const outcome = run(input, evidence);

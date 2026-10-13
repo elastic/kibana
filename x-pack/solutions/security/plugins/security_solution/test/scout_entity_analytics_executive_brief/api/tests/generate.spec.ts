@@ -71,7 +71,7 @@ apiTest.describe(
         const document = await waitForBriefJob({ apiClient, headers, jobId });
         expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
         expect(document.job.took).toBeGreaterThanOrEqual(0);
-        expect(document.report).toStrictEqual({ entities: {}, facts: [], links: [] });
+        expect(document.report).toStrictEqual({ entities: {}, facts: [] });
         expect(document.metadata?.tokens).toBeUndefined();
         expect(document.metadata?.verification).toBeUndefined();
         // Signals are keyed by id, each with only its status and duration.

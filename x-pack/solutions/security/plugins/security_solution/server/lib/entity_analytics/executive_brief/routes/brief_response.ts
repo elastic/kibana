@@ -47,7 +47,6 @@ export const toBriefResponse = (document: BriefDocument): BriefResponse => {
       ...(brief ? { verdict: brief.verdict, assessments: brief.assessments } : {}),
       entities: evidence.entities,
       facts: evidence.facts,
-      links: evidence.links,
     },
     metadata: {
       generatedAt,

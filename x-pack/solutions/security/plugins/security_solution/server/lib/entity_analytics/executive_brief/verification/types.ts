@@ -61,12 +61,14 @@ export interface ClaimField {
   text: string;
 }
 
-/** A unit of the brief that is kept or dropped as a whole. `path` is undefined for the verdict. */
+/**
+ * A unit of the brief that is kept or dropped as a whole. `path` is undefined for the verdict,
+ * whose `factIds` are those its kept assessments cite.
+ */
 export interface Claim {
   path: ItemPath | undefined;
   fields: ClaimField[];
   factIds: number[];
-  linkIds: number[];
   level: AttentionLevel;
 }
 
@@ -91,16 +93,32 @@ export const mapAssessments = (
     {}
   );
 
+/** The assessments not marked for removal, in `ASSESSMENT_KEYS` order. */
+export const keptAssessments = (
+  assessments: Brief['assessments'],
+  dropped: ReadonlySet<string>
+): Assessment[] =>
+  presentAssessments(assessments)
+    .filter(({ key }) => !dropped.has(assessmentPath(key)))
+    .map(({ assessment }) => assessment);
+
+/** The fact ids the verdict rests on: those its kept assessments cite. */
+export const verdictFactIds = (
+  assessments: Brief['assessments'],
+  dropped: ReadonlySet<string>
+): number[] => [
+  ...new Set(keptAssessments(assessments, dropped).flatMap(({ factIds }) => factIds)),
+];
+
 /** Lists the claims of a brief in a fixed order: verdict, then assessments. */
-export const listClaims = (brief: Brief): Claim[] => [
+export const listClaims = (brief: Brief, { dropped }: CheckContext): Claim[] => [
   {
     path: undefined,
     fields: [
       { path: 'verdict.headline', text: brief.verdict.headline },
       { path: 'verdict.summary', text: brief.verdict.summary },
     ],
-    factIds: brief.verdict.factIds,
-    linkIds: brief.verdict.linkIds,
+    factIds: verdictFactIds(brief.assessments, dropped),
     level: brief.verdict.level,
   },
   ...presentAssessments(brief.assessments).map(({ key, assessment }): Claim => {
@@ -109,7 +127,6 @@ export const listClaims = (brief: Brief): Claim[] => [
       path,
       fields: [{ path: `${path}.summary`, text: assessment.summary }],
       factIds: assessment.factIds,
-      linkIds: assessment.linkIds,
       level: assessment.level,
     };
   }),

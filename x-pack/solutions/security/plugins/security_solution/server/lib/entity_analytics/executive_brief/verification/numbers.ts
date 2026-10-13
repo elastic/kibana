@@ -88,16 +88,12 @@ const claimEntities = (claim: Claim, index: EvidenceIndex, facts: readonly Fact[
       claim.fields.some(({ text }) => text.includes(euid))
     ),
     ...facts.flatMap(({ entityIds }) => entityIds),
-    ...claim.linkIds.flatMap((id) => {
-      const link = index.links.get(id);
-      return link ? [link.fromEntityId, link.toEntityId] : [];
-    }),
   ]).filter((euid) => index.entities.has(euid));
 
 /**
- * The numbers a claim may quote: those of the facts it cites (directly or through a cited link),
- * the risk scores of the entities it is about, simple counts of what it cites, and the window
- * length.
+ * The numbers a claim may quote: those of the facts it cites (for the verdict, those its
+ * assessments cite), the risk scores of the entities it is about, simple counts of what it cites,
+ * and the window length.
  */
 export const collectClaimNumbers = (
   claim: Claim,
@@ -105,7 +101,7 @@ export const collectClaimNumbers = (
   range?: string
 ): Set<number> => {
   const allowed = new Set<number>();
-  const facts = citedFacts(index, claim.factIds, claim.linkIds);
+  const facts = citedFacts(index, claim.factIds);
   facts.forEach((fact) => addFactNumbers(allowed, fact, index));
   const entities = claimEntities(claim, index, facts);
   entities.forEach((euid) => {
@@ -121,7 +117,8 @@ export const collectClaimNumbers = (
 };
 
 /**
- * Numbers: every number in a claim's prose must come from what the claim cites. Any other number
+ * Numbers: every number in a claim's prose must come from what the claim cites (the verdict: what
+ * its assessments cite). Any other number
  * drops the claim (structural for the verdict), even when it appears elsewhere in the evidence.
  * Dates, times, ordinals, identifiers, mention tokens and the evidence's entity ids and names are
  * masked first.
@@ -132,7 +129,7 @@ export const createNumbersCheck =
     const { index } = context;
     const outcome = emptyOutcome(brief);
 
-    listClaims(brief).forEach((claim) => {
+    listClaims(brief, context).forEach((claim) => {
       if (isDropped(context, claim.path)) {
         return;
       }

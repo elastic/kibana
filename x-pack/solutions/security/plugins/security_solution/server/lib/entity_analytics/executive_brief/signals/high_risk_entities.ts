@@ -33,7 +33,6 @@ const toFact = (ref: EntityRef, record: Entity): FactDraft => {
   const criticality = record.asset?.criticality;
   const { privileged, others } = watchlistsOf(record);
   return {
-    kind: 'high_risk_entity',
     title: `${ref.name} is at ${level} risk`,
     severity: severityOf(level),
     entities: [ref],
@@ -44,6 +43,7 @@ const toFact = (ref: EntityRef, record: Entity): FactDraft => {
       ...(others.length > 0 ? { watchlists: others.join(', ') } : {}),
       ...(privileged ? { privileged: 'yes' } : {}),
     },
+    source: { type: 'entity', id: ref.euid },
   };
 };
 

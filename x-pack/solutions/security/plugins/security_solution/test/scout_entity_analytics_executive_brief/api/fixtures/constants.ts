@@ -46,8 +46,8 @@ export const SEEDED_ENTITY = {
 } as const;
 
 /**
- * A model answer for the seeded high-risk entity: it cites fact 1 at `watch`, which the evidence
- * supports, and mentions the entity by its EUID token, so verification keeps it unchanged. The
+ * A model answer for the seeded high-risk entity: its threats assessment cites fact 1 at `watch`,
+ * which the evidence supports, and mentions the entity by its EUID token, so verification keeps it unchanged. The
  * prose has no other digits or ids, so the number and citation checks have nothing to change.
  */
 export const HIGH_RISK_ENTITY_BRIEF: Brief = {
@@ -55,21 +55,17 @@ export const HIGH_RISK_ENTITY_BRIEF: Brief = {
     level: 'watch',
     headline: 'One user is at high risk and worth monitoring',
     summary: `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk. No attack discoveries were found in this period.`,
-    factIds: [1],
-    linkIds: [],
   },
   assessments: {
     threats: {
       level: 'watch',
       summary: 'One user is at high risk; no discovered attacks.',
       factIds: [1],
-      linkIds: [],
     },
     response: {
       level: 'clear',
       summary: 'Nothing is waiting for a response.',
       factIds: [],
-      linkIds: [],
     },
   },
 };

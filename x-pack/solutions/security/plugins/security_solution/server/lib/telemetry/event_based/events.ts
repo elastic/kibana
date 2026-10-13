@@ -2584,10 +2584,6 @@ export const ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT: EventTypeOpts<Bri
         type: 'long',
         _meta: { description: 'Number of facts in the gathered evidence' },
       },
-      linkCount: {
-        type: 'long',
-        _meta: { description: 'Number of links in the gathered evidence' },
-      },
       tokens: {
         properties: {
           prompt: {

@@ -9,7 +9,6 @@ import type { Entity } from '@kbn/entity-store/common';
 import type {
   Evidence,
   Fact,
-  Link,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { entityDisplayName } from '../entity_record';
 
@@ -19,7 +18,6 @@ export interface EvidenceIndex {
   /** Entity Store records by EUID. */
   readonly entities: ReadonlyMap<string, Entity>;
   readonly facts: ReadonlyMap<number, Fact>;
-  readonly links: ReadonlyMap<number, Link>;
   /** Matches the entities' EUIDs and names that contain digits, so they aren't read as numbers. */
   readonly identifierPattern?: RegExp;
 }
@@ -29,7 +27,6 @@ const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\
 export const buildEvidenceIndex = (evidence: Evidence): EvidenceIndex => {
   const entities = new Map<string, Entity>(Object.entries(evidence.entities));
   const facts = new Map<number, Fact>(evidence.facts.map((fact) => [fact.id, fact]));
-  const links = new Map<number, Link>(evidence.links.map((link) => [link.id, link]));
   const identifiers = unique(
     [...entities].flatMap(([euid, record]) => [
       euid,
@@ -43,38 +40,18 @@ export const buildEvidenceIndex = (evidence: Evidence): EvidenceIndex => {
     evidence,
     entities,
     facts,
-    links,
     ...(identifiers.length > 0
       ? { identifierPattern: new RegExp(identifiers.map(escapeRegExp).join('|'), 'gi') }
       : {}),
   };
 };
 
-/** True when the ids include at least one fact or link of the evidence. */
-export const hasFactOrLink = (
-  index: EvidenceIndex,
-  factIds: readonly number[],
-  linkIds: readonly number[]
-): boolean =>
-  factIds.some((id) => index.facts.has(id)) || linkIds.some((id) => index.links.has(id));
-
-/** Facts cited directly, plus the facts behind cited links. */
-export const citedFacts = (
-  index: EvidenceIndex,
-  factIds: readonly number[],
-  linkIds: readonly number[]
-): Fact[] => {
-  const result = new Map<number, Fact>();
-  const add = (id: number): void => {
+/** The cited facts that are in the evidence. */
+export const citedFacts = (index: EvidenceIndex, factIds: readonly number[]): Fact[] =>
+  unique(factIds).flatMap((id) => {
     const fact = index.facts.get(id);
-    if (fact) {
-      result.set(fact.id, fact);
-    }
-  };
-  factIds.forEach(add);
-  linkIds.forEach((id) => index.links.get(id)?.factIds.forEach(add));
-  return [...result.values()];
-};
+    return fact ? [fact] : [];
+  });
 
 /** Unique values, first occurrence wins. */
 export const unique = <T>(values: readonly T[]): T[] => [...new Set(values)];

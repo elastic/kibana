@@ -108,7 +108,6 @@ const clampFields = (record: JsonRecord, limits: Record<string, number>): JsonRe
 const withNormalizedIds = (record: JsonRecord): JsonRecord => ({
   ...record,
   factIds: normalizeIds(record.factIds),
-  linkIds: normalizeIds(record.linkIds),
 });
 
 const normalizeAssessments = (assessments: unknown): unknown =>
@@ -137,7 +136,7 @@ export const normalizeBriefOutput = (output: unknown): unknown => {
   return {
     ...output,
     verdict: isRecord(output.verdict)
-      ? clampFields(withNormalizedIds(output.verdict), {
+      ? clampFields(output.verdict, {
           headline: BRIEF_TEXT_LIMITS.verdictHeadline,
           summary: BRIEF_TEXT_LIMITS.verdictSummary,
         })

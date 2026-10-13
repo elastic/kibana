@@ -33,10 +33,10 @@ import {
   waitForBriefJob,
 } from '../fixtures/brief_helpers';
 
-/** A `watch` verdict that cites nothing: a structural problem only the model can fix. */
-const UNCITED_VERDICT_BRIEF: Brief = {
+/** A `clear` verdict below its `watch` assessment: a structural problem only the model can fix. */
+const VERDICT_BELOW_ASSESSMENT_BRIEF: Brief = {
   ...HIGH_RISK_ENTITY_BRIEF,
-  verdict: { ...HIGH_RISK_ENTITY_BRIEF.verdict, factIds: [], linkIds: [] },
+  verdict: { ...HIGH_RISK_ENTITY_BRIEF.verdict, level: 'clear' },
 };
 
 apiTest.describe(
@@ -104,12 +104,12 @@ apiTest.describe(
         expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({
             id: 1,
-            kind: 'high_risk_entity',
+            signalId: 'high_risk_entities',
             severity: 'high',
             entityIds: [SEEDED_ENTITY.id],
+            source: { type: 'entity', id: SEEDED_ENTITY.id },
           }),
         ]);
-        expect(document.report?.links).toStrictEqual([]);
 
         // One LLM call, with the brief tool forced.
         expect(llmProxy.interceptedRequests).toHaveLength(1);
@@ -156,7 +156,7 @@ apiTest.describe(
     apiTest(
       'sends a structural problem back to the model once and stores the repaired brief',
       async ({ apiClient }) => {
-        mockSubmitBrief(llmProxy, UNCITED_VERDICT_BRIEF);
+        mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
         mockSubmitBrief(llmProxy, HIGH_RISK_ENTITY_BRIEF);
 
         const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
@@ -196,8 +196,8 @@ apiTest.describe(
         expect(previousDocument.job.status).toBe('succeeded');
 
         llmProxy.clear();
-        mockSubmitBrief(llmProxy, UNCITED_VERDICT_BRIEF);
-        mockSubmitBrief(llmProxy, UNCITED_VERDICT_BRIEF);
+        mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
+        mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
         const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
@@ -231,7 +231,6 @@ apiTest.describe(
               level: 'watch',
               summary: '{{ entity.id user:not-in-evidence }} needs a response.',
               factIds: [1],
-              linkIds: [],
             },
           },
         });

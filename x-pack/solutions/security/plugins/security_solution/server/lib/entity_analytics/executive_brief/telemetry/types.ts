@@ -33,7 +33,6 @@ export interface BriefCompletedEvent {
   signals: Array<{ id: string; status: SignalStatus; durationMs: number; factCount: number }>;
   entityCount: number;
   factCount: number;
-  linkCount: number;
   tokens?: { prompt: number; completion: number };
   repaired: boolean;
   levelsLowered: number;

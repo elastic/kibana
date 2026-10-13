@@ -13,7 +13,13 @@ import type { Fact } from '../../../../../common/entity_analytics/executive_brie
 import type { EvidenceIndex } from './evidence_index';
 import { citedFacts } from './evidence_index';
 import type { BriefCheck, CheckOutcome } from './types';
-import { assessmentPath, emptyOutcome, mapAssessments, presentAssessments } from './types';
+import {
+  assessmentPath,
+  emptyOutcome,
+  keptAssessments,
+  mapAssessments,
+  verdictFactIds,
+} from './types';
 
 const LEVEL_RANK: Record<AttentionLevel, number> = { clear: 0, watch: 1, action: 2, urgent: 3 };
 
@@ -33,7 +39,8 @@ export const isAddressed = (fact: Fact, index: EvidenceIndex): boolean => {
   }
   return index.evidence.facts.some(
     (other) =>
-      other.kind === 'case' && other.entityIds.some((entityId) => fact.entityIds.includes(entityId))
+      other.source?.type === 'case' &&
+      other.entityIds.some((entityId) => fact.entityIds.includes(entityId))
   );
 };
 
@@ -41,7 +48,7 @@ export const isAddressed = (fact: Fact, index: EvidenceIndex): boolean => {
 const unaddressedSevereDiscoveries = (index: EvidenceIndex): Fact[] =>
   index.evidence.facts.filter(
     (fact) =>
-      fact.kind === 'attack_discovery' &&
+      fact.source?.type === 'attack_discovery' &&
       (fact.severity === 'critical' || fact.severity === 'high') &&
       !isAddressed(fact, index)
   );
@@ -62,21 +69,18 @@ const supportOf = (fact: Fact, index: EvidenceIndex): AttentionLevel => {
   }
 };
 
-/** The highest level the cited facts (directly or through links) support; `clear` with none. */
-export const supportedLevel = (
-  index: EvidenceIndex,
-  factIds: readonly number[],
-  linkIds: readonly number[]
-): AttentionLevel =>
-  citedFacts(index, factIds, linkIds).reduce<AttentionLevel>(
+/** The highest level the cited facts support; `clear` with none. */
+export const supportedLevel = (index: EvidenceIndex, factIds: readonly number[]): AttentionLevel =>
+  citedFacts(index, factIds).reduce<AttentionLevel>(
     (level, fact) => higher(level, supportOf(fact, index)),
     'clear'
   );
 
 /**
  * Guardrails: small deterministic bounds on the AI's judgement.
- * - Ceiling: a level never exceeds what its cited facts support (the verdict: everything the brief
- *   cites); higher levels are lowered, so little evidence can't read as an emergency.
+ * - Ceiling: a level never exceeds what its cited facts support (the verdict: what its kept
+ *   assessments cite, so a verdict without them is `clear`); higher levels are lowered, so little
+ *   evidence can't read as an emergency.
  * - Floors: the verdict is never `clear` while an unaddressed critical/high attack discovery exists,
  *   and never calmer than its most severe assessment. These are structural (the model gets one
  *   chance to fix them).
@@ -86,13 +90,8 @@ export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
   const outcome = emptyOutcome(brief);
   const isKept = (key: AssessmentKey): boolean => !dropped.has(assessmentPath(key));
 
-  const cap = (
-    path: string,
-    level: AttentionLevel,
-    factIds: readonly number[],
-    linkIds: readonly number[]
-  ): AttentionLevel => {
-    const ceiling = supportedLevel(index, factIds, linkIds);
+  const cap = (path: string, level: AttentionLevel, factIds: readonly number[]): AttentionLevel => {
+    const ceiling = supportedLevel(index, factIds);
     if (LEVEL_RANK[level] <= LEVEL_RANK[ceiling]) {
       return level;
     }
@@ -105,26 +104,14 @@ export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
     isKept(key)
       ? {
           ...assessment,
-          level: cap(
-            `${assessmentPath(key)}.level`,
-            assessment.level,
-            assessment.factIds,
-            assessment.linkIds
-          ),
+          level: cap(`${assessmentPath(key)}.level`, assessment.level, assessment.factIds),
         }
       : assessment
   );
-  const kept = presentAssessments(assessments)
-    .filter(({ key }) => isKept(key))
-    .map(({ assessment }) => assessment);
+  const kept = keptAssessments(assessments, dropped);
   const verdict = {
     ...brief.verdict,
-    level: cap(
-      'verdict.level',
-      brief.verdict.level,
-      [...brief.verdict.factIds, ...kept.flatMap(({ factIds }) => factIds)],
-      [...brief.verdict.linkIds, ...kept.flatMap(({ linkIds }) => linkIds)]
-    ),
+    level: cap('verdict.level', brief.verdict.level, verdictFactIds(assessments, dropped)),
   };
   outcome.brief = { verdict, assessments };
 

@@ -192,7 +192,6 @@ export const createBriefTelemetry = ({
         active.span.setAttributes({
           'signal.status': outcome.status,
           'signal.fact_count': outcome.factCount,
-          'signal.link_count': outcome.linkCount,
         });
       }
     },

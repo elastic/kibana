@@ -12,13 +12,10 @@ import { briefSchema } from '../../../../../common/entity_analytics/executive_br
 export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief' as const;
 
 const SUBMIT_BRIEF_DESCRIPTION =
-  'Submit the complete executive brief. Call exactly once. Every claim cites the ids of the facts and links from the provided evidence that back it.';
+  'Submit the complete executive brief. Call exactly once. Every assessment cites the ids of the facts from the provided evidence that back it.';
 
 const FACT_IDS_DESCRIPTION =
-  'Ids of the facts (numbers from the "Facts" section) that back this claim. Never invent ids.';
-
-const LINK_IDS_DESCRIPTION =
-  'Ids of the links (numbers from the "Links" section) that back this claim. Never invent ids.';
+  'Ids of the facts (numbers from the "Facts" section) that back this assessment. Never invent ids.';
 
 const ASSESSMENT_SUMMARY_DESCRIPTION = 'One sentence, at most 180 characters';
 
@@ -31,16 +28,13 @@ const FIELD_DESCRIPTIONS: Readonly<Record<string, string>> = {
     'urgent: an unaddressed critical threat, act today; action: a significant threat needs an owner this week; watch: worth monitoring, no action needed; clear: nothing notable',
   'verdict.headline':
     'One sentence, at most 140 characters: the main reason for the level. Do not write the level itself',
-  'verdict.summary': 'At most 3 short sentences',
-  'verdict.factIds': FACT_IDS_DESCRIPTION,
-  'verdict.linkIds': LINK_IDS_DESCRIPTION,
+  'verdict.summary':
+    'At most 3 short sentences summarising the assessments; state only what the facts they cite back',
   assessments: 'One "threats" assessment and one "response" assessment',
   'assessments.threats.summary': ASSESSMENT_SUMMARY_DESCRIPTION,
   'assessments.threats.factIds': FACT_IDS_DESCRIPTION,
-  'assessments.threats.linkIds': LINK_IDS_DESCRIPTION,
   'assessments.response.summary': ASSESSMENT_SUMMARY_DESCRIPTION,
   'assessments.response.factIds': FACT_IDS_DESCRIPTION,
-  'assessments.response.linkIds': LINK_IDS_DESCRIPTION,
 };
 
 /**

@@ -20,7 +20,7 @@ import { nameFromEuid, toEntityRef } from '../entity_record';
 import { identityResolution, resolveEntities } from './resolve_entities';
 import type { EntityResolution } from './resolve_entities';
 import { getAlertsIndex, getAttackDiscoveryIndices } from './shared/indices';
-import type { EntityRef, FactDraft, LinkDraft, SignalContext } from './types';
+import type { EntityRef, FactDraft, SignalContext } from './types';
 
 export const MAX_DISCOVERIES = 10;
 const DISCOVERY_CANDIDATES = 30;
@@ -29,8 +29,6 @@ const MAX_ALERT_IDS_PER_DISCOVERY = 1000;
 export const MAX_ENTITIES_PER_DISCOVERY = 12;
 /** Alert entities read per discovery, before aliases collapse onto golden entities. */
 const MAX_RAW_ENTITIES_PER_DISCOVERY = 30;
-/** Up to this many entities get a link between every pair; beyond it, a star from the first. */
-const ALL_PAIRS_MAX_ENTITIES = 6;
 
 const AD_USERS_PATH = 'kibana.alert.attack_discovery.users';
 const AD_FIELDS = [
@@ -274,30 +272,10 @@ export const toGoldenEntities = (
   return [...byGolden.values()].slice(0, MAX_ENTITIES_PER_DISCOVERY);
 };
 
-/** Every pair for small discoveries; a star from the most-alerted entity for larger ones. */
-export const sameAttackLinks = (entities: EntityRef[], factIndex: number): LinkDraft[] => {
-  if (entities.length <= ALL_PAIRS_MAX_ENTITIES) {
-    return entities.flatMap((from, i) =>
-      entities
-        .slice(i + 1)
-        .map((to): LinkDraft => ({ type: 'same_attack', from, to, factIndexes: [factIndex] }))
-    );
-  }
-  const [hub, ...rest] = entities;
-  return rest.map(
-    (to): LinkDraft => ({
-      type: 'same_attack',
-      from: hub,
-      to,
-      factIndexes: [factIndex],
-    })
-  );
-};
-
 /**
  * Attack discoveries in the window the user can see (own or shared), not closed, with overlapping
- * regenerations collapsed. Each discovery's alerts are resolved to entities, which are linked as
- * `same_attack` and nominated as candidates.
+ * regenerations collapsed. Each discovery's alerts are resolved to entities, which the fact is
+ * about and which are nominated as candidates.
  */
 export const attackDiscoveriesSignal = defineSignal({
   id: 'attack_discoveries',
@@ -347,25 +325,20 @@ export const attackDiscoveriesSignal = defineSignal({
       toGoldenEntities(entities, resolution)
     );
 
-    const facts: FactDraft[] = [];
-    const links: LinkDraft[] = [];
-    discoveries.forEach((discovery, index) => {
-      const entities = goldenByDiscovery[index];
+    const facts = discoveries.map((discovery, index): FactDraft => {
       const severity = severityFromRiskScore(discovery.riskScore ?? alertScores.get(discovery.id));
-      facts.push({
-        kind: 'attack_discovery',
+      return {
         title: discovery.title,
         timestamp: discovery.timestamp,
         ...(severity ? { severity } : {}),
-        entities,
+        entities: goldenByDiscovery[index],
         numbers: { alerts: discovery.alertIds.length },
         details: {
           status: discovery.workflowStatus,
           ...(discovery.tactics.length > 0 ? { tactics: discovery.tactics.join(', ') } : {}),
         },
-        source: { type: 'attack_discovery', id: discovery.id, name: discovery.title },
-      });
-      links.push(...sameAttackLinks(entities, index));
+        source: { type: 'attack_discovery', id: discovery.id },
+      };
     });
 
     const seen = new Set<string>();
@@ -374,6 +347,6 @@ export const attackDiscoveriesSignal = defineSignal({
       seen.add(euid);
       return true;
     });
-    return { facts, links, candidates };
+    return { facts, candidates };
   },
 });

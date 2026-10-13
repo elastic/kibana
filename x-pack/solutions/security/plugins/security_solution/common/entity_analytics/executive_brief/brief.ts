@@ -9,8 +9,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The brief the AI writes (via a forced tool call) and the server verifies: a verdict and one
- * assessment per key of `ASSESSMENT_KEYS`. Every claim cites the facts and links behind it by id,
- * in `factIds` and `linkIds`. Prose mentions entities by EUID (see `ENTITY_MENTION_FIELD`).
+ * assessment per key of `ASSESSMENT_KEYS`. Each assessment cites the facts behind it by id, in
+ * `factIds`; the verdict summarises the assessments and rests on the facts they cite. Prose
+ * mentions entities by EUID (see `ENTITY_MENTION_FIELD`).
  * Versioned through the document's `schema_version`; threats and actions are added in a later
  * schema version.
  */
@@ -42,7 +43,7 @@ export const BRIEF_TEXT_LIMITS = {
 /** Mention tokens are longer than the names they show, so raw prose is bounded more loosely. */
 export const rawTextLimit = (visibleLimit: number): number => visibleLimit * 4;
 
-/** Most fact or link ids one claim may cite. */
+/** Most fact ids one assessment may cite. */
 export const MAX_CITED_IDS = 24;
 
 const citedIds = () => z.array(z.number().int()).max(MAX_CITED_IDS);
@@ -53,7 +54,6 @@ const assessmentSchema = () =>
     level: z.enum(ATTENTION_LEVELS),
     summary: shortText(BRIEF_TEXT_LIMITS.assessmentSummary),
     factIds: citedIds(),
-    linkIds: citedIds(),
   });
 
 export const briefSchema = lazySchema(() =>
@@ -62,8 +62,6 @@ export const briefSchema = lazySchema(() =>
       level: z.enum(ATTENTION_LEVELS),
       headline: shortText(BRIEF_TEXT_LIMITS.verdictHeadline),
       summary: shortText(BRIEF_TEXT_LIMITS.verdictSummary),
-      factIds: citedIds(),
-      linkIds: citedIds(),
     }),
     assessments: z.object({
       threats: assessmentSchema().optional(),

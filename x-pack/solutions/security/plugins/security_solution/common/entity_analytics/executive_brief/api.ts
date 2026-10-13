@@ -11,7 +11,7 @@ import type { Brief, VerificationSummary } from './brief';
 import { BRIEF_RANGES } from './constants';
 import type { BriefRange } from './constants';
 import type { BriefErrorCode, BriefJobStage, BriefJobStatus } from './document';
-import type { Fact, Link, SignalRun } from './evidence';
+import type { Fact, SignalRun } from './evidence';
 
 /** Request body for generating a brief; the time window is computed server-side from `range`. */
 export const generateBriefRequestBodySchema = lazySchema(() =>
@@ -58,10 +58,9 @@ export interface GenerateBriefResponse {
 export interface BriefReport {
   verdict?: Brief['verdict'];
   assessments?: Brief['assessments'];
-  /** Entity Store records of the entities the facts and links reference, keyed by EUID. */
+  /** Entity Store records of the entities the facts reference, keyed by EUID. */
   entities: Record<string, Entity>;
   facts: Fact[];
-  links: Link[];
 }
 
 /** About the report; `tokens` and `verification` are absent when the AI wasn't called. */

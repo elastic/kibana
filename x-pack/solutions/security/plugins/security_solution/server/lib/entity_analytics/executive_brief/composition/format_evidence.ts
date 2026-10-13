@@ -10,19 +10,17 @@ import { getEntityRisk } from '../../../../../common/entity_analytics/executive_
 import type {
   Evidence,
   Fact,
-  Link,
   Severity,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
-import { LINK_VERBS } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { entityDisplayName, entityTypeOf, watchlistsOf } from '../entity_record';
 import { BRIEF_SIGNALS } from '../signals';
 import type { SignalOutcome } from '../signals/types';
 import { toMention } from '../verification/mentions';
 
 /**
- * Renders evidence as compact text for the prompt. Generic over facts and links: a new signal or
- * fact kind shows up as a new group under "Facts" with no changes here. Facts and links are listed
- * by their numeric ids, which the brief cites. Entities are identified by EUID,
+ * Renders evidence as compact text for the prompt. Generic over facts: a new signal shows up as a
+ * new group under "Facts" with no changes here. Facts are listed by their numeric ids, which the
+ * brief cites. Entities are identified by EUID,
  * which the model cites in prose; names are shown as they are (the platform's anonymisation
  * settings apply to every inference call). UUIDs in free text are noise and are removed.
  */
@@ -100,21 +98,6 @@ const formatFact = (fact: Fact, clean: CleanText): string => {
   return parts.join(' · ');
 };
 
-const formatLink = (link: Link): string => {
-  const parts = [
-    `${link.id}. ${link.fromEntityId} → ${link.toEntityId}: "${LINK_VERBS[link.type]}" (${
-      link.type
-    })`,
-  ];
-  if (link.factIds.length > 0) {
-    parts.push(`facts: ${link.factIds.join(', ')}`);
-  }
-  if (link.firstSeen) {
-    parts.push(`first seen: ${formatTime(link.firstSeen)}`);
-  }
-  return parts.join(' · ');
-};
-
 const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
 const SIGNAL_TITLES: ReadonlyMap<string, string> = new Map(
@@ -128,10 +111,7 @@ const formatSignal = (signal: SignalOutcome, clean: CleanText): string => {
   const reason = signal.reason ? `: ${clean(signal.reason)}` : '';
   switch (signal.status) {
     case 'ok':
-      return `- ${title}: checked, ${plural(signal.factCount, 'fact')}, ${plural(
-        signal.linkCount,
-        'link'
-      )}`;
+      return `- ${title}: checked, ${plural(signal.factCount, 'fact')}`;
     case 'empty':
       return `- ${title}: checked, nothing found`;
     case 'timeout':
@@ -146,35 +126,21 @@ const compareFacts = (a: Fact, b: Fact): number =>
   (Date.parse(b.timestamp ?? '') || 0) - (Date.parse(a.timestamp ?? '') || 0) ||
   a.id - b.id;
 
-/** Groups facts by signal, then kind; signals in run order, unknown signals after. */
+/** Groups facts by the signal that found them; signals in run order, unknown signals after. */
 const groupFacts = (
   evidence: Evidence,
   signals: readonly SignalOutcome[]
 ): Array<{ header: string; facts: Fact[] }> => {
-  const order = signals.map(({ id }) => id);
-  const groups = new Map<string, { header: string; facts: Fact[] }>();
-  evidence.facts.forEach((fact) => {
-    if (!order.includes(fact.signalId)) {
-      order.push(fact.signalId);
-    }
+  const order = new Set([
+    ...signals.map(({ id }) => id),
+    ...evidence.facts.map(({ signalId }) => signalId),
+  ]);
+  return [...order].flatMap((signalId) => {
+    const facts = evidence.facts.filter((fact) => fact.signalId === signalId);
+    return facts.length > 0
+      ? [{ header: signalTitle(signalId), facts: [...facts].sort(compareFacts) }]
+      : [];
   });
-  order.forEach((signalId) => {
-    evidence.facts
-      .filter((fact) => fact.signalId === signalId)
-      .forEach((fact) => {
-        const key = `${signalId}\u0000${fact.kind}`;
-        const group = groups.get(key) ?? {
-          header: `${signalTitle(signalId)} — ${fact.kind}`,
-          facts: [],
-        };
-        group.facts.push(fact);
-        groups.set(key, group);
-      });
-  });
-  return [...groups.values()].map((group) => ({
-    ...group,
-    facts: [...group.facts].sort(compareFacts),
-  }));
 };
 
 /**
@@ -201,10 +167,6 @@ export const formatEvidence = (evidence: Evidence, signals: readonly SignalOutco
   groups.forEach(({ header, facts }) => {
     lines.push('', `### ${header} (${facts.length})`, ...facts.map((f) => formatFact(f, clean)));
   });
-
-  const links = [...evidence.links].sort((a, b) => a.id - b.id);
-  lines.push('', `## Links (${links.length})`);
-  lines.push(...(links.length > 0 ? links.map(formatLink) : ['None']));
 
   lines.push('', '## Signals');
   lines.push(

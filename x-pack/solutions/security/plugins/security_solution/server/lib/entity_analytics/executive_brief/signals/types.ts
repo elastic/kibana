@@ -11,17 +11,15 @@ import type { Entity } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type {
   Evidence,
-  FactKind,
   FactSource,
-  LinkType,
   Severity,
   SignalStatus,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { BriefTelemetry } from '../telemetry/types';
 
 /**
- * Signal framework. Each signal is one file that gathers facts (and optionally links and
- * candidate entities) from one data source. Signals never see each other's output; the only
+ * Signal framework. Each signal is one file that gathers facts (and optionally candidate
+ * entities) from one data source. Signals never see each other's output; the only
  * thing that flows between phases is the candidate entity set.
  */
 
@@ -56,7 +54,6 @@ export type SignalInput<TScope extends SignalScope> = TScope extends 'entities'
   : Record<string, never>;
 
 export interface FactDraft {
-  kind: FactKind;
   title: string;
   /** ISO time. */
   timestamp?: string;
@@ -67,18 +64,8 @@ export interface FactDraft {
   source?: FactSource;
 }
 
-export interface LinkDraft {
-  type: LinkType;
-  from: EntityRef;
-  to: EntityRef;
-  /** Indexes into this signal's `facts` array that back the link. */
-  factIndexes?: number[];
-  firstSeen?: string;
-}
-
 export interface SignalOutput {
   facts: FactDraft[];
-  links?: LinkDraft[];
   /** Tenant signals nominate entities for the entity-scoped phase. */
   candidates?: EntityRef[];
   /** Golden Entity Store records the signal already read; used when resolution has none. */
@@ -114,7 +101,6 @@ export interface SignalOutcome {
   /** Duration in milliseconds. */
   took: number;
   factCount: number;
-  linkCount: number;
 }
 
 export interface GatherResult {

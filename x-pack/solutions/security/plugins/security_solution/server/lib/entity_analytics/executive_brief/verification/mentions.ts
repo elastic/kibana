@@ -153,7 +153,7 @@ export const checkMentions: BriefCheck = (input, context): CheckOutcome => {
   if (unlinked.length > 0) {
     outcome.notes.push(`unlinked mentions: ${unique(unlinked).join(', ')}`);
   }
-  listClaims(brief).forEach((claim) => {
+  listClaims(brief, context).forEach((claim) => {
     const euids = unknown.get(claim.path ?? 'verdict');
     if (!euids || isDropped(context, claim.path)) {
       return;

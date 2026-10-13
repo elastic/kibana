@@ -22,7 +22,7 @@ const EVIDENCE: Evidence = {
 /** Runs the check on a brief whose `threats` assessment says `summary` and cites fact 1. */
 const runAssessment = (summary: string) => {
   const brief = buildValidBrief();
-  brief.assessments.threats = { ...brief.assessments.threats, summary, factIds: [1], linkIds: [] };
+  brief.assessments.threats = { ...brief.assessments.threats, summary, factIds: [1] };
   return createNumbersCheck('7d')(brief, {
     index: buildEvidenceIndex(EVIDENCE),
     dropped: new Set(),
@@ -30,6 +30,19 @@ const runAssessment = (summary: string) => {
 };
 
 describe('createNumbersCheck', () => {
+  it.each([
+    ['keeps a number from a fact its assessments cite', 'The attack has 12 alerts.', 0],
+    ['rejects a number no assessment backs', 'The attack has 250 alerts.', 1],
+  ])('verdict: %s', (_name, summary, errors) => {
+    const brief = buildValidBrief();
+    brief.verdict.summary = summary;
+    const { structuralErrors } = createNumbersCheck('7d')(brief, {
+      index: buildEvidenceIndex(EVIDENCE),
+      dropped: new Set(),
+    });
+    expect(structuralErrors).toHaveLength(errors);
+  });
+
   it('keeps a number from a cited fact', () => {
     expect(runAssessment('The attack has 12 alerts.').drops).toEqual([]);
   });

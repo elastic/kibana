@@ -184,7 +184,6 @@ const toCompletedEvent = ({
     })),
     entityCount: evidence ? Object.keys(evidence.entities).length : 0,
     factCount: evidence?.facts.length ?? 0,
-    linkCount: evidence?.links.length ?? 0,
     ...(usedTokens
       ? { tokens: { prompt: usedTokens.prompt, completion: usedTokens.completion } }
       : {}),

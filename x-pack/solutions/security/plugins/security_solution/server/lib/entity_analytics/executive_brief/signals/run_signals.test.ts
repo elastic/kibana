@@ -42,7 +42,7 @@ const signal = <TScope extends SignalScope = 'tenant'>(
 });
 
 const factOf = (euid: string): SignalOutput => ({
-  facts: [{ kind: 'alert_activity', title: euid, entities: [ref(euid)] }],
+  facts: [{ title: euid, entities: [ref(euid)] }],
 });
 
 const run = (signals: readonly BriefSignal[]) =>

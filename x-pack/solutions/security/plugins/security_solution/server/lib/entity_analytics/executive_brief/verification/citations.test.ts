@@ -5,65 +5,44 @@
  * 2.0.
  */
 
-import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type { Assessment } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type { FullBrief } from './__fixtures__/evidence';
 import { buildValidBrief, FIXTURE_EVIDENCE } from './__fixtures__/evidence';
 import { checkCitations } from './citations';
 import { buildEvidenceIndex } from './evidence_index';
 
-const run = (change: (brief: Brief) => void) => {
+const run = (change: (brief: FullBrief) => void) => {
   const brief = buildValidBrief();
   change(brief);
   return checkCitations(brief, { index: buildEvidenceIndex(FIXTURE_EVIDENCE), dropped: new Set() });
 };
 
 describe('checkCitations', () => {
-  it('removes unknown fact and link ids', () => {
-    const { brief, drops, structuralErrors, notes } = run((b) => {
-      b.verdict.factIds = [1, 99, 1];
-      b.verdict.linkIds = [1, 7];
+  it('removes unknown fact ids', () => {
+    const { brief, drops, notes } = run((b) => {
+      b.assessments.threats.factIds = [1, 99, 1];
     });
-    expect(brief.verdict).toMatchObject({ factIds: [1], linkIds: [1] });
-    expect(notes).toEqual(['removed unknown fact ids: 99', 'removed unknown link ids: 7']);
+    expect(brief.assessments.threats?.factIds).toEqual([1]);
+    expect(notes).toEqual(['removed unknown fact ids: 99']);
     expect(drops).toEqual([]);
-    expect(structuralErrors).toEqual([]);
   });
 
-  it.each<[string, (brief: Brief) => void, { drops: number; structural: number }]>([
+  it.each<[string, Assessment, string[]]>([
     [
       'drops an assessment whose only fact id is unknown',
-      (b) => {
-        b.assessments.response = {
-          level: 'action',
-          summary: 'The attack is not acknowledged yet.',
-          factIds: [404],
-          linkIds: [],
-        };
-      },
-      { drops: 1, structural: 0 },
+      { level: 'action', summary: 'The attack is not acknowledged yet.', factIds: [404] },
+      ['assessments.response'],
     ],
     [
-      'makes the verdict structural',
-      (b) => {
-        b.verdict.factIds = [];
-        b.verdict.linkIds = [404];
-      },
-      { drops: 0, structural: 1 },
+      'lets a clear assessment go without citations',
+      { level: 'clear', summary: 'Nothing to handle.', factIds: [] },
+      [],
     ],
-  ])('a claim left without a fact or link: %s', (_name, change, expected) => {
-    const { drops, structuralErrors } = run(change);
-    expect({ drops: drops.length, structural: structuralErrors.length }).toEqual(expected);
-  });
-
-  it('lets a clear claim go without citations', () => {
+  ])('%s', (_name, response, expected) => {
     const { drops, structuralErrors } = run((b) => {
-      b.assessments.response = {
-        level: 'clear',
-        summary: 'Nothing to handle.',
-        factIds: [],
-        linkIds: [],
-      };
+      b.assessments.response = response;
     });
-    expect(drops).toEqual([]);
+    expect(drops.map(({ path }) => path)).toEqual(expected);
     expect(structuralErrors).toEqual([]);
   });
 });

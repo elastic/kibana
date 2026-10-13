@@ -68,7 +68,6 @@ const raceAbort = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> => {
 
 const hasContent = (output: SignalOutput): boolean =>
   output.facts.length > 0 ||
-  (output.links?.length ?? 0) > 0 ||
   (output.candidates?.length ?? 0) > 0 ||
   (output.entityRecords?.length ?? 0) > 0;
 
@@ -106,7 +105,6 @@ const runOne = async <TScope extends SignalScope>({
         ...(reason ? { reason } : {}),
         took: Date.now() - start,
         factCount: output?.facts.length ?? 0,
-        linkCount: output?.links?.length ?? 0,
       },
       ...(output ? { output } : {}),
     };
@@ -167,7 +165,6 @@ const runPhase = <TScope extends SignalScope>(
 const referencedEntities = (outputs: SignalOutput[]): EntityRef[] =>
   outputs.flatMap((output) => [
     ...output.facts.flatMap((fact) => fact.entities),
-    ...(output.links ?? []).flatMap((link) => [link.from, link.to]),
     ...(output.candidates ?? []),
     ...(output.entityRecords ?? []).flatMap((record) => {
       const euid = record.entity?.id;
@@ -311,7 +308,6 @@ export const runSignals: RunSignals = async (
               reason: 'No entities to look at.',
               took: 0,
               factCount: 0,
-              linkCount: 0,
             },
           })
         );

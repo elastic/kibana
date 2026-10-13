@@ -20,7 +20,6 @@ const CHEN = 'user:j.chen';
  * - Fact 1: open critical attack discovery on ROD (privileged user), LAPTOP and DOCKER, 12 alerts.
  * - Fact 2: acknowledged high attack discovery on CHEN, 3 alerts.
  * - Fact 3: ROD at critical risk (92.5).
- * - Link 1: ROD and DOCKER are part of the same discovered attack (backed by fact 1).
  */
 export const FIXTURE_EVIDENCE: Evidence = {
   entities: {
@@ -49,7 +48,6 @@ export const FIXTURE_EVIDENCE: Evidence = {
   facts: [
     {
       id: 1,
-      kind: 'attack_discovery',
       signalId: 'attack_discoveries',
       title: 'Stolen privileged credentials used to reach docker-host-prod-01',
       timestamp: '2026-10-07T08:31:00.000Z',
@@ -61,7 +59,6 @@ export const FIXTURE_EVIDENCE: Evidence = {
     },
     {
       id: 2,
-      kind: 'attack_discovery',
       signalId: 'attack_discoveries',
       title: 'Suspicious mailbox rule created by j.chen',
       timestamp: '2026-10-08T12:00:00.000Z',
@@ -69,18 +66,18 @@ export const FIXTURE_EVIDENCE: Evidence = {
       entityIds: [CHEN],
       numbers: { alerts: 3 },
       details: { status: 'acknowledged' },
+      source: { type: 'attack_discovery', id: '45c48cce-2e2d-4fbd-8c1b-1d6a2c0f7b22' },
     },
     {
       id: 3,
-      kind: 'high_risk_entity',
       signalId: 'high_risk_entities',
       title: 'a.rodriguez is at Critical risk',
       severity: 'critical',
       entityIds: [ROD],
       numbers: { riskScore: 92.5 },
+      source: { type: 'entity', id: ROD },
     },
   ],
-  links: [{ id: 1, type: 'same_attack', fromEntityId: ROD, toEntityId: DOCKER, factIds: [1] }],
   signals: {
     attack_discoveries: { status: 'ok', took: 120 },
     high_risk_entities: { status: 'ok', took: 80 },
@@ -103,21 +100,17 @@ export const buildValidBrief = (): FullBrief => ({
     headline: 'A privileged account was used to reach a critical production host',
     summary:
       'An open critical attack discovery covers user:a.rodriguez@corp, host:laptop-fin03 and host:docker-host-prod-01 with 12 alerts. user:a.rodriguez@corp has a risk score of 92.5.',
-    factIds: [1, 3],
-    linkIds: [],
   },
   assessments: {
     threats: {
       level: 'urgent',
       summary: 'One critical attack involves a privileged user and a production host.',
-      factIds: [1],
-      linkIds: [1],
+      factIds: [1, 3],
     },
     response: {
       level: 'action',
       summary: 'The critical attack is not acknowledged yet; the high one on user:j.chen is.',
       factIds: [1, 2],
-      linkIds: [],
     },
   },
 });
