@@ -7,6 +7,7 @@
 
 import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
+import { buildRiskLevelHistoryBranch } from './risk_history';
 
 /**
  * Builds an ES|QL query that counts entities that crossed into High or Critical risk
@@ -38,9 +39,6 @@ import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/es
  *     boundary, or a lower one: Low or Moderate to High or Critical, or High to Critical)
  */
 
-/** Width of the boundary window: covers at least one hourly scoring run. */
-const BOUNDARY_WINDOW_HOURS = 2;
-
 export const buildNewlyHighCriticalCountQuery = (
   spaceId: string,
   entitiesIndexName: string,
@@ -53,18 +51,7 @@ export const buildNewlyHighCriticalCountQuery = (
     `SET unmapped_fields="nullify";`,
     'FROM (',
     // Boundary levels from the risk score docs.
-    `  FROM ${index}`,
-    `  | WHERE @timestamp >= ${boundary} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${boundary}`,
-    `  | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
-    `  | EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
-    `  | WHERE entity_euid IS NOT NULL`,
-    // Nested single-condition CASEs: ES|QL evaluates a multi-condition CASE one row at a time.
-    `  | EVAL level_low = CASE(risk_level == "Low", 1, 0),`,
-    `         level_moderate = CASE(risk_level == "Moderate", 2, level_low),`,
-    `         level_high = CASE(risk_level == "High", 3, level_moderate),`,
-    `         level_num = CASE(risk_level == "Critical", 4, level_high)`,
-    `  | STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid`,
-    `  | RENAME entity_euid AS \`entity.id\``,
+    ...buildRiskLevelHistoryBranch(index, boundary, 'boundary_level_num'),
     '), (',
     // Current levels from the entity docs: only High and Critical can qualify.
     `  FROM ${entitiesIndexName}`,

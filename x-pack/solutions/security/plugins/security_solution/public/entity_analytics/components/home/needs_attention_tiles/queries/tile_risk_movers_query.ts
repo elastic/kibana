@@ -7,6 +7,7 @@
 
 import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
+import { buildRiskScoreHistoryBranch } from './risk_history';
 
 /**
  * Builds an ES|QL query that counts entities whose risk score rose by ≥10 points
@@ -32,9 +33,6 @@ import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/es
  * present in the index (e.g. only host docs → user.name is not in the mapping).
  */
 
-/** Width of the boundary window: covers at least one hourly scoring run. */
-const BOUNDARY_WINDOW_HOURS = 2;
-
 export const buildRiskMoversCountQuery = (
   spaceId: string,
   entitiesIndexName: string,
@@ -47,13 +45,7 @@ export const buildRiskMoversCountQuery = (
     `SET unmapped_fields="nullify";`,
     'FROM (',
     // Boundary scores from the risk score docs.
-    `  FROM ${index}`,
-    `  | WHERE @timestamp >= ${boundary} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${boundary}`,
-    `  | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
-    `  | EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`,
-    `  | WHERE entity_euid IS NOT NULL`,
-    `  | STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid`,
-    `  | RENAME entity_euid AS \`entity.id\``,
+    ...buildRiskScoreHistoryBranch(index, boundary, 'boundary_score'),
     '), (',
     // Current scores from the entity docs in view: only scored entities can qualify.
     `  FROM ${entitiesIndexName}`,
