@@ -8,6 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  dataDiscoveryAgentGuidance,
   getChartTypeSelectionPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
@@ -56,9 +57,8 @@ Do **not** use this skill when:
      platformCoreTools.createVisualization
    } call, know the target index and confirm every field you reference exists in its mapping.
    - If the index and fields are already grounded in context, continue directly.
-   - If not, discover them first: list indices and inspect the index mapping (optionally probe with ${
-     platformCoreTools.executeEsql
-   }). Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
+   - ${dataDiscoveryAgentGuidance}
+   - Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
    - ${
      platformCoreTools.createVisualization
    } auto-discovers an index only when you omit \`index\`, and that discovery FAILS when the referenced fields do not exist in any index. Guessing fields and relying on auto-discovery is the most common cause of failures — ground first.

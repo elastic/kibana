@@ -29,9 +29,12 @@ import type { ManagedUserData } from '../../../../flyout/entity_details/shared/h
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
-import { useResolvedFromRecordCount } from '../../../../flyout/entity_details/shared/components/use_resolved_from_record_count';
+import { getResolvedFromRecordCount } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
 import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
+import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
+import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
 
 export interface HeaderProps {
   /** User name displayed as the flyout title. */
@@ -42,6 +45,8 @@ export interface HeaderProps {
   lastSeen: FirstLastSeenData;
   /** Entity store entity ID, used for the entity source badge. */
   entityId?: string;
+  /** Records resolving to `entityId` (aliases); when known, the "Resolved from N" badge counts them. */
+  aliasRecords?: readonly EntityStoreRecord[];
   /** Key-value map of identity fields used to resolve the user. */
   identityFields?: IdentityFields;
   /** Whether the user exists in the entity store. */
@@ -50,6 +55,8 @@ export interface HeaderProps {
   riskLevel?: RiskSeverity;
   /** Scope id included in the copied Entity Analytics flyout link. */
   scopeId?: string;
+  /** Entity-store lookup mode included in the copied Entity Analytics flyout link. */
+  mode?: EntityViewMode;
   /** Shows the copy-link button. Set only by the new flyout; the button still hides when the feature flag is off. */
   showEntityAnalyticsCopyLink?: boolean;
 }
@@ -62,10 +69,12 @@ export const Header = ({
   managedUser,
   lastSeen,
   entityId,
+  aliasRecords,
   identityFields,
   isEntityInStore,
   riskLevel,
   scopeId,
+  mode,
   showEntityAnalyticsCopyLink,
 }: HeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
@@ -78,7 +87,7 @@ export const Header = ({
   const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
-  const resolvedFromCount = useResolvedFromRecordCount(entityId);
+  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords);
   const lastSeenDate = useMemo(
     () =>
       max(
@@ -91,7 +100,15 @@ export const Header = ({
     <>
       <FlyoutHeaderActions>
         {showEntityAnalyticsCopyLink && (
-          <EntityAnalyticsFlyoutCopyLink target={{ kind: 'user', userName, entityId, scopeId }} />
+          <EntityAnalyticsFlyoutCopyLink
+            target={{
+              kind: 'user',
+              userName,
+              entityId,
+              scopeId,
+              mode: toEntityDescriptorMode(mode),
+            }}
+          />
         )}
       </FlyoutHeaderActions>
       <div data-test-subj="user-panel-header">

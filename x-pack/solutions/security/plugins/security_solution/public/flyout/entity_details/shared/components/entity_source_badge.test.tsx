@@ -8,35 +8,44 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../../../common/constants';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../../common/mock';
-import type { StartServices } from '../../../../types';
 import { EntitySourceBadge } from './entity_source_badge';
 
-const renderBadge = (newEntityAnalyticsPage: boolean, resolvedFromCount?: number) => {
-  const startServices = createStartServicesMock();
-  jest
-    .mocked(startServices.featureFlags.useBooleanValue)
-    .mockImplementation((flag, fallback) =>
-      flag === USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG ? newEntityAnalyticsPage : fallback
-    );
-
-  return render(
-    <TestProviders startServices={startServices as StartServices}>
+const renderBadge = ({
+  isEntityInStore = true,
+  hasLastSeenDate = true,
+  resolvedFromCount,
+}: {
+  isEntityInStore?: boolean;
+  hasLastSeenDate?: boolean;
+  resolvedFromCount?: number;
+} = {}) =>
+  render(
+    <TestProviders>
       <EntitySourceBadge
-        isEntityInStore
-        hasLastSeenDate
+        isEntityInStore={isEntityInStore}
+        hasLastSeenDate={hasLastSeenDate}
         resolvedFromCount={resolvedFromCount}
         data-test-subj="entity-source-badge"
       />
     </TestProviders>
   );
-};
 
 describe('EntitySourceBadge', () => {
-  it('keeps Entity Store when the new entity analytics page flag is off', () => {
-    const { getByTestId } = renderBadge(false, 3);
+  it('renders nothing when the entity is neither in the store nor observed', () => {
+    const { queryByTestId } = renderBadge({ isEntityInStore: false, hasLastSeenDate: false });
+
+    expect(queryByTestId('entity-source-badge')).not.toBeInTheDocument();
+  });
+
+  it('shows Observed for an entity that is not in the store', () => {
+    const { getByTestId } = renderBadge({ isEntityInStore: false });
+
+    expect(getByTestId('entity-source-badge')).toHaveTextContent('Observed');
+  });
+
+  it('shows Entity Store for an individual record', () => {
+    const { getByTestId } = renderBadge();
 
     expect(getByTestId('entity-source-badge')).toHaveTextContent('Entity Store');
     expect(
@@ -44,14 +53,8 @@ describe('EntitySourceBadge', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('keeps Entity Store for an individual record when the flag is on', () => {
-    const { getByTestId } = renderBadge(true, undefined);
-
-    expect(getByTestId('entity-source-badge')).toHaveTextContent('Entity Store');
-  });
-
-  it('shows Resolved from N records with the aggregate icon when the flag is on', () => {
-    const { getByTestId } = renderBadge(true, 3);
+  it('shows Resolved from N records with the aggregate icon when resolvedFromCount is provided', () => {
+    const { getByTestId } = renderBadge({ resolvedFromCount: 3 });
     const badge = getByTestId('entity-source-badge');
 
     expect(badge).toHaveTextContent('Resolved from 3 records');
@@ -59,8 +62,14 @@ describe('EntitySourceBadge', () => {
   });
 
   it('uses the singular record label', () => {
-    const { getByTestId } = renderBadge(true, 1);
+    const { getByTestId } = renderBadge({ resolvedFromCount: 1 });
 
     expect(getByTestId('entity-source-badge')).toHaveTextContent('Resolved from 1 record');
+  });
+
+  it('ignores resolvedFromCount for an entity that is not in the store', () => {
+    const { getByTestId } = renderBadge({ isEntityInStore: false, resolvedFromCount: 3 });
+
+    expect(getByTestId('entity-source-badge')).toHaveTextContent('Observed');
   });
 });

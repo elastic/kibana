@@ -48,6 +48,22 @@ describe('buildEntityAnalyticsFlyoutSearch', () => {
     const value = new URLSearchParams(search).get(FLYOUT_V2_URL_PARAM) ?? '';
     expect(decodeFlyoutV2UrlParam(value)).toEqual([{ kind: 'host', hostName: 'web-01' }]);
   });
+
+  it('includes the resolved mode so the link reopens the group view', () => {
+    const search = buildEntityAnalyticsFlyoutSearch({ ...target, mode: 'resolved' });
+    const value = new URLSearchParams(search).get(FLYOUT_V2_URL_PARAM) ?? '';
+    expect(decodeFlyoutV2UrlParam(value)).toEqual([
+      { kind: 'user', userName: 'alice', entityId: 'user-1', mode: 'resolved' },
+    ]);
+  });
+
+  it('omits mode for a single-entity flyout', () => {
+    const search = buildEntityAnalyticsFlyoutSearch({ ...target, mode: undefined });
+    const value = new URLSearchParams(search).get(FLYOUT_V2_URL_PARAM) ?? '';
+    expect(decodeFlyoutV2UrlParam(value)).toEqual([
+      { kind: 'user', userName: 'alice', entityId: 'user-1' },
+    ]);
+  });
 });
 
 describe('EntityAnalyticsFlyoutCopyLink', () => {

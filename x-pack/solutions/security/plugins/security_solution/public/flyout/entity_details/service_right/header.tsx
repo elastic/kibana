@@ -25,6 +25,8 @@ interface ServicePanelHeaderProps {
   observedService: ObservedEntityData<ServiceItem>;
   isEntityInStore?: boolean;
   riskLevel?: RiskSeverity;
+  /** Resolution-group size shown in the entity source badge ("Resolved from N records"). */
+  resolvedFromCount?: number;
   /**
    * Overrides forwarded to the underlying {@link FlyoutHeader} (e.g. `css` / `panelProps` for
    * compact spacing in the EUI system flyout). Legacy callers omit this and keep the default.
@@ -39,6 +41,7 @@ export const ServicePanelHeader = ({
   observedService,
   isEntityInStore,
   riskLevel,
+  resolvedFromCount,
   flyoutHeaderProps,
   headerActions,
 }: ServicePanelHeaderProps) => {
@@ -74,6 +77,7 @@ export const ServicePanelHeader = ({
               <EntitySourceBadge
                 isEntityInStore={!!isEntityInStore}
                 hasLastSeenDate={!!observedService.lastSeen.date}
+                resolvedFromCount={resolvedFromCount}
                 data-test-subj="service-panel-header-observed-badge"
               />
             </EuiFlexItem>

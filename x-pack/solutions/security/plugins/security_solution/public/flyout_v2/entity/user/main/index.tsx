@@ -39,6 +39,7 @@ import {
   getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
+import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -57,6 +58,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
 
 export interface UserProps {
   /**
@@ -74,6 +76,12 @@ export interface UserProps {
    * Used directly when `hit` is not provided, or as a fallback when EUID resolution yields no value.
    */
   entityId?: string;
+  /**
+   * `single` (default) shows the `entityId` record only. `resolved` also loads every record that
+   * resolves to `entityId`; when aliases exist the flyout renders the group view: summary fields
+   * are aggregated across the group and asset criticality is read-only.
+   */
+  mode?: EntityViewMode;
   /**
    * Scope id (timeline id, table id, etc.) — used for downstream containers and queries.
    */
@@ -98,12 +106,17 @@ export const User: FC<UserProps> = memo(function User({
   userName,
   hit,
   entityId: entityIdProp,
+  mode: requestedMode = 'single',
   scopeId = '',
   contextID,
 }) {
   const { services } = useKibana();
   const { uiSettings } = services;
   const euidApi = useEntityStoreEuidApi();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  // Resolution-group view is only available on the new Entity Analytics page; otherwise fall back
+  // to the single-entity view so the header, summary grid and copy link stay consistent.
+  const mode: EntityViewMode = isNewEntityAnalyticsPage ? requestedMode : 'single';
   const {
     openUserFlyoutAsChild,
     openEntityDetailsAsChild,
@@ -134,10 +147,13 @@ export const User: FC<UserProps> = memo(function User({
 
   const entityFromStoreResult = useEntityFromStore({
     entityId,
+    mode,
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
+  const { aliasRecords } = entityFromStoreResult;
+  const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     const legacyFields =
@@ -229,7 +245,9 @@ export const User: FC<UserProps> = memo(function User({
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
+  // Group view is read-only: a single criticality edit can't target every member.
   const onCriticalitySave =
+    !isGroupView &&
     !!assetCriticalityPrivileges.data?.has_write_permissions &&
     entityFromStoreResult.entityRecord &&
     observedUser.entityRecord
@@ -260,11 +278,12 @@ export const User: FC<UserProps> = memo(function User({
     openUserFlyoutAsChild({
       userName,
       entityId,
+      mode,
       scopeId,
       title: userName,
       origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     });
-  }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
+  }, [openUserFlyoutAsChild, userName, entityId, mode, scopeId]);
 
   const onShowRelatedEntity = useCallback(
     (
@@ -419,8 +438,8 @@ export const User: FC<UserProps> = memo(function User({
     ]
   );
 
-  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
-  const riskLevel = getHeaderRiskLevel(observedUser.entityRecord, isNewEntityAnalyticsPage);
+  // Group view shows the resolution-group risk level; a lone target shows its own.
+  const riskLevel = getHeaderRiskLevel(observedUser.entityRecord, isGroupView);
 
   return (
     <>
@@ -430,6 +449,8 @@ export const User: FC<UserProps> = memo(function User({
           managedUser={managedUser}
           lastSeen={observedUser.lastSeen}
           entityId={panelDisplayEntityId}
+          aliasRecords={aliasRecords}
+          mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedUser.entityRecord}
           riskLevel={riskLevel}
@@ -441,6 +462,7 @@ export const User: FC<UserProps> = memo(function User({
         {observedUser.entityRecord && (
           <EntitySummaryGrid
             entityRecord={observedUser.entityRecord}
+            aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
           />

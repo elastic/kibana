@@ -43,6 +43,7 @@ const toEntityFlyoutDescriptor = (
   const identity = {
     ...(target.entityId ? { entityId: target.entityId } : {}),
     ...(target.scopeId ? { scopeId: target.scopeId } : {}),
+    ...(target.mode === 'resolved' ? { mode: target.mode } : {}),
   };
 
   switch (target.kind) {
