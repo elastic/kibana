@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
-import { Redirect, type RouteComponentProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { AlertingNavPromo } from '@kbn/observability-plugin/public';
@@ -29,8 +29,6 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_LEGACY_RULES_V1_PATH,
-  OBSERVABILITY_ALERTING_LEGACY_RULES_V2_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -39,15 +37,6 @@ import { createInvestigateEpisodeAction } from '../actions/investigate_episode_a
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
 
 const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
-
-/**
- * Sends a pre-rename rules path (`/rules/v1/...`) to its current one, keeping the rest of the
- * path, the query string and the hash so old bookmarks and shared links still land correctly.
- */
-const redirectLegacyRulesPath =
-  (from: string, to: string) =>
-  ({ location }: RouteComponentProps) =>
-    <Redirect to={{ ...location, pathname: `${to}${location.pathname.slice(from.length)}` }} />;
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -204,20 +193,6 @@ export const ObservabilityAlertingApp = ({
           </Route>
         </EuiPageSection>
       </Route>
-      <Route
-        path={OBSERVABILITY_ALERTING_LEGACY_RULES_V1_PATH}
-        render={redirectLegacyRulesPath(
-          OBSERVABILITY_ALERTING_LEGACY_RULES_V1_PATH,
-          OBSERVABILITY_ALERTING_RULES_V1_PATH
-        )}
-      />
-      <Route
-        path={OBSERVABILITY_ALERTING_LEGACY_RULES_V2_PATH}
-        render={redirectLegacyRulesPath(
-          OBSERVABILITY_ALERTING_LEGACY_RULES_V2_PATH,
-          OBSERVABILITY_ALERTING_RULES_V2_PATH
-        )}
-      />
       <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
         <EuiPageSection paddingSize="m">
           <ClassicRulesV1Route

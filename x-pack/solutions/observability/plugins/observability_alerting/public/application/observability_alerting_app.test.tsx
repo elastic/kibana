@@ -22,8 +22,6 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_LEGACY_RULES_V1_PATH,
-  OBSERVABILITY_ALERTING_LEGACY_RULES_V2_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -212,27 +210,6 @@ describe('ObservabilityAlertingApp', () => {
         },
       })
     );
-  });
-
-  it('redirects the pre-rename /rules/v1 path to the classic rules path', async () => {
-    const { getByTestId, history } = renderAt(OBSERVABILITY_ALERTING_LEGACY_RULES_V1_PATH);
-
-    await waitFor(() => {
-      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
-    });
-    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_RULES_V1_PATH);
-  });
-
-  it('keeps the sub-path, query string and hash when redirecting the pre-rename /rules/v2 path', async () => {
-    const { history } = renderAt(
-      `${OBSERVABILITY_ALERTING_LEGACY_RULES_V2_PATH}/some-rule?tab=history#top`
-    );
-
-    await waitFor(() => {
-      expect(history.location.pathname).toBe(`${OBSERVABILITY_ALERTING_RULES_V2_PATH}/some-rule`);
-    });
-    expect(history.location.search).toBe('?tab=history');
-    expect(history.location.hash).toBe('#top');
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
