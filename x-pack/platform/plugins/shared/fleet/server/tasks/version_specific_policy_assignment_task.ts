@@ -103,6 +103,7 @@ const LIGHT_AGENT_QUERY_OPTIONS = {
 
 interface VersionSpecificPolicyAssignmentTaskConfig {
   taskInterval?: string;
+  orphanSweepIntervalMs?: number;
 }
 
 interface VersionSpecificPolicyAssignmentTaskSetupContract {
@@ -126,11 +127,13 @@ export class VersionSpecificPolicyAssignmentTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private taskInterval: string;
+  private orphanSweepIntervalMs: number;
 
   constructor(setupContract: VersionSpecificPolicyAssignmentTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
     this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
+    this.orphanSweepIntervalMs = config.orphanSweepIntervalMs ?? ORPHAN_SWEEP_INTERVAL_MS;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -284,7 +287,7 @@ export class VersionSpecificPolicyAssignmentTask {
       return true;
     }
     const elapsedMs = Date.now() - Date.parse(state.lastSweepAt);
-    return Number.isNaN(elapsedMs) || elapsedMs >= ORPHAN_SWEEP_INTERVAL_MS;
+    return Number.isNaN(elapsedMs) || elapsedMs >= this.orphanSweepIntervalMs;
   }
 
   private endRun(msg: string = '') {

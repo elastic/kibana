@@ -207,7 +207,8 @@ export default function (providerContext: FtrProviderContext) {
         );
         extraAgentIds.push(inactiveSentinelAgentId);
 
-        await retry.tryForTime(30000, async () => {
+        // the task runs every minute by default
+        await retry.tryForTime(90000, async () => {
           await verifyReassignAction(agentPolicyWithPPId, inactiveSentinelAgentId, previousMinor);
         });
       });
@@ -232,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(agentDoc._source?.policy_base_id).to.be(undefined);
 
-        await retry.tryForTime(30000, async () => {
+        await retry.tryForTime(90000, async () => {
           await verifyReassignAction(agentPolicyWithPPId, legacyAgentId, previousMinor);
         });
       });

@@ -175,26 +175,28 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(agent2.policy_id).to.be(versionedPolicyId);
     });
 
-    it('should not reassign inactive agents', async () => {
-      // Create an active agent and an inactive agent
+    it('should reassign agents inactive by timeout but not unenrolled agents', async () => {
+      // Create an active agent, an agent inactive by timeout and an unenrolled agent
       await createAgentDoc(providerContext, 'agent1', policyId, '8.18.0', true);
-      await createAgentDoc(providerContext, 'agent2', policyId, '8.18.0', false); // inactive
+      await createAgentDoc(providerContext, 'agent2', policyId, '8.18.0', false); // inactive by timeout
+      await createAgentDoc(providerContext, 'agent3', policyId, '8.18.0', true, { active: false }); // unenrolled
 
       await waitForTask();
 
-      // Wait for active agent to be reassigned
+      // Wait for the agents to be reassigned
+      const versionedPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`;
       await retry.tryForTime(30000, async () => {
         const agent = await getAgent('agent1');
-        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+        expect(agent.policy_id).to.be(versionedPolicyId);
       });
 
-      // Active agent should be reassigned
-      const agent1 = await getAgent('agent1');
-      expect(agent1.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
-
-      // Inactive agent should remain on parent policy
+      // Moving an agent inactive by timeout is a metadata update, so it never stays on a missing policy
       const agent2 = await getAgent('agent2');
-      expect(agent2.policy_id).to.be(policyId);
+      expect(agent2.policy_id).to.be(versionedPolicyId);
+
+      // Unenrolled agent should remain on parent policy
+      const agent3 = await getAgent('agent3');
+      expect(agent3.policy_id).to.be(policyId);
     });
 
     it('should handle agents with unparseable/invalid version gracefully', async () => {

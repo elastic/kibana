@@ -498,6 +498,7 @@ export const config: PluginConfigDescriptor = {
       versionSpecificPolicyAssignment: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
+          orphanSweepIntervalMs: schema.maybe(schema.number({ min: 0 })),
         })
       ),
       unenrollInactiveAgents: schema.maybe(
