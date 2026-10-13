@@ -195,6 +195,96 @@ describe('WorkflowTaskScheduler', () => {
       expect(mockTm.schedule.mock.calls[1][0].runAs).toBeUndefined();
     });
 
+    it.each(['identity change', 'running task'] as const)(
+      'preserves a future RRule dtstart when recreating for %s',
+      async (reason) => {
+        jest.useFakeTimers().setSystemTime(new Date('2030-01-02T00:00:00.000Z'));
+        try {
+          const mockTm = makeMockTaskManager();
+          const id = 'workflow:test-workflow:scheduled';
+          mockTm.schedule.mockRejectedValueOnce({ statusCode: 409 });
+          mockTm.get.mockResolvedValue(
+            makeTaskInstance(id, {
+              schedule: { interval: '30s' },
+              runAt: new Date('2030-01-02T00:00:30.000Z'),
+            })
+          );
+          await new WorkflowTaskScheduler(mockLogger, mockTm).scheduleWorkflowTask(
+            'test-workflow',
+            'default',
+            {
+              type: 'scheduled',
+              with: {
+                rrule: {
+                  freq: 'DAILY',
+                  interval: 1,
+                  tzid: 'UTC',
+                  dtstart: '2030-02-01T09:00:00.000Z',
+                  byhour: [9],
+                  byminute: [0],
+                },
+              },
+            },
+            mockRequest,
+            reason === 'identity change' ? 'account-a' : undefined
+          );
+          expect(mockTm.schedule.mock.calls[1][0]).toEqual(
+            expect.objectContaining({
+              scheduledAt: new Date('2030-01-01T00:00:00.000Z'),
+              runAt: new Date('2030-02-01T09:00:00.000Z'),
+            })
+          );
+        } finally {
+          jest.useRealTimers();
+        }
+      }
+    );
+
+    it('calculates the next occurrence when replacing a running unchanged RRule task', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2030-01-02T12:00:00.000Z'));
+      try {
+        const mockTm = makeMockTaskManager();
+        mockTm.schedule.mockRejectedValueOnce({ statusCode: 409 });
+        mockTm.get.mockResolvedValue(
+          makeTaskInstance('workflow:test-workflow:scheduled', {
+            schedule: {
+              rrule: {
+                freq: Frequency.DAILY,
+                interval: 1,
+                tzid: 'UTC',
+                byhour: [9],
+                byminute: [0],
+              },
+            },
+            runAt: new Date('2030-01-02T09:00:00.000Z'),
+          })
+        );
+        await new WorkflowTaskScheduler(mockLogger, mockTm).scheduleWorkflowTask(
+          'test-workflow',
+          'default',
+          {
+            type: 'scheduled',
+            with: {
+              rrule: {
+                freq: 'DAILY',
+                interval: 1,
+                tzid: 'UTC',
+                byhour: [9],
+                byminute: [0],
+              },
+            },
+          },
+          mockRequest,
+          undefined
+        );
+        expect(mockTm.schedule.mock.calls[1][0].runAt).toEqual(
+          new Date('2030-01-03T09:00:00.000Z')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('returns empty array when workflow has no scheduled triggers', async () => {
       const mockTm = makeMockTaskManager();
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);

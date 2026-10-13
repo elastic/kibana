@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   calculateNextRunAtFromSchedule,
+  type ConcreteTaskInstance,
   type TaskInstance,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -23,6 +24,25 @@ const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 
 const getScheduledWorkflowTaskId = (workflowId: string) => `workflow:${workflowId}:scheduled`;
+
+const getRecreatedTaskTiming = (
+  existing: ConcreteTaskInstance,
+  schedule: TaskInstance['schedule'],
+  preserveRunAt: boolean
+): Pick<TaskInstance, 'runAt' | 'scheduledAt'> => ({
+  scheduledAt: existing.scheduledAt,
+  runAt: preserveRunAt
+    ? existing.runAt
+    : new Date(
+        calculateNextRunAtFromSchedule({
+          schedule,
+          // RRule dtstart defines the recurrence anchor; an interval retains the task's anchor.
+          startDate: schedule?.rrule?.dtstart
+            ? new Date(schedule.rrule.dtstart)
+            : existing.scheduledAt,
+        })
+      ),
+});
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -149,15 +169,7 @@ export class WorkflowTaskScheduler {
           const recreatedTaskInstance = existing
             ? {
                 ...taskInstance,
-                scheduledAt: existing.scheduledAt,
-                runAt: isEqual(existing.schedule, schedule)
-                  ? existing.runAt
-                  : new Date(
-                      calculateNextRunAtFromSchedule({
-                        schedule,
-                        startDate: existing.scheduledAt,
-                      })
-                    ),
+                ...getRecreatedTaskTiming(existing, schedule, isEqual(existing.schedule, schedule)),
               }
             : taskInstance;
           await this.taskManager.removeIfExists(taskId);
@@ -195,13 +207,7 @@ export class WorkflowTaskScheduler {
           const recreatedTaskInstance = existingTask
             ? {
                 ...taskInstance,
-                scheduledAt: existingTask.scheduledAt,
-                runAt: new Date(
-                  calculateNextRunAtFromSchedule({
-                    schedule,
-                    startDate: existingTask.scheduledAt,
-                  })
-                ),
+                ...getRecreatedTaskTiming(existingTask, schedule, false),
               }
             : taskInstance;
           await this.taskManager.removeIfExists(taskId);

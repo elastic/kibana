@@ -264,6 +264,68 @@ describe('bulkScheduleWorkflow', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
+  it('rejects an external SA event before creating an unbound subscriber execution', async () => {
+    const subscriber = createWorkflow('subscriber', { managed: true });
+    if (!subscriber.definition) throw new Error('Missing definition');
+    subscriber.definition.triggers = [{ type: 'alert' }];
+    mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([{ ...subscriber, valid: true }]);
+    jest.spyOn(coreStart.security.authc, 'getPrincipal').mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'external-account',
+      variant: 'stack',
+    });
+    await pluginStart.triggerEvents.emitEvent({ triggerId: 'alert', payload: {}, request });
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('preserves the scheduling error when cleanup fails', async () => {
+    const workflow = createWorkflow('subscriber');
+    mockGetWorkflow.mockResolvedValue(workflow);
+    const error = new Error('Original scheduling failure');
+    taskManager.schedule.mockRejectedValue(error);
+    mockGetWorkflowExecutionWithVersion.mockRejectedValue(new Error('Cleanup unavailable'));
+    await expect(
+      pluginStart.scheduleWorkflow(workflow, { spaceId: 'default' }, request)
+    ).rejects.toBe(error);
+  });
+
+  it('cleans every pending execution after bulk scheduling fails without masking the error', async () => {
+    const error = new Error('Bulk scheduling failed');
+    taskManager.bulkSchedule.mockRejectedValue(error);
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+    mockGetWorkflowExecutionWithVersion
+      .mockRejectedValueOnce(new Error('Cleanup unavailable'))
+      .mockResolvedValue({
+        execution: { id: 'pending', status: ExecutionStatus.PENDING },
+        seqNo: 3,
+        primaryTerm: 1,
+      });
+    const workflows = [createWorkflow('first'), createWorkflow('second')];
+    mockGetWorkflow.mockImplementation(async (id: string) =>
+      workflows.find((workflow) => workflow.id === id)
+    );
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map(workflows.map(({ id }) => [`default:${id}`, { enabled: true }]))
+    );
+    await expect(
+      pluginStart.bulkScheduleWorkflow(
+        workflows.map((workflow) => ({ workflow, context: { spaceId: 'default' } })),
+        request
+      )
+    ).rejects.toBe(error);
+    expect(mockGetWorkflowExecutionWithVersion).toHaveBeenCalledTimes(2);
+    expect(mockTryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: ExecutionStatus.FAILED,
+        error: { type: 'WorkflowSchedulingError', message: error.message },
+      }),
+      { seqNo: 3, primaryTerm: 1 }
+    );
+  });
+
   it('terminalizes a pending execution when task scheduling fails', async () => {
     const workflow = createWorkflow('subscriber');
     mockGetWorkflow.mockResolvedValue(workflow);

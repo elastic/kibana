@@ -64,7 +64,7 @@ apiTest.describe(
       }
     });
 
-    for (const mode of ['inherit', 'rebind', 'user'] as const) {
+    for (const mode of ['inherit', 'rebind', 'user', 'route'] as const) {
       apiTest(
         `event subscribers retain their execution identity: ${mode}`,
         async ({ apiClient }) => {
@@ -90,9 +90,20 @@ apiTest.describe(
             });
             managedIds.add(id);
           };
+          const eventSource = `cp2-route-${Date.now()}`;
           const sourceYaml = workflowYaml(
             accountId,
-            `  - name: fail
+            mode === 'route'
+              ? `  - name: emit
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/workflows_extensions_example/emit
+      body:
+        message: Identity regression
+        source: ${eventSource}
+`
+              : `  - name: fail
     type: elasticsearch.request
     with:
       method: GET
@@ -114,7 +125,11 @@ apiTest.describe(
           const subscriptionYaml = (yaml: string) =>
             yaml.replace(
               '  - type: manual',
-              `  - type: workflows.failed
+              mode === 'route'
+                ? `  - type: example.customTrigger
+    on:
+      condition: 'event.source: "${eventSource}"'`
+                : `  - type: workflows.failed
     on:
       condition: 'event.workflow.id: "${sourceId}"'`
             );
@@ -144,7 +159,11 @@ apiTest.describe(
             expect(result).toHaveStatusCode(200);
             return result.body.results;
           };
-          await wait(apiClient, await run(apiClient, sourceId), 'failed');
+          await wait(
+            apiClient,
+            await run(apiClient, sourceId),
+            mode === 'route' ? 'completed' : 'failed'
+          );
           await expect
             .poll(async () => (await executions(managedId)).length, { timeout: 30_000 })
             .toBe(1);
@@ -162,7 +181,11 @@ apiTest.describe(
           await expect
             .poll(async () => (await executions(boundId)).length, { timeout: 30_000 })
             .toBe(1);
-          expectAccount(await wait(apiClient, (await executions(boundId))[0].id), otherAccountId);
+          expectAccount(
+            await wait(apiClient, (await executions(boundId))[0].id),
+            otherAccountId,
+            mode === 'route' ? { username: accountId } : undefined
+          );
           await expect
             .poll(async () => (await executions(ordinaryId)).length, { timeout: 30_000 })
             .toBe(mode === 'user' ? 1 : 0);
@@ -198,11 +221,73 @@ apiTest.describe(
             (step) => step.stepId === 'authenticate'
           );
           expect(JSON.stringify(authenticate?.output ?? null)).toContain(
-            mode === 'inherit' ? accountId : mode === 'user' ? 'username' : 'null'
+            mode === 'user' ? 'username' : mode === 'rebind' ? 'null' : accountId
           );
         }
       );
     }
+
+    apiTest(
+      'rejects an unmanaged HTTP emitter before persisting an unbound subscriber',
+      async ({ apiClient }) => {
+        const { headers, accountId, otherAccountId, create, run, wait } = getContext();
+        const eventSource = `cp2-unmanaged-route-${Date.now()}`;
+        const subscription = (yaml: string) =>
+          yaml.replace(
+            '  - type: manual',
+            `  - type: example.customTrigger
+    on:
+      condition: 'event.source: "${eventSource}"'`
+          );
+        const subscriberId = await create(
+          apiClient,
+          subscription(
+            workflowYaml(accountId).replace(
+              `settings:
+  run_as: ${accountId}
+`,
+              ''
+            )
+          )
+        );
+        await systemClient.update({
+          index: workflowSystemIndex('workflows'),
+          id: subscriberId,
+          doc: { managed: true },
+          refresh: 'wait_for',
+        });
+        managedIds.add(subscriberId);
+        const boundId = await create(apiClient, subscription(workflowYaml(otherAccountId)));
+        const sourceId = await create(
+          apiClient,
+          workflowYaml(
+            accountId,
+            `  - name: emit
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/workflows_extensions_example/emit
+      body:
+        message: Unmanaged emitter rejection
+        source: ${eventSource}
+`
+          )
+        );
+        await wait(apiClient, await run(apiClient, sourceId));
+        const executions = async (id: string): Promise<WorkflowExecutionDto[]> => {
+          const result = await apiClient.get(`api/workflows/workflow/${id}/executions`, {
+            headers,
+            responseType: 'json',
+          });
+          expect(result).toHaveStatusCode(200);
+          return result.body.results;
+        };
+        // The route awaits event delivery; the bound subscriber proves the event was handled.
+        await expect.poll(async () => (await executions(boundId)).length).toBe(1);
+        await wait(apiClient, (await executions(boundId))[0].id);
+        expect(await executions(subscriberId)).toStrictEqual([]);
+      }
+    );
 
     apiTest(
       'SA continuation audit: binding failure dispatches the failure handler',

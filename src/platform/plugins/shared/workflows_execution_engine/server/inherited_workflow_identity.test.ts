@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type {
@@ -21,6 +22,7 @@ import {
   resolveInheritedWorkflowIdentity,
   withWorkflowExecutionIdentity,
 } from './service_account_execution';
+import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from './trigger_events/event_context/event_chain_context';
 
 const child = {
   id: 'child',
@@ -89,15 +91,29 @@ describe('inherited workflow execution identity', () => {
   });
 
   describe('event subscribers', () => {
+    const getExecution = jest.fn<Promise<ReturnType<typeof parent> | null>, [string, string]>();
+    const resolveEvent = (
+      request: KibanaRequest,
+      workflow: WorkflowExecutionEngineModel = child,
+      spaceId = 'default'
+    ) =>
+      resolveInheritedEventWorkflowIdentity(request, workflow, spaceId, {
+        security: core.security,
+        getExecution,
+      });
+
+    beforeEach(() => {
+      getExecution.mockReset().mockResolvedValue(null);
+      core.security.authc.getPrincipal.mockReturnValue(null);
+    });
+
     it('inherits from the emitting managed workflow without a child-call step', async () => {
       await withWorkflowExecutionIdentity(
         core,
         parent(),
         caller,
         async (request) => {
-          expect(resolveInheritedEventWorkflowIdentity(request, child, 'default')).toEqual(
-            identity
-          );
+          await expect(resolveEvent(request)).resolves.toEqual(identity);
         },
         runAs
       );
@@ -112,7 +128,7 @@ describe('inherited workflow execution identity', () => {
         },
         caller,
         async (request) => {
-          expect(resolveInheritedEventWorkflowIdentity(request, child, 'default')).toEqual({
+          await expect(resolveEvent(request)).resolves.toEqual({
             ...identity,
             inheritedFrom: { workloadId: 'root' },
           });
@@ -132,13 +148,9 @@ describe('inherited workflow execution identity', () => {
           { ...parent(), managed: managedEmitter },
           caller,
           async (request) => {
-            expect(() =>
-              resolveInheritedEventWorkflowIdentity(
-                request,
-                { ...child, managed: managedSubscriber },
-                'default'
-              )
-            ).toThrow('must have its own service account');
+            await expect(
+              resolveEvent(request, { ...child, managed: managedSubscriber })
+            ).rejects.toThrow('must have its own service account');
           },
           runAs
         );
@@ -151,7 +163,7 @@ describe('inherited workflow execution identity', () => {
         parent(),
         caller,
         async (request) => {
-          expect(() => resolveInheritedEventWorkflowIdentity(request, child, 'other')).toThrow(
+          await expect(resolveEvent(request, child, 'other')).rejects.toThrow(
             'emitting workflow space'
           );
         },
@@ -165,33 +177,91 @@ describe('inherited workflow execution identity', () => {
         { ...parent(), managed: false },
         caller,
         async (request) => {
-          expect(
-            resolveInheritedEventWorkflowIdentity(
-              request,
-              {
-                ...child,
-                managed: false,
-                definition: { ...child.definition, settings: { run_as: 'subscriber-account' } },
-              },
-              'default'
-            )
-          ).toBeUndefined();
+          await expect(
+            resolveEvent(request, {
+              ...child,
+              managed: false,
+              definition: { ...child.definition, settings: { run_as: 'subscriber-account' } },
+            })
+          ).resolves.toBeUndefined();
         },
         runAs
       );
     });
 
-    it('keeps ordinary caller scheduling and does not infer identity from headers', () => {
-      expect(resolveInheritedEventWorkflowIdentity(caller, child, 'default')).toBeUndefined();
-      expect(
-        resolveInheritedEventWorkflowIdentity(
+    it('keeps ordinary caller scheduling and does not infer identity from headers', async () => {
+      await expect(resolveEvent(caller)).resolves.toBeUndefined();
+      await expect(
+        resolveEvent(
           httpServerMock.createKibanaRequest({
-            headers: { authorization: 'Bearer untrusted' },
-          }),
-          child,
-          'default'
+            headers: {
+              authorization: 'Bearer untrusted',
+              [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'parent-execution',
+            },
+          })
         )
-      ).toBeUndefined();
+      ).resolves.toBeUndefined();
+      expect(getExecution).not.toHaveBeenCalled();
+    });
+
+    describe('HTTP route emitters', () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'parent-execution' },
+      });
+      beforeEach(() => {
+        core.security.authc.getPrincipal.mockReturnValue({
+          type: 'service_account',
+          serviceAccountId: 'account-a',
+          variant: 'stack',
+        });
+        getExecution.mockResolvedValue(parent());
+      });
+
+      it('recovers the authenticated emitter and retains its root binding', async () => {
+        getExecution.mockResolvedValue({
+          ...parent(),
+          effectiveIdentity: { ...identity, inheritedFrom: { workloadId: 'root' } },
+        });
+        await expect(resolveEvent(request)).resolves.toEqual({
+          ...identity,
+          inheritedFrom: { workloadId: 'root' },
+        });
+        expect(getExecution).toHaveBeenCalledWith('parent-execution', 'default');
+      });
+
+      it.each([
+        [
+          'different account',
+          {
+            ...parent(),
+            workflowDefinition: {
+              ...parent().workflowDefinition,
+              settings: { run_as: 'account-b' },
+            },
+          },
+        ],
+        ['unmanaged emitter', { ...parent(), managed: false }],
+        ['different space', { ...parent(), spaceId: 'other' }],
+        ['missing emitter', null],
+      ] as const)('rejects %s', async (_label, execution) => {
+        getExecution.mockResolvedValue(execution);
+        await expect(resolveEvent(request)).rejects.toThrow();
+      });
+
+      it('rejects an external SA event with no emitter before scheduling', async () => {
+        await expect(resolveEvent(caller)).rejects.toThrow('matching managed workflow emitter');
+        expect(getExecution).not.toHaveBeenCalled();
+      });
+
+      it('allows an external SA event to schedule an independently bound subscriber', async () => {
+        await expect(
+          resolveEvent(caller, {
+            ...child,
+            definition: { ...child.definition, settings: { run_as: 'own-account' } },
+          })
+        ).resolves.toBeUndefined();
+        expect(getExecution).not.toHaveBeenCalled();
+      });
     });
   });
 

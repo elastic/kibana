@@ -1395,7 +1395,11 @@ export class WorkflowsExecutionEnginePlugin
       await ensureWorkflowEnabled(workflow, spaceId);
       const inheritedIdentity = request
         ? options.eventSubscriber
-          ? resolveInheritedEventWorkflowIdentity(request, workflow, spaceId)
+          ? await resolveInheritedEventWorkflowIdentity(request, workflow, spaceId, {
+              security: coreStart.security,
+              getExecution: (id, executionSpaceId) =>
+                workflowExecutionRepository.getWorkflowExecutionById(id, executionSpaceId),
+            })
           : resolveInheritedWorkflowIdentity(request, workflow, {
               inheritParentIdentity: context.inheritParentIdentity === true,
               parentWorkflowId:
@@ -1602,6 +1606,24 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
+    const cleanupSchedulingFailure = async (
+      execution: Pick<EsWorkflowExecution, 'id' | 'spaceId'>,
+      error: Error
+    ): Promise<void> => {
+      try {
+        await failPendingExecutionAfterSchedulingError({
+          workflowExecutionRepository,
+          workflowRunId: execution.id,
+          spaceId: execution.spaceId,
+          message: error.message,
+        });
+      } catch (cleanupError) {
+        this.logger.error(
+          `Failed to clean up workflow execution ${execution.id} after scheduling failed: ${cleanupError}`
+        );
+      }
+    };
+
     const scheduleWorkflowWithIdentity = async (
       workflow: Parameters<ScheduleWorkflow>[0],
       context: Parameters<ScheduleWorkflow>[1],
@@ -1656,12 +1678,10 @@ export class WorkflowsExecutionEnginePlugin
           request ? { request, cloneApiKey: true } : undefined
         );
       } catch (error) {
-        await failPendingExecutionAfterSchedulingError({
-          workflowExecutionRepository,
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-          message: error instanceof Error ? error.message : String(error),
-        });
+        await cleanupSchedulingFailure(
+          workflowExecution,
+          error instanceof Error ? error : new Error(String(error))
+        );
         throw error;
       }
       this.logger.debug(
@@ -1882,7 +1902,17 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
+        try {
+          await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
+        } catch (error) {
+          const schedulingError = error instanceof Error ? error : new Error(String(error));
+          await Promise.all(
+            toSchedule.map(({ workflowExecution }) =>
+              cleanupSchedulingFailure(workflowExecution, schedulingError)
+            )
+          );
+          throw error;
+        }
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 

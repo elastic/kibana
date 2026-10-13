@@ -12,6 +12,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { RunContext, TaskInstance } from '@kbn/task-manager-plugin/server';
 import { visitNestedSteps, WorkflowExecuteStepInputSchema } from '@kbn/workflows';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { getEmitterWorkflowExecutionIdFromRequest } from './trigger_events/event_context/event_chain_context';
 
 export const WORKFLOW_SERVICE_ACCOUNT_TYPE = 'workflow';
 type IdentityExecution = Pick<
@@ -115,15 +116,38 @@ export const resolveInheritedWorkflowIdentity = (
   };
 };
 
-/** Inherits an event emitter's live identity only between managed workflows in the same space. */
-export const resolveInheritedEventWorkflowIdentity = (
+/** Inherits a verified event emitter's identity only between managed workflows in the same space. */
+export const resolveInheritedEventWorkflowIdentity = async (
   request: KibanaRequest,
   workflow: WorkflowExecutionEngineModel,
-  spaceId: string
-): EsWorkflowExecution['effectiveIdentity'] => {
-  const emitter = executionContexts.get(request)?.execution;
-  const accountId = emitter && getExecutionServiceAccountId(emitter);
-  if (!accountId || workflow.definition?.settings?.run_as) return undefined;
+  spaceId: string,
+  {
+    security,
+    getExecution,
+  }: {
+    security: CoreStart['security'];
+    getExecution: (id: string, spaceId: string) => Promise<IdentityExecution | null>;
+  }
+): Promise<EsWorkflowExecution['effectiveIdentity']> => {
+  if (workflow.definition?.settings?.run_as) return undefined;
+  let emitter = executionContexts.get(request)?.execution;
+  if (!emitter) {
+    const principal = security.authc.getPrincipal(request);
+    if (principal?.type !== 'service_account') return undefined;
+    const emitterId = getEmitterWorkflowExecutionIdFromRequest(request);
+    const storedEmitter = emitterId ? await getExecution(emitterId, spaceId) : null;
+    if (
+      !storedEmitter ||
+      getExecutionServiceAccountId(storedEmitter) !== principal.serviceAccountId
+    ) {
+      throw Boom.forbidden(
+        'A workflow that subscribes to events from a service account must have its own service account unless a matching managed workflow emitter can be verified.'
+      );
+    }
+    emitter = storedEmitter;
+  }
+  const accountId = getExecutionServiceAccountId(emitter);
+  if (!accountId) return undefined;
   if (emitter?.managed !== true || workflow.managed !== true) {
     throw Boom.forbidden(
       'A workflow that subscribes to events from a service account must have its own service account unless both the emitting workflow and subscriber are managed.'
