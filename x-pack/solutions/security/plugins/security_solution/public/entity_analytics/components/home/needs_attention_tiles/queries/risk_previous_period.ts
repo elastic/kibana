@@ -27,7 +27,10 @@ import { TIME_RANGE_DAYS } from './tile_period';
 const buildPreviousPeriodStart = (timeRange: TimeRange): string =>
   `NOW() - ${2 * TIME_RANGE_DAYS[timeRange]} days`;
 
-const buildJoinTail = (entitiesIndexName: string, entityFilterClauses: string[]): string[] => [
+export const buildJoinTail = (
+  entitiesIndexName: string,
+  entityFilterClauses: string[]
+): string[] => [
   `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
   `| WHERE entity.name IS NOT NULL`,
   ...entityFilterClauses,
