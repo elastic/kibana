@@ -224,6 +224,29 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml', cancelable));
     }
 
+    // Docker Fleet Server + Elastic Agent: only for the policy version code paths and this suite,
+    // not for every Fleet change.
+    if (
+      // Scout suite: changes to its own Scout tests must still trigger it.
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/tasks\/version_specific_policy_assignment_task/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/services\/agent_policy\.ts/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/services\/agent_policies\//,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/server\/services\/utils\/(version_specific_policies|sentinel_policy_version)/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/common\/services\/version_specific_polic/,
+        /^x-pack\/platform\/plugins\/shared\/fleet\/test\/scout_fleet_real_agent/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/fleet_real_agent/,
+        /^\.buildkite\/pipelines\/pull_request\/scout_fleet_real_agent\.yml/,
+        /^\.buildkite\/scripts\/steps\/test\/scout_fleet_real_agent\.sh/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:scout-fleet-real-agent') ||
+      ALL_UI_TEST_SUITES
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/scout_fleet_real_agent.yml', cancelable)
+      );
+    }
+
     const aiInfraPaths = [
       /^x-pack\/platform\/packages\/shared\/ai-infra/,
       /^x-pack\/platform\/plugins\/shared\/ai_infra/,

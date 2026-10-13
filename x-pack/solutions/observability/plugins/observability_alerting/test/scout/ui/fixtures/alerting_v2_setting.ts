@@ -19,7 +19,7 @@ const GLOBAL_SETTINGS_PATH = `/internal/kibana/global_settings/${encodeURICompon
 /**
  * Toggles the `alerting:v2:enabled` global advanced setting at runtime.
  * Matches the alerting_v2 `test/scout` skill-gating suite: the default Scout
- * server leaves this setting unpinned, unlike `scout_alerting_v2`.
+ * server does not pin this setting (it defaults to on), unlike `scout_alerting_v2`.
  */
 export const setAlertingV2EnabledSetting = async (
   kbnClient: KbnClient,
@@ -28,9 +28,10 @@ export const setAlertingV2EnabledSetting = async (
   await kbnClient.uiSettings.updateGlobal({
     [ALERTING_V2_ENABLED_SETTING_ID]: enabled,
   });
+  await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };
 
-/** DELETE is a no-op when no user value is set. */
+/** Deleting the user value restores the registered default, which is on. DELETE is a no-op when no user value is set. */
 export const unsetAlertingV2EnabledSetting = async (kbnClient: KbnClient): Promise<void> => {
   await kbnClient.request({
     description: `unset ${ALERTING_V2_ENABLED_SETTING_ID}`,

@@ -41,6 +41,11 @@ import type { PrivateLocationAttributes } from '../../runtime_types/private_loca
 import { PackagePolicyService } from './package_policy_service';
 import { rebalanceByCost } from './assign_shards';
 import {
+  EMPTY_REBALANCE_RESULT,
+  summarizeRebalance,
+  type RebalanceShardsResult,
+} from './rebalance_stats';
+import {
   toConditionUpdates,
   toClearedConditionUpdates,
   toMonitorPlacements,
@@ -822,9 +827,9 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds?: string[];
     capacities?: ReadonlyMap<string, number>;
     signal: AbortSignal;
-  }): Promise<{ total: number; moved: number }> {
+  }): Promise<RebalanceShardsResult> {
     if (healthyAgentIds.length === 0) {
-      return { total: 0, moved: 0 };
+      return EMPTY_REBALANCE_RESULT;
     }
     signal.throwIfAborted();
     const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
@@ -832,7 +837,10 @@ export class SyntheticsPrivateLocation {
       signal,
     });
     if (pkgPolicies.length === 0) {
-      return { total: 0, moved: 0 };
+      return {
+        ...EMPTY_REBALANCE_RESULT,
+        monitorsPerAgent: Object.fromEntries(healthyAgentIds.map((agentId) => [agentId, 0])),
+      };
     }
 
     const monitors = toMonitorPlacements(pkgPolicies, location.id);
@@ -840,6 +848,7 @@ export class SyntheticsPrivateLocation {
     const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
 
     let moved = 0;
+    let failedMoves = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
       signal.throwIfAborted();
       // Update in the policy's own recorded space (grouped in toConditionUpdates),
@@ -850,6 +859,7 @@ export class SyntheticsPrivateLocation {
       });
       // Count only successful moves (a failed bulkUpdate leaves the old pin).
       moved += policiesToUpdate.length - failed.length;
+      failedMoves += failed.length;
       if (failed.length > 0) {
         // Not terminal: the rebalance is idempotent and retried every cycle, so
         // the next run re-attempts these same moves. warn (not error) — no
@@ -862,7 +872,12 @@ export class SyntheticsPrivateLocation {
       }
     }
 
-    return { total: pkgPolicies.length, moved };
+    return {
+      total: pkgPolicies.length,
+      moved,
+      failed: failedMoves,
+      ...summarizeRebalance({ monitors, assignment, healthyAgentIds }),
+    };
   }
 
   /**
