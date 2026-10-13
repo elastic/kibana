@@ -7,6 +7,7 @@
 
 import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
 import {
+  ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntBehaviorRequestBody,
@@ -64,6 +65,7 @@ export const registerHuntBehaviorRoute = ({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
             featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+            telemetryPluginId: ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,

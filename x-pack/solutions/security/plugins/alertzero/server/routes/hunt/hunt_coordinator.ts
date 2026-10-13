@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
+  ALERTZERO_HUNT_SWEEP_TELEMETRY_PLUGIN_ID,
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
@@ -130,6 +131,7 @@ export const registerHuntCoordinatorRoute = ({
                 inference: getInference(),
                 searchInferenceEndpoints: getSearchInferenceEndpoints(),
                 featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+                telemetryPluginId: ALERTZERO_HUNT_SWEEP_TELEMETRY_PLUGIN_ID,
                 request,
                 uiSettingsClient: core.uiSettings.client,
                 logger,
