@@ -16,6 +16,7 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { fetchFlamegraph } from './fetch_flamegraph';
 import { fetchFunctions } from './fetch_functions';
+import { getProfilingInitialized } from './get_profiling_initialized';
 import { getStacktracesIdsField } from './get_stacktraces_ids_field';
 
 const servicesFlamegraphRoute = createApmServerRoute({
@@ -137,16 +138,17 @@ const profilingStatusRoute = createApmServerRoute({
     ]);
     if (profilingDataAccessStart) {
       try {
-        const response = await profilingDataAccessStart?.services.universalProfiling.getStatus({
+        const initialized = await getProfilingInitialized({
+          profilingDataAccessStart,
           esClient,
           soClient: (await context.core).savedObjects.client,
           spaceId: (await plugins.spaces?.start())?.spacesService.getSpaceId(resources.request),
         });
 
-        return { initialized: response.has_setup };
+        return { initialized };
       } catch (e) {
         // If any error happens just return as if profiling has not been initialized
-        logger.warn('Could not check Universal Profiling status');
+        logger.warn('Could not check the profiling status');
       }
     }
 
