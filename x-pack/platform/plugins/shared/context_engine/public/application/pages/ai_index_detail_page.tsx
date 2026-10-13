@@ -26,6 +26,7 @@ import {
 import { KiListPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
+import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useKiList } from '../hooks/use_ki_list';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
@@ -114,6 +115,8 @@ export const AiIndexDetailPage = () => {
       isLoading,
     });
   const pageTitle = aiIndex?.id ?? id ?? '';
+
+  useContextEngineBreadcrumbs(pageTitle ? [{ text: pageTitle }] : []);
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
   const headerBadges = useMemo<AppHeaderBadge[] | undefined>(
@@ -275,10 +278,7 @@ export const AiIndexDetailPage = () => {
   );
 
   return (
-    <ContextEnginePageTemplate
-      data-test-subj="contextAiIndexDetailPage"
-      breadcrumbPageName={pageTitle || undefined}
-    >
+    <ContextEnginePageTemplate data-test-subj="contextAiIndexDetailPage">
       <ContextEngineSubPageHeader
         backDestinationLabel={contextEngineBackDestinationLabel}
         backHref={backHref}

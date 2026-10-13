@@ -61,8 +61,40 @@ describe('useKi', () => {
       '/internal/context_engine/ai_index/sample-ki/kis/ki-1',
       expect.objectContaining({
         version: '1',
-        query: { index: 'ai-index-idx-sample-ki' },
+        query: {
+          index: 'ai-index-idx-sample-ki',
+          lifecycle_status: ['active', 'deleted'],
+        },
       })
     );
+  });
+
+  it('surfaces request errors on the hook result', async () => {
+    const core = coreMock.createStart();
+    const requestError = new Error('Not found');
+    (core.http.get as jest.Mock).mockRejectedValue(requestError);
+
+    const { result } = renderUseKi(core, {
+      aiIndexId: 'sample-ki',
+      kiId: 'ki-1',
+      index: 'ai-index-idx-sample-ki',
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe(requestError);
+    });
+    expect(result.current.ki).toBeUndefined();
+  });
+
+  it('does not fetch when index is empty', () => {
+    const core = coreMock.createStart();
+
+    renderUseKi(core, {
+      aiIndexId: 'sample-ki',
+      kiId: 'ki-1',
+      index: '',
+    });
+
+    expect(core.http.get).not.toHaveBeenCalled();
   });
 });
