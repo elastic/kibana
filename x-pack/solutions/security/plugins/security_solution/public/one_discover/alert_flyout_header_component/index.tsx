@@ -20,6 +20,11 @@ import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/main/header';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
+import { useFlyoutV2UrlWriter } from '../../flyout_v2/shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  urlParamKeyForHistoryKey,
+} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DiscoverCellActions } from '../cell_actions';
@@ -96,6 +101,10 @@ export const AlertFlyoutHeader = ({
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(
+    urlParamKeyForHistoryKey(historyKey),
+    historyKey
+  );
   const renderCellActions = useCallback<CellActionRenderer>(
     (props) => (
       <DiscoverCellActions
@@ -114,6 +123,10 @@ export const AlertFlyoutHeader = ({
       return;
     }
 
+    const { _id: documentId, _index: indexName } = hit.raw;
+    if (documentId && indexName) {
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.notes, documentId, indexName });
+    }
     const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
@@ -126,6 +139,7 @@ export const AlertFlyoutHeader = ({
         historyKey,
         session: FLYOUT_SESSION_KIND.START,
         title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
+        onClose: buildOnClose(null),
       }
     );
     if (ref) {
@@ -137,7 +151,16 @@ export const AlertFlyoutHeader = ({
         origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
       });
     }
-  }, [defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
+  }, [
+    buildOnClose,
+    defaultToolsFlyoutProperties,
+    history,
+    historyKey,
+    hit,
+    services,
+    store,
+    writeOnOpen,
+  ]);
 
   useEffect(() => {
     if (!services) {

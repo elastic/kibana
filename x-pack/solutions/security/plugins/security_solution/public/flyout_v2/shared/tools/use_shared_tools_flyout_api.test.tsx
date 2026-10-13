@@ -34,10 +34,12 @@ jest.mock('../hooks/use_default_flyout_properties', () => ({
 
 const mockWriteOnOpen = jest.fn();
 const mockBuildOnClose = jest.fn(() => jest.fn());
+const mockReadRootDescriptor = jest.fn((): unknown => null);
 jest.mock('../url_state/flyout_v2_url_writer', () => ({
   useFlyoutV2UrlWriter: jest.fn(() => ({
     writeOnOpen: mockWriteOnOpen,
     buildOnClose: mockBuildOnClose,
+    readRootDescriptor: mockReadRootDescriptor,
   })),
 }));
 

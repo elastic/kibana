@@ -108,11 +108,24 @@ const NEEDS_ATTACK_HIT = new Set<string>(['attackCorrelations', 'attackEntities'
 // Per-kind restorer helpers (pure functions, not hooks)
 // ---------------------------------------------------------------------------
 
-interface RestoreContext {
+export interface RestoreContext {
   docHit?: DataTableRecord;
   attackHit?: DataTableRecord;
   iocIndicator?: Indicator;
 }
+
+/**
+ * Rebuilds an `Indicator` from its fetched record. Carries `_index` through (the `Indicator` type
+ * only declares `_id`/`fields`, but the IOC opener reads `_index` off the raw hit to re-persist the
+ * URL descriptor). Without it, re-opening on restore would rewrite the descriptor with an empty
+ * index and a second refresh would no longer restore the flyout.
+ */
+export const recordToIndicator = (record: DataTableRecord): Indicator =>
+  ({
+    _id: record.raw._id ?? '',
+    _index: record.raw._index,
+    fields: (record.raw.fields ?? {}) as Indicator['fields'],
+  } as Indicator);
 
 /**
  * Builds the tool-header "show entity" callback for a restored entity tool flyout.
@@ -969,17 +982,7 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // Build resolved context. `useEsDocSearch` already returns `DataTableRecord`s.
     const docHit = docHitRecord ?? undefined;
     const attackHit = attackHitRecord ?? undefined;
-    // Carry `_index` through on the reconstructed indicator (the `Indicator` type only declares
-    // `_id`/`fields`, but the IOC opener reads `_index` off the raw hit to re-persist the URL
-    // descriptor). Without it, re-opening on restore would rewrite the descriptor with an empty
-    // index and a second refresh would no longer restore the flyout.
-    const iocIndicator: Indicator | undefined = iocHitRecord
-      ? ({
-          _id: iocHitRecord.raw._id ?? '',
-          _index: iocHitRecord.raw._index,
-          fields: (iocHitRecord.raw.fields ?? {}) as Indicator['fields'],
-        } as Indicator)
-      : undefined;
+    const iocIndicator = iocHitRecord ? recordToIndicator(iocHitRecord) : undefined;
 
     const ctx: RestoreContext = { docHit, attackHit, iocIndicator };
     const [first, second] = descriptors;

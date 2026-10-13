@@ -6,8 +6,45 @@
  */
 
 import { decode, encode } from '@kbn/rison';
+import type { z } from '@kbn/zod/v4';
+import { flyoutChainSchema } from './flyout_descriptor_schema';
 import { timelineFlyoutHistoryKey } from '../constants/flyout_history';
-import type { FlyoutOrigin } from '../../../common/lib/telemetry/events/flyout_v2/types';
+import type {
+  flyoutDescriptorSchema,
+  documentDescriptorSchema,
+  documentFromPatternDescriptorSchema,
+  analyzerDescriptorSchema,
+  sessionViewDescriptorSchema,
+  documentEntitiesDescriptorSchema,
+  documentCorrelationsDescriptorSchema,
+  documentPrevalenceDescriptorSchema,
+  documentResponseDescriptorSchema,
+  documentThreatIntelligenceDescriptorSchema,
+  documentInvestigationGuideDescriptorSchema,
+  documentGraphDescriptorSchema,
+  notesDescriptorSchema,
+  attackDescriptorSchema,
+  attackCorrelationsDescriptorSchema,
+  attackEntitiesDescriptorSchema,
+  hostDescriptorSchema,
+  userDescriptorSchema,
+  serviceDescriptorSchema,
+  genericEntityDescriptorSchema,
+  entityRiskInputsDescriptorSchema,
+  entityAnomalyInsightsDescriptorSchema,
+  entityAlertsInsightsDescriptorSchema,
+  entityMisconfigurationInsightsDescriptorSchema,
+  entityVulnerabilityInsightsDescriptorSchema,
+  entityGraphViewDescriptorSchema,
+  entityResolutionDescriptorSchema,
+  entityEntraInsightsDescriptorSchema,
+  entityOktaInsightsDescriptorSchema,
+  networkDescriptorSchema,
+  ruleDescriptorSchema,
+  iocDescriptorSchema,
+  cspMisconfigurationDescriptorSchema,
+  cspVulnerabilityDescriptorSchema,
+} from './flyout_descriptor_schema';
 
 /**
  * URL parameter that carries the currently-open flyout chain for the page (non-Timeline) context.
@@ -81,7 +118,7 @@ export const FLYOUT_DESCRIPTOR_KIND = {
   ioc: 'ioc',
   cspMisconfiguration: 'cspMisconfiguration',
   cspVulnerability: 'cspVulnerability',
-} as const;
+} as const satisfies Record<FlyoutDescriptor['kind'], FlyoutDescriptor['kind']>;
 
 export type FlyoutDescriptorKind =
   (typeof FLYOUT_DESCRIPTOR_KIND)[keyof typeof FLYOUT_DESCRIPTOR_KIND];
@@ -89,318 +126,55 @@ export type FlyoutDescriptorKind =
 // ---------------------------------------------------------------------------
 // Per-kind descriptor params
 // ---------------------------------------------------------------------------
+// Inferred from the zod schemas in `flyout_descriptor_schema.ts`, the single source of truth.
 
-// --- Document ---
-
-export interface DocumentDescriptor {
-  kind: 'document';
-  documentId: string;
-  indexName: string;
-}
-
-export interface DocumentFromPatternDescriptor {
-  kind: 'documentFromPattern';
-  documentId: string;
-  /** Index pattern (possibly comma-separated or wildcard) that resolves the document. */
-  indexName: string;
-}
-
-// --- Document tools ---
-// All document tools identify the source document by {documentId, indexName} extracted
-// from hit.raw._id / hit.raw._index at capture time.
-
-export interface AnalyzerDescriptor {
-  kind: 'analyzer';
-  documentId: string;
-  indexName: string;
-}
-
-export interface SessionViewDescriptor {
-  kind: 'sessionView';
-  documentId: string;
-  indexName: string;
-  jumpToCursor?: string;
-  jumpToEntityId?: string;
-}
-
-export interface DocumentEntitiesDescriptor {
-  kind: 'documentEntities';
-  documentId: string;
-  indexName: string;
-  scopeId?: string;
-}
-
-export interface DocumentCorrelationsDescriptor {
-  kind: 'documentCorrelations';
-  documentId: string;
-  indexName: string;
-  scopeId: string;
-}
-
-export interface DocumentPrevalenceDescriptor {
-  kind: 'documentPrevalence';
-  documentId: string;
-  indexName: string;
-  scopeId: string;
-  investigationFields: string[];
-}
-
-export interface DocumentResponseDescriptor {
-  kind: 'documentResponse';
-  documentId: string;
-  indexName: string;
-}
-
-export interface DocumentThreatIntelligenceDescriptor {
-  kind: 'documentThreatIntelligence';
-  documentId: string;
-  indexName: string;
-}
-
-export interface DocumentInvestigationGuideDescriptor {
-  kind: 'documentInvestigationGuide';
-  documentId: string;
-  indexName: string;
-}
-
-export interface DocumentGraphDescriptor {
-  kind: 'documentGraph';
-  documentId: string;
-  indexName: string;
-}
-
-export interface NotesDescriptor {
-  kind: 'notes';
-  documentId: string;
-  indexName: string;
-}
-
-// --- Attack ---
-
-export interface AttackDescriptor {
-  kind: 'attack';
-  attackId: string;
-  indexName: string;
-}
-
-export interface AttackCorrelationsDescriptor {
-  kind: 'attackCorrelations';
-  attackId: string;
-  indexName: string;
-  alertIds: string[];
-}
-
-export interface AttackEntitiesDescriptor {
-  kind: 'attackEntities';
-  attackId: string;
-  indexName: string;
-  alertIds: string[];
-}
-
-// --- Entity main flyouts ---
-
-export interface HostDescriptor {
-  kind: 'host';
-  hostName: string;
-  entityId?: string;
-  scopeId?: string;
-}
-
-export interface UserDescriptor {
-  kind: 'user';
-  userName: string;
-  entityId?: string;
-  scopeId?: string;
-}
-
-export interface ServiceDescriptor {
-  kind: 'service';
-  serviceName: string;
-  entityId?: string;
-  scopeId?: string;
-}
-
-export interface GenericEntityDescriptor {
-  kind: 'genericEntity';
-  scopeId: string;
-  /** Canonical Entity Store v2 id (`entity.id`). Either entityDocId or entityId must be set. */
-  entityId?: string;
-  /** Raw document `_id` of the asset-inventory record. */
-  entityDocId?: string;
-}
-
-// --- Entity tools ---
-// EntityType enum values are stored as plain strings.
-// Restorers must cast back: `entityType as EntityType`.
-
-export interface EntityRiskInputsDescriptor {
-  kind: 'entityRiskInputs';
-  /** EntityType stored as plain string. Cast back to EntityType on restore. */
-  entityType: string;
-  entityName: string;
-  entityId?: string;
-  subTab?: string;
-}
-
-export interface EntityAnomalyInsightsDescriptor {
-  kind: 'entityAnomalyInsights';
-  /** EntityType stored as plain string. Cast back to EntityType on restore. */
-  entityType: string;
-  value: string;
-  entityId?: string;
-}
-
-export interface EntityAlertsInsightsDescriptor {
-  kind: 'entityAlertsInsights';
-  /** EntityType stored as plain string. Cast back to EntityType on restore. */
-  entityType: string;
-  value: string;
-  entityId?: string;
-}
-
-export interface EntityMisconfigurationInsightsDescriptor {
-  kind: 'entityMisconfigurationInsights';
-  /** EntityType stored as plain string. Cast back to EntityType on restore. */
-  entityType: string;
-  value: string;
-  entityId?: string;
-}
-
-export interface EntityVulnerabilityInsightsDescriptor {
-  kind: 'entityVulnerabilityInsights';
-  value: string;
-  entityId?: string;
-  /** EntityType stored as plain string. Cast back to EntityType on restore. */
-  entityType?: string;
-}
-
-export interface EntityGraphViewDescriptor {
-  kind: 'entityGraphView';
-  entityId: string;
-  scopeId: string;
-  entityName: string;
-  /**
-   * EntityType of the originating entity, stored as a plain string. Used on restore to rebuild the
-   * header's "show entity" action so the entity name/icon reappear after a refresh. Optional for
-   * backward compatibility with URLs encoded before this field existed.
-   */
-  entityType?: string;
-}
-
-export interface EntityResolutionDescriptor {
-  kind: 'entityResolution';
-  entityId: string;
-  /** EntityType stored as plain string. Cast back to EntityType on restore. */
-  entityType: string;
-  entityName: string;
-  scopeId: string;
-}
-
-/**
- * Stores the identifying parts of the ManagedUserHit (`_id` / `_index`) for Entra Insights.
- * The restorer rebuilds the ManagedUserHit from these two fields.
- */
-export interface EntityEntraInsightsDescriptor {
-  kind: 'entityEntraInsights';
-  managedUserId: string;
-  managedUserIndex: string;
-  value: string;
-}
-
-/**
- * Stores the identifying parts of the ManagedUserHit (`_id` / `_index`) for Okta Insights.
- * The restorer rebuilds the ManagedUserHit from these two fields.
- */
-export interface EntityOktaInsightsDescriptor {
-  kind: 'entityOktaInsights';
-  managedUserId: string;
-  managedUserIndex: string;
-  value: string;
-}
-
-// --- Network / Rule / IOC / CSP ---
-
-/**
- * FlowTargetSourceDest enum values are stored as plain strings.
- * Restorers must cast back: `flowTarget as FlowTargetSourceDest`.
- */
-export interface NetworkDescriptor {
-  kind: 'network';
-  ip: string;
-  flowTarget: string;
-}
-
-export interface RuleDescriptor {
-  kind: 'rule';
-  ruleId: string;
-}
-
-/**
- * IOC descriptor stores the indicator's `_id` and `_index` so the restorer can re-fetch it.
- */
-export interface IocDescriptor {
-  kind: 'ioc';
-  indicatorId: string;
-  indicatorIndex: string;
-}
-
-export interface CspMisconfigurationDescriptor {
-  kind: 'cspMisconfiguration';
-  resourceId: string;
-  ruleId: string;
-}
-
-export interface CspVulnerabilityDescriptor {
-  kind: 'cspVulnerability';
-  vulnerabilityId?: string | string[];
-  resourceId?: string;
-  packageName?: string | string[];
-  packageVersion?: string | string[];
-  eventId?: string;
-}
+export type DocumentDescriptor = z.infer<typeof documentDescriptorSchema>;
+export type DocumentFromPatternDescriptor = z.infer<typeof documentFromPatternDescriptorSchema>;
+export type AnalyzerDescriptor = z.infer<typeof analyzerDescriptorSchema>;
+export type SessionViewDescriptor = z.infer<typeof sessionViewDescriptorSchema>;
+export type DocumentEntitiesDescriptor = z.infer<typeof documentEntitiesDescriptorSchema>;
+export type DocumentCorrelationsDescriptor = z.infer<typeof documentCorrelationsDescriptorSchema>;
+export type DocumentPrevalenceDescriptor = z.infer<typeof documentPrevalenceDescriptorSchema>;
+export type DocumentResponseDescriptor = z.infer<typeof documentResponseDescriptorSchema>;
+export type DocumentThreatIntelligenceDescriptor = z.infer<
+  typeof documentThreatIntelligenceDescriptorSchema
+>;
+export type DocumentInvestigationGuideDescriptor = z.infer<
+  typeof documentInvestigationGuideDescriptorSchema
+>;
+export type DocumentGraphDescriptor = z.infer<typeof documentGraphDescriptorSchema>;
+export type NotesDescriptor = z.infer<typeof notesDescriptorSchema>;
+export type AttackDescriptor = z.infer<typeof attackDescriptorSchema>;
+export type AttackCorrelationsDescriptor = z.infer<typeof attackCorrelationsDescriptorSchema>;
+export type AttackEntitiesDescriptor = z.infer<typeof attackEntitiesDescriptorSchema>;
+export type HostDescriptor = z.infer<typeof hostDescriptorSchema>;
+export type UserDescriptor = z.infer<typeof userDescriptorSchema>;
+export type ServiceDescriptor = z.infer<typeof serviceDescriptorSchema>;
+export type GenericEntityDescriptor = z.infer<typeof genericEntityDescriptorSchema>;
+export type EntityRiskInputsDescriptor = z.infer<typeof entityRiskInputsDescriptorSchema>;
+export type EntityAnomalyInsightsDescriptor = z.infer<typeof entityAnomalyInsightsDescriptorSchema>;
+export type EntityAlertsInsightsDescriptor = z.infer<typeof entityAlertsInsightsDescriptorSchema>;
+export type EntityMisconfigurationInsightsDescriptor = z.infer<
+  typeof entityMisconfigurationInsightsDescriptorSchema
+>;
+export type EntityVulnerabilityInsightsDescriptor = z.infer<
+  typeof entityVulnerabilityInsightsDescriptorSchema
+>;
+export type EntityGraphViewDescriptor = z.infer<typeof entityGraphViewDescriptorSchema>;
+export type EntityResolutionDescriptor = z.infer<typeof entityResolutionDescriptorSchema>;
+export type EntityEntraInsightsDescriptor = z.infer<typeof entityEntraInsightsDescriptorSchema>;
+export type EntityOktaInsightsDescriptor = z.infer<typeof entityOktaInsightsDescriptorSchema>;
+export type NetworkDescriptor = z.infer<typeof networkDescriptorSchema>;
+export type RuleDescriptor = z.infer<typeof ruleDescriptorSchema>;
+export type IocDescriptor = z.infer<typeof iocDescriptorSchema>;
+export type CspMisconfigurationDescriptor = z.infer<typeof cspMisconfigurationDescriptorSchema>;
+export type CspVulnerabilityDescriptor = z.infer<typeof cspVulnerabilityDescriptorSchema>;
 
 // ---------------------------------------------------------------------------
 // Discriminated union
 // ---------------------------------------------------------------------------
 
-export type FlyoutDescriptor = (
-  | DocumentDescriptor
-  | DocumentFromPatternDescriptor
-  | AnalyzerDescriptor
-  | SessionViewDescriptor
-  | DocumentEntitiesDescriptor
-  | DocumentCorrelationsDescriptor
-  | DocumentPrevalenceDescriptor
-  | DocumentResponseDescriptor
-  | DocumentThreatIntelligenceDescriptor
-  | DocumentInvestigationGuideDescriptor
-  | DocumentGraphDescriptor
-  | NotesDescriptor
-  | AttackDescriptor
-  | AttackCorrelationsDescriptor
-  | AttackEntitiesDescriptor
-  | HostDescriptor
-  | UserDescriptor
-  | ServiceDescriptor
-  | GenericEntityDescriptor
-  | EntityRiskInputsDescriptor
-  | EntityAnomalyInsightsDescriptor
-  | EntityAlertsInsightsDescriptor
-  | EntityMisconfigurationInsightsDescriptor
-  | EntityVulnerabilityInsightsDescriptor
-  | EntityGraphViewDescriptor
-  | EntityResolutionDescriptor
-  | EntityEntraInsightsDescriptor
-  | EntityOktaInsightsDescriptor
-  | NetworkDescriptor
-  | RuleDescriptor
-  | IocDescriptor
-  | CspMisconfigurationDescriptor
-  | CspVulnerabilityDescriptor
-) & {
-  /** UI trigger to attribute when this descriptor is restored from URL state. */
-  origin?: FlyoutOrigin;
-};
+export type FlyoutDescriptor = z.infer<typeof flyoutDescriptorSchema>;
 
 /** Ordered array of up to 2 descriptors representing the current open flyout chain. */
 export type FlyoutV2UrlParamValue = FlyoutDescriptor[];
@@ -438,8 +212,8 @@ export const encodeFlyoutV2UrlParam = (value: FlyoutV2UrlParamValue): string => 
 
 /**
  * Decodes the value of the flyoutV2 URL parameter.
- * Returns null when the value is missing, malformed, not an array, or contains an entry
- * with an unknown `kind`. Never throws.
+ * Returns null when the value is missing, malformed, or fails {@link flyoutChainSchema} (not an
+ * array of 1-2 descriptors, an unknown `kind`, or missing/oversized fields). Never throws.
  *
  * Mirrors the null-on-malformed pattern of `decodeAttackFlyoutV2UrlParam`.
  */
@@ -449,16 +223,9 @@ export const decodeFlyoutV2UrlParam = (
   if (!raw) return null;
 
   try {
-    const decoded = decode(raw);
+    const result = flyoutChainSchema.safeParse(decode(raw));
 
-    if (!Array.isArray(decoded) || decoded.length === 0) return null;
-
-    for (const entry of decoded) {
-      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null;
-      if (!isKnownKind((entry as Record<string, unknown>).kind)) return null;
-    }
-
-    return decoded as unknown as FlyoutV2UrlParamValue;
+    return result.success ? result.data : null;
   } catch {
     return null;
   }

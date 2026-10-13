@@ -45,10 +45,12 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 
 const mockWriteOnOpen = jest.fn();
 const mockBuildOnClose = jest.fn(() => jest.fn());
+const mockReadRootDescriptor = jest.fn((): unknown => null);
 jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
   useFlyoutV2UrlWriter: jest.fn(() => ({
     writeOnOpen: mockWriteOnOpen,
     buildOnClose: mockBuildOnClose,
+    readRootDescriptor: mockReadRootDescriptor,
   })),
 }));
 
@@ -400,8 +402,20 @@ describe('useDocumentFlyoutApi', () => {
         { kind: 'document', documentId: 'doc-id', indexName: 'doc-index' },
         'inherit'
       );
-      // buildOnClose is called with the parent descriptor (null when URL has no prior state)
+      // buildOnClose is called with the parent descriptor (null when nothing is open)
       expect(mockBuildOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('openDocumentFlyoutFromIndexAsChild reverts to the parent read from the writer on close', () => {
+      const parent = { kind: 'analyzer', documentId: 'parent-id', indexName: 'doc-index' };
+      mockReadRootDescriptor.mockReturnValueOnce(parent);
+      const { result } = renderHook(() => useDocumentFlyoutApi());
+      result.current.openDocumentFlyoutFromIndexAsChild({
+        documentId: 'doc-id',
+        indexName: 'doc-index',
+      });
+
+      expect(mockBuildOnClose).toHaveBeenCalledWith(parent);
     });
 
     it.each([
