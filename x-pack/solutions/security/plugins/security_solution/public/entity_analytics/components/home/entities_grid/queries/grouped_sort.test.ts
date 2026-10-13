@@ -6,7 +6,8 @@
  */
 
 import type { QueryArgs, Row } from '../common';
-import { fetchGroupedSortPage } from './grouped_sort';
+import type { SortPageContext } from './types';
+import { fetchGroupedSortPage, withGroupedRows } from './grouped_sort';
 
 const ARGS: QueryArgs = {
   namespace: 'default',
@@ -175,5 +176,53 @@ describe('fetchGroupedSortPage', () => {
     });
 
     await expect(fetchGroupedSortPage(ARGS, runQuery, options)).rejects.toThrow('Too many groups');
+  });
+});
+
+describe('withGroupedRows', () => {
+  const entityPage = [row('host:b', 'low_impact')];
+
+  const createFetcher = (isGrouped?: (args: QueryArgs) => boolean) => {
+    const fetchPage = jest.fn(async (_args: QueryArgs, _ctx: SortPageContext) => entityPage);
+    const runQuery = jest.fn(async (_query: string): Promise<Row[]> => []);
+    const ctx = { runQuery, fetchViewSize: async () => 0 };
+    return {
+      fetchPage,
+      runQuery,
+      fetchSortPage: (args: QueryArgs) =>
+        withGroupedRows(fetchPage, () => GROUP_ROWS_QUERY, isGrouped)(args, ctx),
+    };
+  };
+
+  it('reads the groups apart, and asks the page for the entities the groups may drop', async () => {
+    const { fetchPage, runQuery, fetchSortPage } = createFetcher();
+    runQuery.mockResolvedValueOnce([row('host:a', 'high_impact'), row('host:c', null)]);
+
+    const page = await fetchSortPage(ARGS);
+
+    expect(runQuery).toHaveBeenCalledWith(GROUP_ROWS_QUERY);
+    expect(fetchPage).toHaveBeenCalledWith(
+      { ...ARGS, pageSize: ARGS.pageSize + 2 },
+      expect.anything()
+    );
+    // Descending by value: 'low_impact' > 'high_impact', and the row without a value last.
+    expect(getIds(page)).toEqual(['host:b', 'host:a', 'host:c']);
+  });
+
+  it('reads individual rows with the page as it is', async () => {
+    const { fetchPage, runQuery, fetchSortPage } = createFetcher();
+    const args: QueryArgs = { ...ARGS, rowsMode: 'individual' };
+
+    expect(await fetchSortPage(args)).toBe(entityPage);
+    expect(fetchPage).toHaveBeenCalledWith(args, expect.anything());
+    expect(runQuery).not.toHaveBeenCalled();
+  });
+
+  it('leaves the rows that do not show a value of their group to the page', async () => {
+    const { runQuery, fetchSortPage } = createFetcher(({ sort }) => sort.field !== 'entity.name');
+
+    await fetchSortPage({ ...ARGS, sort: { field: 'entity.name', direction: 'asc' } });
+
+    expect(runQuery).not.toHaveBeenCalled();
   });
 });

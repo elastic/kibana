@@ -28,7 +28,7 @@ import {
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
 import type { QueryArgs, Row } from '../common';
-import { buildGroupRowsOutput, fetchGroupedSortPage } from './grouped_sort';
+import { buildGroupRowsOutput, withGroupedRows } from './grouped_sort';
 import { GROUP_KEY_FIELD, buildGroupRollUpSteps, groupEnricher } from './group_members';
 import type { RollUp } from './group_members';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
@@ -256,16 +256,8 @@ const lastSeenAlertSplitSortPlan = getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD);
  * The page of a plan; for resolved rows, the groups with aliases have the alerts of their members
  * and are read apart from the other entities.
  */
-const fetchAlertSortPage =
-  (plan: SplitSortPlan): SortPageFetcher =>
-  (args, ctx) =>
-    args.rowsMode === 'resolved'
-      ? fetchGroupedSortPage(args, ctx.runQuery, {
-          buildGroupRowsQuery: buildGroupAlertRowsQuery,
-          fetchEntityRows: (extraRows) =>
-            fetchSplitSortPage(plan, { ...args, pageSize: args.pageSize + extraRows }, ctx),
-        })
-      : fetchSplitSortPage(plan, args, ctx);
+const fetchAlertSortPage = (plan: SplitSortPlan): SortPageFetcher =>
+  withGroupedRows((args, ctx) => fetchSplitSortPage(plan, args, ctx), buildGroupAlertRowsQuery);
 
 export const alertCountQuerySpec = {
   fetchSortPage: fetchAlertSortPage(alertCountSplitSortPlan),

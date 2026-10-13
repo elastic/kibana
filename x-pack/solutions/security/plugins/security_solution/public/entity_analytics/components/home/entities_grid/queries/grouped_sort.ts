@@ -9,7 +9,7 @@ import { ENTITY_ID_FIELD, getEntityId, getEntityIds } from '../common';
 import type { PageCursor, QueryArgs, Row, SortDir, SortValue } from '../common';
 import { buildKeepClause, compareEntityIds, fetchPerIdChunk, getMaxAliasGroups } from './esql';
 import { buildEntityFilterConditions, buildSearchedTargetsQuery } from './entities_in_view';
-import type { EsqlRunner } from './types';
+import type { EsqlRunner, SortPageFetcher } from './types';
 
 // A sort by a column that shows the group's value reads the groups with aliases and the other
 // entities apart. Most entities are alone in their group and sort natively, by their own value.
@@ -109,3 +109,23 @@ export const fetchGroupedSortPage = async (
     .sort(compareRows(sort.field, sort.direction))
     .slice(0, pageSize + 1);
 };
+
+/**
+ * A sort page fetcher that, for the rows `isGrouped` says show their group's value, reads the
+ * groups with aliases apart from the other entities, which `fetchPage` reads like the rows of a
+ * group of one. Other rows are read by `fetchPage` as they are.
+ */
+export const withGroupedRows =
+  (
+    fetchPage: SortPageFetcher,
+    buildGroupRowsQuery: (args: QueryArgs) => string,
+    isGrouped: (args: QueryArgs) => boolean = ({ rowsMode }) => rowsMode === 'resolved'
+  ): SortPageFetcher =>
+  (args, ctx) =>
+    isGrouped(args)
+      ? fetchGroupedSortPage(args, ctx.runQuery, {
+          buildGroupRowsQuery,
+          fetchEntityRows: (extraRows) =>
+            fetchPage({ ...args, pageSize: args.pageSize + extraRows }, ctx),
+        })
+      : fetchPage(args, ctx);

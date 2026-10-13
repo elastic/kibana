@@ -26,7 +26,7 @@ import {
 import { buildEuidStages } from './euid_pipeline';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, Row } from '../common';
-import { buildGroupRowsOutput, fetchGroupedSortPage } from './grouped_sort';
+import { buildGroupRowsOutput, withGroupedRows } from './grouped_sort';
 import { GROUP_KEY_FIELD, buildGroupRollUpSteps, groupEnricher } from './group_members';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
@@ -136,18 +136,10 @@ const anomalyCountEnricher: PageEnricher = {
  * The page of the plan; for resolved rows, the groups with aliases have the anomalies of their
  * members and are read apart from the other entities.
  */
-const fetchAnomalyCountSortPage: SortPageFetcher = (args, ctx) =>
-  args.rowsMode === 'resolved'
-    ? fetchGroupedSortPage(args, ctx.runQuery, {
-        buildGroupRowsQuery: buildGroupAnomalyRowsQuery,
-        fetchEntityRows: (extraRows) =>
-          fetchSplitSortPage(
-            anomalySplitSortPlan,
-            { ...args, pageSize: args.pageSize + extraRows },
-            ctx
-          ),
-      })
-    : fetchSplitSortPage(anomalySplitSortPlan, args, ctx);
+const fetchAnomalyCountSortPage: SortPageFetcher = withGroupedRows(
+  (args, ctx) => fetchSplitSortPage(anomalySplitSortPlan, args, ctx),
+  buildGroupAnomalyRowsQuery
+);
 
 export const anomalyCountQuerySpec = {
   fetchSortPage: fetchAnomalyCountSortPage,
