@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProfilingSchema } from '@kbn/profiling-utils';
+import type { ProfilingAvailableSchemas } from '../contexts/profiling_schema/use_profiling_available_schemas';
 import { useProfilingSchema } from '../contexts/profiling_schema/use_profiling_schema';
 
 const SCHEMA_LABEL = i18n.translate('xpack.profiling.schemaSelector.label', {
@@ -118,9 +119,20 @@ const getHelpText = ({
   return undefined;
 };
 
-export function SchemaSelector() {
-  const { selectedSchema, schemas, supportedSchemas, isLoading, error, onSchemaChange } =
-    useProfilingSchema();
+export interface SchemaSelectorProps extends ProfilingAvailableSchemas {
+  /** Undefined until a default is selected */
+  selectedSchema?: ProfilingSchema;
+  onSchemaChange: (schema: ProfilingSchema) => void;
+}
+
+export function SchemaSelector({
+  selectedSchema,
+  schemas,
+  supportedSchemas,
+  isLoading,
+  error,
+  onSchemaChange,
+}: SchemaSelectorProps) {
   const { fontSize } = useEuiFontSize('s');
 
   const offeredSchemas = schemas ?? supportedSchemas;
@@ -194,4 +206,9 @@ export function SchemaSelector() {
       />
     </EuiFormRow>
   );
+}
+
+export function ProfilingAppSchemaSelector() {
+  const profilingSchemaProps = useProfilingSchema();
+  return <SchemaSelector {...profilingSchemaProps} />;
 }

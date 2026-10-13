@@ -25,7 +25,7 @@ jest.mock('../contexts/profiling_schema/profiling_schema_context', () => ({
   ProfilingSchemaContextProvider: jest.fn(({ children }) => children),
 }));
 jest.mock('../schema_selector', () => ({
-  SchemaSelector: jest.fn(() => null),
+  ProfilingAppSchemaSelector: jest.fn(() => null),
 }));
 
 import { useLocation } from 'react-router-dom';
@@ -38,7 +38,7 @@ import { useBackNavigation } from '../contexts/back_navigation/use_back_navigati
 import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { AsyncStatus } from '../../hooks/use_async';
-import { SchemaSelector } from '../schema_selector';
+import { ProfilingAppSchemaSelector } from '../schema_selector';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import {
   ProfilingAppPageTemplate,
@@ -240,7 +240,7 @@ describe('ProfilingAppPageTemplate', () => {
           kuery: 'host.name:my-host',
         })
       );
-      expect(SchemaSelector).toHaveBeenCalled();
+      expect(ProfilingAppSchemaSelector).toHaveBeenCalled();
     });
 
     it('provides the default time range when the page has none', () => {
@@ -276,7 +276,7 @@ describe('ProfilingAppPageTemplate', () => {
       renderTemplate('?rangeFrom=now-1h&rangeTo=now-10m', { children: <div /> });
 
       expect(ProfilingSchemaContextProvider).not.toHaveBeenCalled();
-      expect(SchemaSelector).not.toHaveBeenCalled();
+      expect(ProfilingAppSchemaSelector).not.toHaveBeenCalled();
     });
   });
 });

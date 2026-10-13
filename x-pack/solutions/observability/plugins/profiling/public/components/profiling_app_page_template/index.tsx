@@ -19,7 +19,7 @@ import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
-import { SchemaSelector } from '../schema_selector';
+import { ProfilingAppSchemaSelector } from '../schema_selector';
 import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
 import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
 import { AsyncStatus } from '../../hooks/use_async';
@@ -204,7 +204,7 @@ export function ProfilingAppPageTemplate({
             )}
             {showSchemaSelector && (
               <EuiFlexItem grow={false} css={{ alignSelf: 'flex-start' }}>
-                <SchemaSelector />
+                <ProfilingAppSchemaSelector />
               </EuiFlexItem>
             )}
             <EuiFlexItem>{children}</EuiFlexItem>

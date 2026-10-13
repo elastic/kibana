@@ -98,12 +98,15 @@ export {
 export {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
+  EMBEDDABLE_PROFILING_SCHEMA_SELECTOR,
   EMBEDDABLE_PROFILING_SEARCH_BAR,
   EMBEDDABLE_STACK_TRACES,
   EmbeddableFlamegraph,
   EmbeddableFunctions,
+  EmbeddableProfilingSchemaSelector,
   EmbeddableProfilingSearchBar,
   EmbeddableStackTraces,
+  type EmbeddableProfilingSchemaSelectorProps,
   type EmbeddableProfilingSearchBarProps,
 } from './components/profiling/embeddables';
 
