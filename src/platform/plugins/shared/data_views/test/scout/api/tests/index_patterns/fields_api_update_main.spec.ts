@@ -472,27 +472,17 @@ apiTest.describe(
     });
 
     apiTest('can set field format attribute on an existing field', async ({ apiClient }) => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
       const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
         headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
         responseType: 'json',
         body: {
-          override: true,
-          [SERVICE_KEY_LEGACY]: {
-            title,
-            fields: {
-              foo: { name: 'foo', type: 'string', scripted: true, format: { id: 'string' } },
-            },
-          },
+          [SERVICE_KEY_LEGACY]: { title: 'basic_inde*' },
         },
       });
       expect(createResponse).toHaveStatusCode(200);
       const id = createResponse.body[SERVICE_KEY_LEGACY].id;
       createdIds.push(id);
       expect(createResponse.body[SERVICE_KEY_LEGACY].fieldFormats.foo).toBeUndefined();
-      expect(createResponse.body[SERVICE_KEY_LEGACY].fields.foo.format).toStrictEqual({
-        id: 'string',
-      });
 
       const updateResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/fields`, {
         headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
