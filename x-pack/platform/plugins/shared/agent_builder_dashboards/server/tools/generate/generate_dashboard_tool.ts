@@ -79,12 +79,10 @@ const summarizeDashboard = (
       return {
         id: widget.id,
         title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
+        ...(widget.collapsed ? { collapsed: true } : {}),
         panels: widget.panels.map((panel) => ({
           type: panel.type,
           id: panel.id,
-          grid: panel.grid,
           authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
       };
@@ -92,7 +90,6 @@ const summarizeDashboard = (
     return {
       type: widget.type,
       id: widget.id,
-      grid: widget.grid,
       authoring_note: authoringNotesByPanelId.get(widget.id),
     };
   }),
