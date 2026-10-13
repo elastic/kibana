@@ -836,7 +836,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
 
     if (rrule) {
-      return getRRuleScheduleDurationMs(rrule, new Date()) > timeoutDuration;
+      return getRRuleScheduleDurationMs(rrule, this.instance.task.runAt) > timeoutDuration;
     }
 
     // if the task does not have a schedule, we will not update it on timeout

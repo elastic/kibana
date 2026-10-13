@@ -240,30 +240,42 @@ describe('getNextRunAt', () => {
   });
 
   describe('getRRuleScheduleDurationMs', () => {
-    const from = new Date('2026-08-10T16:11:09.328Z');
-
-    test('returns the gap between occurrences for an hourly rrule', () => {
+    test('returns the gap after runAt for an hourly rrule', () => {
       expect(
-        getRRuleScheduleDurationMs({ freq: 4, interval: 1, tzid: 'UTC', byminute: [13] }, from)
+        getRRuleScheduleDurationMs(
+          { freq: 4, interval: 1, tzid: 'UTC', byminute: [13] },
+          new Date('2026-08-10T16:13:00.000Z')
+        )
       ).toEqual(60 * 60 * 1000);
     });
 
-    test('throws when the rrule has no upcoming occurrences', () => {
-      expect(() =>
-        getRRuleScheduleDurationMs(
-          { freq: 4, interval: 1, tzid: 'UTC', byminute: [13], count: 1 } as RruleSchedule['rrule'],
-          from
-        )
-      ).toThrow('Unable to determine the schedule duration');
-    });
-
-    test('returns the gap between occurrences for a daily rrule', () => {
+    test('returns the gap after runAt for a daily rrule', () => {
       expect(
         getRRuleScheduleDurationMs(
           { freq: 3, interval: 1, tzid: 'UTC', byhour: [12], byminute: [15] },
-          from
+          new Date('2026-08-10T12:15:00.000Z')
         )
       ).toEqual(24 * 60 * 60 * 1000);
+    });
+
+    test('returns the gap after runAt for a nonuniform rrule', () => {
+      const rrule: RruleSchedule['rrule'] = { freq: 4, interval: 1, tzid: 'UTC', byminute: [0, 5] };
+
+      expect(getRRuleScheduleDurationMs(rrule, new Date('2026-08-10T16:05:00.000Z'))).toEqual(
+        55 * 60 * 1000
+      );
+      expect(getRRuleScheduleDurationMs(rrule, new Date('2026-08-10T17:00:00.000Z'))).toEqual(
+        5 * 60 * 1000
+      );
+    });
+
+    test('throws when the rrule has no occurrence after runAt', () => {
+      expect(() =>
+        getRRuleScheduleDurationMs(
+          { freq: 4, interval: 1, tzid: 'UTC', byminute: [13], count: 1 } as RruleSchedule['rrule'],
+          new Date('2026-08-10T16:13:00.000Z')
+        )
+      ).toThrow('Unable to determine the schedule duration');
     });
   });
 

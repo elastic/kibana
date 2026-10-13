@@ -3855,7 +3855,7 @@ describe('TaskManagerRunner', () => {
 
     test('updates saved object with a later runAt if rrule task expires and the gap between occurrences is greater than timeout', async () => {
       const id = _.random(1, 20).toString();
-      const runAt = moment().subtract(5, 'm').toDate();
+      const runAt = moment().subtract(1, 'h').startOf('hour').toDate();
       const {
         instance: taskInstance,
         runner,
@@ -3907,11 +3907,47 @@ describe('TaskManagerRunner', () => {
       expect(updatedRunAt!.getTime()).toBeGreaterThan(runAt.getTime());
     });
 
+    test('updates saved object if a nonuniform rrule task expires and the gap after its runAt is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id,
+          runAt: moment().subtract(1, 'h').startOf('hour').add(5, 'm').toDate(),
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { rrule: { freq: 4, interval: 1, tzid: 'UTC', byminute: [0, 5] } },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15m',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20 * 60 * 1000));
+                jest.advanceTimersByTime(20 * 60 * 1000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'idle', runAt: expect.any(Date) }),
+        expect.anything()
+      );
+    });
+
     test('does not update saved object if rrule task expires and timeout is greater than the gap between occurrences', async () => {
       const id = _.random(1, 20).toString();
       const { runner, store } = await readyToRunStageSetup({
         instance: {
           id,
+          runAt: moment().subtract(1, 'h').startOf('hour').toDate(),
           startedAt: moment().subtract(5, 'm').toDate(),
           schedule: { rrule: { freq: 4, interval: 1, tzid: 'UTC', byminute: [0] } },
         },

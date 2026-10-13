@@ -64,15 +64,14 @@ export function calculateNextRunAtFromSchedule({
   return Math.max(nextRunAt!.getTime(), Date.now());
 }
 
-/** Returns the gap in ms between the next two rrule occurrences after `from`. */
-export function getRRuleScheduleDurationMs(rrule: RruleSchedule['rrule'], from: Date): number {
-  const _rrule = new RRule({ ...rrule, dtstart: from });
-  const nextRunAt = _rrule.after(new Date(from.getTime() + 1));
-  const runAfterNext = nextRunAt ? _rrule.after(new Date(nextRunAt.getTime() + 1)) : null;
-  if (!nextRunAt || !runAfterNext) {
+/** Returns the gap in ms between `runAt` and the rrule occurrence that follows it. */
+export function getRRuleScheduleDurationMs(rrule: RruleSchedule['rrule'], runAt: Date): number {
+  const _rrule = new RRule({ ...rrule, dtstart: runAt });
+  const nextRunAt = _rrule.after(new Date(runAt.getTime() + 1));
+  if (!nextRunAt) {
     throw new Error(
       'Unable to determine the schedule duration: the rrule has no upcoming occurrences'
     );
   }
-  return runAfterNext.getTime() - nextRunAt.getTime();
+  return nextRunAt.getTime() - runAt.getTime();
 }
