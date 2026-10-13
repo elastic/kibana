@@ -115,7 +115,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     isInvalidDefault: (value) => !Array.isArray(value),
   });
   const {
-    services: { docLinks, settings, telemetry },
+    services: { settings, telemetry },
   } = useKibana();
 
   const { http } = useAssistantContext();
@@ -247,12 +247,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
         >
           {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
           {!hasFullScreenContent && (
-            <SecurityAppHeader
-              title={PAGE_TITLE}
-              menu={headerMenu}
-              spacing="largeBleed"
-              docLink={docLinks.links.siem.attacksPage}
-            />
+            <SecurityAppHeader title={PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
           )}
           <Display show={!hasFullScreenContent}>
             <EuiSpacer size="m" />
@@ -346,7 +341,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
       assignees,
       closeControlCenter,
       dataView,
-      docLinks,
       globalFullScreen,
       hasFullScreenContent,
       headerMenu,
