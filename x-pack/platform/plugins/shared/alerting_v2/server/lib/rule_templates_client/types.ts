@@ -34,6 +34,5 @@ export interface GetRuleTemplateArgs {
 
 export interface InstallRuleTemplateArgs {
   id: string;
-  /** The rule to create, usually the template defaults plus the user's edits. */
   data: CreateRuleData;
 }
