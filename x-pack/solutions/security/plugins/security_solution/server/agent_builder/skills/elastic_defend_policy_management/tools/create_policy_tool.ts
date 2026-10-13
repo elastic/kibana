@@ -23,8 +23,11 @@ import {
 } from '../../../../endpoint/errors';
 import {
   POLICY_CHANGE_PREPARATION_ERROR_CODE,
+  POLICY_CHANGE_REJECTED_MESSAGE,
   PolicyChangePreparationError,
+  PolicyChangeRejectedError,
 } from '../domain/impact';
+import type { PolicyOperationRejection } from '../domain/impact';
 import {
   createEndpointPolicyManagementService,
   type EndpointPolicyManagementService,
@@ -55,19 +58,14 @@ export type PolicyToolErrorClass =
   | 'no_change'
   | 'write_rejected'
   | 'write_unverified'
-  | 'non_writable_path'
-  | 'unsupported_operation'
+  | 'rejected_operations'
   | 'invalid_input'
-  | 'unknown_current_value'
   | 'unknown_error';
 
 export const POLICY_TOOL_ERROR_MESSAGES: Readonly<Record<PolicyToolErrorClass, string>> = {
   ...POLICY_ERROR_MESSAGES,
-  non_writable_path: 'Requested policy path is not writable',
-  unsupported_operation: 'Requested policy change is not supported',
+  rejected_operations: POLICY_CHANGE_REJECTED_MESSAGE,
   invalid_input: 'Requested policy change input is invalid',
-  unknown_current_value:
-    'Requested policy change cannot be assessed because the current policy value is unknown',
   unknown_error: 'Failed to complete the policy management request',
 };
 
@@ -130,16 +128,14 @@ export const classifyPolicyError = (error: unknown): PolicyToolErrorClass => {
     return 'write_unverified';
   }
 
+  if (error instanceof PolicyChangeRejectedError) {
+    return 'rejected_operations';
+  }
+
   if (error instanceof PolicyChangePreparationError) {
     switch (error.code) {
-      case POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path:
-        return 'non_writable_path';
-      case POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation:
-        return 'unsupported_operation';
       case POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input:
         return 'invalid_input';
-      case POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value:
-        return 'unknown_current_value';
       default:
         return 'unknown_error';
     }
@@ -165,6 +161,8 @@ type PolicyToolOrdinaryErrorMetadata = Record<string, unknown> & {
   before?: never;
   observation?: never;
   observed?: never;
+  rejections?: never;
+  rejections_total?: never;
 };
 
 type PresentedCandidate = PresentedPolicyIdentity<{ id: string; name: string }>;
@@ -185,10 +183,17 @@ type PolicyToolWriteUnverifiedErrorMetadata = Record<string, unknown> & {
   observed?: PresentedWriteIdentity;
 };
 
+type PolicyToolRejectedOperationsErrorMetadata = Record<string, unknown> & {
+  error: 'rejected_operations';
+  rejections: readonly PolicyOperationRejection[];
+  rejections_total: number;
+};
+
 type PolicyToolErrorMetadata =
   | PolicyToolOrdinaryErrorMetadata
   | PolicyToolAmbiguousNameErrorMetadata
-  | PolicyToolWriteUnverifiedErrorMetadata;
+  | PolicyToolWriteUnverifiedErrorMetadata
+  | PolicyToolRejectedOperationsErrorMetadata;
 
 const presentWriteIdentity = (identity: PolicyWriteIdentity): PresentedWriteIdentity =>
   presentBoundedIdentityStrings({
@@ -231,7 +236,22 @@ const buildErrorMetadata = (
     };
   }
 
+  if (error instanceof PolicyChangeRejectedError) {
+    return {
+      error: 'rejected_operations',
+      rejections: error.rejections,
+      rejections_total: error.rejections.length,
+    };
+  }
+
   return { error: errorClass };
+};
+
+const toCauseMessage = (cause: unknown): string | undefined => {
+  if (cause === undefined || cause === null) {
+    return undefined;
+  }
+  return cause instanceof Error ? cause.message : String(cause);
 };
 
 const toPolicyErrorResult = (error: unknown, logger: Logger, toolId: string) => {
@@ -239,6 +259,10 @@ const toPolicyErrorResult = (error: unknown, logger: Logger, toolId: string) => 
 
   if (errorClass === 'unknown_error') {
     logger.error(`Error in ${toolId}: ${error instanceof Error ? error.message : String(error)}`);
+  } else if (errorClass === 'write_unverified' && error instanceof PolicyWriteUnverifiedError) {
+    const causeMessage = toCauseMessage(error.cause);
+    const causeSuffix = causeMessage !== undefined ? `: ${causeMessage}` : '';
+    logger.warn(`Write unverified in ${toolId} for policy ${error.before.id}${causeSuffix}`);
   } else {
     logger.debug(`Error in ${toolId}: ${errorClass}`);
   }

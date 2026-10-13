@@ -12,6 +12,8 @@ export type {
   FieldRegistrySource,
   FieldRegistryTier,
 } from './types';
+export type { PathNotWritableReason, PathWritability } from './path_writability';
+export { describePathWritability } from './path_writability';
 export { isDerivedPath, isExcludedPath } from './path_rules';
 export {
   getFieldRegistry,
