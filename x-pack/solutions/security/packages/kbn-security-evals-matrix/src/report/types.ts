@@ -44,6 +44,11 @@ export interface ReportExample {
   answerMarkdown?: string;
   toolTrail?: string[];
   steps?: ReportStep[];
+  /**
+   * Overrides the default empty-body copy when the example has neither answer
+   * nor question nor steps (e.g. "evaluated without a conversational agent").
+   */
+  emptyNote?: string;
 }
 
 export interface ReportSection {
@@ -72,6 +77,10 @@ export interface ReportSummaryCell {
 }
 
 export interface ReportSummaryTable {
+  /** Header shown over the row-label column; blank when omitted. */
+  rowLabelHeader?: string;
+  /** Collapsible caption; when set the table renders inside an open `<details>`. */
+  caption?: string;
   columns: ReportSummaryColumn[];
   /** `columns.length` cells per row; the first column is the row label. */
   rows: Array<{
@@ -81,13 +90,20 @@ export interface ReportSummaryTable {
   }>;
 }
 
+/** A provenance fragment: plain text, or a link when a safe http(s) `href` is given. */
+export type ReportProvenanceItem = string | { text: string; href?: string };
+
 export interface ReportDocument {
   title: string;
   /** Provenance fragments (branch, build link, generated-at, ...). */
-  provenance?: string[];
+  provenance?: ReportProvenanceItem[];
   /** Methodology / scoring-semantics notes, rendered as a collapsible block. */
   notes?: string[];
   summaryTable?: ReportSummaryTable;
+  /** Extra tables rendered after `summaryTable` (e.g. token cost). */
+  summaryTables?: ReportSummaryTable[];
+  /** Static helper line rendered after the summary table(s). */
+  legend?: string;
   sections: ReportSection[];
 }
 

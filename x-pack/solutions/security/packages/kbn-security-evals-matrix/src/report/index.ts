@@ -19,6 +19,7 @@ export type {
   ReportAdapter,
   ReportDocument,
   ReportExample,
+  ReportProvenanceItem,
   ReportSection,
   ReportStep,
   ReportSummaryCell,
