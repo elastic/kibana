@@ -2018,6 +2018,42 @@ describe('ProposalsService', () => {
   });
 
   describe('getLatestRevision', () => {
+    it('rejects an id nothing is under with ProposalNotFoundError, which a caller reads as "free"', async () => {
+      // Hunt picks the id a proposal is created under by asking each generation of a subject
+      // whether anything is there, and treats exactly this error as "no": anything else fails closed.
+      const { service } = createService(createStorage());
+
+      await expect(service.getLatestRevision('nothing-here', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
+    it('does not find a proposal that is in another space', async () => {
+      // The read is filtered to the caller's space, so another space's proposal under the same id
+      // does not hold a subject here.
+      const storage = createStorage();
+      storage.search.mockImplementation(
+        async ({ query }: { query: { bool: { filter: Array<Record<string, any>> } } }) => {
+          const space = query.bool.filter.find(
+            (clause) => 'term' in clause && 'spaceId' in clause.term
+          );
+          return space?.term.spaceId === 'other-space'
+            ? {
+                hits: {
+                  hits: [searchHit(baseDocument({ spaceId: 'other-space' }))],
+                  total: { value: 1 },
+                },
+              }
+            : { hits: { hits: [], total: { value: 0 } } };
+        }
+      );
+      const { service } = createService(storage);
+
+      await expect(service.getLatestRevision('proposal-1', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
       const { service } = createService(storage);
