@@ -11,7 +11,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../utils/errors';
+import { getFormattedError } from '../../common/errors';
 
 export interface UseDeveloperModeResult {
   isDeveloperMode: boolean;
