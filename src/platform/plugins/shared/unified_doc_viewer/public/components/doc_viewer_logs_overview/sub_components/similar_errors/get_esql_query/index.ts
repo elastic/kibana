@@ -32,11 +32,13 @@ export function getEsqlQuery({
   culprit,
   message,
   type,
+  level,
 }: {
   serviceName?: string;
   culprit?: string;
   message?: ErrorField;
   type?: ErrorField;
+  level?: { fieldName: string; value: string };
 }): ESQLAstExpression | undefined {
   if (!serviceName) {
     return undefined;
@@ -69,6 +71,10 @@ export function getEsqlQuery({
     } else {
       conditions.push(esqlEquals(type.fieldName, type.value));
     }
+  }
+
+  if (level?.value && level?.fieldName) {
+    conditions.push(esqlEquals(level.fieldName, level.value));
   }
 
   return esqlAnd(conditions);

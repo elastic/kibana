@@ -36,6 +36,7 @@ interface SimilarErrorFields {
   culprit?: FieldInfo;
   message?: FieldInfo;
   type?: FieldInfo;
+  level?: FieldInfo;
 }
 
 const hasErrorIdentifyingField = ({ culprit, message, type }: SimilarErrorFields): boolean =>
@@ -78,6 +79,11 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
   const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hitFlattened);
   const { field: typeField, originalValue: typeValue } =
     getLogExceptionTypeFieldWithFallback(hitFlattened);
+  const { field: levelField, value: rawLevelValue } = getFieldValueWithFallback(
+    hitFlattened,
+    fieldConstants.LOG_LEVEL_FIELD
+  );
+  const levelValue = Array.isArray(rawLevelValue) ? rawLevelValue[0] : rawLevelValue;
   const { value: timestampValue } = getFieldValueWithFallback(
     hitFlattened,
     fieldConstants.TIMESTAMP_FIELD
@@ -92,6 +98,7 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       culprit: createFieldInfo(culpritValue, culpritField),
       message: createFieldInfo(messageValue, messageField),
       type: createFieldInfo(typeValue, typeField),
+      level: createFieldInfo(levelValue, levelField),
     }),
     [
       serviceNameValue,
@@ -102,6 +109,8 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       messageField,
       typeValue,
       typeField,
+      levelValue,
+      levelField,
     ]
   );
 
@@ -132,6 +141,7 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       culprit: gate(fields.culprit, fieldConstants.ERROR_CULPRIT_FIELD),
       message: gate(fields.message),
       type: gate(fields.type),
+      level: gate(fields.level),
     };
   }, [fields, queryableColumns]);
   const hasQueryableErrorField = hasErrorIdentifyingField(queryable);
@@ -164,6 +174,9 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
               ? queryable.type.value.map(String)
               : String(queryable.type.value),
           }
+        : undefined,
+      level: queryable.level
+        ? { fieldName: queryable.level.field, value: String(queryable.level.value) }
         : undefined,
     });
   }, [resolvingColumns, hasQueryableErrorField, queryable]);
