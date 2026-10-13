@@ -16,7 +16,10 @@ import {
   type DataTableRecord,
   fieldConstants,
 } from '@kbn/discover-utils';
-import { getFieldValueWithFallback } from '@kbn/discover-utils/src/utils';
+import {
+  getFieldValueWithFallback,
+  getFirstAvailableFieldValue,
+} from '@kbn/discover-utils/src/utils';
 import { ContentFrameworkSection } from '../../../content_framework/lazy_content_framework_section';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { getEsqlQuery } from './get_esql_query';
@@ -79,10 +82,11 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
   const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hitFlattened);
   const { field: typeField, originalValue: typeValue } =
     getLogExceptionTypeFieldWithFallback(hitFlattened);
-  const { field: levelField, value: rawLevelValue } = getFieldValueWithFallback(
-    hitFlattened,
-    fieldConstants.LOG_LEVEL_FIELD
-  );
+  // Same ranking as `hasErrorFields`, keeping the raw value so arrays aren't stringified.
+  const { field: levelField, value: rawLevelValue } = getFirstAvailableFieldValue(hitFlattened, [
+    fieldConstants.LOG_LEVEL_FIELD,
+    fieldConstants.ERROR_LOG_LEVEL_FIELD,
+  ]);
   const levelValue = Array.isArray(rawLevelValue) ? rawLevelValue[0] : rawLevelValue;
   const { value: timestampValue } = getFieldValueWithFallback(
     hitFlattened,

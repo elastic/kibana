@@ -353,6 +353,23 @@ describe('SimilarErrors', () => {
       expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
         expect.objectContaining({ level: { fieldName: 'log.level', value: 'error' } })
       );
+      expect(
+        screen.getByText(
+          `These errors are based on the following fields: ${fieldConstants.SERVICE_NAME_FIELD}, message, ${fieldConstants.LOG_LEVEL_FIELD}.`
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('falls back to error.log.level when log.level is missing', async () => {
+      mockColumns(fieldConstants.ERROR_LOG_LEVEL_FIELD);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({ ...errorDocFields, [fieldConstants.ERROR_LOG_LEVEL_FIELD]: 'error' })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'error.log.level', value: 'error' } })
+      );
     });
 
     it('filters on severity_text for an OTel document', async () => {
