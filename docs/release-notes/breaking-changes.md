@@ -96,7 +96,7 @@ $$$kibana-275996$$$
 
 **Action**<br> Users can change their language at any time from the user menu or their profile page.
 
-To keep English as the default for everyone while still letting users choose another language, upgrade to the latest 9.5.x patch release and add the following to `kibana.yml`. The `i18n.detectBrowserLocale` setting is a fix shipped in 9.5.6 {applies_to}`stack: ga 9.5.6+` and is also available on {{ech}}:
+To keep English as the default for everyone while still letting users choose another language, upgrade to 9.5.6 or later and set the following settings in `kibana.yml`:
 
 ```yaml
 i18n.detectBrowserLocale: false
