@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiCodeBlock,
-  EuiSkeletonText,
-  EuiText,
-  EuiTextBlockTruncate,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiTextBlockTruncate, EuiTitle } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import type { GetKiResponse, KiListItem } from '../../../../common/http_api/knowledge_indicators';
-import { useKi } from '../../hooks/use_ki';
-import { getErrorMessage } from '../../utils/get_error_message';
+import type { KiListItem } from '../../../../common/http_api/knowledge_indicators';
+import { useNavigation } from '../../hooks/use_navigation';
+import { getViewKiPath } from '../../paths';
 import { getKiDisplayTitle, getKiDisplayTypeLabel } from './helpers';
 
 interface KiRowProps {
@@ -27,88 +20,42 @@ interface KiRowProps {
   ki: KiListItem;
 }
 
-const toKiJson = ({ id, document }: GetKiResponse): string =>
-  JSON.stringify({ id, ...document }, null, 2);
-
-const KiRowSource = ({
-  aiIndexId,
-  kiId,
-  index,
-}: {
-  aiIndexId: string;
-  kiId: string;
-  index: string;
-}) => {
-  const { ki, isLoading, error } = useKi({ aiIndexId, kiId, index });
-
-  if (isLoading) {
-    return <EuiSkeletonText lines={6} data-test-subj="contextKiRowJsonLoading" />;
-  }
-
-  if (error) {
-    return (
-      <EuiText size="s" color="danger" data-test-subj="contextKiRowJsonError">
-        <p>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.rowJsonError', {
-            defaultMessage: 'Unable to load Knowledge Indicator. {message}',
-            values: { message: getErrorMessage(error) },
-          })}
-        </p>
-      </EuiText>
-    );
-  }
-
-  if (ki === undefined) {
-    return null;
-  }
-
-  return (
-    <EuiCodeBlock
-      language="json"
-      paddingSize="m"
-      isCopyable
-      overflowHeight={320}
-      data-test-subj="contextKiRowJson"
-    >
-      {toKiJson(ki)}
-    </EuiCodeBlock>
-  );
-};
-
 export const KiRow = ({ aiIndexId, ki }: KiRowProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { navigateToContextEngine } = useNavigation();
   const title = getKiDisplayTitle(ki.title);
   const typeLabel = getKiDisplayTypeLabel(ki.type);
 
+  const handleClick = useCallback(() => {
+    navigateToContextEngine(getViewKiPath(aiIndexId, ki.id), { index: ki.index });
+  }, [aiIndexId, ki.id, ki.index, navigateToContextEngine]);
+
+  const ariaLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.viewRowAriaLabel', {
+    defaultMessage: 'View Knowledge Indicator {title}',
+    values: { title },
+  });
+
   return (
-    <EuiAccordion
-      id={`contextKiRow-${ki.index}-${ki.id}`}
-      arrowDisplay="left"
-      borders="none"
+    <EuiPanel
       paddingSize="s"
+      hasShadow={false}
+      hasBorder={false}
+      onClick={handleClick}
       data-test-subj="contextKiRow"
-      buttonProps={{
-        'data-test-subj': 'contextKiRowToggle',
-        ...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-          action: CONTEXT_ENGINE_UI_EBT.action.kiList.TOGGLE_ROW,
-        }),
-      }}
-      onToggle={setIsOpen}
-      buttonContent={
-        <div>
-          <EuiTitle size="xxs">
-            <EuiTextBlockTruncate lines={2} cloneElement>
-              <span data-test-subj="contextKiRowTitle">{title}</span>
-            </EuiTextBlockTruncate>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued" data-test-subj="contextKiRowType">
-            <p>{typeLabel}</p>
-          </EuiText>
-        </div>
-      }
+      aria-label={ariaLabel}
+      css={{ cursor: 'pointer', textAlign: 'left', width: '100%' }}
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+        action: CONTEXT_ENGINE_UI_EBT.action.kiList.OPEN_ROW,
+      })}
     >
-      {isOpen ? <KiRowSource aiIndexId={aiIndexId} kiId={ki.id} index={ki.index} /> : null}
-    </EuiAccordion>
+      <EuiTitle size="xxs">
+        <EuiTextBlockTruncate lines={2} cloneElement>
+          <span data-test-subj="contextKiRowTitle">{title}</span>
+        </EuiTextBlockTruncate>
+      </EuiTitle>
+      <EuiText size="xs" color="subdued" data-test-subj="contextKiRowType">
+        <p>{typeLabel}</p>
+      </EuiText>
+    </EuiPanel>
   );
 };
