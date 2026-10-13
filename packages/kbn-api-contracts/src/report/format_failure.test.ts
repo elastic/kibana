@@ -202,6 +202,10 @@ describe('formatFailure', () => {
     it.each([
       ['alone', [allowlistedEntry]],
       [
+        'a tech_preview change',
+        [{ ...techPreviewEntry('/api/approved', 'delete'), allowlisted: true }],
+      ],
+      [
         'with a report-only change',
         [
           allowlistedEntry,

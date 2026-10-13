@@ -285,6 +285,10 @@ describe('buildCommentBody', () => {
       it.each([
         ['alone', [approved]],
         [
+          'a tech_preview change',
+          [entry({ path: '/api/approved', tier: 'tech_preview', allowlisted: true })],
+        ],
+        [
           'with a report-only change',
           [approved, entry({ reportOnly: true, policyReason: 'Additive response variant.' })],
         ],

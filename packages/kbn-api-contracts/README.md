@@ -31,7 +31,7 @@ By default the check is a soft gate: a BC detected in stable/tech_preview fails 
 3. **`src/report/`** - Error formatting and user guidance
 
    - `format_failure.ts` - Generates the tier-grouped CI-log summary (gating tiers first, then an informational experimental section)
-   - `release_note.json` - Release note wording shared by the CI log and the PR comment
+   - `release_note.json` - Release note, `## Impact` and `## Action` wording shared by the CI log and the PR comment
    - `write_impact_report.ts` - Writes the JSON impact report consumed by the PR notifier
    - `links.ts` - Documentation links
 
