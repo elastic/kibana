@@ -235,35 +235,32 @@ describe('Agent actions', () => {
       }
     });
 
-    it('should sign UNENROLL, UPGRADE, MIGRATE and RESTART actions', async () => {
-      const esClient = elasticsearchServiceMock.createInternalClient();
-      const newActions: NewAgentAction[] = (
-        ['UNENROLL', 'UPGRADE', 'MIGRATE', 'RESTART'] as AgentActionType[]
-      ).map((actionType, i) => {
-        const actionId = `action${i + 1}`;
-        return {
-          id: actionId,
-          type: actionType,
-          agents: [actionId],
-        };
-      });
+    it.each(['UNENROLL', 'UPGRADE', 'MIGRATE', 'RESTART'] as AgentActionType[])(
+      'should sign %s action',
+      async (actionType: AgentActionType) => {
+        const esClient = elasticsearchServiceMock.createInternalClient();
 
-      await bulkCreateAgentActions(esClient, newActions);
-      expect(esClient.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({
-          operations: expect.arrayContaining([
-            expect.arrayContaining([
-              expect.objectContaining({
-                signed: {
-                  data: expect.any(String),
-                  signature: expect.any(String),
-                },
-              }),
+        await bulkCreateAgentActions(esClient, [
+          { id: 'action1', type: actionType, agents: ['agent1'] },
+        ]);
+
+        expect(esClient.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            operations: expect.arrayContaining([
+              expect.arrayContaining([
+                expect.objectContaining({
+                  type: actionType,
+                  signed: {
+                    data: expect.any(String),
+                    signature: expect.any(String),
+                  },
+                }),
+              ]),
             ]),
-          ]),
-        })
-      );
-    });
+          })
+        );
+      }
+    );
 
     it('should not sign actions other than UNENROLL, UPGRADE, MIGRATE and RESTART', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
