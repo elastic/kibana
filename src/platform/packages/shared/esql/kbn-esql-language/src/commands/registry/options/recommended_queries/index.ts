@@ -86,20 +86,6 @@ export const getRecommendedQueriesTemplates = ({
             queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
           },
           {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.categorize.label', {
-              // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
-              // the capability aiops.enabled can be used to check both of these conditions
-              defaultMessage: 'Detect change points',
-            }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.categorize.description',
-              {
-                defaultMessage: 'Spot spikes and dips in event volume over time',
-              }
-            ),
-            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} /* To use CHANGE_POINT BY, set grouping field(s) - e.g. BY host, buckets = ... */ | CHANGE_POINT count ON buckets /* Use the BY operator to group by the field - e.g. ON buckets BY host */ | WHERE type IS NOT NULL /* Filter to only include change points. */`,
-          },
-          {
             label: i18n.translate('kbn-esql-language.recommendedQueries.sortByTime.label', {
               defaultMessage: 'Sort by time',
             }),
@@ -110,6 +96,39 @@ export const getRecommendedQueriesTemplates = ({
               }
             ),
             queryString: `${fromCommand}| SORT ${timeField} /* Data is not sorted by default */`,
+          },
+        ]
+      : []),
+    ...(fromCommand
+      ? [
+          {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.loadUnmappedFields.label', {
+              defaultMessage: 'Load unmapped fields',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.loadUnmappedFields.description',
+              {
+                defaultMessage:
+                  'Allows querying unmapped fields, loading their values from the _source if present.',
+              }
+            ),
+            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
+          },
+        ]
+      : []),
+    ...(timeField
+      ? [
+          {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
+              defaultMessage: 'Total count vs count last hour',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.lastHour.description',
+              {
+                defaultMessage: 'Compare the last hour with the rest of the data',
+              }
+            ),
+            queryString: `${fromCommand} | SORT ${timeField} | EVAL now = NOW() | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other") | STATS count = COUNT(*) BY key | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count) | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG)) | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.dateIntervals.label', {
@@ -149,16 +168,18 @@ export const getRecommendedQueriesTemplates = ({
             queryString: `${fromCommand}| STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */ | KEEP event_rate`,
           },
           {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
-              defaultMessage: 'Total count vs count last hour',
+            label: i18n.translate('kbn-esql-language.recommendedQueries.categorize.label', {
+              // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
+              // the capability aiops.enabled can be used to check both of these conditions
+              defaultMessage: 'Detect change points',
             }),
             description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.lastHour.description',
+              'kbn-esql-language.recommendedQueries.categorize.description',
               {
-                defaultMessage: 'Compare the last hour with the rest of the data',
+                defaultMessage: 'Spot spikes and dips in event volume over time',
               }
             ),
-            queryString: `${fromCommand} | SORT ${timeField} | EVAL now = NOW() | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other") | STATS count = COUNT(*) BY key | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count) | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG)) | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} /* To use CHANGE_POINT BY, set grouping field(s) - e.g. BY host, buckets = ... */ | CHANGE_POINT count ON buckets /* Use the BY operator to group by the field - e.g. ON buckets BY host */ | WHERE type IS NOT NULL /* Filter to only include change points. */`,
           },
         ]
       : []),
@@ -179,23 +200,6 @@ export const getRecommendedQueriesTemplates = ({
             queryString: timeField
               ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
               : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
-          },
-        ]
-      : []),
-    ...(fromCommand
-      ? [
-          {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.loadUnmappedFields.label', {
-              defaultMessage: 'Load unmapped fields',
-            }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.loadUnmappedFields.description',
-              {
-                defaultMessage:
-                  'Allows querying unmapped fields, loading their values from the _source if present.',
-              }
-            ),
-            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
           },
         ]
       : []),
