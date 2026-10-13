@@ -114,38 +114,44 @@ describe('triage plan sweep step', () => {
   });
 
   it('plans a batch for a pending alert and claims it', async () => {
+    const pendingAlert = {
+      _id: 'alert-1',
+      _source: {
+        'kibana.alert.rule.uuid': 'rule-a',
+        'kibana.alert.rule.name': 'Rule A name',
+        'kibana.alert.risk_score': 70,
+        'kibana.alert.workflow_status': 'open',
+        'kibana.alert.workflow_tags': [],
+        '@timestamp': new Date().toISOString(),
+      },
+    };
     const callKibanaApi = jest.fn(
-      async ({ path, body }: { path: string; body?: { query?: unknown } }) => {
+      async ({
+        path,
+        body,
+      }: {
+        path: string;
+        body?: { query?: unknown; aggs?: unknown; track_total_hits?: boolean };
+      }) => {
         if (path.includes('/executions'))
           return { status: 200, headers: {}, body: { results: [] } };
-        if (path.endsWith('/signals/search') && JSON.stringify(body).includes('"size":0')) {
+        if (path.endsWith('/signals/search') && body?.track_total_hits === true) {
           return { status: 200, headers: {}, body: { hits: { total: { value: 13 } } } };
         }
-        if (path.endsWith('/signals/search')) {
-          const isClaimedQuery = !JSON.stringify(body?.query).includes('must_not');
+        if (path.endsWith('/signals/search') && body?.aggs !== undefined) {
+          // The unclaimed alerts come back as the top alerts of each rule.
           return {
             status: 200,
             headers: {},
             body: {
-              hits: {
-                hits: isClaimedQuery
-                  ? []
-                  : [
-                      {
-                        _id: 'alert-1',
-                        _source: {
-                          'kibana.alert.rule.uuid': 'rule-a',
-                          'kibana.alert.rule.name': 'Rule A name',
-                          'kibana.alert.risk_score': 70,
-                          'kibana.alert.workflow_status': 'open',
-                          'kibana.alert.workflow_tags': [],
-                          '@timestamp': new Date().toISOString(),
-                        },
-                      },
-                    ],
+              aggregations: {
+                rules: { buckets: [{ top: { hits: { hits: [pendingAlert] } } }] },
               },
             },
           };
+        }
+        if (path.endsWith('/signals/search')) {
+          return { status: 200, headers: {}, body: { hits: { hits: [] } } };
         }
         return { status: 200, headers: {}, body: {} };
       }

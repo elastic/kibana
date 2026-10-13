@@ -34,8 +34,14 @@ export const ALERT_COST = TRIAGE_ALERT_COST;
 /** Alerts per tag update, so one bulk call never exceeds the alert index's term limits. */
 export const TAG_CHUNK_SIZE = 500;
 
-/** Most alerts one sweep reads. Matches the default `index.max_result_window`. */
+/** Most claimed alerts one sweep reads. Matches the default `index.max_result_window`. */
 export const ALERT_FETCH_LIMIT = 10_000;
+
+/**
+ * Most rules one sweep reads unclaimed alerts for. The planner serves at most `IN_FLIGHT_CEILING`
+ * rules and skips those with a live batch, so a few times the ceiling is ample.
+ */
+export const RULE_FETCH_LIMIT = 5 * IN_FLIGHT_CEILING;
 
 export const TRIAGE_PENDING_TAG = 'az:triage_pending';
 export const TRIAGE_EXEC_TAG_PREFIX = 'az:triage_exec:';
