@@ -16,6 +16,7 @@ import type {
 import type { DiscoverSessionWarning } from '../../server';
 import type { DiscoverSessionInternalResponse } from '../../server/api/internal_schema';
 import type { DiscoverSessionClient } from './api_client';
+import { normalizeSessionFilters } from './normalize_session_filters';
 import {
   fromDiscoverSessionApiResponse,
   getDiscoverSessionReferences,
@@ -97,7 +98,7 @@ const createLegacyDiscoverSessionService = (
   legacyClient: LegacyDiscoverSessionClient
 ): DiscoverSessionService => ({
   get: async (id) => ({
-    session: await legacyClient.getDiscoverSession(id),
+    session: normalizeSessionFilters(await legacyClient.getDiscoverSession(id)),
     warnings: [],
   }),
   save: (session, options) => legacyClient.saveDiscoverSession(session, options),

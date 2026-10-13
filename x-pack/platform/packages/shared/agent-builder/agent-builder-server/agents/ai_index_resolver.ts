@@ -16,6 +16,8 @@ export interface AiIndexDetail {
   /** May be a concrete index name, a pattern, or a comma-separated list. */
   esqlTarget: string;
   description?: string;
+  /** Whether this AI Index accepts memory writes. Absent entries fail closed for memory tools. */
+  memoryEnabled?: boolean;
 }
 
 /**

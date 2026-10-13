@@ -12,6 +12,7 @@ import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 
 import { fieldStoryDecorator } from '../../../__stories__/field_story_decorator';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
 import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
 import { HeaderRow } from './header_row';
 
@@ -31,9 +32,9 @@ const meta: Meta<typeof HeaderRow> = {
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs<HeaderRowProps>();
-    const onChange = (value: DatasetBooleanFormValue) => {
-      args.onChange(value);
-      updateArgs({ value });
+    const onChange = (change: ComboBoxChange<DatasetBooleanFormValue>) => {
+      args.onChange(change);
+      updateArgs({ value: change.value });
     };
     return <HeaderRow {...args} onChange={onChange} />;
   },

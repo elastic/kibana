@@ -27,6 +27,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { DeleteAllInvestigationsResult } from './storage';
 import type { TriggerEmitter } from './workflows/triggers/emit';
@@ -49,6 +50,7 @@ export interface NightshiftInvestigationsServerStart {
 }
 
 export interface NightshiftInvestigationsSetupDeps {
+  share: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;

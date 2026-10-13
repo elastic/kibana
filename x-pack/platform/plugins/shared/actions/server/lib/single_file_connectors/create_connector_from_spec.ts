@@ -8,7 +8,7 @@
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { TEST_CONNECTOR_SUB_ACTION, connectorSpecHasEvents } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { z as z4 } from '@kbn/zod/v4';
+import { lazyImmutableGCableObject, z as z4 } from '@kbn/zod/v4';
 
 import type {
   ActionTypeParams,
@@ -72,6 +72,7 @@ export const createConnectorTypeFromSpec = (
     throw new Error('No actions or events defined');
   }
 
+  const { signingKey } = spec;
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
   const schemaForConfig = spec.schema;
@@ -85,11 +86,20 @@ export const createConnectorTypeFromSpec = (
         getRelayClient: actions.getRelayClient,
         networkSettings,
         platform,
+        ...(signingKey
+          ? {
+              getJwtSigner: (connectorId: string) =>
+                actions.getConnectorJwtSigner(connectorId, signingKey),
+            }
+          : {}),
       })
     : undefined;
 
+  // ActionTypeRegistry keeps these validators until process exit. Build each Zod
+  // graph on first use so it can be collected after the validation call returns.
+  const actionNames = Object.keys(spec.actions ?? {});
   const paramsValidator = hasExecutableActions
-    ? generateParamsSchema(executableActions)
+    ? lazyImmutableGCableObject(() => generateParamsSchema(executableActions))
     : undefined;
 
   return {
@@ -98,8 +108,8 @@ export const createConnectorTypeFromSpec = (
     name: spec.metadata.displayName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
-      config: generateConfigSchema(schemaForConfig, Object.keys(spec.actions ?? {})),
-      secrets: generateSecretsSchema(spec.auth, configUtils),
+      config: lazyImmutableGCableObject(() => generateConfigSchema(schemaForConfig, actionNames)),
+      secrets: lazyImmutableGCableObject(() => generateSecretsSchema(spec.auth, configUtils)),
       ...(paramsValidator ? { params: paramsValidator } : {}),
     },
     ...(executor ? { executor } : {}),

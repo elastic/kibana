@@ -72,6 +72,24 @@ describe('executeEsqlTool', () => {
     });
   });
 
+  it('suggests the PROMQL start and end options when a PROMQL query does not apply the time_range', async () => {
+    const tool = executeEsqlTool();
+    const result = (await tool.handler(
+      {
+        query: 'PROMQL index=metrics step=1m load=(avg by (instance) (node_load1))',
+        time_range: { from: 'now-24h', to: 'now' },
+        limit: 100,
+      },
+      createHandlerContext() as any
+    )) as ToolHandlerStandardReturn;
+
+    const { warning } = result.results.find((r) => r.type === ToolResultType.other)?.data as {
+      warning: string;
+    };
+    expect(warning).toContain('start=?_tstart end=?_tend');
+    expect(warning).not.toContain('WHERE @timestamp >= ?_tstart');
+  });
+
   it('omits time_range from results when query has no placeholders and no explicit time_range', async () => {
     const tool = executeEsqlTool();
     const result = (await tool.handler(

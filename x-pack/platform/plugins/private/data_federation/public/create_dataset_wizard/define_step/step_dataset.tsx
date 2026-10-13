@@ -7,19 +7,22 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { Forms } from '@kbn/es-ui-shared-plugin/public';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useFormContext, useFormState, useWatch, type FieldPath } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from '../create_dataset_form_state';
 import { CreateDatasetFormatField } from '../options_step/create_dataset_settings';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { SUPPORTED_DATASET_FORMATS, type SupportedDatasetFormat } from './fields/format_select';
-import type { DatasetWizardContent } from '../types';
+import { SUPPORTED_DATASET_FORMATS, isSupportedDatasetFormat } from './fields/format_select';
+import { useWizardStep } from '../wizard_step_context';
 
-const isSupportedDatasetFormat = (value: string): value is SupportedDatasetFormat =>
-  (SUPPORTED_DATASET_FORMATS as readonly string[]).includes(value);
+const DATASET_STEP_FIELDS: Array<FieldPath<CreateDatasetFormValues>> = [
+  'name',
+  'data_source',
+  'resource',
+  'settings.format',
+];
 
 const inferFormatFromResource = (resource: string): DatasetFormatFormValue => {
   const value = resource?.trim().toLowerCase();
@@ -53,8 +56,12 @@ export function StepDataset({
   isEditMode?: boolean;
   datasetNameToEdit?: string;
 }) {
-  const { control, getValues, setValue, trigger } = useFormContext<CreateDatasetFormValues>();
-  const { updateContent } = Forms.useContent<DatasetWizardContent, 'dataset'>('dataset');
+  const { control, getFieldState, setValue, trigger } = useFormContext<CreateDatasetFormValues>();
+  const formState = useFormState({ control, name: DATASET_STEP_FIELDS });
+  const hasFieldErrors = DATASET_STEP_FIELDS.some(
+    (field) => getFieldState(field, formState).invalid
+  );
+  const updateContent = useWizardStep();
   const name = useWatch({ control, name: 'name' });
   const dataSource = useWatch({ control, name: 'data_source' });
   const resource = useWatch({ control, name: 'resource' });
@@ -77,36 +84,21 @@ export function StepDataset({
 
   useEffect(() => {
     // Don't mark the step invalid (disabling Next) until the user tries to proceed.
-    const isValid =
-      !hasAttemptedValidation ||
-      Boolean(name?.trim() && dataSource?.trim() && resource?.trim() && format?.trim());
     updateContent({
-      isValid,
+      isValid: !hasAttemptedValidation || !hasFieldErrors,
       validate: async () => {
         setHasAttemptedValidation(true);
-        return trigger(['name', 'data_source', 'resource', 'settings.format']);
-      },
-      getData: () => {
-        const values = getValues();
-        return {
-          name: values.name,
-          description: values.description,
-          data_source: values.data_source,
-          resource: values.resource,
-          format: values.settings.format,
-        };
+        return trigger(DATASET_STEP_FIELDS);
       },
     });
-  }, [
-    name,
-    dataSource,
-    resource,
-    format,
-    getValues,
-    hasAttemptedValidation,
-    trigger,
-    updateContent,
-  ]);
+  }, [hasAttemptedValidation, hasFieldErrors, trigger, updateContent]);
+
+  useEffect(() => {
+    // The form uses react-hook-form's default `onSubmit` mode, and the wizard never submits it,
+    // so errors shown after a Next attempt would otherwise not clear until Next is clicked again.
+    if (!hasAttemptedValidation) return;
+    trigger(DATASET_STEP_FIELDS);
+  }, [name, dataSource, resource, format, hasAttemptedValidation, trigger]);
 
   return (
     <div data-test-subj="createDatasetWizardDatasetStep">

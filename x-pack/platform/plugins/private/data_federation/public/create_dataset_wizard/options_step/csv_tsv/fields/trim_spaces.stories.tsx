@@ -12,6 +12,7 @@ import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 
 import { fieldStoryDecorator } from '../../../__stories__/field_story_decorator';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
 import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
 import { TrimSpaces } from './trim_spaces';
 
@@ -31,9 +32,9 @@ const meta: Meta<typeof TrimSpaces> = {
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs<TrimSpacesProps>();
-    const onChange = (value: DatasetBooleanFormValue) => {
-      args.onChange(value);
-      updateArgs({ value });
+    const onChange = (change: ComboBoxChange<DatasetBooleanFormValue>) => {
+      args.onChange(change);
+      updateArgs({ value: change.value });
     };
     return <TrimSpaces {...args} onChange={onChange} />;
   },

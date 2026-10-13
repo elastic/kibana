@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -16,8 +17,24 @@ const nightshiftPageTitle = i18n.translate('xpack.nightshift.pageTitle', {
   defaultMessage: 'Nightshift',
 });
 
+const automationsLabel = i18n.translate('xpack.nightshift.automationsLabel', {
+  defaultMessage: 'Automations',
+});
+
+export const SETTINGS_PAGE_TITLE = i18n.translate('xpack.nightshift.settingsPage.title', {
+  defaultMessage: 'Settings',
+});
+
+export const KNOWLEDGE_PAGE_TITLE = i18n.translate('xpack.nightshift.knowledgePage.title', {
+  defaultMessage: 'Knowledge',
+});
+
 const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
   defaultMessage: 'Settings',
+});
+
+const knowledgeLabel = i18n.translate('xpack.nightshift.knowledgeLinkLabel', {
+  defaultMessage: 'Knowledge',
 });
 
 const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
@@ -30,6 +47,11 @@ const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkL
 
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
+const knowledgeEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_KNOWLEDGE,
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
@@ -53,23 +75,54 @@ const applyEbtProps = (
   });
 };
 
-export function NightshiftAppHeader({
-  onManagementClick,
-  managementHref,
-  onSettingsClick,
-  settingsHref,
-  onSandboxSecretsClick,
-}: {
+export interface NightshiftAppHeaderProps {
+  page?: 'landing' | 'automations' | 'knowledge' | 'settings';
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
+  onKnowledgeClick?: () => void | Promise<void>;
+  knowledgeHref?: string;
   onSettingsClick?: () => void | Promise<void>;
   settingsHref?: string;
   /** Shows the sandbox secrets menu item when set. */
   onSandboxSecretsClick?: () => void;
-}): React.ReactElement {
+  onAutomationsClick?: () => void | Promise<void>;
+  automationsHref?: string;
+  tabs?: AppHeaderTab[];
+  back?: AppHeaderBack;
+}
+
+export function NightshiftAppHeader({
+  page = 'landing',
+  onManagementClick,
+  managementHref,
+  onKnowledgeClick,
+  knowledgeHref,
+  onSettingsClick,
+  settingsHref,
+  onSandboxSecretsClick,
+  onAutomationsClick,
+  automationsHref,
+  tabs,
+  back,
+}: NightshiftAppHeaderProps): React.ReactElement {
+  const isAutomationsPage = page === 'automations';
+  const isKnowledgePage = page === 'knowledge';
+  const isSettingsPage = page === 'settings';
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
+        ...(onAutomationsClick && automationsHref && !isAutomationsPage
+          ? [
+              {
+                id: 'nightshiftAutomations',
+                label: automationsLabel,
+                iconType: 'workflow',
+                href: automationsHref,
+                run: () => void onAutomationsClick(),
+                testId: 'nightshiftAutomationsPrimaryAction',
+              },
+            ]
+          : []),
         ...(onSandboxSecretsClick
           ? [
               {
@@ -92,8 +145,25 @@ export function NightshiftAppHeader({
             void onManagementClick();
           },
           testId: 'nightshiftManagementLink',
+          overflow: true,
         },
-        ...(onSettingsClick && settingsHref
+        ...(onKnowledgeClick && knowledgeHref && !isKnowledgePage
+          ? [
+              {
+                id: 'nightshiftKnowledge',
+                label: knowledgeLabel,
+                iconType: 'documentation' as const,
+                href: knowledgeHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(knowledgeEbtProps, params);
+                  void onKnowledgeClick();
+                },
+                testId: 'nightshiftKnowledgeLink',
+                overflow: true,
+              },
+            ]
+          : []),
+        ...(onSettingsClick && settingsHref && !isSettingsPage
           ? [
               {
                 id: 'nightshiftSettings',
@@ -105,14 +175,43 @@ export function NightshiftAppHeader({
                   void onSettingsClick();
                 },
                 testId: 'nightshiftSettingsLink',
-                overflow: true,
+                overflow: !isAutomationsPage,
               },
             ]
           : []),
       ],
     }),
-    [managementHref, onManagementClick, onSandboxSecretsClick, onSettingsClick, settingsHref]
+    [
+      automationsHref,
+      isAutomationsPage,
+      isKnowledgePage,
+      isSettingsPage,
+      knowledgeHref,
+      managementHref,
+      onAutomationsClick,
+      onKnowledgeClick,
+      onManagementClick,
+      onSandboxSecretsClick,
+      onSettingsClick,
+      settingsHref,
+    ]
   );
 
-  return <AppHeader title={nightshiftPageTitle} menu={menu} spacing="compact" />;
+  return (
+    <AppHeader
+      title={
+        isAutomationsPage
+          ? automationsLabel
+          : isKnowledgePage
+          ? KNOWLEDGE_PAGE_TITLE
+          : isSettingsPage
+          ? SETTINGS_PAGE_TITLE
+          : nightshiftPageTitle
+      }
+      back={back}
+      tabs={tabs}
+      menu={menu}
+      spacing="standard"
+    />
+  );
 }

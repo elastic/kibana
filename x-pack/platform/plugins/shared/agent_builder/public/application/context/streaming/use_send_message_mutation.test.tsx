@@ -32,10 +32,11 @@ jest.mock('../../hooks/use_agent_builder_service', () => ({
     conversationsService: { get: mockGet },
   }),
 }));
+const mockAddDanger = jest.fn();
 const mockServices = {
   application: { currentAppId$: of(undefined) },
   plugins: {},
-  notifications: {},
+  notifications: { toasts: { addDanger: mockAddDanger } },
 };
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: mockServices }),
@@ -251,5 +252,91 @@ describe('useSendMessageMutation', () => {
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
     expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]);
+    expect(mockAddDanger).not.toHaveBeenCalled();
   });
+
+  it('shows a toast when the server rejects the request before running anything', async () => {
+    const { bindings, source, result } = setup();
+    mockGet.mockResolvedValue(savedConversation([]));
+    const payloadTooLarge = Object.assign(new Error('Request Entity Too Large'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 413 },
+      body: { statusCode: 413, message: 'Payload content length greater than maximum allowed' },
+    });
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => source.error(payloadTooLarge));
+
+    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
+    expect(mockAddDanger).toHaveBeenCalledWith({
+      title: expect.stringMatching(/too large to send/),
+    });
+    expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId);
+  });
+
+  it.each([400, 403, 404, 500])(
+    'shows the server message when the request fails with %s',
+    async (status) => {
+      const { source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const rejected = Object.assign(new Error('Rejected'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status },
+        body: { statusCode: status, message: 'Something the user can act on' },
+      });
+
+      act(() => result.current.mutate(vars));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(rejected));
+
+      await waitFor(() =>
+        expect(mockAddDanger).toHaveBeenCalledWith({ title: 'Something the user can act on' })
+      );
+    }
+  );
+
+  it('does not show a toast for an HTTP error that arrives after the run started', async () => {
+    const { bindings, source, result } = setup();
+    mockGet.mockResolvedValue(savedConversation([savedUserMessage, started, terminated]));
+    const reattachError = Object.assign(new Error('Internal Server Error'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 500 },
+    });
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => {
+      source.next(started as ChatEvent);
+      source.error(reattachError);
+    });
+
+    await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
+    expect(mockAddDanger).not.toHaveBeenCalled();
+  });
+
+  it.each([502, 503, 504])(
+    'does not show a toast for a %s gateway error, which is left to the reattach logic',
+    async (status) => {
+      const { bindings, source, result } = setup();
+      mockGet.mockResolvedValue(savedConversation([]));
+      const gatewayError = Object.assign(new Error('Bad Gateway'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status },
+      });
+
+      act(() => result.current.mutate(vars));
+      await waitFor(() => expect(mockChat).toHaveBeenCalled());
+      act(() => source.error(gatewayError));
+
+      await waitFor(() =>
+        expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId)
+      );
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    }
+  );
 });

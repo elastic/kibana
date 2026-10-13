@@ -10,7 +10,7 @@ version: "1"
 #      string takes the whole index.
 #   2. Add any further fields the summary should draw on to the `KEEP` in `discover_documents`,
 #      remembering that `KEEP` fixes the column order the `foreach` reads by position.
-#   3. Tell the prompt what these documents are. "Support article" and "incident record" produce
+#   3. Tell the prompt what these documents are. "Product manual" and "incident record" produce
 #      different summaries from the same text, and the model cannot tell which it is holding.
 #
 # One KI per document is the right granularity only for a bounded corpus of documents that each
@@ -37,7 +37,8 @@ consts:
   # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
   corpus_filter: __CORPUS_FILTER__
   # The KI budget: one model call and one KI per document, 100 at most during onboarding. A
-  # one-KI-per-claim variant multiplies it by the claims per document.
+  # one-KI-per-claim variant sets it to the budget divided by the claims
+  # per document.
   max_documents: __MAX_DOCUMENTS__
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
@@ -49,6 +50,14 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        pilot_size:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Summarizes only this many documents, to measure a run before the full one.
+      additionalProperties: false
 
 steps:
   # Fetched once, outside the loop, and handed to every summary. Without it the model only ever
@@ -60,15 +69,19 @@ steps:
       method: GET
       path: /{{ consts.source_index }}/_mapping
 
+  # Sorted by _id so a pilot's documents are the first of the full run's, and the full run
+  # replaces the pilot's KIs instead of adding to them. Sorted and limited before the body is
+  # read, so only the kept documents' bodies are loaded.
   - name: discover_documents
     type: elasticsearch.esql.query
     with:
       query: |
         FROM {{ consts.source_index }} METADATA _id
         {{ consts.corpus_filter }}
+        | SORT _id ASC
+        | LIMIT {{ inputs.pilot_size | default: consts.max_documents | at_most: consts.max_documents }}
         | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
         | KEEP _id, `{{ consts.title_field }}`, body
-        | LIMIT {{ consts.max_documents }}
 
   # Documents are chunked into batches of at most 100 before entering `parallel`: the engine
   # throws above that fan-out limit. Each batch runs concurrently; batches run sequentially.

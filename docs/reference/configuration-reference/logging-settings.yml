@@ -335,6 +335,8 @@ groups:
       - setting: logging.loggers[].<logger>.name
         description: |
           Specific logger instance.
+
+          `logging.loggers` is a complete list that replaces, rather than merges with, any previously configured custom loggers, so always set the full set you want. Default `stdout` output is unaffected: it comes from `logging.root` and the `console` appender, not from a named logger, so there is no default logger to preserve here.
         datatype: string
         applies_to:
           stack: ga
@@ -374,7 +376,7 @@ groups:
 
           At most, 10 filters are allowed per logger. Omit the setting or set it to `[]` to inherit filters from the nearest ancestor logger (same inheritance pattern as `appenders`). Set `filters: null` to opt out of inherited filters without defining your own.
 
-          For example, to keep most alerting logs at `warn`, but enable `debug` for ES|QL rules when plugins emit `labels.ruleType` in log meta:
+          For example, to keep most alerting logs at `warn`, but enable `debug` for Elasticsearch query rules (rule type `.es-query`), which the alerting task runner adds to log meta as `labels.ruleType`:
 
           ```yaml
           logging:
@@ -384,11 +386,13 @@ groups:
                 filters:
                   - type: meta
                     match:
-                      [labels.ruleType]: esql
+                      '[labels.ruleType]': '.es-query'
                     level: debug
           ```
 
-          Matching uses strict equality (`===`). A string `"3"` in config does not match numeric `3` in meta. Filter paths support nested meta (`labels.ruleType`) and flat top-level keys (`'labels.ruleType'`). Filters only affect records that include matching meta at the log call site. They do not change `isLevelEnabled` checks.
+          Because {{kib}} expands dotted YAML keys into nested objects, a dotted `match` key must be wrapped in square brackets and quoted (`'[labels.ruleType]'`) so it is preserved as a single flat key. A bare `labels.ruleType` (quoted or not) is expanded into a nested object, which is not a valid `match` value and causes {{kib}} to fail at startup. The flat key is then matched against nested meta by walking the dot path at runtime.
+
+          Matching uses strict equality (`===`): a string `"3"` in config does not match numeric `3` in meta. Filters only affect records that include matching meta at the log call site, and do not change `isLevelEnabled` checks.
 
           Meta filters apply inside {{kib}} before log records are written to appenders. Collection and shipping (Filebeat, Elastic Agent, or OpenTelemetry) only see records that already passed the filter.
         datatype: array
@@ -410,7 +414,7 @@ groups:
 
       - setting: logging.loggers[].<logger>.filters[].match
         description: |
-          Map of key-value predicates. Every entry must match the log record's `meta` for the filter to apply. Keys are dot-notation paths into nested meta (for example, `labels.ruleType` or `labels.actionId`). Values may be strings, numbers, or booleans. Each `match` object can have up to 10 keys, string keys can contain up to 256 characters, and string values can contain up to 1024 characters.
+          Map of key-value predicates. Every entry must match the log record's `meta` for the filter to apply. Keys are dot-notation paths into nested meta (for example, `labels.ruleType` or `labels.actionId`), and because {{kib}} expands dotted YAML keys they must be bracket-wrapped and quoted (`'[labels.ruleType]'`). Values may be strings, numbers, or booleans. Each `match` object can have up to 10 keys, string keys can contain up to 256 characters, and string values can contain up to 1024 characters.
         datatype: object
         applies_to:
           stack: ga 9.6

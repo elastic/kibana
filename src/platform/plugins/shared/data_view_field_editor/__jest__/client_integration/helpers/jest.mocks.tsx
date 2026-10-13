@@ -13,6 +13,12 @@ import { of } from 'rxjs';
 const mockUseEffect = useEffect;
 const mockOf = of;
 
+/**
+ * By default the debounce of the preview is collapsed so a param change updates the preview right
+ * away. Tests that need to act within the debounce window can opt in to the real implementation.
+ */
+export const mockDebounce = { useRealImplementation: false };
+
 const EDITOR_ID = 'testEditor';
 const MONACO_MODULE = '@kbn/monaco';
 
@@ -79,7 +85,13 @@ jest.doMock(MONACO_MODULE, () => {
 });
 
 jest.mock('react-use/lib/useDebounce', () => {
+  const originalUseDebounce = jest.requireActual('react-use/lib/useDebounce').default;
+
   return (cb: () => void, ms: number, deps: any[]) => {
+    if (mockDebounce.useRealImplementation) {
+      return originalUseDebounce(cb, ms, deps);
+    }
+
     mockUseEffect(() => {
       cb();
     }, deps);

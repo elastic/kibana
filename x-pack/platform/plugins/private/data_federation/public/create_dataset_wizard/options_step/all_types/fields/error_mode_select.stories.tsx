@@ -12,6 +12,7 @@ import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 
 import { fieldStoryDecorator } from '../../../__stories__/field_story_decorator';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
 import type { DatasetErrorModeFormValue } from '../../../create_dataset_form_state';
 import { ErrorModeSelect } from './error_mode_select';
 
@@ -31,9 +32,9 @@ const meta: Meta<typeof ErrorModeSelect> = {
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs<ErrorModeSelectProps>();
-    const onChange = (value: DatasetErrorModeFormValue) => {
-      args.onChange(value);
-      updateArgs({ value });
+    const onChange = (change: ComboBoxChange<DatasetErrorModeFormValue>) => {
+      args.onChange(change);
+      updateArgs({ value: change.value });
     };
     return <ErrorModeSelect {...args} onChange={onChange} />;
   },

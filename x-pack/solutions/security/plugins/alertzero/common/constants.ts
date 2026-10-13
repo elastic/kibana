@@ -23,6 +23,7 @@ export {
   CANDIDATES_URL,
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
+  WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
 
 /** API privilege for read-only AlertZero internal routes. */
