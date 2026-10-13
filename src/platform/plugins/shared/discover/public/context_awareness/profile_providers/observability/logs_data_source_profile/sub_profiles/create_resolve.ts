@@ -10,7 +10,11 @@
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
-import { DataSourceCategory, SolutionType } from '../../../../profiles';
+import {
+  DataSourceCategory,
+  SolutionType,
+  type DataSourceProfileProviderParams,
+} from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import { isSolutionProfilesInClassicEnabled } from '../../../is_solution_profiles_in_classic_enabled';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
@@ -31,33 +35,37 @@ export const createResolve = (
     createRegExpPatternFrom(baseIndexPattern, 'data'),
   ]);
 
-  return (params) => {
-    const { solutionType } = params.rootContext;
-    const isSupportedSolutionType =
-      solutionType === SolutionType.Observability ||
-      (enabledInClassicNav &&
-        solutionType === SolutionType.Default &&
-        isSolutionProfilesInClassicEnabled(uiSettings));
+  // Matches the integration's base pattern against the index pattern (data view title or ES|QL FROM
+  // target).
+  const matchesIndexPattern = (params: DataSourceProfileProviderParams): boolean => {
+    const indexPattern = extractIndexPatternFrom(params);
+    return Boolean(indexPattern && testIndexPattern(indexPattern));
+  };
 
-    if (!isSupportedSolutionType) {
-      return { isMatch: false };
+  // Matches on the index pattern first; if that does not match, every resolved index must belong to
+  // this integration, so a source spanning multiple integrations is never claimed.
+  const matchesIntegration = (params: DataSourceProfileProviderParams): boolean => {
+    if (matchesIndexPattern(params)) {
+      return true;
     }
 
     const matchedIndices = params.dataView?.matchedIndices;
+    return Boolean(matchedIndices?.length && matchedIndices.every(testIndexPattern));
+  };
 
-    if (matchedIndices && matchedIndices.length > 0) {
-      // Prefer the concrete resolved indices: every one must belong to this integration, so a data
-      // view spanning multiple integrations is never claimed.
-      if (!matchedIndices.every(testIndexPattern)) {
-        return { isMatch: false };
-      }
-    } else {
-      // Fall back to the raw index pattern when the data view has not resolved any indices.
-      const indexPattern = extractIndexPatternFrom(params);
+  return (params) => {
+    const { solutionType } = params.rootContext;
 
-      if (!indexPattern || !testIndexPattern(indexPattern)) {
-        return { isMatch: false };
-      }
+    // Observability always resolves solution profiles; Classic only when the integration and the
+    // opt-out setting both allow it. The matching itself is identical for both.
+    const isSupportedNav =
+      solutionType === SolutionType.Observability ||
+      (solutionType === SolutionType.Default &&
+        enabledInClassicNav &&
+        isSolutionProfilesInClassicEnabled(uiSettings));
+
+    if (!isSupportedNav || !matchesIntegration(params)) {
+      return { isMatch: false };
     }
 
     return {
