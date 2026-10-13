@@ -36,6 +36,12 @@ interface ResolutionClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
+  /**
+   * Latest-entities index already resolved by the caller. Without it every
+   * operation re-resolves the name (several Elasticsearch calls), which
+   * dominates per-group cost in the resolution maintainer.
+   */
+  latestIndex?: string;
 }
 
 export interface LinkResult {
@@ -92,15 +98,17 @@ export class ResolutionClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
+  private readonly latestIndex?: string;
 
-  constructor({ logger, esClient, namespace }: ResolutionClientOpts) {
+  constructor({ logger, esClient, namespace, latestIndex }: ResolutionClientOpts) {
     this.logger = logger;
     this.esClient = esClient;
     this.namespace = namespace;
+    this.latestIndex = latestIndex;
   }
 
   private async latestIndexName(): Promise<string> {
-    return resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+    return this.latestIndex ?? resolveLatestEntitiesIndexName(this.esClient, this.namespace);
   }
 
   /**

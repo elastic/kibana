@@ -48,6 +48,8 @@ export interface RunRelatedUserAliasResolutionDeps {
   resolutionClient: ResolutionClient;
   signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
+  /** Latest index the caller resolved; must match the one `resolutionClient` writes to. */
+  index?: string;
 }
 
 const normalize = (value: string): string => value.trim().toLowerCase();
@@ -226,7 +228,7 @@ export async function runRelatedUserAliasResolution(
   deps: RunRelatedUserAliasResolutionDeps
 ): Promise<PerRuleState> {
   const { state, namespace, esClient, logger, resolutionClient, signal, telemetry } = deps;
-  const index = await resolveLatestEntitiesIndexName(esClient, namespace);
+  const index = deps.index ?? (await resolveLatestEntitiesIndexName(esClient, namespace));
   const seeds = await collectSeeds({ esClient, index, abortSignal: signal });
   const lastRun: RelatedUserAliasResolutionLastRun = {
     seedsScanned: seeds.length,

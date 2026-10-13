@@ -307,4 +307,25 @@ describe('automated-resolution state migration', () => {
 
     expect(output.rules[relatedUserId].lastRun).toEqual(relatedLastRun);
   });
+
+  it('keeps a custom rule definition hash and drops a malformed one', () => {
+    const watermark = '2026-10-01T00:00:00Z';
+    const output = migrate(
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          'custom:a': { lastProcessedTimestamp: watermark, lastRun: null, definitionHash: 'abc' },
+          'custom:b': { lastProcessedTimestamp: watermark, lastRun: null, definitionHash: 42 },
+        },
+      },
+      loggerMock.create()
+    );
+
+    expect(output.rules['custom:a']).toEqual({
+      lastProcessedTimestamp: watermark,
+      lastRun: null,
+      definitionHash: 'abc',
+    });
+    expect(output.rules['custom:b']).toEqual({ lastProcessedTimestamp: watermark, lastRun: null });
+  });
 });

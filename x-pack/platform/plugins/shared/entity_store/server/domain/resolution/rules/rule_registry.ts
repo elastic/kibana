@@ -62,6 +62,25 @@ export type EsqlMatchSpec = {
   | { field?: never; fieldByNamespace: Readonly<Record<string, string>> }
 );
 
+/**
+ * Customer-authored matcher. Both expressions must already be normalized by
+ * `normalizeEsqlExpression`, so each is exactly one ES|QL expression.
+ */
+export interface EsqlExpressionMatchSpec {
+  /** At least one namespace; custom rules never scan every namespace. */
+  namespaces: readonly string[];
+  /** Per-entity boolean expression, ANDed with the engine's own filters. */
+  filterExpression?: string;
+  /** Per-entity key; the engine wraps it in `TO_STRING(...)`. */
+  matchValueExpression: string;
+  declineSameNamespaceDuplicates?: boolean;
+}
+
+export type MatcherSpec = EsqlMatchSpec | EsqlExpressionMatchSpec;
+
+export const isExpressionMatchSpec = (spec: MatcherSpec): spec is EsqlExpressionMatchSpec =>
+  'matchValueExpression' in spec;
+
 export interface ResolutionRuleConfig {
   id: ResolutionRuleId;
   kind: ResolutionRuleKind;

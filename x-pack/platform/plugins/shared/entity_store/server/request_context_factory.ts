@@ -27,6 +27,7 @@ import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { ResolutionRulesClient } from './domain/resolution/rules';
+import { CustomResolutionRulesClient } from './domain/resolution/rules/custom';
 import type { TelemetryReporter } from './telemetry/events';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
@@ -155,6 +156,12 @@ export async function createRequestHandlerContext({
       namespace,
       logger
     ),
+    customResolutionRulesClient: new CustomResolutionRulesClient({
+      soClient: core.savedObjects.client,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      namespace,
+      logger,
+    }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     logsExtractionClient,

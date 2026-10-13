@@ -18,6 +18,7 @@ import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
+import { runCustomResolutionRules } from './custom_rules';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
@@ -38,14 +39,20 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
     const namespace = status.metadata.namespace;
     const state = migrate(status.state, logger);
 
-    const resolutionClient = new ResolutionClient({ logger, esClient, namespace });
+    // The matchers read this index; their writes must go to the same one.
+    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
+    const resolutionClient = new ResolutionClient({
+      logger,
+      esClient,
+      namespace,
+      latestIndex: index,
+    });
     const rules: Record<string, PerRuleState> = { ...state.rules };
     const effectiveRules = new Map(
       (await resolutionRulesClient.getEffectiveRules()).map((rule) => [rule.id, rule])
     );
     const mutatedIds = new Set<string>();
     let backfillStarted = false;
-    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
 
     for (const ruleConfig of RESOLUTION_RULE_CONFIGS) {
       if (signal.aborted) {
@@ -85,6 +92,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             spec: ruleConfig.matcher,
             ruleId: ruleConfig.id,
             mutatedIds,
+            index,
           });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
           rules[ruleConfig.id] = await runRelatedUserAliasResolution({
@@ -95,6 +103,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             resolutionClient,
             signal,
             telemetry,
+            index,
           });
         } else {
           logger.warn(
@@ -107,6 +116,22 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       } catch (error) {
         logger.warn(`Resolution rule '${ruleConfig.id}' failed: ${error}`);
       }
+    }
+
+    if (!signal.aborted) {
+      await runCustomResolutionRules({
+        previousRules: state.rules,
+        rules,
+        resolutionRulesClient,
+        namespace,
+        index,
+        esClient,
+        logger,
+        resolutionClient,
+        signal,
+        telemetry,
+        mutatedIds,
+      });
     }
 
     return { ...state, rules };

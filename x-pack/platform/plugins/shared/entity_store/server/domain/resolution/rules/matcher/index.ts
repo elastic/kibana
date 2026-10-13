@@ -6,5 +6,16 @@
  */
 
 export { GROUP_SIZE_CEILING, MATCHER_PAGE_SIZE } from './constants';
-export { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
-export { runEsqlMatcherRule, type RunEsqlMatcherDeps } from './run';
+export { buildMatchGroupsQuery, buildMatcherValidationQuery, buildWatermarkQuery } from './query';
+export {
+  assertCompleteEsqlResults,
+  classifyMatchGroup,
+  fetchEntities,
+  parseMatchGroupRows,
+  planMatchGroupLink,
+  runEsqlMatcherRule,
+  type FetchedEntity,
+  type MatchGroupRow,
+  type MatchGroupVerdict,
+  type RunEsqlMatcherDeps,
+} from './run';

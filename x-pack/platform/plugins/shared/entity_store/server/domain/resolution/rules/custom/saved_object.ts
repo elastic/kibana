@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import {
+  MAX_CUSTOM_RULE_EXPRESSION_LENGTH,
+  MAX_CUSTOM_RULE_NAME_LENGTH,
+  MAX_CUSTOM_RULE_NAMESPACES,
+  MAX_CUSTOM_RULE_NAMESPACE_LENGTH,
+} from './constants';
+
+export const CustomResolutionRuleTypeName = 'entity-resolution-custom-rule';
+
+export interface CustomResolutionRuleAttributes {
+  name: string;
+  namespaces: string[];
+  filter?: string;
+  matchValue: string;
+  declineSameNamespaceDuplicates: boolean;
+  enabled: boolean;
+}
+
+const customResolutionRuleAttributesSchemaV1 = schema.object({
+  name: schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_NAME_LENGTH }),
+  namespaces: schema.arrayOf(
+    schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_NAMESPACE_LENGTH }),
+    { minSize: 1, maxSize: MAX_CUSTOM_RULE_NAMESPACES }
+  ),
+  filter: schema.maybe(
+    schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_EXPRESSION_LENGTH })
+  ),
+  matchValue: schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_EXPRESSION_LENGTH }),
+  declineSameNamespaceDuplicates: schema.boolean(),
+  enabled: schema.boolean(),
+});
+
+const version1: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: customResolutionRuleAttributesSchemaV1,
+    forwardCompatibility: customResolutionRuleAttributesSchemaV1.extends(
+      {},
+      { unknowns: 'ignore' }
+    ),
+  },
+};
+
+export const CustomResolutionRuleType: SavedObjectsType = {
+  name: CustomResolutionRuleTypeName,
+  hidden: false,
+  namespaceType: 'multiple-isolated',
+  mappings: {
+    dynamic: false,
+    // Rules are always read as a whole set per space; nothing is searched.
+    properties: {},
+  },
+  modelVersions: { 1: version1 },
+  hiddenFromHttpApis: true,
+};
