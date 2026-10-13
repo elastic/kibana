@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, memo } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
