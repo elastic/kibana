@@ -72,7 +72,11 @@ import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabl
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 import { ThreatIntelSupplyService } from './services/threat_intel_supply';
-import { readTelemetryOptIn, registerAlertZeroTelemetryEvents } from './telemetry';
+import {
+  createAlertZeroTelemetryReporter,
+  readTelemetryOptIn,
+  registerAlertZeroTelemetryEvents,
+} from './telemetry';
 import {
   REPORT_STEP_OPT_IN_TIMEOUT_MS,
   registerAlertZeroStepDefinitions,
@@ -307,6 +311,10 @@ export class AlertZeroPlugin
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
+      reportTelemetryEvent: createAlertZeroTelemetryReporter({
+        analytics: coreSetup.analytics,
+        logger: this.logger.get('telemetry'),
+      }),
     });
 
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
