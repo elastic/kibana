@@ -63,8 +63,8 @@ spaceTest.describe('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classi
               /^max(?: \[\d+\])?$/
             );
             await expect(lens.metric.metricProgressBar).toBeVisible();
-            await expect(page.getByRole('meter')).toHaveAttribute('aria-valuenow', '50');
-            await expect(page.getByRole('meter')).toHaveAttribute('aria-valuemax', '100');
+            await expect(lens.metric.metricProgressBar).toHaveAttribute('aria-valuenow', '50');
+            await expect(lens.metric.metricProgressBar).toHaveAttribute('aria-valuemax', '100');
             await expect
               .poll(() => lens.metric.getMetricVisualizationData())
               .toStrictEqual([expect.objectContaining({ value: '0.5', showingBar: true })]);

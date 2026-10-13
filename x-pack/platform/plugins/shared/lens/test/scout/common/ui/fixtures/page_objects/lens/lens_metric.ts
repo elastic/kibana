@@ -40,7 +40,7 @@ export class LensMetric {
     this.metricProgressBar = this.progressBar();
     this.legacyMetricLabel = this.page.getByTestId('metric_label');
     this.legacyMetricValue = this.page.getByTestId('metric_value');
-    this.trendline = this.metricRoot().getByRole('img');
+    this.trendline = this.metricRoot().locator('.echSingleMetricSparkline');
   }
 
   async setBackgroundChart(type: 'none' | 'bar' | 'line'): Promise<void> {
@@ -58,7 +58,7 @@ export class LensMetric {
 
   /** Metric tiles currently rendered, optionally limited to a dashboard panel. */
   metricTiles(scope?: Locator): Locator {
-    return this.metricRoot(scope).getByRole('listitem');
+    return this.metricRoot(scope).locator('.echChart li:not([role="presentation"])');
   }
 
   /**
@@ -121,7 +121,7 @@ export class LensMetric {
           if ((await el.count()) === 0) return undefined;
           return (await el.getAttribute('fill')) ?? undefined;
         })(),
-        showingTrendline: (await tile.getByRole('img').count()) > 0,
+        showingTrendline: (await tile.locator('.echSingleMetricSparkline').count()) > 0,
         showingBar,
       });
     }
