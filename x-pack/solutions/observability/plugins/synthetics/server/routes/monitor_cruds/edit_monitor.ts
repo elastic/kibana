@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import { z } from '@kbn/zod';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -50,15 +51,22 @@ import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{id}',
+  options: {
+    summary: 'Update a monitor',
+    description:
+      "Update a monitor with the specified attributes.\nThe required and default fields may vary based on the monitor type.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.\n\nYou can also partially update a monitor.\nThis will only update the fields that are specified in the request body.\nAll other fields are left unchanged.\nThe specified fields should conform to the monitor type.\nFor example, you can't update the `inline_script` field of a HTTP monitor.",
+    operationId: 'put-synthetic-monitor',
+    oasOperationObject: () => path.join(__dirname, 'examples/put_monitor.yaml'),
+  },
   validate: {},
   validation: {
     request: {
       params: z.strictObject({
-        monitorId: routeId,
+        id: routeId.describe('The identifier for the monitor that you want to update.'),
       }),
       query: z.strictObject({
-        internal: queryBoolean.optional().default(false),
+        internal: queryBoolean.optional().default(false).describe('For internal use only.'),
       }),
       body: editMonitorRequestBody,
     },
@@ -68,7 +76,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
     const reqQuery = request.query as { internal?: boolean };
-    const { monitorId } = request.params;
+    const { id: monitorId } = request.params;
 
     if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
       return response.badRequest({

@@ -1,5 +1,5 @@
 {
-  "sha1": "fd805d16ec4f1951eaba1e114f8b6020901c3a1c",
+  "sha1": "40ee702078a72135ccedd89924fd3e74dc8cb835",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -98,6 +98,70 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
         "line": 323,
         "column": 67
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-4c811ed6dc2e1bd",
+      "title": "Entity case counts counts the distinct open and in-progress cases of each entity in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 123,
+        "column": 25
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-2ae3e645b1eaf7c",
+      "title": "Entity case counts counts only the cases of the request space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 130,
+        "column": 64
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-34b0fbf4249ecca",
+      "title": "Entity case counts is forbidden without Security cases access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 140,
+        "column": 24
+      }
+    },
+    {
+      "id": "eefcaa97be43b3f-93d6299550eb5f4",
+      "title": "Entity case counts is forbidden without entity analytics access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/entity_case_counts/entity_case_counts.spec.ts",
+        "line": 144,
+        "column": 94
       }
     },
     {
