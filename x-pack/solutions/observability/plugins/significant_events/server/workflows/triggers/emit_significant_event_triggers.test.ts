@@ -16,7 +16,7 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'event-id-1',
   status: 'active',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: 'medium',
@@ -42,7 +42,7 @@ describe('emitSignificantEventWriteTriggers', () => {
       summary: 'Test summary',
       status: 'active',
       severity: 'medium',
-      stream_names: ['logs.test'],
+      source_ids: ['logs.test'],
       occurred_at: '2026-01-01T00:00:00.000Z',
     });
   });
@@ -64,7 +64,7 @@ describe('emitSignificantEventWriteTriggers', () => {
       summary: 'Test summary',
       status: 'inactive',
       severity: 'medium',
-      stream_names: ['logs.test'],
+      source_ids: ['logs.test'],
       occurred_at: '2026-01-01T00:00:00.000Z',
       previous_status: 'active',
     });

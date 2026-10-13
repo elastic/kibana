@@ -34,7 +34,6 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
-import type { WorkplaceAIApp, DeepLinkId as WorkplaceAILink } from '@kbn/deeplinks-workplace-ai';
 import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vectordb';
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { DeepLinkId as ContextEngineLink } from '@kbn/deeplinks-context-engine';
@@ -61,7 +60,6 @@ export type AppId =
   | SecurityApp
   | FleetApp
   | SharedApp
-  | WorkplaceAIApp
   | VectordbApp
   | WorkflowsApp;
 
@@ -76,7 +74,6 @@ export type AppDeepLinkId =
   | SecurityLink
   | FleetLink
   | SharedLink
-  | WorkplaceAILink
   | VectordbLink
   | AgentBuilderLink
   | ContextEngineLink

@@ -1423,7 +1423,7 @@ class ConversationClientImpl implements ConversationClient {
     conversationId: string,
     updates: Record<string, unknown>,
     {
-      access = 'owner',
+      access = 'converse',
       source,
       activity,
     }: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }

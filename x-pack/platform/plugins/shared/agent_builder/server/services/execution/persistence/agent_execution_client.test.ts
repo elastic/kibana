@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
+import { EventActorType, AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 
 const mockStorageClient = {
   index: jest.fn(),
@@ -116,7 +116,10 @@ describe('AgentExecutionClient', () => {
     });
 
     it('records the abort reason when given', async () => {
-      const abortReason = { source: 'api' as const, actor: { id: 'u1', username: 'alice' } };
+      const abortReason = {
+        source: 'api' as const,
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      };
       await statusClient.updateStatus('exec-1', ExecutionStatus.aborted, { abortReason });
 
       const [request] = esClient.update.mock.calls[0];
