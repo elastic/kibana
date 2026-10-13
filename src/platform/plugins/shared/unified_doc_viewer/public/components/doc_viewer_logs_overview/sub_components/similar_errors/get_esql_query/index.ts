@@ -73,8 +73,9 @@ export function getEsqlQuery({
     }
   }
 
+  // MATCH instead of == so documents with a multivalued level (e.g. ["error", "fatal"]) still match.
   if (level?.value && level?.fieldName) {
-    conditions.push(esqlEquals(level.fieldName, level.value));
+    conditions.push(esqlFunction('MATCH', [esqlColumn(level.fieldName), esqlString(level.value)]));
   }
 
   return esqlAnd(conditions);

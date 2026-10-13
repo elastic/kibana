@@ -88,7 +88,7 @@ describe('getEsqlQuery', () => {
     );
   });
 
-  it('appends the level predicate after the other conditions', () => {
+  it('appends a multivalue-safe MATCH level predicate after the other conditions', () => {
     const result = renderQuery(
       getEsqlQuery({
         serviceName: 'payment-service',
@@ -98,7 +98,7 @@ describe('getEsqlQuery', () => {
     );
 
     expect(result).toEqual(
-      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Connection attempt failed" AND log.level == "error"`
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Connection attempt failed" AND MATCH(log.level, "error")`
     );
   });
 
