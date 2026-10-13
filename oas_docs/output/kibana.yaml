@@ -162043,7 +162043,7 @@ components:
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
                           default_rendered_nodes:
-                            description: The number of nodes each JSON cell renders by default in the JSON document view. Minimum `10`. Maximum `200`.
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
@@ -162075,7 +162075,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines from `1` to `5`, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -162089,14 +162089,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table data row height, as a number of lines from `1` to `20`, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. Minimum `1`. Maximum `10000`. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: The number of documents to sample for the data table. Minimum `10`. Maximum `10000`. If omitted, defaults to the `discover:sampleSize` advanced setting.
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162123,13 +162123,13 @@ components:
                             type: array
                           type:
                             default: default
-                            description: The tab type. `default` tabs have no type-specific settings. Defaults to `default`.
+                            description: The tab type. `default` tabs have no type-specific settings.
                             enum:
                               - default
                             type: string
                           view_mode:
                             default: documents
-                            description: 'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics). Defaults to `documents`.'
+                            description: 'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics).'
                             enum:
                               - documents
                               - patterns
@@ -162165,7 +162165,7 @@ components:
                           data_source:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
                           default_rendered_nodes:
-                            description: The number of nodes each JSON cell renders by default in the JSON document view. Minimum `10`. Maximum `200`.
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
@@ -162190,7 +162190,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines from `1` to `5`, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -162202,14 +162202,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table data row height, as a number of lines from `1` to `20`, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. Minimum `1`. Maximum `10000`. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: The number of documents to sample for the data table. Minimum `10`. Maximum `10000`. If omitted, defaults to the `discover:sampleSize` advanced setting.
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162236,7 +162236,7 @@ components:
                             type: array
                           type:
                             default: default
-                            description: The tab type. `default` tabs have no type-specific settings. Defaults to `default`.
+                            description: The tab type. `default` tabs have no type-specific settings.
                             enum:
                               - default
                             type: string
@@ -162277,7 +162277,7 @@ components:
                           data_source:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
                           default_rendered_nodes:
-                            description: The number of nodes each JSON cell renders by default in the JSON document view. Minimum `10`. Maximum `200`.
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
@@ -162317,7 +162317,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines from `1` to `5`, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -162338,14 +162338,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table data row height, as a number of lines from `1` to `20`, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. Minimum `1`. Maximum `10000`. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: The number of documents to sample for the data table. Minimum `10`. Maximum `10000`. If omitted, defaults to the `discover:sampleSize` advanced setting.
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162474,7 +162474,7 @@ components:
                       description: Per-column settings keyed by field name, such as width. When set, merges with the source configuration for the referenced session or inline tab.
                       type: object
                     default_rendered_nodes:
-                      description: The number of nodes each JSON cell renders by default in the JSON document view. Minimum `10`. Maximum `200`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
+                      description: The number of nodes each JSON cell renders by default in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       maximum: 200
                       minimum: 10
                       type: number
@@ -162499,7 +162499,7 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: The table header row height, as a number of lines from `1` to `5`, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
+                      description: The table header row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                     hide_nulls:
                       description: When `true`, fields with null values are hidden in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       type: boolean
@@ -162511,14 +162511,14 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: The table data row height, as a number of lines from `1` to `20`, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:rowHeightOption` advanced setting.
+                      description: The table data row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:rowHeightOption` advanced setting.
                     rows_per_page:
-                      description: The number of rows per page. Minimum `1`. Maximum `10000`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleRowsPerPage` advanced setting.
+                      description: The number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleRowsPerPage` advanced setting.
                       maximum: 10000
                       minimum: 1
                       type: number
                     sample_size:
-                      description: The number of documents to sample. Minimum `10`. Maximum `10000`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleSize` advanced setting.
+                      description: The number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleSize` advanced setting.
                       maximum: 10000
                       minimum: 10
                       type: number
