@@ -14,7 +14,6 @@ import {
 } from '../../../../common/workflows/triggers';
 import { StatusChange } from './lifecycle/lifecycle_controller';
 import { asRuleEventsClient } from './rule_events_client.mock';
-
 import { RuleEventsClient } from './rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
