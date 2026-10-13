@@ -34,8 +34,8 @@ import {
   useAlertBasedTilesWithDelta as useAlertBasedTiles,
   useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
   useNewEntityCountWithDelta as useNewEntityCount,
-  useRiskMoversCount,
-  useNewlyHighCriticalCount,
+  useRiskMoversCountWithDelta as useRiskMoversCount,
+  useNewlyHighCriticalCountWithDelta as useNewlyHighCriticalCount,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
@@ -170,9 +170,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: riskMoversCount,
+    delta: riskMoversDelta,
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
+    isDeltaLoading: riskMoversDeltaLoading,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -181,9 +183,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: newlyHCCount,
+    delta: newlyHCDelta,
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
+    isDeltaLoading: newlyHCDeltaLoading,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -326,6 +330,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: riskMoversCount,
+        delta: riskMoversDelta,
+        isDeltaLoading: riskMoversDeltaLoading,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
@@ -364,6 +370,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: newlyHCCount,
+        delta: newlyHCDelta,
+        isDeltaLoading: newlyHCDeltaLoading,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
@@ -460,8 +468,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       anomaliesDeltaLoading,
       anomaliesLoading,
       riskMoversCount,
+      riskMoversDelta,
+      riskMoversDeltaLoading,
       riskMoversLoading,
       newlyHCCount,
+      newlyHCDelta,
+      newlyHCDeltaLoading,
       newlyHCLoading,
       newlyHCMissingIndex,
       watchlistedCount,
