@@ -7,7 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
-import type { PolicyConfig } from '../../../../../../common/endpoint/types';
+import type { PolicyConfig, PolicyOperatingSystem } from '../../../../../../common/endpoint/types';
 import {
   POLICY_COUPLING_PROTECTIONS,
   type PolicyCouplingProtection,
@@ -24,21 +24,40 @@ export const POLICY_CHANGE_PROTECTIONS = POLICY_COUPLING_PROTECTIONS;
 
 export type PolicyChangeProtection = PolicyCouplingProtection;
 
+export type ProtectionSettingWeakenedSetting =
+  | 'malware.blocklist'
+  | 'malware.on_write_scan'
+  | 'behavior_protection.reputation_service'
+  | 'attack_surface_reduction.credential_hardening.enabled'
+  | 'antivirus_registration.mode';
+
+export type PolicyAssessmentAdvisory =
+  | {
+      code: 'protection_weakened';
+      protection: 'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection';
+      os: readonly PolicyOperatingSystem[];
+      to: 'detect' | 'off';
+      text: string;
+    }
+  | {
+      code: 'protection_setting_weakened';
+      setting: ProtectionSettingWeakenedSetting;
+      os: readonly PolicyOperatingSystem[];
+      text: string;
+    }
+  | {
+      code: 'global_manifest_version_stale';
+      value: string;
+      ageDays: number;
+      text: string;
+    };
+
 export const POLICY_CHANGE_PREPARATION_ERROR_CODE = {
   invalid_input: 'invalid_input',
-  non_writable_path: 'non_writable_path',
-  unsupported_operation: 'unsupported_operation',
-  unknown_current_value: 'unknown_current_value',
 } as const;
 
 export type PolicyChangePreparationErrorCode =
   (typeof POLICY_CHANGE_PREPARATION_ERROR_CODE)[keyof typeof POLICY_CHANGE_PREPARATION_ERROR_CODE];
-
-export const DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE =
-  "Direct device notification enablement is not supported. Use set_field on a *.device_control.enabled or *.device_control.usb_storage path when that is the user's actual intent.";
-
-export const DEVICE_CONTROL_MISSING_POPUP_MESSAGE =
-  'Device control cannot be assessed for this policy because its device notification settings are not initialized. Open the policy in the UI to initialize those settings.';
 
 export const POLICY_CHANGE_BOUNDS_MESSAGE =
   'Request exceeds the maximum serialized size or nesting depth';
@@ -207,16 +226,8 @@ export interface PolicyChangeAssessment {
   readonly normalizedDiff: readonly PolicyDiffEntry[];
   readonly sideEffects: readonly PolicyChangeSideEffect[];
   readonly globalBlockers: readonly PolicyAssessmentBlocker[];
+  readonly advisories: readonly PolicyAssessmentAdvisory[];
 }
-
-export const nonWritablePathMessage = (path: string): string =>
-  `Path is not a writable policy field: ${path}`;
-
-export const unknownCurrentValueMessage = (path: string): string =>
-  `Cannot assess an exact before/after change for ${path}: the current value is not present in the live policy.`;
-
-export const invalidSetFieldValueMessage = (path: string): string =>
-  `Invalid set_field value for writable policy field: ${path}`;
 
 export const parseAssessPolicyChangeParams = (value: unknown): AssessPolicyChangeParams => {
   const parsed = assessPolicyChangeParamsSchema.safeParse(value);

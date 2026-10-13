@@ -33,8 +33,8 @@ describe('PolicyScopeDescription', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows tags-only copy when tags are set and expression is null', () => {
-    renderWithI18n(<PolicyScopeDescription matcher={{ tags: ['prod'], expression: null }} />);
+  it('shows tags-only copy when tags are set and expression is unset', () => {
+    renderWithI18n(<PolicyScopeDescription matcher={{ tags: ['prod'] }} />);
 
     expect(
       screen.getByText('Applies to all rules with one or more of the selected routing tags')
@@ -61,10 +61,8 @@ describe('PolicyScopeDescription', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows expression-only copy when expression is set and tags are null', () => {
-    renderWithI18n(
-      <PolicyScopeDescription matcher={{ tags: null, expression: 'data.host:"x"' }} />
-    );
+  it('shows expression-only copy when expression is set and tags are unset', () => {
+    renderWithI18n(<PolicyScopeDescription matcher={{ expression: 'data.host:"x"' }} />);
 
     expect(
       screen.getByText('Applies to all alerts matching the expression conditions')

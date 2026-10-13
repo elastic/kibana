@@ -27,8 +27,35 @@ export const RULE_FALLBACK_TITLE = i18n.translate(
   { defaultMessage: 'Untitled rule' }
 );
 
+export const TIMELINE_TITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.groupedAttachments.timelineTitle',
+  { defaultMessage: 'Forensic timeline' }
+);
+
+export const ENDPOINT_ANALYSIS_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.groupedAttachments.endpointAnalysisSubtitle',
+  { defaultMessage: 'Endpoint analysis' }
+);
+
+export const IOCS_TITLE = i18n.translate(
+  'xpack.securitySolution.agentBuilder.groupedAttachments.iocsTitle',
+  { defaultMessage: 'IOCs' }
+);
+
 export const alertsTitle = (count: number) =>
   i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.alertsTitle', {
     defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+    values: { count },
+  });
+
+export const rulesTitle = (count: number) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.rulesTitle', {
+    defaultMessage: '{count} {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
+export const attacksTitle = (count: number) =>
+  i18n.translate('xpack.securitySolution.agentBuilder.groupedAttachments.attacksTitle', {
+    defaultMessage: '{count} {count, plural, one {attack} other {attacks}}',
     values: { count },
   });
