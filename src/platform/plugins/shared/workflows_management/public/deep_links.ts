@@ -23,7 +23,7 @@ export interface DeepLinksParams {
 const sideNavVisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
 
 export function getDeepLinks({
-  executionsViewEnabled = false,
+  executionsViewEnabled = true,
   libraryEnabled = true,
 }: DeepLinksParams = {}): AppDeepLink[] {
   const links: AppDeepLink[] = [

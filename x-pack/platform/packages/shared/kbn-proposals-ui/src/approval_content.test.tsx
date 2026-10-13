@@ -73,7 +73,7 @@ describe('ApprovalContent', () => {
         onDismiss: jest.fn(),
       });
       expect(screen.getByText('Block IP 10.0.0.4')).toBeInTheDocument();
-      expect(screen.getByText('Configure')).toBeInTheDocument();
+      expect(screen.getByText(/Configure/)).toBeInTheDocument();
       expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
@@ -83,6 +83,56 @@ describe('ApprovalContent', () => {
       expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
     }
   );
+
+  it('shows who acted and when on a replaced proposal that had been decided', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+      },
+    });
+    expect(screen.getByText('elastic')).toBeInTheDocument();
+    expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
+  });
+
+  it('shows a Failed badge on a replaced proposal whose action failed', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+      },
+    });
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+  });
+
+  it('shows no status badge on a replaced revision that was never decided', () => {
+    renderContent({ proposal: { ...baseProposal, status: 'superseded', supersededBy: 'next' } });
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.queryByText('Failed')).not.toBeInTheDocument();
+  });
+
+  it('prefixes the actor with "executed" when the approved action failed', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+      },
+    });
+    expect(screen.getByText(/executed by/)).toBeInTheDocument();
+  });
 
   it('restores the comment and disables decisions when replaced during dismissal', () => {
     const onDismiss = jest.fn();
@@ -255,6 +305,15 @@ describe('ApprovalContent', () => {
     ).toBe(true);
   });
 
+  it('renders the previous-execution-error callout as a danger callout', () => {
+    renderContent({
+      proposal: { ...baseProposal, previousExecutionError: 'HTTP 400: something went wrong' },
+    });
+    expect(screen.getByTestId('approvalContent-previous-failure')).toHaveClass(
+      'euiCallOut--danger'
+    );
+  });
+
   it('hides the previous-execution-error callout once the proposal is decided', () => {
     renderContent({
       proposal: {
@@ -275,6 +334,14 @@ describe('ApprovalContent', () => {
         'This proposal expired before a decision was made and can no longer be actioned.'
       )
     ).toBeInTheDocument();
+  });
+
+  it('shows why the proposal expired', () => {
+    const reason =
+      "The rule was deleted after this proposal was created, so this tuning can't be applied.";
+    renderContent({ proposal: { ...baseProposal, status: 'expired', rationale: reason } });
+
+    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(reason);
   });
 
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {

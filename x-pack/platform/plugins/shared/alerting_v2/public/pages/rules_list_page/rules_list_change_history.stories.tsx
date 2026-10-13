@@ -126,8 +126,7 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
         onBulkEnable={noop}
         onBulkDisable={noop}
         onBulkDelete={noop}
-        onNavigateToDetails={action('navigateToDetails')}
-        onExpand={action('expand')}
+        onOpenSummary={action('openSummary')}
         onQuickEdit={action('quickEdit')}
         onEdit={action('edit')}
         onClone={action('clone')}

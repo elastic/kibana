@@ -1,5 +1,5 @@
 {
-  "sha1": "684c0fdf1dbeff1b791c9750fb2fdf9cee0ffa9c",
+  "sha1": "23bfb417e99e54181c24918cf23901db1994212a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -421,8 +421,8 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-79b9321af5a6eda",
-      "title": "Entity Store install / update API tests Should fail with feature flag disabled",
+      "id": "d1ac35cbfabb8dd-a600fdc9000f15c",
+      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -437,22 +437,6 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-a600fdc9000f15c",
-      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 81,
-        "column": 14
-      }
-    },
-    {
       "id": "d1ac35cbfabb8dd-a0ba708820e1b70",
       "title": "Entity Store install / update API tests Update on uninstalled store should return 404",
       "expectedStatus": "passed",
@@ -464,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 92,
-        "column": 14
+        "line": 83,
+        "column": 4
       }
     },
     {
@@ -480,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 109,
-        "column": 7
+        "line": 100,
+        "column": 69
       }
     },
     {
@@ -496,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 123,
-        "column": 7
+        "line": 115,
+        "column": 11
       }
     },
     {
@@ -512,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 153,
-        "column": 7
+        "line": 145,
+        "column": 21
       }
     },
     {
@@ -528,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 258,
-        "column": 13
+        "line": 249,
+        "column": 15
       }
     },
     {
@@ -544,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 266,
-        "column": 15
+        "line": 257,
+        "column": 13
       }
     },
     {
@@ -560,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 276,
-        "column": 21
+        "line": 267,
+        "column": 13
       }
     },
     {
@@ -576,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 290,
-        "column": 5
+        "line": 280,
+        "column": 22
       }
     },
     {
@@ -592,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 295,
-        "column": 55
+        "line": 287,
+        "column": 4
       }
     },
     {

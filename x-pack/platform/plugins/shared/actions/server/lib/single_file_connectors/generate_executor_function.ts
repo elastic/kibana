@@ -96,8 +96,10 @@ export const generateExecutorFunction = ({
   networkSettings,
   platform,
   clientTypes = defaultClientTypes,
+  getJwtSigner,
 }: {
   actions: ConnectorSpec['actions'];
+  getJwtSigner?: (connectorId: string) => ActionContext['signJwt'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
@@ -255,6 +257,7 @@ export const generateExecutorFunction = ({
       config,
       getClient: getClient as ActionContext['getClient'],
       relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
+      signJwt: getJwtSigner?.(connectorId),
     };
 
     try {

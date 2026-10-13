@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -19,13 +19,19 @@ import {
 import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
-import { NightshiftAppHeader, nightshiftTabs, SETTINGS_PAGE_TITLE } from './app/app_header';
+import { KNOWLEDGE_PAGE_TITLE, NightshiftAppHeader, SETTINGS_PAGE_TITLE } from './app/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { useKnowledgeTabsAvailability } from './knowledge/hooks/use_knowledge_tabs_availability';
+import { isKnowledgeMenuItemVisible } from './knowledge/knowledge_tabs';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { SettingsPage } from './settings/page';
+
+const KnowledgePage = React.lazy(() =>
+  import('./knowledge/page').then(({ KnowledgePage: Page }) => ({ default: Page }))
+);
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
@@ -44,15 +50,15 @@ export function NightshiftPage(): React.ReactElement | null {
   const settingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings',
   });
+  const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/knowledge',
+  });
   const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-    path: '/streams',
+    path: '/sources',
   });
   const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canUseAutomations =
     nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
-  const investigationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-    path: '/investigations',
-  });
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/automations',
   });
@@ -60,26 +66,22 @@ export function NightshiftPage(): React.ReactElement | null {
     () => application.navigateToUrl(settingsHref),
     [application, settingsHref]
   );
+  const navigateToKnowledge = useCallback(
+    () => application.navigateToUrl(knowledgeHref),
+    [application, knowledgeHref]
+  );
   const navigateToManagement = useCallback(
     () => application.navigateToUrl(managementHref),
     [application, managementHref]
   );
-  const navigateToInvestigations = useCallback(
-    () => application.navigateToUrl(investigationsHref),
-    [application, investigationsHref]
+  const navigateToAutomations = useCallback(
+    () => application.navigateToUrl(automationsHref),
+    [application, automationsHref]
   );
-  const isInvestigationsPage =
-    pathname.startsWith('/investigations') || pathname === '/automations';
+  const isKnowledgePage = pathname === '/knowledge' || pathname.startsWith('/knowledge/');
   const isSettingsPage = pathname === '/settings' || pathname.startsWith('/settings/');
-  const canUseInvestigationsPage = canUseAutomations && isInvestigationsPage;
-  const tabs = canUseAutomations
-    ? nightshiftTabs.map((tab) => ({
-        ...tab,
-        isSelected:
-          tab.id === (pathname.endsWith('/automations') ? 'automations' : 'allInvestigations'),
-        href: tab.id === 'automations' ? automationsHref : investigationsHref,
-      }))
-    : undefined;
+  const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
+  const isAutomationDetailRoute = pathname.startsWith('/automations/');
 
   // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
   const canManageSandboxSecrets =
@@ -96,6 +98,8 @@ export function NightshiftPage(): React.ReactElement | null {
   const closeCustomContextFlyout = useCallback(() => setIsCustomContextFlyoutOpen(false), []);
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const knowledgeTabsAvailability = useKnowledgeTabsAvailability({ enabled: isAvailable });
+  const isKnowledgeMenuVisible = isKnowledgeMenuItemVisible(knowledgeTabsAvailability);
 
   useBreadcrumbs(
     [
@@ -106,7 +110,27 @@ export function NightshiftPage(): React.ReactElement | null {
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,
       },
+      ...(pathname.startsWith('/automations')
+        ? [
+            {
+              ...(isAutomationDetailRoute && { href: automationsHref }),
+              text: i18n.translate('xpack.nightshift.automations.breadcrumb', {
+                defaultMessage: 'Automations',
+              }),
+            },
+            ...(isAutomationDetailRoute && !pathname.includes('/runs') && !pathname.endsWith('/new')
+              ? [
+                  {
+                    text: i18n.translate('xpack.nightshift.automations.detail.breadcrumb', {
+                      defaultMessage: 'Automation details',
+                    }),
+                  },
+                ]
+              : []),
+          ]
+        : []),
       ...(isSettingsPage ? [{ text: SETTINGS_PAGE_TITLE }] : []),
+      ...(isKnowledgePage ? [{ text: KNOWLEDGE_PAGE_TITLE }] : []),
     ],
     { serverless }
   );
@@ -146,31 +170,59 @@ export function NightshiftPage(): React.ReactElement | null {
               headerProps={{
                 onManagementClick: navigateToManagement,
                 managementHref,
+                onKnowledgeClick: isKnowledgeMenuVisible ? navigateToKnowledge : undefined,
+                knowledgeHref: isKnowledgeMenuVisible ? knowledgeHref : undefined,
                 onSandboxSecretsClick: canManageSandboxSecrets
                   ? openSandboxSecretsFlyout
                   : undefined,
                 onCustomContextClick: canViewCustomContext ? openCustomContextFlyout : undefined,
-                onAutomationsClick: canUseAutomations ? navigateToInvestigations : undefined,
-                investigationsHref: canUseAutomations ? investigationsHref : undefined,
+                onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
+                automationsHref: canUseAutomations ? automationsHref : undefined,
               }}
             />
           </Route>
         </Routes>
+      ) : isKnowledgePage ? (
+        <React.Suspense
+          fallback={
+            <EuiPageTemplate.Section component="div" restrictWidth={false}>
+              <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLazyLoading" />
+            </EuiPageTemplate.Section>
+          }
+        >
+          <Routes>
+            <Route path="/knowledge/:tab?">
+              <KnowledgePage
+                headerProps={{
+                  onManagementClick: navigateToManagement,
+                  managementHref,
+                  onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
+                  settingsHref: canManageAndConfigure ? settingsHref : undefined,
+                  onSandboxSecretsClick: canManageSandboxSecrets
+                    ? openSandboxSecretsFlyout
+                    : undefined,
+                  onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
+                  automationsHref: canUseAutomations ? automationsHref : undefined,
+                }}
+              />
+            </Route>
+          </Routes>
+        </React.Suspense>
       ) : (
         <>
           <NightshiftAppHeader
-            page={canUseInvestigationsPage ? 'investigations' : 'landing'}
+            page={canUseAutomationsPage ? 'automations' : 'landing'}
             onManagementClick={navigateToManagement}
             managementHref={managementHref}
+            onKnowledgeClick={isKnowledgeMenuVisible ? navigateToKnowledge : undefined}
+            knowledgeHref={isKnowledgeMenuVisible ? knowledgeHref : undefined}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
             onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
-            onCustomContextClick={canViewCustomContext ? openCustomContextFlyout : undefined}
-            onAutomationsClick={canUseAutomations ? navigateToInvestigations : undefined}
-            investigationsHref={canUseAutomations ? investigationsHref : undefined}
-            tabs={canUseInvestigationsPage ? tabs : undefined}
+            onAutomationsClick={canUseAutomations ? navigateToAutomations : undefined}
+            automationsHref={canUseAutomations ? automationsHref : undefined}
             back={
-              canUseInvestigationsPage
+              canUseAutomationsPage
                 ? {
                     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
                     label: 'Nightshift',
@@ -180,12 +232,13 @@ export function NightshiftPage(): React.ReactElement | null {
           />
           <EuiPageTemplate.Section
             component="div"
-            restrictWidth={pathname.endsWith('/automations') ? false : '900px'}
+            restrictWidth={canUseAutomationsPage ? false : '900px'}
           >
-            {canUseInvestigationsPage ? (
+            {canUseAutomationsPage ? (
               <Routes>
+                <Route path="/automations/:id/runs" component={AutomationsPage} />
+                <Route path="/automations/:id" component={AutomationsPage} />
                 <Route path="/automations" component={AutomationsPage} />
-                <Route path="/investigations" component={() => <div>WIP</div>} />
               </Routes>
             ) : (
               <NightshiftApp />

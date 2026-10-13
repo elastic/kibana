@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -21,6 +21,9 @@ import {
 } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
+  isWorkerEnableBlocked,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   type Worker,
   type WorkerSettings,
   type WorkerSettingsWrite,
@@ -29,6 +32,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkerDependenciesCallout } from '../../../components/worker_dependencies/worker_dependencies_callout';
 import type { AlertZeroStartDependencies } from '../../../types';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
@@ -36,6 +40,7 @@ import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
 import { FeatureSettingsLink } from './feature_settings_link';
 import { ViewExecutionsLink } from './view_executions_link';
+import { ThreatIntelSupplySection } from './threat_intel_supply_section';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -101,6 +106,19 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
+  const isHuntWorker = worker.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
+  // Start locked until supply status says the hard-gate is ok. Already-on workers can
+  // still turn off because cannotEnable requires !enabled.
+  const [hardGateOk, setHardGateOk] = useState(false);
+  const handleHardGateChange = useCallback((ok: boolean) => {
+    setHardGateOk(ok);
+  }, []);
+  const isEnableBlocked = isWorkerEnableBlocked(worker.blockingReasons);
+  // Hunt hard-blocks turning on when ML/bootstrap supply prerequisites are unmet, and every
+  // Worker blocks on no available model. `worker.enabled` (not the draft `enabled`) so an
+  // already-on Worker can still be turned off, and toggling the draft on cannot itself
+  // unlock a switch that is blocked.
+  const cannotEnable = ((isHuntWorker && !hardGateOk) || isEnableBlocked) && !worker.enabled;
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -266,7 +284,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
-      disabled={controlsDisabled}
+      disabled={controlsDisabled || cannotEnable}
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
@@ -289,6 +307,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 
   const settingsBody = (
     <>
+      <WorkerDependenciesCallout worker={worker} surface="settings" />
       {settingsLocked ? (
         <EuiText size="s" color="subdued">
           <p>{settingsI18n.WORKER_SETTINGS_UNAVAILABLE}</p>
@@ -301,6 +320,13 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             <p>{error}</p>
           </EuiText>
         </>
+      ) : null}
+      {isHuntWorker ? (
+        <ThreatIntelSupplySection
+          canWrite={canWrite}
+          isSaving={isSaving}
+          onHardGateChange={handleHardGateChange}
+        />
       ) : null}
       <SettingRow
         label={settingsI18n.AUTONOMY_SECTION_TITLE}
@@ -319,13 +345,17 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       {settings.scheduleInterval != null ? (
         <SettingRow
           label={settingsI18n.TRIGGER_LABEL}
-          labelHelp={settingsI18n.TRIGGER_HELP_TEXT}
+          labelHelp={
+            isWorkerScheduleIntervalReadOnly(worker.id)
+              ? settingsI18n.TRIGGER_HELP_READ_ONLY_4H
+              : settingsI18n.TRIGGER_HELP_TEXT
+          }
           data-test-subj={`alertZeroTriggerRow-${worker.id}`}
         >
           <ScheduleIntervalField
             workerId={worker.id}
             current={settings.scheduleInterval}
-            isDisabled={controlsDisabled}
+            isDisabled={controlsDisabled || isWorkerScheduleIntervalReadOnly(worker.id)}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
             onValidityChange={onTriggerValidityChange}
             resetKey={draftResetKey}

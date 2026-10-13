@@ -11,7 +11,7 @@ import type {
   ConversationRoundStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import { isToolCallStep, TimelineEventType } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
@@ -66,8 +66,9 @@ export interface HistoryView {
 }
 
 /**
- * A round paused on a prompt is resumed by the current run: it is left out of the history (the
- * graph renders its steps) and its user message stands in for the next input.
+ * The round this run resumes (`resumedRoundId`) is left out of the history (the graph renders its
+ * steps) and its user message stands in for the next input. A paused round the run does not resume
+ * stays in the history, its paused tool calls marked interrupted so each call keeps a result.
  */
 export const historyView = (
   conversation: ProcessedConversation,
@@ -75,14 +76,45 @@ export const historyView = (
 ): HistoryView => {
   const entries = groupTimelineEntries(conversation.timeline);
   const lastRound = groupTimelineRounds(conversation.timeline).at(-1);
-  if (lastRound && isAwaitingPrompt(lastRound)) {
+  if (!lastRound || !isAwaitingPrompt(lastRound)) {
+    return { entries, input: conversation.nextInput, inputTimestamp: conversationTimestamp };
+  }
+  if (lastRound.id === conversation.resumedRoundId) {
     return {
       entries: entries.filter((entry) => !isTimelineRound(entry) || entry.id !== lastRound.id),
       input: lastRound.userMessage.data,
       inputTimestamp: lastRound.userMessage.created_at,
     };
   }
-  return { entries, input: conversation.nextInput, inputTimestamp: conversationTimestamp };
+  return {
+    entries: entries.map((entry) =>
+      isTimelineRound(entry) && entry.id === lastRound.id
+        ? withPausedCallsInterrupted(entry)
+        : entry
+    ),
+    input: conversation.nextInput,
+    inputTimestamp: conversationTimestamp,
+  };
+};
+
+/** Paused calls are the pause state's nodes; a call with an empty `results` may be a real empty return. */
+const withPausedCallsInterrupted = (
+  round: TimelineRound<ProcessedTimelineEvent>
+): TimelineRound<ProcessedTimelineEvent> => {
+  const { terminal } = round;
+  const pausedIds = new Set(
+    terminal.type === TimelineEventType.executionTerminated
+      ? (terminal.data.state?.agent.nodes ?? []).map((node) => node.tool_call_id)
+      : []
+  );
+  return {
+    ...round,
+    steps: round.steps.map((step) =>
+      isToolCallStep(step) && pausedIds.has(step.tool_call_id)
+        ? { ...step, interrupted: true as const }
+        : step
+    ),
+  };
 };
 
 /** What a compaction cursor leaves visible. */

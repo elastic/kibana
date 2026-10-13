@@ -284,7 +284,7 @@ describe('StoreActionsStep', () => {
           'policy-1',
           createActionPolicy({
             id: 'policy-1',
-            groupingMode: 'all',
+            grouping: { mode: 'all' },
             throttle: { strategy: 'time_interval', interval: '5m' },
           }),
         ],
