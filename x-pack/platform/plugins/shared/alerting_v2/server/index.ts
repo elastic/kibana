@@ -27,7 +27,7 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   },
 };
 
-export const module = new ContainerModule((options) => {
+const pluginModule = new ContainerModule((options) => {
   bindOnSetup(options);
   bindAgentBuilder(options);
   bindOnStart(options);
@@ -39,6 +39,8 @@ export const module = new ContainerModule((options) => {
   bindDispatcherExecutionServices(options);
   bindTasks(options);
 });
+
+export { pluginModule as module };
 
 export type { PluginConfig as AlertingV2Config } from './config';
 export type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from './types';
