@@ -17,3 +17,4 @@ export { esqlQueryDiffAlgorithm } from './esql_query_diff_algorithm';
 export { ruleTypeDiffAlgorithm } from './rule_type_diff_algorithm';
 export { forceTargetVersionDiffAlgorithm } from './force_target_version_diff_algorithm';
 export { requiredFieldsDiffAlgorithm } from './required_fields_diff_algorithm';
+export { ruleScheduleDiffAlgorithm } from './rule_schedule_diff_algorithm';

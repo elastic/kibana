@@ -49,6 +49,7 @@ import {
   ruleTypeDiffAlgorithm,
   forceTargetVersionDiffAlgorithm,
   requiredFieldsDiffAlgorithm,
+  ruleScheduleDiffAlgorithm,
 } from './three_way_diff_algorithms';
 import {
   ScalarArrayDiffMissingBaseVersionStrategy,
@@ -235,7 +236,7 @@ const commonFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableCommon
   setup: multiLineStringDiffAlgorithm,
   related_integrations: simpleDiffAlgorithm,
   required_fields: requiredFieldsDiffAlgorithm,
-  rule_schedule: simpleDiffAlgorithm,
+  rule_schedule: ruleScheduleDiffAlgorithm,
   max_signals: numberDiffAlgorithm,
   rule_name_override: simpleDiffAlgorithm,
   timestamp_override: simpleDiffAlgorithm,

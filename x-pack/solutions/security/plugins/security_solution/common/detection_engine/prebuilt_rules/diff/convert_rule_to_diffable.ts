@@ -60,7 +60,7 @@ import { normalizeRuleResponse } from './normalize_rule_response';
 export const convertRuleToDiffable = (ruleResponse: RuleResponse): DiffableRule => {
   const rule = normalizeRuleResponse(ruleResponse);
 
-  const commonFields = extractDiffableCommonFields(rule);
+  const commonFields = extractDiffableCommonFields(rule, ruleResponse);
 
   switch (rule.type) {
     case 'query':
@@ -109,7 +109,8 @@ export const convertRuleToDiffable = (ruleResponse: RuleResponse): DiffableRule 
 };
 
 const extractDiffableCommonFields = (
-  rule: RuleResponse
+  rule: RuleResponse,
+  rawRule: RuleResponse
 ): RequiredOptional<DiffableCommonFields> => {
   return {
     // --------------------- REQUIRED FIELDS
@@ -136,7 +137,7 @@ const extractDiffableCommonFields = (
     required_fields: rule.required_fields,
 
     // Other domain fields
-    rule_schedule: extractRuleSchedule(rule),
+    rule_schedule: extractRuleSchedule(rawRule),
     max_signals: rule.max_signals,
 
     // --------------------- OPTIONAL FIELDS
