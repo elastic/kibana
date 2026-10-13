@@ -22,9 +22,10 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
+    await apiServices.alertingV2.ebt.optIn();
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -64,6 +65,20 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       expect(persisted.id).toBe(response.body.id);
       expect(persisted.metadata.name).toBe('created-rule');
       expect(persisted.version).toBe(1);
+
+      // Telemetry: an API-key request is reported on the `api` channel with no app.
+      const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
+        ruleId: response.body.id,
+        operation: 'rule.created',
+      });
+      expect(event.properties).toMatchObject({
+        rule_id: response.body.id,
+        operation: 'rule.created',
+        kind: body.kind,
+        enabled: true,
+        channel: 'api',
+      });
+      expect(event.properties.app).toBeUndefined();
     }
   );
 

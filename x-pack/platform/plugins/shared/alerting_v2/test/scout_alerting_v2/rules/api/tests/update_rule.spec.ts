@@ -21,9 +21,10 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
+    await apiServices.alertingV2.ebt.optIn();
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -61,6 +62,19 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.updated_at).not.toBe(created.updated_at);
       expect(response.body.version).toBe(created.version + 1);
+
+      // Telemetry: the update is reported on the `api` channel with no app.
+      const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
+        ruleId: created.id,
+        operation: 'rule.updated',
+      });
+      expect(event.properties).toMatchObject({
+        rule_id: created.id,
+        operation: 'rule.updated',
+        enabled: true,
+        channel: 'api',
+      });
+      expect(event.properties.app).toBeUndefined();
     }
   );
 
