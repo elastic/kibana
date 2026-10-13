@@ -10,8 +10,8 @@
 import { runInNewContext } from 'node:vm';
 import { transformSync } from '@swc/core';
 import type { Options } from '@swc/core';
-import { getNodeRegisterSwcConfig } from './node_register';
-import { getNodeSwcConfig } from './node';
+import { getNodeRegisterSwcConfig } from '../node_register';
+import { getNodeSwcConfig } from '../node';
 
 const configurations = [
   {
