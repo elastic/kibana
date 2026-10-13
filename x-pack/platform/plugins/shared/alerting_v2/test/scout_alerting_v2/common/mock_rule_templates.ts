@@ -15,16 +15,6 @@ export interface MockRuleTemplate {
   attributes: RuleTemplateData;
 }
 
-/**
- * Rule templates for specs that need the rule library to show a realistic
- * catalog. Fleet packages normally install these, so specs seed the saved
- * objects directly.
- *
- * The set covers what the library renders differently: alert and signal rules,
- * one and several tags, a description or none, and a recovery and no-data
- * policy or none. Signal templates opt out of `recovery`, `no_data` and
- * `state_transition`, because the schema forbids them on `kind: 'signal'`.
- */
 export const MOCK_RULE_TEMPLATES = {
   nginxErrorRate: {
     id: 'mock-nginx-error-rate',
