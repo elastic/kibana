@@ -63,7 +63,7 @@ const defaultProps = {
   edges: [] as ServiceMapEdge[],
   selectedNodeId: null,
   selectedNodeForPopover: null,
-  selectedEdgeForPopover: null,
+  selectedEdgeForFlyout: null,
   onNodeSelect: jest.fn(),
   onEdgeSelect: jest.fn(),
   onPopoverClose: jest.fn(),
@@ -503,7 +503,7 @@ describe('useKeyboardNavigation', () => {
       renderHook(() =>
         useKeyboardNavigation({
           ...defaultProps,
-          selectedEdgeForPopover: selectedEdge,
+          selectedEdgeForFlyout: selectedEdge,
           onPopoverClose,
         })
       );
@@ -704,7 +704,7 @@ describe('useKeyboardNavigation', () => {
         useKeyboardNavigation({
           ...defaultProps,
           edges,
-          selectedEdgeForPopover: edges[0],
+          selectedEdgeForFlyout: edges[0],
           onPopoverClose,
         })
       );
