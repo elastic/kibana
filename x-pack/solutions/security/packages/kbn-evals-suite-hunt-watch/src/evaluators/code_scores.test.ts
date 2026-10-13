@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HuntResult } from '@kbn/alertzero-common';
 import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
 import type { HuntExpected, HuntReportExpectation } from '../types';
 import {
@@ -12,6 +13,7 @@ import {
   scoreEvidenceHonesty,
   scoreOutcome,
   scoreProposalPresence,
+  scoreSseAttachment,
   scoreTier1Status,
 } from './code_scores';
 
@@ -34,6 +36,18 @@ const buildExpected = (
   ],
   ...expected,
 });
+
+const CLEAN_HUNT_RESULT: HuntResult = {
+  has_confirmed_hit: false,
+  hit_sources: [],
+  time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+  tier1: {
+    status: 'no_environment_hits',
+    counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+    per_index: [],
+    resolved_iocs: [],
+  },
+};
 
 const buildArtifacts = (report: Partial<HuntReportArtifacts> = {}): HuntArtifacts => ({
   spaceId: 'default',
@@ -150,5 +164,29 @@ describe('code scores', () => {
 
   it('returns MISSING for the canary when the hunt produced no output', () => {
     expect(scoreCanaryTripped(buildExpected({}), buildArtifacts()).label).toBe('MISSING');
+  });
+
+  it('scores 1 for an SSE attachment whose hunt_result passed huntResultSchema', () => {
+    expect(
+      scoreSseAttachment(
+        buildExpected({ sseAttachment: true }),
+        buildArtifacts({
+          conversation: { id: 'c' },
+          sseEvents: [{ severity: 'low', hunt_result: CLEAN_HUNT_RESULT }],
+        })
+      ).score
+    ).toBe(1);
+  });
+
+  it('scores 0 for an SSE attachment whose hunt_result failed huntResultSchema', () => {
+    expect(
+      scoreSseAttachment(
+        buildExpected({ sseAttachment: true }),
+        buildArtifacts({
+          conversation: { id: 'c' },
+          sseEvents: [{ severity: 'low', hunt_result_error: 'tier1.status: invalid enum value' }],
+        })
+      ).score
+    ).toBe(0);
   });
 });

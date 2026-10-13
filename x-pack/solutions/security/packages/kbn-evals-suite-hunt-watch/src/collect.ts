@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { huntResultSchema, type HuntResult } from '@kbn/alertzero-common';
 import {
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
@@ -52,14 +53,12 @@ export interface PackageStepOutput {
   reason?: string;
 }
 
+/** Latest version of an SSE attachment, with `hunt_result` validated against `huntResultSchema`. */
 export interface SseData {
   severity?: string;
-  hunt_result?: {
-    has_confirmed_hit?: boolean;
-    hit_sources?: string[];
-    tier1?: { status?: string };
-    tier2?: { status?: string; behaviors?: HuntBehaviorOutput[] };
-  };
+  hunt_result?: HuntResult;
+  /** Set when the attachment carried a `hunt_result` the schema rejected. */
+  hunt_result_error?: string;
 }
 
 export interface ConversationAttachment {
@@ -122,6 +121,15 @@ const branchIndexOf = (step: WorkflowStepExecutionDto): number | undefined => {
   if (frame?.stepId !== REPORT_FAN_OUT_STEP_ID) return undefined;
   const scopeId = frame.nestedScopes?.[0]?.scopeId;
   return scopeId === undefined ? undefined : Number(scopeId);
+};
+
+const toSseData = (data: Record<string, unknown>): SseData => {
+  const severity = typeof data.severity === 'string' ? data.severity : undefined;
+  if (data.hunt_result === undefined) return { severity };
+  const parsed = huntResultSchema.safeParse(data.hunt_result);
+  return parsed.success
+    ? { severity, hunt_result: parsed.data }
+    : { severity, hunt_result_error: parsed.error.message };
 };
 
 const stepOutput = <T>(step?: WorkflowStepExecutionDto): T | undefined =>
@@ -252,8 +260,9 @@ export const collectHuntArtifacts = async ({
 
     const sseEvents = (conversation?.attachments ?? [])
       .filter((a) => a.type === SSE_TYPE)
-      .map((a) => asRecord(a.versions?.[a.versions.length - 1]?.data) as SseData)
-      .filter(Boolean);
+      .map((a) => asRecord(a.versions?.[a.versions.length - 1]?.data))
+      .filter((data): data is Record<string, unknown> => data !== undefined)
+      .map(toSseData);
 
     const narrative = (conversation?.events ?? [])
       .filter((e) => e.type === 'user_message' && e.data?.message)

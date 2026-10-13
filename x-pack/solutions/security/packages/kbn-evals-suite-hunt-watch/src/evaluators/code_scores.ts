@@ -88,9 +88,8 @@ const reportScores = (
 
 /** Tier 1 status from the SSE hunt result, else from the hunt headline wording. */
 export const resolveTier1Status = (actual: HuntReportArtifacts): HuntTier1Status | undefined => {
-  const fromSse = actual.sseEvents.find((e) => e.hunt_result?.tier1?.status)?.hunt_result?.tier1
-    ?.status;
-  if (fromSse) return fromSse as HuntTier1Status;
+  const fromSse = actual.sseEvents.find((e) => e.hunt_result)?.hunt_result?.tier1.status;
+  if (fromSse) return fromSse;
 
   const headline = actual.hunt?.headline ?? '';
   if (/Tier 1 found no matches/i.test(headline)) return 'no_environment_hits';
@@ -227,7 +226,7 @@ export const scoreHitConsistency = (expected: HuntExpected, artifacts: HuntArtif
           `SSE has_confirmed_hit=${sse.has_confirmed_hit}, report ${report.hasConfirmedHit}`
         );
       }
-      if (report.hasConfirmedHit && (sse?.hit_sources ?? []).length === 0) {
+      if (report.hasConfirmedHit && sse?.hit_sources.length === 0) {
         return fail('confirmed hit carries no hit_sources');
       }
       return pass(`hit=${actual.hunt.hit}`);
@@ -279,9 +278,17 @@ export const scoreSseAttachment = (expected: HuntExpected, artifacts: HuntArtifa
       }
       const count = actual.sseEvents.length;
       if (report.sseAttachment) {
+        const invalid = actual.sseEvents.filter((e) => e.hunt_result_error);
+        if (invalid.length > 0) {
+          return fail(
+            `${invalid.length} SSE attachment(s) failed huntResultSchema: ${invalid
+              .map((e) => e.hunt_result_error)
+              .join('; ')}`
+          );
+        }
         const valid = actual.sseEvents.filter((e) => e.severity && e.hunt_result);
         return valid.length > 0
-          ? pass(`${valid.length} SSE attachment(s) with severity and hunt_result`)
+          ? pass(`${valid.length} SSE attachment(s) with severity and a valid hunt_result`)
           : fail(`report an SSE attachment with a hunt_result, found ${count}`);
       }
       return count === 0

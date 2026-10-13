@@ -99,3 +99,4 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './hunt/write_hunt_evidence_route.gen';
+export { huntResultSchema, isoDatetimeSchema, type HuntResult } from './hunt/hunt_result';
