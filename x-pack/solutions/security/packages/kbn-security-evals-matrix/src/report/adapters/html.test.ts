@@ -90,6 +90,7 @@ describe('mdToHtml', () => {
 
   it('rejects javascript: link URLs', () => {
     const html = mdToHtml('[x](javascript:alert(1))');
+    // eslint-disable-next-line no-script-url -- intentionally untrusted input under test
     expect(html).not.toContain('javascript:');
     expect(html).toBe('<p>x)</p>');
   });

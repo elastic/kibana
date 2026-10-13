@@ -26,9 +26,6 @@
 // otherwise Babel-parse the raw templates and throw "Missing semicolon". Keep this first.
 import './src/setup_dot_text';
 
-// Generic report model + pluggable output adapters (HTML, JSON fallback)
-export * from './src/report';
-
 // CLI tools
 export * as cli from './src/cli';
 export {
