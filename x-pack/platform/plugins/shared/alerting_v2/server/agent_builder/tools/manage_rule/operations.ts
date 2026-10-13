@@ -44,6 +44,7 @@ import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
+import { findBackingIndices, formatBackingIndexWarning } from './concrete_index_warning';
 import { getDateFieldsForQuery, resolveTimeFieldForQuery } from './resolve_time_field';
 
 type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
@@ -423,6 +424,12 @@ export const executeRuleOperations = async (
 
       case 'set_query': {
         const rootQuery = getRootEsqlQuery(op.query);
+
+        const backingIndices = findBackingIndices(rootQuery);
+        if (backingIndices.length > 0) {
+          warnings.push(formatBackingIndexWarning(backingIndices));
+        }
+
         let resolvedTimeField: string | null | undefined;
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);

@@ -328,6 +328,60 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('set_query with a data stream backing index', () => {
+    const backingIndexQuery =
+      'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)';
+
+    it.each([
+      ['a new rule', { isNew: true }],
+      ['an existing rule', { isNew: false }],
+    ])('warns without throwing for %s', async (_description, options) => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Test' },
+        { operation: 'set_query', query: { base: backingIndexQuery } },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), options);
+
+      expect(result.data.query).toEqual({ base: backingIndexQuery });
+      expect(result.warnings).toEqual([
+        expect.stringContaining('data stream `logs-nginx.access-default`'),
+      ]);
+    });
+
+    it('keeps the query and the warning when ES validation also runs', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      } as never);
+
+      const result = await executeRuleOperations(
+        {},
+        [{ operation: 'set_query', query: { base: backingIndexQuery } }],
+        esClient
+      );
+
+      expect(result.queryColumns).toEqual([{ name: 'count', type: 'long' }]);
+      expect(result.warnings).toEqual([expect.stringContaining('backing index')]);
+    });
+
+    it('does not warn for wildcard patterns or data stream names', async () => {
+      const queries = [
+        'FROM logs-nginx.access-* | STATS COUNT(*)',
+        'FROM logs-nginx.access-default | STATS COUNT(*)',
+        'FROM orders-000123 | STATS COUNT(*)',
+      ];
+
+      for (const base of queries) {
+        const result = await executeRuleOperations({}, [
+          { operation: 'set_query', query: { base } },
+        ]);
+        expect(result.warnings).toBeUndefined();
+      }
+    });
+  });
+
   describe('set_query with a breach segment', () => {
     it('validates the base query alone in the LIMIT 0 call', async () => {
       const esClient = createMockEsClient();
