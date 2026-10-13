@@ -13,8 +13,8 @@ import React, { useState } from 'react';
 import {
   AGGREGATE_STRATEGY_HELP_TEXT,
   AGGREGATE_STRATEGY_OPTIONS,
-  PER_EPISODE_STRATEGY_HELP_TEXT,
-  PER_EPISODE_STRATEGY_OPTIONS,
+  PER_ALERT_STRATEGY_HELP_TEXT,
+  PER_ALERT_STRATEGY_OPTIONS,
 } from '../constants';
 
 interface FrequencyHelpTipProps {
@@ -34,9 +34,9 @@ export const FrequencyHelpTip = ({ groupingMode }: FrequencyHelpTipProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const options =
-    groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
+    groupingMode === 'per_alert' ? PER_ALERT_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
   const helpText =
-    groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_HELP_TEXT : AGGREGATE_STRATEGY_HELP_TEXT;
+    groupingMode === 'per_alert' ? PER_ALERT_STRATEGY_HELP_TEXT : AGGREGATE_STRATEGY_HELP_TEXT;
 
   const ariaLabel = i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.frequency.helpAriaLabel',

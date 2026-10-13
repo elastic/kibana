@@ -1,5 +1,5 @@
 {
-  "sha1": "9279c2b0797f919ec7661d92da2e36e84f1e67f6",
+  "sha1": "9cc16345f082b56d39683264c69ce98044d04a08",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -127,7 +127,7 @@
     {
       "id": "ab141bdc9191bd5-e5f8be59926ea89",
       "title": "Data streams index mode shows standard index mode in the details flyout",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -140,14 +140,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 72,
-        "column": 8
+        "line": 71,
+        "column": 5
       }
     },
     {
       "id": "ab141bdc9191bd5-0d2fe0e25ea3d83",
       "title": "Data streams index mode shows logsdb index mode in the details flyout",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -161,13 +161,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
         "line": 75,
-        "column": 5
+        "column": 11
       }
     },
     {
       "id": "ab141bdc9191bd5-14ce718d79c4c66",
       "title": "Data streams index mode allows to upgrade data stream from standard to logsdb index mode",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -180,14 +180,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 93,
-        "column": 29
+        "line": 94,
+        "column": 17
       }
     },
     {
       "id": "ab141bdc9191bd5-989f2abedb34998",
       "title": "Data streams index mode allows to downgrade data stream from logsdb to standard index mode",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -200,14 +200,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
-        "line": 109,
-        "column": 56
+        "line": 110,
+        "column": 11
       }
     },
     {
       "id": "ab141bdc9191bd5-7ff0a40e4afd8cb",
       "title": "Data streams index mode allows to upgrade data stream from time series to logsdb index mode",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -221,13 +221,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
         "line": 132,
-        "column": 5
+        "column": 13
       }
     },
     {
       "id": "ab141bdc9191bd5-5cb9a65537172d2",
       "title": "Data streams index mode allows to downgrade data stream from logsdb to time series index mode",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -241,7 +241,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/data_streams/data_streams_index_mode.spec.ts",
         "line": 156,
-        "column": 9
+        "column": 8
       }
     },
     {

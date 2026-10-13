@@ -41,12 +41,12 @@ describe('containsTemplate', () => {
     expect(containsTemplate('anything', '  ')).toBe(false);
   });
 
-  it('matches the real deductive prompt with decision trees on and off', () => {
+  it('matches the real investigation prompt with decision trees on and off', () => {
     const dir = join(
       REPO_ROOT,
-      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/deductive_investigation/instructions'
+      'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions'
     );
-    const raw = readFileSync(join(dir, 'deductive_investigator.md.text'), 'utf8');
+    const raw = readFileSync(join(dir, 'investigator.md.text'), 'utf8');
     const trees = readFileSync(join(dir, 'decision_trees.text'), 'utf8');
     const fill = (loadStep: string, section: string) =>
       raw
@@ -158,9 +158,9 @@ it('accepts full payload evidence for the investigation conversation', () => {
 });
 
 it('checks executed progress arguments after schema ordering without losing the raw model call', () => {
-  const low = { title: 'Low priority gap', description: 'Missing low signal', confidence: 0.2 };
-  const high = { title: 'High priority gap', description: 'Missing high signal', confidence: 0.9 };
-  const params = { summary: 'Investigating', hypotheses: [], blind_spots: [low, high] };
+  const low = { title: 'Low priority step', description: 'Low impact step', confidence: 0.2 };
+  const high = { title: 'High priority step', description: 'High impact step', confidence: 0.9 };
+  const params = { summary: 'Investigating', hypotheses: [], recommendations: [low, high] };
   const progressCall = {
     ...toolCall,
     tool_id: 'platform.streams.investigation_progress_report',
@@ -170,7 +170,7 @@ it('checks executed progress arguments after schema ordering without losing the 
     {
       ...attributes[0],
       'gen_ai.tool.name': progressCall.tool_id,
-      'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high, low] }),
+      'gen_ai.tool.call.arguments': JSON.stringify({ ...params, recommendations: [high, low] }),
       'gen_ai.output.messages': JSON.stringify([
         {
           role: 'assistant',
@@ -196,7 +196,7 @@ it('checks executed progress arguments after schema ordering without losing the 
       [
         {
           ...spans[0],
-          'gen_ai.tool.call.arguments': JSON.stringify({ ...params, blind_spots: [high] }),
+          'gen_ai.tool.call.arguments': JSON.stringify({ ...params, recommendations: [high] }),
         },
       ],
       progressExpected
@@ -208,7 +208,7 @@ it('checks executed progress arguments after schema ordering without losing the 
         {
           ...spans[0],
           'gen_ai.output.messages': spans[0]['gen_ai.output.messages'].replace(
-            'Low priority gap',
+            'Low priority step',
             'Redacted'
           ),
         },

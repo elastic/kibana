@@ -6,12 +6,17 @@
  */
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import path from 'path';
 import { z } from '@kbn/zod';
 import { routeId } from '../../zod_query';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import type { AgentPolicyInfo } from '../../../../common/types';
-import type { SyntheticsRestApiRouteFactory, SyntheticsRouteHandler } from '../../types';
+import type {
+  RouteContext,
+  SyntheticsRestApiRouteFactory,
+  SyntheticsRouteHandler,
+} from '../../types';
 import type { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
@@ -19,23 +24,32 @@ import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_type
 import type { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { allLocationsToClientContract } from './helpers';
 
-const getPrivateLocationsHandler: SyntheticsRouteHandler<
-  SyntheticsPrivateLocations | PrivateLocation,
-  { id?: string }
-> = async (routeContext) => {
-  const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
-
+const loadPrivateLocations = async ({
+  savedObjectsClient,
+  syntheticsMonitorClient,
+  server,
+}: RouteContext): Promise<SyntheticsPrivateLocations> => {
   const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
   await migrateLegacyPrivateLocations(internalSOClient, server.logger);
-
-  const { id } = request.params;
 
   const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
     savedObjectsClient,
     syntheticsMonitorClient
   );
-  const list = allLocationsToClientContract({ locations }, agentPolicies);
-  if (!id) return list;
+  return allLocationsToClientContract({ locations }, agentPolicies);
+};
+
+const getPrivateLocationsHandler: SyntheticsRouteHandler<SyntheticsPrivateLocations> = async (
+  routeContext
+) => loadPrivateLocations(routeContext);
+
+const getPrivateLocationHandler: SyntheticsRouteHandler<PrivateLocation, { id: string }> = async (
+  routeContext
+) => {
+  const { request, response } = routeContext;
+  const { id } = request.params;
+
+  const list = await loadPrivateLocations(routeContext);
   const location = list.find((loc) => loc.id === id || loc.label === id);
   if (!location) {
     return response.notFound({
@@ -48,7 +62,7 @@ const getPrivateLocationsHandler: SyntheticsRouteHandler<
 };
 
 export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsPrivateLocations | PrivateLocation
+  SyntheticsPrivateLocations
 > = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
@@ -64,7 +78,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 });
 
 export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsPrivateLocations | PrivateLocation,
+  PrivateLocation,
   { id: string }
 > = () => ({
   method: 'GET',
@@ -84,20 +98,21 @@ export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: getPrivateLocationsHandler,
+  handler: getPrivateLocationHandler,
 });
 
 export const getPrivateLocationsAndAgentPolicies = async (
   savedObjectsClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient,
-  excludeAgentPolicies = false
+  excludeAgentPolicies = false,
+  spaceId: string = ALL_SPACES_ID
 ): Promise<SyntheticsPrivateLocationsAttributes & { agentPolicies: AgentPolicyInfo[] }> => {
   try {
     const [privateLocations, agentPolicies] = await Promise.all([
       getPrivateLocations(savedObjectsClient),
       excludeAgentPolicies
         ? new Promise<void>((resolve) => resolve())
-        : syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
+        : syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(spaceId),
     ]);
     return {
       locations: privateLocations || [],

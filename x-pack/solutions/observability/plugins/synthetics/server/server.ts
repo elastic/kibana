@@ -58,37 +58,52 @@ export const initSyntheticsServer = (
       syntheticsMonitorClient
     );
 
+    const { summary, description, operationId, oasOperationObject, ...routeOptions } =
+      options ?? {};
+    const tags = [...(routeOptions.tags ?? []), 'oas-tag:synthetics'];
     const routeConfig = {
       access: 'public' as const,
       path,
       security,
-      summary: options?.summary,
-      description: options?.description,
-      operationId: options?.operationId,
-      options: {
-        tags: [...(options?.tags ?? []), 'oas-tag:synthetics'],
-        availability: options?.availability,
-        excludeFromOAS: options?.excludeFromOAS,
-      },
+      summary,
+      description,
+      operationId,
+    };
+    const getVersionedRouteOptions = {
+      availability: routeOptions.availability,
+      excludeFromOAS: routeOptions.excludeFromOAS,
+      excludeFromRateLimiter: routeOptions.excludeFromRateLimiter,
+      httpResource: routeOptions.httpResource,
+      httpResponseLogLevel: routeOptions.httpResponseLogLevel,
+      tags,
+      timeout: routeOptions.timeout && { idleSocket: routeOptions.timeout.idleSocket },
     };
     const versionConfig = {
       version: '2023-10-31' as const,
       validate: validation ?? (false as const),
-      options: { oasOperationObject: options?.oasOperationObject },
+      options: { oasOperationObject },
     };
 
     switch (method) {
       case 'GET':
-        router.versioned.get(routeConfig).addVersion(versionConfig, handler);
+        router.versioned
+          .get({ ...routeConfig, options: getVersionedRouteOptions })
+          .addVersion(versionConfig, handler);
         break;
       case 'PUT':
-        router.versioned.put(routeConfig).addVersion(versionConfig, handler);
+        router.versioned
+          .put({ ...routeConfig, options: { ...routeOptions, tags } })
+          .addVersion(versionConfig, handler);
         break;
       case 'POST':
-        router.versioned.post(routeConfig).addVersion(versionConfig, handler);
+        router.versioned
+          .post({ ...routeConfig, options: { ...routeOptions, tags } })
+          .addVersion(versionConfig, handler);
         break;
       case 'DELETE':
-        router.versioned.delete(routeConfig).addVersion(versionConfig, handler);
+        router.versioned
+          .delete({ ...routeConfig, options: { ...routeOptions, tags } })
+          .addVersion(versionConfig, handler);
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);

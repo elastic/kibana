@@ -63,11 +63,19 @@ export const matchLastVariable = (text: string): VariableMatch | null =>
 export const matchLastUnfinishedVariable = (text: string): VariableMatch | null =>
   withTrimmedKey(Array.from(text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)).pop() ?? null);
 
-export const ALLOWED_KEY_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;
+/** One JS-identifier path segment (`ep`, `rule_id`). */
+const IDENT = String.raw`[a-zA-Z_$][a-zA-Z0-9_$]*`;
+/**
+ * Bracket subscript: numeric index, quoted key, or a Liquid variable path
+ * (`[0]`, `["rule-1"]`, `[ep]`, `[ep.rule_id]`).
+ */
+const BRACKET_KEY = String.raw`(?:\d+|"[^"]*"|'[^']*'|${IDENT}(?:\.${IDENT})*)`;
+/** Liquid also reads a numeric dot segment as an index (`items.0` is `items[0]`). */
+const PATH_TAIL = String.raw`(?:\.(?:${IDENT}|\d+)|\[\s*${BRACKET_KEY}\s*\])`;
 
-export const PROPERTY_PATH_REGEX =
-  /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*$/;
+export const ALLOWED_KEY_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*(?:\s*\|.*)?$`);
+
+export const PROPERTY_PATH_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*$`);
 
 // Liquid-specific regex patterns
 // Matches: {{ variable | filter_prefix (but not {{ variable | filter }})

@@ -119,7 +119,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       );
 
       const { errorMessage: unsupportedKeysErrors, formattedConfig } = normalizeAPIConfig(
-        editedMonitor as CreateMonitorPayLoad
+        editedMonitor as CreateMonitorPayLoad,
+        { previousParams: (normalizedPreviousMonitor as MonitorFields)[ConfigKey.PARAMS] }
       );
       if (unsupportedKeysErrors) {
         return response.badRequest({

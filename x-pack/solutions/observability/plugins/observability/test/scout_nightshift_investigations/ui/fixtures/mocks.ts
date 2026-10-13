@@ -7,7 +7,10 @@
 
 import type { ScoutPage } from '@kbn/scout-oblt';
 
-export const mockInvestigationApi = async (page: ScoutPage) => {
+export const mockInvestigationApi = async (
+  page: ScoutPage,
+  { includeCompletedInvestigation = false }: { includeCompletedInvestigation?: boolean } = {}
+) => {
   await page.route('**/internal/significant_events/availability', async (route) => {
     await route.fulfill({ status: 200, json: { available: true } });
   });
@@ -31,16 +34,18 @@ export const mockInvestigationApi = async (page: ScoutPage) => {
     await route.fulfill({
       status: 200,
       json: {
-        results: [
-          {
-            investigation_id: 'investigation-1',
-            status: 'completed',
-            created_at: '2026-09-15T12:00:00.000Z',
-            completed_at: '2026-09-15T12:05:00.000Z',
-            subject: { type: 'alert', id: 'alert-1' },
-            summary: 'Completed alert investigation',
-          },
-        ],
+        results: includeCompletedInvestigation
+          ? [
+              {
+                investigation_id: 'investigation-1',
+                status: 'completed',
+                created_at: '2026-09-15T12:00:00.000Z',
+                completed_at: '2026-09-15T12:05:00.000Z',
+                subject: { type: 'alert', id: 'alert-1' },
+                summary: 'Completed alert investigation',
+              },
+            ]
+          : [],
         page: 1,
         size: 20,
         total: 1,

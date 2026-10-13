@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { FP_TP_RAW_EVENT_WINDOW_MS } from '../world';
-import { buildFpTpExampleWorld, FP_TP_EXAMPLES, FP_TP_SCENARIOS, getFpTpScenario } from '.';
+import { deriveFpTpOutcome, FP_TP_RAW_EVENT_WINDOW_MS } from '../world';
+import {
+  buildFpTpExampleWorld,
+  FP_TP_EXAMPLES,
+  FP_TP_SCENARIOS,
+  getFpTpScenario,
+  type FpTpRegisteredExample,
+  type FpTpVariant,
+} from '.';
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -26,6 +33,64 @@ describe('FP/TP scenario registry', () => {
     'returns %s prefixed with its scenario key',
     (id, scenarioKey) => {
       expect(id.startsWith(`${scenarioKey}.`)).toBe(true);
+    }
+  );
+
+  it.each(FP_TP_EXAMPLES.filter(({ checks }) => checks).map((example) => [example.id, example]))(
+    'returns a %s gold that follows from its checks',
+    (_id, { checks, expectedOutcome }) => {
+      expect(checks && deriveFpTpOutcome(checks)).toBe(expectedOutcome);
+    }
+  );
+
+  const baseOf = ({ variant }: FpTpRegisteredExample): FpTpRegisteredExample | undefined =>
+    FP_TP_EXAMPLES.find(({ id }) => id === variant?.of);
+
+  const variantsOfKind = (
+    kind: FpTpVariant['kind']
+  ): ReadonlyArray<[string, FpTpRegisteredExample]> =>
+    FP_TP_EXAMPLES.filter(({ variant }) => variant?.kind === kind).map((example) => [
+      example.id,
+      example,
+    ]);
+
+  it.each(FP_TP_EXAMPLES.filter(({ variant }) => variant).map((example) => [example.id, example]))(
+    'returns a %s base from its own scenario',
+    (id, example) => {
+      const base = baseOf(example);
+      expect(base !== undefined && base.id !== id && base.scenarioKey === example.scenarioKey).toBe(
+        true
+      );
+    }
+  );
+
+  it('returns the provenance of its base for every variant', () => {
+    expect(
+      FP_TP_EXAMPLES.filter(
+        (example) => example.variant && baseOf(example)?.provenance !== example.provenance
+      ).map(({ id }) => id)
+    ).toEqual([]);
+  });
+
+  it('returns checks for every variant and its base', () => {
+    expect(
+      FP_TP_EXAMPLES.filter(
+        (example) => example.variant && !(example.checks && baseOf(example)?.checks)
+      ).map(({ id }) => id)
+    ).toEqual([]);
+  });
+
+  it.each(variantsOfKind('mutation'))(
+    'returns %s checks that differ from its base checks',
+    (_id, example) => {
+      expect(example.checks).not.toEqual(baseOf(example)?.checks);
+    }
+  );
+
+  it.each(variantsOfKind('perturbation'))(
+    'returns %s checks equal to its base checks',
+    (_id, example) => {
+      expect(example.checks).toEqual(baseOf(example)?.checks);
     }
   );
 

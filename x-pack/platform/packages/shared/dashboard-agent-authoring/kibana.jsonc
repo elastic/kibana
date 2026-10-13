@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/dashboard-agent-authoring",
+  "owner": ["@elastic/kibana-dashboards"],
+  "description": "Host-agnostic dashboard authoring core: operations, panel inputs and validation used to generate dashboards.",
+  "group": "platform",
+  "visibility": "shared"
+}

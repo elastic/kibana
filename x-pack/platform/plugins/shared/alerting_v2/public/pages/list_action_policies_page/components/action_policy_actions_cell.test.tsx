@@ -18,16 +18,10 @@ jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'v1',
   name: 'Policy One',
   description: 'Policy description',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  matcher: null,
-  group_by: null,
-  grouping_mode: null,
-  throttle: { strategy: undefined, interval: null },
-  snoozed_until: null,
   created_by: { profile_uid: 'elastic_uid' },
   created_at: '2026-01-01T00:00:00.000Z',
   updated_by: { profile_uid: 'elastic_uid' },

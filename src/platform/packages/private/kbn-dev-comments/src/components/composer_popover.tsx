@@ -20,7 +20,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAnchorPoint } from '../lib/anchor';
+import { getAnchorPoint, isInTooltip } from '../lib/anchor';
 import type { PendingComment } from '../state/comments_controller';
 import { CommentEditor } from './comment_editor';
 import { useComments } from './comments_context';
@@ -28,6 +28,8 @@ import { DisplayNameField, useDisplayName } from './display_name_field';
 import { PinMarker } from './pin_marker';
 import { PopoverBody } from './popover_body';
 import {
+  atTooltipPanelProps,
+  atTooltipProps,
   popoverPanelProps,
   useLayerPortal,
   useLayerZIndex,
@@ -38,8 +40,14 @@ import {
 export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
   const controller = useComments();
   const zIndex = useLayerZIndex();
-  const container = useLayerPortal('devCommentsComposer', zIndex.pins);
-  const panelRef = usePanelZIndex(zIndex.popover);
+  const inTooltip = isInTooltip(pending.element);
+  // The marker goes over the element like the pin will: over a tooltip, at the toasts' level.
+  const container = useLayerPortal(
+    'devCommentsComposer',
+    inTooltip ? zIndex.tooltipPins : zIndex.pins
+  );
+  const popoverZIndex = inTooltip ? zIndex.tooltipPopover : zIndex.popover;
+  const panelRef = usePanelZIndex(popoverZIndex);
   const [text, setText] = useState('');
   const [displayName, setDisplayName] = useDisplayName();
   const canCapture = controller.services.captureViewport !== undefined;
@@ -47,12 +55,9 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
   const { saving } = pending;
   useLayoutTick();
 
-  // The popover took the focus; when the comment is discarded or saved it goes
-  // back to the commented element (a saved comment's pin then takes it over).
-  // That is the element the comment ended on: a click that moves the draft
-  // changes it while the popover stays, and its editor keeps the focus.
-  const elementRef = useRef(pending.element);
-  elementRef.current = pending.element;
+  // On discard or save, focus goes back to the element the comment ended on (a click moves the draft), or to what shows it.
+  const elementRef = useRef(pending.revealedBy ?? pending.element);
+  elementRef.current = pending.revealedBy ?? pending.element;
   useEffect(
     () => () => {
       const element = elementRef.current;
@@ -89,7 +94,7 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
 
   return createPortal(
     <>
-      <PinMarker x={x} y={y} />
+      <PinMarker x={x} y={y} {...(inTooltip ? atTooltipProps : {})} />
       <div
         css={css`
           position: fixed;
@@ -100,7 +105,7 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
         `}
       >
         <EuiPopover
-          // EuiPopover positions its panel when it opens; remount it when another click moves the comment.
+          // EuiPopover positions its panel when it opens: remounted when another click moves the comment.
           key={`${pending.point.x},${pending.point.y}`}
           button={<span />}
           aria-label={i18n.translate('devComments.composer.label', {
@@ -111,10 +116,10 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
           closePopover={() => {}}
           anchorPosition="downCenter"
           panelPaddingSize="none"
-          panelProps={popoverPanelProps}
+          panelProps={inTooltip ? atTooltipPanelProps : popoverPanelProps}
           panelRef={panelRef}
           repositionOnScroll
-          zIndex={zIndex.popover}
+          zIndex={popoverZIndex}
           initialFocus="[data-test-subj='devCommentsComposerInput'] textarea"
         >
           <PopoverBody data-test-subj="devCommentsComposer">

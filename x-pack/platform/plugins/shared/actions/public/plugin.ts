@@ -59,7 +59,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
     this.enabledEmailServices = Array.from(new Set(config.email?.services?.enabled || ['*']));
     this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx.enabled ?? true;
-    this.earsEnabled = config.auth?.ears?.enabled ?? false;
+    this.earsEnabled = config.auth?.ears?.enabled ?? true;
     this.earsExperimentalEnabled = config.auth?.ears?.enableExperimental ?? false;
     this.inboundEventsEnabled = config.inboundEvents?.enabled ?? false;
   }

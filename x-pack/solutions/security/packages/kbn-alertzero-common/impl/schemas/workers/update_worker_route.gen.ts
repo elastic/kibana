@@ -33,13 +33,13 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
   z
     .object({
       /**
-       * Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.
+       * Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults. `true` is refused with a 400, and nothing in the patch is applied, while the Worker's `blockingReasons` include `no_model`. The Workflows API does not apply this check, so a user who can edit managed workflows can still enable the underlying workflow there.
        */
       enabled: z
         .boolean()
         .optional()
         .describe(
-          'Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults.'
+          "Enables or disables the Worker. Enabling an uninstalled Worker first installs its per-space managed document with defaults. `true` is refused with a 400, and nothing in the patch is applied, while the Worker's `blockingReasons` include `no_model`. The Workflows API does not apply this check, so a user who can edit managed workflows can still enable the underlying workflow there."
         ),
       /**
        * Revision returned by list/GET. Required when settings is present; null asserts that the per-space managed Worker has not been installed yet.
@@ -68,6 +68,17 @@ export type UpdateWorkerRequestBodyInput = z.input<typeof UpdateWorkerRequestBod
 export const UpdateWorkerResponse = lazySchema(() =>
   z.object({
     worker: Worker,
+    /**
+     * Present when enabling or disabling the Alert Triage Worker left rules the caller cannot edit (machine learning rules without machine learning permissions). On enable those rules were not attached and are not triaged; on disable they still carry the Worker action.
+     */
+    skippedRuleCount: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe(
+        'Present when enabling or disabling the Alert Triage Worker left rules the caller cannot edit (machine learning rules without machine learning permissions). On enable those rules were not attached and are not triaged; on disable they still carry the Worker action.'
+      ),
   })
 );
 export type UpdateWorkerResponse = z.infer<typeof UpdateWorkerResponse>;

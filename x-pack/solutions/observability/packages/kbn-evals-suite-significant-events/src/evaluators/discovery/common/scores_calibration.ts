@@ -34,12 +34,12 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'detection_metadata_not_severity',
-    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs may affect `confidence` only. Rule `severity_score` may support a higher applicable tier when grounding confirms a matching failure class, but cannot override absent or contradictory grounding.',
+    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs, and the `severity_score` of the rule, are not severity inputs and may affect `confidence` only.',
     score: 2,
   },
   {
     id: 'under_escalation_is_fail',
-    text: 'Under-escalation is a FAIL. When grounding confirms a non-benign failure or material degradation, assign the highest tier the `severity` field contract supports for that confirmed mechanism and blocked or degraded work. Do not assign `40-medium` or `20-low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless the known-ongoing cap explicitly applies or impact is genuinely bounded/unconfirmed per the schema. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    text: 'Under-escalation is a FAIL. When grounding confirms a non-benign failure or material degradation, assign the highest tier the `severity` field contract supports for that confirmed mechanism and blocked or degraded work. Do not assign `medium` or `low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless the known-ongoing cap explicitly applies or impact is genuinely bounded/unconfirmed per the schema. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
     score: 2,
   },
 ];

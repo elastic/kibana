@@ -21,6 +21,7 @@ import type {
   OnPreResponseHandler,
   OnPreRoutingHandler,
 } from './lifecycle';
+import type { HttpSelfUnauthorizedErrorHandler } from './self_client_unauthorized_error_handler';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
@@ -57,12 +58,16 @@ export interface HttpSelfFetchHeaders {
 
 /** @public */
 export interface HttpSelfFetchOptions<TRequestBody = unknown> {
+  /** Forces the configured local listener instead of the global self HTTP target. */
+  target?: 'local';
   /** HTTP method. Defaults to `GET`. */
   method?: string;
   /** Query string parameters to append to the target path. */
   query?: HttpSelfFetchQuery;
   /** JSON-serializable or text request body. */
   body?: TRequestBody | string | null;
+  /** Buffered non-JSON request body (mutually exclusive with `body`). */
+  rawBody?: FormData | Blob | URLSearchParams | ArrayBuffer | ArrayBufferView<ArrayBuffer> | null;
   /** Non-auth, non-Core-owned headers to send with the request. */
   headers?: HttpSelfFetchHeaders;
   /**
@@ -72,11 +77,19 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
   forwardRequestHeaders?: boolean;
   /** API version string used to populate the `elastic-api-version` header. */
   version?: ApiVersion;
-  /** Abort signal for cancelling the outbound request. */
+  /** Abort signal for cancelling the outbound request, including in-flight redirect hops. */
   signal?: AbortSignal | null;
-  /** Request timeout in milliseconds. Defaults to a bounded Core value. */
+  /**
+   * Timeout in milliseconds for the entire outbound call, including any same-origin
+   * redirects Core follows. Defaults to 60 seconds.
+   */
   timeout?: number;
-  /** Whether to include the incoming request base path and space prefix. Defaults to `true`. */
+  /**
+   * When `true` (default), prefix `path` with the scoped request's base path (server
+   * base path plus space). Fake requests use `server.basePath` and the request's space.
+   * When `false`, `path` is used as-is and must already include `server.basePath` when
+   * one is configured. Core does not add that prefix a second time.
+   */
   prependBasePath?: boolean;
   /** When `true`, return response details instead of only the parsed response body. */
   asResponse?: boolean;
@@ -89,6 +102,7 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
 /** @public */
 export interface HttpSelfResponse<TResponseBody = unknown, TRequestBody = unknown> {
   readonly fetchOptions: Readonly<HttpSelfFetchOptions<TRequestBody> & { path: string }>;
+  /** The outbound Request that produced `response` (the last hop when Core followed redirects). */
   readonly request: Readonly<Request>;
   readonly response: Readonly<Response>;
   readonly body?: TResponseBody;
@@ -452,6 +466,15 @@ export interface HttpServiceSetup<
    * @returns {RouterDeprecatedApiDetails[]}
    */
   getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
+
+  /**
+   * Set the {@link HttpSelfUnauthorizedErrorHandler | handler} consulted when a Kibana self HTTP
+   * call is rejected by the authentication lifecycle, giving its owner a chance to refresh a
+   * short-lived credential so the call can be replayed once.
+   *
+   * Can only be called once, and is reserved for the security plugin.
+   */
+  setSelfClientUnauthorizedErrorHandler: (handler: HttpSelfUnauthorizedErrorHandler) => void;
 }
 
 /** @public */

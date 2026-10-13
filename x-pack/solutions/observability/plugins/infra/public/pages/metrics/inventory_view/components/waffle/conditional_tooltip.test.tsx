@@ -22,11 +22,18 @@ import { escapeQuotes } from '@kbn/es-query';
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
+jest.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
+  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
+}));
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
   ReturnType<typeof useWaffleOptionsContext>
+>;
+const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as jest.MockedFunction<
+  typeof useIsPodSchemaSelectorEnabled
 >;
 
 const NODE: InfraWaffleMapNode = {
@@ -111,6 +118,7 @@ describe('ConditionalToolTip', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
   });
 
   it('renders the ECS metric set (including legacy cpu/tx/rx) when preferredSchema=ecs', () => {
@@ -269,6 +277,47 @@ describe('ConditionalToolTip', () => {
       accountId: '',
       region: '',
       schema: 'ecs',
+    } as UseSnapshotRequest);
+  });
+
+  it('queries Kubernetes Pod tooltips with k8s.pod.uid when the selector flag is on and OpenTelemetry is selected', () => {
+    const POD_NODE: InfraWaffleMapNode = {
+      pathId: 'pod-01',
+      id: 'pod-01',
+      name: 'pod-01',
+      path: [{ value: 'pod-01', label: 'pod-01' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
+    mockedUseSnapshot.mockReturnValue(
+      buildBaseSnapshotResponse(['cpu', 'memory', 'rx', 'tx', ...CUSTOM_METRICS.map((m) => m.id)])
+    );
+    // Intentional `as ReturnType<typeof useWaffleOptionsContext>` type assertion as the waffle-options mock is a partial test double;
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      buildWaffleOptions('semconv', 'pod') as unknown as ReturnType<typeof useWaffleOptionsContext>
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={POD_NODE} nodeType="pod" />);
+
+    // Intentional `as UseSnapshotRequest` type assertion as Jest's toHaveBeenCalledWith matcher is untyped relative to the hook request;
+    expect(mockedUseSnapshot).toHaveBeenCalledWith({
+      kuery: '"k8s.pod.uid": "pod-01"',
+      metrics: [
+        { type: 'cpu' },
+        { type: 'memory' },
+        { type: 'rx' },
+        { type: 'tx' },
+        ...CUSTOM_METRICS,
+      ],
+      groupBy: [],
+      nodeType: 'pod',
+      sourceId: 'default',
+      includeTimeseries: true,
+      currentTime,
+      accountId: '',
+      region: '',
+      schema: 'semconv',
     } as UseSnapshotRequest);
   });
 });

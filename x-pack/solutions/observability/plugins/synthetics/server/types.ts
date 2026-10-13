@@ -7,7 +7,10 @@
 
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type {
@@ -21,7 +24,6 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -43,7 +45,7 @@ import type {
 } from '@kbn/maintenance-windows-plugin/server';
 import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 import type { CPSServerSetup } from '@kbn/cps/server';
-import type { TelemetryEventsSender } from './telemetry/sender';
+import type { SyntheticsTelemetry } from './telemetry/synthetics_telemetry';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
 import type { SyntheticsIndicesCache } from './services/synthetics_indices_cache';
@@ -61,7 +63,7 @@ export interface SyntheticsServerSetup {
   share: SharePluginSetup;
   stackVersion: string;
   logger: Logger;
-  telemetry: TelemetryEventsSender;
+  telemetry: SyntheticsTelemetry;
   syntheticsEsClient: SyntheticsEsClient;
   basePath: IBasePath;
   isDev?: boolean;
@@ -87,7 +89,6 @@ export interface SyntheticsPluginsSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
-  telemetry: TelemetryPluginSetup;
   share: SharePluginSetup;
   embeddable: EmbeddableSetup;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
@@ -100,9 +101,9 @@ export interface SyntheticsPluginsStartDependencies {
   fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
-  telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
   alerting: AlertingServerStart;
+  licensing: LicensingPluginStart;
   maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 

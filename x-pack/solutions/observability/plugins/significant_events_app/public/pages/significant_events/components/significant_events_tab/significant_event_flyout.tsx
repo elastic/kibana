@@ -37,8 +37,8 @@ import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../util/formatters';
 import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
-import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
@@ -71,13 +71,6 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Close',
   }
 );
-const CLOSE_EVENT_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.closeEvent',
-  {
-    defaultMessage: 'Close significant event',
-  }
-);
-
 const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.actionsMenuButtonAriaLabel',
   {
@@ -88,7 +81,7 @@ const ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
 const DISMISS_EVENT_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.dismissEvent',
   {
-    defaultMessage: 'Dismiss significant event',
+    defaultMessage: 'Mark significant event inactive',
   }
 );
 const COPY_LINK_ARIA_LABEL = i18n.translate(
@@ -182,12 +175,13 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     },
   } = useKibana();
   const { canManage } = getNightshiftCapabilities(nightshift);
+  const { getSourceTitle } = useSourcesById();
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
     isError: isLifecycleError,
     refetch: refetchLifecycle,
-  } = useFetchSignificantEventLifecycle(event.event_uuid);
+  } = useFetchSignificantEventLifecycle(event.event_id);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -222,11 +216,8 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation({ onTriggerSuccess });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-  const { updateEventStatus, isUpdating } = useUpdateSignificantEvent({
-    onUpdateSuccess: onClose,
-  });
 
-  const isOpen = latestEvent.status === 'open';
+  const isOpen = latestEvent.status === 'active';
 
   useInterval(
     refetchLifecycle,
@@ -261,8 +252,6 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     data-test-subj="sigEventFlyoutActionsButton"
                     iconType="ellipsis"
                     aria-label={ACTIONS_BUTTON_ARIA_LABEL}
-                    isLoading={isUpdating}
-                    isDisabled={isUpdating}
                     onClick={() => setIsActionsMenuOpen((open) => !open)}
                   />
                 </EuiToolTip>
@@ -278,31 +267,12 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     key="dismiss-event"
                     icon="eyeSlash"
                     color="primary"
-                    disabled={isUpdating}
                     onClick={() => {
                       setIsActionsMenuOpen(false);
                       setIsDismissModalOpen(true);
                     }}
                   >
                     {DISMISS_EVENT_LABEL}
-                  </EuiContextMenuItem>,
-                  <EuiContextMenuItem
-                    key="close-event"
-                    icon="cross"
-                    color="danger"
-                    disabled={isUpdating}
-                    onClick={() => {
-                      if (!isUpdating) {
-                        setIsActionsMenuOpen(false);
-                        updateEventStatus({
-                          eventUuid: latestEvent.event_uuid,
-                          status: 'closed',
-                        });
-                      }
-                    }}
-                    data-test-subj="sigEventCloseButton"
-                  >
-                    {CLOSE_EVENT_LABEL}
                   </EuiContextMenuItem>,
                 ]}
               />
@@ -311,7 +281,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         )}
         {isDismissModalOpen && (
           <DismissEventModal
-            eventUuid={latestEvent.event_uuid}
+            eventId={latestEvent.event_id}
             onClose={() => setIsDismissModalOpen(false)}
             onSuccess={() => {
               setIsDismissModalOpen(false);
@@ -354,7 +324,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           {formatTimestamp(event.created_at ?? event['@timestamp'])}
         </EuiText>
         <EuiSpacer size="m" />
-        <BadgeRow items={event.stream_names ?? []} color="hollow" />
+        <BadgeRow items={(event.source_ids ?? []).map(getSourceTitle)} color="hollow" />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>
@@ -366,7 +336,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           </EuiFlexItem>
           <EuiFlexItem>
             <FlyoutMetadataCard title={SEVERITY_LABEL}>
-              <SeverityBadge score={Number.parseInt(event.severity, 10)} />
+              <SeverityBadge severity={event.severity} />
             </FlyoutMetadataCard>
           </EuiFlexItem>
           {event.confidence != null && (
@@ -424,7 +394,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                 <EuiButton
                   iconType="inspect"
                   onClick={() => {
-                    if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
+                    if (!isTriggering) triggerInvestigation(latestEvent.event_id);
                   }}
                   isDisabled={isTriggering || blocksActivity}
                   hasAriaDisabled={blocksActivity}

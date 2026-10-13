@@ -7,10 +7,14 @@
 
 import { toRunMarker, uniquify, type FpTpWorld } from '../world';
 import { encodedPowershellScenario } from './encoded_powershell';
+import { mimicratClickfixScenario } from './mimicrat_clickfix';
 import type { FpTpRegisteredExample, FpTpScenario } from './types';
 
 /** Every scenario the eval runs. Add a scenario here to add its examples to the dataset. */
-export const FP_TP_SCENARIOS: readonly FpTpScenario[] = [encodedPowershellScenario];
+export const FP_TP_SCENARIOS: readonly FpTpScenario[] = [
+  encodedPowershellScenario,
+  mimicratClickfixScenario,
+];
 
 export const FP_TP_EXAMPLES: readonly FpTpRegisteredExample[] = FP_TP_SCENARIOS.flatMap(
   ({ key, examples }) => examples.map((example) => ({ ...example, scenarioKey: key }))
@@ -42,7 +46,9 @@ export const buildFpTpExampleWorld = (exampleId: string, suffix: string): FpTpWo
 export type {
   FpTpEvidenceState,
   FpTpExample,
+  FpTpProvenance,
   FpTpRegisteredExample,
   FpTpScenario,
   FpTpSituation,
+  FpTpVariant,
 } from './types';

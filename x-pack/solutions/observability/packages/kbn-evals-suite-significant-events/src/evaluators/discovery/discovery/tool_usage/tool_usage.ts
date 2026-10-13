@@ -73,12 +73,11 @@ const isSerializationRecovery = (
 const findDuplicateEventWriteRule = (
   eventWrites: Array<ReturnType<typeof extractOrderedToolCalls>[number]>
 ): { ruleUuid: string; firstItemIndex: number; secondItemIndex: number } | undefined => {
-  const ruleOwners = new Map<string, number>();
-
   for (const { params } of eventWrites) {
     if (!Array.isArray(params.items)) {
       continue;
     }
+    const ruleOwners = new Map<string, number>();
     for (const [itemIndex, item] of params.items.entries()) {
       if (!isRecord(item) || !Array.isArray(item.signals)) {
         continue;
@@ -101,12 +100,53 @@ const findDuplicateEventWriteRule = (
   }
 };
 
-/** Require events_write and reject workflow-owned discovery stamping. */
-const scoreOutputTool = (
-  calledTools: Set<string>,
-  steps: ConverseStep[]
-): ToolUsageScore | null => {
+/**
+ * A missing `events_write` is acceptable only when every detection was grounded: discovery skips
+ * the write when no detection is event-eligible (no event is created for non-confirming candidates),
+ * so the run must show a query KI search, an event search, and at least one `execute_esql` per detection.
+ */
+const hasGroundedNoEventDecision = ({
+  steps,
+  calledTools,
+  detectionCount,
+}: {
+  steps: ConverseStep[];
+  calledTools: Set<string>;
+  detectionCount: number;
+}): boolean => {
+  const orderedCalls = extractOrderedToolCalls(steps);
+  const hasQueryKiSearch = orderedCalls.some(
+    ({ toolId, params }) =>
+      isTool(toolId, TOOL_ID_KI_SEARCH) &&
+      Array.isArray(params.kind) &&
+      params.kind.includes('query')
+  );
+  const esqlCallCount = orderedCalls.filter(({ toolId }) =>
+    isTool(toolId, TOOL_ID_EXECUTE_ESQL)
+  ).length;
+
+  return (
+    hasQueryKiSearch &&
+    esqlCallCount >= detectionCount &&
+    calledCanonical(calledTools, TOOL_ID_EVENT_SEARCH)
+  );
+};
+
+/** Require a completed event write or a grounded no-event decision. */
+const scoreOutputTool = ({
+  calledTools,
+  steps,
+  detectionCount,
+}: {
+  calledTools: Set<string>;
+  steps: ConverseStep[];
+  detectionCount: number;
+}): ToolUsageScore | null => {
   if (!calledCanonical(calledTools, TOOL_ID_EVENTS_WRITE)) {
+    if (hasGroundedNoEventDecision({ steps, calledTools, detectionCount })) {
+      return null;
+    }
+
     return {
       score: 0,
       label: `missing-${TOOL_ID_EVENTS_WRITE}`,
@@ -217,7 +257,7 @@ export const scoreToolUsage = ({
 
   const orderedCalls = extractOrderedToolCalls(steps);
 
-  const outputCheck = scoreOutputTool(calledTools, steps);
+  const outputCheck = scoreOutputTool({ calledTools, steps, detectionCount });
   if (outputCheck) {
     return outputCheck;
   }
@@ -301,7 +341,7 @@ export const scoreToolUsageContinuation = (cycles: ContinuationCycle[]): ToolUsa
       steps,
       detectionCount: 1,
       // Establishing cycle of a new episode may write topology without a topology search.
-      // A new event after a closed seed (`expectReuse: false`) still requires that search.
+      // A new event after an inactive seed (`expectReuse: false`) still requires that search.
       allowNewEventTopologyWrite: cycleIndex === 0 && cycle.expectReuse !== false,
     });
     if (

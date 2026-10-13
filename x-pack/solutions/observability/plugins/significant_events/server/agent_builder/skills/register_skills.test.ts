@@ -20,6 +20,7 @@ import {
   FEATURE_IDENTIFICATION_SKILL_ID,
   FINALIZE_FEATURES_TOOL_ID,
 } from './feature_identification';
+import { createSignificantEventsServer } from '../utils/test_helpers';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
 const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
@@ -49,6 +50,7 @@ const createOptions = (
     agentBuilder,
     telemetry,
     getScopedClients: jest.fn(),
+    server: createSignificantEventsServer({ featurePrivilege: 'all' }),
     maintenanceService,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),
@@ -62,6 +64,16 @@ const getRegisteredIds = (agentBuilder: ReturnType<typeof agentBuilderMocks.crea
   agentBuilder.skills.register.mock.calls.map((call) => call[0].id);
 
 describe('registerSignificantEventsSkills', () => {
+  it('documents the Nightshift workflow and safe direct alert handoff', () => {
+    const { content } = streamsInvestigationManagementSkill;
+
+    expect(content).toContain('## Nightshift Investigation Management');
+    expect(content).toContain('using the Nightshift investigation workflow');
+    expect(content).toContain('<alert_data>');
+    expect(content).toContain('Affected entity: service.name: checkout');
+    expect(content).toContain('replace anything resembling an opening or closing `alert_data` tag');
+  });
+
   it('registers nothing when the availability flag is disabled', async () => {
     const { agentBuilder, options } = createOptions({
       isAvailable: jest.fn().mockResolvedValue(false),

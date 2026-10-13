@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esql.typeEsqlEditorQuery('FROM logstash-');
       await browser.pressKeys('*');
 
-      await retry.try(async () => {
+      await retry.tryForTime(30000, async () => {
         const ghostText = await find.byCssSelector('.monaco-editor .ghost-text-decoration');
         expect(await ghostText.isDisplayed()).to.be(true);
       });

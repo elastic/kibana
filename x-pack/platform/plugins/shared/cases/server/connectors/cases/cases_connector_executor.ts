@@ -29,7 +29,11 @@ import {
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
-import { getCaseSettings } from '../../../common/utils/case_settings';
+import {
+  canOverrideExtractObservables,
+  getCaseSettings,
+  resolveExtractObservables,
+} from '../../../common/utils/case_settings';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case, CaseSeverity } from '../../../common';
@@ -105,6 +109,17 @@ const getAssigneesFromTemplate = (
 
   return { assignees: templateAssignees };
 };
+
+/**
+ * Resolves the rule-level `extractObservables` override. Returns `null` when the rule inherits the
+ * space default, or when the owner does not auto-extract by default — the owner gate wins over a
+ * rule choice.
+ */
+const getExtractObservablesOverride = (
+  owner: string,
+  extractObservables: boolean | null | undefined
+): boolean | null =>
+  extractObservables == null || !canOverrideExtractObservables(owner) ? null : extractObservables;
 
 export class CasesConnectorExecutor {
   private readonly logger: Logger;
@@ -783,7 +798,7 @@ export class CasesConnectorExecutor {
       return casesMap;
     }
 
-    const { customFieldsConfigurationMap, templatesConfigurationMap } =
+    const { customFieldsConfigurationMap, templatesConfigurationMap, extractObservablesMap } =
       await this.getCustomFieldsAndTemplatesConfiguration();
 
     const { v2Template, extendedFields, templateRef, resolvedConnector, legacyKeysWithV2Values } =
@@ -793,6 +808,7 @@ export class CasesConnectorExecutor {
         customFieldsConfigurationMap.get(params.owner)
       );
     const hasPlatinumLicenseOrGreater = await this.isAtLeastPlatinum();
+    const spaceExtractObservables = extractObservablesMap.get(params.owner);
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -809,7 +825,8 @@ export class CasesConnectorExecutor {
             templateRef,
             resolvedConnector,
             hasPlatinumLicenseOrGreater,
-            legacyKeysWithV2Values
+            legacyKeysWithV2Values,
+            spaceExtractObservables
           )
         );
       }
@@ -865,7 +882,8 @@ export class CasesConnectorExecutor {
     templateRef?: { id: string; version: number },
     resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector'],
     hasPlatinumLicenseOrGreater = true,
-    legacyKeysWithV2Values?: ReadonlySet<string>
+    legacyKeysWithV2Values?: ReadonlySet<string>,
+    spaceExtractObservables?: boolean
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -881,7 +899,12 @@ export class CasesConnectorExecutor {
     const builtCustomFields = buildCustomFieldsForRequest(customFieldsConfigurations).filter(
       (customField) => !legacyKeysWithV2Values?.has(customField.key)
     );
-    const { syncAlerts, extractObservables } = getCaseSettings(params.owner);
+    const { syncAlerts } = getCaseSettings(params.owner);
+    const extractObservables = resolveExtractObservables(params.owner, spaceExtractObservables);
+    const extractObservablesOverride = getExtractObservablesOverride(
+      params.owner,
+      params.extractObservables
+    );
 
     const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
       id: caseId,
@@ -889,8 +912,14 @@ export class CasesConnectorExecutor {
       tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
-      // Template settings keys are individually optional; merge over owner defaults so syncAlerts is always set.
-      settings: { syncAlerts, extractObservables, ...v2Template.settings },
+      settings: {
+        syncAlerts,
+        extractObservables,
+        ...v2Template.settings,
+        ...(extractObservablesOverride != null
+          ? { extractObservables: extractObservablesOverride }
+          : {}),
+      },
       ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
       customFields: builtCustomFields,
@@ -928,7 +957,8 @@ export class CasesConnectorExecutor {
     templateRef?: { id: string; version: number },
     resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector'],
     hasPlatinumLicenseOrGreater = true,
-    legacyKeysWithV2Values?: ReadonlySet<string>
+    legacyKeysWithV2Values?: ReadonlySet<string>,
+    spaceExtractObservables?: boolean
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -943,7 +973,8 @@ export class CasesConnectorExecutor {
         templateRef,
         resolvedConnector,
         hasPlatinumLicenseOrGreater,
-        legacyKeysWithV2Values
+        legacyKeysWithV2Values,
+        spaceExtractObservables
       );
     }
 
@@ -968,7 +999,17 @@ export class CasesConnectorExecutor {
       })
     );
 
-    const { syncAlerts, extractObservables } = getCaseSettings(params.owner);
+    const { syncAlerts } = getCaseSettings(params.owner);
+    const extractObservables = resolveExtractObservables(params.owner, spaceExtractObservables);
+    const extractObservablesOverride = getExtractObservablesOverride(
+      params.owner,
+      params.extractObservables
+    );
+    const baseSettings = caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables };
+    const resolvedSettings =
+      extractObservablesOverride != null
+        ? { ...baseSettings, extractObservables: extractObservablesOverride }
+        : baseSettings;
 
     return {
       id: caseId,
@@ -980,7 +1021,7 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? { ...NONE_CASE_CONNECTOR },
-      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables },
+      settings: resolvedSettings,
       ...getAssigneesFromTemplate(caseFieldsFromTemplate?.assignees, hasPlatinumLicenseOrGreater),
       ...(caseFieldsFromTemplate?.severity ? { severity: caseFieldsFromTemplate?.severity } : {}),
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
@@ -1235,6 +1276,7 @@ export class CasesConnectorExecutor {
     const {
       customFieldsConfigurationMap: customFieldsConfigurationMapForReopened,
       templatesConfigurationMap: templatesConfigurationMapForReopened,
+      extractObservablesMap: extractObservablesMapForReopened,
     } = await this.getCustomFieldsAndTemplatesConfiguration();
 
     const {
@@ -1249,6 +1291,7 @@ export class CasesConnectorExecutor {
       customFieldsConfigurationMapForReopened.get(params.owner)
     );
     const hasPlatinumLicenseOrGreater = await this.isAtLeastPlatinum();
+    const spaceExtractObservablesForReopened = extractObservablesMapForReopened.get(params.owner);
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(
@@ -1261,7 +1304,8 @@ export class CasesConnectorExecutor {
         templateRefForReopened,
         resolvedConnectorForReopened,
         hasPlatinumLicenseOrGreater,
-        legacyKeysWithV2ValuesForReopened
+        legacyKeysWithV2ValuesForReopened,
+        spaceExtractObservablesForReopened
       )
     );
 
@@ -1534,6 +1578,7 @@ export class CasesConnectorExecutor {
   private async getCustomFieldsAndTemplatesConfiguration(): Promise<{
     customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
     templatesConfigurationMap: Map<string, TemplatesConfiguration>;
+    extractObservablesMap: Map<string, boolean>;
   }> {
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][getCustomFieldsConfiguration] Getting case configurations`,
@@ -1546,6 +1591,9 @@ export class CasesConnectorExecutor {
     const templatesConfigurationMap = new Map(
       configurations.map((config) => [config.owner, config.templates])
     );
-    return { customFieldsConfigurationMap, templatesConfigurationMap };
+    const extractObservablesMap = new Map(
+      configurations.map((conf) => [conf.owner, conf.extractObservables])
+    );
+    return { customFieldsConfigurationMap, templatesConfigurationMap, extractObservablesMap };
   }
 }

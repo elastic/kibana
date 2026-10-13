@@ -43,6 +43,8 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'setPersistedDiscoverSession',
+    'setDraftSessionTitle',
     'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
@@ -106,6 +108,7 @@ export {
   RuntimeStateManagerProvider,
   useRuntimeStateManager,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 

@@ -18,7 +18,6 @@ import { migrateLegacyPrivateLocations } from './migrate_legacy_private_location
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
-import { assertCanEnableAgentSharding } from './agent_sharding_license';
 import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
@@ -54,12 +53,6 @@ export const PrivateLocationSchema = z.strictObject({
     .describe(
       'An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.'
     ),
-  isAgentSharding: z
-    .boolean()
-    .optional()
-    .describe(
-      'If `true`, Kibana shards monitors across the agents enrolled in the policy so each monitor runs on exactly one agent. Requires an Enterprise license.'
-    ),
 });
 
 export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
@@ -82,15 +75,8 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, server, spaceId, context } = routeContext;
+    const { response, request, server, spaceId } = routeContext;
     const location = request.body as PrivateLocationObject;
-    const licenseError = assertCanEnableAgentSharding(
-      (await context.licensing).license,
-      location.isAgentSharding
-    );
-    if (licenseError) {
-      return response.forbidden({ body: { message: licenseError } });
-    }
 
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
     const { agentPolicy, validationError } = await validateAgentPolicy(

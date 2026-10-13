@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { WorkflowListDto, WorkflowListItemDto } from '@kbn/workflows';
 import { ActionsService } from './actions_service';
@@ -56,14 +57,17 @@ const page = (results: WorkflowListDto['results'], total = results.length): Work
   results,
 });
 
+const request = httpServerMock.createKibanaRequest();
+
 describe('ActionsService', () => {
   it('queries managed workflows tagged action (managed installs, not unmanaged)', async () => {
     const { getWorkflows, client } = makeManagement([page([])]);
     const service = new ActionsService(() => client, logger);
-    await service.list('default');
+    await service.list('default', request);
     expect(getWorkflows).toHaveBeenCalledWith(
       expect.objectContaining({ tags: ['action'], managedFilter: 'managed' }),
-      'default'
+      'default',
+      request
     );
   });
 
@@ -81,7 +85,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result).toEqual({
       total: 1,
       actions: [
@@ -107,13 +111,14 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default', ['contain', 'escalate']);
+    const result = await service.list('default', request, ['contain', 'escalate']);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['a-contain', 'b-escalate']);
     expect(result.total).toBe(2);
     // the filter is applied AFTER fetching, so the API still queries by tag only
     expect(getWorkflows).toHaveBeenCalledWith(
       expect.objectContaining({ tags: ['action'] }),
-      'default'
+      'default',
+      request
     );
   });
 
@@ -122,7 +127,7 @@ describe('ActionsService', () => {
       page([workflowItem('a-contain', { name: 'A', category: 'contain' })]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default', ['nightshift-specific-category']);
+    const result = await service.list('default', request, ['nightshift-specific-category']);
     expect(result).toEqual({ actions: [], total: 0 });
   });
 
@@ -134,7 +139,47 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
+    expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
+  });
+
+  it('normalizes a single actionMetadata.subject to a one-element subjects list', async () => {
+    const { client } = makeManagement([
+      page([workflowItem('isolate', { name: 'Isolate host', subject: 'host' })]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions[0].subjects).toEqual(['host']);
+  });
+
+  it('passes a subject list through as subjects and omits subjects when undeclared', async () => {
+    const { client } = makeManagement([
+      page([
+        workflowItem('criticality', {
+          name: 'Set asset criticality',
+          subject: ['user', 'service'],
+        }),
+        workflowItem('legacy', { name: 'Legacy action' }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions.find((a) => a.workflowId === 'criticality')?.subjects).toEqual([
+      'user',
+      'service',
+    ]);
+    expect(result.actions.find((a) => a.workflowId === 'legacy')).not.toHaveProperty('subjects');
+  });
+
+  it('skips a workflow whose actionMetadata.subject names an unknown kind', async () => {
+    const { client } = makeManagement([
+      page([
+        workflowItem('bad-subject', { name: 'Bad', subject: 'container' }),
+        workflowItem('valid', { name: 'Valid', subject: ['user'] }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
   });
 
@@ -147,7 +192,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
   });
 
@@ -161,18 +206,21 @@ describe('ActionsService', () => {
       { ...page(second, 101), page: 2 },
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.total).toBe(101);
     expect(getWorkflows).toHaveBeenCalledTimes(2);
     expect(getWorkflows).toHaveBeenLastCalledWith(
       expect.objectContaining({ page: 2, size: 100 }),
-      'default'
+      'default',
+      request
     );
   });
 
   it('throws when workflows management is unavailable', async () => {
     const service = new ActionsService(() => undefined, logger);
-    await expect(service.list('default')).rejects.toThrow('Workflows management is not available');
+    await expect(service.list('default', request)).rejects.toThrow(
+      'Workflows management is not available'
+    );
   });
 
   it('sorts entries by name', async () => {
@@ -183,7 +231,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions.map((a) => a.name)).toEqual(['Alpha action', 'Zeta action']);
   });
 
@@ -211,7 +259,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions[0].inputSchema).toEqual(inputSchema);
   });
 
@@ -238,7 +286,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions).toEqual([
       expect.not.objectContaining({ inputSchema: expect.anything() }),
       expect.not.objectContaining({ inputSchema: expect.anything() }),
@@ -257,7 +305,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions[0]).not.toHaveProperty('inputSchema');
   });
 });

@@ -19,6 +19,11 @@ jest.mock('../../../hooks', () => ({
   useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
 }));
 
+let mockHasEnterprise = false;
+jest.mock('../../../hooks/use_license', () => ({
+  useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
+}));
+
 jest.mock('../../settings/private_locations/hooks/use_monitor_agent_assignments', () => ({
   useMonitorAgentAssignments: jest.fn(),
 }));
@@ -32,7 +37,7 @@ const assignment = (
 ): MonitorLocationAssignment => ({
   locationId: 'loc-1',
   locationLabel: 'Local Docker PL',
-  isAgentSharding: false,
+  isShardingActive: false,
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
   agents: [
@@ -44,6 +49,7 @@ const assignment = (
 
 describe('MonitorAssignedAgents', () => {
   beforeEach(() => {
+    mockHasEnterprise = false;
     mockUseAssignments.mockReturnValue({ assignments: [], loading: false, error: false });
   });
 
@@ -60,6 +66,7 @@ describe('MonitorAssignedAgents', () => {
   });
 
   it('keeps the block visible while assignments are loading', () => {
+    mockHasEnterprise = true;
     mockUseAssignments.mockReturnValue({
       assignments: [],
       loading: true,
@@ -75,7 +82,6 @@ describe('MonitorAssignedAgents', () => {
             label: 'Local Docker PL',
             isServiceManaged: false,
             agentPolicyId: 'policy-1',
-            isAgentSharding: true,
           },
         ]}
       />
@@ -129,7 +135,7 @@ describe('MonitorAssignedAgents', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [
         assignment({
-          isAgentSharding: true,
+          isShardingActive: true,
           agents: [
             {
               agentId: 'agent-2',
@@ -159,7 +165,7 @@ describe('MonitorAssignedAgents', () => {
 
   it('shows an unassigned state when a sharded location has no pinned agent yet', () => {
     mockUseAssignments.mockReturnValue({
-      assignments: [assignment({ isAgentSharding: true, agents: [] })],
+      assignments: [assignment({ isShardingActive: true, agents: [] })],
       loading: false,
       error: false,
     });
@@ -179,7 +185,7 @@ describe('MonitorAssignedAgents', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [
         assignment({
-          isAgentSharding: true,
+          isShardingActive: true,
           agents: [
             {
               agentId: 'gone-agent',

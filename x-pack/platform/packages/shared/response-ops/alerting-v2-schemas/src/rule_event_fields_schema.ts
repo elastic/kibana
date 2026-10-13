@@ -6,13 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_KQL_LENGTH } from './constants';
 
 export const ruleEventFieldsQuerySchema = z
   .object({
     matcher: z
       .string()
       .min(1)
-      .max(2048)
+      .max(MAX_KQL_LENGTH)
       .optional()
       .describe('Optional matcher expression used to scope suggested rule event field names.'),
   })

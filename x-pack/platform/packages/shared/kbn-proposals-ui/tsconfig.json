@@ -15,5 +15,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/proposals-common",
+    "@kbn/i18n-react",
+    "@kbn/ui-callout",
   ]
 }

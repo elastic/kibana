@@ -6,8 +6,8 @@
  */
 
 import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
@@ -17,10 +17,10 @@ export const installInvestigationWorkflow = async ({
 }: {
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
-  await client.install(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID, {
+  await client.install(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
-  await client.install(DEDUCTIVE_INVESTIGATION_WORKFLOW_ID, {
+  await client.install(NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };

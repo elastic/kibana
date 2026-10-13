@@ -137,10 +137,11 @@ EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
 
 // ---- Entity analytics home page routes ----
 const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
-  const {
-    featureFlags: { getBooleanValue },
-  } = useKibana().services;
-  const isNewHomePageEnabled = getBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, false);
+  const { featureFlags } = useKibana().services;
+  const isNewHomePageEnabled = featureFlags.useBooleanValue(
+    USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
+    false
+  );
 
   const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
 

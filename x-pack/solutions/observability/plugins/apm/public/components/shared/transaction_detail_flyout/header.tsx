@@ -12,12 +12,16 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { AlertsBadge } from '../badge/alerts_badge';
 import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
+import { useTransactionDetailFlyoutAlertsBadge } from './hooks/use_transaction_detail_flyout_alerts_badge';
 import { useTransactionDetailFlyoutLinks } from './hooks/use_transaction_detail_flyout_links';
+import { useTransactionDetailFlyoutContext } from './transaction_detail_flyout_context';
 
 const FILTERS_PENDING_ARIA_LABEL = i18n.translate(
   'xpack.apm.transactionDetailFlyout.filtersPendingAriaLabel',
@@ -25,6 +29,10 @@ const FILTERS_PENDING_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Updating filters',
   }
 );
+
+const TITLE_LINK_TOOLTIP = i18n.translate('xpack.apm.transactionDetailFlyout.titleLinkTooltip', {
+  defaultMessage: 'Open transaction details',
+});
 
 interface TransactionDetailFlyoutHeaderProps {
   transactionName: string;
@@ -38,32 +46,57 @@ export function TransactionDetailFlyoutHeader({
   isFiltersPending = false,
 }: TransactionDetailFlyoutHeaderProps) {
   const {
+    filters: { serviceName },
+  } = useTransactionDetailFlyoutContext();
+  const {
     apm: { transactionDetailsHref },
   } = useTransactionDetailFlyoutLinks();
+  const {
+    show: showAlertsBadge,
+    count: alertsCount,
+    href: alertsHref,
+  } = useTransactionDetailFlyoutAlertsBadge();
 
   return (
-    <EuiFlyoutHeader hasBorder>
+    <EuiFlyoutHeader>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h2 id={titleId} data-test-subj="transactionDetailFlyoutTitle">
               {transactionDetailsHref ? (
-                <EuiLink
-                  href={transactionDetailsHref}
-                  data-test-subj="transactionDetailFlyoutTitleLink"
-                  {...getEbtProps({
-                    action: EBT_CLICK_ACTIONS.VIEW_SPAN,
-                    element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.TITLE,
-                  })}
-                >
-                  {transactionName}
-                </EuiLink>
+                <EuiToolTip content={TITLE_LINK_TOOLTIP} position="bottom">
+                  <EuiLink
+                    href={transactionDetailsHref}
+                    data-test-subj="transactionDetailFlyoutTitleLink"
+                    {...getEbtProps({
+                      action: EBT_CLICK_ACTIONS.VIEW_SPAN,
+                      element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.TITLE,
+                    })}
+                  >
+                    {transactionName}
+                  </EuiLink>
+                </EuiToolTip>
               ) : (
                 transactionName
               )}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
+        {showAlertsBadge ? (
+          <EuiFlexItem grow={false}>
+            <AlertsBadge
+              count={alertsCount}
+              serviceName={serviceName}
+              transactionName={transactionName}
+              href={alertsHref}
+              data-test-subj="transactionDetailFlyoutAlertsBadge"
+              ebt={{
+                action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+                element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
+              }}
+            />
+          </EuiFlexItem>
+        ) : null}
         {isFiltersPending ? (
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner

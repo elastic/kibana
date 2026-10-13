@@ -14,7 +14,7 @@ import type { RouteContext } from './types';
 import {
   MonitorSortFieldSchema,
   OverviewStatusSortFieldSchema,
-} from '../../common/runtime_types/monitor_management/sort_field';
+} from '../../common/runtime_types/schemas/sort_field';
 import {
   MONITOR_STATUS_ENUM,
   OVERVIEW_STATUS_MAX_PER_PAGE,
