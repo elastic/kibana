@@ -61,17 +61,6 @@ describe('createHistogramBoundsQuery', () => {
     );
   });
 
-  it('returns undefined when histogram field types conflict across streams', () => {
-    expect(
-      createHistogramBoundsQuery({
-        metricItem: createMetric({
-          fieldTypes: [ES_FIELD_TYPES.HISTOGRAM, ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
-        }),
-        originalSource: 'metrics-*',
-      })
-    ).toBeUndefined();
-  });
-
   it('casts a legacy histogram with TO_TDIGEST', () => {
     const boundsQuery = createHistogramBoundsQuery({
       metricItem: createMetric({

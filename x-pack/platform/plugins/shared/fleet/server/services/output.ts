@@ -46,6 +46,7 @@ import type {
   BeatsOutputSOAttributes,
 } from '../types';
 import type {
+  KafkaOutput,
   NewBeatsOutput,
   OtlpGrpcExporterConfig,
   OtlpHttpExporterConfig,
@@ -64,10 +65,10 @@ import {
 import {
   SO_SEARCH_LIMIT,
   outputType,
+  kafkaAuthType,
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
-  kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
   otlpProtocol,
   OTLP_GRPC_ONLY_COMPRESSION_TYPES,
@@ -103,11 +104,27 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
-import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
+import {
+  findAgentlessPolicies,
+  checkOtlpOutputAllowed,
+  checkKafkaOAuth2Allowed,
+} from './outputs/helpers';
+import {
+  clearKafkaAuthFieldsForType,
+  getRemovedKafkaOAuth2Secrets,
+  omitKafkaSecretsOfOtherAuthTypes,
+  keepsKafkaOAuth2,
+  omitRemovedKafkaOAuth2Secrets,
+  omitRemovedKafkaOAuth2Settings,
+  usesKafkaOAuth2,
+  withRemovedKafkaOAuth2Settings,
+  withSavedKafkaOAuth2,
+} from './outputs/kafka_auth';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
   ensureNoDuplicateSecrets,
+  validateKafkaOAuth2,
   validateOutputServerless,
 } from './outputs/validators';
 
@@ -151,7 +168,12 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   const logger = appContextService.getLogger();
 
   if (isBeatsSOOutput(so.attributes)) {
-    const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+    const {
+      output_id: outputId,
+      ssl,
+      proxy_id: proxyId,
+      ...attributes
+    } = omitRemovedKafkaOAuth2Settings(omitRemovedKafkaOAuth2Secrets(so.attributes));
     let parsedSsl;
     try {
       parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
@@ -503,6 +525,18 @@ class OutputService {
     }
   }
 
+  private async assertKafkaOAuth2Allowed(
+    output: Parameters<typeof usesKafkaOAuth2>[0],
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract
+  ): Promise<void> {
+    if (!usesKafkaOAuth2(output)) return;
+    const { result, error } = await checkKafkaOAuth2Allowed(esClient, soClient);
+    if (!result) {
+      throw new OutputInvalidError(error!);
+    }
+  }
+
   private async _getDefaultDataOutputsSO() {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
@@ -688,6 +722,18 @@ class OutputService {
     validateFleetSavedObjectId(options?.id);
 
     await this.assertOtlpOutputAllowed(output, esClient, soClient);
+    // preconfigured outputs are checked before they are created, so Fleet setup does not fail
+    if (!options?.fromPreconfiguration) {
+      await this.assertKafkaOAuth2Allowed(output, esClient, soClient);
+    }
+
+    if (output.type === outputType.Kafka && output.secrets) {
+      // do not store the secrets of an authentication method the output does not use
+      output = {
+        ...output,
+        secrets: omitKafkaSecretsOfOtherAuthTypes(output.secrets, output.auth_type),
+      };
+    }
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -837,13 +883,7 @@ class OutputService {
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
       // Clear fields that are only valid for specific auth_type values
-      if (output.auth_type !== kafkaAuthType.None) {
-        data.connection_type = undefined;
-      }
-      if (output.auth_type !== kafkaAuthType.Userpass) {
-        data.username = undefined;
-        data.password = undefined;
-      }
+      clearKafkaAuthFieldsForType(data, output.auth_type, undefined);
       // Kafka does not support proxies — clear any proxy_id silently (#267281)
       data.proxy_id = null;
     }
@@ -1188,6 +1228,28 @@ class OutputService {
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
 
+    if (mergedType === outputType.Kafka) {
+      // an update that does not touch the authentication keeps the OAuth2 settings and secrets
+      data = withSavedKafkaOAuth2(originalOutput, data);
+    }
+
+    // an edit that keeps the OAuth2 authentication as it is does not need OAuth2 to be allowed
+    if (!fromPreconfiguration && !keepsKafkaOAuth2(originalOutput, { ...data, type: mergedType })) {
+      await this.assertKafkaOAuth2Allowed({ ...data, type: mergedType }, esClient, soClient);
+    }
+
+    if (mergedType === outputType.Kafka && (data as { secrets?: object }).secrets) {
+      // do not store the secrets of an authentication method the output does not use
+      data = {
+        ...data,
+        secrets: omitKafkaSecretsOfOtherAuthTypes(
+          (data as { secrets?: object }).secrets,
+          (data as { auth_type?: KafkaOutput['auth_type'] }).auth_type ??
+            (originalOutput as KafkaOutput).auth_type
+        ),
+      } as UpdateOutput;
+    }
+
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
     const isPreconfigured = (fromPreconfiguration || originalOutput.is_preconfigured) ?? false;
@@ -1244,6 +1306,7 @@ class OutputService {
       target.username = null;
       target.password = null;
       target.sasl = null;
+      target.oauth2 = null;
       target.partition = null;
       target.random = null;
       target.round_robin = null;
@@ -1400,12 +1463,8 @@ class OutputService {
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
         // Clear fields that are only valid for specific auth_type values
-        if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.None) {
-          updateData.connection_type = null;
-        }
-        if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.Userpass) {
-          updateData.username = null;
-          updateData.password = null;
+        if (updateData.auth_type) {
+          clearKafkaAuthFieldsForType(updateData, updateData.auth_type, null);
         }
       }
 
@@ -1466,6 +1525,19 @@ class OutputService {
       }
       if (!typedFullUpdateData.sasl) {
         updateData.sasl = null;
+      }
+      if (typedFullUpdateData.auth_type === kafkaAuthType.OAuth2) {
+        // the credentials and the sasl mechanism do not apply to OAuth2
+        updateData.username = null;
+        updateData.password = null;
+        updateData.sasl = null;
+      } else if (typedFullUpdateData.auth_type || !typedFullUpdateData.oauth2) {
+        updateData.oauth2 = null;
+      }
+      if (updateData.oauth2) {
+        // the saved object update merges objects: the settings that are no longer sent have to be
+        // removed explicitly
+        updateData.oauth2 = withRemovedKafkaOAuth2Settings(originalOutput, updateData.oauth2);
       }
       if (!typedFullUpdateData.ssl) {
         updateData.ssl = null;
@@ -1571,6 +1643,20 @@ class OutputService {
           updateData.service_token = typedFullUpdateData.secrets.service_token as string;
         }
       }
+    }
+
+    // The secrets that are no longer part of the output are deleted above. Their references have to
+    // be removed too, or the output would keep pointing at deleted secrets.
+    const removedOAuth2Secrets = getRemovedKafkaOAuth2Secrets(
+      originalOutput,
+      mergedType === outputType.Kafka ? (data as { secrets?: unknown }).secrets : undefined
+    );
+    if (removedOAuth2Secrets) {
+      const newSecrets = updateData.secrets as { oauth2?: Record<string, unknown> } | undefined;
+      updateData.secrets = {
+        ...newSecrets,
+        oauth2: { ...newSecrets?.oauth2, ...removedOAuth2Secrets },
+      } as typeof updateData.secrets;
     }
 
     patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
@@ -1765,6 +1851,7 @@ class OutputService {
         validateOutputSslPaths(output);
       }
       ensureNoDuplicateSecrets(output);
+      validateKafkaOAuth2(output);
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);

@@ -33,8 +33,8 @@ export const STATS_QUERY_TYPE_LABEL = i18n.translate(
 );
 
 export const STREAM_COLUMN_LABEL = i18n.translate(
-  'xpack.significantEventsApp.knowledgeIndicators.columns.streamLabel',
-  { defaultMessage: 'Stream' }
+  'xpack.significantEventsApp.sources.knowledgeIndicators.sourceColumnLabel',
+  { defaultMessage: 'Source' }
 );
 
 export const DURABILITY_COLUMN_LABEL = i18n.translate(
@@ -124,10 +124,10 @@ export const EMPTY_STATE_TITLE = i18n.translate(
 );
 
 export const EMPTY_STATE_DESCRIPTION = i18n.translate(
-  'xpack.significantEventsApp.knowledgeIndicators.emptyState.description',
+  'xpack.significantEventsApp.sources.knowledgeIndicators.emptyStateDescription',
   {
     defaultMessage:
-      'Facts about your stream automatically extracted from log data to power rule generation. Select streams below and generate knowledge indicators.',
+      'Facts about your sources automatically extracted from their data to power rule generation. Select sources below and generate knowledge indicators.',
   }
 );
 
@@ -138,14 +138,14 @@ export const GENERATION_IN_PROGRESS_TITLE = i18n.translate(
   }
 );
 
-export const getGenerationInProgressDescription = (streamNames: string[]): string => {
-  const count = streamNames.length;
+export const getGenerationInProgressDescription = (sourceTitles: string[]): string => {
+  const count = sourceTitles.length;
   if (count <= 2) {
     return i18n.translate(
       'xpack.significantEventsApp.knowledgeIndicators.generationInProgressDescriptionFew',
       {
         defaultMessage: 'Generation is running for: {streams}. This may take a few minutes.',
-        values: { streams: streamNames.join(', ') },
+        values: { streams: sourceTitles.join(', ') },
       }
     );
   }
@@ -155,8 +155,8 @@ export const getGenerationInProgressDescription = (streamNames: string[]): strin
       defaultMessage:
         'Generation is running for {first}, {second} and {remaining} more. This may take a few minutes.',
       values: {
-        first: streamNames[0],
-        second: streamNames[1],
+        first: sourceTitles[0],
+        second: sourceTitles[1],
         remaining: count - 2,
       },
     }

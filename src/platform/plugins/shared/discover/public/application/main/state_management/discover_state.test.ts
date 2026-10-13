@@ -367,9 +367,10 @@ describe('Discover state', () => {
 
   describe('Session load warnings', () => {
     const warning: DiscoverSessionWarning = {
-      type: 'dropped_panel',
+      type: 'dropped_item',
       tab_id: 'tab-1',
-      panel_id: 'control-1',
+      key: 'control_panels',
+      item_id: 'control-1',
       message: 'Unable to transform control panel [control-1].',
     };
 

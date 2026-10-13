@@ -773,6 +773,7 @@ export const getSavedObjectTypes = (
               mechanism: { type: 'text' },
             },
           },
+          oauth2: { type: 'object', dynamic: false },
           partition: { type: 'keyword' },
           random: {
             dynamic: false,
@@ -1020,6 +1021,21 @@ export const getSavedObjectTypes = (
               } = unknownAttributes as Record<string, unknown>;
               return rest;
             },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                oauth2: { type: 'object', dynamic: false },
+              },
+            },
+          ],
+          schemas: {
+            // `oauth2` is known to this version: it is kept when reading a newer document
+            forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
             create: schema.object({}, { unknowns: 'allow' }),
           },
         },

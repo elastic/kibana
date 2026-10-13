@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
+import { isoDateTime } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_SNOOZED_TRIGGER_ID = 'alerting.actions.alertSnoozed' as const;
 
 export const alertSnoozedPayloadSchema = alertActionEnvelopeSchema.extend({
-  expiry: z.iso
-    .datetime()
+  expiry: isoDateTime()
     .nullable()
     .describe(
       i18n.translate('xpack.alertingVTwo.triggers.alertSnoozed.schema.expiry', {

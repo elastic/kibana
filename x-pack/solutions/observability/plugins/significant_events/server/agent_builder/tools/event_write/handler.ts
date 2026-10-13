@@ -52,7 +52,7 @@ const WRITE_CONCURRENCY = 10;
  *
  * Find-or-create items (no `event_id`):
  *  - Scan all currently-active events for one whose confirmed rules contain the candidate's
- *    confirmed rules and whose streams overlap the candidate streams.
+ *    confirmed rules and whose sources overlap the candidate sources.
  *  - If the candidate has no confirmed rules, compare all rules instead.
  *  - If found, skip the write and return the existing event_id (existing_active_event).
  *  - Otherwise write a new event with the caller-supplied status.
