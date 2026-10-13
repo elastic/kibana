@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import {
@@ -25,6 +25,8 @@ import { ColumnsPopover } from '../all_cases/components/columns_popover';
 import { SidebarToggleButton } from '../case_view/components/sidebar/sidebar_toggle_button';
 
 import * as i18n from './translations';
+
+const NAME_FIELD = 'title';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
 
 export interface SimilarCasesTableProps {
@@ -50,7 +52,37 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
     data: { customFields },
   } = useGetCaseConfiguration();
 
-  const { columns } = useSimilarCasesColumns({ selectedColumns, customFields });
+  // The name column is always visible and first, so it is not offered in the column picker.
+  const nameColumn = useMemo(
+    () => ({
+      ...(selectedColumns.find(({ field }) => field === NAME_FIELD) ?? {
+        field: NAME_FIELD,
+        name: '',
+      }),
+      isChecked: true,
+    }),
+    [selectedColumns]
+  );
+
+  const optionalColumns = useMemo(
+    () => selectedColumns.filter(({ field }) => field !== NAME_FIELD),
+    [selectedColumns]
+  );
+
+  const tableColumnsSelection = useMemo(
+    () => [nameColumn, ...optionalColumns],
+    [nameColumn, optionalColumns]
+  );
+
+  const onOptionalColumnsChange = useCallback(
+    (newColumns: CasesColumnSelection[]) => onSelectedColumnsChange([nameColumn, ...newColumns]),
+    [nameColumn, onSelectedColumnsChange]
+  );
+
+  const { columns } = useSimilarCasesColumns({
+    selectedColumns: tableColumnsSelection,
+    customFields,
+  });
 
   const tableRowProps = useCallback(
     (theCase: SimilarCaseUI) => ({
@@ -74,8 +106,8 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
       >
         <EuiFlexItem grow={false}>
           <ColumnsPopover
-            selectedColumns={selectedColumns}
-            onSelectedColumnsChange={onSelectedColumnsChange}
+            selectedColumns={optionalColumns}
+            onSelectedColumnsChange={onOptionalColumnsChange}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
