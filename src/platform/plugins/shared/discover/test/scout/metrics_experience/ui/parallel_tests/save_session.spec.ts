@@ -17,10 +17,13 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { METRICS_GRID_SORT_DEFAULTS, type MetricsGridSortField } from '@kbn/discover-utils';
 import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixtures';
 
 const SAVED_SEARCH_NAME = 'Metrics Tier 3 Save Test';
 const SORT_REVERT_SEARCH_NAME = 'Metrics Sort Revert Test';
+const RECENCY_SEARCH_NAME = 'Metrics Recency Save Test';
+const RECENCY_SORT_FIELD: MetricsGridSortField = 'recency';
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
 const FILTERED_DIMENSION_VALUE = DEFAULT_CONFIG.dimensions[0].values[0];
@@ -245,5 +248,44 @@ spaceTest.describe(
       }
     );
 
+    spaceTest('should reopen a session saved with the recency sort', async ({ pageObjects }) => {
+      const { metricsExperience, discover } = pageObjects;
+
+      await spaceTest.step('save a session sorted by recency', async () => {
+        await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        await expect(metricsExperience.grid).toBeVisible();
+        await metricsExperience.selectSortBy(RECENCY_SORT_FIELD);
+        await expect(metricsExperience.sortSelectorButton).toHaveAttribute(
+          'data-selected-value',
+          RECENCY_SORT_FIELD
+        );
+        await expect
+          .poll(() => metricsExperience.getPersistedMetricsStateField('sortField'))
+          .toBe(RECENCY_SORT_FIELD);
+        await discover.saveSearch(RECENCY_SEARCH_NAME);
+      });
+
+      await spaceTest.step('start a new session with the default sort', async () => {
+        await discover.clickNewSearch();
+        await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.sortSelectorButton).toHaveAttribute(
+          'data-selected-value',
+          METRICS_GRID_SORT_DEFAULTS.sortField
+        );
+      });
+
+      await spaceTest.step('reopening the saved session restores the recency sort', async () => {
+        await discover.loadSavedSearch(RECENCY_SEARCH_NAME);
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.sortSelectorButton).toHaveAttribute(
+          'data-selected-value',
+          RECENCY_SORT_FIELD
+        );
+        // Recency is always most-recent-first, so the direction toggle stays disabled.
+        await expect(metricsExperience.sortDirectionAsc).toBeDisabled();
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
+      });
+    });
   }
 );
