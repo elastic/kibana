@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
+
 export const INTERNAL_HEADERS = {
   'kbn-xsrf': 'scout',
   'x-elastic-internal-origin': 'kibana',
@@ -33,3 +35,29 @@ export const INVESTIGATION_ASSIGNEES_PATH = (id: string) =>
 /** Agent Builder public conversations API. */
 export const AB_CONVERSATIONS_PATH = 'api/agent_builder/conversations';
 export const AB_CONVERSATION_BY_ID_PATH = (id: string) => `api/agent_builder/conversations/${id}`;
+
+/** Investigations query API, and the impact route that seeds side-index documents. */
+export const INVESTIGATIONS_PATH = 'internal/investigations/investigations';
+export const INVESTIGATION_BY_ID_PATH = (id: string) => `${INVESTIGATIONS_PATH}/${id}`;
+export const INVESTIGATIONS_SEVERITY_COUNTS_PATH = `${INVESTIGATIONS_PATH}/_severity_counts`;
+export const IMPACT_PATH = 'internal/investigations/impact';
+/** The caller's investigation API privileges. */
+export const INVESTIGATIONS_PRIVILEGES_PATH = 'internal/investigations/_privileges';
+
+/** Agent Builder without any agentic investigations privilege. */
+export const NO_INVESTIGATIONS_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: { agentBuilder: ['all'] }, spaces: ['*'] }],
+};
+
+/** Base Read of agentic investigations: `read_investigations`, no `manage_investigations`. */
+export const INVESTIGATIONS_READ_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [
+    {
+      base: [],
+      feature: { agenticInvestigations: ['read'], agentBuilder: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};

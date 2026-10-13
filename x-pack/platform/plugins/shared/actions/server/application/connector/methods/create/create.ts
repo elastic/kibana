@@ -6,10 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypePublishesKeys } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import {
+  createConnectorSigningKey,
+  getSigningKeyPublicBaseUrl,
+} from '../../../../lib/connector_signing_keys';
+import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound_events_space_id';
 import type { Connector } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
@@ -109,6 +114,11 @@ export async function create({
   }
   context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
+  const publishesKeys = connectorTypePublishesKeys(actionTypeId);
+  if (publishesKeys) {
+    getSigningKeyPublicBaseUrl(context.publicBaseUrl);
+  }
+
   if (options?.id) {
     validateConnectorId(options.id);
   }
@@ -192,6 +202,23 @@ export async function create({
 
   if (result instanceof Error) {
     await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
+  }
+
+  // The key is written only after this request owns the connector ID, so a conflicting create
+  // cannot overwrite the key of an existing connector.
+  if (publishesKeys && !(result instanceof Error)) {
+    try {
+      await createConnectorSigningKey({
+        unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+        publicBaseUrl: context.publicBaseUrl,
+        spaceId: resolveInboundEventsSpaceId(context),
+        connectorTypeId: actionTypeId,
+        connectorId: id,
+      });
+    } catch (error) {
+      await context.unsecuredSavedObjectsClient.delete('action', id);
+      throw error;
+    }
   }
 
   const wasSuccessful = !(result instanceof Error);

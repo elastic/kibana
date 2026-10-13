@@ -6,13 +6,31 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
 import { AppsSection } from './components/apps_section';
+import { DeveloperModeSection } from './components/developer_mode_section';
+import { useDeveloperMode } from './hooks/use_developer_mode';
 
 export const GeneralSettingsTab = () => {
   const { application } = useKibana().services;
-  // Slack app routes are gated on the Streams feature privilege, not Nightshift.
-  const canManageSlack = application.capabilities.streams?.manage === true;
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { isDeveloperMode, isSaving, setDeveloperMode } = useDeveloperMode();
+  const canSaveAdvancedSettings = application.capabilities.advancedSettings?.save === true;
 
-  return <AppsSection canEdit={canManageSlack} />;
+  return (
+    <>
+      <AppsSection canEdit={canManageAndConfigure} />
+
+      <EuiSpacer />
+
+      <DeveloperModeSection
+        isDeveloperMode={isDeveloperMode}
+        setDeveloperMode={setDeveloperMode}
+        isDeveloperModeSaving={isSaving}
+        canSaveAdvancedSettings={canSaveAdvancedSettings}
+      />
+    </>
+  );
 };
