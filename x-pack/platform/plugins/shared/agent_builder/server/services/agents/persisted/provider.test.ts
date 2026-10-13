@@ -29,6 +29,7 @@ const gatedAgent = {
   permissions: {
     update_agent: true,
     update_access_control: true,
+    update_approvals: true,
   },
 };
 

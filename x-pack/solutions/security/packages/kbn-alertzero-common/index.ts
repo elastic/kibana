@@ -43,6 +43,8 @@ export {
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
   WRITE_HUNT_EVIDENCE_URL,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
+  HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   SECURITY_SERVICE_ACCOUNT_URL,
@@ -78,13 +80,29 @@ export {
   buildWorkerUrl,
 } from './constants';
 
-export type { ScanFailureWorker, ScanFailuresResponse } from './constants';
+export {
+  SECURITY_ROLE_API_VERSION,
+  WORKER_ROLE_DEFINITIONS,
+  buildSecurityRoleUrl,
+} from './worker_roles';
+export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
+
+export type {
+  ScanFailureWorker,
+  ScanFailuresResponse,
+  HuntThreatIntelSupplyScope,
+  HuntThreatIntelSupplyWorkflowKey,
+  HuntThreatIntelSupplyWorkflowStatus,
+  HuntThreatIntelSupplyHardGate,
+  HuntThreatIntelSupplyStatus,
+} from './constants';
 
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  ActionSubjectKind,
   JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
@@ -177,6 +195,15 @@ export type {
 
 export {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
+  BUDGET_PER_HOUR_DEFAULT,
+  BUDGET_PER_HOUR_MAX,
+  BUDGET_PER_HOUR_MIN,
+  TRIAGE_ALERT_COST,
+  TRIAGE_BATCH_OVERHEAD_COST,
+  getMinBudgetPerHour,
+  LOOKBACK_HOURS_DEFAULT,
+  LOOKBACK_HOURS_MAX,
+  LOOKBACK_HOURS_MIN,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
@@ -195,16 +222,18 @@ export {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
-  applyMissingWorkerSettingDefaults,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   diffWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
-  projectStoredAutonomyLevel,
+  nearestLowerAutonomyLevel,
   touchesWorkerSettings,
+  upgradeStoredWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {

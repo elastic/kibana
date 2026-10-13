@@ -633,8 +633,14 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
-    execution.agentParams;
+  const {
+    telemetryMetadata,
+    maxContentLength,
+    reasoningLevel,
+    projectRouting,
+    structuredOutput,
+    outputSchema,
+  } = execution.agentParams;
 
   // See the matching comment in handleConversationExecution: captured once, ahead of the first
   // model call, so every EIS call in this execution reports the same trace id.
@@ -656,6 +662,8 @@ const handleStandaloneExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput: execution.agentParams.nextInput,
+    structuredOutput,
+    outputSchema,
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
