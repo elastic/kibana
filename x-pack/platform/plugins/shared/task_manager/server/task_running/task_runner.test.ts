@@ -870,10 +870,7 @@ describe('TaskManagerRunner', () => {
         expect(lastTiming(onTaskEvent).eventLoopBlock).toEqual(evidence);
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining('blocked the event loop for ~7000ms'),
-          expect.objectContaining({
-            tags: ['bar', 'bar foo', 'event-loop-blocked', 'event-loop-watchdog'],
-            kibana: { event_loop_watchdog: evidence },
-          })
+          { tags: ['bar', 'bar foo', 'event-loop-blocked', 'event-loop-watchdog'] }
         );
         // known before the task document is written
         expect(end.mock.invocationCallOrder[0]).toBeLessThan(

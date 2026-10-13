@@ -236,11 +236,10 @@ export class EventLoopWatchdog implements EventLoopRunObserver {
     const { report } = message;
     const text = formatBlockReport(report);
     if (report.flag.flagged) {
-      const { taskId, taskType, evidence } = report.flag;
-      this.logger.warn(text, {
-        tags: ['event-loop-watchdog', taskType, taskId],
-        kibana: { event_loop_watchdog: evidence },
-      } as Record<string, unknown>);
+      const { taskId, taskType } = report.flag;
+      // The evidence is in the message. No structured fields: on Cloud, log fields are indexed and
+      // a `kibana.event_loop_watchdog` object clashes with mappings left by other watchdog work.
+      this.logger.warn(text, { tags: ['event-loop-watchdog', taskType, taskId] });
     } else if (report.reportable) {
       this.logger.info(text);
     } else {

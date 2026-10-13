@@ -1230,10 +1230,7 @@ export class TaskManagerRunner implements TaskRunner {
       const sampledMs = eventLoopBlock.blockedMs - eventLoopBlock.unsampledMs;
       this.logger.warn(
         `Task ${taskLabel} blocked the event loop for ~${eventLoopBlock.blockedMs}ms (observed ~${eventLoopBlock.observedMs}ms of ~${sampledMs}ms sampled, cpu ${eventLoopBlock.cpuRatio})`,
-        {
-          tags: [this.taskType, taskLabel, 'event-loop-blocked', 'event-loop-watchdog'],
-          kibana: { event_loop_watchdog: eventLoopBlock },
-        } as Record<string, unknown>
+        { tags: [this.taskType, taskLabel, 'event-loop-blocked', 'event-loop-watchdog'] }
       );
     }
     return result;

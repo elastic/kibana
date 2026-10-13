@@ -157,10 +157,8 @@ describe('EventLoopWatchdog', () => {
     worker.emit('message', { type: 'block', report: report(flagged) });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('flagged task sampleTask "abc"'),
-      expect.objectContaining({
-        tags: ['event-loop-watchdog', 'sampleTask', 'abc'],
-        kibana: { event_loop_watchdog: flagged.flagged ? flagged.evidence : undefined },
-      })
+      // tags only: structured fields would be indexed on Cloud and can clash with existing mappings
+      { tags: ['event-loop-watchdog', 'sampleTask', 'abc'] }
     );
     expect(received).toHaveLength(1);
   });
