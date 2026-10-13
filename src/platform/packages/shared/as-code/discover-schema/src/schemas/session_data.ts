@@ -34,11 +34,11 @@ const discoverSessionTabPresentationSchema = z
     hide_chart: z
       .boolean()
       .default(false)
-      .meta({ description: 'When `true`, the chart is hidden.' }),
+      .meta({ description: 'When `true`, the chart is hidden. Defaults to `false`.' }),
     hide_table: z
       .boolean()
       .default(false)
-      .meta({ description: 'When `true`, the data table is hidden.' }),
+      .meta({ description: 'When `true`, the data table is hidden. Defaults to `false`.' }),
     breakdown_field: z
       .string()
       .max(MAX_BREAKDOWN_FIELD_LENGTH)
@@ -49,8 +49,7 @@ const discoverSessionTabPresentationSchema = z
         'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
     }),
     refresh_interval: refreshIntervalSchema.optional().meta({
-      description:
-        'Refresh interval associated with this tab. It can be stored independently; the presence of `time_range` controls whether the time settings are restored.',
+      description: 'The refresh interval of the tab. Applied only when `time_range` is set.',
     }),
     vis_context: visContextSchema.optional(),
     control_panels: discoverSessionApiControlPanelsSchema.optional(),
@@ -60,20 +59,16 @@ const discoverSessionTabPresentationSchema = z
 const discoverSessionTabIdentitySchema = z
   .object({
     id: asCodeIdSchema,
-    label: z.string().max(MAX_TAB_LABEL_LENGTH).meta({ description: 'Tab label.' }),
+    label: z.string().max(MAX_TAB_LABEL_LENGTH).meta({ description: 'The label of the tab.' }),
   })
   .strict();
 
 export const discoverSessionApiDefaultTabTypeStateSchema = z
   .object({
-    type: z
-      .literal(`${DiscoverTabType.Default}`)
-      .default(DiscoverTabType.Default)
-      .meta({
-        description:
-          'Identifies the type of profile settings saved with the tab. ' +
-          'The `default` value indicates that no profile settings are included.',
-      }),
+    type: z.literal(`${DiscoverTabType.Default}`).default(DiscoverTabType.Default).meta({
+      description:
+        'The tab type. `default` tabs have no type-specific settings. Defaults to `default`.',
+    }),
   })
   .strict();
 
@@ -124,7 +119,7 @@ export const discoverSessionApiTabSchema = z
   .meta({
     description:
       'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
-      'The tab type describes saved state and does not select the active Discover experience. ' +
+      'The tab type describes the saved settings and does not change how Discover displays the tab. ' +
       'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
   });
 
@@ -134,12 +129,12 @@ export const discoverSessionApiDataSchema = z
       .string()
       .min(1)
       .max(MAX_SESSION_TITLE_LENGTH)
-      .meta({ description: 'Discover session title.' }),
+      .meta({ description: 'The title of the Discover session.' }),
     description: z
       .string()
       .max(MAX_SESSION_DESCRIPTION_LENGTH)
       .default('')
-      .meta({ description: 'Discover session description.' }),
+      .meta({ description: 'A short description of the Discover session.' }),
     tags: getAsCodeTagsSchema(
       'Tag IDs to associate with this Discover session.',
       MAX_DISCOVER_SESSION_TAGS

@@ -15,5 +15,5 @@ export const viewModeSchema = z
   .default(VIEW_MODE.DOCUMENT_LEVEL)
   .meta({
     description:
-      'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
+      'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics). Defaults to `documents`.',
   });

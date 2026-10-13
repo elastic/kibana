@@ -22,7 +22,7 @@ const discoverSessionControlWidthSchema = z
   .enum([CONTROL_WIDTH_SMALL, CONTROL_WIDTH_MEDIUM, CONTROL_WIDTH_LARGE])
   .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
   .meta({
-    description: 'Minimum width of the control panel.',
+    description: 'The minimum width of the control. Defaults to `medium`.',
   });
 
 export const discoverSessionApiControlPanelSchema = z
@@ -57,5 +57,5 @@ export const discoverSessionApiControlPanelsSchema = z
     'control_panels must have unique ids'
   )
   .meta({
-    description: 'An array of Discover ES|QL control panels.',
+    description: 'The ES|QL controls of the tab.',
   });

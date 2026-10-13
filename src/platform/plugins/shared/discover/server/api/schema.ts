@@ -32,9 +32,7 @@ export const discoverSessionApiResponseSchema = z
 
 /* Shared context for warnings produced while transforming a Discover session tab. */
 const discoverSessionWarningBaseSchema = z.object({
-  message: z
-    .string()
-    .meta({ description: 'Human-readable explanation of why the content was dropped.' }),
+  message: z.string().meta({ description: 'The reason the content was dropped.' }),
   tab_id: z.string().meta({ description: 'The ID of the tab that contains the dropped content.' }),
 });
 
