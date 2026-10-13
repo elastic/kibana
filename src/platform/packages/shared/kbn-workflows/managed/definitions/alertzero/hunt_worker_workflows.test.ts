@@ -737,7 +737,14 @@ describe('Hunt Watch worker chain', () => {
     });
 
     it('reports run_incomplete and an open Investigation when the close patch failed', () => {
-      const ctx = dismissCase({ error: { message: 'patch rejected' } });
+      // kibana.request persists details.status; the message carries the response body and must
+      // not land in the Investigation journal (attach_impact precedent).
+      const ctx = dismissCase({
+        error: {
+          message: 'HTTP 404: {"message":"Conversation conv-1 not found"}',
+          details: { status: 404 },
+        },
+      });
       const status = render(statusWith.package_status, ctx);
       const reason = render(statusWith.package_reason, ctx);
       const summary = render(summaryWith.package_summary, {
@@ -747,11 +754,14 @@ describe('Hunt Watch worker chain', () => {
 
       expect(ctx.variables.dismiss_close_failed).toBe(true);
       expect(status).toBe('run_incomplete');
-      expect(reason).toContain('patch rejected');
+      expect(reason).toContain('HTTP 404');
+      expect(reason).not.toContain('Conversation conv-1 not found');
       // The Worker journal shows only `reason` on a run_incomplete packaging, so the
       // retry guidance has to live here and not just in the summary.
       expect(reason).toContain('still open');
       expect(reason).toContain('manual run');
+      expect(summary).toContain('HTTP 404');
+      expect(summary).not.toContain('Conversation conv-1 not found');
       expect(summary).toContain('still open');
       expect(summary).not.toContain('closed this Investigation as benign');
     });

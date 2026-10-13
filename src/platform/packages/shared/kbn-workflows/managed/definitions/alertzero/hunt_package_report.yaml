@@ -219,21 +219,14 @@ steps:
   # (steps.decide_and_package.output stays nil in both cases), so this cannot
   # close an Investigation packaging never evaluated.
   #
-  # Over `kibana.request`, not the `ai.conversation.metadata.patch` step: the
-  # in-process step resolves no profile uid from the workflow's fake request and
-  # its patch is refused with "Conversation <id> not found" on every Hunt
-  # Investigation, so a clean run's close never landed (the run ended
-  # run_incomplete with the Investigation left open). The internal metadata
-  # route runs the same patch with the identity resolved over HTTP, the same
-  # way it resolved when find_or_create minted the Investigation. This is the
-  # precedent hunt.yaml's attach_impact sets for exactly this refusal. The
-  # route is agent_builder's own, not this package's, and asks only for
-  # `readAgentBuilder`, which the identity these workflows run as already
-  # needs for the journal-note converse call.
+  # Over `kibana.request`: the in-process metadata patch step cannot resolve the
+  # owner id of an Investigation minted over HTTP and is refused as not found.
+  # See https://github.com/elastic/kibana/issues/297561.
   #
   # Runs before resolve_package_status/resolve_package_summary on purpose: `continue: true`
   # swallows a failed patch, so those steps must read this step's error to avoid reporting
-  # a close that never happened.
+  # a close that never happened. Failed-close prose names the HTTP status only, never the
+  # response body: that body would land in the Investigation via write_run_conclusion.
   - name: dismiss_investigation_if_clean
     type: kibana.request
     if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.dismiss == true }}"
@@ -293,7 +286,7 @@ steps:
         {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
         {{ steps.decide_and_package.error.message }}
         {%- elsif variables.dismiss_close_failed == true -%}
-        could not close the Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. It will not be swept again on its own; a manual run targeting this reportId retries the close
+        could not close the Investigation as benign (HTTP {{ steps.dismiss_investigation_if_clean.error.details.status }}), so it is still open. It will not be swept again on its own; a manual run targeting this reportId retries the close
         {%- elsif variables.dispatch_failed_count > 0 -%}
         {{ variables.dispatch_failed_count }} of {{ steps.decide_and_package.output.proposals | size }} gate dispatch(es) failed to launch
         {%- endif -%}
@@ -322,7 +315,7 @@ steps:
         {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
         {% elsif packaged.dismiss == true and variables.dismiss_close_failed == true -%}
-        No confirmed hits, but packaging could not close this Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
+        No confirmed hits, but packaging could not close this Investigation as benign (HTTP {{ steps.dismiss_investigation_if_clean.error.details.status }}), so it is still open. A manual run targeting this reportId retries the close.
         {% elsif packaged.dismissHold == 'open_proposal' -%}
         No confirmed hits this run, but the Investigation still has a Proposal from an earlier run that is pending or executing, so packaging left it open rather than closing it as benign. Decide the existing Proposal first{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismissHold == 'check_failed' -%}

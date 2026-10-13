@@ -366,15 +366,24 @@ steps:
   # no-op returning closed: true, per the client's own patchMetadata contract);
   # accepted unrecoverable case on failure: the Investigation stays open with
   # its pending state visible, and recovery is manual.
+  #
+  # Over `kibana.request`: the in-process metadata patch step cannot resolve the
+  # owner id of an Investigation minted over HTTP and is refused as not found.
+  # See https://github.com/elastic/kibana/issues/297561.
   - name: close_if_settled
-    type: ai.conversation.metadata.patch
+    type: kibana.request
     if: "${{ variables.settled == true }}"
     with:
-      conversation_id: "{{ inputs.investigationConversationId }}"
-      updates:
-        status: closed
-        close_reason: resolved
-        summary: "{{ inputs.closureSummary }}"
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ inputs.investigationConversationId }}/metadata"
+      headers:
+        kbn-xsrf: "true"
+        Content-Type: application/json
+      body:
+        metadata:
+          status: closed
+          close_reason: resolved
+          summary: "{{ inputs.closureSummary }}"
     on-failure:
       continue: true
 
