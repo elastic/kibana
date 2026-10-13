@@ -25,6 +25,7 @@ import {
   IMPROVEMENTS_INDEX,
   isImprovementStatus,
 } from '../../common/http_api/improvements';
+import { createSpaceDslFilter } from '../utils/space_filter';
 import { ImprovementConflictError, ImprovementNotFoundError } from './errors';
 import type { ImprovementsClient } from './storage';
 import { createImprovementsClient } from './storage';
@@ -60,8 +61,8 @@ export interface ListImprovementsOptions {
 }
 
 /**
- * Improvements-store API. No `spaceId` parameters: the store is global, like the AI index
- * registry it hangs off.
+ * Improvements-store API. Bound to one space at construction, like the AI index registry it hangs
+ * off; methods stay space-free.
  */
 export interface ImprovementsServiceApi {
   /**
@@ -96,7 +97,7 @@ export interface ImprovementsServiceApi {
 }
 
 /**
- * Owns the global `context-engine-improvements` index.
+ * Owns the `context-engine-improvements` index, scoped to one space.
  *
  * The lifecycle is an append log: `improvement_id` is the stable lineage key, `revision_id` is the
  * ES `_id`, and every write — including a transition — appends a revision carrying
@@ -104,20 +105,30 @@ export interface ImprovementsServiceApi {
  * it, rather than using `collapse`, because `collapse` makes `track_total_hits` count hits instead
  * of groups and the review UI needs an exact total to paginate.
  *
- * Construct one per request with that request's client. Every entry point here has a user behind it
- * — a run writes through the analysis route, a reviewer transitions from the UI, and a deletion
- * follows an AI index being removed — so reads and writes are authorized by Elasticsearch against
- * the caller rather than performed as Kibana. The index mappings arrive from a template installed
- * at plugin start, which is the only part that needs Kibana's own credentials.
+ * Construct one per request with that request's client and space. Every entry point here has a user
+ * behind it — a run writes through the analysis route, a reviewer transitions from the UI, and a
+ * deletion follows an AI index being removed — so reads and writes are authorized by Elasticsearch
+ * against the caller rather than performed as Kibana. The index mappings arrive from a template
+ * installed at plugin start, which is the only part that needs Kibana's own credentials.
  */
 export class ImprovementsService implements ImprovementsServiceApi {
   private readonly esClient: ElasticsearchClient;
   private readonly logger: Logger;
+  private readonly space: string;
   private readonly client: ImprovementsClient;
 
-  constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
+  constructor({
+    esClient,
+    logger,
+    space,
+  }: {
+    esClient: ElasticsearchClient;
+    logger: Logger;
+    space: string;
+  }) {
     this.esClient = esClient;
     this.logger = logger;
+    this.space = space;
     this.client = createImprovementsClient(esClient);
   }
 
@@ -154,6 +165,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
         const [head] = heads.get(input.improvement_id) ?? [];
         return {
           ...input,
+          space: this.space,
           revision_id: uuidv4(),
           ...(head ? { previous_revision_id: head.document.revision_id } : {}),
           latest: true,
@@ -177,7 +189,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
     size = DEFAULT_IMPROVEMENTS_PAGE_SIZE,
   }: ListImprovementsOptions = {}): Promise<ListImprovementsResponse> {
     const response = await this.searchHeads({
-      filter: buildHeadFilter({ aiIndexId, status }),
+      filter: buildHeadFilter({ space: this.space, aiIndexId, status }),
       from,
       size: Math.min(size, MAX_IMPROVEMENTS_PAGE_SIZE),
     });
@@ -196,7 +208,13 @@ export class ImprovementsService implements ImprovementsServiceApi {
       size: 1,
       track_total_hits: false,
       query: {
-        bool: { filter: [LATEST_ONLY, { term: { improvement_id: improvementId } }] },
+        bool: {
+          filter: [
+            createSpaceDslFilter(this.space),
+            LATEST_ONLY,
+            { term: { improvement_id: improvementId } },
+          ],
+        },
       },
     });
     return toDocuments(response.hits.hits)[0];
@@ -206,7 +224,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
     const response = await this.client.search({
       size: 0,
       track_total_hits: true,
-      query: { bool: { filter: buildHeadFilter({ aiIndexId }) } },
+      query: { bool: { filter: buildHeadFilter({ space: this.space, aiIndexId }) } },
       aggs: { status: { terms: { field: 'status', size: IMPROVEMENT_STATUSES.length } } },
     });
 
@@ -277,7 +295,11 @@ export class ImprovementsService implements ImprovementsServiceApi {
     try {
       await this.esClient.deleteByQuery({
         index: IMPROVEMENTS_INDEX,
-        query: { term: { ai_index_id: aiIndexId } },
+        query: {
+          bool: {
+            filter: [createSpaceDslFilter(this.space), { term: { ai_index_id: aiIndexId } }],
+          },
+        },
         conflicts: 'proceed',
         refresh: true,
         ignore_unavailable: true,
@@ -333,7 +355,13 @@ export class ImprovementsService implements ImprovementsServiceApi {
       track_total_hits: false,
       seq_no_primary_term: true,
       query: {
-        bool: { filter: [LATEST_ONLY, { terms: { improvement_id: improvementIds } }] },
+        bool: {
+          filter: [
+            createSpaceDslFilter(this.space),
+            LATEST_ONLY,
+            { terms: { improvement_id: improvementIds } },
+          ],
+        },
       },
       // Same tiebreaker as the head reads: duplicate heads of one lineage are written by concurrent
       // runs, so they carry the same `@timestamp` and it alone would not settle which one the
@@ -451,13 +479,15 @@ export class ImprovementsService implements ImprovementsServiceApi {
 }
 
 const buildHeadFilter = ({
+  space,
   aiIndexId,
   status,
 }: {
+  space: string;
   aiIndexId?: string;
   status?: ImprovementStatus[];
 }): QueryDslQueryContainer[] => {
-  const filter: QueryDslQueryContainer[] = [LATEST_ONLY];
+  const filter: QueryDslQueryContainer[] = [createSpaceDslFilter(space), LATEST_ONLY];
   if (aiIndexId) {
     filter.push({ term: { ai_index_id: aiIndexId } });
   }

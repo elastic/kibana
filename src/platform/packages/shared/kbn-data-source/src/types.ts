@@ -10,6 +10,7 @@
 import type { DataViewBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { HttpStart } from '@kbn/core/public';
 
 export type DataSourceKind = 'index-pattern' | 'esql';
 
@@ -44,11 +45,12 @@ export interface Column {
  *
  * Design rules — load-bearing, do not violate:
  * 1. {@link Column} is the minimum union. Source-specific properties are accessed via type narrowing.
- * 2. {@link isTimeBased} returns `!!timeFieldName`. Never introspect the fields/columns array.
+ * 2. {@link isTimeBased}: `EsqlSource` returns `!!timeFieldName` and must not introspect columns.
+ *    `DataViewSource` delegates to `DataView.isTimeBased()`.
  * 3. {@link EsqlSource} must never call `_field_caps`.
  * 4. {@link serialize} returns identity only — columns are runtime, never persisted.
  */
-export interface DataSource extends DataViewBase {
+export interface DataSourceBase extends DataViewBase {
   readonly kind: DataSourceKind;
 
   /** Always present for a constructed `DataSource` (narrowed from `DataViewBase`'s optional id). */
@@ -75,13 +77,23 @@ export interface DataSource extends DataViewBase {
   getColumn(name: string): Column | undefined;
 
   /**
-   * True iff a time field is configured for this source.
+   * Fields that filters and KQL can target. Same as {@link getColumns} for `DataViewSource`;
+   * for `EsqlSource`, the fields of the FROM target rather than the query result columns,
+   * resolved with `http`.
+   */
+  getFilterableFields(http?: HttpStart): Promise<readonly Column[]>;
+
+  /**
+   * True iff this source is time-based.
    *
-   * MUST NOT introspect the fields/columns array. The presence of a configured
-   * time field is the only signal — whether that field exists in the current
-   * result set is irrelevant.
+   * `EsqlSource` uses only the configured `timeFieldName` — whether that field
+   * appears in the current result columns is irrelevant.
+   * `DataViewSource` delegates to `DataView.isTimeBased()`.
    */
   isTimeBased(): boolean;
+
+  /** `EsqlSource` always returns `false`; `DataViewSource` returns `true` when the underlying `DataView` is a rollup index pattern. */
+  isRollup(): boolean;
 
   /** `EsqlSource` always returns `false`; `DataViewSource` delegates to the underlying `DataView`. */
   isPersisted(): boolean;

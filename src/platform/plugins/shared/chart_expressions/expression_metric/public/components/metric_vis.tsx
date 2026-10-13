@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Chart, Metric, Settings, isMetricElementEvent } from '@elastic/charts';
 import type {
@@ -33,6 +33,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 
+import { resolveVisIcon } from '@kbn/chart-icons';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
@@ -60,7 +61,17 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} css={{ width, height }} aria-hidden="true" />;
+    <EuiIcon type={resolveVisIcon(type)} fill={color} css={{ width, height }} aria-hidden="true" />;
+
+const SecondaryMetricLabelTooltip: NonNullable<SecondaryMetricProps['labelTooltip']> = ({
+  children,
+  label,
+  placement,
+}) => (
+  <EuiToolTip content={label} position={placement} data-test-subj="mtrVisSecondaryNameTooltip">
+    {children}
+  </EuiToolTip>
+);
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -241,6 +252,7 @@ export const MetricVis = ({
         icon: secondaryMetricInfo.icon,
         labelPosition,
         badgeBorderColor: highContrastMode ? { mode: 'auto' } : { mode: 'none' },
+        labelTooltip: SecondaryMetricLabelTooltip,
       };
     }
 

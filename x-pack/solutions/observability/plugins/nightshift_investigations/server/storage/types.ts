@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  InvestigationStatus,
+  InvestigationStructuredOutput,
+  InvestigationSubjectType,
+  InvestigationTriggerType,
+  PaginatedResponse,
+  Severity,
+} from '../../common';
+
+/** How many handled events a thread keeps; the oldest are dropped first. */
+export const MAX_THREAD_SEEN_EVENTS = 50;
+
+/** A delivered event and the workflow execution handling it. */
+export interface InvestigationThreadEvent {
+  event_id: string;
+  execution_id: string;
+}
+
+/** The chat thread an investigation belongs to, when it was started from one. */
+export interface InvestigationThread {
+  surface: 'slack';
+  workspace: string;
+  channel: string;
+  thread_ts: string;
+  /** The thread's status message; every run edits it in place. */
+  status_message_ts?: string;
+  /** The events already handled, oldest first, so a redelivery runs once. */
+  seen_events?: InvestigationThreadEvent[];
+}
+
+export interface InvestigationAttributes extends InvestigationStructuredOutput {
+  title: string;
+  status: InvestigationStatus;
+  subject_type: InvestigationSubjectType;
+  subject_id: string;
+  subject_summary?: string;
+  trigger_type: InvestigationTriggerType;
+  concurrency_key?: string;
+  created_at: string;
+  started_at?: string;
+  /** `null` once a settled investigation is reopened. */
+  completed_at?: string | null;
+  executed_by?: string;
+  error?: string | null;
+  conversation_id?: string;
+  /** The workflow execution of the latest run, when it is not the one the investigation is named after. */
+  execution_id?: string;
+  thread?: InvestigationThread;
+}
+
+export interface InvestigationRecord extends InvestigationAttributes {
+  id: string;
+  version?: string;
+}
+
+/** An investigation with only `Fields` loaded. `id` and `version` are always present. */
+export type ProjectedInvestigationRecord<Fields extends keyof InvestigationAttributes> = Pick<
+  InvestigationAttributes,
+  Fields
+> & {
+  id: string;
+  version?: string;
+};
+
+export interface InvestigationPatch extends InvestigationStructuredOutput {
+  title?: string;
+  status?: InvestigationStatus;
+  started_at?: string;
+  /** `null` clears the field; a partial update ignores `undefined`. */
+  completed_at?: string | null;
+  executed_by?: string;
+  error?: string | null;
+  conversation_id?: string;
+  execution_id?: string;
+  thread?: InvestigationThread;
+}
+
+export interface FindInvestigationsQuery<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> {
+  statuses?: InvestigationStatus[];
+  subjectTypes?: InvestigationSubjectType[];
+  severities?: Severity[];
+  /**
+   * Full-text query across title, subject_summary, summary, and conclusion.
+   * Passed as `search` + `searchFields` to the SO find API, not as part of the KQL filter.
+   */
+  query?: string;
+  concurrencyKey?: string;
+  createdAfter?: string;
+  createdBefore?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  completedAfter?: string;
+  completedBefore?: string;
+  sortField?: 'created_at' | 'completed_at' | 'severity';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  perPage?: number;
+  fields?: Fields[];
+}
+
+export type FindInvestigationsResult<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> = PaginatedResponse<ProjectedInvestigationRecord<Fields>>;
+
+export interface InvestigationRepository {
+  create(params: { id: string; attributes: InvestigationAttributes }): Promise<void>;
+  get(id: string): Promise<InvestigationRecord | undefined>;
+  update(params: { id: string; patch: InvestigationPatch; version?: string }): Promise<void>;
+  find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsResult<Fields>>;
+}
+
+export type FindInvestigationsAcrossSpacesResult<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> = PaginatedResponse<{ investigation: ProjectedInvestigationRecord<Fields>; spaceId: string }>;
+
+/**
+ * Reads and writes investigations in every space at once, for background work that runs without a
+ * request and therefore cannot be scoped to one space the way {@link InvestigationRepository} is.
+ */
+export interface InvestigationSweepRepository {
+  findAcrossSpaces<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsAcrossSpacesResult<Fields>>;
+  updateInSpace(params: {
+    id: string;
+    spaceId: string;
+    patch: InvestigationPatch;
+    version?: string;
+  }): Promise<void>;
+  deleteAllAcrossSpaces(): Promise<DeleteAllInvestigationsResult>;
+}
+
+export interface DeleteAllInvestigationsFailure {
+  id: string;
+  spaceId: string;
+  error: string;
+}
+
+export interface DeleteAllInvestigationsResult {
+  deleted: number;
+  failures: DeleteAllInvestigationsFailure[];
+}

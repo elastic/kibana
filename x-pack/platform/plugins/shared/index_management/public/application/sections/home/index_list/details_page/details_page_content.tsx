@@ -112,6 +112,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
             sampleDocuments={documentsSampleData?.results ?? []}
             isDocumentsLoading={isDocumentsSampleLoading}
             documentsError={documentsSampleError}
+            onRefreshDocuments={resendDocumentsSampleRequest}
           />
         ),
         order: 10,
@@ -135,6 +136,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     documentsSampleData,
     isDocumentsSampleLoading,
     documentsSampleError,
+    resendDocumentsSampleRequest,
     enableIndexStats,
     extensionsService.indexDetailsTabs,
     index,

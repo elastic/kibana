@@ -11,7 +11,7 @@ import { ArtifactListPage } from './artifact_list';
 import { PolicyArtifactsPage } from './policy_artifacts';
 import { PolicyDetailsPage } from './policy_details';
 
-export type { PolicyArtifactKind } from './policy_artifacts';
+export type { BlocklistOperator, PolicyArtifactKind } from './policy_artifacts';
 
 export interface ArtifactTabPageObjects extends SecurityPageObjects {
   artifactListPage: ArtifactListPage;

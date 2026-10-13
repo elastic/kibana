@@ -19,6 +19,7 @@ import {
   isFilterActiveForScope,
   isEntityFilterActiveForScope,
 } from '../../filters/filter_store';
+import type { FilterToggleEvent, EntityFilterToggleEvent } from '../../filters/filter_store';
 import type { NamespaceSourcePrefixResolver } from '../../filters/search_filters';
 import { isEuidDslTranslatable, buildFieldsDsl } from '../../filters/search_filters';
 import {
@@ -27,6 +28,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
@@ -196,7 +198,10 @@ export const getEntityFilterSpec = (
 ): EntityFilterSpec | undefined => {
   if (!sourceFields || Object.keys(sourceFields).length === 0) return undefined;
 
-  const dsl = buildEntityDsl(nodeId, sourceFields, euidApi, role);
+  const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
+  const dsl = hasNamespaceSourceField(entityType, sourceFields, euidApi)
+    ? buildEntityDsl(nodeId, sourceFields, euidApi, role)
+    : undefined;
   // A DSL we cannot translate without dropping clauses is worse than none: the filter would be
   // wider than the entity. Condition-based namespaces (a `local` user, asset discovery) produce
   // `match` / `terms` clauses with no filter-bar equivalent, so fall through to the identity
@@ -204,7 +209,6 @@ export const getEntityFilterSpec = (
   if (dsl && isEuidDslTranslatable(dsl)) {
     // Ask the entity store which source fields are prefix-matched for this entity type so we
     // replace exactly those prefix clauses with observed exact values — no more, no less.
-    const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
     const prefixFields = euidApi
       ? new Set(euidApi.getEuidNamespaceSourceFields(entityType).prefixMatchFields)
       : new Set<string>();
@@ -222,7 +226,6 @@ export const getEntityFilterSpec = (
   // Use the entity store's own identifier resolution to get only the fields that compose the EUID
   // for this document. Collected attributes (e.g. `user.id` on a `local` user that resolved via
   // `user.name`) are excluded — including them in an AND filter would drop events that lack them.
-  const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
   const doc = { ...sourceFields, 'entity.id': nodeId };
   let rawIdentifiers: Record<string, string> | undefined;
   try {
@@ -246,6 +249,36 @@ export const getEntityFilterSpec = (
   return Object.keys(candidateFields).length > 0
     ? { kind: 'candidateFields', fields: candidateFields }
     : undefined;
+};
+
+/**
+ * A user EUID's namespace is evaluated from event fields. Entity-store relationship records can
+ * supply only retained identity fields (for example `user.id`) and omit those event fields. In
+ * that case, the document DSL would treat the namespace as `unknown` and add ranking guards that
+ * exclude otherwise matching events. Let the Entity Store's identifier helper provide the safe,
+ * available identity building blocks instead.
+ */
+const hasNamespaceSourceField = (
+  entityType: EntityType,
+  sourceFields: Record<string, string | string[]>,
+  euidApi: EuidFilterApi | undefined
+): boolean => {
+  if (!euidApi) return true;
+
+  let namespaceSourceFields: string[];
+  try {
+    const { exactMatchFields, prefixMatchFields } =
+      euidApi.getEuidNamespaceSourceFields(entityType);
+    namespaceSourceFields = [...exactMatchFields, ...prefixMatchFields];
+  } catch {
+    // Let buildEntityDsl handle an unregistered type and fall back to its identity fields.
+    return true;
+  }
+
+  return (
+    namespaceSourceFields.length === 0 ||
+    namespaceSourceFields.some((field) => sourceFields[field] != null)
+  );
 };
 
 const buildEntityDsl = (
@@ -301,10 +334,45 @@ const rewriteDslFieldsForTargetRole = (dsl: object): object => {
   return rewriteKeys(dsl) as object;
 };
 
-/**
- * Emits (or removes) the filter for an entity role, handling both the KQL and fallback forms.
- * Shared by the graph node popover and the grouped-entities flyout so they stay in step.
- */
+type EntityFilterClause =
+  | Pick<FilterToggleEvent, 'type' | 'field' | 'value'>
+  | Pick<
+      EntityFilterToggleEvent,
+      'type' | 'dsl' | 'namespaceSourceValues' | 'getNamespaceSourcePrefix'
+    >;
+
+/** Converts a resolved entity filter spec into clauses shared by node actions and Timeline. */
+export const getEntityFilterSpecClauses = (
+  spec: EntityFilterSpec,
+  role: 'actor' | 'target'
+): EntityFilterClause[] => {
+  if (spec.kind === 'dsl') {
+    return [
+      {
+        type: 'entityDsl',
+        dsl: spec.dsl,
+        namespaceSourceValues: spec.namespaceSourceValues,
+        getNamespaceSourcePrefix: spec.getNamespaceSourcePrefix,
+      },
+    ];
+  }
+  if (spec.kind === 'resolvedIdentity') {
+    // Keep a compound identity together: ORing its fields would match other entities.
+    const roleFields = Object.fromEntries(
+      Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
+    );
+    return [{ type: 'entityDsl', dsl: buildFieldsDsl(roleFields) }];
+  }
+  return Object.entries(spec.fields).flatMap(([field, values]) =>
+    ([] as string[]).concat(values).map((value) => ({
+      type: 'equals' as const,
+      field: fieldForRole(field, role),
+      value,
+    }))
+  );
+};
+
+/** Emits or removes the shared filter clauses for an entity role. */
 export const toggleEntityFilterSpec = (
   scopeId: string,
   filterKey: string,
@@ -312,32 +380,18 @@ export const toggleEntityFilterSpec = (
   role: 'actor' | 'target',
   action: 'show' | 'hide'
 ): void => {
-  if (spec.kind === 'dsl') {
-    emitEntityFilterToggle(
-      scopeId,
-      filterKey,
-      spec.dsl,
-      action,
-      spec.namespaceSourceValues,
-      spec.getNamespaceSourcePrefix
-    );
-    return;
-  }
-  if (spec.kind === 'resolvedIdentity') {
-    // Every field is required, so emit one entity filter ANDing them. Calling `emitFilterToggle`
-    // per field instead would OR them (`addFilter` combines with the first filter), giving a
-    // filter broader than the entity — `user.name` alone matches the same user on other hosts.
-    const roleFields = Object.fromEntries(
-      Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
-    );
-    emitEntityFilterToggle(scopeId, filterKey, buildFieldsDsl(roleFields), action);
-    return;
-  }
-
-  for (const [field, value] of Object.entries(spec.fields)) {
-    // Flatten string | string[] so each value gets its own OR'd phrase filter
-    for (const one of ([] as string[]).concat(value)) {
-      emitFilterToggle(scopeId, fieldForRole(field, role), one, action);
+  for (const clause of getEntityFilterSpecClauses(spec, role)) {
+    if (clause.type === 'entityDsl') {
+      emitEntityFilterToggle(
+        scopeId,
+        filterKey,
+        clause.dsl,
+        action,
+        clause.namespaceSourceValues,
+        clause.getNamespaceSourcePrefix
+      );
+    } else {
+      emitFilterToggle(scopeId, clause.field, clause.value, action);
     }
   }
 };
@@ -442,6 +496,8 @@ export interface GetEntityExpandItemsOptions {
   shouldRender: EntityExpandShouldRender;
   /** Whether entity details should be disabled (shown but not clickable). Defaults to false. */
   showEntityDetailsDisabled?: boolean;
+  /** Whether the node is a grouped entities node. Changes the entity details label. Defaults to false. */
+  isGrouped?: boolean;
   /** Whether entity relationships is currently expanded (controls show/hide label) */
   isEntityRelationshipsExpanded?: boolean;
   /** Whether the entity is part of the initial set of entities (e.g., from the original graph request) */
@@ -476,6 +532,7 @@ export const getEntityExpandItems = (
     isInitialEntity = false,
     toggleEntityRelationships,
     showEntityRelationshipsDisabled = false,
+    isGrouped = false,
   } = options;
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
@@ -603,11 +660,18 @@ export const getEntityExpandItems = (
     items.push({
       type: 'item',
       iconType: 'maximize',
-      testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-      label: i18n.translate(
-        'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-        { defaultMessage: 'Show entity details' }
-      ),
+      testSubject: isGrouped
+        ? GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID
+        : GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+      label: isGrouped
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showGroupedEntities',
+            { defaultMessage: 'Show grouped entities' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+            { defaultMessage: 'Show entity details' }
+          ),
       disabled: showEntityDetailsDisabled,
       onClick: handleEntityDetailsClick,
       showToolTip: showEntityDetailsDisabled,

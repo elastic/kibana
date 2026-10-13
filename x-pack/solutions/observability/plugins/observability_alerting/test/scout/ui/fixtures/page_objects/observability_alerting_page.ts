@@ -7,19 +7,19 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../../../../../public/constants';
 
 export const OBSERVABILITY_ALERTING_SURFACES = [
-  { name: 'Inbox', path: OBSERVABILITY_ALERTING_INBOX_PATH, title: 'Alert episodes' },
-  { name: 'Rules (v1)', path: OBSERVABILITY_ALERTING_RULES_V1_PATH, title: 'Rules' },
+  { name: 'Alerts', path: OBSERVABILITY_ALERTING_ALERTS_PATH, title: 'Alerts' },
+  { name: 'Rules (V1)', path: OBSERVABILITY_ALERTING_RULES_V1_PATH, title: 'Rules' },
   { name: 'Rules', path: OBSERVABILITY_ALERTING_RULES_V2_PATH, title: 'Rules' },
   { name: 'Rule library', path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, title: 'Rule library' },
   {
@@ -38,8 +38,8 @@ export const OBSERVABILITY_ALERTING_RULES_V1_URL_RE =
   /\/app\/observability\/alerting\/rules\/v1(\/|$|\?|#)/;
 export const OBSERVABILITY_ALERTING_RULES_V2_URL_RE =
   /\/app\/observability\/alerting\/rules\/v2(\/|$|\?|#)/;
-export const OBSERVABILITY_ALERTING_INBOX_EPISODE_URL_RE =
-  /\/app\/observability\/alerting\/inbox\/[^/?#]+/;
+export const OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE =
+  /\/app\/observability\/alerting\/alerts\/[^/?#]+/;
 export const OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE =
   /\/app\/observability\/alerting\/rules\/v2\/[^/?#]+/;
 export const MANAGEMENT_ALERTING_V2_EPISODES_URL_RE = /\/app\/management\/alertingV2\/episodes/;
@@ -54,6 +54,19 @@ export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2(\/|$
 export class ObservabilityAlertingPage {
   public readonly pageTitle: Locator;
   public readonly appNotFoundPageContent: Locator;
+  public readonly requiredPrivilegesPrompt: Locator;
+  public readonly episodesListPage: Locator;
+  public readonly episodesKpisAlertsPanel: Locator;
+  public readonly episodesKpisAlertActionsPanel: Locator;
+  public readonly episodesHistogramPanel: Locator;
+  public readonly episodesHistogramChart: Locator;
+  public readonly episodesHistogramError: Locator;
+  public readonly episodesTableLoading: Locator;
+  public readonly episodesTableToolbar: Locator;
+  public readonly episodesItemCount: Locator;
+  public readonly tagsFilterButton: Locator;
+  public readonly tagsFilterListbox: Locator;
+  public readonly tagsFilterSearch: Locator;
   public readonly v1RulesTab: Locator;
   public readonly v2RulesTab: Locator;
   public readonly inboxPage: Locator;
@@ -64,13 +77,29 @@ export class ObservabilityAlertingPage {
   public readonly viewRuleDetailsLink: Locator;
   public readonly episodeDetailsPage: Locator;
   public readonly ruleDetailLayout: Locator;
+  public readonly toasts: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
+    this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
+    this.episodesListPage = this.page.testSubj.locator('alertingV2AlertsListPage');
+    this.episodesKpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
+    this.episodesKpisAlertActionsPanel = this.page.testSubj.locator(
+      'episodesKpisAlertActionsPanel'
+    );
+    this.episodesHistogramPanel = this.page.testSubj.locator('episodesHistogramPanel');
+    this.episodesHistogramChart = this.page.testSubj.locator('unifiedHistogramChart');
+    this.episodesHistogramError = this.page.testSubj.locator('episodesHistogramError');
+    this.episodesTableLoading = this.page.testSubj.locator('alertingV2EpisodesListTable-loading');
+    this.episodesTableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
+    this.episodesItemCount = this.page.testSubj.locator('alertEpisodesItemCount');
+    this.tagsFilterButton = this.page.testSubj.locator('episodesFilterBar-tags-button');
+    this.tagsFilterListbox = this.page.getByRole('listbox', { name: 'Filter options' });
+    this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
     this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
-    this.inboxPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.inboxPage = this.page.testSubj.locator('alertingV2AlertsListPage');
     this.expandRowButton = this.page.testSubj.locator('docTableExpandToggleColumn');
     this.episodeFlyout = this.page.testSubj.locator('alertingV2EpisodeFlyout');
     this.takeActionButton = this.page.testSubj.locator('alertingV2EpisodeFlyoutTakeActionButton');
@@ -78,8 +107,9 @@ export class ObservabilityAlertingPage {
     this.viewRuleDetailsLink = this.page.testSubj.locator(
       'alertingV2EpisodeDetailsViewRuleDetailsButton'
     );
-    this.episodeDetailsPage = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
+    this.episodeDetailsPage = this.page.testSubj.locator('alertingV2AlertDetailsPage');
     this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
+    this.toasts = this.page.components.toast().toasts;
   }
 
   urlFor(path: string): string {
@@ -116,9 +146,9 @@ export class ObservabilityAlertingPage {
 
   async gotoInboxFilteredByRule(ruleId: string): Promise<void> {
     const search = new URLSearchParams({
-      _a: `(episodesList:(ruleId:'${ruleId}'))`,
+      _a: `(alertsList:(ruleId:'${ruleId}'))`,
     });
-    await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}?${search.toString()}`);
+    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}?${search.toString()}`);
     await this.inboxPage.waitFor({ state: 'visible' });
   }
 
@@ -137,11 +167,28 @@ export class ObservabilityAlertingPage {
   }
 
   async gotoEpisodeDetails(episodeId: string): Promise<void> {
-    await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}/${encodeURIComponent(episodeId)}`);
+    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(episodeId)}`);
     await this.episodeDetailsPage.waitFor({ state: 'visible' });
   }
 
   async clickViewRuleDetails(): Promise<void> {
     await this.viewRuleDetailsLink.click();
+  }
+
+  async openTagsFilter(): Promise<void> {
+    await this.tagsFilterButton.click();
+    await this.tagsFilterListbox.waitFor({ state: 'visible' });
+  }
+
+  async searchTagsFilter(query: string): Promise<void> {
+    await this.tagsFilterSearch.fill(query);
+  }
+
+  tagFilterOption(tag: string): Locator {
+    return this.page.testSubj.locator(`episodesFilterBar-tags-popover-option-${tag}`);
+  }
+
+  episodeRuleCell(ruleName: string): Locator {
+    return this.page.testSubj.locator('episodeRuleCell').filter({ hasText: ruleName });
   }
 }

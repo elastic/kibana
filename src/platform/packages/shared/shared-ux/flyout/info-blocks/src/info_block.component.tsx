@@ -9,14 +9,22 @@
 
 import React, { type CSSProperties, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, euiFontSize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiTextTruncate,
+  euiFontSize,
+  useEuiMemoizedStyles,
+  useEuiTheme,
+} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import type { InfoBlockItem } from './types';
 
 export type InfoBlockProps = InfoBlockItem;
 
-const styles = {
+const styles = ({ euiTheme }: UseEuiTheme) => ({
   block: css`
     min-width: 0;
+    padding: ${euiTheme.size.m};
   `,
   // Links in custom values track the value's own weight.
   value: css`
@@ -24,18 +32,26 @@ const styles = {
       font-weight: inherit;
     }
   `,
-};
+});
 
-/** A single title/value pair; one grid cell of an `InfoBlocks` panel. */
+/**
+ * A single title/value pair; one grid cell of an `InfoBlocks` panel.
+ *
+ * Renders a `dt`/`dd` pair. This component must be rendered inside a `dl` element,
+ * which is provided by the parent `InfoBlocks` component.
+ */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
   value,
   size,
   color,
+  id,
+  'data-test-subj': dataTestSubj,
   ...rest
 }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
+  const memoizedStyles = useEuiMemoizedStyles(styles);
   const valueFontSize = size ? euiFontSize(euiThemeContext, size, { unit: 'px' }) : undefined;
   // Primitive values get built-in single-line truncation.
   const isTextValue = typeof value === 'string' || typeof value === 'number';
@@ -50,22 +66,26 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
     : { fontWeight: euiTheme.font.weight.bold };
 
   return (
-    <div data-test-subj={rest['data-test-subj'] ?? 'infoBlock'} css={styles.block}>
-      <EuiText size="xs" color="subdued">
-        <EuiTextTruncate text={title} />
-      </EuiText>
-      <EuiText size="s" color={color} css={styles.value} style={valueStyle}>
-        {/* Values are often identifiers, where both ends carry meaning. */}
-        {isTextValue ? (
-          <EuiTextTruncate
-            data-test-subj="infoBlockValue"
-            text={String(value)}
-            truncation="middle"
-          />
-        ) : (
-          value
-        )}
-      </EuiText>
+    <div {...rest} data-test-subj={dataTestSubj ?? 'infoBlock'} css={memoizedStyles.block}>
+      <dt>
+        <EuiText size="xs" color="subdued">
+          <EuiTextTruncate text={title} />
+        </EuiText>
+      </dt>
+      <dd>
+        <EuiText size="s" color={color} css={memoizedStyles.value} style={valueStyle}>
+          {/* Values are often identifiers, where both ends carry meaning. */}
+          {isTextValue ? (
+            <EuiTextTruncate
+              data-test-subj="infoBlockValue"
+              text={String(value)}
+              truncation="middle"
+            />
+          ) : (
+            value
+          )}
+        </EuiText>
+      </dd>
     </div>
   );
 };

@@ -54,6 +54,8 @@ export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationS
 
 export const ObservableTypesConfigurationSchema = z.array(CaseObservableTypeSchema);
 
+export const WorkflowTagsConfigurationSchema = z.array(z.string());
+
 export const TemplateConfigurationSchema = z.object({
   key: z.string(),
   name: z.string(),
@@ -70,6 +72,8 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
   customFields: CustomFieldsConfigurationSchema,
   templates: TemplatesConfigurationSchema,
   observableTypes: ObservableTypesConfigurationSchema,
+  extractObservables: z.boolean(),
+  workflowTags: WorkflowTagsConfigurationSchema,
 });
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
@@ -107,3 +111,4 @@ export type Configuration = z.infer<typeof ConfigurationSchema>;
 export type Configurations = z.infer<typeof ConfigurationsSchema>;
 export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
 export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;
+export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;

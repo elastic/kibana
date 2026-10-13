@@ -8,15 +8,22 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE } from './constants';
 import { registerMetricsEbtEvents } from './metrics_ebt_events';
 
 describe('registerMetricsEbtEvents', () => {
-  it('registers the metric aggregation configuration change event', () => {
+  const registerEvents = () => {
     const analytics = {
       registerEventType: jest.fn(),
     } as unknown as AnalyticsServiceSetup;
 
     registerMetricsEbtEvents(analytics);
+
+    return analytics;
+  };
+
+  it('registers the metric aggregation configuration change event', () => {
+    const analytics = registerEvents();
 
     expect(analytics.registerEventType).toHaveBeenCalledWith({
       eventType: 'discover_metrics_aggregation_config_changed',
@@ -37,6 +44,50 @@ describe('registerMetricsEbtEvents', () => {
           type: 'keyword',
           _meta: {
             description: 'Aggregation configuration after the change',
+          },
+        },
+      },
+    });
+  });
+
+  it('registers the ES|QL query failure event', () => {
+    const analytics = registerEvents();
+
+    expect(analytics.registerEventType).toHaveBeenCalledWith({
+      eventType: METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
+      schema: {
+        error_type: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Elasticsearch error type of the failed ES|QL query, read from the cause chain so a generic wrapper does not hide the reason (e.g. circuit_breaking_exception, verification_exception, parsing_exception)',
+            optional: true,
+          },
+        },
+        error_category: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'High-level failure classification: user_input, resource_limit, application, or unknown',
+          },
+        },
+        status_code: {
+          type: 'integer',
+          _meta: {
+            description: 'HTTP status returned by Elasticsearch, when one could be recovered',
+            optional: true,
+          },
+        },
+        query_type: {
+          type: 'keyword',
+          _meta: {
+            description: 'ES|QL source command of the failed query: TS, FROM, or unknown',
+          },
+        },
+        profile: {
+          type: 'keyword',
+          _meta: {
+            description: 'Discover profile that owns the failing chart section, to allow filtering',
           },
         },
       },

@@ -49,7 +49,7 @@ const MAX_BYTES_PER_FILE = 400 * 1024;
 
 const GENERATED_DIR = join(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
+  'src/platform/packages/shared/esql/kbn-esql-language/src/commands/definitions/generated'
 );
 
 const GENERATED_PROMQL_OUTPUT_PATH = join(GENERATED_DIR, 'promql_functions.ts');

@@ -116,7 +116,7 @@ node __tests__/equivalence.test.mjs    # verifies it
 ```
 
 Requires `jsdom`, available via the Kibana root `node_modules` — run from
-inside a normal `yarn kbn bootstrap`'d checkout.
+inside a normal `pnpm kbn bootstrap`'d checkout.
 
 - `injector-builder.mjs` — the pure generation logic (extracting each
   detector's inner function out of its paste-mode IIFE and assembling the

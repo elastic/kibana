@@ -39,6 +39,7 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
+import { AllRulesTabs } from './detection_engine/rule_management_ui/components/rules_table/constants';
 import { hasAccessToAttackDiscovery, hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
@@ -185,6 +186,16 @@ export const isDashboardViewPath = (pathname: string): boolean =>
 export const isRuleChangesHistoryPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: RULES_CHANGES_HISTORY_PATH,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the Rules page tabs (installed, monitoring, updates), whose app header owns the page actions.
+ */
+export const isRulesManagementPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: `${RULES_PATH}/:tabName(${Object.values(AllRulesTabs).join('|')})`,
     exact: true,
     strict: false,
   });

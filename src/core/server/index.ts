@@ -97,10 +97,10 @@ export type {
 
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { ElasticsearchConfig, pollEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
+export { ElasticsearchConfig, checkEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
 export type {
   NodesVersionCompatibility,
-  PollEsNodesVersionOptions,
+  CheckEsNodesVersionOptions,
 } from '@kbn/core-elasticsearch-server-internal';
 export type {
   ElasticsearchServicePreboot,
@@ -133,8 +133,6 @@ export type {
   CoreAuditService,
   CoreServiceAccountsService,
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   AuditEvent,
   AuditHttp,
@@ -249,6 +247,13 @@ export type {
   HttpSelfResponse,
   HttpSelfScopedClient,
   HttpSelfService,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerNotHandledResult,
+  HttpSelfUnauthorizedErrorHandlerOptions,
+  HttpSelfUnauthorizedErrorHandlerResult,
+  HttpSelfUnauthorizedErrorHandlerRetryParams,
+  HttpSelfUnauthorizedErrorHandlerRetryResult,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
   RawRequest,
   FakeRawRequest,
   HttpProtocol,

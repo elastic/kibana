@@ -89,6 +89,36 @@ describe('getNodeStack', () => {
     expect(nodeStack).toEqual(['enterCondition_if_ifStepLevel', 'enterThen_if_ifStepLevel']);
   });
 
+  it('reuses precomputed predecessors without traversing again or mutating them', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+    const nodeId = 'secondThenTestConnectorStep';
+    const predecessors = Object.freeze(workflowGraph.getAllPredecessors(nodeId));
+    const getAllPredecessorsSpy = jest.spyOn(workflowGraph, 'getAllPredecessors');
+
+    expect(workflowGraph.getNodeStack(nodeId, predecessors)).toEqual([
+      'enterForeach_testForeachStep',
+      'enterCondition_testIfStep',
+      'enterThen_testIfStep',
+    ]);
+    expect(getAllPredecessorsSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps predecessor order and node stacks independent of mutations to earlier results', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+    const nodeId = 'secondThenTestConnectorStep';
+    const predecessors = workflowGraph.getAllPredecessors(nodeId);
+    const expectedPredecessors = [...predecessors];
+
+    predecessors.reverse();
+
+    expect(workflowGraph.getAllPredecessors(nodeId)).toEqual(expectedPredecessors);
+    expect(workflowGraph.getNodeStack(nodeId)).toEqual([
+      'enterForeach_testForeachStep',
+      'enterCondition_testIfStep',
+      'enterThen_testIfStep',
+    ]);
+  });
+
   it('should return empty stack for top-level step without control-flow wrappers', () => {
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     const nodeStack = workflowGraph.getNodeStack('notInStackStep');

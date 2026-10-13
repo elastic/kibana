@@ -553,6 +553,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'alerting:v2:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Enables experimental features in Alerting v2 when true.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
@@ -575,6 +579,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'agentBuilder:bashSupport': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:apiDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
+    },
   },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
@@ -716,6 +727,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Maximum number of services shown in the APM Services Inventory.' },
+  },
   'observability:apmEnableTransactionProfiling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -843,11 +858,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Streams Canvas',
     },
   },
-  'observability:streamsSigEventsIndexPatterns': {
-    type: 'keyword',
+  'observability:nightshiftContinuousOnboardingEnabled': {
+    type: 'boolean',
     _meta: {
       description:
-        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+        'Non-default value of whether continuous knowledge indicator onboarding is enabled.',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingIntervalHours': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source.',
     },
   },
   'observability:streamsSigEventsScheduledDiscoveryEnabled': {
@@ -937,6 +959,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable diagnostic mode',
     },
   },
+  'observability:nightshiftDeveloperMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of whether Nightshift developer mode is enabled.',
+    },
+  },
   'genAiSettings:defaultAIConnector': {
     type: 'keyword',
     _meta: {
@@ -1016,6 +1044,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
     },
   },
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables displaying nodes whose target entity is unknown or unresolved in the Security graph.',
+    },
+  },
   'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {
@@ -1032,6 +1067,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable token usage tracking in Kibana',
+    },
+  },
+  'alerting:v1:showV1ObservabilityAlertsTable': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the V1 Observability alerts table is shown when Alerting v2 is enabled.',
     },
   },
 };

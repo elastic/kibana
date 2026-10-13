@@ -32,6 +32,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     renderers: {
       register: jest.fn(),
     },
+    conversationEvents: {
+      register: jest.fn(),
+    },
     skills: {
       register: jest.fn(),
     },
@@ -43,6 +46,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     },
     conversationTemplates: {
       register: jest.fn(),
+    },
+    conversations: {
+      enableUpdatedTrigger: jest.fn(),
     },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };

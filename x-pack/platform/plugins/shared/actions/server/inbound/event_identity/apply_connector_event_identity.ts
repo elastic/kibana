@@ -10,7 +10,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { ActionsClientContext } from '../../actions_client';
 import type { RawAction } from '../../types';
-import { resolveInboundEventsSpaceId } from '../ensure_connector_ingress_credentials';
+import { resolveInboundEventsSpaceId } from '../resolve_inbound_events_space_id';
 import { hasConnectorEventIdentity, identityFromRawAction } from './encode_api_key';
 import {
   createEventIdentityApiKeysDisabledError,

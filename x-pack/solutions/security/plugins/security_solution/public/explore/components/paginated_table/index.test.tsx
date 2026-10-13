@@ -206,6 +206,36 @@ describe('Paginated Table Component', () => {
       expect(updateLimitPagination).toHaveBeenCalled();
     });
 
+    test('Should mark only the selected rows per page option with aria-current', () => {
+      renderComponent({ limit: 5 });
+      const popoverButton = screen.getByTestId('loadingMoreSizeRowPopover').querySelector('button');
+      fireEvent.click(popoverButton!);
+
+      expect(screen.getByTestId('loadingMorePickSizeRow-5')).toHaveAttribute(
+        'aria-current',
+        'true'
+      );
+      expect(screen.getByTestId('loadingMorePickSizeRow-2')).not.toHaveAttribute('aria-current');
+    });
+
+    test('Should move aria-current to the newly selected rows per page option', () => {
+      const { rerender } = renderComponent({ limit: 5 });
+      const popoverButton = screen.getByTestId('loadingMoreSizeRowPopover').querySelector('button');
+      fireEvent.click(popoverButton!);
+
+      rerender(
+        <ThemeProvider theme={mockTheme}>
+          <PaginatedTable {...testProps} limit={10} />
+        </ThemeProvider>
+      );
+
+      expect(screen.getByTestId('loadingMorePickSizeRow-10')).toHaveAttribute(
+        'aria-current',
+        'true'
+      );
+      expect(screen.getByTestId('loadingMorePickSizeRow-5')).not.toHaveAttribute('aria-current');
+    });
+
     test('Should call onChange when you choose a new sort in the table', () => {
       const mockOnChange = jest.fn();
       const { container } = renderComponent({

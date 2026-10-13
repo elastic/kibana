@@ -13,7 +13,7 @@ import type {
   ScoutTestConfig,
   SpaceSolutionView,
 } from '@kbn/scout';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { LOGS } from './constants';
 
 interface SetupOptions {
@@ -89,6 +89,7 @@ export async function deleteLogsExperienceData(esClient: EsClient) {
       name: [
         `logs-${LOGS.SYNTH_LOGS_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
         `logs-${LOGS.SYNTH_DOCVIEWER_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
+        `logs-${LOGS.SYNTH_NO_MESSAGE_DATASET}-${LOGS.SYNTH_LOGS_NAMESPACE}`,
       ].join(','),
     },
     { ignore: [404] }

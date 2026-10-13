@@ -10,7 +10,6 @@
 import React, { Fragment, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import type {
-  DataTableColumnsMeta,
   DataTableRecord,
   FormattedHit,
   ShouldShowFieldInTableHandler,
@@ -18,7 +17,6 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -28,6 +26,8 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -40,12 +40,11 @@ export function SourceDocument({
   dataView,
   shouldShowFieldHandler,
   maxEntries,
-  isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
-  columnsMeta,
+  dataSource,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -53,14 +52,14 @@ export function SourceDocument({
   dataView: DataView;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   maxEntries: number;
-  isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
+  const isEsql = dataSource?.kind === 'esql';
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairsReact(
         row,
@@ -68,8 +67,8 @@ export function SourceDocument({
         dataView,
         shouldShowFieldHandler,
         fieldFormats,
-        columnsMeta,
-        Boolean(isPlainRecord)
+        dataSource,
+        isEsql
       ).slice(0, maxEntries)
     : formatHitReact(
         row,
@@ -77,8 +76,8 @@ export function SourceDocument({
         shouldShowFieldHandler,
         maxEntries,
         fieldFormats,
-        columnsMeta,
-        isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
+        dataSource,
+        isEsql ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
       );
 
   const renderedPairs: ReactNode[] = [];
@@ -96,7 +95,7 @@ export function SourceDocument({
     );
   }
 
-  if (isPlainRecord && renderedPairs.length === 0) {
+  if (isEsql && renderedPairs.length === 0) {
     return <span className={classnames(CELL_CLASS, className)}>—</span>;
   }
 
@@ -123,7 +122,7 @@ function getTopLevelObjectPairsReact(
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined,
+  dataSource: DataSource | undefined,
   skipNullishValues: boolean
 ): FormattedHit {
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
@@ -136,11 +135,7 @@ function getTopLevelObjectPairsReact(
       return;
     }
 
-    const subField = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: columnsMeta?.[key],
-    });
+    const subField = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: key });
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;

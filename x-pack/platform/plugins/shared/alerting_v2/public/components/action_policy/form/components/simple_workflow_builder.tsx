@@ -22,6 +22,8 @@ import {
   INLINE_ACTION_STEP_DEFINITIONS,
   InlineWorkflowEditor,
   getInlineActionStepDefinition,
+  isActionValid,
+  type ConnectorCreationConfig,
   type InlineActionStepType,
   type InlineWorkflowActionDraft,
 } from '@kbn/alerting-v2-rule-form';
@@ -45,7 +47,11 @@ const buildDraft = (stepType: InlineActionStepType): InlineWorkflowActionDraft =
   };
 };
 
-export const SimpleWorkflowBuilder = () => {
+interface SimpleWorkflowBuilderProps {
+  connectorCreationConfig?: ConnectorCreationConfig;
+}
+
+export const SimpleWorkflowBuilder = ({ connectorCreationConfig }: SimpleWorkflowBuilderProps) => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const uiSettings = useService(CoreStart('uiSettings'));
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
@@ -61,7 +67,12 @@ export const SimpleWorkflowBuilder = () => {
     <Controller
       name="inlineActions"
       control={control}
-      render={({ field }) => {
+      rules={{
+        validate: (drafts) => drafts.every(isActionValid),
+        // "At least one destination" also counts the drafts.
+        deps: 'destinations',
+      }}
+      render={({ field, formState: { isSubmitted } }) => {
         const drafts = field.value;
 
         const addDraft = (stepType: InlineActionStepType) => {
@@ -121,7 +132,12 @@ export const SimpleWorkflowBuilder = () => {
                             </EuiFlexItem>
                           </EuiFlexGroup>
                           <EuiSpacer size="m" />
-                          <InlineWorkflowEditor value={draft} onChange={updateDraft} />
+                          <InlineWorkflowEditor
+                            value={draft}
+                            onChange={updateDraft}
+                            connectorCreationConfig={connectorCreationConfig}
+                            forceShowErrors={isSubmitted}
+                          />
                         </EuiPanel>
                       </EuiFlexItem>
                     );

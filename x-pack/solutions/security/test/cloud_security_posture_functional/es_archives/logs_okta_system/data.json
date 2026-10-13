@@ -76,6 +76,9 @@
         "email": "alice@example.com",
         "id": "00u1alice0000000000",
         "name": "alice@example.com"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -155,6 +158,9 @@
       },
       "user": {
         "name": "alice@example.com"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -237,6 +243,9 @@
       "user": {
         "email": "bob@example.com",
         "name": "alice@example.com"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }

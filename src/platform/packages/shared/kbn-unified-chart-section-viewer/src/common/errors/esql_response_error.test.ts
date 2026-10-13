@@ -144,6 +144,17 @@ describe('EsqlResponseError', () => {
     expect(err.rootCause).toEqual(rootCause);
   });
 
+  it('copies caused_by to causedBy', () => {
+    const causedBy = { type: 'circuit_breaking_exception', reason: 'data too large' };
+    const err = new EsqlResponseError({
+      type: 'search_phase_execution_exception',
+      reason: 'all shards failed',
+      caused_by: causedBy,
+    });
+
+    expect(err.causedBy).toEqual(causedBy);
+  });
+
   it('normalizes null reason to undefined (Elasticsearch types allow null)', () => {
     const cause = { type: 'x', reason: null } as EsqlResponseErrorCause;
     const err = new EsqlResponseError(cause);

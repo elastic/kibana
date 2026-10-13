@@ -97,6 +97,10 @@ describe('shouldFailOnWorkflowRunRetry', () => {
     expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.WAITING_FOR_INPUT))).toBe(false);
   });
 
+  it('returns false for waiting_for_child', () => {
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.WAITING_FOR_CHILD))).toBe(false);
+  });
+
   it('returns false for queued concurrency backlog', () => {
     expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.QUEUED))).toBe(false);
   });
@@ -251,6 +255,37 @@ describe('resolveInterruptedWorkflowRunTask', () => {
     warnSpy.mockRestore();
   });
 
+  it('returns task_complete without update when execution is waiting_for_child on retry', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'x',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+    } as EsWorkflowExecution);
+    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+
+    await expect(
+      resolveInterruptedWorkflowRunTask({
+        workflowExecutionRepository: repository,
+        stepExecutionRepository,
+        workflowRunId: 'x',
+        spaceId: 'default',
+        taskAttempts: 2,
+        logger,
+      })
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'noop',
+        execution: expect.objectContaining({ status: ExecutionStatus.WAITING_FOR_CHILD }),
+      })
+    );
+
+    expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('waiting_for_child'));
+    warnSpy.mockRestore();
+  });
+
   it('marks failed when retrying a pending execution (stuck before run advances state)', async () => {
     mockExecutionLookup(workflowExecutionsDataClient, {
       id: 'x',
@@ -364,6 +399,28 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
       spaceId: 'default',
       workflowId: 'w',
       status: ExecutionStatus.WAITING_FOR_INPUT,
+    } as EsWorkflowExecution);
+
+    await expect(
+      resolveInterruptedWorkflowResumeTask({
+        workflowExecutionRepository: repository,
+        stepExecutionRepository,
+        workflowRunId: 'x',
+        spaceId: 'default',
+        taskAttempts: 2,
+        logger,
+      })
+    ).resolves.toEqual({ action: 'resume_workflow' });
+
+    expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+  });
+
+  it('returns resume_workflow when still waiting_for_child so handler can retry', async () => {
+    mockExecutionLookup(workflowExecutionsDataClient, {
+      id: 'x',
+      spaceId: 'default',
+      workflowId: 'w',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
     } as EsWorkflowExecution);
 
     await expect(

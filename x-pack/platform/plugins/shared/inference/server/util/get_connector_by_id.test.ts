@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
-import { getConnectorById } from './get_connector_by_id';
+import { getConnectorById, getConnectorByIdWithoutClientRequest } from './get_connector_by_id';
 import { getConnectorList } from './get_connector_list';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -132,5 +133,126 @@ describe('getConnectorById', () => {
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
     ).rejects.toThrow("No connector or inference endpoint found for ID 'my-connector-id'");
+  });
+
+  it('does not create an actions client or list stack connectors when the id matches directly', async () => {
+    const expected = createMockInferenceConnector({ connectorId });
+    getConnectorListMock.mockResolvedValue([expected]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actions.getActionsClientWithRequest as jest.Mock).mockClear();
+
+    const result = await getConnectorById({ actions, request, connectorId, esClient, logger });
+
+    expect(result).toEqual(expected);
+    expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+    expect(actionsClient.getAll).not.toHaveBeenCalled();
+  });
+
+  it('resolves an inference endpoint when the user cannot list stack connectors', async () => {
+    const inferenceEndpoint = createMockInferenceConnector({
+      connectorId: 'my-inference-id',
+      type: InferenceConnectorType.Inference,
+      isInferenceEndpoint: true,
+    });
+    getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockRejectedValue(
+      Boom.forbidden('Unauthorized to get actions')
+    );
+
+    const result = await getConnectorById({
+      actions,
+      request,
+      connectorId: 'my-inference-id',
+      esClient,
+      logger,
+    });
+
+    expect(result).toEqual(inferenceEndpoint);
+  });
+
+  it('throws not found instead of the authorization error when alias lookup is forbidden', async () => {
+    getConnectorListMock.mockResolvedValue([]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockRejectedValue(
+      Boom.forbidden('Unauthorized to get actions')
+    );
+
+    await expect(
+      getConnectorById({ actions, request, connectorId, esClient, logger })
+    ).rejects.toThrow("No connector or inference endpoint found for ID 'my-connector-id'");
+  });
+
+  it('propagates non-authorization errors from the alias lookup', async () => {
+    getConnectorListMock.mockResolvedValue([]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockRejectedValue(new Error('saved objects unavailable'));
+
+    await expect(
+      getConnectorById({ actions, request, connectorId, esClient, logger })
+    ).rejects.toThrow('saved objects unavailable');
+  });
+
+  it('throws not found when the actions client cannot be created during the alias lookup', async () => {
+    getConnectorListMock.mockResolvedValue([]);
+    (actions.getActionsClientWithRequest as jest.Mock).mockRejectedValue(
+      new Error('missing encryption key')
+    );
+
+    await expect(
+      getConnectorById({ actions, request, connectorId, esClient, logger })
+    ).rejects.toThrow("No connector or inference endpoint found for ID 'my-connector-id'");
+  });
+
+  describe('getConnectorByIdWithoutClientRequest', () => {
+    it('resolves a stack connector ID to its superseding inference endpoint', async () => {
+      const inferenceEndpoint = createMockInferenceConnector({
+        connectorId: 'my-inference-id',
+        type: InferenceConnectorType.Inference,
+        isInferenceEndpoint: true,
+      });
+      getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
+      const actionsClient = await actions.getActionsClientWithRequest(request);
+      (actionsClient.getAll as jest.Mock).mockResolvedValue([
+        {
+          id: connectorId,
+          actionTypeId: InferenceConnectorType.Inference,
+          name: 'My Stack Connector',
+          config: { inferenceId: 'my-inference-id' },
+          isPreconfigured: true,
+        },
+      ]);
+
+      const result = await getConnectorByIdWithoutClientRequest({
+        actionsClient,
+        connectorId,
+        esClient,
+        logger,
+      });
+
+      expect(result).toEqual(inferenceEndpoint);
+    });
+
+    it('resolves an inference endpoint when stack connectors cannot be listed', async () => {
+      const inferenceEndpoint = createMockInferenceConnector({
+        connectorId: 'my-inference-id',
+        type: InferenceConnectorType.Inference,
+        isInferenceEndpoint: true,
+      });
+      getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
+      const actionsClient = await actions.getActionsClientWithRequest(request);
+      (actionsClient.getAll as jest.Mock).mockRejectedValue(
+        Boom.forbidden('Unauthorized to get actions')
+      );
+
+      const result = await getConnectorByIdWithoutClientRequest({
+        actionsClient,
+        connectorId: 'my-inference-id',
+        esClient,
+        logger,
+      });
+
+      expect(result).toEqual(inferenceEndpoint);
+    });
   });
 });

@@ -11,6 +11,8 @@ applies_to:
 
 The Zoom connector enables access to Zoom meetings, cloud recordings, transcripts, chat logs, and meeting participants through the Zoom REST API v2.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-zoom-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

@@ -11,6 +11,7 @@ import type {
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import { useCaseAttachmentWorkflowRouting } from '@kbn/cases-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import * as i18n from '../../components/alerts_table/translations';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -25,13 +26,17 @@ export interface UseBulkRunAlertWorkflowPanelResult {
   runWorkflowPanels: ContentPanelConfig[];
 }
 
+export const BULK_RUN_ALERT_WORKFLOW_ACTION_ID = 'bulk-run-alert-workflow';
+
 export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const caseRouting = useCaseAttachmentWorkflowRouting();
   const canRunWorkflow = useMemo(
-    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow && caseRouting !== 'unavailable',
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, caseRouting]
   );
 
   const renderContent = useCallback((props: RenderContentPanelProps) => {
@@ -42,17 +47,19 @@ export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResu
     return <AlertWorkflowsPanel alertIds={alertIds} onClose={props.closePopoverMenu} />;
   }, []);
 
-  const runWorkflowItems = useMemo(
+  const runWorkflowItems = useMemo<BulkActionsConfig[]>(
     () =>
       canRunWorkflow
         ? [
             {
-              key: 'bulk-run-alert-workflow',
+              key: BULK_RUN_ALERT_WORKFLOW_ACTION_ID,
               'data-test-subj': 'bulk-run-alert-workflow-action',
               label: i18n.CONTEXT_MENU_RUN_WORKFLOW,
               name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
               panel: RUN_WORKFLOW_BULK_PANEL_ID,
               disableOnQuery: false,
+              icon: 'workflow' as const,
+              groupId: 'workflow' as const,
             },
           ]
         : [],

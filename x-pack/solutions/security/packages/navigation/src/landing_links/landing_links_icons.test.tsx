@@ -54,6 +54,15 @@ describe('LandingLinksIcons', () => {
     expect(queryByText(BETA)).toBeInTheDocument();
   });
 
+  it('should render the title inside the card link, not as a color-only EuiLink', () => {
+    const { getByText } = render(<LandingLinksIcons items={[DEFAULT_NAV_ITEM]} />);
+
+    const anchor = getByText(DEFAULT_NAV_ITEM.title).closest('a');
+
+    expect(anchor).toHaveClass('euiCard__titleAnchor');
+    expect(anchor).not.toHaveClass('euiLink');
+  });
+
   it('should navigate link', () => {
     const id = SecurityPageName.administration;
     const title = 'test label 2';

@@ -14,6 +14,7 @@ describe('performComputation', () => {
   describe('empty input', () => {
     it('should return undefined fields for empty string', () => {
       const result = performComputation('');
+      expect(result.yamlString).toBe('');
       expect(result.yamlLineCounter).toBeUndefined();
       expect(result.yamlDocument).toBeUndefined();
       expect(result.workflowLookup).toBeUndefined();
@@ -40,6 +41,7 @@ steps:
 
       const result = performComputation(yaml);
 
+      expect(result.yamlString).toBe(yaml);
       expect(result.yamlDocument).toBeDefined();
       expect(result.yamlLineCounter).toBeDefined();
       expect(result.workflowLookup).toBeDefined();

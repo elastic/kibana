@@ -42,9 +42,8 @@ const SORT_FIELD_BY_API_VALUE: Record<FindActionPoliciesApiSortField, FindAction
 export const toFindActionPoliciesArgs = ({
   page,
   per_page: perPage,
+  filter,
   search,
-  tags,
-  enabled,
   sort_field: sortField,
   sort_order: sortOrder,
   ...rest
@@ -53,9 +52,8 @@ export const toFindActionPoliciesArgs = ({
   return {
     page,
     perPage,
+    filter,
     search,
-    tags,
-    enabled,
     sortField: sortField && SORT_FIELD_BY_API_VALUE[sortField],
     sortOrder,
   };
@@ -80,7 +78,7 @@ export const toFindActionPoliciesResponse = ({
 @injectable()
 export class ListActionPoliciesRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}`;
+  static path = ALERTING_V2_ACTION_POLICY_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],

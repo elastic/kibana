@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,23 +19,28 @@ const visualizeFieldTrigger: typeof VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_T
 
 export const useEditVisualization = ({
   services,
-  dataView,
+  dataSource,
   relativeTimeRange,
   lensAttributes,
-  isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   relativeTimeRange?: TimeRange;
   lensAttributes?: TypedLensByValueInput['attributes'];
-  isPlainRecord?: boolean;
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
 
   const checkCanVisualize = useCallback(async () => {
-    if (!dataView.id || isPlainRecord) {
+    if (!dataSource?.id) {
       return false;
     }
+
+    if (dataSource.kind !== 'index-pattern') {
+      return false;
+    }
+
+    const dataView = dataSource.getDataView();
+
     if (!dataView.isTimeBased() || !dataView.getTimeField().visualizable) {
       return false;
     }
@@ -49,7 +54,7 @@ export const useEditVisualization = ({
     );
 
     return Boolean(compatibleActions.length);
-  }, [dataView, isPlainRecord, services.uiActions]);
+  }, [dataSource, services.uiActions]);
 
   const onEditVisualization = useMemo(() => {
     if (!canVisualize || !lensAttributes) {

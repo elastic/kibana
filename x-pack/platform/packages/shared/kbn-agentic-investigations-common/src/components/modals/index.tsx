@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export { AssignActionModal, type AssignActionModalProps } from './assign_action_modal';
-export {
-  BaseActionModal,
-  type BaseActionModalProps,
-  type ActionModalPrimaryAction,
-} from './base_action_modal';
 export { MODAL_TRANSLATIONS } from './translations';
+export {
+  InvestigationActionModals,
+  type InvestigationActionModalsProps,
+} from './investigation_action_modals';

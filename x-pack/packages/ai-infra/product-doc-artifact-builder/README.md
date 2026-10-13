@@ -4,7 +4,7 @@ Script to build the knowledge base artifacts.
 
 ## How to run
 
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 
 node scripts/kibana --dev --no-base-path
 
@@ -66,6 +66,18 @@ Defaults to `{REPO_ROOT}/build/temp-kb-artifacts`
 
 - params for the inference endpoint:
 `inferenceId`
+
+## Run tests
+
+Unit tests for the document processing pipeline (no Kibana or Elasticsearch required):
+
+```
+node scripts/jest x-pack/packages/ai-infra/product-doc-artifact-builder/src/tasks/process_documents.test.ts
+```
+
+The tests cover:
+- Document count consistency (deduplication, sparse-doc filtering)
+- `content_title` trimming (site-name suffixes stripped, product-name pipes like `ES|QL` preserved, titles cut at that pipe restored from the page heading)
 
 ## Building OpenAPI Artifacts
 

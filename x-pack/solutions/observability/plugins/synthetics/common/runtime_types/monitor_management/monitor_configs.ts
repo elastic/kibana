@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { tEnum } from '../../utils/t_enum';
+import type { SchemaOutput } from '../schema_output';
+import type {
+  KerberosConfigCodec,
+  NtlmConfigCodec,
+  RequestBodyCheckCodec,
+  ResponseCheckJSONCodec,
+} from '../schemas/monitor_configs';
 
 export enum MonitorTypeEnum {
   HTTP = 'http',
@@ -15,8 +20,6 @@ export enum MonitorTypeEnum {
   BROWSER = 'browser',
   API = 'api',
 }
-
-export const MonitorTypeCodec = tEnum<MonitorTypeEnum>('type', MonitorTypeEnum);
 
 export enum HTTPMethod {
   GET = 'GET',
@@ -32,11 +35,6 @@ export enum ResponseBodyIndexPolicy {
   ON_ERROR = 'on_error',
 }
 
-export const ResponseBodyIndexPolicyCodec = tEnum<ResponseBodyIndexPolicy>(
-  'ResponseBodyIndexPolicy',
-  ResponseBodyIndexPolicy
-);
-
 export enum MonacoEditorLangId {
   JSON = 'xjson',
   PLAINTEXT = 'plaintext',
@@ -51,8 +49,6 @@ export enum CodeEditorMode {
   XML = 'xml',
 }
 
-export const CodeEditorModeCodec = tEnum<CodeEditorMode>('CodeEditorMode', CodeEditorMode);
-
 export enum ContentType {
   JSON = 'application/json',
   TEXT = 'text/plain',
@@ -65,16 +61,12 @@ export enum ScheduleUnit {
   SECONDS = 's',
 }
 
-export const ScheduleUnitCodec = tEnum<ScheduleUnit>('ScheduleUnit', ScheduleUnit);
-
 export enum VerificationMode {
   CERTIFICATE = 'certificate',
   FULL = 'full',
   NONE = 'none',
   STRICT = 'strict',
 }
-
-export const VerificationModeCodec = tEnum<VerificationMode>('VerificationMode', VerificationMode);
 
 export enum TLSVersion {
   ONE_ZERO = 'TLSv1.0',
@@ -83,22 +75,16 @@ export enum TLSVersion {
   ONE_THREE = 'TLSv1.3',
 }
 
-export const TLSVersionCodec = tEnum<TLSVersion>('TLSVersion', TLSVersion);
-
 export enum ScreenshotOption {
   ON = 'on',
   OFF = 'off',
   ONLY_ON_FAILURE = 'only-on-failure',
 }
 
-export const ScreenshotOptionCodec = tEnum<ScreenshotOption>('ScreenshotOption', ScreenshotOption);
-
 export enum SourceType {
   UI = 'ui',
   PROJECT = 'project',
 }
-
-export const SourceTypeCodec = tEnum<SourceType>('SourceType', SourceType);
 
 export enum FormMonitorType {
   SINGLE = 'single',
@@ -109,20 +95,29 @@ export enum FormMonitorType {
   ICMP = 'icmp',
 }
 
-export const FormMonitorTypeCodec = tEnum<FormMonitorType>('FormMonitorType', FormMonitorType);
-
 export enum Mode {
   ANY = 'any',
   ALL = 'all',
 }
-export const ModeCodec = tEnum<Mode>('Mode', Mode);
 
-export const ResponseCheckJSONCodec = t.interface({
-  description: t.string,
-  expression: t.string,
-});
-export type ResponseCheckJSON = t.TypeOf<typeof ResponseCheckJSONCodec>;
+// UI-only selector value used by the HTTP monitor form to switch between the
+// mutually exclusive authentication schemes. Not persisted directly; the
+// underlying `kerberos.enabled` / `ntlm.enabled` flags (and basic auth
+// username/password) are the source of truth.
+export enum HttpAuthMethod {
+  NONE = 'none',
+  BASIC = 'basic',
+  KERBEROS = 'kerberos',
+  NTLM = 'ntlm',
+}
 
-export const RequestBodyCheckCodec = t.interface({ value: t.string, type: CodeEditorModeCodec });
+// Mirrors the libbeat Kerberos client `auth_type` option used by Heartbeat.
+export enum KerberosAuthType {
+  PASSWORD = 'password',
+  KEYTAB = 'keytab',
+}
 
-export type RequestBodyCheck = t.TypeOf<typeof RequestBodyCheckCodec>;
+export type KerberosConfig = SchemaOutput<typeof KerberosConfigCodec>;
+export type NtlmConfig = SchemaOutput<typeof NtlmConfigCodec>;
+export type ResponseCheckJSON = SchemaOutput<typeof ResponseCheckJSONCodec>;
+export type RequestBodyCheck = SchemaOutput<typeof RequestBodyCheckCodec>;

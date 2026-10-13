@@ -44,7 +44,6 @@
     "@kbn/data-views-plugin",
     "@kbn/config-schema",
     "@kbn/analytics",
-    "@kbn/field-types",
     "@kbn/ftr-screenshot-filename",
     "@kbn/es-archiver",
     "@kbn/core-application-browser",
@@ -58,7 +57,6 @@
     "@kbn/event-annotation-common",
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
-    "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-deprecations-common",
@@ -71,8 +69,9 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/setup-node-env",
     "@kbn/visualizations-common",
-    "@kbn/session-notifications-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/deeplinks-analytics",
+    "@kbn/core-chrome-browser-components",
+    "@kbn/monaco",
   ]
 }

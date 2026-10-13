@@ -20,10 +20,9 @@ const POD_ID = '7d6d7955-f853-42b1-8613-11f52d0d2725';
 const { min, max } = testData.DATES['8.0.0'].pods_only;
 
 /**
- * `/api/metrics/node_details` (`NodeDetailsRequestRT`) does NOT accept a `schema` field in
- * its request body — the schema is resolved server-side from the source configuration. The
- * bodies below intentionally omit `schema`; this is documented behavior, not a missed audit.
- * See issue #264011.
+ * `/api/metrics/node_details` accepts an optional `schema`. Bodies that omit it stay on
+ * the Elastic Common Schema path. OpenTelemetry pod coverage lives in
+ * `node_details_semconv_pods.spec.ts`.
  */
 apiTest.describe(
   'API /api/metrics/node_details',

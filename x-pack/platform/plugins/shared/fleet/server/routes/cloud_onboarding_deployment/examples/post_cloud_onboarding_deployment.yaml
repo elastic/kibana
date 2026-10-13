@@ -26,7 +26,6 @@ requestBody:
           description: 'Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)'
           value:
             provider: 'aws'
-            connectorId: 'cloud-connector-id-1'
             mechanisms:
               - 'agent_based'
             services:
@@ -36,6 +35,7 @@ requestBody:
                 regions:
                   - 'us-east-1'
                 namespace: 'AWS/EC2'
+            authMethod: 'assume_role'
         postCloudOnboardingDeploymentEcfRequestExample:
           description: 'Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)'
           value:
@@ -83,24 +83,25 @@ responses:
                 packagePolicyIds:
                   - 'package-policy-id-1'
           postCloudOnboardingDeploymentAgentBasedExample:
-            description: 'Agent-based deployment — agentPolicyId set after the agent policy is selected or created'
+            description: 'Agent-based deployment — agentPolicyIds set after the agent policy is selected or created'
             value:
               item:
                 id: 'onboarding-deployment-id-2'
                 provider: 'aws'
-                connectorId: 'cloud-connector-id-1'
                 mechanisms:
                   - 'agent_based'
                 services:
                   - 'cloudwatch_metrics'
                 status: 'pending'
                 attemptCount: 1
+                authMethod: 'assume_role'
                 serviceVars:
                   cloudwatch_metrics:
                     regions:
                       - 'us-east-1'
                     namespace: 'AWS/EC2'
-                agentPolicyId: 'agent-policy-id-1'
+                agentPolicyIds:
+                  - 'agent-policy-id-1'
           postCloudOnboardingDeploymentEcfExample:
             description: 'ECF deployment — apiKeyId set after the Elasticsearch API key is created for the ECF service'
             value:

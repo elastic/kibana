@@ -46,12 +46,15 @@ const createSmlDocument = (originId = 'workflow-abc'): SmlDocument => ({
       privileges: [{ space: 'default', name: [`ai_index:${WORKFLOW_KI_TYPE}/read`], count: 1 }],
     },
   },
-  attributes: {
-    id: 'chunk-1',
-    origin: { uri: `workflow://${originId}` },
-    created_at: '2025-01-01T00:00:00.000Z',
-    updated_at: '2025-01-01T00:00:00.000Z',
-    ingestion_method: 'crawled',
+  id: 'chunk-1',
+  '@timestamp': '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  references: [{ uri: `workflow://${originId}`, relation: 'derived_from' }],
+  governance: {
+    provenance: {
+      created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+      updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+    },
   },
 });
 
@@ -101,7 +104,10 @@ describe('workflowSmlType', () => {
           _source: ['spaceId', 'updated_at'],
           query: {
             bool: {
-              must_not: [{ exists: { field: 'deleted_at' } }],
+              must_not: [
+                { exists: { field: 'deleted_at' } },
+                { term: { 'access_control.access_mode': 'private' } },
+              ],
             },
           },
           sort: [{ updated_at: { order: 'desc' } }, '_shard_doc'],
@@ -312,7 +318,10 @@ describe('workflowSmlType', () => {
           query: {
             bool: {
               must: [{ ids: { values: ['workflow-abc'] } }],
-              must_not: [{ exists: { field: 'deleted_at' } }],
+              must_not: [
+                { exists: { field: 'deleted_at' } },
+                { term: { 'access_control.access_mode': 'private' } },
+              ],
             },
           },
           _source: ['name', 'description', 'tags', 'enabled', 'triggerTypes'],
@@ -485,7 +494,7 @@ describe('workflowSmlType', () => {
         spaceId: 'my-space',
       });
 
-      expect(api.getWorkflow).toHaveBeenCalledWith('workflow-xyz', 'my-space');
+      expect(api.getWorkflow).toHaveBeenCalledWith('workflow-xyz', 'my-space', expect.any(Object));
     });
 
     it('returns undefined when workflow is not found', async () => {

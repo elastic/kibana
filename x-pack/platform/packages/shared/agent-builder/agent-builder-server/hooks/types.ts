@@ -7,11 +7,16 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
-import type { AgentConfiguration, ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  AgentConfiguration,
+  ConversationRound,
+  PreExecutionWorkflowStepData,
+} from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
 import type { ToolHandlerContext } from '../tools/handler';
+import type { ExecutionConversationAccess } from '../agents/provider';
 
 export { HookLifecycle, HookExecutionMode };
 
@@ -23,6 +28,22 @@ interface AgentHookContextBase {
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
+  /** 0 for the initial execution, 1+ for a resume (legacy history may not retain exact counts). */
+  roundExecutionIndex?: number;
+  /** Accumulated output of the pre-execution workflows that already ran for this round. */
+  preExecutionWorkflow?: PreExecutionWorkflowStepData;
+  /**
+   * Id of the conversation this round belongs to. Absent for standalone (sub-agent) runs.
+   * For `ai.agent` workflow steps that set neither `create-conversation` nor `conversation_id`,
+   * it names a placeholder conversation that is never persisted, so the id is safe to correlate a
+   * single round but not to key anything that must outlive it.
+   */
+  conversationId?: string;
+  /**
+   * How this run relates to its conversation. With `readOnly`, `conversationId` names a real
+   * conversation that will not receive this round.
+   */
+  conversationAccess: ExecutionConversationAccess;
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {
@@ -41,6 +62,13 @@ export interface AfterToolCallHookContext extends ToolCallHookContextBase {
 export interface AfterExecutionHookContext extends AgentHookContextBase {
   round: ConversationRound;
   conversationId?: string;
+  /**
+   * How this run relates to its conversation. With `readOnly`, `conversationId` names a real
+   * conversation that will not receive this round.
+   */
+  conversationAccess: ExecutionConversationAccess;
+  /** Connector used by this execution, which may differ from a folded pending round's connector. */
+  connectorId?: string;
   agentConfiguration: AgentConfiguration;
 }
 
@@ -59,6 +87,7 @@ export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextBy
 export interface HookHandlerResultByLifecycle {
   [HookLifecycle.beforeAgent]: {
     nextInput?: ProcessedRoundInput;
+    preExecutionWorkflow?: PreExecutionWorkflowStepData;
   };
   [HookLifecycle.beforeToolCall]: {
     toolParams?: Record<string, unknown>;

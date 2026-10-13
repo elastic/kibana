@@ -77,7 +77,14 @@ describe('InboundIngressCredentials', () => {
       secrets: {},
     });
 
-    appMockRenderer.render(<InboundIngressCredentials connector={connector} allowRotate />);
+    const onIngestTokenRotated = jest.fn();
+    appMockRenderer.render(
+      <InboundIngressCredentials
+        connector={connector}
+        allowRotate
+        onIngestTokenRotated={onIngestTokenRotated}
+      />
+    );
 
     await userEvent.click(screen.getByTestId('inbound-ingress-rotate-btn'));
     await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -89,5 +96,6 @@ describe('InboundIngressCredentials', () => {
     expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
       '/internal/actions/connector/sales-ingress/_rotate_event_token'
     );
+    expect(onIngestTokenRotated).toHaveBeenCalledWith('rotated-token');
   });
 });

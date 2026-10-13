@@ -550,6 +550,45 @@ describe('TabbedContent', () => {
     });
   });
 
+  it('can rename a tab and sends tabRenamed event', async () => {
+    const user = userEvent.setup();
+
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const firstTab = initialItems[0];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={firstTab.id}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+      />
+    );
+
+    await user.dblClick(screen.getByTestId(`unifiedTabs_selectTabBtn_${firstTab.id}`));
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, 'Renamed tab');
+    await user.keyboard('{enter}');
+
+    await waitFor(() => {
+      expect(onChanged).toHaveBeenCalledWith({
+        items: [{ ...firstTab, label: 'Renamed tab' }, initialItems[1]],
+        selectedItem: { ...firstTab, label: 'Renamed tab' },
+      });
+      expect(onEBTEvent).toHaveBeenCalledWith({
+        eventName: 'tabRenamed',
+        tabId: firstTab.id,
+        totalTabsOpen: 2,
+      });
+    });
+  });
+
   it('renders tab content when renderContent is provided', () => {
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },

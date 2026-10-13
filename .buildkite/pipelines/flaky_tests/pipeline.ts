@@ -61,8 +61,9 @@ const MAX_COUNT_PER_CONFIG = 50;
 const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
 /**
- * Cypress group steps use `n2-4-virt` and a larger disk for `defend_workflows` suites. Command steps
- * inherit the same defaults unless `agentQueue` / `diskSizeGb` are set on the config entry.
+ * Cypress group steps use `n2-4-virt` for `defend_workflows` suites. Command steps inherit the same
+ * defaults unless `agentQueue` / `diskSizeGb` are set on the config entry. `diskSizeGb: undefined`
+ * uses the agent image default; set a number to override it.
  */
 function defaultCypressFlakyAgentOptions(pathHint: string): {
   agentQueue: string;
@@ -71,7 +72,7 @@ function defaultCypressFlakyAgentOptions(pathHint: string): {
   const defendWorkflows = pathHint.includes('defend_workflows');
   return {
     agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
-    diskSizeGb: defendWorkflows ? 120 : 110,
+    diskSizeGb: undefined,
   };
 }
 
@@ -106,7 +107,7 @@ interface CommandTestSuite {
   scoutLabel?: string;
   agentQueue?: string;
   diskSizeGb?: number;
-  /** Package path (repo-relative) where `yarn junit:merge` should run when it differs from `workingDirectory`. */
+  /** Package path (repo-relative) where `pnpm junit:merge` should run when it differs from `workingDirectory`. */
   junitMergeWorkingDirectory?: string;
 }
 
@@ -284,13 +285,15 @@ steps.push({
   label: 'Build Kibana Distribution',
   agents: expandAgentQueue('c2-8'),
   key: 'build',
-  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
+  // Keep this step when KIBANA_BUILD_ID is set: FTR/Scout/Cypress jobs
+  // depends_on: build, so skipping it skips those jobs. build_kibana.sh
+  // no-ops when the cached dist type matches.
 });
 
 if (hasScoutSuites) {
   // Single step that bootstraps Kibana, resolves ONLY the requested Scout configs, and
   // dynamically uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
-  // Resolving requested configs requires a full `yarn kbn bootstrap`, which is too heavy to
+  // Resolving requested configs requires a full `pnpm kbn bootstrap`, which is too heavy to
   // run inside pipeline.ts itself; combining resolution + planning here avoids paying for an
   // extra agent boot and an artifact round-trip just to hand the manifest between
   // two otherwise-coupled steps.

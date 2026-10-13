@@ -20,6 +20,7 @@ import {
   PolicyOperatingSystem,
   ProtectionModes,
 } from '../../../../../../../../../common/endpoint/types';
+import { POLICY_PROTECTION_FAMILY_TITLES } from '../../../../../../../../../common/endpoint/models/policy_settings_ui_labels';
 import type { BehaviorProtectionOSes } from '../../../../../types';
 import { useLicense } from '../../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../../setting_locked_card';
@@ -69,9 +70,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
 
     return (
       <SettingCard
-        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {
-          defaultMessage: 'Malicious behavior',
-        })}
+        type={POLICY_PROTECTION_FAMILY_TITLES.behavior_protection}
         selected={selected}
         mode={mode}
         supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
