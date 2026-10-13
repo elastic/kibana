@@ -303,7 +303,7 @@ const KafkaOAuth2Schema = schema.object({
       max: MAX_OAUTH2_DURATION_SECONDS,
       meta: {
         description:
-          'How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.',
+          'How many seconds before a token expires it is refreshed. It defaults to `300` when not set.',
       },
     })
   ),

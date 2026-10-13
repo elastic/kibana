@@ -169298,7 +169298,7 @@ components:
                 type: array
               type: object
             expiry_buffer:
-              description: How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.
+              description: How many seconds before a token expires it is refreshed. It defaults to `300` when not set.
               maximum: 86400
               minimum: 0
               type: number
@@ -171737,7 +171737,7 @@ components:
                 type: array
               type: object
             expiry_buffer:
-              description: How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.
+              description: How many seconds before a token expires it is refreshed. It defaults to `300` when not set.
               maximum: 86400
               minimum: 0
               type: number
@@ -177582,7 +177582,7 @@ components:
                 type: array
               type: object
             expiry_buffer:
-              description: How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.
+              description: How many seconds before a token expires it is refreshed. It defaults to `300` when not set.
               maximum: 86400
               minimum: 0
               type: number

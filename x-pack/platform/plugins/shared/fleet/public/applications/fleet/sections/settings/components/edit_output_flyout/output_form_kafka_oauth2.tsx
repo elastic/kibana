@@ -521,7 +521,7 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
                 'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ExpiryBufferHelpText',
                 {
                   defaultMessage:
-                    'How many seconds before a token expires it is refreshed. It defaults to 300 (5 minutes) when not set.',
+                    'How many seconds before a token expires it is refreshed. It defaults to 300 when not set.',
                 }
               )}
               input={inputs.kafkaOAuth2ExpiryBufferInput}
