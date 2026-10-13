@@ -170,6 +170,7 @@ describe('Detection Rule Creation worker', () => {
         stepByName('draft_creation')?.with?.schema as JSONSchema7
       );
       const noDraft = {
+        skipped: true,
         attachment_id: '',
         reason: 'The data source does not exist.',
         rule: {
