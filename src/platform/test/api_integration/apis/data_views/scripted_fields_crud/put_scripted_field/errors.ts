@@ -13,6 +13,12 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // 404, non-scripted-field and too-long ID errors for PUT.
+  // Validation errors only (no happy paths): the scripted field routes are registered on serverless too,
+  // so tag these `tags.deploymentAgnostic` in the condensed spec; only the `main.ts` happy paths are
+  // `tags.stateful.classic` (see create_scripted_field/main.ts).
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('errors', () => {
     it('returns 404 error on non-existing index_pattern', async () => {
       const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;

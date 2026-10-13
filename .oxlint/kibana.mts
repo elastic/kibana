@@ -23,10 +23,13 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_this_in_property_initializers': 'error',
   '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
   '@kbn/eslint/no_unsafe_console': 'error',
+  '@kbn/eslint/no_unsafe_hash': 'error',
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',
   '@kbn/eslint/module_migration': moduleMigrationRule,
+  '@kbn/disable/no_protected_eslint_disable': 'error',
+  '@kbn/disable/no_naked_eslint_disable': 'error',
 };
 
 export const kibanaOverrides: OxlintOverride[] = [

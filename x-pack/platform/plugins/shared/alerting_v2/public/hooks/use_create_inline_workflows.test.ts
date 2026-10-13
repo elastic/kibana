@@ -15,6 +15,8 @@ jest.mock('@kbn/core-di-browser');
 jest.mock('@kbn/workflows-ui');
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
+  getInlineActionStepDefinition: (id: string) =>
+    id === 'slack2.sendMessage' ? { label: 'Slack' } : undefined,
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
@@ -30,6 +32,7 @@ const draft = (id: string): InlineWorkflowActionDraft => ({
 describe('useCreateInlineWorkflows', () => {
   const mockCreateWorkflow = jest.fn();
   const mockDeleteWorkflow = jest.fn();
+  const mockValidateWorkflow = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,6 +41,7 @@ describe('useCreateInlineWorkflows', () => {
         return {
           createWorkflow: mockCreateWorkflow,
           deleteWorkflow: mockDeleteWorkflow,
+          validateWorkflow: mockValidateWorkflow,
         } as ReturnType<typeof useService>;
       }
       return undefined as ReturnType<typeof useService>;
@@ -78,6 +82,66 @@ describe('useCreateInlineWorkflows', () => {
     );
 
     expect(mockDeleteWorkflow).toHaveBeenCalledTimes(1);
+    expect(mockDeleteWorkflow).toHaveBeenCalledWith('wf-1');
+  });
+
+  it('rejects with the validation errors and rolls back when a created workflow is invalid', async () => {
+    mockCreateWorkflow
+      .mockResolvedValueOnce({ id: 'wf-1', valid: true })
+      .mockResolvedValueOnce({ id: 'wf-2', valid: false });
+    mockValidateWorkflow.mockResolvedValue({
+      valid: false,
+      diagnostics: [
+        {
+          severity: 'error',
+          source: 'schema',
+          ruleId: 'schemaViolation',
+          message: 'Expected array at steps.0.with.to',
+        },
+        {
+          severity: 'error',
+          source: 'variable',
+          ruleId: 'invalidVariableReference',
+          message: 'Unknown variable',
+        },
+        {
+          severity: 'warning',
+          source: 'deprecation',
+          ruleId: 'ignoredFetcherSetting',
+          message: 'Deprecated setting',
+        },
+        {
+          severity: 'error',
+          source: 'liquid',
+          ruleId: 'liquidSyntaxError',
+          message: 'Unknown filter',
+        },
+      ],
+    });
+    mockDeleteWorkflow.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useCreateInlineWorkflows());
+
+    await expect(result.current.createInlineWorkflows([draft('a'), draft('b')])).rejects.toThrow(
+      'The Slack workflow is invalid: Expected array at steps.0.with.to; Unknown filter'
+    );
+
+    expect(mockValidateWorkflow).toHaveBeenCalledWith({ yaml: 'workflow: yaml' });
+    expect(mockDeleteWorkflow).toHaveBeenCalledWith('wf-1');
+    expect(mockDeleteWorkflow).toHaveBeenCalledWith('wf-2');
+  });
+
+  it('falls back to a generic message when the validation errors cannot be fetched', async () => {
+    mockCreateWorkflow.mockResolvedValueOnce({ id: 'wf-1', valid: false });
+    mockValidateWorkflow.mockRejectedValue(new Error('validate failed'));
+    mockDeleteWorkflow.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useCreateInlineWorkflows());
+
+    await expect(result.current.createInlineWorkflows([draft('a')])).rejects.toThrow(
+      'The Slack workflow is invalid.'
+    );
+
     expect(mockDeleteWorkflow).toHaveBeenCalledWith('wf-1');
   });
 
