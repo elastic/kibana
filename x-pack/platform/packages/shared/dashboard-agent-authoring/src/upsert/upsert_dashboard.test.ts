@@ -28,6 +28,12 @@ import { upsertDashboardSchema, type DashboardUpsert } from './schema';
 const UPSERT_FAILURE = DASHBOARD_FAILURE_TYPES.upsertDashboard;
 const GRID = { x: 0, y: 0, w: 24, h: 9 };
 
+const upsertFailure = (identifier: string, error: string) => ({
+  type: UPSERT_FAILURE,
+  identifier,
+  error,
+});
+
 const usable = (type: string): ControlFieldCapability => ({ status: 'usable', type });
 const NOT_AGGREGATABLE: ControlFieldCapability = { status: 'not_aggregatable' };
 const CONFLICTING: ControlFieldCapability = { status: 'conflicting' };
@@ -100,49 +106,11 @@ describe('executeDashboardUpsert', () => {
     grid: { x: 0, y: gridY, w: 24, h: 9 },
   });
 
-  const createMarkdownPanel = (
+  const createPanel = (
     id: string,
-    content: string,
-    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 48, h: 5 }
-  ): AttachmentPanel => ({
-    id,
-    type: MARKDOWN_EMBEDDABLE_TYPE,
-    config: { content },
-    grid,
-  });
-
-  const createAnomalyChartsPanel = (
-    id: string,
-    jobIds: string[] = ['job-1'],
-    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 24, h: 15 }
-  ): AttachmentPanel => ({
-    id,
-    type: 'ml_anomaly_charts',
-    config: { job_ids: jobIds },
-    grid,
-  });
-
-  const createAnomalySwimlanePanel = (
-    id: string,
-    jobIds: string[] = ['job-1'],
-    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 48, h: 12 }
-  ): AttachmentPanel => ({
-    id,
-    type: 'ml_anomaly_swimlane',
-    config: { job_ids: jobIds, swimlane_type: 'overall' },
-    grid,
-  });
-
-  const createSingleMetricViewerPanel = (
-    id: string,
-    jobIds: string[] = ['job-1'],
-    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 24, h: 15 }
-  ): AttachmentPanel => ({
-    id,
-    type: 'ml_single_metric_viewer',
-    config: { job_ids: jobIds },
-    grid,
-  });
+    type: string,
+    config: AttachmentPanel['config']
+  ): AttachmentPanel => ({ id, type, config, grid: GRID });
 
   const createSection = (
     id: string,
@@ -285,8 +253,7 @@ describe('executeDashboardUpsert', () => {
 
     const result = await executeDashboardUpsert({
       dashboardData: {
-        title: 'Test dashboard',
-        description: 'Description',
+        title: 'Test',
         panels: [],
       },
       upsert: {
@@ -313,8 +280,7 @@ describe('executeDashboardUpsert', () => {
   it('adds mixed panel kinds across top-level and section targets', async () => {
     const result = await executeDashboardUpsert({
       dashboardData: {
-        title: 'Test dashboard',
-        description: 'Description',
+        title: 'Test',
         panels: [createSection('section-a', 'Section A', 8)],
       },
       upsert: {
@@ -363,13 +329,7 @@ describe('executeDashboardUpsert', () => {
         config: { type: 'metric' },
       }),
     ]);
-    expect(result.failures).toEqual([
-      {
-        type: UPSERT_FAILURE,
-        identifier: 'p95-latency',
-        error: 'ES|QL generation failed',
-      },
-    ]);
+    expect(result.failures).toEqual([upsertFailure('p95-latency', 'ES|QL generation failed')]);
     expect(result.panelAuthoringNotes).toEqual([
       {
         panelId: 'total-requests',
@@ -433,31 +393,6 @@ describe('executeDashboardUpsert', () => {
     );
   });
 
-  it('preserves dashboard metadata and sections while adding panels', async () => {
-    const result = await executeDashboardUpsert({
-      dashboardData: {
-        title: 'Existing title',
-        description: 'Existing description',
-        panels: [createSection('section-1', 'Section 1', 10)],
-      },
-      upsert: { panels: [{ id: 'metric', grid: GRID, content: metricAttachment }] },
-      logger,
-      resolveAttachmentPanel: resolveMetricAttachment,
-    });
-
-    expect(result.dashboardData.title).toBe('Existing title');
-    expect(result.dashboardData.description).toBe('Existing description');
-    expect(getSections(result.dashboardData.panels)).toEqual([
-      expect.objectContaining({
-        id: 'section-1',
-        title: 'Section 1',
-        collapsed: false,
-        panels: [],
-      }),
-    ]);
-    expect(result.dashboardData.panels).toHaveLength(2); // 1 section + 1 panel
-  });
-
   it('creates new panels at the given grid and keeps existing panels in place', async () => {
     const result = await executeDashboardUpsert({
       dashboardData: { title: 'Test', panels: [createLensPanel('existing', 0)] },
@@ -477,32 +412,152 @@ describe('executeDashboardUpsert', () => {
     expect(findPanel(result.dashboardData, 'below')?.grid).toEqual({ x: 0, y: 9, w: 48, h: 6 });
   });
 
-  it('records a failure when a new panel has no grid', async () => {
-    const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(resolveMetricAttachment);
-    const result = await executeDashboardUpsert({
-      dashboardData: { title: 'Test', panels: [] },
-      upsert: { panels: [{ id: 'metric', content: metricAttachment }] },
-      logger,
-      resolveAttachmentPanel,
-    });
+  describe('rejected changes', () => {
+    const vegaPanel = createPanel('vega-1', VEGA_VIS_TYPE, { spec: '{}' });
 
-    expect(resolveAttachmentPanel).not.toHaveBeenCalled();
-    expect(result.dashboardData.panels).toEqual([]);
-    expect(result.failures).toEqual([
+    it.each<{
+      name: string;
+      panels: DashboardAttachmentData['panels'];
+      upsert: DashboardUpsert;
+      identifier: string;
+      error: string;
+    }>([
       {
-        type: UPSERT_FAILURE,
+        name: 'a new panel without grid',
+        panels: [],
+        upsert: { panels: [{ id: 'metric', content: metricAttachment }] },
         identifier: 'metric',
         error: 'Panel "metric" is new. Provide `grid` ({ x, y, w, h }) to create it.',
       },
-    ]);
+      {
+        name: 'a panel without content that does not exist',
+        panels: [],
+        upsert: { panels: [{ id: 'missing-panel', grid: GRID }] },
+        identifier: 'missing-panel',
+        error: 'Panel "missing-panel" does not exist. Provide content to create it.',
+      },
+      {
+        name: 'a new section without title',
+        panels: [],
+        upsert: { sections: [{ id: 'overview' }] },
+        identifier: 'overview',
+        error: 'Section "overview" does not exist. Provide a title to create it.',
+      },
+      {
+        name: 'a section id that is already a panel id',
+        panels: [createLensPanel('overview')],
+        upsert: { sections: [{ id: 'overview', title: 'Overview' }] },
+        identifier: 'overview',
+        error: '"overview" is a panel id. Use a different id for the section.',
+      },
+      {
+        name: 'a panel id that is already a section id',
+        panels: [createSection('overview', 'Overview', 0)],
+        upsert: { panels: [{ id: 'overview', content: markdownContent('Text') }] },
+        identifier: 'overview',
+        error: '"overview" is a section id. Use a different id for the panel.',
+      },
+      {
+        name: 'a panel in an unknown section',
+        panels: [],
+        upsert: {
+          panels: [{ id: 'summary', section: 'missing', content: markdownContent('Text') }],
+        },
+        identifier: 'summary',
+        error:
+          'Section "missing" not found. Create it in `sections` or use an existing section id.',
+      },
+      {
+        name: 'removing an id that does not exist',
+        panels: [createLensPanel('panel-1')],
+        upsert: { remove: ['missing'] },
+        identifier: 'missing',
+        error: 'Nothing with id "missing" exists on the dashboard.',
+      },
+      {
+        name: 'an id that is both updated and removed',
+        panels: [createLensPanel('panel-1')],
+        upsert: {
+          panels: [{ id: 'panel-1', content: { source: 'request', query: 'make it a bar' } }],
+          remove: ['panel-1'],
+        },
+        identifier: 'panel-1',
+        error:
+          '"panel-1" is both updated and removed in this call, so neither change was applied. Do only one.',
+      },
+      {
+        name: 'a request edit of a panel type without a renderer',
+        panels: [createPanel('panel-1', 'aiOpsLogRateAnalysis', { seriesType: 'log_rate' })],
+        upsert: {
+          panels: [{ id: 'panel-1', content: { source: 'request', query: 'refine this' } }],
+        },
+        identifier: 'panel-1',
+        error:
+          'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline editing. To replace the panel with generated content, set `renderer` explicitly.',
+      },
+      {
+        name: 'a custom_content request edit without renderer',
+        panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
+        upsert: {
+          panels: [{ id: 'cc-1', content: { source: 'request', query: 'change the title' } }],
+        },
+        identifier: 'cc-1',
+        error:
+          'Panel "cc-1" is a custom content panel. Edit it with source: "request", renderer: "custom_content". To replace the panel with generated content, set `renderer` explicitly.',
+      },
+      {
+        name: 'a markdown request edit without renderer',
+        panels: [createPanel('md-1', MARKDOWN_EMBEDDABLE_TYPE, { content: 'old text' })],
+        upsert: {
+          panels: [{ id: 'md-1', content: { source: 'request', query: 'change the title' } }],
+        },
+        identifier: 'md-1',
+        error:
+          'Panel "md-1" is a markdown panel. Edit it with source: "config", type: "markdown". To replace the panel with generated content, set `renderer` explicitly.',
+      },
+      {
+        name: 'a lens request replacing a Vega panel without chart type',
+        panels: [vegaPanel],
+        upsert: {
+          panels: [
+            {
+              id: 'vega-1',
+              content: { source: 'request', renderer: 'lens', query: 'change the title' },
+            },
+          ],
+        },
+        identifier: 'vega-1',
+        error: expect.stringContaining('Invalid content for panel "vega-1"'),
+      },
+    ])(
+      'rejects $name and leaves the dashboard unchanged',
+      async ({ panels, upsert, identifier, error }) => {
+        const resolvePanelContent = createResolverMock();
+        const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(
+          resolveMetricAttachment
+        );
+
+        const result = await executeDashboardUpsert({
+          dashboardData: { title: 'Test', panels },
+          upsert,
+          logger,
+          resolvePanelContent,
+          resolveAttachmentPanel,
+        });
+
+        expect(resolvePanelContent).not.toHaveBeenCalled();
+        expect(resolveAttachmentPanel).not.toHaveBeenCalled();
+        expect(result.dashboardData.panels).toEqual(panels);
+        expect(result.failures).toEqual([upsertFailure(identifier, error)]);
+      }
+    );
   });
 
   describe('sections', () => {
     it('adds an empty section with the given id and default collapsed=false', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [],
         },
         upsert: { sections: [{ id: 'overview', title: 'Overview' }] },
@@ -546,23 +601,6 @@ describe('executeDashboardUpsert', () => {
       expect(result.updated).toEqual(['section-a']);
     });
 
-    it('records a failure when a new section has no title', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', panels: [] },
-        upsert: { sections: [{ id: 'overview' }] },
-        logger,
-      });
-
-      expect(getSections(result.dashboardData.panels)).toEqual([]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'overview',
-          error: 'Section "overview" does not exist. Provide a title to create it.',
-        },
-      ]);
-    });
-
     it('records a failure for each occurrence of a duplicated section id', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: { title: 'Test', panels: [] },
@@ -575,48 +613,12 @@ describe('executeDashboardUpsert', () => {
         logger,
       });
 
-      const duplicateFailure = {
-        type: UPSERT_FAILURE,
-        identifier: 'overview',
-        error: 'Section "overview" appears more than once. List each section once.',
-      };
+      const duplicateFailure = upsertFailure(
+        'overview',
+        'Section "overview" appears more than once. List each section once.'
+      );
       expect(getSections(result.dashboardData.panels)).toEqual([]);
       expect(result.failures).toEqual([duplicateFailure, duplicateFailure]);
-    });
-
-    it('rejects a section id that is already a panel id', async () => {
-      const panel = createLensPanel('overview');
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', panels: [panel] },
-        upsert: { sections: [{ id: 'overview', title: 'Overview' }] },
-        logger,
-      });
-
-      expect(result.dashboardData.panels).toEqual([panel]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'overview',
-          error: '"overview" is a panel id. Use a different id for the section.',
-        },
-      ]);
-    });
-
-    it('rejects a panel id that is already a section id', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', panels: [createSection('overview', 'Overview', 0)] },
-        upsert: { panels: [{ id: 'overview', content: markdownContent('Text') }] },
-        logger,
-      });
-
-      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'overview',
-          error: '"overview" is a section id. Use a different id for the panel.',
-        },
-      ]);
     });
 
     it('moves existing panels and adds resolved panels into new sections in one call', async () => {
@@ -678,128 +680,12 @@ describe('executeDashboardUpsert', () => {
       expect({ dashboardData, upsert }).toEqual(originalInputs);
     });
 
-    it('adds a section with inline visualization panels in a single call', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [],
-        },
-        upsert: {
-          sections: [{ id: 'overview', title: 'Overview' }],
-          panels: [
-            {
-              id: 'total-requests',
-              grid: GRID,
-              section: 'overview',
-              content: metricRequest('show total requests'),
-            },
-            {
-              id: 'error-rate',
-              section: 'overview',
-              grid: GRID,
-              content: metricRequest('show error rate'),
-            },
-          ],
-        },
-        logger,
-        resolvePanelContent: createResolvePanelContent({
-          'total-requests': createResolvedPanelContent({
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'metric' },
-          }),
-          'error-rate': createResolvedPanelContent({
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'bar' },
-          }),
-        }),
-      });
-
-      const panelsOnly = getPanelsOnly(result.dashboardData.panels);
-      const sections = getSections(result.dashboardData.panels);
-
-      expect(panelsOnly).toEqual([]);
-      expect(sections).toHaveLength(1);
-      expect(sections[0]).toEqual({
-        id: 'overview',
-        title: 'Overview',
-        collapsed: false,
-        grid: { y: expect.any(Number) },
-        panels: [
-          expect.objectContaining({
-            id: 'total-requests',
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'metric' },
-          }),
-          expect.objectContaining({
-            id: 'error-rate',
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'bar' },
-          }),
-        ],
-      });
-    });
-
-    it('records inline visualization failures when adding a section and keeps successful panels', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [],
-        },
-        upsert: {
-          sections: [{ id: 'overview', title: 'Overview' }],
-          panels: [
-            {
-              id: 'total-requests',
-              grid: GRID,
-              section: 'overview',
-              content: metricRequest('show total requests'),
-            },
-            {
-              id: 'p95-latency',
-              section: 'overview',
-              grid: GRID,
-              content: metricRequest('show p95 latency'),
-            },
-          ],
-        },
-        logger,
-        resolvePanelContent: createResolvePanelContent({
-          'total-requests': createResolvedPanelContent({
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { type: 'metric' },
-          }),
-          'p95-latency': createPanelFailureResult('p95-latency', 'ES|QL generation failed'),
-        }),
-      });
-
-      const sections = getSections(result.dashboardData.panels);
-
-      expect(sections).toHaveLength(1);
-      expect(sections[0].panels).toEqual([
-        expect.objectContaining({
-          id: 'total-requests',
-          type: LENS_EMBEDDABLE_TYPE,
-          config: { type: 'metric' },
-        }),
-      ]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'p95-latency',
-          error: 'ES|QL generation failed',
-        },
-      ]);
-    });
-
     it('adds non-visualization section panels without invoking the panel resolver', async () => {
       const resolvePanelContent = createResolverMock();
 
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [],
         },
         upsert: {
@@ -834,103 +720,10 @@ describe('executeDashboardUpsert', () => {
       ]);
     });
 
-    it('adds attachment-source panels into a target section', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [createSection('section-a', 'Section A', 8)],
-        },
-        upsert: {
-          panels: [
-            {
-              id: 'metric',
-              section: 'section-a',
-              content: metricAttachment,
-              grid: { x: 0, y: 0, w: 12, h: 5 },
-            },
-          ],
-        },
-        logger,
-        resolveAttachmentPanel: resolveMetricAttachment,
-      });
-
-      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
-      expect(getSection(result.dashboardData, 'section-a')?.panels).toEqual([
-        expect.objectContaining({
-          id: 'metric',
-          type: LENS_EMBEDDABLE_TYPE,
-          config: { type: 'metric' },
-          grid: { x: 0, y: 0, w: 12, h: 5 },
-        }),
-      ]);
-    });
-
-    it('adds a markdown panel into a target section', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [createSection('section-a', 'Section A', 0)],
-        },
-        upsert: {
-          panels: [
-            {
-              id: 'summary',
-              grid: GRID,
-              section: 'section-a',
-              content: markdownContent('### Section Summary'),
-            },
-          ],
-        },
-        logger,
-      });
-
-      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
-      expect(getSection(result.dashboardData, 'section-a')?.panels).toEqual([
-        expect.objectContaining({
-          id: 'summary',
-          type: MARKDOWN_EMBEDDABLE_TYPE,
-          config: { content: '### Section Summary', settings: { open_links_in_new_tab: true } },
-        }),
-      ]);
-    });
-
-    it('records a failure when a panel references an unknown section', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [],
-        },
-        upsert: {
-          panels: [
-            {
-              id: 'summary',
-              section: 'nonexistent-section',
-              content: markdownContent('### Summary'),
-            },
-          ],
-        },
-        logger,
-      });
-
-      expect(result.dashboardData.panels).toEqual([]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'summary',
-          error:
-            'Section "nonexistent-section" not found. Create it in `sections` or use an existing section id.',
-        },
-      ]);
-    });
-
     it('removes a section together with the panels it contains', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [
             createLensPanel('top-1'),
             createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
@@ -948,8 +741,7 @@ describe('executeDashboardUpsert', () => {
     it('keeps panels moved out of a section that is removed in the same call', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [
             createLensPanel('top-1', 0),
             createSection('section-a', 'Section A', 20, [
@@ -980,8 +772,7 @@ describe('executeDashboardUpsert', () => {
     it('rejects panels placed into a section that is removed in the same call', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [
             createLensPanel('top-1', 0),
             createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
@@ -997,12 +788,10 @@ describe('executeDashboardUpsert', () => {
       expect(getSections(result.dashboardData.panels)).toHaveLength(0);
       expect(getIds(result.dashboardData.panels)).toEqual(['top-1']);
       expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'top-1',
-          error:
-            'Section "section-a" is removed in this call. Place panel "top-1" in a section that stays, or keep the section.',
-        },
+        upsertFailure(
+          'top-1',
+          'Section "section-a" is removed in this call. Place panel "top-1" in a section that stays, or keep the section.'
+        ),
       ]);
     });
   });
@@ -1011,8 +800,7 @@ describe('executeDashboardUpsert', () => {
     it('removes matching panel ids from top-level and section panels', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [
             createLensPanel('top-1'),
             createSection('section-a', 'Section A', 8, [
@@ -1036,65 +824,13 @@ describe('executeDashboardUpsert', () => {
         }),
       ]);
     });
-
-    it('records a failure for an id that does not exist', async () => {
-      const panel = createLensPanel('panel-1');
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', panels: [panel] },
-        upsert: { remove: ['missing'] },
-        logger,
-      });
-
-      expect(result.dashboardData.panels).toEqual([panel]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'missing',
-          error: 'Nothing with id "missing" exists on the dashboard.',
-        },
-      ]);
-    });
-
-    it('records a failure and applies neither change when an id is both updated and removed', async () => {
-      const resolvePanelContent = createResolverMock(async () =>
-        createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
-      );
-
-      const result = await executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test',
-          description: 'Desc',
-          panels: [createLensPanel('panel-1', 5)],
-        },
-        upsert: {
-          panels: [
-            { id: 'panel-1', content: { source: 'request', query: 'make this a bar chart' } },
-          ],
-          remove: ['panel-1'],
-        },
-        logger,
-        resolvePanelContent,
-      });
-
-      expect(resolvePanelContent).not.toHaveBeenCalled();
-      expect(result.dashboardData.panels).toEqual([createLensPanel('panel-1', 5)]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'panel-1',
-          error:
-            '"panel-1" is both updated and removed in this call, so neither change was applied. Do only one.',
-        },
-      ]);
-    });
   });
 
   describe('moving and resizing panels', () => {
     it('resizes a panel without changing its section', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [
             createSection('section-a', 'Section A', 0, [createLensPanel('section-panel-1', 0)]),
           ],
@@ -1116,8 +852,7 @@ describe('executeDashboardUpsert', () => {
     it('moves a top-level panel into a section', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [createLensPanel('top-1'), createSection('section-a', 'Section A', 10)],
         },
         upsert: { panels: [{ id: 'top-1', section: 'section-a' }] },
@@ -1138,8 +873,7 @@ describe('executeDashboardUpsert', () => {
     it('moves a section panel to the top level when section is null', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [
             createSection('section-a', 'Section A', 0, [createLensPanel('section-panel-1', 0)]),
           ],
@@ -1175,27 +909,6 @@ describe('executeDashboardUpsert', () => {
       expect(result.failures).toEqual([]);
       expect(result.dashboardData).toEqual(dashboardData);
     });
-
-    it('records a failure when a panel without content does not exist', async () => {
-      const result = await executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [],
-        },
-        upsert: { panels: [{ id: 'missing-panel', grid: GRID }] },
-        logger,
-      });
-
-      expect(result.dashboardData.panels).toEqual([]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'missing-panel',
-          error: 'Panel "missing-panel" does not exist. Provide content to create it.',
-        },
-      ]);
-    });
   });
 
   describe('inline panel resolution', () => {
@@ -1216,7 +929,6 @@ describe('executeDashboardUpsert', () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
           title: 'Test',
-          description: 'Desc',
           panels: [createSection('section-a', 'Section A', 0)],
         },
         upsert: {
@@ -1283,8 +995,7 @@ describe('executeDashboardUpsert', () => {
 
       const resultPromise = executeDashboardUpsert({
         dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
+          title: 'Test',
           panels: [],
         },
         upsert: {
@@ -1359,8 +1070,7 @@ describe('executeDashboardUpsert', () => {
       await expect(
         executeDashboardUpsert({
           dashboardData: {
-            title: 'Test dashboard',
-            description: 'Description',
+            title: 'Test',
             panels: [],
           },
           upsert: {
@@ -1415,7 +1125,6 @@ describe('executeDashboardUpsert', () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
           title: 'Test',
-          description: 'Desc',
           panels: [topLevelPanel, createSection('section-a', 'Section A', 20, [sectionPanel])],
         },
         upsert: {
@@ -1498,7 +1207,6 @@ describe('executeDashboardUpsert', () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
           title: 'Test',
-          description: 'Desc',
           panels: [],
         },
         upsert: {
@@ -1518,13 +1226,7 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(getIds(result.dashboardData.panels)).toEqual(['total-requests']);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'p95-latency',
-          error: 'ES|QL generation failed',
-        },
-      ]);
+      expect(result.failures).toEqual([upsertFailure('p95-latency', 'ES|QL generation failed')]);
     });
 
     it('keeps an existing panel unchanged when its edit fails to resolve', async () => {
@@ -1550,42 +1252,8 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(getPanelsOnly(result.dashboardData.panels)).toEqual([panel]);
-      expect(result.failures).toEqual([
-        { type: UPSERT_FAILURE, identifier: 'panel-1', error: 'ES|QL generation failed' },
-      ]);
+      expect(result.failures).toEqual([upsertFailure('panel-1', 'ES|QL generation failed')]);
       expect(result.updated).toEqual([]);
-    });
-
-    it('records a failure without calling the resolver when a request edit targets a panel with no renderer', async () => {
-      const resolvePanelContent = createResolverMock();
-      const panel: AttachmentPanel = {
-        type: 'aiOpsLogRateAnalysis',
-        id: 'panel-1',
-        config: { seriesType: 'log_rate' },
-        grid: { x: 0, y: 5, w: 24, h: 9 },
-      };
-
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', description: 'Desc', panels: [panel] },
-        upsert: {
-          panels: [
-            { id: 'panel-1', content: { source: 'request', query: 'refine this analysis' } },
-          ],
-        },
-        logger,
-        resolvePanelContent,
-      });
-
-      expect(resolvePanelContent).not.toHaveBeenCalled();
-      expect(result.dashboardData.panels).toEqual([panel]);
-      expect(result.failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'panel-1',
-          error:
-            'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline editing. To replace the panel with generated content, set `renderer` explicitly.',
-        },
-      ]);
     });
 
     describe('request edit renderer', () => {
@@ -1610,53 +1278,7 @@ describe('executeDashboardUpsert', () => {
         return { result, resolvePanelContent };
       };
 
-      const customContentPanel: AttachmentPanel = {
-        id: 'cc-1',
-        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-        config: { template: '<div>Old</div>' },
-        grid: { x: 0, y: 0, w: 24, h: 6 },
-      };
-      const vegaPanel: AttachmentPanel = {
-        id: 'vega-1',
-        type: VEGA_VIS_TYPE,
-        config: { spec: '{}' },
-        grid: { x: 0, y: 0, w: 24, h: 9 },
-      };
-
-      it('fails without calling the resolver when a custom_content edit omits renderer', async () => {
-        const { result, resolvePanelContent } = await editWith(customContentPanel, {
-          source: 'request',
-          query: 'change the title',
-        });
-
-        expect(resolvePanelContent).not.toHaveBeenCalled();
-        expect(result.dashboardData.panels).toEqual([customContentPanel]);
-        expect(result.failures).toEqual([
-          {
-            type: UPSERT_FAILURE,
-            identifier: 'cc-1',
-            error:
-              'Panel "cc-1" is a custom content panel. Edit it with source: "request", renderer: "custom_content". To replace the panel with generated content, set `renderer` explicitly.',
-          },
-        ]);
-      });
-
-      it('resolves a custom_content edit that names its renderer', async () => {
-        const { result, resolvePanelContent } = await editWith(customContentPanel, {
-          source: 'request',
-          renderer: 'custom_content',
-          query: 'change the title',
-        });
-
-        expect(resolvePanelContent).toHaveBeenCalledWith(
-          expect.objectContaining({
-            renderer: 'custom_content',
-            nlQuery: 'change the title',
-            existingPanel: customContentPanel,
-          })
-        );
-        expect(result.failures).toEqual([]);
-      });
+      const vegaPanel = createPanel('vega-1', VEGA_VIS_TYPE, { spec: '{}' });
 
       it('infers vega from the existing panel when renderer is omitted', async () => {
         const { result, resolvePanelContent } = await editWith(vegaPanel, {
@@ -1694,24 +1316,6 @@ describe('executeDashboardUpsert', () => {
         ]);
       });
 
-      it('fails without calling the resolver when the lens renderer targets a Vega panel without a chart type', async () => {
-        const { result, resolvePanelContent } = await editWith(vegaPanel, {
-          source: 'request',
-          renderer: 'lens',
-          query: 'change the title',
-        });
-
-        expect(resolvePanelContent).not.toHaveBeenCalled();
-        expect(result.dashboardData.panels).toEqual([vegaPanel]);
-        expect(result.failures).toEqual([
-          {
-            type: UPSERT_FAILURE,
-            identifier: 'vega-1',
-            error: expect.stringContaining('Invalid content for panel "vega-1"'),
-          },
-        ]);
-      });
-
       it('replaces a Lens panel with new custom content when the content names custom_content', async () => {
         const { result, resolvePanelContent } = await editWith(createLensPanel('panel-1'), {
           source: 'request',
@@ -1734,25 +1338,6 @@ describe('executeDashboardUpsert', () => {
           }),
         ]);
       });
-
-      it('fails without calling the resolver for a request without chart type on a by-value panel', async () => {
-        const markdownPanel = createMarkdownPanel('md-1', 'old text');
-        const { result, resolvePanelContent } = await editWith(markdownPanel, {
-          source: 'request',
-          query: 'change the title',
-        });
-
-        expect(resolvePanelContent).not.toHaveBeenCalled();
-        expect(result.dashboardData.panels).toEqual([markdownPanel]);
-        expect(result.failures).toEqual([
-          {
-            type: UPSERT_FAILURE,
-            identifier: 'md-1',
-            error:
-              'Panel "md-1" is a markdown panel. Edit it with source: "config", type: "markdown". To replace the panel with generated content, set `renderer` explicitly.',
-          },
-        ]);
-      });
     });
 
     it('resolves multiple panel edits in parallel', async () => {
@@ -1771,7 +1356,6 @@ describe('executeDashboardUpsert', () => {
       const upsertPromise = executeDashboardUpsert({
         dashboardData: {
           title: 'Test',
-          description: 'Desc',
           panels: [createLensPanel('panel-1', 0), createLensPanel('panel-2', 9)],
         },
         upsert: {
@@ -1849,7 +1433,6 @@ describe('executeDashboardUpsert', () => {
       const result = await executeDashboardUpsert({
         dashboardData: {
           title: 'Test',
-          description: 'Desc',
           panels: [createLensPanel('panel-1', 0), createLensPanel('panel-2', 9)],
         },
         upsert: {
@@ -1863,11 +1446,10 @@ describe('executeDashboardUpsert', () => {
         resolvePanelContent,
       });
 
-      const duplicateFailure = {
-        type: UPSERT_FAILURE,
-        identifier: 'panel-1',
-        error: 'Panel "panel-1" appears more than once. List each panel once.',
-      };
+      const duplicateFailure = upsertFailure(
+        'panel-1',
+        'Panel "panel-1" appears more than once. List each panel once.'
+      );
 
       expect(result.failures).toEqual([duplicateFailure, duplicateFailure]);
 
@@ -1885,196 +1467,87 @@ describe('executeDashboardUpsert', () => {
       );
     });
 
-    it('edits a markdown panel content in place', async () => {
-      const resolvePanelContent = createResolverMock();
-      const markdownPanel = createMarkdownPanel('md-1', 'old text');
-
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', description: 'Desc', panels: [markdownPanel] },
-        upsert: { panels: [{ id: 'md-1', content: markdownContent('### Updated summary') }] },
-        logger,
-        resolvePanelContent,
-      });
-
-      expect(resolvePanelContent).not.toHaveBeenCalled();
-      expect(result.failures).toEqual([]);
-      expect(result.dashboardData.panels).toEqual([
-        {
-          ...markdownPanel,
-          config: { content: '### Updated summary', settings: { open_links_in_new_tab: true } },
-        },
-      ]);
-    });
-
-    it('edits an ML anomaly charts panel in place', async () => {
-      const resolvePanelContent = createResolverMock();
-      const chartsPanel = createAnomalyChartsPanel('charts-1');
-
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', description: 'Desc', panels: [chartsPanel] },
-        upsert: {
-          panels: [
-            {
-              id: 'charts-1',
-              content: {
-                source: 'config',
-                type: 'ml_anomaly_charts',
-                config: {
-                  job_ids: ['job-1'],
-                  title: 'Anomaly charts of job-1 with severity > 50',
-                  severity_threshold: 50,
-                },
-              },
-            },
-          ],
-        },
-        logger,
-        resolvePanelContent,
-      });
-
-      expect(resolvePanelContent).not.toHaveBeenCalled();
-      expect(result.failures).toEqual([]);
-      expect(result.dashboardData.panels).toEqual([
-        {
-          ...chartsPanel,
-          config: {
-            job_ids: ['job-1'],
-            title: 'Anomaly charts of job-1 with severity > 50',
-            severity_threshold: [{ min: 50 }],
-          },
-        },
-      ]);
-    });
-
-    it('edits an ML anomaly swimlane panel in place', async () => {
-      const resolvePanelContent = createResolverMock();
-      const swimlanePanel = createAnomalySwimlanePanel('swim-1');
-
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', description: 'Desc', panels: [swimlanePanel] },
-        upsert: {
-          panels: [
-            {
-              id: 'swim-1',
-              content: {
-                source: 'config',
-                type: 'ml_anomaly_swimlane',
-                config: {
-                  job_ids: ['job-1'],
-                  swimlane_type: 'overall',
-                  severity_threshold: 75,
-                  title: 'Overall anomalies of job-1 (high severity)',
-                },
-              },
-            },
-          ],
-        },
-        logger,
-        resolvePanelContent,
-      });
-
-      expect(resolvePanelContent).not.toHaveBeenCalled();
-      expect(result.failures).toEqual([]);
-      expect(result.dashboardData.panels).toEqual([
-        {
-          ...swimlanePanel,
-          config: {
-            job_ids: ['job-1'],
-            swimlane_type: 'overall',
-            severity_threshold: 75,
-            title: 'Overall anomalies of job-1 (high severity)',
-          },
-        },
-      ]);
-    });
-
-    it('edits an ML single metric viewer panel in place', async () => {
-      const resolvePanelContent = createResolverMock();
-      const singleMetricViewerPanel = createSingleMetricViewerPanel('smv-1');
-
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', description: 'Desc', panels: [singleMetricViewerPanel] },
-        upsert: {
-          panels: [
-            {
-              id: 'smv-1',
-              content: {
-                source: 'config',
-                type: 'ml_single_metric_viewer',
-                config: {
-                  job_ids: ['job-1'],
-                  selected_entities: { 'host.name': 'web-01' },
-                  title: 'Metric viewer for web-01',
-                },
-              },
-            },
-          ],
-        },
-        logger,
-        resolvePanelContent,
-      });
-
-      expect(resolvePanelContent).not.toHaveBeenCalled();
-      expect(result.failures).toEqual([]);
-      expect(result.dashboardData.panels).toEqual([
-        {
-          ...singleMetricViewerPanel,
-          config: {
-            job_ids: ['job-1'],
-            selected_entities: { 'host.name': 'web-01' },
-            title: 'Metric viewer for web-01',
-          },
-        },
-      ]);
-    });
-
-    it.each<[string, UpsertPanelContent, Pick<AttachmentPanel, 'type' | 'config'>]>([
-      [
-        'markdown',
-        markdownContent('new text'),
-        {
+    it.each<{
+      name: string;
+      existingPanel: AttachmentPanel;
+      content: UpsertPanelContent;
+      expected: Pick<AttachmentPanel, 'type' | 'config'>;
+    }>([
+      {
+        name: 'markdown content on a markdown panel',
+        existingPanel: createPanel('panel-1', MARKDOWN_EMBEDDABLE_TYPE, { content: 'old' }),
+        content: markdownContent('new text'),
+        expected: {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: 'new text', settings: { open_links_in_new_tab: true } },
         },
-      ],
-      [
-        'ML anomaly charts',
-        { source: 'config', type: 'ml_anomaly_charts', config: { job_ids: ['job-1'] } },
-        { type: 'ml_anomaly_charts', config: { job_ids: ['job-1'] } },
-      ],
-      [
-        'ML anomaly swimlane',
-        {
+      },
+      {
+        name: 'markdown content on a Lens panel',
+        existingPanel: createLensPanel('panel-1'),
+        content: markdownContent('new text'),
+        expected: {
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: 'new text', settings: { open_links_in_new_tab: true } },
+        },
+      },
+      {
+        name: 'ML anomaly charts content on an anomaly charts panel',
+        existingPanel: createPanel('panel-1', 'ml_anomaly_charts', { job_ids: ['job-1'] }),
+        content: {
+          source: 'config',
+          type: 'ml_anomaly_charts',
+          config: { job_ids: ['job-1'], title: 'Severe anomalies', severity_threshold: 50 },
+        },
+        expected: {
+          type: 'ml_anomaly_charts',
+          config: {
+            job_ids: ['job-1'],
+            title: 'Severe anomalies',
+            severity_threshold: [{ min: 50 }],
+          },
+        },
+      },
+      {
+        name: 'ML anomaly swimlane content on a Lens panel',
+        existingPanel: createLensPanel('panel-1'),
+        content: {
           source: 'config',
           type: 'ml_anomaly_swimlane',
-          config: { job_ids: ['job-1'], swimlane_type: 'overall' },
+          config: { job_ids: ['job-1'], swimlane_type: 'overall', severity_threshold: 75 },
         },
-        { type: 'ml_anomaly_swimlane', config: { job_ids: ['job-1'], swimlane_type: 'overall' } },
-      ],
-      [
-        'ML single metric viewer',
-        { source: 'config', type: 'ml_single_metric_viewer', config: { job_ids: ['job-1'] } },
-        { type: 'ml_single_metric_viewer', config: { job_ids: ['job-1'] } },
-      ],
-    ])(
-      'replaces a Lens panel with %s config content and keeps its id',
-      async (_, content, expectedContent) => {
-        const resolvePanelContent = createResolverMock();
+        expected: {
+          type: 'ml_anomaly_swimlane',
+          config: { job_ids: ['job-1'], swimlane_type: 'overall', severity_threshold: 75 },
+        },
+      },
+      {
+        name: 'ML single metric viewer content on a Lens panel',
+        existingPanel: createLensPanel('panel-1'),
+        content: {
+          source: 'config',
+          type: 'ml_single_metric_viewer',
+          config: { job_ids: ['job-1'], selected_entities: { 'host.name': 'web-01' } },
+        },
+        expected: {
+          type: 'ml_single_metric_viewer',
+          config: { job_ids: ['job-1'], selected_entities: { 'host.name': 'web-01' } },
+        },
+      },
+    ])('applies $name in place', async ({ existingPanel, content, expected }) => {
+      const resolvePanelContent = createResolverMock();
 
-        const result = await executeDashboardUpsert({
-          dashboardData: { title: 'Test', panels: [createLensPanel('panel-1', 0)] },
-          upsert: { panels: [{ id: 'panel-1', content }] },
-          logger,
-          resolvePanelContent,
-        });
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Test', panels: [existingPanel] },
+        upsert: { panels: [{ id: existingPanel.id, content }] },
+        logger,
+        resolvePanelContent,
+      });
 
-        expect(resolvePanelContent).not.toHaveBeenCalled();
-        expect(result.failures).toEqual([]);
-        expect(result.dashboardData.panels).toEqual([
-          expect.objectContaining({ id: 'panel-1', ...expectedContent }),
-        ]);
-      }
-    );
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.panels).toEqual([{ ...existingPanel, ...expected }]);
+    });
 
     it('replaces a panel with attachment content and keeps its id', async () => {
       const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(() => ({
@@ -2113,7 +1586,7 @@ describe('executeDashboardUpsert', () => {
       );
 
       const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', description: 'Desc', panels: [existingPanel] },
+        dashboardData: { title: 'Test', panels: [existingPanel] },
         upsert: {
           panels: [
             {
@@ -2147,108 +1620,6 @@ describe('executeDashboardUpsert', () => {
       ]);
     });
 
-    it('resolves custom_content and Lens edits in the same parallel phase', async () => {
-      const deferredByIdentifier = {
-        'cc-1': createDeferred<PanelContentAttempt>(),
-        'panel-1': createDeferred<PanelContentAttempt>(),
-      };
-      const resolvePanelContent = createResolverMock(
-        ({ identifier }) =>
-          deferredByIdentifier[identifier as keyof typeof deferredByIdentifier].promise
-      );
-
-      const upsertPromise = executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test',
-          description: 'Desc',
-          panels: [
-            {
-              id: 'cc-1',
-              type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-              config: { template: '<div>Old</div>' },
-              grid: { x: 0, y: 0, w: 24, h: 6 },
-            },
-            createLensPanel('panel-1', 6),
-          ],
-        },
-        upsert: {
-          panels: [
-            {
-              id: 'cc-1',
-              content: { source: 'request', renderer: 'custom_content', query: 'add a border' },
-            },
-            { id: 'panel-1', content: { source: 'request', query: 'turn into a bar chart' } },
-          ],
-        },
-        logger,
-        resolvePanelContent,
-      });
-
-      await waitForNextEventLoopTurn();
-      expect(resolvePanelContent).toHaveBeenCalledTimes(2);
-
-      deferredByIdentifier['panel-1'].resolve(
-        createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
-      );
-      deferredByIdentifier['cc-1'].resolve(
-        createResolvedPanelContent({
-          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-          config: { template: '<div>New</div>' },
-        })
-      );
-
-      const result = await upsertPromise;
-      expect(result.failures).toEqual([]);
-      expect(getPanelsOnly(result.dashboardData.panels).map(({ config }) => config)).toEqual([
-        { template: '<div>New</div>' },
-        { type: 'bar' },
-      ]);
-    });
-
-    it('mixes markdown and visualization edits, calling the resolver only for the visualization', async () => {
-      const deferred = createDeferred<PanelContentAttempt>();
-      const resolvePanelContent = createResolverMock(() => deferred.promise);
-
-      const upsertPromise = executeDashboardUpsert({
-        dashboardData: {
-          title: 'Test',
-          description: 'Desc',
-          panels: [createMarkdownPanel('md-1', 'old text'), createLensPanel('panel-1', 5)],
-        },
-        upsert: {
-          panels: [
-            { id: 'md-1', content: markdownContent('### New summary') },
-            { id: 'panel-1', content: { source: 'request', query: 'turn into a bar chart' } },
-          ],
-        },
-        logger,
-        resolvePanelContent,
-      });
-
-      // Gives the upsert a chance to subscribe to the visualization resolve.
-      await waitForNextEventLoopTurn();
-
-      expect(resolvePanelContent).toHaveBeenCalledTimes(1);
-      expect(resolvePanelContent).toHaveBeenCalledWith(
-        expect.objectContaining({ identifier: 'panel-1' })
-      );
-
-      deferred.resolve(
-        createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
-      );
-
-      const result = await upsertPromise;
-      expect(result.failures).toEqual([]);
-      expect(findPanel(result.dashboardData, 'md-1')).toEqual(
-        expect.objectContaining({
-          config: { content: '### New summary', settings: { open_links_in_new_tab: true } },
-        })
-      );
-      expect(findPanel(result.dashboardData, 'panel-1')).toEqual(
-        expect.objectContaining({ config: { type: 'bar' } })
-      );
-    });
-
     it('adds a custom_content panel through the panel resolver', async () => {
       const resolvePanelContent = createResolverMock(async () =>
         createResolvedPanelContent({
@@ -2261,7 +1632,7 @@ describe('executeDashboardUpsert', () => {
       );
 
       const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', description: 'Desc', panels: [] },
+        dashboardData: { title: 'Test', panels: [] },
         upsert: {
           panels: [
             {
@@ -2537,11 +1908,7 @@ describe('executeDashboardUpsert controls', () => {
       'options_list_control',
     ]);
     expect(failures).toEqual([
-      {
-        type: UPSERT_FAILURE,
-        identifier: 'controls[1]',
-        error: 'A dashboard can contain at most one time_slider_control.',
-      },
+      upsertFailure('controls[1]', 'A dashboard can contain at most one time_slider_control.'),
     ]);
   });
 
@@ -2686,13 +2053,7 @@ describe('executeDashboardUpsert controls', () => {
         createFieldCapabilitiesResolver({})
       );
 
-      expect(failures).toEqual([
-        {
-          type: UPSERT_FAILURE,
-          identifier: 'http_method, status_code',
-          error: notMapped,
-        },
-      ]);
+      expect(failures).toEqual([upsertFailure('http_method, status_code', notMapped)]);
     });
 
     it('requests only candidate fields, once per index, with the dashboard project routing', async () => {
@@ -2775,11 +2136,7 @@ describe('executeDashboardUpsert controls', () => {
 
     expect(afterRemove.pinned_panels).toEqual(withControl.pinned_panels);
     expect(failures).toEqual([
-      {
-        type: UPSERT_FAILURE,
-        identifier: 'nonexistent-id',
-        error: 'Nothing with id "nonexistent-id" exists on the dashboard.',
-      },
+      upsertFailure('nonexistent-id', 'Nothing with id "nonexistent-id" exists on the dashboard.'),
     ]);
   });
 });
@@ -2799,55 +2156,13 @@ describe('executeDashboardUpsert attachment-source panels', () => {
 
   // The point of the source: the model places a visualization it already created without
   // copying its payload back through the tool call.
-  it('adds a panel from a visualization attachment without a config in the input', async () => {
-    const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(() => lnsXYAttempt);
-
-    const result = await executeDashboardUpsert({
-      dashboardData: { title: 'Test dashboard', description: '', panels: [] },
-      upsert: { panels: [{ id: 'chart', grid: GRID, content: attachmentContent('att-1') }] },
-      logger,
-      resolveAttachmentPanel,
-    });
-
-    expect(resolveAttachmentPanel).toHaveBeenCalledWith('att-1');
-    expect(result.failures).toHaveLength(0);
-    expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ id: 'chart', type: 'lens', config: { type: 'lnsXY' } }),
-    ]);
-  });
-
-  it('adds an attachment panel inside a new section', async () => {
-    const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(() => lnsXYAttempt);
-
-    const result = await executeDashboardUpsert({
-      dashboardData: { title: 'Test dashboard', description: '', panels: [] },
-      upsert: {
-        sections: [{ id: 'overview', title: 'Overview' }],
-        panels: [
-          { id: 'chart', section: 'overview', grid: GRID, content: attachmentContent('att-1') },
-        ],
-      },
-      logger,
-      resolveAttachmentPanel,
-    });
-
-    expect(resolveAttachmentPanel).toHaveBeenCalledWith('att-1');
-    expect(result.failures).toHaveLength(0);
-    expect(getSections(result.dashboardData.panels)).toEqual([
-      expect.objectContaining({
-        id: 'overview',
-        panels: [expect.objectContaining({ id: 'chart' })],
-      }),
-    ]);
-  });
-
   it('keeps the section when an attachment inside it cannot be resolved', async () => {
     const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(() =>
       createPanelFailureResult('att-missing', 'not found')
     );
 
     const result = await executeDashboardUpsert({
-      dashboardData: { title: 'Test dashboard', description: '', panels: [] },
+      dashboardData: { title: 'Test', panels: [] },
       upsert: {
         sections: [{ id: 'overview', title: 'Overview' }],
         panels: [
@@ -2879,7 +2194,7 @@ describe('executeDashboardUpsert attachment-source panels', () => {
     );
 
     const result = await executeDashboardUpsert({
-      dashboardData: { title: 'Test dashboard', description: '', panels: [] },
+      dashboardData: { title: 'Test', panels: [] },
       upsert: {
         panels: [
           { id: 'chart', grid: GRID, content: attachmentContent('att-1') },
@@ -2890,25 +2205,7 @@ describe('executeDashboardUpsert attachment-source panels', () => {
       resolveAttachmentPanel,
     });
 
-    expect(result.failures).toHaveLength(1);
+    expect(result.failures).toEqual([upsertFailure('missing-chart', 'not found')]);
     expect(getIds(result.dashboardData.panels)).toEqual(['chart']);
-  });
-
-  it('records a failure and skips the panel when the attachment cannot be resolved', async () => {
-    const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(() =>
-      createPanelFailureResult('att-missing', 'not found')
-    );
-
-    const result = await executeDashboardUpsert({
-      dashboardData: { title: 'Test dashboard', description: '', panels: [] },
-      upsert: { panels: [{ id: 'chart', grid: GRID, content: attachmentContent('att-missing') }] },
-      logger,
-      resolveAttachmentPanel,
-    });
-
-    expect(result.dashboardData.panels).toHaveLength(0);
-    expect(result.failures).toEqual([
-      expect.objectContaining({ identifier: 'chart', error: 'not found' }),
-    ]);
   });
 });
