@@ -82,7 +82,13 @@ export const ruleExecutionViewSchema = z
     id: z.string(),
     rule: z.object({
       id: z.string(),
-      version: z.number().int().nullable(),
+      version: z
+        .number()
+        .int()
+        .optional()
+        .describe(
+          'The rule version this run executed. Omitted until the rule executor emits its own event; the `task-run` event does not carry one.'
+        ),
     }),
     space_id: z.string(),
     started_at: z.iso.datetime(),
@@ -101,13 +107,19 @@ export const ruleExecutionViewSchema = z
         ),
     }),
     outcome: ruleExecutionOutcomeSchema,
-    reason: z.string().nullable(),
+    reason: z
+      .string()
+      .optional()
+      .describe('Why the run ended the way it did. Omitted when the source recorded no reason.'),
     error: z
       .object({
         message: z.string(),
-        stack_trace: z.string().nullable(),
+        stack_trace: z.string().optional().describe('Omitted when the source recorded no trace.'),
       })
-      .nullable(),
+      .optional()
+      .describe(
+        'Failure details. Omitted on a successful run, or when the failure was unclassified.'
+      ),
   })
   .meta({ id: 'alerting_rule_execution' });
 

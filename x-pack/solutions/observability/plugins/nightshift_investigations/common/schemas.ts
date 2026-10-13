@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { JsonValue } from '@kbn/utility-types';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
 
@@ -33,6 +34,56 @@ export const investigationSubjectSchema = z.object({
   id: z.string().min(1).max(500),
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
+
+/** Bound on notification destinations one investigation fans out to; one per automation is the norm. */
+export const MAX_INVESTIGATION_NOTIFICATIONS = 5;
+
+const MAX_NOTIFICATION_PARAM_LENGTH = 4096;
+const MAX_NOTIFICATION_PARAM_ENTRIES = 20;
+const MAX_NOTIFICATION_PARAM_DEPTH = 3;
+
+// A finite schema rejects deeply nested or cyclic input without unbounded recursion.
+const notificationParamValueSchema = (remainingDepth: number): z.ZodType<JsonValue> => {
+  const scalar = z.union([
+    z.string().max(MAX_NOTIFICATION_PARAM_LENGTH),
+    z.number(),
+    z.boolean(),
+    z.null(),
+  ]);
+  if (remainingDepth === 0) {
+    return scalar;
+  }
+  const child = notificationParamValueSchema(remainingDepth - 1);
+  return z.union([
+    scalar,
+    z.array(child).max(MAX_NOTIFICATION_PARAM_ENTRIES),
+    z
+      .record(z.string().max(128), child)
+      .refine((value) => Object.keys(value).length <= MAX_NOTIFICATION_PARAM_ENTRIES, {
+        message: 'notification params exceed the 20-key limit',
+      }),
+  ]);
+};
+
+/** Generic destination envelope; notification handlers validate connector-specific params at runtime. */
+export const investigationNotificationDestinationSchema = z.strictObject({
+  type: z.string().min(1).max(100),
+  connector_id: z.string().min(1).max(500),
+  params: z
+    .record(z.string().max(128), notificationParamValueSchema(MAX_NOTIFICATION_PARAM_DEPTH - 1))
+    .refine((value) => Object.keys(value).length <= MAX_NOTIFICATION_PARAM_ENTRIES, {
+      message: 'notification params exceed the 20-key limit',
+    })
+    .refine((value) => JSON.stringify(value).length <= MAX_NOTIFICATION_PARAM_LENGTH, {
+      message: 'notification params exceed the 4096-character JSON limit',
+    }),
+  automation_id: z.string().max(500).optional(),
+  automation_name: z.string().max(500).optional(),
+});
+
+export const investigationNotificationDestinationsSchema = z
+  .array(investigationNotificationDestinationSchema)
+  .max(MAX_INVESTIGATION_NOTIFICATIONS);
 
 export const alertSnapshotGroupSchema = z.object({
   field: z.string().max(500),
@@ -158,6 +209,9 @@ export const freeFormContextSchema = z
   });
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
+export type InvestigationNotificationDestination = z.infer<
+  typeof investigationNotificationDestinationSchema
+>;
 export type AlertSnapshotGroup = z.infer<typeof alertSnapshotGroupSchema>;
 export type AlertSnapshotEvaluation = z.infer<typeof alertSnapshotEvaluationSchema>;
 export type AlertSnapshot = z.infer<typeof alertSnapshotSchema>;

@@ -125,7 +125,14 @@ export class WorkflowEditorPage {
     await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, {
       params: { tab: 'executions' },
     });
-    await this.page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+    const list = this.page.testSubj.locator('workflowExecutionList');
+    const openList = this.page.testSubj.locator('workflowDetailExecutionsButton');
+    // The executions tab still shows the list inline. The flyout opens from the header button.
+    await list.or(openList).waitFor({ state: 'visible' });
+    if (!(await list.isVisible())) {
+      await openList.click();
+      await list.waitFor({ state: 'visible' });
+    }
   }
 
   /**
