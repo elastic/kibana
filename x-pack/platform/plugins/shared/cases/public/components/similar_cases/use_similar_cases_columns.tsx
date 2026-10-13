@@ -89,7 +89,7 @@ export const useSimilarCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '20%',
+        minWidth: '12em',
       },
       assignees: {
         field: casesColumnsConfig.assignees.field,
@@ -152,7 +152,7 @@ export const useSimilarCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '12%',
+        width: '14em',
       },
       totalAlerts: {
         field: casesColumnsConfig.totalAlerts.field,
@@ -266,7 +266,7 @@ export const useSimilarCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '90px',
+        minWidth: '6em',
       },
     }),
     [casesColumnsConfig]
@@ -357,7 +357,7 @@ export const useSimilarCasesColumns = ({
         }
         return getEmptyCellValue();
       },
-      width: '20%',
+      minWidth: '14em',
     }),
     []
   );
