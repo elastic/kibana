@@ -14,7 +14,7 @@ import { canAccessAlertingV2Rules } from '@kbn/alerting-v2-utils';
 import { useTriggerUiActionServices } from '../util';
 
 const BANNER_TITLE = i18n.translate('xpack.stackAlerts.esQuery.ui.universalRulesBanner.title', {
-  defaultMessage: 'Looking for Universal rules?',
+  defaultMessage: 'Looking for ES|QL?',
 });
 
 const UNIVERSAL_RULES_LINK_LABEL = i18n.translate(
@@ -40,12 +40,13 @@ export const EsQueryUniversalRulesBanner = () => {
         announceOnMount
         title={BANNER_TITLE}
         iconType="info"
+        size="s"
         data-test-subj="esQueryUniversalRulesBanner"
       >
         <p>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.universalRulesBanner.body"
-            defaultMessage="ES Query rules are part of Classic rules. Try {universalRulesLink} for the newer ES|QL-based experience."
+            defaultMessage="Try {universalRulesLink} for the newer ES|QL-based experience with more control over your alert data."
             values={{
               universalRulesLink: (
                 <EuiLink

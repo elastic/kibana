@@ -17,7 +17,7 @@ import {
 import { useDeveloperMode } from '../hooks/use_developer_mode';
 import { useKibana } from '../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../hooks/use_significant_events_maintenance';
-import { getFormattedError } from '../utils/errors';
+import { getFormattedError } from '../../common/errors';
 import { configToAnnotatedYaml } from './significant_events_tuning_config_editor';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
@@ -64,7 +64,7 @@ export const useDetectionSettingsForm = () => {
     !canEditSettings || !draftEnabled || blocksActivity;
 
   const continuousExtraction = useContinuousExtractionSettings({
-    globalClient: core.settings.globalClient,
+    client: core.settings.client,
     http: core.http,
     enabledFromStatus: maintenanceStatus?.featureSettings?.continuousOnboardingEnabled,
   });
