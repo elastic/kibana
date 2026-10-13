@@ -168,6 +168,27 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.timingBase).toBe('older-main-base');
   });
 
+  it('keeps selective testing off on on-merge while exposing the shadow mode', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-on-merge';
+    process.env.ON_MERGE_SELECTIVE_MODE = 'shadow';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.isOnMerge).toBe(true);
+    expect(cfg.onMergeSelectiveMode).toBe('shadow');
+    expect(cfg.useSelectiveTesting).toBe(false);
+  });
+
+  it('defaults the on-merge selective mode to off', () => {
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-on-merge';
+    expect(loadRunOrderConfig().onMergeSelectiveMode).toBe('off');
+  });
+
+  it('ignores ON_MERGE_SELECTIVE_MODE outside on-merge', () => {
+    process.env.ON_MERGE_SELECTIVE_MODE = 'shadow';
+    const cfg = loadRunOrderConfig();
+    expect(cfg.isOnMerge).toBe(false);
+    expect(cfg.onMergeSelectiveMode).toBe('off');
+  });
+
   it('honors the prevent label on merge-queue builds', () => {
     process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-merge-queue';
     process.env.BUILDKITE_MERGE_QUEUE_BASE_COMMIT = 'group-base';
