@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HOST_NAME } from '../../../common/es_fields/apm';
-import { hostNamesToKuery } from './utils';
+import { getHostsProfilingKuery, hostNamesToKuery } from './utils';
 
 describe('profiling utils', () => {
   describe('hostNamesToKuery', () => {
@@ -21,6 +21,24 @@ describe('profiling utils', () => {
 
     it('return empty string when no hostname', () => {
       expect(hostNamesToKuery([])).toEqual('');
+    });
+  });
+
+  describe('getHostsProfilingKuery', () => {
+    it('filters by the containers when there are some', () => {
+      expect(
+        getHostsProfilingKuery({
+          hostNames: ['host-1'],
+          containerIds: ['c-1', 'c-2'],
+          kuery: 'a : b',
+        })
+      ).toBe('(container.id : "c-1" OR container.id : "c-2") AND a : b');
+    });
+
+    it('filters by the hosts when there are no containers', () => {
+      expect(getHostsProfilingKuery({ hostNames: ['host-1'], containerIds: [], kuery: '' })).toBe(
+        '(host.name : "host-1")'
+      );
     });
   });
 });

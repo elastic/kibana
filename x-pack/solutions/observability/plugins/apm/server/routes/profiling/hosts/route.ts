@@ -9,14 +9,15 @@ import {
   routeDefinitions,
   type ProfilingHostsFlamegraphResponse,
   type ProfilingHostsFunctionsResponse,
+  type ProfilingHostsSchemasResponse,
 } from '@kbn/apm-api-shared';
-import { CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
-import { mergeKueries, toKueryFilterFormat } from '../../../../common/utils/kuery_utils';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { fetchFlamegraph } from '../fetch_flamegraph';
 import { fetchFunctions } from '../fetch_functions';
+import { getProfilingHostsSchemas } from '../get_profiling_schemas';
 import { getServiceCorrelationFields } from '../get_service_correlation_fields';
+import { getHostsProfilingEventsQuery } from '../profiling_queries';
 
 const profilingHostsFlamegraphRoute = createApmServerRoute({
   endpoint: routeDefinitions.profiling.hostsFlamegraph.endpoint,
@@ -54,12 +55,14 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
         profilingDataAccessStart,
         core,
         esClient: esClient.asCurrentUser,
-        start: startSecs,
-        end: endSecs,
-        kuery:
-          containerIds.length > 0
-            ? mergeKueries([`(${toKueryFilterFormat(CONTAINER_ID, containerIds)})`, kuery])
-            : mergeKueries([`(${toKueryFilterFormat(HOST_NAME, hostNames)})`, kuery]),
+        totalSeconds: endSecs - startSecs,
+        query: getHostsProfilingEventsQuery({
+          start: startSecs,
+          end: endSecs,
+          kuery,
+          hostNames,
+          containerIds,
+        }),
         schema,
       });
 
@@ -119,12 +122,14 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
         esClient: esClient.asCurrentUser,
         startIndex,
         endIndex,
-        start: startSecs,
-        end: endSecs,
-        kuery:
-          containerIds.length > 0
-            ? mergeKueries([`(${toKueryFilterFormat(CONTAINER_ID, containerIds)})`, kuery])
-            : mergeKueries([`(${toKueryFilterFormat(HOST_NAME, hostNames)})`, kuery]),
+        totalSeconds: endSecs - startSecs,
+        query: getHostsProfilingEventsQuery({
+          start: startSecs,
+          end: endSecs,
+          kuery,
+          hostNames,
+          containerIds,
+        }),
         schema,
       });
 
@@ -135,7 +140,50 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
   },
 });
 
+const profilingHostsSchemasRoute = createApmServerRoute({
+  endpoint: routeDefinitions.profiling.hostsSchemas.endpoint,
+  params: routeDefinitions.profiling.hostsSchemas.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ProfilingHostsSchemasResponse> => {
+    const { context, plugins, params } = resources;
+    const core = await context.core;
+    const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
+      core.elasticsearch.client,
+      await getApmEventClient(resources),
+      await plugins.profilingDataAccess?.start(),
+    ]);
+
+    if (!profilingDataAccessStart) {
+      return { schemas: [] };
+    }
+
+    const { start, end, environment, documentType, rollupInterval, kuery } = params.query;
+    const { serviceName } = params.path;
+
+    const { hostNames, containerIds } = await getServiceCorrelationFields({
+      apmEventClient,
+      start,
+      end,
+      environment,
+      serviceName,
+      documentType,
+      rollupInterval,
+    });
+
+    return getProfilingHostsSchemas({
+      profilingDataAccessStart,
+      esClient: esClient.asCurrentUser,
+      start: start / 1000,
+      end: end / 1000,
+      hostNames,
+      containerIds,
+      kuery,
+    });
+  },
+});
+
 export const profilingHostsRouteRepository = {
   ...profilingHostsFlamegraphRoute,
   ...profilingHostsFunctionsRoute,
+  ...profilingHostsSchemasRoute,
 };

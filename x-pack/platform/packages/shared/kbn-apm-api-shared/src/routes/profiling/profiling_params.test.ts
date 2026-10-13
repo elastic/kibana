@@ -13,6 +13,8 @@ import { servicesFlamegraphRoute } from './flamegraph';
 import { servicesFunctionsRoute } from './functions';
 import { profilingHostsFlamegraphRoute } from './hosts_flamegraph';
 import { profilingHostsFunctionsRoute } from './hosts_functions';
+import { servicesProfilingSchemasRoute } from './schemas';
+import { profilingHostsSchemasRoute } from './hosts_schemas';
 
 describe('servicesFlamegraphRoute params', () => {
   it('accepts a valid path and query', () => {
@@ -153,6 +155,62 @@ describe('profilingHostsFunctionsRoute params', () => {
     });
 
     expectParseError(result);
+  });
+});
+
+describe('servicesProfilingSchemasRoute params', () => {
+  const query = {
+    kuery: '',
+    environment: 'production',
+    start: '2021-01-01T00:00:00.000Z',
+    end: '2021-01-02T00:00:00.000Z',
+    transactionType: 'request',
+  };
+
+  it('accepts a valid path and query', () => {
+    expectParseSuccess(
+      servicesProfilingSchemasRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: { ...query, transactionName: 'GET /orders' },
+      })
+    );
+  });
+
+  it('rejects a missing transactionType', () => {
+    const { transactionType, ...queryWithoutTransactionType } = query;
+
+    expectParseError(
+      servicesProfilingSchemasRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: queryWithoutTransactionType,
+      })
+    );
+  });
+});
+
+describe('profilingHostsSchemasRoute params', () => {
+  const query = {
+    kuery: '',
+    environment: 'production',
+    start: '2021-01-01T00:00:00.000Z',
+    end: '2021-01-02T00:00:00.000Z',
+    documentType: ApmDocumentType.TransactionMetric,
+    rollupInterval: RollupInterval.OneMinute,
+  };
+
+  it('accepts a valid path and query', () => {
+    expectParseSuccess(
+      profilingHostsSchemasRoute.params!.safeParse({ path: { serviceName: 'opbeans-node' }, query })
+    );
+  });
+
+  it('rejects an invalid documentType', () => {
+    expectParseError(
+      profilingHostsSchemasRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-node' },
+        query: { ...query, documentType: 'notARealDocumentType' },
+      })
+    );
   });
 });
 

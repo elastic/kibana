@@ -11,13 +11,16 @@ import {
   type ServicesFlamegraphResponse,
   type ServicesFunctionsResponse,
   type ProfilingStatusResponse,
+  type ServicesProfilingSchemasResponse,
 } from '@kbn/apm-api-shared';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { fetchFlamegraph } from './fetch_flamegraph';
 import { fetchFunctions } from './fetch_functions';
 import { getProfilingInitialized } from './get_profiling_initialized';
+import { getProfilingSchemas } from './get_profiling_schemas';
 import { getStacktracesIdsField } from './get_stacktraces_ids_field';
+import { getTransactionsProfilingQuery } from './profiling_queries';
 
 const servicesFlamegraphRoute = createApmServerRoute({
   endpoint: routeDefinitions.profiling.flamegraph.endpoint,
@@ -52,13 +55,16 @@ const servicesFlamegraphRoute = createApmServerRoute({
         profilingDataAccessStart,
         core,
         esClient: esClient.asCurrentUser,
-        start: start / 1000,
-        end: end / 1000,
-        kuery,
-        serviceName,
-        transactionName,
-        environment,
-        transactionType,
+        totalSeconds: (end - start) / 1000,
+        query: getTransactionsProfilingQuery({
+          start: start / 1000,
+          end: end / 1000,
+          kuery,
+          serviceName,
+          transactionName,
+          environment,
+          transactionType,
+        }),
         indices,
         stacktraceIdsField,
         schema,
@@ -114,15 +120,18 @@ const servicesFunctionsRoute = createApmServerRoute({
         esClient: esClient.asCurrentUser,
         startIndex,
         endIndex,
+        totalSeconds: (end - start) / 1000,
+        query: getTransactionsProfilingQuery({
+          start: start / 1000,
+          end: end / 1000,
+          kuery,
+          serviceName,
+          transactionName,
+          environment,
+          transactionType,
+        }),
         indices,
         stacktraceIdsField,
-        start: start / 1000,
-        end: end / 1000,
-        kuery,
-        serviceName,
-        transactionName,
-        environment,
-        transactionType,
         schema,
       });
     }
@@ -160,8 +169,57 @@ const profilingStatusRoute = createApmServerRoute({
   },
 });
 
+const servicesProfilingSchemasRoute = createApmServerRoute({
+  endpoint: routeDefinitions.profiling.schemas.endpoint,
+  params: routeDefinitions.profiling.schemas.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServicesProfilingSchemasResponse> => {
+    const { context, plugins, params } = resources;
+    const core = await context.core;
+    const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
+      core.elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+    ]);
+
+    if (!profilingDataAccessStart) {
+      return { schemas: [] };
+    }
+
+    const { serviceName } = params.path;
+    const { start, end, kuery, transactionName, transactionType, environment } = params.query;
+
+    const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
+    const stacktraceIdsField = await getStacktracesIdsField({
+      apmEventClient,
+      start,
+      end,
+      environment,
+      serviceName,
+      transactionType,
+      transactionName,
+      kuery,
+    });
+
+    return getProfilingSchemas({
+      profilingDataAccessStart,
+      esClient: esClient.asCurrentUser,
+      start: start / 1000,
+      end: end / 1000,
+      kuery,
+      serviceName,
+      transactionName,
+      environment,
+      transactionType,
+      indices,
+      stacktraceIdsField,
+    });
+  },
+});
+
 export const profilingRouteRepository = {
   ...servicesFlamegraphRoute,
   ...profilingStatusRoute,
   ...servicesFunctionsRoute,
+  ...servicesProfilingSchemasRoute,
 };

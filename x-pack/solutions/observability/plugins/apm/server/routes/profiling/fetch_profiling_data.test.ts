@@ -17,13 +17,12 @@ describe('APM profiling data fetchers', () => {
   const profilingDataAccessStart = {
     services: { fetchFlamechartData, fetchFunctions: fetchFunctionsService },
   } as unknown as ProfilingDataAccessPluginStart;
-  const params = {
-    profilingDataAccessStart,
-    core: {} as CoreRequestHandlerContext,
-    esClient: {} as ElasticsearchClient,
-    start: 1000,
-    end: 2000,
-    kuery: '',
+  const core = {} as CoreRequestHandlerContext;
+  const esClient = {} as ElasticsearchClient;
+  const query = { bool: { filter: [{ term: { 'service.name': 'my-service' } }] } };
+  const correlation = {
+    indices: ['traces-apm*'],
+    stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
   };
 
   beforeEach(() => {
@@ -34,16 +33,50 @@ describe('APM profiling data fetchers', () => {
     ['the requested schema', ProfilingSchema.OTEL],
     ['no schema, so the default of the profiling APIs applies', undefined],
   ])('with %s', (_description, schema) => {
-    it('passes the schema on to the flamegraph request', async () => {
-      await fetchFlamegraph({ ...params, schema });
+    it('requests the flamegraph of the query', async () => {
+      await fetchFlamegraph({
+        profilingDataAccessStart,
+        core,
+        esClient,
+        totalSeconds: 900,
+        query,
+        ...correlation,
+        schema,
+      });
 
-      expect(fetchFlamechartData).toHaveBeenCalledWith(expect.objectContaining({ schema }));
+      expect(fetchFlamechartData).toHaveBeenCalledWith({
+        core,
+        esClient,
+        totalSeconds: 900,
+        query,
+        ...correlation,
+        schema,
+      });
     });
 
-    it('passes the schema on to the functions request', async () => {
-      await fetchFunctions({ ...params, startIndex: 0, endIndex: 10, schema });
+    it('requests the functions of the query', async () => {
+      await fetchFunctions({
+        profilingDataAccessStart,
+        core,
+        esClient,
+        startIndex: 0,
+        endIndex: 10,
+        totalSeconds: 900,
+        query,
+        ...correlation,
+        schema,
+      });
 
-      expect(fetchFunctionsService).toHaveBeenCalledWith(expect.objectContaining({ schema }));
+      expect(fetchFunctionsService).toHaveBeenCalledWith({
+        core,
+        esClient,
+        startIndex: 0,
+        endIndex: 10,
+        totalSeconds: 900,
+        query,
+        ...correlation,
+        schema,
+      });
     });
   });
 });
