@@ -61,7 +61,8 @@ describe('GroupedAttachmentFlyoutOpener', () => {
       descriptor,
       {},
       expect.anything(),
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY
+      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+      { originFlyoutSize: 's' }
     );
   });
 

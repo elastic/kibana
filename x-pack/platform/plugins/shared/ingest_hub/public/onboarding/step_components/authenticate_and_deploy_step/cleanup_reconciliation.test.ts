@@ -10,6 +10,7 @@ import {
   buildEffectivePendingCleanup,
   buildCleanedLiveStale,
   buildRemainingPending,
+  pickSecretSourcePolicyId,
 } from './cleanup_reconciliation';
 
 describe('buildLiveStalePolicyIds', () => {
@@ -104,5 +105,24 @@ describe('buildRemainingPending', () => {
     ],
   ])('%s', (_desc, pending, succeeded, expected) => {
     expect(buildRemainingPending(pending, succeeded)).toEqual(expected);
+  });
+});
+
+describe('pickSecretSourcePolicyId', () => {
+  it('returns the first deployed policy when nothing is pending cleanup', () => {
+    expect(pickSecretSourcePolicyId({ a: 'p1', b: 'p2' }, {})).toBe('p1');
+  });
+
+  it('skips a policy whose every instance is being removed', () => {
+    expect(pickSecretSourcePolicyId({ a: 'p1', b: 'p2' }, { a: 'p1' })).toBe('p2');
+  });
+
+  it('keeps a policy that only loses some of its instances', () => {
+    expect(pickSecretSourcePolicyId({ a: 'p1', b: 'p1' }, { a: 'p1' })).toBe('p1');
+  });
+
+  it('returns undefined when every deployed policy is being removed or none is deployed', () => {
+    expect(pickSecretSourcePolicyId({ a: 'p1', b: 'p2' }, { a: 'p1', b: 'p2' })).toBeUndefined();
+    expect(pickSecretSourcePolicyId({}, {})).toBeUndefined();
   });
 });
