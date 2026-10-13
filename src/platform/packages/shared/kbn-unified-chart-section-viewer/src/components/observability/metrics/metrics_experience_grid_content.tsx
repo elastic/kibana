@@ -97,7 +97,7 @@ export const MetricsExperienceGridContent = ({
     currentPage,
   }) ?? {};
 
-  useFetchHistogramBounds({
+  const { loading: histogramBoundsLoading, bounds: histogramBounds } = useFetchHistogramBounds({
     enabled: isComponentVisible,
     metricItems: currentPageFields,
     fetchParams: loadedFetchParams,
@@ -181,6 +181,8 @@ export const MetricsExperienceGridContent = ({
           getDescription={getDescription}
           isTabSelected={isTabSelected}
           isComponentVisible={isComponentVisible}
+          histogramBounds={histogramBounds}
+          histogramBoundsLoading={histogramBoundsLoading}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

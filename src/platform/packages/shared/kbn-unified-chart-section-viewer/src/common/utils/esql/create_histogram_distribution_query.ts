@@ -22,6 +22,7 @@ const HISTOGRAM_FIELD_TYPES: ReadonlySet<ES_FIELD_TYPES> = new Set([
 ]);
 
 export const HISTOGRAM_BUCKET_COUNT = 10;
+export const HISTOGRAM_TIME_BUCKET_COUNT = 100;
 export const HISTOGRAM_COUNT_COLUMN = 'count';
 export const HISTOGRAM_BUCKET_COLUMN = 'bucket';
 
@@ -72,7 +73,7 @@ export const createHistogramDistributionQuery = ({
     }
   }
 
-  const timeBucket = createTimeBucketAggregation({});
+  const timeBucket = createTimeBucketAggregation({ targetBuckets: HISTOGRAM_TIME_BUCKET_COUNT });
   query.pipe(
     `STATS ${HISTOGRAM_COUNT_COLUMN} = COUNT(${expression}, ${HISTOGRAM_BUCKET_COLUMN}) ` +
       `BY ${HISTOGRAM_BUCKET_COLUMN} = BUCKET(${expression}, ${HISTOGRAM_BUCKET_COUNT}, ${bounds.min}, ${bounds.max}), ${timeBucket}`

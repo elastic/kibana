@@ -7,15 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
+  HeatmapConfig,
   LensLegendConfig,
   LensSeriesLayer,
   LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
 import { useBoolean } from '@kbn/react-hooks';
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
@@ -39,6 +47,10 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     yBounds?: LensYBoundsConfig;
     legend?: LensLegendConfig;
     yAxisTitle?: string;
+    /** Lens API heatmap. When set, the chart is not an XY series chart. */
+    heatmapConfig?: HeatmapConfig;
+    /** Shown when a distribution has no finite range, instead of the loading chart. */
+    emptyMessage?: string;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
@@ -67,6 +79,8 @@ export const Chart = ({
   yBounds,
   legend,
   yAxisTitle,
+  heatmapConfig,
+  emptyMessage,
   extraDisabledActions,
   quickActionIds,
   isLoading = false,
@@ -95,10 +109,24 @@ export const Chart = ({
     yBounds,
     legend,
     yAxisTitle,
+    heatmapConfig,
     error,
     userMessages,
     profileId,
   });
+
+  const handleFilter = useCallback<NonNullable<ChartProps['onFilter']>>(
+    (event) => {
+      // A cell click would filter the histogram field by the bucket start, and ES|QL cannot
+      // compare a histogram to a number. Brushing still uses onBrushEnd.
+      if (heatmapConfig) {
+        event.preventDefault();
+        return;
+      }
+      onFilter?.(event);
+    },
+    [heatmapConfig, onFilter]
+  );
 
   return (
     <div
@@ -111,13 +139,48 @@ export const Chart = ({
       `}
       ref={chartRef}
     >
-      {lensProps && !isLoading ? (
+      {emptyMessage && !isLoading ? (
+        <EuiFlexGroup
+          css={css`
+            height: 100%;
+            padding: ${euiTheme.size.m};
+          `}
+          direction="column"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              style={{ height: '100%' }}
+              justifyContent="center"
+              alignItems="center"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="s"
+                  textAlign="center"
+                  color="subdued"
+                  data-test-subj="metricsExperienceHistogramEmpty"
+                >
+                  <p>{emptyMessage}</p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : lensProps && !isLoading ? (
         <>
           <LensWrapperMemo
             lensProps={lensProps}
             services={services}
             onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
+            onFilter={handleFilter}
             abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}

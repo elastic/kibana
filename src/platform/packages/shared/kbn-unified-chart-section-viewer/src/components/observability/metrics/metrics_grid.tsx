@@ -24,16 +24,24 @@ import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
+import { buildHistogramHeatmapConfig } from '../../chart/build_histogram_heatmap_config';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import {
   createESQLQuery,
+  createHistogramDistributionQuery,
   firstNonNullable,
   getAggregationLabel,
+  getHistogramFieldExpression,
   getMetricUniqueKey,
+  resolveMetricUnit,
 } from '../../../common/utils';
+import { getHeatmapValueFormat } from '../../../common/utils/metric_unit/get_heatmap_value_format';
+import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
+import { useFeatureFlag } from '../../../hooks';
+import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -108,7 +116,17 @@ export type MetricsGridProps = Pick<
    * fetches that should pause while hidden (exemplars) need this flag explicitly.
    */
   isComponentVisible: boolean;
+  /** Min/max fetched for the visible histogram charts. Empty until the heatmaps flag is on. */
+  histogramBounds?: HistogramBoundsByMetricKey;
+  histogramBoundsLoading?: boolean;
 };
+
+const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
+
+const histogramEmptyMessage = () =>
+  i18n.translate('metricsExperience.heatmap.noDistributionMessage', {
+    defaultMessage: 'No distribution in this time range',
+  });
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
@@ -130,6 +148,8 @@ export const MetricsGrid = ({
   getDescription,
   isTabSelected,
   isComponentVisible,
+  histogramBounds = EMPTY_HISTOGRAM_BOUNDS,
+  histogramBoundsLoading = false,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -279,6 +299,8 @@ export const MetricsGrid = ({
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
                   isComponentVisible={isComponentVisible}
+                  histogramBounds={histogramBounds}
+                  histogramBoundsLoading={histogramBoundsLoading}
                 />
               </EuiFlexItem>
             );
@@ -322,6 +344,8 @@ interface ChartItemProps
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
   isComponentVisible: boolean;
+  histogramBounds: HistogramBoundsByMetricKey;
+  histogramBoundsLoading: boolean;
 }
 
 const ChartItem = React.memo(
@@ -352,6 +376,8 @@ const ChartItem = React.memo(
     gridSettings,
     onMetricExplored,
     isComponentVisible,
+    histogramBounds,
+    histogramBoundsLoading,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -391,7 +417,39 @@ const ChartItem = React.memo(
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
     void exemplars;
 
+    const isHeatmapsEnabled = useFeatureFlag(
+      FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
+      FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
+    );
+    const isDistribution =
+      isHeatmapsEnabled && getHistogramFieldExpression(metricItem) !== undefined;
+    const boundsResult = isDistribution
+      ? histogramBounds.get(getMetricUniqueKey(metricItem))
+      : undefined;
+    const boundsError = boundsResult && 'error' in boundsResult ? boundsResult.error : undefined;
+    const finiteBounds = boundsResult && !('error' in boundsResult) ? boundsResult : undefined;
+    // A breakdown splits the series chart. Heatmaps do not encode that split yet.
+    const hasBreakdown = applicableDimensions.length > 0;
+    const drawDistribution = isDistribution && !hasBreakdown;
+    // Missing or equal bounds are not a distribution, so the heatmap is not drawn.
+    const hasDistribution = finiteBounds !== undefined && finiteBounds.min < finiteBounds.max;
+
+    const distributionQuery = useMemo(() => {
+      if (!drawDistribution || !hasDistribution || !finiteBounds) {
+        return undefined;
+      }
+      return createHistogramDistributionQuery({
+        metricItem,
+        bounds: finiteBounds,
+        whereStatements,
+        originalSource: userSource,
+      });
+    }, [drawDistribution, hasDistribution, finiteBounds, metricItem, whereStatements, userSource]);
+
     const esqlQuery = useMemo(() => {
+      if (drawDistribution) {
+        return distributionQuery ?? '';
+      }
       const fieldType = firstNonNullable(metricItem.fieldTypes);
       const isSupported = fieldType !== 'unsigned_long';
       return isSupported
@@ -403,7 +461,33 @@ const ChartItem = React.memo(
             gridSettings,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
+    }, [
+      drawDistribution,
+      distributionQuery,
+      metricItem,
+      applicableDimensions,
+      whereStatements,
+      userSource,
+      gridSettings,
+    ]);
+
+    const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
+    const heatmapConfig = useMemo(
+      () =>
+        distributionQuery
+          ? buildHistogramHeatmapConfig({
+              query: distributionQuery,
+              title: metricItem.metricName,
+              description,
+              valueFormat: getHeatmapValueFormat(resolvedUnit),
+            })
+          : undefined,
+      [distributionQuery, metricItem.metricName, description, resolvedUnit]
+    );
+    const emptyMessage =
+      drawDistribution && !histogramBoundsLoading && !boundsError && !distributionQuery
+        ? histogramEmptyMessage()
+        : undefined;
 
     const yAxisTitle = useMemo(() => {
       const instrument = firstNonNullable(metricItem.metricTypes);
@@ -454,8 +538,12 @@ const ChartItem = React.memo(
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}
           description={description}
-          chartLayers={chartLayers}
-          yAxisTitle={yAxisTitle}
+          chartLayers={drawDistribution ? [] : chartLayers}
+          yAxisTitle={drawDistribution ? undefined : yAxisTitle}
+          heatmapConfig={heatmapConfig}
+          emptyMessage={emptyMessage}
+          isLoading={drawDistribution && histogramBoundsLoading}
+          error={drawDistribution ? boundsError : undefined}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

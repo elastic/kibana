@@ -11,6 +11,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
+import { buildHistogramHeatmapConfig } from '../build_histogram_heatmap_config';
 import {
   LensConfigBuilder,
   type LensAttributes,
@@ -101,6 +102,9 @@ describe('useLensProps', () => {
       } as unknown as LensAttributes);
     LensConfigBuilderMock.prototype.build.mockImplementation(() =>
       Promise.resolve(createMockLensAttributes())
+    );
+    LensConfigBuilderMock.prototype.fromAPIFormat.mockImplementation(() =>
+      createMockLensAttributes()
     );
     useChartLayersMock.mockReturnValue(mockChartLayers);
   });
@@ -442,6 +446,39 @@ describe('useLensProps', () => {
     await waitFor(() => {
       expect(LensConfigBuilder.prototype.build).not.toHaveBeenCalled();
       expect(result.current).toBeUndefined();
+    });
+  });
+
+  it('builds a heatmap with the Lens API and leaves the XY builder unused', async () => {
+    const chartRef = createMockChartRef();
+    const heatmapConfig = buildHistogramHeatmapConfig({
+      query: 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)',
+      title: 'latency',
+    });
+
+    const { result } = renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        title: 'latency',
+        query: heatmapConfig.data_source.query,
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockEmptyChartLayers,
+        heatmapConfig,
+        profileId: 'testProfileId',
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.fromAPIFormat).toHaveBeenCalledWith(heatmapConfig);
+      expect(LensConfigBuilder.prototype.build).not.toHaveBeenCalled();
+      expect(result.current).toBeDefined();
     });
   });
 
