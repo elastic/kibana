@@ -5,17 +5,68 @@
  * 2.0.
  */
 
-import { SUBMIT_BRIEF_TOOL_NAME } from './brief_tool_schema';
+import { once } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { z } from '@kbn/zod/v4';
+import type { ToolDefinition, ToolSchema } from '@kbn/inference-common';
+import { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 
-export interface SystemPromptOptions {
-  /** Output language. */
-  responseLanguage?: string;
-}
+export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief';
+
+const FACT_IDS_DESCRIPTION =
+  'Ids of the facts (numbers from the "Facts" section) that back this assessment. Never invent ids.';
+const ASSESSMENT_SUMMARY_DESCRIPTION = 'One sentence, at most 180 characters';
+
+/** Descriptions added to the tool's JSON schema, by property path; they guide the model. */
+const FIELD_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  'verdict.level':
+    'urgent: an unaddressed critical threat, act today; action: a significant threat needs an owner this week; watch: worth monitoring, no action needed; clear: nothing notable',
+  'verdict.headline':
+    'One sentence, at most 140 characters: the main reason for the level. Do not write the level itself',
+  'verdict.summary':
+    'At most 3 short sentences summarising the assessments; state only what the facts they cite back',
+  assessments: 'One "threats" assessment and one "response" assessment',
+  'assessments.threats.summary': ASSESSMENT_SUMMARY_DESCRIPTION,
+  'assessments.threats.factIds': FACT_IDS_DESCRIPTION,
+  'assessments.response.summary': ASSESSMENT_SUMMARY_DESCRIPTION,
+  'assessments.response.factIds': FACT_IDS_DESCRIPTION,
+};
+
+const isToolSchema = (value: unknown): value is ToolSchema =>
+  typeof value === 'object' &&
+  value !== null &&
+  'type' in value &&
+  value.type === 'object' &&
+  'properties' in value;
+
+/** The forced tool: the contract's `Brief` as JSON schema, without `$schema` and zod's safe-integer bounds. */
+export const getSubmitBriefTool = once((): Required<ToolDefinition<ToolSchema>> => {
+  const schema: unknown = JSON.parse(
+    JSON.stringify(z.toJSONSchema(Brief), (key, value) =>
+      key === '$schema' || Math.abs(value) === Number.MAX_SAFE_INTEGER ? undefined : value
+    )
+  );
+  if (!isToolSchema(schema)) {
+    throw new Error('The Brief schema did not convert to an object JSON schema');
+  }
+  Object.entries(FIELD_DESCRIPTIONS).forEach(([path, description]) =>
+    set(
+      schema,
+      [...path.split('.').flatMap((key) => ['properties', key]), 'description'],
+      description
+    )
+  );
+  return {
+    description:
+      'Submit the complete executive brief. Call exactly once. Every assessment cites the ids of the facts from the provided evidence that back it.',
+    schema,
+  };
+});
+
+export const REPAIR_INSTRUCTIONS = `The brief was rejected. Fix every problem listed and call ${SUBMIT_BRIEF_TOOL_NAME} again with the complete corrected brief (the verdict and every assessment, not only the fixed parts). Keep what was not listed. Cite only fact ids from the evidence, and quote only numbers from the facts the assessments cite.`;
 
 /** Instructions for composing the brief. Every rule marked as checked is enforced again in verification. */
-export const buildSystemPrompt = ({
-  responseLanguage = 'English',
-}: SystemPromptOptions = {}): string =>
+export const buildSystemPrompt = (): string =>
   `You are a senior security analyst writing an executive brief for a CISO from Entity Analytics evidence. Call ${SUBMIT_BRIEF_TOOL_NAME} exactly once with the complete brief.
 
 ## The evidence
@@ -44,7 +95,7 @@ export const buildSystemPrompt = ({
 - Gaps: when signals were not checked, say so briefly; never present "not checked" as "nothing found".
 
 ## Style
-Write in ${responseLanguage}. Executive tone: plain words, short sentences, clean over wordy. No markdown, no filler, no hedging boilerplate.`;
+Write in English. Executive tone: plain words, short sentences, clean over wordy. No markdown, no filler, no hedging boilerplate.`;
 
 /** The user message: the window and the formatted evidence. */
 export const buildUserMessage = ({

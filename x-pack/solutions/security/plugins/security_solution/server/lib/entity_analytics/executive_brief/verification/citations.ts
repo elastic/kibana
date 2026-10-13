@@ -5,56 +5,28 @@
  * 2.0.
  */
 
-import type { AttentionLevel } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
-import { unique } from './evidence_index';
-import type { BriefCheck, CheckOutcome } from './types';
-import {
-  assessmentPath,
-  emptyOutcome,
-  isDropped,
-  mapAssessments,
-  presentAssessments,
-} from './types';
-
-/** Only an absence claim ("nothing to report") at level `clear` needs no citation. */
-const needsEvidence = (level: AttentionLevel): boolean => level !== 'clear';
+import { partition, uniq } from 'lodash';
+import { MAX_CITED_IDS } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type { BriefCheck } from './context';
+import { failClaim, mapAssessments } from './context';
 
 /**
- * Citations: ids that are not facts of the evidence are removed from every assessment's
- * `factIds`. An assessment above `clear` left without a fact to back it is dropped. The verdict
- * cites nothing itself; it rests on the facts its assessments cite.
+ * Citations: ids that are not facts of the evidence are removed (and the rest deduplicated and
+ * capped). An assessment above `clear` left without a fact is dropped. The verdict cites nothing
+ * itself; it rests on the facts its assessments cite.
  */
-export const checkCitations: BriefCheck = (input, context): CheckOutcome => {
-  const { index } = context;
+export const checkCitations: BriefCheck = (brief, context) => {
   const removed: number[] = [];
-  const keepKnown = (ids: readonly number[]): number[] =>
-    unique(ids).filter((id) => {
-      if (!index.facts.has(id)) {
-        removed.push(id);
-      }
-      return index.facts.has(id);
-    });
-
-  const outcome = emptyOutcome({
-    ...input,
-    assessments: mapAssessments(input.assessments, (assessment) => ({
-      ...assessment,
-      factIds: keepKnown(assessment.factIds),
-    })),
+  const assessments = mapAssessments(brief.assessments, (assessment, key) => {
+    const [known, unknown] = partition(uniq(assessment.factIds), (id) => context.facts.has(id));
+    removed.push(...unknown);
+    if (assessment.level !== 'clear' && known.length === 0) {
+      failClaim(context, key, 'citation', 'it cites no known fact in factIds');
+    }
+    return { ...assessment, factIds: known.slice(0, MAX_CITED_IDS) };
   });
   if (removed.length > 0) {
-    outcome.notes.push(`removed unknown fact ids: ${unique(removed).join(', ')}`);
+    context.notes.push(`removed unknown fact ids: ${uniq(removed).join(', ')}`);
   }
-
-  presentAssessments(outcome.brief.assessments).forEach(({ key, assessment }) => {
-    const path = assessmentPath(key);
-    if (
-      !isDropped(context, path) &&
-      needsEvidence(assessment.level) &&
-      assessment.factIds.length === 0
-    ) {
-      outcome.drops.push({ path, check: 'citation', reason: 'it cites no known fact in factIds' });
-    }
-  });
-  return outcome;
+  return { ...brief, assessments };
 };

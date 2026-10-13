@@ -11,8 +11,8 @@ import type {
   BriefErrorCode,
   BriefJobStage,
   SignalStatus,
+  VerificationSummary,
 } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { VerificationCheck } from './verification/types';
 
 /** Spans nest as generate → gather → signal (one per signal) → compose → verify. */
 export type BriefSpanName = 'generate' | 'signal' | BriefJobStage;
@@ -36,5 +36,5 @@ export interface BriefCompletedEvent {
   tokens?: { prompt: number; completion: number };
   repaired: boolean;
   levelsLowered: number;
-  verificationDropped: Partial<Record<VerificationCheck, number>>;
+  verificationDropped: VerificationSummary['dropped'];
 }

@@ -6,8 +6,7 @@
  */
 
 import type { Evidence } from '../signals/types';
-import { buildValidBrief, DOCKER, FIXTURE_EVIDENCE, ROD } from './__fixtures__/evidence';
-import { buildEvidenceIndex } from './evidence_index';
+import { buildValidBrief, DOCKER, FIXTURE_EVIDENCE, ROD, runCheck } from './__fixtures__/evidence';
 import { checkMentions, clampVisible } from './mentions';
 
 const TWO_DOCKER_HOSTS: Evidence = {
@@ -24,7 +23,7 @@ const TWO_DOCKER_HOSTS: Evidence = {
 const runAssessment = (summary: string, evidence: Evidence = FIXTURE_EVIDENCE) => {
   const brief = buildValidBrief();
   brief.assessments.threats.summary = summary;
-  return checkMentions(brief, { index: buildEvidenceIndex(evidence), dropped: new Set() });
+  return runCheck(checkMentions, brief, evidence);
 };
 
 describe('checkMentions', () => {
@@ -56,18 +55,19 @@ describe('checkMentions', () => {
   ])('%s', (_name, summary, expected, evidence) => {
     const outcome = runAssessment(summary, evidence);
     expect(outcome.brief.assessments.threats?.summary).toBe(expected);
-    expect(outcome.drops).toEqual([]);
+    expect([...outcome.dropped]).toEqual([]);
   });
 
   it('fails a claim that mentions an EUID not in the evidence', () => {
-    expect(runAssessment('{{ entity.id user:mallory }} logged on.').drops).toEqual([
-      expect.objectContaining({ path: 'assessments.threats', check: 'citation' }),
+    expect([...runAssessment('{{ entity.id user:mallory }} logged on.').dropped]).toEqual([
+      ['threats', 'citation'],
     ]);
   });
 
   describe('clampVisible', () => {
-    const nameOf = (euid: string) => (euid === ROD ? 'a.rodriguez' : euid);
+    const nameOf = (euid: string) => (euid === ROD ? 'a.rodriguez' : 'x');
     const mention = `{{ entity.id ${ROD} }}`;
+    const short = '{{ entity.id host:x-with-a-long-entity-id }}';
 
     it.each<[string, string, number, string]>([
       [
@@ -93,6 +93,12 @@ describe('checkMentions', () => {
         `Access by ${mention}`,
         15,
         'Access by…',
+      ],
+      [
+        'keeps raw text within four times the visible limit',
+        `${short} ${short} ${short}`,
+        12,
+        `${short}…`,
       ],
     ])('%s', (_name, text, max, expected) => {
       expect(clampVisible(text, max, nameOf)).toBe(expected);

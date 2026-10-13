@@ -10,6 +10,8 @@ import type {
   Fact,
 } from '../../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { Evidence } from '../../signals/types';
+import type { BriefCheck } from '../context';
+import { createCheckContext } from '../context';
 
 export const ROD = 'user:a.rodriguez@corp';
 const LAPTOP = 'host:laptop-fin03';
@@ -114,3 +116,15 @@ export const buildValidBrief = (): FullBrief => ({
     },
   },
 });
+
+/** Runs one check against the evidence; returns the checked brief and the context it filled. */
+export const runCheck = (
+  check: BriefCheck,
+  brief: Brief,
+  evidence: Evidence = FIXTURE_EVIDENCE,
+  range?: string
+) => {
+  const context = createCheckContext(evidence, range);
+  const checked = check(brief, context);
+  return { ...context, brief: checked };
+};

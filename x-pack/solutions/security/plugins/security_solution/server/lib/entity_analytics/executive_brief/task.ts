@@ -25,9 +25,8 @@ import {
 } from '../../../../common/entity_analytics/executive_brief/constants';
 import type { StartPlugins } from '../../../plugin';
 import { ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT } from '../../telemetry/event_based/events';
-import { composeVerifiedBrief } from './composition/compose_verified_brief';
-import type { ComposeVerifiedBriefResult } from './composition/types';
-import { BriefCompositionError } from './composition/types';
+import type { ComposeBriefResult } from './composition/compose';
+import { BriefCompositionError, composeBrief } from './composition/compose';
 import { BRIEF_SIGNALS } from './signals';
 import { runSignals } from './signals/run_signals';
 import type { GatherResult } from './signals/types';
@@ -110,8 +109,8 @@ const runBriefJob = async ({
   const authUser = coreStart.security.authc.getCurrentUser(fakeRequest);
   const run: {
     gathered?: GatherResult;
-    composed?: ComposeVerifiedBriefResult;
-    failedTokens?: ComposeVerifiedBriefResult['tokens'];
+    composed?: ComposeBriefResult;
+    failedTokens?: ComposeBriefResult['tokens'];
     errorCode?: JobError['code'];
   } = {};
 
@@ -137,7 +136,7 @@ const runBriefJob = async ({
       const { evidence, outcomes } = gathered;
       const composed = hasFindings(evidence)
         ? await withBriefSpan('compose', {}, () =>
-            composeVerifiedBrief({
+            composeBrief({
               inferenceClient: startPlugins.inference.getClient({
                 request: fakeRequest,
                 bindTo: { connectorId },

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
-import type { Fact } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { EvidenceIndex } from './evidence_index';
-import { citedFacts, unique } from './evidence_index';
-import type { BriefCheck, CheckOutcome, Claim } from './types';
-import { emptyOutcome, isDropped, listClaims, reportClaim } from './types';
+import type { AssessmentKey } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type { BriefCheck, CheckContext } from './context';
+import { assessmentsOf, citedFacts, failClaim, verdictFactIds } from './context';
+import { MENTION_PATTERN } from './mentions';
 
 const NUMBER_PATTERN = /\d+(?:,\d{3})*(?:\.\d+)?/g;
 
 const MONTH =
   '(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\b\\.?';
 
-/**
- * Spans whose digits are identifiers or times, not quantities. Applied in order; each match is
- * blanked before numbers are read.
- */
+/** Spans whose digits are identifiers or times, not quantities; blanked in order before numbers are read. */
 const MASKS: readonly RegExp[] = [
   // UUIDs
   /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi,
@@ -38,115 +35,100 @@ const MASKS: readonly RegExp[] = [
   /\b\d{1,3}(?:\.\d{1,3}){3}\b/g,
   // Ordinals: "1st", "2nd", "23rd", "4th"
   /\b\d+(?:st|nd|rd|th)\b/gi,
-  // Entity mention tokens, MITRE ids, and identifiers with digits attached to letters (host-01,
-  // S3, TA0001)
-  /\{\{[^{}]*\}\}/g,
+  // Mention tokens, MITRE ids, and identifiers with digits attached to letters (host-01, S3, TA0001)
+  MENTION_PATTERN,
   /\bT(?:A)?\d{4}(?:\.\d{3})?\b/g,
   /\b[A-Za-z][\w.-]*?\d[\w.-]*\b/g,
 ];
 
-/** Blanks every span that is not a quantity. */
-export const maskNonQuantities = (text: string): string =>
-  MASKS.reduce((masked, pattern) => masked.replace(pattern, ' '), text);
-
-/** The numbers written in `text`, as written (e.g. "1,204"), ignoring the given identifiers. */
-const findNumbers = (text: string, identifierPattern?: RegExp): string[] =>
-  maskNonQuantities(identifierPattern ? text.replace(identifierPattern, ' ') : text).match(
-    NUMBER_PATTERN
-  ) ?? [];
+/** The numbers written in `text`, as written (e.g. "1,204"), ignoring the evidence's identifiers. */
+const findNumbers = (text: string, { identifierPattern }: CheckContext): string[] =>
+  MASKS.reduce(
+    (masked, pattern) => masked.replace(pattern, ' '),
+    identifierPattern ? text.replace(identifierPattern, ' ') : text
+  ).match(NUMBER_PATTERN) ?? [];
 
 const toValue = (token: string): number => Number(token.replace(/,/g, ''));
 
-/** Adds a value and the ways it may be written: rounded, one decimal, a share as a percentage. */
-const addNumber = (allowed: Set<number>, value: number): void => {
-  if (!Number.isFinite(value)) {
-    return;
-  }
+/** A value and the ways it may be written: rounded, one decimal, a share as a percentage. */
+const variants = (value: number): number[] => {
   const abs = Math.abs(value);
-  allowed.add(abs);
-  allowed.add(Math.round(abs));
-  allowed.add(Math.round(abs * 10) / 10);
-  if (abs > 0 && abs <= 1) {
-    allowed.add(Math.round(abs * 100));
-  }
+  return [
+    abs,
+    Math.round(abs),
+    Math.round(abs * 10) / 10,
+    ...(abs > 0 && abs <= 1 ? [Math.round(abs * 100)] : []),
+  ];
 };
-
-const addFactNumbers = (allowed: Set<number>, fact: Fact, index: EvidenceIndex): void => {
-  Object.values(fact.numbers ?? {}).forEach((value) => addNumber(allowed, value));
-  // Deterministic text written by the signal may carry numbers too.
-  [fact.title, ...Object.values(fact.details ?? {})].forEach((text) =>
-    findNumbers(text, index.identifierPattern).forEach((token) =>
-      addNumber(allowed, toValue(token))
-    )
-  );
-};
-
-/** EUIDs of the entities a claim is about: named in its prose, or part of what it cites. */
-const claimEntities = (claim: Claim, index: EvidenceIndex, facts: readonly Fact[]): string[] =>
-  unique([
-    ...[...index.entities.keys()].filter((euid) =>
-      claim.fields.some(({ text }) => text.includes(euid))
-    ),
-    ...facts.flatMap(({ entityIds }) => entityIds),
-  ]).filter((euid) => index.entities.has(euid));
 
 /**
- * The numbers a claim may quote: those of the facts it cites (for the verdict, those its
- * assessments cite), the risk scores of the entities it is about, simple counts of what it cites,
+ * The numbers a claim may quote: those of the facts it cites (including numbers in their titles
+ * and details), the risk scores of the entities it names or cites, simple counts of what it cites,
  * and the window length.
  */
-export const collectClaimNumbers = (
-  claim: Claim,
-  index: EvidenceIndex,
-  range?: string
-): Set<number> => {
-  const allowed = new Set<number>();
-  const facts = citedFacts(index, claim.factIds);
-  facts.forEach((fact) => addFactNumbers(allowed, fact, index));
-  const entities = claimEntities(claim, index, facts);
-  entities.forEach((euid) => {
-    const record = index.entities.get(euid);
-    const score = record && getEntityRisk(record)?.score;
-    if (score !== undefined) {
-      addNumber(allowed, score);
-    }
-  });
-  [entities.length, facts.length].forEach((count) => addNumber(allowed, count));
-  findNumbers(range ?? '').forEach((token) => addNumber(allowed, toValue(token)));
-  return allowed;
+const allowedNumbers = (texts: string[], factIds: number[], context: CheckContext): Set<number> => {
+  const facts = citedFacts(context, factIds);
+  const euids = uniq([
+    ...[...context.entities.keys()].filter((euid) => texts.some((text) => text.includes(euid))),
+    ...facts.flatMap(({ entityIds }) => entityIds),
+  ]).filter((euid) => context.entities.has(euid));
+  const values = [
+    ...facts.flatMap((fact) => [
+      ...Object.values(fact.numbers ?? {}),
+      ...[fact.title, ...Object.values(fact.details ?? {})].flatMap((text) =>
+        findNumbers(text, context).map(toValue)
+      ),
+    ]),
+    ...euids.flatMap((euid) => {
+      const record = context.entities.get(euid);
+      return (record && getEntityRisk(record)?.score) ?? [];
+    }),
+    euids.length,
+    facts.length,
+    ...findNumbers(context.range ?? '', context).map(toValue),
+  ];
+  return new Set(values.filter(Number.isFinite).flatMap(variants));
 };
 
 /**
  * Numbers: every number in a claim's prose must come from what the claim cites (the verdict: what
- * its assessments cite). Any other number
- * drops the claim (structural for the verdict), even when it appears elsewhere in the evidence.
- * Dates, times, ordinals, identifiers, mention tokens and the evidence's entity ids and names are
- * masked first.
+ * its assessments cite), even when it appears elsewhere in the evidence. Otherwise an assessment is
+ * dropped, or the verdict gets a structural error. Dates, times, ordinals, identifiers, mention
+ * tokens and the evidence's entity ids and names are masked first.
  */
-export const createNumbersCheck =
-  (range?: string): BriefCheck =>
-  (brief, context): CheckOutcome => {
-    const { index } = context;
-    const outcome = emptyOutcome(brief);
-
-    listClaims(brief, context).forEach((claim) => {
-      if (isDropped(context, claim.path)) {
-        return;
-      }
-      const allowed = collectClaimNumbers(claim, index, range);
-      const unsupported = claim.fields.flatMap(({ path, text }) =>
-        findNumbers(text, index.identifierPattern)
-          .filter((token) => !allowed.has(toValue(token)))
-          .map((token) => `${path}: "${token}"`)
+export const checkNumbers: BriefCheck = (brief, context) => {
+  const claims: Array<{ key?: AssessmentKey; fields: Record<string, string>; factIds: number[] }> =
+    [
+      {
+        fields: {
+          'verdict.headline': brief.verdict.headline,
+          'verdict.summary': brief.verdict.summary,
+        },
+        factIds: verdictFactIds(brief, context),
+      },
+      ...assessmentsOf(brief.assessments)
+        .filter(([key]) => !context.dropped.has(key))
+        .map(([key, { summary, factIds }]) => ({
+          key,
+          fields: { [`assessments.${key}.summary`]: summary },
+          factIds,
+        })),
+    ];
+  claims.forEach(({ key, fields, factIds }) => {
+    const allowed = allowedNumbers(Object.values(fields), factIds, context);
+    const unsupported = Object.entries(fields).flatMap(([path, text]) =>
+      findNumbers(text, context)
+        .filter((token) => !allowed.has(toValue(token)))
+        .map((token) => `${path}: "${token}"`)
+    );
+    if (unsupported.length > 0) {
+      failClaim(
+        context,
+        key,
+        'number',
+        `numbers not found in the facts or entities it cites: ${uniq(unsupported).join(', ')}`
       );
-      if (unsupported.length > 0) {
-        reportClaim(
-          outcome,
-          claim,
-          'number',
-          `numbers not found in the facts or entities it cites: ${unique(unsupported).join(', ')}`
-        );
-      }
-    });
-    return outcome;
-  };
+    }
+  });
+  return brief;
+};

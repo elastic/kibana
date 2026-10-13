@@ -12,12 +12,16 @@ import type {
 } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { ASSESSMENT_KEYS } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Evidence } from '../signals/types';
-import { buildValidBrief, DOCKER, FIXTURE_EVIDENCE, withFacts } from './__fixtures__/evidence';
-import { buildEvidenceIndex } from './evidence_index';
+import {
+  buildValidBrief,
+  DOCKER,
+  FIXTURE_EVIDENCE,
+  runCheck,
+  withFacts,
+} from './__fixtures__/evidence';
 import { checkGuardrails } from './guardrails';
 
-const run = (brief: Brief, evidence: Evidence = FIXTURE_EVIDENCE) =>
-  checkGuardrails(brief, { index: buildEvidenceIndex(evidence), dropped: new Set() });
+const run = (brief: Brief, evidence: Evidence) => runCheck(checkGuardrails, brief, evidence);
 
 /** A level, or a level with the fact ids it cites. */
 type Claim = AttentionLevel | [AttentionLevel, number[]];

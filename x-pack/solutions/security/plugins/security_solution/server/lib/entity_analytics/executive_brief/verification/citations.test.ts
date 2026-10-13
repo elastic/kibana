@@ -7,31 +7,30 @@
 
 import type { Assessment } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { FullBrief } from './__fixtures__/evidence';
-import { buildValidBrief, FIXTURE_EVIDENCE } from './__fixtures__/evidence';
+import { buildValidBrief, runCheck } from './__fixtures__/evidence';
 import { checkCitations } from './citations';
-import { buildEvidenceIndex } from './evidence_index';
 
 const run = (change: (brief: FullBrief) => void) => {
   const brief = buildValidBrief();
   change(brief);
-  return checkCitations(brief, { index: buildEvidenceIndex(FIXTURE_EVIDENCE), dropped: new Set() });
+  return runCheck(checkCitations, brief);
 };
 
 describe('checkCitations', () => {
   it('removes unknown fact ids', () => {
-    const { brief, drops, notes } = run((b) => {
+    const { brief, dropped, notes } = run((b) => {
       b.assessments.threats.factIds = [1, 99, 1];
     });
     expect(brief.assessments.threats?.factIds).toEqual([1]);
     expect(notes).toEqual(['removed unknown fact ids: 99']);
-    expect(drops).toEqual([]);
+    expect([...dropped]).toEqual([]);
   });
 
   it.each<[string, Assessment, string[]]>([
     [
       'drops an assessment whose only fact id is unknown',
       { level: 'action', summary: 'The attack is not acknowledged yet.', factIds: [404] },
-      ['assessments.response'],
+      ['response'],
     ],
     [
       'lets a clear assessment go without citations',
@@ -39,10 +38,10 @@ describe('checkCitations', () => {
       [],
     ],
   ])('%s', (_name, response, expected) => {
-    const { drops, structuralErrors } = run((b) => {
+    const { dropped, structuralErrors } = run((b) => {
       b.assessments.response = response;
     });
-    expect(drops.map(({ path }) => path)).toEqual(expected);
+    expect([...dropped.keys()]).toEqual(expected);
     expect(structuralErrors).toEqual([]);
   });
 });
