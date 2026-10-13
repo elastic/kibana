@@ -538,6 +538,7 @@ const ESQLEditorInternal = function ESQLEditor({
     setIsLanguageComponentOpen,
     setIsCurrentQueryStarred,
     trackQueryHistoryOpened: (isOpen) => telemetryService.trackQueryHistoryOpened(isOpen),
+    isVisorOpen,
     isVisorOpenRef,
     setIsVisorOpen,
   });

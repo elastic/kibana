@@ -47,13 +47,18 @@ const renderMenu = async (
   {
     editorIsInline = false,
     currentQuery = '',
-  }: { editorIsInline?: boolean; currentQuery?: string } = {}
+    isVisorOpen = false,
+  }: { editorIsInline?: boolean; currentQuery?: string; isVisorOpen?: boolean } = {}
 ) =>
   act(async () => {
     render(
       <KibanaContextProvider services={services as any}>
         <EsqlEditorActionsProvider>
-          <EsqlEditorActionsRegister editorIsInline={editorIsInline} currentQuery={currentQuery} />
+          <EsqlEditorActionsRegister
+            editorIsInline={editorIsInline}
+            currentQuery={currentQuery}
+            isVisorOpen={isVisorOpen}
+          />
           <ESQLMenu {...props} />
         </EsqlEditorActionsProvider>
       </KibanaContextProvider>
@@ -73,6 +78,16 @@ describe('ESQLMenu', () => {
   it('renders the visor (search) button when the editor is inline', async () => {
     await renderMenu({}, { editorIsInline: true });
     expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
+  });
+
+  it('marks the visor (search) button as pressed while the visor is open', async () => {
+    await renderMenu({}, { editorIsInline: true, isVisorOpen: true });
+    expect(screen.getByTestId('esql-menu-button')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('does not mark the visor (search) button as pressed while the visor is closed', async () => {
+    await renderMenu({}, { editorIsInline: true });
+    expect(screen.getByTestId('esql-menu-button')).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('hides the visor (search) button when hideVisor is set, even if inline', async () => {
