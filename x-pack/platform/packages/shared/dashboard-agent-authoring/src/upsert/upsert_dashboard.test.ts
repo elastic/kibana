@@ -1478,7 +1478,7 @@ describe('executeDashboardUpsert', () => {
       name: string;
       existingPanel: AttachmentPanel;
       content: UpsertPanelContent;
-      expected: Pick<AttachmentPanel, 'type' | 'config'>;
+      expected: Pick<AttachmentPanel, 'type' | 'config'> & Partial<Pick<AttachmentPanel, 'grid'>>;
     }>([
       {
         name: 'markdown content on a markdown panel',
@@ -1487,6 +1487,7 @@ describe('executeDashboardUpsert', () => {
         expected: {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: 'new text', settings: { open_links_in_new_tab: true } },
+          grid: { x: 0, y: 0, w: 24, h: 4 },
         },
       },
       {

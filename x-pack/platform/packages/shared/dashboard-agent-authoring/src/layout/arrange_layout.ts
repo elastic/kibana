@@ -15,7 +15,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { getSectionIdByPanelId, getSectionsById } from '../dashboard_state';
 import { getErrorMessage } from '../utils';
-import { getLensChartType, getMarkdownTextLines } from './panel_sizes';
+import { getLensChartType, getMarkdownHeight, getMarkdownTextLines } from './panel_sizes';
 import {
   GRID_COLUMNS,
   layoutArrangementSchema,
@@ -200,7 +200,11 @@ export const arrangeDashboardLayout = async ({
     const rows = arrangement?.containers.find(({ section }) => section === container.key)?.rows;
     const containerPlacements = rows
       ? placeRows(items, rows)
-      : placeAfterExistingItems(container, items);
+      : placeAfterExistingItems(
+          container,
+          items,
+          getRemovedCount(container.key, container.widgets)
+        );
     containerPlacements.forEach((grid, id) => placements.set(id, grid));
   });
 
@@ -395,23 +399,42 @@ const placeRows = (items: LayoutItem[], rows: LayoutRow[]): Placements => {
   return placements;
 };
 
-/** Keeps existing items where they are and packs new or moved items below them. */
-const placeAfterExistingItems = ({ widgets }: ContainerState, items: LayoutItem[]): Placements => {
-  const widgetsById = new Map(widgets.map((widget) => [widget.id, widget]));
+/**
+ * Keeps existing items where they are and packs new or moved items below them. When an item was
+ * resized, edited, or removed, packs all items again in reading order at their new sizes, so the
+ * container has no overlaps or gaps.
+ */
+const placeAfterExistingItems = (
+  { widgets }: ContainerState,
+  items: LayoutItem[],
+  removedCount: number
+): Placements => {
   const placements: Placements = new Map();
-  let bottomY = 0;
-
-  for (const item of items) {
-    const widget = widgetsById.get(item.id);
-    if (!widget || item.isNew) {
-      continue;
+  const resizedItems = items.map((item): LayoutItem => {
+    if (item.kind !== 'panel' || !item.contentChanged || item.fixedSize || !item.textLines) {
+      return item;
     }
-    const grid = getWidgetGrid(widget);
-    const placedGrid = { ...grid, x: Math.max(0, Math.min(grid.x, GRID_COLUMNS - grid.w)) };
-    placements.set(item.id, placedGrid);
-    bottomY = Math.max(bottomY, placedGrid.y + placedGrid.h);
+    const h = getMarkdownHeight(item.textLines, item.size.w);
+    return h === item.size.h ? item : { ...item, size: { ...item.size, h } };
+  });
+  const isResized = resizedItems.some(
+    (item, index) =>
+      item.kind === 'panel' && !item.isNew && (item.fixedSize || item !== items[index])
+  );
+
+  if (isResized || removedCount > 0) {
+    packItems(resizedItems, 0, placements);
+    return placements;
   }
 
+  const existingIds = new Set(items.filter(({ isNew }) => !isNew).map(({ id }) => id));
+  let bottomY = 0;
+  for (const widget of widgets.filter(({ id }) => existingIds.has(id))) {
+    const grid = getWidgetGrid(widget);
+    const placedGrid = { ...grid, x: Math.max(0, Math.min(grid.x, GRID_COLUMNS - grid.w)) };
+    placements.set(widget.id, placedGrid);
+    bottomY = Math.max(bottomY, placedGrid.y + placedGrid.h);
+  }
   packItems(
     items.filter(({ isNew }) => isNew),
     bottomY,

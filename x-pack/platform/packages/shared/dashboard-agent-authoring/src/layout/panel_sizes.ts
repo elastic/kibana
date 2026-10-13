@@ -121,12 +121,17 @@ export const getMarkdownTextLines = ({ type, config }: PanelContentFields): numb
     .reduce((lines, line) => lines + Math.ceil(line.length / MARKDOWN_CHARACTERS_PER_LINE), 0);
 };
 
+/** Height that fits markdown text of `textLines` full-width lines in a panel `w` columns wide. */
+export const getMarkdownHeight = (textLines: number, w: number): number => {
+  const h = Math.ceil((textLines * GRID_COLUMNS) / w) + MARKDOWN_PADDING_ROWS;
+  return Math.min(Math.max(h, MARKDOWN_MIN_HEIGHT), MARKDOWN_MAX_HEIGHT);
+};
+
 /** Default size of a panel placed without a size. */
 export const getDefaultPanelSize = (panel: PanelContentFields): PanelSize => {
   const textLines = getMarkdownTextLines(panel);
   if (textLines !== undefined) {
-    const h = textLines + MARKDOWN_PADDING_ROWS;
-    return { w: GRID_COLUMNS, h: Math.min(Math.max(h, MARKDOWN_MIN_HEIGHT), MARKDOWN_MAX_HEIGHT) };
+    return { w: GRID_COLUMNS, h: getMarkdownHeight(textLines, GRID_COLUMNS) };
   }
   const chartType = getLensChartType(panel);
   return (
