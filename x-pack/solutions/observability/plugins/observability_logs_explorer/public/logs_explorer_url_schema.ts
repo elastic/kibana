@@ -212,15 +212,15 @@ const isValidFilterSelection = (selection?: FilterSelection | null): boolean => 
 export const getControlOptionsFromControlsState = (
   controls?: ControlsState
 ): ControlOptions | undefined => {
-  const namespace = controls?.namespace;
+  const namespaceControl = controls?.namespace;
   if (
-    !namespace ||
-    (namespace.mode !== 'include' && namespace.mode !== 'exclude') ||
-    !isValidFilterSelection(namespace.selection)
+    !namespaceControl ||
+    (namespaceControl.mode !== 'include' && namespaceControl.mode !== 'exclude') ||
+    !isValidFilterSelection(namespaceControl.selection)
   ) {
     return undefined;
   }
-  return { 'data_stream.namespace': namespace };
+  return { 'data_stream.namespace': namespaceControl };
 };
 
 export const getDiscoverFiltersFromState = (
