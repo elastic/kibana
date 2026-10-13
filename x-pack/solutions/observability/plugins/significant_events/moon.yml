@@ -82,6 +82,7 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/esql-utils'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/agentic-investigations-plugin'
   - '@kbn/core-elasticsearch-server-mocks'
 tags:
   - plugin
