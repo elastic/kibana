@@ -15,7 +15,37 @@ import type {
   AdvancedSettings,
   SerializedNode,
 } from '../../types';
-import type { IndexpatternDatasource, WorkspaceState } from '../../state_management';
+import type {
+  IndexpatternDatasource,
+  WorkspaceState,
+  WorkspaceNodeState,
+  WorkspaceEdgeState,
+} from '../../state_management';
+
+const serializeNode = (
+  { data, scaledSize, parentId, x, y, label, color }: WorkspaceNodeState,
+  nodeIndexes: ReadonlyMap<string, number> = new Map()
+): SerializedNode => ({
+  x,
+  y,
+  label,
+  color,
+  field: data.field,
+  term: data.term,
+  parent: parentId ? nodeIndexes.get(parentId) ?? null : null,
+  size: scaledSize,
+});
+
+const serializeEdge = (
+  { sourceId, targetId, weight, width, label }: WorkspaceEdgeState,
+  nodeIndexes: ReadonlyMap<string, number>
+): SerializedEdge => ({
+  weight,
+  width,
+  label,
+  source: nodeIndexes.get(sourceId) ?? -1,
+  target: nodeIndexes.get(targetId) ?? -1,
+});
 
 function serializeUrlTemplate({ encoder, icon, url, description, isDefault }: UrlTemplate) {
   const serializedTemplate: SerializedUrlTemplate = {
@@ -74,46 +104,15 @@ export function reduxStateToSavedWorkspace(
 ) {
   const nodeIndexes = new Map(workspace.nodeIds.map((nodeId, index) => [nodeId, index]));
   const vertices: SerializedNode[] = canSaveData
-    ? workspace.nodeIds.map((nodeId) => {
-        const node = workspace.nodesById[nodeId];
-        return {
-          x: node.x,
-          y: node.y,
-          label: node.label,
-          color: node.color,
-          field: node.data.field,
-          term: node.data.term,
-          parent: node.parentId ? nodeIndexes.get(node.parentId) ?? null : null,
-          size: node.scaledSize,
-        };
-      })
+    ? workspace.nodeIds.map((nodeId) => serializeNode(workspace.nodesById[nodeId], nodeIndexes))
     : [];
   const blocklist: SerializedNode[] = canSaveData
-    ? workspace.blocklistedNodeIds.map((nodeId) => {
-        const node = workspace.blocklistedNodesById[nodeId];
-        return {
-          x: node.x,
-          y: node.y,
-          label: node.label,
-          color: node.color,
-          field: node.data.field,
-          term: node.data.term,
-          parent: null,
-          size: node.scaledSize,
-        };
-      })
+    ? workspace.blocklistedNodeIds.map((nodeId) =>
+        serializeNode(workspace.blocklistedNodesById[nodeId])
+      )
     : [];
   const links: SerializedEdge[] = canSaveData
-    ? workspace.edgeIds.map((edgeId) => {
-        const edge = workspace.edgesById[edgeId];
-        return {
-          weight: edge.weight,
-          width: edge.width,
-          label: edge.label,
-          source: nodeIndexes.get(edge.sourceId) ?? -1,
-          target: nodeIndexes.get(edge.targetId) ?? -1,
-        };
-      })
+    ? workspace.edgeIds.map((edgeId) => serializeEdge(workspace.edgesById[edgeId], nodeIndexes))
     : [];
 
   const persistedWorkspaceState: SerializedWorkspaceState = {
