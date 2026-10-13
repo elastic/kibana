@@ -281,7 +281,11 @@ const matchLength = (pattern: RegExp, text: string, index: number): number => {
 
 const QUOTE_OPENER = /(\\*)(["'])/y;
 const AUTHORIZATION_VALUE = /(?:[A-Za-z][\w-]*\s+)?[^\s"',}]+/y;
-const COOKIE_VALUE = /[^\r\n"'}]+/y;
+// `name="value"` is a legal cookie form: a double quote right after `=` opens a quoted value, any
+// other quote still ends the span (it closes the string the header sits in).
+const COOKIE_VALUE = /(?:[^\r\n"'}]|(?<==)"[^"\r\n]*")+/y;
+// a `key=` query/form parameter ends at the next separator
+const QUERY_PARAM_VALUE = /[^\s"',}&]+/y;
 const SCALAR_VALUE = /[^\s"',}]+/y;
 const NUMERIC_VALUE = /^-?\d+(?:\.\d+)?$/;
 
@@ -332,7 +336,7 @@ const findSecretValueEnd = (text: string, key: string, start: number): number =>
   if (PROSE_KEYS.has(normalized)) {
     return stopBeforeNextSensitiveKey(text, start, start + matchLength(COOKIE_VALUE, text, start));
   }
-  const length = matchLength(SCALAR_VALUE, text, start);
+  const length = matchLength(normalized === 'key' ? QUERY_PARAM_VALUE : SCALAR_VALUE, text, start);
   // numeric values under token-COUNT keys (`num_token: 5`) are not credentials
   if (isTokenCountKey(key) && NUMERIC_VALUE.test(text.slice(start, start + length))) return start;
   return start + length;
@@ -385,6 +389,14 @@ const isProseValue = (
 // string (`\"key\":\"value\"`).
 const KEY_VALUE_PATTERN = /(?<![\w-])(api[ ]key|[A-Za-z_][\w-]*)(?:\\*["'])?\s*[:=]\s*/gi;
 
+// The bare word `key` is a credential only as a `key=` query or form parameter (Google
+// `?key=AIza...`, `grant=x&key=...`): right after `?` / `&` or at the start of the text. Prose
+// (`key: value`, `the key=...` mid-sentence), JSON `"key":` members and `monkey=1` stay untouched.
+const isQueryParamKey = (text: string, match: RegExpExecArray, key: string): boolean =>
+  normalizeKey(key) === 'key' &&
+  /^\s*=\s*$/.test(match[0].slice(key.length)) &&
+  (match.index === 0 || /[?&]/.test(text[match.index - 1]));
+
 const redactKeyedSecrets = (text: string): string => {
   const pattern = new RegExp(KEY_VALUE_PATTERN.source, KEY_VALUE_PATTERN.flags);
   let result = '';
@@ -392,7 +404,7 @@ const redactKeyedSecrets = (text: string): string => {
   let match: RegExpExecArray | null;
   while ((match = pattern.exec(text)) !== null) {
     const key = match[1];
-    if (!isSensitiveKey(key)) continue;
+    if (!isSensitiveKey(key) && !isQueryParamKey(text, match, key)) continue;
     if (normalizeKey(key) === 'token' && !isStructuralPosition(text, match.index)) continue;
     const valueStart = match.index + match[0].length;
     if (isProseValue(text, key, match, valueStart)) continue;
@@ -414,10 +426,24 @@ const BARE_TOKEN_PATTERNS: RegExp[] = [
   /\bxox[baprs]-[A-Za-z0-9-]{10,}/g, // Slack token
   /\bya29\.[A-Za-z0-9_-]+/g, // Google OAuth access token
   /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+/g, // bare JWT
+  /\bAIza[0-9A-Za-z_-]{35}/g, // Google API key
+  /\bhf_[A-Za-z0-9]{30,}/g, // Hugging Face token
+  /\bgithub_pat_[A-Za-z0-9_]{22,}/g, // GitHub fine-grained personal access token
+  /\bxapp-[A-Za-z0-9-]{10,}/g, // Slack app-level token
+  // PEM private key block; an unterminated block (truncated body) runs to the end of the text
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/g,
 ];
 
+// An AWS secret access key (exactly 40 base64 chars) named in prose, with no `:` / `=` for the keyed
+// pass to see: `the secret access key wJal... was rejected`. Anchored on the name before the value.
+const AWS_SECRET_IN_PROSE =
+  /((?<![A-Za-z0-9])secret[ _-]?(?:access[ _-]?)?key(?:[\s:="'\\]|\b(?:is|was)\b)+)[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])/gi;
+
 const redactBareTokens = (text: string): string =>
-  BARE_TOKEN_PATTERNS.reduce((acc, pattern) => acc.replace(pattern, REDACTED), text);
+  BARE_TOKEN_PATTERNS.reduce((acc, pattern) => acc.replace(pattern, REDACTED), text).replace(
+    AWS_SECRET_IN_PROSE,
+    `$1${REDACTED}`
+  );
 
 const redactUpstreamSecrets = (text: string): string =>
   redactKeyedSecrets(

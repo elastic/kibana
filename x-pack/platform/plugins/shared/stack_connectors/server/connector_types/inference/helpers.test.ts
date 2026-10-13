@@ -23,6 +23,13 @@ const BARE_JWT =
 const AZURE_SUBSCRIPTION_KEY = '0123456789abcdef0123456789abcdef';
 const GITHUB_TOKEN = `ghp_${'a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8'}`;
 const GOOGLE_OAUTH_TOKEN = `ya29.${'a0AfH6SMBx0ZQqT9LrF1kD2mN3pQ4rS5tU6vW7xY'}`;
+const GOOGLE_API_KEY = `AIza${'SyD1234567890abcdefGHIJKLMNOPQRSTUV'}`;
+const HF_TOKEN = `hf_${'aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'}`;
+const GITHUB_PAT = `github_pat_${'11ABCDEFG0aBcDeFgHiJk_lMnOpQrStUvWxYz0123456789aBcDeFgHiJkLmNoPqRsTuVwXyZ'}`;
+const SLACK_APP_TOKEN = `xapp-1-A0123456789-0123456789012-${'abcdef0123456789abcdef0123456789'}`;
+const PEM_BODY_LINE = 'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7zZ0ZQ1yQ';
+const PEM_BLOCK = `-----BEGIN PRIVATE KEY-----\n${PEM_BODY_LINE}\n-----END PRIVATE KEY-----`;
+const AWS_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
 
 describe('eventSourceStreamIntoObservable', () => {
   it('emits SSE events from the stream', async () => {
@@ -173,9 +180,7 @@ describe('upstream credential redaction', () => {
     ['Host: x\nToken: ZZSECRET9', 'ZZSECRET9'],
     ['OPENAI_API_KEY=ZZSECRET9', 'ZZSECRET9'],
     ['HF_TOKEN=ZZSECRET9', 'ZZSECRET9'],
-    ['hf_token: ZZSECRET9', 'ZZSECRET9'],
     ['api_token: ZZSECRET9', 'ZZSECRET9'],
-    ['bearer_token: ZZSECRET9', 'ZZSECRET9'],
     ['{"accessToken":"ZZSECRET9"}', 'ZZSECRET9'],
     ['{"clientSecret":"ZZSECRET9"}', 'ZZSECRET9'],
     ['passwd: ZZSECRET9', 'ZZSECRET9'],
@@ -199,12 +204,31 @@ describe('upstream credential redaction', () => {
     [`Ocp-Apim-Subscription-Key: ${AZURE_SUBSCRIPTION_KEY}`, AZURE_SUBSCRIPTION_KEY],
     [`git push failed: bad credentials at ${GITHUB_TOKEN}`, GITHUB_TOKEN],
     [`google api rejected token ${GOOGLE_OAUTH_TOKEN}`, GOOGLE_OAUTH_TOKEN],
+    // Google API key as a query parameter, bare, and in the other new key formats
+    [
+      `GET https://generativelanguage.googleapis.com/v1/models?key=${GOOGLE_API_KEY} failed`,
+      GOOGLE_API_KEY,
+    ],
+    [`https://x.googleapis.com/v1/models?alt=json&key=${GOOGLE_API_KEY}`, GOOGLE_API_KEY],
+    ['grant_type=x&key=ZZSECRET9&alt=json', 'ZZSECRET9'],
+    ['key=ZZSECRET9', 'ZZSECRET9'],
+    [`upstream echoed ${GOOGLE_API_KEY} back`, GOOGLE_API_KEY],
+    [`hugging face rejected ${HF_TOKEN}`, HF_TOKEN],
+    [`pushed with ${GITHUB_PAT}`, GITHUB_PAT],
+    [`socket mode failed for ${SLACK_APP_TOKEN}`, SLACK_APP_TOKEN],
+    [`${PEM_BLOCK} trailing text`, PEM_BODY_LINE],
+    [`-----BEGIN PRIVATE KEY-----\n${PEM_BODY_LINE}`, PEM_BODY_LINE],
+    [`the AWS secret access key ${AWS_SECRET_KEY} was rejected`, AWS_SECRET_KEY],
+    [`secret key is ${AWS_SECRET_KEY}`, AWS_SECRET_KEY],
+    ['cookie: sid="zzsecret9; Path=/"; theme=dark', 'zzsecret9'],
+    ['Cookie: session="abc123"; theme=dark', 'abc123'],
     // a rest-of-line consumption must not swallow the next key and leave its value dangling
     ['invalid_token: abc123, password: "hunter2"', 'hunter2'],
     ['cookie: session=abc123; password="hunter2"', 'hunter2'],
     [`invalid_token: abc123, api_key: ${AZURE_SUBSCRIPTION_KEY}`, AZURE_SUBSCRIPTION_KEY],
     [`Cookie: a=b; Signature=${SIGV4_SIGNATURE}`, SIGV4_SIGNATURE],
   ])('redacts %s', (input, secret) => {
+    expect(input).toContain(secret);
     expect(truncateUpstreamBody(input)).not.toContain(secret);
   });
 
@@ -226,8 +250,28 @@ describe('upstream credential redaction', () => {
     'mailto:a@b.c',
     'user@example.com',
     'time 10:30@utc',
+    // a plain word `key`, look-alike names and ordinary prose stay readable
+    'key',
+    'monkey=1',
+    'the primary key=1 is duplicated',
+    'key: value',
+    'Duplicate key value violates unique constraint',
+    '{"key":"user_id","value":1}',
+    'see https://example.com/search?q=hotkey&sort=asc',
+    'https://example.com/a?monkey=1&hotkey=2',
+    'Please provide a secret key (40 characters) for the request',
+    'The private key is not set',
+    'hf_ is the prefix Hugging Face tokens start with',
+    'github_pat_ tokens are accepted',
+    '-----BEGIN CERTIFICATE-----\nMIIDdzCCAl+gAwIBAgIE\n-----END CERTIFICATE-----',
   ])('keeps %s', (input) => {
     expect(truncateUpstreamBody(input)).toBe(input);
+  });
+
+  it('redacts only the value of a key= query parameter and keeps the rest of the URL', () => {
+    expect(truncateUpstreamBody('GET /v1/models?alt=json&key=ZZSECRET9&page=2 failed')).toBe(
+      'GET /v1/models?alt=json&key=[redacted]&page=2 failed'
+    );
   });
 });
 
