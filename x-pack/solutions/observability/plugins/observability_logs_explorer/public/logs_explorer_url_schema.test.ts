@@ -342,6 +342,14 @@ describe('logs_explorer_url_schema', () => {
       expect(getControlOptionsFromControlsState(controls)).toBeUndefined();
     });
 
+    it('should return undefined when selectedOptions contains non-string entries', () => {
+      const controls = {
+        namespace: { mode: 'include', selection: { type: 'options', selectedOptions: [null] } },
+      } as unknown as ControlsState;
+
+      expect(getControlOptionsFromControlsState(controls)).toBeUndefined();
+    });
+
     it('should return undefined for an unknown selection type', () => {
       const controls = {
         namespace: { mode: 'include', selection: { type: 'unknown' } },

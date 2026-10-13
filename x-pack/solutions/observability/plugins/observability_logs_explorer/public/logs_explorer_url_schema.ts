@@ -199,7 +199,10 @@ const isValidFilterSelection = (selection?: FilterSelection | null): boolean => 
     case 'exists':
       return true;
     case 'options':
-      return Array.isArray(selection.selectedOptions);
+      return (
+        Array.isArray(selection.selectedOptions) &&
+        selection.selectedOptions.every((option) => typeof option === 'string')
+      );
     default:
       return false;
   }
