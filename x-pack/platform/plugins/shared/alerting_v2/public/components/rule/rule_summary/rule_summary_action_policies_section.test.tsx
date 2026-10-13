@@ -65,18 +65,13 @@ describe('RuleSummaryActionPoliciesSection', () => {
     renderSection();
 
     expect(screen.getByTestId('ruleSummaryActionPolicies')).toHaveTextContent('Action policies');
-    expect(
-      screen
-        .getByTestId('ruleSummaryActionPolicies')
-        .querySelector('[data-euiicon-type="tablePlay"]')
-    ).not.toBeInTheDocument();
     expect(screen.getByTestId('mockActionPoliciesArtifactsSubsection')).toHaveAttribute(
       'data-session',
       'inherit'
     );
     expect(screen.getByTestId('mockActionPoliciesArtifactsSubsection')).toHaveAttribute(
       'data-show-title',
-      'false'
+      'true'
     );
   });
 

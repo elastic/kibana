@@ -26,10 +26,12 @@ const baseRule = {
 } as RuleApiResponse;
 
 describe('RuleSummaryRunbookCard', () => {
-  it('renders the empty prompt when the rule has no runbook', () => {
+  it('renders the Alert-style empty panel when the rule has no runbook', () => {
     renderCard({ ...baseRule, artifacts: [] });
 
-    expect(screen.getByTestId('ruleSummaryRunbookEmpty')).toBeInTheDocument();
+    const empty = screen.getByTestId('ruleSummaryRunbookEmpty');
+    expect(empty).toHaveTextContent('Runbook');
+    expect(empty).toHaveTextContent('No runbook available for this rule.');
     expect(screen.queryByTestId('ruleSummaryRunbookToggle')).not.toBeInTheDocument();
   });
 

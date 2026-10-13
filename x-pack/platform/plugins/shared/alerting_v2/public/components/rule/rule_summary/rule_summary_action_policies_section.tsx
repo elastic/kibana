@@ -30,7 +30,7 @@ export const RuleSummaryActionPoliciesSection: React.FC = () => {
       initialIsOpen
       data-test-subj="ruleSummaryActionPolicies"
     >
-      <ActionPoliciesArtifactsSubsection rule={rule} flyoutSession="inherit" showTitle={false} />
+      <ActionPoliciesArtifactsSubsection rule={rule} flyoutSession="inherit" showTitle />
     </FlyoutAccordion>
   );
 };
