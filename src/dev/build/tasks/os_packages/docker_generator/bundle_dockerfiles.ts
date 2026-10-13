@@ -44,6 +44,12 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   // dockerfiles folder
   await copyAll(resolve(scope.dockerBuildDir, 'bin'), resolve(dockerFilesBuildDir, 'bin'));
   await copyAll(resolve(scope.dockerBuildDir, 'config'), resolve(dockerFilesBuildDir, 'config'));
+  if (scope.serverless) {
+    await copyAll(
+      resolve(scope.dockerBuildDir, 'native_watchdog'),
+      resolve(dockerFilesBuildDir, 'native_watchdog')
+    );
+  }
   if (scope.ironbank) {
     await copyFile(
       resolve(REPO_ROOT, 'licenses/ELASTIC-LICENSE-2.0.txt'),

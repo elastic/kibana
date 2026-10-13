@@ -22,6 +22,7 @@ import Path from 'node:path';
 import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { WriteAdmission, type AdmissionLimits } from './admission';
+import { createNativeSession } from './native_profiler';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import {
   formatSummary,
@@ -154,13 +155,29 @@ export const runWatchdogWorker = (
       });
   };
 
-  const onProfile = async (current: Capture, profile: CpuProfile, blockedMs: number) => {
+  const onProfile = async (
+    current: Capture,
+    profile: CpuProfile,
+    blockedMs: number,
+    profilerStopMs: number
+  ) => {
     const summary = summarizeProfile(profile, sanitizeRoot);
     const phase = phaseAt(current.blockStartUs);
     const block = {
       blockedMs,
       profiledAfterMs: (current.requestedAtUs - current.blockStartUs) / 1000,
       profilerStartMs: current.profilerStartMs,
+      profilerStopMs,
+      backend: data.nativeTarget ? 'native' : 'inspector',
+      // Index zero is V8's synchronous initial stack, not its first periodic sample.
+      firstPeriodicUpperBoundMs:
+        profile.samples.length > 1 &&
+        profile.timeDeltas.length > 1 &&
+        current.profilerStartMs !== undefined
+          ? (current.requestedAtUs - current.blockStartUs) / 1000 +
+            current.profilerStartMs +
+            (profile.timeDeltas[0] + profile.timeDeltas[1]) / 1000
+          : undefined,
     };
     let outcome: ProfileOutcome = { notWritten: 'no diagnostic directory' };
     if (summary.samples === 0) {
@@ -190,8 +207,11 @@ export const runWatchdogWorker = (
   const stopCapture = (current: Capture, blockedMs: number) => {
     if (current.stopping) return;
     current.stopping = true;
+    const requestedAtUs = monotonicUs();
     post<{ profile: CpuProfile }>(current.session, 'Profiler.stop')
-      .then(({ profile }) => onProfile(current, profile, blockedMs))
+      .then(({ profile }) =>
+        onProfile(current, profile, blockedMs, (monotonicUs() - requestedAtUs) / 1000)
+      )
       .catch((error) =>
         log('error', `Failed to process an event loop block profile: ${error.message}`)
       )
@@ -254,5 +274,7 @@ export const runWatchdogWorker = (
 };
 
 if (!isMainThread && parentPort) {
-  runWatchdogWorker(parentPort, workerData as WatchdogWorkerData);
+  const data = workerData as WatchdogWorkerData;
+  const target = data.nativeTarget;
+  runWatchdogWorker(parentPort, data, target ? () => createNativeSession(target) : undefined);
 }

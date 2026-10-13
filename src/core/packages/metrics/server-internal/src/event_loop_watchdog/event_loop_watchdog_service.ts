@@ -27,6 +27,8 @@ import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
+import { NativeExperiment, resolveNativeAddon } from './native_experiment';
+import { loadNativeProfiler } from './native_profiler';
 
 /** Feature flag enabling the event-loop watchdog (and its profiling session) at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
@@ -65,6 +67,8 @@ export class EventLoopWatchdogService {
   private watchdog?: EventLoopWatchdog;
   private subscription?: Subscription;
   private overall$?: Observable<ServiceStatus>;
+  private experiment?: NativeExperiment;
+  private experimentSubscription?: Subscription;
 
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics', 'event_loop_watchdog');
@@ -72,6 +76,17 @@ export class EventLoopWatchdogService {
 
   public setup({ status }: EventLoopWatchdogSetupDeps): void {
     this.overall$ = status.overall$;
+    const path = resolveNativeAddon();
+    if (path) {
+      // Prepare before plugin setup/imports; subsequent code compilation maintains the map.
+      this.experiment = new NativeExperiment(path, this.logger);
+      this.experimentSubscription = status.overall$
+        .pipe(
+          filter(({ level }) => level === ServiceStatusLevels.available),
+          take(1)
+        )
+        .subscribe(() => this.experiment?.log('available'));
+    }
   }
 
   public start({ featureFlags, threads }: EventLoopWatchdogStartDeps): void {
@@ -80,15 +95,19 @@ export class EventLoopWatchdogService {
       logger: this.logger,
       sanitizeRoot: REPO_ROOT,
       diagnosticDir: resolveDiagnosticDir(),
+      nativeTarget: this.experiment?.target,
+      profiling: this.experiment?.target
+        ? { afterMs: 400, maxMs: 10_000, cooldownMs: 60_000 }
+        : undefined,
     });
     this.watchdog = watchdog;
     this.subscription = featureFlags
-      .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, false)
+      .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, this.experiment?.mode === 'sample')
       .pipe(
         distinctUntilChanged(),
         concatMap(async (enabled) => {
           try {
-            if (enabled) {
+            if (enabled && (!this.experiment || this.experiment.mode === 'sample')) {
               watchdog.start();
             } else {
               await watchdog.stop();
@@ -113,6 +132,13 @@ export class EventLoopWatchdogService {
   public async stop(): Promise<void> {
     this.subscription?.unsubscribe();
     this.subscription = undefined;
-    await this.watchdog?.stop();
+    this.experimentSubscription?.unsubscribe();
+    this.experiment?.stop();
+    if (this.watchdog) {
+      await this.watchdog.dispose();
+    } else if (this.experiment?.target) {
+      const { path, id } = this.experiment.target;
+      loadNativeProfiler(path).dispose(id);
+    }
   }
 }

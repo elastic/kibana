@@ -19,6 +19,7 @@ import type { Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
+import { getNodeDownloadInfo } from '../../nodejs/node_download_info';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
@@ -171,6 +172,29 @@ export async function runDockerGenerator(
     await copyAll(config.resolveFromRepo('config'), resolve(dockerBuildDir, 'config'), {
       select: ['serverless*.yml'],
     });
+    // POC: compile inside each target-architecture image, against its exact Node variants.
+    const platform = config
+      .getNodePlatforms()
+      .find(
+        (candidate) =>
+          candidate.isServerless() &&
+          candidate.getArchitecture() === (flags.architecture === 'aarch64' ? 'arm64' : 'x64')
+      );
+    if (!platform) throw new Error('Missing Serverless Node platform');
+    const nativeDir = resolve(dockerBuildDir, 'native_watchdog', flags.architecture ?? 'x64');
+    await copyAll(
+      config.resolveFromRepo(
+        'src/core/packages/metrics/server-internal/src/event_loop_watchdog/native'
+      ),
+      nativeDir,
+      { select: ['build.ts', 'profiler.cc'] }
+    );
+    for (const { variant, extractDir } of getNodeDownloadInfo(config, platform)) {
+      await copyAll(
+        resolve(extractDir, 'include/node'),
+        resolve(nativeDir, variant, 'include/node')
+      );
+    }
   }
 
   // Copy all the needed resources into kibana-docker folder

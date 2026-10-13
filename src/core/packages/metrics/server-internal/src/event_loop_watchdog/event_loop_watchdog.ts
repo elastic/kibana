@@ -11,10 +11,12 @@ import Path from 'node:path';
 import type { InternalThreadsStart, ManagedWorker } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { AdmissionLimits } from './admission';
+import { loadNativeProfiler, type NativeTarget } from './native_profiler';
 import {
   BLOCK_THRESHOLD_MS,
   HEARTBEAT_INTERVAL_MS,
   SLOT_COUNT,
+  SAMPLING_INTERVAL_US,
   Slot,
   WATCHDOG_WORKER_NAME,
   monotonicUs,
@@ -35,6 +37,12 @@ export interface EventLoopWatchdogParams {
   admissionLimits?: AdmissionLimits;
   profiling?: WatchdogWorkerData['profiling'];
   workerEntry?: string;
+  /** POC only: exact-runtime addon, warmed before the watchdog starts. */
+  nativeAddonPath?: string;
+  /** Metadata prepared during core setup, before plugins load. */
+  nativeTarget?: NativeTarget;
+  /** Lazy logging is a benchmark control, not the proposed POC mode. */
+  nativeLogging?: 'eager' | 'lazy';
 }
 
 /**
@@ -47,8 +55,23 @@ export class EventLoopWatchdog {
   private stopping?: Promise<void>;
   private shared?: BigInt64Array;
   private runningSinceUs = 0;
+  private nativeTarget?: NativeTarget;
 
-  constructor(private readonly params: EventLoopWatchdogParams) {}
+  constructor(private readonly params: EventLoopWatchdogParams) {
+    const { nativeAddonPath, logger } = params;
+    this.nativeTarget = params.nativeTarget;
+    if (nativeAddonPath && !this.nativeTarget) {
+      const started = performance.now();
+      const id = loadNativeProfiler(nativeAddonPath).initialize(
+        SAMPLING_INTERVAL_US,
+        params.nativeLogging !== 'lazy'
+      );
+      this.nativeTarget = { path: nativeAddonPath, id };
+      logger.info(
+        `Native watchdog code map prepared in ${Math.round(performance.now() - started)}ms`
+      );
+    }
+  }
 
   public start(): void {
     if (this.worker) return;
@@ -80,6 +103,7 @@ export class EventLoopWatchdog {
       diagnosticDir,
       admissionLimits,
       profiling,
+      nativeTarget: this.nativeTarget,
     };
     this.worker = threads.createWorker<MainToWorkerMessage, WorkerToMainMessage>({
       filename: workerEntry ?? WORKER_ENTRY,
@@ -92,6 +116,7 @@ export class EventLoopWatchdog {
       unref: true,
       restart: { maxAttempts: MAX_RESTARTS, delayMs: RESTART_BASE_DELAY_MS },
       onMessage: ({ level, message, meta }) => logger[level](message, meta),
+      onExit: () => this.cancelNativeCapture(),
       onExhausted: () => {
         clearInterval(this.heartbeatTimer);
         this.heartbeatTimer = undefined;
@@ -118,7 +143,7 @@ export class EventLoopWatchdog {
     this.shared = undefined;
     clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = undefined;
-    // Terminating the worker also ends its inspector session (and so any running profile).
+    // onExit cancels native requests/captures; Inspector sessions end with their worker.
     this.stopping = worker
       .stop()
       .then(() => this.params.logger.info('Event loop watchdog stopped'))
@@ -126,5 +151,20 @@ export class EventLoopWatchdog {
         this.stopping = undefined;
       });
     return this.stopping;
+  }
+
+  /** Releases retained native metadata at service shutdown, not between captures. */
+  public async dispose(): Promise<void> {
+    await this.stop();
+    const target = this.nativeTarget;
+    if (target) {
+      loadNativeProfiler(target.path).dispose(target.id);
+      this.nativeTarget = undefined;
+    }
+  }
+
+  private cancelNativeCapture(): void {
+    const target = this.nativeTarget;
+    if (target) loadNativeProfiler(target.path).cancel(target.id);
   }
 }

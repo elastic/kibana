@@ -41,6 +41,19 @@ RUN tar \
   --strip-components=1 \
   {{#tarZstd}}-I zstd -xf{{/tarZstd}}{{^tarZstd}}-zxf{{/tarZstd}} /tmp/kibana.{{tarExt}}
 
+{{#serverless}}
+# POC only: build both exact-runtime bindings in the target architecture, not on the CI host.
+RUN apk --no-cache add build-base
+COPY native_watchdog/{{#architecture}}{{architecture}}{{/architecture}}{{^architecture}}x64{{/architecture}} /tmp/native_watchdog
+RUN set -eu; for variant in default pointer-compression; do \
+      node/$variant/bin/node /tmp/native_watchdog/build.ts \
+        /tmp/native_watchdog/$variant/include/node \
+        /usr/share/kibana/node/$variant/lib/event_loop_watchdog; \
+      node/$variant/bin/node -e 'const p = require(process.argv[1]); const id = p.initialize(10101); p.dispose(id);' \
+        /usr/share/kibana/node/$variant/lib/event_loop_watchdog/profiler.node; \
+    done
+{{/serverless}}
+
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -111,6 +124,13 @@ RUN for iter in 1 2 3 4 5; do \
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
 COPY --from=builder --chown=0:0 /bin/tini /bin/tini
+{{#serverless}}
+# Verify the bindings against final-stage libc/libstdc++, without the build toolchain.
+RUN set -eu; for variant in default pointer-compression; do \
+      /usr/share/kibana/node/$variant/bin/node -e 'const p = require(process.argv[1]); const id = p.initialize(10101); p.dispose(id);' \
+        /usr/share/kibana/node/$variant/lib/event_loop_watchdog/profiler.node; \
+    done
+{{/serverless}}
 {{#cloud}}
 COPY --from=builder --chown=0:0 /opt /opt
 {{/cloud}}

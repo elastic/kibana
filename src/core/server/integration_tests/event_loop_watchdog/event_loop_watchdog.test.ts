@@ -8,9 +8,11 @@
  */
 
 import Fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import Os from 'node:os';
 import Path from 'node:path';
 import { performance } from 'node:perf_hooks';
+import { Script } from 'node:vm';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ThreadsService } from '@kbn/core-threads-server-internal';
@@ -44,7 +46,13 @@ const idleUtilization = async (ms: number) => {
   return performance.eventLoopUtilization(start).utilization;
 };
 
-describe('EventLoopWatchdog (real worker, real inspector profiler)', () => {
+describe.each([
+  { backend: 'inspector', nativeAddonPath: undefined },
+  {
+    backend: 'native eager',
+    nativeAddonPath: Path.resolve(REPO_ROOT, 'data/event_loop_native/profiler.node'),
+  },
+])('EventLoopWatchdog (real worker, $backend profiler)', ({ nativeAddonPath }) => {
   let logger: MockedLogger;
   let watchdog: EventLoopWatchdog;
   let diagnosticDir: string;
@@ -59,6 +67,23 @@ describe('EventLoopWatchdog (real worker, real inspector profiler)', () => {
     (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana.event_loop_watchdog
       .profile;
 
+  beforeAll(() => {
+    if (nativeAddonPath) {
+      execFileSync(
+        process.execPath,
+        [
+          Path.resolve(
+            REPO_ROOT,
+            'src/core/packages/metrics/server-internal/src/event_loop_watchdog/native/build.ts'
+          ),
+          Path.resolve(Path.dirname(process.execPath), '../include/node'),
+          Path.dirname(nativeAddonPath),
+        ],
+        { cwd: REPO_ROOT, stdio: 'pipe' }
+      );
+    }
+  });
+
   beforeEach(async () => {
     logger = loggerMock.create();
     diagnosticDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'elw-'));
@@ -68,6 +93,7 @@ describe('EventLoopWatchdog (real worker, real inspector profiler)', () => {
       sanitizeRoot: REPO_ROOT,
       diagnosticDir,
       profiling,
+      nativeAddonPath,
     });
     watchdog.start();
     await waitFor(() =>
@@ -77,7 +103,7 @@ describe('EventLoopWatchdog (real worker, real inspector profiler)', () => {
   });
 
   afterEach(async () => {
-    await watchdog.stop();
+    await watchdog.dispose();
     Fs.rmSync(diagnosticDir, { recursive: true, force: true });
   });
 
@@ -103,6 +129,52 @@ describe('EventLoopWatchdog (real worker, real inspector profiler)', () => {
     expect(logger.error).not.toHaveBeenCalled();
     // the profiler is stopped once the profile is taken
     expect(await idleUtilization(500)).toBeLessThan(0.2);
+  });
+
+  it('repeatedly profiles code compiled after preparation, retaining fast native activation', async () => {
+    await watchdog.dispose();
+    watchdog = new EventLoopWatchdog({
+      threads: new ThreadsService().start(),
+      logger,
+      sanitizeRoot: REPO_ROOT,
+      diagnosticDir,
+      nativeAddonPath,
+      profiling: { afterMs: 400, maxMs: 5_000, cooldownMs: 0 },
+    });
+    watchdog.start();
+    await sleep(300);
+    for (let trial = 0; trial < 3; trial++) {
+      const file = Path.join(REPO_ROOT, 'src', `late_block_fixture_${trial}.js`);
+      const block = new Script(
+        `(function lateBlock(milliseconds) {
+          const until = Date.now() + milliseconds;
+          let counter = 0;
+          while (Date.now() < until) counter++;
+          return counter;
+        })`,
+        { filename: file }
+      ).runInThisContext() as (milliseconds: number) => number;
+      block(1_200);
+      const captures = await waitFor(() => {
+        const profiles = [...logger.warn.mock.calls, ...logger.info.mock.calls].filter(
+          ([message]) => String(message).startsWith('Event loop block profile')
+        );
+        return profiles.length === trial + 1 ? profiles : undefined;
+      });
+      const [, meta] = captures.find(([, entry]) => metaOf(entry).profiled === trial + 1) ?? [];
+      const captured = metaOf(meta);
+      expect(captured.samples).toBeGreaterThan(0);
+      if (nativeAddonPath) {
+        // The retained eager map must resolve newly compiled scripts, not just old callers.
+        expect(
+          captured.kibanaFrames.some((frame: { location: string }) =>
+            frame.location.includes(`late_block_fixture_${trial}.js`)
+          )
+        ).toBe(true);
+        expect(captured.profilerStartMs).toBeLessThan(500);
+      }
+      expect(await idleUtilization(300)).toBeLessThan(0.2);
+    }
   });
 
   it('does not profile shorter blocks', async () => {

@@ -9,6 +9,7 @@
 
 import type { LogMeta } from '@kbn/logging';
 import type { AdmissionLimits } from './admission';
+import type { NativeTarget } from './native_profiler';
 
 export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 
@@ -60,6 +61,7 @@ export interface WatchdogWorkerData {
   shared: SharedArrayBuffer;
   sanitizeRoot: string;
   diagnosticDir?: string;
+  nativeTarget?: NativeTarget;
   admissionLimits?: AdmissionLimits;
   /** Overrides of the profiling thresholds, for tests. */
   profiling?: { afterMs: number; maxMs: number; cooldownMs: number };
