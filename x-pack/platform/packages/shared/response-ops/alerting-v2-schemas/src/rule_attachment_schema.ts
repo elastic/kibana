@@ -38,10 +38,11 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
  * strictness itself, `.strip()` does not cascade, so the nested metadata needs
  * its own.
  */
-const { shape } = ruleResponseSchema;
 
-export const ruleAttachmentDataSchema = lazySchema(() =>
-  ruleResponseSchema
+export const ruleAttachmentDataSchema = lazySchema(() => {
+  const { shape } = ruleResponseSchema;
+
+  return ruleResponseSchema
     .omit({ created_by: true, updated_by: true, version: true })
     .extend({
       id: opt(shape.id),
@@ -50,7 +51,7 @@ export const ruleAttachmentDataSchema = lazySchema(() =>
       updated_at: opt(shape.updated_at),
       metadata: shape.metadata.strip(),
     })
-    .strip()
-);
+    .strip();
+});
 
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
