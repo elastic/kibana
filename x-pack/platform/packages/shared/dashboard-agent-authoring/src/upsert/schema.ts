@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { panelGridSchema, timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
+import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { timeRangeSchema } from '@kbn/es-query-server';
 import { controlInputSchema } from '../controls';
 import { upsertPanelContentSchema } from '../operations/panels';
 
