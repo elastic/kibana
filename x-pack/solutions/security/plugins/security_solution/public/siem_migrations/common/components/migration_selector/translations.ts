@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SIEM_MIGRATIONS_OPTION_AREAL_LABEL = i18n.translate(
+export const SIEM_MIGRATIONS_OPTION_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.selectionOption.arealLabel',
   {
     defaultMessage: 'Select a migration',

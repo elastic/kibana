@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import type { AppHeaderProps } from '@kbn/app-header';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { ADD_DATA_PATH } from '../../../../common/constants';
-import { OnboardingCardId, OnboardingTopicId } from '../../../onboarding/constants';
+import { OnboardingCardId } from '../../../onboarding/constants';
 import { useKibana, useNavigation } from '../../../common/lib/kibana';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
@@ -68,11 +68,11 @@ export const useMigrationAppHeaderProps = ({
       migrationType === 'rule'
         ? OnboardingCardId.siemMigrationsRules
         : OnboardingCardId.siemMigrationsDashboards;
-    const onboardingPath = `${OnboardingTopicId.siemMigrations}#${onboardingCardId}`;
+    const manageCardPath = `#${onboardingCardId}`;
 
-    const onboardingHref = getAppUrl({
-      deepLinkId: SecurityPageName.landing,
-      path: onboardingPath,
+    const addAnotherMigrationHref = getAppUrl({
+      deepLinkId: SecurityPageName.siemMigrationsManage,
+      path: manageCardPath,
     });
 
     return {
@@ -81,8 +81,12 @@ export const useMigrationAppHeaderProps = ({
         testId: 'addAnotherMigrationButton',
         label: i18n.SIEM_MIGRATIONS_ADD_ANOTHER_MIGRATION_TITLE,
         iconType: 'plusCircle' as const,
-        href: onboardingHref,
-        run: () => navigateTo({ deepLinkId: SecurityPageName.landing, path: onboardingPath }),
+        href: addAnotherMigrationHref,
+        run: () =>
+          navigateTo({
+            deepLinkId: SecurityPageName.siemMigrationsManage,
+            path: manageCardPath,
+          }),
       },
       items,
     };

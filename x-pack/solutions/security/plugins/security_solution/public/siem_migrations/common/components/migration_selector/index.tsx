@@ -11,7 +11,7 @@ import { EuiBadge, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@el
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
-import { SIEM_MIGRATIONS_OPTION_AREAL_LABEL } from './translations';
+import { SIEM_MIGRATIONS_OPTION_ARIA_LABEL } from './translations';
 import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
 import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
 
@@ -75,7 +75,7 @@ export const MigrationSelector: React.FC<MigrationSelectorProps> = React.memo(
       <EuiComboBox
         id={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
         data-test-subj={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
-        aria-label={SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
+        aria-label={SIEM_MIGRATIONS_OPTION_ARIA_LABEL}
         onChange={onChange}
         options={migrationOptions}
         selectedOptions={selectedMigrationOption}
@@ -98,8 +98,10 @@ export const MigrationSelector: React.FC<MigrationSelectorProps> = React.memo(
 MigrationSelector.displayName = 'MigrationSelector';
 
 const selectorItemStyles = css`
-  flex-basis: 40%;
-  min-width: 40%;
+  flex-basis: 400px;
+  width: 100%;
+  min-width: 240px;
+  max-width: 400px;
 `;
 
 /** Right-aligned migration selector rendered under the migrations AppHeader. */
