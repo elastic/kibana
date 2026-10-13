@@ -220,7 +220,7 @@ describeCodecCases({
 describeCodecCases({
   label: 'LocationMonitorsType',
   codec: LocationMonitorsType,
-  valid: [[], [{ id: 'us_central', count: 4 }]],
+  valid: [[], [{ id: 'us_central', count: 4, browserCount: 1 }]],
   invalid: [{ id: 'us_central', count: 4 }, [{ id: 'us_central' }]],
 });
 
