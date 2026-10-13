@@ -18,12 +18,9 @@ import {
 } from './define_signal';
 import { buildEvidence } from './evidence_registry';
 import type { SignalResult } from './evidence_registry';
-import {
-  identityResolution,
-  nameFromEuid,
-  resolveEntities,
-  typeFromEuid,
-} from './resolve_entities';
+import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
+import { toEntityRef } from '../entity_record';
+import { identityResolution, resolveEntities } from './resolve_entities';
 import type { EntityResolution } from './resolve_entities';
 import type {
   BriefSignal,
@@ -66,7 +63,7 @@ const hasContent = (output: SignalOutput): boolean =>
   output.facts.length > 0 ||
   (output.links?.length ?? 0) > 0 ||
   (output.candidates?.length ?? 0) > 0 ||
-  (output.entityAttributes?.length ?? 0) > 0;
+  (output.entityRecords?.length ?? 0) > 0;
 
 interface PhaseOptions {
   jobAbort: AbortSignal;
@@ -162,11 +159,10 @@ const referencedEntities = (outputs: SignalOutput[]): EntityRef[] =>
     ...output.facts.flatMap((fact) => fact.entities),
     ...(output.links ?? []).flatMap((link) => [link.from, link.to]),
     ...(output.candidates ?? []),
-    ...(output.entityAttributes ?? []).map(({ euid }) => ({
-      euid,
-      type: typeFromEuid(euid),
-      name: nameFromEuid(euid),
-    })),
+    ...(output.entityRecords ?? []).flatMap((record) => {
+      const euid = record.entity?.id;
+      return euid ? [toEntityRef(record, euid)] : [];
+    }),
   ]);
 
 const resolveSafely = async (
@@ -175,7 +171,7 @@ const resolveSafely = async (
   abortSignal: AbortSignal
 ): Promise<EntityResolution> => {
   if (refs.length === 0) {
-    return identityResolution([]);
+    return identityResolution();
   }
   try {
     return await resolveEntities({
@@ -188,7 +184,7 @@ const resolveSafely = async (
     if (!abortSignal.aborted && !isIndexNotFoundError(error)) {
       ctx.logger.warn(`[executive brief] entity resolution failed: ${errorMessage(error)}`);
     }
-    return identityResolution(refs);
+    return identityResolution();
   }
 };
 
@@ -204,6 +200,11 @@ const combineResolutions = (
   docOf: (euid) => first.docOf(euid) ?? second.docOf(euid),
 });
 
+const resolvedRef = (resolution: EntityResolution, golden: string): EntityRef | undefined => {
+  const record = resolution.get(golden);
+  return record ? toEntityRef(record, golden) : undefined;
+};
+
 /**
  * Ranks nominated candidates by how many signals nominated them, then by risk, then by euid, and
  * keeps the top `BRIEF_LIMITS.maxCandidates` golden entities.
@@ -218,7 +219,7 @@ const selectCandidates = (
     for (const candidate of candidates) {
       const golden = resolution.golden(candidate.euid);
       const entry = byGolden.get(golden) ?? {
-        ref: resolution.get(golden) ?? { ...candidate, euid: golden },
+        ref: resolvedRef(resolution, golden) ?? { ...candidate, euid: golden },
         signals: new Set<string>(),
       };
       entry.signals.add(signalId);
@@ -269,17 +270,24 @@ export const runSignals: RunSignals = async (
 
   const signalRisk = new Map<string, number>();
   tenantOutputs.forEach((output) =>
-    (output.entityAttributes ?? []).forEach(({ euid, riskScore }) => {
+    (output.entityRecords ?? []).forEach((record) => {
+      const euid = record.entity?.id;
+      const score = getEntityRisk(record)?.score;
+      if (euid === undefined || score === undefined) return;
       const golden = tenantResolution.golden(euid);
-      if (riskScore !== undefined && !signalRisk.has(golden)) signalRisk.set(golden, riskScore);
+      if (!signalRisk.has(golden)) signalRisk.set(golden, score);
     })
   );
+  const riskOf = (golden: string): number | undefined => {
+    const record = tenantResolution.get(golden);
+    return (record && getEntityRisk(record)?.score) ?? signalRisk.get(golden);
+  };
   const candidates = selectCandidates(
     tenantOutcomes.flatMap(({ run, output }) =>
       output?.candidates ? [{ signalId: run.id, candidates: output.candidates }] : []
     ),
     tenantResolution,
-    (golden) => tenantResolution.get(golden)?.attributes.riskScore ?? signalRisk.get(golden)
+    riskOf
   );
 
   const entityOutcomes: SignalOutcome[] =

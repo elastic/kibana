@@ -43,7 +43,8 @@ export interface BriefParams {
  */
 export interface BriefDocument {
   schema_version: 1;
-  owner: { id: string; username: string };
+  /** Stable principal id of the owner; the caller is always the owner. */
+  owner: { id: string };
   space_id: string;
   job: BriefJob;
   generated_at?: string;
@@ -54,15 +55,4 @@ export interface BriefDocument {
   evidence?: Evidence;
   brief?: Brief;
   verification?: VerificationSummary;
-}
-
-/** GET response: the caller's document without the owner id. */
-export type BriefResponse = Omit<BriefDocument, 'owner' | 'schema_version'> & {
-  owner: { username: string };
-};
-
-export interface GenerateBriefResponse {
-  job: Pick<BriefJob, 'id' | 'status' | 'stage'>;
-  /** True when an existing running job was returned instead of starting a new one. */
-  reused: boolean;
 }

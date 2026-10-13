@@ -8,8 +8,9 @@
 import type { SignalRun } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { buildEvidence } from './evidence_registry';
 import type { SignalResult } from './evidence_registry';
+import type { Entity } from '@kbn/entity-store/common';
 import { identityResolution } from './resolve_entities';
-import type { EntityResolution, ResolvedEntity } from './resolve_entities';
+import type { EntityResolution } from './resolve_entities';
 import type { EntityRef } from './types';
 
 const GOLDEN: EntityRef = { euid: 'user:ann@okta', type: 'user', name: 'ann' };
@@ -17,27 +18,24 @@ const ALIAS: EntityRef = { euid: 'user:ann@h1@local', type: 'user', name: 'ann@h
 const HOST: EntityRef = { euid: 'host:h1', type: 'host', name: 'h1' };
 const OTHER: EntityRef = { euid: 'host:h2', type: 'host', name: 'h2' };
 
-const resolved = (ref: EntityRef, extra: Partial<ResolvedEntity> = {}): ResolvedEntity => ({
-  euid: ref.euid,
-  type: ref.type,
-  name: ref.name,
-  aliasCount: 0,
-  attributes: { euid: ref.euid },
-  ...extra,
-});
+const GOLDEN_RECORD: Entity = {
+  entity: {
+    id: GOLDEN.euid,
+    name: 'ann',
+    type: 'user',
+    relationships: {
+      resolution: { risk: { calculated_level: 'High', calculated_score_norm: 80 } },
+    },
+  },
+  asset: { criticality: 'high_impact' },
+};
+const HOST_RECORD: Entity = { entity: { id: HOST.euid, name: 'h1', type: 'host' } };
 
-/** ALIAS resolves to GOLDEN; everything else is its own golden entity. */
+/** ALIAS resolves to GOLDEN; OTHER has no store document. */
 const resolution: EntityResolution = {
-  ...identityResolution([GOLDEN, HOST, OTHER]),
+  ...identityResolution(),
   golden: (euid) => (euid === ALIAS.euid ? GOLDEN.euid : euid),
-  get: (euid) =>
-    ({
-      [GOLDEN.euid]: resolved(GOLDEN, {
-        aliasCount: 1,
-        attributes: { euid: GOLDEN.euid, riskScore: 80, riskLevel: 'High' },
-      }),
-      [HOST.euid]: resolved(HOST),
-    }[euid]),
+  get: (euid) => ({ [GOLDEN.euid]: GOLDEN_RECORD, [HOST.euid]: HOST_RECORD }[euid]),
 };
 
 const run = (id: string): SignalRun => ({
@@ -54,7 +52,7 @@ const linksOf = (result: SignalResult) =>
   buildEvidence({ results: [result], runs: [run(result.signalId)], resolution }).links;
 
 describe('buildEvidence', () => {
-  it('assigns ENT, F and L ids deterministically, keyed by golden euid', () => {
+  it('keys entities by golden euid and assigns F and L ids deterministically', () => {
     const input = {
       results: [
         {
@@ -81,26 +79,23 @@ describe('buildEvidence', () => {
     const evidence = buildEvidence(input);
 
     expect(evidence).toEqual(buildEvidence(input));
-    expect(Object.keys(evidence.entities)).toEqual(['ENT-1', 'ENT-2', 'ENT-3']);
-    expect(evidence.entities['ENT-1']).toEqual({
-      id: 'ENT-1',
-      euid: GOLDEN.euid,
-      type: 'user',
-      name: 'ann',
-      riskScore: 80,
-      riskLevel: 'High',
-      aliasCount: 1,
+    expect(evidence.entities).toEqual({
+      [GOLDEN.euid]: GOLDEN_RECORD,
+      [HOST.euid]: HOST_RECORD,
+      // No store document: a minimal record from the signal's ref.
+      [OTHER.euid]: { entity: { id: OTHER.euid, name: 'h2', type: 'host' } },
     });
+    expect(Object.keys(evidence.entities)).toEqual([GOLDEN.euid, HOST.euid, OTHER.euid]);
     expect(
       evidence.facts.map(({ id, signalId, entities }) => ({ id, signalId, entities }))
     ).toEqual([
-      { id: 'F-1', signalId: 'a', entities: ['ENT-1', 'ENT-2'] },
-      { id: 'F-2', signalId: 'a', entities: ['ENT-1'] },
-      { id: 'F-3', signalId: 'b', entities: ['ENT-3'] },
+      { id: 'F-1', signalId: 'a', entities: [GOLDEN.euid, HOST.euid] },
+      { id: 'F-2', signalId: 'a', entities: [GOLDEN.euid] },
+      { id: 'F-3', signalId: 'b', entities: [OTHER.euid] },
     ]);
     // Undirected links are stored with their endpoints in euid order.
     expect(evidence.links).toEqual([
-      { id: 'L-1', type: 'co_alert', from: 'ENT-2', to: 'ENT-1', factIds: ['F-1', 'F-2'] },
+      { id: 'L-1', type: 'co_alert', from: HOST.euid, to: GOLDEN.euid, factIds: ['F-1', 'F-2'] },
     ]);
     expect(evidence.signals.map(({ id }) => id)).toEqual(['a', 'b']);
   });
@@ -126,12 +121,12 @@ describe('buildEvidence', () => {
       {
         id: 'L-1',
         type: 'same_attack',
-        from: 'ENT-2',
-        to: 'ENT-1',
+        from: HOST.euid,
+        to: GOLDEN.euid,
         factIds: ['F-1'],
         firstSeen: '2026-10-01T00:00:00Z',
       },
-      { id: 'L-2', type: 'co_alert', from: 'ENT-2', to: 'ENT-1', factIds: [] },
+      { id: 'L-2', type: 'co_alert', from: HOST.euid, to: GOLDEN.euid, factIds: [] },
     ]);
   });
 
@@ -149,8 +144,8 @@ describe('buildEvidence', () => {
     });
 
     expect(links.map(({ id, from, to }) => `${id} ${from}>${to}`)).toEqual([
-      'L-1 ENT-1>ENT-2',
-      'L-2 ENT-2>ENT-1',
+      `L-1 ${GOLDEN.euid}>${HOST.euid}`,
+      `L-2 ${HOST.euid}>${GOLDEN.euid}`,
     ]);
   });
 });

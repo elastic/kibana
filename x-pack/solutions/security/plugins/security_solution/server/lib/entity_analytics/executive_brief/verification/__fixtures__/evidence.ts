@@ -11,34 +11,40 @@ import type {
   Fact,
 } from '../../../../../../common/entity_analytics/executive_brief/evidence';
 
+export const ROD = 'user:a.rodriguez@corp';
+export const LAPTOP = 'host:laptop-fin03';
+export const DOCKER = 'host:docker-host-prod-01';
+export const CHEN = 'user:j.chen';
+
 /**
- * - F-1: open critical attack discovery on ENT-1 (privileged user), ENT-2 and ENT-3, 12 alerts.
- * - F-2: acknowledged high attack discovery on ENT-4, 3 alerts.
- * - F-3: ENT-1 at critical risk (92.5).
- * - L-1: ENT-1 and ENT-3 are part of the same discovered attack (backed by F-1).
+ * - F-1: open critical attack discovery on ROD (privileged user), LAPTOP and DOCKER, 12 alerts.
+ * - F-2: acknowledged high attack discovery on CHEN, 3 alerts.
+ * - F-3: ROD at critical risk (92.5).
+ * - L-1: ROD and DOCKER are part of the same discovered attack (backed by F-1).
  */
 export const FIXTURE_EVIDENCE: Evidence = {
   entities: {
-    'ENT-1': {
-      id: 'ENT-1',
-      euid: 'user:a.rodriguez@corp',
-      type: 'user',
-      name: 'a.rodriguez',
-      riskScore: 92.5,
-      riskLevel: 'Critical',
-      privileged: true,
-      aliasCount: 2,
+    [ROD]: {
+      entity: {
+        id: ROD,
+        name: 'a.rodriguez',
+        type: 'user',
+        attributes: { watchlists: ['privileged-user-monitoring-watchlist-id-default'] },
+        risk: { calculated_level: 'Critical', calculated_score_norm: 92.5 },
+      },
+      user: { name: 'a.rodriguez' },
     },
-    'ENT-2': { id: 'ENT-2', euid: 'host:laptop-fin03', type: 'host', name: 'laptop-fin03' },
-    'ENT-3': {
-      id: 'ENT-3',
-      euid: 'host:docker-host-prod-01',
-      type: 'host',
-      name: 'docker-host-prod-01',
-      riskScore: 71,
-      criticality: 'extreme_impact',
+    [LAPTOP]: { entity: { id: LAPTOP, name: 'laptop-fin03', type: 'host' } },
+    [DOCKER]: {
+      entity: {
+        id: DOCKER,
+        name: 'docker-host-prod-01',
+        type: 'host',
+        risk: { calculated_level: 'High', calculated_score_norm: 71 },
+      },
+      asset: { criticality: 'extreme_impact' },
     },
-    'ENT-4': { id: 'ENT-4', euid: 'user:j.chen', type: 'user', name: 'j.chen' },
+    [CHEN]: { entity: { id: CHEN, name: 'j.chen', type: 'user' } },
   },
   facts: [
     {
@@ -48,7 +54,7 @@ export const FIXTURE_EVIDENCE: Evidence = {
       title: 'Stolen privileged credentials used to reach docker-host-prod-01',
       at: '2026-10-07T08:31:00.000Z',
       severity: 'critical',
-      entities: ['ENT-1', 'ENT-2', 'ENT-3'],
+      entities: [ROD, LAPTOP, DOCKER],
       numbers: { alerts: 12 },
       details: { status: 'open', tactics: 'Initial Access, Lateral Movement' },
       source: { type: 'attack_discovery', id: '8f14e45f-ceea-467a-9575-0b2f0d8c7a11' },
@@ -60,7 +66,7 @@ export const FIXTURE_EVIDENCE: Evidence = {
       title: 'Suspicious mailbox rule created by j.chen',
       at: '2026-10-08T12:00:00.000Z',
       severity: 'high',
-      entities: ['ENT-4'],
+      entities: [CHEN],
       numbers: { alerts: 3 },
       details: { status: 'acknowledged' },
     },
@@ -70,11 +76,11 @@ export const FIXTURE_EVIDENCE: Evidence = {
       signalId: 'high_risk_entities',
       title: 'a.rodriguez is at Critical risk',
       severity: 'critical',
-      entities: ['ENT-1'],
+      entities: [ROD],
       numbers: { riskScore: 92.5 },
     },
   ],
-  links: [{ id: 'L-1', type: 'same_attack', from: 'ENT-1', to: 'ENT-3', factIds: ['F-1'] }],
+  links: [{ id: 'L-1', type: 'same_attack', from: ROD, to: DOCKER, factIds: ['F-1'] }],
   signals: [
     {
       id: 'attack_discoveries',
@@ -109,7 +115,7 @@ export const buildValidBrief = (): Brief => ({
     level: 'urgent',
     headline: 'A privileged account was used to reach a critical production host',
     summary:
-      'An open critical attack discovery covers ENT-1, ENT-2 and ENT-3 with 12 alerts. ENT-1 has a risk score of 92.5.',
+      'An open critical attack discovery covers user:a.rodriguez@corp, host:laptop-fin03 and host:docker-host-prod-01 with 12 alerts. user:a.rodriguez@corp has a risk score of 92.5.',
     evidence: ['F-1', 'F-3'],
   },
   areas: [
@@ -122,7 +128,7 @@ export const buildValidBrief = (): Brief => ({
     {
       id: 'response',
       level: 'action',
-      summary: 'The critical attack is not acknowledged yet; the high one on ENT-4 is.',
+      summary: 'The critical attack is not acknowledged yet; the high one on user:j.chen is.',
       evidence: ['F-1', 'F-2'],
     },
   ],

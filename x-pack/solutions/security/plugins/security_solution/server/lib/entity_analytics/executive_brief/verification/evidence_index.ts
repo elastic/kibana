@@ -5,37 +5,57 @@
  * 2.0.
  */
 
+import type { Entity } from '@kbn/entity-store/common';
 import type {
-  BriefEntity,
   Evidence,
   Fact,
   Link,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import { entityDisplayName } from '../entity_record';
 
 /** Lookup tables over the evidence a brief was composed from. */
 export interface EvidenceIndex {
   readonly evidence: Evidence;
-  readonly entities: ReadonlyMap<string, BriefEntity>;
+  /** Entity Store records by EUID. */
+  readonly entities: ReadonlyMap<string, Entity>;
   readonly facts: ReadonlyMap<string, Fact>;
   readonly links: ReadonlyMap<string, Link>;
+  /** Matches the entities' EUIDs and names that contain digits, so they aren't read as numbers. */
+  readonly identifierPattern?: RegExp;
 }
 
-/** Any evidence id written in prose. */
-export const EVIDENCE_ID_PATTERN = /(?<![\w-])(?:ENT|F|L)-\d+(?![\w-])/g;
+/** Any fact or link id written in prose. */
+export const EVIDENCE_ID_PATTERN = /(?<![\w-])(?:F|L)-\d+(?![\w-])/g;
 
-export const isEntityId = (id: string): boolean => /^ENT-\d+$/.test(id);
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const buildEvidenceIndex = (evidence: Evidence): EvidenceIndex => {
-  const entities = new Map<string, BriefEntity>(
-    Object.values(evidence.entities).map((entity) => [entity.id, entity])
-  );
+  const entities = new Map<string, Entity>(Object.entries(evidence.entities));
   const facts = new Map<string, Fact>(evidence.facts.map((fact) => [fact.id, fact]));
   const links = new Map<string, Link>(evidence.links.map((link) => [link.id, link]));
-  return { evidence, entities, facts, links };
+  const identifiers = unique(
+    [...entities].flatMap(([euid, record]) => [
+      euid,
+      entityDisplayName(record, euid),
+      record.entity?.name ?? '',
+    ])
+  )
+    .filter((identifier) => /\d/.test(identifier))
+    .sort((a, b) => b.length - a.length);
+  return {
+    evidence,
+    entities,
+    facts,
+    links,
+    ...(identifiers.length > 0
+      ? { identifierPattern: new RegExp(identifiers.map(escapeRegExp).join('|'), 'gi') }
+      : {}),
+  };
 };
 
+/** True for the fact and link ids of the evidence: the only ids a claim can cite. */
 export const isKnownId = (index: EvidenceIndex, id: string): boolean =>
-  index.entities.has(id) || index.facts.has(id) || index.links.has(id);
+  index.facts.has(id) || index.links.has(id);
 
 /** True when the ids include at least one fact or link: entities alone back no claim. */
 export const hasFactOrLink = (index: EvidenceIndex, ids: readonly string[]): boolean =>

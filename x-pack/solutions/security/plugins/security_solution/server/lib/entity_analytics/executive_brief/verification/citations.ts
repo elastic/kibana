@@ -14,6 +14,15 @@ import { EVIDENCE_ID_PATTERN, hasFactOrLink, isKnownId, unique } from './evidenc
 import type { BriefCheck, CheckOutcome, Claim } from './types';
 import { emptyOutcome, isDropped, listClaims, reportClaim } from './types';
 
+/** A parenthesised run of fact and link ids in prose, e.g. " (F-1, L-2)", with the space before it. */
+const CITATION_GROUP_PATTERN = /\s*\(\s*[FL]-\d+(?:\s*(?:[,;/]|\band\b)?\s*[FL]-\d+)*\s*\)/g;
+
+/** Removes citation groups from prose (citations belong in `evidence`); never empties it. */
+export const stripCitationGroups = (text: string): string => {
+  const stripped = text.replace(CITATION_GROUP_PATTERN, '');
+  return stripped === text ? text : stripped.trim() || text;
+};
+
 /** Only an absence claim ("nothing to report") at level `clear` needs no citation. */
 const needsEvidence = (level: AttentionLevel): boolean => level !== 'clear';
 
@@ -28,9 +37,10 @@ const unknownIdsInProse = (claim: Claim, index: EvidenceIndex): string[] =>
   );
 
 /**
- * Citations: unknown ids are removed from every evidence list. A claim left without a fact or
- * link to back it, or whose prose names an id that is not in the evidence, is dropped; for the
- * verdict this is structural.
+ * Citations: citation groups are removed from prose, and ids that are not facts or links of the
+ * evidence are removed from every evidence list. A claim left without a fact or link to back it,
+ * or whose prose names an id that is not in the evidence, is dropped; for the verdict this is
+ * structural.
  */
 export const checkCitations: BriefCheck = (input, context): CheckOutcome => {
   const { index } = context;
@@ -44,14 +54,35 @@ export const checkCitations: BriefCheck = (input, context): CheckOutcome => {
       return known;
     });
 
+  const stripped: string[] = [];
+  const prose = (path: string, text: string): string => {
+    const result = stripCitationGroups(text);
+    if (result !== text) {
+      stripped.push(path);
+    }
+    return result;
+  };
+
   const brief: Brief = {
-    verdict: { ...input.verdict, evidence: keepKnown(input.verdict.evidence) },
-    areas: input.areas.map((area) => ({ ...area, evidence: keepKnown(area.evidence) })),
+    verdict: {
+      ...input.verdict,
+      headline: prose('verdict.headline', input.verdict.headline),
+      summary: prose('verdict.summary', input.verdict.summary),
+      evidence: keepKnown(input.verdict.evidence),
+    },
+    areas: input.areas.map((area, i) => ({
+      ...area,
+      summary: prose(`areas[${i}].summary`, area.summary),
+      evidence: keepKnown(area.evidence),
+    })),
   };
 
   const outcome = emptyOutcome(brief);
   if (removed.length > 0) {
     outcome.notes.push(`removed unknown ids: ${unique(removed).join(', ')}`);
+  }
+  if (stripped.length > 0) {
+    outcome.notes.push(`removed citations from prose: ${stripped.join(', ')}`);
   }
 
   listClaims(brief).forEach((claim) => {

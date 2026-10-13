@@ -8,7 +8,7 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/document';
+import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
 import {
   BRIEF_ROUTE,
   EXECUTIVE_BRIEF_TAGS,
@@ -72,19 +72,31 @@ apiTest.describe(
         const document = await waitForBriefJob({ apiClient, headers, jobId });
         await llmCall;
 
-        expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
-        expect(document.brief).toStrictEqual(HIGH_RISK_ENTITY_BRIEF);
-        expect(document.verification).toMatchObject({ lowered: 0, repaired: false });
-        expect(document.params).toMatchObject({ range: '7d', connector_id: connectorId });
-        expect(document.evidence?.facts).toStrictEqual([
-          expect.objectContaining({ id: 'F-1', kind: 'high_risk_entity', severity: 'high' }),
+        expect(document.generation).toMatchObject({ jobId, status: 'succeeded' });
+        expect(document.report?.period.range).toBe('7d');
+        expect(document.report?.verdict).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.verdict);
+        expect(document.report?.areas).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.areas);
+        expect(document.provenance).toMatchObject({
+          connectorId,
+          verification: { lowered: 0, repaired: false },
+        });
+        // Entities are Entity Store records keyed by EUID; facts reference them by EUID.
+        expect(Object.keys(document.provenance?.entities ?? {})).toStrictEqual([SEEDED_ENTITY.id]);
+        expect(document.provenance?.entities[SEEDED_ENTITY.id]).toMatchObject({
+          entity: {
+            id: SEEDED_ENTITY.id,
+            name: SEEDED_ENTITY.name,
+            risk: { calculated_level: SEEDED_ENTITY.riskLevel },
+          },
+        });
+        expect(document.provenance?.facts).toStrictEqual([
+          expect.objectContaining({
+            id: 'F-1',
+            kind: 'high_risk_entity',
+            severity: 'high',
+            entities: [SEEDED_ENTITY.id],
+          }),
         ]);
-        expect(Object.values(document.evidence?.entities ?? {})).toStrictEqual([
-          expect.objectContaining({ name: SEEDED_ENTITY.name }),
-        ]);
-        // The owner id and schema version stay server-side.
-        expect(Object.keys(document.owner)).toStrictEqual(['username']);
-        expect('schema_version' in document).toBe(false);
 
         // One LLM call, with the brief tool forced.
         expect(llmProxy.interceptedRequests).toHaveLength(1);
@@ -114,8 +126,8 @@ apiTest.describe(
 
       await held.release();
       const document = await waitForBriefJob({ apiClient, headers, jobId: first.body.job.id });
-      expect(document.job.status).toBe('succeeded');
-      expect(document.params?.range).toBe('7d');
+      expect(document.generation.status).toBe('succeeded');
+      expect(document.report?.period.range).toBe('7d');
       expect(llmProxy.interceptedRequests).toHaveLength(1);
     });
   }

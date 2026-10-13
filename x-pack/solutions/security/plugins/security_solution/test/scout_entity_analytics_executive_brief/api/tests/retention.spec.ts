@@ -12,7 +12,7 @@ import {
   BRIEF_RETENTION_MS,
   EXECUTIVE_BRIEF_INDEX,
 } from '../../../../common/entity_analytics/executive_brief/constants';
-import type { BriefResponse } from '../../../../common/entity_analytics/executive_brief/document';
+import type { BriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
 import { BRIEF_ROUTE, EXECUTIVE_BRIEF_TAGS, INTERNAL_HEADERS } from '../fixtures/constants';
 import {
   createBriefConnector,
@@ -48,9 +48,9 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
 
     const read = await apiClient.get<BriefResponse>(BRIEF_ROUTE, { headers, responseType: 'json' });
     expect(read).toHaveStatusCode(200);
-    const { generated_at: generatedAt, expires_at: expiresAt } = read.body;
+    const { generatedAt, expiresAt } = read.body.report ?? {};
     expect(generatedAt).toBeDefined();
-    expect(Date.parse(expiresAt) - Date.parse(generatedAt ?? '')).toBe(BRIEF_RETENTION_MS);
+    expect(Date.parse(expiresAt ?? '') - Date.parse(generatedAt ?? '')).toBe(BRIEF_RETENTION_MS);
   });
 
   apiTest(

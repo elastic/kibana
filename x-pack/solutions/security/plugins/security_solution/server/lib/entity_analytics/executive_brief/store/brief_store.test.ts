@@ -112,7 +112,7 @@ const createFakeStorage = () => {
 
 const T0 = Date.parse('2026-10-12T10:00:00.000Z');
 const iso = (ms: number) => new Date(ms).toISOString();
-const owner = { id: 'profile-1', username: 'alice' };
+const owner = { id: 'profile-1' };
 const spaceId = 'default';
 const docId = getBriefDocId(owner.id, spaceId);
 

@@ -110,7 +110,8 @@ describe('composeVerifiedBrief', () => {
     expect(messages).toEqual([
       expect.objectContaining({ content: expect.stringContaining('<evidence>') }),
     ]);
-    expect(JSON.stringify(messages)).not.toContain('a.rodriguez');
+    // Entities are shown by EUID and name; the platform's anonymisation applies to the call.
+    expect(JSON.stringify(messages)).toContain('user:a.rodriguez@corp \\"a.rodriguez\\" (user');
 
     const retryOn = retryConfiguration?.retryOn as (error: Error) => boolean;
     expect(retryOn(toolValidationError())).toBe(false);

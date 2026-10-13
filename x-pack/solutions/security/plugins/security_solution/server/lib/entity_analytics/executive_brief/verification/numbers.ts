@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
 import type { Fact } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { EvidenceIndex } from './evidence_index';
-import { citedFacts, EVIDENCE_ID_PATTERN, isEntityId, unique } from './evidence_index';
+import { citedFacts, EVIDENCE_ID_PATTERN, unique } from './evidence_index';
 import type { BriefCheck, CheckOutcome, Claim } from './types';
 import { emptyOutcome, isDropped, listClaims, reportClaim } from './types';
 
@@ -47,9 +48,11 @@ const MASKS: readonly RegExp[] = [
 export const maskNonQuantities = (text: string): string =>
   MASKS.reduce((masked, pattern) => masked.replace(pattern, ' '), text);
 
-/** The numbers written in `text`, as written (e.g. "1,204"). */
-export const findNumbers = (text: string): string[] =>
-  maskNonQuantities(text).match(NUMBER_PATTERN) ?? [];
+/** The numbers written in `text`, as written (e.g. "1,204"), ignoring the given identifiers. */
+export const findNumbers = (text: string, identifierPattern?: RegExp): string[] =>
+  maskNonQuantities(identifierPattern ? text.replace(identifierPattern, ' ') : text).match(
+    NUMBER_PATTERN
+  ) ?? [];
 
 const toValue = (token: string): number => Number(token.replace(/,/g, ''));
 
@@ -67,32 +70,33 @@ const addNumber = (allowed: Set<number>, value: number): void => {
   }
 };
 
-const addFactNumbers = (allowed: Set<number>, fact: Fact): void => {
+const addFactNumbers = (allowed: Set<number>, fact: Fact, index: EvidenceIndex): void => {
   Object.values(fact.numbers ?? {}).forEach((value) => addNumber(allowed, value));
   // Deterministic text written by the signal may carry numbers too.
   [fact.title, ...Object.values(fact.details ?? {})].forEach((text) =>
-    findNumbers(text).forEach((token) => addNumber(allowed, toValue(token)))
+    findNumbers(text, index.identifierPattern).forEach((token) =>
+      addNumber(allowed, toValue(token))
+    )
   );
 };
 
-/** Entities a claim is about: cited directly, named in its prose, or part of what it cites. */
+/** EUIDs of the entities a claim is about: named in its prose, or part of what it cites. */
 const claimEntities = (claim: Claim, index: EvidenceIndex, facts: readonly Fact[]): string[] =>
   unique([
-    ...claim.evidence.filter(isEntityId),
-    ...claim.fields.flatMap(({ text }) =>
-      [...text.matchAll(EVIDENCE_ID_PATTERN)].map(([id]) => id).filter(isEntityId)
+    ...[...index.entities.keys()].filter((euid) =>
+      claim.fields.some(({ text }) => text.includes(euid))
     ),
     ...facts.flatMap(({ entities }) => entities),
     ...claim.evidence.flatMap((id) => {
       const link = index.links.get(id);
       return link ? [link.from, link.to] : [];
     }),
-  ]).filter((id) => index.entities.has(id));
+  ]).filter((euid) => index.entities.has(euid));
 
 /**
  * The numbers a claim may quote: those of the facts it cites (directly or through a cited link),
- * the risk scores and alias counts of the entities it is about, simple counts of what it cites,
- * and the window length.
+ * the risk scores of the entities it is about, simple counts of what it cites, and the window
+ * length.
  */
 export const collectClaimNumbers = (
   claim: Claim,
@@ -101,15 +105,14 @@ export const collectClaimNumbers = (
 ): Set<number> => {
   const allowed = new Set<number>();
   const facts = citedFacts(index, claim.evidence);
-  facts.forEach((fact) => addFactNumbers(allowed, fact));
+  facts.forEach((fact) => addFactNumbers(allowed, fact, index));
   const entities = claimEntities(claim, index, facts);
-  entities.forEach((id) => {
-    const { riskScore, aliasCount } = index.entities.get(id) ?? {};
-    [riskScore, aliasCount].forEach((value) => {
-      if (value !== undefined) {
-        addNumber(allowed, value);
-      }
-    });
+  entities.forEach((euid) => {
+    const record = index.entities.get(euid);
+    const score = record && getEntityRisk(record)?.score;
+    if (score !== undefined) {
+      addNumber(allowed, score);
+    }
   });
   [entities.length, facts.length].forEach((count) => addNumber(allowed, count));
   findNumbers(range ?? '').forEach((token) => addNumber(allowed, toValue(token)));
@@ -119,7 +122,8 @@ export const collectClaimNumbers = (
 /**
  * Numbers: every number in a claim's prose must come from what the claim cites. Any other number
  * drops the claim (structural for the verdict), even when it appears elsewhere in the evidence.
- * Dates, times, ids, ordinals and identifiers are masked first.
+ * Dates, times, ids, ordinals, identifiers and the evidence's entity ids and names are masked
+ * first.
  */
 export const createNumbersCheck =
   (range?: string): BriefCheck =>
@@ -133,7 +137,7 @@ export const createNumbersCheck =
       }
       const allowed = collectClaimNumbers(claim, index, range);
       const unsupported = claim.fields.flatMap(({ path, text }) =>
-        findNumbers(text)
+        findNumbers(text, index.identifierPattern)
           .filter((token) => !allowed.has(toValue(token)))
           .map((token) => `${path}: "${token}"`)
       );

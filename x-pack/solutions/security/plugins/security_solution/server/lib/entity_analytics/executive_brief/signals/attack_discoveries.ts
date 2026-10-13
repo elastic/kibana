@@ -16,7 +16,8 @@ import {
   isIndexNotFoundError,
   severityFromRiskScore,
 } from './define_signal';
-import { identityResolution, nameFromEuid, resolveEntities } from './resolve_entities';
+import { nameFromEuid, toEntityRef } from '../entity_record';
+import { identityResolution, resolveEntities } from './resolve_entities';
 import type { EntityResolution } from './resolve_entities';
 import { getAlertsIndex, getAttackDiscoveryIndices } from './shared/indices';
 import type { EntityRef, FactDraft, LinkDraft, SignalContext } from './types';
@@ -266,13 +267,8 @@ export const toGoldenEntities = (
   for (const entity of entities) {
     const golden = resolution.golden(entity.euid);
     if (!byGolden.has(golden)) {
-      const resolved = resolution.get(golden);
-      byGolden.set(
-        golden,
-        resolved
-          ? { euid: golden, type: resolved.type, name: resolved.name }
-          : { ...entity, euid: golden }
-      );
+      const record = resolution.get(golden);
+      byGolden.set(golden, record ? toEntityRef(record, golden) : { ...entity, euid: golden });
     }
   }
   return [...byGolden.values()].slice(0, MAX_ENTITIES_PER_DISCOVERY);
@@ -346,7 +342,7 @@ export const attackDiscoveriesSignal = defineSignal({
       ctx.logger.debug(
         `[executive brief] discovery entity resolution failed: ${errorMessage(error)}`
       );
-      return identityResolution(rawEntities);
+      return identityResolution();
     });
     const goldenByDiscovery = entitiesByDiscovery.map((entities) =>
       toGoldenEntities(entities, resolution)

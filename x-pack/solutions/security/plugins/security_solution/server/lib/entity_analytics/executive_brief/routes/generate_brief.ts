@@ -8,17 +8,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { generateBriefRequestBodySchema } from '../../../../../common/entity_analytics/executive_brief/api';
 import {
   BRIEF_LIMITS,
   BRIEF_RANGE_MS,
   EXECUTIVE_BRIEF_API_PATH,
   EXECUTIVE_BRIEF_API_VERSION,
 } from '../../../../../common/entity_analytics/executive_brief/constants';
-import type {
-  BriefJob,
-  GenerateBriefResponse,
-} from '../../../../../common/entity_analytics/executive_brief/document';
+import { generateBriefRequestBodySchema } from '../../../../../common/entity_analytics/executive_brief/api';
+import type { GenerateBriefResponse } from '../../../../../common/entity_analytics/executive_brief/api';
+import type { BriefJob } from '../../../../../common/entity_analytics/executive_brief/document';
 import { resolveConnector } from '../pipeline/resolve_connector';
 import { isJobActive } from '../store/brief_store';
 import { BriefStoreConflictError } from '../store/errors';

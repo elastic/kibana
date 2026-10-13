@@ -20,9 +20,6 @@ export interface StableUserIdAuthUser {
 export interface BriefOwner {
   /** Stable principal id: profile uid, or `realm:[type,name,username]`. */
   id: string;
-  /** For display only; never used for access checks. */
-  username: string;
-  profileUid?: string;
 }
 
 /**
@@ -115,9 +112,5 @@ export const getBriefOwner = async ({
     return undefined;
   }
 
-  return {
-    id,
-    username: authUser.username,
-    profileUid: id.startsWith('realm:') ? undefined : id,
-  };
+  return { id };
 };

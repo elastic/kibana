@@ -31,7 +31,7 @@ export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief';
 
 export const BRIEF_SIGNAL_IDS = ['attack_discoveries', 'high_risk_entities'] as const;
 
-/** The high-risk entity `seedHighRiskEntity` writes; the signal reports it as F-1. */
+/** The high-risk entity `seedHighRiskEntity` writes; `id` is its EUID. The signal reports it as F-1. */
 export const SEEDED_ENTITY = {
   id: 'user:brief-scout-user',
   name: 'brief-scout-user',
@@ -42,7 +42,7 @@ export const SEEDED_ENTITY = {
 /**
  * A model answer for the seeded high-risk entity: it cites F-1 at `watch`, which the evidence
  * supports, so verification keeps it unchanged. The prose has no digits, so the number check has
- * nothing to drop.
+ * nothing to drop, and no ids, so there is no citation group to strip.
  */
 export const HIGH_RISK_ENTITY_BRIEF: Brief = {
   verdict: {

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
+import type { Entity } from '@kbn/entity-store/common';
+import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
 import type { Severity } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import { toEntityRef, watchlistsOf } from '../entity_record';
 import { ALWAYS_AVAILABLE, compareStrings, defineSignal, errorMessage } from './define_signal';
-import {
-  ENTITY_SOURCE_FIELDS,
-  expandResolutionGroups,
-  groupAttributes,
-  parseEntityDoc,
-} from './resolve_entities';
+import { ENTITY_SOURCE_FIELDS, expandResolutionGroups, parseEntityDoc } from './resolve_entities';
 import type { EntityDoc } from './resolve_entities';
 import { getEntitiesLatestIndex } from './shared/indices';
-import type { EntityAttributes, EntityRef, FactDraft } from './types';
+import type { EntityRef, FactDraft } from './types';
 
 export const MAX_HIGH_RISK_ENTITIES = 10;
 const HIGH_RISK_FETCH_SIZE = 100;
@@ -24,22 +22,27 @@ const HIGH_RISK_LEVELS = ['Critical', 'High'] as const;
 const severityOf = (level: string | undefined): Severity =>
   level === 'Critical' ? 'critical' : 'high';
 
-const isHighRisk = (doc: EntityDoc): boolean =>
-  HIGH_RISK_LEVELS.some((level) => level === doc.riskLevel);
+const scoreOf = ({ record }: EntityDoc): number => getEntityRisk(record)?.score ?? 0;
 
-const toFact = (ref: EntityRef, attributes: EntityAttributes): FactDraft => {
-  const level = attributes.riskLevel ?? 'High';
+const isHighRisk = ({ record }: EntityDoc): boolean =>
+  HIGH_RISK_LEVELS.some((level) => level === getEntityRisk(record)?.level);
+
+const toFact = (ref: EntityRef, record: Entity): FactDraft => {
+  const risk = getEntityRisk(record);
+  const level = risk?.level ?? 'High';
+  const criticality = record.asset?.criticality;
+  const { privileged, others } = watchlistsOf(record);
   return {
     kind: 'high_risk_entity',
     title: `${ref.name} is at ${level} risk`,
     severity: severityOf(level),
     entities: [ref],
-    ...(attributes.riskScore !== undefined ? { numbers: { riskScore: attributes.riskScore } } : {}),
+    ...(risk ? { numbers: { riskScore: Math.round(risk.score) } } : {}),
     details: {
       riskLevel: level,
-      ...(attributes.criticality ? { criticality: attributes.criticality } : {}),
-      ...(attributes.watchlists?.length ? { watchlists: attributes.watchlists.join(', ') } : {}),
-      ...(attributes.privileged ? { privileged: 'yes' } : {}),
+      ...(criticality ? { criticality } : {}),
+      ...(others.length > 0 ? { watchlists: others.join(', ') } : {}),
+      ...(privileged ? { privileged: 'yes' } : {}),
     },
   };
 };
@@ -55,7 +58,7 @@ export const highRiskEntitiesSignal = defineSignal({
   scope: 'tenant',
   isAvailable: async () => ALWAYS_AVAILABLE,
   run: async (ctx, _input, abortSignal) => {
-    const response = await ctx.esClient.search<unknown>(
+    const response = await ctx.esClient.search<Entity>(
       {
         index: getEntitiesLatestIndex(ctx.spaceId),
         size: HIGH_RISK_FETCH_SIZE,
@@ -100,10 +103,10 @@ export const highRiskEntitiesSignal = defineSignal({
         const doc = parseEntityDoc(hit._source);
         return doc && !doc.resolvedTo && isHighRisk(doc) ? [doc] : [];
       })
-      .sort((a, b) => (b.riskScore ?? 0) - (a.riskScore ?? 0) || compareStrings(a.euid, b.euid))
+      .sort((a, b) => scoreOf(b) - scoreOf(a) || compareStrings(a.euid, b.euid))
       .slice(0, MAX_HIGH_RISK_ENTITIES);
 
-    const refs: EntityRef[] = docs.map(({ euid, type, name }) => ({ euid, type, name }));
+    const refs = docs.map(({ euid, record }) => toEntityRef(record, euid));
     // Criticality and watchlists often sit on the aliases; fall back to the golden doc alone.
     const resolution = await expandResolutionGroups({
       esClient: ctx.esClient,
@@ -115,13 +118,11 @@ export const highRiskEntitiesSignal = defineSignal({
       return undefined;
     });
 
-    const entityAttributes = docs.map(
-      (doc) => resolution?.get(doc.euid)?.attributes ?? groupAttributes(doc.euid, doc, [])
-    );
+    const entityRecords = docs.map((doc) => resolution?.get(doc.euid) ?? doc.record);
     return {
-      facts: refs.map((ref, index) => toFact(ref, entityAttributes[index])),
+      facts: refs.map((ref, index) => toFact(ref, entityRecords[index])),
       candidates: refs,
-      entityAttributes,
+      entityRecords,
     };
   },
 });

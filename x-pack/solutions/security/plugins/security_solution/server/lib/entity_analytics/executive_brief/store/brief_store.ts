@@ -25,6 +25,7 @@ import type {
 import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { ComposeVerifiedBriefResult } from '../composition/types';
 import { BriefStoreConflictError } from './errors';
+import type { BriefOwner } from './owner_id';
 import type { BriefStorageClient } from './storage';
 
 /** Fields that hold the last successful brief; replaced only when a job succeeds. */
@@ -165,7 +166,7 @@ export class BriefStore {
     spaceId,
     jobId,
   }: {
-    owner: { id: string; username: string };
+    owner: BriefOwner;
     spaceId: string;
     jobId: string;
   }): Promise<StartJobResult> {
@@ -417,7 +418,7 @@ const buildStartedDocument = ({
   now,
 }: {
   previous: BriefDocument | undefined;
-  owner: { id: string; username: string };
+  owner: BriefOwner;
   spaceId: string;
   jobId: string;
   now: Date;
@@ -436,7 +437,7 @@ const buildStartedDocument = ({
 
   return {
     schema_version: 1,
-    owner: { id: owner.id, username: owner.username },
+    owner: { id: owner.id },
     space_id: spaceId,
     job,
     expires_at: keepPrevious && previous ? previous.expires_at : addRetention(startedAt),

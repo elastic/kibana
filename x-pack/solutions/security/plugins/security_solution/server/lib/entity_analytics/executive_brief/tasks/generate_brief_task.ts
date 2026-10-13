@@ -174,7 +174,8 @@ const runGenerateBrief = async ({
     now: new Date(),
     logger,
     user: {
-      username: authUser?.username ?? stored.document.owner.username,
+      // Without a user, signals with per-user visibility only see shared data.
+      username: authUser?.username ?? '',
       profileUid: authUser?.profile_uid,
     },
     getCasesClient: async () => startPlugins.cases?.getCasesClientWithRequest(fakeRequest),

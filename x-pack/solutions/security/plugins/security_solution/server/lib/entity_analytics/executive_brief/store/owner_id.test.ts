@@ -102,14 +102,14 @@ describe('getBriefOwner', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const request = httpServerMock.createKibanaRequest();
 
-  it('returns the stable id, keeping the username for display only', async () => {
+  it('returns the stable id only', async () => {
     expect(
       await getBriefOwner({
         authUser: { username: 'bob', authentication_realm: { type: 'file', name: 'file1' } },
         request,
         esClient,
       })
-    ).toEqual({ id: 'realm:["file","file1","bob"]', username: 'bob', profileUid: undefined });
+    ).toEqual({ id: 'realm:["file","file1","bob"]' });
   });
 
   it('returns undefined without a user or a stable id', async () => {

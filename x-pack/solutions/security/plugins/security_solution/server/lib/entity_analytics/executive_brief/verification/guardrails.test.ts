@@ -7,7 +7,7 @@
 
 import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
-import { buildValidBrief, FIXTURE_EVIDENCE, withFacts } from './__fixtures__/evidence';
+import { buildValidBrief, DOCKER, FIXTURE_EVIDENCE, withFacts } from './__fixtures__/evidence';
 import { buildEvidenceIndex } from './evidence_index';
 import { checkGuardrails, unaddressedSevereDiscoveries } from './guardrails';
 
@@ -37,7 +37,7 @@ const F1_WITH_CASE = withFacts((facts) => [
     kind: 'case',
     signalId: 'cases',
     title: 'Investigate stolen credentials',
-    entities: ['ENT-3'],
+    entities: [DOCKER],
     details: { status: 'in-progress' },
   },
 ]);

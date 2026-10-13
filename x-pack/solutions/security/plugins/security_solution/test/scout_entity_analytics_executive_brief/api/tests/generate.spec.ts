@@ -8,7 +8,7 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/document';
+import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
 import {
   BRIEF_ROUTE,
   BRIEF_SIGNAL_IDS,
@@ -59,11 +59,14 @@ apiTest.describe(
 
         const jobId = response.body.job.id;
         const document = await waitForBriefJob({ apiClient, headers, jobId });
-        expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
-        expect(document.brief).toBeUndefined();
-        expect(document.tokens).toBeUndefined();
-        expect(document.evidence?.facts).toHaveLength(0);
-        expect(document.evidence?.signals.map(({ id }) => id).sort()).toStrictEqual(
+        expect(document.generation).toMatchObject({ jobId, status: 'succeeded' });
+        expect(document.report).toBeDefined();
+        expect(document.report?.verdict).toBeUndefined();
+        expect(document.report?.areas).toBeUndefined();
+        expect(document.provenance?.tokens).toBeUndefined();
+        expect(document.provenance?.verification).toBeUndefined();
+        expect(document.provenance?.facts).toHaveLength(0);
+        expect(document.provenance?.signals.map(({ id }) => id).sort()).toStrictEqual(
           [...BRIEF_SIGNAL_IDS].sort()
         );
         expect(llmProxy.interceptedRequests).toHaveLength(0);

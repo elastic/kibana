@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import type { IKibanaResponse } from '@kbn/core/server';
 import {
   EXECUTIVE_BRIEF_API_PATH,
   EXECUTIVE_BRIEF_API_VERSION,
 } from '../../../../../common/entity_analytics/executive_brief/constants';
-import type {
-  BriefDocument,
-  BriefResponse,
-} from '../../../../../common/entity_analytics/executive_brief/document';
+import type { BriefResponse } from '../../../../../common/entity_analytics/executive_brief/api';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { withStaleJobAsInterrupted } from '../store/brief_store';
+import { toBriefResponse } from './brief_response';
 import type { ExecutiveBriefRouteDeps } from './route_utils';
 import {
   BRIEF_MINIMUM_LICENSE,
@@ -27,13 +24,7 @@ import {
   noStableUserResponse,
 } from './route_utils';
 
-/** The wire shape: no owner id or schema version. */
-export const toBriefResponse = (document: BriefDocument): BriefResponse => ({
-  ...omit(document, ['owner', 'schema_version']),
-  owner: { username: document.owner.username },
-});
-
-/** GET: the caller's brief document in this space (stale jobs read as interrupted), or 404. */
+/** GET: the caller's brief in this space (stale jobs read as interrupted), or 404. */
 export const getBriefRoute = ({
   router,
   logger,

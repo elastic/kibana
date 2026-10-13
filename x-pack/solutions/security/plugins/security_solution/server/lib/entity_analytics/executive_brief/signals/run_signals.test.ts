@@ -63,7 +63,7 @@ const options = () => ({ abortSignal: new AbortController().signal });
 describe('runSignals', () => {
   beforeEach(() => {
     resolveEntitiesMock.mockReset();
-    resolveEntitiesMock.mockImplementation(async ({ refs }) => identityResolution(refs));
+    resolveEntitiesMock.mockImplementation(async () => identityResolution());
   });
 
   it('runs at most signalConcurrency signals at once', async () => {
@@ -149,15 +149,14 @@ describe('runSignals', () => {
     const many = Array.from({ length: 30 }, (_, i) => ref(`user:u${String(i).padStart(2, '0')}`));
     const alias = ref('user:ann@h1@local');
     const golden = ref('user:ann@okta');
-    resolveEntitiesMock.mockImplementation(async ({ refs }) => {
-      const base = identityResolution(refs);
+    resolveEntitiesMock.mockImplementation(async () => {
       const resolution: EntityResolution = {
-        ...base,
+        ...identityResolution(),
         golden: (euid) => (euid === alias.euid ? golden.euid : euid),
         get: (euid) =>
           euid === golden.euid
-            ? { ...golden, aliasCount: 1, attributes: { euid: golden.euid } }
-            : base.get(euid),
+            ? { entity: { id: golden.euid, name: golden.name, type: 'user' } }
+            : undefined,
       };
       return resolution;
     });
@@ -171,7 +170,7 @@ describe('runSignals', () => {
         signal('wide', async () => ({
           facts: [],
           candidates: many,
-          entityAttributes: [{ euid: 'user:u29', riskScore: 90 }],
+          entityRecords: [{ entity: { id: 'user:u29', risk: { calculated_score_norm: 90 } } }],
         })),
         signal('narrow', async () => ({ facts: [], candidates: [alias, ref('user:u10')] })),
         signal('also', async () => ({ facts: [], candidates: [golden] })),

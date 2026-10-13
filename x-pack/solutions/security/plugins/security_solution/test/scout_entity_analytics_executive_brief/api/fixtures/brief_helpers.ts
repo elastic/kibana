@@ -16,10 +16,10 @@ import type {
 import type { Brief } from '../../../../common/entity_analytics/executive_brief/brief';
 import { EXECUTIVE_BRIEF_INDEX } from '../../../../common/entity_analytics/executive_brief/constants';
 import type {
-  BriefDocument,
   BriefResponse,
   GenerateBriefResponse,
-} from '../../../../common/entity_analytics/executive_brief/document';
+} from '../../../../common/entity_analytics/executive_brief/api';
+import type { BriefDocument } from '../../../../common/entity_analytics/executive_brief/document';
 import {
   BRIEF_ROUTE,
   HIGH_RISK_ENTITY_BRIEF,
@@ -127,7 +127,7 @@ export const holdSubmitBrief = (llmProxy: LlmProxy, brief: Brief = HIGH_RISK_ENT
   return { release: () => interceptor.completeAfterIntercept() };
 };
 
-/** Polls GET until the given job has finished, and returns the brief document. */
+/** Polls GET until the given job has finished, and returns the GET response. */
 export const waitForBriefJob = async ({
   apiClient,
   headers,
@@ -148,9 +148,10 @@ export const waitForBriefJob = async ({
       responseType: 'json',
     });
     if (response.statusCode === 200) {
-      const { job } = response.body;
-      lastStatus = `${job.id}: ${job.status}${job.stage ? ` (${job.stage})` : ''}`;
-      if (job.id === jobId && (job.status === 'succeeded' || job.status === 'failed')) {
+      const { generation } = response.body;
+      const { status, stage } = generation;
+      lastStatus = `${generation.jobId}: ${status}${stage ? ` (${stage})` : ''}`;
+      if (generation.jobId === jobId && (status === 'succeeded' || status === 'failed')) {
         return response.body;
       }
     }
@@ -164,7 +165,7 @@ export const waitForBriefJob = async ({
 
 /**
  * Starts a brief and waits for the job to succeed. The test cluster has no findings, so the job
- * completes without an LLM call. Returns the job id from POST and the brief document from GET.
+ * completes without an LLM call. Returns the job id from POST and the GET response.
  */
 export const generateBrief = async ({
   apiClient,
@@ -190,8 +191,10 @@ export const generateBrief = async ({
 
   const jobId = response.body.job.id;
   const document = await waitForBriefJob({ apiClient, headers, jobId, route });
-  if (document.job.status !== 'succeeded') {
-    throw new Error(`Executive brief job ${jobId} failed: ${JSON.stringify(document.job.error)}`);
+  if (document.generation.status !== 'succeeded') {
+    throw new Error(
+      `Executive brief job ${jobId} failed: ${JSON.stringify(document.generation.error)}`
+    );
   }
   return { jobId, document };
 };

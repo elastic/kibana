@@ -9,8 +9,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The brief the AI writes (via a forced tool call) and the server verifies. Every claim cites
- * evidence ids (ENT-n, F-n, L-n). Versioned through the document's `schema_version`; threats and
- * actions are added in a later schema version.
+ * fact and link ids (F-n, L-n). The model names entities by prompt-only ids (ENT-n), which the
+ * server replaces with EUIDs before storing. Versioned through the document's `schema_version`;
+ * threats and actions are added in a later schema version.
  */
 
 export const ATTENTION_LEVELS = ['urgent', 'action', 'watch', 'clear'] as const;

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { Entity } from '@kbn/entity-store/common';
+
 /**
  * Evidence gathered by signals. Signals emit facts and links about entities; the evidence
- * registry assigns stable ids (ENT-n, F-n, L-n) that the AI cites and the UI resolves.
+ * registry keys entities by EUID and assigns stable fact and link ids (F-n, L-n) that the brief
+ * cites and the UI resolves.
  */
 
-export type EntityId = `ENT-${number}`;
 export type FactId = `F-${number}`;
 export type LinkId = `L-${number}`;
-export type EvidenceId = EntityId | FactId | LinkId;
-
-export type BriefEntityType = 'user' | 'host' | 'service' | 'generic';
+export type EvidenceId = FactId | LinkId;
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -30,21 +30,6 @@ export type EaCapability =
   | 'entity_resolution'
   | 'hunting_leads'
   | 'cases';
-
-export interface BriefEntity {
-  id: EntityId;
-  /** Entity Store id (golden entity after resolution). */
-  euid: string;
-  type: BriefEntityType;
-  name: string;
-  riskScore?: number;
-  riskLevel?: string;
-  criticality?: string;
-  watchlists?: string[];
-  privileged?: boolean;
-  /** Number of resolved aliases folded into this entity. */
-  aliasCount?: number;
-}
 
 export type FactKind =
   | 'attack_discovery'
@@ -74,7 +59,8 @@ export interface Fact {
   /** ISO time; facts with a time can appear on threat timelines. */
   at?: string;
   severity?: Severity;
-  entities: EntityId[];
+  /** EUIDs of the (golden) entities the fact is about. */
+  entities: string[];
   /** The only numbers the AI may quote for this fact. */
   numbers?: Record<string, number>;
   /** Short non-numeric descriptors, e.g. { tactics: 'Initial Access, Lateral Movement' }. */
@@ -97,8 +83,10 @@ export type LinkType =
 export interface Link {
   id: LinkId;
   type: LinkType;
-  from: EntityId;
-  to: EntityId;
+  /** EUID. */
+  from: string;
+  /** EUID. */
+  to: string;
   /** Facts that back the link, if any. */
   factIds: FactId[];
   /** First time the link was observed, when known. */
@@ -144,7 +132,11 @@ export interface SignalRun {
 }
 
 export interface Evidence {
-  entities: Record<EntityId, BriefEntity>;
+  /**
+   * Golden entities' Entity Store records by EUID. For a resolution group, `asset.criticality` and
+   * `entity.attributes.watchlists` hold the whole group's values.
+   */
+  entities: Record<string, Entity>;
   facts: Fact[];
   links: Link[];
   signals: SignalRun[];

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Entity } from '@kbn/entity-store/common';
+import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
 import type {
-  BriefEntity,
   Evidence,
   Fact,
   Link,
@@ -14,18 +15,18 @@ import type {
   SignalRun,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { LINK_VERBS } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import { entityDisplayName, entityTypeOf, watchlistsOf } from '../entity_record';
 
 /**
  * Renders evidence as compact text for the prompt. Generic over facts and links: a new signal or
- * fact kind shows up as a new section with no changes here. Entities appear by ENT id only; their
- * names (and euids) are replaced by ENT ids wherever signal text mentions them, and UUIDs are
- * removed, so the only identifiers the model sees are evidence ids.
+ * fact kind shows up as a new section with no changes here. Entities are identified by EUID,
+ * which the model cites in prose; names are shown as they are (the platform's anonymisation
+ * settings apply to every inference call). UUIDs in free text are noise and are removed.
  */
 
 const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
 
 const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
-const MIN_REDACTED_LENGTH = 3;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -33,30 +34,21 @@ const idNumber = (id: string): number => Number(id.slice(id.indexOf('-') + 1));
 
 const byIdNumber = (a: string, b: string): number => idNumber(a) - idNumber(b);
 
-/** Replaces entity names and euids with ENT ids, removes UUIDs, and keeps text on one line. */
-export const createRedactor = (entities: readonly BriefEntity[]): ((text: string) => string) => {
-  const replacements = new Map<string, string>();
-  entities.forEach(({ id, name, euid }) => {
-    [name, euid].forEach((surface) => {
-      if (surface && surface.length >= MIN_REDACTED_LENGTH) {
-        replacements.set(surface.toLowerCase(), id);
-      }
-    });
-  });
-  const surfaces = [...replacements.keys()].sort((a, b) => b.length - a.length);
-  const pattern =
-    surfaces.length > 0
-      ? new RegExp(
-          `(?<![\\w.@-])(?:${surfaces.map(escapeRegExp).join('|')})(?![\\w@-]|\\.\\w)`,
-          'gi'
-        )
-      : undefined;
-  return (text) => {
-    const redacted = pattern
-      ? text.replace(pattern, (match) => replacements.get(match.toLowerCase()) ?? match)
-      : text;
-    return redacted.replace(UUID_PATTERN, '[id]').replace(/"/g, "'").replace(/\s+/g, ' ').trim();
-  };
+type CleanText = (text: string) => string;
+
+const cleanPart = (text: string): string =>
+  text.replace(UUID_PATTERN, '[id]').replace(/"/g, "'").replace(/\s+/g, ' ');
+
+/** Removes UUIDs and keeps text on one line without double quotes, leaving the EUIDs intact. */
+export const createTextCleaner = (euids: readonly string[]): CleanText => {
+  const kept = [...euids].sort((a, b) => b.length - a.length).map(escapeRegExp);
+  const euidPattern = kept.length > 0 ? new RegExp(`(${kept.join('|')})`) : undefined;
+  return (text) =>
+    // Splitting on a capturing group puts the EUIDs at the odd indexes.
+    (euidPattern ? text.split(euidPattern) : [text])
+      .map((part, index) => (index % 2 === 1 ? part : cleanPart(part)))
+      .join('')
+      .trim();
 };
 
 const formatTime = (iso: string): string => iso.replace(/:\d{2}(?:\.\d+)?Z$/, 'Z');
@@ -64,34 +56,32 @@ const formatTime = (iso: string): string => iso.replace(/:\d{2}(?:\.\d+)?Z$/, 'Z
 const formatNumber = (value: number): string =>
   Number.isInteger(value) ? String(value) : String(Math.round(value * 10) / 10);
 
-const formatEntity = (entity: BriefEntity, redact: (text: string) => string): string => {
-  const parts = [`${entity.id} ${entity.type}`];
-  if (entity.riskLevel || entity.riskScore !== undefined) {
-    const score =
-      entity.riskScore === undefined ? '' : ` (score ${formatNumber(entity.riskScore)})`;
-    parts.push(`risk ${entity.riskLevel ?? 'unknown'}${score}`);
+const formatEntity = (euid: string, record: Entity, clean: CleanText): string => {
+  const parts: string[] = [entityTypeOf(record, euid)];
+  const risk = getEntityRisk(record);
+  if (risk) {
+    parts.push(`risk ${risk.level} (score ${formatNumber(risk.score)})`);
   }
-  if (entity.criticality) {
-    parts.push(`criticality ${entity.criticality}`);
+  const criticality = record.asset?.criticality;
+  if (criticality) {
+    parts.push(`criticality ${criticality}`);
   }
-  if (entity.privileged) {
+  const { privileged, others } = watchlistsOf(record);
+  if (privileged) {
     parts.push('privileged');
   }
-  if (entity.watchlists && entity.watchlists.length > 0) {
-    parts.push(`watchlists: ${entity.watchlists.map(redact).join(', ')}`);
+  if (others.length > 0) {
+    parts.push(`watchlists: ${others.map(clean).join(', ')}`);
   }
-  if (entity.aliasCount) {
-    parts.push(`${entity.aliasCount} resolved aliases`);
-  }
-  return parts.join(' · ');
+  return `${euid} "${clean(entityDisplayName(record, euid))}" (${parts.join(' · ')})`;
 };
 
-const formatFact = (fact: Fact, redact: (text: string) => string): string => {
+const formatFact = (fact: Fact, clean: CleanText): string => {
   const head = [
     fact.id,
     fact.severity ? `[${fact.severity}]` : undefined,
     fact.at ? formatTime(fact.at) : undefined,
-    `"${redact(fact.title)}"`,
+    `"${clean(fact.title)}"`,
   ]
     .filter((part) => part !== undefined)
     .join(' ');
@@ -103,7 +93,7 @@ const formatFact = (fact: Fact, redact: (text: string) => string): string => {
     );
   }
   Object.entries(fact.details ?? {}).forEach(([key, value]) => {
-    parts.push(`${key}: ${redact(value)}`);
+    parts.push(`${key}: ${clean(value)}`);
   });
   return parts.join(' | ');
 };
@@ -121,8 +111,8 @@ const formatLink = (link: Link): string => {
 
 const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
-const formatSignal = (signal: SignalRun, redact: (text: string) => string): string => {
-  const reason = signal.reason ? `: ${redact(signal.reason)}` : '';
+const formatSignal = (signal: SignalRun, clean: CleanText): string => {
+  const reason = signal.reason ? `: ${clean(signal.reason)}` : '';
   switch (signal.status) {
     case 'ok':
       return `- ${signal.title}: checked, ${plural(signal.factCount, 'fact')}, ${plural(
@@ -174,19 +164,23 @@ const groupFacts = (evidence: Evidence): Array<{ header: string; facts: Fact[] }
 
 /** Renders the evidence as the prompt's evidence block. Deterministic for the same evidence. */
 export const formatEvidence = (evidence: Evidence): string => {
-  const entities = Object.values(evidence.entities).sort((a, b) => byIdNumber(a.id, b.id));
-  const redact = createRedactor(entities);
+  const entities = Object.entries(evidence.entities);
+  const clean = createTextCleaner(entities.map(([euid]) => euid));
   const lines: string[] = [];
 
   lines.push(`## Entities (${entities.length})`);
-  lines.push(...(entities.length > 0 ? entities.map((e) => formatEntity(e, redact)) : ['None']));
+  lines.push(
+    ...(entities.length > 0
+      ? entities.map(([euid, record]) => formatEntity(euid, record, clean))
+      : ['None'])
+  );
 
   const groups = groupFacts(evidence);
   if (groups.length === 0) {
     lines.push('', '## Facts (0)', 'None found in this window.');
   }
   groups.forEach(({ header, facts }) => {
-    lines.push('', `## ${header} (${facts.length})`, ...facts.map((f) => formatFact(f, redact)));
+    lines.push('', `## ${header} (${facts.length})`, ...facts.map((f) => formatFact(f, clean)));
   });
 
   const links = [...evidence.links].sort((a, b) => byIdNumber(a.id, b.id));
@@ -196,7 +190,7 @@ export const formatEvidence = (evidence: Evidence): string => {
   lines.push('', '## Signals');
   lines.push(
     ...(evidence.signals.length > 0
-      ? evidence.signals.map((signal) => formatSignal(signal, redact))
+      ? evidence.signals.map((signal) => formatSignal(signal, clean))
       : ['None ran'])
   );
   return lines.join('\n');

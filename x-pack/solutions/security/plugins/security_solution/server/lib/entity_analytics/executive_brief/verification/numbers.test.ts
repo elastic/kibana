@@ -6,13 +6,14 @@
  */
 
 import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
-import { buildValidBrief, FIXTURE_EVIDENCE } from './__fixtures__/evidence';
+import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import { buildValidBrief, CHEN, DOCKER, FIXTURE_EVIDENCE, ROD } from './__fixtures__/evidence';
 import { buildEvidenceIndex } from './evidence_index';
 import { createNumbersCheck, findNumbers } from './numbers';
 
-const run = (brief: Brief, dropped: string[] = []) =>
+const run = (brief: Brief, dropped: string[] = [], evidence: Evidence = FIXTURE_EVIDENCE) =>
   createNumbersCheck('7d')(brief, {
-    index: buildEvidenceIndex(FIXTURE_EVIDENCE),
+    index: buildEvidenceIndex(evidence),
     dropped: new Set(dropped),
   });
 
@@ -25,10 +26,10 @@ const withArea = (summary: string, evidence: string[]): Brief => {
 
 describe('findNumbers', () => {
   it.each([
-    ['plain counts', 'ENT-1 raised 57 alerts across 4 rules', ['57', '4']],
+    ['plain counts', 'The user raised 57 alerts across 4 rules', ['57', '4']],
     ['thousands and decimals', '1,204 events and a score of 92.5', ['1,204', '92.5']],
     ['percentages', 'up 18% this week', ['18']],
-    ['evidence ids', 'ENT-12 F-3 L-10', []],
+    ['evidence ids', 'F-3 L-10', []],
     ['ISO timestamps', 'at 2026-10-07T08:31:00.000Z and 2026-10-06', []],
     ['month-name dates', 'on Oct 7, on 12 October 2026 and on October 3rd', []],
     ['clock times and years', 'at 08:31, 9 am and in 2026', []],
@@ -45,11 +46,10 @@ describe('createNumbersCheck', () => {
   it.each<[string, string, string[]]>([
     ['a cited fact number', 'The attack has 12 alerts.', ['F-1']],
     ['a number of a fact behind a cited link', 'The attack has 12 alerts.', ['L-1']],
-    ['a cited entity risk score', 'ENT-1 has a risk score of 92.5.', ['F-3']],
-    ['a rounded risk score', 'ENT-1 has a risk score of 93.', ['F-3']],
-    ['the risk score of an entity of a cited fact', 'ENT-3 scores 71.', ['F-1']],
-    ['the risk score of an entity named in the prose', 'ENT-3 scores 71.', ['F-2']],
-    ['an alias count', 'ENT-1 has 2 resolved aliases.', ['F-3']],
+    ['a cited entity risk score', `${ROD} has a risk score of 92.5.`, ['F-3']],
+    ['a rounded risk score', `${ROD} has a risk score of 93.`, ['F-3']],
+    ['the risk score of an entity of a cited fact', `${DOCKER} scores 71.`, ['F-1']],
+    ['the risk score of an entity named in the prose', `${DOCKER} scores 71.`, ['F-2']],
     ['a count of the cited entities', 'The attack spans 3 entities.', ['F-1']],
     ['the window length', 'Over the last 7 days, one attack.', ['F-1']],
     ['a date, time and id', 'On Oct 7 at 08:31, F-1 started.', ['F-1']],
@@ -62,7 +62,7 @@ describe('createNumbersCheck', () => {
   it.each<[string, string, string[], string]>([
     ['an invented number', 'The attack has 250 alerts.', ['F-1'], '"250"'],
     ['a sum of fact numbers', 'There are 15 alerts in total.', ['F-1', 'F-2'], '"15"'],
-    ['a number from a fact it does not cite', 'ENT-4 has 3 alerts.', ['F-1'], '"3"'],
+    ['a number from a fact it does not cite', `${CHEN} has 3 alerts.`, ['F-1'], '"3"'],
   ])('drops an area with %s', (_name, summary, evidence, token) => {
     expect(run(withArea(summary, evidence)).drops).toEqual([
       {
@@ -71,6 +71,19 @@ describe('createNumbersCheck', () => {
         reason: expect.stringContaining(`areas[0].summary: ${token}`),
       },
     ]);
+  });
+
+  it("ignores digits in the evidence's entity ids and names", () => {
+    const euid = 'host:10-finance';
+    const evidence: Evidence = {
+      ...FIXTURE_EVIDENCE,
+      entities: {
+        ...FIXTURE_EVIDENCE.entities,
+        [euid]: { entity: { id: euid, name: '10 finance', type: 'host' } },
+      },
+    };
+    const outcome = run(withArea(`${euid} (10 finance) is in the attack.`, ['F-1']), [], evidence);
+    expect(outcome.drops).toEqual([]);
   });
 
   it('makes an unsupported number in the verdict structural', () => {

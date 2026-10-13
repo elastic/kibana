@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { Entity } from '@kbn/entity-store/common';
 import type {
-  BriefEntity,
-  EntityId,
   Evidence,
   Fact,
   FactId,
@@ -16,10 +15,10 @@ import type {
   LinkType,
   SignalRun,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import { minimalEntityRecord, nameFromEuid } from '../entity_record';
 import { compareStrings } from './define_signal';
 import type { EntityResolution } from './resolve_entities';
-import { nameFromEuid } from './resolve_entities';
-import type { EntityAttributes, EntityRef, LinkDraft, SignalOutput } from './types';
+import type { EntityRef, LinkDraft, SignalOutput } from './types';
 
 /** Link types with no direction: (a, b) and (b, a) are the same link. */
 const SYMMETRIC_LINK_TYPES: ReadonlySet<LinkType> = new Set<LinkType>([
@@ -35,27 +34,14 @@ export interface SignalResult {
 
 const factNumber = (id: FactId): number => Number(id.slice(2));
 
-const mergeAttributes = (base: EntityAttributes, extra: EntityAttributes): EntityAttributes => {
-  const watchlists = [...new Set([...(base.watchlists ?? []), ...(extra.watchlists ?? [])])].sort(
-    compareStrings
-  );
-  return {
-    euid: base.euid,
-    riskScore: base.riskScore ?? extra.riskScore,
-    riskLevel: base.riskLevel ?? extra.riskLevel,
-    criticality: base.criticality ?? extra.criticality,
-    ...(watchlists.length > 0 ? { watchlists } : {}),
-    ...(base.privileged || extra.privileged ? { privileged: true } : {}),
-  };
-};
-
 /**
- * Turns signal outputs into `Evidence` with stable ids. Results are consumed in the order given
- * (the engine passes them in signal-priority order, not completion order), so the same outputs
- * always get the same ids: entities `ENT-n` by first appearance (each result's facts, then its
- * links), keyed by golden euid; facts `F-n` in output order; links `L-n` in output order after
- * resolution. Links that collapse onto one entity are dropped, and identical links (in either
- * direction for undirected types) are merged.
+ * Turns signal outputs into `Evidence`. Results are consumed in the order given (the engine passes
+ * them in signal-priority order, not completion order), so the same outputs always get the same
+ * evidence: entities keyed by golden EUID in order of first appearance (each result's facts, then
+ * its links), facts `F-n` in output order, and links `L-n` in output order after resolution. Each
+ * entity is its golden Entity Store record, or the record a signal read when resolution has none.
+ * Links that collapse onto one entity are dropped, and identical links (in either direction for
+ * undirected types) are merged.
  */
 export const buildEvidence = ({
   results,
@@ -66,28 +52,25 @@ export const buildEvidence = ({
   runs: readonly SignalRun[];
   resolution: EntityResolution;
 }): Evidence => {
-  const entityIds = new Map<string, EntityId>();
   const entityRefs = new Map<string, EntityRef>();
-  const attributes = new Map<string, EntityAttributes>();
+  const signalRecords = new Map<string, Entity>();
 
   for (const { output } of results) {
-    for (const extra of output.entityAttributes ?? []) {
-      const golden = resolution.golden(extra.euid);
-      const current = attributes.get(golden) ?? { euid: golden };
-      attributes.set(golden, mergeAttributes(current, { ...extra, euid: golden }));
+    for (const record of output.entityRecords ?? []) {
+      const euid = record.entity?.id;
+      if (euid && resolution.golden(euid) === euid && !signalRecords.has(euid)) {
+        signalRecords.set(euid, record);
+      }
     }
   }
 
-  const registerEntity = (ref: EntityRef): EntityId => {
+  /** Returns the golden euid, remembering the first ref seen for it. */
+  const registerEntity = (ref: EntityRef): string => {
     const golden = resolution.golden(ref.euid);
-    const existing = entityIds.get(golden);
-    if (existing) {
-      return existing;
+    if (!entityRefs.has(golden)) {
+      entityRefs.set(golden, ref);
     }
-    const id: EntityId = `ENT-${entityIds.size + 1}`;
-    entityIds.set(golden, id);
-    entityRefs.set(golden, ref);
-    return id;
+    return golden;
   };
 
   const facts: Fact[] = [];
@@ -155,28 +138,16 @@ export const buildEvidence = ({
     (output.links ?? []).forEach((draft) => addLink(draft, factIdsOfOutput));
   }
 
-  const entities: Record<EntityId, BriefEntity> = {};
-  for (const [golden, id] of entityIds) {
-    const ref = entityRefs.get(golden);
-    const resolved = resolution.get(golden);
-    const merged = mergeAttributes(
-      resolved?.attributes ?? { euid: golden },
-      attributes.get(golden) ?? { euid: golden }
-    );
-    entities[id] = {
-      id,
-      euid: golden,
-      type: resolved?.type ?? ref?.type ?? 'generic',
-      name:
-        resolved?.name ??
-        (ref && ref.euid === golden && ref.name ? ref.name : nameFromEuid(golden)),
-      ...(merged.riskScore !== undefined ? { riskScore: merged.riskScore } : {}),
-      ...(merged.riskLevel !== undefined ? { riskLevel: merged.riskLevel } : {}),
-      ...(merged.criticality !== undefined ? { criticality: merged.criticality } : {}),
-      ...(merged.watchlists ? { watchlists: merged.watchlists } : {}),
-      ...(merged.privileged ? { privileged: true } : {}),
-      ...(resolved && resolved.aliasCount > 0 ? { aliasCount: resolved.aliasCount } : {}),
-    };
+  const entities: Record<string, Entity> = {};
+  for (const [golden, ref] of entityRefs) {
+    entities[golden] =
+      resolution.get(golden) ??
+      signalRecords.get(golden) ??
+      minimalEntityRecord({
+        euid: golden,
+        type: ref.type,
+        name: ref.euid === golden && ref.name ? ref.name : nameFromEuid(golden),
+      });
   }
 
   return { entities, facts, links: [...linksByKey.values()], signals: [...runs] };

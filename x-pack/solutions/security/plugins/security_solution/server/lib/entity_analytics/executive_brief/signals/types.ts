@@ -7,8 +7,9 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
+import type { Entity } from '@kbn/entity-store/common';
+import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type {
-  BriefEntityType,
   EaCapability,
   Evidence,
   FactKind,
@@ -27,11 +28,13 @@ import type { BriefTelemetry } from '../telemetry/types';
 /** 'tenant' signals look at the whole window; 'entities' signals look at the candidate set. */
 export type SignalScope = 'tenant' | 'entities';
 
-/** An entity as signals see it, before the evidence registry assigns an ENT id. */
+export type EntityRefType = `${EntityType}`;
+
+/** An entity as signals refer to it, before the engine resolves it to its golden entity. */
 export interface EntityRef {
-  /** Entity Store id; resolved to the golden entity by the engine. */
+  /** Entity Store id (EUID). */
   euid: string;
-  type: BriefEntityType;
+  type: EntityRefType;
   name: string;
 }
 
@@ -72,22 +75,13 @@ export interface LinkDraft {
   firstSeen?: string;
 }
 
-/** Extra entity attributes a signal knows (risk, criticality, watchlists); merged by euid. */
-export interface EntityAttributes {
-  euid: string;
-  riskScore?: number;
-  riskLevel?: string;
-  criticality?: string;
-  watchlists?: string[];
-  privileged?: boolean;
-}
-
 export interface SignalOutput {
   facts: FactDraft[];
   links?: LinkDraft[];
   /** Tenant signals nominate entities for the entity-scoped phase. */
   candidates?: EntityRef[];
-  entityAttributes?: EntityAttributes[];
+  /** Golden Entity Store records the signal already read; used when resolution has none. */
+  entityRecords?: Entity[];
 }
 
 export type Availability = { available: true } | { available: false; reason: string };
