@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createAssignEpisodeActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createAssignEpisodeActionOasExamples } from './create_assign_episode_action_oas_example';
 import { createEpisodeActionRouteForType } from './create_episode_action_route_for_type';
@@ -19,4 +20,10 @@ export const CreateAssignEpisodeActionRoute = createEpisodeActionRouteForType({
   bodySchema: createAssignEpisodeActionBodySchema,
   oasOperationObject: createAssignEpisodeActionOasExamples,
   access: 'public' as const,
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description: 'Indicates the alert already carries the requested assignee.',
+    },
+  },
 });

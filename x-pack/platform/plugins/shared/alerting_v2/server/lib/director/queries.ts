@@ -54,8 +54,8 @@ export interface LatestAlertEventState {
  * Cross-stream field name reconciliation:
  * - `.rule-events` uses nested `rule.id`; `.alert-actions` uses flat
  *   `rule_id`. The `OR` in the top-level `WHERE` accepts either.
- * - `.alert-actions` rows carry `action_type` and no `type`/`episode.status`,
- *   so `type == "alert" AND episode.status IS NOT NULL` naturally scopes
+ * - `.alert-actions` rows carry `action_type` and no `type`/`alert.status`,
+ *   so `type == "alert" AND alert.status IS NOT NULL` naturally scopes
  *   the rule-events aggregations to their own stream, and the
  *   `action_type IN (...)` filter naturally scopes the audit aggregation
  *   to lifecycle actions.
@@ -65,9 +65,10 @@ export interface LatestAlertEventState {
  *   `LAST(..., @timestamp)` aggregations against two different streams. On
  *   the happy path they describe the same episode (activate/deactivate write
  *   the audit doc and the synthetic rule-event doc atomically with the same
- *   `episode_id` and `@timestamp`), but nothing in the raw aggregations
- *   *enforces* that invariant. The routes guard activate/deactivate to the
- *   latest episode of the group, yet the two streams can still diverge:
+ *   episode id, as `alert_id` and `alert.id` respectively, and `@timestamp`),
+ *   but nothing in the raw aggregations *enforces* that invariant. The routes
+ *   guard activate/deactivate to the latest episode of the group, yet the two
+ *   streams can still diverge:
  *     1. Concurrent actions racing the engine (the guard checks the latest
  *        episode at request time, not at write time).
  *     2. Item-level `_bulk` write failures where the audit doc lands but
@@ -97,12 +98,12 @@ export const getLatestAlertEventStateQuery = ({
   }}) AND group_hash IN (${groupHashValues})`;
 
   query = query.pipe`STATS
-      last_status = LAST(status, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_id = LAST(episode.id, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_status = LAST(episode.status, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_status_count = LAST(episode.status_count, @timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_episode_timestamp = MAX(@timestamp) WHERE type == "alert" AND episode.status IS NOT NULL,
-      last_action_episode_id = LAST(episode_id, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}),
+      last_status = LAST(status, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_id = LAST(alert.id, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_status = LAST(alert.status, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_status_count = LAST(alert.status_count, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_episode_timestamp = MAX(@timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_action_episode_id = LAST(alert_id, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE}),
       last_action_type = LAST(action_type, @timestamp) WHERE action_type IN (${ALERT_EPISODE_ACTION_TYPE.ACTIVATE}, ${ALERT_EPISODE_ACTION_TYPE.DEACTIVATE})
     BY group_hash`;
 

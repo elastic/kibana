@@ -12,7 +12,10 @@ import type {
   WorkflowExecutionsTracking,
 } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
-import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
+import {
+  ATTACK_DISCOVERY_EVENT_PROVIDER,
+  getAttackDiscoveryEventOwnerFilter,
+} from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 
 export type EventLogData = WorkflowExecutionsTracking & {
   diagnosticsContext?: DiagnosticsContext;
@@ -70,7 +73,10 @@ export const getWorkflowExecutionsTracking = async ({
           // authorized user in the space read another user's execution by id;
           // matching the event author's `user.name` enforces object-level
           // ownership so a cross-user id lookup finds no events (safe 404).
-          { term: { 'user.name': username } },
+          // Executions run by a service account (e.g. an AlertZero Worker) have
+          // no human owner, so their events are readable by every authorized
+          // user in the space.
+          getAttackDiscoveryEventOwnerFilter(username),
           // NOTE: do not filter on `exists: event.reference`. That field is a
           // `keyword` with `ignore_above`, so a reference larger than the limit is
           // kept in `_source` but never indexed, and `exists` silently drops the

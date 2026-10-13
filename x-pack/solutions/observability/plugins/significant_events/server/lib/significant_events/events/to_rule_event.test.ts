@@ -13,7 +13,7 @@ import {
   type SignalEntry,
   type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
-import type { SignificantEvent } from './data_stream';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { toRuleEvent } from './to_rule_event';
 
 const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({

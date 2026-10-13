@@ -103,15 +103,18 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     value,
     onChange,
     connectorCreationConfig,
+    forceShowErrors,
   }: {
     value: { id: string; connectorId: string | null; params: string };
     onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
     connectorCreationConfig?: { mode: string; href?: string };
+    forceShowErrors?: boolean;
   }) => (
     <div
       data-test-subj={`inlineWorkflowEditor-${value.id}`}
       data-connector-creation-mode={connectorCreationConfig?.mode}
       data-connector-creation-href={connectorCreationConfig?.href}
+      data-force-show-errors={String(Boolean(forceShowErrors))}
     >
       <button
         type="button"
@@ -173,8 +176,8 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_fetch_workflows', () => ({
@@ -212,10 +215,8 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   description: 'Routes critical alerts',
   enabled: true,
   matcher: { expression: 'data.severity : "critical"' },
-  group_by: ['host.name', 'service.name'],
-  grouping_mode: 'per_field',
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',
@@ -315,8 +316,8 @@ describe('ActionPolicyFormPage', () => {
         expect(mockCreateMutateAsync).toHaveBeenCalledWith({
           name: 'Policy from test',
           description: 'Description from test',
-          grouping_mode: 'per_alert',
-          throttle: { strategy: 'on_status_change', interval: null },
+          grouping: { mode: 'per_alert' },
+          throttle: { strategy: 'on_status_change' },
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
         })
       );
@@ -382,6 +383,39 @@ describe('ActionPolicyFormPage', () => {
 
       await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['wf-new']));
       expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
+    });
+
+    it('reveals the errors and focuses the first invalid field instead of saving an empty form', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      expect(saveButton).toBeEnabled();
+      await user.click(saveButton);
+
+      expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+      expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.nameInput)).toHaveFocus();
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('does not create anything while a simple workflow draft is incomplete', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
+      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+      await user.click(screen.getByTestId(TEST_SUBJ.submitButton));
+
+      await waitFor(() =>
+        expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+          'data-force-show-errors',
+          'true'
+        )
+      );
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
     });
 
     it('navigates to listing page on cancel', async () => {
@@ -467,9 +501,8 @@ describe('ActionPolicyFormPage', () => {
         data: {
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
-          grouping_mode: 'per_field',
-          matcher: { expression: 'data.severity : "critical"' },
-          group_by: ['host.name', 'service.name'],
+          grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
+          matcher: { tags: null, expression: 'data.severity : "critical"' },
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
         },

@@ -9,6 +9,8 @@
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
+  ESQLCommand,
+  ESQLCommandOption,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -26,11 +28,18 @@ import {
 } from '@elastic/esql';
 import { commaCompleteItem, newLineCompleteItem, pipeCompleteItem } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ISuggestionItem } from '../types';
+import type {
+  ESQLColumnData,
+  ESQLUserDefinedColumn,
+  ISuggestionItem,
+  UnmappedFieldsStrategy,
+} from '../types';
+import { getExpressionType } from '../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
+import { getColumnName } from '../../definitions/utils/columns';
 
 /**
  * Position of the caret in the sort command:
@@ -204,4 +213,82 @@ export const getCommaAndPipe = (
   }
 
   return [newLineCompleteItem, pipeSuggestion, commaSuggestion];
+};
+
+type StatsCommand = ESQLCommand<'stats'> | ESQLCommand<'inline stats'>;
+
+export const isStatsCommand = (command: ESQLAstAllCommands): command is StatsCommand =>
+  command.type === 'command' && (command.name === 'stats' || command.name === 'inline stats');
+
+export const isByOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
+  !Array.isArray(arg) && isOptionNode(arg) && arg.name === 'by';
+
+/**
+ * Returns the columns defined in the BY clause, keyed by name with the rightmost
+ * definition winning (as Elasticsearch does when a name is reused).
+ * Given | STATS count = COUNT() BY addr = address
+ * returns { addr, { type: 'keyword' ... } }
+ * A bare expression grouping (e.g. BUCKET(@timestamp, 1 d)) defines an implicitly-named column;
+ * `query` is required to recover its source text, which is the name aggregations reference.
+ */
+export const getColumnsDefinedInByClause = (
+  command: Pick<ESQLCommand, 'args'>,
+  inputColumns: Map<string, ESQLColumnData>,
+  query?: string,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+): Map<string, ESQLUserDefinedColumn> => {
+  const typeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, inputColumns, unmappedFieldsStrategy);
+
+  const assignments = new Map<string, ESQLUserDefinedColumn>();
+
+  for (const arg of command.args) {
+    if (!isByOption(arg)) {
+      continue;
+    }
+
+    for (const grouping of arg.args) {
+      // `name = expression` defines a new column, typed from the input columns.
+      if (isAssignment(grouping) && isColumn(grouping.args[0])) {
+        const target = grouping.args[0];
+        const name = getColumnName(target);
+        assignments.set(name, {
+          name,
+          type: typeOf(grouping.args[1]),
+          location: target.location,
+          userDefined: true,
+        });
+        continue;
+      }
+
+      // A bare column grouping references an input field already in scope, unless it reuses an
+      // assigned name — then it shadows that assignment with the input column it points to.
+      if (isColumn(grouping)) {
+        const name = getColumnName(grouping);
+        if (assignments.has(name)) {
+          assignments.set(name, {
+            name,
+            type: typeOf(grouping),
+            location: grouping.location,
+            userDefined: true,
+          });
+        }
+        continue;
+      }
+
+      // A bare expression grouping (e.g. `BUCKET(@timestamp, 1 d)`) defines an implicitly-named
+      // column whose name is its source text; aggregations reference it via a backtick identifier.
+      if (query !== undefined && !Array.isArray(grouping) && !isOptionNode(grouping)) {
+        const name = query.substring(grouping.location.min, grouping.location.max + 1);
+        assignments.set(name, {
+          name,
+          type: typeOf(grouping),
+          location: grouping.location,
+          userDefined: true,
+        });
+      }
+    }
+  }
+
+  return assignments;
 };

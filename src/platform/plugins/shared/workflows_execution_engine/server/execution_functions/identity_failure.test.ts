@@ -24,6 +24,7 @@ import { setupDependencies } from './setup_dependencies';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
+import { isBulkUpdaterItem } from '../repositories/data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
   createMockStepDataClient,
@@ -75,7 +76,7 @@ const setup = () => {
   }));
   dataClient.bulk.mockImplementation(async ({ items }) => {
     const item = items[0];
-    if (item.seqNo !== seqNo) {
+    if (isBulkUpdaterItem(item) || item.seqNo !== seqNo) {
       return {
         errors: true,
         items: [
@@ -251,7 +252,11 @@ describe.each([
         // The stale failure write lands after cancellation has won.
         approval.status = ExecutionStatus.CANCELLED;
       }
-      for (const { document } of items) {
+      for (const item of items) {
+        if (isBulkUpdaterItem(item)) {
+          throw new Error('identity_failure test mock does not apply updater items');
+        }
+        const { document } = item;
         const step = steps.find(({ id }) => id === document.id);
         if (!step) throw new Error(`Missing test step ${document.id}`);
         Object.assign(step, document);

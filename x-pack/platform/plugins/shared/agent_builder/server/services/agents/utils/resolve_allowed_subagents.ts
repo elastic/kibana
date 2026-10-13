@@ -7,12 +7,13 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/logging';
-import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
+import { SELF_AGENT_ID, type AgentConfiguration } from '@kbn/agent-builder-common';
 
 export interface ResolvedSubagent {
   /** real ID or SELF_AGENT_ID */
   id: string;
   description: string;
+  inferenceFeatureId?: string;
 }
 
 const SELF_DESCRIPTION = 'This agent (self-fork).';
@@ -23,7 +24,13 @@ const CONCURRENCY = 5;
  * Minimal shape needed from the agent registry
  */
 export interface SubagentRegistryLookup {
-  get: (id: string) => Promise<{ description?: string } | undefined>;
+  get: (id: string) => Promise<
+    | {
+        description?: string;
+        configuration?: Pick<AgentConfiguration, 'inference_feature_id'>;
+      }
+    | undefined
+  >;
 }
 
 /**
@@ -73,7 +80,12 @@ export const resolveAllowedSubagents = async ({
             logger?.debug(`resolveAllowedSubagents: dropping "${id}" (not found)`);
             return undefined;
           }
-          return { id, description: def.description ?? NO_DESCRIPTION };
+          const inferenceFeatureId = def.configuration?.inference_feature_id;
+          return {
+            id,
+            description: def.description ?? NO_DESCRIPTION,
+            ...(inferenceFeatureId !== undefined ? { inferenceFeatureId } : {}),
+          };
         } catch (err) {
           logger?.debug(
             `resolveAllowedSubagents: dropping "${id}" (${

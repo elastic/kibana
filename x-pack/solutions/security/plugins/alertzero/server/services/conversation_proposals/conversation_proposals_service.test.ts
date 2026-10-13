@@ -398,6 +398,22 @@ describe('ConversationProposalsService', () => {
       expect(result.proposals[2]).not.toHaveProperty('entityIds');
     });
 
+    it('omits entity ids for an impact recorded without entities', async () => {
+      const getEntityIdsByConversationId = jest.fn().mockResolvedValue(new Map([['conv-1', []]]));
+      const service = new ConversationProposalsService(
+        makeProposalsService([makeProposal()]),
+        makeAgentBuilder(),
+        logger,
+        jest.fn().mockReturnValue({ getEntityIdsByConversationId })
+      );
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0]).not.toHaveProperty('entityIds');
+    });
+
     it('still resolves when the impact fetch fails', async () => {
       const service = new ConversationProposalsService(
         makeProposalsService([makeProposal()]),

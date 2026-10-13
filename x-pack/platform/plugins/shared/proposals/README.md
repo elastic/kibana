@@ -16,7 +16,7 @@ This plugin owns the record, the decision, and the guarantee that an approved ac
                           @kbn/agentic-investigations-common's investigation flyout
 server/
   plugin.ts config.ts types.ts constants.ts features.ts
-  routes/ services/ storage/ step_types/ attachments/ managed_workflows/
+  routes/ services/ storage/ step_types/ attachments/ managed_workflows/ tools/
 public/
   plugin.ts index.ts types.ts
   hooks/ components/ attachments/ step_types/
@@ -164,9 +164,36 @@ authorized and before any write, resolves the carried id to the chain head. An
 approval therefore carries the `actionInput` of the revision the approver was
 shown, not the one the Worker first proposed.
 
-Chains predating this field have `rootProposalId` on neither row; the term query
-misses and the fallback returns the row asked about, which is the correct answer
-for a chain of one. The plugin is unshipped, so there is nothing to migrate.
+Every stored proposal carries `rootProposalId` and `revision`. The plugin is
+unshipped, so legacy records without these fields are not supported.
+
+### Caller-supplied ids
+
+`create()` takes an optional `id`, and a UUID is required. Without one it mints a
+random id, exactly as before. With one, the proposal is created under that id with
+`op_type: 'create'`, so two callers that derive the same id from the same thing meet
+at the same document and Elasticsearch decides which one creates it, with no
+check-then-create window in application code.
+
+An id that already exists is refused with `ProposalAlreadyExistsError`. The service
+reads nothing and returns nothing on the way there: what a duplicate means is the
+caller's to decide, which is why the caller chose the id. The error extends
+`ProposalConflictError`, so it is already a 409 on the routes and a `ConflictError`
+in a workflow. A caller that wants to converge on the existing proposal looks it up
+itself, with `get` and `getLatestRevision` (after a `revise()` the row at the
+original id is a superseded stub, not the head). A caller that wants a new proposal
+once the old one has settled derives its next id.
+
+The index is shared across spaces and the service does not scope the id, so the
+caller must put the space (and its own producer) into whatever the id is derived
+from. A clash is refused and never returned, so a missing space costs the caller a
+failed create and nothing more.
+
+`proposals.createProposal`, `system-create-proposal` and
+`system-create-alertzero-proposal` take the id as `proposalId` and pass it down. A
+duplicate fails the create step, before the gate workflow holds a proposal id, so
+nothing is parked or settled. A workflow that wants to handle it can branch on the
+step's `ConflictError`.
 
 ### Architecture
 
@@ -342,6 +369,17 @@ An action declaring `always-gate` therefore overrides any autonomy the caller re
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
 Omitting an optional input is safe. A Liquid template for an absent input still renders — as `''` — so every optional step input is declared with `optionalStepInput`, which treats `''` and `null` as absent. Without it, `actionInput: '${{ inputs.actionInput }}'` on a non-action proposal would fail schema validation before the handler ran.
+
+### How an agent creates a proposal
+
+The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it.
+
+- **It goes through the gate like any Worker.** The tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack. It does not call `ProposalsService.create`, because a proposal's decision is only ever recorded behind its gate (`resumeGate` refuses a proposal with no gate execution).
+- **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.
+- **It waits briefly for the proposal.** It polls `findByWorkflowExecutionId` for up to 5 seconds and returns `{ acknowledged, proposal_id, title, status, workflow_execution_id }`. If the create step has not run by then, it returns `{ acknowledged, workflow_execution_id, note }` and tells the agent not to create the proposal again.
+- **Cost:** each call leaves one gate execution parked (52-week sentinel timeout) until the analyst decides or the proposal expires (72h default), the same as every Worker proposal.
+- **Availability:** unavailable unless workflows are available, the principal holds `manage_proposals`, and it may execute `system-create-proposal` (`assertWorkflowAccess(..., 'execute')`). The handler re-checks `manage_proposals` on every call, and `executeWorkflow` re-checks execute access.
+- **`origin` comes from the agent.** Any agent with the tool can file into any feature's queue (for example `alertzero`), including one steered by injected content. Binding an origin per agent is a possible follow-up.
 
 ### Authoring an action workflow
 

@@ -168,6 +168,28 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
   });
 
+  it('renders proposals as direct siblings so the grouped first/last-child borders apply', () => {
+    mockConversationProposalsPage([mockProposal, decidedProposal]);
+
+    renderSlot();
+
+    const first = screen.getByTestId('investigationFlyoutProposedAction-proposal-1');
+    const last = screen.getByTestId('investigationFlyoutProposedAction-proposal-2');
+    expect(first.parentElement).toBe(last.parentElement);
+    expect(first).toBe(first.parentElement?.firstElementChild);
+    expect(last).toBe(last.parentElement?.lastElementChild);
+  });
+
+  it('renders a lone proposal as the only child of its group', () => {
+    mockConversationProposalsPage([mockProposal]);
+
+    renderSlot();
+
+    const only = screen.getByTestId('investigationFlyoutProposedAction-proposal-1');
+    expect(only).toBe(only.parentElement?.firstElementChild);
+    expect(only).toBe(only.parentElement?.lastElementChild);
+  });
+
   it('renders a decided proposal as a closed record, but still opens a read-only modal for it', () => {
     mockConversationProposalsPage([decidedProposal]);
 

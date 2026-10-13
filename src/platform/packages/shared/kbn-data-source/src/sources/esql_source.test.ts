@@ -10,7 +10,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQLVariableType, SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { clearESQLSourceInfoCache } from '@kbn/esql-utils';
+import { clearESQLSourceInfoCache, ESQL_SOURCE_INFO_CACHE_TTL } from '@kbn/esql-utils';
 import { EsqlSource } from './esql_source';
 
 function makeColumn(
@@ -631,6 +631,40 @@ describe('EsqlSource', () => {
       expect(second).toBe(first);
       expect(postedPaths(http).filter((path) => path === SOURCE_INFO_ROUTE)).toHaveLength(1);
       expect(postedPaths(http).filter((path) => path === TIMEFIELD_ROUTE)).toHaveLength(1);
+    });
+  });
+
+  describe('cache expiry', () => {
+    afterEach(() => jest.restoreAllMocks());
+
+    it('picks up new fields once the cache expires', async () => {
+      // The LRU cache reads `performance.now()`, which fake timers do not reach.
+      let now = performance.now();
+      jest.spyOn(performance, 'now').mockImplementation(() => now);
+      const columnsResponse = (names: string[]) => ({
+        columns: names.map((name) => ({ name, esType: 'keyword' })),
+      });
+      const http = {
+        post: jest.fn(async (path: string) =>
+          path === TIMEFIELD_ROUTE ? { timeField: undefined } : columnsResponse(['a'])
+        ),
+      } as unknown as HttpStart;
+      const columnNames = async () =>
+        (await EsqlSource.create({ query: 'FROM ttl-*', http }))
+          .getColumns()
+          .map(({ name }) => name);
+
+      expect(await columnNames()).toEqual(['a']);
+      (http.post as jest.Mock).mockImplementation(async (path: string) =>
+        path === TIMEFIELD_ROUTE ? { timeField: undefined } : columnsResponse(['a', 'b'])
+      );
+      expect(await columnNames()).toEqual(['a']);
+
+      now += ESQL_SOURCE_INFO_CACHE_TTL + 1;
+      // Let the cache drop the time it memoizes for a millisecond.
+      await new Promise((resolve) => setTimeout(resolve, 5));
+
+      expect(await columnNames()).toEqual(['a', 'b']);
     });
   });
 

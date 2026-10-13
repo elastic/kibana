@@ -52,7 +52,6 @@ describe('executeRecoveryQuery', () => {
     const recoveredHash = buildGroupHash({
       rowDoc: { 'host.name': 'recovery-host-1' },
       groupKeyFields: ['host.name'],
-      fallbackSeed: 'unused',
     });
     const input = createRuleExecutionInput();
 
@@ -112,12 +111,10 @@ describe('executeRecoveryQuery', () => {
     const hashX = buildGroupHash({
       rowDoc: { 'host.name': 'host-x' },
       groupKeyFields: groupingFields,
-      fallbackSeed: 'unused',
     });
     const hashY = buildGroupHash({
       rowDoc: { 'host.name': 'host-y' },
       groupKeyFields: groupingFields,
-      fallbackSeed: 'unused',
     });
 
     scopedEsClient.esql.query.mockResolvedValue(

@@ -107,7 +107,7 @@ test.describe(
     }) => {
       const alerting = pageObjects.observabilityAlerting;
       await alerting.gotoInboxFilteredByRule(ruleId);
-      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
       await expect(alerting.episodesListPage).toBeVisible();
 
       const menuButton = page
@@ -160,7 +160,7 @@ test.describe(
     }) => {
       const alerting = pageObjects.observabilityAlerting;
       await alerting.gotoInboxFilteredByRule(ruleId);
-      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
       await expect(alerting.expandRowButton).toBeVisible({ timeout: 30_000 });
 
       await alerting.expandRowButton.click();
@@ -206,7 +206,7 @@ test.describe(
       );
       const alerting = pageObjects.observabilityAlerting;
       await alerting.gotoInboxFilteredByRule(ruleId);
-      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
       await expect(alerting.episodesListPage).toBeVisible();
 
       const menuButton = page
@@ -233,7 +233,7 @@ test.describe(
 
       status = 'completed';
       await page.reload();
-      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
       await expect(menuButton).toBeVisible({ timeout: 30_000 });
 
       const completedInvestigationsPromise = page.waitForResponse(
@@ -251,7 +251,7 @@ test.describe(
         .poll(() => page.url())
         .toContain('/app/nightshift?investigationId=investigation-1');
       await pageObjects.observabilityAlerting.gotoInboxFilteredByRule(ruleId);
-      await expect(alerting.pageTitle).toHaveText('Alert episodes', { timeout: 30_000 });
+      await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
       await expect(menuButton).toBeVisible({ timeout: 30_000 });
 
       const viewedInvestigationsPromise = page.waitForResponse(
