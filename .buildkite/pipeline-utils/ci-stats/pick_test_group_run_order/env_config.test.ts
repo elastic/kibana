@@ -12,8 +12,8 @@ jest.mock('#pipeline-utils', () => ({
   collectEnvFromLabels: () => ({}),
 }));
 
-import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const';
-import { loadRunOrderConfig } from './env_config';
+import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
 
 const TYPE_ENV = {
   BUILDKITE_BRANCH: 'main',

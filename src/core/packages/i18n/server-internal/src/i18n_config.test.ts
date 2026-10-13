@@ -43,6 +43,7 @@ describe('i18n config', () => {
         locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'],
         defaultLocale: 'en',
         allowLocaleCookie: true,
+        detectBrowserLocale: true,
       });
     });
 
@@ -105,6 +106,16 @@ describe('i18n config', () => {
     it('accepts allowLocaleCookie: false', () => {
       const validated = config.schema.validate({ allowLocaleCookie: false });
       expect(validated.allowLocaleCookie).toBe(false);
+    });
+
+    it('defaults detectBrowserLocale to true', () => {
+      const validated = config.schema.validate({});
+      expect(validated.detectBrowserLocale).toBe(true);
+    });
+
+    it('accepts detectBrowserLocale: false', () => {
+      const validated = config.schema.validate({ detectBrowserLocale: false });
+      expect(validated.detectBrowserLocale).toBe(false);
     });
   });
 

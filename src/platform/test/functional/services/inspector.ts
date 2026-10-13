@@ -61,11 +61,13 @@ export class InspectorService extends FtrService {
     const isOpen = await this.testSubjects.exists('inspectorPanel');
     if (!isOpen) {
       await this.retry.try(async () => {
-        if (await this.testSubjects.exists('app-menu-overflow-button')) {
-          await this.testSubjects.click('app-menu-overflow-button');
+        if (!(await this.testSubjects.exists(openButton))) {
+          if (await this.testSubjects.exists('app-menu-overflow-button')) {
+            await this.testSubjects.click('app-menu-overflow-button');
+          }
         }
         await this.testSubjects.click(openButton);
-        await this.testSubjects.exists('inspectorPanel');
+        await this.testSubjects.existOrFail('inspectorPanel', { timeout: 10000 });
       });
     }
   }
@@ -201,7 +203,7 @@ export class InspectorService extends FtrService {
     const dtsViewId = 'inspectorViewChooser' + viewId;
     const cssSelector = this.testSubjects.getCssSelector(dtsViewId);
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(dtsViewId, { timeout: 1000 }))) {
+      if (!(await this.testSubjects.exists(dtsViewId))) {
         await this.testSubjects.click('inspectorViewChooser');
       }
       const clicked = await this.browser.execute((sel: string) => {
@@ -223,7 +225,14 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    if (!(await this.testSubjects.exists('inspectorViewChooser'))) return;
+    // A single-view inspector renders no view chooser, only the Requests view itself.
+    const hasViewChooser = await this.retry.tryForTime(5000, async () => {
+      if (await this.testSubjects.exists('inspectorViewChooser')) return true;
+      if (await this.testSubjects.exists('inspectorNoRequestsMessage')) return false;
+      if (await this.testSubjects.exists('inspectorRequestChooser')) return false;
+      throw new Error('Inspector view has not rendered');
+    });
+    if (!hasViewChooser) return;
     await this.openInspectorView('Requests');
   }
 

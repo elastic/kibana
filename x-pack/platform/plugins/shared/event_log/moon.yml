@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/serverless'
   - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

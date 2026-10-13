@@ -135,7 +135,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -363,6 +363,8 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
 export interface PackagePolicyClientBulkUpdateOptions {
   user?: AuthenticatedUser;
   force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];

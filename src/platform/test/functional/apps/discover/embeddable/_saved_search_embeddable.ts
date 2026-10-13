@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(lastBreadcrumb).to.be('Editing Rendering Test: saved search')
           ),
         testSubjects
-          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .waitForExists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
       ]);
@@ -266,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .getSavedSearchTitle()
           .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be(undefined)),
         testSubjects
-          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .waitForExists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
       ]);
@@ -277,7 +277,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('unifiedTabs_tabsBar', { timeout: 1000 })).to.be(false);
+      expect(await testSubjects.exists('unifiedTabs_tabsBar')).to.be(false);
       await discover.saveAsSearch('Rendering Test: saved as search by-value');
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
@@ -291,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(lastBreadcrumb).to.be('Rendering Test: saved as search by-value')
           ),
         testSubjects
-          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .waitForExists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
       ]);
@@ -365,7 +365,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             .getSavedSearchTitle()
             .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be(`Editing ${editingTitle}`)),
           testSubjects
-            .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+            .waitForExists('unifiedTabs_tabsBar', { timeout: 1000 })
             .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
           discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
         ]);
@@ -391,7 +391,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             .getSavedSearchTitle()
             .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be(`Editing ${editingTitle}`)),
           testSubjects
-            .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+            .exists('unifiedTabs_tabsBar')
             .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
           discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
         ]);
@@ -418,7 +418,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             .getSavedSearchTitle()
             .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be(savedAsTitle)),
           testSubjects
-            .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+            .waitForExists('unifiedTabs_tabsBar', { timeout: 1000 })
             .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
           discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
         ]);

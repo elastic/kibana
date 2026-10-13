@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import SimpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -94,8 +94,8 @@ class LinterCheck extends PrecommitCheck {
       }
 
       if (options.fix && options.stage) {
-        const simpleGit = new SimpleGit(REPO_ROOT);
-        await simpleGit.add(filesToLint);
+        const git = simpleGit(REPO_ROOT);
+        await git.add(filesToLint);
       }
     }
   }

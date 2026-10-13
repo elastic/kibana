@@ -246,7 +246,7 @@ export class DatePicker {
     // Dialog elements render as a portal at the page root
     await this.page.testSubj.locator(`dateRangePicker${side}AbsoluteTab`).click();
     const input = this.page.testSubj.locator(`dateRangePicker${side}AbsoluteInput`);
-    await input.clear();
+    // Don't clear first: that commits an empty bound, which the parser coerces to `now` and unmounts this input.
     await input.fill(value);
   }
 

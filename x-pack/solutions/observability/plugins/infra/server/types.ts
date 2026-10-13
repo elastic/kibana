@@ -25,6 +25,10 @@ import type {
 
 export type { InfraConfig } from '../common/plugin_config_types';
 
+export interface ServerlessInfo {
+  isServerless: boolean;
+}
+
 export type InfraPluginCoreSetup = CoreSetup<InfraServerPluginStartDeps, InfraPluginStart>;
 export type InfraPluginStartServicesAccessor = InfraPluginCoreSetup['getStartServices'];
 

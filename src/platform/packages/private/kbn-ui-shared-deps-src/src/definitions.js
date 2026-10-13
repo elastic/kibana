@@ -46,7 +46,6 @@ const externals = {
   // JSX runtime exports for SWC's importSource: '@emotion/react'
   '@emotion/react/jsx-runtime': '__kbnSharedDeps__.EmotionReactJsxRuntime',
   '@emotion/react/jsx-dev-runtime': '__kbnSharedDeps__.EmotionReactJsxDevRuntime',
-  jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
   react: '__kbnSharedDeps__.React',

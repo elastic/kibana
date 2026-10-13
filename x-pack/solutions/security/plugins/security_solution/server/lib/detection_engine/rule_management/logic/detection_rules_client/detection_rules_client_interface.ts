@@ -6,6 +6,7 @@
  */
 
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkDeleteActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type {
   RuleCreateProps,
@@ -13,18 +14,22 @@ import type {
   RuleObjectId,
   RuleResponse,
   RuleToImport,
-  RuleSource,
 } from '../../../../../../common/api/detection_engine';
 import type {
   RuleChangesHistoryResponse,
   RestoreRuleFromHistoryResponse,
   UnresolvedRulePatchProps,
 } from '../../../../../../common/api/detection_engine/rule_management';
-import type { IRuleSourceImporter } from '../import/rule_source_importer';
-import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
+import type {
+  ImportRuleSuccess,
+  ImportRulesResult,
+  ImportRuleError,
+} from './methods/import_rules/types';
+
+export type { ImportRuleSuccess, ImportRulesResult, ImportRuleError };
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
@@ -39,8 +44,7 @@ export interface IDetectionRulesClient {
   bulkDeleteRules: (args: BulkDeleteRulesArgs) => Promise<BulkDeleteRulesReturn>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
-  importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
-  importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  importRules: (args: ImportRulesArgs) => Promise<ImportRulesResult>;
   getHistoryForRule: (args: GetHistoryForRuleArgs) => Promise<RuleChangesHistoryResponse>;
   restoreRuleFromHistory: (
     args: RestoreRuleFromHistoryArgs
@@ -76,13 +80,14 @@ export interface DeleteRuleArgs {
 }
 
 export interface BulkDeleteRulesArgs {
-  ruleIds: RuleObjectId[];
+  rules: RuleAlertType[];
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface BulkDeleteRulesReturn {
   rules: RuleAlertType[];
   errors: BulkOperationError[];
+  skipped: BulkDeleteActionSkipResult[];
 }
 
 export interface UpgradePrebuiltRuleArgs {
@@ -96,20 +101,12 @@ export interface RevertPrebuiltRuleArgs {
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
-export interface ImportRuleArgs {
-  ruleToImport: RuleToImport;
-  overrideFields?: { rule_source: RuleSource; immutable: boolean };
-  overwriteRules?: boolean;
-  allowMissingConnectorSecrets?: boolean;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}
-
 export interface ImportRulesArgs {
   rules: RuleToImport[];
   overwriteRules: boolean;
-  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
-  changeTracking?: SecurityRuleChangeTracking<never>;
+  changeTracking?: SecurityRuleChangeTracking;
+  batchSize?: number;
 }
 
 export interface GetHistoryForRuleArgs {

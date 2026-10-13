@@ -22,6 +22,8 @@ import {
   deleteVersionSpecificFleetServerPolicies,
   deleteVersionSpecificFleetServerPoliciesForVersions,
   getAgentCountsForVariantPolicyIds,
+  getVariantAgentsKuery,
+  getVariantPolicyIdsFromAgentsWithoutBaseId,
   getAgentVersionsForVersionSpecificPolicies,
   hasAgentVersionConditionInInputTemplate,
 } from '../services/utils/version_specific_policies';
@@ -83,6 +85,13 @@ const mockedGetAgentCountsForVariantPolicyIds =
   getAgentCountsForVariantPolicyIds as jest.MockedFunction<
     typeof getAgentCountsForVariantPolicyIds
   >;
+const mockedGetVariantPolicyIdsFromAgentsWithoutBaseId =
+  getVariantPolicyIdsFromAgentsWithoutBaseId as jest.MockedFunction<
+    typeof getVariantPolicyIdsFromAgentsWithoutBaseId
+  >;
+const mockedGetVariantAgentsKuery = getVariantAgentsKuery as jest.MockedFunction<
+  typeof getVariantAgentsKuery
+>;
 const mockedGetAgentVersionsForVersionSpecificPolicies =
   getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
     typeof getAgentVersionsForVersionSpecificPolicies
@@ -664,6 +673,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
       // Default: no agents on any variant — safe for tests that don't care about agent counts.
       mockedGetAgentCountsForVariantPolicyIds.mockResolvedValue(new Map());
+      mockedGetVariantPolicyIdsFromAgentsWithoutBaseId.mockResolvedValue(new Map());
     });
 
     afterEach(() => {
@@ -680,8 +690,6 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         { id: 'agent-2', policy_id: 'policy-1#9.3' },
       ] as Agent[];
       mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(variantAgents));
-      // Post-reassignment count check: all agents moved successfully.
-      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
 
       await runTask();
 
@@ -714,6 +722,60 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('locates orphaned agents (including those without policy_base_id) via the variant agents kuery', async () => {
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      const kuery =
+        '(policy_base_id:"policy-1") or (policy_id:("policy-1#9.4") and not policy_base_id:*)';
+      mockedGetVariantAgentsKuery.mockResolvedValue(kuery);
+      mockedFetchAllAgentsByKuery.mockResolvedValue(
+        getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+      );
+
+      await runTask();
+
+      expect(mockedGetVariantAgentsKuery).toHaveBeenCalledWith(expect.anything(), 'policy-1', []);
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ kuery })
+      );
+      // The post-reassignment recheck uses the same kuery plus `active:true` (excludes unenrolled agents).
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledTimes(2);
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ kuery: `(${kuery}) and active:true` })
+      );
+    });
+
+    it('reassigns agents without policy_base_id even when no variant doc remains in .fleet-policies', async () => {
+      await mockVariantPoliciesInIndex([]);
+      mockedGetVariantPolicyIdsFromAgentsWithoutBaseId.mockResolvedValue(
+        new Map([['policy-1', ['policy-1#9.4']]])
+      );
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      mockedFetchAllAgentsByKuery.mockResolvedValue(
+        getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+      );
+
+      await runTask();
+
+      expect(mockedGetVariantAgentsKuery).toHaveBeenCalledWith(expect.anything(), 'policy-1', [
+        'policy-1#9.4',
+      ]);
+      expect(mockedReassignAgents).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ agentIds: ['agent-1'] }),
+        'policy-1'
+      );
+    });
+
     it('skips variant doc deletion and retries on next run when bulk reassignment partially fails', async () => {
       // Simulate: reassignAgents returns { actionId } without throwing even though one agent's
       // _update failed (bulkUpdateAgents silently collects per-agent errors). The post-reassignment
@@ -723,11 +785,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       mockAgentPolicyService.getByIds = jest
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
-      mockedFetchAllAgentsByKuery.mockResolvedValue(
-        getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
-      );
-      // Post-reassignment count: 1 agent still on variant (bulk update failed silently).
-      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 1, agents: [], page: 1, perPage: 0 });
+      const orphan = [{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[];
+      // First fetch collects the agent; the post-reassignment recheck still sees it (bulk update
+      // failed silently).
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(orphan))
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(orphan));
 
       await runTask();
 

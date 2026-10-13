@@ -27771,6 +27771,13 @@ paths:
           required: false
           schema:
             type: string
+        - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
+          in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
         - description: use withAgentCount instead
           in: query
           name: noAgentCount
@@ -50838,6 +50845,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryDetailsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            No live query with this `id` exists in the current space. Live queries issued from another space also return 404.
       summary: Get live query details
       tags:
         - Security Osquery API
@@ -50930,6 +50953,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_GetLiveQueryResultsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            No live query with this `id`, or no query with this `actionId`, exists in the current space. Live queries issued from another space also return 404.
       summary: Get live query results
       tags:
         - Security Osquery API
@@ -139981,6 +140020,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -150763,6 +150803,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -155395,6 +155436,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -155628,6 +155670,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -159839,6 +159882,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -161336,6 +161380,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165158,6 +165203,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165248,6 +165294,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -165308,6 +165355,34 @@ components:
         - desc
       title: termsRankByCustomDirection
       type: string
+    Kibana_HTTP_APIs_termsRankByCustomLastValueOperation:
+      additionalProperties: false
+      description: Terms ranked by the last value of a field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - last_value
+          type: string
+        time_field:
+          description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - field
+        - direction
+        - operation
+      title: Terms Rank By Custom Last Value Operation
+      type: object
     Kibana_HTTP_APIs_termsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
@@ -165326,7 +165401,6 @@ components:
             - standard_deviation
             - unique_count
             - sum
-            - last_value
           type: string
         type:
           enum:
@@ -166011,6 +166085,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -168575,6 +168650,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -170971,6 +171047,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -172959,6 +173036,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -176702,6 +176780,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
             - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -176739,6 +176818,10 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     Security_Detections_API_BulkDisableRules:
       type: object
       properties:

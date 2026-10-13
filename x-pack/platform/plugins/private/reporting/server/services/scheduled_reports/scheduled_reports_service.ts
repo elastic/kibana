@@ -8,6 +8,7 @@
 import type {
   AuditLogger,
   IClusterClient,
+  IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
@@ -19,6 +20,7 @@ import type {
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { KueryNode } from '@kbn/es-query';
 import { partition } from 'lodash';
 import type { ReportingCore } from '../..';
 import type {
@@ -28,6 +30,8 @@ import type {
   ScheduledReportType,
 } from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { ReportingUserIdentity } from '../../lib';
+import { getReportingUserIdentity } from '../../lib';
 import type { ScheduledReportAuditEventParams } from '../audit_events/audit_events';
 import {
   ScheduledReportAuditAction,
@@ -39,6 +43,7 @@ import type { BulkOperationError } from './types';
 import { transformSingleResponse } from './transforms';
 import type { UpdateScheduledReportParams } from './types/update';
 import { updateScheduledReportSchema } from './schemas/update';
+import { buildOwnedByFilter, isScheduledReportOwner } from './lib/ownership';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -58,7 +63,16 @@ interface BulkOperationResult {
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
+// Reporting managers bypass ownership checks and must not depend on API-key owner lookups.
+const UNRESOLVED_IDENTITY: ReportingUserIdentity = { ids: [] };
+
+// UIAM usernames are key IDs, so label API keys explicitly.
+const describePrincipal = ({ username, apiKeyId }: ReportingUserIdentity): string =>
+  apiKeyId !== undefined ? `API key "${apiKeyId}"` : `User "${username ?? 'unknown'}"`;
+
 export class ScheduledReportsService {
+  private identityPromise?: Promise<ReportingUserIdentity>;
+
   constructor(
     private auditLogger: AuditLogger,
     private userCanManageReporting: Boolean,
@@ -116,14 +130,20 @@ export class ScheduledReportsService {
       });
     }
 
-    if (!(await this._canUpdateReport({ id, user }))) {
-      this._throw404({ user, id, action: ScheduledReportAuditAction.UPDATE });
+    const { authorized } = await this._canUpdateReport({ id, user });
+    if (!authorized) {
+      throw await this._buildNotFoundError({ user, id, action: ScheduledReportAuditAction.UPDATE });
     }
 
     try {
       const { title, schedule, notification } = updateParams;
 
-      await this._updateScheduledReportSavedObject({ id, title, schedule, notification });
+      await this._updateScheduledReportSavedObject({
+        id,
+        title,
+        schedule,
+        notification,
+      });
       await this._updateScheduledReportTaskSchedule({ id, schedule });
 
       const updatedReport = await this.savedObjectsClient.get<ScheduledReportType>(
@@ -158,7 +178,17 @@ export class ScheduledReportsService {
     search?: string;
   }): Promise<ListScheduledReportsApiResponse> {
     try {
-      const username = this._getUsername(user);
+      const identity = this.userCanManageReporting
+        ? UNRESOLVED_IDENTITY
+        : await this._getIdentity(user);
+
+      let filter: KueryNode | undefined;
+      if (!this.userCanManageReporting) {
+        filter = buildOwnedByFilter(identity);
+        if (!filter) {
+          return this._getEmptyListApiResponse(page, size);
+        }
+      }
 
       const response = await this.savedObjectsClient.find<ScheduledReportType>({
         type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
@@ -166,9 +196,7 @@ export class ScheduledReportsService {
         perPage: size,
         search,
         searchFields: ['title', 'created_by'],
-        ...(!this.userCanManageReporting
-          ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
-          : {}),
+        ...(filter ? { filter } : {}),
       });
 
       if (!response) {
@@ -269,7 +297,9 @@ export class ScheduledReportsService {
     user: ReportingUser;
   }): Promise<BulkOperationResult> {
     try {
-      const username = this._getUsername(user);
+      const identity = this.userCanManageReporting
+        ? UNRESOLVED_IDENTITY
+        : await this._getIdentity(user);
 
       const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
@@ -281,13 +311,15 @@ export class ScheduledReportsService {
       );
       const [authorizedSchedules, unauthorizedSchedules] = partition(
         validSchedules,
-        (so) => so.attributes.createdBy === username || this.userCanManageReporting
+        (so) =>
+          this.userCanManageReporting ||
+          isScheduledReportOwner({ report: so.attributes, currentUser: identity })
       );
 
       const authErrors = this._formatAndAuditBulkDeleteAuthErrors({
         bulkGetErrors,
         unauthorizedSchedules,
-        username,
+        principal: describePrincipal(identity),
       });
       this._auditBulkGetAuthorized({
         action: ScheduledReportAuditAction.DELETE,
@@ -357,11 +389,11 @@ export class ScheduledReportsService {
   private _formatAndAuditBulkDeleteAuthErrors({
     bulkGetErrors,
     unauthorizedSchedules,
-    username,
+    principal,
   }: {
     bulkGetErrors: SavedObject<ScheduledReportType>[];
     unauthorizedSchedules: SavedObject<ScheduledReportType>[];
-    username: string | boolean;
+    principal: string;
   }) {
     const bulkErrors: BulkOperationError[] = [];
     bulkGetErrors.forEach((so) => {
@@ -381,7 +413,7 @@ export class ScheduledReportsService {
         id: so.id,
       });
       this.logger.warn(
-        `User "${username}" attempted to delete scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
+        `${principal} attempted to delete scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
       );
       this._auditLog({
         action: ScheduledReportAuditAction.DELETE,
@@ -437,8 +469,15 @@ export class ScheduledReportsService {
     return bulkErrors;
   }
 
-  private _getUsername(user: ReportingUser): string | boolean {
-    return user ? user.username : false;
+  private async _getIdentity(user: ReportingUser): Promise<ReportingUserIdentity> {
+    if (!this.identityPromise) {
+      this.identityPromise = getReportingUserIdentity({
+        user,
+        request: this.request,
+        esClient: this.esClient,
+      });
+    }
+    return this.identityPromise;
   }
 
   private _getEmptyListApiResponse(page: number, perPage: number): ListScheduledReportsApiResponse {
@@ -506,16 +545,23 @@ export class ScheduledReportsService {
   }: {
     user: ReportingUser;
     id: string;
-  }): Promise<Boolean> {
-    if (this.userCanManageReporting) return true;
+  }): Promise<{ authorized: boolean }> {
+    if (this.userCanManageReporting) {
+      return { authorized: true };
+    }
 
-    const username = this._getUsername(user);
+    const identity = await this._getIdentity(user);
     const reportToUpdate = await this.savedObjectsClient.get<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
       id
     );
 
-    return reportToUpdate.attributes.createdBy === username;
+    return {
+      authorized: isScheduledReportOwner({
+        report: reportToUpdate.attributes,
+        currentUser: identity,
+      }),
+    };
   }
 
   private async _bulkOperation({
@@ -606,9 +652,7 @@ export class ScheduledReportsService {
       scheduledReportSavedObjectsToUpdate.map((so) => ({
         id: so.id,
         type: so.type,
-        attributes: {
-          enabled: shouldEnable,
-        },
+        attributes: { enabled: shouldEnable },
       }))
     );
   }
@@ -626,7 +670,9 @@ export class ScheduledReportsService {
   }) {
     const errors: BulkOperationError[] = [];
     const scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>> = [];
-    const username = this._getUsername(user);
+    const identity = this.userCanManageReporting
+      ? UNRESOLVED_IDENTITY
+      : await this._getIdentity(user);
     const updatedScheduledReportIds: Set<string> = new Set();
 
     for (const so of scheduledReportSavedObjects) {
@@ -638,14 +684,19 @@ export class ScheduledReportsService {
         });
       } else {
         // check if user is allowed to update this scheduled report
-        if (so.attributes.createdBy !== username && !this.userCanManageReporting) {
+        if (
+          !this.userCanManageReporting &&
+          !isScheduledReportOwner({ report: so.attributes, currentUser: identity })
+        ) {
           errors.push({
             message: `Not found.`,
             status: 404,
             id: so.id,
           });
           this.logger.warn(
-            `User "${username}" attempted to ${operation} scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
+            `${describePrincipal(identity)} attempted to ${operation} scheduled report "${
+              so.id
+            }" created by "${so.attributes.createdBy}" without sufficient privileges.`
           );
           this._auditLog({
             action,
@@ -709,7 +760,7 @@ export class ScheduledReportsService {
     };
   }
 
-  private _throw404({
+  private async _buildNotFoundError({
     user,
     id,
     action,
@@ -717,17 +768,19 @@ export class ScheduledReportsService {
     user: ReportingUser;
     id: string;
     action: ScheduledReportAuditAction;
-  }) {
-    const username = this._getUsername(user);
+  }): Promise<IKibanaResponse> {
+    const identity = await this._getIdentity(user);
     this.logger.warn(
-      `User "${username}" attempted to update scheduled report "${id}" without sufficient privileges.`
+      `${describePrincipal(
+        identity
+      )} attempted to update scheduled report "${id}" without sufficient privileges.`
     );
     this._auditLog({
       action,
       id,
       error: new Error('Not found.'),
     });
-    throw this.responseFactory.customError({
+    return this.responseFactory.customError({
       statusCode: 404,
       body: 'Not found.',
     });

@@ -6,7 +6,6 @@
  */
 
 import { encode } from '@kbn/rison';
-import { recurse } from 'cypress-recurse';
 import 'cypress-network-idle';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
@@ -399,14 +398,10 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
 export const clickAlertsHistogramLegend = (ruleName: string) => {
   cy.get(ALERTS_HISTOGRAM).find(ALERTS_HISTOGRAM_SERIES).should('contain.text', ruleName);
 
-  recurse(
-    () => {
-      cy.get('body').type('{esc}');
-      cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
-      return cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName));
-    },
-    ($el) => $el.is(':visible')
-  ).click();
+  cy.get('body').type('{esc}');
+  cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
+  cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName)).should('be.visible');
+  cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName)).click();
 };
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
@@ -422,17 +417,11 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  recurse(
-    () => {
-      // To clear focus
-      cy.get('body').type('{esc}');
-      cy.get(propertySelector).eq(rowIndex).should('be.visible');
-      cy.get(propertySelector).eq(rowIndex).realHover();
-      return cy.get(actionSelector).first();
-    },
-    ($el) => $el.is(':visible')
-  );
-
+  // To clear focus
+  cy.get('body').type('{esc}');
+  cy.get(propertySelector).eq(rowIndex).should('be.visible');
+  cy.get(propertySelector).eq(rowIndex).realHover();
+  cy.get(actionSelector).first().should('be.visible');
   cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
@@ -449,13 +438,9 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 };
 
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
-  recurse(
-    () => {
-      clickExpandActions(propertySelector, rowIndex);
-      return cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first();
-    },
-    ($el) => $el.is(':visible')
-  );
+  // The expand button toggles the actions popover, so click it once; the assertion below waits
+  // for the opening transition.
+  clickExpandActions(propertySelector, rowIndex);
 
   hideMessageTooltip();
 

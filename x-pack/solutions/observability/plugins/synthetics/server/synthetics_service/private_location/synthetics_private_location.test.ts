@@ -14,6 +14,9 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
+import { PackagePolicyService } from './package_policy_service';
+import { BROWSER_TEST_NOW_RUN } from '../synthetics_monitor/synthetics_monitor_client';
+import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { handleMultilineStringFormatter } from '../formatters/formatting_utils';
@@ -21,6 +24,10 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+
+jest.mock('../../tasks/clean_up_package_policies_task', () => ({
+  scheduleTestNowCleanUp: jest.fn(),
+}));
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -581,6 +588,64 @@ describe('SyntheticsPrivateLocation', () => {
     expect(test.formattedPolicy.inputs[3].streams[1].vars?.timeout).toStrictEqual({
       type: 'text',
       value: '30s',
+    });
+  });
+
+  describe('Test Now clean up', () => {
+    const makePrivateLocation = () =>
+      new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: {
+            asInternalUser: { listAgents: jest.fn().mockResolvedValue({ agents: [], total: 0 }) },
+          },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+
+    beforeEach(() => {
+      (scheduleTestNowCleanUp as jest.Mock).mockClear();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('hands the run-once policies it created to the Test Now clean up', async () => {
+      const created = [{ id: 'tn-1', name: BROWSER_TEST_NOW_RUN }];
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created, failed: [] } as any);
+
+      await makePrivateLocation().createPackagePolicies(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation],
+        'default',
+        [],
+        'test-run-id',
+        true
+      );
+
+      expect(scheduleTestNowCleanUp).toHaveBeenCalledWith(expect.anything(), created);
+    });
+
+    it('does not schedule a Test Now clean up for a regular monitor create', async () => {
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created: [{ id: 'm1-loc1' }], failed: [] } as any);
+
+      await makePrivateLocation().createPackagePolicies(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation],
+        'default',
+        []
+      );
+
+      expect(scheduleTestNowCleanUp).not.toHaveBeenCalled();
     });
   });
 });

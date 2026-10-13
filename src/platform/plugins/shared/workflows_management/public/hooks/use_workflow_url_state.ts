@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { LayoutDirection } from '@kbn/workflows';
@@ -26,10 +26,10 @@ export interface WorkflowUrlState {
 }
 
 /**
- * Normalise a `query-string` value (which may be `string | string[] | null`)
+ * Normalise a `query-string` value (which may be `string | (string | null)[] | null`)
  * to `string | undefined`, taking the first element of any array.
  */
-function firstString(value: string | string[] | null | undefined): string | undefined {
+function firstString(value: string | Array<string | null> | null | undefined): string | undefined {
   if (Array.isArray(value)) return value[0] ?? undefined;
   return value ?? undefined;
 }
@@ -47,7 +47,7 @@ export function useWorkflowUrlState() {
     stepId: string | undefined;
     shouldAutoResume: boolean;
   } => {
-    const params = parse(location.search);
+    const params = queryString.parse(location.search);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view: params.view === 'graph' ? 'graph' : 'yaml',
@@ -61,7 +61,7 @@ export function useWorkflowUrlState() {
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>) => {
-      const currentParams = parse(history.location.search);
+      const currentParams = queryString.parse(history.location.search);
 
       // Update the params with new values
       const newParams = {
@@ -78,7 +78,7 @@ export function useWorkflowUrlState() {
       });
 
       // Update the URL without causing a full page reload
-      const newSearch = stringify(cleanParams, { encode: false });
+      const newSearch = queryString.stringify(cleanParams, { encode: false });
       const newLocation = {
         ...history.location,
         search: newSearch ? `?${newSearch}` : '',

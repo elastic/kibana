@@ -15,7 +15,8 @@
     "**/ftr_e2e/**",
     "**/e2e/**",
     "**/integration_tests/**",
-    "**/json_schemas/**"
+    "**/json_schemas/**",
+    "src/platform/packages/shared/kbn-flot-charts/lib/**"
   ],
 
   "rules": {

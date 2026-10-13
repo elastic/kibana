@@ -6,11 +6,36 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import type { RiskScoreDistribution } from '@kbn/entity-store/common';
 import {
   RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
   type RiskScoreMaintainerStageSummaryEvent,
 } from '../../../telemetry/event_based/events';
+import type { RiskScoreBandDistribution } from './risk_score_distribution';
+
+const toLowercaseDistribution = ({
+  Critical,
+  High,
+  Moderate,
+  Low,
+  Unknown,
+  normP50,
+  normP90,
+}: RiskScoreBandDistribution): RiskScoreDistribution => ({
+  critical: Critical,
+  high: High,
+  moderate: Moderate,
+  low: Low,
+  unknown: Unknown,
+  normP50,
+  normP90,
+});
+
+const toTelemetryDistributionField = (
+  key: 'baseScoreDistribution' | 'resolutionScoreDistribution',
+  distribution: RiskScoreBandDistribution | undefined
+) => (distribution === undefined ? {} : { [key]: toLowercaseDistribution(distribution) });
 
 const ERROR_MESSAGE_MAX_LENGTH = 500;
 
@@ -180,6 +205,8 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
         scoresWrittenResetToZero: number;
         pagesProcessed: number;
         lookupPrunedDocs: number;
+        baseScoreDistribution?: RiskScoreBandDistribution;
+        resolutionScoreDistribution?: RiskScoreBandDistribution;
       }) => {
         reportEvent(RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType, {
           namespace: runContext.namespace,
@@ -197,6 +224,11 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
           pagesProcessed: input.pagesProcessed,
           lookupPrunedDocs: input.lookupPrunedDocs,
           idBasedRiskScoringEnabled: runContext.idBasedRiskScoringEnabled,
+          ...toTelemetryDistributionField('baseScoreDistribution', input.baseScoreDistribution),
+          ...toTelemetryDistributionField(
+            'resolutionScoreDistribution',
+            input.resolutionScoreDistribution
+          ),
         });
       },
     };

@@ -413,8 +413,8 @@ const DURATION_LABEL = i18n.translate('xpack.synthetics.flyout.durationLabel', {
   defaultMessage: 'Duration (median)',
 });
 
-const ERRORS_LABEL = i18n.translate('xpack.synthetics.flyout.errorsLabel', {
-  defaultMessage: 'Errors',
+const ERRORS_LABEL = i18n.translate('xpack.synthetics.flyout.failedTestsLabel', {
+  defaultMessage: 'Failed tests',
 });
 
 const ALERTS_LABEL = i18n.translate('xpack.synthetics.flyout.alertsLabel', {
