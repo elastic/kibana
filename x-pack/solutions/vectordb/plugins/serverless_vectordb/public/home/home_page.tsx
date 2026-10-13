@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { TrialUsageBadge } from '@kbn/shared-components';
 import { ConnectToProject, useOnboardingCredentials } from '@kbn/vectordb-onboarding';
 import { i18n } from '@kbn/i18n';
 import { useDeploymentStats } from '../hooks/use_deployment_stats';
@@ -29,7 +28,7 @@ import { useAuthenticatedUser } from '../hooks/use_authenticated_user';
 
 export const HomePage = () => {
   const {
-    services: { cloud, application, chrome, docLinks },
+    services: { application, chrome, docLinks },
   } = useKibana();
   const { user } = useAuthenticatedUser();
   const { stats, isLoading } = useDeploymentStats();
@@ -69,11 +68,6 @@ export const HomePage = () => {
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
-              {cloud?.isInTrial() && (
-                <EuiFlexItem grow={false}>
-                  <TrialUsageBadge cloud={cloud} />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

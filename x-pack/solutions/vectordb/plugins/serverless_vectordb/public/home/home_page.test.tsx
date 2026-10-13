@@ -23,10 +23,6 @@ jest.mock('@kbn/vectordb-onboarding', () => ({
   useOnboardingCredentials: () => ({ elasticsearchUrl: null, apiKey: null, isLoading: false }),
 }));
 
-jest.mock('@kbn/shared-components', () => ({
-  TrialUsageBadge: () => <div data-test-subj="trialUsageBadge" />,
-}));
-
 jest.mock('./home_page_banner', () => ({ HomePageBanner: jest.fn(() => null) }));
 jest.mock('./add_data_section', () => ({
   AddDataSection: () => <div data-test-subj="addDataSection" />,
@@ -70,20 +66,16 @@ const emptyStats = {
 
 describe('HomePage', () => {
   const navigateToApp = jest.fn();
-  const isInTrial = jest.fn();
 
   const mockServices = ({
-    cloud = { isInTrial },
     canMonitorAllIndices = true,
     hasIndexManagement = true,
   }: {
-    cloud?: object | null;
     canMonitorAllIndices?: boolean;
     hasIndexManagement?: boolean;
   } = {}) => {
     mockUseKibana.mockReturnValue({
       services: {
-        cloud,
         application: {
           navigateToApp,
           capabilities: { vectordbIndexStats: { canMonitorAllIndices } },
@@ -101,7 +93,6 @@ describe('HomePage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    isInTrial.mockReturnValue(false);
     mockServices();
     mockUseAuthenticatedUser.mockReturnValue({ user: undefined });
     mockUseDeploymentStats.mockReturnValue({ stats, isLoading: false });
@@ -134,34 +125,6 @@ describe('HomePage', () => {
       render(<HomePage />);
 
       expect(screen.getByRole('heading', { name: 'Welcome' })).toBeInTheDocument();
-    });
-  });
-
-  describe('the trial badge', () => {
-    it('is shown while the project is in trial', () => {
-      isInTrial.mockReturnValue(true);
-
-      render(<HomePage />);
-
-      expect(screen.getByTestId('trialUsageBadge')).toBeInTheDocument();
-    });
-
-    it('is hidden outside of a trial', () => {
-      isInTrial.mockReturnValue(false);
-
-      render(<HomePage />);
-
-      expect(screen.queryByTestId('trialUsageBadge')).not.toBeInTheDocument();
-    });
-
-    it('is hidden when the cloud service is unavailable', () => {
-      // in trial, so the badge can only be hidden because the service is missing
-      isInTrial.mockReturnValue(true);
-      mockServices({ cloud: null });
-
-      render(<HomePage />);
-
-      expect(screen.queryByTestId('trialUsageBadge')).not.toBeInTheDocument();
     });
   });
 

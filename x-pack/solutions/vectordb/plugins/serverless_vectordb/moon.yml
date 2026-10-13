@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/core-chrome-browser'
   - '@kbn/cloud-plugin'
-  - '@kbn/shared-components'
   - '@kbn/shared-ux-router'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-server'
