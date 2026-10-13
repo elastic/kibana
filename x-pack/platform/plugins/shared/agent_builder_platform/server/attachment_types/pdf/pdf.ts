@@ -110,10 +110,9 @@ export const createPdfAttachmentType = ({
       }
 
       const { signal, stopListening } = getRequestAbortedSignal(request);
-      let file: PdfFile | undefined;
       try {
         const filesPlugin = await getFilesPlugin();
-        file = await getPdfFile(filesPlugin.fileServiceFactory.asScoped(request), origin);
+        const file = await getPdfFile(filesPlugin.fileServiceFactory.asScoped(request), origin);
         const pdf = await downloadPdf(file);
         const text = await extractDocument({
           esClient: await getEsClient(),
@@ -127,13 +126,6 @@ export const createPdfAttachmentType = ({
           throw pdfErrors.textTooLong();
         }
         return { file_id: origin, name: file.data.name, text };
-      } catch (error) {
-        if (signal.aborted) {
-          await file?.delete().catch((deleteError) => {
-            logger.warn(`Could not delete the PDF after the request was aborted: ${deleteError}`);
-          });
-        }
-        throw error;
       } finally {
         stopListening();
       }

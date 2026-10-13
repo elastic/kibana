@@ -256,25 +256,14 @@ describe('pdf attachment type', () => {
         return { abortedRequest };
       };
 
-      it('deletes the PDF from the Files API and rethrows', async () => {
+      it('rethrows and keeps the file', async () => {
         const { abortedRequest } = setup();
         const { plugin, deleteFile } = createFilesPluginStub();
 
         await expect(
           createDefinition(plugin).resolve!('file-abc', createResolveContext(abortedRequest))
         ).rejects.toThrow('aborted');
-        expect(deleteFile).toHaveBeenCalledTimes(1);
-      });
-
-      it('still rethrows when the delete fails', async () => {
-        const { abortedRequest } = setup();
-        const { plugin, deleteFile } = createFilesPluginStub();
-        deleteFile.mockRejectedValue(new Error('delete failed'));
-
-        await expect(
-          createDefinition(plugin).resolve!('file-abc', createResolveContext(abortedRequest))
-        ).rejects.toThrow('aborted');
-        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('delete failed'));
+        expect(deleteFile).not.toHaveBeenCalled();
       });
     });
   });
