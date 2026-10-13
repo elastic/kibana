@@ -134,15 +134,28 @@ steps:
   #
   # A required source, so no `on-failure`: a failed search fails the run, which the
   # review records as `failed`.
+  #
+  # Both Attack Discovery destinations, unioned: the runner-launched analyses'
+  # ad-hoc index AND the persisted-alerts data stream. On serverless only the
+  # product data stream exists (user creation of dot-prefixed names is
+  # rejected), on stateful stacks both may hold the document — `ignore_unavailable`
+  # keeps either absence from failing the search. Same union as
+  # `fetch_attack_discovery_alert` in forensics_run_endpoint_analysis.
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+      ignore_unavailable: true
       size: 1
       query:
-        ids:
-          values:
-            - "{{ inputs.attack_discovery_id }}"
+        bool:
+          should:
+            - ids:
+                values:
+                  - "{{ inputs.attack_discovery_id }}"
+            - term:
+                kibana.alert.uuid: "{{ inputs.attack_discovery_id }}"
+          minimum_should_match: 1
 
   # An empty search SUCCEEDS, so the step above cannot catch an id that names no
   # document.
