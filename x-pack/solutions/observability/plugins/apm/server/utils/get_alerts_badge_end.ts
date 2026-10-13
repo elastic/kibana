@@ -15,15 +15,3 @@ export function getAlertsBadgeEndMs(endMs: number, nowMs: number = Date.now()): 
   }
   return endMs >= nowMs ? endMs : nowMs;
 }
-
-/**
- * ISO-string variant of {@link getAlertsBadgeEndMs} for client time-range values.
- */
-export function getAlertsBadgeEnd(end: string, nowMs: number = Date.now()): string {
-  const endMs = new Date(end).getTime();
-  if (Number.isNaN(endMs)) {
-    return end;
-  }
-  const badgesEndMs = getAlertsBadgeEndMs(endMs, nowMs);
-  return badgesEndMs === endMs ? end : new Date(badgesEndMs).toISOString();
-}

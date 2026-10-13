@@ -11,7 +11,7 @@ import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../commo
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getAlertsBadgeEndMs } from '../../../common/utils/get_alerts_badge_end';
+import { getAlertsBadgeEndMs } from '../../utils/get_alerts_badge_end';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { MAX_NUMBER_OF_TX_GROUPS } from './get_service_transaction_groups';
 

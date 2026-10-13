@@ -21,7 +21,7 @@ import type { ServiceGroup } from '../../../../common/service_groups';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { getAlertsBadgeEndMs } from '../../../../common/utils/get_alerts_badge_end';
+import { getAlertsBadgeEndMs } from '../../../utils/get_alerts_badge_end';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
