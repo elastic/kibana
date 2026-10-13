@@ -71,8 +71,13 @@ export function DetectionFlyout({
   const { share, agentBuilder } = useKibana().services;
   const [selectedEntity, setSelectedEntity] = useState<ResolvedImpactedService | undefined>();
 
-  const { services: associatedEntities, isInitialLoading: isLoadingStreamFeatures } =
-    useImpactedServices(event);
+  const {
+    services: associatedEntities,
+    isInitialLoading: isLoadingImpactedServices,
+    failedSourceIds,
+    isError: isImpactedServicesError,
+    refetch: refetchImpactedServices,
+  } = useImpactedServices(event);
   const selectedEntityFeature = selectedEntity?.feature;
 
   useEffect(() => {
@@ -195,22 +200,60 @@ export function DetectionFlyout({
             </>
           )}
 
-          {(isLoadingStreamFeatures || associatedEntities.length > 0) && (
+          {(isLoadingImpactedServices ||
+            associatedEntities.length > 0 ||
+            isImpactedServicesError ||
+            failedSourceIds.length > 0) && (
             <>
-              <FlyoutSectionTitle>
-                {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
-                  defaultMessage: 'Impacted services',
-                })}
-              </FlyoutSectionTitle>
-              <EuiSpacer size="s" />
-              {isLoadingStreamFeatures && (
+              {(isLoadingImpactedServices || associatedEntities.length > 0) && (
+                <>
+                  <FlyoutSectionTitle>
+                    {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
+                      defaultMessage: 'Impacted services',
+                    })}
+                  </FlyoutSectionTitle>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+              {isLoadingImpactedServices && (
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
                     <EuiLoadingSpinner size="m" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
-              {!isLoadingStreamFeatures && associatedEntities.length > 0 && (
+              {!isLoadingImpactedServices &&
+                (isImpactedServicesError || failedSourceIds.length > 0) && (
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    data-test-subj="nightshiftDetectionFlyoutImpactedServicesError"
+                  >
+                    <p>
+                      {isImpactedServicesError
+                        ? i18n.translate('xpack.nightshift.detectionFlyout.impactedServicesError', {
+                            defaultMessage: 'Impacted services could not be loaded.',
+                          })
+                        : i18n.translate(
+                            'xpack.nightshift.detectionFlyout.impactedServicesPartialError',
+                            {
+                              defaultMessage:
+                                'Some sources could not be loaded, so this list may be incomplete.',
+                            }
+                          )}
+                    </p>
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={() => refetchImpactedServices()}
+                      data-test-subj="nightshiftDetectionFlyoutImpactedServicesRetry"
+                    >
+                      {i18n.translate('xpack.nightshift.detectionFlyout.impactedServicesRetry', {
+                        defaultMessage: 'Retry',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiText>
+                )}
+              {!isLoadingImpactedServices && associatedEntities.length > 0 && (
                 <EuiFlexGroup gutterSize="s" wrap responsive={false}>
                   {associatedEntities.map((entity) => (
                     <EuiFlexItem grow={false} key={entity.key}>
