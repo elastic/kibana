@@ -94,6 +94,23 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
     expect(coverage.role.kibana[0].feature).not.toHaveProperty('siemV5');
   });
 
+  it('lets the Alert Triage sweep read its batch workflow executions and start batches', () => {
+    const { feature } =
+      WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID].role.kibana[0];
+
+    // The sweep reads the managed batch workflow's executions to see which rules have a live
+    // batch, and starts batches. Without these it plans nothing (`live_batches_unreadable`).
+    expect(feature.workflowsManagement).toEqual(
+      expect.arrayContaining([
+        'workflow_read_managed',
+        'workflow_execution_read',
+        'workflow_execution_read_managed',
+        'workflow_execute',
+        'workflow_execution_cancel',
+      ])
+    );
+  });
+
   it('encodes the role name in the role URL', () => {
     expect(buildSecurityRoleUrl('a/b')).toBe('/api/security/role/a%2Fb');
   });
