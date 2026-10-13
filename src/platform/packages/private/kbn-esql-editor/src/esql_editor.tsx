@@ -42,23 +42,18 @@ import React, {
   useState,
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { createPortal, flushSync } from 'react-dom';
+import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
-import {
-  REVIEW_ACTIONS_WIDGET_ID,
-  useCommentToEsql,
-  useGhostLineHint,
-  useVisorNlToEsql,
-} from './comment_to_esql';
+import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
-import { QuickSearchVisor, type QuickSearchVisorApi } from './editor_visor';
+import { QuickSearchVisor } from './editor_visor';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
 import { useNlToEsqlCheck } from './hooks/use_nl_to_esql_check';
@@ -152,7 +147,6 @@ const ESQLEditorInternal = function ESQLEditor({
   enableCreateView = false,
   onESQLDocsFlyoutVisibilityChanged,
   onVisorNlResultReady,
-  onVisorNlResultRejected,
   editorApiRef,
 }: ESQLEditorInternalProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -706,23 +700,11 @@ const ESQLEditorInternal = function ESQLEditor({
     [onUpdateAndSubmitQuery]
   );
 
-  // Non-inline visors are owned by the parent
-  const inlineVisorRef = useRef<QuickSearchVisorApi>(null);
-  const visorNlOnReject = useCallback(() => {
-    if (inlineVisorRef.current) {
-      // Clicking the editor closes the visor and makes it inert; reopen before focusing it
-      flushSync(() => setIsVisorOpen(true));
-      inlineVisorRef.current.restoreNlPrompt();
-    }
-    onVisorNlResultRejected?.();
-  }, [onVisorNlResultRejected]);
-
   const { showVisorReview } = useVisorNlToEsql({
     editorRef,
     editorModel,
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
-    onReject: visorNlOnReject,
     telemetryService,
   });
 
@@ -918,11 +900,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
                     }
-                    // Keep / Undo on a generated query is not a click into the query
-                    const isReviewAction =
-                      e.target.type === monaco.editor.MouseTargetType.CONTENT_WIDGET &&
-                      e.target.detail === REVIEW_ACTIONS_WIDGET_ID;
-                    if (isVisorOpenRef.current && !isReviewAction) {
+                    if (isVisorOpenRef.current) {
                       setIsVisorOpen(false);
                     }
                     if (enableResourceBrowser) {
@@ -1010,7 +988,6 @@ const ESQLEditorInternal = function ESQLEditor({
       </EuiFlexGroup>
       {!hideQuickSearch && Boolean(editorIsInline) && (
         <QuickSearchVisor
-          ref={inlineVisorRef}
           query={code}
           isInline
           isVisible={isVisorOpen}

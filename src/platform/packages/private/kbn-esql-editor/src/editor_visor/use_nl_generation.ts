@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { reportEsqlError } from '../report_error';
 import { nlErrorMessage } from './visor_i18n';
-import type { ESQLEditorDeps } from '../types';
+import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 const INFERENCE_CONNECTORS_ROUTE = '/internal/inference/connectors';
@@ -43,7 +43,7 @@ export const clearInferenceConnectorCache = (): void => {
 
 interface UseNlGenerationParams {
   query: string;
-  onNlResult?: (generatedQuery: string) => void;
+  onNlResult?: VisorNlResultHandler;
   onUpdateAndSubmitQuery: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
 }
@@ -61,8 +61,6 @@ export const useNlGeneration = ({
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(hasInferenceConnector);
   const abortControllerRef = useRef<AbortController | null>(null);
-  // Prompt behind the result under review; the input is cleared meanwhile
-  const submittedNlPromptRef = useRef('');
 
   useEffect(() => {
     if (!isNlToEsqlEnabled) return;
@@ -104,10 +102,6 @@ export const useNlGeneration = ({
     setNlValue('');
   }, []);
 
-  const restoreNlPrompt = useCallback(() => {
-    setNlValue((current) => (current.trim() ? current : submittedNlPromptRef.current));
-  }, []);
-
   const onNlSubmit = useCallback(async () => {
     const trimmed = nlValue.trim();
     if (!trimmed || isNlLoading) return;
@@ -123,7 +117,6 @@ export const useNlGeneration = ({
       });
       if (abortController.signal.aborted) return;
       if (result.content) {
-        appliedContent = true;
         trackNlResult(
           trimmed.length,
           query.length,
@@ -133,9 +126,10 @@ export const useNlGeneration = ({
           result.content.length
         );
         if (onNlResult) {
-          submittedNlPromptRef.current = trimmed;
-          onNlResult(result.content);
+          // The prompt stays until the generated query is kept
+          onNlResult(result.content, () => setNlValue(''));
         } else {
+          appliedContent = true;
           onUpdateAndSubmitQuery(result.content);
         }
       }
@@ -168,13 +162,5 @@ export const useNlGeneration = ({
     trackNlResult,
   ]);
 
-  return {
-    nlValue,
-    setNlValue,
-    restoreNlPrompt,
-    isNlLoading,
-    hasConnector,
-    onNlSubmit,
-    onStopGeneration,
-  };
+  return { nlValue, setNlValue, isNlLoading, hasConnector, onNlSubmit, onStopGeneration };
 };

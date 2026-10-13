@@ -48,7 +48,7 @@ describe('useNlGeneration', () => {
     expect(coreStart.http.post).not.toHaveBeenCalled();
   });
 
-  it('onNlSubmit calls onNlResult with the generated content when provided', async () => {
+  it('onNlSubmit calls onNlResult and keeps the prompt until the result is accepted', async () => {
     const onNlResult = jest.fn();
     (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
 
@@ -61,28 +61,13 @@ describe('useNlGeneration', () => {
       await result.current.onNlSubmit();
     });
 
-    expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10');
+    expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10', expect.any(Function));
     expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+    expect(result.current.nlValue).toBe('show me logs');
+
+    act(() => onNlResult.mock.calls[0][1]());
+
     expect(result.current.nlValue).toBe('');
-  });
-
-  it('restoreNlPrompt keeps a newer prompt', async () => {
-    (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
-
-    const { result } = renderHook(
-      () => useNlGeneration({ ...defaultParams, onNlResult: jest.fn() }),
-      { wrapper: createWrapper() }
-    );
-
-    act(() => result.current.setNlValue('show me logs'));
-    await act(async () => {
-      await result.current.onNlSubmit();
-    });
-    act(() => result.current.setNlValue('newer prompt'));
-
-    act(() => result.current.restoreNlPrompt());
-
-    expect(result.current.nlValue).toBe('newer prompt');
   });
 
   it('onNlSubmit falls back to onUpdateAndSubmitQuery when onNlResult is not provided', async () => {

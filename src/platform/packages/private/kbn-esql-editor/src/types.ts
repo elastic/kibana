@@ -103,10 +103,11 @@ export interface ESQLEditorProps {
    * The parent receives `handler` and can pass it as `onNlResult` to a sibling
    * QuickSearchVisor (the non-inline case where the visor lives outside the editor).
    */
-  onVisorNlResultReady?: (handler: (generatedQuery: string) => void) => void;
-  /** Called when the user undoes a generated query; see QuickSearchVisor's `restoreNlPrompt` */
-  onVisorNlResultRejected?: () => void;
+  onVisorNlResultReady?: (handler: VisorNlResultHandler) => void;
 }
+
+/** Receives the generated ES|QL for review; `onAccept` is called once the user keeps it */
+export type VisorNlResultHandler = (generatedQuery: string, onAccept: () => void) => void;
 
 interface ESQLVariableService {
   isCreateControlSuggestionEnabled: boolean;

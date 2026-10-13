@@ -18,7 +18,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
-import { QuickSearchVisor, type QuickSearchVisorApi, type QuickSearchVisorProps } from '.';
+import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
 import { clearInferenceConnectorCache } from './use_nl_generation';
 import { clearNlToEsqlLicenseCache } from '../hooks/use_nl_to_esql_check';
@@ -419,37 +419,9 @@ describe('Quick search visor', () => {
           })
         );
       });
-      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
-    });
-
-    it('restoreNlPrompt returns to natural language with the submitted prompt focused', async () => {
-      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
-        content: 'FROM logs | LIMIT 10',
-      });
-      const onNlResult = jest.fn();
-      const visorRef = React.createRef<QuickSearchVisorApi>();
-      const { getByTestId, queryByTestId } = renderWithI18n(
-        <KibanaContextProvider services={enterpriseServices}>
-          <QuickSearchVisor ref={visorRef} {...props} onNlResult={onNlResult} />
-        </KibanaContextProvider>
+      await waitFor(() =>
+        expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10', expect.any(Function))
       );
-
-      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument());
-      await act(async () => {
-        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
-      });
-      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
-      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('');
-      await act(async () => {
-        await userEvent.click(getByTestId('esqlVisorModeKql'));
-      });
-      expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
-
-      act(() => visorRef.current?.restoreNlPrompt());
-
-      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
-      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('show me logs');
-      expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus();
     });
 
     it.each([

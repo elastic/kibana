@@ -13,7 +13,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 
-export const REVIEW_ACTIONS_WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
+const WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
 // Buttons (~30px) plus 8px breathing room above so they don't sit flush against the inserted code.
 const ZONE_HEIGHT_PX = 38;
 const ZONE_PADDING_TOP_PX = 8;
@@ -57,7 +57,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   }
 
   public getId(): string {
-    return REVIEW_ACTIONS_WIDGET_ID;
+    return WIDGET_ID;
   }
 
   public getDomNode(): HTMLElement {
@@ -90,7 +90,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     this.buttons[0]?.focus({ preventScroll: true });
   }
 
-  public dispose({ focusEditor = true }: { focusEditor?: boolean } = {}): void {
+  public dispose(): void {
     const ownsFocus = this.domNode?.contains(document.activeElement) ?? false;
     this.isFocusPending = false;
     this.editor.removeContentWidget(this);
@@ -106,7 +106,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     this.domNode = undefined;
     this.buttons = [];
 
-    if (ownsFocus && focusEditor) {
+    if (ownsFocus) {
       this.editor.focus();
     }
   }

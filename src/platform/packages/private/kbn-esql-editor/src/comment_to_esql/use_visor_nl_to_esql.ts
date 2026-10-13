@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import type { VisorNlResultHandler } from '../types';
 import { useReplaceReview } from './use_replace_review';
 import type { ReviewState } from './use_replace_review';
 import { getVisorNlInsertPlan } from './visor_nl_insert';
@@ -22,7 +23,6 @@ interface UseVisorNlToEsqlParams {
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   onSubmit: (query: string) => void;
   onAfterInsert?: () => void;
-  onReject?: () => void;
   telemetryService?: ESQLEditorTelemetryService;
 }
 
@@ -31,11 +31,11 @@ export const useVisorNlToEsql = ({
   editorModel,
   onSubmit,
   onAfterInsert,
-  onReject,
   telemetryService,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
+  const onAcceptRef = useRef<(() => void) | undefined>(undefined);
   const isSupersedingRef = useRef(false);
 
   const onAfterAccept = useCallback(
@@ -45,6 +45,7 @@ export const useVisorNlToEsql = ({
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
       onSubmit(generatedContentRef.current);
+      onAcceptRef.current?.();
     },
     [onSubmit, telemetryService]
   );
@@ -56,9 +57,8 @@ export const useVisorNlToEsql = ({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
-      onReject?.();
     },
-    [telemetryService, onReject]
+    [telemetryService]
   );
 
   const acceptAction = useMemo(
@@ -91,12 +91,10 @@ export const useVisorNlToEsql = ({
     editSourceId: 'nl-to-esql-visor',
     onAfterAccept,
     onAfterReject,
-    // Undo moves focus to the visor input instead
-    focusEditorOnReject: false,
   });
 
-  const showVisorReview = useCallback(
-    (generatedContent: string) => {
+  const showVisorReview = useCallback<VisorNlResultHandler>(
+    (generatedContent, onAccept) => {
       const editor = editorRef.current;
       const model = editorModel.current;
       if (!editor || !model) return;
@@ -108,6 +106,7 @@ export const useVisorNlToEsql = ({
       isSupersedingRef.current = false;
 
       generatedContentRef.current = generatedContent;
+      onAcceptRef.current = onAccept;
 
       const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
       if (!plan) return;
