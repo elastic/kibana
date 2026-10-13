@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SubscriptionStatus, SubscriptionStatusActionId } from '../status/types';
 
-const popoverContentStyles = css({ width: 320 });
+const popoverContentStyles = css({ width: 360 });
 
 export interface SubscriptionBadgeProps {
   status: SubscriptionStatus;
@@ -146,7 +146,8 @@ export const SubscriptionBadge = ({ status, onOpen, onAction }: SubscriptionBadg
           <EuiBadge
             color={euiTheme.colors.primary}
             tabIndex={0}
-            title={status.label}
+            // EuiBadge falls back to its inner text as a native title, which would duplicate the tooltip.
+            title=""
             data-test-subj="subscriptionStatusBadge"
           >
             {status.label}
