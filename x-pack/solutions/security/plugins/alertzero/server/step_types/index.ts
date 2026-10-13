@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt/types';
+import {
+  getTriageHeadroomStepDefinition,
+  getTriagePlanSweepStepDefinition,
+} from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
 import {
   getSummarizeInvestigationStepDefinition,
@@ -26,6 +31,8 @@ export const registerStepDefinitions = ({
   getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
+  getInternalEsClient,
+  getTaskManager,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -36,6 +43,8 @@ export const registerStepDefinitions = ({
   getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
+  getInternalEsClient?: () => ElasticsearchClient;
+  getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -45,6 +54,7 @@ export const registerStepDefinitions = ({
       getHuntServices,
       getResolveHostEnrollment,
       isContextEngineEnabled,
+      getInternalEsClient,
       logger,
     })
   );
@@ -55,6 +65,8 @@ export const registerStepDefinitions = ({
       resolveConnectorId,
     })
   );
+  workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
+  workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
 };
 
 export { getPackageReportStepDefinition } from './package_report';

@@ -10,7 +10,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/const
 import type { CaseCustomField, User } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
@@ -547,7 +547,7 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
-  attachments: BulkCreateAttachmentsRequestV2;
+  attachments: BulkCreateUnifiedAttachmentsRequest;
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {
