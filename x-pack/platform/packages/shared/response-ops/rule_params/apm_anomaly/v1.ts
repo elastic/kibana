@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { MAX_APM_FIELD_VALUE_LENGTH, MAX_TIME_WINDOW_UNIT_LENGTH } from '../common/constants';
 
 export enum AnomalyDetectorType {
   txLatency = 'txLatency',
@@ -26,10 +27,16 @@ const detectorsSchema = schema.oneOf([
 export const anomalyParamsSchema = schema.object(
   {
     serviceName: schema.maybe(
-      schema.string({ meta: { description: 'The service name from APM.' } })
+      schema.string({
+        maxLength: MAX_APM_FIELD_VALUE_LENGTH,
+        meta: { description: 'The service name from APM.' },
+      })
     ),
     transactionType: schema.maybe(
-      schema.string({ meta: { description: 'The transaction type from APM.' } })
+      schema.string({
+        maxLength: MAX_APM_FIELD_VALUE_LENGTH,
+        meta: { description: 'The transaction type from APM.' },
+      })
     ),
     windowSize: schema.number({
       meta: {
@@ -38,9 +45,13 @@ export const anomalyParamsSchema = schema.object(
       },
     }),
     windowUnit: schema.string({
+      maxLength: MAX_TIME_WINDOW_UNIT_LENGTH,
       meta: { description: 'The type of units for the time window: minutes, hours, or days.' },
     }),
-    environment: schema.string({ meta: { description: 'The environment from APM.' } }),
+    environment: schema.string({
+      maxLength: MAX_APM_FIELD_VALUE_LENGTH,
+      meta: { description: 'The environment from APM.' },
+    }),
     anomalySeverityType: schema.oneOf(
       [
         schema.literal(ML_ANOMALY_SEVERITY.CRITICAL),
@@ -58,6 +69,7 @@ export const anomalyParamsSchema = schema.object(
     anomalyDetectorTypes: schema.maybe(
       schema.arrayOf(detectorsSchema, {
         minSize: 1,
+        maxSize: Object.values(AnomalyDetectorType).length,
         meta: {
           description:
             'The types of anomalies that are detected. For example, detect abnormal latency, throughput, failed transaction rates, or low transaction count.',
