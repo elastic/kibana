@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
+import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildQueryFromFilters, isOfAggregateQueryType } from '@kbn/es-query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
@@ -15,6 +16,11 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { createFilter } from '../use_discover_links';
 import { buildEsqlCategoryDocsQuery } from './build_esql_analysis_queries';
+
+const getFirstFieldValue = (fields: estypes.SearchHit['fields'], name?: string): string => {
+  const value = name === undefined ? undefined : fields?.[name]?.[0];
+  return value == null ? '' : String(value);
+};
 
 export function useDocsForCategory() {
   const {
@@ -94,10 +100,10 @@ export function useDocsForCategory() {
       // Respect meta.negate / meta.disabled via buildQueryFromFilters (must vs must_not)
       const filterQuery = buildQueryFromFilters([categoryFilter, ...additionalFilters], undefined);
 
-      // Build source fields array
-      const sourceFields = [field];
+      // Build the fields to retrieve
+      const fieldsToFetch = [field];
       if (timeField) {
-        sourceFields.push(timeField);
+        fieldsToFetch.push(timeField);
       }
 
       // Perform match_all search with filters
@@ -108,7 +114,10 @@ export function useDocsForCategory() {
               index,
               size,
               body: {
-                _source: sourceFields,
+                // Use the fields API rather than _source, so dotted field names are resolved
+                // whether the document holds them as a flat key or as nested objects.
+                _source: false,
+                fields: fieldsToFetch,
                 query: {
                   bool: {
                     must: [{ match_all: {} }, ...filterQuery.must],
@@ -127,9 +136,9 @@ export function useDocsForCategory() {
       return {
         // @ts-expect-error total value typing
         total: response.rawResponse.hits.total,
-        results: response.rawResponse.hits.hits.map((hit: any) => ({
-          timestamp: hit._source[timeField!],
-          message: hit._source[field],
+        results: response.rawResponse.hits.hits.map((hit: estypes.SearchHit) => ({
+          timestamp: getFirstFieldValue(hit.fields, timeField),
+          message: getFirstFieldValue(hit.fields, field),
         })),
       };
     },
