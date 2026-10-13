@@ -36,6 +36,22 @@ describe('readSearchEmbeddingModel', () => {
     });
   });
 
+  it('embeds the query with search_inference_id when one is set', async () => {
+    esClient.indices.getMapping.mockResolvedValue(
+      mappingWith({
+        type: 'semantic_text',
+        inference_id: '.jina-v5',
+        search_inference_id: 'jina-v5-query',
+        model_settings: { task_type: 'text_embedding', dimensions: 1024 },
+      })
+    );
+
+    await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
+      kind: 'dense',
+      inferenceId: 'jina-v5-query',
+    });
+  });
+
   it('reads a sparse model', async () => {
     esClient.indices.getMapping.mockResolvedValue(
       mappingWith({

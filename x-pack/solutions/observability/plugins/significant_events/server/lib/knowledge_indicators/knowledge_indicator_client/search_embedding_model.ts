@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  InferenceTaskType,
+  MappingProperty,
+  MappingSemanticTextProperty,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../data_stream';
 import { SEARCH_EMBEDDING } from '../fields';
@@ -17,21 +22,33 @@ export type SearchEmbeddingModel =
 
 export type SearchEmbeddingModelResolver = () => Promise<SearchEmbeddingModel>;
 
-interface SemanticTextMapping {
-  type?: string;
-  inference_id?: string;
-  model_settings?: { task_type?: string };
-}
+// `model_settings` is written by ES once the first embedded document is indexed; it is not in the
+// client's mapping types.
+type SemanticTextMapping = MappingSemanticTextProperty & {
+  model_settings?: { task_type?: InferenceTaskType };
+};
 
-const readModel = (mapping: SemanticTextMapping | undefined): SearchEmbeddingModel => {
-  const taskType = mapping?.model_settings?.task_type;
-  if (taskType === 'sparse_embedding') {
-    return { kind: 'sparse' };
+const readModel = (property: MappingProperty | undefined): SearchEmbeddingModel => {
+  if (property?.type !== 'semantic_text') {
+    return { kind: 'unknown' };
   }
-  if ((taskType === 'text_embedding' || taskType === 'embedding') && mapping?.inference_id) {
-    return { kind: 'dense', inferenceId: mapping.inference_id };
+  const {
+    inference_id: inferenceId,
+    search_inference_id: searchInferenceId,
+    model_settings,
+  } = property as SemanticTextMapping;
+  const queryInferenceId = searchInferenceId ?? inferenceId;
+  switch (model_settings?.task_type) {
+    case 'sparse_embedding':
+      return { kind: 'sparse' };
+    case 'text_embedding':
+    case 'embedding':
+      return queryInferenceId
+        ? { kind: 'dense', inferenceId: queryInferenceId }
+        : { kind: 'unknown' };
+    default:
+      return { kind: 'unknown' };
   }
-  return { kind: 'unknown' };
 };
 
 /** Reads the `search_embedding` model from the backing-index mappings of the data stream. */
@@ -43,10 +60,7 @@ export const readSearchEmbeddingModel = async (
   try {
     const mappings = await esClient.indices.getMapping({ index: dataStream });
     for (const { mappings: indexMappings } of Object.values(mappings ?? {})) {
-      const field = indexMappings?.properties?.[SEARCH_EMBEDDING] as
-        | SemanticTextMapping
-        | undefined;
-      const model = readModel(field);
+      const model = readModel(indexMappings?.properties?.[SEARCH_EMBEDDING]);
       if (model.kind !== 'unknown') {
         return model;
       }
