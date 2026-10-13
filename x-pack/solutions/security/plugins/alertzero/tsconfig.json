@@ -27,6 +27,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
     "@kbn/app-header",
+    "@kbn/deeplinks-management",
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-workflows",
     "@kbn/spaces-plugin",

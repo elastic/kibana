@@ -7,10 +7,10 @@
 
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
@@ -19,164 +19,197 @@ export type EntityDefinitionType = string;
 
 /** Which extraction process a task is running as. */
 export type ExtractionMode = z.infer<typeof ExtractionMode>;
-export const ExtractionMode = z.enum(['single', 'priority', 'nonPriority']);
+export const ExtractionMode = lazySchema(() => z.enum(['single', 'priority', 'nonPriority']));
 /** Named access to the modes. Use this rather than the string literals, which live only above. */
 export const EXTRACTION_MODE = ExtractionMode.enum;
 
-const mappingSchema = z.any();
+const mappingSchema = lazySchema(() => z.any());
 
-const retentionOperationSchema = z.discriminatedUnion('operation', [
-  z.object({ operation: z.literal('collect_values') }),
-  z.object({ operation: z.literal('prefer_newest_value') }),
-  z.object({ operation: z.literal('prefer_oldest_value') }),
-  z.object({ operation: z.literal('managed') }),
-]);
+const retentionOperationSchema = lazySchema(() =>
+  z.discriminatedUnion('operation', [
+    z.object({ operation: z.literal('collect_values') }),
+    z.object({ operation: z.literal('prefer_newest_value') }),
+    z.object({ operation: z.literal('prefer_oldest_value') }),
+    z.object({ operation: z.literal('managed') }),
+  ])
+);
 
-const fieldSchema = z.object({
-  allowAPIUpdate: z.optional(z.boolean()),
-  destination: z.string(),
-  mapping: z.optional(mappingSchema),
-  retention: retentionOperationSchema,
-  source: z.string(),
-});
+const fieldSchema = lazySchema(() =>
+  z.object({
+    allowAPIUpdate: z.optional(z.boolean()),
+    destination: z.string(),
+    mapping: z.optional(mappingSchema),
+    retention: retentionOperationSchema,
+    source: z.string(),
+  })
+);
 
-const euidFieldSchema = z.object({
-  field: z.string(),
-});
+const euidFieldSchema = lazySchema(() =>
+  z.object({
+    field: z.string(),
+  })
+);
 
-const euidSeparatorSchema = z.object({
-  sep: z.string(),
-});
+const euidSeparatorSchema = lazySchema(() =>
+  z.object({
+    sep: z.string(),
+  })
+);
 
 // DoS guard: cap every user-supplied string in the whenClause schema before it reaches Painless/ESQL generation.
 const MAX_FIELD_EVALUATION_STRING_LENGTH = 1000;
 
 // Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value or fallbackValue).
-const fieldEvaluationWhenClauseSourceMatchSchema = z.object({
-  sourceMatchesAny: z.array(z.string()),
-  then: z.string(),
-});
-const fieldEvaluationWhenClauseFieldMappingThenSchema = z.object({
-  field: z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
-  mapping: z.record(
-    z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
-    z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH)
-  ),
-});
+const fieldEvaluationWhenClauseSourceMatchSchema = lazySchema(() =>
+  z.object({
+    sourceMatchesAny: z.array(z.string()),
+    then: z.string(),
+  })
+);
+const fieldEvaluationWhenClauseFieldMappingThenSchema = lazySchema(() =>
+  z.object({
+    field: z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
+    mapping: z.record(
+      z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
+      z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH)
+    ),
+  })
+);
 
-const fieldEvaluationWhenClauseConditionSchema = z.object({
-  condition: streamlangConditionSchema,
-  then: z.union([
-    z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
-    fieldEvaluationWhenClauseFieldMappingThenSchema,
-  ]),
-});
-const fieldEvaluationWhenClauseSchema = z.union([
-  fieldEvaluationWhenClauseSourceMatchSchema,
-  fieldEvaluationWhenClauseConditionSchema,
-]);
+const fieldEvaluationWhenClauseConditionSchema = lazySchema(() =>
+  z.object({
+    condition: streamlangConditionSchema,
+    then: z.union([
+      z.string().max(MAX_FIELD_EVALUATION_STRING_LENGTH),
+      fieldEvaluationWhenClauseFieldMappingThenSchema,
+    ]),
+  })
+);
+const fieldEvaluationWhenClauseSchema = lazySchema(() =>
+  z.union([fieldEvaluationWhenClauseSourceMatchSchema, fieldEvaluationWhenClauseConditionSchema])
+);
 
-const fieldEvaluationSourceSchema = z.union([
-  z.object({ field: z.string() }),
-  z.object({ firstChunkOfField: z.string(), splitBy: z.string() }),
-]);
+const fieldEvaluationSourceSchema = lazySchema(() =>
+  z.union([
+    z.object({ field: z.string() }),
+    z.object({ firstChunkOfField: z.string(), splitBy: z.string() }),
+  ])
+);
 
-const fieldEvaluationSchema = z.object({
-  destination: z.string(),
-  sources: z.array(fieldEvaluationSourceSchema),
-  fallbackValue: z.string().nullable(),
-  whenClauses: z.array(fieldEvaluationWhenClauseSchema),
-});
+const fieldEvaluationSchema = lazySchema(() =>
+  z.object({
+    destination: z.string(),
+    sources: z.array(fieldEvaluationSourceSchema),
+    fallbackValue: z.string().nullable(),
+    whenClauses: z.array(fieldEvaluationWhenClauseSchema),
+  })
+);
 
-const euidCompositionSchema = z
-  .array(z.union([euidFieldSchema, euidSeparatorSchema]))
-  .min(1)
-  .refine((parts) => parts.some((part) => 'field' in part), {
-    message: 'Each EUID composition must contain at least one field part',
-  });
+const euidCompositionSchema = lazySchema(() =>
+  z
+    .array(z.union([euidFieldSchema, euidSeparatorSchema]))
+    .min(1)
+    .refine((parts) => parts.some((part) => 'field' in part), {
+      message: 'Each EUID composition must contain at least one field part',
+    })
+);
 
-const euidRankingBranchSchema = z.object({
-  when: streamlangConditionSchema.optional(),
-  ranking: z.array(euidCompositionSchema).min(1),
-});
+const euidRankingBranchSchema = lazySchema(() =>
+  z.object({
+    when: streamlangConditionSchema.optional(),
+    ranking: z.array(euidCompositionSchema).min(1),
+  })
+);
 
-export const euidRankingSchema = z.object({
-  branches: z.array(euidRankingBranchSchema).min(1),
-});
+export const euidRankingSchema = lazySchema(() =>
+  z.object({
+    branches: z.array(euidRankingBranchSchema).min(1),
+  })
+);
 
 // Any field used in the euid calculation must be mapped in the fields array,
 // otherwise we won't have guarantees of field being available
-const calculatedIdentityFieldLogicSchema = z.object({
-  // Ranking mechanism for EUID: branches evaluated in order; first matching branch wins.
-  // Branch with no `when` always matches (fallback). Used by ESQL, Painless, Memory, DSL.
-  euidRanking: euidRankingSchema,
+const calculatedIdentityFieldLogicSchema = lazySchema(() =>
+  z.object({
+    // Ranking mechanism for EUID: branches evaluated in order; first matching branch wins.
+    // Branch with no `when` always matches (fallback). Used by ESQL, Painless, Memory, DSL.
+    euidRanking: euidRankingSchema,
 
-  // Optional pre-evaluated fields (e.g. entity.namespace from event.module). Applied before
-  // euid generation and translated to ESQL, Painless, and in-memory.
-  fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
+    // Optional pre-evaluated fields (e.g. entity.namespace from event.module). Applied before
+    // euid generation and translated to ESQL, Painless, and in-memory.
+    fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
 
-  // Document-level filter (Condition from @kbn/streamlang). Only documents matching this
-  // filter are considered for this entity type. Must express "at least one identity field
-  // present" (and any entity-specific rules, e.g. user IDP pre-conditions). Translated to
-  // DSL and ESQL via conditionToQueryDsl and conditionToESQL.
-  documentsFilter: streamlangConditionSchema,
+    // Document-level filter (Condition from @kbn/streamlang). Only documents matching this
+    // filter are considered for this entity type. Must express "at least one identity field
+    // present" (and any entity-specific rules, e.g. user IDP pre-conditions). Translated to
+    // DSL and ESQL via conditionToQueryDsl and conditionToESQL.
+    documentsFilter: streamlangConditionSchema,
 
-  // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
-  skipTypePrepend: z.optional(z.boolean()),
-});
+    // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
+    skipTypePrepend: z.optional(z.boolean()),
+  })
+);
 
 /**
  * Single-field identity: entity is identified by one field only (e.g. service.name, entity.id).
  * No composition, no field evaluations. ESQL/DSL use a simplified path for this shape.
  */
-export const singleFieldIdentitySchema = z.object({
-  singleField: z.string(),
-  // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
-  skipTypePrepend: z.optional(z.boolean()),
-});
+export const singleFieldIdentitySchema = lazySchema(() =>
+  z.object({
+    singleField: z.string(),
+    // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
+    skipTypePrepend: z.optional(z.boolean()),
+  })
+);
 
-const identityFieldSchema = z.union([
-  calculatedIdentityFieldLogicSchema,
-  singleFieldIdentitySchema,
-]);
+const identityFieldSchema = lazySchema(() =>
+  z.union([calculatedIdentityFieldLogicSchema, singleFieldIdentitySchema])
+);
 
 // Field value: literal string, single source reference, or composition (CONCAT of fields).
-const fieldValueSchema = z.union([
-  z.string(),
-  z.object({ source: z.string() }),
-  z.object({
-    composition: z.object({
-      fields: z.array(z.string()).min(1),
-      sep: z.string(),
+const fieldValueSchema = lazySchema(() =>
+  z.union([
+    z.string(),
+    z.object({ source: z.string() }),
+    z.object({
+      composition: z.object({
+        fields: z.array(z.string()).min(1),
+        sep: z.string(),
+      }),
     }),
-  }),
-]);
+  ])
+);
 export type FieldValueSchema = z.infer<typeof fieldValueSchema>;
 
 // Schema for "when condition true set fields" (condition + field overrides). Used e.g. for pre-agg overrides.
-export const setFieldsByConditionSchema = z.object({
-  condition: streamlangConditionSchema,
-  fields: z.record(z.string(), fieldValueSchema).refine((value) => Object.keys(value).length > 0, {
-    message: 'At least one field override is required',
-  }),
-});
+export const setFieldsByConditionSchema = lazySchema(() =>
+  z.object({
+    condition: streamlangConditionSchema,
+    fields: z
+      .record(z.string(), fieldValueSchema)
+      .refine((value) => Object.keys(value).length > 0, {
+        message: 'At least one field override is required',
+      }),
+  })
+);
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
 
 // Definition-owned reasons stay separate so a rule can only report a reason it owns.
-export const creationRejectionReasonSchema = z.enum([
-  'user_not_local_namespace',
-  'host_missing_host_id',
-]);
+export const creationRejectionReasonSchema = lazySchema(() =>
+  z.enum(['user_not_local_namespace', 'host_missing_host_id'])
+);
 export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSchema>;
 
 /** Conditional rules require both `requires` and `rejectionReason`; `{}` opts in unconditionally. */
-const creatableFromSingleDocumentSchema = z.union([
-  z.strictObject({
-    requires: streamlangConditionSchema,
-    rejectionReason: creationRejectionReasonSchema,
-  }),
-  z.strictObject({}),
-]);
+const creatableFromSingleDocumentSchema = lazySchema(() =>
+  z.union([
+    z.strictObject({
+      requires: streamlangConditionSchema,
+      rejectionReason: creationRejectionReasonSchema,
+    }),
+    z.strictObject({}),
+  ])
+);
 export type CreatableFromSingleDocument = z.infer<typeof creatableFromSingleDocumentSchema>;
 
 const MAX_MANAGED_BY_STRING_LENGTH = 256;
@@ -188,47 +221,51 @@ const MAX_MANAGED_BY_STRING_LENGTH = 256;
  * - `user`: created through the API or UI; `id` is the Kibana user profile uid when known.
  */
 export type EntityDefinitionManagedBy = z.infer<typeof EntityDefinitionManagedBy>;
-export const EntityDefinitionManagedBy = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('plugin'), id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH) }),
-  z.object({
-    kind: z.literal('integration'),
-    package: z.string().max(MAX_MANAGED_BY_STRING_LENGTH),
-  }),
-  z.object({
-    kind: z.literal('user'),
-    id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH).optional(),
-  }),
-]);
+export const EntityDefinitionManagedBy = lazySchema(() =>
+  z.discriminatedUnion('kind', [
+    z.object({ kind: z.literal('plugin'), id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH) }),
+    z.object({
+      kind: z.literal('integration'),
+      package: z.string().max(MAX_MANAGED_BY_STRING_LENGTH),
+    }),
+    z.object({
+      kind: z.literal('user'),
+      id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH).optional(),
+    }),
+  ])
+);
 
-export const entitySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  type: EntityType,
-  filter: z.string().optional(),
-  entityTypeFallback: z.string().optional(),
-  fields: z.array(fieldSchema),
-  // Optional evaluated fields applied before pre-agg overrides and STATS for all entity types.
-  fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
-  identityField: identityFieldSchema,
-  indexPatterns: z.array(z.string()),
-  // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
-  // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
-  postAggFilter: z.optional(streamlangConditionSchema),
-  // Optional document-level predicate (Condition from @kbn/streamlang) marking this entity type's
-  // high-signal logs. Omission means the type has no priority/non-priority split.
-  priorityExtractionGate: z.optional(streamlangConditionSchema),
-  // Opts the non-priority process into sampling. Requires priorityExtractionGate; omission means
-  // no sampling.
-  nonPrioritySampling: z.optional(z.boolean()),
-  // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
-  whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
-  // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
-  whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
-  // Omission disables single-document creation for the entity type.
-  creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
-  // Who manages the definition. Optional here; the registry requires it.
-  managedBy: z.optional(EntityDefinitionManagedBy),
-});
+export const entitySchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    type: EntityType,
+    filter: z.string().optional(),
+    entityTypeFallback: z.string().optional(),
+    fields: z.array(fieldSchema),
+    // Optional evaluated fields applied before pre-agg overrides and STATS for all entity types.
+    fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
+    identityField: identityFieldSchema,
+    indexPatterns: z.array(z.string()),
+    // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
+    // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
+    postAggFilter: z.optional(streamlangConditionSchema),
+    // Optional document-level predicate (Condition from @kbn/streamlang) marking this entity type's
+    // high-signal logs. Omission means the type has no priority/non-priority split.
+    priorityExtractionGate: z.optional(streamlangConditionSchema),
+    // Opts the non-priority process into sampling. Requires priorityExtractionGate; omission means
+    // no sampling.
+    nonPrioritySampling: z.optional(z.boolean()),
+    // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
+    whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
+    // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
+    whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
+    // Omission disables single-document creation for the entity type.
+    creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
+    // Who manages the definition. Optional here; the registry requires it.
+    managedBy: z.optional(EntityDefinitionManagedBy),
+  })
+);
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
 export type CalculatedEntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // full identity (euidRanking + documentsFilter + optional fieldEvaluations)

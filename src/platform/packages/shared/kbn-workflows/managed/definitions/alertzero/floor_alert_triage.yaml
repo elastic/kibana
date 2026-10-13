@@ -102,7 +102,7 @@ steps:
 
   # ---------------------------------------------------------------------------
   # 2. Open an Investigation conversation seeded from the `investigation`
-  #    template. Seeds status, severity, and the workflow_execution_id that links
+  #    template. Seeds status, severity, and the workflow_execution_ids that link
   #    the Investigation to this run.
   # ---------------------------------------------------------------------------
   - name: create_investigation
@@ -121,7 +121,7 @@ steps:
         description: >-
           Automated triage of {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %} from rule
           "{{ event.rule.name }}" ({{ event.rule.id }}).
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # ---------------------------------------------------------------------------
   # 3. Attach the analysed alerts to the Investigation in chunks of 20.
@@ -225,6 +225,7 @@ steps:
               tagged or closed.
     with:
       workflow-id: system-security-alert-analysis
+      run-as-mode: inherit
       inputs:
         # A child run has no trigger event of its own, so the batch must be passed
         # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
@@ -635,6 +636,7 @@ steps:
                   {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
         with:
           workflow-id: system-security-floor-alert-triage-review
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             rule_id: "{{ event.rule.id }}"

@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { useForm, type FormConfig, type FormData, type FormHook } from '../../../shared_imports';
+import { waitForNextPaint } from '../../utils/wait_for_next_paint';
 import type { FormHookWithWarnings } from './form_hook_with_warnings';
 import { extractValidationResults } from './extract_validation_results';
 import type { ValidationResults } from './validation_results';
@@ -109,6 +110,8 @@ export function useFormWithWarnings<T extends FormData = FormData, I extends For
 
       setIsSubmitted(true);
       setSubmitting(true);
+      // Let the browser paint the submitting state before heavy synchronous validation runs
+      await waitForNextPaint();
 
       const isFormValid = await validate();
       const formData = isFormValid ? getFormData() : ({} as T);

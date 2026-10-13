@@ -11,6 +11,8 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
+const NIGHTSHIFT_PAGE_LOAD_TIMEOUT = 60_000;
+
 test.describe(
   'Nightshift navigation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -54,12 +56,19 @@ test.describe(
 
     test('links to Settings', async ({ page, pageObjects }) => {
       await page.gotoApp('nightshift');
-      await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
-      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
-      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
+      await expect(page.getByTestId('nightshiftPage')).toBeVisible({
+        timeout: NIGHTSHIFT_PAGE_LOAD_TIMEOUT,
+      });
+      await expect(page.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
+      await expect(page.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
 
       await pageObjects.appMenu.clickItem('nightshiftSettingsLink');
-      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+      await expect(page).toHaveURL(/\/app\/nightshift\/settings\/(general|detections)/);
+      await expect(page.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');
+
+      await page.getByTestId('nightshiftSettingsTab-investigations').click();
+      await expect(page).toHaveURL(/\/app\/nightshift\/settings\/investigations/);
+      await expect(page.getByTestId('nightshiftRunLimitEnabledSwitch-investigation')).toBeVisible();
     });
   }
 );

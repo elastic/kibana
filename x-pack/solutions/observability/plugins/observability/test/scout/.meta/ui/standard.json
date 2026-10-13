@@ -1,5 +1,5 @@
 {
-  "sha1": "7e2f03be824ce018ad0dbbb560ee18b1ea839d45",
+  "sha1": "994d90276d07c3d984a044d88355732fd8e3436f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -881,13 +881,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 179,
-        "column": 13
+        "column": 7
       }
     },
     {
@@ -897,13 +896,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 186,
-        "column": 13
+        "column": 56
       }
     },
     {
@@ -913,29 +911,27 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 209,
-        "column": 11
+        "column": 7
       }
     },
     {
-      "id": "33b867a7e4eb3bf-ff1ea68fdcf4fdd",
-      "title": "Observability Alerts nav — alerting v2 clicking Alerts loads Alert episodes when alerting v2 is enabled",
+      "id": "33b867a7e4eb3bf-774772c580c93ed",
+      "title": "Observability Alerts nav — alerting v2 clicking Alerts loads alerts when alerting v2 is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 242,
-        "column": 24
+        "column": 13
       }
     },
     {
@@ -945,13 +941,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 256,
-        "column": 13
+        "line": 255,
+        "column": 9
       }
     },
     {
@@ -961,12 +956,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 278,
+        "line": 276,
         "column": 11
       }
     },
@@ -977,13 +971,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 294,
-        "column": 11
+        "column": 7
       }
     },
     {
@@ -993,13 +986,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 304,
-        "column": 10
+        "line": 303,
+        "column": 7
       }
     },
     {
@@ -1009,13 +1001,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 310,
-        "column": 71
+        "line": 311,
+        "column": 69
       }
     },
     {
@@ -1025,13 +1016,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 334,
-        "column": 10
+        "line": 333,
+        "column": 7
       }
     },
     {
@@ -1041,13 +1031,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
-        "line": 346,
-        "column": 29
+        "line": 343,
+        "column": 25
       }
     },
     {
@@ -1057,13 +1046,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 355,
-        "column": 32
+        "column": 11
       }
     },
     {
@@ -1073,13 +1061,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 369,
-        "column": 11
+        "column": 7
       }
     },
     {
@@ -1089,13 +1076,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 388,
-        "column": 18
+        "column": 23
       }
     },
     {
@@ -1105,13 +1091,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 406,
-        "column": 28
+        "column": 25
       }
     },
     {
@@ -1121,13 +1106,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 423,
-        "column": 7
+        "column": 16
       }
     },
     {
@@ -1137,13 +1121,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 437,
-        "column": 11
+        "column": 7
       }
     },
     {
@@ -1153,13 +1136,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 449,
-        "column": 7
+        "column": 16
       }
     },
     {
@@ -1169,13 +1151,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 462,
-        "column": 7
+        "column": 16
       }
     },
     {
@@ -1185,13 +1166,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
         "line": 475,
-        "column": 7
+        "column": 16
       }
     },
     {

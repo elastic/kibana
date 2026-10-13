@@ -17,10 +17,11 @@ import {
 } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
-import type { TelemetryEventsSender } from '../../telemetry/sender';
-import { createMockTelemetryEventsSender } from '../../telemetry/__mocks__';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { SyntheticsTelemetry } from '../../telemetry/synthetics_telemetry';
 
-import { MONITOR_UPDATE_CHANNEL, MONITOR_CURRENT_CHANNEL } from '../../telemetry/constants';
+import { MONITOR_UPDATE_EVENT_TYPE, MONITOR_CURRENT_EVENT_TYPE } from '../../telemetry/constants';
 import { createHash } from 'crypto';
 import {
   formatTelemetryEvent,
@@ -203,28 +204,46 @@ describe('monitor upgrade telemetry helpers', () => {
 });
 
 describe('sendTelemetryEvents', () => {
-  let eventsTelemetryMock: jest.Mocked<TelemetryEventsSender>;
+  let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+  let telemetry: SyntheticsTelemetry;
   let loggerMock: jest.Mocked<Logger>;
 
   beforeEach(() => {
-    eventsTelemetryMock = createMockTelemetryEventsSender();
+    analyticsMock = coreMock.createSetup().analytics as jest.Mocked<AnalyticsServiceSetup>;
     loggerMock = loggingSystemMock.createLogger();
+    telemetry = new SyntheticsTelemetry(analyticsMock, loggerMock);
   });
 
-  it('should queue telemetry events with generic error', () => {
+  it('should report update and current events', () => {
     const event = formatTelemetryEvent({
       monitor: testConfig,
       stackVersion,
       isInlineScript: true,
       errors,
     });
-    sendTelemetryEvents(loggerMock, eventsTelemetryMock, event);
+    sendTelemetryEvents(loggerMock, telemetry, event);
 
-    expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith(MONITOR_UPDATE_CHANNEL, [
-      event,
-    ]);
-    expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith(MONITOR_CURRENT_CHANNEL, [
-      event,
-    ]);
+    expect(analyticsMock.reportEvent).toHaveBeenCalledWith(MONITOR_UPDATE_EVENT_TYPE, {
+      ...event,
+      issuedTo: undefined,
+    });
+    expect(analyticsMock.reportEvent).toHaveBeenCalledWith(MONITOR_CURRENT_EVENT_TYPE, {
+      ...event,
+      issuedTo: undefined,
+    });
+  });
+
+  it('logs instead of throwing when reporting fails', () => {
+    analyticsMock.reportEvent.mockImplementation(() => {
+      throw new Error('boom');
+    });
+    const event = formatTelemetryEvent({
+      monitor: testConfig,
+      stackVersion,
+      isInlineScript: true,
+    });
+
+    expect(() => sendTelemetryEvents(loggerMock, telemetry, event)).not.toThrow();
+    expect(loggerMock.error).toHaveBeenCalled();
   });
 });

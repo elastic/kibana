@@ -18,7 +18,7 @@ import { seriesStatisticsEsqlGuidance } from './series_statistics_prompt';
 const buildTargetIndexGuidance = (index: string) => `
 ## Read from the requested index
 
-The query **MUST** read from \`${index}\`. Use that name verbatim in the source command (\`FROM\` or \`TS\`), including any wildcards and any \`cluster:\` remote prefix.
+The query **MUST** read from \`${index}\`. Use that name verbatim in the source command (\`FROM\`, \`TS\`, or the \`index\` option of \`PROMQL\`), including any wildcards and any \`cluster:\` remote prefix.
 Do **NOT** substitute a pattern inferred from the request, from the field names, or from your own knowledge of common Elasticsearch schemas, even when it looks more specific or more idiomatic — a chart built on a pattern that matches no index silently renders empty.
 To restrict which documents are returned, add a \`WHERE\` clause; never narrow by changing the source.
 `;
@@ -45,6 +45,7 @@ Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`
 ## Time
 
 Use the event-time field. Do not hardcode times or \`now()\` ranges. On a time series, omit \`LIMIT\`, \`SORT\`, and \`DATE_TRUNC\`.
+\`PROMQL\` has no time field to filter or bucket on (see below).
 
 ### FROM
 
@@ -68,13 +69,26 @@ Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time fie
 
 Use \`TS\` only when the resource is marked \`is-tsds="true"\`; otherwise use \`FROM\`. With \`TS\`, bucket \`@timestamp\` exactly as with \`FROM\` and do not add \`TRANGE\`: the visualization framework adds the \`@timestamp\` range.
 
+### PROMQL
+
+The visualization framework automatically applies the time range to \`PROMQL\` queries, and the step is derived from it,
+meaning you **do not need** to set the \`start\` and \`end\` options. Only set \`step\` when the user asks for a specific resolution, e.g.
+
+\`\`\`esql
+PROMQL index=metrics-tsds request_rate=(sum by (host.name) (rate(http_requests_total)))
+\`\`\`
+
+The time bucket column of \`PROMQL\` is \`step\`, and it has no \`@timestamp\` column, so do not add a \`WHERE\` time filter, \`BUCKET\` or \`TBUCKET\` after \`PROMQL\`, also for charts that do not group by time.
+For time series charts, use the \`PROMQL\` command as is, without \`STATS\`: the chart uses \`step\` as its time axis.
+For metric and gauge charts or a ranking by label, use the single-value results patterns of the \`PROMQL\` documentation.
+
 ${seriesStatisticsEsqlGuidance}
 
 ## Grouping dimensions (BY)
 
 Only \`BY\` dimensions the user asked for:
 
-- **Time series** default: group by the time bucket alone. Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
+- **Time series** default: group by the time bucket alone (or no \`by (...)\` in \`PROMQL\`). Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
 - **Categorical charts**: \`BY\` only the category field(s) named in the request (plus no invented splits).
 - Index dimensions may be used in \`WHERE\` filters when the user scopes to a specific series; that is not a reason to put them in \`BY\`.
 

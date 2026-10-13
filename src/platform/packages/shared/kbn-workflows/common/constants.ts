@@ -46,6 +46,7 @@ export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library
 /**
  * Global Advanced Setting gating the global Workflow Executions view
  * (`/app/workflows/executions`) and the execution flyout on workflow detail.
+ * Enabled by default; operators can turn it off in kibana.yml.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
  * readable from any browser plugin that consumes the workflows UI without
@@ -95,6 +96,17 @@ export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-sys
  */
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
+
+/**
+ * Why the workflow editor cannot apply changes. The editor sends it on the
+ * `workflow.yaml` attachment so the agent does not offer edits the user cannot save.
+ */
+export const WORKFLOW_EDITOR_READ_ONLY_REASONS = [
+  'executions_tab',
+  'managed',
+  'no_permission',
+] as const;
+export type WorkflowEditorReadOnlyReason = (typeof WORKFLOW_EDITOR_READ_ONLY_REASONS)[number];
 
 /**
  * UI event broadcast on the agent builder events bus when a workflow YAML
