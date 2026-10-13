@@ -49,7 +49,7 @@ export interface HuntExpected {
    * gated on the scope gate / skip reason / zero writes instead.
    */
   outcome?: HuntRunOutcome[];
-  /** Expected `incomplete_stage` when `partial`, e.g. `package` for a clean run under the known gap. */
+  /** Expected `incomplete_stage` when `partial`, e.g. `packaging` when the benign close fails. */
   incompleteStage?: string;
   /** Whether the scope gate short-circuits before find-or-create (`index_scope_blocked`). */
   indexScopeBlocked: boolean;

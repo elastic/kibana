@@ -325,8 +325,9 @@ export const resetHuntReport = async ({
       headers: { 'elastic-api-version': PUBLIC_API_VERSION, 'kbn-xsrf': 'true' },
     }
   ).catch((error) => {
-    // 404 means there was nothing to delete.
-    if ((error as { response?: { status?: number } })?.response?.status !== 404) throw error;
+    // 404 means there was nothing to delete. The scout fetch wrapper surfaces it only in the
+    // message (`Status: 404`), not as a structured status.
+    if (!/Status: 404|404 Not Found/.test(String(error))) throw error;
   });
 
   try {

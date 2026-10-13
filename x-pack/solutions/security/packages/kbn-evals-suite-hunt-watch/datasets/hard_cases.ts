@@ -71,7 +71,7 @@ export const hardCases: HuntWatchExample[] = [
     output: {
       expected: {
         outcome: ['partial'],
-        incompleteStage: 'package',
+        incompleteStage: 'packaging',
         indexScopeBlocked: false,
         reports: [
           {

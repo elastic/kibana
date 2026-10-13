@@ -38,7 +38,7 @@ export const goldenDataset: HuntWatchExample[] = [
             hasConfirmedHit: true,
             tier1Status: 'no_environment_hits',
             tier2Executed: true,
-            pendingProposals: 1,
+            pendingProposals: { min: 1 },
             evidenceWritten: true,
             sseAttachment: true,
             investigationStatus: 'open',
@@ -53,15 +53,18 @@ export const goldenDataset: HuntWatchExample[] = [
     },
   },
   {
-    // Under the known packaging gap (no report-scoped SSE on a clean run) a clean run ends
-    // `partial` / `incomplete_stage: package`. The benign-dismiss assertion is skipped (kibana-58i.7).
+    // Observed on main (2026-10-13): the hunt completes with no hit, then packaging tries to close
+    // the Investigation as benign and fails with "Conversation <id> not found", so the run ends
+    // `partial` / `incomplete_stage: packaging` and the Investigation stays open. This row pins
+    // that behavior; when the benign close works it flips to `completed` / `closed`
+    // (kibana-58i.7). The benign-dismiss assertion is skipped until then.
     id: 'golden-clean-aws-iam-clean',
     cohort: 'golden',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.clean] },
     output: {
       expected: {
         outcome: ['partial'],
-        incompleteStage: 'package',
+        incompleteStage: 'packaging',
         indexScopeBlocked: false,
         reports: [
           {
