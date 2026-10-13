@@ -60,7 +60,9 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   );
 
   return (
-    <>
+    // A plain block wrapper stops the parent column flex item from stretching the toolbar
+    // and the table vertically when the sidebar is taller than the table content.
+    <div>
       <EuiFlexGroup
         justifyContent="spaceBetween"
         gutterSize="s"
@@ -107,7 +109,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
           rowProps={tableRowProps}
         />
       )}
-    </>
+    </div>
   );
 };
 SimilarCasesTable.displayName = 'SimilarCasesTable';
