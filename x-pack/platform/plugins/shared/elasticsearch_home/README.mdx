@@ -17,9 +17,9 @@ capability. The workflows counts are read from the workflows plugin's own `/api/
 It does not register an application. Hosting plugins render the page inside their own app and route,
 so the page can be the home of more than one product without any of them changing URL.
 
-`features`, `share` and `agentBuilder` are required plugins; `cloud` is optional, and the connection
-details group is hidden where cloud reports no endpoint. The whole plugin can be switched off with
-`xpack.elasticsearchHome.enabled: false`.
+The plugin is enabled by default, but `config/serverless.yml` sets
+`xpack.elasticsearchHome.enabled: false`, so serverless project types that render the page have to
+re-enable it in their own `serverless.<project>.yml`. Today those are Elasticsearch and VectorDB.
 
 ## Rendering it from a host plugin
 
