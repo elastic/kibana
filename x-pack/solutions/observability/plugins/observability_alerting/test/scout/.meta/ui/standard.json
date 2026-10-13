@@ -1,5 +1,5 @@
 {
-  "sha1": "96d5b4ff0576e21b1249f84e2b9f7d8bb3ccbe06",
+  "sha1": "fb86e43e506b5d93106f3b5b395ff8749d6da21e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -49,7 +49,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
         "line": 53,
-        "column": 91
+        "column": 83
       }
     },
     {
@@ -65,7 +65,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
         "line": 81,
-        "column": 82
+        "column": 74
       }
     },
     {

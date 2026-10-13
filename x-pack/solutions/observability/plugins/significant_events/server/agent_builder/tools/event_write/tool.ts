@@ -202,7 +202,8 @@ const enrichCausalFeatures = async (
   }
 
   try {
-    // `featureIds` matches slug-style references and `id` matches uuid-style references.
+    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
+    // references and `featureIds` (feature.slug) matches slug-style ones.
     const references = [...causalFeatures, ...blastRadiusEntries];
     const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
     const streamNames = [
@@ -315,12 +316,15 @@ export function createEventsWriteTool({
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
       **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. No-op if severity and status are
-      unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
-      investigation makes the stored severity authoritative. It is preserved unless Discovery
-      marks the event inactive, reactivates an inactive event, or submits a confirmed
-      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
-      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
+      Signals and topology are merged with prior versions. \`severity\` is your verdict under its
+      field contract, decided from the merged confirming signals; the writer stores it as given
+      (an inactive event is low) and returns the stored tier. No-op if the stored severity and
+      status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
+      completed investigation makes the stored severity authoritative over the newly proposed
+      one. It is preserved unless Discovery marks the event inactive, reactivates an inactive event, or
+      submits a confirmed rule UUID absent from the current event. When no new rule UUIDs are
+      introduced, title and symptom_hypothesis are frozen to the stored values and
+      narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
@@ -330,7 +334,7 @@ export function createEventsWriteTool({
       a generated event_id.
     `,
     annotations: {
-      title: 'Write Significant Events',
+      title: 'Write significant events',
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,
@@ -387,6 +391,7 @@ export function createEventsWriteTool({
                 written: result.written,
                 stream_names: input.stream_names,
                 error_message: isBulkError ? result.error.reason : undefined,
+                ...(result.written ? { severity: result.severity } : {}),
               }),
           });
         });

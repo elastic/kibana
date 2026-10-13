@@ -85,23 +85,37 @@ const assembleSummary = ({
 };
 
 /**
- * The packaging outcome, from what was actually minted rather than what was decided: a run the
- * existing-Proposal guard suppressed proposed nothing, and one held open was not dismissed.
+ * The packaging outcome, from what was actually minted rather than what was decided: a run whose
+ * look-up failed proposed nothing, one whose findings a live Proposal already covers proposed
+ * nothing new, and one held open was not dismissed.
  */
 const packagingLine = ({
   decided,
   mintSuppression,
   dismissHold,
   proposalTitles,
+  convergedTitles,
+  alreadyOpen,
 }: {
   decided: Pick<DecidePackageReportResult, 'dismiss' | 'proposals'>;
-  mintSuppression: 'none' | 'existing_proposals' | 'check_failed';
+  mintSuppression: 'none' | 'check_failed';
   dismissHold: 'none' | 'open_proposal' | 'check_failed';
   proposalTitles: string[];
+  /** Titles of the proposals another Investigation already holds, which this run did not repeat. */
+  convergedTitles: Array<string | undefined>;
+  /** Findings a live Proposal this Investigation already holds covers, so none was created. */
+  alreadyOpen: number;
 }): string => {
-  if (mintSuppression === 'existing_proposals') {
-    return 'Packaging: no new proposals, the Investigation already has proposals from an earlier run';
-  }
+  const converged = convergedTitles.length;
+  const convergedNote =
+    converged > 0
+      ? `${converged} already raised by another Investigation${
+          convergedTitles.some(Boolean) ? ` (${convergedTitles.filter(Boolean).join('; ')})` : ''
+        }`
+      : undefined;
+  const alreadyOpenNote =
+    alreadyOpen > 0 ? `${alreadyOpen} already open on this Investigation` : undefined;
+  const covered = [convergedNote, alreadyOpenNote].filter(Boolean).join('; ');
   if (mintSuppression === 'check_failed') {
     return 'Packaging: no new proposals, existing proposals could not be checked';
   }
@@ -111,12 +125,16 @@ const packagingLine = ({
   if (decided.dismiss && dismissHold === 'check_failed') {
     return 'Packaging: no new proposals, left open because existing proposals could not be checked';
   }
-  if (decided.dismiss || decided.proposals.length === 0)
-    return 'Packaging: dismissed, no proposals';
+  if (decided.dismiss) return 'Packaging: dismissed, no proposals';
+  if (decided.proposals.length === 0) {
+    return covered
+      ? `Packaging: no new proposals, ${covered}`
+      : 'Packaging: dismissed, no proposals';
+  }
   const count = decided.proposals.length;
   return `Packaging: proposed ${count} ${count === 1 ? 'action' : 'actions'}${
     proposalTitles.length > 0 ? `: ${proposalTitles.join('; ')}` : ''
-  }`;
+  }${covered ? `; ${covered}` : ''}`;
 };
 
 /**
@@ -128,11 +146,17 @@ export const buildInvestigationSummary = ({
   decided,
   mintSuppression = 'none',
   dismissHold = 'none',
+  converged = [],
+  alreadyOpen = 0,
 }: {
   state: CurrentRunState;
   decided: Pick<DecidePackageReportResult, 'dismiss' | 'proposals'>;
   /** Why this run minted nothing even though it found something to propose. */
-  mintSuppression?: 'none' | 'existing_proposals' | 'check_failed';
+  mintSuppression?: 'none' | 'check_failed';
+  /** What this run found that another Investigation's live Proposal already covers. */
+  converged?: Array<{ title?: string }>;
+  /** What a live Proposal this Investigation already holds covers, so none was created. */
+  alreadyOpen?: number;
   /** Why a run that would dismiss left the Investigation open instead. */
   dismissHold?: 'none' | 'open_proposal' | 'check_failed';
 }): string => {
@@ -159,7 +183,14 @@ export const buildInvestigationSummary = ({
     ...(corroborated.length > 0 ? [`Techniques corroborated: ${corroborated.join(', ')}`] : []),
     ...(hosts.length > 0 ? [`Hosts: ${hosts.join(', ')}`] : []),
     ...(state.users.length > 0 ? [`Users: ${state.users.join(', ')}`] : []),
-    packagingLine({ decided, mintSuppression, dismissHold, proposalTitles }),
+    packagingLine({
+      decided,
+      mintSuppression,
+      dismissHold,
+      proposalTitles,
+      convergedTitles: converged.map((entry) => entry.title),
+      alreadyOpen,
+    }),
   ];
   // Evidence sits after the entity sections and before the packaging line.
   return assembleSummary({
@@ -202,6 +233,8 @@ export const buildCleanInvestigationSummary = ({
       mintSuppression: 'none',
       dismissHold,
       proposalTitles: [],
+      convergedTitles: [],
+      alreadyOpen: 0,
     }),
   ];
   return assembleSummary({ sections, evidenceLines: [], evidenceIndex: sections.length });
