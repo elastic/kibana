@@ -31,7 +31,6 @@ export const useUserProfiles = ({
   return useQuery({
     queryKey: queryKeys.security.userProfiles(dedupedUids),
     enabled: enabled && Boolean(userProfile) && dedupedUids.length > 0,
-    retry: false,
     queryFn: async (): Promise<UserProfileWithAvatar[]> => {
       return await userProfile.bulkGet<{ avatar?: UserProfileAvatarData }>({
         uids: new Set(dedupedUids),

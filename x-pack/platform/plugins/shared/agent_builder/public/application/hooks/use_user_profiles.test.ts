@@ -29,7 +29,6 @@ interface CapturedQuery {
   queryKey: unknown[];
   queryFn: () => Promise<unknown>;
   enabled: boolean;
-  retry: boolean;
 }
 
 const renderWith = (uids: string[]): CapturedQuery => {
@@ -81,9 +80,5 @@ describe('useUserProfiles', () => {
     const withoutSynthetic = renderWith(['profile-a']);
 
     expect(withSynthetic.queryKey).toEqual(withoutSynthetic.queryKey);
-  });
-
-  it('does not retry a failed lookup', () => {
-    expect(renderWith(['profile-a']).retry).toBe(false);
   });
 });

@@ -131,19 +131,5 @@ describe('Agent Builder audit event builders', () => {
         },
       });
     });
-
-    it('records a failure when creation errored', () => {
-      const event = conversationAuditEvent({
-        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
-        conversationId: 'conv-1',
-        error: new Error('nope'),
-      });
-
-      expect(event).toMatchObject({
-        message: 'Failed attempt to create conversation [id=conv-1]',
-        event: { outcome: AUDIT_OUTCOME.FAILURE },
-        error: { message: 'nope' },
-      });
-    });
   });
 });

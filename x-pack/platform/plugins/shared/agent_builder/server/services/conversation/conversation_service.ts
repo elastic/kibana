@@ -39,7 +39,7 @@ interface ConversationServiceDeps {
   agents: AgentsServiceStart;
   eventBus?: ConversationEventBus;
   conversationEvents: ConversationEventsServiceStart;
-  auditLogService?: AuditLogService;
+  auditLogService: AuditLogService;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -50,7 +50,7 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly agents: AgentsServiceStart;
   private readonly eventBus?: ConversationEventBus;
   private readonly conversationEvents: ConversationEventsServiceStart;
-  private readonly auditLogService?: AuditLogService;
+  private readonly auditLogService: AuditLogService;
 
   constructor({
     logger,
@@ -103,7 +103,6 @@ export class ConversationServiceImpl implements ConversationService {
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
     const eventBus = this.eventBus;
-    const auditLogService = this.auditLogService;
 
     return createClient({
       user,
@@ -113,9 +112,8 @@ export class ConversationServiceImpl implements ConversationService {
       agentRegistry,
       conversationEvents: this.conversationEvents,
       eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
-      onConversationCreated: auditLogService
-        ? (params) => auditLogService.logConversationCreated(request, params)
-        : undefined,
+      onConversationCreated: (params) =>
+        this.auditLogService.logConversationCreated(request, params),
     });
   }
 

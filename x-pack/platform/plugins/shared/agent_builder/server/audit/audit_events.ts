@@ -199,8 +199,8 @@ export function toolAuditEvent({
 }
 
 export interface ConversationAuditEventParams extends CommonAuditEventParams {
-  conversationId?: string;
-  agentId?: string;
+  conversationId: string;
+  agentId: string;
 }
 
 export function conversationAuditEvent({
@@ -210,14 +210,7 @@ export function conversationAuditEvent({
   outcome,
   error,
 }: ConversationAuditEventParams): AuditEvent {
-  let doc = 'a conversation';
-  if (conversationId && agentId) {
-    doc = `conversation [id=${conversationId}, agent=${agentId}]`;
-  } else if (conversationId) {
-    doc = `conversation [id=${conversationId}]`;
-  } else if (agentId) {
-    doc = `conversation [agent=${agentId}]`;
-  }
+  const doc = `conversation [id=${conversationId}, agent=${agentId}]`;
 
   const [present, progressive, past] = eventVerbs[action];
   const message = error
