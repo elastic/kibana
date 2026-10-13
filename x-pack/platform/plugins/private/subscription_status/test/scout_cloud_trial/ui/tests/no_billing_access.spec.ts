@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { tags, test } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 test.describe(
   'Subscription status badge for users without billing access',
-  { tag: tags.serverless.search },
+  { tag: ['@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsViewer();

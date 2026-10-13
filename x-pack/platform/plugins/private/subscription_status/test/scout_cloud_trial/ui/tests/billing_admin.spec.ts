@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { tags, test } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 test.describe(
   'Subscription status badge for billing admins',
-  { tag: tags.serverless.search },
+  { tag: ['@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page }) => {
       /**
@@ -19,7 +19,8 @@ test.describe(
        * There is no supported way to grant this role in a Scout test. Cloud assigns it at the
        * organization level, and with UIAM a Scout user only carries the single project role it
        * logged in with, so role mappings (used by the stateful cloud_links tests) don't apply.
-       * Replace this with a real role once Scout can log in with extra Cloud roles.
+       * Replace this with a real role once Scout can log in with extra Cloud roles:
+       * https://github.com/elastic/kibana/issues/297366
        */
       await page.route('**/internal/security/me', async (route) => {
         const response = await route.fetch();
