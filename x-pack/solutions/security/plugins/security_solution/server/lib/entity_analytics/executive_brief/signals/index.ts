@@ -7,15 +7,13 @@
 
 import { attackDiscoveriesSignal } from './attack_discoveries';
 import { highRiskEntitiesSignal } from './high_risk_entities';
-import type { BriefSignal } from './types';
+import type { BriefSignal } from './engine/types';
 
-/**
- * Every signal the brief runs, in priority order: the order evidence is registered in, and the
- * order to cut in. Adding a signal means one file plus one line here.
- */
+/** Every signal the brief runs, in priority order: the order facts are numbered in. */
 export const BRIEF_SIGNALS: readonly BriefSignal[] = [
   attackDiscoveriesSignal,
   highRiskEntitiesSignal,
 ];
 
-export { runSignals } from './run_signals';
+export { runSignals } from './engine/run_signals';
+export type { Evidence, GatherResult, SignalOutcome } from './engine/types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Evidence } from '../signals/types';
+import type { Evidence } from '../signals';
 import { buildValidBrief, DOCKER, FIXTURE_EVIDENCE, ROD, runCheck } from './__fixtures__/evidence';
 import { checkMentions, clampVisible } from './mentions';
 

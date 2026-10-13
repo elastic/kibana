@@ -6,20 +6,15 @@
  */
 
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
-import type { GetExecutiveBriefStatusResponse } from '../../../../common/api/entity_analytics/executive_brief/get_status.gen';
 import {
-  BRIEF_ROUTE,
   EXECUTIVE_BRIEF_TAGS,
   HIGH_RISK_ENTITY_BRIEF,
-  INTERNAL_HEADERS,
   SEEDED_ENTITY,
   SUBMIT_BRIEF_TOOL_NAME,
-  briefStatusRoute,
 } from '../fixtures/constants';
+import { apiTest } from '../fixtures';
 import {
   createBriefConnector,
   deleteAllBriefs,
@@ -47,7 +42,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, esClient, log }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+      headers = cookieHeader;
       ({ connectorId, llmProxy } = await createBriefConnector({ apiServices, log }));
       await seedHighRiskEntity(esClient);
     });
@@ -65,20 +60,19 @@ apiTest.describe(
 
     apiTest(
       'generates a verified brief through the LLM and stores it for the caller',
-      async ({ apiClient }) => {
+      async ({ entityAnalyticsApi }) => {
         const llmCall = mockSubmitBrief(llmProxy);
 
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
         expect(response.body.id).toBeDefined();
         expect(response.body.status).toBe('pending');
 
         const jobId = response.body.id;
-        const document = await waitForBriefJob({ apiClient, headers, jobId });
+        const document = await waitForBriefJob({ entityAnalyticsApi, headers, jobId });
         await llmCall;
 
         expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
@@ -119,39 +113,38 @@ apiTest.describe(
 
     apiTest(
       'a second POST replaces the job in progress, and the replaced run writes nothing',
-      async ({ apiClient }) => {
+      async ({ entityAnalyticsApi }) => {
         const replacedBrief: Brief = {
           ...HIGH_RISK_ENTITY_BRIEF,
           verdict: { ...HIGH_RISK_ENTITY_BRIEF.verdict, headline: 'From the replaced run' },
         };
         const held = holdSubmitBrief(llmProxy, replacedBrief);
 
-        const first = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const first = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(first).toHaveStatusCode(200);
         await held.waitForCall();
 
         // While the first job is in flight, its status has no duration yet.
-        const inFlight = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(), {
-          headers,
-          responseType: 'json',
-        });
+        const inFlight = await entityAnalyticsApi.getExecutiveBriefStatus({ headers });
         expect(inFlight.body).toMatchObject({ id: first.body.id, status: 'running' });
         expect(inFlight.body.took).toBeUndefined();
 
         const secondCall = mockSubmitBrief(llmProxy);
-        const second = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '24h', connectorId },
-        });
+        const second = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '24h', connectorId } },
+          { headers }
+        );
         expect(second).toHaveStatusCode(200);
         expect(second.body.id).not.toBe(first.body.id);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: second.body.id });
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: second.body.id,
+        });
         await secondCall;
         expect(document.job.status).toBe('succeeded');
         expect(document.metadata?.period.range).toBe('24h');
@@ -162,7 +155,11 @@ apiTest.describe(
         expect(llmProxy.interceptedRequests).toHaveLength(2);
         for (let read = 0; read < 6; read++) {
           await new Promise((resolve) => setTimeout(resolve, 500));
-          const after = await waitForBriefJob({ apiClient, headers, jobId: second.body.id });
+          const after = await waitForBriefJob({
+            entityAnalyticsApi,
+            headers,
+            jobId: second.body.id,
+          });
           expect(after.report?.verdict?.headline).toBe(HIGH_RISK_ENTITY_BRIEF.verdict.headline);
           expect(after.metadata?.period.range).toBe('24h');
         }
@@ -171,18 +168,21 @@ apiTest.describe(
 
     apiTest(
       'sends a structural problem back to the model once and stores the repaired brief',
-      async ({ apiClient }) => {
+      async ({ entityAnalyticsApi }) => {
         mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
         mockSubmitBrief(llmProxy, HIGH_RISK_ENTITY_BRIEF);
 
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.verdict).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.verdict);
         expect(document.metadata?.verification?.repaired).toBe(true);
@@ -196,16 +196,15 @@ apiTest.describe(
 
     apiTest(
       'fails with llm_output when the repaired brief is still invalid, keeping the previous brief',
-      async ({ apiClient }) => {
+      async ({ entityAnalyticsApi }) => {
         mockSubmitBrief(llmProxy, HIGH_RISK_ENTITY_BRIEF);
-        const previous = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const previous = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(previous).toHaveStatusCode(200);
         const previousDocument = await waitForBriefJob({
-          apiClient,
+          entityAnalyticsApi,
           headers,
           jobId: previous.body.id,
         });
@@ -214,14 +213,17 @@ apiTest.describe(
         llmProxy.clear();
         mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
         mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '24h', connectorId },
-        });
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '24h', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
         expect(document.job).toMatchObject({
           status: 'failed',
           error: { code: 'llm_output' },
@@ -235,7 +237,7 @@ apiTest.describe(
 
     apiTest(
       'links name mentions to the entity and drops assessments that mention unknown entities',
-      async ({ apiClient }) => {
+      async ({ entityAnalyticsApi }) => {
         mockSubmitBrief(llmProxy, {
           verdict: {
             ...HIGH_RISK_ENTITY_BRIEF.verdict,
@@ -251,14 +253,17 @@ apiTest.describe(
           },
         });
 
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.verdict?.summary).toBe(
           `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk.`

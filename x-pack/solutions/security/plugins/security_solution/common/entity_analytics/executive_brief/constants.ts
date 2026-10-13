@@ -31,14 +31,12 @@ export const BRIEF_RANGE_MS: Record<BriefRange, number> = {
 };
 
 export const BRIEF_LIMITS = {
-  /** Signals running at once within a phase. */
+  /** Signals running at once. */
   signalConcurrency: 3,
   /** Default per-signal timeout; a signal may declare a lower one. */
   signalTimeoutMs: 10_000,
   /** Budget for the whole gather stage; unfinished signals are aborted. */
   gatherBudgetMs: 45_000,
-  /** Candidate entities passed to entity-scoped signals. */
-  maxCandidates: 25,
   /** Running briefs across the cluster before POST returns 429. */
   maxRunningBriefs: 5,
 } as const;

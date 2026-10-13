@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { BRIEF_ROUTE, EXECUTIVE_BRIEF_TAGS, INTERNAL_HEADERS } from '../fixtures/constants';
+import { EXECUTIVE_BRIEF_TAGS } from '../fixtures/constants';
+import { apiTest } from '../fixtures';
 
 apiTest.describe('Executive brief - authorization', { tag: EXECUTIVE_BRIEF_TAGS }, () => {
   let headers: Record<string, string>;
@@ -18,21 +18,20 @@ apiTest.describe('Executive brief - authorization', { tag: EXECUTIVE_BRIEF_TAGS 
       elasticsearch: { cluster: [] },
       kibana: [{ base: [], feature: { discover: ['all'] }, spaces: ['*'] }],
     });
-    headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+    headers = cookieHeader;
   });
 
-  apiTest('a user without Entity Analytics access gets 403', async ({ apiClient }) => {
-    const generate = await apiClient.post(BRIEF_ROUTE, {
-      headers,
-      responseType: 'json',
-      body: { range: '7d' },
-    });
+  apiTest('a user without Entity Analytics access gets 403', async ({ entityAnalyticsApi }) => {
+    const generate = await entityAnalyticsApi.generateExecutiveBrief(
+      { body: { range: '7d' } },
+      { headers }
+    );
     expect(generate).toHaveStatusCode(403);
 
-    const read = await apiClient.get(BRIEF_ROUTE, { headers, responseType: 'json' });
+    const read = await entityAnalyticsApi.getExecutiveBrief({ headers });
     expect(read).toHaveStatusCode(403);
 
-    const deleted = await apiClient.delete(BRIEF_ROUTE, { headers, responseType: 'json' });
+    const deleted = await entityAnalyticsApi.deleteExecutiveBrief({ headers });
     expect(deleted).toHaveStatusCode(403);
   });
 });

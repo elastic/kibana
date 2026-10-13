@@ -12,6 +12,12 @@ import {
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 
+/** The scheduled and adhoc attack discovery alerts indices of a space. */
+export const getAttackDiscoveryAlertsIndices = (spaceId: string): string[] => [
+  `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Scheduled attack alerts
+  `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Adhoc attack alerts
+];
+
 /**
  * Builds the index pattern targeted by the attacks routes: scheduled and adhoc
  * attack discovery alerts for the active space.
@@ -20,11 +26,5 @@ export const getAttackAlertsIndex = async ({
   context,
 }: {
   context: SecuritySolutionRequestHandlerContext;
-}): Promise<string[]> => {
-  const spaceId = (await context.securitySolution).getSpaceId();
-
-  return [
-    `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Scheduled attack alerts
-    `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Adhoc attack alerts
-  ];
-};
+}): Promise<string[]> =>
+  getAttackDiscoveryAlertsIndices((await context.securitySolution).getSpaceId());

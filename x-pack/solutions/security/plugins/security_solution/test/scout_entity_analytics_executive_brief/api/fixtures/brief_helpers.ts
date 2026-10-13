@@ -14,20 +14,13 @@ import type {
   EsClient,
   ScoutLogger,
 } from '@kbn/scout-security';
+import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
+import type { EntityAnalyticsApi } from '@kbn/security-solution-test-api-clients/scout';
 import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
 import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
-import type { GetExecutiveBriefStatusResponse } from '../../../../common/api/entity_analytics/executive_brief/get_status.gen';
 import { EXECUTIVE_BRIEF_INDEX } from '../../../../common/entity_analytics/executive_brief/constants';
 import type { BriefDocument } from '../../../../server/lib/entity_analytics/executive_brief/store/storage';
-import {
-  BRIEF_ROUTE,
-  HIGH_RISK_ENTITY_BRIEF,
-  INTERNAL_HEADERS,
-  SEEDED_ENTITY,
-  SUBMIT_BRIEF_TOOL_NAME,
-  briefStatusRoute,
-} from './constants';
+import { HIGH_RISK_ENTITY_BRIEF, SEEDED_ENTITY, SUBMIT_BRIEF_TOOL_NAME } from './constants';
 
 type Headers = Record<string, string>;
 
@@ -132,53 +125,34 @@ export const holdSubmitBrief = (llmProxy: LlmProxy, brief: Brief = HIGH_RISK_ENT
   };
 };
 
-/** Reads the full brief with GET; throws unless it answers 200. */
-const readBrief = async ({
-  apiClient,
-  headers,
-  route,
-}: {
-  apiClient: ApiClientFixture;
+interface BriefRequest {
+  entityAnalyticsApi: EntityAnalyticsApi;
   headers: Headers;
-  route: string;
-}): Promise<GetExecutiveBriefResponse> => {
-  const response = await apiClient.get<GetExecutiveBriefResponse>(route, {
-    headers: { ...INTERNAL_HEADERS, ...headers },
-    responseType: 'json',
-  });
-  if (response.statusCode !== 200) {
-    throw new Error(
-      `GET ${route} returned ${response.statusCode}: ${JSON.stringify(response.body)}`
-    );
-  }
-  return response.body;
-};
+  /** Defaults to the default space. */
+  kibanaSpace?: string;
+}
 
 /** Polls the status route until the given job has finished, then returns the full GET response. */
 export const waitForBriefJob = async ({
-  apiClient,
+  entityAnalyticsApi,
   headers,
+  kibanaSpace,
   jobId,
-  route = BRIEF_ROUTE,
-}: {
-  apiClient: ApiClientFixture;
-  headers: Headers;
-  jobId: string;
-  route?: string;
-}): Promise<GetExecutiveBriefResponse> => {
+}: BriefRequest & { jobId: string }): Promise<GetExecutiveBriefResponse> => {
   const deadline = Date.now() + JOB_TIMEOUT_MS;
   let lastStatus = 'not found';
 
   while (Date.now() < deadline) {
-    const response = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(route), {
-      headers: { ...INTERNAL_HEADERS, ...headers },
-      responseType: 'json',
-    });
-    if (response.statusCode === 200) {
-      const { id, status, stage } = response.body;
-      lastStatus = `${id}: ${status}${stage ? ` (${stage})` : ''}`;
-      if (id === jobId && (status === 'succeeded' || status === 'failed')) {
-        return readBrief({ apiClient, headers, route });
+    const status = await entityAnalyticsApi.getExecutiveBriefStatus({ headers, kibanaSpace });
+    if (status.statusCode === 200) {
+      const { id, status: jobStatus, stage } = status.body;
+      lastStatus = `${id}: ${jobStatus}${stage ? ` (${stage})` : ''}`;
+      if (id === jobId && (jobStatus === 'succeeded' || jobStatus === 'failed')) {
+        const read = await entityAnalyticsApi.getExecutiveBrief({ headers, kibanaSpace });
+        if (read.statusCode !== 200) {
+          throw new Error(`GET returned ${read.statusCode}: ${JSON.stringify(read.body)}`);
+        }
+        return read.body;
       }
     }
     await sleep(POLL_INTERVAL_MS);
@@ -194,29 +168,23 @@ export const waitForBriefJob = async ({
  * completes without an LLM call. Returns the job id from POST and the GET response.
  */
 export const generateBrief = async ({
-  apiClient,
-  headers,
   connectorId,
-  route = BRIEF_ROUTE,
-}: {
-  apiClient: ApiClientFixture;
-  headers: Headers;
-  connectorId: string;
-  route?: string;
-}): Promise<{ jobId: string; document: GetExecutiveBriefResponse }> => {
-  const response = await apiClient.post<GenerateExecutiveBriefResponse>(route, {
-    headers: { ...INTERNAL_HEADERS, ...headers },
-    responseType: 'json',
-    body: { range: '7d', connectorId },
-  });
+  ...request
+}: BriefRequest & { connectorId: string }): Promise<{
+  jobId: string;
+  document: GetExecutiveBriefResponse;
+}> => {
+  const { entityAnalyticsApi, headers, kibanaSpace } = request;
+  const response = await entityAnalyticsApi.generateExecutiveBrief(
+    { body: { range: '7d', connectorId } },
+    { headers, kibanaSpace }
+  );
   if (response.statusCode !== 200) {
-    throw new Error(
-      `POST ${route} returned ${response.statusCode}: ${JSON.stringify(response.body)}`
-    );
+    throw new Error(`POST returned ${response.statusCode}: ${JSON.stringify(response.body)}`);
   }
 
   const jobId = response.body.id;
-  const document = await waitForBriefJob({ apiClient, headers, jobId, route });
+  const document = await waitForBriefJob({ ...request, jobId });
   if (document.job.status !== 'succeeded') {
     throw new Error(`Executive brief job ${jobId} failed: ${JSON.stringify(document.job.error)}`);
   }
@@ -377,7 +345,7 @@ export const getCurrentUser = async ({
   headers: Headers;
 }): Promise<CurrentUser> => {
   const { body } = await apiClient.get<CurrentUser>('internal/security/me', {
-    headers: { ...INTERNAL_HEADERS, ...headers },
+    headers: { ...INTERNAL_API_HEADERS, ...headers },
     responseType: 'json',
   });
   return body;

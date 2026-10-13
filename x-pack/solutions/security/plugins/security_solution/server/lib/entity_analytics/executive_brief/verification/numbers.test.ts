@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Evidence } from '../signals/types';
+import type { Evidence } from '../signals';
 import type { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { buildValidBrief, FIXTURE_EVIDENCE, runCheck } from './__fixtures__/evidence';
 import { checkNumbers } from './numbers';

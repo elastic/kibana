@@ -6,22 +6,15 @@
  */
 
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
-import { apiTest } from '@kbn/scout-security';
+import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
-import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
-import type { GetExecutiveBriefStatusResponse } from '../../../../common/api/entity_analytics/executive_brief/get_status.gen';
 import {
   BRIEF_JOB_DEADLINE_MS,
+  EXECUTIVE_BRIEF_API_PATH,
   EXECUTIVE_BRIEF_INDEX,
 } from '../../../../common/entity_analytics/executive_brief/constants';
-import {
-  BRIEF_ROUTE,
-  BRIEF_SIGNAL_IDS,
-  EXECUTIVE_BRIEF_TAGS,
-  INTERNAL_HEADERS,
-  briefStatusRoute,
-} from '../fixtures/constants';
+import { BRIEF_SIGNAL_IDS, EXECUTIVE_BRIEF_TAGS } from '../fixtures/constants';
+import { apiTest } from '../fixtures';
 import {
   createBriefConnector,
   deleteAllBriefs,
@@ -41,7 +34,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, log }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+      headers = cookieHeader;
       ({ connectorId, llmProxy } = await createBriefConnector({ apiServices, log }));
     });
 
@@ -57,16 +50,15 @@ apiTest.describe(
 
     apiTest(
       'with no findings, records what was checked without calling the LLM',
-      async ({ apiClient }) => {
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+      async ({ entityAnalyticsApi }) => {
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
 
         const jobId = response.body.id;
-        const document = await waitForBriefJob({ apiClient, headers, jobId });
+        const document = await waitForBriefJob({ entityAnalyticsApi, headers, jobId });
         expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
         expect(document.job.took).toBeGreaterThanOrEqual(0);
         expect(document.report).toStrictEqual({ entities: {}, facts: [] });
@@ -82,10 +74,7 @@ apiTest.describe(
         expect(llmProxy.interceptedRequests).toHaveLength(0);
 
         // The status route returns the same job, flat: no job, report or metadata keys.
-        const status = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(), {
-          headers,
-          responseType: 'json',
-        });
+        const status = await entityAnalyticsApi.getExecutiveBriefStatus({ headers });
         expect(status).toHaveStatusCode(200);
         expect(Object.keys(status.body).sort()).toStrictEqual([
           'id',
@@ -99,48 +88,51 @@ apiTest.describe(
       }
     );
 
-    apiTest('rejects an unknown connector before starting a job', async ({ apiClient }) => {
-      const response = await apiClient.post(BRIEF_ROUTE, {
-        headers,
-        responseType: 'json',
-        body: { range: '7d', connectorId: 'executive-brief-missing-connector' },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.attributes).toMatchObject({ code: 'no_connector' });
+    apiTest(
+      'rejects an unknown connector before starting a job',
+      async ({ entityAnalyticsApi }) => {
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId: 'executive-brief-missing-connector' } },
+          { headers }
+        );
+        expect(response).toHaveStatusCode(400);
+        expect(response.body).toMatchObject({ attributes: { code: 'no_connector' } });
 
-      const read = await apiClient.get(BRIEF_ROUTE, { headers, responseType: 'json' });
-      expect(read).toHaveStatusCode(404);
-      const status = await apiClient.get(briefStatusRoute(), { headers, responseType: 'json' });
-      expect(status).toHaveStatusCode(404);
-    });
+        const read = await entityAnalyticsApi.getExecutiveBrief({ headers });
+        expect(read).toHaveStatusCode(404);
+        const status = await entityAnalyticsApi.getExecutiveBriefStatus({ headers });
+        expect(status).toHaveStatusCode(404);
+      }
+    );
 
     apiTest('rejects an invalid range', async ({ apiClient }) => {
-      const response = await apiClient.post(BRIEF_ROUTE, {
-        headers,
+      // The generated client only accepts valid bodies.
+      const response = await apiClient.post(EXECUTIVE_BRIEF_API_PATH, {
+        headers: { 'kbn-xsrf': 'scout', ...INTERNAL_API_HEADERS, ...headers },
         responseType: 'json',
         body: { range: '1y', connectorId },
       });
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('DELETE removes the caller brief', async ({ apiClient }) => {
-      await generateBrief({ apiClient, headers, connectorId });
+    apiTest('DELETE removes the caller brief', async ({ entityAnalyticsApi }) => {
+      await generateBrief({ entityAnalyticsApi, headers, connectorId });
 
-      const deleted = await apiClient.delete(BRIEF_ROUTE, { headers, responseType: 'json' });
+      const deleted = await entityAnalyticsApi.deleteExecutiveBrief({ headers });
       expect(deleted).toHaveStatusCode(200);
       expect(deleted.body).toStrictEqual({ deleted: true });
 
-      const read = await apiClient.get(BRIEF_ROUTE, { headers, responseType: 'json' });
+      const read = await entityAnalyticsApi.getExecutiveBrief({ headers });
       expect(read).toHaveStatusCode(404);
 
-      const deletedAgain = await apiClient.delete(BRIEF_ROUTE, { headers, responseType: 'json' });
+      const deletedAgain = await entityAnalyticsApi.deleteExecutiveBrief({ headers });
       expect(deletedAgain.body).toStrictEqual({ deleted: false });
     });
 
     apiTest(
       'a running job past its deadline reads as interrupted',
-      async ({ apiClient, esClient }) => {
-        const { jobId } = await generateBrief({ apiClient, headers, connectorId });
+      async ({ apiClient, entityAnalyticsApi, esClient }) => {
+        const { jobId } = await generateBrief({ entityAnalyticsApi, headers, connectorId });
         const { docId } = await getBriefDocId({ apiClient, headers, spaceId: 'default' });
         const startedAt = new Date(Date.now() - BRIEF_JOB_DEADLINE_MS - 60_000).toISOString();
 
@@ -153,10 +145,7 @@ apiTest.describe(
           refresh: true,
         });
 
-        const read = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-        });
+        const read = await entityAnalyticsApi.getExecutiveBrief({ headers });
         expect(read).toHaveStatusCode(200);
         // `took` runs to the last stage change, here the start.
         expect(read.body.job).toMatchObject({
@@ -166,10 +155,7 @@ apiTest.describe(
           error: { code: 'interrupted' },
         });
 
-        const status = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(), {
-          headers,
-          responseType: 'json',
-        });
+        const status = await entityAnalyticsApi.getExecutiveBriefStatus({ headers });
         expect(status.body).toStrictEqual(read.body.job);
       }
     );

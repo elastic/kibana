@@ -27,9 +27,8 @@ import type { StartPlugins } from '../../../plugin';
 import { ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT } from '../../telemetry/event_based/events';
 import type { ComposeBriefResult } from './composition/compose';
 import { BriefCompositionError, composeBrief } from './composition/compose';
-import { BRIEF_SIGNALS } from './signals';
-import { runSignals } from './signals/run_signals';
-import type { GatherResult } from './signals/types';
+import type { GatherResult } from './signals';
+import { BRIEF_SIGNALS, runSignals } from './signals';
 import type { BriefStore, JobUpdate } from './store/brief_store';
 import type { BriefCompletedEvent } from './telemetry';
 import { withBriefSpan } from './telemetry';
@@ -106,7 +105,6 @@ const runBriefJob = async ({
     return;
   }
 
-  const authUser = coreStart.security.authc.getCurrentUser(fakeRequest);
   const run: {
     gathered?: GatherResult;
     composed?: ComposeBriefResult;
@@ -122,11 +120,9 @@ const runBriefJob = async ({
             esClient: coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser,
             spaceId,
             timeRange: { from, to },
-            now: new Date(),
             logger,
             // Without a user, signals with per-user visibility only see shared data.
-            user: { username: authUser?.username ?? '', profileUid: authUser?.profile_uid },
-            getCasesClient: async () => startPlugins.cases?.getCasesClientWithRequest(fakeRequest),
+            username: coreStart.security.authc.getCurrentUser(fakeRequest)?.username ?? '',
           },
           BRIEF_SIGNALS,
           { abortSignal }

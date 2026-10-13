@@ -23,7 +23,7 @@ import {
 } from '@kbn/inference-common';
 import type { VerificationSummary } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { Evidence, SignalOutcome } from '../signals/types';
+import type { Evidence, SignalOutcome } from '../signals';
 import { withBriefSpan } from '../telemetry';
 import type { VerifyBriefResult } from '../verification/verify_brief';
 import { verifyBrief } from '../verification/verify_brief';

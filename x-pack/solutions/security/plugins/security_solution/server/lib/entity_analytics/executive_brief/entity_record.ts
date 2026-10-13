@@ -6,12 +6,14 @@
  */
 
 import type { Entity } from '@kbn/entity-store/common';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { getEntityType } from '../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
 import { resolveDisplayName } from '../lead_generation/entity_conversion';
 import { matchesPrivilegedWatchlist } from '../lead_generation/observation_modules/utils';
-import type { EntityRef, EntityRefType } from './signals/types';
 
-export const typeFromEuid = (euid: string): EntityRefType => {
+type EntityTypeName = `${EntityType}`;
+
+export const typeFromEuid = (euid: string): EntityTypeName => {
   const [prefix] = euid.split(':');
   return prefix === 'user' || prefix === 'host' || prefix === 'service' ? prefix : 'generic';
 };
@@ -24,7 +26,7 @@ export const nameFromEuid = (euid: string): string => {
 };
 
 /** The record's entity type, or the EUID's when the record has no known type. */
-export const entityTypeOf = (record: Entity, euid: string): EntityRefType => {
+export const entityTypeOf = (record: Entity, euid: string): EntityTypeName => {
   try {
     return getEntityType(record);
   } catch {
@@ -35,16 +37,16 @@ export const entityTypeOf = (record: Entity, euid: string): EntityRefType => {
 export const entityDisplayName = (record: Entity, euid: string): string =>
   resolveDisplayName(record, entityTypeOf(record, euid), euid);
 
-export const toEntityRef = (record: Entity, euid: string): EntityRef => ({
-  euid,
-  type: entityTypeOf(record, euid),
-  name: entityDisplayName(record, euid),
-});
-
 /** A record for an entity the store has no document for. */
-export const minimalEntityRecord = ({ euid, type, name }: EntityRef): Entity => ({
-  entity: { id: euid, name, type },
-});
+export const minimalEntityRecord = ({
+  id,
+  type = typeFromEuid(id),
+  name = nameFromEuid(id),
+}: {
+  id: string;
+  type?: EntityTypeName;
+  name?: string;
+}): Entity => ({ entity: { id, name, type } });
 
 /** Whether the entity is privileged, and the other watchlists it is on. */
 export const watchlistsOf = ({ entity }: Entity): { privileged: boolean; others: string[] } => {

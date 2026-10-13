@@ -14,7 +14,7 @@ import type {
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
 import { entityDisplayName, entityTypeOf, watchlistsOf } from '../entity_record';
 import { BRIEF_SIGNALS } from '../signals';
-import type { Evidence, SignalOutcome } from '../signals/types';
+import type { Evidence, SignalOutcome } from '../signals';
 import { alternationPattern } from '../verification/context';
 import { toMention } from '../verification/mentions';
 

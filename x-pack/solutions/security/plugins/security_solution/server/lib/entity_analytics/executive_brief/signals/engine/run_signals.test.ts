@@ -5,44 +5,30 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { BRIEF_LIMITS } from '../../../../../common/entity_analytics/executive_brief/constants';
+import { BRIEF_LIMITS } from '../../../../../../common/entity_analytics/executive_brief/constants';
 import { runSignals } from './run_signals';
-import type { BriefSignal, EntityRef, SignalContext, SignalOutput, SignalScope } from './types';
-
-jest.mock('./resolve_entities', () => {
-  const actual = jest.requireActual('./resolve_entities');
-  return { ...actual, resolveEntities: async () => actual.identityResolution() };
-});
-
-const ref = (euid: string): EntityRef => ({ euid, type: 'user', name: euid.slice(5) });
+import type { BriefSignal, FactDraft, SignalContext } from './types';
 
 const ctx: SignalContext = {
   esClient: elasticsearchServiceMock.createElasticsearchClient(),
   spaceId: 'default',
   timeRange: { from: '2026-10-05T00:00:00.000Z', to: '2026-10-12T00:00:00.000Z' },
-  now: new Date('2026-10-12T00:00:00.000Z'),
   logger: loggingSystemMock.createLogger(),
-  user: { username: 'analyst' },
-  getCasesClient: async () => undefined,
+  username: 'analyst',
 };
 
-const signal = <TScope extends SignalScope = 'tenant'>(
+const signal = (
   id: string,
-  run: BriefSignal<TScope>['run'],
-  overrides: Partial<BriefSignal<TScope>> = {}
-): BriefSignal<TScope> => ({
-  id,
-  title: id,
-  scope: 'tenant' as TScope,
-  isAvailable: async () => ({ available: true }),
-  run,
-  ...overrides,
-});
+  run: BriefSignal['run'],
+  overrides: Partial<BriefSignal> = {}
+): BriefSignal => ({ id, title: id, run, ...overrides });
 
-const factOf = (euid: string): SignalOutput => ({
-  facts: [{ title: euid, entities: [ref(euid)] }],
+const factAbout = (euid: string): FactDraft => ({
+  title: euid,
+  entities: [{ entity: { id: euid, name: euid.slice(5), type: 'user' } }],
 });
 
 const run = (signals: readonly BriefSignal[]) =>
@@ -50,13 +36,17 @@ const run = (signals: readonly BriefSignal[]) =>
 
 describe('runSignals', () => {
   it('records each failure on its own signal and keeps the others', async () => {
-    const indexNotFound = Object.assign(new Error('no such index'), {
-      meta: { body: { error: { type: 'index_not_found_exception' } } },
-    });
+    const indexNotFound = new errors.ResponseError({
+      statusCode: 404,
+      body: { error: { type: 'index_not_found_exception' } },
+      headers: {},
+      warnings: null,
+      meta: {},
+    } as unknown as ConstructorParameters<typeof errors.ResponseError>[0]);
 
     const { evidence, outcomes } = await run([
-      signal('ok', async () => factOf('user:ann')),
-      signal('slow', () => new Promise<SignalOutput>(() => undefined), { timeoutMs: 20 }),
+      signal('ok', async () => [factAbout('user:ann')]),
+      signal('slow', () => new Promise<FactDraft[]>(() => undefined), { timeoutMs: 20 }),
       signal('broken', async () => {
         throw new Error('kaboom');
       }),
@@ -76,6 +66,23 @@ describe('runSignals', () => {
     expect(evidence.facts).toHaveLength(1);
   });
 
+  it('numbers facts in signal order and keys each entity once by EUID', async () => {
+    const { evidence } = await run([
+      signal('first', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return [factAbout('user:ann'), factAbout('user:bob')];
+      }),
+      signal('second', async () => [factAbout('user:ann')]),
+    ]);
+
+    expect(evidence.facts.map(({ id, signalId, entityIds }) => [id, signalId, entityIds])).toEqual([
+      [1, 'first', ['user:ann']],
+      [2, 'first', ['user:bob']],
+      [3, 'second', ['user:ann']],
+    ]);
+    expect(Object.keys(evidence.entities)).toEqual(['user:ann', 'user:bob']);
+  });
+
   it('runs at most signalConcurrency signals at once', async () => {
     let active = 0;
     let maxActive = 0;
@@ -84,30 +91,12 @@ describe('runSignals', () => {
         maxActive = Math.max(maxActive, ++active);
         await new Promise((resolve) => setTimeout(resolve, 10));
         active--;
-        return { facts: [] };
+        return [];
       })
     );
 
     await run(signals);
 
     expect(maxActive).toBe(BRIEF_LIMITS.signalConcurrency);
-  });
-
-  it('passes at most maxCandidates entities to entity signals', async () => {
-    const candidates = Array.from({ length: BRIEF_LIMITS.maxCandidates + 5 }, (_, i) =>
-      ref(`user:u${String(i).padStart(2, '0')}`)
-    );
-    const entityRun = jest.fn(async () => ({ facts: [] }));
-
-    await run([
-      signal('wide', async () => ({ facts: [], candidates })),
-      signal<'entities'>('per_entity', entityRun, { scope: 'entities' }),
-    ]);
-
-    expect(entityRun).toHaveBeenCalledWith(
-      ctx,
-      { entities: candidates.slice(0, BRIEF_LIMITS.maxCandidates) },
-      expect.anything()
-    );
   });
 });

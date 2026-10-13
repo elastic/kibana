@@ -11,7 +11,7 @@ import type {
   Brief,
 } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { ASSESSMENT_KEYS } from '../../../../../common/entity_analytics/executive_brief/brief';
-import type { Evidence } from '../signals/types';
+import type { Evidence } from '../signals';
 import {
   buildValidBrief,
   DOCKER,

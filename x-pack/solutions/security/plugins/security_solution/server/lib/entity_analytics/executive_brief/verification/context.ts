@@ -17,7 +17,7 @@ import type {
 import type { AssessmentKey } from '../../../../../common/entity_analytics/executive_brief/brief';
 import { ASSESSMENT_KEYS } from '../../../../../common/entity_analytics/executive_brief/brief';
 import { entityDisplayName } from '../entity_record';
-import type { Evidence } from '../signals/types';
+import type { Evidence } from '../signals';
 
 export type VerificationCheck = keyof VerificationSummary['dropped'];
 

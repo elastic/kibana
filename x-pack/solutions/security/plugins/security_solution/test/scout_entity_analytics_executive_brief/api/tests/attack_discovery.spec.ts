@@ -6,14 +6,13 @@
  */
 
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type {
   AttentionLevel,
   Brief,
 } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
-import { BRIEF_ROUTE, EXECUTIVE_BRIEF_TAGS, INTERNAL_HEADERS } from '../fixtures/constants';
+import { EXECUTIVE_BRIEF_TAGS } from '../fixtures/constants';
+import { apiTest } from '../fixtures';
 import {
   createAttackDiscoveryIndex,
   createBriefConnector,
@@ -54,7 +53,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth, esClient, log }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+      headers = cookieHeader;
       ({ username } = await getCurrentUser({ apiClient, headers }));
       ({ connectorId, llmProxy } = await createBriefConnector({ apiServices, log }));
       await createAttackDiscoveryIndex(esClient);
@@ -75,7 +74,7 @@ apiTest.describe(
 
     apiTest(
       "uses the caller's own and shared discoveries, never another user's private one",
-      async ({ apiClient, esClient }) => {
+      async ({ entityAnalyticsApi, esClient }) => {
         await seedAttackDiscoveries(esClient, [
           {
             id: 'ad-private-other',
@@ -95,14 +94,17 @@ apiTest.describe(
         ]);
         mockSubmitBrief(llmProxy, discoveryBrief('watch'));
 
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
         expect(document.job.status).toBe('succeeded');
         expect(document.metadata?.signals.attack_discoveries.status).toBe('ok');
         const discoveryIds = (document.report?.facts ?? [])
@@ -115,7 +117,7 @@ apiTest.describe(
 
     apiTest(
       'collapses regenerated discoveries with overlapping alerts into the highest-risk one',
-      async ({ apiClient, esClient }) => {
+      async ({ entityAnalyticsApi, esClient }) => {
         await seedAttackDiscoveries(esClient, [
           {
             id: 'ad-first-run',
@@ -132,14 +134,17 @@ apiTest.describe(
         ]);
         mockSubmitBrief(llmProxy, discoveryBrief('watch'));
 
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({
@@ -155,20 +160,23 @@ apiTest.describe(
 
     apiTest(
       'caps the attention level at what a low-severity discovery supports',
-      async ({ apiClient, esClient }) => {
+      async ({ entityAnalyticsApi, esClient }) => {
         await seedAttackDiscoveries(esClient, [
           { id: 'ad-low', title: 'Unusual logon', alertIds: ['alert-low'], riskScore: 10 },
         ]);
         mockSubmitBrief(llmProxy, discoveryBrief('urgent'));
 
-        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
-          headers,
-          responseType: 'json',
-          body: { range: '7d', connectorId },
-        });
+        const response = await entityAnalyticsApi.generateExecutiveBrief(
+          { body: { range: '7d', connectorId } },
+          { headers }
+        );
         expect(response).toHaveStatusCode(200);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
+        const document = await waitForBriefJob({
+          entityAnalyticsApi,
+          headers,
+          jobId: response.body.id,
+        });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({ id: 1, severity: 'low' }),

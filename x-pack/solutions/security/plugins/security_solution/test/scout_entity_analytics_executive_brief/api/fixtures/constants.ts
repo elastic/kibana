@@ -5,24 +5,8 @@
  * 2.0.
  */
 
-import { INTERNAL_API_HEADERS, tags } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
-import { EXECUTIVE_BRIEF_API_PATH } from '../../../../common/entity_analytics/executive_brief/constants';
-
-/** The brief route in the default space (no leading slash, the apiClient convention). */
-export const BRIEF_ROUTE = EXECUTIVE_BRIEF_API_PATH.replace(/^\//, '');
-
-/** The status route under a brief route (default space unless `route` is given). */
-export const briefStatusRoute = (route: string = BRIEF_ROUTE): string => `${route}/status`;
-
-/** The brief route in a non-default space. */
-export const briefRouteInSpace = (spaceId: string): string => `s/${spaceId}/${BRIEF_ROUTE}`;
-
-export const INTERNAL_HEADERS = {
-  'kbn-xsrf': 'scout',
-  'Content-Type': 'application/json;charset=UTF-8',
-  ...INTERNAL_API_HEADERS,
-} as const;
 
 /**
  * Stateful classic only: the `entityAnalyticsExecutiveBriefEnabled` flag is set by the

@@ -6,16 +6,9 @@
  */
 
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
-import {
-  BRIEF_ROUTE,
-  EXECUTIVE_BRIEF_TAGS,
-  INTERNAL_HEADERS,
-  briefRouteInSpace,
-  briefStatusRoute,
-} from '../fixtures/constants';
+import { EXECUTIVE_BRIEF_TAGS } from '../fixtures/constants';
+import { apiTest } from '../fixtures';
 import {
   countStoredBriefs,
   createBriefConnector,
@@ -39,10 +32,10 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
 
   apiTest.beforeAll(async ({ apiServices, samlAuth, log }) => {
     const owner = await samlAuth.asInteractiveUser('admin');
-    ownerHeaders = { ...INTERNAL_HEADERS, ...owner.cookieHeader };
+    ownerHeaders = owner.cookieHeader;
     // `editor` has Entity Analytics access, so a 404 can only come from the owner filter.
     const otherUser = await samlAuth.asInteractiveUser('editor');
-    otherUserHeaders = { ...INTERNAL_HEADERS, ...otherUser.cookieHeader };
+    otherUserHeaders = otherUser.cookieHeader;
 
     await apiServices.spaces.create({ id: OTHER_SPACE_ID });
     ({ connectorId, llmProxy } = await createBriefConnector({ apiServices, log }));
@@ -64,67 +57,54 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
     await apiServices.spaces.delete(OTHER_SPACE_ID);
   });
 
-  apiTest('another user can neither read nor delete the brief', async ({ apiClient }) => {
+  apiTest('another user can neither read nor delete the brief', async ({ entityAnalyticsApi }) => {
     const { jobId } = await generateBrief({
-      apiClient,
+      entityAnalyticsApi,
       headers: ownerHeaders,
       connectorId,
     });
 
-    const read = await apiClient.get(BRIEF_ROUTE, {
-      headers: otherUserHeaders,
-      responseType: 'json',
-    });
+    const read = await entityAnalyticsApi.getExecutiveBrief({ headers: otherUserHeaders });
     expect(read).toHaveStatusCode(404);
 
-    const status = await apiClient.get(briefStatusRoute(), {
-      headers: otherUserHeaders,
-      responseType: 'json',
-    });
+    const status = await entityAnalyticsApi.getExecutiveBriefStatus({ headers: otherUserHeaders });
     expect(status).toHaveStatusCode(404);
 
-    const deleted = await apiClient.delete(BRIEF_ROUTE, {
-      headers: otherUserHeaders,
-      responseType: 'json',
-    });
+    const deleted = await entityAnalyticsApi.deleteExecutiveBrief({ headers: otherUserHeaders });
     expect(deleted).toHaveStatusCode(200);
     expect(deleted.body).toStrictEqual({ deleted: false });
 
-    const ownerRead = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
-      headers: ownerHeaders,
-      responseType: 'json',
-    });
+    const ownerRead = await entityAnalyticsApi.getExecutiveBrief({ headers: ownerHeaders });
     expect(ownerRead).toHaveStatusCode(200);
     expect(ownerRead.body.job).toMatchObject({ id: jobId, status: 'succeeded' });
   });
 
   apiTest(
     'the brief is only visible in the space where it was generated',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, entityAnalyticsApi, esClient }) => {
       const { jobId } = await generateBrief({
-        apiClient,
+        entityAnalyticsApi,
         headers: ownerHeaders,
         connectorId,
       });
 
-      const otherSpaceRead = await apiClient.get(briefRouteInSpace(OTHER_SPACE_ID), {
+      const otherSpaceRead = await entityAnalyticsApi.getExecutiveBrief({
         headers: ownerHeaders,
-        responseType: 'json',
+        kibanaSpace: OTHER_SPACE_ID,
       });
       expect(otherSpaceRead).toHaveStatusCode(404);
 
       // A brief in the other space is a separate document and leaves the first one untouched.
       const { jobId: otherSpaceJobId } = await generateBrief({
-        apiClient,
+        entityAnalyticsApi,
         headers: ownerHeaders,
         connectorId: otherSpaceConnectorId,
-        route: briefRouteInSpace(OTHER_SPACE_ID),
+        kibanaSpace: OTHER_SPACE_ID,
       });
       expect(otherSpaceJobId).not.toBe(jobId);
 
-      const defaultSpaceRead = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
+      const defaultSpaceRead = await entityAnalyticsApi.getExecutiveBrief({
         headers: ownerHeaders,
-        responseType: 'json',
       });
       expect(defaultSpaceRead.body.job.id).toBe(jobId);
 
@@ -137,34 +117,37 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
     }
   );
 
-  apiTest('a second generate replaces the first brief', async ({ apiClient, esClient }) => {
-    const { jobId: firstJobId } = await generateBrief({
-      apiClient,
-      headers: ownerHeaders,
-      connectorId,
-    });
-    const { jobId: secondJobId, document } = await generateBrief({
-      apiClient,
-      headers: ownerHeaders,
-      connectorId,
-    });
+  apiTest(
+    'a second generate replaces the first brief',
+    async ({ apiClient, entityAnalyticsApi, esClient }) => {
+      const { jobId: firstJobId } = await generateBrief({
+        entityAnalyticsApi,
+        headers: ownerHeaders,
+        connectorId,
+      });
+      const { jobId: secondJobId, document } = await generateBrief({
+        entityAnalyticsApi,
+        headers: ownerHeaders,
+        connectorId,
+      });
 
-    expect(secondJobId).not.toBe(firstJobId);
-    expect(document.job).toMatchObject({ id: secondJobId, status: 'succeeded' });
+      expect(secondJobId).not.toBe(firstJobId);
+      expect(document.job).toMatchObject({ id: secondJobId, status: 'succeeded' });
 
-    // Same document (deterministic id per owner and space), now holding the second job.
-    const { docId, ownerId } = await getBriefDocId({
-      apiClient,
-      headers: ownerHeaders,
-      spaceId: 'default',
-    });
-    const stored = await readStoredBrief(esClient, docId);
-    expect(stored).toMatchObject({
-      schemaVersion: 1,
-      owner: { id: ownerId },
-      spaceId: 'default',
-      job: { id: secondJobId, status: 'succeeded' },
-    });
-    expect(await countStoredBriefs(esClient, ownerId)).toBe(1);
-  });
+      // Same document (deterministic id per owner and space), now holding the second job.
+      const { docId, ownerId } = await getBriefDocId({
+        apiClient,
+        headers: ownerHeaders,
+        spaceId: 'default',
+      });
+      const stored = await readStoredBrief(esClient, docId);
+      expect(stored).toMatchObject({
+        schemaVersion: 1,
+        owner: { id: ownerId },
+        spaceId: 'default',
+        job: { id: secondJobId, status: 'succeeded' },
+      });
+      expect(await countStoredBriefs(esClient, ownerId)).toBe(1);
+    }
+  );
 });

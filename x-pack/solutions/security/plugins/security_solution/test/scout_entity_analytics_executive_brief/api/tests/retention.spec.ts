@@ -6,14 +6,13 @@
  */
 
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   BRIEF_RETENTION_MS,
   EXECUTIVE_BRIEF_INDEX,
 } from '../../../../common/entity_analytics/executive_brief/constants';
-import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
-import { BRIEF_ROUTE, EXECUTIVE_BRIEF_TAGS, INTERNAL_HEADERS } from '../fixtures/constants';
+import { EXECUTIVE_BRIEF_TAGS } from '../fixtures/constants';
+import { apiTest } from '../fixtures';
 import {
   createBriefConnector,
   deleteAllBriefs,
@@ -29,7 +28,7 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
 
   apiTest.beforeAll(async ({ apiServices, samlAuth, log }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+    headers = cookieHeader;
     ({ connectorId, llmProxy } = await createBriefConnector({ apiServices, log }));
   });
 
@@ -43,25 +42,25 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
     await deleteBriefConnector({ apiServices, connectorId, llmProxy });
   });
 
-  apiTest('a generated brief expires 30 days after it was generated', async ({ apiClient }) => {
-    await generateBrief({ apiClient, headers, connectorId });
+  apiTest(
+    'a generated brief expires 30 days after it was generated',
+    async ({ entityAnalyticsApi }) => {
+      await generateBrief({ entityAnalyticsApi, headers, connectorId });
 
-    const read = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
-      headers,
-      responseType: 'json',
-    });
-    expect(read).toHaveStatusCode(200);
-    const { metadata, expiresAt } = read.body;
-    expect(metadata?.generatedAt).toBeDefined();
-    expect(Date.parse(expiresAt) - Date.parse(metadata?.generatedAt ?? '')).toBe(
-      BRIEF_RETENTION_MS
-    );
-  });
+      const read = await entityAnalyticsApi.getExecutiveBrief({ headers });
+      expect(read).toHaveStatusCode(200);
+      const { metadata, expiresAt } = read.body;
+      expect(metadata?.generatedAt).toBeDefined();
+      expect(Date.parse(expiresAt) - Date.parse(metadata?.generatedAt ?? '')).toBe(
+        BRIEF_RETENTION_MS
+      );
+    }
+  );
 
   apiTest(
     'an expired brief reads as not found, even before cleanup runs',
-    async ({ apiClient, esClient }) => {
-      await generateBrief({ apiClient, headers, connectorId });
+    async ({ apiClient, entityAnalyticsApi, esClient }) => {
+      await generateBrief({ entityAnalyticsApi, headers, connectorId });
       const { docId } = await getBriefDocId({ apiClient, headers, spaceId: 'default' });
 
       await esClient.update({
@@ -71,7 +70,7 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
         refresh: true,
       });
 
-      const read = await apiClient.get(BRIEF_ROUTE, { headers, responseType: 'json' });
+      const read = await entityAnalyticsApi.getExecutiveBrief({ headers });
       expect(read).toHaveStatusCode(404);
     }
   );

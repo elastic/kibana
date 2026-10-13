@@ -9,7 +9,7 @@ import type {
   Brief,
   VerificationSummary,
 } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { Evidence } from '../signals/types';
+import type { Evidence } from '../signals';
 import { checkCitations } from './citations';
 import type { BriefCheck } from './context';
 import { createCheckContext, mapAssessments } from './context';
