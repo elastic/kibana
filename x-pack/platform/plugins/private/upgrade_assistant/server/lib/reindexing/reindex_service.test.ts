@@ -529,18 +529,21 @@ describe('reindexService', () => {
       const rolloverPhase = { actions: { rollover: { max_docs: 2 } } };
       const deletePhase = { actions: { delete: {} } };
       it.each([
-        ['pending rollover', rolloverPhase, {}, false],
+        ['pending rollover', rolloverPhase, undefined, {}, false],
         [
           'already rolled over',
           rolloverPhase,
+          undefined,
           { 'index.lifecycle.indexing_complete': 'true' },
           true,
         ],
-        ['with a rollover alias but no rollover action', deletePhase, {}, true],
-        ['not yet in a phase, with a rollover alias', undefined, {}, false],
+        ['with a rollover alias but no rollover action', deletePhase, undefined, {}, true],
+        ['not yet in a phase, whose policy rolls over', undefined, rolloverPhase, {}, false],
+        ['not yet in a phase, whose policy does not roll over', undefined, deletePhase, {}, true],
+        ['not yet in a phase, whose policy is missing', undefined, undefined, {}, true],
       ])(
         'handles the ILM lifecycle date of an index %s',
-        async (_, phaseDefinition, extraSettings, preservesLifecycleDate) => {
+        async (_, phaseDefinition, policyHotPhase, extraSettings, preservesLifecycleDate) => {
           actions.getFlatSettings.mockResolvedValueOnce({
             ...settingsMappings,
             settings: {
@@ -554,6 +557,7 @@ describe('reindexService', () => {
               myIndex: {
                 index: 'myIndex',
                 managed: true,
+                policy: 'myPolicy',
                 lifecycle_date_millis: 1700000000000,
                 skip: false,
                 phase_execution: {
@@ -565,6 +569,17 @@ describe('reindexService', () => {
               },
             },
           });
+          clusterClient.asCurrentUser.ilm.getLifecycle.mockResponse(
+            policyHotPhase
+              ? {
+                  myPolicy: {
+                    version: 1,
+                    modified_date: '2023-11-14T22:13:20.000Z',
+                    policy: { phases: { hot: policyHotPhase } },
+                  },
+                }
+              : {}
+          );
           clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
             acknowledged: true,
           });
@@ -583,6 +598,10 @@ describe('reindexService', () => {
               },
             },
           });
+          // The policy is only looked up when ILM has not cached a phase yet
+          expect(clusterClient.asCurrentUser.ilm.getLifecycle).toHaveBeenCalledTimes(
+            phaseDefinition ? 0 : 1
+          );
         }
       );
 

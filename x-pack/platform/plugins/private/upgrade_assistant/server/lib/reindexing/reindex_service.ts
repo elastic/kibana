@@ -200,14 +200,29 @@ export const reindexServiceFactory = (
     if (!ilmExplain?.managed) {
       return { managed: false };
     }
-    const { lifecycle_date_millis: lifecycleDate, phase_execution: phaseExecution } = ilmExplain;
+    const {
+      lifecycle_date_millis: lifecycleDate,
+      policy,
+      phase_execution: phaseExecution,
+    } = ilmExplain;
     // Not cached until ILM enters the first phase
     const phaseDefinition = phaseExecution?.phase_definition;
     return {
       managed: true,
       lifecycleDate,
-      hasRolloverAction: phaseDefinition && phaseDefinition.actions?.rollover !== undefined,
+      hasRolloverAction: phaseDefinition
+        ? phaseDefinition.actions?.rollover !== undefined
+        : await hasHotPhaseRollover(policy),
     };
+  };
+
+  const hasHotPhaseRollover = async (policyName?: string): Promise<boolean> => {
+    if (!policyName) {
+      return false;
+    }
+    // A missing policy never rolls over
+    const policies = await esClient.ilm.getLifecycle({ name: policyName }, { ignore: [404] });
+    return policies[policyName]?.policy.phases.hot?.actions?.rollover !== undefined;
   };
 
   /**
@@ -240,8 +255,7 @@ export const reindexServiceFactory = (
     // Indices pending rollover get their lifecycle date at rollover time, which origination_date would override.
     // ILM sets indexing_complete once the index has rolled over.
     const isRolloverPending =
-      (hasRolloverAction ?? settings['index.lifecycle.rollover_alias'] !== undefined) &&
-      settings['index.lifecycle.indexing_complete'] !== 'true';
+      hasRolloverAction && settings['index.lifecycle.indexing_complete'] !== 'true';
 
     let createIndex;
     try {

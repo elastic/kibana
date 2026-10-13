@@ -376,6 +376,55 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    it('should preserve the ILM lifecycle date of an index not yet in a phase whose policy does not roll over', async () => {
+      const indexName = 'ilm-new-phase-data';
+      const policyName = 'ua-reindex-ilm-new-phase-policy';
+
+      // The hot min_age keeps the index in the "new" phase, so ILM has not cached a phase definition
+      await es.ilm.putLifecycle({
+        name: policyName,
+        policy: {
+          phases: { hot: { min_age: '1d', actions: { set_priority: { priority: 100 } } } },
+        },
+      });
+      await es.indices.create({
+        index: indexName,
+        settings: {
+          'index.lifecycle.name': policyName,
+          'index.lifecycle.rollover_alias': 'ilm-new-phase',
+        },
+      });
+
+      let newIndexName: string | undefined;
+      try {
+        const originalLifecycleDate = await getLifecycleDateMillis(indexName);
+        const { indices } = await es.ilm.explainLifecycle({ index: indexName });
+        const explain = indices[indexName];
+        expect(explain.managed && explain.phase).to.be('new');
+        expect(explain.managed && explain.phase_execution?.phase_definition).to.be(undefined);
+
+        await supertest
+          .post(`/api/upgrade_assistant/reindex/${indexName}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const lastState = await waitForReindexToComplete(indexName);
+        newIndexName = lastState.newIndexName;
+        expect(lastState.errorMessage).to.equal(null);
+        expect(lastState.status).to.equal(ReindexStatus.completed);
+        expect(await getLifecycleDateMillis(lastState.newIndexName)).to.equal(
+          originalLifecycleDate
+        );
+      } finally {
+        // Deleting the new index first also removes the alias, so the original name can be cleaned up if left over
+        if (newIndexName) {
+          await es.indices.delete({ index: newIndexName, ignore_unavailable: true });
+        }
+        await es.indices.delete({ index: indexName, ignore_unavailable: true });
+        await es.ilm.deleteLifecycle({ name: policyName });
+      }
+    });
+
     it('should reindex an ILM-managed index whose write-blocking phase is already due', async () => {
       const indexName = 'ilm-readonly-data';
       const policyName = 'ua-reindex-ilm-readonly-policy';
