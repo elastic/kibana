@@ -55,6 +55,8 @@ export const WorkspaceRoute = ({
    * `workspace.changeHandler()`.
    */
   const workspaceRef = useRef<Workspace>();
+  // Callbacks retained during store initialization need access to the completed store.
+  // This ref is a temporary bridge until further workspace state optimizations remove that dependency.
   const storeRef = useRef<GraphStore>();
   /**
    * Providing `workspaceRef.current` to the hook dependencies or components itself
