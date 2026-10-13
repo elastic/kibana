@@ -431,6 +431,12 @@ describe('logs_explorer_url_schema', () => {
       expect(result).toEqual([]);
     });
 
+    it('should ignore non-array filters', () => {
+      const filters = { a: 1 } as unknown as Filter[];
+
+      expect(getDiscoverFiltersFromState('test-index', filters)).toEqual([]);
+    });
+
     it('should not create filters for empty selected options', () => {
       const index = 'test-index';
       const controls: ControlOptions = {

@@ -229,7 +229,7 @@ export const getDiscoverFiltersFromState = (
   controls?: ControlOptions
 ) => {
   return [
-    ...filters,
+    ...(Array.isArray(filters) ? filters : []),
     ...(controls
       ? (Object.entries(controls) as Array<[keyof ControlOptions, OptionsListControl]>).reduce<
           Filter[]
