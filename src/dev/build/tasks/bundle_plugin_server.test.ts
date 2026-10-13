@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import Fs from 'fs';
 import Os from 'os';
@@ -537,6 +538,64 @@ describe('bundlePluginServer', () => {
     expect(loaded.a.marker).toBe('a-marker');
     expect(loaded.a.b.marker).toBe('b-marker');
     expect(loaded.a.b.a).toBe(loaded.a);
+  });
+
+  it('keeps one instance when another package requires a module by name', async () => {
+    const root = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-plugin-bundle-scope-'));
+    directories.push(root);
+    const scope = Path.join(root, 'node_modules', '@kbn');
+    const owner = Path.join(scope, 'owner-plugin');
+    const consumer = Path.join(scope, 'consumer-plugin');
+    const ownerServer = Path.join(owner, 'server');
+    const consumerServer = Path.join(consumer, 'server');
+    Fs.mkdirSync(ownerServer, { recursive: true });
+    Fs.mkdirSync(consumerServer, { recursive: true });
+    Fs.writeFileSync(Path.join(owner, 'package.json'), '{"name":"@kbn/owner-plugin"}\n');
+    Fs.writeFileSync(Path.join(consumer, 'package.json'), '{"name":"@kbn/consumer-plugin"}\n');
+
+    Fs.writeFileSync(
+      Path.join(ownerServer, 'plugin.js'),
+      [
+        '"use strict";',
+        'exports.token = require("./token");',
+        'exports.inner = require("./inner");',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(ownerServer, 'token.js'),
+      '"use strict";\nexports.state = { marker: "token-marker" };\n'
+    );
+    Fs.writeFileSync(
+      Path.join(ownerServer, 'inner.js'),
+      '"use strict";\nexports.marker = "inner-marker";\n'
+    );
+    Fs.writeFileSync(
+      Path.join(consumerServer, 'read.js'),
+      '"use strict";\nexports.token = require("@kbn/owner-plugin/server/token");\n'
+    );
+
+    await bundlePluginServer(owner);
+
+    const bundle = Fs.readFileSync(Path.join(ownerServer, 'plugin.js'), 'utf8');
+    expect(bundle).toContain('inner-marker');
+    expect(bundle).not.toContain('token-marker');
+    expect(bundle).toContain('require("./token.js")');
+
+    const loaded = requireFromTest(Path.join(ownerServer, 'plugin.js'));
+    expect(loaded.inner.marker).toBe('inner-marker');
+    // Jest resolves @kbn/* itself, so check the shared instance with Node.
+    const same = execFileSync(
+      process.execPath,
+      [
+        '-e',
+        'const owner = require(process.argv[1]); const other = require(process.argv[2]); process.exit(owner.token.state === other.token.state ? 0 : 1);',
+        Path.join(ownerServer, 'plugin.js'),
+        Path.join(consumerServer, 'read.js'),
+      ],
+      { encoding: 'utf8' }
+    );
+    expect(same).toBe('');
   });
 
   it('leaves a plugin entry with no local files unchanged', async () => {

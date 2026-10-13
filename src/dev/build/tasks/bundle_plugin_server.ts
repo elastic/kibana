@@ -520,7 +520,13 @@ function collectInlineGraph(entry: string, packageRoot: string): Set<string> {
   if (startup.size < 2) {
     return startup;
   }
-  return excludeSharedModules(startup, entry, packageRoot);
+  const inline = excludeSharedModules(startup, entry, packageRoot);
+  // A second pass picks up relative requires of files that another package
+  // loads by name, which the first pass could not see.
+  if (excludeCrossPackageModules(inline, entry, packageRoot)) {
+    return excludeSharedModules(inline, entry, packageRoot);
+  }
+  return inline;
 }
 
 /**
@@ -574,6 +580,151 @@ function excludeSharedModules(
   }
 
   return inline;
+}
+
+const crossPackageRequiredFilesCache = new Map<string, ReadonlyMap<string, ReadonlySet<string>>>();
+
+/**
+ * Drop modules that another package require()s by name, such as
+ * `@kbn/lists-plugin/server/exception_item_import_error`. The same-package
+ * scan never sees that specifier, so inlining the file creates a second class
+ * and `instanceof` checks fail.
+ *
+ * @returns whether any module was removed from the inline set
+ */
+function excludeCrossPackageModules(
+  inline: Set<string>,
+  entry: string,
+  packageRoot: string
+): boolean {
+  const required = crossPackageRequiredFiles(packageRoot);
+  let removed = false;
+  for (const file of required) {
+    if (file !== entry && inline.delete(file)) {
+      removed = true;
+    }
+  }
+  return removed;
+}
+
+function crossPackageRequiredFiles(packageRoot: string): ReadonlySet<string> {
+  const scopeDir = kbnScopeDir(packageRoot);
+  const packageName = readPackageName(packageRoot);
+  if (!scopeDir || !packageName) {
+    return new Set();
+  }
+
+  let byPackage = crossPackageRequiredFilesCache.get(scopeDir);
+  if (!byPackage) {
+    byPackage = indexCrossPackageRequires(scopeDir);
+    crossPackageRequiredFilesCache.set(scopeDir, byPackage);
+  }
+  return byPackage.get(packageName) ?? new Set();
+}
+
+function kbnScopeDir(packageRoot: string): string | null {
+  const scopeDir = Path.dirname(packageRoot);
+  const inKbnScope =
+    Path.basename(scopeDir) === '@kbn' && Path.basename(Path.dirname(scopeDir)) === 'node_modules';
+  if (!inKbnScope) {
+    return null;
+  }
+  return Fs.realpathSync(scopeDir);
+}
+
+function readPackageName(packageRoot: string): string | null {
+  const packageJson = Path.join(packageRoot, 'package.json');
+  if (!Fs.existsSync(packageJson)) {
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(Fs.readFileSync(packageJson, 'utf8'));
+    if (!parsed || typeof parsed !== 'object' || !('name' in parsed)) {
+      return null;
+    }
+    const { name } = parsed as { name?: unknown };
+    return typeof name === 'string' ? name : null;
+  } catch {
+    return null;
+  }
+}
+
+function indexCrossPackageRequires(scopeDir: string): ReadonlyMap<string, ReadonlySet<string>> {
+  const rootsByName = new Map<string, string>();
+  for (const entry of Fs.readdirSync(scopeDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name === 'node_modules') {
+      continue;
+    }
+    const packageDir = Path.join(scopeDir, entry.name);
+    const name = readPackageName(packageDir);
+    if (name) {
+      rootsByName.set(name, Fs.realpathSync(packageDir));
+    }
+  }
+
+  const required = new Map<string, Set<string>>();
+  const files: string[] = [];
+  const visit = (dir: string) => {
+    for (const entry of Fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === 'node_modules') {
+        continue;
+      }
+      const abs = Path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        visit(abs);
+        continue;
+      }
+      if (entry.isFile() && entry.name.endsWith('.js')) {
+        files.push(abs);
+      }
+    }
+  };
+  visit(scopeDir);
+
+  for (const file of files) {
+    let code: string;
+    try {
+      code = Fs.readFileSync(file, 'utf8');
+    } catch {
+      continue;
+    }
+    if (!code.includes('@kbn/')) {
+      continue;
+    }
+    for (const specifier of code.matchAll(/require\(\s*["'](@kbn\/[^"']+)["']\s*\)/g)) {
+      const spec = specifier[1];
+      if (!spec) {
+        continue;
+      }
+      const resolved = resolvePackageSpecifier(spec, rootsByName);
+      if (!resolved) {
+        continue;
+      }
+      const packageName = spec.startsWith('@kbn/') ? `@kbn/${spec.split('/')[1]}` : null;
+      if (!packageName) {
+        continue;
+      }
+      const filesForPackage = required.get(packageName) ?? new Set<string>();
+      filesForPackage.add(resolved);
+      required.set(packageName, filesForPackage);
+    }
+  }
+
+  return required;
+}
+
+function resolvePackageSpecifier(
+  specifier: string,
+  rootsByName: ReadonlyMap<string, string>
+): string | null {
+  const slash = specifier.indexOf('/', '@kbn/'.length);
+  const packageName = slash === -1 ? specifier : specifier.slice(0, slash);
+  const subpath = slash === -1 ? '' : specifier.slice(slash + 1);
+  const packageRoot = rootsByName.get(packageName);
+  if (!packageRoot || !subpath) {
+    return null;
+  }
+  return resolveExisting(packageRoot, subpath);
 }
 
 function listPackageJsFiles(packageRoot: string): string[] {
