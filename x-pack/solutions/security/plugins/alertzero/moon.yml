@@ -83,7 +83,6 @@ dependsOn:
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
   - '@kbn/task-manager-plugin'
-  - '@kbn/workflows-execution-engine'
 tags:
   - plugin
   - prod
