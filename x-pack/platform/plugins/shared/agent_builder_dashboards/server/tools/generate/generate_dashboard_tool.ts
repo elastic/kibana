@@ -34,6 +34,7 @@ import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 import { createLayoutArranger } from './layout_arranger';
+import { findLayoutSummary } from './layout_summary';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
@@ -138,7 +139,7 @@ Panel positions and sizes are arranged automatically after the changes are appli
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, ...upsert },
-      { logger, attachments, events, esClient, modelProvider }
+      { logger, attachments, events, esClient, modelProvider, resultStore }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
@@ -150,11 +151,14 @@ Panel positions and sizes are arranged automatically after the changes are appli
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const { dashboardData, created, updated, failures, panelAuthoringNotes } =
+        const { dashboardData, created, updated, failures, panelAuthoringNotes, layoutSummary } =
           await executeDashboardUpsert({
             dashboardData: latestVersion?.data,
             upsert,
             logger,
+            layoutSummary: previousAttachmentId
+              ? await findLayoutSummary(resultStore, previousAttachmentId)
+              : undefined,
             resolvePanelContent: createPanelResolver({
               logger,
               modelProvider,
@@ -195,6 +199,7 @@ Panel positions and sizes are arranged automatically after the changes are appli
                 created,
                 updated,
                 failures: failures.length > 0 ? failures : undefined,
+                layout_summary: layoutSummary,
               },
             },
           ],

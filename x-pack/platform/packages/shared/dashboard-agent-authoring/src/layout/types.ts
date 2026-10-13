@@ -10,7 +10,7 @@ import type { SizeClassName } from './panel_sizes';
 
 export const GRID_COLUMNS = 48;
 
-export const MAX_LAYOUT_RULES = 20;
+export const MAX_LAYOUT_SUMMARY_LENGTH = 1000;
 
 export interface PanelSize {
   w: number;
@@ -64,8 +64,8 @@ export interface LayoutRequest {
   dashboardDescription?: string;
   /** Layout instructions from the user, when the call asked for a relayout. */
   instructions?: string;
-  /** Layout rules from the user's earlier instructions, which still apply. */
-  rules?: string[];
+  /** Summary of the user's earlier layout and size requests, which still apply. */
+  layoutSummary?: string;
   containers: LayoutContainer[];
 }
 
@@ -107,12 +107,12 @@ export const layoutArrangementSchema = z.object({
       })
     )
     .max(200),
-  rules: z
-    .array(z.string().min(1).max(500))
-    .max(MAX_LAYOUT_RULES)
+  layoutSummary: z
+    .string()
+    .max(MAX_LAYOUT_SUMMARY_LENGTH)
     .optional()
     .describe(
-      'Only when instructions are given: the updated layout rules, i.e. the earlier rules merged with the instructions.'
+      'Only when instructions are given: the updated summary of the layout and size requests that still apply, or an empty string when none do.'
     ),
 });
 

@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { omit } from 'lodash';
 import {
   isSection,
   type AttachmentPanel,
@@ -29,7 +28,6 @@ import {
   type LayoutContainer,
   type LayoutPanel,
   type LayoutSectionItem,
-  MAX_LAYOUT_RULES,
 } from './types';
 
 type PanelGrid = AttachmentPanel['grid'];
@@ -73,27 +71,36 @@ interface ArrangeLayoutParams {
   editedPanelIds: ReadonlySet<string>;
   /** Layout instructions; when set, every container is arranged again. */
   instructions?: string;
+  /** Summary of the user's earlier layout requests, which still apply. */
+  layoutSummary?: string;
   authoringNotesByPanelId: ReadonlyMap<string, string>;
   arrangeLayout?: ArrangeDashboardLayout;
   logger: Logger;
+}
+
+export interface ArrangedDashboardLayout {
+  dashboardData: DashboardAttachmentData;
+  /** Summary of the user's layout requests that still apply, to pass to the next call. */
+  layoutSummary?: string;
 }
 
 /**
  * Places the panels and sections a change touched. Containers with added, moved, removed,
  * or edited items (or every container, when `instructions` are given) are arranged into rows by the
  * injected `arrangeLayout` call; code turns the rows into grid positions. Without the call, or when
- * it fails, existing items keep their position and new ones are packed below them. The user's
- * layout instructions are kept in `layout_rules` and passed to every later layout call.
+ * it fails, existing items keep their position and new ones are packed below them. With
+ * `instructions`, the layout call also rewrites the summary of the user's layout requests.
  */
 export const arrangeDashboardLayout = async ({
   originalDashboardData,
   dashboardData,
   editedPanelIds,
   instructions,
+  layoutSummary,
   authoringNotesByPanelId,
   arrangeLayout,
   logger,
-}: ArrangeLayoutParams): Promise<DashboardAttachmentData> => {
+}: ArrangeLayoutParams): Promise<ArrangedDashboardLayout> => {
   const originalContainerKeyByPanelId = getSectionIdByPanelId(originalDashboardData);
   const originalSectionIds = new Set(getSectionsById(originalDashboardData).keys());
 
@@ -128,10 +135,8 @@ export const arrangeDashboardLayout = async ({
   );
 
   if (dirtyContainers.length === 0) {
-    return dashboardData;
+    return { dashboardData, layoutSummary };
   }
-
-  const previousRules = dashboardData.layout_rules ?? [];
 
   const toLayoutItem = (
     widget: AttachmentPanel | DashboardSection,
@@ -192,7 +197,7 @@ export const arrangeDashboardLayout = async ({
       dashboardTitle: dashboardData.title,
       ...(dashboardData.description ? { dashboardDescription: dashboardData.description } : {}),
       ...(instructions !== undefined ? { instructions } : {}),
-      ...(previousRules.length > 0 ? { rules: previousRules } : {}),
+      ...(layoutSummary ? { layoutSummary } : {}),
       containers: layoutContainers,
     },
   });
@@ -207,21 +212,16 @@ export const arrangeDashboardLayout = async ({
     containerPlacements.forEach((grid, id) => placements.set(id, grid));
   });
 
-  const rules =
+  const nextLayoutSummary =
     instructions === undefined
-      ? previousRules
-      : arrangement?.rules ?? [...previousRules, instructions].slice(-MAX_LAYOUT_RULES);
+      ? layoutSummary
+      : arrangement?.layoutSummary ?? [layoutSummary, instructions].filter(Boolean).join(' ');
 
-  return withLayoutRules(applyPlacements(dashboardData, placements), rules);
+  return {
+    dashboardData: applyPlacements(dashboardData, placements),
+    layoutSummary: nextLayoutSummary || undefined,
+  };
 };
-
-const withLayoutRules = (
-  dashboardData: DashboardAttachmentData,
-  rules: string[]
-): DashboardAttachmentData =>
-  rules.length > 0
-    ? { ...dashboardData, layout_rules: rules }
-    : omit(dashboardData, 'layout_rules');
 
 /** Ids of widgets grouped by the `y` they start at, in reading order. */
 const groupIntoRows = (widgets: Array<AttachmentPanel | DashboardSection>): string[][] => {

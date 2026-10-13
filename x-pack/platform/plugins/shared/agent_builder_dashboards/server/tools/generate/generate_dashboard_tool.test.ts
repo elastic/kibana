@@ -68,6 +68,7 @@ const callHandler = async (dashboardAttachmentId?: string) => {
     },
     events: { sendUiEvent },
     esClient: { asCurrentUser: {} },
+    resultStore: { listEntries: jest.fn(async () => []) },
   };
   const ret = await tool.handler(
     { dashboardAttachmentId } as unknown as Parameters<typeof tool.handler>[0],

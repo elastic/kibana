@@ -12,7 +12,7 @@ const LAYOUT_SYSTEM_PROMPT = `You arrange the panels of a Kibana dashboard on a 
 
 ## Priorities
 
-1. The user's layout and size requests: \`instructions\` (new) and \`rules\` (earlier, still in force). When they conflict, \`instructions\` win.
+1. The user's layout and size requests: \`instructions\` (new) and \`layoutSummary\` (earlier, still in force). When they conflict, \`instructions\` win.
 2. Few gaps: the widths of a row add up to 48. Never leave an empty row.
 3. Panel sizes within the ranges below.
 4. Stability: change as little as possible of the current arrangement.
@@ -37,9 +37,9 @@ Markdown panels list their text length in \`textLines\`; code sets the height of
 
 Place new items by purpose, next to related items: in a row with room, or in a new row. In a new dashboard, lead with a markdown introduction when there is one, then metrics and gauges, then trends, then breakdowns and tables. At the top level, put panels above sections. A section always takes a row of its own; its \`w\` and the row \`h\` are ignored.
 
-## Rules
+## Layout summary
 
-When \`instructions\` are given, also return \`rules\`: the earlier \`rules\` merged with the instructions, so later calls keep honoring them. Write each rule as a short, lasting statement that names panels by title or id, e.g. "Metrics share the first row", "error-rate sits right of latency", or "requests-table is full width". Drop rules that the instructions replace or that name panels no longer on the dashboard. Return an empty list when the user asks to drop all earlier layout requests. Without \`instructions\`, omit \`rules\`.`;
+When \`instructions\` are given, also return \`layoutSummary\`: a short summary of every layout and size request of the user that still applies, so later calls keep honoring them. Write it from scratch: start from the earlier \`layoutSummary\`, apply the instructions, and leave out whatever they change, revert, or replace, and requests about panels no longer on the dashboard. Name panels by title or id, e.g. "Metrics share the first row; error-rate sits right of latency; requests-table is full width." Return an empty string when no request still applies. Without \`instructions\`, omit \`layoutSummary\`.`;
 
 /** Builds the messages of the layout call for a layout request. */
 export const buildLayoutPrompt = (request: LayoutRequest): { system: string; user: string } => ({
