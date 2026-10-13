@@ -16,7 +16,8 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UniversalProfilingStatus } from '@kbn/profiling-utils';
+import type { ProfilingSchemasStatus } from '@kbn/profiling-utils';
+import { hasUsableProfilingData } from '@kbn/profiling-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { Flamegraph } from './flamegraph';
 import { Functions } from './functions';
@@ -33,11 +34,11 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
   const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, setDateRange } = useDatePickerContext();
   const { fullKuery, customKuery, setCustomKuery } = useProfilingKuery();
-  const { request$ } = useRequestObservable<UniversalProfilingStatus>();
+  const { request$ } = useRequestObservable<ProfilingSchemasStatus>();
 
   const { data, status, error } = useFetcher(
     async (callApi) => {
-      return callApi<UniversalProfilingStatus>(`/api/infra/profiling/status`, {
+      return callApi<ProfilingSchemasStatus>(`/api/infra/profiling/status`, {
         method: 'GET',
       });
     },
@@ -175,7 +176,7 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
 
   return (
     <>
-      {data?.has_setup === false ? (
+      {data && !hasUsableProfilingData(data) ? (
         <ProfilingEmptyState />
       ) : (
         <>
