@@ -123,6 +123,7 @@ export {
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
 } from './services';
 
 export type {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../mock';
 
@@ -125,5 +125,32 @@ describe('AgentHealth', () => {
 
     expect(utils.queryByTestId('restartUpgradeBtn')).not.toBeInTheDocument();
     expect(utils.container.querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
+  });
+});
+
+describe('AgentHealth tooltip', () => {
+  const agent = { active: true, status: 'online' } as unknown as Agent;
+
+  it('shows the check-in tooltip on hover by default', async () => {
+    const renderer = createFleetTestRendererMock();
+    const utils = renderer.render(<AgentHealth agent={agent} />);
+
+    fireEvent.mouseOver(utils.getByText('Healthy'));
+
+    await waitFor(() => expect(utils.getByText('Never checked in')).toBeInTheDocument());
+  });
+
+  it('shows no check-in tooltip when hideTooltip is set', async () => {
+    const renderer = createFleetTestRendererMock();
+    const utils = renderer.render(<AgentHealth agent={agent} hideTooltip />);
+
+    fireEvent.mouseOver(utils.getByText('Healthy'));
+
+    // Give a tooltip the chance to appear before asserting that it does not.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(utils.queryByText('Never checked in')).not.toBeInTheDocument();
+    expect(utils.getByText('Healthy')).toBeInTheDocument();
   });
 });
