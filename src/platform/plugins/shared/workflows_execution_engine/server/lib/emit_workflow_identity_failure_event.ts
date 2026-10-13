@@ -18,21 +18,36 @@ import {
 } from './telemetry/utils/extract_execution_metadata';
 import type { EmitEvent } from '../trigger_events';
 
-/** Emits a pre-runtime identity failure with the persisted event-chain context and original task request. */
+/** Emits a pre-runtime identity failure with the persisted event-chain context. */
 export const emitWorkflowIdentityFailureEvent = async ({
   execution,
   request,
   emitEvent,
   logger,
   maxEventChainDepth,
+  emitWithoutRequest,
 }: {
   execution: EsWorkflowExecution;
-  request: KibanaRequest;
+  request?: KibanaRequest;
+  emitWithoutRequest?: (execution: EsWorkflowExecution) => Promise<void>;
   emitEvent: EmitEvent;
   logger: Logger;
   maxEventChainDepth: number;
 }): Promise<void> => {
   if (execution.isTestRun) return;
+  if (!request) {
+    try {
+      if (!emitWithoutRequest) throw new Error('Identity-failure dispatch is unavailable.');
+      await emitWithoutRequest(execution);
+    } catch (error) {
+      logger.warn(
+        `Failed to dispatch workflow identity failure (execution=${execution.id}): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+    return;
+  }
   const visitedWorkflowIds = mergeEmitterWorkflowIntoEventChainVisited(
     extractEventChainVisitedWorkflowIdsFromExecution(execution, maxEventChainDepth),
     execution.workflowId,

@@ -30,7 +30,7 @@ export async function maybeScheduleDormantQueuedRunIfNeeded({
 }: {
   workflowExecutionId: string;
   spaceId: string;
-  request: KibanaRequest;
+  request?: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   logger: Logger;
@@ -83,7 +83,7 @@ export async function handleConcurrencyBlockedExecution({
 }: {
   workflowExecutionId: string;
   spaceId: string;
-  request: KibanaRequest;
+  request?: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository?: StepExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;

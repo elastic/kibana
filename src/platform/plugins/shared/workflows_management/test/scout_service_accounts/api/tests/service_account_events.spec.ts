@@ -101,7 +101,9 @@ apiTest.describe(
           (execution) => execution.id !== control.id
         );
         expect(handler).toBeDefined();
-        expectAccount(await wait(apiClient, String(handler?.id)), otherAccountId);
+        expectAccount(await wait(apiClient, String(handler?.id)), otherAccountId, {
+          username: otherAccountId,
+        });
       }
     );
   }

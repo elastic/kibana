@@ -123,6 +123,73 @@ describe('WorkflowTaskScheduler', () => {
       );
     });
 
+    it.each([undefined, 'old-account', 'account-a'])(
+      'schedules a pinned SA task and migrates previous identity %s',
+      async (oldAccount) => {
+        const mockTm = makeMockTaskManager();
+        const workflow = makeWorkflow();
+        if (!workflow.definition) throw new Error('Expected workflow definition');
+        workflow.definition.settings = { run_as: 'account-a' };
+        mockTm.schedule.mockRejectedValueOnce({ statusCode: 409 });
+        mockTm.get.mockResolvedValue(
+          makeTaskInstance('workflow:test-workflow:scheduled', {
+            credential: oldAccount
+              ? {
+                  type: 'service_account',
+                  workloadType: 'workflow',
+                  workloadId: workflow.id,
+                  spaceId: 'default',
+                  expectedServiceAccountId: oldAccount,
+                }
+              : undefined,
+          })
+        );
+        const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+        await scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest);
+        expect(mockTm.schedule).toHaveBeenCalledWith(
+          expect.objectContaining({
+            runAs: {
+              workloadType: 'workflow',
+              workloadId: workflow.id,
+              spaceId: 'default',
+              expectedServiceAccountId: 'account-a',
+            },
+          }),
+          { request: mockRequest }
+        );
+        if (oldAccount === 'account-a') {
+          expect(mockTm.removeIfExists).not.toHaveBeenCalled();
+          expect(mockTm.bulkUpdateSchedules).toHaveBeenCalled();
+        } else {
+          expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
+          expect(mockTm.schedule).toHaveBeenCalledTimes(2);
+        }
+      }
+    );
+
+    it('replaces SA credentials when a workflow returns to caller execution', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTm.get.mockResolvedValue(
+        makeTaskInstance('workflow:test-workflow:scheduled', {
+          credential: {
+            type: 'service_account',
+            workloadType: 'workflow',
+            workloadId: 'test-workflow',
+            spaceId: 'default',
+            expectedServiceAccountId: 'old-account',
+          },
+        })
+      );
+      await new WorkflowTaskScheduler(mockLogger, mockTm).scheduleWorkflowTasks(
+        makeWorkflow(),
+        'default',
+        mockRequest
+      );
+      expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:test-workflow:scheduled');
+      expect(mockTm.schedule.mock.calls[1][0].runAs).toBeUndefined();
+    });
+
     it('returns empty array when workflow has no scheduled triggers', async () => {
       const mockTm = makeMockTaskManager();
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);

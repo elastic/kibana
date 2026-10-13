@@ -14,6 +14,7 @@ import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { ResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import type { WorkflowExecutionLoopParams } from './types';
 import { DEFAULT_WORKFLOW_TIMEOUT } from '../default_workflow_settings';
+import { getWorkflowTaskRunAs } from '../service_account_execution';
 import { getResolvedStepTimeout } from '../step/timeout_zone_step/step_level/enter_step_timeout_zone_node_impl';
 import {
   getHitlIdleDeadlineMsForNode,
@@ -130,6 +131,7 @@ async function armSyncParentWakeTask(
       executionId: workflowExecution.id,
       spaceId: workflowExecution.spaceId || 'default',
       fakeRequest: params.fakeRequest,
+      runAs: getWorkflowTaskRunAs(workflowExecution),
       runAt,
     });
   } catch (error: unknown) {

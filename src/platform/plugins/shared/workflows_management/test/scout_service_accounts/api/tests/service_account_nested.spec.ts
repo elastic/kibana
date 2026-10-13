@@ -29,68 +29,90 @@ apiTest.describe(
 
     apiTest.afterAll(teardown);
 
-    for (const boundChild of [false, true]) {
-      apiTest(
-        `SA continuation audit: ${
-          boundChild ? 'bound' : 'unbound'
-        } child approval does not change parent identity`,
-        async ({ apiClient, samlAuth }) => {
-          const { headers, accountId, otherAccountId, create, run, wait, expectAccount } =
-            getContext();
+    apiTest(
+      'bound child approval does not change parent identity',
+      async ({ apiClient, samlAuth }) => {
+        const { headers, accountId, otherAccountId, create, run, wait, expectAccount } =
+          getContext();
 
-          apiTest.setTimeout(180_000);
-          const { cookieHeader } = await samlAuth.asInteractiveUser({
-            elasticsearch: { cluster: [], indices: [] },
-            kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-          });
-          const approverHeaders = { ...headers, ...cookieHeader };
-          const childYaml = workflowYaml(otherAccountId, waitStep + authenticationStep);
-          const childId = await create(
-            apiClient,
-            boundChild
-              ? childYaml
-              : childYaml.replace(`settings:\n  run_as: ${otherAccountId}\n`, '')
-          );
-          const parentId = await create(
-            apiClient,
-            workflowYaml(
-              accountId,
-              `  - name: child
+        apiTest.setTimeout(180_000);
+        const { cookieHeader } = await samlAuth.asInteractiveUser({
+          elasticsearch: { cluster: [], indices: [] },
+          kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+        });
+        const approverHeaders = { ...headers, ...cookieHeader };
+        const childYaml = workflowYaml(otherAccountId, waitStep + authenticationStep);
+        const childId = await create(apiClient, childYaml);
+        const parentId = await create(
+          apiClient,
+          workflowYaml(
+            accountId,
+            `  - name: child
     type: workflow.execute
     with:
       workflow-id: ${childId}
       inputs: {}
 ${authenticationStep}`
-            )
-          );
-          const parentExecutionId = await run(apiClient, parentId);
-          const parent = await wait(apiClient, parentExecutionId, 'waiting_for_child');
-          const childExecutionId = parent.stepExecutions?.find((step) => step.stepId === 'child')
-            ?.state?.executionId;
-          expect(typeof childExecutionId).toBe('string');
-          const child = await wait(apiClient, String(childExecutionId), 'waiting_for_input');
-          const approved = await apiClient.post(`api/workflows/executions/${child.id}/resume`, {
-            headers: approverHeaders,
-            body: {
-              input: { approved: true },
-              stepExecutionId: child.stepExecutions?.find((step) => step.stepId === 'approval')?.id,
-            },
-            responseType: 'json',
-          });
-          expect(approved, JSON.stringify(approved.body)).toHaveStatusCode(200);
-          const completedChild = await wait(apiClient, child.id);
-          expect(completedChild.effectiveIdentity).toStrictEqual(
-            boundChild ? { type: 'service_account', id: otherAccountId } : undefined
-          );
-          const output = JSON.stringify(
-            completedChild.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output
-          );
-          expect(output).not.toContain(accountId);
-          expect(output.includes(otherAccountId)).toBe(boundChild);
-          expectAccount(await wait(apiClient, parentExecutionId), accountId);
-        }
-      );
-    }
+          )
+        );
+        const parentExecutionId = await run(apiClient, parentId);
+        const parent = await wait(apiClient, parentExecutionId, 'waiting_for_child');
+        const childExecutionId = parent.stepExecutions?.find((step) => step.stepId === 'child')
+          ?.state?.executionId;
+        expect(typeof childExecutionId).toBe('string');
+        const child = await wait(apiClient, String(childExecutionId), 'waiting_for_input');
+        const approved = await apiClient.post(`api/workflows/executions/${child.id}/resume`, {
+          headers: approverHeaders,
+          body: {
+            input: { approved: true },
+            stepExecutionId: child.stepExecutions?.find((step) => step.stepId === 'approval')?.id,
+          },
+          responseType: 'json',
+        });
+        expect(approved, JSON.stringify(approved.body)).toHaveStatusCode(200);
+        const completedChild = await wait(apiClient, child.id);
+        expect(completedChild.effectiveIdentity).toStrictEqual({
+          type: 'service_account',
+          id: otherAccountId,
+        });
+        const output = JSON.stringify(
+          completedChild.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output
+        );
+        expect(output).not.toContain(accountId);
+        expect(output).toContain(otherAccountId);
+        expectAccount(await wait(apiClient, parentExecutionId), accountId);
+      }
+    );
+
+    apiTest(
+      'an unmanaged parent cannot delegate its SA to an unbound child',
+      async ({ apiClient }) => {
+        const { headers, accountId, create, run, wait } = getContext();
+        const childId = await create(
+          apiClient,
+          workflowYaml(accountId).replace(`settings:\n  run_as: ${accountId}\n`, '')
+        );
+        const parentId = await create(
+          apiClient,
+          workflowYaml(
+            accountId,
+            `  - name: child
+    type: workflow.execute
+    with:
+      workflow-id: ${childId}
+`
+          )
+        );
+        const failed = await wait(apiClient, await run(apiClient, parentId), 'failed');
+        expect(JSON.stringify(failed)).toContain('Only managed parent workflows');
+        const children = await apiClient.get(`api/workflows/workflow/${childId}/executions`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(children).toHaveStatusCode(200);
+        expect(children.body.results).toHaveLength(0);
+      }
+    );
 
     apiTest('a nested child selects its own account', async ({ apiClient }) => {
       const { headers, accountId, otherAccountId, create, run, wait, expectAccount } = getContext();

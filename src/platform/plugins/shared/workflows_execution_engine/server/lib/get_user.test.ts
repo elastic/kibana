@@ -8,6 +8,7 @@
  */
 
 import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
+import { securityServiceMock } from '@kbn/core/server/mocks';
 import { getAuthenticatedUser } from './get_user';
 
 const createRequest = (): KibanaRequest => ({ headers: {} } as KibanaRequest);
@@ -20,11 +21,27 @@ const createClusterClient = (): IClusterClient =>
 const createSecurity = (user: unknown): SecurityServiceStart =>
   ({
     authc: {
+      getPrincipal: jest.fn(),
       getCurrentUser: jest.fn().mockReturnValue(user),
     },
   } as unknown as SecurityServiceStart);
 
 describe('getAuthenticatedUser', () => {
+  it('identifies a service-account principal without authenticating an expired temporary request', async () => {
+    const security = securityServiceMock.createStart();
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'account-a',
+      variant: 'stack',
+    });
+    const client = createClusterClient();
+    await expect(getAuthenticatedUser(createRequest(), security, client)).resolves.toBe(
+      'account-a'
+    );
+    expect(client.asScoped).not.toHaveBeenCalled();
+    expect(security.authc.getCurrentUser).not.toHaveBeenCalled();
+  });
+
   it('returns the profile UID when available', async () => {
     await expect(
       getAuthenticatedUser(

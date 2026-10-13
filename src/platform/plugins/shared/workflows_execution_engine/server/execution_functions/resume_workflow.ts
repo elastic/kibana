@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { completeIdentityFailureCleanup } from './complete_identity_failure_cleanup';
 import { finalizeWorkflowIdentityFailure } from './finalize_workflow_identity_failure';
@@ -189,7 +190,13 @@ async function resumeWorkflowWithRequest({
 }
 
 export const resumeWorkflow = async (
-  params: Parameters<typeof resumeWorkflowWithRequest>[0]
+  params: Omit<Parameters<typeof resumeWorkflowWithRequest>[0], 'fakeRequest'> & {
+    fakeRequest?: KibanaRequest;
+    runAs?: RunContext['runAs'];
+    emitIdentityFailure?: Parameters<
+      typeof emitWorkflowIdentityFailureEvent
+    >[0]['emitWithoutRequest'];
+  }
 ): ReturnType<typeof resumeWorkflowWithRequest> => {
   const execution = await params.workflowExecutionRepository.getWorkflowExecutionById(
     params.workflowRunId,
@@ -215,7 +222,8 @@ export const resumeWorkflow = async (
       (fakeRequest) => {
         enteredExecution = true;
         return resumeWorkflowWithRequest({ ...params, fakeRequest });
-      }
+      },
+      params.runAs
     );
   } catch (error) {
     if (!enteredExecution && getExecutionServiceAccountId(execution)) {
@@ -232,6 +240,7 @@ export const resumeWorkflow = async (
         await emitWorkflowIdentityFailureEvent({
           execution: failedExecution,
           request: params.fakeRequest,
+          emitWithoutRequest: params.emitIdentityFailure,
           emitEvent: params.workflowsExecutionEngine.triggerEvents.emitEvent,
           logger: params.logger,
           maxEventChainDepth: params.config.eventDriven.maxChainDepth,

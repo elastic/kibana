@@ -15,7 +15,7 @@ import type {
 } from '@kbn/workflows';
 import {
   ensureInheritedBindingCurrent,
-  getWorkflowOriginalRequest,
+  getWorkflowTaskRunAs,
   resolveInheritedWorkflowIdentity,
   withWorkflowExecutionIdentity,
 } from './service_account_execution';
@@ -85,15 +85,63 @@ describe('inherited workflow execution identity', () => {
     );
   });
 
-  it('does not inherit by default, even inside an SA execution', async () => {
+  it('inherits by default inside an SA execution', async () => {
     await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
       expect(
         resolveInheritedWorkflowIdentity(request, child, {
           ...context,
           inheritParentIdentity: false,
         })
-      ).toBeUndefined();
-      expect(getWorkflowOriginalRequest(request)).toBe(caller);
+      ).toEqual(identity);
+    });
+  });
+
+  it.each([undefined, 'default'] as const)(
+    'follows the SA for an unbound child with mode %s',
+    async (mode) => {
+      await withWorkflowExecutionIdentity(
+        core,
+        parent({ 'workflow-id': child.id, 'run-as-mode': mode }),
+        caller,
+        async (request) => {
+          expect(
+            resolveInheritedWorkflowIdentity(request, child, {
+              ...context,
+              inheritParentIdentity: false,
+            })
+          ).toEqual(identity);
+          expect(
+            resolveInheritedWorkflowIdentity(
+              request,
+              {
+                ...child,
+                definition: { ...child.definition, settings: { run_as: 'child-account' } },
+              },
+              { ...context, inheritParentIdentity: false }
+            )
+          ).toBeUndefined();
+          expect(() =>
+            resolveInheritedWorkflowIdentity(
+              request,
+              { ...child, managed: false },
+              { ...context, inheritParentIdentity: false }
+            )
+          ).toThrow('Only managed child workflows');
+        }
+      );
+    }
+  );
+
+  it('does not treat the obsolete inheritRunAs flag as explicit delegation', async () => {
+    const withInput = { 'workflow-id': child.id, inheritRunAs: true };
+    await withWorkflowExecutionIdentity(core, parent(withInput), caller, async (request) => {
+      const boundChild = {
+        ...child,
+        definition: { ...child.definition, settings: { run_as: 'child-account' } },
+      };
+      expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
+        'literal workflow-id and identity choice'
+      );
     });
   });
 
@@ -139,10 +187,8 @@ describe('inherited workflow execution identity', () => {
   });
 
   it.each([
-    { ...approval, 'run-as-mode': 'default' as const },
-    { 'workflow-id': child.id },
     { ...approval, 'workflow-id': '{{ inputs.child }}' },
-    { 'workflow-id': child.id, inheritRunAs: true },
+    { ...approval, 'workflow-id': 'not-the-resolved-child' },
   ])('rejects missing, unsupported, or dynamic identity choices: %j', async (withInput) => {
     await withWorkflowExecutionIdentity(core, parent(withInput), caller, async (request) => {
       expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
@@ -198,7 +244,7 @@ describe('inherited workflow execution identity', () => {
     });
   });
 
-  it('remints from the root binding after the parent has finished and retains original caller credentials', async () => {
+  it('remints from the root binding after the parent has finished', async () => {
     const inherited = await withWorkflowExecutionIdentity(core, parent(), caller, async (request) =>
       resolveInheritedWorkflowIdentity(request, child, context)
     );
@@ -210,7 +256,8 @@ describe('inherited workflow execution identity', () => {
     };
     for (let resume = 0; resume < 2; resume++) {
       await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
-        expect(getWorkflowOriginalRequest(request)).toBe(caller);
+        expect(request).not.toBe(caller);
+        expect(getWorkflowTaskRunAs(execution)?.workloadId).toBe('parent');
       });
     }
     expect(core.security.serviceAccounts.withScopedRequestForWorkload).toHaveBeenLastCalledWith(

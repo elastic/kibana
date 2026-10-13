@@ -71,7 +71,12 @@ const mockHandleQueuedWorkflowRunAtTaskStart =
   >;
 
 describe('runWorkflow', () => {
-  it.each([false, true])('finalizes identity failure (inherited: %s)', async (inherited) => {
+  it.each([
+    { inherited: false, native: false },
+    { inherited: true, native: false },
+    { inherited: false, native: true },
+    { inherited: true, native: true },
+  ])('finalizes identity failure (%j)', async ({ inherited, native }) => {
     jest.clearAllMocks();
     const dependencies = mockContextDependencies();
     jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
@@ -135,6 +140,15 @@ describe('runWorkflow', () => {
       ).not.toHaveBeenCalled();
     });
 
+    const emitIdentityFailure = jest.fn().mockResolvedValue(undefined);
+    const runAs = {
+      withScopedRequest: jest
+        .fn()
+        .mockRejectedValue(
+          new Error('The workload binding does not match the expected service account.')
+        ),
+    };
+
     await expect(
       runWorkflow({
         workflowRunId: 'run-identity-failure',
@@ -143,7 +157,9 @@ describe('runWorkflow', () => {
         dependencies,
         logger: createMockLogger(),
         config: createMockWorkflowExecutionEngineConfig(),
-        fakeRequest: createFakeKibanaRequest(),
+        fakeRequest: native ? undefined : createFakeKibanaRequest(),
+        runAs: native ? runAs : undefined,
+        emitIdentityFailure,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository,
         stepExecutionRepository,
@@ -159,6 +175,7 @@ describe('runWorkflow', () => {
       expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
       { seqNo: 1, primaryTerm: 1 }
     );
+    expect(emitIdentityFailure).toHaveBeenCalledTimes(native ? 1 : 0);
     expect(mockSetupDependencies).not.toHaveBeenCalled();
     expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
   });

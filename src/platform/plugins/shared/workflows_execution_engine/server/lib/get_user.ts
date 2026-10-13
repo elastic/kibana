@@ -29,6 +29,8 @@ export async function getAuthenticatedUser(
 ): Promise<string | undefined> {
   // Try getCurrentUser first (works for regular authenticated requests)
   try {
+    const principal = security.authc.getPrincipal(request);
+    if (principal?.type === 'service_account') return principal.serviceAccountId;
     const user = security.authc.getCurrentUser(request);
     if (user?.profile_uid || user?.username) {
       return user.profile_uid ?? user.username;

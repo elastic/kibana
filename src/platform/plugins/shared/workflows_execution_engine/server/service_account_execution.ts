@@ -9,24 +9,30 @@
 
 import Boom from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { RunContext, TaskInstance } from '@kbn/task-manager-plugin/server';
 import { visitNestedSteps, WorkflowExecuteStepInputSchema } from '@kbn/workflows';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 export const WORKFLOW_SERVICE_ACCOUNT_TYPE = 'workflow';
 type IdentityExecution = Pick<
   EsWorkflowExecution,
-  'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity' | 'managed'
+  | 'id'
+  | 'workflowId'
+  | 'spaceId'
+  | 'workflowDefinition'
+  | 'effectiveIdentity'
+  | 'managed'
+  | 'executedBy'
 >;
-const executionContexts = new WeakMap<
-  KibanaRequest,
-  { originalRequest: KibanaRequest; execution: IdentityExecution }
->();
+const executionContexts = new WeakMap<KibanaRequest, { execution: IdentityExecution }>();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
   'run-as-mode': true,
 });
 
-export const getExecutionServiceAccountId = (execution: IdentityExecution): string | undefined =>
+export const getExecutionServiceAccountId = (
+  execution: Partial<Pick<IdentityExecution, 'effectiveIdentity' | 'workflowDefinition'>>
+): string | undefined =>
   execution.effectiveIdentity?.inheritedFrom
     ? execution.effectiveIdentity.id
     : execution.workflowDefinition?.settings?.run_as;
@@ -44,9 +50,12 @@ export const resolveInheritedWorkflowIdentity = (
     spaceId?: string;
   }
 ): EsWorkflowExecution['effectiveIdentity'] => {
-  if (!context.inheritParentIdentity) return undefined;
   const parent = executionContexts.get(request)?.execution;
   const accountId = parent && getExecutionServiceAccountId(parent);
+  const followsParent = Boolean(
+    accountId && context.parentWorkflowExecutionId && !workflow.definition?.settings?.run_as
+  );
+  if (!context.inheritParentIdentity && !followsParent) return undefined;
   if (!parent?.id || !accountId)
     throw Boom.forbidden(
       'Service account inheritance requires a parent executing as a service account.'
@@ -84,7 +93,7 @@ export const resolveInheritedWorkflowIdentity = (
     : 'default';
   if (
     !identityChoice?.success ||
-    mode === 'default' ||
+    (mode === 'default' && !followsParent) ||
     identityChoice.data['workflow-id'] !== workflow.id
   ) {
     throw Boom.forbidden(
@@ -126,23 +135,53 @@ export const ensureInheritedBindingCurrent = async (
   }
 };
 
-export const getWorkflowOriginalRequest = (request: KibanaRequest): KibanaRequest =>
-  executionContexts.get(request)?.originalRequest ?? request;
+export const getWorkflowInitiatingUser = (request: KibanaRequest): string | undefined =>
+  executionContexts.get(request)?.execution.executedBy;
+
+export const getWorkflowTaskRunAs = (
+  execution: Partial<Pick<IdentityExecution, 'workflowDefinition' | 'effectiveIdentity'>> &
+    Pick<IdentityExecution, 'workflowId' | 'spaceId'>
+): TaskInstance['runAs'] => {
+  const accountId = getExecutionServiceAccountId(execution);
+  return accountId
+    ? {
+        workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+        workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
+        spaceId: execution.spaceId,
+        expectedServiceAccountId: accountId,
+      }
+    : undefined;
+};
 
 export const withWorkflowExecutionIdentity = async <T>(
   core: CoreStart,
   execution: IdentityExecution,
-  request: KibanaRequest,
-  execute: (request: KibanaRequest) => Promise<T>
+  request: KibanaRequest | undefined,
+  execute: (request: KibanaRequest) => Promise<T>,
+  runAs?: RunContext['runAs']
 ): Promise<T> => {
-  const originalRequest = getWorkflowOriginalRequest(request);
   const serviceAccountId = getExecutionServiceAccountId(execution);
   if (!serviceAccountId) {
-    return execute(originalRequest);
+    if (runAs || !request)
+      throw Boom.forbidden('Workflow execution identity does not match its task.');
+    return execute(request);
   }
   if (!core.security.serviceAccounts.isEnabled()) {
     throw Boom.forbidden('Service account execution is disabled.');
   }
+  const scoped = async (scopedRequest: KibanaRequest) => {
+    executionContexts.set(scopedRequest, { execution });
+    try {
+      return await execute(scopedRequest);
+    } finally {
+      executionContexts.delete(scopedRequest);
+    }
+  };
+  if (runAs) {
+    return runAs.withScopedRequest(scoped, { expectedServiceAccountId: serviceAccountId });
+  }
+  // Compatibility for pre-migration API-key tasks already stored in Task Manager.
+  if (!request) throw Boom.forbidden('Workflow task has no execution identity.');
   return core.security.serviceAccounts.withScopedRequestForWorkload(
     {
       workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
@@ -150,13 +189,6 @@ export const withWorkflowExecutionIdentity = async <T>(
       spaceId: execution.spaceId,
       expectedServiceAccountId: serviceAccountId,
     },
-    async (scopedRequest) => {
-      executionContexts.set(scopedRequest, { originalRequest, execution });
-      try {
-        return await execute(scopedRequest);
-      } finally {
-        executionContexts.delete(scopedRequest);
-      }
-    }
+    scoped
   );
 };
