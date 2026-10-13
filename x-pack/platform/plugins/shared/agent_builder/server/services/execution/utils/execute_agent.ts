@@ -15,6 +15,7 @@ import type {
   AgentExecutionMode,
   ConversationRoundAuthor,
   InteractivityConfigInput,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
@@ -49,6 +50,7 @@ export const executeAgent$ = ({
   roundId,
   conversationAccess,
   workflowExecutionId,
+  user,
 }: {
   agentId: string;
   executionId: string;
@@ -74,6 +76,7 @@ export const executeAgent$ = ({
   roundId?: string;
   conversationAccess?: ExecutionConversationAccess;
   workflowExecutionId?: string;
+  user?: UserIdAndName;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -91,6 +94,7 @@ export const executeAgent$ = ({
       projectRouting,
       conversationAccess,
       workflowExecutionId,
+      user,
       agentParams: {
         nextInput,
         conversation,
