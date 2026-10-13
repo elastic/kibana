@@ -108,6 +108,61 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
     }
   });
 
+  apiTest(
+    'Security all can manage rules; Security read can list them but not write',
+    async ({ apiClient, samlAuth }) => {
+      const securityRole = (privilege: 'all' | 'read') => ({
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: ['.entities.v2.*'], privileges: ['read', 'view_index_metadata'] }],
+        },
+        kibana: [{ base: [], feature: { siemV5: [privilege] }, spaces: ['*'] }],
+      });
+      const manager = await samlAuth.asInteractiveUser(securityRole('all'));
+      const reader = await samlAuth.asInteractiveUser(securityRole('read'));
+      const managerHeaders = { ...manager.cookieHeader, ...INTERNAL_HEADERS };
+      const readerHeaders = { ...reader.cookieHeader, ...INTERNAL_HEADERS };
+
+      const created = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
+        headers: managerHeaders,
+        responseType: 'json',
+        body: { name: 'Security all rule', ...LOCAL_USERS_TO_AD_RULE },
+      });
+      expect(created.statusCode).toBe(200);
+
+      const listedByReader = await apiClient.get(
+        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES,
+        { headers: readerHeaders, responseType: 'json' }
+      );
+      expect(listedByReader.statusCode).toBe(200);
+      expect(
+        (listedByReader.body as { rules: Array<{ id: string }> }).rules.map(({ id }) => id)
+      ).toContain(created.body.id);
+
+      const createdByReader = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES,
+        {
+          headers: readerHeaders,
+          responseType: 'json',
+          body: { name: 'Security read rule', ...LOCAL_USERS_TO_AD_RULE },
+        }
+      );
+      expect(createdByReader.statusCode).toBe(403);
+
+      const deletedByReader = await apiClient.delete(
+        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(created.body.id),
+        { headers: readerHeaders, responseType: 'json' }
+      );
+      expect(deletedByReader.statusCode).toBe(403);
+
+      const deletedByManager = await apiClient.delete(
+        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(created.body.id),
+        { headers: managerHeaders, responseType: 'json' }
+      );
+      expect(deletedByManager.statusCode).toBe(200);
+    }
+  );
+
   apiTest('rejects invalid rules with a clear error and saves nothing', async ({ apiClient }) => {
     const cases: Array<[string, Record<string, unknown>, string]> = [
       ['pipe injection', { filter: 'true | DROP user.name' }, "Invalid 'filter'"],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const CustomResolutionRuleTypeName = 'entity-resolution-custom-rule';
+
 /**
  * Prefix for custom-rule entries in the automated-resolution task state. Only
  * entries with this prefix are ever pruned; unknown OOTB ids pass through.

@@ -66,7 +66,7 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 
 ### Custom Resolution Rules
 
-All require the Enterprise license. Writes need `securitySolution-entity-analytics-manage` plus saved-objects access to `entity-resolution-custom-rule` (admin roles only). See [resolution.md](resolution.md#custom-resolution-rules).
+All require the Enterprise license. Reads need the Entity Analytics privileges; writes need `securitySolution-entity-analytics-manage` (Security `all`). See [resolution.md](resolution.md#custom-resolution-rules).
 
 | Method | Path | Description |
 |--------|------|-------------|

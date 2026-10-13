@@ -9,13 +9,14 @@ import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-serve
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
+  CustomResolutionRuleTypeName,
   MAX_CUSTOM_RULE_EXPRESSION_LENGTH,
   MAX_CUSTOM_RULE_NAME_LENGTH,
   MAX_CUSTOM_RULE_NAMESPACES,
   MAX_CUSTOM_RULE_NAMESPACE_LENGTH,
 } from './constants';
 
-export const CustomResolutionRuleTypeName = 'entity-resolution-custom-rule';
+export { CustomResolutionRuleTypeName };
 
 export interface CustomResolutionRuleAttributes {
   name: string;

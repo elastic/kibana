@@ -19,10 +19,7 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
-import {
-  ResolutionRulesClient,
-  getMaintainerRulesSavedObjectsClient,
-} from '../../domain/resolution/rules';
+import { ResolutionRulesClient } from '../../domain/resolution/rules';
 import { EntityMetadataClient } from '../../domain/entity_metadata';
 import { RelationshipsClient } from '../../domain/relationships';
 import type { TelemetryReporter } from '../../telemetry/events';
@@ -144,7 +141,7 @@ export async function executeMaintainerRun({
   const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
     projectRouting: 'space',
   }).asCurrentUser;
-  const soClient = getMaintainerRulesSavedObjectsClient(coreStart.savedObjects, request);
+  const soClient = coreStart.savedObjects.getScopedClient(request);
   const emitWorkflowTriggerEvent = createWorkflowTriggerEmitter({
     getWorkflowsClient: () => workflowsExtensions.getClient(request),
     logger,

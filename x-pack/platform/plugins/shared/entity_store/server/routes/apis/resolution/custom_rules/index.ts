@@ -57,8 +57,7 @@ const toErrorResponseOrThrow = (
   if (error instanceof Error && SavedObjectsErrorHelpers.isForbiddenError(error)) {
     return res.forbidden({
       body: {
-        message:
-          'Managing custom resolution rules requires all Kibana privileges in this space, or Saved Objects Management',
+        message: 'Not authorized to manage custom resolution rules in this space',
       },
     });
   }

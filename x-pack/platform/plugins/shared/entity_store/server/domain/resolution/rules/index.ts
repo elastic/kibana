@@ -11,11 +11,7 @@ export {
   type ResolutionRuleConfig,
   type EsqlMatchSpec,
 } from './rule_registry';
-export {
-  ResolutionRulesClient,
-  getMaintainerRulesSavedObjectsClient,
-  type EffectiveResolutionRule,
-} from './rule_client';
+export { ResolutionRulesClient, type EffectiveResolutionRule } from './rule_client';
 export {
   CustomResolutionRuleCreate,
   CustomResolutionRuleIdParams,
