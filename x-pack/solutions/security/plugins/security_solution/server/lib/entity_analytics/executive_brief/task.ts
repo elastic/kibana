@@ -24,7 +24,7 @@ import {
 import type { StartPlugins } from '../../../plugin';
 import type { ComposeBriefResult } from './composition/compose';
 import { BriefCompositionError, composeBrief } from './composition/compose';
-import type { GatherResult } from './signals';
+import type { Evidence } from './signals';
 import { BRIEF_SIGNALS, runSignals } from './signals';
 import type { ExecutiveBriefDataClient } from './data_client/data_client';
 import type { BriefOwner, JobUpdate } from './data_client/types';
@@ -77,7 +77,7 @@ const toJobError = (error: unknown, abortSignal: AbortSignal, startedAtMs: numbe
  * silently. Reports the EBT completion event however the run ends.
  */
 const runBriefJob = async ({
-  params: { jobId, spaceId, range, from, to, connectorId },
+  params: { jobId, profileId, spaceId, range, from, to, connectorId },
   fakeRequest,
   dataClient,
   coreStart,
@@ -105,7 +105,7 @@ const runBriefJob = async ({
   }
 
   const run: {
-    gathered?: GatherResult;
+    evidence?: Evidence;
     composed?: ComposeBriefResult;
     failedTokens?: ComposeBriefResult['tokens'];
     errorCode?: JobError['code'];
@@ -113,22 +113,20 @@ const runBriefJob = async ({
 
   try {
     await withBriefSpan('generate', { range }, async () => {
-      const gathered = await withBriefSpan('gather', {}, () =>
-        runSignals(
-          {
-            esClient: coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser,
-            spaceId,
-            timeRange: { from, to },
-            logger,
-            // Without a user, signals with per-user visibility only see shared data.
-            username: coreStart.security.authc.getCurrentUser(fakeRequest)?.username ?? '',
-          },
-          BRIEF_SIGNALS,
-          { abortSignal }
-        )
+      const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+      const evidence = await withBriefSpan('gather', {}, () =>
+        runSignals(BRIEF_SIGNALS, {
+          esClient,
+          resolutionClient: startPlugins.entityStore.createResolutionClient(esClient, spaceId),
+          spaceId,
+          username: coreStart.security.authc.getCurrentUser(fakeRequest)?.username ?? '',
+          profileId,
+          timeRange: { from, to },
+          abortSignal,
+          logger,
+        })
       );
-      run.gathered = gathered;
-      const { evidence, outcomes } = gathered;
+      run.evidence = evidence;
       const composed = hasFindings(evidence)
         ? await withBriefSpan('compose', {}, () =>
             composeBrief({
@@ -137,7 +135,6 @@ const runBriefJob = async ({
                 bindTo: { connectorId },
               }),
               evidence,
-              signals: outcomes,
               timeRange: { from, to, range },
               abortSignal,
               logger,
@@ -156,7 +153,9 @@ const runBriefJob = async ({
           connectorId,
           ...(composed?.model ? { model: composed.model } : {}),
           ...(composed ? { tokens: composed.tokens, verification: composed.verification } : {}),
-          signals: evidence.signals,
+          signals: Object.fromEntries(
+            evidence.signals.map(({ id, status, took }) => [id, { status, took }])
+          ),
         },
       });
     });
@@ -175,7 +174,7 @@ const runBriefJob = async ({
     }
   }
 
-  const { gathered, composed, failedTokens, errorCode } = run;
+  const { evidence, composed, failedTokens, errorCode } = run;
   const tokens = composed?.tokens ?? failedTokens;
   const event: BriefCompletedEvent = {
     outcome: errorCode ? 'failed' : 'succeeded',
@@ -183,14 +182,14 @@ const runBriefJob = async ({
     range,
     ...(composed?.model ? { model: composed.model } : {}),
     durationMs: Date.now() - startedAtMs,
-    signals: (gathered?.outcomes ?? []).map(({ id, status, took, factCount }) => ({
+    signals: (evidence?.signals ?? []).map(({ id, status, took, factCount }) => ({
       id,
       status,
       durationMs: took,
       factCount,
     })),
-    entityCount: Object.keys(gathered?.evidence.entities ?? {}).length,
-    factCount: gathered?.evidence.facts.length ?? 0,
+    entityCount: Object.keys(evidence?.entities ?? {}).length,
+    factCount: evidence?.facts.length ?? 0,
     ...(tokens ? { tokens: { prompt: tokens.prompt, completion: tokens.completion } } : {}),
     repaired: composed?.verification.repaired ?? false,
     levelsLowered: composed?.verification.lowered ?? 0,

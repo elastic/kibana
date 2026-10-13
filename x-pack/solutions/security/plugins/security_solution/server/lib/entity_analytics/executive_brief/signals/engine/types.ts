@@ -7,49 +7,46 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
+import type { ResolutionClient } from '@kbn/entity-store/server';
 import type {
-  BriefMetadata,
   BriefReport,
   Fact,
-  FactSource,
-  Severity,
   SignalStatus,
 } from '../../../../../../common/api/entity_analytics/executive_brief/common.gen';
 
-export interface SignalContext {
+/** What a signal's `run` receives. */
+export interface SignalInput {
   /** Scoped to the requesting user, so signals only see what the user can see. */
   esClient: ElasticsearchClient;
+  /** Entity Store resolution, with the same user-scoped client. */
+  resolutionClient: ResolutionClient;
   spaceId: string;
+  /** The requesting user's name, for Attack Discovery visibility; may be empty. */
+  username: string;
+  /** The requesting user's profile id, for Attack Discovery visibility. */
+  profileId: string;
   /** Absolute window, fixed when the job starts. */
   timeRange: { from: string; to: string };
+  /** Aborts on the signal's timeout, the gather budget or the job's end; pass it to every search. */
+  abortSignal: AbortSignal;
   logger: Logger;
-  /** The requesting user, for features with per-user visibility (Attack Discovery); may be empty. */
-  username: string;
 }
 
-/** A fact before it is numbered. Its entities are golden Entity Store records. */
-export interface FactDraft {
-  title: string;
-  /** ISO time. */
-  timestamp?: string;
-  severity?: Severity;
+/** What a signal's `run` returns: facts before numbering, and the golden records they reference. */
+export interface SignalResult {
+  facts: Array<Omit<Fact, 'id'>>;
   entities: Entity[];
-  numbers?: Record<string, number>;
-  details?: Record<string, string>;
-  source?: FactSource;
 }
 
-/** One data source the brief reads. A signal never sees another signal's output. */
-export interface BriefSignal {
+/** One data source the brief reads; register it in `signals/index.ts`. */
+export interface Signal {
   id: string;
   /** Shown in "Based on" and used as the prompt section header. */
   title: string;
-  /** Defaults to BRIEF_LIMITS.signalTimeoutMs. */
-  timeoutMs?: number;
-  run(ctx: SignalContext, abortSignal: AbortSignal): Promise<FactDraft[]>;
+  run(input: SignalInput): Promise<SignalResult>;
 }
 
-/** How one signal's run went, for the prompt and telemetry; only `status` and `took` are stored. */
+/** How one signal's run went, for the prompt, the stored metadata and telemetry. */
 export interface SignalOutcome {
   id: string;
   status: SignalStatus;
@@ -60,15 +57,9 @@ export interface SignalOutcome {
   factCount: number;
 }
 
-/** What the signals gathered: the report's entities and facts, and each signal's run. */
+/** What the signals gathered: entities keyed by EUID, facts numbered in signal order, and each run. */
 export interface Evidence {
   entities: BriefReport['entities'];
   facts: Fact[];
-  signals: BriefMetadata['signals'];
-}
-
-export interface GatherResult {
-  evidence: Evidence;
-  /** One per signal, in signal-priority order. */
-  outcomes: SignalOutcome[];
+  signals: SignalOutcome[];
 }

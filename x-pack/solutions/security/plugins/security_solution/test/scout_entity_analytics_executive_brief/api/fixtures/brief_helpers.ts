@@ -245,7 +245,7 @@ export interface SeededDiscovery {
   id: string;
   title: string;
   alertIds: string[];
-  /** 0..100; the signal derives the fact severity from it. */
+  /** The sum of the alerts' risk scores; the signal derives severity from their average. */
   riskScore: number;
   /** Owners of a private discovery; a discovery without users is shared. */
   users?: string[];

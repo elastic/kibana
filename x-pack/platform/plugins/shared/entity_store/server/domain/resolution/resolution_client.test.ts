@@ -814,4 +814,54 @@ describe('ResolutionClient', () => {
       );
     });
   });
+
+  describe('getResolutionGroups', () => {
+    it('returns each entity its group in two searches, leaving out unknown entities', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
+      const otherAliasDoc = createEntityDoc('alias-2', 'user', 'target-1');
+      const standaloneDoc = createEntityDoc('host-1', 'host');
+
+      // the requested entities, for their targets
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc, standaloneDoc]) as never
+      );
+      // every group's target and aliases
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, aliasDoc, otherAliasDoc, standaloneDoc]) as never
+      );
+
+      const result = await client.getResolutionGroups([
+        'target-1',
+        'alias-1',
+        'host-1',
+        'missing',
+        'alias-1',
+      ]);
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      const targetGroup = {
+        target: targetDoc,
+        aliases: [aliasDoc, otherAliasDoc],
+        group_size: 3,
+        entity_type: 'user',
+      };
+      expect(result).toEqual(
+        new Map([
+          ['target-1', targetGroup],
+          ['alias-1', targetGroup],
+          ['host-1', { target: standaloneDoc, aliases: [], group_size: 1, entity_type: 'host' }],
+        ])
+      );
+    });
+
+    it('leaves out an alias whose target is missing', async () => {
+      const aliasDoc = createEntityDoc('alias-1', 'user', 'deleted-target');
+
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+
+      expect(await client.getResolutionGroups(['alias-1'])).toEqual(new Map());
+    });
+  });
 });

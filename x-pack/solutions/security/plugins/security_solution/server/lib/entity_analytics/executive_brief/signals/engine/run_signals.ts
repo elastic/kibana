@@ -6,95 +6,100 @@
  */
 
 import pMap from 'p-map';
+import type { Entity } from '@kbn/entity-store/common';
 import { isNotFoundError } from '@kbn/es-errors';
 import { BRIEF_LIMITS } from '../../../../../../common/entity_analytics/executive_brief/constants';
+import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { withBriefSpan } from '../../telemetry';
-import { SignalUnavailableError, errorMessage } from './define_signal';
-import { buildEvidence } from './evidence_registry';
-import type { BriefSignal, FactDraft, GatherResult, SignalContext, SignalOutcome } from './types';
+import type { Evidence, Signal, SignalInput, SignalOutcome, SignalResult } from './types';
 
-/** Rejects as soon as `signal` aborts, even if the wrapped work ignores it. */
-const raceAbort = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> =>
-  Promise.race([
-    promise,
-    new Promise<never>((_, reject) => {
-      if (signal.aborted) reject(signal.reason);
-      signal.addEventListener('abort', () => reject(signal.reason), { once: true });
-    }),
-  ]);
+/** Thrown by a signal when its data source is not there (not set up, no index yet). */
+export class SignalUnavailableError extends Error {}
 
-const runOne = async (
-  ctx: SignalContext,
-  signal: BriefSignal,
-  jobAbort: AbortSignal,
-  gatherAbort: AbortSignal
-): Promise<{ outcome: SignalOutcome; facts: FactDraft[] }> => {
-  const start = Date.now();
-  const timeoutMs = signal.timeoutMs ?? BRIEF_LIMITS.signalTimeoutMs;
-  const abortSignal = AbortSignal.any([gatherAbort, AbortSignal.timeout(timeoutMs)]);
-  const finish = (status: SignalOutcome['status'], facts: FactDraft[] = [], reason?: string) => {
-    if (reason) ctx.logger.debug(`[executive brief] signal "${signal.id}" ${status}: ${reason}`);
-    const took = Date.now() - start;
-    const outcome = { id: signal.id, status, ...(reason ? { reason } : {}), took };
-    return { outcome: { ...outcome, factCount: facts.length }, facts };
-  };
+type SignalRun = { result: SignalResult } | { error: unknown; aborted: boolean };
 
-  try {
-    const facts = await raceAbort(signal.run(ctx, abortSignal), abortSignal);
-    return finish(facts.length > 0 ? 'ok' : 'empty', facts);
-  } catch (error) {
-    if (abortSignal.aborted) {
-      const reason = jobAbort.aborted
-        ? 'The brief was cancelled before this source finished.'
-        : gatherAbort.aborted
-        ? 'The time budget for gathering evidence ran out before this source finished.'
-        : `This source did not answer within ${Math.round(timeoutMs / 1000)} seconds.`;
-      return finish('timeout', [], reason);
-    }
-    if (error instanceof SignalUnavailableError) {
-      return finish('unavailable', [], error.message);
-    }
-    if (isNotFoundError(error)) {
-      return finish('unavailable', [], 'The data this source reads has not been created.');
-    }
-    ctx.logger.warn(`[executive brief] signal "${signal.id}" failed: ${errorMessage(error)}`);
-    return finish('error', [], errorMessage(error));
+/** A signal's status: from its facts when it returned, from the error when it threw. */
+const statusOf = (run: SignalRun): Pick<SignalOutcome, 'status' | 'reason'> => {
+  if ('result' in run) {
+    return { status: run.result.facts.length > 0 ? 'ok' : 'empty' };
   }
+  if (run.aborted) {
+    return { status: 'timeout', reason: 'This source did not answer in time.' };
+  }
+  if (run.error instanceof SignalUnavailableError) {
+    return { status: 'unavailable', reason: run.error.message };
+  }
+  if (isNotFoundError(run.error)) {
+    return { status: 'unavailable', reason: 'The data this source reads has not been created.' };
+  }
+  return { status: 'error', reason: getErrorMessage(run.error) };
+};
+
+/** Runs one signal with its own timeout inside `input.abortSignal`; a failure becomes its outcome. */
+const runSignal = async (signal: Signal, input: SignalInput) => {
+  const start = Date.now();
+  const abortSignal = AbortSignal.any([
+    input.abortSignal,
+    AbortSignal.timeout(BRIEF_LIMITS.signalTimeoutMs),
+  ]);
+  const run: SignalRun = await signal.run({ ...input, abortSignal }).then(
+    (result) => ({ result }),
+    (error: unknown) => ({ error, aborted: abortSignal.aborted })
+  );
+  const { status, reason } = statusOf(run);
+  if (reason) {
+    const level = status === 'error' ? 'warn' : 'debug';
+    input.logger[level](`[executive brief] signal "${signal.id}" ${status}: ${reason}`);
+  }
+  const result = 'result' in run ? run.result : { facts: [], entities: [] };
+  const took = Date.now() - start;
+  return {
+    result,
+    outcome: { id: signal.id, status, reason, took, factCount: result.facts.length },
+  };
+};
+
+/** Numbers the facts in signal order and keys the entities by EUID, the first record winning. */
+const collect = (results: SignalResult[]): Pick<Evidence, 'entities' | 'facts'> => {
+  const facts = results
+    .flatMap((result) => result.facts)
+    .map((fact, index) => ({ ...fact, id: index + 1 }));
+  const entities: Record<string, Entity> = {};
+  for (const record of results.flatMap((result) => result.entities)) {
+    const euid = record.entity?.id;
+    if (euid) {
+      entities[euid] ??= record;
+    }
+  }
+  return { entities, facts };
 };
 
 /**
- * Runs every signal through a bounded pool, each in its own span, with a per-signal timeout and a
- * gather budget. A failing or slow signal is recorded in its outcome and never fails the run; only
- * an aborted job throws. Evidence follows signal order, not completion order.
+ * Runs the signals through a bounded pool, each in its own span, within the gather budget. A failed
+ * signal is recorded in its outcome; only an aborted job throws. Evidence follows signal order.
  */
 export const runSignals = async (
-  ctx: SignalContext,
-  signals: readonly BriefSignal[],
-  { abortSignal }: { abortSignal: AbortSignal }
-): Promise<GatherResult> => {
-  const gatherAbort = AbortSignal.any([
-    abortSignal,
+  signals: readonly Signal[],
+  input: SignalInput
+): Promise<Evidence> => {
+  const gatherSignal = AbortSignal.any([
+    input.abortSignal,
     AbortSignal.timeout(BRIEF_LIMITS.gatherBudgetMs),
   ]);
-  const results = await pMap(
+  const runs = await pMap(
     signals,
     (signal) =>
       withBriefSpan('signal', { 'signal.id': signal.id }, async (span) => {
-        const result = await runOne(ctx, signal, abortSignal, gatherAbort);
-        span?.setAttributes({
-          'signal.status': result.outcome.status,
-          'signal.fact_count': result.outcome.factCount,
-        });
-        return result;
+        const run = await runSignal(signal, { ...input, abortSignal: gatherSignal });
+        const { status, factCount } = run.outcome;
+        span?.setAttributes({ 'signal.status': status, 'signal.fact_count': factCount });
+        return run;
       }),
     { concurrency: BRIEF_LIMITS.signalConcurrency }
   );
-  abortSignal.throwIfAborted();
-
-  const outcomes = results.map(({ outcome }) => outcome);
-  const evidence = buildEvidence(
-    results.map(({ outcome, facts }) => ({ signalId: outcome.id, facts })),
-    outcomes
-  );
-  return { evidence, outcomes };
+  input.abortSignal.throwIfAborted();
+  return {
+    ...collect(runs.map(({ result }) => result)),
+    signals: runs.map(({ outcome }) => outcome),
+  };
 };

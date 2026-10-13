@@ -12,7 +12,7 @@ import type {
   Severity,
 } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
-import { entityDisplayName, entityTypeOf, watchlistsOf } from '../entity_record';
+import { entityDisplayName, entityTypeOf, watchlistsOf } from '../signals/engine/entity_record';
 import { BRIEF_SIGNALS } from '../signals';
 import type { Evidence, SignalOutcome } from '../signals';
 import { alternationPattern } from '../verification/context';
@@ -99,7 +99,8 @@ const compareFacts = (a: Fact, b: Fact): number =>
  * The prompt's evidence block: entities by mention token, facts by the ids the brief cites (grouped
  * by signal, in run order), and how each signal's run went. Deterministic for the same input.
  */
-export const formatEvidence = (evidence: Evidence, signals: readonly SignalOutcome[]): string => {
+export const formatEvidence = (evidence: Evidence): string => {
+  const { signals } = evidence;
   const entities = Object.entries(evidence.entities);
   const clean = createTextCleaner(entities.map(([euid]) => euid));
   const bySignal = groupBy(evidence.facts, 'signalId');

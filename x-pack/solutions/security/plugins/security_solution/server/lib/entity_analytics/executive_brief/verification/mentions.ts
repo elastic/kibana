@@ -12,7 +12,7 @@ import {
   ENTITY_MENTION_FIELD,
   rawTextLimit,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
-import { entityDisplayName, entityTypeOf } from '../entity_record';
+import { entityDisplayName, entityTypeOf } from '../signals/engine/entity_record';
 import type { BriefCheck } from './context';
 import { failClaim, mapAssessments } from './context';
 

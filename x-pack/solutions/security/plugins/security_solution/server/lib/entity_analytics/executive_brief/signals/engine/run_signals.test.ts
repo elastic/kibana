@@ -8,31 +8,36 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { ResolutionClient } from '@kbn/entity-store/server';
 import { BRIEF_LIMITS } from '../../../../../../common/entity_analytics/executive_brief/constants';
 import { runSignals } from './run_signals';
-import type { BriefSignal, FactDraft, SignalContext } from './types';
+import type { Signal, SignalInput, SignalResult } from './types';
 
-const ctx: SignalContext = {
-  esClient: elasticsearchServiceMock.createElasticsearchClient(),
-  spaceId: 'default',
-  timeRange: { from: '2026-10-05T00:00:00.000Z', to: '2026-10-12T00:00:00.000Z' },
-  logger: loggingSystemMock.createLogger(),
-  username: 'analyst',
-};
-
-const signal = (
-  id: string,
-  run: BriefSignal['run'],
-  overrides: Partial<BriefSignal> = {}
-): BriefSignal => ({ id, title: id, run, ...overrides });
-
-const factAbout = (euid: string): FactDraft => ({
-  title: euid,
-  entities: [{ entity: { id: euid, name: euid.slice(5), type: 'user' } }],
+jest.mock('../../../../../../common/entity_analytics/executive_brief/constants', () => {
+  const actual = jest.requireActual(
+    '../../../../../../common/entity_analytics/executive_brief/constants'
+  );
+  return { ...actual, BRIEF_LIMITS: { ...actual.BRIEF_LIMITS, signalTimeoutMs: 20 } };
 });
 
-const run = (signals: readonly BriefSignal[]) =>
-  runSignals(ctx, signals, { abortSignal: new AbortController().signal });
+const input: SignalInput = {
+  esClient: elasticsearchServiceMock.createElasticsearchClient(),
+  resolutionClient: {} as ResolutionClient,
+  spaceId: 'default',
+  username: 'analyst',
+  profileId: 'u_analyst',
+  timeRange: { from: '2026-10-05T00:00:00.000Z', to: '2026-10-12T00:00:00.000Z' },
+  abortSignal: new AbortController().signal,
+  logger: loggingSystemMock.createLogger(),
+};
+
+const signal = (id: string, run: Signal['run']): Signal => ({ id, title: id, run });
+
+/** One fact per EUID, each about that one entity. */
+const factsAbout = (signalId: string, ...euids: string[]): SignalResult => ({
+  facts: euids.map((euid) => ({ signalId, title: euid, entityIds: [euid] })),
+  entities: euids.map((euid) => ({ entity: { id: euid, name: euid.slice(5), type: 'user' } })),
+});
 
 describe('runSignals', () => {
   it('records each failure on its own signal and keeps the others', async () => {
@@ -44,36 +49,46 @@ describe('runSignals', () => {
       meta: {},
     } as unknown as ConstructorParameters<typeof errors.ResponseError>[0]);
 
-    const { evidence, outcomes } = await run([
-      signal('ok', async () => [factAbout('user:ann')]),
-      signal('slow', () => new Promise<FactDraft[]>(() => undefined), { timeoutMs: 20 }),
-      signal('broken', async () => {
-        throw new Error('kaboom');
-      }),
-      signal('no_index', async () => {
-        throw indexNotFound;
-      }),
-    ]);
+    const evidence = await runSignals(
+      [
+        signal('ok', async () => factsAbout('ok', 'user:ann')),
+        signal(
+          'slow',
+          ({ abortSignal }) =>
+            new Promise<SignalResult>((_, reject) => {
+              abortSignal.addEventListener('abort', () => reject(abortSignal.reason));
+            })
+        ),
+        signal('broken', async () => {
+          throw new Error('kaboom');
+        }),
+        signal('no_index', async () => {
+          throw indexNotFound;
+        }),
+      ],
+      input
+    );
 
-    expect(outcomes).toEqual([
+    expect(evidence.signals).toEqual([
       expect.objectContaining({ id: 'ok', status: 'ok', factCount: 1 }),
       expect.objectContaining({ id: 'slow', status: 'timeout', reason: expect.any(String) }),
       expect.objectContaining({ id: 'broken', status: 'error', reason: 'kaboom' }),
       expect.objectContaining({ id: 'no_index', status: 'unavailable' }),
     ]);
-    // Only the status and duration are kept on the evidence.
-    expect(evidence.signals.broken).toStrictEqual({ status: 'error', took: expect.any(Number) });
     expect(evidence.facts).toHaveLength(1);
   });
 
   it('numbers facts in signal order and keys each entity once by EUID', async () => {
-    const { evidence } = await run([
-      signal('first', async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        return [factAbout('user:ann'), factAbout('user:bob')];
-      }),
-      signal('second', async () => [factAbout('user:ann')]),
-    ]);
+    const evidence = await runSignals(
+      [
+        signal('first', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          return factsAbout('first', 'user:ann', 'user:bob');
+        }),
+        signal('second', async () => factsAbout('second', 'user:ann')),
+      ],
+      input
+    );
 
     expect(evidence.facts.map(({ id, signalId, entityIds }) => [id, signalId, entityIds])).toEqual([
       [1, 'first', ['user:ann']],
@@ -91,11 +106,11 @@ describe('runSignals', () => {
         maxActive = Math.max(maxActive, ++active);
         await new Promise((resolve) => setTimeout(resolve, 10));
         active--;
-        return [];
+        return { facts: [], entities: [] };
       })
     );
 
-    await run(signals);
+    await runSignals(signals, input);
 
     expect(maxActive).toBe(BRIEF_LIMITS.signalConcurrency);
   });

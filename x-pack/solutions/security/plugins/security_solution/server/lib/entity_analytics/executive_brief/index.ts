@@ -11,6 +11,13 @@
  * (`composition/`), verifies the brief against that evidence (`verification/`), and stores the
  * report in the user's document (`data_client/`), which the GET routes read.
  * Set up only when `entityAnalyticsExecutiveBriefEnabled` is on.
+ *
+ * Glossary:
+ * - `Signal`: one data source the brief reads, `{ id, title, run }`, listed in `signals/index.ts`.
+ * - `SignalInput`: what `run` receives: the user-scoped clients, space, user, window and abort signal.
+ * - `SignalResult`: what `run` returns: facts not yet numbered, and the Entity Store records they cite.
+ * - `Fact`: one numbered finding in the report, which the AI cites by id.
+ * - `Evidence`: every signal's facts and entities, plus how each signal's run went.
  */
 
 import type { AnalyticsServiceSetup, Logger, StartServicesAccessor } from '@kbn/core/server';

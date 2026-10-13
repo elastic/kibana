@@ -80,10 +80,10 @@ export const FIXTURE_EVIDENCE: Evidence = {
       source: { type: 'entity', id: ROD },
     },
   ],
-  signals: {
-    attack_discoveries: { status: 'ok', took: 120 },
-    high_risk_entities: { status: 'ok', took: 80 },
-  },
+  signals: [
+    { id: 'attack_discoveries', status: 'ok', took: 120, factCount: 2 },
+    { id: 'high_risk_entities', status: 'ok', took: 80, factCount: 1 },
+  ],
 };
 
 /** FIXTURE_EVIDENCE with the facts replaced or extended. */

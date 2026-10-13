@@ -5,37 +5,73 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
 import type { Entity } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
+import type { Fact } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { EntityRiskLevels } from '../../../../../common/api/entity_analytics/common';
+import { EntityRiskLevelsEnum } from '../../../../../common/api/entity_analytics/common';
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
-import { entityDisplayName, watchlistsOf } from '../entity_record';
-import { compareStrings, defineSignal, errorMessage } from './engine/define_signal';
-import { ENTITY_SOURCE_FIELDS, resolveEntities } from './engine/resolve_entities';
-import type { FactDraft } from './engine/types';
+import { ENTITY_STORE_RESOLVED_TO_FIELD } from '../../../../agent_builder/tools/entity_analytics/entity_resolution';
+import { getErrorMessage } from '../../../../utils/error_helpers';
+import { entityDisplayName, watchlistsOf } from './engine/entity_record';
+import { resolveEntities } from './engine/resolve_entities';
+import type { Signal } from './engine/types';
 
+const SIGNAL_ID = 'high_risk_entities';
 const MAX_HIGH_RISK_ENTITIES = 10;
 const HIGH_RISK_FETCH_SIZE = 100;
-const HIGH_RISK_LEVELS = ['Critical', 'High'];
+const HIGH_RISK_LEVELS: EntityRiskLevels[] = [
+  EntityRiskLevelsEnum.Critical,
+  EntityRiskLevelsEnum.High,
+];
 const SCORE_SORT = { order: 'desc', unmapped_type: 'float', missing: '_last' } as const;
+/** The parts of an Entity Store record the brief reads when resolution is unavailable. */
+const SOURCE_FIELDS = [
+  '@timestamp',
+  'entity.id',
+  'entity.name',
+  'entity.type',
+  'entity.EngineMetadata.Type',
+  'entity.attributes.watchlists',
+  'entity.risk',
+  'entity.relationships.resolution.risk',
+  'asset.criticality',
+  'user.name',
+  'host.name',
+  'service.name',
+];
 
+const euidOf = ({ entity }: Entity): string => entity?.id ?? '';
 const scoreOf = (record: Entity): number => getEntityRisk(record)?.score ?? 0;
+const isHighRisk = (record: Entity): boolean => {
+  const level = getEntityRisk(record)?.level;
+  return euidOf(record) !== '' && level !== undefined && HIGH_RISK_LEVELS.includes(level);
+};
 
-const toFact = (euid: string, record: Entity): FactDraft => {
+const toFact = (record: Entity): Omit<Fact, 'id'> => {
+  const euid = euidOf(record);
   const risk = getEntityRisk(record);
-  const level = risk?.level ?? 'High';
+  const level = risk?.level ?? EntityRiskLevelsEnum.High;
   const criticality = record.asset?.criticality;
   const { privileged, others } = watchlistsOf(record);
+  const details: Record<string, string> = { riskLevel: level };
+  if (criticality) {
+    details.criticality = criticality;
+  }
+  if (others.length > 0) {
+    details.watchlists = others.join(', ');
+  }
+  if (privileged) {
+    details.privileged = 'yes';
+  }
   return {
+    signalId: SIGNAL_ID,
     title: `${entityDisplayName(record, euid)} is at ${level} risk`,
-    severity: level === 'Critical' ? 'critical' : 'high',
-    entities: [record],
-    ...(risk ? { numbers: { riskScore: Math.round(risk.score) } } : {}),
-    details: {
-      riskLevel: level,
-      ...(criticality ? { criticality } : {}),
-      ...(others.length > 0 ? { watchlists: others.join(', ') } : {}),
-      ...(privileged ? { privileged: 'yes' } : {}),
-    },
+    severity: level === EntityRiskLevelsEnum.Critical ? 'critical' : 'high',
+    entityIds: [euid],
+    numbers: risk ? { riskScore: Math.round(risk.score) } : undefined,
+    details,
     source: { type: 'entity', id: euid },
   };
 };
@@ -44,18 +80,18 @@ const toFact = (euid: string, record: Entity): FactDraft => {
  * Golden entities at High or Critical risk (the resolution-group score when there is one), with
  * asset criticality and watchlists from the whole resolution group.
  */
-export const highRiskEntitiesSignal = defineSignal({
-  id: 'high_risk_entities',
+export const highRiskEntitiesSignal: Signal = {
+  id: SIGNAL_ID,
   title: 'High-risk entities',
-  run: async ({ esClient, spaceId, logger }, abortSignal) => {
+  run: async ({ esClient, resolutionClient, spaceId, abortSignal, logger }) => {
     const response = await esClient.search<Entity>(
       {
         index: getEntitiesAlias(ENTITY_LATEST, spaceId),
         size: HIGH_RISK_FETCH_SIZE,
-        _source: ENTITY_SOURCE_FIELDS,
+        _source: SOURCE_FIELDS,
         query: {
           bool: {
-            must_not: [{ exists: { field: 'entity.relationships.resolution.resolved_to' } }],
+            must_not: [{ exists: { field: ENTITY_STORE_RESOLVED_TO_FIELD } }],
             should: [
               { terms: { 'entity.risk.calculated_level': HIGH_RISK_LEVELS } },
               {
@@ -77,31 +113,25 @@ export const highRiskEntitiesSignal = defineSignal({
     );
 
     // The query sorts group-scored entities first; rank them all by the score that applies.
-    const records = response.hits.hits
-      .flatMap(({ _source: record }) =>
-        record?.entity?.id && HIGH_RISK_LEVELS.includes(getEntityRisk(record)?.level ?? '')
-          ? [record]
-          : []
-      )
-      .sort(
-        (a, b) => scoreOf(b) - scoreOf(a) || compareStrings(a.entity?.id ?? '', b.entity?.id ?? '')
-      )
-      .slice(0, MAX_HIGH_RISK_ENTITIES);
+    const ranked = orderBy(
+      response.hits.hits.flatMap(({ _source: record }) =>
+        record && isHighRisk(record) ? [record] : []
+      ),
+      [scoreOf, euidOf],
+      ['desc', 'asc']
+    ).slice(0, MAX_HIGH_RISK_ENTITIES);
 
-    // Criticality and watchlists often sit on the aliases; fall back to the golden doc alone.
+    // Criticality and watchlists often sit on the aliases; fall back to the ranked record alone.
     const resolved = await resolveEntities({
-      esClient,
-      spaceId,
-      euids: records.map(({ entity }) => entity?.id ?? ''),
+      resolutionClient,
+      euids: ranked.map(euidOf),
       abortSignal,
     }).catch((error: unknown) => {
-      logger.debug(`[executive brief] high-risk alias lookup failed: ${errorMessage(error)}`);
+      logger.debug(`[executive brief] high-risk alias lookup failed: ${getErrorMessage(error)}`);
       return new Map<string, Entity>();
     });
 
-    return records.map((record) => {
-      const euid = record.entity?.id ?? '';
-      return toFact(euid, resolved.get(euid) ?? record);
-    });
+    const entities = ranked.map((record) => resolved.get(euidOf(record)) ?? record);
+    return { facts: entities.map(toFact), entities };
   },
-});
+};

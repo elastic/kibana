@@ -29,7 +29,7 @@ export const BRIEF_RANGE_MS: Record<BriefRange, number> = {
 export const BRIEF_LIMITS = {
   /** Signals running at once. */
   signalConcurrency: 3,
-  /** Default per-signal timeout; a signal may declare a lower one. */
+  /** Per-signal timeout. */
   signalTimeoutMs: 10_000,
   /** Budget for the whole gather stage; unfinished signals are aborted. */
   gatherBudgetMs: 45_000,

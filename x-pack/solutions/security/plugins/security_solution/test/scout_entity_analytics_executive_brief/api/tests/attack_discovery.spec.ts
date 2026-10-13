@@ -123,13 +123,13 @@ apiTest.describe(
             id: 'ad-first-run',
             title: 'Credential theft (first run)',
             alertIds: ['alert-1', 'alert-2', 'alert-3'],
-            riskScore: 80,
+            riskScore: 225,
           },
           {
             id: 'ad-second-run',
             title: 'Credential theft (second run)',
             alertIds: ['alert-1', 'alert-2', 'alert-3', 'alert-4'],
-            riskScore: 60,
+            riskScore: 200,
           },
         ]);
         mockSubmitBrief(llmProxy, discoveryBrief('watch'));
@@ -150,7 +150,8 @@ apiTest.describe(
           expect.objectContaining({
             id: 1,
             signalId: 'attack_discoveries',
-            severity: 'critical',
+            // A total of 225 over 3 alerts averages 75.
+            severity: 'high',
             numbers: { alerts: 3 },
             source: { type: 'attack_discovery', id: 'ad-first-run' },
           }),

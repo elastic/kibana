@@ -23,7 +23,7 @@ import {
 } from '@kbn/inference-common';
 import type { VerificationSummary } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { Evidence, SignalOutcome } from '../signals';
+import type { Evidence } from '../signals';
 import { withBriefSpan } from '../telemetry';
 import type { VerifyBriefResult } from '../verification/verify_brief';
 import { verifyBrief } from '../verification/verify_brief';
@@ -106,7 +106,6 @@ const repairMessages = (toolCall: ToolCall | undefined, errors: string[]): Messa
 export const composeBrief = async ({
   inferenceClient,
   evidence,
-  signals,
   timeRange,
   abortSignal,
   logger,
@@ -115,7 +114,6 @@ export const composeBrief = async ({
   /** Bound to the resolved connector. */
   inferenceClient: BoundInferenceClient;
   evidence: Evidence;
-  signals: readonly SignalOutcome[];
   timeRange: { from: string; to: string; range: string };
   abortSignal: AbortSignal;
   logger: Logger;
@@ -126,7 +124,7 @@ export const composeBrief = async ({
     {
       role: MessageRole.User,
       content: buildUserMessage({
-        formattedEvidence: formatEvidence(evidence, signals),
+        formattedEvidence: formatEvidence(evidence),
         timeRange,
       }),
     },

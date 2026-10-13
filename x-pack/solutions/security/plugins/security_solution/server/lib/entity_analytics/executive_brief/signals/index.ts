@@ -7,13 +7,10 @@
 
 import { attackDiscoveriesSignal } from './attack_discoveries';
 import { highRiskEntitiesSignal } from './high_risk_entities';
-import type { BriefSignal } from './engine/types';
+import type { Signal } from './engine/types';
 
 /** Every signal the brief runs, in priority order: the order facts are numbered in. */
-export const BRIEF_SIGNALS: readonly BriefSignal[] = [
-  attackDiscoveriesSignal,
-  highRiskEntitiesSignal,
-];
+export const BRIEF_SIGNALS: readonly Signal[] = [attackDiscoveriesSignal, highRiskEntitiesSignal];
 
 export { runSignals } from './engine/run_signals';
-export type { Evidence, GatherResult, SignalOutcome } from './engine/types';
+export type { Evidence, SignalOutcome } from './engine/types';

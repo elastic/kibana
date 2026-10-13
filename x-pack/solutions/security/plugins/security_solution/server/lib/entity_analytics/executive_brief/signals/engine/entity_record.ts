@@ -6,20 +6,20 @@
  */
 
 import type { Entity } from '@kbn/entity-store/common';
-import type { EntityType } from '../../../../common/entity_analytics/types';
-import { getEntityType } from '../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
-import { resolveDisplayName } from '../lead_generation/entity_conversion';
-import { matchesPrivilegedWatchlist } from '../lead_generation/observation_modules/utils';
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { getEntityType } from '../../../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
+import { resolveDisplayName } from '../../../lead_generation/entity_conversion';
+import { matchesPrivilegedWatchlist } from '../../../lead_generation/observation_modules/utils';
 
 type EntityTypeName = `${EntityType}`;
 
-export const typeFromEuid = (euid: string): EntityTypeName => {
+const typeFromEuid = (euid: string): EntityTypeName => {
   const [prefix] = euid.split(':');
   return prefix === 'user' || prefix === 'host' || prefix === 'service' ? prefix : 'generic';
 };
 
 /** Best-effort display name for an entity with no document in the store. */
-export const nameFromEuid = (euid: string): string => {
+const nameFromEuid = (euid: string): string => {
   const separator = euid.indexOf(':');
   const body = separator === -1 ? euid : euid.slice(separator + 1);
   return typeFromEuid(euid) === 'user' ? body.split('@')[0] : body;
