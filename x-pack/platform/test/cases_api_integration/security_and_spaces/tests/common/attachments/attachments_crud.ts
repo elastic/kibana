@@ -33,6 +33,10 @@ const unifiedCommentReq = {
   owner: 'securitySolutionFixture',
 };
 
+// The comment schema also rejects this, so the assertion pins the route's serialized-size check.
+const oversizedData = { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH) };
+const dataTooLargeMessage = `The data field is too large. The maximum serialized length is ${MAX_ATTACHMENT_JSON_LENGTH}.`;
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -79,15 +83,14 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should reject an attachment with oversized data', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
 
-      await addAttachmentV2({
+      const response = (await addAttachmentV2({
         supertest,
         caseId: postedCase.id,
-        params: {
-          ...unifiedCommentReq,
-          data: { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH + 1) },
-        },
+        params: { ...unifiedCommentReq, data: oversizedData },
         expectedHttpCode: 400,
-      });
+      })) as unknown as { message: string };
+
+      expect(response.message).to.contain(dataTooLargeMessage);
     });
 
     it('should reject a replace with oversized data', async () => {
@@ -98,17 +101,15 @@ export default ({ getService }: FtrProviderContext): void => {
         params: unifiedCommentReq,
       });
 
-      await updateAttachmentV2({
+      const response = (await updateAttachmentV2({
         supertest,
         caseId: postedCase.id,
         attachmentId: created.id,
-        req: {
-          ...unifiedCommentReq,
-          version: created.version,
-          data: { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH + 1) },
-        },
+        req: { ...unifiedCommentReq, version: created.version, data: oversizedData },
         expectedHttpCode: 400,
-      });
+      })) as unknown as { message: string };
+
+      expect(response.message).to.contain(dataTooLargeMessage);
     });
 
     describe('rbac', () => {
