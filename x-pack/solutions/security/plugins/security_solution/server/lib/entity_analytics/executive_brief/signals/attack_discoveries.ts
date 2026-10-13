@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import {
+  ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+} from '@kbn/elastic-assistant-common';
 import { uniqBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Entity } from '@kbn/entity-store/common';
 import type { Severity } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
-import { getAttackDiscoveryAlertsIndices } from '../../../detection_engine/routes/common/index_patterns/get_attack_alerts_index';
 import { getAlertEntities } from '../../../../workflows/step_types/get_alert_entities_step/get_alert_entities';
 import { minimalEntityRecord } from '../entity_record';
 import {
@@ -102,7 +105,10 @@ const fetchDiscoveries = async (
   };
   const response = await esClient.search(
     {
-      index: getAttackDiscoveryAlertsIndices(spaceId),
+      index: [
+        `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
+        `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
+      ],
       // Either index may be missing; with both missing no discovery has run (no shards).
       ignore_unavailable: true,
       size: DISCOVERY_CANDIDATES,

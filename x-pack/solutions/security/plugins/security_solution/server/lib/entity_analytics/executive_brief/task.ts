@@ -24,14 +24,13 @@ import {
   EXECUTIVE_BRIEF_GENERATE_TASK_TYPE,
 } from '../../../../common/entity_analytics/executive_brief/constants';
 import type { StartPlugins } from '../../../plugin';
-import { ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT } from '../../telemetry/event_based/events';
 import type { ComposeBriefResult } from './composition/compose';
 import { BriefCompositionError, composeBrief } from './composition/compose';
 import type { GatherResult } from './signals';
 import { BRIEF_SIGNALS, runSignals } from './signals';
 import type { BriefStore, JobUpdate } from './store/brief_store';
 import type { BriefCompletedEvent } from './telemetry';
-import { withBriefSpan } from './telemetry';
+import { ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT, withBriefSpan } from './telemetry';
 
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 

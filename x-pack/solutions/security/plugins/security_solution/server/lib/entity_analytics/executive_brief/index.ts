@@ -13,7 +13,7 @@
  * Set up only when `entityAnalyticsExecutiveBriefEnabled` is on.
  */
 
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -24,15 +24,18 @@ import { registerBriefRoutes } from './routes';
 import { BriefStore } from './store/brief_store';
 import { createBriefStorageClient } from './store/storage';
 import { registerBriefTasks, scheduleCleanupTask } from './task';
+import { ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT } from './telemetry';
 
-/** Plugin setup: registers the routes and tasks, sharing one store created on first use. */
+/** Plugin setup: registers the routes, tasks and usage event, sharing one store created on first use. */
 export const setupExecutiveBrief = ({
+  analytics,
   router,
   taskManager,
   getStartServices,
   logger: pluginLogger,
   hasEncryptionKey,
 }: {
+  analytics: AnalyticsServiceSetup;
   router: SecuritySolutionPluginRouter;
   taskManager: TaskManagerSetupContract | undefined;
   getStartServices: StartServicesAccessor<StartPlugins>;
@@ -50,6 +53,7 @@ export const setupExecutiveBrief = ({
     return store;
   };
 
+  analytics.registerEventType(ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT);
   if (taskManager) {
     registerBriefTasks({ taskManager, getStartServices, getBriefStore, logger });
   }

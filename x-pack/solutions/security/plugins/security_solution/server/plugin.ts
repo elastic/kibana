@@ -739,6 +739,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (experimentalFeatures.entityAnalyticsExecutiveBriefEnabled) {
       setupExecutiveBrief({
+        analytics: core.analytics,
         router,
         taskManager: plugins.taskManager,
         getStartServices: core.getStartServices,
