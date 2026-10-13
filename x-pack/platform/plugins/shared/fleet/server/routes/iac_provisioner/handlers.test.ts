@@ -5,435 +5,225 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuthenticatedUser } from '@kbn/core/server';
 
-import {
-  IacProvisionerRequestError,
-  IacProvisionerUnavailableError,
-  PackageNotFoundError,
-} from '../../errors';
 import { appContextService } from '../../services/app_context';
-import { iacProvisionerService } from '../../services';
-import { getPackageInfo } from '../../services/epm/packages';
+import { iacCallbackService } from '../../services/iac_callback';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
-import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
-import {
-  reportIacProvisionerRenderCompleted,
-  reportIacProvisionerRenderRequested,
-} from '../../services/telemetry/iac_provisioner_telemetry';
+import type { IacCallback } from '../../../common/types/models/iac_callback';
 
-import { renderIacTemplateHandler } from './handlers';
+import {
+  createIacCallbackHandler,
+  deleteIacCallbackHandler,
+  getIacCallbackHandler,
+  receiveIacCallbackHandler,
+} from './handlers';
 
 jest.mock('../../services/app_context');
-jest.mock('../../services', () => ({
-  iacProvisionerService: { renderTemplate: jest.fn() },
+jest.mock('../../services', () => ({ iacProvisionerService: {} }));
+jest.mock('../../services/iac_provisioner_integrations', () => ({}));
+jest.mock('../../services/telemetry/iac_provisioner_telemetry', () => ({
+  reportIacProvisionerRenderCompleted: jest.fn(),
+  reportIacProvisionerRenderRequested: jest.fn(),
 }));
-jest.mock('../../services/epm/packages');
-jest.mock('../../services/utils/iac_provisioner');
-jest.mock('../../services/telemetry/iac_provisioner_telemetry');
+jest.mock('../../services/iac_callback', () => ({
+  iacCallbackService: { create: jest.fn(), get: jest.fn(), receive: jest.fn(), cancel: jest.fn() },
+}));
+jest.mock('../../services/utils/iac_provisioner', () => ({
+  isIacProvisionerEnabled: jest.fn(),
+}));
 
-const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
-const mockedGetPackageInfo = jest.mocked(getPackageInfo);
-const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
+const mockedService = jest.mocked(iacCallbackService);
+const mockedEnabled = jest.mocked(isIacProvisionerEnabled);
+const mockedAppContext = jest.mocked(appContextService);
 
-const buildContext = () =>
-  ({
-    fleet: Promise.resolve({ internalSoClient: {} }),
-  } as any);
-
-const buildRequest = (body: Record<string, unknown>) =>
-  httpServerMock.createKibanaRequest({ body });
-
-const CSPM_PACKAGE_INFO = {
-  name: 'cloud_security_posture',
-  version: '3.5.0',
-  policy_templates: [
-    {
-      name: 'cspm',
-      inputs: [
-        { type: 'cloudbeat/cis_aws', title: '', description: '' },
-        { type: 'cloudbeat/cis_gcp', title: '', description: '' },
-      ],
-    },
-  ],
+const PAYLOAD = {
+  role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
+  stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
+  aws_account_id: '123456789012',
+  region: 'us-east-1',
 };
 
-const CAI_PACKAGE_INFO = {
-  name: 'cloud_asset_inventory',
-  version: '1.7.0',
-  policy_templates: [
-    {
-      name: 'asset_inventory',
-      inputs: [{ type: 'cloudbeat/asset_inventory_aws', title: '', description: '' }],
-    },
-  ],
-};
-
-const RENDERED = {
-  artifactUrl: 'https://s3.example/rendered',
-  expiresAt: '2026-07-28T12:00:00Z',
-  templateSha: 'sha256:661cb7def1c7101f',
-  render: true,
-  blueprint: { id: 'federated-identity', version: 'v1' },
-};
-
-const cspmSelection = {
-  name: 'cloud_security_posture',
-  policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-};
-
-const renderBody = (overrides: Record<string, unknown> = {}) => ({
+const ITEM: IacCallback = {
+  id: 'cb-1',
   provider: 'aws',
-  flow: 'cloud_connector',
-  workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
-  integrations: [cspmSelection],
-  ...overrides,
-});
+  status: 'pending',
+  created_at: '2026-10-13T10:00:00.000Z',
+  created_by: 'elastic',
+  space_id: 'default',
+  expires_at: '2026-10-13T12:00:00.000Z',
+};
 
-describe('renderIacTemplateHandler', () => {
+const apiKeyUser = (id: string) =>
+  ({
+    username: 'fleet-iac-callback',
+    authentication_type: 'api_key',
+    api_key: { id, name: 'k' },
+  } as unknown as AuthenticatedUser);
+const realmUser = () =>
+  ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
+
+const buildContext = (spaceId = 'default') =>
+  ({ fleet: Promise.resolve({ spaceId, internalSoClient: {} }) } as any);
+
+describe('IaC callback handlers', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let getCurrentUser: jest.Mock;
+  const soClient = { tag: 'internal-so-client' };
+  const esClient = { tag: 'internal-es-client' };
 
   beforeEach(() => {
     jest.clearAllMocks();
     response = httpServerMock.createResponseFactory();
-    mockedIsEnabled.mockResolvedValue(true);
-    const logger = { info: jest.fn(), error: jest.fn(), get: jest.fn() };
-    logger.get.mockReturnValue(logger);
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
+    getCurrentUser = jest.fn();
+    mockedAppContext.getLogger.mockReturnValue(loggingSystemMock.createLogger());
+    mockedAppContext.getSecurityCore.mockReturnValue({ authc: { getCurrentUser } } as any);
+    mockedAppContext.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient as any);
+    mockedAppContext.getInternalUserESClient.mockReturnValue(esClient as any);
+    mockedEnabled.mockResolvedValue(true);
   });
 
-  it('returns 404 when the IaC Provisioner is not enabled', async () => {
-    mockedIsEnabled.mockResolvedValue(false);
+  describe('createIacCallbackHandler', () => {
+    it('returns 404 when the IaC Provisioner is not enabled', async () => {
+      mockedEnabled.mockResolvedValue(false);
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
+      await createIacCallbackHandler(buildContext(), request, response);
 
-    expect(response.notFound).toHaveBeenCalled();
-    expect(mockedRenderTemplate).not.toHaveBeenCalled();
-  });
-
-  it('passes caller-supplied enabledInputs through and fills the package version', async () => {
-    mockedGetPackageInfo.mockImplementation(
-      async ({ pkgName }) =>
-        (pkgName === 'cloud_security_posture' ? CSPM_PACKAGE_INFO : CAI_PACKAGE_INFO) as any
-    );
-    mockedRenderTemplate.mockResolvedValue(RENDERED);
-
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(
-        renderBody({
-          integrations: [
-            cspmSelection,
-            {
-              name: 'cloud_asset_inventory',
-              policyTemplates: [
-                { name: 'asset_inventory', enabledInputs: ['cloudbeat/asset_inventory_aws'] },
-              ],
-            },
-          ],
-        })
-      ),
-      response
-    );
-
-    expect(mockedRenderTemplate).toHaveBeenCalledWith({
-      provider: 'aws',
-      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
-      integrations: [
-        {
-          name: 'cloud_security_posture',
-          version: '3.5.0',
-          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-        },
-        {
-          name: 'cloud_asset_inventory',
-          version: '1.7.0',
-          policyTemplates: [
-            { name: 'asset_inventory', enabledInputs: ['cloudbeat/asset_inventory_aws'] },
-          ],
-        },
-      ],
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: 'IaC Provisioner is not enabled' },
+      });
+      expect(mockedService.create).not.toHaveBeenCalled();
     });
-    expect(response.ok).toHaveBeenCalledWith({ body: RENDERED });
-    expect(mockedGetPackageInfo).toHaveBeenCalledWith(
-      expect.objectContaining({ skipArchive: true })
-    );
-    expect(reportIacProvisionerRenderRequested).toHaveBeenCalledWith(
-      expect.objectContaining({ flow: 'cloud_connector', integrationCount: 2 })
-    );
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: true, httpStatus: 200 })
-    );
-  });
 
-  it('forwards templateSha when the caller supplies it', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockResolvedValue(RENDERED);
+    it('creates the record as the internal user, tagged with the caller and space', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(renderBody({ templateSha: 'sha256:661cb7def1c7101f' })),
-      response
-    );
+      await createIacCallbackHandler(buildContext('marketing'), request, response);
 
-    expect(mockedRenderTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({ templateSha: 'sha256:661cb7def1c7101f' })
-    );
-  });
-
-  it('omits templateSha when the caller does not supply it', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockResolvedValue(RENDERED);
-
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
-
-    expect(mockedRenderTemplate).toHaveBeenCalledWith(
-      expect.not.objectContaining({ templateSha: expect.anything() })
-    );
-  });
-
-  it('returns 400 when a requested policy template is not on the package', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(
-        renderBody({
-          integrations: [
-            {
-              name: 'cloud_security_posture',
-              policyTemplates: [{ name: 'kspm', enabledInputs: ['cloudbeat/cis_k8s'] }],
-            },
-          ],
-        })
-      ),
-      response
-    );
-
-    expect(response.badRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({
-          message: expect.stringContaining('kspm'),
-        }),
-      })
-    );
-    expect(mockedRenderTemplate).not.toHaveBeenCalled();
-  });
-
-  it('returns 400 when an enabled input is not declared on the policy template', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(
-        renderBody({
-          integrations: [
-            {
-              name: 'cloud_security_posture',
-              policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_azure'] }],
-            },
-          ],
-        })
-      ),
-      response
-    );
-
-    expect(response.badRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({
-          message: expect.stringContaining('cloudbeat/cis_azure'),
-        }),
-      })
-    );
-    expect(mockedRenderTemplate).not.toHaveBeenCalled();
-  });
-
-  it('sends multiple integrations each with their own nested policyTemplates', async () => {
-    mockedGetPackageInfo.mockImplementation(async ({ pkgName }) => {
-      if (pkgName === 'aws') {
-        return {
-          name: 'aws',
-          version: '7.1.0',
-          policy_templates: [
-            { name: 'guardduty', inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }] },
-          ],
-        } as any;
-      }
-      if (pkgName === 'aws_guardduty') {
-        return {
-          name: 'aws_guardduty',
-          version: '2.0.0',
-          policy_templates: [{ name: 'guardduty', inputs: [{ type: 'aws-s3' }] }],
-        } as any;
-      }
-      return CSPM_PACKAGE_INFO as any;
+      expect(mockedService.create).toHaveBeenCalledWith(soClient, esClient, {
+        provider: 'aws',
+        createdBy: 'elastic',
+        spaceId: 'marketing',
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
     });
-    mockedRenderTemplate.mockResolvedValue(RENDERED);
+  });
 
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(
-        renderBody({
-          integrations: [
-            { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
-            {
-              name: 'aws_guardduty',
-              policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
-            },
-            cspmSelection,
-          ],
-        })
-      ),
-      response
-    );
+  describe('getIacCallbackHandler', () => {
+    it('returns the item without any key material', async () => {
+      mockedService.get.mockResolvedValue(ITEM);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
-    expect(mockedGetPackageInfo).toHaveBeenCalledTimes(3);
-    expect(mockedRenderTemplate).toHaveBeenCalledWith({
-      provider: 'aws',
-      workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
-      integrations: [
-        {
-          name: 'aws',
-          version: '7.1.0',
-          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
-        },
-        {
-          name: 'aws_guardduty',
-          version: '2.0.0',
-          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
-        },
-        {
-          name: 'cloud_security_posture',
-          version: '3.5.0',
-          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-        },
-      ],
+      await getIacCallbackHandler(buildContext(), request, response);
+
+      expect(mockedService.get).toHaveBeenCalledWith(soClient, 'cb-1');
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM } });
     });
-    expect(response.ok).toHaveBeenCalled();
+
+    it('returns 404 for a record created in another space', async () => {
+      mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await getIacCallbackHandler(buildContext('default'), request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+
+    it('returns 404 for an unknown record', async () => {
+      mockedService.get.mockResolvedValue(undefined);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
+
+      await getIacCallbackHandler(buildContext(), request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
   });
 
-  it('passes provider 4xx through with error codes so the client can fall back', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockRejectedValue(
-      new IacProvisionerRequestError('unrenderable', 422, ['render.unknown_blueprint'])
-    );
+  describe('deleteIacCallbackHandler', () => {
+    it('cancels the record', async () => {
+      mockedService.get.mockResolvedValue(ITEM);
+      mockedService.cancel.mockResolvedValue({ ...ITEM, status: 'cancelled' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
+      await deleteIacCallbackHandler(buildContext(), request, response);
 
-    expect(response.customError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: 422,
-        body: expect.objectContaining({
-          attributes: { errorCodes: ['render.unknown_blueprint'] },
-        }),
-      })
-    );
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: false,
-        httpStatus: 422,
-        errorCodes: ['render.unknown_blueprint'],
-      })
-    );
+      expect(mockedService.cancel).toHaveBeenCalledWith(soClient, 'cb-1');
+      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'cb-1', status: 'cancelled' } });
+    });
+
+    it('returns 404 for a record created in another space without cancelling it', async () => {
+      mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await deleteIacCallbackHandler(buildContext('default'), request, response);
+
+      expect(mockedService.cancel).not.toHaveBeenCalled();
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
   });
 
-  it('maps non-422 provider 4xx to 502 so auth-like statuses never reach the browser', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockRejectedValue(
-      new IacProvisionerRequestError('mTLS rejected', 401, [])
-    );
-
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
-
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 502 }));
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, httpStatus: 401 })
-    );
-  });
-
-  it('returns 404 without an error log when a requested package does not exist', async () => {
-    mockedGetPackageInfo.mockRejectedValue(
-      new PackageNotFoundError('[no_such_package] package not installed or found in registry')
-    );
-
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(
-        renderBody({
-          integrations: [
-            {
-              name: 'no_such_package',
-              policyTemplates: [{ name: 'whatever', enabledInputs: ['x'] }],
-            },
-          ],
-        })
-      ),
-      response
-    );
-
-    expect(response.notFound).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({ message: expect.stringContaining('no_such_package') }),
-      })
-    );
-    expect(appContextService.getLogger().get().error).not.toHaveBeenCalled();
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, httpStatus: 404 })
-    );
-  });
-
-  it('maps provider unavailability to 502', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockRejectedValue(new IacProvisionerUnavailableError('no response'));
-
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
-
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 502 }));
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false })
-    );
-  });
-
-  it('maps unexpected errors to 500 with an error log', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockRejectedValue(new Error('unexpected boom'));
-
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
-
-    expect(response.customError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: 500,
-        body: expect.objectContaining({
-          message: 'An unexpected error occurred while rendering the IaC template',
-        }),
-      })
-    );
-    expect(appContextService.getLogger().get().error).toHaveBeenCalledWith(
-      expect.stringContaining('unexpected boom')
-    );
-    expect(response.customError).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({
-          message: expect.stringContaining('unexpected boom'),
-        }),
-      })
-    );
-    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, httpStatus: 500 })
-    );
-  });
-
-  it('returns a render:false body without requiring artifactUrl or expiresAt', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    const alreadyCurrent = {
-      templateSha: 'sha256:661cb7def1c7101f',
-      render: false,
-      blueprint: { id: 'federated-identity', version: 'v1' },
+  describe('receiveIacCallbackHandler', () => {
+    const receive = (user: AuthenticatedUser | null) => {
+      getCurrentUser.mockReturnValue(user);
+      const request = httpServerMock.createKibanaRequest({
+        params: { callbackId: 'cb-1' },
+        body: PAYLOAD,
+      });
+      return receiveIacCallbackHandler(buildContext(), request, response);
     };
-    mockedRenderTemplate.mockResolvedValue(alreadyCurrent);
 
-    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
+    it('passes the caller key id to the service and answers 200 on receive', async () => {
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: { ...ITEM, status: 'received' },
+      });
 
-    expect(response.ok).toHaveBeenCalledWith({ body: alreadyCurrent });
+      await receive(apiKeyUser('key-1'));
+
+      expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
+        apiKeyId: 'key-1',
+        payload: PAYLOAD,
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
+    });
+
+    it('passes no key id when the caller did not authenticate with an API key', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'not_found' });
+
+      await receive(realmUser());
+
+      expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
+        apiKeyId: undefined,
+        payload: PAYLOAD,
+      });
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+
+    it('answers 409 on a conflicting payload', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'conflict', item: ITEM });
+      await receive(apiKeyUser('key-1'));
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: 'Callback already received with different values' },
+      });
+    });
+
+    it('answers 410 when the record is cancelled or expired', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'gone' });
+      await receive(apiKeyUser('key-1'));
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 410,
+        body: { message: 'Callback is no longer accepting values' },
+      });
+    });
+
+    it('answers 400 on cross-field validation failure', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'invalid', message: 'mismatch' });
+      await receive(apiKeyUser('key-1'));
+      expect(response.badRequest).toHaveBeenCalledWith({ body: { message: 'mismatch' } });
+    });
   });
 });

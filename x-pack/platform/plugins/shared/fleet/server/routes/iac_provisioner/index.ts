@@ -9,13 +9,29 @@ import { IAC_PROVISIONER_API_ROUTES, API_VERSIONS } from '../../../common/consta
 import type { FleetAuthzRouter } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
-import { genericErrorResponse } from '../schema/errors';
+import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 import {
   RenderIacTemplateRequestSchema,
   RenderIacTemplateResponseSchema,
 } from '../../types/rest_spec/iac_provisioner';
+import {
+  CreateIacCallbackRequestSchema,
+  CreateIacCallbackResponseSchema,
+  DeleteIacCallbackRequestSchema,
+  DeleteIacCallbackResponseSchema,
+  GetIacCallbackRequestSchema,
+  GetIacCallbackResponseSchema,
+  ReceiveIacCallbackRequestSchema,
+  ReceiveIacCallbackResponseSchema,
+} from '../../types/rest_spec/iac_callback';
 
-import { renderIacTemplateHandler } from './handlers';
+import {
+  createIacCallbackHandler,
+  deleteIacCallbackHandler,
+  getIacCallbackHandler,
+  receiveIacCallbackHandler,
+  renderIacTemplateHandler,
+} from './handlers';
 
 const IAC_PROVISIONER_ROUTE_SECURITY = {
   authz: {
@@ -27,6 +43,20 @@ const IAC_PROVISIONER_ROUTE_SECURITY = {
         anyRequired: [
           FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
           FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+        ],
+      },
+    ],
+  },
+};
+
+const IAC_CALLBACK_WRITE_SECURITY = {
+  authz: {
+    // Mints an API key (create) or kills one (delete): same level as creating an identity.
+    requiredPrivileges: [
+      {
+        anyRequired: [
+          FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+          FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
         ],
       },
     ],
@@ -61,5 +91,131 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       renderIacTemplateHandler
+    );
+
+  router.versioned
+    .post({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
+      summary: 'Create an IaC callback',
+      description:
+        'Create a one-time record and a short-lived, zero-privilege API key that a launched CloudFormation stack uses to report its role back to Kibana.',
+      access: 'internal',
+      security: IAC_CALLBACK_WRITE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: CreateIacCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => CreateIacCallbackResponseSchema,
+            },
+            400: { description: 'A bad request.', body: genericErrorResponse },
+            404: { description: 'The IaC Provisioner is not enabled.', body: notFoundResponse },
+          },
+        },
+      },
+      createIacCallbackHandler
+    );
+
+  router.versioned
+    .get({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN,
+      summary: 'Get an IaC callback',
+      description: 'Get the state of a callback record. Never returns the API key.',
+      access: 'internal',
+      security: IAC_PROVISIONER_ROUTE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetIacCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetIacCallbackResponseSchema,
+            },
+            404: { description: 'Not found.', body: notFoundResponse },
+          },
+        },
+      },
+      getIacCallbackHandler
+    );
+
+  router.versioned
+    .delete({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_DELETE_PATTERN,
+      summary: 'Cancel an IaC callback',
+      description: 'Cancel a callback record and invalidate its API key.',
+      access: 'internal',
+      security: IAC_CALLBACK_WRITE_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: DeleteIacCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => DeleteIacCallbackResponseSchema,
+            },
+            404: { description: 'Not found.', body: notFoundResponse },
+          },
+        },
+      },
+      deleteIacCallbackHandler
+    );
+
+  // Public: the stack's Lambda calls this with the per-callback key. Kibana's auth chain rejects
+  // any other key before the handler; the handler then binds the key to the record.
+  router.versioned
+    .post({
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_RECEIVE_PATTERN,
+      summary: 'Receive an IaC callback',
+      description:
+        'Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticated with the API key issued for this callback.',
+      access: 'public',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorized by the per-callback API key bound to the record in the handler',
+        },
+      },
+      options: {
+        tags: ['oas-tag:Fleet IaC provisioner'],
+        availability: {
+          since: '9.6.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: ReceiveIacCallbackRequestSchema,
+          response: {
+            200: {
+              description: 'OK: the values were stored, or were already stored.',
+              body: () => ReceiveIacCallbackResponseSchema,
+            },
+            400: { description: 'A bad request.', body: genericErrorResponse },
+            404: { description: 'Not found.', body: notFoundResponse },
+            409: {
+              description: 'Different values were already received for this callback.',
+              body: genericErrorResponse,
+            },
+            410: {
+              description: 'The callback was cancelled or has expired.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      receiveIacCallbackHandler
     );
 };
