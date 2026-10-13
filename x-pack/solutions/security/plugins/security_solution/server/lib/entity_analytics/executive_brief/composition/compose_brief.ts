@@ -23,6 +23,7 @@ import type { Brief } from '../../../../../common/entity_analytics/executive_bri
 import {
   AREA_IDS,
   BRIEF_TEXT_LIMITS,
+  MAX_CITED_IDS,
   rawTextLimit,
   briefSchema,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
@@ -54,7 +55,6 @@ export interface ComposeBriefParams {
 }
 
 const MAX_REPORTED_ERRORS = 20;
-const MAX_EVIDENCE_IDS = 24;
 
 /** Provider statuses the inference plugin doesn't retry by default. */
 const NON_RETRYABLE_STATUSES: ReadonlySet<number> = new Set([
@@ -79,8 +79,11 @@ type JsonRecord = Record<string, unknown>;
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const cap = (value: unknown, max: number): unknown =>
-  Array.isArray(value) ? value.slice(0, max) : value;
+/** Unique integer ids, capped; anything that isn't a list is left for validation to report. */
+const normalizeIds = (value: unknown): unknown =>
+  Array.isArray(value)
+    ? [...new Set(value.filter((id) => Number.isInteger(id)))].slice(0, MAX_CITED_IDS)
+    : value;
 
 /**
  * Trims prose beyond the raw bound at a word boundary, so it doesn't cost a repair round-trip.
@@ -102,9 +105,10 @@ const clampFields = (record: JsonRecord, limits: Record<string, number>): JsonRe
     record
   );
 
-const withCappedEvidence = (record: JsonRecord): JsonRecord => ({
+const withNormalizedIds = (record: JsonRecord): JsonRecord => ({
   ...record,
-  evidence: cap(record.evidence, MAX_EVIDENCE_IDS),
+  factIds: normalizeIds(record.factIds),
+  linkIds: normalizeIds(record.linkIds),
 });
 
 /** Keeps the first area of each id, then caps the list. */
@@ -124,14 +128,15 @@ const normalizeAreas = (areas: unknown): unknown => {
     .slice(0, AREA_IDS.length)
     .map((area) =>
       isRecord(area)
-        ? clampFields(withCappedEvidence(area), { summary: BRIEF_TEXT_LIMITS.areaSummary })
+        ? clampFields(withNormalizedIds(area), { summary: BRIEF_TEXT_LIMITS.areaSummary })
         : area
     );
 };
 
 /**
  * Fixes mechanical overshoots before validation, so they don't cost a repair: prose longer than
- * allowed is trimmed, evidence lists are cut, and repeated areas are removed.
+ * allowed is trimmed, cited ids are deduplicated and cut (non-integers dropped), and repeated
+ * areas are removed.
  */
 export const normalizeBriefOutput = (output: unknown): unknown => {
   if (!isRecord(output)) {
@@ -140,7 +145,7 @@ export const normalizeBriefOutput = (output: unknown): unknown => {
   return {
     ...output,
     verdict: isRecord(output.verdict)
-      ? clampFields(withCappedEvidence(output.verdict), {
+      ? clampFields(withNormalizedIds(output.verdict), {
           headline: BRIEF_TEXT_LIMITS.verdictHeadline,
           summary: BRIEF_TEXT_LIMITS.verdictSummary,
         })

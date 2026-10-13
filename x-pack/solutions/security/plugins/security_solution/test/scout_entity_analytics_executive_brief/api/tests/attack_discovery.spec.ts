@@ -33,14 +33,16 @@ const discoveryBrief = (level: AttentionLevel): Brief => ({
     level,
     headline: 'Attack Discovery found activity worth reviewing',
     summary: 'A discovered attack is open and worth reviewing.',
-    evidence: ['F-1'],
+    factIds: [1],
+    linkIds: [],
   },
   areas: [
     {
       id: 'threats',
       level,
       summary: 'A discovered attack is open.',
-      evidence: ['F-1'],
+      factIds: [1],
+      linkIds: [],
     },
   ],
 });
@@ -144,7 +146,7 @@ apiTest.describe(
         expect(document.generation.status).toBe('succeeded');
         expect(document.provenance?.facts).toStrictEqual([
           expect.objectContaining({
-            id: 'F-1',
+            id: 1,
             kind: 'attack_discovery',
             severity: 'critical',
             numbers: { alerts: 3 },
@@ -172,7 +174,7 @@ apiTest.describe(
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
         expect(document.generation.status).toBe('succeeded');
         expect(document.provenance?.facts).toStrictEqual([
-          expect.objectContaining({ id: 'F-1', severity: 'low' }),
+          expect.objectContaining({ id: 1, severity: 'low' }),
         ]);
         expect(document.report?.verdict?.level).toBe('watch');
         expect(document.report?.areas?.map(({ level }) => level)).toStrictEqual(['watch']);

@@ -17,13 +17,15 @@ import { checkGuardrails } from './guardrails';
 const run = (brief: Brief, evidence: Evidence = FIXTURE_EVIDENCE) =>
   checkGuardrails(brief, { index: buildEvidenceIndex(evidence), dropped: new Set() });
 
-/** A level, or a level with the evidence it cites. */
-type Claim = AttentionLevel | [AttentionLevel, string[]];
+/** A level, or a level with the fact and link ids it cites. */
+type Claim = AttentionLevel | [AttentionLevel, number[], number[]?];
 
 const toClaim = (claim: Claim) =>
-  typeof claim === 'string' ? { level: claim } : { level: claim[0], evidence: claim[1] };
+  typeof claim === 'string'
+    ? { level: claim }
+    : { level: claim[0], factIds: claim[1], linkIds: claim[2] ?? [] };
 
-/** The valid brief with the given levels (and evidence lists, where given). */
+/** The valid brief with the given levels (and cited ids, where given). */
 const brief = (verdict: Claim, areas: Claim[]): Brief => {
   const valid = buildValidBrief();
   return {
@@ -34,18 +36,18 @@ const brief = (verdict: Claim, areas: Claim[]): Brief => {
 
 const F1_ACKNOWLEDGED = withFacts((facts) =>
   facts.map((fact) =>
-    fact.id === 'F-1' ? { ...fact, details: { ...fact.details, status: 'acknowledged' } } : fact
+    fact.id === 1 ? { ...fact, details: { ...fact.details, status: 'acknowledged' } } : fact
   )
 );
 
 const F1_WITH_CASE = withFacts((facts) => [
   ...facts,
   {
-    id: 'F-9',
+    id: 9,
     kind: 'case',
     signalId: 'cases',
     title: 'Investigate stolen credentials',
-    entities: [DOCKER],
+    entityIds: [DOCKER],
     details: { status: 'in-progress' },
   },
 ]);
@@ -53,7 +55,7 @@ const F1_WITH_CASE = withFacts((facts) => [
 const ALL_LOW = withFacts((facts) => facts.map((fact) => ({ ...fact, severity: 'low' })));
 
 const F1_UNRATED = withFacts((facts) =>
-  facts.map(({ severity, ...fact }) => (fact.id === 'F-1' ? fact : { ...fact, severity }))
+  facts.map(({ severity, ...fact }) => (fact.id === 1 ? fact : { ...fact, severity }))
 );
 
 describe('checkGuardrails', () => {
@@ -72,19 +74,19 @@ describe('checkGuardrails', () => {
     ],
     [
       'lowers urgent to action when the severe discovery is already handled',
-      brief(['urgent', ['F-2']], [['urgent', ['F-2']]]),
+      brief(['urgent', [2]], [['urgent', [2]]]),
       FIXTURE_EVIDENCE,
       { verdict: 'action', areas: ['action'], lowered: 2 },
     ],
     [
       'caps an unrated fact at action',
-      brief(['action', ['F-1']], [['urgent', ['F-1']]]),
+      brief(['action', [1]], [['urgent', [1]]]),
       F1_UNRATED,
       { verdict: 'action', areas: ['action'], lowered: 1 },
     ],
     [
       'lets the verdict rest on what its areas cite',
-      brief(['urgent', ['F-2']], [['urgent', ['L-1']]]),
+      brief(['urgent', [2]], [['urgent', [], [1]]]),
       FIXTURE_EVIDENCE,
       { verdict: 'urgent', areas: ['urgent'], lowered: 0 },
     ],
@@ -103,7 +105,9 @@ describe('checkGuardrails', () => {
       'a clear verdict with an unaddressed severe discovery',
       brief('clear', []),
       FIXTURE_EVIDENCE,
-      ['cannot be "clear" while unaddressed critical or high attack discoveries exist (F-1)'],
+      [
+        'cannot be "clear" while unaddressed critical or high attack discoveries exist (fact ids 1)',
+      ],
     ],
     [
       'a verdict below its worst area',

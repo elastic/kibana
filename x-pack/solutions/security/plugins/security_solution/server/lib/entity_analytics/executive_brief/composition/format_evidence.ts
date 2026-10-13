@@ -20,7 +20,8 @@ import { toMention } from '../verification/mentions';
 
 /**
  * Renders evidence as compact text for the prompt. Generic over facts and links: a new signal or
- * fact kind shows up as a new section with no changes here. Entities are identified by EUID,
+ * fact kind shows up as a new group under "Facts" with no changes here. Facts and links are listed
+ * by their numeric ids, which the brief cites. Entities are identified by EUID,
  * which the model cites in prose; names are shown as they are (the platform's anonymisation
  * settings apply to every inference call). UUIDs in free text are noise and are removed.
  */
@@ -30,10 +31,6 @@ const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 
 const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-const idNumber = (id: string): number => Number(id.slice(id.indexOf('-') + 1));
-
-const byIdNumber = (a: string, b: string): number => idNumber(a) - idNumber(b);
 
 type CleanText = (text: string) => string;
 
@@ -79,14 +76,17 @@ const formatEntity = (euid: string, record: Entity, clean: CleanText): string =>
 
 const formatFact = (fact: Fact, clean: CleanText): string => {
   const head = [
-    fact.id,
+    `${fact.id}.`,
     fact.severity ? `[${fact.severity}]` : undefined,
     fact.at ? formatTime(fact.at) : undefined,
     `"${clean(fact.title)}"`,
   ]
     .filter((part) => part !== undefined)
     .join(' ');
-  const parts = [head, `entities: ${fact.entities.length > 0 ? fact.entities.join(', ') : 'none'}`];
+  const parts = [
+    head,
+    `entities: ${fact.entityIds.length > 0 ? fact.entityIds.join(', ') : 'none'}`,
+  ];
   const numbers = Object.entries(fact.numbers ?? {});
   if (numbers.length > 0) {
     parts.push(
@@ -96,18 +96,22 @@ const formatFact = (fact: Fact, clean: CleanText): string => {
   Object.entries(fact.details ?? {}).forEach(([key, value]) => {
     parts.push(`${key}: ${clean(value)}`);
   });
-  return parts.join(' | ');
+  return parts.join(' · ');
 };
 
 const formatLink = (link: Link): string => {
-  const parts = [`${link.id} ${link.from} → ${link.to}: "${LINK_VERBS[link.type]}" (${link.type})`];
+  const parts = [
+    `${link.id}. ${link.fromEntityId} → ${link.toEntityId}: "${LINK_VERBS[link.type]}" (${
+      link.type
+    })`,
+  ];
   if (link.factIds.length > 0) {
-    parts.push(`backed by: ${link.factIds.join(', ')}`);
+    parts.push(`facts: ${link.factIds.join(', ')}`);
   }
   if (link.firstSeen) {
     parts.push(`first seen: ${formatTime(link.firstSeen)}`);
   }
-  return parts.join(' | ');
+  return parts.join(' · ');
 };
 
 const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
@@ -132,7 +136,7 @@ const formatSignal = (signal: SignalRun, clean: CleanText): string => {
 const compareFacts = (a: Fact, b: Fact): number =>
   (a.severity ? SEVERITY_RANK[a.severity] : 4) - (b.severity ? SEVERITY_RANK[b.severity] : 4) ||
   (Date.parse(b.at ?? '') || 0) - (Date.parse(a.at ?? '') || 0) ||
-  byIdNumber(a.id, b.id);
+  a.id - b.id;
 
 /** Groups facts by signal, then kind; signals in run order, unknown signals after. */
 const groupFacts = (evidence: Evidence): Array<{ header: string; facts: Fact[] }> => {
@@ -176,15 +180,16 @@ export const formatEvidence = (evidence: Evidence): string => {
       : ['None'])
   );
 
+  lines.push('', `## Facts (${evidence.facts.length})`);
   const groups = groupFacts(evidence);
   if (groups.length === 0) {
-    lines.push('', '## Facts (0)', 'None found in this window.');
+    lines.push('None found in this window.');
   }
   groups.forEach(({ header, facts }) => {
-    lines.push('', `## ${header} (${facts.length})`, ...facts.map((f) => formatFact(f, clean)));
+    lines.push('', `### ${header} (${facts.length})`, ...facts.map((f) => formatFact(f, clean)));
   });
 
-  const links = [...evidence.links].sort((a, b) => byIdNumber(a.id, b.id));
+  const links = [...evidence.links].sort((a, b) => a.id - b.id);
   lines.push('', `## Links (${links.length})`);
   lines.push(...(links.length > 0 ? links.map(formatLink) : ['None']));
 

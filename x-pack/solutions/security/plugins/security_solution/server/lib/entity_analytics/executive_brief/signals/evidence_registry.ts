@@ -9,9 +9,7 @@ import type { Entity } from '@kbn/entity-store/common';
 import type {
   Evidence,
   Fact,
-  FactId,
   Link,
-  LinkId,
   LinkType,
   SignalRun,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
@@ -32,16 +30,14 @@ export interface SignalResult {
   output: SignalOutput;
 }
 
-const factNumber = (id: FactId): number => Number(id.slice(2));
-
 /**
  * Turns signal outputs into `Evidence`. Results are consumed in the order given (the engine passes
  * them in signal-priority order, not completion order), so the same outputs always get the same
  * evidence: entities keyed by golden EUID in order of first appearance (each result's facts, then
- * its links), facts `F-n` in output order, and links `L-n` in output order after resolution. Each
- * entity is its golden Entity Store record, or the record a signal read when resolution has none.
- * Links that collapse onto one entity are dropped, and identical links (in either direction for
- * undirected types) are merged.
+ * its links), facts numbered 1, 2, … in output order, and links numbered the same way in output
+ * order after resolution. Each entity is its golden Entity Store record, or the record a signal
+ * read when resolution has none. Links that collapse onto one entity are dropped, and identical
+ * links (in either direction for undirected types) are merged.
  */
 export const buildEvidence = ({
   results,
@@ -76,10 +72,9 @@ export const buildEvidence = ({
   const facts: Fact[] = [];
   const linksByKey = new Map<string, Link>();
 
-  const sortFactIds = (ids: FactId[]): FactId[] =>
-    [...new Set(ids)].sort((a, b) => factNumber(a) - factNumber(b));
+  const sortFactIds = (ids: number[]): number[] => [...new Set(ids)].sort((a, b) => a - b);
 
-  const addLink = (draft: LinkDraft, factIdsOfOutput: FactId[]): void => {
+  const addLink = (draft: LinkDraft, factIdsOfOutput: number[]): void => {
     const fromGolden = resolution.golden(draft.from.euid);
     const toGolden = resolution.golden(draft.to.euid);
     if (fromGolden === toGolden) {
@@ -89,7 +84,7 @@ export const buildEvidence = ({
     const [first, second] = swap ? [draft.to, draft.from] : [draft.from, draft.to];
     const key = `${draft.type}|${swap ? toGolden : fromGolden}|${swap ? fromGolden : toGolden}`;
     const factIds = (draft.factIndexes ?? []).flatMap((index) =>
-      factIdsOfOutput[index] ? [factIdsOfOutput[index]] : []
+      factIdsOfOutput[index] !== undefined ? [factIdsOfOutput[index]] : []
     );
     const existing = linksByKey.get(key);
     if (existing) {
@@ -99,23 +94,22 @@ export const buildEvidence = ({
       }
       return;
     }
-    const from = registerEntity(first);
-    const to = registerEntity(second);
-    const id: LinkId = `L-${linksByKey.size + 1}`;
+    const fromEntityId = registerEntity(first);
+    const toEntityId = registerEntity(second);
     linksByKey.set(key, {
-      id,
+      id: linksByKey.size + 1,
       type: draft.type,
-      from,
-      to,
+      fromEntityId,
+      toEntityId,
       factIds: sortFactIds(factIds),
       ...(draft.firstSeen ? { firstSeen: draft.firstSeen } : {}),
     });
   };
 
   for (const { signalId, output } of results) {
-    const factIdsOfOutput: FactId[] = output.facts.map((draft) => {
-      const id: FactId = `F-${facts.length + 1}`;
-      const entities = [...new Set(draft.entities.map(registerEntity))];
+    const factIdsOfOutput = output.facts.map((draft): number => {
+      const id = facts.length + 1;
+      const entityIds = [...new Set(draft.entities.map(registerEntity))];
       facts.push({
         id,
         kind: draft.kind,
@@ -123,7 +117,7 @@ export const buildEvidence = ({
         title: draft.title,
         ...(draft.at ? { at: draft.at } : {}),
         ...(draft.severity ? { severity: draft.severity } : {}),
-        entities,
+        entityIds,
         ...(draft.numbers && Object.keys(draft.numbers).length > 0
           ? { numbers: draft.numbers }
           : {}),

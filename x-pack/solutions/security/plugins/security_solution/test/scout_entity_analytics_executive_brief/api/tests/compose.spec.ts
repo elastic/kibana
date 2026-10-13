@@ -29,10 +29,10 @@ import {
   waitForBriefJob,
 } from '../fixtures/brief_helpers';
 
-/** A verdict above `clear` that cites nothing: a structural problem only the model can fix. */
+/** A `watch` verdict that cites nothing: a structural problem only the model can fix. */
 const UNCITED_VERDICT_BRIEF: Brief = {
   ...HIGH_RISK_ENTITY_BRIEF,
-  verdict: { ...HIGH_RISK_ENTITY_BRIEF.verdict, evidence: [] },
+  verdict: { ...HIGH_RISK_ENTITY_BRIEF.verdict, factIds: [], linkIds: [] },
 };
 
 apiTest.describe(
@@ -98,12 +98,13 @@ apiTest.describe(
         });
         expect(document.provenance?.facts).toStrictEqual([
           expect.objectContaining({
-            id: 'F-1',
+            id: 1,
             kind: 'high_risk_entity',
             severity: 'high',
-            entities: [SEEDED_ENTITY.id],
+            entityIds: [SEEDED_ENTITY.id],
           }),
         ]);
+        expect(document.provenance?.links).toStrictEqual([]);
 
         // One LLM call, with the brief tool forced.
         expect(llmProxy.interceptedRequests).toHaveLength(1);
@@ -215,7 +216,8 @@ apiTest.describe(
               id: 'response',
               level: 'watch',
               summary: '{{ entity.id user:not-in-evidence }} needs a response.',
-              evidence: ['F-1'],
+              factIds: [1],
+              linkIds: [],
             },
           ],
         });

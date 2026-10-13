@@ -12,10 +12,13 @@ import { briefSchema } from '../../../../../common/entity_analytics/executive_br
 export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief' as const;
 
 const SUBMIT_BRIEF_DESCRIPTION =
-  'Submit the complete executive brief. Call exactly once. Every claim cites evidence ids from the provided evidence.';
+  'Submit the complete executive brief. Call exactly once. Every claim cites the ids of the facts and links from the provided evidence that back it.';
 
-const EVIDENCE_DESCRIPTION =
-  'Evidence ids that back this claim: at least one F-n or L-n id from the evidence. Never invent ids.';
+const FACT_IDS_DESCRIPTION =
+  'Ids of the facts (numbers from the "Facts" section) that back this claim. Never invent ids.';
+
+const LINK_IDS_DESCRIPTION =
+  'Ids of the links (numbers from the "Links" section) that back this claim. Never invent ids.';
 
 /**
  * Descriptions added to the JSON schema derived from `briefSchema`, keyed by property path
@@ -27,10 +30,12 @@ const FIELD_DESCRIPTIONS: Readonly<Record<string, string>> = {
   'verdict.headline':
     'One sentence, at most 140 characters: the main reason for the level. Do not write the level itself',
   'verdict.summary': 'At most 3 short sentences',
-  'verdict.evidence': EVIDENCE_DESCRIPTION,
+  'verdict.factIds': FACT_IDS_DESCRIPTION,
+  'verdict.linkIds': LINK_IDS_DESCRIPTION,
   areas: 'Exactly one "threats" area and one "response" area',
   'areas[].summary': 'One sentence, at most 180 characters',
-  'areas[].evidence': EVIDENCE_DESCRIPTION,
+  'areas[].factIds': FACT_IDS_DESCRIPTION,
+  'areas[].linkIds': LINK_IDS_DESCRIPTION,
 };
 
 /**
@@ -40,6 +45,11 @@ const FIELD_DESCRIPTIONS: Readonly<Record<string, string>> = {
  */
 const TRIMMED_KEYWORDS: ReadonlySet<string> = new Set(['maxLength', 'maxItems']);
 
+/** zod's safe-integer bounds mean nothing to the model; normalisation drops non-integers. */
+const isSafeIntegerBound = ([key, value]: [string, unknown]): boolean =>
+  (key === 'minimum' && value === Number.MIN_SAFE_INTEGER) ||
+  (key === 'maximum' && value === Number.MAX_SAFE_INTEGER);
+
 type JsonNode = Record<string, unknown>;
 
 const isNode = (value: unknown): value is JsonNode =>
@@ -48,11 +58,13 @@ const isNode = (value: unknown): value is JsonNode =>
 const isToolSchema = (value: unknown): value is ToolSchema =>
   isNode(value) && value.type === 'object' && isNode(value.properties);
 
-/** Returns a copy of the JSON schema node with descriptions added and trimmed limits removed. */
+/** Copies a schema node, adding descriptions and removing trimmed limits and integer bounds. */
 const prepare = (node: JsonNode, path: string): JsonNode => {
   const description = path ? FIELD_DESCRIPTIONS[path] : undefined;
   const result: JsonNode = Object.fromEntries(
-    Object.entries(node).filter(([key]) => !TRIMMED_KEYWORDS.has(key))
+    Object.entries(node).filter(
+      (entry) => !TRIMMED_KEYWORDS.has(entry[0]) && !isSafeIntegerBound(entry)
+    )
   );
   if (description) {
     result.description = description;

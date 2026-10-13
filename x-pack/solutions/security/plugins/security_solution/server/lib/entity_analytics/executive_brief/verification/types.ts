@@ -62,7 +62,8 @@ export interface ClaimField {
 export interface Claim {
   path: ItemPath | undefined;
   fields: ClaimField[];
-  evidence: string[];
+  factIds: number[];
+  linkIds: number[];
   level: AttentionLevel;
 }
 
@@ -74,7 +75,8 @@ export const listClaims = (brief: Brief): Claim[] => [
       { path: 'verdict.headline', text: brief.verdict.headline },
       { path: 'verdict.summary', text: brief.verdict.summary },
     ],
-    evidence: brief.verdict.evidence,
+    factIds: brief.verdict.factIds,
+    linkIds: brief.verdict.linkIds,
     level: brief.verdict.level,
   },
   ...brief.areas.map((area, i): Claim => {
@@ -82,7 +84,8 @@ export const listClaims = (brief: Brief): Claim[] => [
     return {
       path,
       fields: [{ path: `${path}.summary`, text: area.summary }],
-      evidence: area.evidence,
+      factIds: area.factIds,
+      linkIds: area.linkIds,
       level: area.level,
     };
   }),

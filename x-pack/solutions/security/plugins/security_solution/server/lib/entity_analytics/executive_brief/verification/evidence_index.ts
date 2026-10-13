@@ -18,21 +18,18 @@ export interface EvidenceIndex {
   readonly evidence: Evidence;
   /** Entity Store records by EUID. */
   readonly entities: ReadonlyMap<string, Entity>;
-  readonly facts: ReadonlyMap<string, Fact>;
-  readonly links: ReadonlyMap<string, Link>;
+  readonly facts: ReadonlyMap<number, Fact>;
+  readonly links: ReadonlyMap<number, Link>;
   /** Matches the entities' EUIDs and names that contain digits, so they aren't read as numbers. */
   readonly identifierPattern?: RegExp;
 }
-
-/** Any fact or link id written in prose. */
-export const EVIDENCE_ID_PATTERN = /(?<![\w-])(?:F|L)-\d+(?![\w-])/g;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const buildEvidenceIndex = (evidence: Evidence): EvidenceIndex => {
   const entities = new Map<string, Entity>(Object.entries(evidence.entities));
-  const facts = new Map<string, Fact>(evidence.facts.map((fact) => [fact.id, fact]));
-  const links = new Map<string, Link>(evidence.links.map((link) => [link.id, link]));
+  const facts = new Map<number, Fact>(evidence.facts.map((fact) => [fact.id, fact]));
+  const links = new Map<number, Link>(evidence.links.map((link) => [link.id, link]));
   const identifiers = unique(
     [...entities].flatMap(([euid, record]) => [
       euid,
@@ -53,29 +50,29 @@ export const buildEvidenceIndex = (evidence: Evidence): EvidenceIndex => {
   };
 };
 
-/** True for the fact and link ids of the evidence: the only ids a claim can cite. */
-export const isKnownId = (index: EvidenceIndex, id: string): boolean =>
-  index.facts.has(id) || index.links.has(id);
-
-/** True when the ids include at least one fact or link: entities alone back no claim. */
-export const hasFactOrLink = (index: EvidenceIndex, ids: readonly string[]): boolean =>
-  ids.some((id) => index.facts.has(id) || index.links.has(id));
+/** True when the ids include at least one fact or link of the evidence. */
+export const hasFactOrLink = (
+  index: EvidenceIndex,
+  factIds: readonly number[],
+  linkIds: readonly number[]
+): boolean =>
+  factIds.some((id) => index.facts.has(id)) || linkIds.some((id) => index.links.has(id));
 
 /** Facts cited directly, plus the facts behind cited links. */
-export const citedFacts = (index: EvidenceIndex, ids: readonly string[]): Fact[] => {
-  const result = new Map<string, Fact>();
-  ids.forEach((id) => {
+export const citedFacts = (
+  index: EvidenceIndex,
+  factIds: readonly number[],
+  linkIds: readonly number[]
+): Fact[] => {
+  const result = new Map<number, Fact>();
+  const add = (id: number): void => {
     const fact = index.facts.get(id);
     if (fact) {
       result.set(fact.id, fact);
     }
-    index.links.get(id)?.factIds.forEach((factId) => {
-      const backing = index.facts.get(factId);
-      if (backing) {
-        result.set(backing.id, backing);
-      }
-    });
-  });
+  };
+  factIds.forEach(add);
+  linkIds.forEach((id) => index.links.get(id)?.factIds.forEach(add));
   return [...result.values()];
 };
 

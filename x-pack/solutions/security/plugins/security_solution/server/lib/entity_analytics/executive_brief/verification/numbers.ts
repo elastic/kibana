@@ -8,7 +8,7 @@
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
 import type { Fact } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { EvidenceIndex } from './evidence_index';
-import { citedFacts, EVIDENCE_ID_PATTERN, unique } from './evidence_index';
+import { citedFacts, unique } from './evidence_index';
 import type { BriefCheck, CheckOutcome, Claim } from './types';
 import { emptyOutcome, isDropped, listClaims, reportClaim } from './types';
 
@@ -38,8 +38,9 @@ const MASKS: readonly RegExp[] = [
   /\b\d{1,3}(?:\.\d{1,3}){3}\b/g,
   // Ordinals: "1st", "2nd", "23rd", "4th"
   /\b\d+(?:st|nd|rd|th)\b/gi,
-  // Evidence ids, MITRE ids, and identifiers with digits attached to letters (host-01, S3, TA0001)
-  EVIDENCE_ID_PATTERN,
+  // Entity mention tokens, MITRE ids, and identifiers with digits attached to letters (host-01,
+  // S3, TA0001)
+  /\{\{[^{}]*\}\}/g,
   /\bT(?:A)?\d{4}(?:\.\d{3})?\b/g,
   /\b[A-Za-z][\w.-]*?\d[\w.-]*\b/g,
 ];
@@ -86,10 +87,10 @@ const claimEntities = (claim: Claim, index: EvidenceIndex, facts: readonly Fact[
     ...[...index.entities.keys()].filter((euid) =>
       claim.fields.some(({ text }) => text.includes(euid))
     ),
-    ...facts.flatMap(({ entities }) => entities),
-    ...claim.evidence.flatMap((id) => {
+    ...facts.flatMap(({ entityIds }) => entityIds),
+    ...claim.linkIds.flatMap((id) => {
       const link = index.links.get(id);
-      return link ? [link.from, link.to] : [];
+      return link ? [link.fromEntityId, link.toEntityId] : [];
     }),
   ]).filter((euid) => index.entities.has(euid));
 
@@ -104,7 +105,7 @@ export const collectClaimNumbers = (
   range?: string
 ): Set<number> => {
   const allowed = new Set<number>();
-  const facts = citedFacts(index, claim.evidence);
+  const facts = citedFacts(index, claim.factIds, claim.linkIds);
   facts.forEach((fact) => addFactNumbers(allowed, fact, index));
   const entities = claimEntities(claim, index, facts);
   entities.forEach((euid) => {
@@ -122,8 +123,8 @@ export const collectClaimNumbers = (
 /**
  * Numbers: every number in a claim's prose must come from what the claim cites. Any other number
  * drops the claim (structural for the verdict), even when it appears elsewhere in the evidence.
- * Dates, times, ids, ordinals, identifiers and the evidence's entity ids and names are masked
- * first.
+ * Dates, times, ordinals, identifiers, mention tokens and the evidence's entity ids and names are
+ * masked first.
  */
 export const createNumbersCheck =
   (range?: string): BriefCheck =>

@@ -31,7 +31,10 @@ export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief';
 
 export const BRIEF_SIGNAL_IDS = ['attack_discoveries', 'high_risk_entities'] as const;
 
-/** The high-risk entity `seedHighRiskEntity` writes; `id` is its EUID. The signal reports it as F-1. */
+/**
+ * The high-risk entity `seedHighRiskEntity` writes; `id` is its EUID. The signal reports it as
+ * fact 1.
+ */
 export const SEEDED_ENTITY = {
   id: 'user:brief-scout-user',
   name: 'brief-scout-user',
@@ -40,7 +43,7 @@ export const SEEDED_ENTITY = {
 } as const;
 
 /**
- * A model answer for the seeded high-risk entity: it cites F-1 at `watch`, which the evidence
+ * A model answer for the seeded high-risk entity: it cites fact 1 at `watch`, which the evidence
  * supports, and mentions the entity by its EUID token, so verification keeps it unchanged. The
  * prose has no other digits or ids, so the number and citation checks have nothing to change.
  */
@@ -49,20 +52,23 @@ export const HIGH_RISK_ENTITY_BRIEF: Brief = {
     level: 'watch',
     headline: 'One user is at high risk and worth monitoring',
     summary: `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk. No attack discoveries were found in this period.`,
-    evidence: ['F-1'],
+    factIds: [1],
+    linkIds: [],
   },
   areas: [
     {
       id: 'threats',
       level: 'watch',
       summary: 'One user is at high risk; no discovered attacks.',
-      evidence: ['F-1'],
+      factIds: [1],
+      linkIds: [],
     },
     {
       id: 'response',
       level: 'clear',
       summary: 'Nothing is waiting for a response.',
-      evidence: [],
+      factIds: [],
+      linkIds: [],
     },
   ],
 };

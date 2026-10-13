@@ -19,10 +19,10 @@ const EVIDENCE: Evidence = {
   },
 };
 
-/** Runs the check on a brief whose `threats` area says `summary` and cites F-1. */
+/** Runs the check on a brief whose `threats` area says `summary` and cites fact 1. */
 const runArea = (summary: string) => {
   const brief = buildValidBrief();
-  brief.areas[0] = { ...brief.areas[0], summary, evidence: ['F-1'] };
+  brief.areas[0] = { ...brief.areas[0], summary, factIds: [1], linkIds: [] };
   return createNumbersCheck('7d')(brief, {
     index: buildEvidenceIndex(EVIDENCE),
     dropped: new Set(),
@@ -42,7 +42,7 @@ describe('createNumbersCheck', () => {
 
   it.each([
     ['dates', 'On Oct 7 at 08:31 the attack started.'],
-    ['ids', 'F-1 and L-1 describe the attack.'],
+    ['mention tokens', `{{ entity.id ${DIGIT_HOST} }} is in the attack.`],
     ['entity names', 'The 10 finance host is in the attack.'],
     ['EUIDs', `${DIGIT_HOST} is in the attack.`],
   ])('masks %s', (_name, summary) => {

@@ -9,13 +9,9 @@ import type { Entity } from '@kbn/entity-store/common';
 
 /**
  * Evidence gathered by signals. Signals emit facts and links about entities; the evidence
- * registry keys entities by EUID and assigns stable fact and link ids (F-n, L-n) that the brief
- * cites and the UI resolves.
+ * registry keys entities by EUID and numbers facts and links (1, 2, …, each in registry order
+ * within one brief). The brief cites them by these numbers and the UI resolves them.
  */
-
-export type FactId = `F-${number}`;
-export type LinkId = `L-${number}`;
-export type EvidenceId = FactId | LinkId;
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low';
 
@@ -50,7 +46,8 @@ export interface FactSource {
 }
 
 export interface Fact {
-  id: FactId;
+  /** 1-based, in registry order within one brief. */
+  id: number;
   kind: FactKind;
   /** The signal that produced it. */
   signalId: string;
@@ -60,7 +57,7 @@ export interface Fact {
   at?: string;
   severity?: Severity;
   /** EUIDs of the (golden) entities the fact is about. */
-  entities: string[];
+  entityIds: string[];
   /** The only numbers the AI may quote for this fact. */
   numbers?: Record<string, number>;
   /** Short non-numeric descriptors, e.g. { tactics: 'Initial Access, Lateral Movement' }. */
@@ -81,14 +78,15 @@ export type LinkType =
   | 'supervises';
 
 export interface Link {
-  id: LinkId;
+  /** 1-based, in registry order within one brief. */
+  id: number;
   type: LinkType;
-  /** EUID. */
-  from: string;
-  /** EUID. */
-  to: string;
-  /** Facts that back the link, if any. */
-  factIds: FactId[];
+  /** EUID of the entity the link starts from. */
+  fromEntityId: string;
+  /** EUID of the entity the link points to. */
+  toEntityId: string;
+  /** Ids of the facts that back the link, if any. */
+  factIds: number[];
   /** First time the link was observed, when known. */
   firstSeen?: string;
 }

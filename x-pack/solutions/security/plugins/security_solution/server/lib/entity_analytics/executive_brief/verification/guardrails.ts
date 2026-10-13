@@ -30,7 +30,7 @@ export const isAddressed = (fact: Fact, index: EvidenceIndex): boolean => {
   }
   return index.evidence.facts.some(
     (other) =>
-      other.kind === 'case' && other.entities.some((entity) => fact.entities.includes(entity))
+      other.kind === 'case' && other.entityIds.some((entityId) => fact.entityIds.includes(entityId))
   );
 };
 
@@ -60,8 +60,12 @@ const supportOf = (fact: Fact, index: EvidenceIndex): AttentionLevel => {
 };
 
 /** The highest level the cited facts (directly or through links) support; `clear` with none. */
-export const supportedLevel = (index: EvidenceIndex, ids: readonly string[]): AttentionLevel =>
-  citedFacts(index, ids).reduce<AttentionLevel>(
+export const supportedLevel = (
+  index: EvidenceIndex,
+  factIds: readonly number[],
+  linkIds: readonly number[]
+): AttentionLevel =>
+  citedFacts(index, factIds, linkIds).reduce<AttentionLevel>(
     (level, fact) => higher(level, supportOf(fact, index)),
     'clear'
   );
@@ -93,8 +97,13 @@ export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
     return true;
   });
 
-  const cap = (path: string, level: AttentionLevel, ids: readonly string[]): AttentionLevel => {
-    const ceiling = supportedLevel(index, ids);
+  const cap = (
+    path: string,
+    level: AttentionLevel,
+    factIds: readonly number[],
+    linkIds: readonly number[]
+  ): AttentionLevel => {
+    const ceiling = supportedLevel(index, factIds, linkIds);
     if (LEVEL_RANK[level] <= LEVEL_RANK[ceiling]) {
       return level;
     }
@@ -104,22 +113,26 @@ export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
   };
 
   const areas = brief.areas.map((area, i) =>
-    isKept[i] ? { ...area, level: cap(`areas[${i}].level`, area.level, area.evidence) } : area
+    isKept[i]
+      ? { ...area, level: cap(`areas[${i}].level`, area.level, area.factIds, area.linkIds) }
+      : area
   );
   const keptAreas = areas.filter((_area, i) => isKept[i]);
   const verdict = {
     ...brief.verdict,
-    level: cap('verdict.level', brief.verdict.level, [
-      ...brief.verdict.evidence,
-      ...keptAreas.flatMap(({ evidence }) => evidence),
-    ]),
+    level: cap(
+      'verdict.level',
+      brief.verdict.level,
+      [...brief.verdict.factIds, ...keptAreas.flatMap(({ factIds }) => factIds)],
+      [...brief.verdict.linkIds, ...keptAreas.flatMap(({ linkIds }) => linkIds)]
+    ),
   };
   outcome.brief = { verdict, areas };
 
   const discoveries = unaddressedSevereDiscoveries(index);
   if (verdict.level === 'clear' && discoveries.length > 0) {
     outcome.structuralErrors.push(
-      `verdict.level: cannot be "clear" while unaddressed critical or high attack discoveries exist (${discoveries
+      `verdict.level: cannot be "clear" while unaddressed critical or high attack discoveries exist (fact ids ${discoveries
         .map(({ id }) => id)
         .join(', ')}).`
     );

@@ -8,10 +8,10 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * The brief the AI writes (via a forced tool call) and the server verifies. Every claim cites
- * fact and link ids (F-n, L-n). The model names entities by prompt-only ids (ENT-n), which the
- * server replaces with EUIDs before storing. Versioned through the document's `schema_version`;
- * threats and actions are added in a later schema version.
+ * The brief the AI writes (via a forced tool call) and the server verifies. Every claim cites the
+ * facts and links behind it by id, in `factIds` and `linkIds`. Prose mentions entities by EUID
+ * (see `ENTITY_MENTION_FIELD`). Versioned through the document's `schema_version`; threats and
+ * actions are added in a later schema version.
  */
 
 export const ATTENTION_LEVELS = ['urgent', 'action', 'watch', 'clear'] as const;
@@ -40,7 +40,10 @@ export const BRIEF_TEXT_LIMITS = {
 /** Mention tokens are longer than the names they show, so raw prose is bounded more loosely. */
 export const rawTextLimit = (visibleLimit: number): number => visibleLimit * 4;
 
-const evidenceIds = z.array(z.string().max(16)).max(24);
+/** Most fact or link ids one claim may cite. */
+export const MAX_CITED_IDS = 24;
+
+const citedIds = () => z.array(z.number().int()).max(MAX_CITED_IDS);
 const shortText = (max: number) => z.string().min(1).max(rawTextLimit(max));
 
 export const briefSchema = lazySchema(() =>
@@ -49,7 +52,8 @@ export const briefSchema = lazySchema(() =>
       level: z.enum(ATTENTION_LEVELS),
       headline: shortText(BRIEF_TEXT_LIMITS.verdictHeadline),
       summary: shortText(BRIEF_TEXT_LIMITS.verdictSummary),
-      evidence: evidenceIds,
+      factIds: citedIds(),
+      linkIds: citedIds(),
     }),
     areas: z
       .array(
@@ -57,7 +61,8 @@ export const briefSchema = lazySchema(() =>
           id: z.enum(AREA_IDS),
           level: z.enum(ATTENTION_LEVELS),
           summary: shortText(BRIEF_TEXT_LIMITS.areaSummary),
-          evidence: evidenceIds,
+          factIds: citedIds(),
+          linkIds: citedIds(),
         })
       )
       .max(AREA_IDS.length),
