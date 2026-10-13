@@ -11,8 +11,8 @@
  * Share session tests.
  *
  * Validates that a fully configured metrics view (ES|QL query with a WHERE
- * clause, time range, breakdown dimensions, grid settings, and search term)
- * can be shared via URL and that opening that URL restores every piece of
+ * clause, time range, breakdown dimensions, grid settings, search term, and
+ * sort) can be shared via URL and that opening that URL restores every piece of
  * that state.
  */
 
@@ -23,6 +23,13 @@ const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
 const FILTERED_DIMENSION_VALUE = DEFAULT_CONFIG.dimensions[0].values[0];
 const SEARCH_TERM = 'counter_0';
+// Metric search tolerates one-character typos, so `counter_0` also matches the other single-digit
+// counters. Sorting descending therefore puts the alphabetically last counter first.
+const LAST_COUNTER_METRIC = DEFAULT_CONFIG.metrics
+  .filter(({ type }) => type === 'counter')
+  .map(({ name }) => name)
+  .sort((a, b) => b.localeCompare(a))[0];
+const FIRST_CARD_DESC = `${LAST_COUNTER_METRIC}-0`;
 const FILTERED_QUERY = `${testData.ESQL_QUERIES.TS} | WHERE ${FIRST_DIMENSION} == "${FILTERED_DIMENSION_VALUE}"`;
 // Narrower than DEFAULT_TIME_RANGE so the restored range is distinguishable from the default.
 const SHARED_TIME_RANGE = {
@@ -91,6 +98,16 @@ spaceTest.describe(
             .toContain(`searchTerm:${SEARCH_TERM}`);
         });
 
+        await spaceTest.step('sort the grid in descending order', async () => {
+          await metricsExperience.setSortDirection('desc');
+          await expect(metricsExperience.sortDirectionDesc).toHaveAttribute('aria-pressed', 'true');
+          await metricsExperience.waitForFirstCard(FIRST_CARD_DESC);
+          // The share URL is built from the URL state, which `kbnUrlControls` writes asynchronously.
+          await expect
+            .poll(() => metricsExperience.getProfileState(page.url()))
+            .toContain('sortDirection:desc');
+        });
+
         const timeConfigBefore = await datePicker.getTimeConfig();
         const cardCountBefore = await metricsExperience.getVisibleCardCount();
         const queryBefore = await discover.getEsqlQueryValue();
@@ -137,7 +154,6 @@ spaceTest.describe(
 
         await spaceTest.step('grid settings and search should be preserved', async () => {
           await expect(metricsExperience.searchInput).toHaveValue(SEARCH_TERM);
-          await metricsExperience.waitForFirstCard('counter_0-0');
           await metricsExperience.gridSettings.open();
           await expect(metricsExperience.gridSettings.counterSelect).toContainText('Maximum');
           await expect(metricsExperience.gridSettings.gaugeSelect).toContainText('Minimum');
@@ -145,6 +161,11 @@ spaceTest.describe(
             '50th percentile'
           );
           await metricsExperience.gridSettings.cancel();
+        });
+
+        await spaceTest.step('sort should be preserved', async () => {
+          await expect(metricsExperience.sortDirectionDesc).toHaveAttribute('aria-pressed', 'true');
+          await metricsExperience.waitForFirstCard(FIRST_CARD_DESC);
         });
 
         await spaceTest.step('card count should match the original session', async () => {
