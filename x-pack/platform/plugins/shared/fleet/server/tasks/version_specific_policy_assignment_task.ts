@@ -46,7 +46,11 @@ import {
   getSentinelVersionPolicyId,
   hasSentinelVersionSuffix,
 } from '../../common/services/version_specific_policies_utils';
-import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../common/constants';
+import {
+  AGENT_POLICY_INDEX,
+  AGENT_POLICY_VERSION_SEPARATOR,
+  AGENTS_INDEX,
+} from '../../common/constants';
 import { isSentinelPolicyVersionEnabled } from '../services/utils/sentinel_policy_version';
 
 import { throwIfAborted } from './utils';
@@ -74,6 +78,9 @@ const STALE_VARIANT_GRACE_MS = 60 * 60 * 1000; // 1 hour
 // MAX_VERSION_SPECIFIC_POLICY_BUCKETS policy ids and the parent policies of the variants, so it does not run
 // on every run. It runs right away when the sentinel version is turned on or off, which changes what is orphaned.
 const ORPHAN_SWEEP_INTERVAL_MS = 10 * 60 * 1000;
+// Upper bound of the distinct `policy_id`s of agents without `policy_base_id` that the candidate query reads: none
+// once the startup backfill has run, only the agents of an older fleet-server in a mixed version rollout.
+const MAX_AGENTS_WITHOUT_POLICY_BASE_ID = 10000;
 
 interface VersionSpecificPolicyAssignmentTaskState {
   lastSweepAt?: string;
@@ -316,7 +323,22 @@ export class VersionSpecificPolicyAssignmentTask {
         return;
       }
 
+      // One query for the page: only the policies that have agents to look at are visited, instead of
+      // a count query for every policy of every run.
+      const policyIdsWithCandidates = await this.findPolicyIdsWithCandidateAgents(
+        esClient,
+        agentPolicyPageResults.map((agentPolicy) => agentPolicy.id),
+        // agents on `#sentinel` that are inactive can only be told apart by the status
+        !sentinelVersionEnabled
+      );
+      this.logger.debug(
+        `[VersionSpecificPolicyAssignmentTask] ${policyIdsWithCandidates.size} of ${agentPolicyPageResults.length} agent policies have agents to assign`
+      );
+
       for (const agentPolicy of agentPolicyPageResults) {
+        if (!policyIdsWithCandidates.has(agentPolicy.id)) {
+          continue;
+        }
         throwIfAborted(signal);
         await this.processAgentPolicyForVersionAssignment(
           esClient,
@@ -535,6 +557,100 @@ export class VersionSpecificPolicyAssignmentTask {
   }
 
   /**
+   * Which of the given agent policies have agents that `findAgentsNeedingVersionSpecificPolicies` may
+   * find, with one search for all of them. Same agents as its query, so that it can skip the others:
+   * - active agents on the policy or on its `#sentinel` copy
+   * - active agents on a variant that were recently upgraded
+   * - when `includeSentinelAgents` is set, agents on the `#sentinel` copy whatever their status, to
+   *   cover the inactive ones that are moved off it when the sentinel version is disabled
+   *
+   * Agents without `policy_base_id` (enrolled by an older fleet-server) are matched through their
+   * `policy_id`, so that a missing field never hides an agent.
+   */
+  private async findPolicyIdsWithCandidateAgents(
+    esClient: ElasticsearchClient,
+    agentPolicyIds: string[],
+    includeSentinelAgents: boolean
+  ): Promise<Set<string>> {
+    const policyIds = new Set(agentPolicyIds);
+    if (policyIds.size === 0) {
+      return new Set();
+    }
+    const sentinelPolicyIds = agentPolicyIds.map(getSentinelVersionPolicyId);
+    const parentPolicyIds = [...agentPolicyIds, ...sentinelPolicyIds];
+    const recentlyUpgradedTime = this.getRecentlyUpgradedTime();
+
+    const response = await esClient.search<
+      unknown,
+      {
+        base_policy_ids: { buckets: Array<{ key: string }> };
+        without_policy_base_id: { policy_ids: { buckets: Array<{ key: string }> } };
+      }
+    >({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      query: {
+        bool: {
+          should: [
+            {
+              bool: {
+                filter: [{ term: { active: true } }],
+                should: [
+                  // on the policy or on its `#sentinel` copy
+                  { terms: { policy_id: parentPolicyIds } },
+                  // on a variant that was recently upgraded: matched by the base policy id, or
+                  // for agents without it, by any `policy_id` of an agent that was recently upgraded
+                  {
+                    bool: {
+                      filter: [
+                        { terms: { policy_base_id: agentPolicyIds } },
+                        { range: { upgraded_at: { gte: recentlyUpgradedTime } } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [{ range: { upgraded_at: { gte: recentlyUpgradedTime } } }],
+                      must_not: [{ exists: { field: 'policy_base_id' } }],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            ...(includeSentinelAgents ? [{ terms: { policy_id: sentinelPolicyIds } }] : []),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      aggs: {
+        base_policy_ids: { terms: { field: 'policy_base_id', size: policyIds.size } },
+        without_policy_base_id: {
+          filter: { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
+          aggs: {
+            policy_ids: { terms: { field: 'policy_id', size: MAX_AGENTS_WITHOUT_POLICY_BASE_ID } },
+          },
+        },
+      },
+    });
+
+    const found = new Set<string>();
+    for (const { key } of response.aggregations?.base_policy_ids?.buckets ?? []) {
+      found.add(key);
+    }
+    for (const { key } of response.aggregations?.without_policy_base_id?.policy_ids?.buckets ??
+      []) {
+      found.add(classifyPolicyId(key).baseId);
+    }
+    return new Set([...found].filter((policyId) => policyIds.has(policyId)));
+  }
+
+  private getRecentlyUpgradedTime(): string {
+    return new Date(Date.now() - RECENTLY_UPGRADED_WINDOW_MINUTES * 60 * 1000).toISOString();
+  }
+
+  /**
    * Find agents that need to be assigned/reassigned to version-specific policies
    *
    * Criteria:
@@ -558,9 +674,7 @@ export class VersionSpecificPolicyAssignmentTask {
     // 1. Agents on the parent policy (not a versioned policy)
     // 2. Agents that were recently upgraded
     // 3. Agents on versioned policy with mismatched version or outdated revision
-    const recentlyUpgradedTime = new Date(
-      Date.now() - RECENTLY_UPGRADED_WINDOW_MINUTES * 60 * 1000
-    ).toISOString();
+    const recentlyUpgradedTime = this.getRecentlyUpgradedTime();
 
     // Query 1: Agents on parent policy (newly enrolled or need initial assignment), or on its
     // `#sentinel` copy (the policy had no version conditions before and agents were moved to `#sentinel`)

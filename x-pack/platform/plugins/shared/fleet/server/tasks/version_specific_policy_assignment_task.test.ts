@@ -169,6 +169,39 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     return mockTask.runTask(taskInstance, mockCore, new AbortController().signal);
   };
 
+  // The search of phase 1 that tells which agent policies have agents to look at (one per page of
+  // agent policies). By default every agent policy of the page has some: pass the ids to limit them.
+  const mockCandidateAgentPolicies = async ({
+    policyIdsWithCandidates,
+    policyIdsOfAgentsWithoutPolicyBaseId = [],
+  }: {
+    policyIdsWithCandidates?: string[];
+    policyIdsOfAgentsWithoutPolicyBaseId?: string[];
+  } = {}) => {
+    const [coreStart] = await mockCore.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+    esClient.search.mockImplementation(async (request: any) => {
+      if (!request.aggs?.base_policy_ids) {
+        return {};
+      }
+      const requestedPolicyIds: string[] =
+        request.query.bool.should[0].bool.should[1].bool.filter[0].terms.policy_base_id;
+      return {
+        aggregations: {
+          base_policy_ids: {
+            buckets: requestedPolicyIds
+              .filter((id) => !policyIdsWithCandidates || policyIdsWithCandidates.includes(id))
+              .map((key) => ({ key })),
+          },
+          without_policy_base_id: {
+            policy_ids: { buckets: policyIdsOfAgentsWithoutPolicyBaseId.map((key) => ({ key })) },
+          },
+        },
+      };
+    });
+    return esClient;
+  };
+
   // Configure the .fleet-policies terms aggregation the orphan sweep reads in its first pass.
   // lastWrittenMs defaults to epoch (0) so mocked variants are always outside the 1-hour GRACE
   // window and eligible for deletion. Pass lastWrittenMs: Date.now() to simulate a fresh write.
@@ -213,7 +246,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   });
 
   describe('Task execution', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await mockCandidateAgentPolicies();
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
@@ -577,6 +611,137 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    describe('agent policies with agents to look at', () => {
+      const twoAgentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+        { id: 'policy-2', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+
+      beforeEach(() => {
+        mockAgentPolicyService.fetchAllAgentPolicies =
+          getMockAgentPolicyFetchAllAgentPolicies(twoAgentPolicies);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedGetAgentsByKuery.mockResolvedValue({ total: 1, agents: [], page: 1, perPage: 1 });
+        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          getMockFetchAllAgentsByKuery(
+            generateAgents(1, options.kuery.includes('policy-2') ? 'policy-2' : 'policy-1')
+          )
+        );
+      });
+
+      const policyIdsQueried = () =>
+        mockedGetAgentsByKuery.mock.calls.map(([, , options]) =>
+          ['policy-1', 'policy-2'].filter((id) => options.kuery?.includes(`"${id}"`))
+        );
+
+      it('searches once for all the agent policies of a page', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+        const esClient = await mockCandidateAgentPolicies();
+
+        await runTask();
+
+        const candidateSearches = esClient.search.mock.calls.filter(
+          ([request]: any) => request.aggs?.base_policy_ids
+        );
+        expect(candidateSearches).toHaveLength(1);
+        const [[request]] = candidateSearches;
+        expect(request.index).toBe('.fleet-agents');
+        expect(request.size).toBe(0);
+        expect(request.aggs.base_policy_ids.terms).toEqual({
+          field: 'policy_base_id',
+          size: 2,
+        });
+        const [activeAgents, inactiveSentinelAgents] = request.query.bool.should;
+        expect(inactiveSentinelAgents).toBeUndefined();
+        expect(activeAgents.bool.filter).toEqual([{ term: { active: true } }]);
+        const [onPolicy, onVariant, withoutBaseId] = activeAgents.bool.should;
+        // the policy and its #sentinel copy
+        expect(onPolicy).toEqual({
+          terms: { policy_id: ['policy-1', 'policy-2', 'policy-1#sentinel', 'policy-2#sentinel'] },
+        });
+        // a variant of the policies that was recently upgraded
+        expect(onVariant.bool.filter[0]).toEqual({
+          terms: { policy_base_id: ['policy-1', 'policy-2'] },
+        });
+        expect(onVariant.bool.filter[1].range.upgraded_at.gte).toEqual(expect.any(String));
+        // agents without policy_base_id are found by their policy_id
+        expect(withoutBaseId.bool.must_not).toEqual([{ exists: { field: 'policy_base_id' } }]);
+      });
+
+      it('only looks at the agent policies that have agents', async () => {
+        await mockCandidateAgentPolicies({ policyIdsWithCandidates: ['policy-2'] });
+
+        await runTask();
+
+        expect(policyIdsQueried().flat()).toEqual(['policy-2']);
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledTimes(1);
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+          expect.anything(),
+          ['policy-2'],
+          undefined,
+          expect.anything()
+        );
+      });
+
+      it('does not query the agents when no agent policy has agents', async () => {
+        await mockCandidateAgentPolicies({ policyIdsWithCandidates: [] });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+        expect(mockedFetchAllAgentsByKuery).not.toHaveBeenCalled();
+        expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+      });
+
+      it('finds the agent policy of agents without policy_base_id by their policy_id, also on #sentinel', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          policyIdsOfAgentsWithoutPolicyBaseId: ['policy-1', 'policy-2#sentinel'],
+        });
+
+        await runTask();
+
+        expect(policyIdsQueried().flat().sort()).toEqual(['policy-1', 'policy-2']);
+      });
+
+      it('ignores agents of other agent policies', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          policyIdsOfAgentsWithoutPolicyBaseId: ['another-policy', 'another-policy#9.4'],
+        });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+      });
+
+      it('also searches for the agents on #sentinel of any status when the sentinel version is disabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
+        const esClient = await mockCandidateAgentPolicies();
+
+        await runTask();
+
+        const [[request]] = esClient.search.mock.calls.filter(
+          ([searchRequest]: any) => searchRequest.aggs?.base_policy_ids
+        );
+        expect(request.query.bool.should[1]).toEqual({
+          terms: { policy_id: ['policy-1#sentinel', 'policy-2#sentinel'] },
+        });
+      });
+
+      it('does not search for the agents on #sentinel of any status when the sentinel version is enabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+        const esClient = await mockCandidateAgentPolicies();
+
+        await runTask();
+
+        const [[request]] = esClient.search.mock.calls.filter(
+          ([searchRequest]: any) => searchRequest.aggs?.base_policy_ids
+        );
+        expect(request.query.bool.should).toHaveLength(1);
+      });
+    });
+
     describe('package policies of the agent policies', () => {
       const packagePolicy = (id: string) =>
         ({ id, name: id, package: { name: 'test-package', version: '1.0.0' } } as PackagePolicy);
@@ -676,7 +841,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   });
 
   describe('Version extraction', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await mockCandidateAgentPolicies();
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
@@ -1152,7 +1318,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       return esClient;
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      await mockCandidateAgentPolicies();
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
