@@ -21,6 +21,7 @@ import type {
   DataGridDensity,
   JsonModeSettings,
   DocumentsDisplayMode,
+  UnifiedDataTableQueryContext,
 } from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -376,6 +377,18 @@ export function SearchEmbeddableGridComponent({
     [discoverServices.uiSettings, savedSearchQuery]
   );
 
+  // The effective search scope of the panel: its own query and filters, plus the dashboard's.
+  const queryContext = useMemo<UnifiedDataTableQueryContext>(
+    () => ({
+      query: savedSearchQuery,
+      filters: [...(savedSearchFilters ?? []), ...(fetchContext?.filters ?? [])],
+      filterQuery:
+        fetchContext?.query && isOfQueryType(fetchContext.query) ? fetchContext.query : undefined,
+      timeRange,
+    }),
+    [fetchContext?.filters, fetchContext?.query, savedSearchFilters, savedSearchQuery, timeRange]
+  );
+
   const searchContext = useMemo(() => {
     if (!isEsql) {
       return undefined;
@@ -418,6 +431,7 @@ export function SearchEmbeddableGridComponent({
       dataSource={resultDataSource ?? kbnDataSource}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
+      queryContext={queryContext}
       rows={rows}
       rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
       sampleSizeState={fetchedSampleSize}

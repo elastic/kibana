@@ -34,5 +34,13 @@ describe('visualizationCreationSkill', () => {
       platformCoreTools.executeEsql,
       platformCoreTools.createVisualization,
     ]);
+   
+  it('finds unnamed data in one broad index search without probing it', () => {
+    const { content } = visualizationCreationSkill;
+    expect(content).toContain(
+      'find it in one `platform.core.list_indices` call with a broad pattern around the topic (e.g. `*log*`, not `logs-*`)'
+    );
+    expect(content).toContain('Do not query the data before generating');
+    expect(content).not.toContain('optionally probe with');
   });
 });
