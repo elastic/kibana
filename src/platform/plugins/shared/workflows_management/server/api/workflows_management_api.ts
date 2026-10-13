@@ -79,6 +79,7 @@ import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_e
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
+import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import type { WorkflowsManagementClient } from './workflows_management_client';
 import { createWorkflowsManagementClient } from './workflows_management_client';
 import type {
@@ -711,7 +712,7 @@ export class WorkflowsManagementApi {
     isUserInteractive?: boolean
   ): Promise<string> {
     if (requiresDelegatedIdentity(workflow)) {
-      throw new Error(
+      throw new WorkflowRequiresDelegatedIdentityError(
         i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
           defaultMessage:
             "Workflow '{workflowId}' delegates its execution identity to a parent workflow and cannot be run standalone.",

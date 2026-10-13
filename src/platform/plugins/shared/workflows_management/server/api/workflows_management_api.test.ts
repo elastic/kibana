@@ -32,6 +32,8 @@ import {
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import { WorkflowForbiddenError } from './workflow_forbidden_error';
+import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import {
   type AlertPreprocessingContext,
   type SmlIndexAttachmentFn,
@@ -1373,16 +1375,21 @@ steps:
         yaml: 'name: Attack Discovery Runner',
       } as WorkflowExecutionEngineModel;
 
-      await expect(
-        api.runWorkflowWithAlertPreprocessing({
+      const error = await api
+        .runWorkflowWithAlertPreprocessing({
           workflow,
           spaceId: 'default',
           inputs: {},
           request: mockRequest,
           preprocessingContext: {} as AlertPreprocessingContext,
         })
-      ).rejects.toThrow(/delegates its execution identity to a parent workflow/);
+        .catch((e: unknown) => e);
 
+      expect(error).toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(error).toBeInstanceOf(WorkflowForbiddenError);
+      expect((error as Error).message).toMatch(
+        /delegates its execution identity to a parent workflow/
+      );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
     });
   });
