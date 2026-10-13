@@ -39,6 +39,9 @@ describe('config validation', () => {
             },
           },
         },
+        "connectorSigningKeys": Object {
+          "enabled": false,
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -110,6 +113,9 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "connectorSigningKeys": Object {
+          "enabled": false,
         },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
@@ -291,6 +297,9 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "connectorSigningKeys": Object {
+          "enabled": false,
         },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
@@ -499,6 +508,9 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "connectorSigningKeys": Object {
+          "enabled": false,
         },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [

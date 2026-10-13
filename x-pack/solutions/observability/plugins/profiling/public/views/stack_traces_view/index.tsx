@@ -9,6 +9,8 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { groupSamplesByCategory } from '../../../common/topn';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { useProfilingSchema } from '../../components/contexts/profiling_schema/use_profiling_schema';
+import { NoProfilingDataPrompt } from '../../components/no_profiling_data_prompt';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { StackTraces } from '../../components/stack_traces';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
@@ -23,6 +25,34 @@ import { AsyncStatus } from '../../hooks/use_async';
 import { RedirectTo } from '../../components/redirect_to';
 
 export function StackTracesView() {
+  const profilingRouter = useProfilingRouter();
+
+  const { path, query } = useProfilingParams('/stacktraces/{topNType}');
+
+  const tabs = getStackTracesTabs({
+    path,
+    query,
+    profilingRouter,
+  });
+  const selectedTab = tabs.find((tab) => tab.isSelected);
+
+  return (
+    <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
+      <ProfilingAppPageTemplate
+        tabs={tabs}
+        showSchemaSelector
+        pageTitle={i18n.translate('xpack.profiling.stackTracesView.pageTitle', {
+          defaultMessage: 'Stacktraces',
+        })}
+      >
+        <StackTracesContent />
+      </ProfilingAppPageTemplate>
+    </RouteBreadcrumb>
+  );
+}
+
+// Rendered inside the page template, which provides the selected profiling schema
+function StackTracesContent() {
   const routePath = useProfilingRoutePath();
 
   const profilingRouter = useProfilingRouter();
@@ -36,16 +66,10 @@ export function StackTracesView() {
 
   const limit = limitFromQueryParams || 10;
 
-  const tabs = getStackTracesTabs({
-    path,
-    query,
-    profilingRouter,
-  });
-  const selectedTab = tabs.find((tab) => tab.isSelected);
-
   const {
     services: { fetchTopN },
   } = useProfilingDependencies();
+  const { selectedSchema } = useProfilingSchema();
 
   const timeRange = useTimeRange({
     rangeFrom,
@@ -57,15 +81,19 @@ export function StackTracesView() {
       if (!topNType) {
         return Promise.resolve({ charts: [], metadata: {} });
       }
+      if (!selectedSchema) {
+        return undefined;
+      }
       return fetchTopN({
         http,
         type: topNType,
         timeFrom: timeRange.inSeconds.start,
         timeTo: timeRange.inSeconds.end,
         kuery,
+        schema: selectedSchema,
       }).then(groupSamplesByCategory);
     },
-    [topNType, timeRange.inSeconds.start, timeRange.inSeconds.end, fetchTopN, kuery]
+    [topNType, timeRange.inSeconds.start, timeRange.inSeconds.end, fetchTopN, kuery, selectedSchema]
   );
 
   function onChartClick(category: string) {
@@ -93,50 +121,45 @@ export function StackTracesView() {
   }, [state.status, state.data?.charts.length, onPageReady, rangeFrom, rangeTo]);
 
   return (
-    <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
-      <ProfilingAppPageTemplate
-        tabs={tabs}
-        pageTitle={i18n.translate('xpack.profiling.stackTracesView.pageTitle', {
-          defaultMessage: 'Stacktraces',
-        })}
-      >
-        <StackTraces
-          type={topNType}
-          state={state}
-          displayOption={displayAs}
-          limit={limit}
-          onChartClick={onChartClick}
-          onChangeDisplayOption={(nextValue) => {
-            profilingRouter.push(routePath, {
-              path,
-              query: {
-                ...query,
-                displayAs: nextValue,
-              },
-            });
-          }}
-          onStackedBarChartBrushEnd={(nextRange) => {
-            profilingRouter.push(routePath, {
-              path,
-              query: {
-                ...query,
-                rangeFrom: nextRange.rangeFrom,
-                rangeTo: nextRange.rangeTo,
-              },
-            });
-          }}
-          onShowMoreClick={() => {
-            profilingRouter.push(routePath, {
-              path,
-              query: {
-                ...query,
-                limit: limit + 10,
-              },
-            });
-          }}
-        />
-      </ProfilingAppPageTemplate>
-    </RouteBreadcrumb>
+    <NoProfilingDataPrompt
+      hasData={state.status !== AsyncStatus.Settled || state.data?.charts.length !== 0}
+    >
+      <StackTraces
+        type={topNType}
+        state={state}
+        displayOption={displayAs}
+        limit={limit}
+        onChartClick={onChartClick}
+        onChangeDisplayOption={(nextValue) => {
+          profilingRouter.push(routePath, {
+            path,
+            query: {
+              ...query,
+              displayAs: nextValue,
+            },
+          });
+        }}
+        onStackedBarChartBrushEnd={(nextRange) => {
+          profilingRouter.push(routePath, {
+            path,
+            query: {
+              ...query,
+              rangeFrom: nextRange.rangeFrom,
+              rangeTo: nextRange.rangeTo,
+            },
+          });
+        }}
+        onShowMoreClick={() => {
+          profilingRouter.push(routePath, {
+            path,
+            query: {
+              ...query,
+              limit: limit + 10,
+            },
+          });
+        }}
+      />
+    </NoProfilingDataPrompt>
   );
 }
 
