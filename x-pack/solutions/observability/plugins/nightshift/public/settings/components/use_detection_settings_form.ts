@@ -64,7 +64,7 @@ export const useDetectionSettingsForm = () => {
     !canEditSettings || !draftEnabled || blocksActivity;
 
   const continuousExtraction = useContinuousExtractionSettings({
-    globalClient: core.settings.globalClient,
+    client: core.settings.client,
     http: core.http,
     enabledFromStatus: maintenanceStatus?.featureSettings?.continuousOnboardingEnabled,
   });

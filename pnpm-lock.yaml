@@ -425,8 +425,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.29.0
-        version: 4.29.0(monaco-editor@0.56.0)
+        specifier: 4.30.0
+        version: 4.30.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -11105,8 +11105,8 @@ packages:
   '@elastic/esql-ast@4.29.0':
     resolution: {integrity: sha512-JEjzxf5ihXRJJahTw6CrxN2b05jzqGargj2JM72vTZ4bKw94sYUlmf/mgzmR3YBdU8Xm43sIx6LWmTFBd0TLGg==}
 
-  '@elastic/esql-definitions@4.29.0':
-    resolution: {integrity: sha512-A5J/GI89mWqaWI4VP1w+Wc6GbT+/tBI3LiC4A9Au7DZhSvOKdpJQY4URzk7OJ87ABk5F8SceDirILxLsHSeMkQ==}
+  '@elastic/esql-definitions@4.31.0':
+    resolution: {integrity: sha512-J6zXrPIXviW2+YwAFrvrpk9uo6bStL8yJCIIeDnJiiSZqnDB2CtTCb1Kd+hL6gynpQ5C+VjLXLRrn0OSP8jmdQ==}
 
   '@elastic/esql-grammar@4.29.0':
     resolution: {integrity: sha512-m9GnY/JU+Y5lLQHksallW1FjJGXD/GscYHOtJp0XuKg5mg6W07Kn6LEYx7hq7hQzi0eprJqdtxDbinVb0ZIkUg==}
@@ -11196,8 +11196,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.29.0':
-    resolution: {integrity: sha512-0yg27rterkVJ1s376pGSfHXRjR8aG0t0I9WCsp6VIAkrfFgSDrgDhPQ2AbbVAqWqawVzdyz7KUsbLjuz0xuDUw==}
+  '@elastic/monaco-esql@4.30.0':
+    resolution: {integrity: sha512-57RPlAJlw28OhsOZz/gIW1leGq1bwvb1/0vzaNSc8anKUusyxR/CWOdNCRkMhRocjdISzh9uPcPCXxwM+mj4pg==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -28142,13 +28142,13 @@ snapshots:
 
   '@elastic/esql-ast@4.29.0':
     dependencies:
-      '@elastic/esql-definitions': 4.29.0
+      '@elastic/esql-definitions': 4.31.0
       '@elastic/esql-grammar': 4.29.0
       '@elastic/esql-promql-grammar': 4.29.0
       '@elastic/esql-types': 4.29.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.29.0': {}
+  '@elastic/esql-definitions@4.31.0': {}
 
   '@elastic/esql-grammar@4.29.0':
     dependencies:
@@ -28158,7 +28158,7 @@ snapshots:
   '@elastic/esql-parser@4.29.0':
     dependencies:
       '@elastic/esql-ast': 4.29.0
-      '@elastic/esql-definitions': 4.29.0
+      '@elastic/esql-definitions': 4.31.0
       '@elastic/esql-promql-grammar': 4.29.0
       '@elastic/esql-traversal': 4.29.0
       '@elastic/esql-types': 4.29.0
@@ -28182,7 +28182,7 @@ snapshots:
   '@elastic/esql@4.29.0':
     dependencies:
       '@elastic/esql-ast': 4.29.0
-      '@elastic/esql-definitions': 4.29.0
+      '@elastic/esql-definitions': 4.31.0
       '@elastic/esql-grammar': 4.29.0
       '@elastic/esql-parser': 4.29.0
       '@elastic/esql-promql-grammar': 4.29.0
@@ -28305,9 +28305,9 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.29.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.30.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.29.0
+      '@elastic/esql-definitions': 4.31.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -28395,7 +28395,7 @@ snapshots:
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.29.0
+      '@elastic/esql-definitions': 4.31.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
