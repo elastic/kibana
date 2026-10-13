@@ -279,12 +279,11 @@ describe('SavedObjectsFinder', () => {
       });
     });
 
-    it('renders a compressed search field and filters, but not table, with compressedSearchBar', async () => {
+    it('renders a compressed search field and filters, but not table', async () => {
       mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
 
       renderFinder({
         ...baseProps,
-        compressedSearchBar: true,
         showFilter: true,
         savedObjectMetaData: metaDataConfig,
         services: { contentClient, savedObjectsTagging, uiSettings },

@@ -53,15 +53,9 @@ export interface AddFromLibraryFormProps {
 
 export interface AddFromLibraryContentProps {
   container: CanAddNewPanel;
-  finderId?: string;
-  initialPageSize?: SavedObjectFinderProps['initialPageSize'];
 }
 
-export const AddFromLibraryContent = ({
-  container,
-  finderId = 'embeddableAddPanel',
-  initialPageSize,
-}: AddFromLibraryContentProps) => {
+export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps) => {
   const libraryTypes = useAddFromLibraryTypes();
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
@@ -89,8 +83,7 @@ export const AddFromLibraryContent = ({
 
   return (
     <SavedObjectFinder
-      id={finderId}
-      initialPageSize={initialPageSize}
+      id="embeddableAddPanel"
       services={{
         contentClient: {
           ...contentManagement.client,
@@ -116,7 +109,6 @@ export const AddFromLibraryContent = ({
       onChoose={onChoose}
       savedObjectMetaData={libraryTypes}
       showFilter={true}
-      compressedSearchBar
       noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
         defaultMessage: 'No matching objects found.',
       })}

@@ -207,13 +207,7 @@ function LibraryContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
     );
   }
 
-  return (
-    <LibraryComponent
-      container={dashboardApi}
-      finderId="dashboardAddPanelFromLibrary"
-      initialPageSize={15}
-    />
-  );
+  return <LibraryComponent container={dashboardApi} />;
 }
 
 export function AddPanelFlyout({
