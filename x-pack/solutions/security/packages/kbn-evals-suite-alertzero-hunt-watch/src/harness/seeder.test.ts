@@ -100,6 +100,38 @@ describe('buildPhasePlan', () => {
   });
 });
 
+describe('seeded index names honour HUNT_WATCH_SPACE_ID', () => {
+  const scopedSample = (): Record<string, CorpusSample> => ({
+    'aaaaaaaa-twin.json': {
+      chain: 'c',
+      step: 's',
+      positive: { docs: [{ stream: 'logs-a', at: -60, doc: {} }] },
+      fixtures: [{ stream: 'logs-ti', at: -3600, doc: {} }],
+    },
+  });
+
+  afterEach(() => {
+    delete process.env.HUNT_WATCH_SPACE_ID;
+  });
+
+  it('names indices after the default space when the env is unset', () => {
+    expect(seededIndexNames(scopedSample())).toEqual(
+      expect.arrayContaining(['logs-a-default', 'logs-ti-default'])
+    );
+  });
+
+  it('names indices after the pinned space, for seeding and for the reset', () => {
+    process.env.HUNT_WATCH_SPACE_ID = 'hunt-watch-eis';
+    expect(seededIndexNames(scopedSample())).toEqual([
+      'logs-a-hunt-watch-eis',
+      'logs-ti-hunt-watch-eis',
+    ]);
+    for (const d of buildPhasePlan('E+', scopedSample(), NOW).docs) {
+      expect(d.index).toMatch(/-hunt-watch-eis$/);
+    }
+  });
+});
+
 describe('stripAzqaEntityIds', () => {
   it('drops azqa-* string values at any depth, including inside arrays', () => {
     expect(

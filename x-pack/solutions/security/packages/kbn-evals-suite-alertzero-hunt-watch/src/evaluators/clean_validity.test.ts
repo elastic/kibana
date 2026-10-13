@@ -219,8 +219,8 @@ describe('R3-B1: applicability must not come from SUT output', () => {
   });
 });
 
-// ---------------------------------------------------------------- Rev 7 N1-N3
-describe('Rev 7 N1-N3 (reviewer verdict t_6b85e943)', () => {
+// ------------------------------------------------- Rev 7 reviewer findings N1-N3
+describe('clean validity: Rev 7 reviewer findings N1-N3', () => {
   it('N1: T1 nst, one grounded+executed, one query_ungrounded -> incomplete_retryable (not final)', () => {
     const fxPartialGround = sut({
       tier1_status: 'no_searchable_terms',

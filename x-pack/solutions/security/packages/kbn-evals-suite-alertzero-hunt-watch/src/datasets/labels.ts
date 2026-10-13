@@ -6,6 +6,7 @@
  */
 
 import type { CorpusSample, ManifestChain } from '../fixtures/load_corpus';
+import { huntWatchSpaceId } from '../harness/space';
 
 /**
  * Labels are derived mechanically from the ad2-v1 manifest and its samples,
@@ -68,9 +69,9 @@ const collectSeededStreams = (
   const fixtures = new Set<string>();
   for (const sample of Object.values(samples)) {
     for (const part of ['positive', 'negative'] as const) {
-      for (const d of sample[part]?.docs ?? []) seeded.add(`${d.stream}-default`);
+      for (const d of sample[part]?.docs ?? []) seeded.add(`${d.stream}-${huntWatchSpaceId()}`);
     }
-    for (const d of sample.fixtures ?? []) fixtures.add(`${d.stream}-default`);
+    for (const d of sample.fixtures ?? []) fixtures.add(`${d.stream}-${huntWatchSpaceId()}`);
   }
   return { seeded: [...seeded].sort(), fixtures: [...fixtures].sort() };
 };

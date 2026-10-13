@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { CorpusSample, SampleDoc } from '../fixtures/load_corpus';
 import { sampleBase, seededDocId } from '../datasets/labels';
+import { huntWatchSpaceId } from './space';
 import type { Phase } from '../types';
 
 /**
@@ -62,7 +63,7 @@ export const rebaseTimestamp = (at: number, nowMs: number): string =>
   new Date(nowMs + at * 1000).toISOString();
 
 const seedDoc = (d: SampleDoc, id: string, nowMs: number): SeedDoc => ({
-  index: `${d.stream}-default`,
+  index: `${d.stream}-${huntWatchSpaceId()}`,
   id,
   body: { ...stripAzqaEntityIds(d.doc), '@timestamp': rebaseTimestamp(d.at, nowMs) },
 });
@@ -115,9 +116,9 @@ export const seededIndexNames = (samples: Record<string, CorpusSample>): string[
   const names = new Set<string>();
   for (const s of Object.values(samples)) {
     for (const part of [s.positive?.docs, s.negative?.docs] as Array<SampleDoc[] | undefined>) {
-      for (const d of part ?? []) names.add(`${d.stream}-default`);
+      for (const d of part ?? []) names.add(`${d.stream}-${huntWatchSpaceId()}`);
     }
-    for (const f of s.fixtures ?? []) names.add(`${f.stream}-default`);
+    for (const f of s.fixtures ?? []) names.add(`${f.stream}-${huntWatchSpaceId()}`);
   }
   return [...names].sort();
 };

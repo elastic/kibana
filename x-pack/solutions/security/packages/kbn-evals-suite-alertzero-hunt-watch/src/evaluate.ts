@@ -8,6 +8,7 @@
 import { evaluate as base } from '@kbn/evals';
 import { HuntWatchClient } from './harness/hunt_client';
 import { ensureHuntWorkerEnabled } from './harness/worker_setup';
+import { huntWatchSpaceId } from './harness/space';
 
 // Paths and feature ids are inlined like the template suite
 // (threat-intel-enrichment): packages expose a single public entry point, so
@@ -118,8 +119,9 @@ export const evaluate = base.extend<
       void kbnClient;
       // The per-space Worker workflow id is `<managed id>-<spaceId>`
       // (managed_workflows_service.resolveWorkflowDocumentId with
-      // workflowIdSuffix = spaceId). Scout runs in the default space.
-      await use(`${WORKER_WORKFLOW_ID}-default`);
+      // workflowIdSuffix = spaceId). The default space unless
+      // HUNT_WATCH_SPACE_ID pins another one.
+      await use(`${WORKER_WORKFLOW_ID}-${huntWatchSpaceId()}`);
     },
     { scope: 'worker' },
   ],

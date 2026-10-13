@@ -12,9 +12,10 @@ import { loadManifest, loadSamples } from '../../src/fixtures/load_corpus';
 import { buildReportSpecs, PAYLOAD_HASHES } from '../../src/fixtures/report_documents';
 import {
   HUNT_REPORTS_PER_PHASE,
-  corpusGateAlertsMustBeZero,
+  corpusGateAlertsDeltaMustBeZero,
   phaseOrder,
 } from '../../src/harness/phases';
+import { alertsIndexForSpace, huntWatchSpaceId } from '../../src/harness/space';
 import { PhaseSeeder, type PhaseBuckets } from '../../src/harness/seeder';
 import {
   buildExamples,
@@ -38,7 +39,8 @@ import type { Phase } from '../../src/types';
 const GREP_TITLE =
   'hunt watch seeded-recall sweep runs E0, E+ and E- through the production Worker';
 
-const ALERTS_INDEX = '.alerts-security.alerts-default';
+const SPACE_ID = huntWatchSpaceId();
+const ALERTS_INDEX = alertsIndexForSpace(SPACE_ID);
 
 /**
  * The live Hunt Watch sweep. One stack per (model, rep). Per phase the seeded
@@ -63,7 +65,10 @@ const ALERTS_INDEX = '.alerts-security.alerts-default';
  */
 evaluate(
   GREP_TITLE,
-  { tag: tags.stateful.classic },
+  // Both targets: CI schedules the stateful/classic run and the
+  // serverless/security-complete run from these tags (see
+  // kbn-scout's getServerRunFlagsFromTags); locally `--scout-arch` picks one.
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   async ({ executorClient, huntWatchClient, esClient, log, repetitions }) => {
     // The sweep runs in this Playwright task once; runExperiment's task only
     // replays the recorded outputs. Repeating it would re-publish one sweep as
@@ -90,6 +95,13 @@ evaluate(
     const failures: ControlFailure[] = [];
     const buckets = {} as Record<Phase, PhaseBuckets>;
 
+    // Baseline for the relative C1 gate, captured before anything the suite
+    // controls touches the stack: a shared endpoint may already hold alerts
+    // (golden had 233), and only the delta E0 produces invalidates the run.
+    const alertsBefore = (await esClient.count({ index: ALERTS_INDEX, ignore_unavailable: true }))
+      .count;
+    log.info(`[hunt-watch] space ${SPACE_ID}: ${alertsBefore} pre-existing alerts`);
+
     // Phases run in a fixed order (design v3 §4): E0, then E+, then E-.
     for (const phase of phaseList) {
       log.info(`[hunt-watch] phase ${phase}: seeding environment`);
@@ -98,9 +110,10 @@ evaluate(
       log.info(`[hunt-watch] phase ${phase}: seeded ${plan.docs.length} docs`);
 
       if (phase === 'E0') {
-        // C1 (corpus gate): the clean environment must not already alert.
+        // C1 (corpus gate): the clean environment must not add alerts relative
+        // to the pre-run baseline (shared endpoints may hold pre-existing ones).
         const counted = await esClient.count({ index: ALERTS_INDEX, ignore_unavailable: true });
-        const c1 = corpusGateAlertsMustBeZero(counted.count);
+        const c1 = corpusGateAlertsDeltaMustBeZero(alertsBefore, counted.count);
         if (c1) {
           failures.push({
             control: c1.control,

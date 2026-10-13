@@ -9,37 +9,15 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
-import { serviceAccountsServerArgs } from '../../service_accounts/shared';
+import { withAlertzeroHuntWatch } from '../shared';
 
 /**
- * Config set for the alertzero-hunt-watch eval suite. The suite drives the production hunt
- * Worker, so it needs what the Worker needs:
- *
- * - service accounts (the Worker runs as one; off by default, and the suite's setup calls
- *   `/internal/security/service_account`),
- * - alertzero plus its required `agenticInvestigations` and `proposals` plugins (both default
- *   off; without them Kibana cascade-disables alertzero and the hunt routes never register),
- * - the `securitySolution:enableAlertZero` setting (every `/internal/alertzero/*` route answers
- *   404 while it is off, including the Worker list the suite's setup reads),
- * - the Workflows UI and agent settings the hunt workflows' `ai.agent` steps require.
+ * Config set for the alertzero-hunt-watch eval suite: the evals tracing stack
+ * plus the hunt Worker's requirements (service accounts, alertzero and its
+ * dependent plugins, the enableAlertZero setting, Workflows UI/agent settings —
+ * see ../shared.ts).
  *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_alertzero_hunt_watch
  */
-export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
-  kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
-    serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
-      ...serviceAccountsServerArgs,
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
-      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
-      '--uiSettings.overrides.workflows:ui:enabled=true',
-      '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
-    ],
-  },
-};
+export const servers: ScoutServerConfig = withAlertzeroHuntWatch(evalsTracingConfig);

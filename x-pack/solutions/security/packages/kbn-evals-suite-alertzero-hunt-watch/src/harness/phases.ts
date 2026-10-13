@@ -72,11 +72,25 @@ export const nothingSearchedInvariantHolds = (run: {
 
 /**
  * C1 corpus gate: after seeding E0 alone and waiting one full rule interval
- * plus lookback, the alerts index for the space holds 0 alerts. Implemented
- * against the live stack by the eval spec; this helper formats the assertion.
+ * plus lookback, the suite must not have added any alert to the space. The
+ * gate is relative to the pre-run count so a shared endpoint with
+ * pre-existing alerts (233 on one shared endpoint at time of writing) still passes:
+ * only the delta the clean corpus itself produces invalidates the run.
+ * Implemented against the live stack by the eval spec; this helper formats
+ * the assertion.
  */
-export const corpusGateAlertsMustBeZero = (alertCount: number): ControlFailure | null =>
-  alertCount === 0 ? null : { control: 'C1', detail: `E0 seeded ${alertCount} alerts, expected 0` };
+export const corpusGateAlertsDeltaMustBeZero = (
+  alertsBefore: number,
+  alertsAfter: number
+): ControlFailure | null =>
+  alertsAfter - alertsBefore === 0
+    ? null
+    : {
+        control: 'C1',
+        detail: `E0 seeded ${
+          alertsAfter - alertsBefore
+        } new alerts on top of the ${alertsBefore} pre-existing ones, expected a delta of 0`,
+      };
 
 /**
  * C2 leak audit gate (design v1): R-beh text must contain no host/user/IoC
