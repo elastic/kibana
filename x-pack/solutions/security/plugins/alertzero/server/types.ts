@@ -20,11 +20,13 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SubscriptionAvailability } from '../common/availability';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
@@ -61,6 +63,15 @@ export type AlertTriageAttachmentServiceProvider = (
 ) => Promise<AlertTriageAttachmentService | undefined>;
 
 /**
+ * Installs threat-intel supply managed workflows owned by security_solution
+ * (global ingest/enrich plus the per-space attribute workflow) for the given
+ * space. Pushed from security_solution's `start()` so AlertZero can call it when
+ * Hunt enable finds a required TI document missing, without owning TI YAML or
+ * declaring a reverse plugin dependency.
+ */
+export type ThreatIntelSupplyWorkflowInstaller = (params: { spaceId: string }) => Promise<void>;
+
+/**
  * Soft-enable contract. Always returned from `setup()` so optional consumers
  * (e.g. security_solution threat-intel supply) can gate on `isEnabled` without
  * reading `xpack.alertzero` config themselves.
@@ -86,6 +97,14 @@ export interface AlertZeroPluginStart {
   registerAlertTriageAttachmentServiceProvider: (
     provider: AlertTriageAttachmentServiceProvider
   ) => void;
+  /**
+   * Same push pattern as {@link registerAlertTriageAttachmentServiceProvider}: security_solution
+   * registers the TI owner installer from its `start()` so Hunt ensure can install missing
+   * supply workflows without AlertZero owning those definitions.
+   */
+  registerThreatIntelSupplyWorkflowInstaller: (
+    installer: ThreatIntelSupplyWorkflowInstaller
+  ) => void;
 }
 
 export interface AlertZeroSetupDependencies {
@@ -99,6 +118,7 @@ export interface AlertZeroSetupDependencies {
 }
 
 export interface AlertZeroStartDependencies {
+  taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
@@ -119,6 +139,12 @@ export interface AlertZeroStartDependencies {
    * connector an operator picked for a tier.
    */
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  /**
+   * Optional, matching the plugin manifest. Resolves a hunted host's Fleet
+   * enrollment so package_report can fill a respond action's endpoint_ids.
+   * Absence degrades every host to unenrolled, same as no agent found.
+   */
+  fleet?: FleetStartContract;
 }
 
 export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;

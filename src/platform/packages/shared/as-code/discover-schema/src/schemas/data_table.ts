@@ -38,7 +38,7 @@ export const dataTableLimitsSchema = z
   .object({
     rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
-        'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".',
+        'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.',
     }),
     sample_size: z.number().min(10).max(10000).optional().meta({
       description:

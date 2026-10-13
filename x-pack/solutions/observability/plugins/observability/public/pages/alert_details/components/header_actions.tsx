@@ -317,7 +317,7 @@ export function HeaderActions({
                         size="s"
                         color="text"
                         href={discoverUrl}
-                        iconType="discoverApp"
+                        iconType="productDiscover"
                         target="_blank"
                         onClick={handleClosePopover}
                         data-test-subj={`alertDetailsPage_viewInDiscover${

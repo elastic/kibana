@@ -38,7 +38,7 @@ const QUERY_ACTION_ID = 'query-action-uuid';
 const buildOsqueryContext = ({
   bulkCreate = jest.fn().mockResolvedValue(undefined),
   indicesExists = jest.fn().mockResolvedValue(true),
-  bulk = jest.fn().mockResolvedValue(undefined),
+  bulk = jest.fn().mockResolvedValue({ errors: false, items: [] }),
   reportEvent = jest.fn(),
 }: {
   bulkCreate?: jest.Mock;
@@ -127,6 +127,23 @@ describe('createActionHandler', () => {
     expect(fleetActions[0].space_id).toBe('production');
     // and the action SO write goes to the bulk indexer
     expect(bulk).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws when the osquery action document fails to index', async () => {
+    const bulk = jest.fn().mockResolvedValue({
+      errors: true,
+      items: [{ index: { status: 429, error: { type: 'es_rejected', reason: 'rejected' } } }],
+    });
+    const { context, reportEvent } = buildOsqueryContext({ bulk });
+
+    await expect(
+      createActionHandler(
+        context,
+        { query: 'SELECT * FROM os_version;', agent_ids: [TEST_AGENT] },
+        { space: { id: 'production' } }
+      )
+    ).rejects.toThrow(/Failed to write osquery action document .*: rejected/);
+    expect(reportEvent).not.toHaveBeenCalled();
   });
 
   // The top-level space_id above is dropped by Fleet Server before it reaches the

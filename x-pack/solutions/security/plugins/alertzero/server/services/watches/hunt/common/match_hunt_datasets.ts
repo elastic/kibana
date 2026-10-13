@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntIoc } from '@kbn/alertzero-common';
@@ -100,6 +100,9 @@ export const HUNT_VENDOR_ALIASES: Readonly<Record<string, readonly string[]>> = 
   paloaltonetworks: ['panw'],
   f5: ['f5bigip'],
   vmware: ['vsphere'],
+  amazon: ['aws'],
+  amazonwebservices: ['aws'],
+  fortigate: ['fortinetfortigate'],
 };
 
 /** Normalized segments of a dataset vendor token: `cisco_asa` -> ['cisco', 'asa']. */
@@ -165,14 +168,16 @@ export interface ModelDatasetMatch {
   scored: Array<{ dataset: string; confidence: number }>;
 }
 
-const datasetMatchSchema = z.object({
-  datasets: z.array(
-    z.object({
-      dataset: z.string(),
-      confidence: z.number().min(0).max(1),
-    })
-  ),
-});
+const datasetMatchSchema = lazySchema(() =>
+  z.object({
+    datasets: z.array(
+      z.object({
+        dataset: z.string(),
+        confidence: z.number().min(0).max(1),
+      })
+    ),
+  })
+);
 
 type DatasetMatchOutput = z.infer<typeof datasetMatchSchema>;
 
@@ -255,18 +260,7 @@ export const matchDatasetsWithModel = async ({
   let output: DatasetMatchOutput;
   try {
     const structured = model.chatModel.withStructuredOutput(datasetMatchSchema);
-    const raw = await structured.invoke(buildPrompt(options, report));
-    // The structured-output contract is only as good as the provider honours it: a
-    // missing or NaN `confidence` would pass the threshold compare below, and a
-    // non-array `datasets` would throw outside this try. Validate before trusting.
-    const parsed = datasetMatchSchema.safeParse(raw);
-    if (!parsed.success) {
-      logger?.warn(
-        `Hunt dataset model matching returned an invalid shape: ${parsed.error.message}`
-      );
-      return undefined;
-    }
-    output = parsed.data;
+    output = await structured.invoke(buildPrompt(options, report));
   } catch (err) {
     logger?.warn(
       `Hunt dataset model matching failed: ${err instanceof Error ? err.message : String(err)}`

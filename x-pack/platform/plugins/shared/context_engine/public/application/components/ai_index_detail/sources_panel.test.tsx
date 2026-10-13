@@ -54,6 +54,7 @@ jest.mock('../../hooks/use_data_connectors', () => ({
 const baseAiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
@@ -68,7 +69,19 @@ const sources: AiIndexSource[] = [
   { type: 'esql', value: 'FROM c' },
 ];
 
-const renderWithProviders = (ui: React.ReactElement, services = coreMock.createStart()) => {
+const createServices = (canReadConnectors = true) => {
+  const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    actions: {
+      ...services.application.capabilities.actions,
+      show: canReadConnectors,
+    },
+  };
+  return services;
+};
+
+const renderWithProviders = (ui: React.ReactElement, services = createServices()) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
@@ -119,14 +132,12 @@ describe('SourcesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No sources yet')).toBeInTheDocument();
+    expect(screen.getByText('No sources configured.')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Add the data that automations should analyze when generating Knowledge Indicators.'
-      )
+      screen.getByText('Data that automations should analyze when generating Knowledge Indicators.')
     ).toBeInTheDocument();
   });
 
@@ -141,7 +152,7 @@ describe('SourcesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('This AI index has no sources.')).toBeInTheDocument();
+    expect(screen.getByText('No sources configured.')).toBeInTheDocument();
   });
 
   it('renders one row per source', () => {
@@ -186,6 +197,23 @@ describe('SourcesPanel', () => {
     );
 
     expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
+  });
+
+  it('does not fetch connectors for connector sources without Actions read', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [{ type: 'connector', value: 'connector-gdrive' }],
+        }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />,
+      createServices(false)
+    );
+
+    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
   });
 
   it('resolves the connector name for connector sources', () => {

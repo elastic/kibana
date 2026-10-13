@@ -53,23 +53,17 @@ describe('AttackAttachmentPayloadSchema', () => {
     ).toBe(true);
   });
 
-  describe('attachments written before the narrative fields existed', () => {
-    it('accepts metadata carrying only title, alertCount and index', () => {
-      expect(AttackAttachmentPayloadSchema.safeParse(minimalPayload).success).toBe(true);
-    });
-
-    it('accepts metadata carrying only the legacy optional fields alongside them', () => {
-      expect(
-        AttackAttachmentPayloadSchema.safeParse({
-          ...minimalPayload,
-          metadata: {
-            ...minimalPayload.metadata,
-            summaryMarkdown: 'An attacker escalated privileges on host-1.',
-            riskScore: 73,
-          },
-        }).success
-      ).toBe(true);
-    });
+  it('accepts metadata carrying only some of the optional fields', () => {
+    expect(
+      AttackAttachmentPayloadSchema.safeParse({
+        ...minimalPayload,
+        metadata: {
+          ...minimalPayload.metadata,
+          summaryMarkdown: 'An attacker escalated privileges on host-1.',
+          riskScore: 73,
+        },
+      }).success
+    ).toBe(true);
   });
 
   it('accepts an adhoc attack index', () => {
@@ -141,6 +135,21 @@ describe('AttackAttachmentPayloadSchema', () => {
         AttackAttachmentPayloadSchema.safeParse({
           ...minimalPayload,
           owner: 'o'.repeat(MAX_ATTACK_OWNER_LENGTH + 1),
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects an empty attachmentId', () => {
+      expect(
+        AttackAttachmentPayloadSchema.safeParse({ ...minimalPayload, attachmentId: '' }).success
+      ).toBe(false);
+    });
+
+    it('rejects an empty index', () => {
+      expect(
+        AttackAttachmentPayloadSchema.safeParse({
+          ...minimalPayload,
+          metadata: { ...minimalPayload.metadata, index: '' },
         }).success
       ).toBe(false);
     });

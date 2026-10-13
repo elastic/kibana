@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { MAX_PROMOTED_LEADS } from '../../../../common/entity_analytics/lead_generation/constants';
 import {
@@ -113,29 +113,34 @@ Rules:
 - "confidence" is how certain you are this would change a hunter's priorities today, not a general risk rating.`;
 
 const promotionPrompt = ChatPromptTemplate.fromTemplate(PROMOTION_PROMPT);
-const promotionOutputSchema = z.object({
-  selections: z
-    .array(
-      z.object({
-        euid: z.string().min(1).describe('The exact EUID from the pool entity, e.g. "user:alice"'),
-        reason: z
-          .string()
-          .min(1)
-          .describe(
-            'One or two sentences, plain text, citing the specific observations, attributes, or relationships that make this entity hunt-worthy'
-          ),
-        confidence: z
-          .enum(['low', 'medium', 'high'])
-          .describe(
-            "How certain you are this would change a hunter's priorities today, not a general risk rating"
-          ),
-      })
-    )
-    .max(POOL_SIZE)
-    .describe(
-      `Up to ${MAX_PROMOTED_LEADS} entities that would change what a hunter investigates today. Empty if none clear the bar.`
-    ),
-});
+const promotionOutputSchema = lazySchema(() =>
+  z.object({
+    selections: z
+      .array(
+        z.object({
+          euid: z
+            .string()
+            .min(1)
+            .describe('The exact EUID from the pool entity, e.g. "user:alice"'),
+          reason: z
+            .string()
+            .min(1)
+            .describe(
+              'One or two sentences, plain text, citing the specific observations, attributes, or relationships that make this entity hunt-worthy'
+            ),
+          confidence: z
+            .enum(['low', 'medium', 'high'])
+            .describe(
+              "How certain you are this would change a hunter's priorities today, not a general risk rating"
+            ),
+        })
+      )
+      .max(POOL_SIZE)
+      .describe(
+        `Up to ${MAX_PROMOTED_LEADS} entities that would change what a hunter investigates today. Empty if none clear the bar.`
+      ),
+  })
+);
 
 export const buildExploratoryLeads = async (
   candidates: readonly LeadCandidate[],

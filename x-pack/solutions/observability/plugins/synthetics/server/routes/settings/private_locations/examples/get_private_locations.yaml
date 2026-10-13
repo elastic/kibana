@@ -1,0 +1,28 @@
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../../oas_schemas.yaml#/getPrivateLocation'
+        examples:
+          getPrivateLocationsResponseExample1:
+            value:
+              - label: Test private location
+                id: fleet-server-policy
+                agentPolicyId: fleet-server-policy
+                isInvalid: false
+                geo:
+                  lat: 0
+                  lon: 0
+                namespace: default
+              - label: Test private location 2
+                id: 691225b0-6ced-11ee-8f5a-376306ee85ae
+                agentPolicyId: 691225b0-6ced-11ee-8f5a-376306ee85ae
+                isInvalid: false
+                geo:
+                  lat: 0
+                  lon: 0
+                namespace: test

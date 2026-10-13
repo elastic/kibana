@@ -373,6 +373,15 @@ paths:
                       $ref: '#/components/schemas/owner'
                     templates:
                       $ref: '#/components/schemas/templates'
+                    workflowTags:
+                      type: array
+                      description: |
+                        Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                      maxItems: 100
+                      items:
+                        type: string
+                        minLength: 1
+                        maxLength: 1024
                     updated_at:
                       type: string
                       format: date-time
@@ -563,6 +572,15 @@ paths:
                     $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
+                  workflowTags:
+                    type: array
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    maxItems: 100
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 1024
                   updated_at:
                     type: string
                     format: date-time
@@ -755,6 +773,15 @@ paths:
                     $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
+                  workflowTags:
+                    type: array
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    maxItems: 100
+                    items:
+                      type: string
+                      minLength: 1
+                      maxLength: 1024
                   updated_at:
                     type: string
                     format: date-time
@@ -3829,6 +3856,15 @@ components:
           $ref: '#/components/schemas/owner'
         templates:
           $ref: '#/components/schemas/templates'
+        workflowTags:
+          type: array
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 1024
     update_case_configuration_request:
       title: Update case configuration request
       description: |
@@ -3906,6 +3942,15 @@ components:
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
         templates:
           $ref: '#/components/schemas/templates'
+        workflowTags:
+          type: array
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 1024
         version:
           description: |
             The version of the connector. To retrieve the version value, use the get configuration API.
@@ -5430,6 +5475,8 @@ components:
               type: text
           observableTypes: []
           extractObservables: true
+          workflowTags:
+            - soc-triage
           owner: cases
           created_at: '2024-07-01T17:07:17.767Z'
           created_by:
@@ -5481,6 +5528,8 @@ components:
           type: .jira
           fields: null
         closure_type: close-by-user
+        workflowTags:
+          - soc-triage
         customFields:
           - key: d312efda-ec2b-42ec-9e2c-84981795c581
             label: my-text-field
@@ -5534,6 +5583,8 @@ components:
             tags:
               - Template tag 1
         extractObservables: true
+        workflowTags:
+          - soc-triage
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:
@@ -5574,6 +5625,9 @@ components:
           type: .jira
           fields: null
         closure_type: close-by-user
+        workflowTags:
+          - soc-triage
+          - enrichment
         customFields:
           - key: d312efda-ec2b-42ec-9e2c-84981795c581
             label: my-text-field
@@ -5599,6 +5653,9 @@ components:
             required: false
             type: toggle
         extractObservables: true
+        workflowTags:
+          - soc-triage
+          - enrichment
         owner: cases
         created_at: '2024-07-01T17:07:17.767Z'
         created_by:

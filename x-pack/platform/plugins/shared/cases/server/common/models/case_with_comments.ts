@@ -314,6 +314,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
+        commentableCase.handleAttackComments([attachment]),
         this.createCommentUserAction(comment, attachment),
       ]);
 
@@ -519,10 +520,11 @@ export class CaseCommentModel {
       await this.params.services.alertsService.ensureDocumentsExist({ alerts: events });
     }
 
-    // An attack discovery is an AAD alert (rule type `attack-discovery`), so the reference is
-    // authorized for read like an alert, and additionally checked for existence, rule type and
-    // space: without that a caller could persist an arbitrary id/index pair and have the status
-    // sync write to any document it can reach.
+    // An attack discovery is an AAD alert, so the reference is checked for existence, rule type
+    // and space before it is persisted: without that a caller could persist an arbitrary id/index
+    // pair and have the status sync write to any document it can reach. Scheduled discoveries are
+    // additionally authorized for read through alerting RBAC; ad-hoc ones, whose sentinel rule type
+    // alerting never registers, are authorized by the caller's index privileges.
     const attackAttachments = attachments.filter((a) => isAttackAttachmentType(a.type));
     const attacks = getAttackInfoFromComments(attackAttachments, true);
 
@@ -546,8 +548,6 @@ export class CaseCommentModel {
         await this.updateAlertsStatus(alerts);
       }
     }
-
-    await this.handleAttackComments(attachments);
   }
 
   /**
@@ -710,22 +710,25 @@ export class CaseCommentModel {
         (attachment) => !isSavedObjectErrorResult(attachment)
       );
 
-      const attachmentsWithoutErrors = attachments.flatMap((attachment) => {
-        const savedObject = savedObjectsWithoutErrors.find((so) => so.id === attachment.id);
+      const withoutErrors = (items: CommentRequestWithId) =>
+        items.flatMap((attachment) => {
+          const savedObject = savedObjectsWithoutErrors.find((so) => so.id === attachment.id);
 
-        return savedObject
-          ? [
-              {
-                ...attachment,
-                savedObjectType: savedObject.type as AttachmentSavedObjectType,
-              },
-            ]
-          : [];
-      });
+          return savedObject
+            ? [
+                {
+                  ...attachment,
+                  savedObjectType: savedObject.type as AttachmentSavedObjectType,
+                },
+              ]
+            : [];
+        });
 
       await Promise.all([
-        commentableCase.handleAlertComments(attachmentsWithoutErrors),
-        this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
+        // Alert sync uses the original request so alerts already on the case still get synced.
+        commentableCase.handleAlertComments(withoutErrors(attachments)),
+        commentableCase.handleAttackComments(withoutErrors(attachments)),
+        this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts)),
       ]);
 
       return commentableCase;

@@ -138,9 +138,7 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
     ).toBeInTheDocument();
     expect(
       renderResult.getByTestId('customYaraSignatures-link-to-exceptions').getAttribute('href')
-    ).toEqual(
-      '/app/security/administration/custom_yara_signatures?includedPolicies=someid%2Cglobal'
-    );
+    ).toEqual('/app/security/administration/policy/someid/customYaraSignatures');
 
     // Other cards should still be visible
     expect(renderResult.getByTestId('trustedApps-fleet-integration-card')).toBeInTheDocument();
@@ -152,6 +150,25 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
       renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
     ).toBeInTheDocument();
     expect(renderResult.getByTestId('blocklists-fleet-integration-card')).toBeInTheDocument();
+  });
+
+  it('should link yara signatures card to the artifact list when user cannot read policy management', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadPolicyManagement: false,
+      }),
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.getByTestId('customYaraSignatures-link-to-exceptions').getAttribute('href')
+    ).toEqual(
+      '/app/security/administration/custom_yara_signatures?includedPolicies=someid%2Cglobal'
+    );
   });
 
   it('should not display yara signatures card when feature flag is disabled', () => {

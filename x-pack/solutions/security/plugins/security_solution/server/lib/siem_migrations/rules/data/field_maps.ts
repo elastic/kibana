@@ -102,9 +102,9 @@ export const getIntegrationsFieldMap: ({
   elserInferenceId,
 }: {
   elserInferenceId?: string;
-}) => FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationIntegration, 'knowledge_base'>>> = ({
-  elserInferenceId,
-}) => ({
+}) => FieldMap<
+  SchemaFieldMapKeys<Omit<RuleMigrationIntegration, 'knowledge_base' | 'version'>>
+> = ({ elserInferenceId }) => ({
   id: { type: 'keyword', required: true },
   title: { type: 'text', required: true },
   description: { type: 'text', required: true },
@@ -124,7 +124,9 @@ export const getPrebuiltRulesFieldMap: ({
   elserInferenceId,
 }: {
   elserInferenceId?: string;
-}) => FieldMap<SchemaFieldMapKeys<RuleMigrationPrebuiltRule>> = ({ elserInferenceId }) => ({
+}) => FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationPrebuiltRule, 'version'>>> = ({
+  elserInferenceId,
+}) => ({
   name: { type: 'text', required: true },
   description: { type: 'text', required: true },
   elser_embedding: {

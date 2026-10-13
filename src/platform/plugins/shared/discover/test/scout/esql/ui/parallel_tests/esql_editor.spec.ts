@@ -28,11 +28,11 @@ spaceTest.describe('Discover ES|QL editor', { tag: tags.deploymentAgnostic }, ()
   spaceTest(
     'shows an error callout for a malformed query and clears it',
     async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
+      const { discover, esqlEditor } = pageObjects;
 
       // Submitted directly rather than via writeAndSubmitEsqlQuery: that waits for a
       // successful fetch, which never arrives for a query the parser rejects.
-      await discover.codeEditor.setCodeEditorValue('from logstash-* | limit A');
+      await esqlEditor.setQuery('from logstash-* | limit A');
       await discover.submitQuery();
       await expect(page.testSubj.locator('discoverErrorCalloutTitle')).toBeVisible();
 
@@ -44,20 +44,20 @@ spaceTest.describe('Discover ES|QL editor', { tag: tags.deploymentAgnostic }, ()
   spaceTest(
     'returns focus to the editor when the data source browser is dismissed',
     async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
+      const { esqlEditor } = pageObjects;
 
-      await discover.codeEditor.setCodeEditorValue('from logstash-*');
+      await esqlEditor.setQuery('from logstash-*');
 
       // The sources badge is a Monaco decoration. Decorations are styled by class name
       // and cannot carry a data-test-subj, so this app-owned class is the stable hook.
-      await page.locator('.esqlSourcesBadge').click();
+      await esqlEditor.getDecoration('esqlSourcesBadge').click();
       await expect(page.testSubj.locator('esqlDataSourceBrowser')).toBeVisible();
 
       await page.keyboard.press('Escape');
       await expect(page.testSubj.locator('esqlDataSourceBrowser')).toBeHidden();
 
       // Focus must land back on the editor rather than being stranded on the body.
-      await expect(page.locator('[data-test-subj="ESQLEditor"] textarea')).toBeFocused();
+      await expect(esqlEditor.input).toBeFocused();
     }
   );
 });

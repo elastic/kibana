@@ -42,6 +42,7 @@
     "@kbn/ml-common-types",
     "@kbn/maintenance-windows-plugin",
     "@kbn/test-saml-auth",
+    "@kbn/es",
     "@kbn/mock-idp-utils",
     "@kbn/securitysolution-rules",
   ]

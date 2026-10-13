@@ -102,7 +102,7 @@ describe('DiscoverEBTManager', () => {
             type: 'keyword',
             _meta: {
               description:
-                'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
+                'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval, dataTableClearSelectedFields',
             },
           },
           fieldName: {
@@ -110,6 +110,19 @@ describe('DiscoverEBTManager', () => {
             _meta: {
               description:
                 "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
+              optional: true,
+            },
+          },
+          fieldNames: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description:
+                  "Field names cleared together when eventName is dataTableClearSelectedFields. For non ECS compliant fields, there's a <non-ecs> placeholder",
+              },
+            },
+            _meta: {
               optional: true,
             },
           },
@@ -196,6 +209,13 @@ describe('DiscoverEBTManager', () => {
             type: 'keyword',
             _meta: {
               description: 'The ES|QL source command used by the query i.e. FROM, TS, PROMQL',
+              optional: true,
+            },
+          },
+          approximation: {
+            type: 'boolean',
+            _meta: {
+              description: 'Whether the response contains approximate results',
               optional: true,
             },
           },
@@ -468,6 +488,34 @@ describe('DiscoverEBTManager', () => {
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
         eventName: 'dataTableRemoval',
         fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
+      });
+    });
+
+    it('should track clearing selected fields as one event', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      await scopedManager.trackDataTableClearSelectedFields({
+        fieldNames: [],
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).not.toHaveBeenCalled();
+
+      await scopedManager.trackDataTableClearSelectedFields({
+        fieldNames: ['test', 'test2', 'test2'],
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_field_usage', {
+        eventName: 'dataTableClearSelectedFields',
+        fieldNames: ['test', NON_ECS_FIELD],
       });
     });
 
@@ -1260,6 +1308,90 @@ describe('DiscoverEBTManager', () => {
       expect(analyzeSpy).toHaveBeenCalledTimes(1);
 
       analyzeSpy.mockRestore();
+    });
+
+    it('should track approximation as true when the response has approximate results', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
+      });
+
+      tracker.reportEvent({ requestAdapter: undefined, approximation: true });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        expect.objectContaining({ approximation: true })
+      );
+    });
+
+    it('should track approximation as false when the response does not have approximate results', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
+      });
+
+      tracker.reportEvent({ requestAdapter: undefined, approximation: false });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        expect.objectContaining({ approximation: false })
+      );
+    });
+
+    it('should omit approximation from the event when not provided', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent({
+        eventName: 'testQueryEvent',
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-01T00:05:00.000Z',
+        },
+      });
+
+      tracker.reportEvent({ requestAdapter: undefined });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_performance',
+        expect.not.objectContaining({ approximation: true })
+      );
     });
   });
 

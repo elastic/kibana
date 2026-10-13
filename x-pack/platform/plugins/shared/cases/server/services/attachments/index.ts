@@ -88,8 +88,8 @@ import type {
 import { isSOError } from '../../common/error';
 import {
   assertLegacyWriteableAttachmentType,
+  decodeAttachmentSavedObject,
   getTransformerForPatchAttributes,
-  toUnifiedAttributes,
 } from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
@@ -366,7 +366,7 @@ export class AttachmentService {
         AttachmentType.persistableState,
         AttachmentType.externalReference,
       ];
-      // Files are stored with the migrated unified `file` type (not the legacy
+      // Files are stored with the unified `file` type (not the legacy
       // `.files` externalReference subtype), so excluding `file` from the type
       // list is enough — no subtype filter needed. `externalReferenceAttachmentTypeId`
       // isn't mapped on `cases-attachments`, so filtering on it would 400.
@@ -403,12 +403,7 @@ export class AttachmentService {
   }
 
   /**
-   * Deletes the given attachment saved objects.
-   *
-   * Core's `bulkDelete` reports per-object failures through `statuses` instead of throwing, so the
-   * ids whose delete genuinely failed (i.e. not a 404, which just means the object is already
-   * gone) are returned to the caller. Callers that need an all-or-nothing guarantee must inspect
-   * them; the ones that only need best-effort cleanup can ignore the return value.
+   * Deletes the attachments and returns the ids whose saved object was confirmed deleted by this call.
    */
   public async bulkDelete({ savedObjectIds, refresh }: DeleteAttachmentArgs): Promise<string[]> {
     try {
@@ -446,8 +441,11 @@ export class AttachmentService {
       // `/reset`). So exclude an id only when a delete failed with a status
       // other than 404.
       const failedIds = new Set<string>();
+      const deletedIds = new Set<string>();
       for (const status of statuses) {
-        if (!status.success && status.error?.statusCode !== 404) {
+        if (status.success) {
+          deletedIds.add(status.id);
+        } else if (status.error?.statusCode !== 404) {
           failedIds.add(status.id);
         }
       }
@@ -456,7 +454,9 @@ export class AttachmentService {
         this.context.analyticsV2AttachmentsWriter.bulkDeleteAttachments(idsToMirror)
       );
 
-      return [...failedIds];
+      // Unlike the mirror, callers reporting the deletion need ids this call actually removed: an
+      // id that 404'd in both types was already gone, and a non-404 failure may have survived.
+      return savedObjectIds.filter((id) => deletedIds.has(id) && !failedIds.has(id));
     } catch (error) {
       this.context.log.error(`Error on DELETE attachments ${savedObjectIds}: ${error}`);
       throw error;
@@ -696,7 +696,7 @@ export class AttachmentService {
         [savedObjectId]
       );
       if (soType === null) {
-        throw new Error(`Attachment ${savedObjectId} not found`);
+        throw Boom.notFound(`Attachment ${savedObjectId} not found`);
       }
 
       const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(updatedAttributes);
@@ -1101,26 +1101,15 @@ export class AttachmentService {
       const validatedAttachments: Array<SavedObjectsFindResult<AttachmentAttributesV2>> = [];
 
       for (const so of res.saved_objects) {
-        const injectedSo = injectAttachmentSOAttributesFromRefs(
-          so as unknown as SavedObject<AttachmentPersistedAttributes>
-        ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
-        const transformed = toUnifiedAttributes({
-          attributes: injectedSo.attributes,
-        });
-        if (transformed.isUnified) {
-          const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
-            transformed.attributes
-          );
-          validatedAttachments.push(Object.assign(injectedSo, { attributes: validatedAttributes }));
-        } else {
-          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-            transformed.attributes
-          );
-
+        try {
           validatedAttachments.push(
-            Object.assign(injectedSo, {
-              attributes: validatedAttributes,
-            }) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>
+            decodeAttachmentSavedObject(
+              so as unknown as SavedObject<AttachmentPersistedAttributes>
+            ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>
+          );
+        } catch (error) {
+          this.context.log.warn(
+            `Failed to decode attachment id ${so.id} of type ${so.type}, skipping it: ${error}`
           );
         }
       }

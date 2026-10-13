@@ -212,7 +212,8 @@ export interface UsageStats {
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
-  'observability:streamsSigEventsIndexPatterns': string;
+  'observability:nightshiftContinuousOnboardingEnabled': boolean;
+  'observability:nightshiftContinuousOnboardingIntervalHours': number;
   'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': number;
@@ -239,4 +240,5 @@ export interface UsageStats {
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
+  'alerting:v1:showV1ObservabilityAlertsTable': boolean;
 }

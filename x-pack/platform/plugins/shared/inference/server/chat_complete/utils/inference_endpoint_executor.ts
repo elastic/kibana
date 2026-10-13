@@ -37,7 +37,7 @@ export const createInferenceEndpointExecutor = ({
 }): InferenceEndpointExecutor => {
   return {
     async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
-      const { pluginId, productSolution, productFeature, interactionId } =
+      const { pluginId, productSolution, productFeature, interactionId, traceId, userId, spaceId } =
         metadata?.connectorTelemetry ?? {};
       const response = await esClient.transport.request(
         {
@@ -60,6 +60,9 @@ export const createInferenceEndpointExecutor = ({
             ...(interactionId
               ? { 'X-Elastic-Inference-Interaction-Id': interactionId }
               : undefined),
+            ...(traceId ? { 'X-Elastic-Trace-Id': traceId } : undefined),
+            ...(userId ? { 'X-Elastic-User-Id': userId } : undefined),
+            ...(spaceId ? { 'X-Elastic-Space-Id': spaceId } : undefined),
             // asStream bypasses the transport's decompression step, so explicitly request
             // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
             'accept-encoding': 'identity',

@@ -96,16 +96,21 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
       proposal.decidedBy?.username ??
       APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
     : undefined;
+  const status = approvedStatusFor(proposal);
   return {
-    status: approvedStatusFor(proposal),
+    status,
     actorName,
     decidedAt: proposal.decidedAt,
-    // A decline's reason is structured (`dismissReason`), with the free-text rationale folded in
-    // when the decliner left one; an approval has no `dismissReason` at all, so it falls back to
-    // `rationale` alone, same as before.
-    reason: proposal.dismissReason
-      ? formatDismissReason(proposal.dismissReason, proposal.rationale)
-      : proposal.rationale,
+    // A failed action reports why it failed, so the analyst is not left with "Action failed"
+    // alone. A decline's reason is structured (`dismissReason`), with the free-text rationale
+    // folded in when the decliner left one; an approval has no `dismissReason` at all, so it
+    // falls back to `rationale` alone.
+    reason:
+      status === 'failed' && proposal.executionError
+        ? proposal.executionError
+        : proposal.dismissReason
+        ? formatDismissReason(proposal.dismissReason, proposal.rationale)
+        : proposal.rationale,
   };
 };
 

@@ -20,7 +20,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { InitialSettings } from './use_data_drift_result';
 import {
@@ -44,7 +44,7 @@ export interface DataDriftDetectionAppStateProps {
 
 export type DataDriftSpec = typeof DataDriftDetectionAppState;
 
-const getStr = (arg: string | string[] | null, fallbackStr?: string): string => {
+const getStr = (arg: string | Array<string | null> | null, fallbackStr?: string): string => {
   if (arg === undefined || arg == null) return fallbackStr ?? '';
 
   if (typeof arg === 'string') return arg.replaceAll(`'`, '');
@@ -107,7 +107,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
   };
   const location = useLocation();
 
-  const params = parse(location.search, {
+  const params = queryString.parse(location.search, {
     sort: false,
   });
 

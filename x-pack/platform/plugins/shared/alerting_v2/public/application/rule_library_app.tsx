@@ -17,6 +17,7 @@ export const RuleLibraryApp = () => {
   return (
     <RequireAlertingPrivilege
       features={['rules']}
+      capability="all"
       pageName={i18n.translate('xpack.alertingV2.ruleLibraryApp.pageName', {
         defaultMessage: 'Rule library',
       })}
