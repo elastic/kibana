@@ -83,7 +83,6 @@ export const markDuplicateKeys = (
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
-        status: candidate.input.status,
         written: false,
         reason: 'duplicate_in_batch',
         error: {

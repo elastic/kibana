@@ -6,7 +6,6 @@
  */
 
 import { eventsWriteBulkHandler, eventsWriteHandler } from './handler';
-import { agentLifecycle } from './agent_lifecycle';
 import type { EventsWriteInput } from './types';
 import type {
   SignificantEvent,
@@ -469,7 +468,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(results[0]).toEqual({
       index: 0,
       event_id: 'unknown-event-id',
-      status: 'active',
       written: false,
       reason: 'unknown_event_id',
       error: {
@@ -569,8 +567,8 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
         inputs: [
           {
             ...baseInput,
+            status: undefined,
             event_id: eventId,
-            status: 'active',
             severity: 'high',
             signals: [
               {
@@ -589,7 +587,6 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
             ],
           },
         ],
-        resolveLifecycle: agentLifecycle,
       });
 
       expect(results[0]).toMatchObject({ written: true, status: 'active', event_id: eventId });
@@ -602,8 +599,8 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
         inputs: [
           {
             ...baseInput,
+            status: undefined,
             event_id: eventId,
-            status: 'active',
             severity: 'high',
             signals: [
               {
@@ -622,7 +619,6 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
             ],
           },
         ],
-        resolveLifecycle: agentLifecycle,
       });
 
       expect(results[0]).toMatchObject({ written: true, status: 'recovering' });
@@ -632,8 +628,7 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     it('skips a write that adds nothing new, as it would on an active event', async () => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientFor(recovering()),
-        inputs: [{ ...baseInput, event_id: eventId, status: 'active', severity: 'high' }],
-        resolveLifecycle: agentLifecycle,
+        inputs: [{ ...baseInput, event_id: eventId, status: undefined, severity: 'high' }],
       });
 
       expect(results[0]).toMatchObject({
@@ -646,34 +641,84 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     });
   });
 
-  it('reports a resolver refusal as a skip and writes nothing', async () => {
-    const stored = makeStoredEvent('checkout-held', { status: 'active' });
+  it('skips, writing nothing, when the lifecycle has nothing to write', async () => {
+    const stored = makeStoredEvent('checkout-closed', { status: 'inactive' });
     const eventClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      inputs: [{ ...baseInput, event_id: 'checkout-held', status: 'active', severity: 'high' }],
-      resolveLifecycle: () => ({ write: false, reason: 'already_in_state' }),
+      inputs: [
+        {
+          ...baseInput,
+          event_id: 'checkout-closed',
+          status: undefined,
+          signals: [
+            {
+              type: 'detection',
+              source_id: 'logs.checkout',
+              description: 'Healthy again',
+              verdict: 'refutes',
+              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+              metadata: {
+                detection_id: 'det-rule-1',
+                rule_uuid: 'rule-1',
+                change_point_type: 'dip',
+                p_value: 0.01,
+              },
+            },
+          ],
+        },
+      ],
     });
 
     expect(results[0]).toMatchObject({
       written: false,
       skipped: true,
       reason: 'unchanged_outcome',
-      status: 'active',
+      status: 'inactive',
     });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
-  it('writes the status the resolver chose, not the one on the item', async () => {
+  it('refuses to open a new event without a breaching member', async () => {
+    await expect(
+      eventsWriteBulkHandler({
+        eventSearchClient: makeEventSearchClient(),
+        inputs: [
+          {
+            ...baseInput,
+            status: undefined,
+            signals: [
+              {
+                type: 'detection',
+                source_id: 'logs.checkout',
+                description: 'Healthy',
+                verdict: 'refutes',
+                evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+                metadata: {
+                  detection_id: 'det-rule-1',
+                  rule_uuid: 'rule-1',
+                  change_point_type: 'dip',
+                  p_value: 0.01,
+                },
+              },
+            ],
+          },
+        ],
+      })
+    ).rejects.toThrow('without a breaching member');
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it('writes the status the lifecycle decided, not one the item could carry', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
       inputs: [
         {
           ...baseInput,
-          status: 'inactive',
+          status: undefined,
           signals: [
             {
               type: 'detection',
@@ -691,14 +736,13 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
           ],
         },
       ],
-      resolveLifecycle: agentLifecycle,
     });
 
     expect(results[0]).toMatchObject({ written: true, status: 'active' });
     expect(writtenDocs()[0].status).toBe('active');
   });
 
-  it('holds no lifecycle policy itself: without a resolver the status on the item is written', async () => {
+  it('writes an explicit status as given, bypassing the lifecycle', async () => {
     const eventId = 'checkout-recovering';
     const stored = makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
     const eventClient = makeEventSearchClient({

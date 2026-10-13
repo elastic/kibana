@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { Severity, SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import type { LifecycleDecision } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
-  | 'status'
   | 'source_ids'
   | 'title'
   | 'symptom_hypothesis'
@@ -26,18 +24,9 @@ export type EventsWriteInput = Pick<
   Partial<Pick<SignificantEvent, 'severity'>> & {
     event_id?: string;
     conversation_id?: string;
+    /** Omit to let the lifecycle decide from the members' verdicts. */
+    status?: SignificantEvent['status'];
   };
-
-/**
- * Decides the status a caller's write carries, from the event's latest version (undefined for a
- * new event): the status to write, or a refusal. Lifecycle rules live in the state machine; the
- * writer only applies the answer, so it holds no policy of its own.
- */
-export type LifecycleResolver = (args: {
-  latest: SignificantEvent | undefined;
-  /** The event's signals once this write is merged: the latest verdict per rule. */
-  signals: SignalEntry[];
-}) => LifecycleDecision;
 
 export interface EventsWriteResult {
   index: number;
@@ -65,7 +54,8 @@ export interface EventsWriteDuplicateResult {
 export interface EventsWriteNoOpResult {
   index: number;
   event_id: string;
-  status: SignificantEvent['status'];
+  /** Absent when the lifecycle decided nothing to write for an event that does not exist yet. */
+  status?: SignificantEvent['status'];
   written: false;
   skipped: true;
   reason: 'unchanged_outcome';
@@ -76,7 +66,8 @@ export interface EventsWriteNoOpResult {
 export interface EventsWriteFailureResult {
   index: number;
   event_id: string;
-  status: SignificantEvent['status'];
+  /** Absent: a rejected item never reached the lifecycle. */
+  status?: SignificantEvent['status'];
   written: false;
   reason: 'bulk_error' | 'duplicate_in_batch' | 'superseded' | 'unknown_event_id';
   error: CompactBulkError;
@@ -99,6 +90,15 @@ export interface SnapshotCandidate {
 }
 
 export type WriteCandidate = DedupCandidate | SnapshotCandidate;
+
+/** A candidate with the stored history of its event (`latest` is undefined for a new event). */
+export type LoadedCandidate = WriteCandidate & {
+  latest: SignificantEvent | undefined;
+  priorDocs: SignificantEvent[];
+};
+
+/** A loaded candidate whose status is decided: by the lifecycle, or the caller's own. */
+export type ResolvedWriteCandidate = LoadedCandidate & { status: SignificantEvent['status'] };
 
 export type EventsWriteBulkResult =
   | EventsWriteResult

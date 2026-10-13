@@ -37,19 +37,11 @@ import {
   trackTelemetryBestEffort,
 } from '../bulk_write';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
-import { agentLifecycle } from './agent_lifecycle';
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
-
-/**
- * Every item the agent writes asserts a breach, which is the status it asks for: `active`. The
- * state machine resolves the status actually written (`agentLifecycle`): `recovering` and
- * `inactive` belong to the status evaluation, never to the agent.
- */
-const AGENT_WRITE_STATUS = 'active' as const;
 
 export const eventsWriteItemSchema = lazySchema(() =>
   significantEventSchema
@@ -374,10 +366,7 @@ export function createEventsWriteTool({
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        const resolvedItems = toolParams.items.map((item) => ({
-          ...assignStoredSourceIds(catalog, item),
-          status: AGENT_WRITE_STATUS,
-        }));
+        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
           resolvedItems,
@@ -389,7 +378,6 @@ export function createEventsWriteTool({
           eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
-          resolveLifecycle: agentLifecycle,
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -451,7 +439,6 @@ export function createEventsWriteTool({
               telemetry.trackAgentToolEventsWrite({
                 success: false,
                 event_id: input.event_id ?? 'unknown',
-                status: AGENT_WRITE_STATUS,
                 written: false,
                 source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,

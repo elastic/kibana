@@ -592,20 +592,21 @@ describe('events_write tool', () => {
     );
   });
 
-  it('writes every item as active', async () => {
+  it('sends no status to the writer, which takes it from the lifecycle', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       { index: 0, event_id: 'event-1', status: 'active', written: true },
     ]);
 
     await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
-      { items: [{ ...input, status: 'inactive' }] },
+      { items: [input] },
       createMockToolContext()
     );
 
     const [{ inputs }] = (eventsWriteBulkHandler as jest.Mock).mock.calls[0];
     expect(inputs).toHaveLength(1);
-    expect(inputs[0]).toMatchObject({ event_id: 'event-1', status: 'active' });
+    expect(inputs[0]).toMatchObject({ event_id: 'event-1' });
+    expect(inputs[0]).not.toHaveProperty('status');
   });
 
   it('does not replace successful results when telemetry throws', async () => {

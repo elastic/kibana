@@ -17,13 +17,19 @@ import {
   preserveStableNarrative,
 } from './episode_context';
 import { lockSeverityForCompletedInvestigation, type EventsWriteSource } from './severity_lock';
-import type { BulkResults, EventsWriteInput, EventsWriteResult, WriteCandidate } from './types';
+import type {
+  BulkResults,
+  EventsWriteInput,
+  EventsWriteResult,
+  LoadedCandidate,
+  ResolvedWriteCandidate,
+  WriteCandidate,
+} from './types';
 
 interface EventFacts
   extends Pick<SignificantEvent, 'status' | 'severity' | 'signals' | 'confidence'> {
-  candidate: WriteCandidate;
+  candidate: ResolvedWriteCandidate;
   rest: Omit<EventsWriteInput, 'event_id'>;
-  latestEvent: SignificantEvent | undefined;
   episodeContext: ReturnType<typeof mergeEpisodeContext>;
   frozenNarrative: ReturnType<typeof preserveStableNarrative>;
 }
@@ -35,26 +41,23 @@ interface EventFacts
  * investigation lock.
  */
 export const shouldSkipAsNoOp = ({
-  latestEvent,
   candidate,
-  priorDocs,
   severity,
 }: {
-  latestEvent: SignificantEvent | undefined;
-  candidate: WriteCandidate;
-  priorDocs: SignificantEvent[];
+  candidate: ResolvedWriteCandidate;
   severity: Severity;
 }): boolean => {
-  if (latestEvent === undefined) return false;
+  const { latest, priorDocs } = candidate;
+  if (latest === undefined) return false;
 
-  const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
+  const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latest]);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
   return (
-    latestEvent.status === candidate.input.status &&
-    latestEvent.severity === severity &&
+    latest.status === candidate.status &&
+    latest.severity === severity &&
     !addsRule &&
-    !changesMemberVerdict([...priorDocs, latestEvent], candidate.input.signals)
+    !changesMemberVerdict([...priorDocs, latest], candidate.input.signals)
   );
 };
 
@@ -108,33 +111,23 @@ const decideSeverity = ({
   return proposed;
 };
 
-/** Full history for remaining continuation writes (lineage merge). */
-export const fetchPriorDocsByEventId = async ({
+/** Attaches each continuation's stored lineage to its candidate, so later stages never look it up. */
+export const loadHistory = async ({
   eventSearchClient,
   candidates,
 }: {
   eventSearchClient: RuleEventsClient;
   candidates: WriteCandidate[];
-}): Promise<{
-  latestByEventId: Map<string, SignificantEvent>;
-  priorDocsByEventId: Map<string, SignificantEvent[]>;
-}> => {
-  const latestByEventId = new Map<string, SignificantEvent>();
-  const priorDocsByEventId = new Map<string, SignificantEvent[]>();
-  await Promise.all(
-    candidates
-      .filter((c) => c.input.event_id !== undefined)
-      .map(async (c) => {
-        const { hits } = await eventSearchClient.findByEventId(c.eventId);
-        priorDocsByEventId.set(c.eventId, hits);
-        const latest = hits.at(-1);
-        if (latest !== undefined) {
-          latestByEventId.set(c.eventId, latest);
-        }
-      })
+}): Promise<LoadedCandidate[]> =>
+  Promise.all(
+    candidates.map(async (candidate): Promise<LoadedCandidate> => {
+      if (candidate.input.event_id === undefined) {
+        return { ...candidate, latest: undefined, priorDocs: [] };
+      }
+      const { hits } = await eventSearchClient.findByEventId(candidate.eventId);
+      return { ...candidate, latest: hits.at(-1), priorDocs: hits };
+    })
   );
-  return { latestByEventId, priorDocsByEventId };
-};
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
@@ -145,19 +138,14 @@ export const fetchPriorDocsByEventId = async ({
 export const computeEventFacts = ({
   candidate,
   timestamp,
-  latestByEventId,
-  priorDocsByEventId,
   source,
 }: {
-  candidate: WriteCandidate;
+  candidate: ResolvedWriteCandidate;
   timestamp: string;
-  latestByEventId: Map<string, SignificantEvent>;
-  priorDocsByEventId: Map<string, SignificantEvent[]>;
   source: EventsWriteSource | undefined;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
-  const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
-  const latestEvent = latestByEventId.get(candidate.eventId);
+  const { latest, priorDocs } = candidate;
   const isContinuation = candidate.input.event_id !== undefined;
 
   const signals = isContinuation
@@ -173,12 +161,11 @@ export const computeEventFacts = ({
         confidence: rest.confidence ?? 0,
       };
 
-  // The status was resolved before the facts (`resolveLifecycle`), or is the caller's own.
-  const status = candidate.input.status;
+  const { status } = candidate;
 
   const severity = lockSeverityForCompletedInvestigation({
     source,
-    latestEvent,
+    latestEvent: latest,
     proposedSeverity: decideSeverity({ proposed: candidate.input.severity, status, signals }),
     proposedStatus: status,
     proposedSignals: candidate.input.signals,
@@ -188,15 +175,14 @@ export const computeEventFacts = ({
   const frozenNarrative = isContinuation
     ? preserveStableNarrative(
         extractRuleUuids(candidate.input.signals),
-        latestEvent,
-        extractRuleUuidsFromEvents([...priorDocs, latestEvent])
+        latest,
+        extractRuleUuidsFromEvents([...priorDocs, latest])
       )
     : undefined;
 
   return {
     candidate,
     rest,
-    latestEvent,
     signals,
     episodeContext,
     status,
@@ -217,7 +203,6 @@ export const buildPendingWrite = ({
   const {
     candidate,
     rest,
-    latestEvent,
     signals,
     episodeContext,
     status,
@@ -243,7 +228,7 @@ export const buildPendingWrite = ({
         : {}),
       '@timestamp': timestamp,
       event_id: candidate.eventId,
-      investigations: latestEvent?.investigations,
+      investigations: candidate.latest?.investigations,
       signals,
       source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,
