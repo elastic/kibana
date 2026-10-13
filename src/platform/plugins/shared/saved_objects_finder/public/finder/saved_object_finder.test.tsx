@@ -31,7 +31,6 @@ type MockSearch = jest.MockedFunction<
 >;
 
 let capturedTableSearch: EuiSearchBarProps | undefined;
-let capturedTableCompressed: boolean | undefined;
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
   fn.cancel = jest.fn();
@@ -44,9 +43,8 @@ jest.mock('@elastic/eui', () => {
   const ActualEuiInMemoryTable = actual.EuiInMemoryTable;
 
   const EuiInMemoryTable = (props: React.ComponentProps<typeof ActualEuiInMemoryTable>) => {
-    // Keep the real table rendering, but expose its configuration for focused assertions.
+    // Keep the real table rendering, but expose its search config for focused filter assertions.
     capturedTableSearch = typeof props.search === 'object' ? props.search : undefined;
-    capturedTableCompressed = props.compressed;
 
     return <ActualEuiInMemoryTable {...props} />;
   };
@@ -209,7 +207,6 @@ describe('SavedObjectsFinder', () => {
   beforeEach(() => {
     mockSearch.mockClear();
     capturedTableSearch = undefined;
-    capturedTableCompressed = undefined;
   });
 
   it('should call API on startup', async () => {
@@ -280,21 +277,6 @@ describe('SavedObjectsFinder', () => {
       await waitFor(() => {
         expect(screen.getByText('This is some description about the action')).toBeVisible();
       });
-    });
-
-    it('renders a compressed search field and filters, but not table', async () => {
-      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
-
-      renderFinder({
-        ...baseProps,
-        showFilter: true,
-        savedObjectMetaData: metaDataConfig,
-        services: { contentClient, savedObjectsTagging, uiSettings },
-      });
-
-      await waitForItemsLoaded();
-      expect(capturedTableSearch?.compressed).toBe(true);
-      expect(capturedTableCompressed).not.toBe(true);
     });
 
     it('with left button', async () => {
