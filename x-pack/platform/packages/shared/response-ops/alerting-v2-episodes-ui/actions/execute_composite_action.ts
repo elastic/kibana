@@ -10,6 +10,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { BulkResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
+import { readBulkOutcome } from './helpers';
 import * as i18n from './translations';
 
 export interface ExecuteCompositeActionParams<TContext = void> {
@@ -67,12 +68,17 @@ export const executeCompositeAction = async <TContext = void>({
     (nativeSettled.status === 'rejected' ? nativeEpisodes.length : 0) +
     (sourceSettled.status === 'rejected' ? sourceEpisodes.length : 0);
 
-  const totalSucceeded = (nativeResult?.affected_count ?? 0) + (sourceResult?.succeeded ?? 0);
-  const totalFailed =
-    (nativeResult?.errors?.length ?? 0) + (sourceResult?.failed ?? 0) + rejectedCount;
+  const nativeOutcome = nativeResult ? readBulkOutcome(nativeResult) : null;
+  const totalSucceeded = (nativeOutcome?.processed ?? 0) + (sourceResult?.succeeded ?? 0);
+  const totalFailed = (nativeOutcome?.failed ?? 0) + (sourceResult?.failed ?? 0) + rejectedCount;
 
   if (totalSucceeded === 0 && totalFailed > 0) {
     throw new Error('All composite action operations failed');
+  }
+
+  if (totalSucceeded === 0 && (nativeOutcome?.unchanged ?? 0) > 0) {
+    deps.notifications.toasts.add({ title: i18n.BULK_NO_CHANGES_TOAST, color: 'success' });
+    return;
   }
 
   showCombinedToast(deps.notifications, totalSucceeded, totalFailed);

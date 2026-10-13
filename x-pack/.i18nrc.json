@@ -9,6 +9,7 @@
       "platform/packages/shared/ml/aiops_log_rate_analysis",
       "platform/plugins/shared/aiops"
     ],
+    "xpack.aiAnonymization": "platform/packages/shared/ai-infra/ai-anonymization-server",
     "xpack.aiAssistant": "platform/packages/shared/kbn-ai-assistant",
     "xpack.alerting": "platform/plugins/shared/alerting",
     "xpack.alertingV2": "platform/packages/shared/response-ops/alerting-v2-utils",
@@ -77,6 +78,7 @@
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inferenceWorkflows": "platform/plugins/shared/inference_workflows",
     "xpack.investigationOutput": "solutions/observability/packages/kbn-investigation-output",
+    "xpack.isomer": "platform/packages/shared/isomer",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": [

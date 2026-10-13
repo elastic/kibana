@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  ALERT_ACTION_NO_OP_CODE,
+  INVALID_ALERT_STATE_TRANSITION_CODE,
+} from '@kbn/alerting-v2-schemas';
+
 /**
  * This file hosts two distinct catalogs:
  *
@@ -55,7 +60,7 @@ export const ALERTING_ERROR_CODES = {
   BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
   /**
    * A builder rule's query was changed without explicitly clearing
-   * `metadata.builder_type`. The transition to ES|QL mode must be explicit.
+   * `metadata.builder`. The transition to ES|QL mode must be explicit.
    */
   BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
@@ -146,8 +151,19 @@ export const ALERTING_ERROR_CODES = {
    * actions (`activate` / `deactivate`) only accept the latest episode.
    */
   ALERT_EPISODE_NOT_LATEST: 'ALERT_NOT_LATEST',
-  /** The requested action is incompatible with the episode's current `episode.status`. */
-  INVALID_EPISODE_STATE_TRANSITION: 'INVALID_ALERT_STATE_TRANSITION',
+  /**
+   * The requested action is a no-op against the alert's current state machine:
+   * `activate` / `deactivate` of an alert already in that lifecycle state, or
+   * `ack` / `unack` of an alert already on that side of acknowledgement.
+   */
+  INVALID_EPISODE_STATE_TRANSITION: INVALID_ALERT_STATE_TRANSITION_CODE,
+  /**
+   * The requested action would write the value the alert already carries —
+   * `assign` to the current assignee, or `tag` with the current set. Distinct
+   * from `INVALID_ALERT_STATE_TRANSITION` because no state machine is
+   * involved: the write is simply identical to what is already recorded.
+   */
+  ALERT_ACTION_NO_OP: ALERT_ACTION_NO_OP_CODE,
 
   // ──────────────────── Rule doctor insights ─────────────────
   /** A rule doctor insight with the given identifier does not exist. */
@@ -192,14 +208,14 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
 export const ALERTING_LOG_CODES = {
   // ─────────────────────────────── Dispatcher steps ──────────────────────
   /**
-   * Hydrate episode data step: some episodes had no matching .rule-events row;
-   * data will be absent for those episodes
+   * Hydrate alert data step: some alerts had no matching .rule-events row;
+   * data will be absent for those alerts
    */
-  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
-    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   /**
    * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
-   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * limit, so rows past it were dropped. Alerts whose ack, snooze or
    * deactivate state was in the dropped rows may be dispatched.
    */
   FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
@@ -380,7 +396,7 @@ export const ALERTING_LOG_CODES = {
   /**
    * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
    * The dispatcher will write terminal `unmatched` records for the blocking
-   * episodes (which will NOT be dispatched) and force-advance the watermark.
+   * alerts (which will NOT be dispatched) and force-advance the watermark.
    */
   DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
   /**
@@ -389,8 +405,8 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
   /**
-   * The escape hatch fired but no episodes were fetched for the window (the
-   * pipeline was aborted before or during FetchEpisodesStep, or the scan query
+   * The escape hatch fired but no alerts were fetched for the window (the
+   * pipeline was aborted before or during FetchAlertsStep, or the scan query
    * was rejected, e.g. `inline_stats_too_large`), and watermark lag is still
    * within one max scan window. The watermark is held; the stuck counter is
    * reset so the scan can recover without dropping the window. The message
@@ -398,16 +414,16 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
   /**
-   * The escape hatch fired with no fetched episodes and watermark lag already
+   * The escape hatch fired with no fetched alerts and watermark lag already
    * exceeds one max scan window. The window is force-advanced without knowing
-   * its episodes; unread events in that window are skipped so the dispatcher
+   * its alerts; unread events in that window are skipped so the dispatcher
    * cannot stall indefinitely. The message carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
     'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
   /**
    * The escape hatch attempted to write `unmatched` records but the bulkIndexDocs
-   * call failed. The watermark is held so episodes will be retried next tick.
+   * call failed. The watermark is held so alerts will be retried next tick.
    */
   DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
   /**
