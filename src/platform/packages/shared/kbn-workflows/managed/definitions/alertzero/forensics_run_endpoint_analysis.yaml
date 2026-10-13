@@ -246,13 +246,71 @@ steps:
         type: if
         condition: "${{ steps.resolve_host.output.host_name != blank }}"
         steps:
+          # Whether there is anything for the agent to reconstruct. The Hunt Watch
+          # worker makes the same check (`check_index_scope`) before it selects a
+          # report. The forensic skill resolves `logs-endpoint.events.*` only once
+          # the agent is running, so without this a host with no Elastic Defend
+          # telemetry spends the indicator's single attempt on a 15m run that can
+          # only report nothing.
+          #
+          # Gated like the agent, so a retry of a finished analysis does not depend
+          # on telemetry still being there. Fails the run on a read error, like the
+          # alert lookups above: a read error is a gap, not "no telemetry", and the
+          # indicator stays pending for a cheap retry since this is before the agent.
+          - name: check_endpoint_telemetry
+            type: elasticsearch.search
+            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            with:
+              index: "logs-endpoint.events.*"
+              ignore_unavailable: true
+              size: 1
+              _source: false
+              query:
+                bool:
+                  filter:
+                    - term:
+                        host.name: "{{ steps.resolve_host.output.host_name }}"
+                    - range:
+                        "@timestamp":
+                          gte: "now-72h"
+
+          # `checked` tells "no telemetry" apart from "did not look": a skipped step
+          # has no output, and that must not read as an empty index.
+          - name: resolve_endpoint_telemetry
+            type: data.set
+            with:
+              checked: "${{ steps.check_endpoint_telemetry.output != null }}"
+              present: "${{ steps.check_endpoint_telemetry.output.hits.hits[0]._id != blank }}"
+
+          # Before the agent and before the attempt is recorded, so a failed note
+          # fails the run and the next sweep re-checks, the same as `journal_no_host`.
+          - name: journal_no_telemetry
+            type: workflow.execute
+            if: >-
+              ${{ steps.resolve_endpoint_telemetry.output.checked == true
+                and steps.resolve_endpoint_telemetry.output.present != true }}
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  No Elastic Defend telemetry was found for `{{ steps.resolve_host.output.host_name }}`
+                  in `logs-endpoint.events.*`, so endpoint analysis was not run.
+
           # Record the attempt before the agent. A later run reads it back from the
           # indicator and does not start another analysis. `attributes` merges, so
           # this does not change `status`. A failed write fails the run here, before
           # the agent, and the indicator stays pending for one more try.
+          #
+          # `present` already implies the check ran, which only happens on the path
+          # where the agent would, so it is the whole telemetry condition here.
           - name: mark_attempted
             type: context-engine.updateKi
-            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
             with:
               ai_index_id: "{{ inputs.ai_index_id }}"
               ki_id: "{{ inputs.ki_id }}"
@@ -264,7 +322,10 @@ steps:
           # the analysis or leave the indicator pending
           - name: journal_analysis_started
             type: workflow.execute
-            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
             on-failure:
               continue: true
             with:
@@ -276,10 +337,14 @@ steps:
                   Starting endpoint analysis of `{{ steps.resolve_host.output.host_name }}`.
           - name: forensic_analysis
             type: ai.agent
-            # Runs once per indicator: only when findings are still missing and no
-            # earlier run has recorded an attempt. Both attachments, or a recorded
-            # attempt with either still missing, skips the agent.
-            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            # Runs once per indicator: only when findings are still missing, no
+            # earlier run has recorded an attempt, and the host has Defend telemetry.
+            # Both attachments, or a recorded attempt with either still missing,
+            # skips the agent.
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
             # Continues on failure so the run still reaches its terminal write.
             # If this step failed the run instead, the indicator would stay
             # `pending`, and the sweep would re-run this 15m agent every minute
@@ -342,7 +407,16 @@ steps:
                   propose=false when that leaves nothing. Never guess an id, pid, path, or command that is
                   not in the evidence.
                 - Cite hosts, process/path, tactics, and why this action now in rationale.
-                - Optionally add a short comment (one sentence) explaining why you chose this action.
+                - Set `title` on every recommendation to a short plain-text label of that one action
+                  and its target, using the catalog entry's `name`. A host action names the host
+                  (`Isolate host WIN-ANALYST01`). A process action names the process and the host
+                  (`Kill powershell.exe (PID 4212) on WIN-ANALYST01`). Include the target so two of
+                  the same action still read as different cards.
+                - Set `comment` on every recommendation to one or two sentences for the analyst
+                  approving that one card: the evidence this action rests on and what it stops
+                  (`powershell.exe (PID 4212) spawned from winword.exe and is encrypting files
+                  under C:\Users; killing it stops the encryption`). Specific to this action and
+                  target. Do not restate the assessment from `rationale`.
                 - Set `confidence` per action, not for the reconstruction as a whole: how sure you are
                   that this action hits the right host or process and that the evidence justifies it
                   now. Identifiers read directly from the telemetry support high; an inference about
@@ -535,6 +609,8 @@ steps:
                       required:
                         - actionId
                         - actionInput
+                        - title
+                        - comment
                         - confidence
                       properties:
                         actionId:
@@ -544,10 +620,27 @@ steps:
                           description: >
                             workflowId from `security.alertzero.actions.list`. Must match a catalog
                             entry exactly. Never invent an id.
+                        # 256 is the proposal step's title limit. A longer one fails the dispatch.
+                        title:
+                          type: string
+                          minLength: 1
+                          maxLength: 256
+                          description: >
+                            Short plain-text label of this action and its target, using the catalog
+                            entry's name. A host action names the host (`Isolate host WIN-ANALYST01`).
+                            A process action names the process and the host
+                            (`Kill powershell.exe (PID 4212) on WIN-ANALYST01`).
+                        # Required and bounded: this is the body of the approval card. The
+                        # full assessment is in `rationale`, which is journaled once on the
+                        # investigation; a card that repeats it is too long to review.
                         comment:
                           type: string
+                          minLength: 1
                           maxLength: 500
-                          description: One sentence explaining why this action is justified.
+                          description: >
+                            One or two sentences for the analyst approving this one action: the
+                            evidence it rests on and what it stops. Specific to this action and
+                            target; do not restate `rationale`.
                         # Set per action, not per run: a run can be certain about one host and
                         # only suspect another, and each action becomes its own approval card.
                         # Required because the analyst is deciding whether to disrupt a
@@ -759,16 +852,31 @@ steps:
       attached: >-
         ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs }}
-      # Findings only exist when a host was known, since that's the only branch
-      # where the agent runs. So no host means no findings is the correct
+      # Findings only exist when a host was known and had Defend telemetry, since
+      # that's the only path where the agent runs. So no host, or a host with
+      # nothing in `logs-endpoint.events.*`, means no findings is the correct
       # outcome, not a failure — and no retry will resolve a host that the
-      # discovery and its constituent alerts never named. One of this
-      # indicator's attachments is a partial write, not a finished run. The
-      # assessment is a journal note and is not part of this check.
+      # discovery and its constituent alerts never named, or produce telemetry
+      # that was never shipped. `checked` keeps a run that did not look (findings
+      # already attached, or a recorded attempt) from reading as "no telemetry".
+      # One of this indicator's attachments is a partial write, not a finished
+      # run. The assessment is a journal note and is not part of this check.
       settled: >-
         ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
-          or steps.resolve_host.output.host_name == blank }}
+          or steps.resolve_host.output.host_name == blank
+          or (steps.resolve_endpoint_telemetry.output.checked == true
+            and steps.resolve_endpoint_telemetry.output.present != true) }}
+      # Both findings are on the investigation, but not from this run: an
+      # earlier run attached them and never recorded how it ended, whether
+      # because its verdict write failed or because it died between the
+      # attachments and the verdict. This run has no agent output to check the
+      # proposals against, so it cannot vouch for them, and must not retire the
+      # indicator as `processed` on their behalf.
+      outcome_unrecorded: >-
+        ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
+          and steps.forensic_analysis.output == null }}
 
   # The worker writes this onto the indicator before dispatch. A missing
   # attribute fails closed to manual.
@@ -807,15 +915,22 @@ steps:
   # action cannot fail the run. Runs after investigation items are attached.
   # `parallel` with `settled` keeps every dispatch's outcome: `foreach` would
   # keep only the last one, and continuing on failure would clear a rejection.
+  #
+  # The `if` gates the whole step, including `foreach`. `| default: []` does not
+  # produce an array in this engine, and `foreach` hard-fails when its source is
+  # missing. The step runs only when the list has items, so a missing or empty
+  # list skips the fan-out instead of failing the run after the agent.
   - name: propose_actions
     type: parallel
     if: >-
       ${{ steps.resolve_run_outcome.output.attached == true
-        and steps.forensic_analysis.output.structured_output.propose == true }}
-    foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | default: [] }}"
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions }}"
     mode: settled
     concurrency:
-      max: "{{ consts.max_recommended_actions }}"
+      # must use a literal until https://github.com/elastic/security-team/issues/19967 is fixed
+      max: 8
     steps:
       - name: propose_action
         type: workflow.executeAsync
@@ -826,7 +941,17 @@ steps:
           run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.resolve_request.output.investigation_id }}"
-            comment: "{{ foreach.item.comment | default: steps.forensic_analysis.output.structured_output.rationale }}"
+            # Without this the proposal stores the action's own name, so two isolates
+            # of different hosts share one label. Truncated to the proposal step's
+            # title limit: a longer one fails the dispatch.
+            title: '{{ foreach.item.title | truncate: 256, "" }}'
+            # The per-action comment, not the run's `rationale`: the rationale is the
+            # whole assessment (up to 7900 characters) and is already journaled on the
+            # investigation, so repeating it on each card buries the one sentence the
+            # analyst needs. The schema requires a non-empty comment; the fallback only
+            # keeps a card readable if a blank slips through, since the bridge rejects
+            # a proposal with no comment.
+            comment: "{{ foreach.item.comment | default: foreach.item.title }}"
             actionWorkflowId: "{{ foreach.item.actionId }}"
             actionInput: '${{ foreach.item.actionInput }}'
             # `impact` and `category` are deliberately not passed: both would override what
@@ -855,11 +980,14 @@ steps:
           and steps.resolve_proposal_dispatch.output.failed > 0 }}
 
   # Retiring the indicator so that the sweep stops picking it up.
-  # Do this before the terminal writes, which do not continue on failure.
-  # Instead of swallowing these failures and reporting a falsely-completed
-  # run, the we fail the run. The failure shows up in the execution record,
-  # and the next sweep retries just the write. This is cheap since
-  # `resolve_prior_assessment` skips the agent once findings are already attached.
+  # The verdict writes below do not continue on failure. Instead of swallowing
+  # these failures and reporting a falsely-completed run, we fail the run. The
+  # failure shows up in the execution record, and the next sweep re-dispatches.
+  # That retry skips the agent (`resolve_prior_assessment` finds both findings),
+  # but it also has nothing to check the assessment or the proposals against,
+  # so it lands on `mark_outcome_unrecorded` rather than here. Each verdict
+  # write therefore retries in place first: a short context-engine blip should
+  # not cost the verdict.
   # Only `attributes.status` is written. `attributes` merges on update; `tags`
   # is a list and a partial update would replace the full list.
   - name: mark_processed
@@ -868,7 +996,13 @@ steps:
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
         and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_run_outcome.output.outcome_unrecorded != true
         and steps.resolve_proposals.output.proposals_lost != true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
@@ -904,6 +1038,11 @@ steps:
         and steps.verify_investigation.output.metadata != null
         and steps.resolve_run_outcome.output.settled == true
         and steps.resolve_proposals.output.proposals_lost == true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
@@ -914,10 +1053,60 @@ steps:
             Containment proposals did not reach the queue for investigation
             {{ steps.resolve_request.output.investigation_id }}
 
+  # An earlier run attached the findings and never recorded its verdict. The
+  # assessment note and the containment proposals exist only in that run's
+  # agent output; this run cannot re-check or redo them (a redo would duplicate
+  # whichever proposals did land). So it does not claim `processed`: it says
+  # what it knows and retires the indicator as `failed` so someone looks.
+  # The investigation already holds whatever that run managed to write.
+  - name: journal_outcome_unrecorded
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.outcome_unrecorded == true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          An earlier endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its
+          findings here but did not record how it ended. Its assessment and any containment
+          proposals should be checked against the notes above. The indicator was retired and
+          will not be retried.
+
+  - name: mark_outcome_unrecorded
+    type: context-engine.updateKi
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.outcome_unrecorded == true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: failed
+          failure_reason: >-
+            Findings reached investigation {{ steps.resolve_request.output.investigation_id }}
+            from an earlier run that did not record its outcome; assessment and proposals unverified
+
   # The investigation needs to hear how this analysis ended — every other
   # problem path already narrates itself, but this one didn't, even though
   # it's the step that takes 15m and is most likely to fail. Without this,
   # silence would read as "never analyzed" instead of "analyzed, found nothing."
+  #
+  # The note names which case it was and links the execution. It does not include
+  # `error.message`: a later agent round reads this journal as user input, and the
+  # error itself stays on the execution.
   - name: journal_analysis_problem
     type: workflow.execute
     if: >-
@@ -933,7 +1122,8 @@ steps:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` left no findings on this investigation.
-          {% if steps.forensic_analysis.error != null %}The forensic agent failed: {{ steps.forensic_analysis.error.message }}{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis finished but none of its findings could be attached.{% endif %}
+          {% if steps.forensic_analysis.error != null %}The forensic agent failed.{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis finished but none of its findings could be attached.{% endif %}
+          See execution `{{ execution.id }}` ([full per-stage detail]({{ execution.url }})).
 
   # The run had a host to analyze but still landed no findings — e.g. no
   # OWNER access on the conversation, a deleted investigation, a rejected
@@ -946,6 +1136,11 @@ steps:
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
         and steps.resolve_run_outcome.output.settled != true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"

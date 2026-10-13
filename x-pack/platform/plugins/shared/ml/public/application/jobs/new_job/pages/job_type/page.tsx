@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiSpacer, EuiText, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiText, EuiFlexGrid, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -364,8 +364,7 @@ export const Page: FC = () => {
             <LinkCard
               data-test-subj={id}
               onClick={onClick}
-              icon={icon.type}
-              iconAreaLabel={icon.ariaLabel}
+              icon={<EuiIcon size="xl" type={icon.type} aria-label={icon.ariaLabel} />}
               title={title}
               description={description}
               isDisabled={!isTimeBasedIndex}
@@ -397,25 +396,28 @@ export const Page: FC = () => {
       <EuiFlexGrid gutterSize="l" columns={4}>
         <EuiFlexItem>
           <LinkCard
-            icon="dataVisualizer"
-            iconAreaLabel={i18n.translate(
-              'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
+            icon={
+              <EuiIcon
+                size="xl"
+                type="dataVisualizer"
+                aria-label={i18n.translate(
+                  'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
+                  {
+                    defaultMessage: 'Data Visualizer',
+                  }
+                )}
+              />
+            }
+            title={i18n.translate('xpack.ml.newJob.wizard.jobType.dataVisualizerTitle', {
+              defaultMessage: 'Data Visualizer',
+            })}
+            description={i18n.translate(
+              'xpack.ml.newJob.wizard.jobType.dataVisualizerDescription',
               {
-                defaultMessage: 'Data Visualizer',
+                defaultMessage:
+                  'Learn more about the characteristics of your data and identify the fields for analysis with machine learning.',
               }
             )}
-            title={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
-                defaultMessage="Data Visualizer"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.dataVisualizerDescription"
-                defaultMessage="Learn more about the characteristics of your data and identify the fields for analysis with machine learning."
-              />
-            }
             onClick={addSelectionToRecentlyAccessed}
           />
         </EuiFlexItem>

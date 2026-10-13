@@ -16,13 +16,15 @@ import {
   KI_FEATURE_CREATE_TOOL_ID,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
-  STREAM_FEATURES_ENDPOINT,
   TOOL_API_HEADERS,
   TOOL_EXECUTE_ENDPOINT,
   buildDetection,
   buildFeature,
+  createAccessSource,
+  deleteAccessSource,
   deleteDetections,
   deleteFeature,
+  getFeaturesEndpoint,
   deleteSignificantEvent,
   seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
@@ -38,13 +40,19 @@ for (const role of ['editor', 'admin'] as const) {
       const ruleUuid = `${role}-access-${uuidv4()}`;
       const featureId = `${role}-access-${uuidv4()}`;
       const toolFeatureId = `${role}-tool-access-${uuidv4()}`;
+      let sourceId: string;
+      let sourceSlug: string;
       let headers: Record<string, string>;
       let toolHeaders: Record<string, string>;
 
-      apiTest.beforeAll(async ({ apiServices, esClient, samlAuth }) => {
+      apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
         // Detection writes are rejected while Significant Events is paused.
         await apiServices.significantEventsTest.resumeSignificantEvents();
         await seedSignificantEvent(esClient, eventId);
+        ({ id: sourceId, slug: sourceSlug } = await createAccessSource({
+          kbnClient,
+          title: `${role}-access-${uuidv4()}`,
+        }));
         const { cookieHeader } = await samlAuth.asInteractiveUser(role);
         headers = { ...COMMON_API_HEADERS, ...cookieHeader };
         toolHeaders = { ...TOOL_API_HEADERS, ...cookieHeader };
@@ -53,8 +61,9 @@ for (const role of ['editor', 'admin'] as const) {
       apiTest.afterAll(async ({ esClient, kbnClient }) => {
         await deleteSignificantEvent(esClient, eventId);
         await deleteDetections(esClient, ruleUuid);
-        await deleteFeature(kbnClient, featureId);
-        await deleteFeature(kbnClient, toolFeatureId);
+        await deleteFeature({ kbnClient, sourceId, featureId });
+        await deleteFeature({ kbnClient, sourceId, featureId: toolFeatureId });
+        await deleteAccessSource({ kbnClient, sourceId });
       });
 
       apiTest('closes a significant event', async ({ apiClient }) => {
@@ -79,7 +88,7 @@ for (const role of ['editor', 'admin'] as const) {
       apiTest('writes and reads detections', async ({ apiClient }) => {
         const createResponse = await apiClient.post(DETECTIONS_ENDPOINT, {
           headers,
-          body: { detections: [buildDetection(ruleUuid)] },
+          body: { detections: [buildDetection(ruleUuid, sourceId)] },
           responseType: 'json',
         });
         expect(createResponse).toHaveStatusCode(200);
@@ -109,7 +118,7 @@ for (const role of ['editor', 'admin'] as const) {
       });
 
       apiTest('creates and deletes a knowledge indicator', async ({ apiClient }) => {
-        const createResponse = await apiClient.post(STREAM_FEATURES_ENDPOINT, {
+        const createResponse = await apiClient.post(getFeaturesEndpoint(sourceId), {
           headers,
           body: buildFeature(featureId),
           responseType: 'json',
@@ -117,24 +126,34 @@ for (const role of ['editor', 'admin'] as const) {
         expect(createResponse).toHaveStatusCode(200);
         expect(createResponse.body).toStrictEqual({ acknowledged: true });
 
-        const deleteResponse = await apiClient.delete(`${STREAM_FEATURES_ENDPOINT}/${featureId}`, {
-          headers,
-          responseType: 'json',
-        });
+        const deleteResponse = await apiClient.delete(
+          `${getFeaturesEndpoint(sourceId)}/${featureId}`,
+          {
+            headers,
+            responseType: 'json',
+          }
+        );
         expect(deleteResponse).toHaveStatusCode(200);
       });
 
       apiTest('creates a knowledge indicator from Agent Builder', async ({ apiClient }) => {
         const response = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
           headers: toolHeaders,
-          body: { tool_id: KI_FEATURE_CREATE_TOOL_ID, tool_params: buildFeature(toolFeatureId) },
+          body: {
+            tool_id: KI_FEATURE_CREATE_TOOL_ID,
+            tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
+          },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
         expect(response.body.results).toStrictEqual([
           expect.objectContaining({
             type: 'other',
-            data: expect.objectContaining({ acknowledged: true, feature: { id: toolFeatureId } }),
+            data: expect.objectContaining({
+              slug: sourceSlug,
+              acknowledged: true,
+              feature: { id: toolFeatureId },
+            }),
           }),
         ]);
       });

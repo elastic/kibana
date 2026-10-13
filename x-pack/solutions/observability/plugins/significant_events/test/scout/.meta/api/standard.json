@@ -1,5 +1,5 @@
 {
-  "sha1": "7e2dd27a285ba179fb1c1b2a186d5b7a850189d4",
+  "sha1": "382604f9f49d928b8f204a67c4582b198bd5d0f1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 53,
-        "column": 59
+        "line": 65,
+        "column": 15
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 73,
-        "column": 17
+        "line": 76,
+        "column": 39
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 106,
-        "column": 14
+        "line": 111,
+        "column": 46
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 118,
-        "column": 67
+        "line": 124,
+        "column": 25
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 53,
-        "column": 59
+        "line": 65,
+        "column": 15
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 73,
-        "column": 17
+        "line": 76,
+        "column": 39
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 106,
-        "column": 14
+        "line": 111,
+        "column": 46
       }
     },
     {
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 118,
-        "column": 67
+        "line": 124,
+        "column": 25
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 54,
-        "column": 61
+        "line": 64,
+        "column": 57
       }
     },
     {
@@ -240,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 77,
-        "column": 41
+        "line": 82,
+        "column": 13
       }
     },
     {
@@ -256,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 91,
-        "column": 20
+        "line": 97,
+        "column": 27
       }
     },
     {
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 102,
-        "column": 7
+        "line": 109,
+        "column": 41
       }
     },
     {
@@ -288,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 117,
-        "column": 74
+        "line": 121,
+        "column": 7
       }
     },
     {
@@ -304,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 135,
-        "column": 76
+        "line": 140,
+        "column": 16
       }
     },
     {
@@ -320,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 146,
-        "column": 7
+        "line": 149,
+        "column": 23
       }
     },
     {
@@ -336,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/pause_on_flag_off.spec.ts",
-        "line": 123,
-        "column": 55
+        "line": 254,
+        "column": 46
       }
     },
     {
@@ -437,8 +437,8 @@
       }
     },
     {
-      "id": "670d85d4e7806a5-1d8b985de6fcd2d",
-      "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
+      "id": "670d85d4e7806a5-3f5db4d3dfa9dd0",
+      "title": "Onboarding bulk status API returns not_started for every requested source id that has never been onboarded",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -453,8 +453,8 @@
       }
     },
     {
-      "id": "670d85d4e7806a5-6eae18e8b4c773e",
-      "title": "Onboarding bulk status API rejects an empty streamNames array",
+      "id": "670d85d4e7806a5-3ee47c15c4bf695",
+      "title": "Onboarding bulk status API rejects an empty sourceIds array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -464,7 +464,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 47,
+        "line": 46,
         "column": 6
       }
     },
@@ -480,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 54,
-        "column": 30
+        "line": 53,
+        "column": 28
       }
     },
     {
