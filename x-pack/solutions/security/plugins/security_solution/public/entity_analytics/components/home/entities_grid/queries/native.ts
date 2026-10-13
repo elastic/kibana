@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import { RESOLVED_TO_FIELD } from '../common';
 import { buildEntitiesInViewSteps } from './entities_in_view';
-import { buildKeepClause, buildCursorClause, buildSortSuffix } from './esql';
-import { fetchGroupedSortPage } from './grouped_sort';
-import { GROUP_VALUE_SORT_FIELDS } from './group_values';
+import {
+  ENTITY_TYPE_FILTER,
+  buildKeepClause,
+  buildCursorClause,
+  buildSortSuffix,
+  getEntityAlias,
+} from './esql';
+import { buildGroupRowsOutput, fetchGroupedSortPage } from './grouped_sort';
+import { GROUP_VALUE_SORT_FIELDS, buildGroupRowSteps } from './group_values';
 import type { QueryArgs } from '../common';
 import type { ColumnQuerySpec } from './types';
 
@@ -28,6 +35,15 @@ const buildNativeEntitySortQuery = (args: QueryArgs, extraRows = 0): string => {
 };
 
 /** Sort of a column whose value is on the entity doc. */
+/** The groups with aliases that pass the filters, with the group's values of the columns. */
+const buildGroupValueRowsQuery = (args: QueryArgs): string =>
+  [
+    `FROM ${getEntityAlias(args.namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+    ...buildGroupRowSteps(args),
+    ...buildGroupRowsOutput(args),
+  ].join('\n');
+
 /** Resolved rows show the group's value in these columns, so their sort has to see the groups. */
 const isGroupValueSort = ({ rowsMode, sort }: QueryArgs): boolean =>
   rowsMode === 'resolved' && GROUP_VALUE_SORT_FIELDS.includes(sort.field);
@@ -35,8 +51,9 @@ const isGroupValueSort = ({ rowsMode, sort }: QueryArgs): boolean =>
 export const nativeSortQuerySpec = {
   fetchSortPage: (args, { runQuery }) =>
     isGroupValueSort(args)
-      ? fetchGroupedSortPage(args, runQuery, (extraRows) =>
-          buildNativeEntitySortQuery(args, extraRows)
-        )
+      ? fetchGroupedSortPage(args, runQuery, {
+          buildGroupRowsQuery: buildGroupValueRowsQuery,
+          fetchEntityRows: (extraRows) => runQuery(buildNativeEntitySortQuery(args, extraRows)),
+        })
       : runQuery(buildNativeEntitySortQuery(args)),
 } satisfies ColumnQuerySpec;

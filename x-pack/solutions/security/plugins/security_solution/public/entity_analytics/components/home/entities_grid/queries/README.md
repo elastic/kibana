@@ -54,6 +54,10 @@ the group's value, and the records of an expanded group show their own.
 - **Risk score change**: the group's score now minus the group's last score before the window,
   from the group's risk score docs (`score_type` is `resolution`). An entity without a group
   score compares its own scores. Individual rows read only the own scores.
+- **Alerts, last alert and anomalies**: the members' alerts and anomalies added up, and the latest
+  alert of the members. A page reads them for the entities of its groups and rolls them up
+  (`groupEnricher`); an alert or anomaly maps to one entity of a type, so an entity's own count
+  is not counted again in a group.
 - **Criticality**: the highest of the members. **Sources** and **watchlists**: the distinct
   values of the members. **First seen** and **last seen**: the earliest and the latest of the
   members (`group_values.ts`).
@@ -76,6 +80,11 @@ group's value, the other entities sort natively by their own value, with as many
 there are groups, since an entity that heads a group is dropped for its group row. The two
 streams are merged in the order of the sort, from the same cursor. A search can't run after the
 group join, so its matches among the group heads are read separately.
+
+Sorting by alerts, last alert or anomalies works the same way, with the group rows from a roll-up
+in the query: the alerts (or anomaly records) are counted per entity in one pass, as in the other
+plans, next to a small branch that maps the aliases and the heads of the groups to their group,
+and the counts are then added up per group. The other entities keep their plans.
 
 ## Which query runs
 
@@ -136,7 +145,8 @@ below is one less than what its query can return: the extra row tells that there
 | A list of ids is longer than `ID_LIST_CHUNK_SIZE` | it is split into several queries: an ES\|QL query can't be longer than 1MB, and ids can be about 100 characters long |
 | The count fails | the view counts as small, so the small view queries run |
 | A computed column fails | its cells stay empty, the other columns still load, and the grid shows an error toast |
-| More than `getMaxAliasGroups` groups with aliases pass the filters, when sorting by criticality, first seen or last seen | the grid shows an error toast: a page from a partial list of groups would be in the wrong order |
+| The groups of a page have more than `MAX_PAGE_MEMBERS` members | the alert and anomaly cells stay empty and the grid shows an error toast: their members can't be read to total them |
+| More than `getMaxAliasGroups` groups with aliases pass the filters, when sorting by criticality, first seen, last seen, alerts, last alert or anomalies | the grid shows an error toast: a page from a partial list of groups would be in the wrong order |
 | More than `MAX_GROUP_VALUE_CORRECTIONS` groups pass the filters on the group values differently from their main entity | the grid shows an error toast; the filter can't list them (an ES\|QL query can't be longer than 1MB) |
 
 ## Checking a change

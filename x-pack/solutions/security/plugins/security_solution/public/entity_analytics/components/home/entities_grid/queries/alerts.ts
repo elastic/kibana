@@ -6,14 +6,14 @@
  */
 
 import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
-import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   buildIdentityPrefilter,
   getAlertsIndex,
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
-  SET_UNMAPPED_NULLIFY,
+  buildLookupJoinClause,
+  ENTITY_TYPE_FILTER,
   toList,
 } from './esql';
 import {
@@ -21,15 +21,19 @@ import {
   getEntityId,
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
+  RESOLVED_TO_FIELD,
   SEVERITY_COUNT_FIELDS,
   isOneOf,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
 import type { QueryArgs, Row } from '../common';
+import { buildGroupRowsOutput, fetchGroupedSortPage } from './grouped_sort';
+import { GROUP_KEY_FIELD, buildGroupRollUpSteps, groupEnricher } from './group_members';
+import type { RollUp } from './group_members';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
-import type { ColumnQuerySpec, PageEnricher } from './types';
+import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './types';
 
 const ALERT_COUNT_FIELD = 'alert_count';
 const LAST_SEEN_ALERT_FIELD = 'last_seen_alert';
@@ -86,7 +90,7 @@ const buildUnstampedIdentityFilters = (
   for (const row of pageRows) {
     const entityType = row[ENTITY_TYPE_FIELD];
     if (isAllowedEntityType(entityType)) {
-      const clause = getEuidEsqlFilterBasedOnDocument(getBuiltInEntityDefinition(entityType), row);
+      const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
       if (clause) {
         clauses.add(clause);
         matchedRows.push(row);
@@ -114,7 +118,6 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
   const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
   return [
-    SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}, ${getEntityAlias(namespace)} METADATA _index`,
     `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${buildLookback(
       timeRange
@@ -136,11 +139,49 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   ].join('\n');
 };
 
+/** A group's alerts are those of its members: the counts add up, and the last alert is the latest. */
+const ALERT_ROLL_UPS: Readonly<Record<string, RollUp>> = {
+  [LAST_SEEN_ALERT_FIELD]: 'max',
+  ...Object.fromEntries(ALERT_COUNT_FIELDS.map((field) => [field, 'sum' as const])),
+};
+
+/**
+ * Alerts of the groups with aliases that pass the filters, as the rows of the grid. Like the sort
+ * query, the alerts and the entity index share one FROM, as FORK can't run inside a subquery:
+ * the extra branch maps the aliases and the heads of the groups to their group, so one pass over
+ * the alerts counts them per entity, and the counts are rolled up per group.
+ */
+const buildGroupAlertRowsQuery = (args: QueryArgs): string => {
+  const { namespace, timeRange, concreteEntityIndexName } = args;
+  const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
+  return [
+    `FROM ${getAlertsIndex(namespace)}, ${getEntityAlias(namespace)} METADATA _index`,
+    `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${buildLookback(
+      timeRange
+    )} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${isEntityDoc} AND ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL)`,
+    ...buildAlertEuidPipeline({
+      alertBranchCondition: `NOT ${isEntityDoc}`,
+      extraBranch: [
+        `WHERE ${isEntityDoc}`,
+        `| EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, ${RESOLVED_TO_FIELD}), ${GROUP_KEY_FIELD} = ${RESOLVED_TO_FIELD}`,
+        `| KEEP _ea_entity_id, ${GROUP_KEY_FIELD}`,
+      ],
+    }),
+    `| STATS ${[
+      ...buildAlertAggregations(`${GROUP_KEY_FIELD} IS NULL`),
+      `${GROUP_KEY_FIELD} = MAX(${GROUP_KEY_FIELD})`,
+    ].join(', ')} BY \`entity.id\``,
+    ...buildGroupRollUpSteps(ALERT_ROLL_UPS),
+    buildLookupJoinClause(concreteEntityIndexName),
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+    ...buildGroupRowsOutput(args, ALERT_FIELDS),
+  ].join('\n');
+};
+
 // ── split sort (see split_sort.ts) ───────────────────────────────────────────
 
 /** Open alerts in the time range, mapped to `entity.id`, without entity docs. */
 const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
-  SET_UNMAPPED_NULLIFY,
   `FROM ${getAlertsIndex(namespace)}`,
   `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`,
   ...buildAlertEuidPipeline(),
@@ -172,7 +213,6 @@ const buildAlertsEnrichQuery = (
 ): string => {
   const { namespace, timeRange } = args;
   return [
-    SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}`,
     `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)}`,
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
@@ -213,12 +253,27 @@ const alertsEnricher: PageEnricher = {
 const alertCountSplitSortPlan = getAlertSplitSortPlan(ALERT_COUNT_FIELD);
 const lastSeenAlertSplitSortPlan = getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD);
 
+/**
+ * The page of a plan; for resolved rows, the groups with aliases have the alerts of their members
+ * and are read apart from the other entities.
+ */
+const fetchAlertSortPage =
+  (plan: SplitSortPlan): SortPageFetcher =>
+  (args, ctx) =>
+    args.rowsMode === 'resolved'
+      ? fetchGroupedSortPage(args, ctx.runQuery, {
+          buildGroupRowsQuery: buildGroupAlertRowsQuery,
+          fetchEntityRows: (extraRows) =>
+            fetchSplitSortPage(plan, { ...args, pageSize: args.pageSize + extraRows }, ctx),
+        })
+      : fetchSplitSortPage(plan, args, ctx);
+
 export const alertCountQuerySpec = {
-  fetchSortPage: (args, ctx) => fetchSplitSortPage(alertCountSplitSortPlan, args, ctx),
-  enricher: alertsEnricher,
+  fetchSortPage: fetchAlertSortPage(alertCountSplitSortPlan),
+  enricher: groupEnricher(alertsEnricher, ALERT_ROLL_UPS),
 } satisfies ColumnQuerySpec;
 
 export const lastSeenAlertQuerySpec = {
-  fetchSortPage: (args, ctx) => fetchSplitSortPage(lastSeenAlertSplitSortPlan, args, ctx),
+  fetchSortPage: fetchAlertSortPage(lastSeenAlertSplitSortPlan),
   // No enricher: the alerts enricher of the alert count reads this field too.
 } satisfies ColumnQuerySpec;

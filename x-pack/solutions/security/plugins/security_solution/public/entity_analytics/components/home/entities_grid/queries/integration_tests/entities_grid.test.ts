@@ -80,12 +80,12 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
   [
     'last_seen_alert',
     'desc',
-    ['host:h2', 'user:alice@okta', 'host:h1', 'host:h3', 'service:payments', 'user:bob@okta'],
+    ['host:h1', 'host:h2', 'user:alice@okta', 'host:h3', 'service:payments', 'user:bob@okta'],
   ],
   [
     'anomaly_count',
     'desc',
-    ['user:alice@okta', 'host:h2', 'host:h1', 'host:h3', 'service:payments', 'user:bob@okta'],
+    ['user:alice@okta', 'host:h1', 'host:h2', 'user:bob@okta', 'host:h3', 'service:payments'],
   ],
   [
     'risk_score_change',
@@ -388,12 +388,14 @@ describe('entities grid on Elasticsearch', () => {
 
     it('counts the open alerts in the window per severity, with the last one', async () => {
       expect(await fetchColumnValues('alert_count')).toEqual({
+        // The alerts of host:h1 and of its two aliases: host:h4 was last alerted half an hour ago.
         'host:h1': {
           ...NO_ALERTS,
-          alert_count: 3,
-          alert_critical: 1,
+          alert_count: 5,
+          alert_critical: 2,
           alert_high: 2,
-          last_seen_alert: hoursAgo(cluster.now, 3),
+          alert_low: 1,
+          last_seen_alert: hoursAgo(cluster.now, 0.5),
         },
         'host:h2': {
           ...NO_ALERTS,
@@ -413,33 +415,48 @@ describe('entities grid on Elasticsearch', () => {
       });
     });
 
-    it('counts the anomaly records of the installed jobs', async () => {
+    it('counts the anomaly records of the installed jobs, in a group those of its members', async () => {
       expect(await fetchColumnValues('anomaly_count')).toEqual({
-        'host:h1': { anomaly_count: null },
+        'host:h1': { anomaly_count: 1 },
         'host:h2': { anomaly_count: 1 },
         'host:h3': { anomaly_count: null },
         'service:payments': { anomaly_count: null },
         'user:alice@okta': { anomaly_count: 2 },
-        'user:bob@okta': { anomaly_count: null },
+        'user:bob@okta': { anomaly_count: 1 },
       });
     });
 
-    it.each(Object.entries(VIEW_SIZES))(
-      'gives an entity the same anomaly count sorted by it as enriched, on %s',
-      async (_view, viewSize) => {
-        const sorted = await fetchAllPages(
-          cluster.runQuery,
-          { ...BASE_ARGS, sort: { field: 'anomaly_count', direction: 'desc' } },
-          viewSize
-        );
-        const enriched = await fetchColumnValues('anomaly_count');
-        expect(
-          Object.fromEntries(sorted.map((row) => [row['entity.id'], row.anomaly_count]))
-        ).toEqual(
-          Object.fromEntries(Object.entries(enriched).map(([id, { anomaly_count: n }]) => [id, n]))
-        );
-      }
-    );
+    it('counts the alerts and anomalies of an entity alone in individual rows', async () => {
+      expect(await fetchColumnValues('alert_count', 'individual')).toMatchObject({
+        'host:h1': { alert_count: 3 },
+        'host:h4': { alert_count: 1 },
+        'host:h5': { alert_count: 1 },
+      });
+      expect(await fetchColumnValues('anomaly_count', 'individual')).toMatchObject({
+        'host:h1': { anomaly_count: null },
+        'host:h4': { anomaly_count: 1 },
+      });
+    });
+
+    describe.each(['anomaly_count', 'alert_count', 'last_seen_alert'])('%s', (field) => {
+      it.each(Object.entries(VIEW_SIZES))(
+        'gives an entity the same value sorted by it as enriched, on %s',
+        async (_view, viewSize) => {
+          const sorted = await fetchAllPages(
+            cluster.runQuery,
+            { ...BASE_ARGS, sort: { field, direction: 'desc' } },
+            viewSize
+          );
+          // The alert count's enricher reads the last alert too.
+          const enriched = await fetchColumnValues(
+            field === 'last_seen_alert' ? 'alert_count' : field
+          );
+          expect(Object.fromEntries(sorted.map((row) => [row['entity.id'], row[field]]))).toEqual(
+            Object.fromEntries(Object.entries(enriched).map(([id, values]) => [id, values[field]]))
+          );
+        }
+      );
+    });
 
     it('sizes each group with its records', async () => {
       expect(await fetchColumnValues('group_size')).toEqual({

@@ -5,35 +5,29 @@
  * 2.0.
  */
 
-import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD, getEntityId, getEntityIds } from '../common';
+import { ENTITY_ID_FIELD, getEntityId, getEntityIds } from '../common';
 import type { PageCursor, QueryArgs, Row, SortDir, SortValue } from '../common';
-import {
-  ENTITY_TYPE_FILTER,
-  buildKeepClause,
-  compareEntityIds,
-  fetchPerIdChunk,
-  getEntityAlias,
-  getMaxAliasGroups,
-} from './esql';
+import { buildKeepClause, compareEntityIds, fetchPerIdChunk, getMaxAliasGroups } from './esql';
 import { buildEntityFilterConditions, buildSearchedTargetsQuery } from './entities_in_view';
-import { buildGroupRowSteps } from './group_values';
 import type { EsqlRunner } from './types';
 
 // A sort by a column that shows the group's value reads the groups with aliases and the other
 // entities apart. Most entities are alone in their group and sort natively, by their own value.
 // The few groups with aliases come from the alias docs, and the two streams are merged here.
 
-/** The groups with aliases that pass the filters, as the rows of the grid. */
-const buildGroupRowsQuery = (args: QueryArgs): string =>
-  [
-    `FROM ${getEntityAlias(args.namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
-    ...buildGroupRowSteps(args),
-    // The filters are written on the entity fields, which now hold the group's values.
-    ...buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`),
-    buildKeepClause(args),
-    `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,
-  ].join('\n');
+/**
+ * The end of every query of group rows: the filters on the entity fields, which by now hold the
+ * group's values, and the fields of the rows. `columns` are the group's own columns that the
+ * rows carry.
+ */
+export const buildGroupRowsOutput = (
+  args: QueryArgs,
+  columns: readonly string[] = []
+): string[] => [
+  ...buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`),
+  buildKeepClause(args, ...columns),
+  `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,
+];
 
 const getSortValue = (row: Row, field: string): SortValue => {
   const value = row[field];
@@ -61,13 +55,23 @@ const isAfterCursor = (field: string, direction: SortDir, cursor: PageCursor | n
   return (row: Row): boolean => getEntityId(row) !== cursor.entityId && compare(row, cursorRow) > 0;
 };
 
+export interface GroupedSortOptions {
+  /** The groups with aliases that pass the filters, as rows with the group's values. */
+  buildGroupRowsQuery: (args: QueryArgs) => string;
+  /**
+   * The other entities, sorted and filtered by their own value like the rows of a group of one,
+   * with `extraRows` more than the page and its extra row, as the heads of groups are dropped.
+   */
+  fetchEntityRows: (extraRows: number) => Promise<Row[]>;
+}
+
 /**
  * One page of rows plus one, sorted by a column that shows the group's value.
  *
  * The groups with aliases that pass the filters are read first. The other entities are read
- * natively, sorted and filtered by their own value, with as many extra rows as there are groups,
- * since an entity that heads a group is dropped for its group row. A search can't run after the
- * group join, so its matches among the group heads are read separately.
+ * sorted and filtered by their own value, with as many extra rows as there are groups, since an
+ * entity that heads a group is dropped for its group row. A search can't run after the group
+ * join, so its matches among the group heads are read separately.
  *
  * It fails when there are more groups than one query returns: a page from a partial list of
  * groups would be in the wrong order.
@@ -75,7 +79,7 @@ const isAfterCursor = (field: string, direction: SortDir, cursor: PageCursor | n
 export const fetchGroupedSortPage = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
-  buildEntitiesQuery: (extraRows: number) => string
+  { buildGroupRowsQuery, fetchEntityRows }: GroupedSortOptions
 ): Promise<Row[]> => {
   const { sort, cursor, pageSize } = args;
   const groups = await runQuery(buildGroupRowsQuery(args));
@@ -97,7 +101,7 @@ export const fetchGroupedSortPage = async (
     .filter((row) => searchedIds.has(getEntityId(row) ?? ''))
     .filter(isAfterCursor(sort.field, sort.direction, cursor));
 
-  const entityRows = (await runQuery(buildEntitiesQuery(groupIds.size))).filter(
+  const entityRows = (await fetchEntityRows(groupIds.size)).filter(
     (row) => !groupIds.has(getEntityId(row) ?? '')
   );
 

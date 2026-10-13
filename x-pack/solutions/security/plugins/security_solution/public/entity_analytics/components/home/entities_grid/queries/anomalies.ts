@@ -11,16 +11,29 @@ import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookback,
-  SET_UNMAPPED_NULLIFY,
+  buildLookupJoinClause,
+  ENTITY_TYPE_FILTER,
+  getEntityAlias,
   toList,
 } from './esql';
-import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
+import {
+  getEntityIds,
+  getEntityId,
+  getNumber,
+  ANOMALY_COUNT_FIELD,
+  RESOLVED_TO_FIELD,
+} from '../common';
 import { buildEuidStages } from './euid_pipeline';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, Row } from '../common';
+import { buildGroupRowsOutput, fetchGroupedSortPage } from './grouped_sort';
+import { GROUP_KEY_FIELD, buildGroupRollUpSteps, groupEnricher } from './group_members';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
-import type { ColumnQuerySpec, PageEnricher } from './types';
+import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './types';
+
+/** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
+const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 
 /**
  * Final anomaly records of the security jobs in the time range, one row per record with its
@@ -52,6 +65,35 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
     mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
     sortField: ANOMALY_COUNT_FIELD,
   });
+
+/** A group's anomalies are those of its members. */
+const ANOMALY_ROLL_UPS = { [ANOMALY_COUNT_FIELD]: 'sum' } as const;
+
+/**
+ * Anomalies of the groups with aliases that pass the filters, as the rows of the grid. The
+ * counts per entity merge with the aliases and the heads of the groups, mapped to their group,
+ * and the counts are rolled up per group.
+ */
+const buildGroupAnomalyRowsQuery = (args: QueryArgs): string =>
+  [
+    SET_UNMAPPED_NULLIFY,
+    'FROM (',
+    ...buildAnomalyEntityRows(args),
+    `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
+    '), (',
+    `FROM ${getEntityAlias(args.namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+    `| EVAL member = MV_APPEND(\`entity.id\`, ${RESOLVED_TO_FIELD}), ${GROUP_KEY_FIELD} = ${RESOLVED_TO_FIELD}`,
+    '| MV_EXPAND member',
+    `| KEEP member, ${GROUP_KEY_FIELD}`,
+    '| RENAME member AS `entity.id`',
+    ')',
+    `| STATS ${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD}), ${GROUP_KEY_FIELD} = MAX(${GROUP_KEY_FIELD}) BY \`entity.id\``,
+    ...buildGroupRollUpSteps(ANOMALY_ROLL_UPS),
+    buildLookupJoinClause(args.concreteEntityIndexName),
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+    ...buildGroupRowsOutput(args, [ANOMALY_COUNT_FIELD]),
+  ].join('\n');
 
 // ── split sort (see split_sort.ts) ───────────────────────────────────────────
 
@@ -91,7 +133,24 @@ const anomalyCountEnricher: PageEnricher = {
 
 // ── query spec ────────────────────────────────────────────────────────────────
 
+/**
+ * The page of the plan; for resolved rows, the groups with aliases have the anomalies of their
+ * members and are read apart from the other entities.
+ */
+const fetchAnomalyCountSortPage: SortPageFetcher = (args, ctx) =>
+  args.rowsMode === 'resolved'
+    ? fetchGroupedSortPage(args, ctx.runQuery, {
+        buildGroupRowsQuery: buildGroupAnomalyRowsQuery,
+        fetchEntityRows: (extraRows) =>
+          fetchSplitSortPage(
+            anomalySplitSortPlan,
+            { ...args, pageSize: args.pageSize + extraRows },
+            ctx
+          ),
+      })
+    : fetchSplitSortPage(anomalySplitSortPlan, args, ctx);
+
 export const anomalyCountQuerySpec = {
-  fetchSortPage: (args, ctx) => fetchSplitSortPage(anomalySplitSortPlan, args, ctx),
-  enricher: anomalyCountEnricher,
+  fetchSortPage: fetchAnomalyCountSortPage,
+  enricher: groupEnricher(anomalyCountEnricher, ANOMALY_ROLL_UPS),
 } satisfies ColumnQuerySpec;
