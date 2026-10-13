@@ -90,3 +90,27 @@ export const pollUntil = async <T>(
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 };
+
+interface ActionsConnector {
+  id: string;
+  actionTypeId: string;
+  config?: { taskType?: string };
+}
+
+/**
+ * Preconfigured chat-completion inference connectors on this stack, via the public Actions
+ * list route. Empty on a stack booted without a connector source (plain CI): the e2e specs
+ * use this to skip their LLM-dependent flow with an explicit reason instead of failing.
+ */
+export const listChatCompletionConnectors = async (
+  api: AlertZeroApi
+): Promise<ActionsConnector[]> => {
+  const result = await api.public<ActionsConnector[]>('GET', '/api/actions/connectors');
+  if (result.statusCode !== 200) {
+    throw new Error(`listing connectors failed: ${result.statusCode}`);
+  }
+  return result.body.filter(
+    (connector) =>
+      connector.actionTypeId === '.inference' && connector.config?.taskType === 'chat_completion'
+  );
+};

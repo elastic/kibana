@@ -57,7 +57,11 @@ const getConnectorsFromKibanaDevYml = (): Record<string, AvailableConnector> => 
   }
 };
 
-const loadStaticPreconfiguredConnectors = (): Record<string, AvailableConnector> => {
+const loadStaticPreconfiguredConnectors = ({
+  required,
+}: {
+  required: boolean;
+}): Record<string, AvailableConnector> => {
   const envValue = process.env[AI_CONNECTORS_ENV];
   if (envValue) {
     try {
@@ -74,7 +78,7 @@ const loadStaticPreconfiguredConnectors = (): Record<string, AvailableConnector>
     }
   }
 
-  if (process.env.CI) {
+  if (required && process.env.CI) {
     throw new Error(`Can't read connectors, env variable ${AI_CONNECTORS_ENV} is not set`);
   }
 
@@ -130,9 +134,47 @@ const buildEisPreconfiguredConnectors = (): Record<string, unknown> => {
   return connectors;
 };
 
-const preconfiguredConnectors = {
-  ...loadStaticPreconfiguredConnectors(),
-  ...buildEisPreconfiguredConnectors(),
+/**
+ * Builds the stateful EIS server config: Elasticsearch uses the QA inference endpoint, and
+ * Kibana merges static preconfigured connectors (from env or `config/kibana.dev.yml`) with
+ * connectors derived from `target/eis_models.json`.
+ *
+ * `required: true` preserves this set's contract: on CI without `${AI_CONNECTORS_ENV}` the
+ * config throws rather than silently booting without connectors. `required: false` lets other
+ * config sets reuse the EIS wiring opportunistically: when no connector source exists the
+ * fragment falls back to plain `defaultConfig`, so the stack boots without inference
+ * connectors and LLM-dependent tests can skip themselves.
+ */
+export const buildEisServerConfig = ({ required }: { required: boolean }): ScoutServerConfig => {
+  const preconfiguredConnectors = {
+    ...loadStaticPreconfiguredConnectors({ required }),
+    ...buildEisPreconfiguredConnectors(),
+  };
+
+  if (
+    !required &&
+    Object.keys(preconfiguredConnectors).every((key) => !preconfiguredConnectors[key])
+  ) {
+    return { ...defaultConfig };
+  }
+
+  return {
+    ...defaultConfig,
+    esTestCluster: {
+      ...defaultConfig.esTestCluster,
+      serverArgs: [
+        ...defaultConfig.esTestCluster.serverArgs,
+        `xpack.inference.elastic.url=${EIS_QA_URL}`,
+      ],
+    },
+    kbnTestServer: {
+      ...defaultConfig.kbnTestServer,
+      serverArgs: [
+        ...defaultConfig.kbnTestServer.serverArgs,
+        `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
+      ],
+    },
+  };
 };
 
 /**
@@ -140,20 +182,4 @@ const preconfiguredConnectors = {
  * uses the QA inference endpoint, and Kibana merges static preconfigured connectors
  * (from env or `config/kibana.dev.yml`) with connectors derived from `target/eis_models.json`.
  */
-export const servers: ScoutServerConfig = {
-  ...defaultConfig,
-  esTestCluster: {
-    ...defaultConfig.esTestCluster,
-    serverArgs: [
-      ...defaultConfig.esTestCluster.serverArgs,
-      `xpack.inference.elastic.url=${EIS_QA_URL}`,
-    ],
-  },
-  kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
-    ],
-  },
-};
+export const servers: ScoutServerConfig = buildEisServerConfig({ required: true });

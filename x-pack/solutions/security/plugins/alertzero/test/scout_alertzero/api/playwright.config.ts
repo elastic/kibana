@@ -7,11 +7,6 @@
 
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
-/**
- * Sequential: the flows share one Worker, one proposals queue and one set of seeded alerts, and
- * each waits on real model calls. Needs the `alertzero_e2e` server config set (EIS models).
- */
 export default createPlaywrightConfig({
   testDir: './tests',
-  workers: 1,
 });

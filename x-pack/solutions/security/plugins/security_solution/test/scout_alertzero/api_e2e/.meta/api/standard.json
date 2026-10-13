@@ -13,7 +13,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/attack_discovery_to_isolate.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api_e2e/api/tests/attack_discovery_to_isolate.spec.ts",
         "line": 89,
         "column": 53
       }
@@ -27,7 +27,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api_e2e/api/tests/worker_control.spec.ts",
         "line": 48,
         "column": 5
       }
@@ -41,7 +41,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api_e2e/api/tests/worker_control.spec.ts",
         "line": 60,
         "column": 24
       }
@@ -55,7 +55,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api_e2e/api/tests/worker_control.spec.ts",
         "line": 76,
         "column": 14
       }
@@ -69,7 +69,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api_e2e/api/tests/worker_control.spec.ts",
         "line": 97,
         "column": 21
       }

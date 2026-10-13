@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { mkdirSync, writeFileSync } from 'fs';
 import { expect } from '@kbn/scout-security/api';
 import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { getAd2Scenario } from '@kbn/evals-suite-attack-discovery-agent-builder';
-import { seedEndpointHosts } from '../../../scout/edr_response_actions/common/seed_endpoint_hosts';
-import { completeHostAction } from '../../../scout/edr_response_actions/common/complete_host_action';
+import { seedEndpointHosts } from '../../../../scout/edr_response_actions/common/seed_endpoint_hosts';
+import { completeHostAction } from '../../../../scout/edr_response_actions/common/complete_host_action';
 import {
   assertExecutionCompleted,
   apiTest,
@@ -26,6 +25,7 @@ import {
   resetWorker,
   seedAttackScenario,
   updateWorker,
+  listChatCompletionConnectors,
   waitForExecution,
   waitForExecutionStatus,
   waitForNewExecution,
@@ -34,12 +34,6 @@ import type { SeededScenario } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
 const FORENSICS_WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
-
-// Media capture hook (run_scout.sh's SCOUT_KEEP_STACK path): when ORCA_MEDIA_EJECT=1 this spec
-// ejects the ids the off-board capture script needs, and the seeded host is left in place so the
-// live stack can still be photographed after the run. Opt-in and off for every other consumer.
-const MEDIA_EJECT = process.env.ORCA_MEDIA_EJECT === '1';
-const MEDIA_FACTS_DIR = '/tmp/orca-media';
 
 interface EndpointAction {
   id: string;
@@ -52,9 +46,10 @@ interface EndpointAction {
  * Seeded attack chain -> Attack Discovery -> review -> Investigate proposal -> approve ->
  * forensics -> Isolate proposal -> approve -> Defend isolate action.
  *
- * Every hop is a real workflow run against a real model (EIS, via the `alertzero_e2e` config
- * set); nothing is stubbed. Proposals are read from the queue and approved through the same
- * route the approval modal calls.
+ * Every hop is a real workflow run against a real model (via the preconfigured inference
+ * connectors of the `alertzero` server config set); nothing is stubbed. When the stack was
+ * booted without a chat-completion inference connector (plain CI), the flow cannot run and the
+ * test skips with an explicit reason instead of failing or silently passing.
  */
 apiTest.describe(
   'AlertZero e2e - attack discovery to host isolation',
@@ -85,9 +80,7 @@ apiTest.describe(
       await attempt(async () => {
         if (api) await resetWorker(api, FORENSICS_WORKER_ID);
       });
-      // Media ejection (ORCA_MEDIA_EJECT=1) needs the seeded host to survive the run: the capture
-      // script photographs the live stack after this spec, and the host it releases is this one.
-      if (!MEDIA_EJECT) await attempt(async () => cleanupHosts?.());
+      await attempt(async () => cleanupHosts?.());
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
       });
@@ -106,6 +99,17 @@ apiTest.describe(
       async ({ apiClient, samlAuth, esClient, kbnClient, config }) => {
         apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 3 * testData.PROPOSAL_TIMEOUT_MS);
         const api = await getAdminApi(apiClient, samlAuth);
+
+        // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
+        // chat-completion inference connector (the `alertzero` config set only wires connectors
+        // when a connector source exists, which plain CI does not have), every workflow run
+        // would fail on its first model call. Skip with an explicit reason instead of failing;
+        // with a connector present the flow runs for real (see the config set's doc block).
+        const chatConnectors = await listChatCompletionConnectors(api);
+        apiTest.skip(
+          chatConnectors.length === 0,
+          'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero attack-discovery flow requires one (agent_builder_smoke-style EIS connector source)'
+        );
 
         // Explicit setup: force the per-space anonymization fields install before the workflows
         // run. On a cold space the first `anonymization_fields` read lazily installs it
@@ -326,27 +330,6 @@ apiTest.describe(
           },
           { timeoutMs: testData.ACTION_TIMEOUT_MS }
         );
-
-        // Media capture hook (run_scout.sh's SCOUT_KEEP_STACK path, ORCA_MEDIA_EJECT=1): eject the
-        // ids the off-board capture script needs and leave the seeded host in place so the live
-        // stack can still be photographed after this run. Opt-in; a normal run is unchanged.
-        if (MEDIA_EJECT) {
-          mkdirSync(MEDIA_FACTS_DIR, { recursive: true });
-          writeFileSync(
-            `${MEDIA_FACTS_DIR}/facts.json`,
-            JSON.stringify(
-              {
-                investigateProposalId: investigate.id,
-                isolateProposalId: isolate.id,
-                hostId: hosts.hosts[0].agentId,
-                hostName: hosts.hosts[0].hostname,
-                startedAt,
-              },
-              null,
-              2
-            )
-          );
-        }
       }
     );
   }
