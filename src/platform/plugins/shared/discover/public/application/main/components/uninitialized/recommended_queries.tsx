@@ -27,6 +27,11 @@ import type { QueryTemplate } from '@kbn/esql-language';
 
 const RUN_BUTTON_CLASS = 'discoverRecommendedQuery__run';
 
+const CODE_BLOCK_HEIGHT = '112px';
+
+// Wider than the EUI `xl` breakpoint (1200). Below this, the section uses 85vw.
+const WIDE_SCREEN_MIN_WIDTH = 1240;
+
 const cardStyles = css`
   .${RUN_BUTTON_CLASS} {
     opacity: 0;
@@ -64,7 +69,7 @@ const RecommendedQueryCard = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m" css={cardStyles}>
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s" css={cardStyles}>
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
@@ -98,7 +103,11 @@ const RecommendedQueryCard = ({
         fontSize="s"
         paddingSize="s"
         isCopyable
-        css={{ marginTop: euiTheme.size.m }}
+        css={{
+          marginTop: euiTheme.size.m,
+          blockSize: CODE_BLOCK_HEIGHT,
+          overflow: 'auto',
+        }}
       >
         {queryString}
       </EuiCodeBlock>
@@ -118,7 +127,21 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
     <section
       aria-labelledby={titleId}
       data-test-subj="discoverRecommendedQueries"
-      css={{ paddingInline: euiTheme.size.l }}
+      css={{
+        paddingInline: euiTheme.size.l,
+        boxSizing: 'border-box',
+        minWidth: 0,
+        // 100cqi is the Discover content column, so the section cannot spill past it.
+        width: 'min(85vw, 100cqi)',
+        maxWidth: 'min(85vw, 100cqi)',
+        [`@media (max-width: ${euiTheme.breakpoint.m - 1}px)`]: {
+          paddingTop: euiTheme.size.l,
+        },
+        [`@media (min-width: ${WIDE_SCREEN_MIN_WIDTH}px)`]: {
+          width: 'min(75vw, 100cqi)',
+          maxWidth: 'min(75vw, 100cqi)',
+        },
+      }}
     >
       <EuiTitle size="xs">
         <h2 id={titleId}>
@@ -127,7 +150,19 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
           })}
         </h2>
       </EuiTitle>
-      <EuiFlexGrid columns={3} gutterSize="m" css={{ marginTop: euiTheme.size.base }}>
+      <EuiFlexGrid
+        columns={3}
+        gutterSize="m"
+        css={{
+          marginTop: euiTheme.size.base,
+          width: '100%',
+          minWidth: 0,
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          [`@media (max-width: ${euiTheme.breakpoint.m - 1}px)`]: {
+            gridTemplateColumns: '1fr',
+          },
+        }}
+      >
         {queries.map((query) => (
           <EuiFlexItem key={query.queryString}>
             <RecommendedQueryCard query={query} onRunQuery={onRunQuery} />

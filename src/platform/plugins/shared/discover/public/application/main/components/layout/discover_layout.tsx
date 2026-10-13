@@ -552,6 +552,8 @@ const componentStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    // Lets the empty-state section size against this column, not the viewport.
+    containerType: 'inline-size',
   }),
   dscPageContent: css({
     position: 'relative',
