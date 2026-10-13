@@ -548,6 +548,82 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('Should query only the agent fields it needs, without the status runtime field', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = generateAgents(2, 'policy-1', '8.18.0');
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 2, agents, page: 1, perPage: 2 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ perPage: 0, includeStatusRuntimeField: false })
+      );
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          includeStatusRuntimeField: false,
+          fetchFields: [],
+          _source: ['policy_id', 'agent.version'],
+        })
+      );
+    });
+
+    describe('package policies of the agent policies', () => {
+      const packagePolicy = (id: string) =>
+        ({ id, name: id, package: { name: 'test-package', version: '1.0.0' } } as PackagePolicy);
+
+      const runWithTwoAgentPolicies = async () => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+          { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+          { id: 'policy-2', revision: 5, has_agent_version_conditions: true },
+        ] as AgentPolicy[]);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockPackagePolicyService.findAllForAgentPolicy = jest
+          .fn()
+          .mockImplementation(async (_soClient: unknown, agentPolicyId: string) => [
+            packagePolicy(`package-policy-of-${agentPolicyId}`),
+          ]);
+        mockedGetAgentsByKuery.mockResolvedValue({ total: 2, agents: [], page: 1, perPage: 2 });
+        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          getMockFetchAllAgentsByKuery(
+            generateAgents(2, options.kuery.includes('policy-2') ? 'policy-2' : 'policy-1')
+          )
+        );
+
+        await runTask();
+      };
+
+      it('loads a package without an agent version condition only once per run', async () => {
+        mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(false);
+
+        await runWithTwoAgentPolicies();
+
+        expect(mockedGetPackageInfo).toHaveBeenCalledTimes(1);
+        expect(mockedGetAgentTemplateAssetsMap).toHaveBeenCalledTimes(1);
+        expect(mockPackagePolicyService.compilePackagePolicyForVersions).not.toHaveBeenCalled();
+        // the agents of both policies are still assigned
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledTimes(2);
+      });
+
+      it('compiles a package with an agent version condition for every agent policy', async () => {
+        mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(true);
+
+        await runWithTwoAgentPolicies();
+
+        expect(mockedGetPackageInfo).toHaveBeenCalledTimes(2);
+        expect(mockPackagePolicyService.compilePackagePolicyForVersions).toHaveBeenCalledTimes(2);
+      });
+    });
+
     it('Should not compile version-specific inputs for package policies without agent version conditions', async () => {
       const agentPolicies = [
         {
@@ -683,6 +759,58 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+    });
+
+    describe('sweep throttle', () => {
+      const minutesAgo = (minutes: number) =>
+        new Date(Date.now() - minutes * 60 * 1000).toISOString();
+      const runWithState = (state: Record<string, unknown>) =>
+        runTask({ ...MOCK_TASK_INSTANCE, state });
+
+      beforeEach(() => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
+        mockedGetVariantPolicyIdsFromAgentsWithoutBaseId.mockClear();
+      });
+
+      it('sweeps on the first run and records when', async () => {
+        const result = await runWithState({});
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          state: { lastSweepAt: expect.any(String), sentinelVersionEnabled: false },
+        });
+      });
+
+      it('skips the sweep when it ran recently and keeps the time of the last sweep', async () => {
+        const lastSweepAt = minutesAgo(2);
+
+        const result = await runWithState({ lastSweepAt, sentinelVersionEnabled: false });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).not.toHaveBeenCalled();
+        expect(result).toEqual({ state: { lastSweepAt, sentinelVersionEnabled: false } });
+      });
+
+      it('sweeps again once the interval has passed', async () => {
+        const result: any = await runWithState({
+          lastSweepAt: minutesAgo(11),
+          sentinelVersionEnabled: false,
+        });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+        expect(Date.now() - Date.parse(result.state.lastSweepAt)).toBeLessThan(60 * 1000);
+      });
+
+      it('sweeps right away when the sentinel version was turned on or off', async () => {
+        await runWithState({ lastSweepAt: minutesAgo(1), sentinelVersionEnabled: true });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+      });
+
+      it('sweeps when the time of the last sweep is not valid', async () => {
+        await runWithState({ lastSweepAt: 'not a date', sentinelVersionEnabled: false });
+
+        expect(mockedGetVariantPolicyIdsFromAgentsWithoutBaseId).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('reassigns orphaned agents and deletes stale variant docs when the parent no longer has version conditions', async () => {

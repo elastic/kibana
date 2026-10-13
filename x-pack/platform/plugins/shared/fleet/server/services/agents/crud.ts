@@ -561,6 +561,15 @@ export async function fetchAllAgentsByKuery(
     _source?: estypes.SearchRequest['_source'];
     /** Overrides the ES `fields` param. Defaults to all runtime field keys. */
     fetchFields?: string[];
+    /**
+     * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
+     * requires. Defaults to true. Forced on when the kuery references `status`.
+     *
+     * Opting out replaces the `NOT status:inactive` filter of `showInactive: false` with the
+     * stored `active:true` filter, so agents that are inactive by timeout are no longer excluded
+     * (unenrolled agents are). `Agent.status` is not populated.
+     */
+    includeStatusRuntimeField?: boolean;
   }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
@@ -570,19 +579,22 @@ export async function fetchAllAgentsByKuery(
     sortOrder = 'desc',
     spaceId,
     showInactive = true,
+    includeStatusRuntimeField = true,
   } = options;
+  const shouldIncludeStatusRuntimeField =
+    includeStatusRuntimeField || Boolean(kuery?.toLowerCase().includes('status:'));
 
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
   if (kuery && kuery !== '') {
     filters.push(kuery);
   }
   if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
+    filters.push(shouldIncludeStatusRuntimeField ? ACTIVE_AGENT_CONDITION : 'active:true');
   }
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = {
-    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),
     ...(appContextService.getExperimentalFeatures().enableOpAMP
       ? PIPELINE_CONFIG_RUNTIME_FIELD
       : {}),
@@ -606,7 +618,9 @@ export async function fetchAllAgentsByKuery(
         ...query,
       },
       resultsMapper: (data): Agent[] => {
-        return data.hits.hits.map((hit) => searchHitToAgent(hit));
+        return data.hits.hits.map((hit) =>
+          searchHitToAgent(hit, { requireStatusRuntimeField: shouldIncludeStatusRuntimeField })
+        );
       },
     });
   } catch (err) {

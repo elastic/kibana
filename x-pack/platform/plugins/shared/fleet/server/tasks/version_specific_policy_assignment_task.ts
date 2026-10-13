@@ -70,6 +70,29 @@ const MAX_VERSION_SPECIFIC_POLICY_BUCKETS = 10000;
 // race with a concurrent deployPolicies call: any racing write stamps a fresh @timestamp
 // (agent_policy.ts:1946), which the deleteByQuery range filter excludes without a TOCTOU window.
 const STALE_VARIANT_GRACE_MS = 60 * 60 * 1000; // 1 hour
+// The orphan sweep is a safety net: policy updates already reassign agents directly. It reads up to
+// MAX_VERSION_SPECIFIC_POLICY_BUCKETS policy ids and the parent policies of the variants, so it does not run
+// on every run. It runs right away when the sentinel version is turned on or off, which changes what is orphaned.
+const ORPHAN_SWEEP_INTERVAL_MS = 10 * 60 * 1000;
+
+interface VersionSpecificPolicyAssignmentTaskState {
+  lastSweepAt?: string;
+  sentinelVersionEnabled?: boolean;
+  // the state of a task is a `Record<string, unknown>`
+  [key: string]: unknown;
+}
+
+// Agent fields read by the task: the id (always returned), the policy id and the agent version
+const AGENT_SOURCE_FIELDS = ['policy_id', 'agent.version'];
+
+// Options of the agent queries that only read the fields above: no agent status runtime field (and the
+// inactivity timeouts scan it needs), no agent status in the response and only the needed source fields.
+// With `showInactive: false` agents that are inactive by timeout are then not excluded, unenrolled agents are.
+const LIGHT_AGENT_QUERY_OPTIONS = {
+  includeStatusRuntimeField: false,
+  fetchFields: [] as string[],
+  _source: AGENT_SOURCE_FIELDS,
+};
 
 interface VersionSpecificPolicyAssignmentTaskConfig {
   taskInterval?: string;
@@ -198,25 +221,42 @@ export class VersionSpecificPolicyAssignmentTask {
       // them: Phase 1 skips agents already correctly assigned, so a wrongly-deleted variant is
       // never recreated and the agent stays stranded on a missing policy permanently.
       const deployedThisRun = new Set<string>();
+      // Packages without an agent version condition in their input templates, to not load them again
+      // for every agent policy of the run
+      const packageHasTemplateCondition = new Map<string, boolean>();
       const sentinelVersionEnabled = await isSentinelPolicyVersionEnabled();
+      const previousState = (taskInstance.state ?? {}) as VersionSpecificPolicyAssignmentTaskState;
       await this.processAgentPoliciesWithVersionConditions(
         esClient,
         soClient,
         signal,
         deployedThisRun,
-        sentinelVersionEnabled
+        sentinelVersionEnabled,
+        packageHasTemplateCondition
       );
       if (sentinelVersionEnabled) {
         await this.assignAgentsToSentinelPolicies(esClient, soClient, signal);
       }
-      await this.reassignAgentsFromOrphanedVersionSpecificPolicies(
-        esClient,
-        soClient,
-        signal,
-        deployedThisRun,
-        sentinelVersionEnabled
-      );
+      const shouldSweepOrphans = this.shouldSweepOrphans(previousState, sentinelVersionEnabled);
+      if (shouldSweepOrphans) {
+        await this.reassignAgentsFromOrphanedVersionSpecificPolicies(
+          esClient,
+          soClient,
+          signal,
+          deployedThisRun,
+          sentinelVersionEnabled
+        );
+      } else {
+        this.logger.debug(
+          '[VersionSpecificPolicyAssignmentTask] Skipping the orphan sweep, it ran recently'
+        );
+      }
       this.endRun('success');
+      const state: VersionSpecificPolicyAssignmentTaskState = {
+        lastSweepAt: shouldSweepOrphans ? new Date().toISOString() : previousState.lastSweepAt,
+        sentinelVersionEnabled,
+      };
+      return { state };
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
         this.logger.warn(
@@ -229,6 +269,17 @@ export class VersionSpecificPolicyAssignmentTask {
       this.endRun('error');
     }
   };
+
+  private shouldSweepOrphans(
+    state: VersionSpecificPolicyAssignmentTaskState,
+    sentinelVersionEnabled: boolean
+  ): boolean {
+    if (!state.lastSweepAt || state.sentinelVersionEnabled !== sentinelVersionEnabled) {
+      return true;
+    }
+    const elapsedMs = Date.now() - Date.parse(state.lastSweepAt);
+    return Number.isNaN(elapsedMs) || elapsedMs >= ORPHAN_SWEEP_INTERVAL_MS;
+  }
 
   private endRun(msg: string = '') {
     this.logger.debug(
@@ -244,7 +295,8 @@ export class VersionSpecificPolicyAssignmentTask {
     soClient: SavedObjectsClientContract,
     signal: AbortSignal,
     deployedThisRun: Set<string>,
-    sentinelVersionEnabled: boolean
+    sentinelVersionEnabled: boolean,
+    packageHasTemplateCondition: Map<string, boolean>
   ) {
     // Fetch agent policies with version conditions in batches
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -272,7 +324,8 @@ export class VersionSpecificPolicyAssignmentTask {
           agentPolicy,
           signal,
           deployedThisRun,
-          sentinelVersionEnabled
+          sentinelVersionEnabled,
+          packageHasTemplateCondition
         );
       }
     }
@@ -315,6 +368,7 @@ export class VersionSpecificPolicyAssignmentTask {
           .join(' or ')})`,
         perPage: AGENTS_BATCHSIZE,
         showInactive: false,
+        ...LIGHT_AGENT_QUERY_OPTIONS,
       });
       for await (const agentsBatch of agentsFetcher) {
         throwIfAborted(signal);
@@ -443,7 +497,8 @@ export class VersionSpecificPolicyAssignmentTask {
     agentPolicy: AgentPolicy,
     signal: AbortSignal,
     deployedThisRun: Set<string>,
-    sentinelVersionEnabled: boolean
+    sentinelVersionEnabled: boolean,
+    packageHasTemplateCondition: Map<string, boolean>
   ) {
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Processing agent policy ${agentPolicy.id}`
@@ -474,7 +529,8 @@ export class VersionSpecificPolicyAssignmentTask {
       agentPolicy.id,
       agentVersionGroups,
       signal,
-      deployedThisRun
+      deployedThisRun,
+      packageHasTemplateCondition
     );
   }
 
@@ -540,6 +596,7 @@ export class VersionSpecificPolicyAssignmentTask {
       kuery: combinedKuery,
       showInactive: false,
       perPage: 0,
+      includeStatusRuntimeField: false,
     });
     const { total: inactiveSentinelTotal } = includeInactiveSentinelAgents
       ? await getAgentsByKuery(esClient, soClient, {
@@ -608,6 +665,7 @@ export class VersionSpecificPolicyAssignmentTask {
           kuery: combinedKuery,
           perPage: AGENTS_BATCHSIZE,
           showInactive: false,
+          ...LIGHT_AGENT_QUERY_OPTIONS,
         })
       );
     }
@@ -617,6 +675,8 @@ export class VersionSpecificPolicyAssignmentTask {
           kuery: inactiveSentinelKuery,
           perPage: AGENTS_BATCHSIZE,
           showInactive: true,
+          // the kuery filters by status: keep the status runtime field, only read the needed source fields
+          _source: AGENT_SOURCE_FIELDS,
         })
       );
     }
@@ -658,7 +718,8 @@ export class VersionSpecificPolicyAssignmentTask {
     parentPolicyId: string,
     agentVersionGroups: AgentVersionGroup[],
     signal: AbortSignal,
-    deployedThisRun: Set<string>
+    deployedThisRun: Set<string>,
+    packageHasTemplateCondition: Map<string, boolean>
   ) {
     // Deploy the parent policy with version-specific policies for each version found
     const versionsToCreate = agentVersionGroups.map((group) => group.minorVersion);
@@ -682,6 +743,12 @@ export class VersionSpecificPolicyAssignmentTask {
           continue;
         }
 
+        const packageKey = `${packagePolicy.package.name}@${packagePolicy.package.version}`;
+        // Nothing to compile for a package without an agent version condition in its input templates
+        if (packageHasTemplateCondition.get(packageKey) === false) {
+          continue;
+        }
+
         const pkgInfo = await getPackageInfo({
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
@@ -694,7 +761,9 @@ export class VersionSpecificPolicyAssignmentTask {
           savedObjectsClient: soClient,
         });
 
-        if (hasAgentVersionConditionInInputTemplate(assetsMap)) {
+        const hasTemplateCondition = hasAgentVersionConditionInInputTemplate(assetsMap);
+        packageHasTemplateCondition.set(packageKey, hasTemplateCondition);
+        if (hasTemplateCondition) {
           this.logger.debug(
             `[VersionSpecificPolicyAssignmentTask] Compiling version-specific inputs for package policy ${packagePolicy.id}`
           );
@@ -1075,6 +1144,7 @@ export class VersionSpecificPolicyAssignmentTask {
         kuery: variantAgentsKuery,
         perPage: AGENTS_BATCHSIZE,
         showInactive: true,
+        ...LIGHT_AGENT_QUERY_OPTIONS,
       });
       for await (const agentsBatch of agentsFetcher) {
         throwIfAborted(signal);
