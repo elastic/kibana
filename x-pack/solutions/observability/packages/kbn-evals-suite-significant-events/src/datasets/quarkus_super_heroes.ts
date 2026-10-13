@@ -799,7 +799,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'healthy-baseline',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'Quarkus Super Heroes application logs under healthy conditions with normal fight simulations across all microservices',
       },
@@ -842,7 +842,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'kafka-disconnect',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'Quarkus Super Heroes logs where the Kafka broker becomes unreachable, causing rest-fights to fail publishing fight events (SRMSG18206, SRMSG18212, Unable to write to Kafka) and event-statistics to fail consuming them (Topic fights not present in metadata, org.apache.kafka.common.errors.TimeoutException)',
       },
@@ -908,7 +908,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'fights-db-disconnect',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'Quarkus Super Heroes logs where the MongoDB database backing rest-fights becomes unreachable, causing fight persistence to fail with MongoTimeoutException (Timed out while waiting for a server that matches WritableServerSelector) and MongoSocketOpenException errors',
       },
@@ -967,7 +967,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'heroes-service-unreachable',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'Quarkus Super Heroes logs where the rest-heroes service becomes unreachable — SmallRye Fault Tolerance activates the fallback, producing "Falling back on Hero" WARN logs and fights won by "Fallback hero" in rest-fights. No hard connection errors are surfaced.',
       },
@@ -1023,7 +1023,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     {
       input: {
         scenario_id: 'heroes-db-disconnect',
-        stream_name: 'logs',
+        source_id: 'logs',
         stream_description:
           'Quarkus Super Heroes logs where the heroes PostgreSQL database becomes unreachable via the Vert.x reactive driver, causing rest-heroes to log Vert.x pool timeouts (NoStackTraceThrowable: Timeout, HR000021: DDL command failed) at startup and rest-fights to fall back to a fallback hero for all fight simulations',
       },
