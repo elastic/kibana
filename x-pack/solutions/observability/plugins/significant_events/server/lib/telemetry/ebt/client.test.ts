@@ -38,8 +38,7 @@ describe('EbtTelemetryClient', () => {
         output_tokens_used: 150,
         cached_tokens_used: 20,
         duration_ms: 1200,
-        stream_name: 'test-stream',
-        stream_type: 'wired',
+        source_id: 'test-stream',
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -51,8 +50,7 @@ describe('EbtTelemetryClient', () => {
           output_tokens_used: 150,
           cached_tokens_used: 20,
           duration_ms: 1200,
-          stream_name: 'test-stream',
-          stream_type: 'wired',
+          source_id: 'test-stream',
         }
       );
     });

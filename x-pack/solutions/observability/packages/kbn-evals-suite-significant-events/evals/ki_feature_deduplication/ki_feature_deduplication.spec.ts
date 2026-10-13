@@ -320,7 +320,7 @@ evaluate.describe(
                       id: scenario.input.scenario_id,
                       input: {
                         scenario_id: scenario.input.scenario_id,
-                        stream_name: MANAGED_STREAM_NAME,
+                        source_id: MANAGED_STREAM_NAME,
                         iterations: scenario.input.iterations,
                       },
                     })),
@@ -332,7 +332,7 @@ evaluate.describe(
                 }: {
                   input: {
                     scenario_id: string;
-                    stream_name: string;
+                    source_id: string;
                     iterations: number;
                   };
                 }) => {

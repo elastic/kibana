@@ -400,6 +400,7 @@ export class AlertZeroPlugin
 
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
+      getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };

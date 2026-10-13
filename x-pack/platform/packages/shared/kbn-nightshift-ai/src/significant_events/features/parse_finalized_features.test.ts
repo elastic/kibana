@@ -25,34 +25,30 @@ const feature = (overrides: Record<string, unknown> = {}) => ({
 
 describe('parseFinalizedFeatures', () => {
   it('keeps valid unique features and well-formed ignored entries', () => {
-    const { features, ignoredFeatures } = parseFinalizedFeatures(
-      {
-        features: [
-          feature({
-            filter: { field: 'service.name' },
-            evidence: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'],
-          }),
-          feature({ id: 'empty-properties', properties: {} }),
-          feature({ title: 'Duplicate Okta' }),
-        ],
-        ignored_features: [
-          {
-            feature_id: 'excluded',
-            feature_title: 'Excluded',
-            excluded_feature_id: 'known-excluded',
-            reason: 'Same feature',
-          },
-          { feature_id: 42 },
-        ],
-      },
-      'logs.test'
-    );
+    const { features, ignoredFeatures } = parseFinalizedFeatures({
+      features: [
+        feature({
+          filter: { field: 'service.name' },
+          evidence: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'],
+        }),
+        feature({ id: 'empty-properties', properties: {} }),
+        feature({ title: 'Duplicate Okta' }),
+      ],
+      ignored_features: [
+        {
+          feature_id: 'excluded',
+          feature_title: 'Excluded',
+          excluded_feature_id: 'known-excluded',
+          reason: 'Same feature',
+        },
+        { feature_id: 42 },
+      ],
+    });
 
     expect(features).toEqual([
       expect.objectContaining({
         id: 'okta',
         title: 'Okta',
-        stream_name: 'logs.test',
         filter: undefined,
         evidence: ['e1', 'e2', 'e3', 'e4', 'e5'],
       }),
@@ -68,14 +64,11 @@ describe('parseFinalizedFeatures', () => {
   });
 
   it('caps the number of returned features', () => {
-    const { features } = parseFinalizedFeatures(
-      {
-        features: Array.from({ length: MAX_IDENTIFIED_FEATURES_PER_ITERATION + 1 }, (_, index) =>
-          feature({ id: `feature-${index}`, properties: { name: `feature-${index}` } })
-        ),
-      },
-      'logs.test'
-    );
+    const { features } = parseFinalizedFeatures({
+      features: Array.from({ length: MAX_IDENTIFIED_FEATURES_PER_ITERATION + 1 }, (_, index) =>
+        feature({ id: `feature-${index}`, properties: { name: `feature-${index}` } })
+      ),
+    });
 
     expect(features).toHaveLength(MAX_IDENTIFIED_FEATURES_PER_ITERATION);
   });
