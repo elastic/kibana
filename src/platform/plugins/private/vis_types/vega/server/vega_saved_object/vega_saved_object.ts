@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
+import { MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -20,12 +21,12 @@ import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
  * Attributes are stored in the API shape; filters replace `data_view_id` with `data_view_ref_name`.
  */
 export const vegaLibraryItemSavedObjectSchema = schema.object({
-  title: schema.string({ minLength: 1 }),
-  description: schema.maybe(schema.string()),
+  title: schema.displayName(),
+  description: schema.maybe(schema.description()),
   spec: schema.oneOf([
     schema.object({
       format: schema.literal('hjson'),
-      value: schema.string({ minLength: 1 }),
+      value: schema.string({ minLength: 1, maxLength: 1_000_000 }),
     }),
     schema.object({
       format: schema.literal('json'),
@@ -34,7 +35,7 @@ export const vegaLibraryItemSavedObjectSchema = schema.object({
   ]),
   query: schema.maybe(
     schema.object({
-      expression: schema.string(),
+      expression: schema.string({ maxLength: 1_000_000 }),
       language: schema.oneOf([schema.literal('kql'), schema.literal('lucene')]),
     })
   ),
@@ -48,10 +49,11 @@ export const vegaLibraryItemSavedObjectSchema = schema.object({
             schema.literal(ASCODE_FILTER_TYPE.DSL),
             schema.literal(ASCODE_FILTER_TYPE.SPATIAL),
           ]),
-          data_view_ref_name: schema.maybe(schema.string()),
+          data_view_ref_name: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
         },
         { unknowns: 'allow' }
-      )
+      ),
+      { maxSize: 100 }
     )
   ),
 });

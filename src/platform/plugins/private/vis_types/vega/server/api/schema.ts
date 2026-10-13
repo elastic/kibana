@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, displayName, description } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import {
-  asCodeQuerySchema,
-  getAsCodeTagsSchema,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_TITLE_LENGTH,
-} from '@kbn/as-code-shared-schemas';
+import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 
 export const vegaSpecSchema = z
   .discriminatedUnion('format', [
@@ -49,14 +44,8 @@ export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(100).optional()
 
 export const vegaLibraryItemSchema = z
   .object({
-    title: z
-      .string()
-      .min(1)
-      .max(MAX_TITLE_LENGTH)
-      .meta({ description: 'The Vega library item title.' }),
-    description: z
-      .string()
-      .max(MAX_DESCRIPTION_LENGTH)
+    title: displayName().meta({ description: 'The Vega library item title.' }),
+    description: description()
       .optional()
       .meta({ description: 'A short description of the Vega library item.' }),
     spec: vegaSpecSchema,
