@@ -204,6 +204,19 @@ function buildEuiGridColumn({
 
   const isSorted = sortedColumns?.some((column) => column.id === columnName);
 
+  // The summary column is not backed by a data view field in every data view, e.g. an ES|QL
+  // one. It still shows the cell actions of the document.
+  const cellActionsField =
+    dataViewField ??
+    (columnName === SOURCE_COLUMN
+      ? dataView.fields.create({
+          name: SOURCE_COLUMN,
+          type: '_source',
+          searchable: false,
+          aggregatable: false,
+        })
+      : undefined);
+
   let cellActions: EuiDataGridColumnCellAction[];
 
   if (disableCellActions) {
@@ -212,9 +225,9 @@ function buildEuiGridColumn({
     if (columnCellActions?.length && cellActionsHandling === 'replace') {
       cellActions = columnCellActions;
     } else {
-      cellActions = dataViewField
+      cellActions = cellActionsField
         ? buildCellActions(
-            dataViewField,
+            cellActionsField,
             toastNotifications,
             valueToStringConverter,
             documentsDisplayMode,

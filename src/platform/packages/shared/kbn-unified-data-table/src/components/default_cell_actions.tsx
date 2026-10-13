@@ -16,10 +16,15 @@ import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
-import { REVERSE_CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { getIgnoredReason } from '@kbn/discover-utils';
+import {
+  getDataViewFieldFromDataSource,
+  getIgnoredReason,
+  getMessageFieldWithFallbacks,
+} from '@kbn/discover-utils';
+import { useFindSimilarValues } from '../hooks/use_find_similar_values';
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
 import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
@@ -138,37 +143,48 @@ export const ReverseCategorizeBtn = ({
   uiActions?: UiActionsStart;
 }) => {
   const context = useContext(UnifiedDataTableContext);
+  const row = context.getRowByIndex(rowIndex);
+
+  // The summary (_source) column shows the message of the document, so analyse the value of
+  // its message field rather than the column itself.
+  const { targetField, rawValue } = (() => {
+    if (columnId !== SOURCE_COLUMN) {
+      return { targetField: field, rawValue: row?.flattened[columnId] };
+    }
+    const { field: messageFieldName, value } = getMessageFieldWithFallbacks(row?.flattened ?? {});
+    return {
+      targetField: messageFieldName
+        ? getDataViewFieldFromDataSource({
+            dataView: context.dataView,
+            dataSource: context.dataSource,
+            fieldName: messageFieldName,
+          })
+        : undefined,
+      rawValue: value,
+    };
+  })();
+
+  const { isAvailable, findSimilarValues } = useFindSimilarValues({
+    uiActions,
+    dataView: context.dataView,
+    field: targetField,
+  });
   const buttonTitle = i18n.translate('unifiedDataTable.grid.reverseCategorize', {
     defaultMessage: 'Find similar values',
   });
 
-  const isTextfield = field.esTypes?.includes('text') === true;
-
-  if (!uiActions || !isTextfield || !context.dataView.isTimeBased()) {
+  if (!isAvailable) {
     return null;
   }
 
   return (
     <Component
       onClick={() => {
-        const row = context.getRowByIndex(rowIndex);
-        const rawValue = row?.flattened[columnId];
         // Use the indexed/flattened value so category regex matching is not broken by
         // field formatting or clipboard escaping from valueToStringConverter.
-        const fieldValue =
-          typeof rawValue === 'string' ? rawValue : rawValue == null ? '' : String(rawValue);
-
-        uiActions.executeTriggerActions(REVERSE_CATEGORIZE_FIELD_TRIGGER, {
-          field,
-          dataView: context.dataView,
-          originatingApp: 'discover',
-          fieldValue,
-          openInNewTab: context.onOpenInNewTab,
-          query: context.queryContext?.query,
-          filters: context.queryContext?.filters,
-          filterQuery: context.queryContext?.filterQuery,
-          timeRange: context.queryContext?.timeRange,
-        });
+        findSimilarValues(
+          typeof rawValue === 'string' ? rawValue : rawValue == null ? '' : String(rawValue)
+        );
         dataGridRef?.current?.closeCellPopover();
       }}
       iconType="search"
@@ -232,7 +248,7 @@ export function buildCellActions(
   });
 
   const showReverseCategorize =
-    field.esTypes?.includes('text') === true &&
+    (field.esTypes?.includes('text') === true || field.name === SOURCE_COLUMN) &&
     uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
     dataView?.isTimeBased() === true;
 
