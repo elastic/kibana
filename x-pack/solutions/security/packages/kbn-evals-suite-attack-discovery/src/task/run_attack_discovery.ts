@@ -101,9 +101,15 @@ export const generateInsights = async ({
     const response = await inferenceClient.chatComplete({ messages });
 
     try {
-      const validated = attackDiscoveryGenerationSchema.parse(
-        JSON.parse(extractJson(response.content))
-      );
+      // In continuation mode the model returns only the missing suffix of
+      // combinedMaybePartialResults, so concatenate before parsing (same as
+      // the product generate node's getCombined call).
+      const jsonText = extractJson(response.content);
+      const combinedResponse =
+        combinedMaybePartialResults != null && combinedMaybePartialResults.length > 0
+          ? `${combinedMaybePartialResults}${jsonText}`
+          : jsonText;
+      const validated = attackDiscoveryGenerationSchema.parse(JSON.parse(combinedResponse));
       return {
         insights: validated.insights as AttackDiscovery[],
         traceId: getCurrentTraceId() ?? undefined,

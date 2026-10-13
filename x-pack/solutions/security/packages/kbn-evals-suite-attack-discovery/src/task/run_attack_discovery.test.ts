@@ -92,6 +92,34 @@ describe('generateInsights', () => {
     expect(chatComplete).toHaveBeenCalledTimes(3);
   });
 
+  it('combines a continuation reply with the partial results before parsing', async () => {
+    // graphState continuation: the prompt asks for only the missing suffix of
+    // combinedMaybePartialResults, so the reply is not standalone JSON
+    const partial =
+      '{"insights":[{"title":"Suspicious login","summaryMarkdown":"**sum**","detailsMarkdown":"**det**","alertIds":["a-1"]}';
+    const suffixReply = ['```json', ']}', '```'].join('\n');
+    const { inferenceClient, chatComplete } = createInferenceClient(suffixReply);
+
+    const { insights } = await generateInsights({
+      inferenceClient,
+      log,
+      prompt: 'Analyze the alerts.',
+      alerts: ['alert one'],
+      combinedMaybePartialResults: partial,
+      continuePrompt: 'Continue the JSON array.',
+    });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(insights).toEqual([
+      {
+        title: 'Suspicious login',
+        summaryMarkdown: '**sum**',
+        detailsMarkdown: '**det**',
+        alertIds: ['a-1'],
+      },
+    ]);
+  });
+
   it('renders $ sequences in the query literally, like the product prompt template', async () => {
     const { inferenceClient, chatComplete } = createInferenceClient(FENCED_JSON_REPLY);
     const alertsWithDollars = ['alert cmd: $& whoami; price 5$$'];
