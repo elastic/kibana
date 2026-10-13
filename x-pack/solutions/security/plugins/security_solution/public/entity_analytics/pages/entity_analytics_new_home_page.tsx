@@ -207,6 +207,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
     isDeltaLoading: riskMoversDeltaLoading,
+    isHistoryMissing: riskMoversHistoryMissing,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -228,6 +229,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
     isDeltaLoading: newlyHCDeltaLoading,
+    isHistoryMissing: newlyHCHistoryMissing,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -383,6 +385,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: riskMoversCount,
         delta: riskMoversDelta,
         isDeltaLoading: riskMoversDeltaLoading,
+        isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
@@ -424,6 +427,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: newlyHCCount,
         delta: newlyHCDelta,
         isDeltaLoading: newlyHCDeltaLoading,
+        isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
@@ -527,11 +531,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       riskMoversCount,
       riskMoversDelta,
       riskMoversDeltaLoading,
+      riskMoversHistoryMissing,
       riskMoversTrend,
       riskMoversLoading,
       newlyHCCount,
       newlyHCDelta,
       newlyHCDeltaLoading,
+      newlyHCHistoryMissing,
       newlyHCTrend,
       newlyHCLoading,
       newlyHCMissingIndex,

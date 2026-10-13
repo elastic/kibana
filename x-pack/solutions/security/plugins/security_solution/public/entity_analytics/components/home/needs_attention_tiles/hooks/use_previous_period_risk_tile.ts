@@ -112,7 +112,7 @@ export const usePreviousPeriodRiskTile = ({
 /**
  * Turns a risk tile's count and its previous-period result into the delta. It is undefined while
  * loading (with `isDeltaLoading` true), when a query failed, and when the risk history does not
- * reach back to the start of the previous period.
+ * reach back to the start of the previous period (with `isHistoryMissing` true).
  */
 export const getRiskTileDelta = ({
   count,
@@ -135,5 +135,7 @@ export const getRiskTileDelta = ({
   return {
     delta: isReady && hasHistory ? count - previous : undefined,
     isDeltaLoading: !skip && !isReady && !isError && !isUnavailable,
+    // Known not to reach back to the start of the previous period: the tile says so.
+    isHistoryMissing: !skip && !isError && isReady && !hasHistory,
   };
 };

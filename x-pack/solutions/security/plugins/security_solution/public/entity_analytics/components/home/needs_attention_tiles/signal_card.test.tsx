@@ -110,6 +110,29 @@ describe('SignalCard', () => {
     expect(screen.queryByTestId('eaFaceliftSignalCardDeltaBadge')).not.toBeInTheDocument();
   });
 
+  it('says there is not enough history to compare, in place of the delta', () => {
+    renderCard({ isDeltaUnavailable: true });
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaUnavailable')).toHaveTextContent(
+      'Not enough history to compare'
+    );
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaLabel')).not.toBeInTheDocument();
+  });
+
+  it('does not say it at a zero count, or while the delta loads, or next to a delta', () => {
+    const { unmount } = renderCard({ value: 0, isDeltaUnavailable: true });
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaUnavailable')).not.toBeInTheDocument();
+    unmount();
+
+    const loading = renderCard({ isDeltaLoading: true, isDeltaUnavailable: true });
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaUnavailable')).not.toBeInTheDocument();
+    loading.unmount();
+
+    renderCard({ delta: 5, isDeltaUnavailable: true });
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaUnavailable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toBeInTheDocument();
+  });
+
   it('draws the sparkline from the series values', () => {
     renderCard({ trend: [3, 5, 4] });
     expect(mockSeriesData).toEqual([

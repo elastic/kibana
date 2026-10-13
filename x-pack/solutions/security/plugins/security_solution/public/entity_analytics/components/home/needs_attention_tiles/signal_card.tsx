@@ -51,6 +51,11 @@ const SELECTED_DOT_OFFSET = 8;
 const TREND_UPWARD = '\u{2191}';
 const TREND_DOWNWARD = '\u{2193}';
 
+const notEnoughHistory = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistory',
+  { defaultMessage: 'Not enough history to compare' }
+);
+
 const vsPreviousPeriod = i18n.translate(
   'xpack.securitySolution.entityAnalytics.facelift.signalCard.vsPreviousPeriod',
   { defaultMessage: 'vs previous period' }
@@ -96,7 +101,10 @@ const getTrendReversedBadgeColors = (
 /** Delta text with a thousands separator like the main number, e.g. `+3` or `+1,627`. */
 const formatDelta = (delta: number): string => `${delta > 0 ? '+' : ''}${delta.toLocaleString()}`;
 
-const DeltaLabel: React.FC = () => {
+const DeltaLabel: React.FC<{ text?: string; testSubj?: string }> = ({
+  text = vsPreviousPeriod,
+  testSubj = 'eaFaceliftSignalCardDeltaLabel',
+}) => {
   const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
   return (
@@ -111,9 +119,9 @@ const DeltaLabel: React.FC = () => {
         line-height: ${METRIC_LINE_HEIGHT};
         color: ${euiTheme.colors.textSubdued};
       `}
-      data-test-subj="eaFaceliftSignalCardDeltaLabel"
+      data-test-subj={testSubj}
     >
-      {vsPreviousPeriod}
+      {text}
     </span>
   );
 };
@@ -376,6 +384,11 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
   const shownDelta =
     interactive && !card.isDeltaLoading && delta !== undefined && delta !== 0 ? delta : undefined;
   const shownTrend = interactive && trend !== undefined && trend.length > 1 ? trend : undefined;
+  const showNoHistory =
+    interactive &&
+    card.isDeltaUnavailable === true &&
+    !card.isDeltaLoading &&
+    shownDelta === undefined;
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -550,6 +563,12 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
                 </span>
               ) : null}
               {shownDelta !== undefined ? <MetricTrendBadge delta={shownDelta} /> : null}
+              {showNoHistory ? (
+                <DeltaLabel
+                  text={notEnoughHistory}
+                  testSubj="eaFaceliftSignalCardDeltaUnavailable"
+                />
+              ) : null}
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

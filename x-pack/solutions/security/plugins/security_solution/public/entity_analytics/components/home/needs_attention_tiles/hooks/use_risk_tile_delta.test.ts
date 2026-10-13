@@ -202,10 +202,15 @@ describe('getRiskTileDelta', () => {
   const ready = { count: 50, previous: 40, hasHistory: true, isFetching: false, isError: false };
 
   it('is the count minus the previous period once everything has loaded', () => {
-    expect(getRiskTileDelta(ready)).toEqual({ delta: 10, isDeltaLoading: false });
+    expect(getRiskTileDelta(ready)).toEqual({
+      delta: 10,
+      isDeltaLoading: false,
+      isHistoryMissing: false,
+    });
     expect(getRiskTileDelta({ ...ready, previous: 0 })).toEqual({
       delta: 50,
       isDeltaLoading: false,
+      isHistoryMissing: false,
     });
   });
 
@@ -217,13 +222,42 @@ describe('getRiskTileDelta', () => {
         hasHistory: undefined,
         isUnavailable: true,
       })
-    ).toEqual({ delta: undefined, isDeltaLoading: false });
+    ).toEqual({ delta: undefined, isDeltaLoading: false, isHistoryMissing: false });
   });
 
   it('shows no spinner for a skipped tile', () => {
     expect(getRiskTileDelta({ ...ready, previous: undefined, skip: true })).toEqual({
       delta: undefined,
       isDeltaLoading: false,
+      isHistoryMissing: false,
     });
+  });
+
+  it('says the history is missing, with no delta, once it is known not to reach back far enough', () => {
+    expect(getRiskTileDelta({ ...ready, hasHistory: false })).toEqual({
+      delta: undefined,
+      isDeltaLoading: false,
+      isHistoryMissing: true,
+    });
+  });
+
+  it('does not say the history is missing while loading, after an error, or when skipped', () => {
+    expect(getRiskTileDelta({ ...ready, hasHistory: false, isFetching: true })).toEqual({
+      delta: undefined,
+      isDeltaLoading: true,
+      isHistoryMissing: false,
+    });
+    expect(getRiskTileDelta({ ...ready, hasHistory: undefined })).toEqual({
+      delta: undefined,
+      isDeltaLoading: true,
+      isHistoryMissing: false,
+    });
+    expect(
+      getRiskTileDelta({ ...ready, hasHistory: false, previous: undefined, isError: true })
+        .isHistoryMissing
+    ).toBe(false);
+    expect(getRiskTileDelta({ ...ready, hasHistory: false, skip: true }).isHistoryMissing).toBe(
+      false
+    );
   });
 });
