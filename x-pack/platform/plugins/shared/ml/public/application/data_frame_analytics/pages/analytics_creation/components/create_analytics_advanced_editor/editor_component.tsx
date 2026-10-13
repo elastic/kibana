@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import dfaJsonSchema from '@kbn/json-schemas/src/put___ml_data_frame_analytics__id__schema.json';
-import { monaco } from '@kbn/monaco';
 import type { FC } from 'react';
 import React from 'react';
 
@@ -51,12 +50,12 @@ export const EditorComponent: FC<{
       }}
       editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
         const editorModelUri: string = editor.getModel()?.uri.toString()!;
-        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        jsonDefaults.setDiagnosticsOptions({
           validate: true,
           enableSchemaRequest: false,
           schemaValidation: 'error',
           schemas: [
-            ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas ?? []),
+            ...(jsonDefaults.diagnosticsOptions.schemas ?? []),
             {
               uri: editorModelUri,
               fileMatch: [editorModelUri],

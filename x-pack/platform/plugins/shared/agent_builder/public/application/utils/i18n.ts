@@ -3030,6 +3030,56 @@ export const labels = {
       defaultMessage: 'AI Indices',
     }),
   },
+  autoApprovedApis: {
+    sectionTitle: i18n.translate('xpack.agentBuilder.autoApprovedApis.sectionTitle', {
+      defaultMessage: 'Auto-approved APIs',
+    }),
+    sectionDescription: i18n.translate('xpack.agentBuilder.autoApprovedApis.sectionDescription', {
+      defaultMessage:
+        'Allow this agent to call APIs that modify or delete data without asking for confirmation, including any subagents it delegates to.',
+    }),
+    elasticsearchLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.elasticsearchLabel', {
+      defaultMessage: 'Elasticsearch APIs',
+    }),
+    kibanaLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.kibanaLabel', {
+      defaultMessage: 'Kibana APIs',
+    }),
+    placeholder: i18n.translate('xpack.agentBuilder.autoApprovedApis.placeholder', {
+      defaultMessage: 'Select APIs',
+    }),
+    optionalLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.optionalLabel', {
+      defaultMessage: 'Optional',
+    }),
+    allElasticsearchApisDescription: (count: number) =>
+      i18n.translate('xpack.agentBuilder.autoApprovedApis.allElasticsearchApisDescription', {
+        defaultMessage:
+          '{count, plural, one {# destructive Elasticsearch API} other {All # destructive Elasticsearch APIs}}',
+        values: { count },
+      }),
+    allKibanaApisDescription: (count: number) =>
+      i18n.translate('xpack.agentBuilder.autoApprovedApis.allKibanaApisDescription', {
+        defaultMessage:
+          '{count, plural, one {# destructive Kibana API} other {All # destructive Kibana APIs}}',
+        values: { count },
+      }),
+    namespaceApisDescription: (namespace: string, count: number) =>
+      i18n.translate('xpack.agentBuilder.autoApprovedApis.namespaceApisDescription', {
+        defaultMessage:
+          '{count, plural, one {# destructive API in {namespace}} other {All # destructive APIs in {namespace}}}',
+        values: { namespace, count },
+      }),
+    restrictedHelpText: i18n.translate('xpack.agentBuilder.autoApprovedApis.restrictedHelpText', {
+      defaultMessage:
+        'Only the owner, managers, or an administrator can change the auto-approved APIs.',
+    }),
+    defaultAgentRestrictedHelpText: i18n.translate(
+      'xpack.agentBuilder.autoApprovedApis.defaultAgentRestrictedHelpText',
+      {
+        defaultMessage:
+          'Only administrators can change the auto-approved APIs of the default agent.',
+      }
+    ),
+  },
 };
 
 // Shared badge config for the Connectors "Technical preview" label, reused across the

@@ -19,6 +19,15 @@ import {
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { getUnprocessedOtelErrors } from './get_unprocessed_otel_errors';
 
+function captureLogsClientMock(): { logsClient: LogsClient; getLastSearchArg: () => unknown } {
+  const mock = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+  const logsClient = { search: mock } as unknown as LogsClient;
+  return {
+    logsClient,
+    getLastSearchArg: () => mock.mock.calls[0][0],
+  };
+}
+
 interface Hit {
   _id?: string;
   _index?: string;
@@ -157,5 +166,49 @@ describe('getUnprocessedOtelErrors', () => {
     expect(errors.map((error) => error.id)).toEqual(['error-2', 'error-4']);
     expect(errors.map((error) => error.service?.name)).toEqual(['my-service', 'another-service']);
     expect(logger.debug).toHaveBeenCalledTimes(2);
+  });
+
+  describe('query construction', () => {
+    it('includes an exists filter on span.id when docId is absent', async () => {
+      const { logsClient, getLastSearchArg } = captureLogsClientMock();
+      await getUnprocessedOtelErrors({
+        logsClient,
+        logger,
+        traceId: 'trace-1',
+        start: 0,
+        end: 1000,
+      });
+
+      const searchArg = getLastSearchArg() as { query: { bool: { filter: unknown[] } } };
+      const filters = searchArg.query.bool.filter;
+      const existsFilter = filters.find(
+        (f): f is { exists: { field: string } } =>
+          typeof f === 'object' && f !== null && 'exists' in f
+      );
+      expect(existsFilter?.exists?.field).toBe(SPAN_ID);
+    });
+
+    it('includes a term filter on span.id when docId is supplied', async () => {
+      const { logsClient, getLastSearchArg } = captureLogsClientMock();
+      await getUnprocessedOtelErrors({
+        logsClient,
+        logger,
+        traceId: 'trace-1',
+        docId: 'span-abc',
+        start: 0,
+        end: 1000,
+      });
+
+      const searchArg = getLastSearchArg() as { query: { bool: { filter: unknown[] } } };
+      const filters = searchArg.query.bool.filter;
+      const termFilter = filters.find(
+        (f): f is { term: Record<string, unknown> } =>
+          typeof f === 'object' &&
+          f !== null &&
+          'term' in f &&
+          SPAN_ID in (f as { term: Record<string, unknown> }).term
+      );
+      expect(termFilter?.term?.[SPAN_ID]).toBe('span-abc');
+    });
   });
 });

@@ -27,21 +27,18 @@ describe('buildAssumableBy', () => {
     ]);
   });
 
-  it.each<UiamProjectType>([
-    'elasticsearch',
-    'observability',
-    'security',
-    'vectordb',
-    'workplaceai',
-  ])('passes through the `%s` project type verbatim', (projectType) => {
-    const [entry] = buildAssumableBy({
-      organizationId: 'organization-id',
-      projectId: 'project-id',
-      projectType,
-    });
+  it.each<UiamProjectType>(['elasticsearch', 'observability', 'security', 'vectordb'])(
+    'passes through the `%s` project type verbatim',
+    (projectType) => {
+      const [entry] = buildAssumableBy({
+        organizationId: 'organization-id',
+        projectId: 'project-id',
+        projectType,
+      });
 
-    expect(entry).toMatchObject({ project_type: projectType });
-  });
+      expect(entry).toMatchObject({ project_type: projectType });
+    }
+  );
 
   it('adds the Relay platform service account from the server-owned id', () => {
     expect(

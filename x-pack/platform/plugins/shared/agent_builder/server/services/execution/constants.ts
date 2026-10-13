@@ -16,8 +16,12 @@ export const ABORT_POLL_INTERVAL_MS = 2000;
  */
 export const CANCELLATION_DEADLINE_MS = 5_000;
 
-/** How often (ms) followExecution polls for new events. */
-export const FOLLOW_POLL_INTERVAL_MS = 500;
+/**
+ * How often (ms) followExecution polls for new events. Each poll is a single `_source`-filtered
+ * GET (plus a full read only when events landed), and the interval bounds how late streamed
+ * events reach the client.
+ */
+export const FOLLOW_POLL_INTERVAL_MS = 200;
 
 /** How often (ms) execution events are batched before being written to ES. */
 export const EVENT_BATCH_INTERVAL_MS = 200;
