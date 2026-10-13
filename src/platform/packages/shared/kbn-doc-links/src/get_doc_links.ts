@@ -1131,6 +1131,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       datasets: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets`,
       datasetSettings: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets#dataset-settings`,
       authentication: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#authentication`,
+      grantReadAccess: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#grant-read-access`,
       staticCredentials: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-static-credentials`,
       federatedIdentity: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-federated-identity`,
       querying: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-querying`,
