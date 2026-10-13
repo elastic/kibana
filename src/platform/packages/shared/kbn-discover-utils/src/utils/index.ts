@@ -27,6 +27,7 @@ export * from './is_esql_saved_search';
 export * from './nested_fields';
 export * from './get_field_value';
 export * from './get_visible_columns';
+export * from './get_data_view_field_from_data_source';
 export * from './convert_value_to_string';
 export * from './local_storage_utils';
 export * from './sorting';

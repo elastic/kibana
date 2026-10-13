@@ -37,6 +37,12 @@ triggers:
         conversationId:
           type: string
           description: Conversation this Proposal belongs to (create_proposal.yaml's own required field).
+        proposalId:
+          type: string
+          description: >-
+            The id the Proposal is created under, derived by packaging from what is proposed so a
+            second run proposing the same thing meets this one. The service refuses an id that
+            already exists, which is how two racing runs create one Proposal.
         title:
           type: string
           description: Short plain-text label naming what is proposed; absent falls back to the action's own name.
@@ -73,6 +79,7 @@ triggers:
           description: The creation barrier this gate checks (created >= this) before closing the Investigation.
       required:
         - conversationId
+        - proposalId
         - comment
         - category
         - investigationConversationId
@@ -99,6 +106,20 @@ steps:
   # lets the requery/close steps below run their own best-effort cleanup
   # rather than aborting the whole execution if the wrap itself never resolves
   # normally.
+  #
+  # This is also where a lost race lands, and it is not a rare case. Packaging looks up what
+  # already exists before it dispatches this gate, and two reports that reach the same host in
+  # one sweep are packaged side by side, so both can find the subject free. The window between
+  # that look-up and the create is dispatch latency, plus the bridge's `reopen_investigation`,
+  # which runs before it creates: far longer than the search lag that would be the only
+  # window if packaging created the Proposal itself. The service creates the Proposal under
+  # `proposalId` or refuses with a conflict, so the loser's create fails before any gate is
+  # parked or any Proposal id is held, and `continue` carries it on to the requery below.
+  #
+  # The loser is not left silent: `journal_lost_race` below says where its finding went. What it
+  # cannot do is close the Investigation. `expectedProposalCount` was fixed when this gate was
+  # dispatched and counts the Proposal that was lost, and a sibling gate's `created_count` never
+  # reaches it, so an Investigation with a lost finding stays open until an analyst closes it.
   - name: create_and_gate_proposal
     type: workflow.execute
     with:
@@ -106,6 +127,7 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "${{ inputs.conversationId }}"
+        proposalId: "${{ inputs.proposalId }}"
         title: "${{ inputs.title }}"
         comment: "${{ inputs.comment }}"
         actionWorkflowId: "${{ inputs.actionWorkflowId }}"
@@ -113,6 +135,72 @@ steps:
         impact: "${{ inputs.impact }}"
         confidence: "${{ inputs.confidence }}"
         category: "${{ inputs.category }}"
+    on-failure:
+      continue: true
+
+  # Only when the create above failed: was it because another Investigation got there first? The
+  # Proposal under this id says which Investigation raised it. Its document can take a moment to be
+  # searchable after the conflict, so the read is retried. A read that still fails is not an
+  # error: the loser just gets no note, as it did before.
+  - name: fetch_existing_proposal
+    type: kibana.request
+    if: "${{ steps.create_and_gate_proposal.error.message != nil and steps.create_and_gate_proposal.error.message != empty }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ inputs.proposalId }}"
+      headers:
+        elastic-api-version: "1"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 1s
+      continue: true
+
+  # A lost race is a Proposal under this id that belongs to a different conversation. Any other
+  # failure (the gate itself ending in an error, a refused create) is left to read as it always
+  # has, so a note is only written when it can say something true.
+  #
+  # Winning the id is not the same as covering the finding. Two findings for one subject share a
+  # target, since the target is what the id is derived from, but not necessarily a criticality: a
+  # critical report asks for `extreme_impact` and any other confirmed finding for `high_impact`. If
+  # the weaker one won, the stronger finding's request was never proposed, and a note saying it is
+  # "covered" would hide that. So the note compares the winner's level with this finding's, with
+  # the same ranking packaging uses when it resolves a slot (`ASSET_CRITICALITY_LEVELS`, which a
+  # test keeps in step with the list below), and says so when the winner asks for less. A level it
+  # does not know is covered only by the same level, rather than guessed at.
+  - name: resolve_lost_race
+    type: data.set
+    with:
+      lost_race: "${{ steps.fetch_existing_proposal.output.conversationId != nil and steps.fetch_existing_proposal.output.conversationId != empty and steps.fetch_existing_proposal.output.conversationId != inputs.conversationId }}"
+      lost_race_note: |-
+        {%- assign levels = 'low_impact,medium_impact,high_impact,extreme_impact' | split: ',' -%}
+        {%- assign wanted = inputs.actionInput.criticality_level -%}
+        {%- assign won = steps.fetch_existing_proposal.output.actionInput.criticality_level -%}
+        {%- assign wantedRank = -1 -%}
+        {%- assign wonRank = -1 -%}
+        {%- for level in levels -%}
+          {%- if level == wanted -%}{%- assign wantedRank = forloop.index0 -%}{%- endif -%}
+          {%- if level == won -%}{%- assign wonRank = forloop.index0 -%}{%- endif -%}
+        {%- endfor -%}
+        {%- assign covered = true -%}
+        {%- if wanted != nil and wanted != empty -%}
+          {%- if wantedRank >= 0 and wonRank >= 0 -%}
+            {%- if wonRank < wantedRank -%}{%- assign covered = false -%}{%- endif -%}
+          {%- elsif wanted != won -%}
+            {%- assign covered = false -%}
+          {%- endif -%}
+        {%- endif -%}
+        A Proposal for "{{ inputs.title | default: 'the proposed action' }}" was raised by [another Investigation]({% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/alertzero?selectedConversationId={{ steps.fetch_existing_proposal.output.conversationId }}) at the same moment as this one, {% if covered %}so no second Proposal was created and this finding is covered by that one.{% else %}but it asks for {{ won | default: 'no level' }} where this finding asks for {{ wanted }}, so the level this finding asks for was not proposed. A manual run targeting this report proposes it.{% endif %} This Investigation stays open until an analyst closes it.
+
+  - name: journal_lost_race
+    type: workflow.execute
+    if: "${{ variables.lost_race == true }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: "{{ variables.lost_race_note }}"
     on-failure:
       continue: true
 

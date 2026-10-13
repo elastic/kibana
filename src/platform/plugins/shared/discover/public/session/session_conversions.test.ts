@@ -829,9 +829,7 @@ describe('Discover session conversion and UI preparation', () => {
       'missing-type-control': { order: 0 },
     });
 
-    expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'controlGroupJson panels must have a type'
-    );
+    expect(() => toDiscoverSessionApiData(session)).toThrow('Control type is missing or invalid.');
   });
 
   it('uses zero for missing control order, matching the server transform', () => {
@@ -857,7 +855,7 @@ describe('Discover session conversion and UI preparation', () => {
     session.tabs[2].controlGroupJson = JSON.stringify({ 'broken-control': null });
 
     expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'controlGroupJson panels must be JSON objects'
+      'Control configuration must be a JSON object.'
     );
   });
 });

@@ -17,6 +17,11 @@ import type {
 } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 
+/** `isView` records that the source came from the views API; enrichers overwrite `type`. */
+export interface BrowsableSource extends ESQLSourceResult {
+  isView?: boolean;
+}
+
 const normalizeTimeseriesIndices = ({
   indices,
 }: Pick<IndicesAutocompleteResult, 'indices'>): ESQLSourceResult[] => {
@@ -39,18 +44,19 @@ const normalizeDatasets = ({ datasets }: EsqlDatasetsResult): ESQLSourceResult[]
     hidden: false,
   })) ?? [];
 
-const normalizeViews = ({ views }: EsqlViewsResult): ESQLSourceResult[] =>
+const normalizeViews = ({ views }: EsqlViewsResult): BrowsableSource[] =>
   views?.map((view) => ({
     name: view.name,
     title: view.name,
     type: view.type ?? SOURCES_TYPES.VIEW,
     hidden: false,
+    isView: true,
   })) ?? [];
 
 const mergeSources = (
-  base: ESQLSourceResult[],
-  ...additional: ESQLSourceResult[][]
-): ESQLSourceResult[] => {
+  base: BrowsableSource[],
+  ...additional: BrowsableSource[][]
+): BrowsableSource[] => {
   const seenNames = new Set(base.map((source) => source.name));
   const merged = [...base];
 
@@ -81,8 +87,8 @@ export const useAllSources = ({
   getTimeseriesIndices,
   getDatasets,
   getViews,
-}: UseAllSourcesParams): { allSources: ESQLSourceResult[]; isLoading: boolean } => {
-  const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
+}: UseAllSourcesParams): { allSources: BrowsableSource[]; isLoading: boolean } => {
+  const [allSources, setAllSources] = useState<BrowsableSource[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const isMountedRef = useRef(true);
 
@@ -111,7 +117,7 @@ export const useAllSources = ({
       }
     };
 
-    const fetchViews = async (): Promise<ESQLSourceResult[]> => {
+    const fetchViews = async (): Promise<BrowsableSource[]> => {
       if (isTimeseries || !getViews) return [];
       try {
         return normalizeViews(await getViews());
@@ -125,13 +131,13 @@ export const useAllSources = ({
     // Appends datasets and views as each request settles, so the slower one does not delay the
     // other. EuiSelectable renders its loading message instead of the list, so the browser loads
     // only while the list is empty.
-    const appendOptionalSources = async (base: ESQLSourceResult[]) => {
-      const optional: Record<'datasets' | 'views', ESQLSourceResult[]> = {
+    const appendOptionalSources = async (base: BrowsableSource[]) => {
+      const optional: Record<'datasets' | 'views', BrowsableSource[]> = {
         datasets: [],
         views: [],
       };
 
-      const append = (key: 'datasets' | 'views', sources: ESQLSourceResult[]) => {
+      const append = (key: 'datasets' | 'views', sources: BrowsableSource[]) => {
         if (!sources.length || !isMountedRef.current || !isEffectActive) return;
         optional[key] = sources;
         // Rebuilding from the base keeps the order stable whichever request settles first.

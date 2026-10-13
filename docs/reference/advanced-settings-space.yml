@@ -663,6 +663,8 @@ groups:
         id: labs-dashboard-defer-below-fold
         description: |
           Enables deferred loading of dashboard panels below the fold. *Below the fold* refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll.
+
+          When this setting is on, panels below the fold wait to fetch data until you scroll them into view. Reports still load every panel.
         datatype: bool
         default: false
         applies_to:
@@ -673,8 +675,8 @@ groups:
           self: ga
           serverless: unavailable
         note: |
-          :applies_to: stack: ga 9.4.3!+
-          From version 9.4.3, all panels load immediately regardless of this setting. Deferred loading of below-the-fold panels is disabled because enabling it can cause some dashboards to fail to load.
+          :applies_to: stack: ga 9.4.4!-9.5.1!
+          In these versions, all panels load immediately regardless of this setting. Deferred loading of below-the-fold panels is disabled because enabling it can cause some dashboards to fail to load.
 
       - setting: "labs:canvas:byValueEmbeddable"
         id: labs-canvas-by-value-embeddable

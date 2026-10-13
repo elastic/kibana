@@ -14,6 +14,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgenticInvestigationsConfig } from './config';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
@@ -44,6 +45,7 @@ import { InvestigationStatusService } from './investigations/services/investigat
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { createInvestigationsPrivilegesReader } from './investigations/services/check_investigations_privileges';
 import { deleteInvestigationDataAcrossSpaces } from './investigations/services/delete_investigation_data_across_spaces';
+import { countPendingProposals } from './investigations/services/count_pending_proposals';
 import { InProgressResolver } from './investigations/services/in_progress';
 import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
 import { createInvestigationsClient } from './investigations/services/investigations_client';
@@ -78,6 +80,7 @@ export class AgenticInvestigationsPlugin
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
   private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
+  private workflowsManagement?: WorkflowsServerPluginSetup['management'];
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsConfig>) {
     this.logger = context.logger.get();
@@ -86,8 +89,14 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features, workflowsExtensions, agentBuilder }: AgenticInvestigationsSetupDependencies
+    {
+      features,
+      workflowsExtensions,
+      agentBuilder,
+      workflowsManagement,
+    }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
+    this.workflowsManagement = workflowsManagement?.management;
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
     if (this.escalationsEnabled) {
@@ -247,7 +256,8 @@ export class AgenticInvestigationsPlugin
       getHypothesesService: () => this.requireHypothesesService(),
       getProposals: () => plugins.proposals,
       inProgress: new InProgressResolver({
-        getAgentExecutions: () => plugins.agentBuilder.execution,
+        getWorkflowsManagement: () => this.workflowsManagement,
+        getProposals: () => plugins.proposals,
         logger: this.logger,
       }),
       logger: this.logger,
@@ -274,6 +284,14 @@ export class AgenticInvestigationsPlugin
           plugins.agentBuilder.attachments.getScopedClient({ request }),
         conversationTemplates: plugins.agentBuilder.conversationTemplates,
         getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+        countPendingProposals: (request, conversationIds) =>
+          countPendingProposals({
+            proposals: plugins.proposals,
+            request,
+            conversationIds,
+            spaceId: this.getSpaceId(request),
+            logger: this.logger,
+          }),
       });
     }
 

@@ -31,14 +31,14 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
     title: i18nStrings.alertZero.title,
     icon: 'sun',
   },
-];
-
-/** AlertZero nodes that follow the platform Discover / Dashboards entries. */
-export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
   {
     link: alertZeroLink(SecurityPageName.alertZeroEscalations),
     icon: 'flag',
   },
+];
+
+/** AlertZero nodes that follow the platform Discover / Dashboards entries. */
+export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
   {
     // Kept a flat entry on purpose: the per-watch, Workers and Skills links are registered as deep
     // links so they stay searchable, but they are not children here — the chrome sub-panel is not the
