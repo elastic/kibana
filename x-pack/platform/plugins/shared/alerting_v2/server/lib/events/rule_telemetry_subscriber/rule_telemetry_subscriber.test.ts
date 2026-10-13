@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { LoggerService } from '../../services/logger_service/logger_service';
+import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
+import { createMockEbtService } from '../../services/ebt_service/ebt_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRuleResponse } from '../../test_utils';
-import { RULE_CHANGED_EVENT, RULE_OPERATIONS } from '../../telemetry/rule_changed_event';
+import { RULE_CHANGED_EBT_EVENT_TYPE, RULE_OPERATIONS } from '../../telemetry/rule_changed_event';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
@@ -49,9 +50,7 @@ const createdEvent = (...args: [Parameters<typeof eventOfType>[1]]): RuleEvent =
 
 describe('RuleTelemetrySubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
-  let analytics: jest.Mocked<Pick<AnalyticsServiceStart, 'reportEvent'>>;
-  let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
+  let ebtService: jest.Mocked<EbtServiceContract>;
   let subscriber: RuleTelemetrySubscriber;
   let context: AlertingPublisherContext;
 
@@ -65,9 +64,9 @@ describe('RuleTelemetrySubscriber', () => {
 
   beforeEach(() => {
     bus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
-    analytics = { reportEvent: jest.fn() };
-    ({ loggerService, mockLogger } = createLoggerService());
-    subscriber = new RuleTelemetrySubscriber(bus, analytics, loggerService);
+    ebtService = createMockEbtService();
+    const { loggerService } = createLoggerService();
+    subscriber = new RuleTelemetrySubscriber(bus, ebtService, loggerService);
     context = { request: httpServerMock.createKibanaRequest() as KibanaRequest, origin: 'user' };
   });
 
@@ -106,8 +105,8 @@ describe('RuleTelemetrySubscriber', () => {
           context
         );
 
-        expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-        expect(analytics.reportEvent).toHaveBeenCalledWith(RULE_CHANGED_EVENT.eventType, {
+        expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
+        expect(ebtService.reportEvent).toHaveBeenCalledWith(RULE_CHANGED_EBT_EVENT_TYPE, {
           rule_id: 'rule-1',
           operation: type,
           template_id: 'template-1',
@@ -133,8 +132,8 @@ describe('RuleTelemetrySubscriber', () => {
         context
       );
 
-      expect(analytics.reportEvent).toHaveBeenCalledWith(
-        RULE_CHANGED_EVENT.eventType,
+      expect(ebtService.reportEvent).toHaveBeenCalledWith(
+        RULE_CHANGED_EBT_EVENT_TYPE,
         expect.objectContaining({ rule_id: 'rule-1', channel: 'ui', app: 'discover' })
       );
     });
@@ -144,7 +143,7 @@ describe('RuleTelemetrySubscriber', () => {
 
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), context);
 
-      const [, data] = analytics.reportEvent.mock.calls[0];
+      const [, data] = ebtService.reportEvent.mock.calls[0];
       expect(data).not.toHaveProperty('app');
     });
 
@@ -157,7 +156,7 @@ describe('RuleTelemetrySubscriber', () => {
         context
       );
 
-      const [, data] = analytics.reportEvent.mock.calls[0];
+      const [, data] = ebtService.reportEvent.mock.calls[0];
       expect(data).not.toHaveProperty('template_id');
       expect(data).not.toHaveProperty('builder_type');
     });
@@ -171,28 +170,7 @@ describe('RuleTelemetrySubscriber', () => {
         context
       );
 
-      expect(analytics.reportEvent).not.toHaveBeenCalled();
-    });
-
-    it('swallows reportEvent failures and logs them at debug', () => {
-      analytics.reportEvent.mockImplementationOnce(() => {
-        throw new Error('analytics unavailable');
-      });
-      subscriber.start();
-
-      expect(() =>
-        handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), context)
-      ).not.toThrow();
-
-      expect(mockLogger.debug).toHaveBeenCalledTimes(1);
-      const [message, meta] = mockLogger.debug.mock.calls[0];
-      expect(typeof message === 'function' ? message() : message).toContain(
-        'analytics unavailable'
-      );
-      expect(meta).toEqual({
-        labels: expect.objectContaining({ rule_id: 'rule-1', space_id: 'default' }),
-      });
-      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(ebtService.reportEvent).not.toHaveBeenCalled();
     });
   });
 

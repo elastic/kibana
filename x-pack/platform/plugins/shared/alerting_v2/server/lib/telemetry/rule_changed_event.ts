@@ -39,8 +39,10 @@ export interface RuleChangedEventData {
   app?: string;
 }
 
+export const RULE_CHANGED_EBT_EVENT_TYPE = 'alerting_v2_rule_changed' as const;
+
 export const RULE_CHANGED_EVENT: EventTypeOpts<RuleChangedEventData> = {
-  eventType: 'alerting_v2_rule_changed',
+  eventType: RULE_CHANGED_EBT_EVENT_TYPE,
   schema: {
     rule_id: {
       type: 'keyword',

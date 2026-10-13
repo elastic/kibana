@@ -6,15 +6,15 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { CoreStart } from '@kbn/core-di-server';
-import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
+import { EbtServiceToken } from '../../services/ebt_service/tokens';
 import {
   buildRuleChangedEventData,
-  RULE_CHANGED_EVENT,
+  RULE_CHANGED_EBT_EVENT_TYPE,
   RULE_OPERATIONS,
   type RuleOperation,
 } from '../../telemetry/rule_changed_event';
@@ -30,11 +30,9 @@ type ReportedRuleEvent = Extract<RuleEvent, { type: RuleOperation }>;
 
 /**
  * Singleton bus subscriber that reports rule-lifecycle domain events as
- * event-based telemetry (EBT).
+ * event-based telemetry (EBT) through the {@link EbtServiceContract}.
  *
- * Telemetry is best-effort: a failure to report is logged at `debug` and never
- * affects the rule operation that produced the event. Events without a domain
- * rule are skipped since there is nothing to project.
+ * Events without a domain rule are skipped since there is nothing to project.
  */
 @injectable()
 export class RuleTelemetrySubscriber {
@@ -45,8 +43,7 @@ export class RuleTelemetrySubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
-    @inject(CoreStart('analytics'))
-    private readonly analytics: Pick<AnalyticsServiceStart, 'reportEvent'>,
+    @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('events');
@@ -78,22 +75,15 @@ export class RuleTelemetrySubscriber {
 
   #reportRuleChanged(event: ReportedRuleEvent): void {
     const { type: operation, payload } = event;
-    const { ruleId, spaceId, rule, channel, app } = payload;
+    const { rule, channel, app } = payload;
 
     if (!rule) {
       return;
     }
 
-    try {
-      this.analytics.reportEvent(
-        RULE_CHANGED_EVENT.eventType,
-        buildRuleChangedEventData(rule, { operation, channel, app })
-      );
-    } catch (err) {
-      this.logger.debug({
-        message: () => `Failed to report rule changed telemetry event: ${err}`,
-        labels: { event_type: event.type, rule_id: ruleId, space_id: spaceId },
-      });
-    }
+    this.ebtService.reportEvent(
+      RULE_CHANGED_EBT_EVENT_TYPE,
+      buildRuleChangedEventData(rule, { operation, channel, app })
+    );
   }
 }
