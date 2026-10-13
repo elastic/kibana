@@ -128,7 +128,7 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 - \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
 - \`sections\`: sections to create or update.
-- \`panels\`: panels to create, edit, replace, move between sections, or resize, by id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
+- \`panels\`: panels to create, edit, move between sections, or resize, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
 - \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider).
 - \`remove\`: ids of panels, sections, or controls to remove.
 

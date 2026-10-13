@@ -561,6 +561,41 @@ describe('executeDashboardUpsert', () => {
           'Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.',
       },
       {
+        name: 'a new Lens panel without chartType',
+        panels: [],
+        upsert: {
+          panels: [
+            { id: 'trend', grid: GRID, content: { source: 'request', query: 'show trend' } },
+          ],
+        },
+        identifier: 'trend',
+        error: 'Panel "trend" is new. Provide `chartType` to create a Lens panel.',
+      },
+      {
+        name: 'a new custom_content panel without query',
+        panels: [],
+        upsert: {
+          panels: [
+            {
+              id: 'kpi',
+              grid: GRID,
+              content: { source: 'request', renderer: 'custom_content', esql: 'FROM logs' },
+            },
+          ],
+        },
+        identifier: 'kpi',
+        error: 'Panel "kpi" is new. Provide `query` to create it.',
+      },
+      {
+        name: 'a custom_content edit with nothing to change',
+        panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
+        upsert: {
+          panels: [{ id: 'cc-1', content: { source: 'request', renderer: 'custom_content' } }],
+        },
+        identifier: 'cc-1',
+        error: 'Panel "cc-1" edit needs `query`, `esql`, or both.',
+      },
+      {
         name: 'attachment content on an existing panel',
         panels: [createLensPanel('panel-1')],
         upsert: {

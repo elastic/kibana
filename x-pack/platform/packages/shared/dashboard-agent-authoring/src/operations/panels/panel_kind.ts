@@ -6,107 +6,15 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import { z } from '@kbn/zod/v4';
-
-const PLACEMENT_KEYS: ReadonlySet<string> = new Set(['grid', 'panelId']);
-
-type OptionalField<TField extends z.core.SomeType> = TField extends z.ZodOptional
-  ? TField
-  : z.ZodOptional<TField>;
-
-/** An add field merged with its edit field: optional unless both require it. */
-type MergedRequiredness<
-  TAddField extends z.core.SomeType,
-  TEditField extends z.core.SomeType
-> = TEditField extends z.ZodOptional ? OptionalField<TAddField> : TAddField;
-
-/** Nullable when only the edit field accepts `null` (e.g. to clear a value). */
-type MergedField<
-  TAddField extends z.core.SomeType,
-  TEditField extends z.core.SomeType
-> = null extends z.input<TEditField>
-  ? null extends z.input<TAddField>
-    ? MergedRequiredness<TAddField, TEditField>
-    : z.ZodNullable<MergedRequiredness<TAddField, TEditField>>
-  : MergedRequiredness<TAddField, TEditField>;
-
-/** Type of the merged shape built by `toUpsertContentSchema`. */
-type UpsertContentShape<TAddShape extends z.ZodRawShape, TEditShape extends z.ZodRawShape> = {
-  [TKey in Exclude<
-    keyof TAddShape | keyof TEditShape,
-    'grid' | 'panelId'
-  >]: TKey extends keyof TAddShape
-    ? TKey extends keyof TEditShape
-      ? MergedField<TAddShape[TKey], TEditShape[TKey]>
-      : OptionalField<TAddShape[TKey]>
-    : TKey extends keyof TEditShape
-    ? OptionalField<TEditShape[TKey]>
-    : never;
-};
-
-const isOptional = (field: z.core.$ZodType): boolean => z.safeParse(field, undefined).success;
-
-const acceptsNull = (field: z.core.$ZodType): boolean => z.safeParse(field, null).success;
-
-const getDescription = (field: z.core.$ZodType): string | undefined =>
-  z.globalRegistry.get(field)?.description;
-
-/**
- * Merges a kind's add and edit inputs into one content shape for upsert items, which create or
- * edit depending on whether the panel id exists. Placement fields (`grid`, `panelId`) are left
- * out, add descriptions win, and a field stays required only when both inputs require it. A field
- * only the edit input accepts `null` for (e.g. to clear a value) stays nullable, with the edit
- * description appended. Upsert re-parses the content with the add or edit input once it knows which one applies.
- */
-const toUpsertContentSchema = <TAddShape extends z.ZodRawShape, TEditShape extends z.ZodRawShape>(
-  addShape: TAddShape,
-  editShape: TEditShape
-): z.ZodObject<UpsertContentShape<TAddShape, TEditShape>> => {
-  const contentKeys = [...new Set([...Object.keys(addShape), ...Object.keys(editShape)])].filter(
-    (key) => !PLACEMENT_KEYS.has(key)
-  );
-  // The entries are built at runtime, so the shape type is restated.
-  return z.object(
-    Object.fromEntries(
-      contentKeys.map((key) => {
-        const addField = addShape[key];
-        const editField = editShape[key];
-        const field = addField ?? editField;
-        const isRequired =
-          addField !== undefined &&
-          editField !== undefined &&
-          !isOptional(addField) &&
-          !isOptional(editField);
-        const mergedField = isRequired || isOptional(field) ? field : z.optional(field);
-        if (!addField || !editField || !acceptsNull(editField) || acceptsNull(addField)) {
-          return [key, mergedField];
-        }
-        return [
-          key,
-          z
-            .nullable(mergedField)
-            .describe(
-              [getDescription(addField), getDescription(editField)]
-                .filter(Boolean)
-                .join(' On an existing panel: ')
-            ),
-        ];
-      })
-    )
-  ) as z.ZodObject<UpsertContentShape<TAddShape, TEditShape>>;
-};
+import type { z } from '@kbn/zod/v4';
 
 interface PanelKindBase {
   /** Embeddable type panels of this kind are stored as. Edits may only target panels of this type. */
   readonly embeddableType: string;
   /** Human-readable name used in errors and descriptions, e.g. "anomaly charts". */
   readonly label: string;
-  /** Input that creates a panel of this kind. */
-  readonly addInputSchema: z.ZodObject;
-  /** Input that edits an existing panel of this kind by id. */
-  readonly editInputSchema: z.ZodObject;
-  /** `addInputSchema` and `editInputSchema` merged, without placement: the upsert item content. */
-  readonly upsertContentSchema: z.ZodObject;
+  /** Content of an upsert item that creates a panel of this kind or edits one. */
+  readonly contentSchema: z.ZodObject;
 }
 
 /** A panel kind the agent authors by value (`source: 'config'`), discriminated by `type`. Declare with `defineConfigPanelKind`. */
@@ -132,30 +40,17 @@ interface ConfigDiscriminator<Type extends string> {
   type: z.ZodLiteral<Type>;
 }
 
-/**
- * Declares a by-value panel kind. The input schemas must carry the kind's `type` literal, and
- * `upsertContentSchema` is derived from them.
- */
+/** Declares a by-value panel kind. The content schema must carry the kind's `type` literal. */
 export const defineConfigPanelKind = <
   const Type extends string,
-  AddShape extends ConfigDiscriminator<Type> & z.ZodRawShape,
-  EditShape extends ConfigDiscriminator<Type> & z.ZodRawShape
+  Shape extends ConfigDiscriminator<Type> & z.ZodRawShape
 >(kind: {
   type: Type;
   embeddableType: string;
   label: string;
-  addInputSchema: z.ZodObject<AddShape>;
-  editInputSchema: z.ZodObject<EditShape>;
+  contentSchema: z.ZodObject<Shape>;
   toEmbeddableConfig?: ConfigPanelKind['toEmbeddableConfig'];
-}) =>
-  ({
-    source: 'config',
-    ...kind,
-    upsertContentSchema: toUpsertContentSchema<AddShape, EditShape>(
-      kind.addInputSchema.shape,
-      kind.editInputSchema.shape
-    ),
-  } as const satisfies ConfigPanelKind);
+}) => ({ source: 'config', ...kind } as const satisfies ConfigPanelKind);
 
 /** Lens is the default renderer, so its `renderer` field may be optional. */
 type RendererField<Renderer extends string> =
@@ -167,26 +62,13 @@ interface RequestDiscriminator<Renderer extends string> {
   renderer: RendererField<Renderer>;
 }
 
-/**
- * Declares a server-side generated panel kind. The input schemas must carry the kind's `renderer`
- * literal, and `upsertContentSchema` is derived from them.
- */
+/** Declares a server-side generated panel kind. The content schema must carry the kind's `renderer` literal. */
 export const defineRequestPanelKind = <
   const Renderer extends string,
-  AddShape extends RequestDiscriminator<Renderer> & z.ZodRawShape,
-  EditShape extends RequestDiscriminator<Renderer> & z.ZodRawShape
+  Shape extends RequestDiscriminator<Renderer> & z.ZodRawShape
 >(kind: {
   renderer: Renderer;
   embeddableType: string;
   label: string;
-  addInputSchema: z.ZodObject<AddShape>;
-  editInputSchema: z.ZodObject<EditShape>;
-}) =>
-  ({
-    source: 'request',
-    ...kind,
-    upsertContentSchema: toUpsertContentSchema<AddShape, EditShape>(
-      kind.addInputSchema.shape,
-      kind.editInputSchema.shape
-    ),
-  } as const satisfies RequestPanelKind);
+  contentSchema: z.ZodObject<Shape>;
+}) => ({ source: 'request', ...kind } as const satisfies RequestPanelKind);

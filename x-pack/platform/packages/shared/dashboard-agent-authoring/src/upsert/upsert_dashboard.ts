@@ -13,7 +13,6 @@ import {
   type DashboardAttachmentData,
   type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
-import type { z } from '@kbn/zod/v4';
 import {
   appendPanelsToDashboard,
   findSectionIndex,
@@ -26,8 +25,6 @@ import { appendControls } from '../controls';
 import {
   buildConfigPanelContent,
   canEditPanel,
-  editPanelInputSchema,
-  newPanelInputSchema,
   type ResolvePanelContent,
   type UpsertPanelContent,
 } from '../operations/panels';
@@ -42,9 +39,6 @@ import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type ValidateDashboard } from '../validate_dashboard';
 import { placeNewWidgets } from './placement';
 import type { DashboardUpsert, UpsertPanelItem, UpsertSectionItem } from './schema';
-
-/** Grid given to panel inputs while parsing; the item's `grid` sets the real position. */
-const PARSE_GRID = { x: 0, y: 0, w: 24, h: 10 };
 
 type RecordFailure = (identifier: string, error: string) => void;
 
@@ -79,11 +73,6 @@ export interface DashboardUpsertResult {
   failures: DashboardFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
 }
-
-const formatIssues = (error: z.ZodError): string =>
-  error.issues
-    .map(({ path, message }) => (path.length > 0 ? `${path.join('.')}: ${message}` : message))
-    .join('; ');
 
 const findDuplicates = (ids: string[]): Set<string> =>
   new Set(ids.filter((id, index) => ids.indexOf(id) !== index));
@@ -208,53 +197,39 @@ const planPanelContent = ({
     return resolvePanelContent(request);
   };
 
-  if (existingPanel) {
-    if (!canEditPanel(content, existingPanel)) {
-      return { error: getPanelEditError(existingPanel) };
-    }
-    const parsed = editPanelInputSchema.safeParse({ ...content, panelId: id });
-    if (!parsed.success) {
-      return { error: `Invalid content for panel "${id}": ${formatIssues(parsed.error)}` };
-    }
-    const editInput = parsed.data;
-    if (editInput.source === 'config') {
-      return {
-        resolveContent: () => ({
-          type: 'success',
-          panelContent: buildConfigPanelContent(editInput.type, editInput.config),
-        }),
-      };
-    }
-    const request = toEditResolutionRequest(editInput, existingPanel);
-    return { resolveContent: () => resolveRequest(request) };
+  if (existingPanel && !canEditPanel(content, existingPanel)) {
+    return { error: getPanelEditError(existingPanel) };
   }
 
-  const parsed = newPanelInputSchema.safeParse({ ...content, grid: PARSE_GRID });
-  if (!parsed.success) {
-    return { error: `Invalid content for panel "${id}": ${formatIssues(parsed.error)}` };
-  }
-  const newInput = parsed.data;
-  if (newInput.source === 'config') {
+  if (content.source === 'config') {
+    const { type, config } = content;
     return {
       resolveContent: () => ({
         type: 'success',
-        panelContent: buildConfigPanelContent(newInput.type, newInput.config),
+        panelContent: buildConfigPanelContent(type, config),
       }),
     };
   }
-  if (newInput.source === 'attachment') {
+
+  if (content.source === 'attachment') {
+    const { attachment_id: attachmentId } = content;
     return {
       resolveContent: () => {
         if (!resolveAttachmentPanel) {
           throw new Error('Attachment panel resolver is required for attachment-source panels.');
         }
-        return resolveAttachmentPanel(newInput.attachment_id);
+        return resolveAttachmentPanel(attachmentId);
       },
     };
   }
-  return {
-    resolveContent: () => resolveRequest(toCreationResolutionRequest(newInput, id)),
-  };
+
+  const result = existingPanel
+    ? toEditResolutionRequest(content, existingPanel)
+    : toCreationResolutionRequest(content, id);
+  if ('error' in result) {
+    return result;
+  }
+  return { resolveContent: () => resolveRequest(result.request) };
 };
 
 const planPanels = ({
@@ -360,12 +335,12 @@ const applyPanel = ({
   const { id, section, grid } = item;
 
   if (!existingPanel) {
-    if (!attempt) {
+    if (!attempt || !grid) {
       return dashboardData;
     }
     return appendPanelsToDashboard({
       dashboardData,
-      panelsToAdd: [{ id, ...attempt.panelContent, grid: grid ?? PARSE_GRID }],
+      panelsToAdd: [{ id, ...attempt.panelContent, grid }],
       sectionId: section ?? undefined,
     });
   }

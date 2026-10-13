@@ -33,10 +33,10 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * - `'config'`: authored by value, discriminated by `type`.
  * - `'attachment'`: an existing visualization attachment from the conversation.
  *
- * Each kind's module describes it once, with `defineConfigPanelKind` or `defineRequestPanelKind`.
- * Registering it in one of the lists below derives its members of the input schemas, the
- * embeddable-type lookups, and the type lists in descriptions and errors. List order is the
- * order of the schema unions sent to the model.
+ * Each kind's module describes it once, with `defineConfigPanelKind` or `defineRequestPanelKind`,
+ * including one content schema that both creates and edits its panels. Registering it in one of
+ * the lists below derives its member of the content schema and the embeddable-type lookups. List
+ * order is the order of the schema unions sent to the model.
  */
 export { attachmentPanelInputSchema } from './attachment_source';
 export type { AttachmentPanelInput } from './attachment_source';
@@ -70,18 +70,33 @@ const REQUEST_PANEL_KINDS = [
  */
 const toNonEmpty = <T>([first, ...rest]: readonly T[]): [T, ...T[]] => [first, ...rest];
 
-const configPanelInputSchema = z.discriminatedUnion(
-  'type',
-  toNonEmpty(CONFIG_PANEL_KINDS.map(({ addInputSchema }) => addInputSchema))
-);
+/**
+ * Panel content of an upsert item: creates a panel of any kind, or edits an existing panel of the
+ * same kind.
+ */
+export const upsertPanelContentSchema = z.discriminatedUnion('source', [
+  z.discriminatedUnion(
+    'type',
+    toNonEmpty(CONFIG_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
+  ),
+  z.discriminatedUnion(
+    'renderer',
+    toNonEmpty(REQUEST_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
+  ),
+  attachmentPanelInputSchema,
+]);
 
-export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
+export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 
-const configPanelKindByType = new Map<ConfigPanelInput['type'], ConfigPanelKind>(
+type ConfigPanelContent = Extract<UpsertPanelContent, { source: 'config' }>;
+
+export type PanelRequestContent = Extract<UpsertPanelContent, { source: 'request' }>;
+
+const configPanelKindByType = new Map<ConfigPanelContent['type'], ConfigPanelKind>(
   CONFIG_PANEL_KINDS.map((kind) => [kind.type, kind])
 );
 
-const getConfigPanelKind = (type: ConfigPanelInput['type']): ConfigPanelKind => {
+const getConfigPanelKind = (type: ConfigPanelContent['type']): ConfigPanelKind => {
   const kind = configPanelKindByType.get(type);
   if (!kind) {
     throw new Error(`Panel type "${type}" is not registered.`);
@@ -91,7 +106,7 @@ const getConfigPanelKind = (type: ConfigPanelInput['type']): ConfigPanelKind => 
 
 /** Builds panel content from a by-value panel's `type` and `config`. */
 export const buildConfigPanelContent = (
-  type: ConfigPanelInput['type'],
+  type: ConfigPanelContent['type'],
   config: AttachmentPanel['config']
 ): PanelContent => {
   const { embeddableType, toEmbeddableConfig } = getConfigPanelKind(type);
@@ -101,59 +116,10 @@ export const buildConfigPanelContent = (
 /** Finds the by-value panel type stored as the given embeddable type, if any. */
 export const findConfigPanelType = (
   embeddableType: string
-): { type: ConfigPanelInput['type']; label: string } | undefined => {
+): { type: ConfigPanelContent['type']; label: string } | undefined => {
   const kind = CONFIG_PANEL_KINDS.find((entry) => entry.embeddableType === embeddableType);
   return kind && { type: kind.type, label: kind.label };
 };
-
-/** A new-panel input: a by-value config, a request to resolve, or a visualization attachment. */
-export const newPanelInputSchema = z.discriminatedUnion('source', [
-  configPanelInputSchema,
-  z.discriminatedUnion(
-    'renderer',
-    toNonEmpty(REQUEST_PANEL_KINDS.map(({ addInputSchema }) => addInputSchema))
-  ),
-  attachmentPanelInputSchema,
-]);
-
-export type NewPanelInput = z.infer<typeof newPanelInputSchema>;
-
-export type PanelRequestInput = Extract<NewPanelInput, { source: 'request' }>;
-
-/** An edit of an existing panel, identified by `panelId`. */
-export const editPanelInputSchema = z.discriminatedUnion('source', [
-  z.discriminatedUnion(
-    'renderer',
-    toNonEmpty(REQUEST_PANEL_KINDS.map(({ editInputSchema }) => editInputSchema))
-  ),
-  z.discriminatedUnion(
-    'type',
-    toNonEmpty(CONFIG_PANEL_KINDS.map(({ editInputSchema }) => editInputSchema))
-  ),
-]);
-
-export type EditPanelInput = z.infer<typeof editPanelInputSchema>;
-
-export type EditPanelRequestInput = Extract<EditPanelInput, { source: 'request' }>;
-
-/**
- * Panel content of an upsert item: the create and edit fields of any panel kind, without
- * placement. Upsert re-parses it with `newPanelInputSchema` or `editPanelInputSchema` once it
- * knows whether the panel exists.
- */
-export const upsertPanelContentSchema = z.discriminatedUnion('source', [
-  z.discriminatedUnion(
-    'type',
-    toNonEmpty(CONFIG_PANEL_KINDS.map(({ upsertContentSchema }) => upsertContentSchema))
-  ),
-  z.discriminatedUnion(
-    'renderer',
-    toNonEmpty(REQUEST_PANEL_KINDS.map(({ upsertContentSchema }) => upsertContentSchema))
-  ),
-  attachmentPanelInputSchema.omit({ grid: true }),
-]);
-
-export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 
 /**
  * Embeddable types an upsert content can edit. A request without a renderer edits Lens or Vega
