@@ -26,6 +26,7 @@ import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector'
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
 import { ProfilingHostsCallout } from './profiling_hosts_callout';
 import { ProfilingHostsFlamegraph } from './profiling_hosts_flamegraph';
+import { ProfilingHostsSchemaSelector } from './profiling_hosts_schema_selector';
 import { ProfilingHostsTopNFunctions } from './profiling_hosts_top_functions';
 
 export { ProfilingHeaderSearchBar } from './profiling_header_search_bar';
@@ -161,13 +162,28 @@ export function ProfilingOverview() {
           <EuiSpacer />
         </>
       )}
-      <ProfilingSchemaSelector
-        start={start}
-        end={end}
-        // The Java views filter APM transactions with the kuery, which doesn't apply to profiling
-        // data, so their schemas with data are checked for the whole time range
-        kuery={isJavaAgent ? '' : kuery}
-      />
+      {/* Java agents record the profiler stacktrace IDs of each transaction, so their profiling
+      data and schemas with data come from the service's transactions. Other agents can only be
+      correlated through the hosts or containers the service runs on. */}
+      {isJavaAgent ? (
+        <ProfilingSchemaSelector
+          serviceName={serviceName}
+          start={start}
+          end={end}
+          environment={environment}
+          kuery={kuery}
+          transactionType={transactionType}
+        />
+      ) : (
+        <ProfilingHostsSchemaSelector
+          serviceName={serviceName}
+          start={start}
+          end={end}
+          environment={environment}
+          dataSource={preferred?.source}
+          kuery={kuery}
+        />
+      )}
       <EuiSpacer />
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </>

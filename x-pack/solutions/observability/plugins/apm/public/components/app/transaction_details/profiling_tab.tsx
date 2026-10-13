@@ -112,11 +112,13 @@ function ProfilingTabContent() {
     <>
       <EuiSpacer />
       <ProfilingSchemaSelector
+        serviceName={serviceName}
         start={start}
         end={end}
-        // The kuery filters APM transactions, which doesn't apply to profiling data, so the schemas
-        // with data are checked for the whole time range
-        kuery=""
+        environment={environment}
+        kuery={kuery}
+        transactionName={transactionName}
+        transactionType={transactionType}
       />
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </>

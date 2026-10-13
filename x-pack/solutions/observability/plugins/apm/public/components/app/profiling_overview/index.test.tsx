@@ -12,6 +12,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
 import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector';
 import { ProfilingHostsFlamegraph } from './profiling_hosts_flamegraph';
+import { ProfilingHostsSchemaSelector } from './profiling_hosts_schema_selector';
 import { ProfilingOverview } from '.';
 
 const KUERY = 'process.thread.name : "main"';
@@ -41,6 +42,9 @@ jest.mock('../../../context/apm_service/use_apm_service_context', () => ({
 jest.mock('../../shared/profiling/schema_selector', () => ({
   ProfilingSchemaSelector: jest.fn(() => null),
 }));
+jest.mock('./profiling_hosts_schema_selector', () => ({
+  ProfilingHostsSchemaSelector: jest.fn(() => null),
+}));
 jest.mock('../../shared/profiling/flamegraph', () => ({
   ProfilingFlamegraph: jest.fn(() => null),
 }));
@@ -62,30 +66,41 @@ describe('ProfilingOverview', () => {
     jest.clearAllMocks();
   });
 
-  it('checks the schemas with data for the profiling query of the hosts views', () => {
+  it('checks the schemas with data of the hosts of the service in the hosts views', () => {
     mockAgent('nodejs');
 
     render(<ProfilingOverview />);
 
-    expect(ProfilingSchemaSelector).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: KUERY }),
+    expect(ProfilingHostsSchemaSelector).toHaveBeenCalledWith(
+      expect.objectContaining({
+        serviceName: 'my-service',
+        environment: 'production',
+        kuery: KUERY,
+      }),
       expect.anything()
     );
+    expect(ProfilingSchemaSelector).not.toHaveBeenCalled();
     expect(ProfilingHostsFlamegraph).toHaveBeenCalledWith(
       expect.objectContaining({ schema: ProfilingSchema.OTEL }),
       expect.anything()
     );
   });
 
-  it('checks the schemas with data for the whole time range in the Java views', () => {
+  it('checks the schemas with data of the transactions of the service in the Java views', () => {
     mockAgent('java');
 
     render(<ProfilingOverview />);
 
     expect(ProfilingSchemaSelector).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: '' }),
+      expect.objectContaining({
+        serviceName: 'my-service',
+        environment: 'production',
+        kuery: KUERY,
+        transactionType: 'request',
+      }),
       expect.anything()
     );
+    expect(ProfilingHostsSchemaSelector).not.toHaveBeenCalled();
     expect(ProfilingFlamegraph).toHaveBeenCalledWith(
       expect.objectContaining({ schema: ProfilingSchema.OTEL }),
       expect.anything()

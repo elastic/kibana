@@ -48,11 +48,17 @@ jest.mock('../../shared/profiling/top_functions', () => ({ ProfilingTopNFunction
 const ProfilingTab = profilingTab.component;
 
 describe('Transaction profiling tab', () => {
-  it('checks the schemas with data for the whole time range', () => {
+  it('checks the schemas with data of the transactions', () => {
     render(<ProfilingTab />);
 
     expect(ProfilingSchemaSelector).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: '' }),
+      expect.objectContaining({
+        serviceName: 'my-service',
+        environment: 'production',
+        kuery: 'transaction.result : "HTTP 2xx"',
+        transactionName: 'GET /orders',
+        transactionType: 'request',
+      }),
       expect.anything()
     );
   });
