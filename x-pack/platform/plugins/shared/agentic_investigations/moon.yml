@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/platform/plugins/shared/agentic_investigations
 dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/tooling-log'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/core-security-server'
@@ -65,6 +67,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - scripts/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
