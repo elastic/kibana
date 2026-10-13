@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
@@ -29,7 +29,7 @@ export const UniversalRulesOnlyCallout = ({
   description,
 }: {
   appId: string;
-  description: string;
+  description: ReactNode;
 }) => {
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
     `${ALERTING_V2_SECTION_ID}.${appId}.universalRulesOnlyCalloutDismissed`,

@@ -230,7 +230,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
 
 const RuleBuilderSectionDivider: React.FC = () => (
   <>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="l" />
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiHorizontalRule margin="none" />

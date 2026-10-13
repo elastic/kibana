@@ -12,14 +12,12 @@ export const getRulesPageMenu = ({
   authorizedToCreateAnyRules,
   canShowSettings,
   extraItems = [],
-  createRuleLabel,
   onCreateRule,
   onOpenSettings,
 }: {
   authorizedToCreateAnyRules: boolean;
   canShowSettings: boolean;
   extraItems?: NonNullable<AppMenuConfig['items']>;
-  createRuleLabel?: string;
   onCreateRule?: () => void;
   onOpenSettings: () => void;
 }): AppMenuConfig => {
@@ -27,11 +25,9 @@ export const getRulesPageMenu = ({
     authorizedToCreateAnyRules && onCreateRule
       ? {
           id: 'createRule',
-          label:
-            createRuleLabel ??
-            i18n.translate('xpack.triggersActionsUI.rules.addRuleButtonLabel', {
-              defaultMessage: 'Create rule',
-            }),
+          label: i18n.translate('xpack.triggersActionsUI.rules.addRuleButtonLabel', {
+            defaultMessage: 'Create rule',
+          }),
           iconType: 'plusCircle',
           run: onCreateRule,
           testId: 'createRuleButton',
