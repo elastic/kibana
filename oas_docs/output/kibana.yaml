@@ -1045,6 +1045,7 @@ paths:
                         permissions:
                           update_access_control: false
                           update_agent: false
+                          update_approvals: false
                         type: chat
                       - access_control:
                           access_mode: private
@@ -1071,6 +1072,7 @@ paths:
                         permissions:
                           update_access_control: true
                           update_agent: true
+                          update_approvals: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -1167,6 +1169,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available; added in 9.6.0
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1599,6 +1626,7 @@ paths:
                     permissions:
                       update_access_control: true
                       update_agent: true
+                      update_approvals: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1702,6 +1730,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available; added in 9.6.0
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -9896,7 +9949,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10013,7 +10066,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10165,7 +10218,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10358,7 +10411,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10573,7 +10626,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10741,7 +10794,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -10919,7 +10972,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -11098,7 +11151,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -11266,7 +11319,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -11424,7 +11477,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-ack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11438,12 +11491,12 @@ paths:
         content:
           application/json:
             examples:
-              bulkAckEpisodeActionRequest:
-                summary: Acknowledge two alert episodes
+              bulkAckAlertActionRequest:
+                summary: Acknowledge two alerts
                 value:
                   items:
-                    - alert_id: episode-1
-                    - alert_id: episode-2
+                    - alert_id: alert-1
+                    - alert_id: alert-2
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_request'
       responses:
@@ -11451,15 +11504,15 @@ paths:
           content:
             application/json:
               examples:
-                bulkAckEpisodeActionResponse:
-                  summary: One action created, one episode not found
+                bulkAckAlertActionResponse:
+                  summary: One action created, one alert not found
                   value:
                     affected_count: 1
                     errors:
                       - error:
                           code: ALERT_NOT_FOUND
-                          message: Alert with alert_id [episode-2] not found
-                        id: episode-2
+                          message: Alert with alert_id [alert-2] not found
+                        id: alert-2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
           description: Returns the number of created actions and per-item errors for actions that were not created.
@@ -11532,7 +11585,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk acknowledge alert episodes
+      summary: Bulk acknowledge alerts
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -11548,7 +11601,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-activate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11562,11 +11615,11 @@ paths:
         content:
           application/json:
             examples:
-              bulkActivateEpisodeActionRequest:
-                summary: Reopen an alert episode with a reason
+              bulkActivateAlertActionRequest:
+                summary: Reopen an alert with a reason
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       reason: manual reopen
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_request'
@@ -11575,7 +11628,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkActivateEpisodeActionResponse:
+                bulkActivateAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 1
@@ -11652,7 +11705,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk activate alert episodes
+      summary: Bulk activate alerts
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -11668,7 +11721,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-assign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11682,13 +11735,13 @@ paths:
         content:
           application/json:
             examples:
-              bulkAssignEpisodeActionRequest:
-                summary: Assign one episode and clear the assignee of another
+              bulkAssignAlertActionRequest:
+                summary: Assign one alert and clear the assignee of another
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       assignee_uid: u_abc123
-                    - alert_id: episode-2
+                    - alert_id: alert-2
                       assignee_uid: null
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_request'
@@ -11697,7 +11750,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkAssignEpisodeActionResponse:
+                bulkAssignAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 2
@@ -11774,7 +11827,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk assign alert episodes
+      summary: Bulk assign alerts
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -11790,7 +11843,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11804,11 +11857,11 @@ paths:
         content:
           application/json:
             examples:
-              bulkDeactivateEpisodeActionRequest:
-                summary: Close an alert episode with a reason
+              bulkDeactivateAlertActionRequest:
+                summary: Close an alert with a reason
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       reason: false positive
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_request'
@@ -11817,7 +11870,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkDeactivateEpisodeActionResponse:
+                bulkDeactivateAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 1
@@ -11894,7 +11947,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk deactivate alert episodes
+      summary: Bulk deactivate alerts
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -11910,7 +11963,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-tag
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11924,14 +11977,14 @@ paths:
         content:
           application/json:
             examples:
-              bulkTagEpisodeActionRequest:
-                summary: Tag two alert episodes with production
+              bulkTagAlertActionRequest:
+                summary: Tag two alerts with production
                 value:
                   items:
-                    - alert_id: episode-1
+                    - alert_id: alert-1
                       tags:
                         - production
-                    - alert_id: episode-2
+                    - alert_id: alert-2
                       tags:
                         - production
             schema:
@@ -11941,7 +11994,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkTagEpisodeActionResponse:
+                bulkTagAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 2
@@ -12018,7 +12071,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk tag alert episodes
+      summary: Bulk tag alerts
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12034,7 +12087,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create the same action for multiple alerts in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-bulk-unack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12048,12 +12101,12 @@ paths:
         content:
           application/json:
             examples:
-              bulkUnackEpisodeActionRequest:
-                summary: Unacknowledge two alert episodes
+              bulkUnackAlertActionRequest:
+                summary: Unacknowledge two alerts
                 value:
                   items:
-                    - alert_id: episode-1
-                    - alert_id: episode-2
+                    - alert_id: alert-1
+                    - alert_id: alert-2
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_request'
       responses:
@@ -12061,7 +12114,7 @@ paths:
           content:
             application/json:
               examples:
-                bulkUnackEpisodeActionResponse:
+                bulkUnackAlertActionResponse:
                   summary: All actions created
                   value:
                     affected_count: 2
@@ -12138,7 +12191,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk unacknowledge alert episodes
+      summary: Bulk unacknowledge alerts
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12154,7 +12207,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-ack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12176,8 +12229,8 @@ paths:
         content:
           application/json:
             examples:
-              createAckEpisodeActionRequest:
-                summary: Acknowledge the alert episode
+              createAckAlertActionRequest:
+                summary: Acknowledge the alert
                 value: {}
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_ack_alert_action'
@@ -12231,17 +12284,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -12252,10 +12305,10 @@ paths:
                     code: INVALID_ALERT_STATE_TRANSITION
                     details:
                       action_type: ack
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] is already acknowledged.'
+                    message: '[alert-1] is already acknowledged.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert is already acknowledged.
@@ -12285,7 +12338,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Acknowledge an alert episode
+      summary: Acknowledge an alert
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12301,7 +12354,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-activate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12323,7 +12376,7 @@ paths:
         content:
           application/json:
             examples:
-              createActivateEpisodeActionRequest:
+              createActivateAlertActionRequest:
                 summary: Activate with a reason
                 value:
                   reason: Issue reappeared after silence window.
@@ -12379,33 +12432,33 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
               examples:
-                alertEpisodeNotLatest:
+                alertNotLatest:
                   summary: The alert has been superseded by a newer alert of its series
                   value:
                     code: ALERT_NOT_LATEST
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Alert [episode-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+                    message: Alert [alert-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
+          description: Indicates the alert has been superseded by a newer alert in its series, or is already in the requested state.
         '500':
           content:
             application/json:
@@ -12432,7 +12485,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Activate an alert episode
+      summary: Activate an alert
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12448,7 +12501,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-assign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12470,8 +12523,8 @@ paths:
         content:
           application/json:
             examples:
-              createAssignEpisodeActionRequest:
-                summary: Assign the alert episode to user u_abc123
+              createAssignAlertActionRequest:
+                summary: Assign the alert to user u_abc123
                 value:
                   assignee_uid: u_abc123
             schema:
@@ -12526,17 +12579,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -12547,10 +12600,10 @@ paths:
                     code: ALERT_ACTION_NO_OP
                     details:
                       action_type: assign
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] is already assigned to [u_abc123].'
+                    message: '[alert-1] is already assigned to [u_abc123].'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert already carries the requested assignee.
@@ -12580,7 +12633,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Assign an alert episode to a user
+      summary: Assign an alert to a user
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12596,7 +12649,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12618,7 +12671,7 @@ paths:
         content:
           application/json:
             examples:
-              createDeactivateEpisodeActionRequest:
+              createDeactivateAlertActionRequest:
                 summary: Deactivate as a false positive
                 value:
                   reason: False positive confirmed by on-call.
@@ -12674,33 +12727,33 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
               examples:
-                alertEpisodeNotLatest:
+                alertNotLatest:
                   summary: The alert has been superseded by a newer alert of its series
                   value:
                     code: ALERT_NOT_LATEST
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: Alert [episode-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
+                    message: Alert [alert-1] is not the latest alert for group [98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56]
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.
+          description: Indicates the alert has been superseded by a newer alert in its series, or is already in the requested state.
         '500':
           content:
             application/json:
@@ -12727,7 +12780,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Deactivate an alert episode
+      summary: Deactivate an alert
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12743,7 +12796,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-tag
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12765,8 +12818,8 @@ paths:
         content:
           application/json:
             examples:
-              createTagEpisodeActionRequest:
-                summary: Tag the alert episode with production and investigating
+              createTagAlertActionRequest:
+                summary: Tag the alert with production and investigating
                 value:
                   tags:
                     - production
@@ -12823,17 +12876,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -12844,10 +12897,10 @@ paths:
                     code: ALERT_ACTION_NO_OP
                     details:
                       action_type: tag
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] already has these tags.'
+                    message: '[alert-1] already has these tags.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert already carries exactly the requested tags.
@@ -12877,7 +12930,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Tag an alert episode
+      summary: Tag an alert
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -12893,7 +12946,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-alerts-id-unack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12915,8 +12968,8 @@ paths:
         content:
           application/json:
             examples:
-              createUnackEpisodeActionRequest:
-                summary: Unacknowledge the alert episode
+              createUnackAlertActionRequest:
+                summary: Unacknowledge the alert
                 value: {}
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unack_alert_action'
@@ -12970,17 +13023,17 @@ paths:
           content:
             application/json:
               examples:
-                alertEpisodeNotFound:
+                alertNotFound:
                   summary: No alert exists for the given alert_id
                   value:
                     code: ALERT_NOT_FOUND
                     details:
-                      alert_id: episode-1
+                      alert_id: alert-1
                     error: Not Found
-                    message: Alert with alert_id [episode-1] not found
+                    message: Alert with alert_id [alert-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode was not found.
+          description: Indicates the alert was not found.
         '409':
           content:
             application/json:
@@ -12991,10 +13044,10 @@ paths:
                     code: INVALID_ALERT_STATE_TRANSITION
                     details:
                       action_type: unack
-                      alert_id: episode-1
+                      alert_id: alert-1
                       group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
                     error: Conflict
-                    message: '[episode-1] must be acknowledged first before it can be unacknowledged.'
+                    message: '[alert-1] must be acknowledged first before it can be unacknowledged.'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert is not acknowledged.
@@ -13024,7 +13077,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Unacknowledge an alert episode
+      summary: Unacknowledge an alert
       tags:
         - alerting-v2
       x-state: Experimental; added in 9.5.0
@@ -13067,7 +13120,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Inclusive ISO datetime upper bound on the event timestamp.
           in: query
@@ -13075,7 +13127,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
           in: query
@@ -13154,7 +13205,7 @@ paths:
                       - action_group_count: 1
                         alert_count: 1
                         alerts:
-                          - id: episode-1
+                          - id: alert-1
                         dispatched_at: '2026-01-15T12:05:00.000Z'
                         outcome: success
                         policy:
@@ -13292,7 +13343,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Inclusive ISO datetime upper bound on event.start.
           in: query
@@ -13300,7 +13350,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Sort field. Defaults to started_at.
           in: query
@@ -15228,7 +15277,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15345,7 +15394,7 @@ paths:
         [Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: get-alerting-v2-rules-id
       parameters:
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15517,7 +15566,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15712,7 +15761,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -15966,7 +16015,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -16152,7 +16201,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -16334,7 +16383,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: 'The identifier for the rule. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
           in: path
           name: id
           required: true
@@ -48208,6 +48257,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -48542,6 +48604,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -48769,6 +48844,19 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      serviceIds:
+                        description: Service IDs active when the stack was last launched or updated.
+                        items:
+                          maxLength: 128
+                          minLength: 1
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      stackArn:
+                        description: CloudFormation stack ARN pasted by the user post-launch.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
                       stackName:
                         description: CloudFormation stack name (128-char AWS limit).
                         maxLength: 128
@@ -48922,6 +49010,19 @@ paths:
                                 - unified
                                 - otel
                                 - crowdstrike
+                              type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
                               type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
@@ -49183,6 +49284,19 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              serviceIds:
+                                description: Service IDs active when the stack was last launched or updated.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 1000
+                                type: array
+                              stackArn:
+                                description: CloudFormation stack ARN pasted by the user post-launch.
+                                maxLength: 2048
+                                minLength: 1
                                 type: string
                               stackName:
                                 description: CloudFormation stack name (128-char AWS limit).
@@ -72355,7 +72469,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -72469,17 +72582,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -72901,7 +73011,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -72978,7 +73087,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -73092,17 +73200,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -73524,7 +73629,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     host:
                       additionalProperties: false
@@ -73633,7 +73737,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -73747,17 +73850,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -74179,7 +74279,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -74263,7 +74362,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -74424,17 +74522,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -74855,7 +74950,6 @@ paths:
                       properties:
                         ingested:
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -75049,7 +75143,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -75163,17 +75256,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -75595,7 +75685,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -75672,7 +75761,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -75786,17 +75874,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -76218,7 +76303,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     host:
                       additionalProperties: false
@@ -76327,7 +76411,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -76441,17 +76524,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -76873,7 +76953,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -76957,7 +77036,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -77118,17 +77196,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -77549,7 +77624,6 @@ paths:
                       properties:
                         ingested:
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -77743,7 +77817,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -77857,17 +77930,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -78289,7 +78359,6 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -78366,7 +78435,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -78480,17 +78548,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -78912,7 +78977,6 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               host:
                                 additionalProperties: false
@@ -79021,7 +79085,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -79135,17 +79198,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -79567,7 +79627,6 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -79651,7 +79710,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -79812,17 +79870,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -80243,7 +80298,6 @@ paths:
                                 properties:
                                   ingested:
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -133568,7 +133622,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_383___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -151440,7 +151494,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_54___schema0:
+    Kibana_HTTP_APIs__zod_v4_383___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -151469,7 +151523,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_383___schema0'
                       - type: object
                         properties:
                           destination:
@@ -152091,7 +152145,6 @@ components:
         created_at:
           description: The ISO datetime when the action policy was created.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         created_by:
           allOf:
@@ -152146,7 +152199,6 @@ components:
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         updated_by:
           allOf:
@@ -152592,7 +152644,6 @@ components:
         snoozed_until:
           description: The ISO datetime until which the targeted action policies should be snoozed.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
       required:
         - ids
@@ -152848,7 +152899,6 @@ components:
           type: array
         dispatched_at:
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         error:
           additionalProperties: false
@@ -153070,7 +153120,6 @@ components:
       properties:
         ended_at:
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         error:
           additionalProperties: false
@@ -153111,7 +153160,6 @@ components:
           type: string
         started_at:
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         timings:
           additionalProperties: false
@@ -153500,7 +153548,6 @@ components:
         created_at:
           description: ISO timestamp when the rule was created.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         created_by:
           allOf:
@@ -153602,7 +153649,6 @@ components:
         updated_at:
           description: ISO timestamp when the rule was last updated.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         updated_by:
           allOf:
@@ -153770,7 +153816,6 @@ components:
         snoozed_until:
           description: The ISO datetime until which the action policy should be snoozed.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
       required:
         - snoozed_until
@@ -161093,6 +161138,7 @@ components:
           description: Minimum width of the control panel.
       required:
         - type
+        - config
       title: options_list_control
       type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-range-slider-control:
@@ -161133,6 +161179,7 @@ components:
           description: Minimum width of the control panel.
       required:
         - type
+        - config
       title: range_slider_control
       type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-time-slider-control:
@@ -162042,40 +162089,35 @@ components:
                 drilldowns:
                   items:
                     anyOf:
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              encode_url:
-                                default: true
-                                description: When true, URL is escaped using percent encoding
-                                type: boolean
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                              url:
-                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                      - properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_open_panel_menu
                                 type: string
-                            required:
-                              - url
-                          - type: object
-                            properties:
-                              label:
-                                type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_open_panel_menu
-                                    type: string
-                              type:
-                                enum:
-                                  - url_drilldown
-                                type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
                         title: url_drilldown
+                        type: object
                   maxItems: 100
                   type: array
                 hide_border:
@@ -162092,7 +162134,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -162107,7 +162149,7 @@ components:
                                   description: Optional width of the column in pixels.
                                   minimum: 0
                                   type: number
-                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           data_source:
                             discriminator:
@@ -162119,31 +162161,23 @@ components:
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
                               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
                           density:
-                            anyOf:
-                              - enum:
-                                  - compact
-                                type: string
-                              - enum:
-                                  - expanded
-                                type: string
-                              - enum:
-                                  - normal
-                                type: string
-                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            enum:
+                              - compact
+                              - expanded
+                              - normal
+                            type: string
                           documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                            description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                            enum:
+                              - table
+                              - json
+                            type: string
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -162159,9 +162193,9 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
-                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
@@ -162173,14 +162207,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162192,7 +162226,7 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                                   enum:
                                     - asc
                                     - desc
@@ -162207,25 +162241,20 @@ components:
                             type: array
                           type:
                             default: default
-                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            description: The tab type. `default` tabs have no type-specific settings.
                             enum:
                               - default
                             type: string
                           view_mode:
-                            anyOf:
-                              - enum:
-                                  - documents
-                                type: string
-                              - enum:
-                                  - patterns
-                                type: string
-                              - enum:
-                                  - aggregated
-                                type: string
                             default: documents
-                            description: Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).
+                            description: 'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics).'
+                            enum:
+                              - documents
+                              - patterns
+                              - aggregated
+                            type: string
                           wrap_lines:
-                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
                             type: boolean
                         required:
                           - data_source
@@ -162234,7 +162263,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -162249,36 +162278,28 @@ components:
                                   description: Optional width of the column in pixels.
                                   minimum: 0
                                   type: number
-                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           data_source:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
                           density:
-                            anyOf:
-                              - enum:
-                                  - compact
-                                type: string
-                              - enum:
-                                  - expanded
-                                type: string
-                              - enum:
-                                  - normal
-                                type: string
-                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            enum:
+                              - compact
+                              - expanded
+                              - normal
+                            type: string
                           documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                            description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                            enum:
+                              - table
+                              - json
+                            type: string
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -162287,9 +162308,9 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
-                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
                           row_height:
                             anyOf:
@@ -162299,14 +162320,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162318,7 +162339,7 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                                   enum:
                                     - asc
                                     - desc
@@ -162333,12 +162354,12 @@ components:
                             type: array
                           type:
                             default: default
-                            description: Identifies the type of profile settings saved with the tab. The `default` value indicates that no profile settings are included.
+                            description: The tab type. `default` tabs have no type-specific settings.
                             enum:
                               - default
                             type: string
                           wrap_lines:
-                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
                             type: boolean
                         required:
                           - data_source
@@ -162346,7 +162367,7 @@ components:
                         description: An ES|QL tab with saved metrics grid settings. The dashboard panel stores these settings and restores them in Discover. The panel does not render the metrics grid.
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -162361,7 +162382,7 @@ components:
                                   description: Optional width of the column in pixels.
                                   minimum: 0
                                   type: number
-                            description: Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.
+                            description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           counter_aggregation:
                             description: Aggregation applied to counter metric fields.
@@ -162374,22 +162395,17 @@ components:
                           data_source:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
                           default_rendered_nodes:
-                            description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.'
+                            description: The number of nodes each JSON cell renders by default in the JSON document view.
                             maximum: 200
                             minimum: 10
                             type: number
                           density:
-                            anyOf:
-                              - enum:
-                                  - compact
-                                type: string
-                              - enum:
-                                  - expanded
-                                type: string
-                              - enum:
-                                  - normal
-                                type: string
-                            description: 'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.'
+                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            enum:
+                              - compact
+                              - expanded
+                              - normal
+                            type: string
                           dimensions:
                             description: Fields used to group metrics in the metrics grid.
                             items:
@@ -162398,14 +162414,11 @@ components:
                             maxItems: 5
                             type: array
                           documents_display_mode:
-                            anyOf:
-                              - enum:
-                                  - table
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                            description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                            enum:
+                              - table
+                              - json
+                            type: string
                           gauge_aggregation:
                             description: Aggregation applied to gauge metric fields.
                             enum:
@@ -162422,9 +162435,9 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.'
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           hide_nulls:
-                            description: 'Discover display option: controls whether fields with null values are hidden in JSON document view.'
+                            description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
                           histogram_percentile:
                             description: Percentile displayed for histogram metric fields.
@@ -162443,14 +162456,14 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
+                            description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            description: 'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".'
+                            description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
                             maximum: 10000
                             minimum: 10
                             type: number
@@ -162466,7 +162479,7 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                                   enum:
                                     - asc
                                     - desc
@@ -162485,7 +162498,7 @@ components:
                               - metrics
                             type: string
                           wrap_lines:
-                            description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.'
+                            description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
                             type: boolean
                         required:
                           - data_source
@@ -162518,40 +162531,35 @@ components:
                 drilldowns:
                   items:
                     anyOf:
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              encode_url:
-                                default: true
-                                description: When true, URL is escaped using percent encoding
-                                type: boolean
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                              url:
-                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                      - properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_open_panel_menu
                                 type: string
-                            required:
-                              - url
-                          - type: object
-                            properties:
-                              label:
-                                type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_open_panel_menu
-                                    type: string
-                              type:
-                                enum:
-                                  - url_drilldown
-                                type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
                         title: url_drilldown
+                        type: object
                   maxItems: 100
                   type: array
                 hide_border:
@@ -162581,34 +162589,26 @@ components:
                             description: Optional width of the column in pixels.
                             minimum: 0
                             type: number
-                      description: Per-column presentation overrides (e.g. widths) keyed by field name. When set, merges with the source configuration for the referenced session or inline tab.
+                      description: Per-column settings keyed by field name, such as width. When set, merges with the source configuration for the referenced session or inline tab.
                       type: object
                     default_rendered_nodes:
-                      description: 'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: The number of nodes each JSON cell renders by default in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       maximum: 200
                       minimum: 10
                       type: number
                     density:
-                      anyOf:
-                        - enum:
-                            - compact
-                          type: string
-                        - enum:
-                            - expanded
-                          type: string
-                        - enum:
-                            - normal
-                          type: string
-                      description: 'Discover display option: controls table row spacing (`compact`, `expanded`, or `normal`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: The table row spacing. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
+                      enum:
+                        - compact
+                        - expanded
+                        - normal
+                      type: string
                     documents_display_mode:
-                      anyOf:
-                        - enum:
-                            - table
-                          type: string
-                        - enum:
-                            - json
-                          type: string
-                      description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                      description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                      enum:
+                        - table
+                        - json
+                      type: string
                     header_row_height:
                       anyOf:
                         - maximum: 5
@@ -162617,9 +162617,9 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: 'Discover display option: controls table header row height (number 1–5 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: The table header row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                     hide_nulls:
-                      description: 'Discover display option: controls whether fields with null values are hidden in JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: When `true`, fields with null values are hidden in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       type: boolean
                     row_height:
                       anyOf:
@@ -162629,14 +162629,14 @@ components:
                         - enum:
                             - auto
                           type: string
-                      description: 'Discover display option: controls table data row height (number 1–20 or `auto`). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".'
+                      description: The table data row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:rowHeightOption` advanced setting.
                     rows_per_page:
-                      description: Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".
+                      description: The number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleRowsPerPage` advanced setting.
                       maximum: 10000
                       minimum: 1
                       type: number
                     sample_size:
-                      description: 'Discover display option: controls how many documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".'
+                      description: The number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleSize` advanced setting.
                       maximum: 10000
                       minimum: 10
                       type: number
@@ -162647,7 +162647,7 @@ components:
                         type: object
                         properties:
                           direction:
-                            description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                            description: 'The sort direction: `asc` for ascending or `desc` for descending.'
                             enum:
                               - asc
                               - desc
@@ -162661,7 +162661,7 @@ components:
                       maxItems: 100
                       type: array
                     wrap_lines:
-                      description: 'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                      description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.
                       type: boolean
                 ref_id:
                   type: string
@@ -162797,43 +162797,38 @@ components:
                           - trigger
                           - type
                     title: dashboard_drilldown
-                  - allOf:
-                      - additionalProperties: false
-                        type: object
-                        properties:
-                          encode_url:
-                            default: true
-                            description: When true, URL is escaped using percent encoding
-                            type: boolean
-                          open_in_new_tab:
-                            default: true
-                            type: boolean
-                          url:
-                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                  - properties:
+                      encode_url:
+                        default: true
+                        description: When true, URL is escaped using percent encoding
+                        type: boolean
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_click_image
                             type: string
-                        required:
-                          - url
-                      - type: object
-                        properties:
-                          label:
+                          - enum:
+                              - on_open_panel_menu
                             type: string
-                          trigger:
-                            anyOf:
-                              - enum:
-                                  - on_click_image
-                                type: string
-                              - enum:
-                                  - on_open_panel_menu
-                                type: string
-                          type:
-                            enum:
-                              - url_drilldown
-                            type: string
-                        required:
-                          - label
-                          - trigger
-                          - type
+                      type:
+                        enum:
+                          - url_drilldown
+                        type: string
+                      url:
+                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: string
+                    required:
+                      - url
+                      - label
+                      - trigger
+                      - type
                     title: url_drilldown
+                    type: object
               maxItems: 100
               type: array
             hide_border:
@@ -163159,6 +163154,7 @@ components:
       required:
         - type
         - grid
+        - config
       title: Options list control
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control:
@@ -163184,6 +163180,7 @@ components:
       required:
         - type
         - grid
+        - config
       title: Range slider control
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts:
@@ -163421,40 +163418,35 @@ components:
             drilldowns:
               items:
                 anyOf:
-                  - allOf:
-                      - additionalProperties: false
-                        type: object
-                        properties:
-                          encode_url:
-                            default: true
-                            description: When true, URL is escaped using percent encoding
-                            type: boolean
-                          open_in_new_tab:
-                            default: true
-                            type: boolean
-                          url:
-                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                  - properties:
+                      encode_url:
+                        default: true
+                        description: When true, URL is escaped using percent encoding
+                        type: boolean
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_open_panel_menu
                             type: string
-                        required:
-                          - url
-                      - type: object
-                        properties:
-                          label:
-                            type: string
-                          trigger:
-                            anyOf:
-                              - enum:
-                                  - on_open_panel_menu
-                                type: string
-                          type:
-                            enum:
-                              - url_drilldown
-                            type: string
-                        required:
-                          - label
-                          - trigger
-                          - type
+                      type:
+                        enum:
+                          - url_drilldown
+                        type: string
+                      url:
+                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: string
+                    required:
+                      - url
+                      - label
+                      - trigger
+                      - type
                     title: url_drilldown
+                    type: object
               maxItems: 100
               type: array
             filters:
@@ -163668,74 +163660,65 @@ components:
                                   - trigger
                                   - type
                             title: dashboard_drilldown
-                          - allOf:
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  open_in_new_tab:
-                                    default: true
-                                    type: boolean
-                              - type: object
-                                properties:
-                                  label:
+                          - properties:
+                              label:
+                                type: string
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_apply_filter
                                     type: string
-                                  trigger:
-                                    anyOf:
-                                      - enum:
-                                          - on_apply_filter
-                                        type: string
-                                  type:
-                                    enum:
-                                      - discover_drilldown
-                                    type: string
-                                required:
-                                  - label
-                                  - trigger
-                                  - type
+                              type:
+                                enum:
+                                  - discover_drilldown
+                                type: string
+                            required:
+                              - label
+                              - trigger
+                              - type
                             title: discover_drilldown
-                          - allOf:
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  encode_url:
-                                    default: true
-                                    description: When true, URL is escaped using percent encoding
-                                    type: boolean
-                                  open_in_new_tab:
-                                    default: true
-                                    type: boolean
-                                  url:
-                                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: object
+                          - properties:
+                              encode_url:
+                                default: true
+                                description: When true, URL is escaped using percent encoding
+                                type: boolean
+                              label:
+                                type: string
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_click_row
                                     type: string
-                                required:
-                                  - url
-                              - type: object
-                                properties:
-                                  label:
+                                  - enum:
+                                      - on_click_value
                                     type: string
-                                  trigger:
-                                    anyOf:
-                                      - enum:
-                                          - on_click_row
-                                        type: string
-                                      - enum:
-                                          - on_click_value
-                                        type: string
-                                      - enum:
-                                          - on_open_panel_menu
-                                        type: string
-                                      - enum:
-                                          - on_select_range
-                                        type: string
-                                  type:
-                                    enum:
-                                      - url_drilldown
+                                  - enum:
+                                      - on_open_panel_menu
                                     type: string
-                                required:
-                                  - label
-                                  - trigger
-                                  - type
+                                  - enum:
+                                      - on_select_range
+                                    type: string
+                              type:
+                                enum:
+                                  - url_drilldown
+                                type: string
+                              url:
+                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                                type: string
+                            required:
+                              - url
+                              - label
+                              - trigger
+                              - type
                             title: url_drilldown
+                            type: object
                       maxItems: 100
                       type: array
                     hide_border:
@@ -163808,74 +163791,65 @@ components:
                               - trigger
                               - type
                         title: dashboard_drilldown
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                          - type: object
-                            properties:
-                              label:
+                      - properties:
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_apply_filter
                                 type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_apply_filter
-                                    type: string
-                              type:
-                                enum:
-                                  - discover_drilldown
-                                type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                          type:
+                            enum:
+                              - discover_drilldown
+                            type: string
+                        required:
+                          - label
+                          - trigger
+                          - type
                         title: discover_drilldown
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              encode_url:
-                                default: true
-                                description: When true, URL is escaped using percent encoding
-                                type: boolean
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                              url:
-                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: object
+                      - properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_click_row
                                 type: string
-                            required:
-                              - url
-                          - type: object
-                            properties:
-                              label:
+                              - enum:
+                                  - on_click_value
                                 type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_click_row
-                                    type: string
-                                  - enum:
-                                      - on_click_value
-                                    type: string
-                                  - enum:
-                                      - on_open_panel_menu
-                                    type: string
-                                  - enum:
-                                      - on_select_range
-                                    type: string
-                              type:
-                                enum:
-                                  - url_drilldown
+                              - enum:
+                                  - on_open_panel_menu
                                 type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                              - enum:
+                                  - on_select_range
+                                type: string
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
                         title: url_drilldown
+                        type: object
                   maxItems: 100
                   type: array
                 hide_border:
@@ -169195,6 +169169,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -169268,6 +169243,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: false
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -169321,6 +169375,34 @@ components:
           additionalProperties: false
           type: object
           properties:
+            oauth2:
+              additionalProperties: false
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: false
@@ -171526,6 +171608,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -171599,6 +171682,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: true
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: true
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -171652,6 +171814,34 @@ components:
           additionalProperties: true
           type: object
           properties:
+            oauth2:
+              additionalProperties: true
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: true
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: true
@@ -174816,40 +175006,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         hide_border:
@@ -174892,40 +175077,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         duration:
@@ -174964,40 +175144,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         hide_border:
@@ -175031,40 +175206,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         group_filters:
@@ -175299,40 +175469,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         hide_border:
@@ -176183,7 +176348,7 @@ components:
                 - action
                 - from
                 - to
-            - allOf:
+            - anyOf:
                 - additionalProperties: false
                   type: object
                   properties:
@@ -176206,6 +176371,10 @@ components:
                       type: boolean
                     ignore_missing:
                       type: boolean
+                    internal_networks:
+                      items:
+                        type: string
+                      type: array
                     source_ip:
                       minLength: 1
                       type: string
@@ -176219,24 +176388,46 @@ components:
                     - action
                     - source_ip
                     - destination_ip
-                - anyOf:
-                    - additionalProperties: false
-                      type: object
-                      properties:
-                        internal_networks:
-                          items:
-                            type: string
-                          type: array
-                      required:
-                        - internal_networks
-                    - additionalProperties: false
-                      type: object
-                      properties:
-                        internal_networks_field:
-                          minLength: 1
-                          type: string
-                      required:
-                        - internal_networks_field
+                    - internal_networks
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    action:
+                      enum:
+                        - network_direction
+                      type: string
+                    customIdentifier:
+                      description: Custom identifier to correlate this processor across outputs
+                      minLength: 1
+                      type: string
+                    description:
+                      description: Human-readable notes about this processor step
+                      type: string
+                    destination_ip:
+                      minLength: 1
+                      type: string
+                    ignore_failure:
+                      description: Continue pipeline execution if this processor fails
+                      type: boolean
+                    ignore_missing:
+                      type: boolean
+                    internal_networks_field:
+                      minLength: 1
+                      type: string
+                    source_ip:
+                      minLength: 1
+                      type: string
+                    target_field:
+                      minLength: 1
+                      type: string
+                    where:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                      description: Conditional expression controlling whether this processor runs
+                  required:
+                    - action
+                    - source_ip
+                    - destination_ip
+                    - internal_networks_field
             - additionalProperties: false
               description: JsonExtract processor - Extract values from JSON strings using JSONPath-like selectors
               type: object
@@ -177263,6 +177454,7 @@ components:
             - user_pass
             - ssl
             - kerberos
+            - oauth2
           type: string
         broker_timeout:
           type: number
@@ -177336,6 +177528,85 @@ components:
           type: string
         name:
           type: string
+        oauth2:
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            audience:
+              type: string
+            claims:
+              additionalProperties:
+                nullable: true
+              type: object
+            client_certificate_key_file:
+              type: string
+            client_certificate_key_id:
+              type: string
+            client_id:
+              type: string
+            client_id_file:
+              type: string
+            client_secret_file:
+              type: string
+            endpoint_params:
+              additionalProperties:
+                items:
+                  type: string
+                maxItems: 100
+                type: array
+              type: object
+            expiry_buffer:
+              description: How many seconds before a token's expiry the agent requests a new one. It defaults to `300` when not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            grant_type:
+              enum:
+                - client_credentials
+                - urn:ietf:params:oauth:grant-type:jwt-bearer
+              type: string
+            iss:
+              type: string
+            scopes:
+              items:
+                type: string
+              maxItems: 100
+              type: array
+            signature_algorithm:
+              enum:
+                - RS256
+                - RS384
+                - RS512
+              type: string
+            timeout:
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
+              maximum: 86400
+              minimum: 0
+              type: number
+            tls:
+              additionalProperties: false
+              type: object
+              properties:
+                ca_file:
+                  type: string
+                cert_file:
+                  type: string
+                insecure_skip_verify:
+                  type: boolean
+                key_file:
+                  type: string
+                max_version:
+                  type: string
+                min_version:
+                  type: string
+                server_name_override:
+                  type: string
+            token_url:
+              minLength: 1
+              type: string
+          required:
+            - token_url
         otel_disable_beatsauth:
           nullable: true
           type: boolean
@@ -177389,6 +177660,34 @@ components:
           additionalProperties: false
           type: object
           properties:
+            oauth2:
+              additionalProperties: false
+              type: object
+              properties:
+                client_certificate_key:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
+                client_secret:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        id:
+                          type: string
+                      required:
+                        - id
+                    - type: string
             password:
               anyOf:
                 - additionalProperties: false
@@ -181194,6 +181493,9 @@ components:
               type: string
             - enum:
                 - pin
+              type: string
+            - enum:
+                - popout
               type: string
             - enum:
                 - sort_down
@@ -189923,6 +190225,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
             - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -189960,6 +190263,10 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     Security_Detections_API_BulkDisableRules:
       type: object
       properties:

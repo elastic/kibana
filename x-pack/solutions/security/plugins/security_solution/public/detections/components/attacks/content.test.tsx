@@ -7,20 +7,30 @@
 
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 import { TestProviders } from '../../../common/mock';
 import {
   AttacksPageContent,
-  ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID,
+  ATTACKS_PAGE_TYPE_FILTER_TEST_ID,
   SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID,
 } from './content';
+import {
+  GENERATIONS_MENU_ITEM_TEST_ID,
+  RUN_MENU_ITEM_TEST_ID,
+  SCHEDULE_MENU_ITEM_TEST_ID,
+  SETTINGS_MENU_ITEM_TEST_ID,
+} from './header/use_attacks_header_menu';
 import { KPIS_SECTION } from './kpis/kpis_section';
 import { TABLE_SECTION_TEST_ID } from './table/table_section';
 import { useKibana } from '../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../common/lib/telemetry';
+import { ATTACKS_PATH } from '../../../../common/constants';
 
 import { useAttackDiscoveryControls } from '../../../attack_discovery/pages/use_attack_discovery_controls';
 
@@ -80,13 +90,24 @@ jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => (
 
 const dataView: DataView = createStubDataView({ spec: {} });
 
+const renderWithProviders = () =>
+  render(
+    <TestProviders>
+      <MemoryRouter initialEntries={[ATTACKS_PATH]}>
+        <AttacksPageContent dataView={dataView} />
+      </MemoryRouter>
+    </TestProviders>
+  );
+
 describe('AttacksPageContent', () => {
   const reportEvent = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: { capabilities: { advancedSettings: { save: true } } },
+        http: { basePath: { prepend: (path: string) => path } },
         featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
         settings: {
           client: {
@@ -117,20 +138,55 @@ describe('AttacksPageContent', () => {
   });
 
   it('should render correctly', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByTestId(SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID)).toBeInTheDocument();
-      expect(screen.getByTestId('header-page-title')).toHaveTextContent('Attacks');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Attacks');
       expect(screen.getByTestId(TABLE_SECTION_TEST_ID)).toBeInTheDocument();
+    });
+
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(GENERATIONS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(RUN_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(SETTINGS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(SCHEDULE_MENU_ITEM_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders the header as a direct child of the page wrapper so it can stay sticky', async () => {
+    renderWithProviders();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root).parentElement).toBe(
+        screen.getByTestId(SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID)
+      );
     });
   });
 
-  it('should render `Schedule` button and report telemetry when clicked', async () => {
+  it('hides the header and filters while the attacks table is in full screen', async () => {
+    renderWithProviders();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeVisible();
+      expect(screen.getByTestId(ATTACKS_PAGE_TYPE_FILTER_TEST_ID)).toBeVisible();
+    });
+
+    document.body.classList.add('euiDataGrid__restrictBody');
+
+    await waitFor(() => {
+      expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeInTheDocument();
+      expect(screen.getByTestId(ATTACKS_PAGE_TYPE_FILTER_TEST_ID)).not.toBeVisible();
+    });
+
+    document.body.classList.remove('euiDataGrid__restrictBody');
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeVisible();
+      expect(screen.getByTestId(ATTACKS_PAGE_TYPE_FILTER_TEST_ID)).toBeVisible();
+    });
+  });
+
+  it('should render `Schedule` action and report telemetry when clicked', async () => {
     const openFlyoutMock = jest.fn();
     (useAttackDiscoveryControls as jest.Mock).mockReturnValue({
       connectorId: 'test-connector',
@@ -140,17 +196,10 @@ describe('AttacksPageContent', () => {
       settingsFlyout: null,
     });
 
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('schedule')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId('schedule'));
+    await openAppMenuOverflow();
+    fireEvent.click(screen.getByTestId(SCHEDULE_MENU_ITEM_TEST_ID));
 
     expect(openFlyoutMock).toHaveBeenCalledWith('schedule');
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ScheduleFlyoutOpened, {
@@ -158,7 +207,7 @@ describe('AttacksPageContent', () => {
     });
   });
 
-  it('should render `Settings` button and report telemetry when clicked', async () => {
+  it('should render `Settings` action and report telemetry when clicked', async () => {
     const openFlyoutMock = jest.fn();
     (useAttackDiscoveryControls as jest.Mock).mockReturnValue({
       connectorId: 'test-connector',
@@ -168,17 +217,10 @@ describe('AttacksPageContent', () => {
       settingsFlyout: null,
     });
 
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('settings')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId('settings'));
+    await openAppMenuOverflow();
+    fireEvent.click(screen.getByTestId(SETTINGS_MENU_ITEM_TEST_ID));
 
     expect(openFlyoutMock).toHaveBeenCalledWith('settings');
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.SettingsFlyoutOpened, {
@@ -186,7 +228,7 @@ describe('AttacksPageContent', () => {
     });
   });
 
-  it('should render `Run` button and report telemetry when clicked', async () => {
+  it('should render `Run` action and report telemetry when clicked', async () => {
     const onGenerateMock = jest.fn();
     (useAttackDiscoveryControls as jest.Mock).mockReturnValue({
       connectorId: 'test-connector',
@@ -196,17 +238,10 @@ describe('AttacksPageContent', () => {
       settingsFlyout: null,
     });
 
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('run')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId('run'));
+    await openAppMenuOverflow();
+    fireEvent.click(screen.getByTestId(RUN_MENU_ITEM_TEST_ID));
 
     expect(onGenerateMock).toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.GenerateClicked, {
@@ -214,72 +249,28 @@ describe('AttacksPageContent', () => {
     });
   });
 
-  it('should render the `Generations` button', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+  it('should not render the control center flyout before the `Generations` action is clicked', async () => {
+    renderWithProviders();
 
-    await waitFor(() => {
-      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
-    });
-  });
-
-  it('should not render the control center flyout before the `Generations` button is clicked', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
-    });
-
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(GENERATIONS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
     expect(screen.queryByTestId('generationsControlCenterFlyout')).not.toBeInTheDocument();
   });
 
-  it('should open the control center flyout when the `Generations` button is clicked', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+  it('should open the control center flyout and report telemetry when the `Generations` action is clicked', async () => {
+    renderWithProviders();
 
-    await waitFor(() => {
-      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID));
+    await openAppMenuOverflow();
+    fireEvent.click(screen.getByTestId(GENERATIONS_MENU_ITEM_TEST_ID));
 
     expect(screen.getByTestId('generationsControlCenterFlyout')).toBeInTheDocument();
-  });
-
-  it('should report telemetry when the `Generations` button is clicked', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId(ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID));
-
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.GenerationsControlCenterOpened, {
       source: 'attacks_page_header',
     });
   });
 
   it('should render `Type` filter', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByTestId('mock-type-filter')).toBeInTheDocument();
@@ -287,11 +278,7 @@ describe('AttacksPageContent', () => {
   });
 
   it('should render `Connector` filter', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByTestId('connectorFilterButton')).toBeInTheDocument();
@@ -299,11 +286,7 @@ describe('AttacksPageContent', () => {
   });
 
   it('should render `Assignee` button', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByTestId('mock-filter-by-assignees-popover')).toBeInTheDocument();
@@ -311,11 +294,7 @@ describe('AttacksPageContent', () => {
   });
 
   it('should render KPIs section', async () => {
-    render(
-      <TestProviders>
-        <AttacksPageContent dataView={dataView} />
-      </TestProviders>
-    );
+    renderWithProviders();
 
     await waitFor(() => {
       expect(screen.getByTestId(KPIS_SECTION)).toBeInTheDocument();

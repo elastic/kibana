@@ -19,6 +19,12 @@ export interface HuntServices {
   /** The proposals plugin's service, for writing back hunt proposals. */
   getProposalsService: ProposalsPluginStart['getProposalsService'];
   /**
+   * The proposals plugin's privilege checker, for a caller that writes through the service
+   * itself rather than through a route or a workflow step, which check it on their own. The
+   * service does not: it writes with its own credentials and relies on its callers.
+   */
+  getProposalPrivileges: ProposalsPluginStart['getProposalPrivileges'];
+  /**
    * Inference plugin start contract, for building a ScopedModel per hunt run.
    * Optional plugin, so this is undefined on a deployment without it and the
    * caller degrades at the Tier 2 boundary rather than failing the hunt.
