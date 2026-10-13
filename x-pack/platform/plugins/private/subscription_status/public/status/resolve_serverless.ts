@@ -30,15 +30,15 @@ const getTitle = (projectType?: ProjectType): string => {
       });
     case 'observability':
       return i18n.translate('xpack.subscriptionStatus.serverless.observabilityTitle', {
-        defaultMessage: 'Elastic Observability Serverless',
+        defaultMessage: 'Observability Serverless',
       });
     case 'security':
       return i18n.translate('xpack.subscriptionStatus.serverless.securityTitle', {
-        defaultMessage: 'Elastic Security Serverless',
+        defaultMessage: 'Security Serverless',
       });
     case 'vectordb':
       return i18n.translate('xpack.subscriptionStatus.serverless.vectordbTitle', {
-        defaultMessage: 'Elasticsearch Vector Database',
+        defaultMessage: 'Vector Database Serverless',
       });
     case undefined:
       return i18n.translate('xpack.subscriptionStatus.serverless.defaultTitle', {

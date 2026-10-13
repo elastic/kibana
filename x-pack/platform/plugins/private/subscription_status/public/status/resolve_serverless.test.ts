@@ -91,9 +91,9 @@ describe('resolveServerlessStatus', () => {
   });
 
   it.each<[ProjectType, string, string]>([
-    ['observability', 'Elastic Observability Serverless', 'observability'],
-    ['security', 'Elastic Security Serverless', 'security'],
-    ['vectordb', 'Elasticsearch Vector Database', 'vectordb'],
+    ['observability', 'Observability Serverless', 'observability'],
+    ['security', 'Security Serverless', 'security'],
+    ['vectordb', 'Vector Database Serverless', 'vectordb'],
   ])(
     'maps the %s project to its title and pricing solution',
     async (projectType, title, solution) => {
