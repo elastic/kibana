@@ -174,7 +174,7 @@ async function collectWorkflowDiagnostics(
       message:
         `Destination workflow "${destinationId}" does not declare \`inputs.payload\` with ` +
         `\`$ref: '${ALERTING_V2_NOTIFICATION_GROUP_REF}'\` on its manual trigger. ` +
-        `Liquid variables like {{ inputs.payload.episodes }} will not be statically validated against the dispatch payload shape.`,
+        `Liquid variables like {{ inputs.payload.alerts }} will not be statically validated against the dispatch payload shape.`,
     });
   }
 
