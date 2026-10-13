@@ -382,6 +382,13 @@ export class WorkersService {
     }
 
     try {
+      // Worker workflows run their `ai.agent` steps on the shared thin agent, so the space needs
+      // it before a run can start. An API enable may come before anything has listed the space's
+      // Workers.
+      if (nextEnabled) {
+        await this.ensureAgent(spaceId);
+      }
+
       if (pendingSettingsValues) {
         await this.persistWorker(request, registration, {
           spaceId,

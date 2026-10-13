@@ -788,8 +788,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
 
+    const agentId = validatedParams.agentId ?? agentBuilderDefaultAgentId;
     const conversation = await getConversation({
-      agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
+      agentId,
       conversationId: validatedParams.conversationId,
       autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
       conversationClient,
@@ -800,6 +801,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         : undefined,
       subagentCreation: validatedParams.subagentCreation,
     });
+
+    // Reading a conversation back requires use access to its agent, and a missing agent reads as
+    // "Conversation not found". Check before creating one so the error names the agent and no
+    // unreadable conversation is stored.
+    if (conversation.operation === 'CREATE') {
+      const agentRegistry = await this.deps.agentService.getRegistry({ request });
+      await agentRegistry.get(agentId, { access: 'use' });
+    }
 
     return { validatedParams, conversation, receivedAt };
   }
