@@ -357,8 +357,14 @@ describe('Detection Coverage review', () => {
 
       const caseSteps = (match: string) =>
         close?.cases?.find((c) => c.match === match)?.steps.map(({ name }) => name);
-      expect(caseSteps('approved')).toEqual(['close_investigation_resolved']);
-      expect(caseSteps('dismissed')).toEqual(['close_investigation_dismissed']);
+      expect(caseSteps('approved')).toEqual([
+        'close_investigation_resolved',
+        'report_investigation_closed_resolved',
+      ]);
+      expect(caseSteps('dismissed')).toEqual([
+        'close_investigation_dismissed',
+        'report_investigation_closed_dismissed',
+      ]);
 
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
@@ -582,6 +588,7 @@ describe('Detection Coverage review', () => {
       expect(entryCaseOf('dismissed')).toEqual([
         'mark_declined',
         'close_investigation_declined',
+        'report_investigation_closed_declined',
         'stop_declined',
       ]);
       expect(entryCaseOf('expired')).toEqual(['stop_expired']);
