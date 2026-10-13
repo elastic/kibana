@@ -25,6 +25,7 @@ import {
   assertConnectorSucceeded,
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  escapeServiceNowCommentText,
   fitHitlRenderedTextPreservingLink,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
@@ -48,7 +49,7 @@ function buildDefaultInputServiceNowComment({
   formUrl: string;
 }): string {
   return fitHitlTextPreservingSuffix(
-    stepMessage,
+    escapeServiceNowCommentText(stepMessage),
     serviceNowCommentLink(DEFAULT_HITL_INPUT_OPEN_FORM_LABEL, formUrl),
     SERVICENOW_COMMENT_MAX_LENGTH
   );
@@ -275,18 +276,18 @@ export async function sendWaitForInputNotifications({
   if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
     const table = renderServiceNowField(serviceNowTable, renderTemplate, 'table');
     const sysId = renderServiceNowField(serviceNowSysId, renderTemplate, 'sys-id');
-    const comment =
+    const renderedComment =
       serviceNowConfig.message != null
-        ? fitHitlRenderedTextPreservingLink(
-            resolveWaitForInputChannelMessage({
-              channelMessageTemplate: serviceNowConfig.message,
-              stepMessage,
-              formUrl,
-              renderTemplate,
-            }),
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: serviceNowConfig.message,
+            stepMessage,
             formUrl,
-            SERVICENOW_COMMENT_MAX_LENGTH
-          )
+            renderTemplate,
+          })
+        : undefined;
+    const comment =
+      renderedComment != null
+        ? fitHitlRenderedTextPreservingLink(renderedComment, formUrl, SERVICENOW_COMMENT_MAX_LENGTH)
         : buildDefaultInputServiceNowComment({ stepMessage, formUrl });
 
     const result = await connectorExecutor.execute({

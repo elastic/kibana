@@ -9,9 +9,11 @@
 
 import {
   assertConnectorSucceeded,
+  escapeServiceNowCommentText,
   fitHitlRenderedTextPreservingLink,
   fitHitlTextPreservingSuffix,
   SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 
@@ -48,6 +50,22 @@ describe('slackApiChannelTarget', () => {
 
   it('routes other values to channelIds', () => {
     expect(slackApiChannelTarget('C0123456789')).toEqual({ channelIds: ['C0123456789'] });
+  });
+});
+
+describe('escapeServiceNowCommentText', () => {
+  it('escapes HTML and journal code tags in comment text', () => {
+    expect(escapeServiceNowCommentText('Host <your_input> [code]x[/code] & "q"')).toBe(
+      'Host \uFF1Cyour_input\uFF1E [\u200bcode]x[\u200b/code] & "q"'
+    );
+  });
+});
+
+describe('serviceNowCommentLink', () => {
+  it('keeps the journal anchor and escapes the label', () => {
+    expect(serviceNowCommentLink('Approve[/code]', 'https://example.com?a=1&b=2')).toBe(
+      '[code]<a href="https://example.com?a=1&amp;b=2">Approve[\u200b/code]</a>[/code]'
+    );
   });
 });
 

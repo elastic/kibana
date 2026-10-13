@@ -256,6 +256,53 @@ describe('sendWaitForInputNotifications', () => {
     );
   });
 
+  it('sends a custom ServiceNow message unchanged, including journal HTML', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: {
+          'connector-id': 'snow-1',
+          table: 'incident',
+          'sys-id': 'abc123',
+          message:
+            'Host <your_input>\n[code]<a href="{{context.hitl.externalFormLink}}">Open the form</a>[/code]',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+      'Host <your_input>\n[code]<a href="https://kibana.example/form">Open the form</a>[/code]'
+    );
+  });
+
+  it('escapes ServiceNow step text outside the Open form anchor', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+      },
+      stepMessage: 'Ticket for <your_input>',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+      'Ticket for \uFF1Cyour_input\uFF1E\n\n[code]<a href="https://kibana.example/form">Open form</a>[/code]'
+    );
+  });
+
   it('renders ServiceNow table and sys-id before adding the comment', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

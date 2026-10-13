@@ -329,6 +329,23 @@ describe('send_wait_for_approval_notifications', () => {
       });
     });
 
+    it('escapes ServiceNow comment text outside the journal anchors', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        message: 'Isolate <your_input>? [code]no[/code]',
+        channels: {
+          servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+        'Isolate \uFF1Cyour_input\uFF1E? [\u200bcode]no[\u200b/code]\n\n[code]<a href="https://kibana.example/approve">Approve</a>[/code]\n[code]<a href="https://kibana.example/reject">Decline</a>[/code]'
+      );
+    });
+
     it('renders ServiceNow table and sys-id before adding the comment', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 

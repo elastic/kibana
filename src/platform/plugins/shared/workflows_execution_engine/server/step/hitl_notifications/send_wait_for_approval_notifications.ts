@@ -21,6 +21,7 @@ import {
   assertConnectorSucceeded,
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  escapeServiceNowCommentText,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -75,7 +76,7 @@ function buildServiceNowApprovalComment({
   rejectUrl: string;
 }): string {
   return fitHitlTextPreservingSuffix(
-    message,
+    escapeServiceNowCommentText(message),
     `${serviceNowCommentLink(approveLabel, approveUrl)}\n${serviceNowCommentLink(
       rejectLabel,
       rejectUrl

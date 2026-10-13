@@ -80,8 +80,21 @@ export function fitHitlRenderedTextPreservingLink(
   return `${prefix}${link}${after}`;
 }
 
+/** Stops ServiceNow from reading `[code]` in user text as journal HTML. */
+function breakServiceNowCodeTag(value: string): string {
+  return value.replace(/\[(\/?code)\]/gi, '[\u200b$1]');
+}
+
+/**
+ * Makes comment text safe to place outside a journal anchor.
+ * Angle brackets are replaced, not encoded: ServiceNow decodes `&lt;` and then rejects the tag.
+ */
+export function escapeServiceNowCommentText(value: string): string {
+  return breakServiceNowCodeTag(value).replace(/</g, '\uFF1C').replace(/>/g, '\uFF1E');
+}
+
 function escapeServiceNowHtml(value: string): string {
-  return value
+  return breakServiceNowCodeTag(value)
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
