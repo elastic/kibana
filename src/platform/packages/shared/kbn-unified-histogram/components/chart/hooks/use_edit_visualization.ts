@@ -62,11 +62,14 @@ export const useEditVisualization = ({
     }
 
     return () => {
-      services.lens.navigateToPrefilledEditor({
-        id: '',
-        time_range: relativeTimeRange,
-        attributes: lensAttributes,
-      });
+      services.lens.navigateToPrefilledEditor(
+        {
+          id: '',
+          time_range: relativeTimeRange,
+          attributes: lensAttributes,
+        },
+        { originatingApp: 'discover' }
+      );
     };
   }, [canVisualize, lensAttributes, relativeTimeRange, services.lens]);
 

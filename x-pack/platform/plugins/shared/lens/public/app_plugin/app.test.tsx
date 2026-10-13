@@ -1040,7 +1040,7 @@ describe('Lens App', () => {
         await save({ savedObjectId: undefined });
         expect(props.redirectToOrigin).toHaveBeenCalled();
         expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
-        expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl');
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'dashboards');
       });
 
       it('does not track a creation when an existing doc is saved', async () => {

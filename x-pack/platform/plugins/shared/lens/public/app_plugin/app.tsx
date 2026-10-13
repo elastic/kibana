@@ -52,6 +52,7 @@ import { trackCreateUiCounterEvents, trackSaveUiCounterEvents } from '../lens_ui
 import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
+  getTelemetrySource,
   isSaveAndReturn,
   isLegacyEditorEmbeddable,
   setBreadcrumbsTitle,
@@ -345,7 +346,6 @@ export function App({
       if (telemetryEvents && telemetryEvents.length) {
         trackSaveUiCounterEvents(telemetryEvents);
       }
-      const isNewVisualization = !persistedDoc;
       try {
         const newState = await runSaveLensVisualization(
           {
@@ -366,8 +366,12 @@ export function App({
           saveProps,
           options
         );
-        if (isNewVisualization) {
-          trackCreateUiCounterEvents(isTextBasedAttributes(currentDoc) ? 'esql' : 'dsl');
+        // Track creation events for new visualizations
+        if (!initialInput?.ref_id) {
+          trackCreateUiCounterEvents(
+            isTextBasedAttributes(currentDoc) ? 'esql' : 'dsl',
+            getTelemetrySource(incomingState)
+          );
         }
         if (newState) {
           dispatchSetState(newState);
