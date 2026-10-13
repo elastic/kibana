@@ -66,6 +66,8 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - ftr-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -77,4 +79,10 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  ftr-config:
+    - e2e/ftr_config.ts
+    - e2e/ftr_config_open.ts
+    - e2e/ftr_config_runner.ts
+  scout-tests:
+    - test/scout/**/*
 tasks: {}

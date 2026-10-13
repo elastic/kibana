@@ -150,6 +150,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -163,4 +164,9 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_service_accounts/**/*
+    - test/scout_uiam_local/**/*
+    - test/scout_workflows_oom_testing/**/*
 tasks: {}

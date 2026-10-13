@@ -56,6 +56,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __jest__/**/*
@@ -69,4 +70,7 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_upgrade_assistant_integration/**/*
 tasks: {}

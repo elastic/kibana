@@ -149,6 +149,7 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -162,4 +163,7 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_synthetics_agent_e2e/**/*
 tasks: {}

@@ -189,6 +189,8 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*
@@ -199,4 +201,32 @@ fileGroups:
     - utils/**/*
     - index.ts
     - '!target/**/*'
+  jest-integration-config:
+    - server/integration_tests/capabilities/jest.integration.config.js
+    - server/integration_tests/config/jest.integration.config.js
+    - server/integration_tests/core_app/jest.integration.config.js
+    - server/integration_tests/elasticsearch/jest.integration.config.js
+    - server/integration_tests/execution_context/jest.integration.config.js
+    - server/integration_tests/http/jest.integration.config.js
+    - server/integration_tests/http_resources/jest.integration.config.js
+    - server/integration_tests/logging/jest.integration.config.js
+    - server/integration_tests/logging/otel/jest.integration.config.js
+    - server/integration_tests/metrics/jest.integration.config.js
+    - server/integration_tests/node/jest.integration.config.js
+    - server/integration_tests/pricing/jest.integration.config.js
+    - server/integration_tests/root/jest.integration.config.js
+    - server/integration_tests/saved_objects/jest.integration.config.js
+    - server/integration_tests/saved_objects/migrations/group1/jest.integration.config.js
+    - server/integration_tests/saved_objects/migrations/group3/jest.integration.config.js
+    - server/integration_tests/saved_objects/migrations/group4/jest.integration.config.js
+    - server/integration_tests/saved_objects/migrations/group5/jest.integration.config.js
+    - server/integration_tests/saved_objects/migrations/zdt_1/jest.integration.config.js
+    - server/integration_tests/saved_objects/migrations/zdt_2/jest.integration.config.js
+    - server/integration_tests/saved_objects/migrations/zdt_v2_compat/jest.integration.config.js
+    - server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js
+    - server/integration_tests/status/jest.integration.config.js
+    - server/integration_tests/ui_settings/jest.integration.config.js
+    - server/integration_tests/user_storage/jest.integration.config.js
+  scout-tests:
+    - test/scout/**/*
 tasks: {}

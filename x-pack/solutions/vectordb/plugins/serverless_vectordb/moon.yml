@@ -63,6 +63,7 @@ tags:
   - group-vectordb
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -74,4 +75,6 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
 tasks: {}

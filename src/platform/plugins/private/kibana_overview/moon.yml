@@ -46,6 +46,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*
@@ -55,4 +56,7 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_shared_ux_no_data/**/*
 tasks: {}

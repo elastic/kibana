@@ -24,8 +24,11 @@ tags:
   - prod
   - group-platform
   - shared
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+  scout-tests:
+    - test/scout_hardening/**/*
 tasks: {}

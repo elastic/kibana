@@ -67,6 +67,7 @@ tags:
   - prod
   - group-security
   - private
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -76,4 +77,6 @@ fileGroups:
     - server/**/*.ts
     - test/scout/**/*
     - '!target/**/*'
+  scout-tests:
+    - test/scout/**/*
 tasks: {}

@@ -124,6 +124,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -136,4 +137,6 @@ fileGroups:
     - '!.storybook/**/*.js'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
 tasks: {}

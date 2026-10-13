@@ -43,6 +43,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -53,4 +54,12 @@ fileGroups:
     - '!test/plugins/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout_interactive_setup_no_security_ui/**/*
+    - test/scout_interactive_setup_no_tls_api/**/*
+    - test/scout_interactive_setup_no_tls_ui/**/*
+    - test/scout_interactive_setup_tls_enrollment_api/**/*
+    - test/scout_interactive_setup_tls_enrollment_ui/**/*
+    - test/scout_interactive_setup_tls_manual_api/**/*
+    - test/scout_interactive_setup_tls_manual_ui/**/*
 tasks: {}

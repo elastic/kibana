@@ -26,10 +26,16 @@ tags:
   - dev
   - group-vectordb
   - private
+  - ftr-tests
 fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
     - '!*/plugins/**/*'
     - '!plugins/**/*'
+  ftr-config:
+    - serverless/api_integration/configs/config.feature_flags.ts
+    - serverless/api_integration/configs/config.ts
+    - serverless/functional/configs/config.feature_flags.ts
+    - serverless/functional/configs/config.ts
 tasks: {}

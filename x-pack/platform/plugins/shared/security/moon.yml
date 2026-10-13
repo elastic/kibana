@@ -133,6 +133,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -143,4 +144,19 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_kerberos/**/*
+    - test/scout_pki/**/*
+    - test/scout_pki_stress/**/*
+    - test/scout_security_audit/**/*
+    - test/scout_security_audit_otel/**/*
+    - test/scout_service_accounts/**/*
+    - test/scout_session_concurrent_limit/**/*
+    - test/scout_session_idle/**/*
+    - test/scout_session_invalidate/**/*
+    - test/scout_session_lifespan/**/*
+    - test/scout_session_management/**/*
+    - test/scout_uiam_local/**/*
+    - test/scout_uiam_oauth_local/**/*
 tasks: {}

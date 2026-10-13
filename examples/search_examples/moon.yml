@@ -45,6 +45,7 @@ tags:
   - prod
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -54,4 +55,6 @@ fileGroups:
     - server/**/*.ts
     - test/scout_examples/**/*
     - '!target/**/*'
+  scout-tests:
+    - test/scout_examples/**/*
 tasks: {}

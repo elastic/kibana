@@ -34,6 +34,7 @@ tags:
   - prod
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -41,4 +42,6 @@ fileGroups:
     - server/**/*
     - test/scout_examples/**/*
     - '!target/**/*'
+  scout-tests:
+    - test/scout_examples/**/*
 tasks: {}

@@ -52,6 +52,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - index.ts
@@ -64,4 +65,6 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  jest-integration-config:
+    - integration_tests/jest.integration.config.js
 tasks: {}

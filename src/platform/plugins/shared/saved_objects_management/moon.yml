@@ -53,6 +53,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -63,4 +64,6 @@ fileGroups:
     - '!public/management_section/objects_table/saved_objects_table_pseudo.tsx'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
 tasks: {}

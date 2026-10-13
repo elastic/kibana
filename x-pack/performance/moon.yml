@@ -38,6 +38,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - ftr-tests
 fileGroups:
   src:
     - '**/*.ts'
@@ -45,4 +46,40 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  ftr-config:
+    - configs/http2_config.ts
+    - configs/streams_heavy_config.ts
+    - journeys_e2e/aiops_log_rate_analysis.ts
+    - journeys_e2e/apm_service_inventory.ts
+    - journeys_e2e/cloud_security_dashboard.ts
+    - journeys_e2e/dashboard_listing_page.ts
+    - journeys_e2e/data_stress_test_lens.ts
+    - journeys_e2e/data_stress_test_lens_esql.ts
+    - journeys_e2e/ecommerce_dashboard_map_only.ts
+    - journeys_e2e/ecommerce_dashboard_saved_search_only.ts
+    - journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
+    - journeys_e2e/flight_dashboard.ts
+    - journeys_e2e/infra_hosts_view_ecs.ts
+    - journeys_e2e/infra_hosts_view_semconv.ts
+    - journeys_e2e/login.ts
+    - journeys_e2e/many_fields_discover.ts
+    - journeys_e2e/many_fields_discover_esql.ts
+    - journeys_e2e/many_fields_esql_editor.ts
+    - journeys_e2e/many_fields_lens_editor.ts
+    - journeys_e2e/many_fields_transform.ts
+    - journeys_e2e/many_points_chart_dashboard.ts
+    - journeys_e2e/many_series_chart_dashboard.ts
+    - journeys_e2e/metrics_experience_grid.ts
+    - journeys_e2e/promotion_tracking_dashboard.ts
+    - journeys_e2e/streams_data_quality.ts
+    - journeys_e2e/streams_field_mapping.ts
+    - journeys_e2e/streams_listing_page.ts
+    - journeys_e2e/streams_processing_step.ts
+    - journeys_e2e/streams_retention.ts
+    - journeys_e2e/streams_wired_hierarchy.ts
+    - journeys_e2e/tags_listing_page.ts
+    - journeys_e2e/tsdb_logs_data_visualizer.ts
+    - journeys_e2e/web_logs_dashboard.ts
+    - journeys_e2e/web_logs_dashboard_esql.ts
+    - journeys_e2e/web_logs_dashboard_esql_long_running.ts
 tasks: {}

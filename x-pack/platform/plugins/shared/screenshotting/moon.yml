@@ -41,6 +41,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*
@@ -50,4 +51,6 @@ fileGroups:
     - '!chromium/**/*'
   jest-config:
     - jest.config.js
+  jest-integration-config:
+    - jest.integration.config.js
 tasks: {}

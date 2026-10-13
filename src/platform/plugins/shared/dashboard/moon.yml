@@ -143,6 +143,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'
@@ -158,4 +160,11 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  jest-integration-config:
+    - jest.integration.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_anonymous_authc/**/*
+    - test/scout_search_sessions/**/*
+    - test/scout_test_plugins/**/*
 tasks: {}

@@ -61,6 +61,7 @@ tags:
   - dev
   - group-security
   - private
+  - ftr-tests
 fileGroups:
   src:
     - '**/*'
@@ -73,4 +74,61 @@ fileGroups:
     - '!security-solution-evals/**/*'
     - '!*/packages/**/*'
     - '!*/*/packages/**/*'
+  ftr-config:
+    - accessibility/config.ts
+    - alerting_api_integration/security_and_spaces/group2/config.ts
+    - api_integration/apis/cases/config.ts
+    - api_integration/apis/cloud_security_posture/config.ts
+    - api_integration/config.ts
+    - api_integration_basic/config.ts
+    - cases_api_integration/security_and_spaces/config_trial.ts
+    - cases_api_integration/security_and_spaces/config_trial_common.ts
+    - cloud_security_posture_api/config.graph_basic.ts
+    - cloud_security_posture_api/config.ts
+    - cloud_security_posture_functional/config.agentless.ts
+    - cloud_security_posture_functional/config.cloud.ts
+    - cloud_security_posture_functional/data_views/config.ts
+    - cloud_security_posture_functional/group1/config.ts
+    - cloud_security_posture_functional/group2/config.ts
+    - cloud_security_posture_functional/group3/config.ts
+    - cloud_security_posture_functional/group4/config.ts
+    - cloud_security_posture_functional/group5/config.ts
+    - defend_workflows_cypress/cli_config.ts
+    - defend_workflows_cypress/config.ts
+    - defend_workflows_cypress/serverless_config.base.ts
+    - defend_workflows_cypress/serverless_config.ts
+    - fleet_api_integration/config.agent.ts
+    - fleet_api_integration/config.epm.ts
+    - fleet_api_integration/config.package_policy.ts
+    - functional/config.base.ts
+    - functional_solution_sidenav/config.ts
+    - kubernetes_security/basic/config.ts
+    - osquery_cypress/cli_config.ts
+    - osquery_cypress/config.ts
+    - osquery_cypress/serverless_cli_config.ts
+    - osquery_cypress/serverless_config.base.ts
+    - osquery_cypress/visual_config.ts
+    - plugin_functional/config.ts
+    - screenshot_creation/config.ts
+    - security_solution_cypress/ai4dsoc_serverless_config.ts
+    - security_solution_cypress/cli_config.ts
+    - security_solution_cypress/config.ts
+    - security_solution_cypress/serverless_config.ts
+    - serverless/api_integration/configs/config.feature_flags.ts
+    - serverless/api_integration/configs/config.graph.ts
+    - serverless/api_integration/configs/config.graph_essentials.ts
+    - serverless/api_integration/configs/config.ts
+    - serverless/api_integration/test_suites/fleet/config.ts
+    - serverless/functional/configs/config.cloud_security_posture.agentless.ts
+    - serverless/functional/configs/config.cloud_security_posture.basic.ts
+    - serverless/functional/configs/config.cloud_security_posture.cloud.ts
+    - serverless/functional/configs/config.cloud_security_posture.complete.ts
+    - serverless/functional/configs/config.cloud_security_posture.essentials.ts
+    - serverless/functional/configs/config.context_awareness.ts
+    - serverless/functional/configs/config.feature_flags.ts
+    - serverless/functional/configs/config.mki_only.ts
+    - serverless/functional/configs/config.screenshots.ts
+    - serverless/functional/configs/config.trial_companion.ts
+    - serverless/functional/configs/config.ts
+    - session_view/basic/config.ts
 tasks: {}

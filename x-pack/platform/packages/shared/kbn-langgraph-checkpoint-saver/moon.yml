@@ -27,8 +27,11 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+  jest-integration-config:
+    - jest.integration.config.js
 tasks: {}

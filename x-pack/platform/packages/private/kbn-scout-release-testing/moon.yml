@@ -26,8 +26,11 @@ tags:
   - dev
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+  scout-tests:
+    - test/scout/**/*
 tasks: {}

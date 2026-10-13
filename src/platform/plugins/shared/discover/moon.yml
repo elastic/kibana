@@ -184,6 +184,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -194,4 +195,9 @@ fileGroups:
     - '!target/**/*'
   jest-config:
     - jest.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_discover_context_awareness/**/*
+    - test/scout_search_sessions/**/*
+    - test/scout_test_plugins/**/*
 tasks: {}

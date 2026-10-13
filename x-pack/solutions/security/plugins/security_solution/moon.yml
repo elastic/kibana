@@ -328,6 +328,8 @@ tags:
   - prod
   - group-security
   - private
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -348,4 +350,19 @@ fileGroups:
     - '!target/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
+  jest-integration-config:
+    - public/detection_engine/rule_creation_ui/components/step_define_rule/__integration_tests__/jest.integration.config.js
+    - public/detection_engine/rule_management_ui/pages/rule_management/__integration_tests__/rules_upgrade/jest.integration.config.js
+    - public/detection_engine/rule_management_ui/pages/rule_management/__integration_tests__/rules_upgrade/upgrade_rule_after_preview/fields/common/jest.integration.config.js
+    - public/detection_engine/rule_management_ui/pages/rule_management/__integration_tests__/rules_upgrade/upgrade_rule_after_preview/fields/type_specific/jest.integration.config.js
+    - public/jest.integration.config.js
+    - server/jest.integration.config.js
+  scout-tests:
+    - test/scout/**/*
+    - test/scout_ai_value_report/**/*
+    - test/scout_alertzero/**/*
+    - test/scout_cps_local/**/*
+    - test/scout_edr_real_fleet/**/*
+    - test/scout_es_max_response_size/**/*
+    - test/scout_security_attacks_alignment/**/*
 tasks: {}
