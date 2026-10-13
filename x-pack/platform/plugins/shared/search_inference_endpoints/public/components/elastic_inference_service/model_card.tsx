@@ -23,6 +23,7 @@ import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
 import {
   getModelEOLDate,
+  getModelTitle,
   getProviderKeyForCreator,
   isModelEndOfLifeReached,
   isModelNearingEndOfLife,
@@ -46,10 +47,7 @@ const modelCardBodyStyles = ({ euiTheme }: UseEuiTheme) => ({
 export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
   const euiThemeContext = useEuiTheme();
   const { modelName, modelCreator, categories } = model;
-  const providerPrefix = `${modelCreator} `;
-  const modelTitle = modelName.startsWith(providerPrefix)
-    ? modelName.slice(providerPrefix.length)
-    : modelName;
+  const modelTitle = getModelTitle(modelName, modelCreator);
   const modelId = model.endpoints[0] ? getModelId(model.endpoints[0]) : undefined;
   const providerKey = getProviderKeyForCreator(modelCreator);
   const provider = providerKey ? SERVICE_PROVIDERS[providerKey] : undefined;
