@@ -116,6 +116,8 @@ const packageComponentTemplateMappings = () => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // `clearAllMocks` keeps implementations; drop the per-test rejection rules.
+  esClient.indices.putIndexTemplate.mockReset();
 
   mockedAppContextService.getLogger.mockReturnValue(logger);
   mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
@@ -286,6 +288,75 @@ describe('applyLogsdbColumnarIndexMode', () => {
     ).toEqual({ type: 'keyword', doc_values: false, store: true });
   });
 
+  it('puts the data streams already switched back when another one is rejected', async () => {
+    const info = packageInfo();
+    mockInstalledPackage({
+      ...info,
+      data_streams: [
+        ...info.data_streams,
+        { ...info.data_streams[0], dataset: 'test.other', path: 'other' },
+      ],
+    });
+    esClient.indices.putIndexTemplate.mockImplementation(async (params: any) => {
+      if (params.name === 'logs-test.other' && params.template.settings.index.mode) {
+        throw nestedCausedByError();
+      }
+      return { acknowledged: true };
+    });
+
+    await expect(
+      applyLogsdbColumnarIndexMode({
+        esClient,
+        savedObjectsClient,
+        logger,
+        pkgName: PKG_NAME,
+        enabled: true,
+      })
+    ).rejects.toThrow(FleetErrorWithStatusCode);
+
+    const lastIndexTemplate = esClient.indices.putIndexTemplate.mock.calls
+      .filter(([params]: any) => params.name === DATA_STREAM)
+      .pop();
+    expect((lastIndexTemplate?.[0] as any).template.settings.index).toEqual({});
+    expect(templateModule.updateCurrentWriteIndices).not.toHaveBeenCalled();
+  });
+
+  it('rolls a data stream back to the mode it had, not to the opposite of the request', async () => {
+    mockInstalledPackage(packageInfo());
+    esClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: DATA_STREAM,
+          index_template: {
+            template: { settings: { index: { mode: 'logsdb_columnar' } }, mappings: {} },
+            composed_of: [],
+            index_patterns: '',
+          },
+        },
+      ],
+    } as any);
+    esClient.indices.putIndexTemplate.mockRejectedValueOnce(nestedCausedByError());
+
+    await expect(
+      applyLogsdbColumnarIndexMode({
+        esClient,
+        savedObjectsClient,
+        logger,
+        pkgName: PKG_NAME,
+        enabled: true,
+      })
+    ).rejects.toThrow(FleetErrorWithStatusCode);
+
+    // The data stream was already on columnar: its component template goes back to the stripped
+    // mappings, not to the LogsDB ones.
+    const rollback = esClient.cluster.putComponentTemplate.mock.calls
+      .filter(([params]: any) => params.name === COMPONENT_TEMPLATE)
+      .pop();
+    expect(
+      (rollback?.[0] as any).body.template.mappings.properties.event.properties.original
+    ).toEqual({ type: 'keyword' });
+  });
+
   it('does not enrich Elasticsearch errors when the mode is being removed', async () => {
     mockInstalledPackage(packageInfo());
     const err = nestedCausedByError();
@@ -351,7 +422,7 @@ describe('setLogsdbColumnarChoice', () => {
       ...extra,
     });
 
-  it('stores the choice on the installation, then applies it to Elasticsearch', async () => {
+  it('applies the choice to Elasticsearch, then stores it on the installation', async () => {
     jest.mocked(getInstallationObject).mockResolvedValue(installation());
     mockInstalledPackage(packageInfo());
 
@@ -363,10 +434,24 @@ describe('setLogsdbColumnarChoice', () => {
     expect(
       (esClient.indices.putIndexTemplate.mock.calls[0][0] as any).template.settings.index
     ).toEqual({ mode: 'logsdb_columnar' });
-    // The stored state must describe what Fleet is applying: persist first, then write templates.
-    expect(savedObjectsClient.update.mock.invocationCallOrder[0]).toBeLessThan(
-      esClient.indices.putIndexTemplate.mock.invocationCallOrder[0]
+    // Only an accepted change is stored, so a rejected one can be retried.
+    expect(esClient.indices.putIndexTemplate.mock.invocationCallOrder[0]).toBeLessThan(
+      savedObjectsClient.update.mock.invocationCallOrder[0]
     );
+  });
+
+  it('keeps the stored choice when Elasticsearch rejects the change, so it can be retried', async () => {
+    jest.mocked(getInstallationObject).mockResolvedValue(installation());
+    mockInstalledPackage(packageInfo());
+    esClient.indices.putIndexTemplate.mockRejectedValueOnce(nestedCausedByError());
+
+    await expect(setChoice(true)).rejects.toThrow(FleetErrorWithStatusCode);
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+
+    await expect(setChoice(true)).resolves.toEqual({ changed: true });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, PKG_NAME, {
+      logsdb_columnar_enabled: true,
+    });
   });
 
   it('is a no-op when the stored choice already matches', async () => {

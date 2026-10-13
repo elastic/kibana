@@ -25,6 +25,7 @@ import { FleetErrorWithStatusCode, PackageNotFoundError } from '../../../errors'
 import type { IndexTemplateEntry, Installation, RegistryDataStream } from '../../../types';
 import { auditLoggingService } from '../../audit_logging';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+import { getCurrentIndexModes } from '../elasticsearch/template/columnar_index_mode';
 import {
   installComponentAndIndexTemplateForDataStream,
   installDataStreamComponentTemplates,
@@ -137,12 +138,13 @@ export function assertLogsdbColumnarSupported({
 }
 
 /**
- * Stores the user's installation-level `logsdb_columnar` choice and applies it to Elasticsearch.
+ * Applies the user's installation-level `logsdb_columnar` choice to Elasticsearch and stores it.
  *
  * Shared by the update package API and the package policy editor so both behave the same: a
  * no-op when the stored choice already matches, a 400 when enabling a package without a ready
- * logs data stream, and nothing written until that check has passed. The choice is persisted
- * before the templates are rewritten so the saved object always describes what Fleet is applying.
+ * logs data stream, and nothing written until that check has passed. The choice is only stored
+ * once Elasticsearch accepted it: a rejected change leaves the previous choice in place, so it
+ * can be retried.
  */
 export async function setLogsdbColumnarChoice({
   savedObjectsClient,
@@ -176,6 +178,15 @@ export async function setLogsdbColumnarChoice({
     enabled,
   });
 
+  await applyLogsdbColumnarIndexMode({
+    esClient,
+    savedObjectsClient,
+    logger,
+    pkgName,
+    enabled,
+    installedPackageWithAssets,
+  });
+
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: installedPackage.id,
@@ -184,15 +195,6 @@ export async function setLogsdbColumnarChoice({
   });
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
     logsdb_columnar_enabled: enabled,
-  });
-
-  await applyLogsdbColumnarIndexMode({
-    esClient,
-    savedObjectsClient,
-    logger,
-    pkgName,
-    enabled,
-    installedPackageWithAssets,
   });
 
   return { changed: true };
@@ -207,9 +209,10 @@ export async function setLogsdbColumnarChoice({
  * `installComponentAndIndexTemplateForDataStream` takes care of), then the write indices are
  * asked to roll over so the change takes effect — in both directions.
  *
- * Persisting the choice on the installation saved object is the caller's job
- * (`setLogsdbColumnarChoice`); it runs first so the stored state always reflects what Fleet is
- * applying.
+ * If Elasticsearch rejects any data stream, the ones already switched are put back on their
+ * previous mode and nothing is rolled over, so the change is all or nothing. Persisting the
+ * choice on the installation saved object is the caller's job (`setLogsdbColumnarChoice`), once
+ * this has succeeded.
  */
 export async function applyLogsdbColumnarIndexMode({
   esClient,
@@ -242,36 +245,45 @@ export async function applyLogsdbColumnarIndexMode({
     paths,
   };
 
-  const indexModesFor = (columnar: boolean) =>
-    new Map<string, string | undefined>(
-      readyDataStreams.map((dataStream) => [
-        getRegistryDataStreamAssetBaseName(dataStream),
-        columnar ? LOGSDB_COLUMNAR_INDEX_MODE : undefined,
-      ])
-    );
+  const templateNames = readyDataStreams.map((dataStream) =>
+    getRegistryDataStreamAssetBaseName(dataStream)
+  );
+  const targetIndexModes = new Map<string, string | undefined>(
+    templateNames.map((name) => [name, enabled ? LOGSDB_COLUMNAR_INDEX_MODE : undefined])
+  );
+  // What each data stream goes back to if the change is rejected: its current mode, which is not
+  // the same for every data stream when the package defaults put only some of them on columnar.
+  const currentIndexModes = await getCurrentIndexModes(esClient, templateNames);
+  const previousIndexModes = new Map<string, string | undefined>(
+    templateNames.map((name) => [
+      name,
+      currentIndexModes.get(name) === LOGSDB_COLUMNAR_INDEX_MODE
+        ? LOGSDB_COLUMNAR_INDEX_MODE
+        : undefined,
+    ])
+  );
 
   const experimentalDataStreamFeatures = installation?.experimental_data_stream_features ?? [];
 
-  // The "previous" set is what the component templates have to be restored to if Elasticsearch
-  // rejects the new index template; it is the same templates prepared with the opposite mode.
   const [targetTemplates, previousTemplates] = await Promise.all([
     prepareDataStreamTemplates(
       readyDataStreams,
       packageInstallContext,
       assetsMap,
       experimentalDataStreamFeatures,
-      indexModesFor(enabled)
+      targetIndexModes
     ),
     prepareDataStreamTemplates(
       readyDataStreams,
       packageInstallContext,
       assetsMap,
       experimentalDataStreamFeatures,
-      indexModesFor(!enabled)
+      previousIndexModes
     ),
   ]);
 
-  const updatedIndexTemplates: IndexTemplateEntry[] = [];
+  const updated: number[] = [];
+  const failures: unknown[] = [];
 
   await pMap(
     targetTemplates,
@@ -283,6 +295,7 @@ export async function applyLogsdbColumnarIndexMode({
           componentTemplates,
           indexTemplate,
         });
+        updated.push(index);
       } catch (err) {
         // Elasticsearch only validates the composed mappings when the index template is written,
         // which happens after the component templates were already rewritten. Put the previous
@@ -296,11 +309,39 @@ export async function applyLogsdbColumnarIndexMode({
             `Failed to restore component templates for ${indexTemplate.templateName} after a rejected ${LOGSDB_COLUMNAR_INDEX_MODE} change: ${rollbackErr}`
           );
         });
-        throw enabled ? enrichColumnarIndexTemplateError(err, indexTemplate.templateName) : err;
+        failures.push(
+          enabled ? enrichColumnarIndexTemplateError(err, indexTemplate.templateName) : err
+        );
       }
-      updatedIndexTemplates.push(indexTemplate);
     },
     { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
+
+  if (failures.length > 0) {
+    // Put the data streams that were already switched back on their previous mode, so a rejected
+    // change leaves the whole package as it was and can be retried.
+    await pMap(
+      updated,
+      async (index) => {
+        const { componentTemplates, indexTemplate } = previousTemplates[index];
+        await installComponentAndIndexTemplateForDataStream({
+          esClient,
+          logger,
+          componentTemplates,
+          indexTemplate,
+        }).catch((rollbackErr) => {
+          logger.error(
+            `Failed to restore ${indexTemplate.templateName} after a rejected ${LOGSDB_COLUMNAR_INDEX_MODE} change: ${rollbackErr}`
+          );
+        });
+      },
+      { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+    );
+    throw failures[0];
+  }
+
+  const updatedIndexTemplates: IndexTemplateEntry[] = updated.map(
+    (index) => targetTemplates[index].indexTemplate
   );
 
   await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates, {
