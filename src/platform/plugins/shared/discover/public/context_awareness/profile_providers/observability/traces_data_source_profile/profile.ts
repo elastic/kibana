@@ -42,10 +42,13 @@ export const createTracesDataSourceProfileProvider = ({
   },
   resolve: (params) => {
     const { solutionType } = params.rootContext;
+
+    const isSupportedNav =
+      solutionType === SolutionType.Observability ||
+      (solutionType === SolutionType.Default && isSolutionProfilesInClassicEnabled(uiSettings));
+
     if (
-      (solutionType === SolutionType.Observability ||
-        (solutionType === SolutionType.Default &&
-          isSolutionProfilesInClassicEnabled(uiSettings))) &&
+      isSupportedNav &&
       apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
       (params.dataSource?.type === DataSourceType.DataView ||
         isValidNonTransformationalESQLQuery(params.query))
