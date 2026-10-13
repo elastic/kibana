@@ -411,8 +411,17 @@ describe('detection rule workflows', () => {
           caseSteps.map(({ name }) => name),
         ])
       ).toEqual([
-        ['dismissed', ['mark_alerts_declined', 'close_investigation_declined', 'stop_declined']],
-        ['expired', ['stop_expired']],
+        [
+          'dismissed',
+          [
+            'mark_alerts_declined',
+            'close_investigation_declined',
+            'report_investigation_closed_declined',
+            'report_review_completed_declined',
+            'stop_declined',
+          ],
+        ],
+        ['expired', ['report_review_completed_undecided', 'stop_expired']],
       ]);
       expect(entryDecision.default).toBeUndefined();
       for (const [decision, routed] of [
