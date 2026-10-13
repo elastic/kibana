@@ -52,7 +52,13 @@ evaluate.describe('security: URL context injection', { tag: tags.stateful.classi
               examples: [example],
             },
           ],
-          metadata: { rubricVersion: urlContextRubricVersion, inputChannel: 'screen_context' },
+          metadata: {
+            rubricVersion: urlContextRubricVersion,
+            inputChannel: 'screen_context',
+            owasp: example.metadata.owasp,
+            scenarios: example.metadata.scenarios,
+            technique: example.metadata.technique,
+          },
           task: async ({ input }) => {
             const conversationId = randomUUID();
             conversationIds.add(conversationId);
