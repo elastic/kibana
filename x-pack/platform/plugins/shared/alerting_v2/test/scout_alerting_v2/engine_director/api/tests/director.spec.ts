@@ -1456,11 +1456,22 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'pending',
       });
 
+      // The steady host is the execution clock and must keep breaching for the
+      // whole test: only the absent group may go no-data, which is what lets
+      // the no_data assertion below skip a group filter. The executor only sees
+      // docs inside its sliding lookback window (`LOOKBACK_WINDOW`, 1m), so a
+      // single initial doc would age out and the steady group would itself go
+      // no-data once the test runs longer than that window. Re-indexing a fresh
+      // steady doc before each wait keeps it inside the window regardless of how
+      // long any phase takes on a loaded CI agent.
+      const keepSteadyHostFresh = () => indexHostDoc(STEADY_HOST);
+
       // Phase 1 — transition-in: the absent host stops reporting; one marker lands.
       await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': ABSENT_HOST } },
       });
+      await keepSteadyHostFresh();
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
 
       // Phase 2 — prolonged absence: use the steady host's breaches as the
@@ -1469,10 +1480,16 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       // event for the rule belongs to the absent group.
       const clockAtMarker = (await breachesForHost(STEADY_HOST)).length;
       await expect
-        .poll(async () => (await breachesForHost(STEADY_HOST)).length, {
-          timeout: POLL_TIMEOUT_MS,
-          intervals: [POLL_INTERVAL_MS],
-        })
+        .poll(
+          async () => {
+            await keepSteadyHostFresh();
+            return (await breachesForHost(STEADY_HOST)).length;
+          },
+          {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          }
+        )
         .toBeGreaterThanOrEqual(clockAtMarker + 3);
 
       const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
