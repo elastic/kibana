@@ -25,6 +25,7 @@ const KI_LIST_FIELDS = [
   'updated_at',
   'type',
   'title',
+  'description',
   'expires_at',
   KI_LIFECYCLE_STATUS_FIELD,
 ] as const;
@@ -34,6 +35,8 @@ export interface GetKisOptions {
   dest: AiIndexDest;
   size: number;
   type?: string;
+  /** Fuzzy full-text search over indexed title and description columns. */
+  query?: string;
   /** When omitted, non-deleted KIs only (unset status counts as active). */
   lifecycleStatuses?: KiLifecycleStatus[];
 }
@@ -80,6 +83,34 @@ const lifecycleFilterClause = (lifecycleStatuses?: KiLifecycleStatus[]): string[
   return [`WHERE ${KI_LIFECYCLE_STATUS_ALIAS} IN (${values})`];
 };
 
+const searchFilterClause = (has: (field: KiListField) => boolean, query?: string): string[] => {
+  if (query === undefined) {
+    return [];
+  }
+  const matches: string[] = [];
+  if (has('title')) {
+    matches.push('MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})');
+  }
+  if (has('description')) {
+    matches.push('MATCH(description, ?searchQuery, {"fuzziness":"AUTO"})');
+  }
+  if (matches.length === 0) {
+    return ['WHERE FALSE'];
+  }
+  return [`WHERE (${matches.join(' OR ')})`];
+};
+
+const listQueryParams = (type?: string, query?: string) => {
+  const params: Array<{ type: string } | { searchQuery: string }> = [];
+  if (type !== undefined) {
+    params.push({ type });
+  }
+  if (query !== undefined) {
+    params.push({ searchQuery: query });
+  }
+  return params.length > 0 ? { params } : {};
+};
+
 /** A dest value may be a comma-separated list of index expressions. */
 const destExpressions = (destValue: string): string[] =>
   destValue
@@ -118,11 +149,13 @@ const currentKisQuery = (
   dest: AiIndexDest,
   sources: string[],
   has: (field: KiListField) => boolean,
-  lifecycleStatuses?: KiLifecycleStatus[]
+  lifecycleStatuses?: KiLifecycleStatus[],
+  query?: string
 ): string => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
+  const metadata = query !== undefined ? 'METADATA _id, _index, _score' : 'METADATA _id, _index';
   return [
-    `FROM ${fromSources(sources)} METADATA _id, _index`,
+    `FROM ${fromSources(sources)} ${metadata}`,
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
       ? [
@@ -135,6 +168,7 @@ const currentKisQuery = (
       : []),
     lifecycleStatusEvalClause(has),
     ...lifecycleFilterClause(lifecycleStatuses),
+    ...searchFilterClause(has, query),
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
     ...(has('updated_at') ? [] : ['EVAL updated_at = TO_STRING(NULL)']),
@@ -144,7 +178,7 @@ const currentKisQuery = (
 
 export const getKis = async (
   esClient: ElasticsearchClient,
-  { dest, size, type, lifecycleStatuses }: GetKisOptions
+  { dest, size, type, query, lifecycleStatuses }: GetKisOptions
 ): Promise<ListKisResponse> => {
   // Zero-row probes resolve the mapped columns under the caller's own read privilege; an
   // expression that resolves to nothing is left out so the rest of the dest still lists.
@@ -165,9 +199,10 @@ export const getKis = async (
     dest,
     sources.map(({ expression }) => expression),
     has,
-    lifecycleStatuses
+    lifecycleStatuses,
+    query
   );
-  const typeParams = type !== undefined ? { params: [{ type }] } : {};
+  const filterParams = listQueryParams(type, query);
   const keepFields = [
     '_index',
     'id',
@@ -178,10 +213,19 @@ export const getKis = async (
     KI_LIFECYCLE_STATUS_ALIAS,
   ].join(', ');
 
+  const rowsSort =
+    query !== undefined
+      ? has('@timestamp')
+        ? 'SORT _score DESC, revision_time DESC, id ASC'
+        : 'SORT _score DESC, id ASC'
+      : has('@timestamp')
+      ? 'SORT revision_time DESC, id ASC'
+      : 'SORT id ASC';
+
   const rowsQuery = [
     base,
     ...(type !== undefined ? ['WHERE type == ?type'] : []),
-    has('@timestamp') ? 'SORT revision_time DESC, id ASC' : 'SORT id ASC',
+    rowsSort,
     `KEEP ${keepFields}`,
     `LIMIT ${size}`,
   ].join('\n| ');
@@ -193,7 +237,12 @@ export const getKis = async (
       : 'STATS total = COUNT(*)',
   ].join('\n| ');
   const bucketsQuery = [
-    base,
+    currentKisQuery(
+      dest,
+      sources.map(({ expression }) => expression),
+      has,
+      lifecycleStatuses
+    ),
     'WHERE type IS NOT NULL',
     'STATS count = COUNT(*) BY type',
     'SORT count DESC, type ASC',
@@ -201,8 +250,8 @@ export const getKis = async (
   ].join('\n| ');
 
   const [rows, totals, buckets] = await Promise.all([
-    size > 0 ? esClient.esql.query({ query: rowsQuery, ...typeParams }) : undefined,
-    esClient.esql.query({ query: totalsQuery, ...typeParams }),
+    size > 0 ? esClient.esql.query({ query: rowsQuery, ...filterParams }) : undefined,
+    esClient.esql.query({ query: totalsQuery, ...filterParams }),
     esClient.esql.query({ query: bucketsQuery }),
   ]);
 

@@ -9,6 +9,7 @@ import type {
   AppHeaderBadge,
   AppHeaderDescription,
   AppHeaderMenu,
+  AppHeaderMetadataItems,
   AppHeaderTab,
 } from '@kbn/app-header';
 import { APP_HEADER_TEST_SUBJECTS, AppHeader } from '@kbn/app-header';
@@ -48,6 +49,7 @@ interface ContextEngineSubPageHeaderProps {
   onBackClick?: MouseEventHandler;
   pageTitle: string;
   description?: AppHeaderDescription;
+  metadata?: AppHeaderMetadataItems;
   badges?: AppHeaderBadge[];
   tabs?: AppHeaderTab[];
   menu?: AppHeaderMenu;
@@ -59,6 +61,7 @@ export const ContextEngineSubPageHeader = ({
   onBackClick,
   pageTitle,
   description,
+  metadata,
   badges,
   tabs,
   menu,
@@ -74,6 +77,7 @@ export const ContextEngineSubPageHeader = ({
     <AppHeader
       title={pageTitle}
       description={description}
+      metadata={metadata}
       badges={badges}
       tabs={tabs}
       menu={menu}

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import {
-  listKiTestAiIndex,
-  renderListKiWithProviders,
-  SAMPLE_DISCOVER_URL,
-  SAMPLE_INDEX_MANAGEMENT_URL,
-} from './test_helpers';
+import { listKiTestAiIndex, renderListKiWithProviders } from './test_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();
@@ -28,6 +23,7 @@ const stableCountsByType = [
 ];
 
 const selectTypeFilter = (type: string) => {
+  fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
   fireEvent.click(screen.getByTestId(`contextListKiFilter-${type}`));
 };
 
@@ -55,36 +51,37 @@ describe('ListKiHeader', () => {
     jest.clearAllMocks();
   });
 
-  it('renders type filters and backing index link', async () => {
+  it('renders search, status and type filters, and refresh', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
 
-    expect(screen.getByTestId('contextListKiTypeFilters')).toHaveTextContent('All (6)');
+    expect(screen.getByTestId('contextListKiSearchBox')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiStatusFilters')).toHaveTextContent('Status');
+    expect(screen.getByTestId('contextListKiTypeFilters')).toHaveTextContent('Type');
+    expect(screen.getByTestId('contextListKiRefreshButton')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
     expect(screen.getByTestId('contextListKiFilter-playbook')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByTestId('contextListKiPanelDestLink')).toHaveAttribute(
-        'href',
-        SAMPLE_INDEX_MANAGEMENT_URL
-      );
-    });
   });
 
-  it('renders plain dest text without index management access', async () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />, {
-      indexManagementMonitor: false,
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('contextListKiPanelDest')).toHaveTextContent(
-        'ai-index-idx-sample-ki'
-      );
-    });
-    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
+  it('requests active KIs by default', () => {
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    expect(mockUseListKi).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lifecycleStatus: ['active'] })
+    );
   });
 
   it('requests a type filter when a type is selected', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     selectTypeFilter('playbook');
     expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'playbook' }));
+  });
+
+  it('requests a status filter when deleted is selected', () => {
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    fireEvent.click(screen.getByTestId('contextListKiStatusFilters'));
+    fireEvent.click(screen.getByTestId('contextListKiStatusFilter-deleted'));
+    expect(mockUseListKi).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lifecycleStatus: ['deleted'] })
+    );
   });
 
   it('keeps all filter options after selecting a type', () => {
@@ -94,37 +91,48 @@ describe('ListKiHeader', () => {
     expect(screen.getByTestId('contextListKiFilter-faq')).toBeInTheDocument();
   });
 
-  it('keeps summary label when a type is selected', () => {
+  it('submits search on Enter', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    selectTypeFilter('playbook');
-    expect(screen.getByTestId('contextListKiPanelSummary')).toHaveTextContent(
-      '1 Knowledge Indicator in ai-index-idx-sample-ki'
-    );
+    const searchBox = screen.getByTestId('contextListKiSearchBox');
+    fireEvent.change(searchBox, { target: { value: 'refund' } });
+    fireEvent.keyDown(searchBox, { key: 'Enter', code: 'Enter' });
+    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ query: 'refund' }));
   });
 
-  it('renders Discover link when available', () => {
+  it('commits search and refetches when refresh is clicked', () => {
+    const refetch = jest.fn();
+    mockUseListKi.mockImplementation(() => ({
+      kis: [],
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+      refetch,
+    }));
+
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
-      'href',
-      SAMPLE_DISCOVER_URL
-    );
+    const searchBox = screen.getByTestId('contextListKiSearchBox');
+    fireEvent.change(searchBox, { target: { value: 'refund' } });
+    fireEvent.click(screen.getByTestId('contextListKiRefreshButton'));
+    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ query: 'refund' }));
+    expect(refetch).not.toHaveBeenCalled();
   });
 
-  it('hides Discover link when unavailable', () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />, { discoverShow: false });
-    expect(screen.queryByTestId('contextListKiDiscoverLink')).not.toBeInTheDocument();
-  });
+  it('refetches when refresh is clicked without changing the query', () => {
+    const refetch = jest.fn();
+    mockUseListKi.mockImplementation(() => ({
+      kis: [],
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      isLoading: false,
+      isFetching: false,
+      error: undefined,
+      refetch,
+    }));
 
-  it('renders index pattern dest as plain text', () => {
-    renderListKiWithProviders(
-      <ListKiPanel
-        aiIndex={{
-          ...listKiTestAiIndex,
-          dest: { type: 'index', value: 'ai-index-idx-logs-*' },
-        }}
-      />
-    );
-    expect(screen.getByTestId('contextListKiPanelDest')).toHaveTextContent('ai-index-idx-logs-*');
-    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    fireEvent.click(screen.getByTestId('contextListKiRefreshButton'));
+    expect(refetch).toHaveBeenCalled();
   });
 });

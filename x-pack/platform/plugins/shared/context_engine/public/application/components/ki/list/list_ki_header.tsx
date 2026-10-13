@@ -5,130 +5,90 @@
  * 2.0.
  */
 
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EuiButtonIcon, EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
-import { ALL_TYPE_FILTER, type ListKiTypeFilter } from './list_ki_helpers';
-
-interface TypeFilterOption {
-  id: string;
-  label: string;
-  'data-test-subj': string;
-}
+import React, { useRef } from 'react';
+import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
+import type { KiListSummary } from '../../../hooks/use_list_ki';
+import type { ListKiTypeFilter } from './list_ki_helpers';
+import { ListKiSearchBox, type ListKiSearchBoxHandle } from './list_ki_search_box';
+import { ListKiStatusFilter } from './list_ki_status_filter';
+import { ListKiTypeFilter as ListKiTypeFilterButton } from './list_ki_type_filter';
 
 interface ListKiHeaderProps {
-  total: number;
-  destValue: string;
-  indexManagementHref?: string;
-  discoverHref?: string;
+  searchQuery: string;
+  isSearchLoading?: boolean;
+  onSearch: (value: string) => void;
   typeFilter: ListKiTypeFilter;
-  typeFilterOptions: TypeFilterOption[];
+  summary: KiListSummary;
   onTypeFilterChange: (filter: ListKiTypeFilter) => void;
+  statusFilter: KiLifecycleStatus;
+  onStatusFilterChange: (status: KiLifecycleStatus) => void;
+  isRefreshing?: boolean;
+  onRefresh: (committedSearchQuery: string) => void;
 }
 
 export const ListKiHeader = ({
-  total,
-  destValue,
-  indexManagementHref,
-  discoverHref,
+  searchQuery,
+  isSearchLoading = false,
+  onSearch,
   typeFilter,
-  typeFilterOptions,
+  summary,
   onTypeFilterChange,
+  statusFilter,
+  onStatusFilterChange,
+  isRefreshing = false,
+  onRefresh,
 }: ListKiHeaderProps) => {
-  const destLink =
-    indexManagementHref !== undefined ? (
-      <EuiLink
-        href={indexManagementHref}
-        data-test-subj="contextListKiPanelDestLink"
-        {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-          action: CONTEXT_ENGINE_UI_EBT.action.listKi.DEST_LINK,
-        })}
-      >
-        {destValue}
-      </EuiLink>
-    ) : (
-      <code data-test-subj="contextListKiPanelDest">{destValue}</code>
-    );
+  const searchBoxRef = useRef<ListKiSearchBoxHandle>(null);
+
+  const refreshLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.refreshButton', {
+    defaultMessage: 'Refresh',
+  });
+
+  const handleRefresh = () => {
+    const committed = searchBoxRef.current?.commitSearch() ?? searchQuery.trim();
+    onRefresh(committed);
+  };
 
   return (
-    <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" data-test-subj="contextListKiPanelSummary">
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.listKi.summary"
-              defaultMessage="{count, plural, one {# {indicatorLabel}} other {# {indicatorLabel}}} in"
-              values={{
-                count: total,
-                indicatorLabel: (
-                  <strong>
-                    {i18n.translate(
-                      'xpack.contextEngine.aiIndexDetail.listKi.summaryIndicatorLabel',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {Knowledge Indicator} other {Knowledge Indicators}}',
-                        values: { count: total },
-                      }
-                    )}
-                  </strong>
-                ),
-              }}
-            />{' '}
-            {destLink}
-          </EuiText>
-        </EuiFlexItem>
-        {discoverHref && (
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              href={discoverHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-test-subj="contextListKiDiscoverLink"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-                action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.listKi.discoverLink"
-                defaultMessage="View raw docs in Discover"
-              />
-            </EuiLink>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      {typeFilterOptions.length > 1 && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.typeFilterLegend', {
-              defaultMessage: 'Filter Knowledge Indicators by type',
-            })}
-            type="single"
-            buttonSize="compressed"
-            idSelected={typeFilter.value}
-            onChange={(id) => {
-              onTypeFilterChange(
-                id === ALL_TYPE_FILTER.value ? ALL_TYPE_FILTER : { kind: 'type', value: id }
-              );
-            }}
-            options={typeFilterOptions}
-            data-test-subj="contextListKiTypeFilters"
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem>
+        <ListKiSearchBox
+          ref={searchBoxRef}
+          value={searchQuery}
+          isLoading={isSearchLoading}
+          onSearch={onSearch}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup compressed>
+          <ListKiStatusFilter
+            statusFilter={statusFilter}
+            onStatusFilterChange={onStatusFilterChange}
           />
-        </>
-      )}
-    </>
+
+          <ListKiTypeFilterButton
+            typeFilter={typeFilter}
+            summary={summary}
+            onTypeFilterChange={onTypeFilterChange}
+          />
+        </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={refreshLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="refresh"
+            size="s"
+            display="base"
+            color="primary"
+            isLoading={isRefreshing}
+            onClick={handleRefresh}
+            aria-label={refreshLabel}
+            data-test-subj="contextListKiRefreshButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
