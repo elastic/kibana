@@ -388,6 +388,8 @@ interface RunFindByIdsEsqlQueryArgs {
   idValues: string[];
   // Optional extra predicate ANDed onto the id-membership filter.
   where?: ESQLAstExpression;
+  // Row cap. ES|QL answers 1,000 rows when no limit is given, which silently cuts a long history.
+  limit?: number;
 }
 
 export const runFindByIdsEsqlQuery = async <T>({
@@ -397,6 +399,7 @@ export const runFindByIdsEsqlQuery = async <T>({
   idField,
   idValues,
   where: extraWhere,
+  limit,
 }: RunFindByIdsEsqlQueryArgs): Promise<{ hits: T[] }> => {
   if (idValues.length === 0) return { hits: [] };
 
@@ -410,6 +413,9 @@ export const runFindByIdsEsqlQuery = async <T>({
     query = query.where`${where}`;
   }
   query = query.sort(['@timestamp', 'ASC']);
+  if (limit !== undefined) {
+    query = query.limit(limit);
+  }
   query = query.keep('_source');
 
   const hits = await executeEsqlQuery<T>({ esClient, query });
