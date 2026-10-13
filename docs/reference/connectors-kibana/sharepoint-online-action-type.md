@@ -19,7 +19,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
-SharePoint Online connectors support four authentication types:
+SharePoint Online connectors support the following authentication types:
 
 #### Quick Connect OAuth 2.0 (recommended)
 

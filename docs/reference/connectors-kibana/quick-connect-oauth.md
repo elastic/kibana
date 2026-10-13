@@ -1,7 +1,7 @@
 ---
 navigation_title: Quick Connect OAuth 2.0
 type: reference
-description: "Connect Gmail, Google Calendar, Google Drive, Slack, Microsoft Teams, and SharePoint Online to Elastic with Quick Connect OAuth 2.0, without registering your own OAuth app."
+description: "Use Quick Connect OAuth 2.0 to authorize supported Kibana connectors without registering your own OAuth app."
 applies_to:
   stack: preview 9.6
   serverless: preview
