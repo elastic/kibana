@@ -91,6 +91,8 @@ interface BaseSavedObjectFinder {
   helpText?: string;
   tableCaption?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
+  /** Renders a denser search field and filter buttons, e.g. for use in a flyout */
+  compressedSearchBar?: boolean;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -365,6 +367,7 @@ class SavedObjectFinderUiClass extends React.Component<
       onChange: ({ query }) => {
         this.setState({ query: query ?? Query.parse('') }, this.fetchItems);
       },
+      compressed: this.props.compressedSearchBar,
       box: {
         incremental: true,
         'data-test-subj': 'savedObjectFinderSearchInput',

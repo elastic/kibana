@@ -279,6 +279,24 @@ describe('SavedObjectsFinder', () => {
       });
     });
 
+    it('renders a compressed search field and filters, but not table, with compressedSearchBar', async () => {
+      mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc, doc2, doc3] }));
+
+      renderFinder({
+        ...baseProps,
+        compressedSearchBar: true,
+        showFilter: true,
+        savedObjectMetaData: metaDataConfig,
+        services: { contentClient, savedObjectsTagging, uiSettings },
+      });
+
+      await waitForItemsLoaded();
+      // EUI labels its default styles "uncompressed", so match the "-compressed" label exactly
+      expect(screen.getByTestId('savedObjectFinderSearchInput').className).toMatch(/-compressed/);
+      expect(document.querySelector('.euiFilterGroup')?.className).toMatch(/-compressed/);
+      expect(screen.getByRole('table').className).toMatch(/-uncompressed/);
+    });
+
     it('with left button', async () => {
       mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc] }));
 

@@ -116,6 +116,7 @@ export const AddFromLibraryContent = ({
       onChoose={onChoose}
       savedObjectMetaData={libraryTypes}
       showFilter={true}
+      compressedSearchBar
       noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
         defaultMessage: 'No matching objects found.',
       })}
