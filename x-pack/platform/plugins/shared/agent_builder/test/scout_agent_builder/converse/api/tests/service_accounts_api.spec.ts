@@ -48,7 +48,7 @@ const ADD_EVENTS_PATH = (id: string) => `${CONVERSATION_PATH(id)}/_add_events`;
 const CHAT_CONVERSE = `${chatApiPath}/converse`;
 const EXECUTE_TOOL_PATH = `${API_AGENT_BUILDER}/tools/_execute`;
 const VERSION_HEADER = { 'elastic-api-version': ELASTIC_API_VERSION };
-const EXECUTION_MODES: ExecutionMode[] = ['local'];
+const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
 
 const ROLE_NAME = 'agent-builder-service-account-role';
 const NOTE_EVENT = { type: 'text_note', data: { text: 'from the service account' } };
@@ -185,15 +185,6 @@ apiTest.describe('Agent Builder — service accounts', { tag: STATEFUL_ONLY }, (
       });
     }
   );
-
-  // Task Manager mints the task credential with `grant_api_key`, passing the caller's token as an
-  // OAuth access token. Elasticsearch refuses a service-account token there
-  // (`unable to authenticate user [_bearer_token] for action [.../api_key/grant]`), so the
-  // default execution mode fails at scheduling for any service account until Task Manager
-  // handles that credential type.
-  apiTest.fixme('creates and participates through converse [task_manager]', async () => {
-    // Tracked upstream; see the comment above.
-  });
 
   for (const mode of EXECUTION_MODES) {
     apiTest(

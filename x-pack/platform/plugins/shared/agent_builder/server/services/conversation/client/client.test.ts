@@ -4782,10 +4782,10 @@ describe('ConversationClient', () => {
       );
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
-      const result = await serviceAccountClient.addCustomEvents({
-        id: 'conversation-1',
-        events: [{ type: 'text_note', data: { text: 'hello' } }],
-      });
+      const result = await serviceAccountClient.addCustomEvents(
+        { id: 'conversation-1', events: [{ type: 'text_note', data: { text: 'hello' } }] },
+        { source: 'http_api' }
+      );
 
       expect(result[0].actor).toEqual({
         type: EventActorType.user,
@@ -4814,12 +4814,15 @@ describe('ConversationClient', () => {
         onConversationCreated,
       });
 
-      await notifyingClient.create({
-        id: 'conversation-1',
-        agent_id: 'agent-1',
-        title: 'T',
-        rounds: [],
-      });
+      await notifyingClient.create(
+        {
+          id: 'conversation-1',
+          agent_id: 'agent-1',
+          title: 'T',
+          rounds: [],
+        },
+        { source: 'http_api' }
+      );
 
       expect(onConversationCreated).toHaveBeenCalledWith({
         conversationId: 'conversation-1',
@@ -4844,12 +4847,15 @@ describe('ConversationClient', () => {
       );
 
       await expect(
-        notifyingClient.create({
-          id: 'conversation-1',
-          agent_id: 'agent-1',
-          title: 'T',
-          rounds: [],
-        })
+        notifyingClient.create(
+          {
+            id: 'conversation-1',
+            agent_id: 'agent-1',
+            title: 'T',
+            rounds: [],
+          },
+          { source: 'http_api' }
+        )
       ).rejects.toThrow();
 
       expect(onConversationCreated).toHaveBeenCalledWith(
@@ -4876,12 +4882,15 @@ describe('ConversationClient', () => {
       });
 
       await expect(
-        notifyingClient.create({
-          id: 'conversation-1',
-          agent_id: 'agent-1',
-          title: 'T',
-          rounds: [],
-        })
+        notifyingClient.create(
+          {
+            id: 'conversation-1',
+            agent_id: 'agent-1',
+            title: 'T',
+            rounds: [],
+          },
+          { source: 'http_api' }
+        )
       ).resolves.toBeDefined();
     });
   });
