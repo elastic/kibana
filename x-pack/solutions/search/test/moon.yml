@@ -34,24 +34,10 @@ tags:
   - dev
   - group-search
   - private
-  - ftr-tests
-  - ftr-domain-search
 fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
     - '!*/plugins/**/*'
     - '!plugins/**/*'
-  ftr-config:
-    - accessibility/config.ts
-    - api_integration/config.ts
-    - functional_search/config.ts
-    - functional_search/config/config.basic.ts
-    - functional_search/config/config.feature_flags.ts
-    - functional_solution_sidenav/config.ts
-    - serverless/api_integration/configs/config.ts
-    - serverless/functional/configs/config.feature_flags.ts
-    - serverless/functional/configs/config.screenshots.ts
-    - serverless/functional/configs/config.search_features.ts
-    - serverless/functional/configs/config.ts
 tasks: {}

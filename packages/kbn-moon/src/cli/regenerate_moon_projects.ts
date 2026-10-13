@@ -23,7 +23,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
-import { readFtrConfigDomains } from '../ftr_manifests';
 import type { MoonProjectConfig } from './moon_project_type';
 import {
   compactFilePathsToGlobs,
@@ -86,7 +85,6 @@ export function regenerateMoonProjects() {
     const allPackages = getPackages(REPO_ROOT);
     const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const allPackageIds = allPackages.map((pkg) => pkg.name);
-    const ftrConfigsByPackageDir = groupFtrConfigsByPackageDir(allPackages);
 
     for (const pkg of packages) {
       log.verbose(`Generating project configuration for ${pkg.name}`);
@@ -104,8 +102,6 @@ export function regenerateMoonProjects() {
       applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
 
       applyJestTaskConfig(projectConfig);
-
-      applyFtrTaskConfig(projectConfig, ftrConfigsByPackageDir.get(pkg.normalizedRepoRelativeDir));
 
       projectConfig = applyDevOverrides(
         projectConfig,
@@ -299,57 +295,6 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
 
     projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
   }
-}
-
-interface PackageFtrConfigs {
-  /** Config paths relative to the package directory. */
-  configs: string[];
-  domains: Set<string>;
-}
-
-/** Assigns every FTR manifest config to the innermost package directory containing it. */
-function groupFtrConfigsByPackageDir(packages: Package[]): Map<string, PackageFtrConfigs> {
-  const packageDirs = new Set(packages.map((pkg) => pkg.normalizedRepoRelativeDir));
-  const result = new Map<string, PackageFtrConfigs>();
-
-  for (const [configPath, domains] of readFtrConfigDomains(REPO_ROOT)) {
-    if (!fs.existsSync(path.resolve(REPO_ROOT, configPath))) {
-      logger.warning(`FTR config listed in a manifest does not exist: ${configPath}`);
-      continue;
-    }
-
-    let dir = path.dirname(configPath);
-    while (dir !== '.' && !packageDirs.has(dir)) {
-      dir = path.dirname(dir);
-    }
-    if (dir === '.') {
-      logger.warning(`FTR config is not inside any package: ${configPath}`);
-      continue;
-    }
-
-    const entry = result.get(dir) ?? { configs: [], domains: new Set<string>() };
-    entry.configs.push(path.relative(dir, configPath));
-    domains.forEach((domain) => entry.domains.add(domain));
-    result.set(dir, entry);
-  }
-
-  return result;
-}
-
-function applyFtrTaskConfig(projectConfig: MoonProjectConfig, ftrConfigs?: PackageFtrConfigs) {
-  if (!ftrConfigs) {
-    return;
-  }
-
-  projectConfig.tags = (projectConfig.tags || []).concat(
-    MOON_CONST.TAG_FTR,
-    [...ftrConfigs.domains].sort().map((domain) => `${MOON_CONST.TAG_FTR_DOMAIN_PREFIX}${domain}`)
-  );
-
-  projectConfig.fileGroups = {
-    ...projectConfig.fileGroups,
-    [MOON_CONST.FILE_GROUP_FTR_CONFIG]: [...ftrConfigs.configs].sort(),
-  };
 }
 
 type ProjectCreationResult = 'create' | 'update' | 'intact' | 'delete' | 'skip';

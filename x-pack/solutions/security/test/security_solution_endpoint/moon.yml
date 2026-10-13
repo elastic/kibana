@@ -39,16 +39,8 @@ tags:
   - dev
   - group-security
   - private
-  - ftr-tests
-  - ftr-domain-security
 fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
-  ftr-config:
-    - configs/config.base.ts
-    - configs/endpoint.config.ts
-    - configs/integrations.config.ts
-    - configs/serverless.endpoint.config.ts
-    - configs/serverless.integrations.config.ts
 tasks: {}
