@@ -26,7 +26,7 @@ interface KqlTelemetryDoc {
 apiTest.describe('KQL telemetry API', { tag: tags.deploymentAgnostic }, () => {
   let headers: Record<string, string>;
 
-  apiTest.beforeAll(async ({ kbnClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     headers = {
       ...cookieHeader,
@@ -35,11 +35,6 @@ apiTest.describe('KQL telemetry API', { tag: tags.deploymentAgnostic }, () => {
       'x-elastic-internal-origin': 'kibana',
       'kbn-xsrf': 'scout',
     };
-    await kbnClient.savedObjects.clean({ types: ['kql-telemetry'] });
-  });
-
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.clean({ types: ['kql-telemetry'] });
   });
 
   const getCounter = async (

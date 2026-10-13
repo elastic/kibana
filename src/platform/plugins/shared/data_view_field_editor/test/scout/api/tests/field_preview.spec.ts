@@ -42,6 +42,7 @@ apiTest.describe('Field preview', { tag: tags.deploymentAgnostic }, () => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     headers = { ...COMMON_HEADERS, ...cookieHeader };
 
+    await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
     await esClient.indices.create({
       index: INDEX_NAME,
       mappings: { properties: { foo: { type: 'integer' }, bar: { type: 'keyword' } } },

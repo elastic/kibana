@@ -23,7 +23,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ samlAuth, esClient }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       headers = { ...COMMON_HEADERS, ...cookieHeader };
-      await esClient.indices.delete({ index: ES_INDEX }).catch(() => {});
+      await esClient.indices.delete({ index: ES_INDEX }, { ignore: [404] });
       await esClient.bulk({
         refresh: 'wait_for',
         operations: Array.from({ length: 5 }, (_, i) => [
@@ -34,7 +34,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: ES_INDEX }).catch(() => {});
+      await esClient.indices.delete({ index: ES_INDEX }, { ignore: [404] });
     });
 
     apiTest(
