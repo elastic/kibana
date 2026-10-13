@@ -20,6 +20,7 @@ import {
   ENTITY_FIELDS,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
+  RESOLVED_TO_FIELD,
   RESOLUTION_RISK_SCORE_FIELD,
   RISK_SCORE_NORM_FIELD,
   getEntityId,
@@ -242,6 +243,15 @@ export const buildJoinedPageSteps = (
 ];
 
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
+
+/**
+ * After a step that left one row per group under `entity.id`: joins the entity doc of the group's
+ * main entity and drops the groups whose main entity is missing.
+ */
+export const buildGroupHeadSteps = (concreteEntityIndexName: string): string[] => [
+  buildLookupJoinClause(concreteEntityIndexName),
+  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+];
 
 /** Indents the steps of a FORK branch under its parentheses. */
 export const indentForkBranch = (esql: string): string =>

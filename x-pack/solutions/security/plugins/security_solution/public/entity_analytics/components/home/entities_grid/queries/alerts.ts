@@ -12,7 +12,7 @@ import {
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
-  buildLookupJoinClause,
+  buildGroupHeadSteps,
   ENTITY_TYPE_FILTER,
   toList,
 } from './esql';
@@ -172,8 +172,7 @@ const buildGroupAlertRowsQuery = (args: QueryArgs): string => {
       `${GROUP_KEY_FIELD} = MAX(${GROUP_KEY_FIELD})`,
     ].join(', ')} BY \`entity.id\``,
     ...buildGroupRollUpSteps(ALERT_ROLL_UPS),
-    buildLookupJoinClause(concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+    ...buildGroupHeadSteps(concreteEntityIndexName),
     ...buildGroupRowsOutput(args, ALERT_FIELDS),
   ].join('\n');
 };

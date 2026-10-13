@@ -11,7 +11,7 @@ import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD, getEntityId, getEntityIds } from '.
 import type { GroupValueCorrections, QueryArgs, Row } from '../common';
 import {
   ENTITY_TYPE_FILTER,
-  buildLookupJoinClause,
+  buildGroupHeadSteps,
   fetchPerIdChunk,
   getEntityAlias,
   toList,
@@ -66,9 +66,7 @@ const buildAliasGroupSteps = ({
   `| EVAL rank = ${buildCriticalityRankExpression(CRITICALITY_FIELD)}`,
   `| STATS alias_rank = MAX(rank), alias_sources = VALUES(${SOURCE_FIELD}), alias_watchlists = VALUES(${WATCHLISTS_FIELD}), alias_first_seen = MIN(${FIRST_SEEN_FIELD}), alias_last_seen = MAX(${LAST_SEEN_FIELD}) BY group_key = ${RESOLVED_TO_FIELD}`,
   '| RENAME group_key AS `entity.id`',
-  buildLookupJoinClause(concreteEntityIndexName),
-  // Drops the groups whose main entity is missing, as the group size does.
-  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+  ...buildGroupHeadSteps(concreteEntityIndexName),
 ];
 
 /**

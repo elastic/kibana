@@ -11,7 +11,7 @@ import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookback,
-  buildLookupJoinClause,
+  buildGroupHeadSteps,
   ENTITY_TYPE_FILTER,
   getEntityAlias,
   toList,
@@ -90,8 +90,7 @@ const buildGroupAnomalyRowsQuery = (args: QueryArgs): string =>
     ')',
     `| STATS ${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD}), ${GROUP_KEY_FIELD} = MAX(${GROUP_KEY_FIELD}) BY \`entity.id\``,
     ...buildGroupRollUpSteps(ANOMALY_ROLL_UPS),
-    buildLookupJoinClause(args.concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+    ...buildGroupHeadSteps(args.concreteEntityIndexName),
     ...buildGroupRowsOutput(args, [ANOMALY_COUNT_FIELD]),
   ].join('\n');
 
