@@ -30,6 +30,8 @@ describe('runWatchdogWorker (debugger sampling)', () => {
   let listeners: Map<string, Listener[]>;
   let blocked: boolean;
   let heartbeat: NodeJS.Timeout;
+  let failOn: Set<string>;
+  let disconnect: jest.Mock;
 
   const emit = (event: string, message: Parameters<Listener>[0]) =>
     listeners.get(event)?.forEach((listener) => listener(message));
@@ -52,6 +54,10 @@ describe('runWatchdogWorker (debugger sampling)', () => {
       on: (event: string, listener: Listener) =>
         listeners.set(event, [...(listeners.get(event) ?? []), listener]),
       post: (method, params, callback) => {
+        if (failOn.has(method)) {
+          setImmediate(() => callback(new Error(`${method} failed`)));
+          return;
+        }
         posted.push(
           method === 'Debugger.setSkipAllPauses'
             ? `skip:${(params as { skip: boolean }).skip}`
@@ -65,7 +71,7 @@ describe('runWatchdogWorker (debugger sampling)', () => {
             emit('Debugger.paused', { params: { callFrames: CALL_FRAMES } });
         });
       },
-      disconnect: jest.fn(),
+      disconnect,
     };
     runWatchdogWorker(channel.port2, { shared, sanitizeRoot: '/kibana', profiling }, () => session);
   };
@@ -81,6 +87,8 @@ describe('runWatchdogWorker (debugger sampling)', () => {
     logs = [];
     posted = [];
     listeners = new Map();
+    failOn = new Set();
+    disconnect = jest.fn();
   });
 
   afterEach(() => {
@@ -125,6 +133,30 @@ describe('runWatchdogWorker (debugger sampling)', () => {
     emit('Debugger.paused', { params: { callFrames: CALL_FRAMES } });
     await sleep(20);
     expect(posted).toEqual(['Debugger.resume']);
+  });
+
+  it.each(['Debugger.pause', 'Debugger.resume'])(
+    'disconnects (releasing any pause) and stops sampling when %s fails during a sample',
+    async (method) => {
+      start();
+      await sleep(50);
+      failOn.add(method);
+      await block(600);
+      await sleep(100);
+      expect(disconnect).toHaveBeenCalled();
+      expect(logs.map(({ message }) => message)).toContainEqual(
+        expect.stringMatching(/^Event loop stack sampling disabled: could not (pause|resume)/)
+      );
+    }
+  );
+
+  it('disconnects when an unrequested pause cannot be resumed', async () => {
+    start();
+    await sleep(50);
+    failOn.add('Debugger.resume');
+    emit('Debugger.paused', { params: { callFrames: CALL_FRAMES } });
+    await sleep(20);
+    expect(disconnect).toHaveBeenCalled();
   });
 
   it('does not sample blocks shorter than the threshold, and at most once per cooldown', async () => {

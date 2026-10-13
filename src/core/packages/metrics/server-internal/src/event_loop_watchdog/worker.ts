@@ -31,6 +31,7 @@ import {
   POLL_INTERVAL_MS,
   PROFILE_AFTER_MS,
   PROFILE_COOLDOWN_MS,
+  MAX_PAUSE_WAIT_MS,
   SAMPLE_INTERVAL_MS,
   Slot,
   monotonicUs,
@@ -118,6 +119,20 @@ export const runWatchdogWorker = (
   let unrequestedPauses = 0;
   let pendingSample: ((frames: DebuggerCallFrame[]) => void) | undefined;
   let enabled = false;
+  /**
+   * Fail-safe for any inspector failure that could leave the main thread paused: disconnecting
+   * disables the debugger, which releases any pause. Sampling stays off for this worker.
+   */
+  const disable = (reason: string) => {
+    enabled = false;
+    pendingSample = undefined;
+    try {
+      session.disconnect();
+    } catch {
+      // already disconnected
+    }
+    log('warn', `Event loop stack sampling disabled: ${reason}`);
+  };
   session.on('Debugger.scriptParsed', ({ params }) => scriptUrls.set(params.scriptId, params.url));
   session.on('Debugger.paused', ({ params }) => {
     if (pendingSample) {
@@ -128,7 +143,7 @@ export const runWatchdogWorker = (
     }
     // Not ours (e.g. a `debugger;` statement in the short window pauses are allowed): resume.
     unrequestedPauses++;
-    post('Debugger.resume').catch(() => {});
+    post('Debugger.resume').catch((error) => disable(`could not resume a pause: ${error.message}`));
   });
   session.connectToMainThread();
   const enableRequestedAtUs = monotonicUs();
@@ -153,14 +168,48 @@ export const runWatchdogWorker = (
   let lastCaptureAtUs = -Infinity;
   let captured = 0;
 
-  /** Pauses the main thread once, records its stack, and resumes it. */
-  const sample = async (current: Capture) => {
+  /**
+   * Pauses the main thread once, records its stack, and resumes it. Returns false when no pause
+   * was taken in time (e.g. the block ended and no JavaScript ran since).
+   */
+  const sample = async (current: Capture): Promise<boolean> => {
     const requestedAtUs = monotonicUs();
-    const frames = new Promise<DebuggerCallFrame[]>((resolve) => (pendingSample = resolve));
-    await Promise.all([post('Debugger.setSkipAllPauses', { skip: false }), post('Debugger.pause')]);
-    const callFrames = await frames;
+    let timeout: NodeJS.Timeout | undefined;
+    const frames = new Promise<DebuggerCallFrame[] | undefined>((resolve) => {
+      pendingSample = resolve;
+      timeout = setTimeout(() => resolve(undefined), MAX_PAUSE_WAIT_MS);
+    });
+    let callFrames: DebuggerCallFrame[] | undefined;
+    try {
+      await Promise.all([
+        post('Debugger.setSkipAllPauses', { skip: false }),
+        post('Debugger.pause'),
+      ]);
+      callFrames = await frames;
+    } catch (error) {
+      disable(`could not pause: ${error.message}`);
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+    if (!callFrames) {
+      // Not paused in time: skip pauses again; a late pause is then resumed as unrequested.
+      pendingSample = undefined;
+      await post('Debugger.setSkipAllPauses', { skip: true }).catch((error) =>
+        disable(`could not skip pauses: ${error.message}`)
+      );
+      return false;
+    }
     const pausedAtUs = monotonicUs();
-    await Promise.all([post('Debugger.resume'), post('Debugger.setSkipAllPauses', { skip: true })]);
+    try {
+      await Promise.all([
+        post('Debugger.resume'),
+        post('Debugger.setSkipAllPauses', { skip: true }),
+      ]);
+    } catch (error) {
+      disable(`could not resume: ${error.message}`);
+      throw error;
+    }
     current.firstSampleAtUs ??= pausedAtUs;
     current.pauseMs.push((pausedAtUs - requestedAtUs) / 1000);
     current.resumeMs.push((monotonicUs() - pausedAtUs) / 1000);
@@ -172,6 +221,7 @@ export const runWatchdogWorker = (
         columnNumber: location.columnNumber ?? 0,
       }))
     );
+    return true;
   };
 
   const startCapture = (blockStartUs: number) => {
@@ -186,8 +236,8 @@ export const runWatchdogWorker = (
     capture = current;
     lastCaptureAtUs = current.requestedAtUs;
     const loop = async () => {
-      while (!current.stopping) {
-        await sample(current);
+      while (!current.stopping && enabled) {
+        if (!(await sample(current))) break;
         await new Promise((resolve) => setTimeout(resolve, sampleIntervalMs));
       }
     };
