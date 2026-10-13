@@ -96,7 +96,7 @@ export class ConversationServiceImpl implements ConversationService {
   }): Promise<ConversationClient> {
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
-    const agentRegistry = await this.agents.getRegistry({ request });
+    const agentRegistry = await this.agents.getRegistry({ request, user });
     const eventBus = this.eventBus;
 
     return createClient({

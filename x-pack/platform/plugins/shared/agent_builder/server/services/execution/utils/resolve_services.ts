@@ -13,7 +13,11 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
-import { createAgentNotFoundError, isAgentNotFoundError } from '@kbn/agent-builder-common';
+import {
+  createAgentNotFoundError,
+  isAgentNotFoundError,
+  type UserIdAndName,
+} from '@kbn/agent-builder-common';
 import type { AgentRegistry, AgentsServiceStart } from '../../agents';
 import { createModelProvider } from '../runner/model_provider';
 import { resolveExecutionConnectorId } from './resolve_execution_connector_id';
@@ -60,6 +64,7 @@ export const resolveServices = async ({
   spaces,
   security,
   elasticsearch,
+  user,
 }: {
   agentId: string;
   connectorId?: string;
@@ -72,8 +77,10 @@ export const resolveServices = async ({
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
+  /** Identity to authorize the agent lookup as, when it differs from the request's own. */
+  user?: UserIdAndName;
 }) => {
-  const agentRegistry = await agentService.getRegistry({ request });
+  const agentRegistry = await agentService.getRegistry({ request, user });
   const inferenceFeatureId = await getAgentInferenceFeatureId({
     agentRegistry,
     agentId,

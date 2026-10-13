@@ -11,6 +11,7 @@ import type {
   AgentConfiguration,
   ConversationRound,
   PreExecutionWorkflowStepData,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
@@ -22,6 +23,8 @@ export { HookLifecycle, HookExecutionMode };
 
 interface AgentHookContextBase {
   request: KibanaRequest;
+  /** Identity the run acts as, when it differs from the request's own (e.g. a Task Manager run). */
+  user?: UserIdAndName;
   abortSignal?: AbortSignal;
   agentId?: string;
 }
