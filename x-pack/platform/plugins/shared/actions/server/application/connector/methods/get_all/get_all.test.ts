@@ -417,7 +417,7 @@ describe('getAll()', () => {
           };
         }
         return { sandboxSupportedAuthTypes: [], isSystemActionType: false };
-      }) as ActionTypeRegistry['get'];
+      }) as unknown as ActionTypeRegistry['get'];
 
       const result = await actionsClient.getAll({ sandboxCapableOnly: true });
 

@@ -7,7 +7,10 @@
 
 import type { ActionTypeRegistry } from '../../../action_type_registry';
 
-/** True when the connector instance's config.authType is opted into sandbox credential injection. */
+/**
+ * True when the connector can use sandbox credential injection: either the action type opts in
+ * via isSandboxCapable, or config.authType is in sandboxSupportedAuthTypes (spec auth opt-in).
+ */
 export const isSandboxCapableConnector = ({
   actionTypeId,
   config,
@@ -24,6 +27,11 @@ export const isSandboxCapableConnector = ({
   const actionType = actionTypeRegistry.get(actionTypeId);
   if (actionType.isSystemActionType) {
     return false;
+  }
+
+  // Secrets are not decrypted at list time, so the predicate must work from config alone.
+  if (actionType.isSandboxCapable?.({ config: config ?? {}, secrets: {} })) {
+    return true;
   }
 
   const sandboxSupportedAuthTypes = actionType.sandboxSupportedAuthTypes ?? [];
