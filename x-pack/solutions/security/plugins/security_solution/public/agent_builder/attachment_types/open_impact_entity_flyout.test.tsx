@@ -6,25 +6,18 @@
  */
 
 import React, { useEffect } from 'react';
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import { openImpactEntityFlyout } from './open_impact_entity_flyout';
 
 const opened = jest.fn();
 
 jest.mock('./grouped_attachments/flyout_opener', () => ({
-  GroupedAttachmentFlyoutOpener: ({
-    descriptor,
-    onOpened,
-  }: {
-    descriptor: unknown;
-    onOpened?: () => void;
-  }) => {
-    // The real opener opens the flyout in an effect, then reports it.
+  GroupedAttachmentFlyoutOpener: ({ descriptor }: { descriptor: unknown }) => {
+    // The real opener opens the flyout in an effect.
     useEffect(() => {
       opened(descriptor);
-      onOpened?.();
-    }, [descriptor, onOpened]);
+    }, [descriptor]);
     return (
       <div
         data-test-subj="groupedAttachmentFlyoutOpener"
@@ -95,7 +88,16 @@ describe('openImpactEntityFlyout', () => {
     expect(opened).toHaveBeenCalledWith({ kind: 'service', serviceName: 'okta-sso' });
   });
 
-  it('tears the opener down once the flyout has opened, keeping one hidden container', async () => {
+  it('keeps the opener mounted after the flyout opens, so its data-view listeners can finish', () => {
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'jsmith', type: 'user' }, ...base });
+    });
+
+    expect(screen.getByTestId('groupedAttachmentFlyoutOpener')).toBeInTheDocument();
+    expect(container()).not.toBeNull();
+  });
+
+  it('replaces the mounted opener when another entity is opened', () => {
     act(() => {
       openImpactEntityFlyout({ entity: { id: 'jsmith', type: 'user' }, ...base });
     });
@@ -107,10 +109,10 @@ describe('openImpactEntityFlyout', () => {
     expect(
       document.querySelectorAll('[data-test-subj="securityImpactEntityFlyoutOpener"]')
     ).toHaveLength(1);
-    await waitFor(() =>
-      expect(screen.queryByTestId('groupedAttachmentFlyoutOpener')).not.toBeInTheDocument()
+    expect(screen.getByTestId('groupedAttachmentFlyoutOpener')).toHaveAttribute(
+      'data-descriptor',
+      JSON.stringify({ kind: 'host', hostName: 'ws-finance-04' })
     );
-    expect(container()).not.toBeNull();
   });
 
   it('does nothing when the entity has no flyout type', () => {

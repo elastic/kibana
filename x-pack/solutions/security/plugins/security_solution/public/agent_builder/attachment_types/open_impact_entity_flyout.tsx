@@ -51,13 +51,11 @@ const unmount = (): void => {
 /**
  * The opener opens the flyout on mount, as the "What's happened" rows do. Those rows own their
  * opener; the impact row lives in another plugin and reaches us through a plain callback, so
- * the opener mounts in a hidden node on the body. The flyout itself lives in a core overlay
- * with its own providers, so the opener is torn down as soon as it has fired.
+ * the opener mounts in a hidden node on the body. It stays mounted: its data-view bootstrap
+ * registers the listeners that finish initializing the flyout, and removing them when the
+ * flyout opens drops that work. The next open replaces this one.
  */
-const mountOpener = (
-  render: (onOpened: () => void) => React.ReactElement,
-  rendering: CoreStart['rendering']
-): void => {
+const mountOpener = (element: React.ReactElement, rendering: CoreStart['rendering']): void => {
   unmount();
   let container = document.querySelector<HTMLElement>(
     `[data-test-subj="${OPENER_CONTAINER_TEST_SUBJ}"]`
@@ -68,10 +66,7 @@ const mountOpener = (
     container.style.display = 'none';
     document.body.appendChild(container);
   }
-  // Deferred: `onOpened` fires inside the opener's own effect, and a root must not unmount
-  // from within its own commit.
-  const onOpened = () => setTimeout(unmount, 0);
-  unmountOpener = toMountPoint(render(onOpened), rendering)(container);
+  unmountOpener = toMountPoint(element, rendering)(container);
 };
 
 /** Pushes the entity's flyout onto the investigation flyout, the way the "What's happened" rows do. */
@@ -90,13 +85,10 @@ export const openImpactEntityFlyout = ({
   }
 
   mountOpener(
-    (onOpened) => (
-      <GroupedAttachmentFlyoutOpener
-        descriptor={descriptor}
-        resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-        onOpened={onOpened}
-      />
-    ),
+    <GroupedAttachmentFlyoutOpener
+      descriptor={descriptor}
+      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+    />,
     rendering
   );
 };
