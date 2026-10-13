@@ -11,15 +11,16 @@
  * Save session tests.
  *
  * Validates that a fully configured metrics view (ES|QL query with a WHERE
- * clause, stored time range, breakdown dimensions, grid settings, and search
- * term) can be saved, reloaded, and restored after unsaved metrics-specific
- * changes.
+ * clause, stored time range, breakdown dimensions, grid settings, search
+ * term, and sort) can be saved, reloaded, and restored after unsaved
+ * metrics-specific changes, including a sort change.
  */
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixtures';
 
 const SAVED_SEARCH_NAME = 'Metrics Tier 3 Save Test';
+const SORT_REVERT_SEARCH_NAME = 'Metrics Sort Revert Test';
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
 const FILTERED_DIMENSION_VALUE = DEFAULT_CONFIG.dimensions[0].values[0];
@@ -31,6 +32,14 @@ const LAST_COUNTER_METRIC = DEFAULT_CONFIG.metrics
   .map(({ name }) => name)
   .sort((a, b) => b.localeCompare(a))[0];
 const FIRST_CARD_DESC = `${LAST_COUNTER_METRIC}-0`;
+// First cards of the unfiltered TS query in each alphabetical direction.
+const ALPHABETICAL_METRIC_NAMES = DEFAULT_CONFIG.metrics
+  .map(({ name }) => name)
+  .sort((a, b) => a.localeCompare(b));
+const UNFILTERED_FIRST_CARD_ASC = `${ALPHABETICAL_METRIC_NAMES[0]}-0`;
+const UNFILTERED_FIRST_CARD_DESC = `${
+  ALPHABETICAL_METRIC_NAMES[ALPHABETICAL_METRIC_NAMES.length - 1]
+}-0`;
 const FILTERED_QUERY = `${testData.ESQL_QUERIES.TS} | WHERE ${FIRST_DIMENSION} == "${FILTERED_DIMENSION_VALUE}"`;
 // Narrower than DEFAULT_TIME_RANGE so the restored range is distinguishable from the default.
 const SAVED_TIME_RANGE = {
@@ -203,5 +212,38 @@ spaceTest.describe(
         await expect(discover.unsavedChangesIndicator()).toBeHidden();
       });
     });
+
+    spaceTest(
+      'should flag a sort change as unsaved and revert to the saved sort',
+      async ({ pageObjects }) => {
+        const { metricsExperience, discover } = pageObjects;
+
+        await spaceTest.step('save a session sorted in descending order', async () => {
+          await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+          await expect(metricsExperience.grid).toBeVisible();
+          await metricsExperience.setSortDirection('desc');
+          await metricsExperience.waitForFirstCard(UNFILTERED_FIRST_CARD_DESC);
+          await expect
+            .poll(() => metricsExperience.getPersistedMetricsStateField('sortDirection'))
+            .toBe('desc');
+          await discover.saveSearch(SORT_REVERT_SEARCH_NAME);
+          await expect(discover.unsavedChangesIndicator()).toBeHidden();
+        });
+
+        await spaceTest.step('changing the sort direction marks the session unsaved', async () => {
+          await metricsExperience.setSortDirection('asc');
+          await metricsExperience.waitForFirstCard(UNFILTERED_FIRST_CARD_ASC);
+          await expect(discover.unsavedChangesIndicator()).toBeVisible();
+        });
+
+        await spaceTest.step('reverting restores the saved sort', async () => {
+          await discover.revertUnsavedChanges();
+          await expect(metricsExperience.sortDirectionDesc).toHaveAttribute('aria-pressed', 'true');
+          await metricsExperience.waitForFirstCard(UNFILTERED_FIRST_CARD_DESC);
+          await expect(discover.unsavedChangesIndicator()).toBeHidden();
+        });
+      }
+    );
+
   }
 );
