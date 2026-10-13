@@ -165,8 +165,8 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
     expect(screen.getByTestId('ruleSummaryInvestigation')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleSummaryActionPolicies')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
     expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();
     expect(screen.getByTestId('mockActionPoliciesArtifacts')).toBeInTheDocument();
@@ -176,13 +176,13 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.queryByTestId('mockRuleMetadata')).not.toBeInTheDocument();
   });
 
-  it('omits action policies when the user cannot read them', () => {
+  it('omits action policies under Artifacts when the user cannot read them', () => {
     mockCanRead.mockImplementation((capability: string) => capability !== 'actionPolicies');
     renderFlyout();
 
-    expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockActionPoliciesArtifacts')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
+    expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockActionPoliciesArtifacts')).not.toBeInTheDocument();
   });
 
   it('shows last-update timestamp and audit info blocks in the header', () => {
