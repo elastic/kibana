@@ -137,6 +137,7 @@ steps:
       provider: gcp
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c,asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -152,6 +153,7 @@ steps:
       provider: gcp
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c,asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -167,6 +169,7 @@ steps:
       provider: gcp
       machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c,asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: check_types
     timeout_in_minutes: 60
     env:
