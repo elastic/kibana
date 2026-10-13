@@ -59,8 +59,8 @@ the group's value, and the records of an expanded group show their own.
   (`groupEnricher`); an alert or anomaly maps to one entity of a type, so an entity's own count
   is not counted again in a group.
 - **Cases**: the distinct open and in-progress cases of the members, so a case attached to two
-  members counts once. The page sends each group's member ids to the case counts route, which
-  counts the distinct cases of a group over its members.
+  members counts once. The page asks the case counts route to include the members, which it reads
+  from the entity index, and the route counts the distinct cases of a group over its members.
 - **Criticality**: the highest of the members. **Sources** and **watchlists**: the distinct
   values of the members. **First seen** and **last seen**: the earliest and the latest of the
   members (`group_values.ts`).

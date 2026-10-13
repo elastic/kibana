@@ -39,12 +39,14 @@ const enrichWith = (post: () => Promise<unknown>) => {
 };
 
 /** Enriches the rows of `args`, with the entity docs of the group members the query returns. */
-const enrichGroups = async (args: QueryArgs, members: Row[]) => {
+const enrichRows = async (args: QueryArgs) => {
   const http = httpServiceMock.createSetupContract();
   http.post.mockResolvedValue({ 'host:h1': 3 });
-  const runQuery = jest.fn(async () => members);
-  const fields = await caseCountQuerySpec.enricher.fetch(ROWS, args, { runQuery, http });
-  return { fields, http, runQuery };
+  const fields = await caseCountQuerySpec.enricher.fetch(ROWS, args, {
+    runQuery: jest.fn(async () => []),
+    http,
+  });
+  return { fields, http };
 };
 
 describe('case count enricher', () => {
@@ -60,39 +62,21 @@ describe('case count enricher', () => {
   });
 
   describe('for the groups of resolved rows', () => {
-    const MEMBERS: Row[] = [
-      { 'entity.id': 'host:a1', 'entity.relationships.resolution.resolved_to': 'host:h1' },
-      { 'entity.id': 'host:a2', 'entity.relationships.resolution.resolved_to': 'host:h1' },
-    ];
-
-    it('sends the members of each group, for the server to count their distinct cases', async () => {
-      const { fields, http } = await enrichGroups(ARGS, MEMBERS);
+    it('asks the server to count the distinct cases of the members of each group', async () => {
+      const { fields, http } = await enrichRows(ARGS);
 
       expect(http.post).toHaveBeenCalledWith(
         ENTITY_CASE_COUNTS_INTERNAL_URL,
         expect.objectContaining({
-          body: JSON.stringify({
-            entity_ids: ['host:h1', 'user:a'],
-            member_ids: { 'host:h1': ['host:a1', 'host:a2'] },
-          }),
+          body: JSON.stringify({ entity_ids: ['host:h1', 'user:a'], include_members: true }),
         })
       );
       expect(fields.get('host:h1')).toEqual({ case_count: 3 });
     });
 
-    it('sends no members when no group has aliases', async () => {
-      const { http } = await enrichGroups(ARGS, []);
+    it('counts the cases of the entities themselves for individual rows', async () => {
+      const { http } = await enrichRows({ ...ARGS, rowsMode: 'individual' });
 
-      expect(http.post).toHaveBeenCalledWith(
-        ENTITY_CASE_COUNTS_INTERNAL_URL,
-        expect.objectContaining({ body: JSON.stringify({ entity_ids: ['host:h1', 'user:a'] }) })
-      );
-    });
-
-    it('reads no members for individual rows', async () => {
-      const { http, runQuery } = await enrichGroups({ ...ARGS, rowsMode: 'individual' }, MEMBERS);
-
-      expect(runQuery).not.toHaveBeenCalled();
       expect(http.post).toHaveBeenCalledWith(
         ENTITY_CASE_COUNTS_INTERNAL_URL,
         expect.objectContaining({ body: JSON.stringify({ entity_ids: ['host:h1', 'user:a'] }) })

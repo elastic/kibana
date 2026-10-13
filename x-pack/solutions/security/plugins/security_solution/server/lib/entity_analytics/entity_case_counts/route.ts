@@ -18,10 +18,9 @@ import {
   canReadSecurityCases,
   fetchEntityCaseCounts,
 } from './fetch_entity_case_counts';
+import { fetchGroupMemberIds } from './fetch_group_member_ids';
 
 /** Most member ids a request lists: the cases of all of them are read in one query. */
-const MAX_MEMBER_IDS = 2000;
-
 export const registerEntityCaseCountsRoute = ({
   router,
   logger: rootLogger,
@@ -45,16 +44,8 @@ export const registerEntityCaseCountsRoute = ({
               z.object({
                 // An id is at most as long as an entity attachment's `attachmentId`.
                 entity_ids: z.array(z.string().max(1000)).max(100),
-                // The members of the group of an entity id, which count their cases with its own.
-                member_ids: z
-                  .record(z.string().max(1000), z.array(z.string().max(1000)).max(MAX_MEMBER_IDS))
-                  .refine(
-                    (members) =>
-                      Object.keys(members).length <= 100 &&
-                      Object.values(members).flat().length <= MAX_MEMBER_IDS,
-                    { message: `At most ${MAX_MEMBER_IDS} member ids of at most 100 entities` }
-                  )
-                  .optional(),
+                // Counts the cases of the entities resolved to each entity with its own.
+                include_members: z.boolean().optional(),
               })
             ),
           },
@@ -75,12 +66,22 @@ export const registerEntityCaseCountsRoute = ({
           const repository = coreStart.savedObjects.createInternalRepository([
             CASE_ATTACHMENT_TYPE,
           ]);
+          const { entity_ids: entityIds, include_members: includeMembers } = request.body;
+          const memberIds = includeMembers
+            ? await fetchGroupMemberIds(
+                (
+                  await context.core
+                ).elasticsearch.client.asCurrentUser,
+                spaceId,
+                entityIds
+              )
+            : {};
           const counts = await fetchEntityCaseCounts(
             repository,
             await cases.getCasesClientWithRequest(request),
             spaceId,
-            request.body.entity_ids,
-            request.body.member_ids
+            entityIds,
+            memberIds
           );
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {

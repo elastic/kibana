@@ -165,15 +165,7 @@ TRUE, _euid_branch_1_formula, NULL))
 ]
 `;
 
-exports[`entities grid query builders enrich queries case_count builds its query from the page rows 1`] = `
-Array [
-  "FROM entities-latest-default
-| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
-| EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace
-| LIMIT 10000",
-]
-`;
+exports[`entities grid query builders enrich queries case_count builds its query from the page rows 1`] = `Array []`;
 
 exports[`entities grid query builders enrich queries group_size builds its query from the page rows 1`] = `
 Array [
