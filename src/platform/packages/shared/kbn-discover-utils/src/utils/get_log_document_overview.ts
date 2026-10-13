@@ -38,6 +38,11 @@ export function getLogDocumentOverview(
 
   const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];
   const level = Array.isArray(levelArray) && levelArray.length > 0 ? levelArray[0] : levelArray;
+  const severityTextArray = doc.flattened[fieldConstants.OTEL_SEVERITY_TEXT_FIELD];
+  const severityText =
+    Array.isArray(severityTextArray) && severityTextArray.length > 0
+      ? severityTextArray[0]
+      : severityTextArray;
   const message = formatField(fieldConstants.MESSAGE_FIELD);
   const errorMessage = formatField(fieldConstants.ERROR_MESSAGE_FIELD);
   const eventOriginal = formatField(fieldConstants.EVENT_ORIGINAL_FIELD);
@@ -91,6 +96,7 @@ export function getLogDocumentOverview(
 
   return {
     [fieldConstants.LOG_LEVEL_FIELD]: level,
+    [fieldConstants.OTEL_SEVERITY_TEXT_FIELD]: severityText,
     [fieldConstants.ERROR_LOG_LEVEL_FIELD]: errorLogLevel,
     [fieldConstants.TIMESTAMP_FIELD]: timestamp,
     [fieldConstants.MESSAGE_FIELD]: message,

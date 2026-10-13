@@ -8,7 +8,11 @@
  */
 
 import { getLogLevelFieldWithFallback } from './get_log_level_field_with_fallback';
-import { LOG_LEVEL_FIELD, ERROR_LOG_LEVEL_FIELD } from '../field_constants';
+import {
+  LOG_LEVEL_FIELD,
+  ERROR_LOG_LEVEL_FIELD,
+  OTEL_SEVERITY_TEXT_FIELD,
+} from '../field_constants';
 import type { LogDocumentOverview } from '../types';
 
 describe('getLogLevelFieldWithFallback', () => {
@@ -116,5 +120,49 @@ describe('getLogLevelFieldWithFallback', () => {
       value: 'debug',
     });
     expect(result.value).not.toBe('error');
+  });
+
+  it('returns severity_text when only the OTel field is present', () => {
+    const doc: LogDocumentOverview = {
+      ...createBaseDoc(),
+      [OTEL_SEVERITY_TEXT_FIELD]: 'ERROR',
+    };
+
+    const result = getLogLevelFieldWithFallback(doc);
+
+    expect(result).toEqual({
+      field: OTEL_SEVERITY_TEXT_FIELD,
+      value: 'ERROR',
+    });
+  });
+
+  it('prioritizes log.level over severity_text', () => {
+    const doc: LogDocumentOverview = {
+      ...createBaseDoc(),
+      'log.level': 'info',
+      [OTEL_SEVERITY_TEXT_FIELD]: 'ERROR',
+    };
+
+    const result = getLogLevelFieldWithFallback(doc);
+
+    expect(result).toEqual({
+      field: LOG_LEVEL_FIELD,
+      value: 'info',
+    });
+  });
+
+  it('prioritizes severity_text over error.log.level', () => {
+    const doc: LogDocumentOverview = {
+      ...createBaseDoc(),
+      [OTEL_SEVERITY_TEXT_FIELD]: 'WARN',
+      'error.log.level': 'error',
+    };
+
+    const result = getLogLevelFieldWithFallback(doc);
+
+    expect(result).toEqual({
+      field: OTEL_SEVERITY_TEXT_FIELD,
+      value: 'WARN',
+    });
   });
 });
