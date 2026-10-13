@@ -140,6 +140,20 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     },
     {
       code: dedent`
+        import { z } from '@kbn/zod';
+        const make = (z) => z.string();
+        export const X = make(helper).optional();
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const make = ({ z }) => z.string();
+        export const X = make(helper).optional();
+      `,
+    },
+    {
+      code: dedent`
         import { z } from 'some-other-package';
         export const X = z.object({});
       `,

@@ -121,6 +121,46 @@ describe('changed-line scope for require_lazy_zod_schema', () => {
     ]);
   });
 
+  it('does not suppress a module property copied from a function-local object', () => {
+    jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 3, end: 3 }]);
+    jest
+      .spyOn(changedLines, 'isUnchangedInAddedFile')
+      .mockImplementation((_filename, declaration) =>
+        changedLines.isDeclarationInRemovedSource(declaration, [
+          'const make = () => ({\n  input: z.string(),\n});',
+        ])
+      );
+    const code = [
+      "import { z } from '@kbn/zod';",
+      'const Connector = {',
+      '  input: z.string(),',
+      '};',
+    ].join('\n');
+
+    expect(linter.verify(code, config, 'schema.ts')).toEqual([
+      expect.objectContaining({ messageId: 'eagerZodSchema', line: 3 }),
+    ]);
+  });
+
+  it('suppresses a module property copied from a module-level object', () => {
+    jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([{ start: 3, end: 3 }]);
+    jest
+      .spyOn(changedLines, 'isUnchangedInAddedFile')
+      .mockImplementation((_filename, declaration) =>
+        changedLines.isDeclarationInRemovedSource(declaration, [
+          'const Connector = {\n  input: z.string(),\n};',
+        ])
+      );
+    const code = [
+      "import { z } from '@kbn/zod';",
+      'const Connector = {',
+      '  input: z.string(),',
+      '};',
+    ].join('\n');
+
+    expect(linter.verify(code, config, 'schema.ts')).toEqual([]);
+  });
+
   it('does not report schemas when no lines changed', () => {
     jest.spyOn(changedLines, 'getChangedLines').mockReturnValue([]);
     const code = "import { z } from '@kbn/zod';\nconst Existing = z.object({});";
@@ -227,6 +267,20 @@ describe('Git diff hunk lines', () => {
     expect(changedLines.isDeclarationInRemovedSource("Moved = z.enum(['a', 'b']);", removed)).toBe(
       true
     );
+  });
+
+  it('does not treat a moved property from a function-local object as a module declaration', () => {
+    const removed = ['const make = () => ({\n  input: z.string(),\n});'];
+    expect(
+      changedLines.isDeclarationInRemovedSource('Connector = {\n  input: z.string(),\n};', removed)
+    ).toBe(false);
+  });
+
+  it('matches a moved module-level object declaration', () => {
+    const removed = ['const Connector = {\n  input: z.string(),\n};'];
+    expect(
+      changedLines.isDeclarationInRemovedSource('Connector = {\n  input: z.string(),\n};', removed)
+    ).toBe(true);
   });
 });
 
