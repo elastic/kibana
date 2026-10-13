@@ -2040,7 +2040,7 @@ describe('Attack Discovery worker chain', () => {
       expect(steps.filter((step) => step.type === 'workflow.output')).toHaveLength(1);
     });
 
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'alerts_not_analysed', 'attacks_generated', 'reviews_requested'])(
       'reports %s so a caller can tell an empty run from a failed one',
       (name) => {
         expect((worker.outputs ?? []).map((output) => output.name)).toContain(name);
@@ -2049,7 +2049,7 @@ describe('Attack Discovery worker chain', () => {
 
     // The editor type-checks `workflow.output` `with:` source text, so a
     // `type: number` field cannot be filled with `"${{ ... }}"`.
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'alerts_not_analysed', 'attacks_generated', 'reviews_requested'])(
       'declares %s as a string so the templated emit passes editor type checks',
       (name) => {
         expect((worker.outputs ?? []).find((output) => output.name === name)?.type).toBe('string');
@@ -2059,7 +2059,7 @@ describe('Attack Discovery worker chain', () => {
     // `${{ }}` keeps the Liquid value's type. Runtime output validation then
     // rejects a number against `type: string`. `{{ }}` stringifies so the
     // emitted value matches the declared schema.
-    it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
+    it.each(['alerts_analyzed', 'alerts_not_analysed', 'attacks_generated', 'reviews_requested'])(
       'stringifies %s in emit_result so runtime matches the string output schema',
       (name) => {
         expect(stepIn(workerSteps, 'emit_result')?.with?.[name]).toEqual(

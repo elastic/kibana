@@ -36,7 +36,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -66,9 +66,11 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * uses the internal-workflow management profile: enablement is enforced rather
  * than restorable.
  *
- * The version carries the YAML's switch to a per-batch ES|QL retrieval, which lets
- * each batch persist the replacements its discoveries use. Bumped as a deliberate
- * rollout signal for that switch; the YAML change alone already rolls out through
+ * Version 4 carries risk-first retrieval (`kibana.alert.risk_score DESC,
+ * @timestamp DESC`), the `max_batches` input and the `alerts_eligible` /
+ * `alerts_not_analysed` outputs. Version 3 introduced the per-batch ES|QL retrieval,
+ * which lets each batch persist the replacements its discoveries use. Bumped as a
+ * deliberate rollout signal; the YAML change alone already rolls out through
  * `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
@@ -76,7 +78,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

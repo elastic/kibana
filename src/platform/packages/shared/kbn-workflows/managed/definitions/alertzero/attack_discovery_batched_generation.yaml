@@ -2,10 +2,14 @@ version: "1"
 name: Attack Discovery Batched Generation
 description: |
   Runs Attack Discovery over the whole open alert population for a lookback
-  window instead of a single truncated slice: retrieve once sorted by
-  @timestamp, slice into fixed-size batches, run the pipeline per batch in
-  parallel, and aggregate. A batch that fails is reported in `batch_errors`
-  rather than failing the run.
+  window instead of a single truncated slice: retrieve once, riskiest and
+  newest first (`kibana.alert.risk_score DESC, @timestamp DESC`), slice into
+  fixed-size batches, run the pipeline per batch in parallel, and aggregate. A
+  batch that fails is reported in `batch_errors` rather than failing the run.
+
+  A run analyses at most `max_batches` batches. When more alerts qualify, the
+  riskiest and newest are analysed and the remainder is reported as
+  `alerts_not_analysed` rather than silently dropped.
 
   Each batch runs the full pipeline, so every batch persists its own
   discoveries. Persistence is idempotent (de-duplication keys on the attack
@@ -17,7 +21,9 @@ description: |
   Emits to the caller: attack_discoveries (the persisted alert documents),
   batch_errors,
   batches_total, batches_succeeded, batches_failed, discoveries_generated (what
-  the model produced, before de-duplication). A declared outputs block is
+  the model produced, before de-duplication), alerts_eligible (every alert that
+  matched the filters) and alerts_not_analysed (eligible alerts left out by the
+  `max_batches` cap). A declared outputs block is
   deliberately omitted: a legacy array-typed output is validated as an array of
   scalars (items anyOf string/number/boolean), which would reject arrays of
   discovery objects at runtime, and workflow.execute types a child's output as
@@ -36,12 +42,21 @@ triggers:
         batch_size:
           default: 100
           description: >
-            Maximum alerts per Attack Discovery run. Also sets the retrieval
-            ceiling at `batch_size * 100`, because the engine caps a parallel
+            Maximum alerts per Attack Discovery run. The retrieval ceiling is
+            `batch_size * max_batches`, because the engine caps a parallel
             fan-out at 100 branches — a smaller batch buys less total coverage,
             not more.
           maximum: 1000
           minimum: 50
+          type: integer
+        max_batches:
+          default: 100
+          description: >
+            Maximum batches analysed per run. Alerts beyond
+            `batch_size * max_batches` are not analysed: they are the lowest
+            risk and oldest, and are counted in `alerts_not_analysed`.
+          maximum: 100
+          minimum: 1
           type: integer
         connector_id:
           description: >
@@ -69,16 +84,36 @@ steps:
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
       #
-      # `LIMIT` is derived so the fan-out can never exceed 100 branches.
+      # Riskiest first, newest first among equals, so the `LIMIT` below cuts the
+      # lowest-risk, oldest alerts when more qualify than a run analyses. The
+      # previous `@timestamp ASC` kept the OLDEST alerts and dropped the newest.
+      # Alerts with no risk score sort last under `DESC`.
+      #
+      # `LIMIT` is derived so the fan-out can never exceed `max_batches` (itself
+      # at most 100) branches.
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE @timestamp >= NOW() - {{ inputs.lookback }}
           | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
           | WHERE kibana.alert.building_block_type IS NULL
           | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
-          | SORT @timestamp ASC
-          | LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}
+          | SORT kibana.alert.risk_score DESC, @timestamp DESC
+          | LIMIT {{ inputs.batch_size | times: inputs.max_batches | at_most: 10000 }}
           | KEEP _id
+
+  # How many alerts qualify, so the run can say how many the `max_batches` cap
+  # left out. Same filters as `retrieve_alert_ids`; keep the two in step.
+  - name: count_eligible_alerts
+    type: elasticsearch.esql.query
+    timeout: "5m"
+    with:
+      query: |-
+        FROM .alerts-security.alerts-{{ workflow.spaceId }}
+          | WHERE @timestamp >= NOW() - {{ inputs.lookback }}
+          | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
+          | WHERE kibana.alert.building_block_type IS NULL
+          | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
+          | STATS eligible = COUNT(*)
 
   # `mode: settled` is what turns a failed batch into a gap instead of a failed
   # run. Concurrency is the per-run rate-limit exposure against the connector as
@@ -237,6 +272,18 @@ steps:
         {%- assign generated = generated | plus: batch_count -%}
         {%- endfor -%}
         {{ generated }}
+      # Every alert that matched the filters, and how many of those the cap left
+      # out. `retrieve_alert_ids` holds at most `batch_size * max_batches` rows, so
+      # the difference is exactly what was never handed to a batch. Clamped at 0
+      # because alerts can be closed between the two queries.
+      alerts_eligible: |-
+        {{ steps.count_eligible_alerts.output.values | first | first | default: 0 }}
+      alerts_not_analysed: |-
+        {%- assign eligible = steps.count_eligible_alerts.output.values | first | first | default: 0 -%}
+        {%- assign retrieved = steps.retrieve_alert_ids.output.values | size -%}
+        {%- assign left_out = eligible | minus: retrieved -%}
+        {%- if left_out < 0 -%}{%- assign left_out = 0 -%}{%- endif -%}
+        {{ left_out }}
 
   # `| plus: 0` coerces the counted strings above back to numbers.
   - name: emit_result
@@ -256,3 +303,5 @@ steps:
       # expression `fetch_discoveries` queries by, so the two cannot drift.
       execution_uuids: "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
       alerts_analyzed: "${{ steps.aggregate.output.alerts_analyzed | plus: 0 }}"
+      alerts_eligible: "${{ steps.aggregate.output.alerts_eligible | plus: 0 }}"
+      alerts_not_analysed: "${{ steps.aggregate.output.alerts_not_analysed | plus: 0 }}"

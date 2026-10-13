@@ -62,6 +62,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.pluginId).toBe('alertzero');
   });
 
+  // The risk-first retrieval, `max_batches` input and `alerts_not_analysed` output
+  // need installed copies to pick up the new definition.
+  it('carries version 4, the risk-first retrieval and max_batches cap', () => {
+    expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(4);
+  });
+
   it('is discoverable from the managed registry by id', () => {
     expect(
       getManagedWorkflowDefinition(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID)
@@ -95,8 +101,13 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
   });
 
   describe('inputs', () => {
-    it('exposes exactly batch_size, connector_id and lookback', () => {
-      expect(Object.keys(inputs()).sort()).toEqual(['batch_size', 'connector_id', 'lookback']);
+    it('exposes exactly batch_size, connector_id, lookback and max_batches', () => {
+      expect(Object.keys(inputs()).sort()).toEqual([
+        'batch_size',
+        'connector_id',
+        'lookback',
+        'max_batches',
+      ]);
     });
 
     it('defaults batch_size to 100', () => {
@@ -135,8 +146,16 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(query()).toMatch(/\| KEEP _id$/);
     });
 
-    it('sorts by @timestamp so batches are contiguous in time', () => {
-      expect(query()).toContain('SORT @timestamp ASC');
+    // The LIMIT cuts whatever sorts last, so the order decides which alerts a
+    // capped run drops: riskiest and newest must be kept, not the oldest.
+    it('sorts riskiest first, then newest first, so the cap drops the least important alerts', () => {
+      expect(query()).toContain('| SORT kibana.alert.risk_score DESC, @timestamp DESC');
+      expect(query()).not.toContain('@timestamp ASC');
+    });
+
+    it('sorts before limiting', () => {
+      expect(query().indexOf('| SORT')).toBeGreaterThan(-1);
+      expect(query().indexOf('| SORT')).toBeLessThan(query().indexOf('| LIMIT'));
     });
 
     it('retrieves only open and acknowledged alerts', () => {
@@ -166,8 +185,52 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(query()).toContain('METADATA _id');
     });
 
-    it('derives the LIMIT from batch_size so the fan-out cap cannot be exceeded', () => {
-      expect(query()).toContain('LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}');
+    it('derives the LIMIT from batch_size and max_batches so the fan-out cap cannot be exceeded', () => {
+      expect(query()).toContain(
+        'LIMIT {{ inputs.batch_size | times: inputs.max_batches | at_most: 10000 }}'
+      );
+    });
+
+    describe('max_batches cap', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      const renderLimit = async (batchSize: number, maxBatches: number) => {
+        const rendered = await engine.parseAndRender(query(), {
+          inputs: { batch_size: batchSize, max_batches: maxBatches, lookback: '24h' },
+          workflow: { spaceId: 'default' },
+        });
+        return Number(/\| LIMIT (\d+)/.exec(rendered)?.[1]);
+      };
+
+      it.each([
+        [100, 5, 500],
+        [50, 1, 50],
+        [100, 100, 10000],
+        [1000, 100, 10000],
+      ])('retrieves at most batch_size %s x max_batches %s = %s ids', async (size, max, limit) => {
+        expect(await renderLimit(size, max)).toBe(limit);
+      });
+
+      it('declares max_batches as an integer between 1 and 100, defaulting to the engine fan-out ceiling', () => {
+        expect(inputs().max_batches).toMatchObject({
+          default: 100,
+          maximum: 100,
+          minimum: 1,
+          type: 'integer',
+        });
+      });
+    });
+
+    it('counts eligible alerts with the same filters as the retrieval', () => {
+      const countQuery = String(step('count_eligible_alerts').with?.query);
+      const filters = (text: string) =>
+        text
+          .split('|')
+          .map((clause) => clause.trim())
+          .filter((clause) => clause.startsWith('WHERE'));
+
+      expect(filters(countQuery)).toEqual(filters(query()));
+      expect(countQuery).toContain('STATS eligible = COUNT(*)');
     });
   });
 
@@ -364,6 +427,8 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     it('emits the aggregate contract the parent reads', () => {
       expect(Object.keys(step('emit_result').with ?? {}).sort()).toEqual([
         'alerts_analyzed',
+        'alerts_eligible',
+        'alerts_not_analysed',
         'attack_discoveries',
         'batch_errors',
         'batches_failed',
@@ -395,6 +460,53 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(step('emit_result').with?.discoveries_generated).toBe(
         '${{ steps.aggregate.output.discoveries_generated | plus: 0 }}'
       );
+    });
+
+    describe('alerts_not_analysed', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      const render = async (eligible: number, retrieved: number) =>
+        (
+          await engine.parseAndRender(String(step('aggregate').with?.alerts_not_analysed), {
+            steps: {
+              count_eligible_alerts: { output: { values: [[eligible]] } },
+              retrieve_alert_ids: {
+                output: { values: Array.from({ length: retrieved }, (_, i) => [`alert-${i}`]) },
+              },
+            },
+          })
+        ).trim();
+
+      it('reports the eligible alerts the cap left out of the run', async () => {
+        expect(await render(1300, 500)).toBe('800');
+      });
+
+      it('reports zero when every eligible alert was retrieved', async () => {
+        expect(await render(500, 500)).toBe('0');
+      });
+
+      it('never goes negative when alerts close between the count and the retrieval', async () => {
+        expect(await render(490, 500)).toBe('0');
+      });
+
+      it('reports the eligible total', async () => {
+        expect(
+          (
+            await engine.parseAndRender(String(step('aggregate').with?.alerts_eligible), {
+              steps: { count_eligible_alerts: { output: { values: [[1300]] } } },
+            })
+          ).trim()
+        ).toBe('1300');
+      });
+
+      it('coerces both counts back to numbers on emit', () => {
+        expect(step('emit_result').with?.alerts_eligible).toBe(
+          '${{ steps.aggregate.output.alerts_eligible | plus: 0 }}'
+        );
+        expect(step('emit_result').with?.alerts_not_analysed).toBe(
+          '${{ steps.aggregate.output.alerts_not_analysed | plus: 0 }}'
+        );
+      });
     });
 
     // A legacy array-typed output is validated as an array of scalars

@@ -103,6 +103,10 @@ outputs:
   # its own execution and in the journal it writes to its Investigation.
   - name: alerts_analyzed
     type: string
+  # Eligible alerts the batched generation's `max_batches` cap left out (the lowest
+  # risk and oldest), so a capped run is visibly partial instead of looking complete.
+  - name: alerts_not_analysed
+    type: string
   - name: schedule_interval
     type: string
   # The Attack Discovery generation ids, not this workflow's execution id. Each
@@ -290,5 +294,6 @@ steps:
       # elastic/kibana#290732; keep them apart.
       reviews_requested: "{{ steps.resolve_fanout.output.attack_count }}"
       alerts_analyzed: "{{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
+      alerts_not_analysed: "{{ steps.run_generation.output.alerts_not_analysed | default: 0 }}"
       schedule_interval: "{{ inputs.schedule_interval }}"
       execution_uuids: "{{ steps.run_generation.output.execution_uuids | join: ',' }}"
