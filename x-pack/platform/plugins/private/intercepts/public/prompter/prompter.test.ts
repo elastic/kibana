@@ -65,6 +65,7 @@ describe('ProductInterceptPrompter', () => {
           analytics,
           targetDomElement: document.createElement('div'),
           userAllowsFeedback,
+          isChromeVisible$: Rx.of(true),
         })
       ).toEqual({
         registerIntercept: expect.any(Function),
@@ -139,6 +140,7 @@ describe('ProductInterceptPrompter', () => {
           analytics,
           targetDomElement: document.createElement('div'),
           userAllowsFeedback,
+          isChromeVisible$: Rx.of(true),
         }));
       });
 
@@ -170,6 +172,7 @@ describe('ProductInterceptPrompter', () => {
           analytics,
           targetDomElement: document.createElement('div'),
           userAllowsFeedback: false,
+          isChromeVisible$: Rx.of(true),
         }));
 
         const intercept$ = registerIntercept({
