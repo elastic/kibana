@@ -6,15 +6,23 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { buildKeepClause } from './esql';
+import {
+  buildKeepClause,
+  buildMeasureAggregations,
+  buildMeasureMerges,
+  buildResolvedEntityMergeSteps,
+} from './esql';
+import type { Measure } from './esql';
 import type { PageCursor, QueryArgs, Row } from '../common';
 import { COLUMN_ENRICHERS, SORT_PAGE_FETCHERS } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import { alertCountQuerySpec } from './alerts';
+import { anomalyCountQuerySpec } from './anomalies';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 import type { RunContext, SortPageFetcher } from './types';
 
 const { enricher: alertsEnricher } = alertCountQuerySpec;
+const { enricher: anomaliesEnricher } = anomalyCountQuerySpec;
 
 const BASE_ARGS: QueryArgs = {
   namespace: 'default',
@@ -227,6 +235,98 @@ describe('entities grid query builders', () => {
     });
   });
 
+  describe('the measures of a resolved row', () => {
+    const MEASURES: readonly Measure[] = [
+      { field: 'last_at', aggregation: 'MAX(`@timestamp`)', merge: 'MAX' },
+      { field: 'total', aggregation: 'COUNT(*)', merge: 'SUM' },
+      { field: 'high', aggregation: 'COUNT(*)', condition: 'level == "high"', merge: 'SUM' },
+    ];
+
+    it('aggregates every measure over the rows that match its condition', () => {
+      expect(buildMeasureAggregations(MEASURES, 'is_alert')).toEqual([
+        'last_at = MAX(`@timestamp`) WHERE is_alert',
+        'total = COUNT(*) WHERE is_alert',
+        'high = COUNT(*) WHERE is_alert AND level == "high"',
+      ]);
+    });
+
+    it('merges the measures of the entities of a resolved entity as each says', () => {
+      expect(buildMeasureMerges(MEASURES)).toEqual([
+        'last_at = MAX(last_at)',
+        'total = SUM(total)',
+        'high = SUM(high)',
+      ]);
+    });
+
+    it('moves the rows of an alias to its resolved entity, merged', () => {
+      expect(buildResolvedEntityMergeSteps(BASE_ARGS, buildMeasureMerges(MEASURES))).toEqual([
+        `| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
+        '| EVAL `entity.id` = COALESCE(entity.relationships.resolution.resolved_to, `entity.id`)',
+        '| STATS last_at = MAX(last_at), total = SUM(total), high = SUM(high) BY `entity.id`',
+      ]);
+    });
+
+    it('keeps only the ids when there is nothing to merge', () => {
+      expect(buildResolvedEntityMergeSteps(BASE_ARGS, []).at(-1)).toBe('| STATS BY `entity.id`');
+    });
+
+    it('leaves the rows of individual rows as they are', () => {
+      expect(
+        buildResolvedEntityMergeSteps({ ...BASE_ARGS, rowsMode: 'individual' }, [
+          'total = SUM(total)',
+        ])
+      ).toEqual([]);
+    });
+  });
+
+  describe('the enrich queries of a resolved row', () => {
+    const ALIAS: Row = {
+      'entity.id': 'host:alias-1',
+      'entity.EngineMetadata.Type': 'host',
+      'host.name': 'alias-1',
+      'entity.relationships.resolution.resolved_to': 'host:h-1',
+    };
+    const pageRows = PAGE_ROWS.slice(0, 1);
+
+    /** Answers the read of the aliases with `ALIAS`, and the other queries with `rows`. */
+    const createRunner = (rows: Row[]) =>
+      jest.fn(
+        async (query: string): Promise<Row[]> => (query.includes('resolved_to IN') ? [ALIAS] : rows)
+      );
+
+    it.each([
+      ['alerts', alertsEnricher, 'alert_count', 3],
+      ['anomalies', anomaliesEnricher, 'anomaly_count', 3],
+    ] as const)(
+      'reads the %s of the aliases too, for the row of their resolved entity',
+      async (_name, enricher, field, count) => {
+        const runQuery = createRunner([{ 'entity.id': 'host:h-1', [field]: count }]);
+
+        const fields = await enricher.fetch(pageRows, BASE_ARGS, createRunContext(runQuery));
+
+        const [aliasQuery, measureQuery] = runQuery.mock.calls.map(([query]) => query);
+        expect(aliasQuery).toContain('resolved_to IN ("host:h-1")');
+        expect(measureQuery).toContain('host:alias-1');
+        expect(measureQuery).toContain(`${field} = SUM(${field})`);
+        expect(fields.get('host:h-1')).toMatchObject({ [field]: count });
+        expect(fields.has('host:alias-1')).toBe(false);
+      }
+    );
+
+    it('reads no aliases for individual rows', async () => {
+      const runQuery = createRunner([]);
+
+      await alertsEnricher.fetch(
+        pageRows,
+        { ...BASE_ARGS, rowsMode: 'individual' },
+        createRunContext(runQuery)
+      );
+
+      expect(runQuery).toHaveBeenCalledTimes(1);
+      expect(runQuery.mock.calls[0][0]).not.toContain('LOOKUP JOIN');
+    });
+  });
+
   describe('enrich queries', () => {
     it.each(COLUMN_ENRICHERS)('%s builds its query from the page rows', async (_id, { fetch }) => {
       const runQuery = jest.fn(async (_query: string) => []);
@@ -261,7 +361,7 @@ describe('entities grid query builders', () => {
 
       const fields = await alertsEnricher.fetch(
         PAGE_ROWS.slice(0, 2),
-        BASE_ARGS,
+        { ...BASE_ARGS, rowsMode: 'individual' },
         createRunContext(runQuery)
       );
 

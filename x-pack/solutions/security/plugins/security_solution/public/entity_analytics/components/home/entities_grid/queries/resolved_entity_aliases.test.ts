@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { QueryArgs, Row } from '../common';
-import { resolvedEntityEnricher } from './resolved_entity_aliases';
-import type { PageEnricher, RunContext } from './types';
+import { withEntityAliases } from './resolved_entity_aliases';
 
 const ARGS: QueryArgs = {
   namespace: 'default',
@@ -21,121 +19,44 @@ const ARGS: QueryArgs = {
   anomalyJobIds: [],
 };
 
-const HEAD_ROWS: Row[] = [{ 'entity.id': 'host:head' }, { 'entity.id': 'host:single' }];
-
-const alias = (id: string, headId: string): Row => ({
+const row = (id: string, resolvedTo?: string): Row => ({
   'entity.id': id,
-  'entity.relationships.resolution.resolved_to': headId,
+  ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
 });
 
-const createContext = (members: Row[]): RunContext & { runQuery: jest.Mock } => ({
-  runQuery: jest.fn(async () => members),
-  http: httpServiceMock.createSetupContract(),
-});
+describe('withEntityAliases', () => {
+  it('adds the aliases of the rows after them', async () => {
+    const alias = row('host:a1', 'host:a');
+    const runQuery = jest.fn(async (_query: string) => [alias]);
+    const rows = [row('host:a'), row('host:b')];
 
-type Fetch = PageEnricher['fetch'];
-
-/** A base enricher that reads `values` per entity id, and the ids it was asked about. */
-const createBaseEnricher = (
-  values: Record<string, Row>
-): PageEnricher & { fetch: jest.Mock<ReturnType<Fetch>, Parameters<Fetch>> } => ({
-  fields: ['alert_count', 'last_seen_alert'],
-  fetch: jest.fn<ReturnType<Fetch>, Parameters<Fetch>>(
-    async (rows) =>
-      new Map(rows.map((row) => [String(row['entity.id']), values[String(row['entity.id'])] ?? {}]))
-  ),
-});
-
-const AGGREGATIONS = { alert_count: 'SUM', last_seen_alert: 'MAX' } as const;
-
-describe('resolvedEntityEnricher', () => {
-  it('totals the counts and takes the latest time of a resolved entity and its aliases', async () => {
-    const base = createBaseEnricher({
-      'host:head': { alert_count: 2, last_seen_alert: '2026-10-01T00:00:00.000Z' },
-      'host:a1': { alert_count: 3, last_seen_alert: '2026-10-05T00:00:00.000Z' },
-      'host:a2': { alert_count: 1, last_seen_alert: null },
-      'host:single': { alert_count: 4, last_seen_alert: '2026-10-02T00:00:00.000Z' },
-    });
-    const ctx = createContext([alias('host:a1', 'host:head'), alias('host:a2', 'host:head')]);
-
-    const fields = await resolvedEntityEnricher(base, AGGREGATIONS).fetch(HEAD_ROWS, ARGS, ctx);
-
-    expect(Object.fromEntries(fields)).toEqual({
-      'host:head': { alert_count: 6, last_seen_alert: '2026-10-05T00:00:00.000Z' },
-      'host:single': { alert_count: 4, last_seen_alert: '2026-10-02T00:00:00.000Z' },
-    });
+    expect(await withEntityAliases(rows, ARGS, runQuery)).toEqual([...rows, alias]);
+    expect(runQuery).toHaveBeenCalledTimes(1);
+    expect(runQuery).toHaveBeenCalledWith(expect.stringContaining('IN ("host:a", "host:b")'));
   });
 
-  it('reads the members of the heads in one query, and then the heads and their members', async () => {
-    const base = createBaseEnricher({});
-    const ctx = createContext([alias('host:a1', 'host:head')]);
+  it('leaves individual rows as they are, without a query', async () => {
+    const runQuery = jest.fn(async (_query: string): Promise<Row[]> => []);
+    const rows = [row('host:a')];
 
-    await resolvedEntityEnricher(base, AGGREGATIONS).fetch(HEAD_ROWS, ARGS, ctx);
-
-    expect(ctx.runQuery).toHaveBeenCalledTimes(1);
-    expect(ctx.runQuery).toHaveBeenCalledWith(
-      expect.stringContaining('resolved_to IN ("host:head", "host:single")')
-    );
-    expect(base.fetch).toHaveBeenCalledTimes(1);
-    expect(base.fetch.mock.calls[0][0].map((row) => row['entity.id'])).toEqual([
-      'host:head',
-      'host:single',
-      'host:a1',
-    ]);
+    expect(await withEntityAliases(rows, { ...ARGS, rowsMode: 'individual' }, runQuery)).toBe(rows);
+    expect(runQuery).not.toHaveBeenCalled();
   });
 
-  it('has no value for a column that none of the members has one for', async () => {
-    const base = createBaseEnricher({
-      'host:head': { alert_count: null, last_seen_alert: null },
-      'host:a1': { alert_count: null, last_seen_alert: null },
-    });
-    const ctx = createContext([alias('host:a1', 'host:head')]);
+  it('does not query without rows', async () => {
+    const runQuery = jest.fn(async (_query: string): Promise<Row[]> => []);
 
-    const fields = await resolvedEntityEnricher(base, AGGREGATIONS).fetch(
-      [HEAD_ROWS[0]],
-      ARGS,
-      ctx
+    expect(await withEntityAliases([], ARGS, runQuery)).toEqual([]);
+    expect(runQuery).not.toHaveBeenCalled();
+  });
+
+  it('fails when the aliases are more than the query of the read can list', async () => {
+    const runQuery = jest.fn(async (_query: string) =>
+      Array.from({ length: 2_001 }, (_, i) => row(`host:a${i}`, 'host:a'))
     );
 
-    expect(fields.get('host:head')).toEqual({ alert_count: null, last_seen_alert: null });
-  });
-
-  it('reads long lists of entities in several reads', async () => {
-    const base = createBaseEnricher({});
-    const members = Array.from({ length: 450 }, (_, i) => alias(`host:a${i}`, 'host:head'));
-
-    await resolvedEntityEnricher(base, AGGREGATIONS).fetch(
-      [HEAD_ROWS[0]],
-      ARGS,
-      createContext(members)
+    await expect(withEntityAliases([row('host:a')], ARGS, runQuery)).rejects.toThrow(
+      'too many aliases'
     );
-
-    expect(base.fetch).toHaveBeenCalledTimes(3);
-  });
-
-  it('fails when the resolved entities of the page have too many aliases to read', async () => {
-    const members = Array.from({ length: 10_000 }, (_, i) => alias(`host:a${i}`, 'host:head'));
-
-    await expect(
-      resolvedEntityEnricher(createBaseEnricher({}), AGGREGATIONS).fetch(
-        [HEAD_ROWS[0]],
-        ARGS,
-        createContext(members)
-      )
-    ).rejects.toThrow('too many aliases');
-  });
-
-  it('reads individual rows as they are, without a query for members', async () => {
-    const base = createBaseEnricher({ 'host:head': { alert_count: 2 } });
-    const ctx = createContext([alias('host:a1', 'host:head')]);
-
-    const fields = await resolvedEntityEnricher(base, AGGREGATIONS).fetch(
-      [HEAD_ROWS[0]],
-      { ...ARGS, rowsMode: 'individual' },
-      ctx
-    );
-
-    expect(fields.get('host:head')).toEqual({ alert_count: 2 });
-    expect(ctx.runQuery).not.toHaveBeenCalled();
   });
 });

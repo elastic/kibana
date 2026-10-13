@@ -13,11 +13,15 @@ import {
   buildEffectiveRiskSteps,
   buildKeepClause,
   buildLookupJoinClause,
+  buildMeasureAggregations,
+  buildMeasureMerges,
+  buildResolvedEntityMergeSteps,
   buildSortSuffix,
   ESQL_MAX_QUERY_LENGTH,
   ESQL_MAX_RESULT_ROWS,
   toList,
 } from './esql';
+import type { Measure } from './esql';
 import type { PageCursor, QueryArgs, Row } from '../common';
 import type { EsqlRunner, SortPageContext } from './types';
 
@@ -146,8 +150,8 @@ interface EntityListSortOptions {
   /** Foreign index rows mapped to `entity.id`, before any STATS. */
   buildForeignRows: (args: QueryArgs) => readonly string[];
   buildSortQuery: (args: QueryArgs) => string;
-  /** STATS aggregations of the foreign columns. */
-  aggregations: readonly string[];
+  /** The foreign columns: how they aggregate, and merge into those of a resolved entity. */
+  measures: readonly Measure[];
   /** Foreign columns the rows carry. */
   columns: readonly string[];
   /** `EVAL` that sets the foreign columns of an empty row. */
@@ -163,14 +167,19 @@ export const buildEntityListSortPlan = ({
   emptyValue,
   buildForeignRows,
   buildSortQuery,
-  aggregations,
+  measures,
   columns,
   emptyColumns,
 }: EntityListSortOptions): SplitSortPlan => {
   /** Entities in view with a value, with their entity docs. */
-  const buildEntitiesWithValues = (args: QueryArgs, groupBy: string): string[] => [
+  const buildEntitiesWithValues = (
+    args: QueryArgs,
+    groupBy: string,
+    merges: readonly string[]
+  ): string[] => [
     ...buildForeignRows(args),
     groupBy,
+    ...buildResolvedEntityMergeSteps(args, merges),
     buildLookupJoinClause(args.concreteEntityIndexName),
     ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
   ];
@@ -178,7 +187,11 @@ export const buildEntityListSortPlan = ({
     emptyValue,
     buildValueRowsQuery: (args, limit) =>
       [
-        ...buildEntitiesWithValues(args, `| STATS ${aggregations.join(', ')} BY \`entity.id\``),
+        ...buildEntitiesWithValues(
+          args,
+          `| STATS ${buildMeasureAggregations(measures).join(', ')} BY \`entity.id\``,
+          buildMeasureMerges(measures)
+        ),
         ...buildValueCursorClause(args.cursor),
         ...buildSortSuffix(sortField, args.sort.direction, limit),
         buildKeepClause(args, ...columns),
@@ -188,7 +201,7 @@ export const buildEntityListSortPlan = ({
       fetchEmptyRowsExcludingValueIds(
         args,
         runQuery,
-        buildEntitiesWithValues(args, '| STATS BY `entity.id`'),
+        buildEntitiesWithValues(args, '| STATS BY `entity.id`', []),
         { emptyColumns, columns },
         afterId,
         limit

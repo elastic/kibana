@@ -90,7 +90,7 @@ export const getMaxAliasGroups = (pageSize: number): number => ESQL_MAX_RESULT_R
  * Why: an ES|QL statement is capped at 1MB, and entity ids run to about 100 characters, so a
  * 10k-id list fails ("ESQL statement is too large"). 2,000 ids stays well under the cap.
  */
-const ID_LIST_CHUNK_SIZE = 2_000;
+export const ID_LIST_CHUNK_SIZE = 2_000;
 
 /** Runs one query per chunk of ids, in parallel, and concatenates the rows. */
 export const fetchPerIdChunk = async (
@@ -252,6 +252,51 @@ export const buildResolvedEntitySteps = (concreteEntityIndexName: string): strin
   buildLookupJoinClause(concreteEntityIndexName),
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
 ];
+
+/** How the values of entities merge into the value of their resolved entity: add up, or take the greatest. */
+type MeasureMerge = 'SUM' | 'MAX';
+
+/** A column that aggregates rows of other data (alerts, anomalies) per entity. */
+export interface Measure {
+  field: string;
+  aggregation: string;
+  /** Only the rows that match this condition count. */
+  condition?: string;
+  merge: MeasureMerge;
+}
+
+/** STATS aggregations of every measure, over the rows that match `rowCondition`. */
+export const buildMeasureAggregations = (
+  measures: readonly Measure[],
+  rowCondition?: string
+): string[] =>
+  measures.map(({ field, aggregation, condition }) => {
+    const conditions = [rowCondition, condition].filter(Boolean);
+    return conditions.length
+      ? `${field} = ${aggregation} WHERE ${conditions.join(' AND ')}`
+      : `${field} = ${aggregation}`;
+  });
+
+/** STATS aggregations that merge the measures of several entities into one. */
+export const buildMeasureMerges = (measures: readonly Measure[]): string[] =>
+  measures.map(({ field, merge }) => `${field} = ${merge}(${field})`);
+
+/**
+ * After a STATS per entity: on resolved rows, an alias counts for its resolved entity, so the
+ * rows of an alias become those of its resolved entity, merged by `merges`. Individual rows are
+ * the entities themselves.
+ */
+export const buildResolvedEntityMergeSteps = (
+  { rowsMode, concreteEntityIndexName }: Pick<QueryArgs, 'rowsMode' | 'concreteEntityIndexName'>,
+  merges: readonly string[]
+): string[] =>
+  rowsMode === 'resolved'
+    ? [
+        buildLookupJoinClause(concreteEntityIndexName),
+        `| EVAL \`entity.id\` = COALESCE(${RESOLVED_TO_FIELD}, \`entity.id\`)`,
+        `| STATS ${merges.length ? `${merges.join(', ')} ` : ''}BY \`entity.id\``,
+      ]
+    : [];
 
 /** Indents the steps of a FORK branch under its parentheses. */
 export const indentForkBranch = (esql: string): string =>

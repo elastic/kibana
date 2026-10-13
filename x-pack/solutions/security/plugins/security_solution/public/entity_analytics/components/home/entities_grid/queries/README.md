@@ -56,9 +56,11 @@ expanded group show their own.
   from the resolved entity's risk score docs (`score_type` is `resolution`). An entity without a resolved entity
   score compares its own scores. Individual rows read only the own scores.
 - **Alerts, last alert and anomalies**: the aliases' alerts and anomalies added up, and the latest
-  alert of the aliases. A page reads them for the entities of its resolved entitys and rolls them up
-  (`resolvedEntityEnricher`); an alert or anomaly maps to one entity of a type, so an entity's own count
-  is not counted again in a resolved entity.
+  alert of the aliases. These are measures (`Measure` in `esql.ts`): rows of other data, aggregated
+  per entity. On resolved rows the queries then move the rows of an alias to its resolved entity and
+  merge them as each measure says, add up or take the greatest (`buildResolvedEntityMergeSteps`),
+  in the sorts and in the enrichers alike. An enricher also reads the aliases of the page's rows
+  (`withEntityAliases`), to look for their alerts and anomalies too.
 - **Cases**: the distinct open and in-progress cases of the aliases, so a case attached to two
   aliases counts once. The page asks the case counts route to include the aliases, which it reads
   from the entity index, and the route counts the distinct cases of a resolved entity over its aliases.
@@ -76,19 +78,18 @@ before any query runs, `fetchResolvedEntityFilterOverrides` lists the resolved e
 their main entity: the ones the filters add (the resolved entity passes, the main entity doesn't) and the
 ones they remove. `buildEntitiesInViewConditions` then tests the main entities on their own
 values, corrected by those two lists, so the sorts, the count and the enrichers all read the same
-rows without knowing about groups.
+rows without knowing about resolved entities.
 
 Sorting by criticality, first seen or last seen reads the resolved entities with aliases and the other
 entities apart (`fetchResolvedEntitySortPage`): the resolved entities come from the alias docs and carry the
 resolved entity's value, the other entities sort natively by their own value, with as many extra rows as
-there are groups, since an entity that is a resolved entity is dropped for its resolved entity row. The two
+there are resolved entities, since an entity that is a resolved entity is dropped for its resolved entity row. The two
 streams are merged in the order of the sort, from the same cursor. A search can't run after the
-group join, so its matches among the resolved entities are read separately.
+join of the resolved entities, so its matches among the resolved entities are read separately.
 
-Sorting by alerts, last alert or anomalies works the same way, with the resolved entity rows from a aggregation
-in the query: the alerts (or anomaly records) are counted per entity in one pass, as in the other
-plans, next to a small branch that maps the aliases and the resolved entities to their resolved entity,
-and the counts are then added up per resolved entity. The other entities keep their plans.
+Sorting by alerts, last alert or anomalies needs no plan of its own: the plans of individual rows
+run as they are, with the rows of the aliases moved to their resolved entity before the merge
+with the entities in view.
 
 ## Which query runs
 
@@ -149,7 +150,7 @@ below is one less than what its query can return: the extra row tells that there
 | A list of ids is longer than `ID_LIST_CHUNK_SIZE` | it is split into several queries: an ES\|QL query can't be longer than 1MB, and ids can be about 100 characters long |
 | The count fails | the view counts as small, so the small view queries run |
 | A computed column fails | its cells stay empty, the other columns still load, and the grid shows an error toast |
-| The resolved entities of a page have more than `MAX_PAGE_ALIASES` aliases | the alert and anomaly cells stay empty and the grid shows an error toast: their aliases can't be read to total them |
+| The resolved entities of a page have more than `ID_LIST_CHUNK_SIZE` aliases | the alert and anomaly cells stay empty and the grid shows an error toast: their aliases can't be listed in the query that totals them |
 | More than `getMaxAliasGroups` resolved entities with aliases pass the filters, when sorting by criticality, first seen, last seen, alerts, last alert or anomalies | the grid shows an error toast: a page from a partial list of resolved entities would be in the wrong order |
 | More than `MAX_RESOLVED_ENTITY_FILTER_OVERRIDES` groups pass the filters on the resolved entity values differently from their main entity | the grid shows an error toast; the filter can't list them (an ES\|QL query can't be longer than 1MB) |
 

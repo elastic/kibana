@@ -12,32 +12,27 @@ import {
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
-  buildResolvedEntitySteps,
-  ENTITY_TYPE_FILTER,
+  buildMeasureAggregations,
+  buildMeasureMerges,
+  buildResolvedEntityMergeSteps,
   toList,
 } from './esql';
+import type { Measure } from './esql';
 import {
   getEntityIds,
   getEntityId,
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
-  RESOLVED_TO_FIELD,
   SEVERITY_COUNT_FIELDS,
   isOneOf,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
 import type { QueryArgs, Row } from '../common';
-import { buildResolvedEntityRowsOutput, withResolvedEntityRows } from './resolved_entity_sort';
-import {
-  RESOLVED_ENTITY_KEY_FIELD,
-  buildResolvedEntityAggregationSteps,
-  resolvedEntityEnricher,
-} from './resolved_entity_aliases';
-import type { ResolvedEntityAggregation } from './resolved_entity_aliases';
+import { withEntityAliases } from './resolved_entity_aliases';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
-import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './types';
+import type { ColumnQuerySpec, PageEnricher } from './types';
 
 const ALERT_COUNT_FIELD = 'alert_count';
 const LAST_SEEN_ALERT_FIELD = 'last_seen_alert';
@@ -48,28 +43,18 @@ const ALERT_OPEN_STATUS_FILTER =
 const ALERT_COUNT_FIELDS = [ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)] as const;
 const ALERT_FIELDS = [LAST_SEEN_ALERT_FIELD, ...ALERT_COUNT_FIELDS] as const;
 
-const ALERT_AGGREGATIONS: ReadonlyArray<{
-  field: string;
-  aggregation: string;
-  condition?: string;
-}> = [
-  { field: LAST_SEEN_ALERT_FIELD, aggregation: 'MAX(`@timestamp`)' },
-  { field: ALERT_COUNT_FIELD, aggregation: 'COUNT(*)' },
+const ALERT_MEASURES: readonly Measure[] = [
+  { field: LAST_SEEN_ALERT_FIELD, aggregation: 'MAX(`@timestamp`)', merge: 'MAX' },
+  { field: ALERT_COUNT_FIELD, aggregation: 'COUNT(*)', merge: 'SUM' },
   ...Object.entries(SEVERITY_COUNT_FIELDS).map(([severity, field]) => ({
     field,
     aggregation: 'COUNT(*)',
     condition: `\`kibana.alert.severity\` == "${severity}"`,
+    merge: 'SUM' as const,
   })),
 ];
 
-/** STATS aggregations of every alert column, over the rows that match `rowCondition`. */
-const buildAlertAggregations = (rowCondition?: string): string[] =>
-  ALERT_AGGREGATIONS.map(({ field, aggregation, condition }) => {
-    const conditions = [rowCondition, condition].filter(Boolean);
-    return conditions.length
-      ? `${field} = ${aggregation} WHERE ${conditions.join(' AND ')}`
-      : `${field} = ${aggregation}`;
-  });
+const ALERT_MERGES = buildMeasureMerges(ALERT_MEASURES);
 
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
   isOneOf(ALLOWED_ENTITY_TYPES, type);
@@ -135,49 +120,15 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
       ],
     }),
     `| STATS ${[
-      ...buildAlertAggregations(`${IN_VIEW_FIELD} IS NULL`),
+      ...buildMeasureAggregations(ALERT_MEASURES, `${IN_VIEW_FIELD} IS NULL`),
       `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
     ].join(', ')} BY \`entity.id\``,
+    ...buildResolvedEntityMergeSteps(args, [
+      ...ALERT_MERGES,
+      `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
+    ]),
     `| WHERE ${IN_VIEW_FIELD} == 1`,
     ...buildJoinedPageSteps(args, sortField, ALERT_FIELDS),
-  ].join('\n');
-};
-
-/** A resolved entity's alerts are those of its aliases: the counts add up, and the last alert is the latest. */
-const RESOLVED_ALERT_AGGREGATIONS: Readonly<Record<string, ResolvedEntityAggregation>> = {
-  [LAST_SEEN_ALERT_FIELD]: 'MAX',
-  ...Object.fromEntries(ALERT_COUNT_FIELDS.map((field) => [field, 'SUM' as const])),
-};
-
-/**
- * Alerts of the resolved entities with aliases that pass the filters, as the rows of the grid. Like the sort
- * query, the alerts and the entity index share one FROM, as FORK can't run inside a subquery:
- * the extra branch maps the aliases to their resolved entity, so one pass over
- * the alerts counts them per entity, and the counts are aggregated per resolved entity.
- */
-const buildResolvedEntityAlertRowsQuery = (args: QueryArgs): string => {
-  const { namespace, timeRange, concreteEntityIndexName } = args;
-  const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
-  return [
-    `FROM ${getAlertsIndex(namespace)}, ${getEntityAlias(namespace)} METADATA _index`,
-    `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${buildLookback(
-      timeRange
-    )} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${isEntityDoc} AND ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL)`,
-    ...buildAlertEuidPipeline({
-      alertBranchCondition: `NOT ${isEntityDoc}`,
-      extraBranch: [
-        `WHERE ${isEntityDoc}`,
-        `| EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, ${RESOLVED_TO_FIELD}), ${RESOLVED_ENTITY_KEY_FIELD} = ${RESOLVED_TO_FIELD}`,
-        `| KEEP _ea_entity_id, ${RESOLVED_ENTITY_KEY_FIELD}`,
-      ],
-    }),
-    `| STATS ${[
-      ...buildAlertAggregations(`${RESOLVED_ENTITY_KEY_FIELD} IS NULL`),
-      `${RESOLVED_ENTITY_KEY_FIELD} = MAX(${RESOLVED_ENTITY_KEY_FIELD})`,
-    ].join(', ')} BY \`entity.id\``,
-    ...buildResolvedEntityAggregationSteps(RESOLVED_ALERT_AGGREGATIONS),
-    ...buildResolvedEntitySteps(concreteEntityIndexName),
-    ...buildResolvedEntityRowsOutput(args, ALERT_FIELDS),
   ].join('\n');
 };
 
@@ -202,7 +153,7 @@ const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
     emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
     buildForeignRows: buildOpenAlertEntityRows,
     buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
-    aggregations: buildAlertAggregations(),
+    measures: ALERT_MEASURES,
     columns: [sortField, ...ALERT_FIELDS],
     emptyColumns: ALERT_EMPTY_COLUMNS,
   });
@@ -221,19 +172,26 @@ const buildAlertsEnrichQuery = (
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
     ...buildAlertEuidPipeline({ stampedEntityIds: entityIds, ...unstampedIdentity }),
     `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
-    `| STATS ${buildAlertAggregations().join(', ')} BY \`entity.id\``,
+    `| STATS ${buildMeasureAggregations(ALERT_MEASURES).join(', ')} BY \`entity.id\``,
+    ...buildResolvedEntityMergeSteps(args, ALERT_MERGES),
   ].join('\n');
 };
 
-/** Reads the alert count, last alert, and per-severity counts of the page rows. */
+/**
+ * Reads the alert count, last alert, and per-severity counts of the page rows. The alerts of the
+ * aliases of a resolved row count for it.
+ */
 const alertsEnricher: PageEnricher = {
   fields: ALERT_FIELDS,
   fetch: async (pageRows, args, { runQuery }) => {
     const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
 
-    const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
-    const rows = await runQuery(buildAlertsEnrichQuery(args, entityIds, unstampedIdentity));
+    const alertedRows = await withEntityAliases(pageRows, args, runQuery);
+    const unstampedIdentity = buildUnstampedIdentityFilters(alertedRows);
+    const rows = await runQuery(
+      buildAlertsEnrichQuery(args, getEntityIds(alertedRows), unstampedIdentity)
+    );
 
     const byId = new Map(rows.map((r) => [getEntityId(r), r]));
     return new Map(
@@ -256,22 +214,12 @@ const alertsEnricher: PageEnricher = {
 const alertCountSplitSortPlan = getAlertSplitSortPlan(ALERT_COUNT_FIELD);
 const lastSeenAlertSplitSortPlan = getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD);
 
-/**
- * The page of a plan; for resolved rows, the resolved entities with aliases have the alerts of their aliases
- * and are read apart from the other entities.
- */
-const fetchAlertSortPage = (plan: SplitSortPlan): SortPageFetcher =>
-  withResolvedEntityRows(
-    (args, ctx) => fetchSplitSortPage(plan, args, ctx),
-    buildResolvedEntityAlertRowsQuery
-  );
-
 export const alertCountQuerySpec = {
-  fetchSortPage: fetchAlertSortPage(alertCountSplitSortPlan),
-  enricher: resolvedEntityEnricher(alertsEnricher, RESOLVED_ALERT_AGGREGATIONS),
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(alertCountSplitSortPlan, args, ctx),
+  enricher: alertsEnricher,
 } satisfies ColumnQuerySpec;
 
 export const lastSeenAlertQuerySpec = {
-  fetchSortPage: fetchAlertSortPage(lastSeenAlertSplitSortPlan),
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(lastSeenAlertSplitSortPlan, args, ctx),
   // No enricher: the alerts enricher of the alert count reads this field too.
 } satisfies ColumnQuerySpec;
