@@ -115,7 +115,11 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
   }
 
   return (
-    <section aria-labelledby={titleId} data-test-subj="discoverRecommendedQueries">
+    <section
+      aria-labelledby={titleId}
+      data-test-subj="discoverRecommendedQueries"
+      css={{ paddingInline: euiTheme.size.l }}
+    >
       <EuiTitle size="xs">
         <h2 id={titleId}>
           {i18n.translate('discover.recommendedQueries.title', {
