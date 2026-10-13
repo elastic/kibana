@@ -246,7 +246,8 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
     });
 
     it('names a failed close by HTTP status in package_summary', () => {
-      const summary = stepNamed(workflow, 'resolve_package_summary').with?.package_summary as string;
+      const summary = stepNamed(workflow, 'resolve_package_summary').with
+        ?.package_summary as string;
 
       expect(summary).toEqual(
         expect.stringContaining('dismiss_investigation_if_clean.error.details.status')
@@ -254,7 +255,8 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
     });
 
     it('does not interpolate the dismiss error message into package_summary', () => {
-      const summary = stepNamed(workflow, 'resolve_package_summary').with?.package_summary as string;
+      const summary = stepNamed(workflow, 'resolve_package_summary').with
+        ?.package_summary as string;
 
       expect(summary).not.toEqual(
         expect.stringContaining('dismiss_investigation_if_clean.error.message')
