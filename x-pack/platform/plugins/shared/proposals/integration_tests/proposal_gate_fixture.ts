@@ -312,7 +312,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     /**
      * Goes through the real service, the same path the tool and HTTP route take,
      * so a test can park a gate, revise under it, resume, and assert the revision
-     * rather than the trigger's original input reaches `execute_action`.
+     * rather than the trigger's original input reaches `execute_as_approver`.
      */
     revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
