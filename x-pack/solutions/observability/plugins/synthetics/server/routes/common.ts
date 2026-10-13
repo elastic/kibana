@@ -374,10 +374,15 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
 
 export function parseMappingKey(key: string | undefined) {
   switch (key) {
+    case 'schedule':
     case 'schedule.keyword':
       return 'schedule.number';
     case 'project_id.keyword':
       return 'project_id';
+    case 'name':
+    case 'tags':
+    case 'type':
+      return `${key}.keyword`;
     default:
       return key;
   }
