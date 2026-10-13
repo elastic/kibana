@@ -1367,6 +1367,28 @@ describe('detection rule workflows', () => {
         expect(emitInput).toContain('_shards.failed == 0');
       });
 
+      // An EQL sequence writes one building-block alert per matched event next to the
+      // sequence alert. The sweep leaves those out when it counts false positives, so
+      // the backtest counts the same way or a two-event sequence reads as three alerts.
+      it('leaves building blocks out of both preview counts', () => {
+        const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const counts = previewSteps.filter(({ type }) => type === 'elasticsearch.search');
+
+        expect(counts).toHaveLength(2);
+        for (const count of counts) {
+          const query = count.with?.query as {
+            bool: { filter: unknown[]; must_not: unknown[] };
+          };
+          expect(query.bool.filter).toEqual([
+            { term: { 'kibana.alert.rule.uuid': expect.stringContaining('previewId') } },
+          ]);
+          expect(query.bool.must_not).toEqual([
+            { exists: { field: 'kibana.alert.building_block_type' } },
+          ]);
+        }
+      });
+
       // Data view, timestamp override and alert suppression are passed through to
       // both preview bodies instead of excluding the rule from the backtest.
       it('previews rules with a data view, timestamp override or alert suppression', () => {
