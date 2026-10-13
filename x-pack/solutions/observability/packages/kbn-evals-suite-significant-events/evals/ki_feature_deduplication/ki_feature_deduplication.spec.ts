@@ -112,10 +112,9 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
       id: 'semantic-search-id-reuse',
       input: {
         sampleDocuments: [checkoutDocument],
-        knownFeatureIds: '',
+        knownFeatureIds: 'entity: inventory-service',
         seededFeature: {
           id: 'checkout-service',
-          stream_name: DEDUP_CONTEXT_STREAM_NAME,
           type: 'entity',
           subtype: 'service',
           title: 'Checkout API',
