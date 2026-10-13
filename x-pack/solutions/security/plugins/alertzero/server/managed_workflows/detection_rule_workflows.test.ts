@@ -1190,6 +1190,40 @@ describe('detection rule workflows', () => {
         expect(comment).not.toContain('marks these alerts acknowledged');
       });
 
+      // The unbacktested branch names the one reason that applies, so a threshold
+      // rule with a query change is not told it is the wrong rule type.
+      it.each([
+        ['saved_query', 'query', 'does not support saved query rules or machine learning rules'],
+        [
+          'machine_learning',
+          'query',
+          'does not support saved query rules or machine learning rules',
+        ],
+        ['esql', 'exception', 'cannot apply an exception to an ES|QL rule'],
+        ['query', 'exception', 'could not convert the proposed exception into a preview filter'],
+        ['query', 'threshold', 'does not support this change on a query rule'],
+      ])(
+        'explains why a %s rule with a %s change has no backtest',
+        async (type, changeType, reason) => {
+          const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+          const comment = String((compose.with as Record<string, string>).comment);
+
+          const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
+            inputs: {},
+            consts: {},
+            steps: {
+              fetch_rule: { output: { type, name: 'r', id: 'id' } },
+              diagnose_rule: { output: { structured_output: { change_type: changeType } } },
+              can_preview_query_change: { output: { supported: false } },
+            },
+          });
+
+          expect(rendered).toContain('No backtest is available for this change.');
+          expect(rendered).toContain(reason);
+          expect(rendered).toContain('Approving still applies the proposed change');
+        }
+      );
+
       // The diagnosis schema leaves its title unbounded and the proposal step
       // rejects anything longer, so an unbounded forward fails the whole review.
       it('bounds the proposal title to what the proposal step accepts', async () => {

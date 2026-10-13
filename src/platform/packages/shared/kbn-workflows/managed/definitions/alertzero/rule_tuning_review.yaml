@@ -1000,9 +1000,16 @@ steps:
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest is available. The preview does not support saved query rules or machine learning rules,
-        and it cannot preview an exception on an ES|QL rule.
-        Or the agent could not convert the proposed exception into a preview filter.
+        No backtest is available for this change.
+        {% if steps.fetch_rule.output.type == 'saved_query' or steps.fetch_rule.output.type == 'machine_learning' %}
+        The preview does not support saved query rules or machine learning rules.
+        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' and steps.fetch_rule.output.type == 'esql' %}
+        The preview cannot apply an exception to an ES|QL rule, which has no filters.
+        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' %}
+        The agent could not convert the proposed exception into a preview filter.
+        {% else %}
+        The preview does not support this change on a {{ steps.fetch_rule.output.type }} rule.
+        {% endif %}
         Approving still applies the proposed change.
         Judge it on the change and on the false positives above, not on a simulated alert count.
         {% endif %}
