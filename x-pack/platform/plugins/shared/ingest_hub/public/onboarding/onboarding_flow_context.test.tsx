@@ -19,8 +19,10 @@ jest.mock('./use_is_self_managed', () => ({
 }));
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
+import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useIsSelfManaged } from './use_is_self_managed';
 
+const mockUseAwsServiceMatrix = useAwsServiceMatrix as jest.Mock;
 const mockUseIsSelfManaged = useIsSelfManaged as jest.Mock;
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
@@ -706,6 +708,46 @@ describe('OnboardingFlowProvider', () => {
     });
   });
 
+  describe('ECF-only services on self-managed', () => {
+    const matrixEntry = (id: string, ecfOnly?: boolean) => ({
+      id,
+      name: id,
+      showInUI: true,
+      dataFormat: 'otel',
+      deploymentMethods: [],
+      ...(ecfOnly ? { ecfOnly } : {}),
+    });
+
+    beforeEach(() => {
+      mockUseAwsServiceMatrix.mockReturnValue({
+        matrix: [matrixEntry('waf_otel', true), matrixEntry('ec2_otel')],
+        isError: false,
+        refetch: jest.fn(),
+      });
+    });
+
+    afterEach(() => {
+      mockUseAwsServiceMatrix.mockReturnValue({ matrix: [], isError: false, refetch: jest.fn() });
+    });
+
+    it('are not offered, while the other services are', () => {
+      mockUseIsSelfManaged.mockReturnValue(true);
+
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      expect(result.current.awsServicesMap?.get('waf_otel')?.showInUI).toBe(false);
+      expect(result.current.awsServicesMap?.get('ec2_otel')?.showInUI).toBe(true);
+    });
+
+    it('are offered on cloud', () => {
+      mockUseIsSelfManaged.mockReturnValue(false);
+
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      expect(result.current.awsServicesMap?.get('waf_otel')?.showInUI).toBe(true);
+    });
+  });
+
   describe('setAgentBasedDeployment', () => {
     it('merges partial state without clobbering unrelated persisted fields', () => {
       const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
@@ -846,6 +888,34 @@ describe('OnboardingFlowProvider', () => {
 
       expect(result.current.authenticateAndDeployStep.staticKeys).toBeUndefined();
       expect(result.current.authenticateAndDeployStep.authMethod).toBeUndefined();
+    });
+  });
+
+  describe('clearStagedStaticKeys', () => {
+    it('drops the in-memory keys and the persisted access key id but keeps the auth method', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setStaticKeys({ access_key_id: 'AKIA', secret_access_key: 'secret' });
+      });
+      rerender();
+      expect(result.current.authenticateAndDeployStep.staticKeys).toBeDefined();
+
+      act(() => {
+        result.current.clearStagedStaticKeys();
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.staticKeys).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.authMethod).toBe('static_keys');
+      // Not seeded back from the persisted access key id after a reload.
+      const authStepIndex = mockUseSessionStorage.mock.calls.findLastIndex(
+        ([key]) => typeof key === 'string' && key.endsWith('authenticateAndDeployStep')
+      );
+      const setAuthStep = mockUseSessionStorage.mock.results[authStepIndex].value[1] as jest.Mock;
+      expect(setAuthStep.mock.calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ authMethod: 'static_keys', accessKeyId: undefined })
+      );
     });
   });
 });
