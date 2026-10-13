@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import {
   useApproveProposal,
@@ -19,6 +20,7 @@ import {
 } from '@kbn/proposals-plugin/public';
 import { useCurrentUserProfile } from '../../../user_profiles';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { investigationQueryKeys } from '../../../investigations/query_keys';
 import { ProposedActionsSlot } from './proposed_actions_slot';
 
 jest.mock('@kbn/proposals-plugin/public', () => ({
@@ -82,10 +84,15 @@ const decidedProposal: ProposalWithMetadata = {
   action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
 };
 
+let queryClient: QueryClient;
+let invalidateQueries: jest.SpyInstance;
+
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <I18nProvider>
-    <EuiProvider>{children}</EuiProvider>
-  </I18nProvider>
+  <QueryClientProvider client={queryClient}>
+    <I18nProvider>
+      <EuiProvider>{children}</EuiProvider>
+    </I18nProvider>
+  </QueryClientProvider>
 );
 
 const renderSlot = () =>
@@ -113,6 +120,8 @@ const mockConversationProposalsPage = (
 describe('ProposedActionsSlot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient = new QueryClient();
+    invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
     approveMutateAsync.mockResolvedValue(undefined);
     dismissMutateAsync.mockResolvedValue(undefined);
     mockUseApproveProposal.mockReturnValue({
@@ -268,6 +277,25 @@ describe('ProposedActionsSlot', () => {
     });
   });
 
+  it('reads the investigation again once a proposal is approved, so a resumed worker shows as running', async () => {
+    mockConversationProposalsPage([mockProposal]);
+
+    renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
+    );
+
+    await waitFor(() =>
+      expect(invalidateQueries).toHaveBeenCalledWith({
+        queryKey: investigationQueryKeys.detail('conversation-1'),
+      })
+    );
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: investigationQueryKeys.card('conversation-1'),
+    });
+  });
+
   it('shows Applying on the row and its modal, scoped to the proposal useIsApprovingProposal reports', () => {
     mockConversationProposalsPage([mockProposal]);
     mockUseIsApprovingProposal.mockImplementation((id) => id === 'proposal-1');
@@ -298,6 +326,7 @@ describe('ProposedActionsSlot', () => {
     expect(
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
     ).toBeInTheDocument();
+    expect(invalidateQueries).not.toHaveBeenCalled();
   });
 
   it('shows the reason form in the same modal instead of dismissing directly', () => {
@@ -331,6 +360,11 @@ describe('ProposedActionsSlot', () => {
       expect(dismissMutateAsync).toHaveBeenCalledWith({
         id: 'proposal-1',
         body: { dismissReason: 'no_reason', rationale: undefined },
+      })
+    );
+    await waitFor(() =>
+      expect(invalidateQueries).toHaveBeenCalledWith({
+        queryKey: investigationQueryKeys.detail('conversation-1'),
       })
     );
   });

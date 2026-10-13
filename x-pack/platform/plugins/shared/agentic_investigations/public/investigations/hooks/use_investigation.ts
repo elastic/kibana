@@ -13,7 +13,7 @@ import type { Investigation } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { investigationQueryKeys } from '../query_keys';
 
-/** How often an investigation an agent is working on is read again. */
+/** How often an investigation a worker is running for is read again. */
 export const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 
 export const fetchInvestigation = (
@@ -27,8 +27,8 @@ export const fetchInvestigation = (
   });
 
 /**
- * Reads an investigation from the shared query API and reads it again every few seconds while an
- * Agent Builder execution runs for it, so findings appear as they are recorded.
+ * Reads an investigation from the shared query API and reads it again every few seconds while it
+ * is in progress (a worker runs for it), so findings appear as they are recorded.
  */
 export const useInvestigation = (id: string) => {
   const {

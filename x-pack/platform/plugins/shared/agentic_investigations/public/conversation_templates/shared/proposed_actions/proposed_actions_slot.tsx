@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { useQueryClient } from '@kbn/react-query';
 import {
   useApproveProposal,
   useConversationProposals,
@@ -28,6 +29,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
 import { useCurrentUserProfile } from '../../../user_profiles';
+import { investigationQueryKeys } from '../../../investigations/query_keys';
 import { decisionErrorMessage } from './decision_errors';
 import {
   PROPOSED_ACTIONS_EMPTY_LABEL,
@@ -42,6 +44,7 @@ export interface ProposedActionsSlotProps {
 interface ProposedActionRowProps {
   proposal: ProposalWithMetadata;
   currentActorName?: string;
+  onDecided: () => void;
   onDecisionError: (err: unknown) => void;
   approve: ReturnType<typeof useApproveProposal>;
   dismiss: ReturnType<typeof useDismissProposal>;
@@ -55,6 +58,7 @@ interface ProposedActionRowProps {
 const ProposedActionRow = ({
   proposal,
   currentActorName,
+  onDecided,
   onDecisionError,
   approve,
   dismiss,
@@ -77,6 +81,7 @@ const ProposedActionRow = ({
             id: proposal.id,
             body: { actionInput: proposal.actionInput },
           });
+          onDecided();
         } catch (err) {
           onDecisionError(err);
           throw err;
@@ -88,6 +93,7 @@ const ProposedActionRow = ({
             id: proposal.id,
             body: { dismissReason, rationale },
           });
+          onDecided();
         } catch (err) {
           onDecisionError(err);
           throw err;
@@ -116,10 +122,18 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   const { data: currentUserProfile } = useCurrentUserProfile();
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
+  const queryClient = useQueryClient();
 
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
+
+  // The investigation stops polling while a proposal awaits a decision; read it again so a worker
+  // that resumes after the decision shows as running.
+  const onDecided = () => {
+    void queryClient.invalidateQueries({ queryKey: investigationQueryKeys.detail(conversationId) });
+    void queryClient.invalidateQueries({ queryKey: investigationQueryKeys.card(conversationId) });
+  };
 
   const onDecisionError = useCallback(
     (err: unknown) => notifications?.toasts.addDanger(decisionErrorMessage(err)),
@@ -162,6 +176,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
               key={proposal.id}
               proposal={proposal}
               currentActorName={currentActorName}
+              onDecided={onDecided}
               onDecisionError={onDecisionError}
               approve={approve}
               dismiss={dismiss}
