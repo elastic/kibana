@@ -11,12 +11,12 @@ import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookback,
-  buildMeasureAggregations,
-  buildMeasureMerges,
-  buildResolvedEntityMergeSteps,
+  buildEntityAggregations,
+  buildResolvedEntityAggregations,
+  buildResolvedEntityAggregationSteps,
   toList,
 } from './esql';
-import type { Measure } from './esql';
+import type { EntityAggregation } from './esql';
 import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
 import { buildEuidStages } from './euid_pipeline';
 import { buildMergedForeignSortQuery } from './foreign_sort';
@@ -48,11 +48,11 @@ const buildAnomalyEntityRows = (
 
 // ── sort queries ──────────────────────────────────────────────────────────────
 
-const ANOMALY_MEASURES: readonly Measure[] = [
-  { field: ANOMALY_COUNT_FIELD, aggregation: 'COUNT(*)', merge: 'SUM' },
+const ANOMALY_AGGREGATIONS: readonly EntityAggregation[] = [
+  { field: ANOMALY_COUNT_FIELD, aggregation: 'COUNT(*)', resolvedEntity: 'SUM' },
 ];
 
-const ANOMALY_MERGES = buildMeasureMerges(ANOMALY_MEASURES);
+const ANOMALY_RESOLVED_ENTITY_AGGREGATIONS = buildResolvedEntityAggregations(ANOMALY_AGGREGATIONS);
 
 /** Entities without anomalies have no count and sort last. */
 const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
@@ -60,8 +60,8 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
     settings: [SET_UNMAPPED_NULLIFY],
     foreignRows: [
       ...buildAnomalyEntityRows(args),
-      `| STATS ${buildMeasureAggregations(ANOMALY_MEASURES).join(', ')} BY \`entity.id\``,
-      ...buildResolvedEntityMergeSteps(args, ANOMALY_MERGES),
+      `| STATS ${buildEntityAggregations(ANOMALY_AGGREGATIONS).join(', ')} BY \`entity.id\``,
+      ...buildResolvedEntityAggregationSteps(args, ANOMALY_RESOLVED_ENTITY_AGGREGATIONS),
     ],
     mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
     sortField: ANOMALY_COUNT_FIELD,
@@ -74,7 +74,7 @@ const anomalySplitSortPlan: SplitSortPlan = buildEntityListSortPlan({
   emptyValue: null,
   buildForeignRows: (args) => [SET_UNMAPPED_NULLIFY, ...buildAnomalyEntityRows(args)],
   buildSortQuery: buildAnomalyCountSortQuery,
-  measures: ANOMALY_MEASURES,
+  aggregations: ANOMALY_AGGREGATIONS,
   columns: [ANOMALY_COUNT_FIELD],
   emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`,
 });
@@ -86,8 +86,8 @@ const buildAnomalyCountEnrichQuery = (args: QueryArgs, entityRows: readonly Row[
     SET_UNMAPPED_NULLIFY,
     ...buildAnomalyEntityRows(args, buildIdentityPrefilter(entityRows)),
     `| WHERE \`entity.id\` IN (${toList(getEntityIds(entityRows))})`,
-    `| STATS ${buildMeasureAggregations(ANOMALY_MEASURES).join(', ')} BY \`entity.id\``,
-    ...buildResolvedEntityMergeSteps(args, ANOMALY_MERGES),
+    `| STATS ${buildEntityAggregations(ANOMALY_AGGREGATIONS).join(', ')} BY \`entity.id\``,
+    ...buildResolvedEntityAggregationSteps(args, ANOMALY_RESOLVED_ENTITY_AGGREGATIONS),
   ].join('\n');
 
 const anomalyCountEnricher: PageEnricher = {

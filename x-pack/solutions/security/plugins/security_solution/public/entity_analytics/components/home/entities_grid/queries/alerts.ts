@@ -12,12 +12,12 @@ import {
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
-  buildMeasureAggregations,
-  buildMeasureMerges,
-  buildResolvedEntityMergeSteps,
+  buildEntityAggregations,
+  buildResolvedEntityAggregations,
+  buildResolvedEntityAggregationSteps,
   toList,
 } from './esql';
-import type { Measure } from './esql';
+import type { EntityAggregation } from './esql';
 import {
   getEntityIds,
   getEntityId,
@@ -43,18 +43,18 @@ const ALERT_OPEN_STATUS_FILTER =
 const ALERT_COUNT_FIELDS = [ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)] as const;
 const ALERT_FIELDS = [LAST_SEEN_ALERT_FIELD, ...ALERT_COUNT_FIELDS] as const;
 
-const ALERT_MEASURES: readonly Measure[] = [
-  { field: LAST_SEEN_ALERT_FIELD, aggregation: 'MAX(`@timestamp`)', merge: 'MAX' },
-  { field: ALERT_COUNT_FIELD, aggregation: 'COUNT(*)', merge: 'SUM' },
+const ALERT_AGGREGATIONS: readonly EntityAggregation[] = [
+  { field: LAST_SEEN_ALERT_FIELD, aggregation: 'MAX(`@timestamp`)', resolvedEntity: 'MAX' },
+  { field: ALERT_COUNT_FIELD, aggregation: 'COUNT(*)', resolvedEntity: 'SUM' },
   ...Object.entries(SEVERITY_COUNT_FIELDS).map(([severity, field]) => ({
     field,
     aggregation: 'COUNT(*)',
     condition: `\`kibana.alert.severity\` == "${severity}"`,
-    merge: 'SUM' as const,
+    resolvedEntity: 'SUM' as const,
   })),
 ];
 
-const ALERT_MERGES = buildMeasureMerges(ALERT_MEASURES);
+const ALERT_RESOLVED_ENTITY_AGGREGATIONS = buildResolvedEntityAggregations(ALERT_AGGREGATIONS);
 
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
   isOneOf(ALLOWED_ENTITY_TYPES, type);
@@ -120,11 +120,11 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
       ],
     }),
     `| STATS ${[
-      ...buildMeasureAggregations(ALERT_MEASURES, `${IN_VIEW_FIELD} IS NULL`),
+      ...buildEntityAggregations(ALERT_AGGREGATIONS, `${IN_VIEW_FIELD} IS NULL`),
       `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
     ].join(', ')} BY \`entity.id\``,
-    ...buildResolvedEntityMergeSteps(args, [
-      ...ALERT_MERGES,
+    ...buildResolvedEntityAggregationSteps(args, [
+      ...ALERT_RESOLVED_ENTITY_AGGREGATIONS,
       `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
     ]),
     `| WHERE ${IN_VIEW_FIELD} == 1`,
@@ -153,7 +153,7 @@ const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
     emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
     buildForeignRows: buildOpenAlertEntityRows,
     buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
-    measures: ALERT_MEASURES,
+    aggregations: ALERT_AGGREGATIONS,
     columns: [sortField, ...ALERT_FIELDS],
     emptyColumns: ALERT_EMPTY_COLUMNS,
   });
@@ -172,8 +172,8 @@ const buildAlertsEnrichQuery = (
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
     ...buildAlertEuidPipeline({ stampedEntityIds: entityIds, ...unstampedIdentity }),
     `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
-    `| STATS ${buildMeasureAggregations(ALERT_MEASURES).join(', ')} BY \`entity.id\``,
-    ...buildResolvedEntityMergeSteps(args, ALERT_MERGES),
+    `| STATS ${buildEntityAggregations(ALERT_AGGREGATIONS).join(', ')} BY \`entity.id\``,
+    ...buildResolvedEntityAggregationSteps(args, ALERT_RESOLVED_ENTITY_AGGREGATIONS),
   ].join('\n');
 };
 

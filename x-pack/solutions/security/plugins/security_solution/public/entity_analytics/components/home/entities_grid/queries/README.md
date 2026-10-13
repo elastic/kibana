@@ -56,10 +56,10 @@ expanded group show their own.
   from the resolved entity's risk score docs (`score_type` is `resolution`). An entity without a resolved entity
   score compares its own scores. Individual rows read only the own scores.
 - **Alerts, last alert and anomalies**: the aliases' alerts and anomalies added up, and the latest
-  alert of the aliases. These are measures (`Measure` in `esql.ts`): rows of other data, aggregated
-  per entity. On resolved rows the queries then move the rows of an alias to its resolved entity and
-  merge them as each measure says, add up or take the greatest (`buildResolvedEntityMergeSteps`),
-  in the sorts and in the enrichers alike. An enricher also reads the aliases of the page's rows
+  alert of the aliases. Each column is an `EntityAggregation` (`esql.ts`): how rows of other data
+  aggregate per entity, and how a resolved entity's value comes from its aliases' (`SUM` or `MAX`).
+  On resolved rows the queries give the rows of an alias to its resolved entity and aggregate them
+  (`buildResolvedEntityAggregationSteps`), in the sorts and in the enrichers alike. An enricher also reads the aliases of the page's rows
   (`withEntityAliases`), to look for their alerts and anomalies too.
 - **Cases**: the distinct open and in-progress cases of the aliases, so a case attached to two
   aliases counts once. The page asks the case counts route to include the aliases, which it reads

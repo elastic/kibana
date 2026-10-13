@@ -13,22 +13,22 @@ import {
   buildEffectiveRiskSteps,
   buildKeepClause,
   buildLookupJoinClause,
-  buildMeasureAggregations,
-  buildMeasureMerges,
-  buildResolvedEntityMergeSteps,
+  buildEntityAggregations,
+  buildResolvedEntityAggregations,
+  buildResolvedEntityAggregationSteps,
   buildSortSuffix,
   ESQL_MAX_QUERY_LENGTH,
   ESQL_MAX_RESULT_ROWS,
   toList,
 } from './esql';
-import type { Measure } from './esql';
+import type { EntityAggregation } from './esql';
 import type { PageCursor, QueryArgs, Row } from '../common';
 import type { EsqlRunner, SortPageContext } from './types';
 
 /*
  * Split sort: a foreign sort that reads its two kinds of rows separately.
  *
- * The general sort query (`buildSortQuery`) merges the foreign values with every entity in
+ * The general sort query (`buildSortQuery`) resolvedEntityAggregations the foreign values with every entity in
  * view, so it reads `entity.id` for every entity in view. On a large view that read is
  * most of the cost (about 20s for 10M entities on ECH). Yet the rows split in two:
  * - value rows: entities with a foreign value (alerts, anomalies, a risk score change).
@@ -150,8 +150,8 @@ interface EntityListSortOptions {
   /** Foreign index rows mapped to `entity.id`, before any STATS. */
   buildForeignRows: (args: QueryArgs) => readonly string[];
   buildSortQuery: (args: QueryArgs) => string;
-  /** The foreign columns: how they aggregate, and merge into those of a resolved entity. */
-  measures: readonly Measure[];
+  /** The foreign columns: how they aggregate per entity, and for a resolved entity. */
+  aggregations: readonly EntityAggregation[];
   /** Foreign columns the rows carry. */
   columns: readonly string[];
   /** `EVAL` that sets the foreign columns of an empty row. */
@@ -167,7 +167,7 @@ export const buildEntityListSortPlan = ({
   emptyValue,
   buildForeignRows,
   buildSortQuery,
-  measures,
+  aggregations,
   columns,
   emptyColumns,
 }: EntityListSortOptions): SplitSortPlan => {
@@ -175,11 +175,11 @@ export const buildEntityListSortPlan = ({
   const buildEntitiesWithValues = (
     args: QueryArgs,
     groupBy: string,
-    merges: readonly string[]
+    resolvedEntityAggregations: readonly string[]
   ): string[] => [
     ...buildForeignRows(args),
     groupBy,
-    ...buildResolvedEntityMergeSteps(args, merges),
+    ...buildResolvedEntityAggregationSteps(args, resolvedEntityAggregations),
     buildLookupJoinClause(args.concreteEntityIndexName),
     ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
   ];
@@ -189,8 +189,8 @@ export const buildEntityListSortPlan = ({
       [
         ...buildEntitiesWithValues(
           args,
-          `| STATS ${buildMeasureAggregations(measures).join(', ')} BY \`entity.id\``,
-          buildMeasureMerges(measures)
+          `| STATS ${buildEntityAggregations(aggregations).join(', ')} BY \`entity.id\``,
+          buildResolvedEntityAggregations(aggregations)
         ),
         ...buildValueCursorClause(args.cursor),
         ...buildSortSuffix(sortField, args.sort.direction, limit),

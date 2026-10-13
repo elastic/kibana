@@ -207,7 +207,7 @@ describe('buildEntityListSortPlan', () => {
     emptyValue: 0,
     buildForeignRows: () => ['FROM alerts'],
     buildSortQuery: () => 'general',
-    measures: [{ field: 'alert_count', aggregation: 'COUNT(*)', merge: 'SUM' }],
+    aggregations: [{ field: 'alert_count', aggregation: 'COUNT(*)', resolvedEntity: 'SUM' }],
     columns: ['alert_count'],
     emptyColumns: 'alert_count = 0',
   });

@@ -253,48 +253,55 @@ export const buildResolvedEntitySteps = (concreteEntityIndexName: string): strin
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
 ];
 
-/** How the values of entities merge into the value of their resolved entity: add up, or take the greatest. */
-type MeasureMerge = 'SUM' | 'MAX';
+/** How the values of the aliases of a resolved entity give its value: add up, or take the greatest. */
+type ResolvedEntityAggregation = 'SUM' | 'MAX';
 
 /** A column that aggregates rows of other data (alerts, anomalies) per entity. */
-export interface Measure {
+export interface EntityAggregation {
   field: string;
   aggregation: string;
   /** Only the rows that match this condition count. */
   condition?: string;
-  merge: MeasureMerge;
+  /** How the column of a resolved entity comes from the columns of its aliases. */
+  resolvedEntity: ResolvedEntityAggregation;
 }
 
-/** STATS aggregations of every measure, over the rows that match `rowCondition`. */
-export const buildMeasureAggregations = (
-  measures: readonly Measure[],
+/** STATS aggregations of every column, over the rows that match `rowCondition`. */
+export const buildEntityAggregations = (
+  aggregations: readonly EntityAggregation[],
   rowCondition?: string
 ): string[] =>
-  measures.map(({ field, aggregation, condition }) => {
+  aggregations.map(({ field, aggregation, condition }) => {
     const conditions = [rowCondition, condition].filter(Boolean);
     return conditions.length
       ? `${field} = ${aggregation} WHERE ${conditions.join(' AND ')}`
       : `${field} = ${aggregation}`;
   });
 
-/** STATS aggregations that merge the measures of several entities into one. */
-export const buildMeasureMerges = (measures: readonly Measure[]): string[] =>
-  measures.map(({ field, merge }) => `${field} = ${merge}(${field})`);
+/** STATS aggregations that give each column of a resolved entity from the rows of its aliases. */
+export const buildResolvedEntityAggregations = (
+  aggregations: readonly EntityAggregation[]
+): string[] =>
+  aggregations.map(({ field, resolvedEntity }) => `${field} = ${resolvedEntity}(${field})`);
 
 /**
- * After a STATS per entity: on resolved rows, an alias counts for its resolved entity, so the
- * rows of an alias become those of its resolved entity, merged by `merges`. Individual rows are
- * the entities themselves.
+ * After a STATS per entity: on resolved rows, the rows of an alias count for its resolved entity.
+ * For a resolved entity with 2 alerts, last at 10:00, and an alias with 3 alerts, last at 11:00,
+ * these steps give 5 alerts (`SUM`), last at 11:00 (`MAX`): the rows of the alias get the id of the
+ * resolved entity, then `resolvedEntityAggregations` aggregate the rows of both. Individual rows
+ * are the entities themselves.
  */
-export const buildResolvedEntityMergeSteps = (
+export const buildResolvedEntityAggregationSteps = (
   { rowsMode, concreteEntityIndexName }: Pick<QueryArgs, 'rowsMode' | 'concreteEntityIndexName'>,
-  merges: readonly string[]
+  resolvedEntityAggregations: readonly string[]
 ): string[] =>
   rowsMode === 'resolved'
     ? [
         buildLookupJoinClause(concreteEntityIndexName),
         `| EVAL \`entity.id\` = COALESCE(${RESOLVED_TO_FIELD}, \`entity.id\`)`,
-        `| STATS ${merges.length ? `${merges.join(', ')} ` : ''}BY \`entity.id\``,
+        `| STATS ${
+          resolvedEntityAggregations.length ? `${resolvedEntityAggregations.join(', ')} ` : ''
+        }BY \`entity.id\``,
       ]
     : [];
 

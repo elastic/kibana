@@ -8,11 +8,11 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
   buildKeepClause,
-  buildMeasureAggregations,
-  buildMeasureMerges,
-  buildResolvedEntityMergeSteps,
+  buildEntityAggregations,
+  buildResolvedEntityAggregations,
+  buildResolvedEntityAggregationSteps,
 } from './esql';
-import type { Measure } from './esql';
+import type { EntityAggregation } from './esql';
 import type { PageCursor, QueryArgs, Row } from '../common';
 import { COLUMN_ENRICHERS, SORT_PAGE_FETCHERS } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
@@ -235,44 +235,56 @@ describe('entities grid query builders', () => {
     });
   });
 
-  describe('the measures of a resolved row', () => {
-    const MEASURES: readonly Measure[] = [
-      { field: 'last_at', aggregation: 'MAX(`@timestamp`)', merge: 'MAX' },
-      { field: 'total', aggregation: 'COUNT(*)', merge: 'SUM' },
-      { field: 'high', aggregation: 'COUNT(*)', condition: 'level == "high"', merge: 'SUM' },
+  describe('the aggregations of a resolved row', () => {
+    const AGGREGATIONS: readonly EntityAggregation[] = [
+      { field: 'last_at', aggregation: 'MAX(`@timestamp`)', resolvedEntity: 'MAX' },
+      { field: 'total', aggregation: 'COUNT(*)', resolvedEntity: 'SUM' },
+      {
+        field: 'high',
+        aggregation: 'COUNT(*)',
+        condition: 'level == "high"',
+        resolvedEntity: 'SUM',
+      },
     ];
 
-    it('aggregates every measure over the rows that match its condition', () => {
-      expect(buildMeasureAggregations(MEASURES, 'is_alert')).toEqual([
+    it('aggregates every column over the rows that match its condition', () => {
+      expect(buildEntityAggregations(AGGREGATIONS, 'is_alert')).toEqual([
         'last_at = MAX(`@timestamp`) WHERE is_alert',
         'total = COUNT(*) WHERE is_alert',
         'high = COUNT(*) WHERE is_alert AND level == "high"',
       ]);
     });
 
-    it('merges the measures of the entities of a resolved entity as each says', () => {
-      expect(buildMeasureMerges(MEASURES)).toEqual([
+    it('gives each column of a resolved entity from its aliases as the column says', () => {
+      expect(buildResolvedEntityAggregations(AGGREGATIONS)).toEqual([
         'last_at = MAX(last_at)',
         'total = SUM(total)',
         'high = SUM(high)',
       ]);
     });
 
-    it('moves the rows of an alias to its resolved entity, merged', () => {
-      expect(buildResolvedEntityMergeSteps(BASE_ARGS, buildMeasureMerges(MEASURES))).toEqual([
+    it('gives the rows of an alias to its resolved entity, and aggregates them', () => {
+      expect(
+        buildResolvedEntityAggregationSteps(
+          BASE_ARGS,
+          buildResolvedEntityAggregations(AGGREGATIONS)
+        )
+      ).toEqual([
         `| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
         '| EVAL `entity.id` = COALESCE(entity.relationships.resolution.resolved_to, `entity.id`)',
         '| STATS last_at = MAX(last_at), total = SUM(total), high = SUM(high) BY `entity.id`',
       ]);
     });
 
-    it('keeps only the ids when there is nothing to merge', () => {
-      expect(buildResolvedEntityMergeSteps(BASE_ARGS, []).at(-1)).toBe('| STATS BY `entity.id`');
+    it('keeps only the ids when there is nothing to aggregate', () => {
+      expect(buildResolvedEntityAggregationSteps(BASE_ARGS, []).at(-1)).toBe(
+        '| STATS BY `entity.id`'
+      );
     });
 
     it('leaves the rows of individual rows as they are', () => {
       expect(
-        buildResolvedEntityMergeSteps({ ...BASE_ARGS, rowsMode: 'individual' }, [
+        buildResolvedEntityAggregationSteps({ ...BASE_ARGS, rowsMode: 'individual' }, [
           'total = SUM(total)',
         ])
       ).toEqual([]);
@@ -304,10 +316,10 @@ describe('entities grid query builders', () => {
 
         const fields = await enricher.fetch(pageRows, BASE_ARGS, createRunContext(runQuery));
 
-        const [aliasQuery, measureQuery] = runQuery.mock.calls.map(([query]) => query);
+        const [aliasQuery, enrichQuery] = runQuery.mock.calls.map(([query]) => query);
         expect(aliasQuery).toContain('resolved_to IN ("host:h-1")');
-        expect(measureQuery).toContain('host:alias-1');
-        expect(measureQuery).toContain(`${field} = SUM(${field})`);
+        expect(enrichQuery).toContain('host:alias-1');
+        expect(enrichQuery).toContain(`${field} = SUM(${field})`);
         expect(fields.get('host:h-1')).toMatchObject({ [field]: count });
         expect(fields.has('host:alias-1')).toBe(false);
       }
