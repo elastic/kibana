@@ -1,0 +1,37 @@
+# How the Endpoint Analysis Worker reports
+
+The Worker reports its sweep, each analysis run reports how it settled its indicator, and the proposal gate reports its close. Event fields are in the [telemetry README](../README.md).
+
+| Workflow | Step | `event` | Where |
+|---|---|---|---|
+| `forensics_endpoint_analysis.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result`, only when the sweep started or refused a dispatch or its search failed |
+| `forensics_run_endpoint_analysis.yaml` | `report_analysis_completed` | `endpoint_analysis_completed` | Right before `emit_result` |
+| `forensics_proposal_gate.yaml` | `report_investigation_closed_settled` | `worker_investigation_closed` | Right after `close_if_settled` |
+
+## Runs
+
+The Worker polls every minute, so a sweep that started nothing, refused nothing and read its source cleanly sends nothing. Otherwise each space would send about 1,440 empty events a day.
+
+`candidates_found` is the pending indicators in the lookback window, `items_dispatched` and `items_in_flight` the analyses started, and `items_failed` the dispatches the engine refused. `source_read_failed` is the indicator search; there is no lookup.
+
+- `failed_source_unavailable`: the search failed.
+- `failed_all_items`: every dispatch was refused (`degraded_reason: dependency_unavailable`).
+- `degraded_partial`: some were (`dependency_unavailable`).
+- `produced`: otherwise.
+
+A dispatch the engine drops as a duplicate still counts as started. While one analysis holds its indicator's slot, the next polls dispatch it again, so a long analysis reports one `produced` run per minute.
+
+## Analysis outcome
+
+`analysis_outcome` follows the same conditions as the run's `mark_*` writes, in their order. Findings an earlier run attached without recording its outcome retire the indicator as `failed`, so they report `failed`. A run that fails on a read or a terminal write (the indicator stays pending) never reaches its report; the engine's failed-run event covers it.
+
+## Closes
+
+The Worker never opens an Investigation. It works on the Attack Discovery Investigation named by the indicator, and its proposal gate closes that Investigation once every containment Proposal is decided.
+
+| Workflow | Close | `close_reason` |
+|---|---|---|
+| Proposal gate | Every containment Proposal of the Investigation decided | `other` |
+
+- The gate closes through the Agentic Investigations status route, because it runs as the Worker's service account and doesn't own the Investigation. That route writes no close reason, so the close is `other`, and it also sends `agentic_investigations_investigation_closed`.
+- The route doesn't return what it changed, so the gate reads the Investigation's status first (`read_status_before_close`) and reports only when it was `open` and the close returned `closed`. Two gates that settle at the same moment can both see it open, so a close can rarely be counted twice.
