@@ -89,7 +89,7 @@ export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: St
       paddingSize="none"
       css={{ maxWidth: isLargeScreen ? euiTheme.base * 20 : undefined }}
     >
-      <EuiPanel paddingSize="m" color="transparent">
+      <EuiPanel paddingSize="m" color="transparent" hasBorder={false}>
         <EuiSteps
           steps={steps}
           titleSize="xxs"
@@ -98,7 +98,7 @@ export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: St
         />
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiPanel paddingSize="m" color="transparent">
+      <EuiPanel paddingSize="m" color="transparent" hasBorder={false}>
         {currentStep === 1 ? (
           <EuiButton
             fill

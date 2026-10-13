@@ -27,30 +27,6 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
     capabilities === undefined || capabilities.agenticInvestigations?.showEscalations !== false;
 
   return [
-    {
-      id: SecurityPageName.alerts,
-      title: i18n.NAV_ALERTS,
-      path: '/alerts',
-      visibleIn: ['globalSearch', 'projectSideNav'],
-    },
-    {
-      id: SecurityPageName.attacks,
-      title: i18n.NAV_ATTACKS,
-      path: '/attacks',
-      visibleIn: ['globalSearch', 'projectSideNav'],
-    },
-    {
-      id: SecurityPageName.alertZeroThreatHunt,
-      title: i18n.NAV_THREAT_HUNT,
-      path: '/threat-hunt',
-      visibleIn: ['globalSearch', 'projectSideNav'],
-    },
-    {
-      id: SecurityPageName.alertZeroStreams,
-      title: i18n.NAV_STREAMS,
-      path: '/streams',
-      visibleIn: ['globalSearch', 'projectSideNav'],
-    },
     ...(showEscalations
       ? [
           {

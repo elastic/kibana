@@ -24,7 +24,9 @@ import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
-evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
+const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+
+evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, () => {
   evaluate(
     'grades investigations with the RCA judges and persists complete agent traces',
     async ({

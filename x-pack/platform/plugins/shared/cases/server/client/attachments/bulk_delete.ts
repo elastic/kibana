@@ -31,11 +31,13 @@ import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
 import { handleAlerts, updateCaseAttachmentStats } from './delete';
 import { getRelatedAttachmentsToDelete } from './related_deletions';
+import { emitAttachmentsDeletedEvents } from './trigger_utils';
 import { isAssociatedToCase } from '../../common/partitioning';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 
 interface BulkDeleteClassification {
   missingIds: string[];
+  foundAttachments: Array<SavedObject<AttachmentAttributesV2>>;
   attachmentsNotInCase: Array<SavedObject<AttachmentAttributesV2>>;
   fileAttachments: Array<SavedObject<AttachmentAttributesV2>>;
   attachmentsInCase: Array<SavedObject<AttachmentAttributesV2>>;
@@ -76,35 +78,58 @@ export const bulkDeleteAttachments = async (
 
     const { saved_objects: soAttachments } = await attachmentService.getter.bulkGet(uniqueIds);
 
-    const { missingIds, attachmentsNotInCase, fileAttachments, attachmentsInCase } =
-      soAttachments.reduce<BulkDeleteClassification>(
-        (acc, attachment) => {
-          if (attachment.error != null || attachment.attributes == null) {
-            acc.missingIds.push(attachment.id);
-            return acc;
-          }
-
-          const found = attachment as SavedObject<AttachmentAttributesV2>;
-
-          if (!isAssociatedToCase(caseId, found)) {
-            acc.attachmentsNotInCase.push(found);
-            return acc;
-          }
-
-          if (found.attributes.type === FILE_ATTACHMENT_TYPE) {
-            acc.fileAttachments.push(found);
-            return acc;
-          }
-
-          acc.attachmentsInCase.push(found);
+    const {
+      missingIds,
+      foundAttachments,
+      attachmentsNotInCase,
+      fileAttachments,
+      attachmentsInCase,
+    } = soAttachments.reduce<BulkDeleteClassification>(
+      (acc, attachment) => {
+        if (attachment.error != null || attachment.attributes == null) {
+          acc.missingIds.push(attachment.id);
           return acc;
-        },
-        { missingIds: [], attachmentsNotInCase: [], fileAttachments: [], attachmentsInCase: [] }
-      );
+        }
+
+        const found = attachment as SavedObject<AttachmentAttributesV2>;
+
+        acc.foundAttachments.push(found);
+
+        if (!isAssociatedToCase(caseId, found)) {
+          acc.attachmentsNotInCase.push(found);
+          return acc;
+        }
+
+        if (found.attributes.type === FILE_ATTACHMENT_TYPE) {
+          acc.fileAttachments.push(found);
+          return acc;
+        }
+
+        acc.attachmentsInCase.push(found);
+        return acc;
+      },
+      {
+        missingIds: [],
+        foundAttachments: [],
+        attachmentsNotInCase: [],
+        fileAttachments: [],
+        attachmentsInCase: [],
+      }
+    );
 
     if (missingIds.length > 0) {
       throw Boom.notFound(doNotExistOnCaseMessage(missingIds, caseId));
     }
+
+    // Authorized before the case and file checks below, so their error messages cannot tell an
+    // unauthorized caller which case an attachment belongs to, or what type it is.
+    await authorization.ensureAuthorized({
+      entities: foundAttachments.map((attachment) => ({
+        id: attachment.id,
+        owner: attachment.attributes.owner,
+      })),
+      operation: Operations.deleteComment,
+    });
 
     if (attachmentsNotInCase.length > 0) {
       throw Boom.notFound(
@@ -124,14 +149,6 @@ export const bulkDeleteAttachments = async (
       );
     }
 
-    await authorization.ensureAuthorized({
-      entities: attachmentsInCase.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-      })),
-      operation: Operations.deleteComment,
-    });
-
     const relatedAttachments = includeRelated
       ? await getRelatedAttachmentsToDelete({ caseId, attachments: attachmentsInCase, clientArgs })
       : [];
@@ -147,20 +164,33 @@ export const bulkDeleteAttachments = async (
     }
 
     const attachmentsToDelete = [...attachmentsInCase, ...relatedAttachments];
+    const idsToDelete = attachmentsToDelete.map((attachment) => attachment.id);
 
-    const failedIds = await attachmentService.bulkDelete({
-      savedObjectIds: attachmentsToDelete.map((attachment) => attachment.id),
+    // Built before anything is deleted: the decode strips the non request fields (created_at etc.)
+    // the same way the single delete does, and it throws on an attachment it cannot represent. If
+    // that happened after the delete, the attachments would be gone with no user action recording it.
+    const attachmentDeletions = attachmentsToDelete.map((attachment) => ({
+      id: attachment.id,
+      owner: attachment.attributes.owner,
+      attachment: decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes),
+      savedObjectType: attachment.type as AttachmentSavedObjectType,
+    }));
+
+    const deletedIds = await attachmentService.bulkDelete({
+      savedObjectIds: idsToDelete,
       refresh: true,
     });
 
-    // Core's bulk delete reports per-object failures instead of throwing. Surface them before any
-    // stats or user actions are written, so the case is never recorded as having lost attachments
-    // that are in fact still there.
-    if (failedIds.length > 0) {
+    // Core's bulk delete reports per-object failures instead of throwing, and only confirmed
+    // deletes come back. Surface anything that did not before stats or user actions are written,
+    // so the case is never recorded as having lost attachments that are in fact still there.
+    const notDeletedIds = idsToDelete.filter((id) => !deletedIds.includes(id));
+
+    if (notDeletedIds.length > 0) {
       throw Boom.internal(
-        `Failed to delete ${failedIds.length === 1 ? 'attachment' : 'attachments'} ${failedIds.join(
-          ', '
-        )} on case ${caseId}.`
+        `Failed to delete ${
+          notDeletedIds.length === 1 ? 'attachment' : 'attachments'
+        } ${notDeletedIds.join(', ')} on case ${caseId}.`
       );
     }
 
@@ -168,13 +198,7 @@ export const bulkDeleteAttachments = async (
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId,
-      attachments: attachmentsToDelete.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-        // strip the non request fields (created_at etc.) the same way the single delete does
-        attachment: decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes),
-        savedObjectType: attachment.type as AttachmentSavedObjectType,
-      })),
+      attachments: attachmentDeletions,
       user,
     });
 
@@ -183,6 +207,8 @@ export const bulkDeleteAttachments = async (
       attachments: attachmentsToDelete.map((attachment) => attachment.attributes),
       caseId,
     });
+
+    emitAttachmentsDeletedEvents(clientArgs, caseId, attachmentsToDelete);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk delete attachments for case: ${caseId}: ${error}`,
@@ -235,7 +261,7 @@ export const bulkDeleteFileAttachments = async (
       operation: Operations.deleteComment,
     });
 
-    await Promise.all([
+    const [, deletedAttachmentIds] = await Promise.all([
       deleteFiles(
         fileEntities.map((entity) => entity.id),
         fileService
@@ -255,6 +281,12 @@ export const bulkDeleteFileAttachments = async (
       })),
       user,
     });
+
+    emitAttachmentsDeletedEvents(
+      clientArgs,
+      caseId,
+      fileAttachments.filter(({ id }) => deletedAttachmentIds.includes(id))
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete file attachments for case: ${caseId}: ${error}`,

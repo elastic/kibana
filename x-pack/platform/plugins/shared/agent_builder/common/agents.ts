@@ -7,7 +7,7 @@
 
 import type {
   AgentAccessControl,
-  AgentConfiguration,
+  AgentConfigurationInput,
   AgentDefinition,
 } from '@kbn/agent-builder-common';
 
@@ -21,20 +21,21 @@ export interface AgentListOptions {
 
 export type AgentCreateRequest = Omit<
   AgentDefinition,
-  'type' | 'readonly' | 'created_by' | 'access_control'
+  'type' | 'readonly' | 'created_by' | 'access_control' | 'configuration'
 > & {
   /**
    * Id of a registered agent type. Defaults to the chat type (empty base).
    */
   type?: string;
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
+  configuration: AgentConfigurationInput;
 };
 
 export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
-  configuration?: Partial<AgentConfiguration>;
+  configuration?: Partial<AgentConfigurationInput>;
 };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;

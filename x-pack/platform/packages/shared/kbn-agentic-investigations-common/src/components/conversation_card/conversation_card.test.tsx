@@ -17,30 +17,40 @@ const investigation: Investigation = {
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
   events: [],
 };
 
-const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
+const renderCard = (
+  isSelected?: boolean,
+  onClickCard = jest.fn(),
+  renderInFlightStatus?: (inv: Investigation) => React.ReactNode
+) => {
   renderWithKibanaRenderContext(
     <ConversationCard
       investigation={investigation}
-      hasBorder={false}
       isSelected={isSelected}
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       renderAssignees={() => null}
+      renderInFlightStatus={renderInFlightStatus}
     />
   );
   return { onClickCard };
 };
 
 describe('ConversationCard', () => {
+  it('renders the in-flight status the page supplies for this investigation', () => {
+    renderCard(false, jest.fn(), (inv) => <span>{`Applying ${inv.id}`}</span>);
+
+    expect(screen.getByText('Applying inv-1')).toBeInTheDocument();
+  });
+
   it('emits the conversation id on click so the caller can open the details flyout', () => {
     const { onClickCard } = renderCard();
 
@@ -71,9 +81,9 @@ describe('ConversationCard', () => {
     renderWithKibanaRenderContext(
       <ConversationCard
         investigation={{ ...investigation, createdAt, updatedAt: new Date().toISOString() }}
-        hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}
@@ -88,9 +98,9 @@ describe('ConversationCard', () => {
     renderWithKibanaRenderContext(
       <ConversationCard
         investigation={{ ...investigation, createdAt: '2024-03-05T14:30:00.000Z' }}
-        hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}

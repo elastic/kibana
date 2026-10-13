@@ -16,9 +16,11 @@ export { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '
 export { useESQLQueryStats } from './hooks/use_esql_query_stats';
 export type {
   ESQLEditorProps,
+  ESQLEditorApi,
   DataErrorsControl,
   QuickSearchVisorProps,
   RestorableStateProviderApi,
+  VisorNlResultHandler,
 } from '@kbn/esql-editor';
 export type { EsqlPluginSetup, EsqlPluginStart };
 

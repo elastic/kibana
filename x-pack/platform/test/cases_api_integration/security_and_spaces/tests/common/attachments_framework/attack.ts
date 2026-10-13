@@ -15,11 +15,12 @@ import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type {
   AttachmentRequestV2,
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain/attachment/v2';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
+import { secOnly, superUser } from '../../../../common/lib/authentication/users';
 import {
   bulkCreateAttachments,
   bulkDeleteAttachments,
@@ -32,6 +33,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   ALERT_INDEX,
+  AD_HOC_ATTACK_INDEX,
   ATTACK_INDEX,
   buildAlertDocument,
   buildAttackDocument,
@@ -41,6 +43,7 @@ import {
 
 const OWNER = 'securitySolutionFixture';
 const ATTACK_ID = 'attack-doc-1';
+const AD_HOC_ATTACK_ID = 'ad-hoc-attack-doc-1';
 const ALERT_IDS = ['attack-alert-1', 'attack-alert-2'];
 
 // Attack↔alert is many-to-many: an alert can belong to several attacks, and both of those attacks
@@ -53,8 +56,7 @@ const ATTACK_B_ONLY_ALERT_ID = 'attack-alert-b-only';
 
 /**
  * The metadata snapshot the Attacks page takes at attach time. `title`, `alertCount` and
- * `index` are the required fields; the rest are optional because metadata is stored in
- * `_source` but never indexed, so fields added in a later release cannot be backfilled.
+ * `index` are the required fields; the rest are optional.
  */
 const attackMetadata = {
   title: 'Credential harvesting followed by lateral movement',
@@ -70,6 +72,24 @@ const attackAttachment = {
   owner: OWNER,
   attachmentId: ATTACK_ID,
   metadata: attackMetadata,
+};
+
+/**
+ * Ad-hoc discoveries live in their own index and carry a rule type the alerting framework never
+ * registers, so they are authorized by the caller's Elasticsearch index privileges rather than by
+ * alerting RBAC. They are always visible, so there is no privacy to check beyond that.
+ */
+const adHocAttackMetadata = {
+  title: 'Manually generated attack',
+  alertCount: 0,
+  index: AD_HOC_ATTACK_INDEX,
+};
+
+const adHocAttackAttachment = {
+  type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+  owner: OWNER,
+  attachmentId: AD_HOC_ATTACK_ID,
+  metadata: adHocAttackMetadata,
 };
 
 const alertAttachments = ALERT_IDS.map((alertId) => ({
@@ -95,6 +115,7 @@ const toArray = (value: string | string[] | undefined): string[] => {
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
   describe('Attack attachments', () => {
@@ -104,6 +125,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await indexAttackDocuments({
         es,
         attackIds: [ATTACK_ID, ATTACK_A_ID, ATTACK_B_ID],
+        adHocAttackIds: [AD_HOC_ATTACK_ID],
         alertIds: [...ALERT_IDS, SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID],
       });
     });
@@ -123,7 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: [
             attackAttachment,
             ...alertAttachments,
-          ] as unknown as BulkCreateAttachmentsRequestV2,
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
         expect(updatedCase.comments?.length).to.be(1 + ALERT_IDS.length);
@@ -201,6 +223,23 @@ export default ({ getService }: FtrProviderContext): void => {
             .flatMap((comment) => toArray(comment.alertId ?? comment.attachmentId))
             .sort()
         ).to.eql([...ALERT_IDS].sort());
+      });
+
+      it('persists an ad-hoc attack', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+        const updatedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: adHocAttackAttachment as unknown as AttachmentRequestV2,
+        });
+
+        const attack = updatedCase.comments!.find(
+          (comment) => comment.type === SECURITY_ATTACK_ATTACHMENT_TYPE
+        ) as unknown as { attachmentId: string; metadata: typeof adHocAttackMetadata };
+        expect(attack).to.be.ok();
+        expect(attack.attachmentId).to.eql(AD_HOC_ATTACK_ID);
+        expect(attack.metadata.index).to.eql(AD_HOC_ATTACK_INDEX);
       });
     });
 
@@ -280,7 +319,7 @@ export default ({ getService }: FtrProviderContext): void => {
             buildAlertAttachment(SHARED_ALERT_ID),
             buildAlertAttachment(ATTACK_A_ONLY_ALERT_ID),
             buildAlertAttachment(ATTACK_B_ONLY_ALERT_ID),
-          ] as unknown as BulkCreateAttachmentsRequestV2,
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
         const attachments = updatedCase.comments as unknown as Attachment[];
@@ -309,7 +348,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId,
-          attachmentIds: [attackAttachmentId(ATTACK_A_ID)],
+          savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
           includeRelated: false,
         });
 
@@ -338,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId,
-          attachmentIds: [attackAttachmentId(ATTACK_A_ID), ...removableAlertAttachmentIds],
+          savedObjectIds: [attackAttachmentId(ATTACK_A_ID), ...removableAlertAttachmentIds],
         });
 
         const remaining = await readAttachments(caseId);
@@ -356,7 +395,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId,
-          attachmentIds: [
+          savedObjectIds: [
             attackAttachmentId(ATTACK_A_ID),
             ...resolveRemovableAlertAttachmentIds(attachments, ATTACK_A_ID),
           ],
@@ -371,7 +410,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId,
-          attachmentIds: [attackAttachmentId(ATTACK_B_ID), ...remainingAlertAttachmentIds],
+          savedObjectIds: [attackAttachmentId(ATTACK_B_ID), ...remainingAlertAttachmentIds],
         });
 
         expect(await readAttachments(caseId)).to.eql([]);
@@ -383,7 +422,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkDeleteAttachments({
           supertest,
           caseId,
-          attachmentIds: [attackAttachmentId(ATTACK_A_ID), 'not-an-attachment-of-this-case'],
+          savedObjectIds: [attackAttachmentId(ATTACK_A_ID), 'not-an-attachment-of-this-case'],
           expectedHttpCode: 404,
         });
 
@@ -421,7 +460,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkDeleteAttachments({
             supertest,
             caseId,
-            attachmentIds: [attackAttachmentId(ATTACK_A_ID)],
+            savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
           });
 
           const remaining = await readAttachments(caseId);
@@ -449,7 +488,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkDeleteAttachments({
             supertest,
             caseId,
-            attachmentIds: [attackAttachmentId(ATTACK_A_ID)],
+            savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
             includeRelated: false,
           });
 
@@ -625,6 +664,35 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(
           comments.find((comment) => comment.type === SECURITY_ATTACK_ATTACHMENT_TYPE)?.attachmentId
         ).to.eql(ATTACK_ID);
+      });
+
+      it('rejects an attack from a user without read access to attack discoveries', async () => {
+        // `sec_only_all` holds every cases privilege but none of the attack discovery ones, so the
+        // attachment is refused by the alerting RBAC check, not by a cases privilege.
+        await indexAttackDocuments({ es, attackIds: [ATTACK_ID], spaceId: 'space1' });
+
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: OWNER }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: attackAttachment as unknown as AttachmentRequestV2,
+          auth: { user: secOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+
+        expect(
+          await getAllComments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            auth: { user: superUser, space: 'space1' },
+          })
+        ).to.eql([]);
       });
     });
   });

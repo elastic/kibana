@@ -837,7 +837,9 @@ describe('updateAlertsStatus', () => {
 
   describe('ensureAttacksAuthorized', () => {
     const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
+    const AD_HOC_ATTACK_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
     const attacks = [{ id: 'attack-1', index: ATTACK_INDEX }];
+    const adHocAttacks = [{ id: 'attack-1', index: AD_HOC_ATTACK_INDEX }];
 
     const attackDoc = (source: Record<string, unknown>) => ({
       docs: [{ _index: ATTACK_INDEX, _id: 'attack-1', found: true, _source: source }],
@@ -847,6 +849,15 @@ describe('updateAlertsStatus', () => {
       'kibana.alert.rule.rule_type_id': 'attack-discovery',
       'kibana.space_ids': ['default'],
     };
+
+    const validAdHocAttackSource = {
+      'kibana.alert.rule.rule_type_id': 'attack_discovery_ad_hoc_rule_type_id',
+      'kibana.space_ids': ['default'],
+    };
+
+    const adHocAttackDoc = (source: Record<string, unknown>) => ({
+      docs: [{ _index: AD_HOC_ATTACK_INDEX, _id: 'attack-1', found: true, _source: source }],
+    });
 
     it('authorizes an attack discovery alert in the current space', async () => {
       esClient.mget.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
@@ -860,6 +871,66 @@ describe('updateAlertsStatus', () => {
         _source_includes: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
       });
       expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts: attacks });
+    });
+
+    it('authorizes an ad-hoc attack discovery alert in the current space', async () => {
+      esClient.mget.mockResolvedValueOnce(adHocAttackDoc(validAdHocAttackSource) as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks: adHocAttacks, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        docs: [{ _id: 'attack-1', _index: AD_HOC_ATTACK_INDEX }],
+        _source_includes: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
+      });
+      // `attack_discovery_ad_hoc_rule_type_id` is a sentinel the alerting framework never
+      // registers, so alerting RBAC cannot authorize it. The `mget` above runs as the current
+      // user, which is the index privilege gate ad-hoc discoveries are read with everywhere else.
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('sends only the scheduled attacks of a mixed batch through alerting RBAC', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: AD_HOC_ATTACK_INDEX,
+            _id: 'attack-1',
+            found: true,
+            _source: validAdHocAttackSource,
+          },
+          { _index: ATTACK_INDEX, _id: 'attack-2', found: true, _source: validAttackSource },
+        ],
+      } as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [
+            { id: 'attack-1', index: AD_HOC_ATTACK_INDEX },
+            { id: 'attack-2', index: ATTACK_INDEX },
+          ],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
+        alerts: [{ id: 'attack-2', index: ATTACK_INDEX }],
+      });
+    });
+
+    it('throws when an ad-hoc attack belongs to another space', async () => {
+      esClient.mget.mockResolvedValueOnce(
+        adHocAttackDoc({
+          'kibana.alert.rule.rule_type_id': 'attack_discovery_ad_hoc_rule_type_id',
+          'kibana.space_ids': ['space-2'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks: adHocAttacks, spaceId: 'default' })
+      ).rejects.toThrow(/are not attack discoveries in space default: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
     it('throws when the referenced document does not exist', async () => {

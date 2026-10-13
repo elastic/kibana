@@ -26,6 +26,7 @@ import {
 import { Operations } from '../../authorization';
 import { mockCaseComments } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { commentFileExternalReference } from '../cases/mock';
 
 describe('bulk_delete', () => {
   describe('bulkDeleteFileAttachments', () => {
@@ -96,7 +97,10 @@ describe('bulk_delete', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
-      clientArgs.services.attachmentService.bulkDelete.mockResolvedValue([]);
+      // Mirrors the real service, which answers with the ids it confirmed deleted.
+      clientArgs.services.attachmentService.bulkDelete.mockImplementation(
+        async ({ savedObjectIds }) => savedObjectIds
+      );
     });
 
     it('deletes all the requested attachments in a single call and refreshes', async () => {
@@ -161,6 +165,23 @@ describe('bulk_delete', () => {
         ],
         user: expect.anything(),
       });
+    });
+
+    it('emits the attachmentsDeleted event for the deleted attachments', async () => {
+      await bulkDeleteAttachments(
+        { caseId: 'mock-id-1', savedObjectIds: ['mock-comment-1', 'mock-comment-2'] },
+        clientArgs
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          attachmentIds: ['mock-comment-1', 'mock-comment-2'],
+          attachmentType: 'user',
+          owner: 'securitySolution',
+        }
+      );
     });
 
     it('updates the case attachment stats', async () => {
@@ -395,7 +416,9 @@ describe('bulk_delete', () => {
       });
 
       it('throws when a saved object failed to be deleted, before any stats or user actions are written', async () => {
-        clientArgs.services.attachmentService.bulkDelete.mockResolvedValue(['mock-comment-2']);
+        // The service only answers with the ids it confirmed deleted, so a missing id means the
+        // saved object may still be there.
+        clientArgs.services.attachmentService.bulkDelete.mockResolvedValue(['mock-comment-1']);
 
         await expect(
           bulkDeleteAttachments(
@@ -409,6 +432,31 @@ describe('bulk_delete', () => {
           clientArgs.services.userActionService.creator.bulkCreateAttachmentDeletion
         ).not.toHaveBeenCalled();
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalled();
+      });
+
+      it('builds the user action payloads before deleting, so a malformed attachment is not lost', async () => {
+        const malformedAttachment = {
+          ...userComment,
+          id: 'mock-malformed-1',
+          attributes: { ...userComment.attributes, type: 'not-a-valid-type' },
+        } as unknown as (typeof mockCaseComments)[number];
+
+        clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [malformedAttachment],
+        });
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-malformed-1'] },
+            clientArgs
+          )
+        ).rejects.toThrow('Failed to bulk delete attachments for case: mock-id-1');
+
+        expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
+        expect(clientArgs.services.caseService.patchCase).not.toHaveBeenCalled();
+        expect(
+          clientArgs.services.userActionService.creator.bulkCreateAttachmentDeletion
+        ).not.toHaveBeenCalled();
       });
 
       it('does not delete anything when the user is not authorized', async () => {
@@ -425,6 +473,112 @@ describe('bulk_delete', () => {
 
         expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
       });
+
+      it('authorizes before disclosing which case an attachment belongs to', async () => {
+        clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [alertAttachment],
+        });
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-comment-4'] },
+            clientArgs
+          )
+        ).rejects.toThrow(
+          'Failed to bulk delete attachments for case: mock-id-1: Error: Unauthorized'
+        );
+      });
+
+      it('authorizes before disclosing that an attachment is a file', async () => {
+        clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+          saved_objects: [fileAttachment],
+        });
+        clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkDeleteAttachments(
+            { caseId: 'mock-id-1', savedObjectIds: ['mock-file-attachment-1'] },
+            clientArgs
+          )
+        ).rejects.toThrow(
+          'Failed to bulk delete attachments for case: mock-id-1: Error: Unauthorized'
+        );
+      });
+    });
+  });
+
+  describe('attachmentsDeleted event', () => {
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+    const { id, version, ...attributes } = commentFileExternalReference;
+    const fileAttachment = {
+      id: 'file-attachment-1',
+      type: 'cases-comments',
+      attributes,
+      references: [],
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+        fileAttachment,
+      ]);
+    });
+
+    it('emits the event for the deleted file attachments', async () => {
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          attachmentIds: ['file-attachment-1'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
+    it('only emits the event for the file attachments confirmed deleted', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+        fileAttachment,
+        { ...fileAttachment, id: 'file-attachment-2' },
+      ]);
+      clientArgs.services.attachmentService.bulkDelete.mockResolvedValueOnce(['file-attachment-2']);
+
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1', 'file-2'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          attachmentIds: ['file-attachment-2'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
+    it('does not emit the event when no file attachments were found', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([]);
+
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
     });
   });
 

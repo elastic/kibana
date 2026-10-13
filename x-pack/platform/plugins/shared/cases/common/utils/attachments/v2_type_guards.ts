@@ -96,8 +96,3 @@ export const isUnifiedAlertAttachment = (
 // ------ Attack -------
 export const isAttackAttachmentType = (type: string): boolean =>
   type === SECURITY_ATTACK_ATTACHMENT_TYPE;
-
-export const isUnifiedAttackAttachment = (
-  attachment: AttachmentRequestV2
-): attachment is UnifiedReferenceAttachmentPayload =>
-  isUnifiedReferenceAttachmentRequest(attachment) && isAttackAttachmentType(attachment.type);

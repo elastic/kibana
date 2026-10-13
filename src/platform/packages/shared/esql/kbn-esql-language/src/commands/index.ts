@@ -26,6 +26,7 @@ export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
 export { getIndexSourcesFromQuery, shouldBeQuotedSource } from './definitions/utils/sources';
 export { getPromqlBracketsToClose } from './definitions/utils/ast';
 export { escapeEsqlColumnName } from './definitions/utils/columns';
+export { deriveQueryFieldNames } from './registry/highlight/utils';
 export {
   Commands as CommandNames,
   Functions as FunctionNames,
