@@ -41,7 +41,7 @@ export function SourcePicker({
       savedObjectMetaData={[
         {
           type: 'index-pattern',
-          getIconForSavedObject: () => 'indexPatternApp',
+          getIconForSavedObject: () => 'table',
           name: i18n.translate('xpack.graph.sourceModal.savedObjectType.dataView', {
             defaultMessage: 'Data view',
           }),

@@ -294,7 +294,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     () => [
       {
         type: 'lens',
-        getIconForSavedObject: () => 'lensApp',
+        getIconForSavedObject: () => 'productLens',
         name: i18n.translate(
           'xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.savedObjectType.lens',
           {

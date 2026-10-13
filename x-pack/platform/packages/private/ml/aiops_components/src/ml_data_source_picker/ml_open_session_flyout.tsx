@@ -91,7 +91,7 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
           savedObjectMetaData={[
             {
               type: SavedSearchType,
-              getIconForSavedObject: () => 'discoverApp',
+              getIconForSavedObject: () => 'productDiscover',
               name: i18n.translate(
                 'xpack.aiops.dataSourcePicker.openSessionFlyout.savedObjectName',
                 {

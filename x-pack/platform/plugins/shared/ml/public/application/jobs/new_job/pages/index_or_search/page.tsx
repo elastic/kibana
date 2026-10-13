@@ -146,7 +146,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'discoverApp',
+                getIconForSavedObject: () => 'productDiscover',
                 name: i18n.translate(
                   'xpack.ml.newJob.wizard.searchSelection.savedObjectType.discoverSession',
                   {
@@ -159,7 +159,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
               },
               {
                 type: 'index-pattern',
-                getIconForSavedObject: () => 'indexPatternApp',
+                getIconForSavedObject: () => 'table',
                 name: i18n.translate(
                   'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
                   {

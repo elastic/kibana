@@ -141,7 +141,7 @@ export const SourceSelection: FC = () => {
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'discoverApp',
+                getIconForSavedObject: () => 'productDiscover',
                 name: i18n.translate(
                   'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.discoverSession',
                   {
@@ -154,7 +154,7 @@ export const SourceSelection: FC = () => {
               },
               {
                 type: 'index-pattern',
-                getIconForSavedObject: () => 'indexPatternApp',
+                getIconForSavedObject: () => 'table',
                 name: i18n.translate(
                   'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.dataView',
                   {
