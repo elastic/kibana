@@ -199,6 +199,52 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(agent3.policy_id).to.be(policyId);
     });
 
+    it('should reassign an agent on the sentinel policy that is inactive by timeout exactly once', async () => {
+      const sentinelPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}sentinel`;
+      await createAgentDoc(
+        providerContext,
+        'inactive-sentinel-agent',
+        sentinelPolicyId,
+        '8.18.0',
+        false
+      );
+
+      await waitForTask();
+
+      const versionedPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`;
+      await retry.tryForTime(30000, async () => {
+        const agent = await getAgent('inactive-sentinel-agent');
+        expect(agent.policy_id).to.be(versionedPolicyId);
+      });
+
+      // one reassign action for the agent, not one per selection of the task
+      await waitForTask();
+      const actions = await es.search({
+        index: '.fleet-actions',
+        q: 'agents:inactive-sentinel-agent',
+      });
+      expect(actions.hits.hits.length).to.be(1);
+      expect((actions.hits.hits[0]._source as any).type).to.be('POLICY_REASSIGN');
+    });
+
+    it('should reassign a legacy agent without policy_base_id on the sentinel policy', async () => {
+      // agent documents written before policy_base_id was added only have policy_id
+      const sentinelPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}sentinel`;
+      await createAgentDoc(providerContext, 'legacy-sentinel-agent', sentinelPolicyId, '8.18.0');
+      const agentDoc = await es.get<{ policy_base_id?: string }>({
+        index: '.fleet-agents',
+        id: 'legacy-sentinel-agent',
+      });
+      expect(agentDoc._source?.policy_base_id).to.be(undefined);
+
+      await waitForTask();
+
+      await retry.tryForTime(30000, async () => {
+        const agent = await getAgent('legacy-sentinel-agent');
+        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+      });
+    });
+
     it('should handle agents with unparseable/invalid version gracefully', async () => {
       // Create an agent with an unparseable version (edge case)
       // The task uses semver.coerce() which will return null for invalid versions

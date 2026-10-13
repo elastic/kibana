@@ -54,7 +54,6 @@ export default function (providerContext: FtrProviderContext) {
       let packagePolicyId: string;
       const agentId = `agent-package-${Date.now()}`;
       const upgradedAgentId = `upgraded-package-${Date.now()}`;
-      const extraAgentIds: string[] = [];
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -126,12 +125,6 @@ export default function (providerContext: FtrProviderContext) {
           .delete(`/api/fleet/agents/${upgradedAgentId}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        for (const extraAgentId of extraAgentIds) {
-          await supertest
-            .delete(`/api/fleet/agents/${extraAgentId}`)
-            .set('kbn-xsrf', 'xxxx')
-            .expect(200);
-        }
         // Retry to tolerate the unenroll updates above not being immediately visible to the
         // policy delete guard's search.
         await retry.tryForTime(20000, async () => {
@@ -191,50 +184,6 @@ export default function (providerContext: FtrProviderContext) {
 
           // verify upgraded agent with version specific policy is reassigned
           await verifyReassignAction(agentPolicyWithPPId, upgradedAgentId, currentMinor);
-        });
-      });
-
-      it('should reassign an agent on the sentinel policy that is inactive by timeout exactly once', async () => {
-        const inactiveSentinelAgentId = `inactive-sentinel-package-${Date.now()}`;
-        await fleetAndAgents.generateAgent(
-          'inactive',
-          inactiveSentinelAgentId,
-          `${agentPolicyWithPPId}#sentinel`,
-          previousMinorVersion,
-          undefined,
-          undefined,
-          true
-        );
-        extraAgentIds.push(inactiveSentinelAgentId);
-
-        // the task runs every minute by default
-        await retry.tryForTime(90000, async () => {
-          await verifyReassignAction(agentPolicyWithPPId, inactiveSentinelAgentId, previousMinor);
-        });
-      });
-
-      it('should reassign a legacy agent without policy_base_id on the sentinel policy', async () => {
-        // agents documents written before policy_base_id was added only have policy_id
-        const legacyAgentId = `legacy-sentinel-package-${Date.now()}`;
-        await fleetAndAgents.generateAgent(
-          'online',
-          legacyAgentId,
-          `${agentPolicyWithPPId}#sentinel`,
-          previousMinorVersion,
-          undefined,
-          undefined,
-          true
-        );
-        extraAgentIds.push(legacyAgentId);
-
-        const agentDoc = await es.get<{ policy_base_id?: string }>({
-          index: '.fleet-agents',
-          id: legacyAgentId,
-        });
-        expect(agentDoc._source?.policy_base_id).to.be(undefined);
-
-        await retry.tryForTime(90000, async () => {
-          await verifyReassignAction(agentPolicyWithPPId, legacyAgentId, previousMinor);
         });
       });
 
