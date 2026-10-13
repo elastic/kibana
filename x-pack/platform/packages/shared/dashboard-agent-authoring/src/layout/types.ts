@@ -112,7 +112,7 @@ export const layoutArrangementSchema = z.object({
     .max(MAX_LAYOUT_OVERRIDES_LENGTH)
     .optional()
     .describe(
-      'Only when instructions are given: lasting exceptions of the user to the default layout and sizes, or an empty string when none apply.'
+      'Only when instructions or layoutOverrides are given: lasting exceptions of the user to the default layout and sizes, or an empty string when none apply.'
     ),
 });
 

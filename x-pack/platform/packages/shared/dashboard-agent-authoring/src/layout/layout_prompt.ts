@@ -39,14 +39,14 @@ Place new items by purpose, next to related items: in a row with room, or in a n
 
 ## Layout overrides
 
-When \`instructions\` are given, also return \`layoutOverrides\`: the user's lasting exceptions to the default placement and sizing, which it would otherwise undo, so later calls keep honoring them. Keep only:
+When \`instructions\` or \`layoutOverrides\` are given, also return \`layoutOverrides\`: the user's lasting exceptions to the default placement and sizing, which it would otherwise undo, so later calls keep honoring them. Keep only:
 
 - Sizes outside the range of a panel's class, or a fixed size, e.g. the bar chart "errors-by-code is full width".
 - Groupings to keep when panels are added or removed, e.g. "kpi-requests, kpi-errors and kpi-hosts share the first row" or "error-rate sits right of latency".
 
 Leave out one-time moves and reorders, e.g. "put the reference section first": the current arrangement already keeps them. Also leave out what matches the defaults, notes about content, and statements that other items keep their place.
 
-Start from the earlier \`layoutOverrides\`, apply the instructions, and drop whatever they change, revert, or replace, and overrides of panels no longer on the dashboard. Name panels and sections by id, since titles may be missing or change. Return an empty string when no override applies. Without \`instructions\`, omit \`layoutOverrides\`.`;
+Start from the earlier \`layoutOverrides\` and apply the instructions. Rewrite or drop any override that no longer applies: the user changed, replaced, or reverted it (e.g. "undo"), or a panel or section it names was removed or moved to another container. Otherwise return the earlier \`layoutOverrides\` unchanged. Name panels and sections by id, since titles may be missing or change. Return an empty string when no override applies. Without \`instructions\` or \`layoutOverrides\`, omit \`layoutOverrides\`.`;
 
 /** Builds the messages of the layout call for a layout request. */
 export const buildLayoutPrompt = (request: LayoutRequest): { system: string; user: string } => ({

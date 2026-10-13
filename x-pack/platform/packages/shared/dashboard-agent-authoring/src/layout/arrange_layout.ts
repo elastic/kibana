@@ -88,8 +88,8 @@ export interface ArrangedDashboardLayout {
  * Places the panels and sections a change touched. Containers with added, moved, removed,
  * or edited items (or every container, when `instructions` are given) are arranged into rows by the
  * injected `arrangeLayout` call; code turns the rows into grid positions. Without the call, or when
- * it fails, existing items keep their position and new ones are packed below them. With
- * `instructions`, the layout call also rewrites the user's layout overrides.
+ * it fails, existing items keep their position and new ones are packed below them. The layout
+ * call also updates the user's layout overrides.
  */
 export const arrangeDashboardLayout = async ({
   originalDashboardData,
@@ -212,8 +212,7 @@ export const arrangeDashboardLayout = async ({
     containerPlacements.forEach((grid, id) => placements.set(id, grid));
   });
 
-  const nextLayoutOverrides =
-    instructions === undefined ? layoutOverrides : arrangement?.layoutOverrides ?? layoutOverrides;
+  const nextLayoutOverrides = arrangement?.layoutOverrides ?? layoutOverrides;
 
   return {
     dashboardData: applyPlacements(dashboardData, placements),
