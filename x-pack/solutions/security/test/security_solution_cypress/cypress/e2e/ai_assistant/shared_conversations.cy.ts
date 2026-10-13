@@ -121,9 +121,9 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     createAzureConnector();
     seedConversation(mockConvo1);
     seedConversation(mockConvo2);
-    visitGetStartedPage();
   });
   it('Share modal works to not share, share globally, and share selected', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -183,6 +183,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     assertSharedConversationIcon(mockConvo2.title);
   });
   it('Shared conversations appear for the user they were shared with', () => {
+    visitGetStartedPage();
     shareConversations([
       {
         title: mockConvo1.title,
@@ -218,6 +219,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     assertMessageSent(mockConvo1.messages[0].content);
   });
   it('Dismissed callout remains dismissed when conversation is unselected and selected again', () => {
+    visitGetStartedPage();
     shareConversations([
       {
         title: mockConvo1.title,
@@ -245,6 +247,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     assertNoSharedCallout();
   });
   it('Duplicate conversation allows user to continue a shared conversation', () => {
+    visitGetStartedPage();
     shareConversations([
       {
         title: mockConvo1.title,
@@ -267,12 +270,14 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   });
 
   it('Duplicate conversation from conversation menu creates a duplicate', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     duplicateFromMenu(mockConvo1.title);
   });
 
   it('Duplicate conversation from conversation side menu creates a duplicate and secondary user cannot access', () => {
+    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     duplicateFromConversationSideContextMenu(mockConvo2.title);
@@ -291,6 +296,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   });
 
   it('Copy URL copies the proper url from conversation menu', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -298,6 +304,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
   });
   it('Copy URL copies the proper url from conversation side menu', () => {
+    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     copyUrlFromConversationSideContextMenu();
@@ -305,6 +312,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   });
 
   it('Copy URL copies the proper url from share modal', () => {
+    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -313,6 +321,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   });
 
   it('Visiting a URL with the assistant param opens the assistant to the proper conversation', () => {
+    visitGetStartedPage();
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
     });
@@ -324,6 +333,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
 
     // Login as the secondary user, who has not been given access to the conversation
     login(secondaryRole);
+    visitGetStartedPage();
 
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
