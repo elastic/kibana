@@ -138,12 +138,13 @@ export const generateVisualizationEsql = async ({
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
+  const blockingError = response.error ?? findTargetError(response.query, index);
   // The time filter check runs on the first pass only: the fallback gets one chance to fix
   // it, and a chart that ignores the time picker beats no chart at all.
-  const responseError =
-    response.error ??
-    findTargetError(response.query, index) ??
-    (await findMissingTimeFilterError(esClient.asCurrentUser, response.query));
+  const timeFilterError = blockingError
+    ? undefined
+    : await findMissingTimeFilterError(esClient.asCurrentUser, response.query);
+  const responseError = blockingError ?? timeFilterError;
 
   if (response.query && !responseError) {
     return { query: response.query, columns: response.results?.columns };
@@ -165,6 +166,9 @@ export const generateVisualizationEsql = async ({
   const fallbackError = fallbackResponse.error ?? findTargetError(fallbackResponse.query, index);
 
   if (!fallbackResponse.query || fallbackError) {
+    if (response.query && timeFilterError) {
+      return { query: response.query, columns: response.results?.columns };
+    }
     return { error: fallbackError ?? 'No queries generated' };
   }
 

@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
+  parseTimeFieldFromESQLQuery,
+} from '@kbn/esql-utils';
 import { DEFAULT_TIME_FIELD, getDateFieldNames } from './date_fields';
 
 /**
@@ -37,7 +41,9 @@ export const findMissingTimeFilterError = async (
   }
 
   try {
-    const dateFields = await getDateFieldNames(esClient, index);
+    const dateFields = await getDateFieldNames(esClient, index, {
+      projectRouting: getProjectRoutingFromEsqlQuery(query),
+    });
     if (
       dateFields.length === 0 ||
       dateFields.includes(DEFAULT_TIME_FIELD) ||
