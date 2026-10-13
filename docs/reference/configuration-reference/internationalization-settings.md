@@ -112,7 +112,7 @@ Chrome and Microsoft Edge can move text nodes when they translate a page using t
 
 {applies_to}`serverless: experimental` {applies_to}`stack: experimental 9.6+` If you encounter this issue, a compatibility option exists in {{kib}}. The location of this option depends on how you sign in:
 
-- When signing in using an {{ecloud}} account, open **Profile** and turn on **Browser translation compatibility** in the Language section.
-- When signing in to {{kib}} using a different method, for example with a username and password or on a self-managed deployment, open the user menu, choose **Language**, and turn on the option.
+- When signing in using an {{ecloud}} account, open the user menu, choose **Language**, and turn on the option.
+- When signing in to {{kib}} using a different method, for example with a username and password or on a self-managed deployment, open **Profile** and turn on **Browser translation compatibility** in the Language section.
 
 Reload {{kib}} after saving. The option stays inactive until the browser translates the page.
