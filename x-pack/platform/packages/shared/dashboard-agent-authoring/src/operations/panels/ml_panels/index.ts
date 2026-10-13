@@ -6,7 +6,10 @@
  */
 
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
-import { anomalyChartsEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import {
+  anomalyChartsEmbeddableStateSchema,
+  severityThresholdSchema,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import {
   anomalySwimLaneOverallSchema,
   anomalySwimLaneViewBySchema,
@@ -25,10 +28,10 @@ import { defineConfigPanelKind } from '../panel_kind';
  * ML panels; the agent derives job IDs and parameters from prior tool calls or
  * conversation context.
  *
- * Config shapes come from `@kbn/ml-server-schemas`, flattened where the model
- * only needs a simpler form: anomaly charts take a numeric `severity_threshold`
- * mapped to the embeddable's open-ended `{ min }` range, and the swim lane takes
- * one object whose `view_by` is required only for view-by swim lanes.
+ * Config shapes come from `@kbn/ml-server-schemas` so dashboard generation
+ * accepts the same payload as ML chart attachments. Anomaly charts additionally
+ * accept a numeric `severity_threshold` and map it to the embeddable's
+ * open-ended `{ min }` range.
  */
 
 const panelIdSchema = z.string().max(256);
@@ -37,13 +40,21 @@ const panelIdSchema = z.string().max(256);
 
 export const anomalyChartsPanelConfigSchema = z.object({
   ...anomalyChartsEmbeddableStateSchema.shape,
+  // Agent-facing number plus the embeddable array form (e.g. forwarded attachments).
   severity_threshold: z
-    .number()
-    .min(0)
-    .max(100)
+    .union([
+      z
+        .number()
+        .min(0)
+        .max(100)
+        .describe(
+          'Minimum anomaly score (0–100) to display. Omit to show all scores. Typical values: 25 (minor+), 50 (major+), 75 (critical only).'
+        ),
+      z.array(severityThresholdSchema).max(5),
+    ])
     .optional()
     .describe(
-      'Minimum anomaly score (0–100) to display. Omit to show all scores. Typical values: 25 (minor+), 50 (major+), 75 (critical only).'
+      'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted (for example from an ML chart attachment).'
     ),
 });
 
@@ -73,39 +84,24 @@ export const anomalyChartsPanelKind = defineConfigPanelKind({
   editInputSchema: editAnomalyChartsPanelConfigInputSchema,
   toEmbeddableConfig: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
+    const normalizedThreshold =
+      typeof severityThreshold === 'number' ? [{ min: severityThreshold }] : severityThreshold;
     return {
       ...rest,
-      ...(typeof severityThreshold === 'number'
-        ? { severity_threshold: [{ min: severityThreshold }] }
-        : {}),
+      ...(normalizedThreshold != null ? { severity_threshold: normalizedThreshold } : {}),
     };
   },
 });
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────
 
-/** Both swim lane variants as one object, so the model sees their shared fields once. */
-export const anomalySwimlaneConfigSchema = anomalySwimLaneOverallSchema
-  .extend({
-    swimlane_type: z.enum([
-      anomalySwimLaneOverallSchema.shape.swimlane_type.value,
-      anomalySwimLaneViewBySchema.shape.swimlane_type.value,
-    ]),
-    view_by: anomalySwimLaneViewBySchema.shape.view_by
-      .optional()
-      .describe(
-        'Field name used to split anomalies into a view-by swim lane. Required when swimlane_type is "viewBy".'
-      ),
-  })
-  .superRefine(({ swimlane_type: swimlaneType, view_by: viewBy }, ctx) => {
-    if (swimlaneType === 'viewBy' && !viewBy) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['view_by'],
-        message: 'view_by is required when swimlane_type is "viewBy".',
-      });
-    }
-  });
+export const anomalySwimlaneOverallConfigSchema = anomalySwimLaneOverallSchema;
+export const anomalySwimlaneViewByConfigSchema = anomalySwimLaneViewBySchema;
+
+export const anomalySwimlaneConfigSchema = z.discriminatedUnion('swimlane_type', [
+  anomalySwimlaneOverallConfigSchema,
+  anomalySwimlaneViewByConfigSchema,
+]);
 
 const anomalySwimlaneConfigInputSchema = z.object({
   source: z.literal('config'),
@@ -131,10 +127,6 @@ export const anomalySwimlanePanelKind = defineConfigPanelKind({
   label: 'anomaly swim lane',
   addInputSchema: anomalySwimlaneConfigInputSchema,
   editInputSchema: editAnomalySwimlaneConfigInputSchema,
-  toEmbeddableConfig: (config) => {
-    const { view_by: viewBy, ...rest } = config;
-    return rest.swimlane_type === 'viewBy' ? { ...rest, view_by: viewBy } : rest;
-  },
 });
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────

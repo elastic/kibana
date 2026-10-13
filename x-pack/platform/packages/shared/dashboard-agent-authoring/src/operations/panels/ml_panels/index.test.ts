@@ -33,6 +33,21 @@ describe('ml_anomaly_charts registry entry', () => {
       });
     });
 
+    it('passes through an embeddable severity_threshold range array', () => {
+      expect(
+        buildConfigPanelContent('ml_anomaly_charts', {
+          job_ids: ['job-1'],
+          severity_threshold: [{ min: 50 }],
+        })
+      ).toEqual({
+        type: 'ml_anomaly_charts',
+        config: {
+          job_ids: ['job-1'],
+          severity_threshold: [{ min: 50 }],
+        },
+      });
+    });
+
     it('omits severity_threshold when it is not provided', () => {
       expect(
         buildConfigPanelContent('ml_anomaly_charts', {
@@ -96,7 +111,7 @@ describe('anomalyChartsPanelConfigSchema', () => {
     ).toBe(false);
   });
 
-  it('accepts a numeric severity_threshold but not an embeddable range array', () => {
+  it('accepts a numeric severity_threshold and an embeddable range array', () => {
     expect(
       anomalyChartsPanelConfigSchema.safeParse({
         job_ids: ['job-1'],
@@ -108,7 +123,7 @@ describe('anomalyChartsPanelConfigSchema', () => {
         job_ids: ['job-1'],
         severity_threshold: [{ min: 50 }],
       }).success
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 

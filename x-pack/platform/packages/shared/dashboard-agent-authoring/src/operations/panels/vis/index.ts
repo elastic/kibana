@@ -173,25 +173,3 @@ export const vegaPanelKind = defineRequestPanelKind({
   addInputSchema: vegaPanelRequestSchema,
   editInputSchema: vegaEditPanelRequestSchema,
 });
-
-/**
- * Lens and Vega upsert content as one object, so the model sees their shared fields once. Upsert
- * re-parses it with the add or edit input of the panel's renderer.
- */
-export const visUpsertContentSchema = lensPanelKind.upsertContentSchema.extend({
-  renderer: z
-    .enum([lensPanelKind.renderer, vegaPanelKind.renderer])
-    .optional()
-    .describe(
-      '(optional) "vega" renders with Vega-Lite: use it for small multiples/faceting, layered or combination charts, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Omit it for Lens, the default for new panels. On an existing panel, omit it to keep its renderer.'
-    ),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe(
-      'Lens chart type, chosen from the dashboard chart type guidance. Required for new Lens panels; for Vega, optionally the closest Lens chart type as an authoring hint. On an existing panel, changes its chart type; omit it to keep the existing configuration.'
-    ),
-  applyChartRules: lensEditPanelRequestSchema.shape.applyChartRules.describe(
-    '(optional, Lens only) Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
-  ),
-});
