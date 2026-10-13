@@ -9,9 +9,14 @@
 
 import type { AgentConfig, Retry } from './types.ts';
 
+export type SpotZone = 'us-central1-a' | 'us-central1-c' | 'us-central1-f';
+
+// Add a machine type here when a ported step first uses it.
+export type MachineType = 'n2-standard-8';
+
 export const spotZones = {
-  centralFCA: 'us-central1-f,us-central1-c,us-central1-a',
-} as const;
+  centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],
+} as const satisfies Record<string, readonly SpotZone[]>;
 
 // Exit statuses are integers or '*', the forms Buildkite's schema allows.
 //
@@ -26,8 +31,8 @@ export const retry = {
   },
 } satisfies Record<string, Retry>;
 
-export const spotAgent = (machineType: string, zones: string): AgentConfig => ({
+export const spotAgent = (machineType: MachineType, zones: readonly SpotZone[]): AgentConfig => ({
   machineType,
   preemptible: true,
-  spotZones: zones,
+  spotZones: zones.join(','),
 });
