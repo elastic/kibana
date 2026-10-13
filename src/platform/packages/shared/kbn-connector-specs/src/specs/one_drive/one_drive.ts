@@ -48,10 +48,13 @@ export const OneDrive: ConnectorSpec = {
   metadata: {
     id: '.one_drive',
     displayName: 'OneDrive',
-    description: i18n.translate('core.kibanaConnectorSpecs.oneDrive.metadata.description', {
-      defaultMessage:
-        'Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.oneDrive.metadata.description',
+      {
+        defaultMessage:
+          'Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -70,7 +73,7 @@ export const OneDrive: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.oneDrive.auth.authorizationUrl.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.oneDrive.auth.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/my-tenant/oauth2/v2.0/authorize",
@@ -80,7 +83,7 @@ export const OneDrive: ConnectorSpec = {
             tokenUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.oneDrive.auth.tokenUrl.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.oneDrive.auth.tokenUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Microsoft Entra (Azure AD) tenant ID: https://login.microsoftonline.com/my-tenant/oauth2/v2.0/token",
@@ -285,7 +288,7 @@ export const OneDrive: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.oneDrive.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.oneDrive.test.description', {
       defaultMessage:
         'Verifies the OneDrive connection by fetching the authenticated user profile.',
     }),

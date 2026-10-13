@@ -7,96 +7,120 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const VIEW_DETAILS = i18n.translate('xpack.alertingV2.episodesUi.actions.viewDetailsLabel', {
-  defaultMessage: 'View details',
-});
+export const VIEW_DETAILS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.viewDetailsLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
 
-export const ACK = i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.acknowledge', {
-  defaultMessage: 'Acknowledge',
-});
+export const ACK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.acknowledgeAction.acknowledge',
+  {
+    defaultMessage: 'Acknowledge',
+  }
+);
 
-export const UNACK = i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.unacknowledge', {
-  defaultMessage: 'Unacknowledge',
-});
+export const UNACK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.acknowledgeAction.unacknowledge',
+  {
+    defaultMessage: 'Unacknowledge',
+  }
+);
 
-export const SNOOZE = i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.snooze', {
+export const SNOOZE = i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.snooze', {
   defaultMessage: 'Snooze',
 });
 
-export const UNSNOOZE = i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
-  defaultMessage: 'Unsnooze',
-});
+export const UNSNOOZE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.unsnooze',
+  {
+    defaultMessage: 'Unsnooze',
+  }
+);
 
-export const RESOLVE = i18n.translate('xpack.alertingV2.episodesUi.resolveAction.deactivate', {
-  defaultMessage: 'Resolve',
-});
+export const RESOLVE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.deactivate',
+  {
+    defaultMessage: 'Resolve',
+  }
+);
 
-export const UNRESOLVE = i18n.translate('xpack.alertingV2.episodesUi.resolveAction.activate', {
-  defaultMessage: 'Unresolve',
-});
+export const UNRESOLVE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.activate',
+  {
+    defaultMessage: 'Unresolve',
+  }
+);
 
-export const EDIT_TAGS = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.editTags', {
-  defaultMessage: 'Edit alert tags',
-});
+export const EDIT_TAGS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.editTags',
+  {
+    defaultMessage: 'Edit alert tags',
+  }
+);
 
 export const EDIT_ASSIGNEE = i18n.translate(
-  'xpack.alertingV2.episodesUi.assigneeAction.editAssignee',
+  'xpack.alertingV2EpisodesUi.episodesUi.assigneeAction.editAssignee',
   {
     defaultMessage: 'Edit assignee',
   }
 );
 
 export const OPEN_IN_DISCOVER = i18n.translate(
-  'xpack.alertingV2.episodesUi.actions.openInDiscoverLabel',
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.openInDiscoverLabel',
   {
     defaultMessage: 'Open in Discover',
   }
 );
 
 export const TAGS_FLYOUT_TITLE = i18n.translate(
-  'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.flyoutTitle',
   {
     defaultMessage: 'Edit alert tags',
   }
 );
 
-export const CANCEL = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.cancel', {
+export const CANCEL = i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.tagsAction.cancel', {
   defaultMessage: 'Cancel',
 });
 
 export const RESOLVE_ACTION_REASON = i18n.translate(
-  'xpack.alertingV2.episodesUi.resolveAction.reason',
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.reason',
   {
     defaultMessage: 'Updated from alerts actions UI',
   }
 );
 
-export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2Episodes.actions.bulkErrorToast', {
-  defaultMessage: 'An error occurred while performing the bulk action.',
-});
+export const BULK_ERROR_TOAST = i18n.translate(
+  'xpack.alertingV2EpisodesUi.actions.bulkErrorToast',
+  {
+    defaultMessage: 'An error occurred while performing the bulk action.',
+  }
+);
 
 export const getBulkSuccessToast = (processed: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkSuccessToast', {
+  i18n.translate('xpack.alertingV2EpisodesUi.actions.bulkSuccessToast', {
     defaultMessage: '{processed, plural, one {# alert} other {# alerts}} updated successfully.',
     values: { processed },
   });
 
 export const BULK_NO_CHANGES_TOAST = i18n.translate(
-  'xpack.alertingV2Episodes.actions.bulkNoChangesToast',
+  'xpack.alertingV2EpisodesUi.actions.bulkNoChangesToast',
   {
     defaultMessage: 'No changes were needed.',
   }
 );
 
 export const getBulkPartialSuccessToast = (processed: number, total: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialSuccessToast', {
+  i18n.translate('xpack.alertingV2EpisodesUi.actions.bulkPartialSuccessToast', {
     defaultMessage:
       '{processed} of {total} {total, plural, one {alert} other {alerts}} updated successfully.',
     values: { processed, total },
   });
 
 export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
-  'xpack.alertingV2Episodes.actions.unresolveNotAvailable',
+  'xpack.alertingV2EpisodesUi.actions.unresolveNotAvailable',
   {
     defaultMessage: 'Unresolve is not available for classic alerts',
   }

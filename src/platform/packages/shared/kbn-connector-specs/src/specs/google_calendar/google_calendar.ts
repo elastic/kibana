@@ -41,9 +41,12 @@ export const GoogleCalendar: ConnectorSpec = {
   metadata: {
     id: '.google_calendar',
     displayName: 'Google Calendar',
-    description: i18n.translate('core.kibanaConnectorSpecs.googleCalendar.metadata.description', {
-      defaultMessage: 'Search and access events and calendars in Google Calendar',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.googleCalendar.metadata.description',
+      {
+        defaultMessage: 'Search and access events and calendars in Google Calendar',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -245,9 +248,12 @@ export const GoogleCalendar: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.googleCalendar.test.description', {
-      defaultMessage: 'Verifies Google Calendar connection by fetching calendar list',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.googleCalendar.test.description',
+      {
+        defaultMessage: 'Verifies Google Calendar connection by fetching calendar list',
+      }
+    ),
     handler: async (ctx) => {
       await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
         params: { maxResults: 1 },

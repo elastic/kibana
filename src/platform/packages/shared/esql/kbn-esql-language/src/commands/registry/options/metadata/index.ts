@@ -36,7 +36,7 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'METADATA',
   text: 'METADATA ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.esql.definitions.metadataDoc', {
+  detail: i18n.translate('esqlLanguage.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
   category: SuggestionCategory.VALUE,

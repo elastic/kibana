@@ -21,9 +21,12 @@ export const ZendeskConnector: ConnectorSpec = {
   metadata: {
     id: '.zendesk',
     displayName: 'Zendesk',
-    description: i18n.translate('core.kibanaConnectorSpecs.zendesk.metadata.description', {
-      defaultMessage: 'Search and retrieve tickets, users, and Help Center content in Zendesk',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.zendesk.metadata.description',
+      {
+        defaultMessage: 'Search and retrieve tickets, users, and Help Center content in Zendesk',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -37,22 +40,34 @@ export const ZendeskConnector: ConnectorSpec = {
         overrides: {
           meta: {
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.password.label', {
-                defaultMessage: 'API token',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.password.helpText', {
-                defaultMessage:
-                  'Your Zendesk API token (Admin Center > Apps and integrations > APIs)',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.zendesk.auth.password.label',
+                {
+                  defaultMessage: 'API token',
+                }
+              ),
+              helpText: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.zendesk.auth.password.helpText',
+                {
+                  defaultMessage:
+                    'Your Zendesk API token (Admin Center > Apps and integrations > APIs)',
+                }
+              ),
             },
             username: {
-              label: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.label', {
-                defaultMessage: 'Email',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.helpText', {
-                defaultMessage:
-                  'Your Zendesk account email; add "/token" at the end for API token auth (e.g. your_email@example.com/token)',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.zendesk.auth.username.label',
+                {
+                  defaultMessage: 'Email',
+                }
+              ),
+              helpText: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.zendesk.auth.username.helpText',
+                {
+                  defaultMessage:
+                    'Your Zendesk account email; add "/token" at the end for API token auth (e.g. your_email@example.com/token)',
+                }
+              ),
               placeholder: 'your_email@example.com/token',
             },
           },
@@ -69,14 +84,20 @@ export const ZendeskConnector: ConnectorSpec = {
         .describe('Your Zendesk subdomain')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.zendesk.config.subdomain.label', {
-            defaultMessage: 'Subdomain',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.zendesk.config.subdomain.label',
+            {
+              defaultMessage: 'Subdomain',
+            }
+          ),
           placeholder: 'your-company',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.config.subdomain.helpText', {
-            defaultMessage:
-              'The subdomain for your Zendesk account (e.g. your-company for https://your-company.zendesk.com)',
-          }),
+          helpText: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.zendesk.config.subdomain.helpText',
+            {
+              defaultMessage:
+                'The subdomain for your Zendesk account (e.g. your-company for https://your-company.zendesk.com)',
+            }
+          ),
         }),
     })
   ),
@@ -272,7 +293,7 @@ export const ZendeskConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.zendesk.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.zendesk.test.description', {
       defaultMessage: 'Verifies Zendesk connection by listing current user',
     }),
     handler: async (ctx) => {
