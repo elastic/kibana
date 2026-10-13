@@ -56,6 +56,9 @@ function makeServicesStepReturn(): ReturnType<typeof useServicesStep> {
     handleNext: jest.fn(),
     dataFormat: 'ecs',
     setDataFormat: jest.fn(),
+    agentBasedOnlySelected: [],
+    ecfOnlySelected: [],
+    isUnavailableForMethod: () => false,
   };
 }
 
@@ -68,6 +71,36 @@ function renderStep(initialEntries = ['/']) {
     </MemoryRouter>
   );
 }
+
+describe('ServicesStep — agentBasedOnlyCallout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseOnboardingFlow.mockReturnValue({
+      detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+    });
+  });
+
+  it('does not render the callout when agentBasedOnlySelected is empty', () => {
+    mockUseServicesStep.mockReturnValue(makeServicesStepReturn());
+    renderStep(['/']);
+    expect(screen.queryByTestId('servicesStep-agentBasedOnlyCallout')).toBeNull();
+  });
+
+  it('renders the callout with service names when agentBasedOnlySelected is non-empty', () => {
+    mockUseServicesStep.mockReturnValue({
+      ...makeServicesStepReturn(),
+      agentBasedOnlySelected: [
+        { id: 'aws_securityhub', name: 'Security Hub' },
+        { id: 'amazon_security_lake', name: 'Amazon Security Lake' },
+      ] as any,
+    });
+    renderStep(['/']);
+    const callout = screen.getByTestId('servicesStep-agentBasedOnlyCallout');
+    expect(callout).toBeTruthy();
+    expect(callout.textContent).toContain('Security Hub');
+    expect(callout.textContent).toContain('Amazon Security Lake');
+  });
+});
 
 describe('ServicesStep — isFormatDisabled', () => {
   beforeEach(() => {

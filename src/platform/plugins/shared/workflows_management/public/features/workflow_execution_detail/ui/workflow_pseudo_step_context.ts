@@ -118,6 +118,20 @@ export function buildTriggerStepExecutionFromContext(
   } as WorkflowStepExecutionDto;
 }
 
+/**
+ * Top-level keys that `buildOverviewStepExecutionFromContext` adds for display only. They are not
+ * in the workflow execution context, so they are not valid template paths.
+ */
+const OVERVIEW_DISPLAY_ONLY_FIELDS: ReadonlySet<string> = new Set([
+  'trace',
+  'executionError',
+  'skipReason',
+]);
+
+/** Whether a flattened Overview field path is a template path that exists in the workflow context. */
+export const isOverviewContextField = (fieldPath: string): boolean =>
+  !OVERVIEW_DISPLAY_ONLY_FIELDS.has(fieldPath.split('.')[0]);
+
 export function buildOverviewStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto {

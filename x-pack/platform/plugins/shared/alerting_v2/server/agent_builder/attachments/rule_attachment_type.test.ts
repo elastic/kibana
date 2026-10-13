@@ -30,11 +30,9 @@ const baseRuleData: RuleAttachmentData = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   created_at: '2026-04-01T00:00:00.000Z',
   updated_at: '2026-04-10T00:00:00.000Z',
 };
@@ -103,7 +101,7 @@ describe('createRuleAttachmentType', () => {
         metadata: { name: 'New' },
         time_field: '@timestamp',
         schedule: { every: '1m' },
-        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        query: { base: 'FROM logs-*' },
       };
       const result = await definition.validate(proposed);
       expect(result.valid).toBe(true);

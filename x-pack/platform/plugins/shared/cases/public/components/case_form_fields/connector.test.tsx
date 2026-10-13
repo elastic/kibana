@@ -19,6 +19,11 @@ import { FormTestComponent } from '../../common/test_utils';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 
+// Warm Jest's module cache for the React.lazy connector fields at module load (not governed by
+// testTimeout), so tests don't race the dynamic import under CI load.
+import '../connectors/jira/case_fields';
+import '../connectors/resilient/case_fields';
+
 jest.mock('../connectors/servicenow/use_get_choices');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;

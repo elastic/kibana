@@ -120,7 +120,10 @@ describe('DevCommentsPlugin', () => {
     expect(sent).toEqual(
       expect.objectContaining({ text: 'Needs a label', route: { pageKey: '/', path: '/' } })
     );
-    expect(await screen.findAllByText('5 minutes ago')).not.toHaveLength(0);
+    // The new comment shows, with when it was written: the full date and time, to the second, as the tooltip.
+    expect(
+      await screen.findAllByTitle(/^[A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d{2}:\d{2}/)
+    ).not.toHaveLength(0);
   });
 
   it('registers nothing outside dev mode, when disabled, or without the toolbar', () => {

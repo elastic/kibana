@@ -100,6 +100,43 @@ export const buildActorDiscoveryQuery = (
   };
 };
 
+const collectActorValuesByField = (
+  config: RelationshipIntegrationConfig,
+  buckets: CompositeBucket[]
+): Map<string, Set<string>> => {
+  const actorFields = config.customActor?.fields ?? USER_IDENTITY_FIELDS;
+  const valuesByField = new Map<string, Set<string>>();
+  for (const bucket of buckets) {
+    for (const field of actorFields) {
+      const value = bucket.key[field];
+      if (value != null) {
+        let fieldSet = valuesByField.get(field);
+        if (!fieldSet) {
+          fieldSet = new Set();
+          valuesByField.set(field, fieldSet);
+        }
+        fieldSet.add(value);
+      }
+    }
+  }
+  return valuesByField;
+};
+
+/**
+ * Returns every distinct non-null actor-field value across the page's buckets,
+ * i.e. the values `buildActorPageFilter` narrows Step 2 to, flattened across fields.
+ */
+export const getPageActorValues = (
+  config: RelationshipIntegrationConfig,
+  buckets: CompositeBucket[]
+): string[] => {
+  const values = new Set<string>();
+  for (const fieldValues of collectActorValuesByField(config, buckets).values()) {
+    for (const value of fieldValues) values.add(value);
+  }
+  return Array.from(values);
+};
+
 /**
  * Builds the page filter that narrows the Step 2 ES|QL query to the actors
  * surfaced by Step 1's composite aggregation.
@@ -143,29 +180,12 @@ export const buildActorPageFilter = (
   config: RelationshipIntegrationConfig,
   buckets: CompositeBucket[]
 ): QueryDslQueryContainer => {
-  const actorFields = config.customActor?.fields ?? USER_IDENTITY_FIELDS;
-
   if (buckets.length === 0) {
     return { bool: { must_not: { match_all: {} } } };
   }
 
-  const valuesByField = new Map<string, Set<string>>();
-  for (const bucket of buckets) {
-    for (const field of actorFields) {
-      const value = bucket.key[field];
-      if (value != null) {
-        let fieldSet = valuesByField.get(field);
-        if (!fieldSet) {
-          fieldSet = new Set();
-          valuesByField.set(field, fieldSet);
-        }
-        fieldSet.add(value);
-      }
-    }
-  }
-
   const should: QueryDslQueryContainer[] = [];
-  for (const [field, values] of valuesByField) {
+  for (const [field, values] of collectActorValuesByField(config, buckets)) {
     should.push({ terms: { [field]: Array.from(values) } });
   }
 

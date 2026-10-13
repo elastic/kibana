@@ -363,6 +363,17 @@ All API endpoints require authentication. The plugin integrates with Kibana's se
 
 Workflows are space-aware and respect Kibana Spaces boundaries.
 
+### Queryable execution data
+
+The managed data views for `.workflows-executions*` and `.workflows-step-executions*` use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
+
+Elasticsearch index privileges are additive. A role or API key with unrestricted `read` or `all` on `*` or either execution index pattern is not limited by the Workflows DLS and FLS grant:
+
+- `read` can access execution documents from all spaces and all fields.
+- `all` can also modify or delete execution data.
+
+For least-privilege access, grant the Workflows feature privilege for the required spaces without a direct Elasticsearch index privilege on `*` or `.workflows-*`.
+
 ---
 
 ## Additional Resources
@@ -409,29 +420,58 @@ See the queryable execution data changes in
 
 ### Access model
 
-The workflow Access dialog uses `@kbn/entity-access-control` and
+The workflow Access control dialog uses `@kbn/entity-access-control` and
 `@kbn/entity-access-control-ui`. Its ACL has the same field structure as Agent
 Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 `role`, and server-assigned `added_at`. The workflow stores the owner in `owner_id`.
+Save a new workflow before you change its access controls. Access controls are stored on the workflow document.
+Open Access control from the workflow header.
 
-| Role | View | Run | Edit and delete | Change access |
+| Role | View | Run | Edit and soft-delete | Change access |
 | --- | --- | --- | --- | --- |
+| Administrator | Yes | Requires owner or ACL access | Requires owner or Editor access | Yes |
 | Owner | Yes | Yes | Yes | Yes |
 | Editor | Yes | Yes | Yes | No |
 | Executor | Yes | Yes | No | No |
 | Viewer | Yes | No | No | No |
 
 These permissions also require the corresponding feature privileges in the space.
-Only the owner can request user suggestions, which require Workflows Read in that
-space. New grants and permission increases require the recipient's current RBAC:
+The shared `@kbn/entity-access-control` administrator check uses wildcard
+application privileges, including those in the Stack `superuser` and Serverless project `admin` roles.
+Custom roles with those wildcard grants also qualify. Workflows All does not.
+API keys continue to use the normal ACL checks.
+Administrators can view private workflows and recover access after an owner is
+offboarded. Updating access preserves the existing owner. An administrator who
+makes an ownerless legacy workflow private becomes its owner. Keeping it public
+does not assign ownership.
+Administrators must add themselves as Executor to run a private workflow, or
+Editor to edit it or test draft YAML and steps. The access dialog shows a notice
+when an administrator edits another user's ACL. Background execution keeps its
+normal ACL checks.
+
+With Kibana audit logging enabled, `workflow_access_control_update` records a
+summary of each access update and one event per added, removed, or changed user.
+It records visibility and owner changes without repeating unchanged grants.
+`workflow_access_control_denied` records failed ACL checks, including execution
+checks. `workflow_access_control_admin_override` records administrative access
+when viewing a workflow, managing its ACL, or hard-deleting it.
+Searches, lists, batch lookups, filters, and result mapping do not emit ACL events.
+Write prechecks audit denials. The check on the stored document audits overrides.
+A rejected scheduled run emits a denial on each tick until access is restored or
+the schedule is disabled.
+Override events confirm authorization only. Existing operation events report the
+operation outcome. ACL events do not contain workflow YAML or execution data.
+
+The owner and administrators can request user suggestions, which require
+Workflows Read in that space. New grants and permission increases require the recipient's current RBAC:
 Viewer requires Read, Executor also requires Execute, and Editor also requires
 Update. Removals, unchanged entries, and permission decreases can be saved even
 if a recipient has lost RBAC. A write conflict repeats validation against the
 latest ACL. Runtime access still requires RBAC. A rejected grant leaves the
 access settings unchanged.
 Public workflows use the existing RBAC permissions for viewing, running, editing,
-and deletion. ACL entries apply only to private workflows. The owner controls
-visibility and sharing. Managed workflows keep their existing plugin access rules.
+and deletion. ACL entries apply only to private workflows. The owner and
+administrators control visibility and sharing. Managed workflows keep their existing plugin access rules.
 
 The detail page tests workflows even when disabled. Executors test the saved YAML;
 Editors and owners can test draft YAML. Test runs do not enable the workflow.
@@ -439,7 +479,9 @@ Normal runs and scheduled runs still require an enabled workflow.
 
 Workflows without an ACL keep their existing access. New workflows with a user
 profile record the creator as owner and start with public access under RBAC.
-For older workflows, the recorded creator can set the first ACL; this records their profile ID as owner. Subsequent checks use profile IDs.
+For older workflows, the recorded creator or an administrator can set the first
+ACL. Keeping an ownerless workflow public does not assign an owner. Making it
+private assigns the caller as owner. Subsequent checks use profile IDs.
 
 Workflow searches apply ACL filters before pagination and aggregation. Execution
 and Inbox searches exclude inaccessible workflow IDs, including soft-deleted
@@ -449,8 +491,9 @@ Execution checks use the current ACL and the execution identity.
 
 Soft deletion retains the workflow document and its ACL for execution and change
 history reads.
-Only the owner can hard-delete a private workflow, and the request must include
-`force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
+The owner or an administrator can hard-delete a private workflow. Administrator
+overrides are audited. The request must
+include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
 require no ACL acknowledgment. Their documents are removed before best-effort
 history cleanup, and cleanup failures do not fail deletion.
 Hard deletion of a private workflow first marks it as deleted and disabled, then

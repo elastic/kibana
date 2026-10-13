@@ -32,7 +32,7 @@ async function sha256(str: string) {
   }
 }
 
-/** Builds the ad-hoc data view id `getESQLAdHocDataview` uses for the same index, time field, and routing. */
+/** Id of the ES|QL ad-hoc DataView of a dataset (index pattern, time field, project routing). */
 export async function getESQLAdHocDataviewId({
   indexPattern,
   timeFieldName,

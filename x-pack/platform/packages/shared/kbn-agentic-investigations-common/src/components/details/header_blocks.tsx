@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { InfoBlocks, type InfoBlockItem } from '@kbn/flyout-info-blocks';
+import { AssigneeAvatarStack } from '../escalation_queue/assignee_avatar_stack';
 import { getEmptyValue } from '../helpers';
 import { TEMPLATE_UI_LABELS } from '../../template_ui/translations';
 
@@ -45,15 +46,13 @@ export const ConversationHeaderBlocks = ({
     if (assigneeUids.length === 0) {
       return null;
     }
-    return (
-      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-        {assigneeUids.map((uid) => (
-          <EuiFlexItem key={uid} grow={false}>
-            <EuiAvatar size="s" name={uid} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
+    const profiles = assigneeUids.map((uid) => ({
+      uid,
+      enabled: true as const,
+      user: { username: uid },
+      data: {},
+    }));
+    return <AssigneeAvatarStack profiles={profiles} />;
   }, [assigneesNode, assigneeUids]);
 
   const statusValue = useMemo<React.ReactNode>(() => {

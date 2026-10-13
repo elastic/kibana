@@ -38,14 +38,32 @@ export const EXTRACT_IOCS_MAX_RESPONSE_SIZE = 5_000;
 
 const IOC_TIERS = ['discriminating', 'contextual', 'reference', 'denied', 'uncertain'] as const;
 
-const extractedIocSchema = schema.object({
+/** Matches the keyword ignore_above used for IOC values on the reports index. */
+const MAX_IOC_VALUE_LENGTH = MAX_URL_LENGTH;
+/**
+ * `defangValue` expands `.` → `[.]` (+2 each) and `://` → `[:]//` (+2). Worst
+ * case is an all-dots string of `MAX_IOC_VALUE_LENGTH`, which triples in size.
+ * Keep the response bound above that so a near-limit URL with `defang: true`
+ * cannot fail extract/enrich validation after a successful pushIoc.
+ */
+const MAX_IOC_DEFANGED_LENGTH = MAX_IOC_VALUE_LENGTH * 3;
+/** Shared by request/response validation and reconcile prefixing. */
+export const MAX_IOC_TIER_BASIS_LENGTH = 512;
+/** 240 chars either side of the value (extract_iocs) plus the value itself (MAX_IOC_VALUE_LENGTH). */
+export const MAX_IOC_CONTEXT_LENGTH = 240 + MAX_IOC_VALUE_LENGTH + 240;
+
+export const extractedIocSchema = schema.object({
   type: oneOfLiterals(IOC_TYPES),
-  value: schema.string(),
-  defanged: schema.maybe(schema.string()),
+  value: schema.string({ minLength: 1, maxLength: MAX_IOC_VALUE_LENGTH }),
+  defanged: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_IOC_DEFANGED_LENGTH })),
   tier: oneOfLiterals(IOC_TIERS),
   tier_heuristic: oneOfLiterals(IOC_TIERS),
-  tier_basis: schema.string(),
+  tier_basis: schema.string({ minLength: 1, maxLength: MAX_IOC_TIER_BASIS_LENGTH }),
   port: schema.maybe(schema.number()),
+  deferred_unreviewed: schema.maybe(schema.boolean()),
+  // Prompt-only source-text window (url/domain candidates). Never persisted:
+  // enrich_report_core strips it before its output reaches persist_extractions.
+  context: schema.maybe(schema.string({ maxLength: MAX_IOC_CONTEXT_LENGTH })),
 });
 
 export const extractIocsResponseSchema = schema.object({
@@ -56,6 +74,86 @@ export const extractIocsResponseSchema = schema.object({
 });
 
 export type ExtractIocsResponse = TypeOf<typeof extractIocsResponseSchema>;
+
+// ── enrich_report_core ──────────────────────────────────────────────────────
+
+// Core receives the full article plus extract_iocs output. Text alone can be
+// 5M chars; 5,000 IOCs each near their value/defanged/tier_basis/context bounds
+// can add ~57 MiB of JSON on top of that (worst case, not typical), so this
+// must clear ~62 MiB with margin or a maximally IOC-dense report 413s on every
+// retry and stays pending forever.
+export const ENRICH_REPORT_CORE_MAX_BODY_BYTES = 80 * 1024 * 1024;
+
+export const enrichReportCoreBodySchema = schema.object({
+  text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
+  iocs: schema.arrayOf(extractedIocSchema, { maxSize: EXTRACT_IOCS_MAX_RESPONSE_SIZE }),
+  // Pass-through of extract_iocs' fingerprint so truncated reports keep the same
+  // correlation key (extract hashes before the 5k cap; the capped array alone does not).
+  ioc_set_hash: schema.maybe(schema.nullable(schema.string({ maxLength: 128 }))),
+  title: schema.maybe(schema.string({ maxLength: 1_024 })),
+  article_url: schema.maybe(schema.string({ maxLength: MAX_URL_LENGTH })),
+  report_id: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+  truncated: schema.maybe(schema.boolean()),
+});
+
+const reportBehaviorSchema = schema.object({
+  // `id` is always a sha256 hex digest computed server-side (behaviorId), never
+  // model output. `technique_id` is either '' or a regex-validated ATT&CK id
+  // (normalizeAttackTechniqueId); `description` is already sliced to 2,000
+  // chars before this schema runs. Bounds here are defense-in-depth, matching
+  // the zod transforms upstream rather than trusting them alone.
+  id: schema.string({ maxLength: 64 }),
+  technique_id: schema.string({ maxLength: 16 }),
+  description: schema.string({ maxLength: 2_000 }),
+  telemetry_targets: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 20 }),
+  confidence: schema.number(),
+  llm_confidence: schema.number(),
+});
+
+const reportArtifactSchema = schema.object({
+  // `value`/`context` are already sliced (2,048 / 1,000 chars) by artifactSchema
+  // upstream; bounds here are defense-in-depth, not the primary guarantee.
+  type: schema.string({ maxLength: 32 }),
+  value: schema.string({ maxLength: 2_048 }),
+  context: schema.string({ maxLength: 1_000 }),
+});
+
+export const enrichReportCoreResponseSchema = schema.object({
+  categories: schema.arrayOf(schema.string(), { maxSize: THREAT_CATEGORIES.length }),
+  regions: schema.arrayOf(schema.string(), { maxSize: THREAT_REGIONS.length }),
+  relevance: schema.number(),
+  diamond_suitable: schema.boolean(),
+  severity: schema.object({
+    level: oneOfLiterals(SEVERITY_LEVELS),
+    score: schema.number(),
+    rationale: schema.maybe(schema.string()),
+  }),
+  count: schema.number(),
+  iocs: schema.arrayOf(extractedIocSchema, { maxSize: EXTRACT_IOCS_MAX_RESPONSE_SIZE }),
+  ioc_set_hash: schema.nullable(schema.string()),
+  anchor_iocs: schema.arrayOf(extractedIocSchema, { maxSize: EXTRACT_IOCS_MAX_RESPONSE_SIZE }),
+  promotable_count: schema.number(),
+  truncated: schema.maybe(schema.literal(true)),
+  adjudication: schema.object({
+    provider: schema.literal('semantic_model'),
+    reviewed: schema.number(),
+    approved: schema.number(),
+    downgraded: schema.number(),
+    deterministic_references: schema.number(),
+    deferred_unreviewed: schema.number(),
+  }),
+  behaviors: schema.arrayOf(reportBehaviorSchema, { maxSize: 100 }),
+  artifacts: schema.arrayOf(reportArtifactSchema, { maxSize: 200 }),
+  context: schema.object({
+    mode: schema.oneOf([schema.literal('full'), schema.literal('degraded_context')]),
+    original_chars: schema.number(),
+    selected_chars: schema.number(),
+    coverage: schema.number(),
+  }),
+  model_id: schema.string(),
+});
+
+export type EnrichReportCoreResponse = TypeOf<typeof enrichReportCoreResponseSchema>;
 
 // ── extract_diamond ──────────────────────────────────────────────────────────
 
@@ -83,6 +181,10 @@ export const extractDiamondResponseSchema = schema.object({
     schema.literal('single_call'),
     schema.literal('per_vertex_fallback'),
   ]),
+  context_mode: schema.oneOf([schema.literal('full'), schema.literal('degraded_context')]),
+  context_coverage: schema.number(),
+  context_chars: schema.number(),
+  source_chars: schema.number(),
   report_id: schema.maybe(schema.string()),
 });
 
@@ -91,7 +193,10 @@ export type ExtractDiamondResponse = TypeOf<typeof extractDiamondResponseSchema>
 // ── assess_relevance ─────────────────────────────────────────────────────────
 
 export const assessRelevanceBodySchema = schema.object({
-  url: schema.maybe(schema.string({ minLength: 1, maxLength: 2048 })),
+  // Workflows render a missing optional URL as an empty string. The service
+  // already treats that as absent, so accepting it keeps legacy/manual reports
+  // from becoming permanent gate retries.
+  url: schema.maybe(schema.string({ maxLength: 2048 })),
   title: schema.maybe(schema.string({ maxLength: 1024 })),
   text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
 });
@@ -120,6 +225,12 @@ export const assessRelevanceResponseSchema = schema.object({
   }),
   has_original_commentary: schema.boolean(),
   reason: schema.string(),
+  context: schema.object({
+    mode: schema.oneOf([schema.literal('full'), schema.literal('degraded_context')]),
+    original_chars: schema.number(),
+    selected_chars: schema.number(),
+    coverage: schema.number(),
+  }),
 });
 
 export type AssessRelevanceResponse = TypeOf<typeof assessRelevanceResponseSchema>;

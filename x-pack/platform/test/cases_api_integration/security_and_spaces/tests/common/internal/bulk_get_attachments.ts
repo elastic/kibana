@@ -13,7 +13,8 @@ import {
   postCaseReq,
   getPostCaseRequest,
   postCommentUserReq,
-  postCommentAlertReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -47,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
         updatedCase = await bulkCreateAttachments({
           caseId: postedCase.id,
-          params: [postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedAlertReq],
           supertest,
         });
       });

@@ -209,47 +209,39 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'boolean',
           },
           min_created_at: { _meta: { description: 'Earliest rule creation date.' }, type: 'date' },
-          count_by_query_format: {
-            composed: {
-              _meta: { description: 'Number of rules using the composed query format.' },
-              type: 'long',
-            },
-            standalone: {
-              _meta: { description: 'Number of rules using the standalone query format.' },
-              type: 'long',
-            },
-          },
           count_by_recovery_strategy: {
             no_breach: {
               _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+              type: 'long',
+            },
+            condition: {
+              _meta: { description: 'Number of rules with recovery strategy condition.' },
               type: 'long',
             },
             query: {
               _meta: { description: 'Number of rules with recovery strategy query.' },
               type: 'long',
             },
-            none: {
-              _meta: { description: 'Number of rules with recovery strategy none.' },
+            manual: {
+              _meta: { description: 'Number of rules with recovery strategy manual.' },
               type: 'long',
             },
           },
           count_by_no_data_strategy: {
-            last_known_status: {
-              _meta: {
-                description: 'Number of rules with no-data strategy last_known_status.',
-              },
+            ignore: {
+              _meta: { description: 'Number of rules with no-data strategy ignore.' },
               type: 'long',
             },
-            emit: {
-              _meta: { description: 'Number of rules with no-data strategy emit.' },
+            keep_last: {
+              _meta: { description: 'Number of rules with no-data strategy keep_last.' },
               type: 'long',
             },
-            recover: {
-              _meta: { description: 'Number of rules with no-data strategy recover.' },
+            resolve: {
+              _meta: { description: 'Number of rules with no-data strategy resolve.' },
               type: 'long',
             },
-            none: {
-              _meta: { description: 'Number of rules with no-data strategy none.' },
+            alert: {
+              _meta: { description: 'Number of rules with no-data strategy alert.' },
               type: 'long',
             },
           },

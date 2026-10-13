@@ -316,7 +316,7 @@ export function Wrapper({
       ? {
           id: 'discover',
           label: viewInDiscoverLabel,
-          iconType: 'discoverApp',
+          iconType: 'productDiscover',
           href: discoverHref,
           testId: `streamsDiscoverActionButton-${definition.stream.name}`,
         }

@@ -33,6 +33,7 @@ const baseWorkflow: WorkflowExecutionEngineModel = {
 
 const baseParams = {
   workflow: baseWorkflow,
+  spaceId: 'default',
   context: { spaceId: 'default' },
   defaultTriggeredBy: 'manual',
   authenticatedUser: 'user-1',
@@ -42,6 +43,81 @@ const baseParams = {
 };
 
 describe('buildWorkflowExecutionDocument', () => {
+  it.each([undefined, 'child-account'])(
+    'persists inherited identity instead of child identity (%s), without modifying its definition',
+    (childAccount) => {
+      const inheritedIdentity = {
+        type: 'service_account' as const,
+        id: 'parent-account',
+        inheritedFrom: {
+          workloadId: 'parent',
+        },
+      };
+      const workflow = {
+        ...baseWorkflow,
+        definition: {
+          name: 'Child',
+          version: '1' as const,
+          enabled: true,
+          triggers: [],
+          steps: [],
+          settings: childAccount ? { run_as: childAccount } : undefined,
+        },
+      };
+      const execution = buildWorkflowExecutionDocument({
+        ...baseParams,
+        workflow,
+        inheritedIdentity,
+        context: { parentWorkflowId: 'parent', parentWorkflowExecutionId: 'parent-run' },
+      });
+      expect(execution.effectiveIdentity).toEqual(inheritedIdentity);
+      expect(execution.context).toMatchObject({
+        parentWorkflowId: 'parent',
+        parentWorkflowExecutionId: 'parent-run',
+      });
+      expect(execution.executedBy).toBe('user-1');
+      expect(execution.workflowDefinition?.settings?.run_as).toBe(childAccount);
+      expect(execution.yaml).toBe(baseWorkflow.yaml);
+    }
+  );
+
+  it('uses the explicit execution space instead of the context or global workflow storage space', () => {
+    const context = { spaceId: 'foreign-space', inputs: { message: 'test input' } };
+    const getConcurrencyGroupKey = jest.fn(() => null);
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: { ...baseWorkflow, spaceId: '*' },
+      spaceId: 'request-space',
+      context,
+      getConcurrencyGroupKey,
+    });
+
+    expect(workflowExecution).toMatchObject({
+      spaceId: 'request-space',
+      context: { spaceId: 'request-space', inputs: { message: 'test input' } },
+    });
+    expect(getConcurrencyGroupKey).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'request-space',
+        context: expect.objectContaining({ spaceId: 'request-space' }),
+      })
+    );
+    expect(context.spaceId).toBe('foreign-space');
+  });
+
+  it('uses the explicit space when the context does not contain a space', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      spaceId: 'request-space',
+      context: { inputs: { message: 'test input' } },
+    });
+
+    expect(workflowExecution).toMatchObject({
+      spaceId: 'request-space',
+      context: { spaceId: 'request-space', inputs: { message: 'test input' } },
+    });
+  });
+
   it('preserves saved-child classification during a test run', () => {
     expect(
       buildWorkflowExecutionDocument({

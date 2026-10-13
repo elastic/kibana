@@ -48,7 +48,6 @@ import {
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
-import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
 import { FlyoutErrorBanner } from './flyout_error_banner';
 import {
   authenticationModeFromDataSource,
@@ -58,6 +57,7 @@ import {
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { DataFederationKibanaServices } from '../types';
+import { UI_COUNTER_EVENTS } from '../ui_counters';
 
 export interface CreateDataSourceFlyoutProps {
   /** When set, the flyout opens in edit mode for this data source. */
@@ -78,16 +78,22 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   onSave,
 }) => {
   const {
-    services: { cloudInfo, featureFlags, docLinks },
+    services: { cloudInfo, featureFlags, docLinks, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
 
   const dataFederationLinks = docLinks.links.dataFederation;
 
-  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
+  const enableFederatedIdentity = Boolean(cloudInfo?.jwtIssuer);
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
   const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
   const isEditMode = initialDataSource !== undefined;
+
+  useEffect(() => {
+    if (!isEditMode) {
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasourceCreateFormOpened);
+    }
+  }, [isEditMode, reportUiCounter]);
 
   const formDefaultValues = useMemo(
     (): CreateDataSourceFlyoutFormValues =>
@@ -189,7 +195,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       initialDataSource
         ? authenticationModeFromDataSource(initialDataSource)
         : getDefaultAuthenticationMode(dataSourceType, {
-            enableFederatedIdentity: enableFederatedIdentityAuth,
+            enableFederatedIdentity,
           })
   );
 
@@ -208,11 +214,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     if (!isEditMode) {
       setAuthenticationMode(
         getDefaultAuthenticationMode(dataSourceType, {
-          enableFederatedIdentity: enableFederatedIdentityAuth,
+          enableFederatedIdentity,
         })
       );
     }
-  }, [dataSourceType, isEditMode, enableFederatedIdentityAuth]);
+  }, [dataSourceType, isEditMode, enableFederatedIdentity]);
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
@@ -297,6 +303,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           </EuiFormRow>
           <EuiFormRow
             label={createDataSourceFlyoutStrings.nameLabel()}
+            helpText={createDataSourceFlyoutStrings.nameDescription()}
             isInvalid={Boolean(errors.name)}
             error={errors.name?.message}
             fullWidth
@@ -313,7 +320,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               readOnly={isEditMode}
             />
           </EuiFormRow>
-          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={createDataSourceFlyoutStrings.descriptionLabel()}
+            helpText={createDataSourceFlyoutStrings.descriptionDescription()}
+            fullWidth
+          >
             <EuiTextArea
               data-test-subj="createDataSourceFlyoutDescription"
               fullWidth
@@ -324,23 +335,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          {dataSourceType === 's3' && (
-            <CreateDataSourceFlyoutTypeSettingsS3Region
+          {dataSourceType !== 's3' && (
+            <CreateDataSourceFlyoutTypeSettingsBlock
               control={control}
+              dataSourceType={dataSourceType}
               unregister={unregister}
-              isRequired={!isEditMode}
             />
           )}
-          <CreateDataSourceFlyoutTypeSettingsBlock
-            control={control}
-            dataSourceType={dataSourceType}
-            unregister={unregister}
-          />
           <EuiHorizontalRule margin="m" />
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}
-            enableFederatedIdentity={enableFederatedIdentityAuth}
+            enableFederatedIdentity={enableFederatedIdentity}
             onAuthenticationModeChange={setAuthenticationMode}
           />
           <CreateDataSourceFlyoutAuthenticationFields
@@ -371,7 +377,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
+            <EuiButtonEmpty
+              data-test-subj="createDataSourceFlyoutCancel"
+              data-telemetry-id="dataFederation-dataSourceForm-cancelButton"
+              onClick={() => onClose()}
+            >
               {createDataSourceFlyoutStrings.cancelButton()}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -383,6 +393,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
                   type="submit"
                   form="createDataSourceForm"
                   data-test-subj="createDataSourceFlyoutSubmit"
+                  data-telemetry-id="dataFederation-dataSourceForm-saveButton"
                   isLoading={isSaving}
                   disabled={isSaving}
                 >

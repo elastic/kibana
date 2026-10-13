@@ -61,6 +61,10 @@ interface SiemSearchBarProps {
    * KQL input and pinned filter bar remain visible.
    */
   hideDatePicker?: boolean;
+  /**
+   * Controls the search bar's padding and border. Use 'inPage' to align it with the page content.
+   */
+  displayStyle?: 'inPage' | 'detached' | 'withBorders';
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
@@ -68,6 +72,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     dataTestSubj,
     dataView,
     additionalDataViews,
+    displayStyle,
     end,
     filterQuery,
     fromStr,
@@ -355,6 +360,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showQueryMenu={!hideQueryMenu}
           allowSavingQueries
           dataTestSubj={dataTestSubj}
+          displayStyle={displayStyle}
         />
       </div>
     ) : null;
@@ -372,6 +378,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
+    prevProps.displayStyle === nextProps.displayStyle &&
     deepEqual(prevProps.queries, nextProps.queries) &&
     deepEqual(prevProps.dataView, nextProps.dataView) &&
     deepEqual(prevProps.additionalDataViews, nextProps.additionalDataViews)

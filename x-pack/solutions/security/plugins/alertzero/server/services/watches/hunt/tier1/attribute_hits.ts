@@ -203,3 +203,21 @@ export const attributeHits = (
     };
     return { ...hit, matched };
   });
+
+/**
+ * Whether Tier 1 can turn this IOC into a query clause at all. Mirrors
+ * `buildIocShould`: a hash needs a length in `HASH_ALGO_BY_LENGTH`, every other
+ * type needs at least one ECS field to search. The coordinator uses this to
+ * decide whether a report's IOCs justify a broad Tier 1 scope; an IOC list made
+ * only of values Tier 1 will drop must not send a hunt across every dataset to
+ * search for nothing.
+ */
+export const isTier1SearchableIoc = ({ type, value }: HuntIoc): boolean => {
+  // `huntForThreat` trims every value and drops the blank ones before building any
+  // clause; judge the same string, whatever the type.
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return false;
+  return type === 'hash'
+    ? HASH_ALGO_BY_LENGTH[trimmed.length] !== undefined
+    : (IOC_FIELDS_BY_TYPE[type] ?? []).length > 0;
+};

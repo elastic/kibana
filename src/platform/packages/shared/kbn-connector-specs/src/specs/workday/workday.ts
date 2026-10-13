@@ -26,7 +26,7 @@ const ABSENCE_API_VERSION = 'v5';
 const HOLIDAY_API_VERSION = 'v1';
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec_ui';
 import {
@@ -125,32 +125,34 @@ export const Workday: ConnectorSpec = {
     ],
   },
 
-  schema: z.object({
-    tenantUrl: UISchemas.url('https://<tenant>.workday.com')
-      .describe(
-        'Base URL of your Workday tenant, e.g. https://mycompany.workday.com. ' +
-          'Used to construct API endpoint URLs in the form ' +
-          'https://<tenant>.workday.com/ccx/api/<module>/<version>/<tenantName>/...'
-      )
-      .meta({
-        label: 'Tenant URL',
-        validate: { allowedHosts: true },
-        placeholder: 'https://mycompany.workday.com',
-        helpText: 'Your Workday tenant base URL. Find it in the URL when you log in to Workday.',
-      }),
-    tenantName: z
-      .string()
-      .describe(
-        'Your Workday tenant name (the identifier that appears in the API path). ' +
-          'Example: if your tenant URL is https://mycompany.workday.com, your tenant name is "mycompany".'
-      )
-      .meta({
-        label: 'Tenant Name',
-        placeholder: 'mycompany',
-        helpText:
-          'The tenant identifier used in API paths. Usually matches your company name in the Workday URL.',
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      tenantUrl: UISchemas.url('https://<tenant>.workday.com')
+        .describe(
+          'Base URL of your Workday tenant, e.g. https://mycompany.workday.com. ' +
+            'Used to construct API endpoint URLs in the form ' +
+            'https://<tenant>.workday.com/ccx/api/<module>/<version>/<tenantName>/...'
+        )
+        .meta({
+          label: 'Tenant URL',
+          validate: { allowedHosts: true },
+          placeholder: 'https://mycompany.workday.com',
+          helpText: 'Your Workday tenant base URL. Find it in the URL when you log in to Workday.',
+        }),
+      tenantName: z
+        .string()
+        .describe(
+          'Your Workday tenant name (the identifier that appears in the API path). ' +
+            'Example: if your tenant URL is https://mycompany.workday.com, your tenant name is "mycompany".'
+        )
+        .meta({
+          label: 'Tenant Name',
+          placeholder: 'mycompany',
+          helpText:
+            'The tenant identifier used in API paths. Usually matches your company name in the Workday URL.',
+        }),
+    })
+  ),
 
   actions: {
     whoAmI: {

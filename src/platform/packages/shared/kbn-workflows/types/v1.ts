@@ -18,6 +18,7 @@ import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/acces
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
+  WorkflowEffectiveIdentitySchema,
   WorkflowStepTokenUsageSchema,
   WorkflowTokenUsageSchema,
   WorkflowYaml,
@@ -159,7 +160,7 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
   startedAt: string;
   finishedAt: string;
@@ -252,6 +253,9 @@ export interface EsWorkflowStepExecution {
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
 
+  /** Whether this step belongs to a managed workflow execution. */
+  managed?: boolean;
+
   /**
    * Optional Human-In-The-Loop audit envelope, populated only by
    * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
@@ -311,7 +315,7 @@ export interface WorkflowExecutionDto {
   /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
   stepExecutionIds?: string[];
   duration: number | null;
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
@@ -498,7 +502,7 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
 
 export type WorkflowAccessControlUpdateResponseDto = Pick<
   WorkflowDetailDto,
-  'owner_id' | 'access_control' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
+  'owner_id' | 'access_control' | 'permissions' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
 >;
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
@@ -591,10 +595,13 @@ export interface ConnectorInstance {
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
+  connectorType?: string;
+  isInferenceEndpoint?: boolean;
 }
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {
@@ -863,6 +870,10 @@ export interface ConnectorIdSelectionHandler {
    * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
    */
   enableCreation?: boolean;
+  /**
+   * Feature ID used to resolve inference endpoints for this selection.
+   */
+  inferenceFeatureId?: string;
 }
 
 export interface ConnectorExamples {

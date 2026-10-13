@@ -18,7 +18,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
 import { WatchlistEntitySourceClient } from '../../entity_sources/infra';
-import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
+import { syncWatchlistInBackground } from '../../entity_sources/entity_sources_service';
 import { getWatchlistSavedObjectClient } from '../../shared/utils';
 import {
   buildWatchlistApiCallSuccessFields,
@@ -129,28 +129,16 @@ export const createWatchlistRoute = (
 
                 // Fire-and-forget sync if entity sources were created
                 if (createdSources.length > 0) {
-                  void (async () => {
-                    try {
-                      const entitySourcesService = createEntitySourcesService({
-                        esClient: core.elasticsearch.client.asCurrentUser,
-                        soClient,
-                        logger,
-                        namespace,
-                        getStartServices,
-                        hasEncryptionKey,
-                      });
-                      await entitySourcesService.syncWatchlist(watchlistId);
-                      logger.info(
-                        `[WatchlistCreate] Background sync completed for watchlist ${watchlistId}`
-                      );
-                    } catch (syncError) {
-                      const errorMsg =
-                        syncError instanceof Error ? syncError.message : String(syncError);
-                      logger.warn(
-                        `[WatchlistCreate] Background sync failed for watchlist ${watchlistId}: ${errorMsg}`
-                      );
-                    }
-                  })();
+                  void syncWatchlistInBackground({
+                    watchlistId,
+                    logContext: 'WatchlistCreate',
+                    esClient: core.elasticsearch.client.asCurrentUser,
+                    soClient,
+                    logger,
+                    namespace,
+                    getStartServices,
+                    hasEncryptionKey,
+                  });
                 }
 
                 return response.ok({

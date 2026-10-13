@@ -1473,7 +1473,13 @@ function finalizeResult(result, prepared, transformOptions) {
     }
 
     if (prepared.soleDefaultExport) {
-      code = appendStatement(code, 'module.exports = exports.default;');
+      // A default export that is itself an ES module namespace (`import * as ns; export default ns`)
+      // stays on exports.default: exposing it through module.exports would make interop helpers
+      // treat the namespace as the module and resolve `.default` to undefined.
+      code = appendStatement(
+        code,
+        'if (!(exports.default && exports.default.__esModule)) module.exports = exports.default;'
+      );
     }
   }
 

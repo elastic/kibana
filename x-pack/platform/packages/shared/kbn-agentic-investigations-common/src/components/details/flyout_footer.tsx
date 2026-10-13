@@ -21,6 +21,7 @@ import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 export type { CloseInvestigationModalRenderProps };
 
 export interface ConversationDetailsFlyoutFooterProps {
+  isOpenedFromChat: boolean;
   investigation: Investigation;
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
@@ -29,6 +30,12 @@ export interface ConversationDetailsFlyoutFooterProps {
    * Supplied by the caller who has access to Kibana HTTP hooks unavailable in this package.
    */
   onOpenEscalation?: (props: EscalationModalRenderProps) => React.ReactNode;
+  /**
+   * Wraps the "Open escalation" button, so the caller can hide it once it learns at render time
+   * that the user may not escalate. Without it the button shows whenever `onOpenEscalation` is
+   * supplied.
+   */
+  wrapEscalationButton?: (button: React.ReactElement) => React.ReactNode;
   /**
    * When provided, the "Close investigation" action renders a confirmation modal.
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
@@ -48,9 +55,11 @@ const CLOSED_MODAL: ModalState = { type: null, recordId: null };
  * can be mounted through `core.overlays.openFlyout`, where there is no page-level React tree.
  */
 export const ConversationDetailsFlyoutFooter = ({
+  isOpenedFromChat,
   investigation,
   onOpenChat,
   onOpenEscalation,
+  wrapEscalationButton,
   onCloseInvestigation,
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
@@ -64,6 +73,19 @@ export const ConversationDetailsFlyoutFooter = ({
     []
   );
 
+  const escalationButton = (
+    <EuiFlexItem grow={false}>
+      <EuiButton
+        color="primary"
+        iconType="document"
+        onClick={() => onClickAction('createEscalation', investigation.recordId)}
+        size="s"
+      >
+        {ACTIONS_TRANSLATIONS.buttons.openEscalation}
+      </EuiButton>
+    </EuiFlexItem>
+  );
+
   const renderCloseModal = onCloseInvestigation
     ? (props: CloseInvestigationModalRenderProps) => onCloseInvestigation(props)
     : undefined;
@@ -71,28 +93,20 @@ export const ConversationDetailsFlyoutFooter = ({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <AiButtonEmpty
-            size="s"
-            iconType="productAgent"
-            onClick={onOpenChat}
-            data-test-subj="investigationFlyoutOpenChat"
-          >
-            {DETAILS_FLYOUT_LABELS.actions.openChat}
-          </AiButtonEmpty>
-        </EuiFlexItem>
-        {canRenderEscalationButton && (
+        {!isOpenedFromChat && (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              iconType="document"
-              onClick={() => onClickAction('createEscalation', investigation.recordId)}
+            <AiButtonEmpty
               size="s"
+              iconType="productAgent"
+              onClick={onOpenChat}
+              data-test-subj="investigationFlyoutOpenChat"
             >
-              {ACTIONS_TRANSLATIONS.buttons.openEscalation}
-            </EuiButton>
+              {DETAILS_FLYOUT_LABELS.actions.openChat}
+            </AiButtonEmpty>
           </EuiFlexItem>
         )}
+        {canRenderEscalationButton &&
+          (wrapEscalationButton ? wrapEscalationButton(escalationButton) : escalationButton)}
       </EuiFlexGroup>
 
       <InvestigationActionModals

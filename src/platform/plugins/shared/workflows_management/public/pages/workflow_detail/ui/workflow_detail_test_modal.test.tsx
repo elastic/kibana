@@ -9,13 +9,14 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
+  selectReplayIsTestRun,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -36,6 +37,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
+  useRunWorkflow: jest.fn(),
+  useTestWorkflow: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
@@ -53,6 +56,7 @@ jest.mock('../../../hooks/use_async_thunk', () => ({
 jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
   selectIsTestModalOpen: jest.fn(),
   selectReplayExecutionId: jest.fn(),
+  selectReplayIsTestRun: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
   selectWorkflowId: jest.fn(),
   selectWorkflow: jest.fn(),
@@ -63,14 +67,16 @@ jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => (
 jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
   WorkflowExecuteModal: ({
     definition,
+    isTestRun,
     onClose,
     onSubmit,
   }: {
     definition: any;
+    isTestRun: boolean;
     onClose: () => void;
     onSubmit: (inputs: any, triggerTab: string) => void;
   }) => (
-    <div data-test-subj="workflow-execute-modal">
+    <div data-test-subj="workflow-execute-modal" data-is-test-run={String(isTestRun)}>
       <div data-test-subj="modal-definition">{JSON.stringify(definition)}</div>
       <button type="button" data-test-subj="close-modal" onClick={onClose}>
         {'Close'}
@@ -78,7 +84,9 @@ jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
       <button
         type="button"
         data-test-subj="submit-modal"
-        onClick={() => onSubmit({ test: 'input' }, 'manual')}
+        onClick={() => {
+          void Promise.resolve(onSubmit({ test: 'input' }, 'manual')).catch(() => undefined);
+        }}
       >
         {'Run'}
       </button>
@@ -96,6 +104,8 @@ describe('WorkflowDetailTestModal', () => {
   };
 
   let mockTestWorkflow: jest.Mock;
+  let mockRunWorkflow: jest.Mock;
+  let mockTestSavedWorkflow: jest.Mock;
 
   const renderModal = () => {
     const store = createMockStore();
@@ -110,10 +120,22 @@ describe('WorkflowDetailTestModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockTestWorkflow = jest.fn();
+    mockRunWorkflow = jest.fn();
+    mockTestSavedWorkflow = jest.fn();
+
+    jest.mocked(useRunWorkflow).mockReturnValue({
+      mutateAsync: mockRunWorkflow,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useRunWorkflow>);
+    jest.mocked(useTestWorkflow).mockReturnValue({
+      mutateAsync: mockTestSavedWorkflow,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useTestWorkflow>);
     jest.mocked(selectWorkflow).mockReturnValue(undefined);
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
     (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue(null);
+    (selectReplayIsTestRun as unknown as jest.Mock).mockReturnValue(false);
     (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
     (selectWorkflowId as unknown as jest.Mock).mockReturnValue(null);
     (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
@@ -129,6 +151,7 @@ describe('WorkflowDetailTestModal', () => {
         notifications: {
           toasts: {
             addWarning: jest.fn(),
+            addError: jest.fn(),
           },
         },
       },
@@ -217,6 +240,98 @@ describe('WorkflowDetailTestModal', () => {
         triggerTab: 'manual',
       });
     });
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(getByTestId('workflow-execute-modal')).toHaveAttribute('data-is-test-run', 'true');
+  });
+
+  it('submits a production run through useRunWorkflow when replaying an execution', async () => {
+    mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
+    (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue('exec-1');
+    (selectWorkflowId as unknown as jest.Mock).mockReturnValue('wf-1');
+
+    const mockSetSelectedExecution = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({
+      setSelectedExecution: mockSetSelectedExecution,
+    });
+
+    const { getByTestId } = renderModal();
+
+    expect(getByTestId('workflow-execute-modal')).toHaveAttribute('data-is-test-run', 'false');
+
+    fireEvent.click(getByTestId('submit-modal'));
+
+    await waitFor(() => {
+      expect(mockRunWorkflow).toHaveBeenCalledWith({
+        id: 'wf-1',
+        inputs: { test: 'input' },
+      });
+    });
+    expect(mockTestWorkflow).not.toHaveBeenCalled();
+    expect(mockTestSavedWorkflow).not.toHaveBeenCalled();
+    expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-exec');
+  });
+
+  it('re-runs a test execution through useTestWorkflow', async () => {
+    mockTestSavedWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
+    (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue('exec-1');
+    (selectReplayIsTestRun as unknown as jest.Mock).mockReturnValue(true);
+    (selectWorkflowId as unknown as jest.Mock).mockReturnValue('wf-1');
+
+    const mockSetSelectedExecution = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({
+      setSelectedExecution: mockSetSelectedExecution,
+    });
+
+    const { getByTestId } = renderModal();
+
+    expect(getByTestId('workflow-execute-modal')).toHaveAttribute('data-is-test-run', 'true');
+
+    fireEvent.click(getByTestId('submit-modal'));
+
+    await waitFor(() => {
+      expect(mockTestSavedWorkflow).toHaveBeenCalledWith({
+        workflowId: 'wf-1',
+        inputs: { test: 'input' },
+      });
+    });
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(mockTestWorkflow).not.toHaveBeenCalled();
+    expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-test-exec');
+  });
+
+  it('toasts and does not select an execution when production replay fails', async () => {
+    const apiError = new Error('run failed');
+    mockRunWorkflow.mockRejectedValue(apiError);
+    (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue('exec-1');
+    (selectWorkflowId as unknown as jest.Mock).mockReturnValue('wf-1');
+
+    const addError = jest.fn();
+    mockUseKibana.mockReturnValue({
+      services: {
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError,
+          },
+        },
+      },
+    });
+
+    const mockSetSelectedExecution = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({
+      setSelectedExecution: mockSetSelectedExecution,
+    });
+
+    const { getByTestId } = renderModal();
+    fireEvent.click(getByTestId('submit-modal'));
+
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalledWith(
+        apiError,
+        expect.objectContaining({ title: expect.any(String) })
+      );
+    });
+    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
   });
 
   it('opens a test run for an executor of a disabled workflow', async () => {

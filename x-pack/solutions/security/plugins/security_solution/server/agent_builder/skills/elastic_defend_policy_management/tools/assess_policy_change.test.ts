@@ -6,7 +6,6 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
@@ -41,9 +40,6 @@ jest.mock('../services/assess_change', () => ({
 }));
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn(async () => [
-  { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-]) as unknown as StartServicesAccessor;
 const mockedAssessChange = jest.mocked(assessChange);
 
 const MIXED_STATUS: Readonly<Record<string, number>> = {
@@ -96,6 +92,7 @@ interface AssessmentFixture {
   normalizedDiff?: AssessPolicyChangeDto['assessment']['normalizedDiff'];
   sideEffects?: AssessPolicyChangeDto['assessment']['sideEffects'];
   globalBlockers?: AssessPolicyChangeDto['assessment']['globalBlockers'];
+  advisories?: AssessPolicyChangeDto['assessment']['advisories'];
   enrollment?: AssessPolicyChangeDto['enrollment'];
 }
 
@@ -138,12 +135,14 @@ const createDto = (overrides: AssessmentFixture = {}): AssessPolicyChangeDto => 
     assessment: {
       policy: { snapshot: { identity: policy } } as AssessPolicyChangeDto['assessment']['policy'],
       proposed: {} as AssessPolicyChangeDto['assessment']['proposed'],
+      proposedConfig: {} as AssessPolicyChangeDto['assessment']['proposedConfig'],
       fields: [],
       requestedOperations,
       changes,
       normalizedDiff,
       sideEffects,
       globalBlockers: overrides.globalBlockers ?? [],
+      advisories: overrides.advisories ?? [],
     },
   };
 };
@@ -180,7 +179,6 @@ const getResult = async (
 ) => {
   const tool = createAssessPolicyChangeTool({
     endpointAppContextService: options.endpointAppContextService ?? createAuthorizedService(),
-    getStartServices,
   });
   const result = await tool.handler(params, options.ctx ?? createContext());
   if (!('results' in result)) {
@@ -198,13 +196,11 @@ describe('createAssessPolicyChangeTool', () => {
     const endpointAppContextService = createAuthorizedService();
     const tool = createAssessPolicyChangeTool({
       endpointAppContextService,
-      getStartServices,
     });
 
     expect(mockedCreatePolicyTool).toHaveBeenCalledWith(
       expect.objectContaining({
         endpointAppContextService,
-        getStartServices,
         id: ASSESS_POLICY_CHANGE_TOOL_ID,
         schema: assessPolicyChangeSchema,
         maxResultTokens: 12_000,
@@ -336,11 +332,19 @@ describe('createAssessPolicyChangeTool', () => {
         documentation: 'D'.repeat(200_000),
       },
     };
+    const advisory = {
+      code: 'protection_weakened' as const,
+      protection: 'malware' as const,
+      os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+      to: 'off' as const,
+      text: 'Malware protection on Windows, macOS, Linux is turned off: this protection no longer detects or blocks threats.',
+    };
     mockedAssessChange.mockResolvedValue(
       createDto({
         changes: [hugeFact],
         normalizedDiff: [],
         sideEffects: [],
+        advisories: [advisory],
       })
     );
 
@@ -363,6 +367,7 @@ describe('createAssessPolicyChangeTool', () => {
     );
     expect(presented).not.toHaveProperty('requested_impact_value_truncated');
     expect(presented).not.toHaveProperty('requested_impact_value_total');
+    expect(presented.advisories).toEqual([advisory]);
     expect(fitsGuardedEnvelope(presented, 12_000)).toBe(true);
   });
 });

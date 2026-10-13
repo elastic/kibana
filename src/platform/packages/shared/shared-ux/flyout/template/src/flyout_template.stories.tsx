@@ -27,6 +27,7 @@ import {
 type Args = SharedStoryArgs & {
   headerIsCollapsed: boolean;
   numTabs: number;
+  numCallouts: number;
   numSections: number;
   numSubsections: number;
   sectionIcon: boolean;
@@ -43,6 +44,7 @@ const meta: Meta<Args> = {
     paginationJump: false,
     numUnstructuredBlocks: 0,
     numTabs: 0,
+    titleAsLink: false,
     titleIcon: false,
     description: true,
     numMetaBlocks: 0,
@@ -76,6 +78,11 @@ const meta: Meta<Args> = {
       control: { type: 'boolean' },
       if: { arg: 'numPages', truthy: true },
       table: { category: 'Menu bar' },
+    },
+    titleAsLink: {
+      name: 'Title as link',
+      control: { type: 'boolean' },
+      table: { category: 'Header' },
     },
     titleIcon: {
       name: 'Title icon',
@@ -163,6 +170,41 @@ const TABS: Array<{ id: string; label: string; detail: string }> = [
   { id: 'insights', label: 'Insights', detail: 'Insights panel content.' },
 ];
 
+/** Mixed levels, and a mix of `text`, actions, and dismissal, so stacked callouts can be compared. */
+const CALLOUT_POOL = [
+  <FlyoutTemplate.Body.Callout
+    key="disabled"
+    level="warning"
+    title="Rule is disabled"
+    text="No alerts are generated until the rule is enabled again."
+  />,
+  <FlyoutTemplate.Body.Callout
+    key="failures"
+    level="danger"
+    title="3 actions failed"
+    actionProps={{ primary: { children: 'Retry', onClick: action('callout retry') } }}
+  />,
+  <FlyoutTemplate.Body.Callout
+    key="migrated"
+    level="info"
+    title="This rule was migrated from a legacy format"
+    onDismiss={action('callout dismiss')}
+  />,
+  <FlyoutTemplate.Body.Callout key="saved" level="success" title="Changes saved" />,
+];
+
+/** Placed directly under `Body`, so in tabbed stories the callouts are flyout-wide. */
+const calloutItems = (count: number) => CALLOUT_POOL.slice(0, count);
+
+/** Callout control, declared per story like the section controls. */
+const CALLOUT_ARG_TYPES: Story['argTypes'] = {
+  numCallouts: {
+    name: 'Callouts',
+    control: { type: 'range', min: 0, max: CALLOUT_POOL.length, step: 1 },
+    table: { category: 'Body' },
+  },
+};
+
 /** Strips the fixture-only fields the root `tabs` prop has no use for. */
 const tabsProp = (count: number) => TABS.slice(0, count).map(({ id, label }) => ({ id, label }));
 
@@ -237,10 +279,15 @@ const sectionItems = (args: Args) =>
 const RegularSectionsRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
   return (
-    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+    <FlyoutTemplate
+      onClose={action('onClose')}
+      size="m"
+      {...buildFlyoutProps(args, 'Service details', pagination)}
+    >
       {headerZone(args, 'Service details')}
       {bodyZone(
         <>
+          {calloutItems(args.numCallouts)}
           {unstructuredBlocks(args.numUnstructuredBlocks)}
           {sectionItems(args)}
         </>
@@ -251,18 +298,23 @@ const RegularSectionsRender = (args: Args): React.JSX.Element => {
 };
 
 export const RegularSections: Story = {
-  argTypes: SECTION_ARG_TYPES,
-  args: SECTION_ARGS,
+  argTypes: { ...SECTION_ARG_TYPES, ...CALLOUT_ARG_TYPES },
+  args: { ...SECTION_ARGS, numCallouts: 0 },
   render: RegularSectionsRender,
 };
 
 const AccordionSectionsRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
   return (
-    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+    <FlyoutTemplate
+      onClose={action('onClose')}
+      size="m"
+      {...buildFlyoutProps(args, 'Alert details', pagination)}
+    >
       {headerZone(args, 'Alert details')}
       {bodyZone(
         <>
+          {calloutItems(args.numCallouts)}
           {unstructuredBlocks(args.numUnstructuredBlocks)}
           {SECTIONS.slice(0, args.numSections).map(({ id, title, content }, index) => (
             <FlyoutTemplate.Body.Accordion
@@ -285,17 +337,22 @@ const AccordionSectionsRender = (args: Args): React.JSX.Element => {
 export const AccordionSections: Story = {
   argTypes: {
     ...SECTION_ARG_TYPES,
+    ...CALLOUT_ARG_TYPES,
     // Accordion content is always outlined, so the border toggle does not apply here.
     sectionHasBorder: { table: { disable: true } },
   },
-  args: SECTION_ARGS,
+  args: { ...SECTION_ARGS, numCallouts: 0 },
   render: AccordionSectionsRender,
 };
 
 const MenuBarPaginationRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
   return (
-    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+    <FlyoutTemplate
+      onClose={action('onClose')}
+      size="m"
+      {...buildFlyoutProps(args, 'Service details', pagination)}
+    >
       {headerZone(args, 'Service details')}
       {bodyZone(
         <>
@@ -310,6 +367,7 @@ const MenuBarPaginationRender = (args: Args): React.JSX.Element => {
 
 export const MenuBarPagination: Story = {
   argTypes: {
+    titleAsLink: { table: { disable: true } },
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     footer: { table: { disable: true } },
@@ -361,7 +419,7 @@ const WithHistoryRender = (args: Args): React.JSX.Element => {
           onClose={() => setIsFlyoutAOpen(false)}
           size="m"
           historyKey={historyKey}
-          {...buildFlyoutProps(args)}
+          {...buildFlyoutProps(args, 'Flyout A')}
         >
           {headerZone(args, 'Flyout A')}
           {bodyZone(bodyContent('Flyout A'))}
@@ -373,7 +431,7 @@ const WithHistoryRender = (args: Args): React.JSX.Element => {
           onClose={() => setIsFlyoutBOpen(false)}
           size="m"
           historyKey={historyKey}
-          {...buildFlyoutProps(args)}
+          {...buildFlyoutProps(args, 'Flyout B')}
         >
           {headerZone(args, 'Flyout B')}
           {bodyZone(bodyContent('Flyout B'))}
@@ -385,7 +443,7 @@ const WithHistoryRender = (args: Args): React.JSX.Element => {
           onClose={() => setIsFlyoutCOpen(false)}
           size="m"
           historyKey={historyKey}
-          {...buildFlyoutProps(args)}
+          {...buildFlyoutProps(args, 'Flyout C')}
         >
           {headerZone(args, 'Flyout C')}
           {bodyZone(bodyContent('Flyout C'))}
@@ -398,6 +456,7 @@ const WithHistoryRender = (args: Args): React.JSX.Element => {
 
 export const MenuBarHistory: Story = {
   argTypes: {
+    titleAsLink: { table: { disable: true } },
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     numPages: { table: { disable: true } },
@@ -409,6 +468,7 @@ export const MenuBarHistory: Story = {
     numLeadingActions: 0,
     numTrailingActions: 0,
     numUnstructuredBlocks: 1,
+    titleAsLink: true,
     titleIcon: true,
     description: false,
     footer: true,
@@ -417,6 +477,7 @@ export const MenuBarHistory: Story = {
 };
 
 const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
+  const title = 'Flyout title is quite long, so that it takes up 2 lines of text and then some';
   const pagination = usePaginationProps(args);
   const body = (
     <>
@@ -429,21 +490,19 @@ const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
     <FlyoutTemplate
       onClose={action('onClose')}
       size="m"
-      {...buildFlyoutProps(args, pagination)}
+      {...buildFlyoutProps(args, title, pagination)}
       tabs={tabsProp(args.numTabs)}
     >
-      {headerZone(
-        args,
-        'Flyout title is quite long, so that it takes up 2 lines of text and then some',
-        undefined,
-        { collapsed: args.headerIsCollapsed }
-      )}
+      {headerZone(args, title, undefined, { collapsed: args.headerIsCollapsed })}
       {bodyZone(
-        TABS.slice(0, args.numTabs).map(({ id }) => (
-          <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
-            {body}
-          </FlyoutTemplate.Body.TabPanel>
-        ))
+        <>
+          {calloutItems(args.numCallouts)}
+          {TABS.slice(0, args.numTabs).map(({ id }) => (
+            <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+              {body}
+            </FlyoutTemplate.Body.TabPanel>
+          ))}
+        </>
       )}
       {footerZone(args)}
     </FlyoutTemplate>
@@ -453,6 +512,7 @@ const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
 export const HeaderCollapseOnScroll: Story = {
   argTypes: {
     ...SECTION_ARG_TYPES,
+    ...CALLOUT_ARG_TYPES,
     numPages: { table: { disable: true } },
     headerIsCollapsed: {
       name: 'Force collapsed',
@@ -469,6 +529,7 @@ export const HeaderCollapseOnScroll: Story = {
     numSubsections: 2,
     numUnstructuredBlocks: 1,
     numTabs: 3,
+    numCallouts: 0,
     titleIcon: true,
     headerIsCollapsed: false,
   },
@@ -508,7 +569,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
       <FlyoutTemplate
         onClose={action('onClose')}
         size="m"
-        {...buildFlyoutProps(args)}
+        {...buildFlyoutProps(args, 'Tabs demo')}
         tabs={visibleTabs.map(({ id, label }) => ({ id, label }))}
         selectedTabId={selectedTabId}
         onTabChange={setSelectedTabId}
@@ -516,6 +577,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
         {headerZone(args, 'Tabs demo', undefined, { collapsed: args.headerIsCollapsed })}
 
         <FlyoutTemplate.Body>
+          {calloutItems(args.numCallouts)}
           {visibleTabs.map(({ id, detail }) => (
             <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
               {unstructuredBlocks(args.numUnstructuredBlocks)}
@@ -535,6 +597,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
 
 export const Tabs: StoryObj<Args> = {
   argTypes: {
+    ...CALLOUT_ARG_TYPES,
     numTabs: {
       name: 'Tabs',
       control: { type: 'range', min: 1, max: TABS.length, step: 1 },
@@ -559,6 +622,7 @@ export const Tabs: StoryObj<Args> = {
     numLeadingActions: 0,
     numTrailingActions: 0,
     numUnstructuredBlocks: 1,
+    numCallouts: 0,
   },
   render: TabsRender,
 };
@@ -582,7 +646,11 @@ const ThrowOnClick = () => {
  * show it overlapping real content rather than empty space.
  */
 const FooterActionsRender = (args: Args): React.JSX.Element => (
-  <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args)}>
+  <FlyoutTemplate
+    onClose={action('onClose')}
+    size="m"
+    {...buildFlyoutProps(args, 'Footer actions')}
+  >
     {headerZone(args, 'Footer actions')}
     {bodyZone(
       <>
@@ -613,6 +681,7 @@ export const FooterActions: Story = {
     numTrailingActions: { table: { disable: true } },
     numPages: { table: { disable: true } },
     paginationJump: { table: { disable: true } },
+    titleAsLink: { table: { disable: true } },
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     numMetaBlocks: { table: { disable: true } },
@@ -642,7 +711,11 @@ export const FooterActions: Story = {
 
 /** Header and body each sit behind their own error boundary, so a throw in one spares the other. */
 const ErrorInFlyoutRender = (args: Args): React.JSX.Element => (
-  <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args)}>
+  <FlyoutTemplate
+    onClose={action('onClose')}
+    size="m"
+    {...buildFlyoutProps(args, 'Error in flyout')}
+  >
     {headerZone(
       args,
       'Error in flyout',

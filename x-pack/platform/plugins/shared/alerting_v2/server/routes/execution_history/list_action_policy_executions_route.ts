@@ -35,7 +35,7 @@ export const toListExecutionHistoryArgs = ({
   search,
   rule_ids: ruleIds,
   outcomes,
-  episode_ids: episodeIds,
+  alert_ids: alertIds,
   from,
   to,
   sort_field: sortField,
@@ -49,7 +49,7 @@ export const toListExecutionHistoryArgs = ({
     search,
     ruleIds,
     outcomes,
-    episodeIds,
+    alertIds,
     from,
     to,
     sortField,
@@ -71,7 +71,7 @@ export const toListExecutionHistoryResponse = ({
     page,
     per_page: perPage,
     total,
-    search_matches: searchMatches,
+    search_matches: searchMatches ?? undefined,
   };
 };
 

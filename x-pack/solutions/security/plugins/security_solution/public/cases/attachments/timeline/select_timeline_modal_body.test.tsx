@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { SelectTimelineModalBody } from './select_timeline_modal_body';
 
@@ -46,24 +45,24 @@ jest.mock('../../../timelines/components/timeline/selectable_timeline', () => ({
 }));
 
 describe('SelectTimelineModalBody', () => {
-  it('forwards SelectableTimeline (title, id) selections to onTimelineChange', async () => {
+  it('forwards SelectableTimeline (title, id) selections to onTimelineChange', () => {
     const onTimelineChange = jest.fn();
     const onClose = jest.fn();
     render(<SelectTimelineModalBody onTimelineChange={onTimelineChange} onClose={onClose} />);
 
-    await userEvent.click(screen.getByTestId('selectable-timeline-mock-pick'));
+    fireEvent.click(screen.getByTestId('selectable-timeline-mock-pick'));
     expect(onTimelineChange).toHaveBeenCalledWith('Investigation', 'so-id-1');
 
-    await userEvent.click(screen.getByTestId('selectable-timeline-mock-pick-null'));
+    fireEvent.click(screen.getByTestId('selectable-timeline-mock-pick-null'));
     expect(onTimelineChange).toHaveBeenCalledWith('Investigation', null);
   });
 
-  it('forwards onClose', async () => {
+  it('forwards onClose', () => {
     const onTimelineChange = jest.fn();
     const onClose = jest.fn();
     render(<SelectTimelineModalBody onTimelineChange={onTimelineChange} onClose={onClose} />);
 
-    await userEvent.click(screen.getByTestId('selectable-timeline-mock-close'));
+    fireEvent.click(screen.getByTestId('selectable-timeline-mock-close'));
 
     expect(onClose).toHaveBeenCalled();
   });

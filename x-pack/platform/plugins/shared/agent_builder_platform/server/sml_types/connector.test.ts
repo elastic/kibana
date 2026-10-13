@@ -13,6 +13,7 @@ import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types'
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
+  ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
 }));
 
@@ -313,7 +314,7 @@ describe('connectorSmlType', () => {
       expect(result!.content).toBe('MCP\nModel Context Protocol connector');
     });
 
-    it('includes sub-action descriptions when spec has isTool actions', async () => {
+    it('includes sub-action descriptions when spec has actions', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
         type: 'action',

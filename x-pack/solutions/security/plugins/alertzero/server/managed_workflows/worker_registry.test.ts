@@ -12,10 +12,9 @@ import {
   SYSTEM_SECURITY_WORKER_IDS,
   WATCH_TAG,
 } from '@kbn/alertzero-common';
-import { WorkflowSchema } from '@kbn/workflows';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
-import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import { workerRegistry } from './worker_registry';
+import { workflowSchemaFailure } from './test_helpers/workflow_schema';
 
 type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 
@@ -29,8 +28,14 @@ interface ExpectedWorkerSettings {
    * deliberately not offered as a setting.
    */
   every?: string;
-  /** Present only for Workers with Watch-owned settings. */
+  /** Present only for Workers with Watch-owned settings, nested under `extras` in the YAML. */
   extras?: Record<string, unknown>;
+  /**
+   * Watch-owned settings the YAML renders flat into `worker_settings` rather than nesting them
+   * under `extras`. Alert Triage diverges from Rule Tuning's shape here: the settings API uses
+   * `extras` for both, only the rendered YAML differs.
+   */
+  flatSettings?: Record<string, unknown>;
   triggerTypes: string[];
 }
 
@@ -40,7 +45,11 @@ interface ExpectedWorkerSettings {
  * change what already-installed spaces receive.
  */
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
-  'system-security-floor-alert-triage': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-floor-alert-triage': {
+    settingsVersion: 1,
+    flatSettings: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    triggerTypes: ['alert', 'manual'],
+  },
   'system-security-floor-attack-discovery': {
     settingsVersion: 1,
     scheduleInterval: '24h',
@@ -53,7 +62,13 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     every: '1m',
     triggerTypes: ['scheduled', 'manual'],
   },
-  'system-security-hunt-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-hunt-continuous-threat-hunt': {
+    settingsVersion: 1,
+    scheduleInterval: '4h',
+    // No extras: tier2When/candidateLimit/fanOutMax are fixed implementation constants,
+    // not settings. Manual autonomy is fixed; schedule still runs every 4h.
+    triggerTypes: ['scheduled', 'manual'],
+  },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
@@ -61,7 +76,12 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
-  'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-detection-rule-coverage': {
+    settingsVersion: 1,
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    triggerTypes: ['scheduled', 'manual'],
+  },
 };
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {
@@ -104,35 +124,41 @@ describe('workerRegistry', () => {
             ? {}
             : { scheduleInterval: expected.scheduleInterval }),
           ...(expected.extras === undefined ? {} : { extras: expected.extras }),
+          ...(expected.flatSettings ?? {}),
         })
       );
 
       // A Worker with no schedule must not gain one by accident, and vice versa.
       expect(parsed.triggers?.map(({ type }) => type)).toEqual(expected.triggerTypes);
-      expect(parsed.triggers?.[0]?.with?.every).toBe(expected.every ?? expected.scheduleInterval);
+      if (expected.triggerTypes.includes('scheduled')) {
+        const scheduled = parsed.triggers?.find(({ type }) => type === 'scheduled');
+        expect(scheduled?.with?.every).toBe(expected.every ?? expected.scheduleInterval);
+      } else {
+        expect(parsed.triggers?.[0]?.with?.every).toBeUndefined();
+      }
       // A fixed cadence must stay out of the settings contract, or the shared Watch
       // page would render an interval control the Worker does not accept writes for.
       if (expected.scheduleInterval === undefined) {
         expect(yaml).not.toContain('scheduleInterval');
       }
 
-      expect(yaml).not.toContain('candidateLimit');
+      // Hunt renders candidateLimit as a fixed constant; no other Worker may leak that dial name.
+      if (catalog.id !== 'system-security-hunt-continuous-threat-hunt') {
+        expect(yaml).not.toContain('candidateLimit');
+      }
     }
   );
 
   it.each(SYSTEM_SECURITY_WORKER_CATALOG)(
-    '$id renders YAML that passes strict workflow validation',
+    '$id renders YAML that passes the workflow schema',
     (catalog) => {
       const registration = workerRegistry.get(catalog.id);
       if (!registration) {
         throw new Error(`Worker "${catalog.id}" is not registered`);
       }
-      // The managed definitions test validates triggers loosely, so it cannot catch a `with.every`
-      // the engine would reject. This is the assertion that does.
       const yaml = getYamlTemplate(catalog.id)(registration.settings.createDefaultValues());
-      const result = parseWorkflowYamlToJSON(yaml, WorkflowSchema);
 
-      expect(result.success ? null : result.error).toBeNull();
+      expect(workflowSchemaFailure(yaml)).toBeUndefined();
     }
   );
 
@@ -150,7 +176,7 @@ describe('workerRegistry', () => {
       const parsed = parse(yaml) as { triggers?: Array<{ with?: { every?: string } }> };
 
       expect(parsed.triggers?.[0]?.with?.every).toBe(scheduleInterval);
-      expect(parseWorkflowYamlToJSON(yaml, WorkflowSchema).success).toBe(true);
+      expect(workflowSchemaFailure(yaml)).toBeUndefined();
     }
   );
 });
