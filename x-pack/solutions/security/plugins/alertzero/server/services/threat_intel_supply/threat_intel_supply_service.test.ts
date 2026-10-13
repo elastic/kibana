@@ -130,7 +130,19 @@ describe('ThreatIntelSupplyService', () => {
     (esClient.inference.get as jest.Mock).mockClear();
     (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
     (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
-      '.kibana-threat-reports': { mappings: { dynamic: 'strict' } },
+      '.kibana-threat-reports': {
+        mappings: {
+          dynamic: 'strict',
+          properties: {
+            content: {
+              properties: {
+                title: { type: 'semantic_text', inference_id: '.elser' },
+                body_text: { type: 'semantic_text', inference_id: '.elser' },
+              },
+            },
+          },
+        },
+      },
     });
     (esClient.inference.get as jest.Mock).mockResolvedValue({});
   });
@@ -149,9 +161,10 @@ describe('ThreatIntelSupplyService', () => {
   });
 
   it('returns embedding_endpoint_unavailable when a semantic field has no inference_id', async () => {
-    (esClient.indices.getMapping as jest.Mock).mockResolvedValueOnce({
+    (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
       '.kibana-threat-reports': {
         mappings: {
+          dynamic: 'strict',
           properties: {
             content: {
               properties: {

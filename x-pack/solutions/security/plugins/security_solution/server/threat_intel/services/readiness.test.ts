@@ -267,6 +267,7 @@ describe('getThreatIntelReadiness', () => {
     deps.esClient.indices.getMapping.mockResolvedValue({
       '.kibana-threat-reports': {
         mappings: {
+          dynamic: 'strict',
           properties: {
             content: {
               properties: {
