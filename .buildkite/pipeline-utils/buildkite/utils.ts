@@ -31,9 +31,12 @@ function isObj(x: unknown): x is Record<string, unknown> {
 }
 
 function isCommandStep(step: Record<string, unknown>): step is Record<string, unknown> & {
-  command: string;
+  command: string | string[];
 } {
-  return typeof step.command === 'string';
+  return (
+    typeof step.command === 'string' ||
+    (Array.isArray(step.command) && step.command.every((line) => typeof line === 'string'))
+  );
 }
 
 function getSteps(filename: string, doc: unknown): unknown[] {
