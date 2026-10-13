@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus, isTerminalStatus, type WorkflowDetailDto } from '@kbn/workflows';
+import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
 import { CREATE_KI_STEP_ID } from '@kbn/context-engine-plugin/common/step_types/create_ki';
 import {
   collectWorkflowValidationErrors,
@@ -110,6 +111,17 @@ export const runAutomationHandler = async ({
 
   const workflowsManagement = getWorkflowsManagement();
   const { workflowId, pilotSize } = params;
+
+  // Checked before the workflow is read: the preflight below surfaces validation diagnostics
+  // derived from the stored definition, which must never reach a caller who cannot execute it.
+  const security = await getSecurityStart();
+  const canExecute = await hasWorkflowExecutePrivilege({ security, request, spaceId });
+  if (!canExecute) {
+    return {
+      started: false,
+      reason: `Unauthorized to execute workflow '${workflowId}'. The workflowsManagement execute privilege is required.`,
+    };
+  }
 
   // Read the saved workflow up front: an invalid definition cannot run on either path, and the
   // pilot-input check below reads the parsed definition, which is null for an invalid workflow.

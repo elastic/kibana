@@ -113,6 +113,25 @@ describe('runAutomationHandler', () => {
     expect(result.workflowUrl).toBeUndefined();
   });
 
+  it('does not read the workflow or leak validation diagnostics when execute privilege is missing', async () => {
+    hasWorkflowExecutePrivilege.mockResolvedValue(false);
+    getWorkflowMock.mockResolvedValue(validWorkflow({ valid: false, definition: null }));
+    validateWorkflowMock.mockResolvedValue({
+      valid: false,
+      diagnostics: [
+        { severity: 'error', message: 'Unknown connector id', source: 'schema', ruleId: 'x' },
+      ],
+    });
+
+    const result = await runAutomationHandler(buildDeps());
+
+    expect(getWorkflowMock).not.toHaveBeenCalled();
+    expect(validateWorkflowMock).not.toHaveBeenCalled();
+    expect(result.started).toBe(false);
+    expect(result.reason).toContain('Unauthorized');
+    expect(result.reason).not.toContain('Unknown connector id');
+  });
+
   it('returns started=false when executeWorkflow fails', async () => {
     getWorkflowMock.mockResolvedValue(validWorkflow());
     executeWorkflow.mockResolvedValue({
