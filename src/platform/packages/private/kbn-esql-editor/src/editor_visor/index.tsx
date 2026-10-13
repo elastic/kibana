@@ -206,6 +206,10 @@ export interface QuickSearchVisorProps {
   disableSubmitAction?: boolean;
   // Called after a KQL filter is submitted so the parent can move focus back to the editor
   onKqlSubmitted?: () => void;
+  // Mode owned by the host (e.g. restored per Discover tab). When unset, the visor picks its own default
+  visorMode?: VisorMode;
+  // Called when the user picks a mode. The built-in default is never reported
+  onVisorModeChange?: (mode: VisorMode) => void;
 }
 
 export function QuickSearchVisor({
@@ -217,13 +221,16 @@ export function QuickSearchVisor({
   isDisabled = false,
   disableSubmitAction = false,
   onKqlSubmitted,
+  visorMode: controlledVisorMode,
+  onVisorModeChange: onControlledVisorModeChange,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState(VisorMode.KQL);
+  const [uncontrolledVisorMode, setUncontrolledVisorMode] = useState(VisorMode.KQL);
+  const visorMode = controlledVisorMode ?? uncontrolledVisorMode;
   const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
   const [isKqlFocused, setIsKqlFocused] = useState(false);
   const wasVisibleRef = useRef(isVisible);
@@ -282,18 +289,20 @@ export function QuickSearchVisor({
 
   const onVisorModeChange = useCallback(
     (id: VisorMode) => {
-      setVisorMode(id);
+      setUncontrolledVisorMode(id);
+      onControlledVisorModeChange?.(id);
       if (id === VisorMode.KQL) {
         onStopGeneration();
       }
     },
-    [onStopGeneration]
+    [onStopGeneration, onControlledVisorModeChange]
   );
 
   // License and connector are known only after the first render. Start in natural language once they are.
+  // Only the built-in default moves: a host-owned mode is left alone.
   useEffect(() => {
     if (showAskAiButton) {
-      setVisorMode(VisorMode.NaturalLanguage);
+      setUncontrolledVisorMode(VisorMode.NaturalLanguage);
     }
   }, [showAskAiButton]);
 
@@ -344,7 +353,8 @@ export function QuickSearchVisor({
     };
   }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
-  const isKqlMode = visorMode === VisorMode.KQL;
+  // Without the AI option there is no toggle, so a restored natural language mode falls back to KQL.
+  const isKqlMode = visorMode === VisorMode.KQL || !showAskAiButton;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
 
   if (!KQLComponent) {

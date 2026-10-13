@@ -237,6 +237,10 @@ export const updateTabs: InternalStateThunkActionCreator<
           stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
           defaultsHandling: 'strip',
         });
+        tab.uiState = {
+          ...tab.uiState,
+          visorMode: recentlyClosedTabToRestore.uiState.visorMode,
+        };
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;

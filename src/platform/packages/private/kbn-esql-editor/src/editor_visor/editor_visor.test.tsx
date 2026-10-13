@@ -19,6 +19,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
+import { VisorMode } from './visor_mode';
 import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
 import { clearInferenceConnectorCache } from './use_nl_generation';
 import { clearNlToEsqlLicenseCache } from '../hooks/use_nl_to_esql_check';
@@ -339,6 +340,24 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('keeps a host-owned KQL mode once AI is available and reports user changes', async () => {
+      const onVisorModeChange = jest.fn();
+      const { getByTestId, queryByTestId } = renderWithI18n(
+        renderWithEnterprise({ ...props, visorMode: VisorMode.KQL, onVisorModeChange })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
+      expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
+      expect(onVisorModeChange).not.toHaveBeenCalled();
+
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+
+      expect(onVisorModeChange).toHaveBeenCalledWith(VisorMode.NaturalLanguage);
     });
 
     it('keeps the visor one row and overlays the focused NL textarea', () => {

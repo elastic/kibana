@@ -15,7 +15,7 @@ import {
   dismissAllFlyoutsExceptFor,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
-import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { ESQLEditorRestorableState, VisorMode } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import {
   type Query,
@@ -326,6 +326,15 @@ export const DiscoverTopNav = ({
     },
     [dispatch, setEsqlEditorUiState]
   );
+
+  const visorMode = useCurrentTabSelector((state) => state.uiState.visorMode);
+  const setVisorModeUiState = useCurrentTabAction(internalStateActions.setVisorModeUiState);
+  const onVisorModeChange = useCallback(
+    (newVisorMode: VisorMode) => {
+      dispatch(setVisorModeUiState({ visorMode: newVisorMode }));
+    },
+    [dispatch, setVisorModeUiState]
+  );
   const mainDataState = useDataState(dataStateContainer.data$.main$);
   const isUninitializedEsqlTab =
     isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED;
@@ -460,6 +469,8 @@ export const DiscoverTopNav = ({
         onDraftChange={onSearchDraftChange}
         esqlEditorInitialState={esqlEditorInitialState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
+        visorMode={visorMode}
+        onVisorModeChange={onVisorModeChange}
         esqlVariablesConfig={
           isEsqlMode
             ? {
