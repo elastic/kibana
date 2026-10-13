@@ -5,10 +5,11 @@
     "types": ["jest", "node"],
     "lib": ["es2021"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "oxlint_plugin.js", "rules/**/*.mjs"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/repo-packages",
     "@kbn/repo-info",
+    "@kbn/swc-register",
   ]
 }
