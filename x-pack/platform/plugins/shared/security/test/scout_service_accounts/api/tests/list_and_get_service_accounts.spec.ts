@@ -131,11 +131,27 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   });
 
   apiTest.afterAll(async ({ esClient, kbnClient, config }) => {
-    await unbindWorkloads(kbnClient, boundWorkloads);
-    for (const spaceId of createdSpaces) {
-      await kbnClient.spaces.delete(spaceId);
+    // Every step runs, even when an earlier one fails, so one failure doesn't leave the rest behind.
+    const failures: Error[] = [];
+    const cleanup = [
+      async () => unbindWorkloads(kbnClient, boundWorkloads),
+      async () => {
+        for (const spaceId of createdSpaces) {
+          await kbnClient.spaces.delete(spaceId);
+        }
+      },
+      async () => deleteServiceAccounts(esClient, config, created),
+    ];
+    for (const remove of cleanup) {
+      try {
+        await remove();
+      } catch (error) {
+        failures.push(error instanceof Error ? error : new Error('Directory cleanup failed.'));
+      }
     }
-    await deleteServiceAccounts(esClient, config, created);
+    if (failures.length) {
+      throw new AggregateError(failures, 'Service account directory cleanup failed.');
+    }
   });
 
   /**
