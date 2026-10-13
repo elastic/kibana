@@ -5,24 +5,26 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
-const suggestedUserProfileSchema = z.object({
-  uid: z.string(),
-  user: z.object({
-    username: z.string(),
-    full_name: z.string().optional(),
-    email: z.string().optional(),
-  }),
-  avatar: z
-    .object({
-      initials: z.string().nullable().optional(),
-      color: z.string().nullable().optional(),
-      image_url: z.string().nullable().optional(),
-    })
-    .optional(),
-});
+const suggestedUserProfileSchema = lazySchema(() =>
+  z.object({
+    uid: z.string(),
+    user: z.object({
+      username: z.string(),
+      full_name: z.string().optional(),
+      email: z.string().optional(),
+    }),
+    avatar: z
+      .object({
+        initials: z.string().nullable().optional(),
+        color: z.string().nullable().optional(),
+        image_url: z.string().nullable().optional(),
+      })
+      .optional(),
+  })
+);
 
-export const suggestUserProfilesResponseSchema = z
-  .array(suggestedUserProfileSchema)
-  .meta({ id: 'alerting_suggest_user_profiles_response' });
+export const suggestUserProfilesResponseSchema = lazySchema(() =>
+  z.array(suggestedUserProfileSchema).meta({ id: 'alerting_suggest_user_profiles_response' })
+);
