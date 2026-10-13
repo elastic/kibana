@@ -16,7 +16,11 @@
 const Fs = require('fs');
 const Path = require('path');
 const { slugifyId } = require('./slugify_id');
-const { addReasoningEffortVariants, parseModelGroups } = require('./connector_matching');
+const {
+  addReasoningEffortVariants,
+  parseModelGroups,
+  splitReasoningEffortVariantId,
+} = require('./connector_matching');
 
 function parseArgs(argv, { defaults = {} } = {}) {
   const out = { ...defaults };
@@ -65,12 +69,19 @@ function die(message) {
 /**
  * One definition per discovered EIS model, plus a `<id>-effort-<level>` variant for every
  * `eis/<model>@<level>` in `requestedModelGroups` (EVAL_MODEL_GROUPS), so a run can evaluate the
- * same endpoint at several reasoning efforts.
+ * same endpoint at several reasoning efforts. A judge named as a variant
+ * (`EVAL_CONNECTOR_ID=eis-x-effort-high`) gets its variant generated the same way.
  */
 function buildEisConnectors(
   models,
-  { connectorIdPrefix = 'eis-', requestedModelGroups = [] } = {}
+  { connectorIdPrefix = 'eis-', requestedModelGroups = [], evaluationConnectorId = '' } = {}
 ) {
+  const { baseId: judgeId, reasoningEffort: judgeEffort } = splitReasoningEffortVariantId(
+    String(evaluationConnectorId).trim()
+  );
+  const groups = judgeEffort
+    ? [...requestedModelGroups, `${judgeId}@${judgeEffort}`]
+    : requestedModelGroups;
   const connectors = {};
   for (const m of models) {
     const inferenceId = m && typeof m === 'object' ? m.inferenceId : undefined;
@@ -92,7 +103,7 @@ function buildEisConnectors(
       },
     };
   }
-  return addReasoningEffortVariants(connectors, requestedModelGroups);
+  return addReasoningEffortVariants(connectors, groups);
 }
 
 function main() {
@@ -127,6 +138,7 @@ function main() {
   const connectors = buildEisConnectors(models, {
     connectorIdPrefix,
     requestedModelGroups: parseModelGroups(process.env.EVAL_MODEL_GROUPS || ''),
+    evaluationConnectorId: process.env.EVAL_CONNECTOR_ID,
   });
 
   const json = JSON.stringify(connectors);

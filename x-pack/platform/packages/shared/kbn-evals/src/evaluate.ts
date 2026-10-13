@@ -38,7 +38,7 @@ import { getSpaceIdsFromEnv } from './utils/space_ids';
 import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from './utils/concurrency';
 import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
 import { buildModelFromConnector } from './utils/build_model_from_connector';
-import { getConnectorReasoningEffort } from './utils/eval_connector';
+import { getConnectorReasoningEffort, isInferenceEndpointDefinition } from './utils/eval_connector';
 import { withDefaultReasoning } from './utils/with_default_reasoning';
 import type {
   DefaultEvaluators,
@@ -155,8 +155,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           use,
         });
       } else {
-        // If the evaluation connector is the same as the main connector, reuse it
-        await use(connector);
+        // Same connector as the task: reuse the bound one, but at the judge definition's own
+        // effort. A run-level effort applies to the task model only, whichever judge is used.
+        const judgeReasoningEffort = getConnectorReasoningEffort(evaluationConnectorParam);
+        await use(
+          isInferenceEndpointDefinition(connector)
+            ? { ...connector, reasoningEffort: judgeReasoningEffort }
+            : connector
+        );
       }
     },
     {
@@ -164,7 +170,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   inferenceClient: [
-    async ({ log, fetch, connector }, use) => {
+    async ({ log, fetch, connector, evaluationConnector }, use) => {
       log.info('Loading inference client');
 
       const inferenceClient = createRestClient({
@@ -175,11 +181,18 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
       const wrappedInferenceClient = wrapInferenceClientWithEisConnectorTelemetry(inferenceClient);
       const reasoningEffort = getConnectorReasoningEffort(connector);
+      const judgeReasoningEffort = getConnectorReasoningEffort(evaluationConnector);
+      const effortByConnectorId = new Map([
+        [connector.id, reasoningEffort],
+        [evaluationConnector.id, judgeReasoningEffort],
+      ]);
       log.serviceLoaded?.('inferenceClient');
 
       await use(
-        reasoningEffort
-          ? withDefaultReasoning(wrappedInferenceClient, reasoningEffort)
+        reasoningEffort || judgeReasoningEffort
+          ? withDefaultReasoning(wrappedInferenceClient, reasoningEffort, (connectorId) =>
+              effortByConnectorId.get(connectorId)
+            )
           : wrappedInferenceClient
       );
     },
@@ -422,13 +435,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
-      const boundEvaluatorClient = inferenceClient.bindTo({
+      const evaluatorInferenceClient = inferenceClient.bindTo({
         connectorId: evaluationConnector.id,
       });
-      const judgeReasoningEffort = getConnectorReasoningEffort(evaluationConnector);
-      const evaluatorInferenceClient = judgeReasoningEffort
-        ? withDefaultReasoning(boundEvaluatorClient, judgeReasoningEffort)
-        : boundEvaluatorClient;
 
       // These judges run in-process against `evaluationConnector`, so unlike the
       // `_evaluate`-backed ones they know their model up front.

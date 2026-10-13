@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import { isReasoningEffort } from './inference_endpoint_definition';
+
 interface BuildExecutionIdArgs {
   baseExecutionId?: string;
   suiteId?: string;
@@ -50,14 +53,16 @@ export function buildExecutionId({
 /**
  * Reads the model segment of a composite execution id back into its parts: `claude@high`
  * -> `{ modelId: 'claude', reasoningEffort: 'high' }`, `claude` -> `{ modelId: 'claude' }`.
+ * A trailing `@...` that is not a reasoning effort level belongs to the model id.
  */
 export function parseExecutionIdModelSegment(segment: string): {
   modelId: string;
-  reasoningEffort?: string;
+  reasoningEffort?: ChatCompletionReasoningEffort;
 } {
   const at = segment.lastIndexOf('@');
-  if (at === -1) {
+  const suffix = at === -1 ? undefined : segment.slice(at + 1);
+  if (!isReasoningEffort(suffix)) {
     return { modelId: segment };
   }
-  return { modelId: segment.slice(0, at), reasoningEffort: segment.slice(at + 1) };
+  return { modelId: segment.slice(0, at), reasoningEffort: suffix };
 }

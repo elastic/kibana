@@ -106,6 +106,12 @@ describe('parseExecutionIdModelSegment', () => {
     expect(parseExecutionIdModelSegment('claude-opus')).toEqual({ modelId: 'claude-opus' });
   });
 
+  it('keeps an @ that is not followed by a reasoning effort level in the model id', () => {
+    expect(parseExecutionIdModelSegment('mistral-large@2407')).toEqual({
+      modelId: 'mistral-large@2407',
+    });
+  });
+
   it('round-trips what buildExecutionId produced', () => {
     const executionId = buildExecutionId({
       baseExecutionId: 'bk-build-1',

@@ -14,11 +14,13 @@ const { slugifyId } = require('./slugify_id');
 
 const isEisEndpoint = (connector) => connector?.provider === 'elastic';
 
-// Keep in sync with `REASONING_EFFORT_LEVELS` and `buildReasoningEffortVariantId` in
-// `src/utils/inference_endpoint_definition.ts` / `src/cli/reasoning_effort_variants.ts`
+// Keep in sync with `REASONING_EFFORT_LEVELS` in `src/utils/inference_endpoint_definition.ts`:
+// these scripts run as plain Node in CI and cannot import the TypeScript sources. The variant id
+// format (`<id>-effort-<level>`) is what `src/config/create_playwright_eval_config.ts` runs as a
+// Playwright project, via the `reasoningEffort` the variant definition carries.
 const REASONING_EFFORT_LEVELS = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh'];
 
-const VARIANT_ID_SUFFIX = /-effort-(none|minimal|low|medium|high|xhigh)$/;
+const VARIANT_ID_SUFFIX = new RegExp(`-effort-(${REASONING_EFFORT_LEVELS.join('|')})$`);
 
 // `eis/<model>@high` -> `{ base: 'eis/<model>', reasoningEffort: 'high' }`.
 function parseModelGroup(requestedValue) {
@@ -146,7 +148,6 @@ function parseModelGroups(raw) {
 }
 
 module.exports = {
-  REASONING_EFFORT_LEVELS,
   addReasoningEffortVariants,
   buildReasoningEffortVariantId,
   connectorMatchesModelGroup,
