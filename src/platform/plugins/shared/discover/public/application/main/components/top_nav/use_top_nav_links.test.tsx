@@ -593,7 +593,7 @@ describe('useTopNavLinks', () => {
     it.each<[string, SolutionId | null]>([
       ['security', 'security'],
       ['search', 'es'],
-      ['workplace ai', 'workplaceai'],
+      ['vector database', 'vectordb'],
     ])('should fall back to v1 popover items in %s', async (_name, solutionNavId) => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true, solutionNavId);
 
