@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
@@ -53,9 +53,8 @@ export const significantEventInvestigationSchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe('ID of the investigation workflow execution.'),
-    started_at: z.iso.datetime({ offset: true }).describe('When this investigation run started.'),
-    completed_at: z.iso
-      .datetime({ offset: true })
+    started_at: isoDateTime({ offset: true }).describe('When this investigation run started.'),
+    completed_at: isoDateTime({ offset: true })
       .optional()
       .describe(
         'When this investigation run finished. Absent while the investigation is still running.'
@@ -66,7 +65,7 @@ export type SignificantEventInvestigation = z.infer<typeof significantEventInves
 
 export const significantEventSchema = lazySchema(() =>
   significantEventBaseSchema.extend({
-    '@timestamp': z.iso.datetime({ offset: true }),
+    '@timestamp': isoDateTime({ offset: true }),
     status: significantEventStatusSchema,
     assessment_note: z
       .string()

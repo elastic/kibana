@@ -771,6 +771,7 @@ export interface DocLinks {
     readonly datasetSettings: string;
     readonly datasetMappings: string;
     readonly authentication: string;
+    readonly grantReadAccess: string;
     readonly staticCredentials: string;
     readonly federatedIdentity: string;
     readonly querying: string;

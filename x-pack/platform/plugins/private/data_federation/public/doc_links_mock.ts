@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const storybookDocLinksMock = {
+export const docLinksMock = {
   links: {
     elasticsearch: {
       mappingReference: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference',
@@ -25,7 +25,9 @@ export const storybookDocLinksMock = {
       dataSources: '',
       datasets: '',
       datasetSettings: '',
+      datasetMappings: '',
       authentication: '',
+      grantReadAccess: '',
       staticCredentials: '',
       federatedIdentity: '',
       querying: '',
