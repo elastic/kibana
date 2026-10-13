@@ -15,7 +15,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { z } from '@kbn/zod';
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import { getRouteConfig } from './get_route_config';
-import { onRequestValidationError } from './request_validation_error';
 import { discoverSessionApiResponseSchema } from './schema';
 import { upsertDiscoverSession } from './session_upsert';
 import { trackDiscoverSessionAction } from './user_activity';
@@ -50,7 +49,6 @@ export const registerUpsertRoute = (
               .strict(),
             body: discoverSessionApiDataSchema,
           },
-          onRequestValidationError,
           response: {
             200: {
               body: () => discoverSessionApiResponseSchema,

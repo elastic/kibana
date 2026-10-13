@@ -33,7 +33,6 @@ import {
   discoverSessionInternalDataSchema,
   type DiscoverSessionInternalResponse,
 } from './internal_schema';
-import { onRequestValidationError } from './request_validation_error';
 import type { DiscoverSessionWarning } from './schema';
 import { transformInternalDiscoverSessionIn } from './transforms/transform_discover_session_in';
 import { transformInternalDiscoverSessionOut } from './transforms/transform_discover_session_out';
@@ -68,7 +67,6 @@ export const registerInternalRoutes = (
         version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: { body: discoverSessionInternalDataSchema },
-          onRequestValidationError,
           response: {
             201: { body: () => discoverSessionInternalResponseSchema, description: 'Created' },
             400: { description: 'Invalid request' },
@@ -106,7 +104,6 @@ export const registerInternalRoutes = (
             params: discoverSessionInternalParamsSchema,
             body: discoverSessionInternalDataSchema,
           },
-          onRequestValidationError,
           response: {
             200: { body: () => discoverSessionInternalResponseSchema, description: 'Updated' },
             201: { body: () => discoverSessionInternalResponseSchema, description: 'Created' },

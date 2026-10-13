@@ -13,7 +13,6 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getRouteConfig } from './get_route_config';
-import { onRequestValidationError } from './request_validation_error';
 import {
   discoverSessionSearchRequestParamsSchema,
   discoverSessionSearchResponseSchema,
@@ -42,7 +41,6 @@ export const registerSearchRoute = (
           request: {
             query: discoverSessionSearchRequestParamsSchema,
           },
-          onRequestValidationError,
           response: {
             200: {
               body: () => discoverSessionSearchResponseSchema,

@@ -14,7 +14,6 @@ import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server'
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import { getRouteConfig } from './get_route_config';
-import { onRequestValidationError } from './request_validation_error';
 import { discoverSessionApiResponseSchema } from './schema';
 import { createDiscoverSession } from './session_create';
 import { trackDiscoverSessionAction } from './user_activity';
@@ -40,7 +39,6 @@ export const registerCreateRoute = (
           request: {
             body: discoverSessionApiDataSchema,
           },
-          onRequestValidationError,
           response: {
             201: {
               body: () => discoverSessionApiResponseSchema,
