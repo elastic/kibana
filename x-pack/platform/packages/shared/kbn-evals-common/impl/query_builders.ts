@@ -16,7 +16,6 @@ import { MAX_SCORES_PER_QUERY } from '../constants';
 interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
-  reasoningEffort?: string;
   evaluatorName?: string;
   filterField?: 'experiment_id' | 'metadata.execution_id';
   spaceId?: string;
@@ -139,9 +138,6 @@ export const buildExperimentFilterQuery = (
   }
   if (options?.modelId) {
     must.push({ term: { 'task.model.id': options.modelId } });
-  }
-  if (options?.reasoningEffort) {
-    must.push({ term: { 'task.model.reasoning_effort': options.reasoningEffort } });
   }
   if (options?.evaluatorName) {
     must.push({ term: { 'evaluator.name': options.evaluatorName } });

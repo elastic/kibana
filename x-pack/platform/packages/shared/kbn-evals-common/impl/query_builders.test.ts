@@ -174,12 +174,6 @@ describe('query_builders', () => {
       expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
     });
 
-    it('adds a reasoning effort filter when reasoningEffort is provided', () => {
-      const query = buildExperimentFilterQuery('experiment-123', { reasoningEffort: 'high' });
-      expect(query.bool.must).toHaveLength(2);
-      expect(query.bool.must[1]).toEqual({ term: { 'task.model.reasoning_effort': 'high' } });
-    });
-
     it('adds an evaluator name filter when evaluatorName is provided', () => {
       const query = buildExperimentFilterQuery('experiment-123', { evaluatorName: 'correctness' });
       expect(query.bool.must).toHaveLength(2);
