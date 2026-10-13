@@ -221,21 +221,17 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       // parity): security.security_labs_search is a registered builtin, but it
       // queries the AI knowledge base, which this suite never installs. In that case the tool
       // replies that the content is not installed and tells the agent to make no further tool
-      // calls, so the reference accepts both obeying that instruction and a rule grounded in the
-      // attachment, but never rewards fabricated research.
+      // calls, so the reference requires obeying that instruction without fabricating research.
       reference:
         'Attempts to search Security Labs for prior research on this side-loading pattern/technique ' +
         'first. If research is found, calls security.create_detection_rule with a description informed ' +
         'by that research (specific path, hash, and technique). If no Security Labs research is ' +
         'available, states that the research is unavailable without fabricating or citing any research, ' +
-        'and then either stops as the tool instructs or calls security.create_detection_rule with a ' +
-        'rule grounded in the host/process/hash/path/technique details from the attachment.',
+        'provides the GenAI Settings link, and makes no further tool calls as the tool instructs.',
     },
     metadata: {
       expectedSkill: 'detection-rule-edit',
-      // Without Security Labs content the reference-sanctioned stop path is a correct
-      // outcome; the trajectory score on this example is expected to be lower.
-      expectedTools: ['security.security_labs_search', 'security.create_detection_rule'],
+      expectedTools: ['security.security_labs_search'],
       severity: 'high',
       tags: ['rule-creation', 'research'],
     },

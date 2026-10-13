@@ -16,14 +16,8 @@ import { DeviceControlAccessLevel, ProtectionModes } from '../../../../../../com
 import type { RansomwareLinuxContext } from './expand_change_set';
 import { expandChangeSet } from './expand_change_set';
 import type { ExplicitPolicyChange } from './policy_change_operation';
-import {
-  DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE,
-  POLICY_CHANGE_PREPARATION_ERROR_CODE,
-  PolicyChangePreparationError,
-  invalidSetFieldValueMessage,
-  nonWritablePathMessage,
-  unknownCurrentValueMessage,
-} from './policy_change_operation';
+import type { PolicyOperationRejection } from './policy_operation_rejection';
+import { PolicyChangeRejectedError } from './policy_operation_rejection';
 
 const ransomwareLinuxContext: RansomwareLinuxContext = {
   linuxRansomwareProtection: true,
@@ -50,20 +44,18 @@ const legacyLinuxRansomwarePolicy = (): PolicyConfig => {
   return policy;
 };
 
-const expectPreparationError = (
+const expectRejections = (
   run: () => unknown,
-  code: (typeof POLICY_CHANGE_PREPARATION_ERROR_CODE)[keyof typeof POLICY_CHANGE_PREPARATION_ERROR_CODE],
-  message: string
-): PolicyChangePreparationError => {
+  rejections: PolicyOperationRejection[]
+): PolicyChangeRejectedError => {
   try {
     run();
     throw new Error('expected preparation to fail');
   } catch (error) {
-    expect(error).toBeInstanceOf(PolicyChangePreparationError);
-    const preparationError = error as PolicyChangePreparationError;
-    expect(preparationError.code).toBe(code);
-    expect(preparationError.message).toBe(message);
-    return preparationError;
+    expect(error).toBeInstanceOf(PolicyChangeRejectedError);
+    const rejected = error as PolicyChangeRejectedError;
+    expect(rejected.rejections).toEqual(rejections);
+    return rejected;
   }
 };
 
@@ -102,31 +94,75 @@ describe('expandChangeSet', () => {
     );
   });
 
-  it('rejects invalid device-switch values with invalid_input before any helper runs', () => {
+  it('rejects invalid device-switch values with invalid_value before any helper runs', () => {
     const policy = policyFactory();
     const before = structuredClone(policy);
-    expectPreparationError(
+    expectRejections(
       () =>
         expandChangeSet(
           [{ op: 'set_field', path: 'windows.device_control.enabled', value: 'false' }],
           policy,
           ransomwareLinuxContext
         ),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-      invalidSetFieldValueMessage('windows.device_control.enabled')
+      [
+        {
+          operationIndexes: [0],
+          path: 'windows.device_control.enabled',
+          reason: 'invalid_value',
+          acceptedValues: { type: 'boolean' },
+        },
+      ]
     );
     expect(policy).toEqual(before);
   });
 
-  it('refuses device popup-enabled paths for valid values', () => {
+  it('refuses device popup-enabled paths with the coupled_only reason', () => {
     const path = 'windows.popup.device_control.enabled';
     const policy = policyFactory();
     const before = structuredClone(policy);
-    expectPreparationError(
+    expectRejections(
       () =>
         expandChangeSet([{ op: 'set_field', path, value: true }], policy, ransomwareLinuxContext),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE
+      [{ operationIndexes: [0], path, reason: 'coupled_only' }]
+    );
+    expect(policy).toEqual(before);
+  });
+
+  it('collects every pass-1 rejection for a mixed request in one error', () => {
+    const policy = policyFactory();
+    const before = structuredClone(policy);
+    expectRejections(
+      () =>
+        expandChangeSet(
+          [
+            { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect },
+            { op: 'set_field', path: 'windows.antivirus_registration.enabled', value: false },
+            { op: 'set_field', path: 'windows.device_control.usb_storage', value: 'sometimes' },
+          ],
+          policy,
+          ransomwareLinuxContext
+        ),
+      [
+        {
+          operationIndexes: [1],
+          path: 'windows.antivirus_registration.enabled',
+          reason: 'derived_setting',
+        },
+        {
+          operationIndexes: [2],
+          path: 'windows.device_control.usb_storage',
+          reason: 'invalid_value',
+          acceptedValues: {
+            type: 'enum',
+            values: [
+              DeviceControlAccessLevel.audit,
+              DeviceControlAccessLevel.read_only,
+              DeviceControlAccessLevel.no_execute,
+              DeviceControlAccessLevel.deny_all,
+            ],
+          },
+        },
+      ]
     );
     expect(policy).toEqual(before);
   });
@@ -178,7 +214,7 @@ describe('expandChangeSet', () => {
   });
 
   it('rejects conflicting values for a coupled field across operating systems', () => {
-    expectPreparationError(
+    expectRejections(
       () =>
         expandChangeSet(
           [
@@ -188,8 +224,13 @@ describe('expandChangeSet', () => {
           policyFactory(),
           ransomwareLinuxContext
         ),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      'Conflicting values for coupled policy field: malware.mode'
+      [
+        {
+          operationIndexes: [0, 1],
+          path: 'malware.mode',
+          reason: 'conflicting_operations',
+        },
+      ]
     );
   });
 
@@ -203,23 +244,75 @@ describe('expandChangeSet', () => {
       },
     ];
 
-    expectPreparationError(
+    expectRejections(
       () => expandChangeSet(operations, policyFactory(), ransomwareLinuxContext),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      'Conflicting values for coupled policy field: malware.mode'
+      [
+        {
+          operationIndexes: [0, 1],
+          path: 'malware.mode',
+          reason: 'conflicting_operations',
+        },
+      ]
     );
   });
 
   it('rejects disabling session_data before enabling tty_io', () => {
+    const policy = policyFactory();
+    policy.linux.events.session_data = true;
     const operations = [
       { op: 'set_field' as const, path: 'linux.events.session_data', value: false },
       { op: 'set_field' as const, path: 'linux.events.tty_io', value: true },
     ];
 
-    expectPreparationError(
+    expectRejections(
+      () => expandChangeSet(operations, policy, ransomwareLinuxContext),
+      [
+        {
+          operationIndexes: [0, 1],
+          path: 'linux.events.tty_io',
+          reason: 'invalid_combination',
+        },
+      ]
+    );
+  });
+
+  it('attributes an invalid combination only to operations that set the fields', () => {
+    const operations = [
+      { op: 'set_field' as const, path: 'linux.events.session_data', value: false },
+      { op: 'set_field' as const, path: 'linux.events.tty_io', value: true },
+    ];
+
+    expectRejections(
       () => expandChangeSet(operations, policyFactory(), ransomwareLinuxContext),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
-      'Linux tty_io cannot be enabled while session_data is disabled.'
+      [
+        {
+          operationIndexes: [1],
+          path: 'linux.events.tty_io',
+          reason: 'invalid_combination',
+        },
+      ]
+    );
+  });
+
+  it('rejects a stored invalid combination with no operation indexes', () => {
+    const policy = policyFactory();
+    policy.linux.events.session_data = false;
+    policy.linux.events.tty_io = true;
+
+    expectRejections(
+      () =>
+        expandChangeSet(
+          [{ op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect }],
+          policy,
+          ransomwareLinuxContext
+        ),
+      [
+        {
+          operationIndexes: [],
+          path: 'linux.events.tty_io',
+          reason: 'invalid_combination',
+        },
+      ]
     );
   });
 
@@ -520,14 +613,13 @@ describe('expandChangeSet', () => {
       const policy = legacyLinuxRansomwarePolicy();
       const before = structuredClone(policy);
 
-      expectPreparationError(
+      expectRejections(
         () =>
           expandChangeSet([{ op: 'set_field', path, value }], policy, {
             linuxRansomwareProtection: false,
             licenseInformation: platinum,
           }),
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
-        unknownCurrentValueMessage(path)
+        [{ operationIndexes: [0], path, reason: 'current_value_missing' }]
       );
       expect(policy).toEqual(before);
     }
@@ -539,30 +631,28 @@ describe('expandChangeSet', () => {
     const legacyMac: { mac: { ransomware?: unknown } } = policy;
     delete legacyMac.mac.ransomware;
 
-    expectPreparationError(
+    expectRejections(
       () =>
         expandChangeSet(
           [{ op: 'set_field', path: 'mac.ransomware.mode', value: ProtectionModes.prevent }],
           policy,
           { linuxRansomwareProtection: true, licenseInformation: platinum }
         ),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
-      unknownCurrentValueMessage('mac.ransomware.mode')
+      [{ operationIndexes: [0], path: 'mac.ransomware.mode', reason: 'current_value_missing' }]
     );
   });
 
   it('refuses unknown, excluded, derived, and other non-writable direct paths', () => {
     const unknownPolicy = policyFactory();
     const unknownBefore = structuredClone(unknownPolicy);
-    expectPreparationError(
+    expectRejections(
       () =>
         expandChangeSet(
           [{ op: 'set_field', path: 'not.a.real.path', value: true }],
           unknownPolicy,
           ransomwareLinuxContext
         ),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-      nonWritablePathMessage('not.a.real.path')
+      [{ operationIndexes: [0], path: 'not.a.real.path', reason: 'unknown_path' }]
     );
     expect(unknownPolicy).toEqual(unknownBefore);
   });
@@ -572,16 +662,96 @@ describe('expandChangeSet', () => {
     delete (policy as unknown as { global_manifest_version?: unknown }).global_manifest_version;
     const before = structuredClone(policy);
 
-    expectPreparationError(
+    expectRejections(
       () =>
         expandChangeSet(
           [{ op: 'set_field', path: 'global_manifest_version', value: '2024-01-01' }],
           policy,
           ransomwareLinuxContext
         ),
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
-      unknownCurrentValueMessage('global_manifest_version')
+      [
+        {
+          operationIndexes: [0],
+          path: 'global_manifest_version',
+          reason: 'current_value_missing',
+        },
+      ]
     );
     expect(policy).toEqual(before);
+  });
+  it('constrains tty_io when session_data is disabled', () => {
+    const policy = policyFactory();
+    policy.linux.events.tty_io = true;
+    const result = expandChangeSet(
+      [{ op: 'set_field', path: 'linux.events.session_data', value: false }],
+      policy,
+      ransomwareLinuxContext
+    );
+    expect(changeAt(result.explicitChanges, 'linux.events.tty_io')).toMatchObject({
+      from: true,
+      to: false,
+      origin: { kind: 'coupled' },
+    });
+  });
+
+  it('creates missing device control through the shared switch helper', () => {
+    const policy = policyFactory();
+    delete policy.windows.device_control;
+    delete policy.mac.device_control;
+    delete policy.windows.popup.device_control;
+    delete policy.mac.popup.device_control;
+    const expected = structuredClone(policy);
+    policyConfigHelpers.setDeviceControlSwitch(expected, true);
+    policyConfigHelpers.setDeviceControlUsbStorage(expected, DeviceControlAccessLevel.deny_all);
+    const result = expandChangeSet(
+      [
+        { op: 'set_field', path: 'windows.device_control.enabled', value: true },
+        { op: 'set_field', path: 'windows.device_control.usb_storage', value: 'deny_all' },
+      ],
+      policy,
+      ransomwareLinuxContext
+    );
+    expect(result.proposedConfig).toEqual(expected);
+
+    expectRejections(
+      () =>
+        expandChangeSet(
+          [
+            { op: 'set_field', path: 'windows.device_control.enabled', value: false },
+            { op: 'set_field', path: 'windows.device_control.usb_storage', value: 'deny_all' },
+          ],
+          policy,
+          ransomwareLinuxContext
+        ),
+      [
+        {
+          operationIndexes: [1],
+          path: 'windows.device_control.usb_storage',
+          reason: 'current_value_missing',
+        },
+      ]
+    );
+  });
+
+  it('creates custom YARA on all OSes through the shared helper', () => {
+    const policy = policyFactory();
+    delete policy.windows.memory_protection.custom_yara_signatures;
+    delete policy.mac.memory_protection.custom_yara_signatures;
+    delete policy.linux.memory_protection.custom_yara_signatures;
+    const result = expandChangeSet(
+      [{ op: 'set_field', path: 'windows.memory_protection.custom_yara_signatures', value: true }],
+      policy,
+      ransomwareLinuxContext
+    );
+    expect(result.proposedConfig.windows.memory_protection.custom_yara_signatures).toBe(true);
+    expect(result.proposedConfig.mac.memory_protection.custom_yara_signatures).toBe(true);
+    expect(result.proposedConfig.linux.memory_protection.custom_yara_signatures).toBe(true);
+    expect(
+      changeAt(result.explicitChanges, 'mac.memory_protection.custom_yara_signatures')?.origin.kind
+    ).toBe('coupled');
+    expect(
+      changeAt(result.explicitChanges, 'linux.memory_protection.custom_yara_signatures')?.origin
+        .kind
+    ).toBe('coupled');
   });
 });

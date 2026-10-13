@@ -22,6 +22,11 @@ export interface WorkspaceVolumeDeps {
   workspaceClient: IWorkspaceClient;
   /** Existing workspace id from the conversation, if any. */
   initialWorkspaceId?: string;
+  /**
+   * When false, `flush()` never writes: the loaded workspace is a private scratch copy.
+   * Defaults to true.
+   */
+  persist?: boolean;
   /** Maximum total bytes the workspace may hold. Defaults to 25 MiB. */
   capacityBytes?: number;
   /** Test-only override for the UUID generator. */
@@ -134,6 +139,7 @@ export class WorkspaceVolume {
 
   /**
    * Persist the current state of the workspace to ES. No-ops when:
+   *  - persistence is off (`persist: false`), OR
    *  - no `workspace_id` has been minted (bash was never used), OR
    *  - nothing has changed since the last flush (`isDirty() === false`), OR
    *  - the workspace is empty and the document doesn't exist yet (no need
@@ -141,6 +147,7 @@ export class WorkspaceVolume {
    * Resets the dirty bit on success so the next round starts fresh.
    */
   async flush(): Promise<void> {
+    if (this.deps.persist === false) return;
     if (!this.workspaceId) return;
     if (!this.isDirty()) return;
     const files = await this.snapshot();
