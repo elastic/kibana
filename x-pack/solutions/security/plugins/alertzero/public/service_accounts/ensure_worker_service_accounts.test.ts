@@ -9,10 +9,11 @@ import type { HttpStart } from '@kbn/core/public';
 import {
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
-  WORKER_ROLE_DEFINITIONS,
+  WORKER_SERVICE_ACCOUNT_NAMES,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   buildSecurityRoleUrl,
+  getWorkerRoleName,
 } from '@kbn/alertzero-common';
 import {
   ensureWorkerServiceAccounts,
@@ -43,22 +44,44 @@ const account = (
   ...overrides,
 });
 
+interface RoleEntry {
+  name: string;
+  metadata?: { _reserved?: boolean };
+}
+
+const reserved = (name: string): RoleEntry => ({ name, metadata: { _reserved: true } });
+
+/** Every worker's built-in role on both stateful and Serverless. */
+const ALL_BUILT_IN_ROLES = Object.values(WORKER_SERVICE_ACCOUNT_NAMES).flatMap((name) => [
+  reserved(getWorkerRoleName(name, STATEFUL)),
+  reserved(getWorkerRoleName(name, SERVERLESS)),
+]);
+
+const ROLE_URL_PREFIX = buildSecurityRoleUrl('');
+const isRoleUrl = (url: string) => url.startsWith(ROLE_URL_PREFIX);
+
+/** Answers a get-role-by-name call from `roles`, or with a 404 like Kibana's role route. */
+const lookupRole = (roles: RoleEntry[], url: string) => {
+  const roleName = decodeURIComponent(url.slice(ROLE_URL_PREFIX.length));
+  const role = roles.find(({ name }) => name === roleName);
+  if (!role) throw httpError(404, 'Not Found');
+  return role;
+};
+
 const setup = ({
   pages = [{ serviceAccounts: [] as Array<ReturnType<typeof account>> }],
   enabled = true,
-  roles = {} as Record<string, { metadata?: Record<string, unknown> }>,
+  roles = ALL_BUILT_IN_ROLES,
 }: {
   pages?: Array<{ serviceAccounts: Array<ReturnType<typeof account>>; nextPage?: string }>;
   enabled?: boolean;
-  /** Roles the get-role API returns by name; any other name is a 404. */
-  roles?: Record<string, { metadata?: Record<string, unknown> }>;
+  /** The roles that exist, looked up by name. */
+  roles?: RoleEntry[];
 } = {}) => {
-  const get = jest.fn(async (url: string): Promise<unknown> => {
-    const role = Object.keys(roles).find((roleName) => url === buildSecurityRoleUrl(roleName));
-    if (role) return { name: role, ...roles[role] };
-    if (url.startsWith(buildSecurityRoleUrl(''))) throw httpError(404, 'Not Found');
-    return undefined;
-  });
+  // Pages answer the account listings in order; role lookups answer by URL.
+  const get = jest.fn(
+    async (url: string): Promise<unknown> => (isRoleUrl(url) ? lookupRole(roles, url) : undefined)
+  );
   pages.forEach((page) => get.mockResolvedValueOnce(page));
   const put = jest.fn().mockResolvedValue({});
   const http = { get, put } as unknown as HttpStart;
@@ -70,27 +93,12 @@ const setup = ({
   return { http, get, put, serviceAccounts };
 };
 
+const roleLookupCalls = (get: jest.Mock) => get.mock.calls.filter(([url]) => isRoleUrl(url));
+
 describe('ensureWorkerServiceAccounts', () => {
-  it('creates the role and the account for a worker that has none', async () => {
-    const { http, put, serviceAccounts } = setup();
-
-    const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], STATEFUL);
-
-    const { name, role } = WORKER_ROLE_DEFINITIONS[TRIAGE];
-    expect(put).toHaveBeenCalledWith(`/api/security/role/${name}`, {
-      version: SECURITY_ROLE_API_VERSION,
-      query: { createOnly: true },
-      body: JSON.stringify(role),
-    });
-    expect(serviceAccounts.create).toHaveBeenCalledWith(
-      expect.objectContaining({ name, roles: [name] })
-    );
-    expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
-  });
-
-  it('reuses an existing account without touching its role', async () => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
-    const { http, put, serviceAccounts } = setup({
+  it('reuses an existing account without looking up its role', async () => {
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
+    const { http, get, put, serviceAccounts } = setup({
       pages: [
         { serviceAccounts: [account('other')], nextPage: 'cursor' },
         { serviceAccounts: [account(name)] },
@@ -100,11 +108,12 @@ describe('ensureWorkerServiceAccounts', () => {
     const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], STATEFUL);
 
     expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
+    expect(roleLookupCalls(get)).toHaveLength(0);
     expect(put).not.toHaveBeenCalled();
     expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 
-  it('lists the accounts once for several workers', async () => {
+  it('lists the accounts once and looks up each worker role', async () => {
     const { http, get, serviceAccounts } = setup();
 
     const results = await ensureWorkerServiceAccounts(
@@ -114,13 +123,14 @@ describe('ensureWorkerServiceAccounts', () => {
       STATEFUL
     );
 
-    expect(get).toHaveBeenCalledTimes(1);
     expect(get).toHaveBeenCalledWith(SECURITY_SERVICE_ACCOUNT_URL, { query: { limit: 100 } });
+    expect(get.mock.calls.filter(([url]) => url === SECURITY_SERVICE_ACCOUNT_URL)).toHaveLength(1);
+    expect(roleLookupCalls(get)).toHaveLength(2);
     expect([...results.values()].every(({ ok }) => ok)).toBe(true);
   });
 
   it('reports an existing account that Kibana cannot run as', async () => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
     const { http, serviceAccounts } = setup({
       pages: [{ serviceAccounts: [account(name, { assumable: false })] }],
     });
@@ -131,20 +141,13 @@ describe('ensureWorkerServiceAccounts', () => {
     expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 
-  it('keeps an existing role and still creates the account', async () => {
-    const { http, put, serviceAccounts } = setup();
-    put.mockRejectedValueOnce(httpError(409));
-
-    const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], STATEFUL);
-
-    expect(serviceAccounts.create).toHaveBeenCalled();
-    expect(results.get(TRIAGE)?.ok).toBe(true);
-  });
-
   it('picks up an account created concurrently', async () => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
     const { http, get, serviceAccounts } = setup();
-    get.mockResolvedValueOnce({ serviceAccounts: [account(name)] });
+    // After the first page, account listings see the account the other tab created.
+    get.mockImplementation(async (url: string) =>
+      isRoleUrl(url) ? lookupRole(ALL_BUILT_IN_ROLES, url) : { serviceAccounts: [account(name)] }
+    );
     serviceAccounts.create.mockRejectedValueOnce(httpError(409));
 
     const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], STATEFUL);
@@ -155,29 +158,14 @@ describe('ensureWorkerServiceAccounts', () => {
   it('reports a failure when the lookup after a conflict also fails', async () => {
     const { http, get, serviceAccounts } = setup();
     serviceAccounts.create.mockRejectedValueOnce(httpError(409));
-    get.mockRejectedValueOnce(httpError(503, 'Service unavailable'));
+    get.mockImplementation(async (url: string) => {
+      if (isRoleUrl(url)) return lookupRole(ALL_BUILT_IN_ROLES, url);
+      throw httpError(503, 'Service unavailable');
+    });
 
     const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], STATEFUL);
 
     expect(results.get(TRIAGE)).toEqual({ ok: false, error: 'Service unavailable' });
-  });
-
-  it('fails only the worker whose role cannot be created', async () => {
-    const { http, put, serviceAccounts } = setup();
-    put.mockImplementation(async (url: string) => {
-      if (url.includes(WORKER_ROLE_DEFINITIONS[TRIAGE].name)) throw httpError(403, 'Forbidden');
-      return {};
-    });
-
-    const results = await ensureWorkerServiceAccounts(
-      http,
-      serviceAccounts,
-      [TRIAGE, TUNING],
-      STATEFUL
-    );
-
-    expect(results.get(TRIAGE)).toEqual({ ok: false, error: 'Forbidden' });
-    expect(results.get(TUNING)?.ok).toBe(true);
   });
 
   it('fails every worker when service accounts are not enabled', async () => {
@@ -209,110 +197,82 @@ describe('ensureWorkerServiceAccounts', () => {
     expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 
-  describe('on Serverless', () => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
-    const predefinedRole = `_${name}`;
-    const tuningRole = `_${WORKER_ROLE_DEFINITIONS[TUNING].name}`;
-    const reserved = { metadata: { _reserved: true } };
-
-    it('creates the account with the predefined role and no custom role', async () => {
-      const { http, get, put, serviceAccounts } = setup({ roles: { [predefinedRole]: reserved } });
-
-      const results = await ensureWorkerServiceAccounts(
-        http,
-        serviceAccounts,
-        [TRIAGE],
-        SERVERLESS
-      );
-
-      expect(get).toHaveBeenCalledWith(buildSecurityRoleUrl(predefinedRole), {
-        version: SECURITY_ROLE_API_VERSION,
-      });
-      expect(put).not.toHaveBeenCalled();
-      expect(serviceAccounts.create).toHaveBeenCalledWith(
-        expect.objectContaining({ name, roles: [predefinedRole] })
-      );
-      expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
-    });
-
-    it('fails only the worker whose predefined role is not found', async () => {
-      const { http, serviceAccounts } = setup({ roles: { [predefinedRole]: reserved } });
-
-      const results = await ensureWorkerServiceAccounts(
-        http,
-        serviceAccounts,
-        [TRIAGE, TUNING],
-        SERVERLESS
-      );
-
-      expect(results.get(TUNING)).toEqual({
-        ok: false,
-        error: expect.stringContaining(tuningRole),
-      });
-      expect(serviceAccounts.create).not.toHaveBeenCalledWith(
-        expect.objectContaining({ roles: [tuningRole] })
-      );
-      expect(results.get(TRIAGE)?.ok).toBe(true);
-    });
-
-    it('treats a role with the predefined name that is not reserved as missing', async () => {
-      const { http, serviceAccounts } = setup({ roles: { [predefinedRole]: { metadata: {} } } });
-
-      const results = await ensureWorkerServiceAccounts(
-        http,
-        serviceAccounts,
-        [TRIAGE],
-        SERVERLESS
-      );
-
-      expect(results.get(TRIAGE)).toEqual({
-        ok: false,
-        error: expect.stringContaining(predefinedRole),
-      });
-      expect(serviceAccounts.create).not.toHaveBeenCalled();
-    });
-
-    it('fails only the worker whose role lookup fails', async () => {
-      const { http, get, serviceAccounts } = setup({ roles: { [predefinedRole]: reserved } });
-      const lookup = get.getMockImplementation();
-      get.mockImplementation(async (url: string) => {
-        if (url === buildSecurityRoleUrl(tuningRole)) throw httpError(403, 'Forbidden');
-        return lookup?.(url);
-      });
-
-      const results = await ensureWorkerServiceAccounts(
-        http,
-        serviceAccounts,
-        [TRIAGE, TUNING],
-        SERVERLESS
-      );
-
-      expect(results.get(TUNING)).toEqual({ ok: false, error: 'Forbidden' });
-      expect(results.get(TRIAGE)?.ok).toBe(true);
-    });
-
-    it('reuses an existing account without looking up its role', async () => {
-      const { http, get, serviceAccounts } = setup({
-        pages: [{ serviceAccounts: [account(name)] }],
-      });
-
-      const results = await ensureWorkerServiceAccounts(
-        http,
-        serviceAccounts,
-        [TRIAGE],
-        SERVERLESS
-      );
-
-      expect(results.get(TRIAGE)?.ok).toBe(true);
-      expect(get).not.toHaveBeenCalledWith(buildSecurityRoleUrl(predefinedRole), expect.anything());
-      expect(serviceAccounts.create).not.toHaveBeenCalled();
-    });
-  });
-
   it('does nothing without workers', async () => {
     const { http, get, serviceAccounts } = setup();
 
     expect((await ensureWorkerServiceAccounts(http, serviceAccounts, [], STATEFUL)).size).toBe(0);
     expect(get).not.toHaveBeenCalled();
+  });
+
+  describe.each([
+    ['stateful', STATEFUL, 'Elasticsearch has no built-in'],
+    ['Serverless', SERVERLESS, 'does not exist in this project'],
+  ])('on %s', (_flavor, options, missingMessage) => {
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
+    const roleName = getWorkerRoleName(name, options);
+    const tuningRoleName = getWorkerRoleName(WORKER_SERVICE_ACCOUNT_NAMES[TUNING], options);
+
+    it('creates the account with the built-in role and never creates a role', async () => {
+      const { http, get, put, serviceAccounts } = setup();
+
+      const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], options);
+
+      expect(get).toHaveBeenCalledWith(buildSecurityRoleUrl(roleName), {
+        version: SECURITY_ROLE_API_VERSION,
+      });
+      expect(put).not.toHaveBeenCalled();
+      expect(serviceAccounts.create).toHaveBeenCalledWith(
+        expect.objectContaining({ name, roles: [roleName] })
+      );
+      expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
+    });
+
+    it('fails only the worker whose built-in role is missing', async () => {
+      const { http, serviceAccounts } = setup({ roles: [reserved(roleName)] });
+
+      const results = await ensureWorkerServiceAccounts(
+        http,
+        serviceAccounts,
+        [TRIAGE, TUNING],
+        options
+      );
+
+      expect(results.get(TUNING)).toEqual({
+        ok: false,
+        error: expect.stringContaining(missingMessage),
+      });
+      expect(results.get(TUNING)).toEqual({
+        ok: false,
+        error: expect.stringContaining(tuningRoleName),
+      });
+      expect(serviceAccounts.create).not.toHaveBeenCalledWith(
+        expect.objectContaining({ roles: [tuningRoleName] })
+      );
+      expect(results.get(TRIAGE)?.ok).toBe(true);
+    });
+
+    it('fails a worker whose role of that name is not built in', async () => {
+      const { http, serviceAccounts } = setup({ roles: [{ name: roleName, metadata: {} }] });
+
+      const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], options);
+
+      expect(results.get(TRIAGE)).toEqual({
+        ok: false,
+        error: expect.stringContaining(missingMessage),
+      });
+      expect(serviceAccounts.create).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed role lookup', async () => {
+      const { http, get, serviceAccounts } = setup();
+      get.mockImplementation(async (url: string) => {
+        if (isRoleUrl(url)) throw httpError(403, 'Forbidden');
+      });
+
+      const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], options);
+
+      expect(results.get(TRIAGE)).toEqual({ ok: false, error: 'Forbidden' });
+      expect(serviceAccounts.create).not.toHaveBeenCalled();
+    });
   });
 });
