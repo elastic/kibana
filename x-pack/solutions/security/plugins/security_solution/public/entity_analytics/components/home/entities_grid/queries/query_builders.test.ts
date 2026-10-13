@@ -325,6 +325,19 @@ describe('entities grid query builders', () => {
       }
     );
 
+    it('reads no anomalies without security jobs, as there is no anomaly index', async () => {
+      const runQuery = createRunner([]);
+
+      const fields = await anomaliesEnricher.fetch(
+        pageRows,
+        { ...BASE_ARGS, anomalyJobIds: [] },
+        createRunContext(runQuery)
+      );
+
+      expect(runQuery).not.toHaveBeenCalled();
+      expect(fields.get('host:h-1')).toEqual({ anomaly_count: null });
+    });
+
     it('reads no aliases for individual rows', async () => {
       const runQuery = createRunner([]);
 

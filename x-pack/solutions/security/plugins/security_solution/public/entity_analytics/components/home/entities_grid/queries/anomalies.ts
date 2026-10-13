@@ -61,9 +61,9 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
     foreignRows: [
       ...buildAnomalyEntityRows(args),
       `| STATS ${buildEntityAggregations(ANOMALY_AGGREGATIONS).join(', ')} BY \`entity.id\``,
-      ...buildResolvedEntityAggregationSteps(args, ANOMALY_RESOLVED_ENTITY_AGGREGATIONS),
     ],
     mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
+    resolvedEntityAggregations: ANOMALY_RESOLVED_ENTITY_AGGREGATIONS,
     sortField: ANOMALY_COUNT_FIELD,
   });
 
@@ -95,6 +95,10 @@ const anomalyCountEnricher: PageEnricher = {
   fetch: async (pageRows, args, { runQuery }) => {
     const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
+    // Without security jobs there is no anomaly index to read, and no anomaly.
+    if (!args.anomalyJobIds.length) {
+      return new Map(entityIds.map((id) => [id, { [ANOMALY_COUNT_FIELD]: null }]));
+    }
 
     // The anomalies of the aliases of a resolved row count for it.
     const rows = await runQuery(

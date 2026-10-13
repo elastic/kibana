@@ -7,7 +7,11 @@
 
 import { ENTITY_ID_FIELD } from '../common';
 import type { QueryArgs } from '../common';
-import { buildEffectiveRiskSteps, buildJoinedPageSteps } from './esql';
+import {
+  buildEffectiveRiskSteps,
+  buildJoinedPageSteps,
+  buildResolvedEntityAggregationSteps,
+} from './esql';
 import { IN_VIEW_FIELD, buildEntitiesInViewSteps } from './entities_in_view';
 
 // ── foreign sorts ────────────────────────────────────────────────────────────
@@ -23,6 +27,12 @@ export interface MergedForeignRowsOptions {
   entityConditions?: readonly string[];
   /** Merge aggregations that carry the foreign columns, e.g. `x = MAX(x)`. */
   mergeAggregations: readonly string[];
+  /**
+   * On resolved rows, the foreign rows of an alias count for its resolved entity: how its columns
+   * aggregate. They go after the merge, which has the entity docs to join, even when no foreign
+   * index exists.
+   */
+  resolvedEntityAggregations?: readonly string[];
   /** Steps after the merge that compute the sort column. */
   afterMerge?: readonly string[];
 }
@@ -44,6 +54,7 @@ export const buildMergedForeignRows = (
     entityFields = [],
     entityConditions = [],
     mergeAggregations,
+    resolvedEntityAggregations,
     afterMerge = [],
   }: MergedForeignRowsOptions
 ): string[] => [
@@ -60,6 +71,12 @@ export const buildMergedForeignRows = (
   `| STATS ${[...mergeAggregations, `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`].join(
     ', '
   )} BY \`${ENTITY_ID_FIELD}\``,
+  ...(resolvedEntityAggregations
+    ? buildResolvedEntityAggregationSteps(args, [
+        ...resolvedEntityAggregations,
+        `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
+      ])
+    : []),
   `| WHERE ${IN_VIEW_FIELD} == 1`,
   ...afterMerge,
 ];

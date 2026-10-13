@@ -672,9 +672,6 @@ TRUE, _euid_branch_1_formula, NULL))
 | EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
 | WHERE \`entity.id\` IS NOT NULL
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
-| STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -684,6 +681,9 @@ FROM entities-latest-default
 | KEEP \`entity.id\`, _in_view
 )
 | STATS anomaly_count = MAX(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
+| STATS anomaly_count = SUM(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
@@ -748,9 +748,6 @@ TRUE, _euid_branch_1_formula, NULL))
 | EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
 | WHERE \`entity.id\` IS NOT NULL
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
-| STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -760,6 +757,9 @@ FROM entities-latest-default
 | KEEP \`entity.id\`, _in_view
 )
 | STATS anomaly_count = MAX(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
+| STATS anomaly_count = SUM(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | WHERE anomaly_count IS NULL AND entity.id > \\"host:h-1\\"
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
@@ -825,9 +825,6 @@ TRUE, _euid_branch_1_formula, NULL))
 | EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
 | WHERE \`entity.id\` IS NOT NULL
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
-| STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -838,6 +835,9 @@ FROM entities-latest-default
 | KEEP \`entity.id\`, _in_view
 )
 | STATS anomaly_count = MAX(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
+| STATS anomaly_count = SUM(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
@@ -2959,9 +2959,6 @@ TRUE, _euid_branch_1_formula, NULL))
 | EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
 | WHERE \`entity.id\` IS NOT NULL
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
-| STATS anomaly_count = SUM(anomaly_count) BY \`entity.id\`
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -2972,6 +2969,9 @@ FROM entities-latest-default
 | KEEP \`entity.id\`, _in_view
 )
 | STATS anomaly_count = MAX(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
+| EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
+| STATS anomaly_count = SUM(anomaly_count), _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | SORT anomaly_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
