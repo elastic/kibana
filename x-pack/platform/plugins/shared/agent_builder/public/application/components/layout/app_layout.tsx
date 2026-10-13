@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -15,7 +16,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { useQueryState } from '../../hooks/use_query_state';
 import { searchParamNames } from '../../search_param_names';
 
 import {
@@ -33,16 +33,26 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const {
     services: { analytics },
   } = useKibana();
-  // Kept in the URL so an entry point (e.g. "Open chat" on an investigation) can land on the page
-  // with the sidebar already collapsed; toggling keeps the URL in step with the state.
-  const [sidebarCollapsedParam, setSidebarCollapsedParam] = useQueryState<string>(
-    searchParamNames.sidebarCollapsed
+  const history = useHistory();
+  // An entry point (e.g. "Open chat" on an investigation) can ask for a collapsed sidebar via the
+  // `sidebarCollapsed` search param. It is read once as the initial state and then removed from
+  // the URL, so the state has a single owner and toggling never touches the URL.
+  const [isCondensed, setIsCondensed] = useState(
+    () =>
+      new URLSearchParams(history.location.search).get(searchParamNames.sidebarCollapsed) === 'true'
   );
-  const isCondensed = sidebarCollapsedParam === 'true';
-  const setIsCondensed = useCallback(
-    (nextIsCondensed: boolean) => setSidebarCollapsedParam(nextIsCondensed ? 'true' : null),
-    [setSidebarCollapsedParam]
-  );
+
+  useEffect(() => {
+    const { pathname, search, hash, state } = history.location;
+    const searchParams = new URLSearchParams(search);
+    if (!searchParams.has(searchParamNames.sidebarCollapsed)) {
+      return;
+    }
+    searchParams.delete(searchParamNames.sidebarCollapsed);
+    history.replace({ pathname, search: searchParams.toString(), hash, state });
+    // `history` is stable, so this runs once on mount; the param is a one-shot hint consumed by
+    // the initial state above.
+  }, [history]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -63,7 +73,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         setIsCondensed(nextIsCondensed);
       }
     },
-    [analytics, isCondensed, setIsCondensed]
+    [analytics, isCondensed]
   );
 
   const sidebarStyles = css`
@@ -88,7 +98,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         pageSideBar={
           <UnifiedSidebar
             isCondensed={isCondensed}
-            onToggleCondensed={() => setIsCondensed(!isCondensed)}
+            onToggleCondensed={() => setIsCondensed((v) => !v)}
           />
         }
         pageSideBarProps={{
