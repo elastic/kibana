@@ -15,7 +15,13 @@ import type { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 
 /** Allowed icon types for AI button components. */
-export type AiButtonIconType = 'addToChat' | 'sparkles' | 'productAgent' | 'aiAssistantLogo';
+export type AiButtonIconType =
+  | 'addToChat'
+  | 'sparkles'
+  | 'productAgent'
+  | 'aiAssistantLogo'
+  | 'inspect'
+  | 'eye';
 type AiButtonTextSize = 'xs' | 's' | 'm';
 
 /** Event handler prop names from DOMAttributes (onClick, onKeyDown, …). */

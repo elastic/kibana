@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
   type InvestigationLocatorParams,
@@ -107,15 +109,18 @@ export const useInvestigateAlert = ({
     [investigationId, investigationLocator]
   );
 
+  const markViewed = useCallback(
+    (viewedId: string) =>
+      setViewedInvestigationIds((prev = []) =>
+        [viewedId, ...prev.filter((id) => id !== viewedId)].slice(0, MAX_VIEWED_INVESTIGATIONS)
+      ),
+    [setViewedInvestigationIds]
+  );
+
   const markInvestigationViewed = useCallback(() => {
     if (!investigationId) return;
-    setViewedInvestigationIds((prev = []) =>
-      [investigationId, ...prev.filter((id) => id !== investigationId)].slice(
-        0,
-        MAX_VIEWED_INVESTIGATIONS
-      )
-    );
-  }, [investigationId, setViewedInvestigationIds]);
+    markViewed(investigationId);
+  }, [investigationId, markViewed]);
 
   const isFinished = latestStatus === 'failed' || latestStatus === 'cancelled';
   const isOpened = Boolean(investigationId && viewedInvestigationIds.includes(investigationId));
@@ -155,16 +160,42 @@ export const useInvestigateAlert = ({
 
     setIsStarting(true);
     try {
-      await investigationsClient.fetch('POST /internal/nightshift/investigations', {
-        signal: null,
-        params: {
-          body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
-        },
+      const { investigation_id: startedId } = await investigationsClient.fetch(
+        'POST /internal/nightshift/investigations',
+        {
+          signal: null,
+          params: {
+            body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
+          },
+        }
+      );
+      const startedInvestigationUrl = investigationLocator?.getRedirectUrl({
+        investigationId: startedId,
       });
       services?.notifications?.toasts?.addSuccess({
         title: i18n.translate('xpack.observability.alerts.investigationStarted', {
           defaultMessage: 'Investigation started',
         }),
+        ...(startedInvestigationUrl &&
+          services && {
+            text: toMountPoint(
+              <EuiLink
+                href={startedInvestigationUrl}
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                  markViewed(startedId);
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
+                    return;
+                  }
+                  event.preventDefault();
+                  investigationLocator?.navigate({ investigationId: startedId });
+                }}
+                data-test-subj="alertInvestigationStartedViewLink"
+              >
+                {viewInvestigationActionLabel}
+              </EuiLink>,
+              services
+            ),
+          }),
       });
       await queryClient.invalidateQueries(statusQueryKey);
       onInvestigate?.();
@@ -200,5 +231,8 @@ export const useInvestigateAlert = ({
       detail: latestStatus,
     }),
     markInvestigationViewed,
+    hasInvestigation: latestInvestigation !== undefined,
   };
 };
+
+export type AlertInvestigation = ReturnType<typeof useInvestigateAlert>;
