@@ -11,42 +11,51 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowTriggerTab } from './types';
 
 export const TRIGGER_TABS_LABELS: Record<WorkflowTriggerTab, string> = {
-  alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerLabel', {
+  alert: i18n.translate('workflows.workflowsManagement.workflowsExecution.alertTriggerLabel', {
     defaultMessage: 'Alert',
   }),
-  index: i18n.translate('plugins.workflowsManagement.workflowsExecution.indexTriggerLabel', {
+  index: i18n.translate('workflows.workflowsManagement.workflowsExecution.indexTriggerLabel', {
     defaultMessage: 'Document',
   }),
-  event: i18n.translate('plugins.workflowsManagement.workflowsExecution.eventTriggerLabel', {
+  event: i18n.translate('workflows.workflowsManagement.workflowsExecution.eventTriggerLabel', {
     defaultMessage: 'Event',
   }),
-  manual: i18n.translate('plugins.workflowsManagement.workflowsExecution.manualTriggerLabel', {
+  manual: i18n.translate('workflows.workflowsManagement.workflowsExecution.manualTriggerLabel', {
     defaultMessage: 'Manual',
   }),
   historical: i18n.translate(
-    'plugins.workflowsManagement.workflowsExecution.historicalTriggerLabel',
+    'workflows.workflowsManagement.workflowsExecution.historicalTriggerLabel',
     { defaultMessage: 'Historical' }
   ),
 };
 
 export const TRIGGER_TABS_DESCRIPTIONS: Record<WorkflowTriggerTab, string> = {
   manual: i18n.translate(
-    'plugins.workflowsManagement.workflowsExecution.manualTriggerDescription',
+    'workflows.workflowsManagement.workflowsExecution.manualTriggerDescription',
     {
       defaultMessage: 'Provide custom JSON data manually',
     }
   ),
-  index: i18n.translate('plugins.workflowsManagement.workflowsExecution.indexTriggerDescription', {
-    defaultMessage: 'Choose a document from Elasticsearch',
-  }),
-  alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
-    defaultMessage: 'Choose an existing alert directly',
-  }),
-  event: i18n.translate('plugins.workflowsManagement.workflowsExecution.eventTriggerDescription', {
-    defaultMessage: 'Select one of possible events that you can use to run a workflow',
-  }),
+  index: i18n.translate(
+    'workflows.workflowsManagement.workflowsExecution.indexTriggerDescription',
+    {
+      defaultMessage: 'Choose a document from Elasticsearch',
+    }
+  ),
+  alert: i18n.translate(
+    'workflows.workflowsManagement.workflowsExecution.alertTriggerDescription',
+    {
+      defaultMessage: 'Choose an existing alert directly',
+    }
+  ),
+  event: i18n.translate(
+    'workflows.workflowsManagement.workflowsExecution.eventTriggerDescription',
+    {
+      defaultMessage: 'Select one of possible events that you can use to run a workflow',
+    }
+  ),
   historical: i18n.translate(
-    'plugins.workflowsManagement.workflowsExecution.historicalTriggerDescription',
+    'workflows.workflowsManagement.workflowsExecution.historicalTriggerDescription',
     { defaultMessage: 'Reuse input data from previous executions' }
   ),
 };

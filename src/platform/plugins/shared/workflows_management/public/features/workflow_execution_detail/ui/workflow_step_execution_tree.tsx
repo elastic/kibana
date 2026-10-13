@@ -1568,7 +1568,7 @@ export const WorkflowStepExecutionTree = ({
       title={
         <h2>
           <FormattedMessage
-            id="workflows.WorkflowStepExecutionTree.errorLoadingStepExecutions"
+            id="workflows.WorkflowStepExecutionTree.errorLoadingExecutionGraph"
             defaultMessage="Error loading execution graph"
           />
         </h2>

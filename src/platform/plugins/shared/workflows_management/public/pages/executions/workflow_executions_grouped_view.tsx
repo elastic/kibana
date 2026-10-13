@@ -100,10 +100,9 @@ const GroupStats = ({ count }: { count: number }) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const badgeValue = count > 99 ? '99+' : count.toString();
-  const executionsLabel = i18n.translate(
-    'workflowsManagement.executionsPage.table.groupBy.stat.executions',
-    { defaultMessage: 'Executions' }
-  );
+  const executionsLabel = i18n.translate('workflows.executionsPage.table.groupBy.stat.executions', {
+    defaultMessage: 'Executions',
+  });
 
   return (
     <EuiFlexGroup
@@ -155,7 +154,7 @@ const GroupTable = React.memo<{
     () => [
       {
         field: 'workflow',
-        name: i18n.translate('workflowsManagement.executionsPage.column.workflow', {
+        name: i18n.translate('workflows.executionsPage.column.workflow', {
           defaultMessage: 'Workflow',
         }),
         render: (_value, execution) => (
@@ -164,7 +163,7 @@ const GroupTable = React.memo<{
       },
       {
         field: 'tags',
-        name: i18n.translate('workflowsManagement.executionsPage.column.tags', {
+        name: i18n.translate('workflows.executionsPage.column.tags', {
           defaultMessage: 'Tags',
         }),
         width: '250px',
@@ -172,7 +171,7 @@ const GroupTable = React.memo<{
       },
       {
         field: 'triggers',
-        name: i18n.translate('workflowsManagement.executionsPage.column.trigger', {
+        name: i18n.translate('workflows.executionsPage.column.trigger', {
           defaultMessage: 'Trigger',
         }),
         width: '250px',
@@ -180,7 +179,7 @@ const GroupTable = React.memo<{
       },
       {
         field: 'startedAt',
-        name: i18n.translate('workflowsManagement.executionsPage.column.started', {
+        name: i18n.translate('workflows.executionsPage.column.started', {
           defaultMessage: 'Started',
         }),
         width: '250px',
@@ -188,7 +187,7 @@ const GroupTable = React.memo<{
       },
       {
         field: 'duration',
-        name: i18n.translate('workflowsManagement.executionsPage.column.duration', {
+        name: i18n.translate('workflows.executionsPage.column.duration', {
           defaultMessage: 'Duration',
         }),
         width: '250px',
@@ -196,7 +195,7 @@ const GroupTable = React.memo<{
         render: (_value, execution) => <WorkflowExecutionDurationCell execution={execution} />,
       },
       {
-        name: i18n.translate('workflowsManagement.executionsPage.column.actions', {
+        name: i18n.translate('workflows.executionsPage.column.actions', {
           defaultMessage: 'Actions',
         }),
         width: '56px',
@@ -216,12 +215,9 @@ const GroupTable = React.memo<{
 
   return (
     <EuiBasicTable
-      tableCaption={i18n.translate(
-        'workflowsManagement.executionsPage.table.groupBy.tableCaption',
-        {
-          defaultMessage: 'Executions in this group',
-        }
-      )}
+      tableCaption={i18n.translate('workflows.executionsPage.table.groupBy.tableCaption', {
+        defaultMessage: 'Executions in this group',
+      })}
       items={executions}
       columns={columns}
       tableLayout="auto"
@@ -265,7 +261,7 @@ export const WorkflowExecutionsGroupedView = React.memo<WorkflowExecutionsGroupe
       return (
         <div data-test-subj="executionsTableGroupedView">
           <EuiText size="s" color="subdued">
-            {i18n.translate('workflowsManagement.executionsPage.table.groupBy.empty', {
+            {i18n.translate('workflows.executionsPage.table.groupBy.empty', {
               defaultMessage: 'No executions to group.',
             })}
           </EuiText>
@@ -278,7 +274,7 @@ export const WorkflowExecutionsGroupedView = React.memo<WorkflowExecutionsGroupe
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText css={summaryCss} data-test-subj="executionsTableGroupSummary">
-              {i18n.translate('workflowsManagement.executionsPage.table.groupBy.summary', {
+              {i18n.translate('workflows.executionsPage.table.groupBy.summary', {
                 defaultMessage:
                   '{executionCount} {executionCount, plural, one {execution} other {executions}} | {groupCount} {groupCount, plural, one {group} other {groups}}',
                 values: {

@@ -200,7 +200,7 @@ export const getExecutionHistoryColumns = (
           <EuiFlexItem grow={false}>
             {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
               <EuiBadge color="warning" data-test-subj="workflowExecutionActionRequiredBadge">
-                {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                {i18n.translate('workflows.executionListItem.actionRequiredBadge', {
                   defaultMessage: 'Action is required',
                 })}
               </EuiBadge>

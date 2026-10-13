@@ -28,17 +28,17 @@ const isConnectorSpecWithEvents = (spec: ConnectorSpec): spec is ConnectorSpecWi
 export const toConnectorEventTriggerSchema = (specEventSchema: z.ZodObject): z.ZodObject =>
   specEventSchema.extend({
     connectorId: z.string().describe(
-      i18n.translate('workflowsManagement.triggers.connectorEvent.connectorIdDescription', {
+      i18n.translate('workflows.triggers.connectorEvent.connectorIdDescription', {
         defaultMessage: 'Id of the connector instance that received this event.',
       })
     ),
     connectorTypeId: z.string().describe(
-      i18n.translate('workflowsManagement.triggers.connectorEvent.connectorTypeIdDescription', {
+      i18n.translate('workflows.triggers.connectorEvent.connectorTypeIdDescription', {
         defaultMessage: 'Connector type id (for example .inboundWebhook).',
       })
     ),
     spaceId: z.string().describe(
-      i18n.translate('workflowsManagement.triggers.connectorEvent.spaceIdDescription', {
+      i18n.translate('workflows.triggers.connectorEvent.spaceIdDescription', {
         defaultMessage: 'Kibana space of the connector instance.',
       })
     ),
@@ -46,7 +46,7 @@ export const toConnectorEventTriggerSchema = (specEventSchema: z.ZodObject): z.Z
       .string()
       .optional()
       .describe(
-        i18n.translate('workflowsManagement.triggers.connectorEvent.correlationKeyDescription', {
+        i18n.translate('workflows.triggers.connectorEvent.correlationKeyDescription', {
           defaultMessage: 'Optional correlation key supplied by the connector for this ingest.',
         })
       ),
