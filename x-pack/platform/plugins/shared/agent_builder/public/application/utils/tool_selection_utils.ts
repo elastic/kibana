@@ -129,16 +129,18 @@ export const isSkillAutoIncluded = <
 /**
  * Returns the list of active skills for an agent, combining explicitly selected skills
  * with built-in (readonly) skills when elastic capabilities are enabled. Built-in skills
- * that are already explicitly selected are not duplicated.
+ * that are already explicitly selected are not duplicated. Skills inherited from the agent's
+ * type count as explicitly selected.
  */
 export const getActiveSkills = <
   T extends { id: string; readonly: boolean; exclude_from_elastic_capabilities?: boolean }
 >(
   allSkills: T[],
   agentSkillIds: string[] | undefined,
-  enableElasticCapabilities: boolean
+  enableElasticCapabilities: boolean,
+  inheritedSkillIds: ReadonlySet<string> = new Set()
 ): T[] => {
-  const explicitIds = new Set(agentSkillIds ?? []);
+  const explicitIds = new Set([...inheritedSkillIds, ...(agentSkillIds ?? [])]);
   const explicitSkills = allSkills.filter((s) => explicitIds.has(s.id));
   if (!enableElasticCapabilities) return explicitSkills;
   const builtinNotExplicit = allSkills.filter(

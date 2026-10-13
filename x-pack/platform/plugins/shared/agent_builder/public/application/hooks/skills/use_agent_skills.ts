@@ -12,6 +12,10 @@ import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useToasts } from '../use_toasts';
+import type { AgentSkillSummary } from '../../../../common/http_api/skills';
+
+// Stable across renders, so memos keyed on `skills` don't recompute while there is no data.
+const noSkills: AgentSkillSummary[] = [];
 
 export const useAgentSkills = ({ agentId }: { agentId?: string } = {}) => {
   const { addErrorToast } = useToasts();
@@ -39,7 +43,7 @@ export const useAgentSkills = ({ agentId }: { agentId?: string } = {}) => {
   }, [isError, error, addErrorToast]);
 
   return {
-    skills: data ?? [],
+    skills: data ?? noSkills,
     isLoading,
     error,
     isError,
