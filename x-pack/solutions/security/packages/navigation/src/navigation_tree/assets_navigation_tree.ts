@@ -24,6 +24,7 @@ const ARTIFACT_TAB_PATHS_RECORD: Record<keyof typeof ENDPOINT_ARTIFACT_LISTS, st
   hostIsolationExceptions: `${SECURITY_MANAGEMENT_PATH}/host_isolation_exceptions`,
   blocklists: `${SECURITY_MANAGEMENT_PATH}/blocklist`,
   endpointExceptions: `${SECURITY_MANAGEMENT_PATH}/endpoint_exceptions`,
+  customYaraSignatures: `${SECURITY_MANAGEMENT_PATH}/custom_yara_signatures`,
 } as const;
 const ARTIFACT_TAB_PATHS = Object.values(ARTIFACT_TAB_PATHS_RECORD);
 
