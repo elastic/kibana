@@ -631,6 +631,13 @@
       "approvedBy": "@elastic/security-defend-workflows",
       "oasdiffId": "request-property-max-length-set",
       "prUrl": "https://github.com/elastic/kibana/pull/295450"
+    },
+    {
+      "path": "/api/ml/saved_objects/sync",
+      "method": "get",
+      "oasdiffId": "request-parameter-removed",
+      "reason": "test",
+      "approvedBy": "@elastic/kibana-core"
     }
   ]
 }
