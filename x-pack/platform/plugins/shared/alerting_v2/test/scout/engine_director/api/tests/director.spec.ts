@@ -479,9 +479,14 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
 
       // Wait for the active transition — by then the executor will have run
       // at least four times for this group, walking status_count 1 → 2 → 3.
-      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
-        episodeStatus: 'active',
-      });
+      // Space the runs beyond the timeframe so each one counts as a distinct
+      // pending evaluation rather than collapsing into the previous one.
+      await apiServices.alertingV2.ruleRunner.waitForEvents(
+        rule.id,
+        1,
+        { episodeStatus: 'active' },
+        { intervalMs: TIMEFRAME_RUN_INTERVAL_MS }
+      );
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
       const pendingCounts = events
@@ -673,9 +678,14 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       // The episode must reach inactive eventually (after threshold is met).
-      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
-        episodeStatus: 'inactive',
-      });
+      // Space the runs beyond the timeframe so each recovering evaluation counts
+      // toward the threshold rather than collapsing into the previous one.
+      await apiServices.alertingV2.ruleRunner.waitForEvents(
+        rule.id,
+        1,
+        { episodeStatus: 'inactive' },
+        { intervalMs: TIMEFRAME_RUN_INTERVAL_MS }
+      );
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
 
@@ -728,9 +738,14 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         query: { term: { 'host.name': 'host-skip-recovering' } },
       });
 
-      await apiServices.alertingV2.ruleRunner.waitForEvents(rule.id, 1, {
-        episodeStatus: 'inactive',
-      });
+      // Space the run beyond the timeframe so the recovery is seen as a distinct
+      // evaluation and the episode transitions straight to inactive.
+      await apiServices.alertingV2.ruleRunner.waitForEvents(
+        rule.id,
+        1,
+        { episodeStatus: 'inactive' },
+        { intervalMs: TIMEFRAME_RUN_INTERVAL_MS }
+      );
 
       await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,

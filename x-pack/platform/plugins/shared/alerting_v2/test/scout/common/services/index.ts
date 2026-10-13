@@ -26,7 +26,11 @@ export { getRuleTemplatesApiService } from './rule_templates_api_service';
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
-export type { RuleExecutorTaskApiService } from './rule_executor_task_api_service';
+export type {
+  ReportedRun,
+  ReportedRunStatus,
+  RuleExecutorTaskApiService,
+} from './rule_executor_task_api_service';
 export { getRuleExecutorTaskApiService } from './rule_executor_task_api_service';
 
 export type { RuleRunnerApiService } from './rule_runner_api_service';

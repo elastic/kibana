@@ -42,6 +42,12 @@ import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
+import {
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -252,14 +258,25 @@ export function AlertDetails() {
     };
   }, [agentBuilder, alertDetail, ruleTypeBreached]);
 
+  const alertsListBreadcrumb = shouldShowV1ObservabilityAlertsTable(services)
+    ? {
+        href: http.basePath.prepend(paths.observability.alerts),
+        deepLinkId: 'observability-overview:alerts' as const,
+      }
+    : {
+        href: http.basePath.prepend(
+          `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}`
+        ),
+        deepLinkId: `${OBSERVABILITY_ALERTING_APP_ID}:alerts` as const,
+      };
+
   useBreadcrumbs(
     [
       {
-        href: http.basePath.prepend(paths.observability.alerts),
+        ...alertsListBreadcrumb,
         text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
           defaultMessage: 'Alerts',
         }),
-        deepLinkId: 'observability-overview:alerts',
       },
       {
         text: ruleTypeBreached ?? defaultBreadcrumb,

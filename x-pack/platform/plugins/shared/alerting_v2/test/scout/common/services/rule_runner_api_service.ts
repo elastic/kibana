@@ -10,7 +10,7 @@ import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 import type { RuleEventFilter, RuleEventsApiService } from './rule_events_api_service';
-import type { RuleExecutorTaskApiService } from './rule_executor_task_api_service';
+import type { ReportedRun, RuleExecutorTaskApiService } from './rule_executor_task_api_service';
 import type { RunRule } from './rules_api_service';
 
 const DEFAULT_SPACE_ID = 'default';
@@ -27,6 +27,23 @@ export interface WaitForExecutionsParams {
   /** Lower bound (inclusive) for the run start; defaults to the time of the call. */
   since?: Date;
   spaceId?: string;
+  /** Poll budget; defaults to `POLL_TIMEOUT_MS`. Raise it when runs are slow under load. */
+  timeoutMs?: number;
+}
+
+export interface WaitForReportedRunParams {
+  ruleId: string;
+  /** Accepts the run a spec is waiting for. */
+  match: (run: ReportedRun) => boolean;
+  /** Lower bound (inclusive) on the run start; defaults to every run so far. */
+  since?: Date;
+  spaceId?: string;
+  /**
+   * Poll budget; defaults to `POLL_TIMEOUT_MS`. A disabled rule rejects `_run`,
+   * so its only runs come from the scheduler — pass a budget above the schedule
+   * interval to catch one.
+   */
+  timeoutMs?: number;
 }
 
 /**
@@ -44,6 +61,8 @@ export interface RuleRunnerApiService {
   ) => Promise<void>;
   /** Runs the rule until its executor task has completed at least `runs` runs. */
   waitForExecutions: (params: WaitForExecutionsParams) => Promise<void>;
+  /** Runs the rule until some run reports a `kibana.task.data` matching `match`, and returns it. */
+  waitForReportedRun: (params: WaitForReportedRunParams) => Promise<ReportedRun>;
   /** Wraps `read` for `expect.poll` so every poll requests a run before reading. */
   runThen: <T>(ruleId: string, read: () => Promise<T>) => () => Promise<T>;
 }
@@ -57,13 +76,14 @@ export const getRuleRunnerApiService = ({
   log: ScoutLogger;
   runRule: RunRule;
   ruleEvents: Pick<RuleEventsApiService, 'find'>;
-  ruleExecutorTask: Pick<RuleExecutorTaskApiService, 'countRuns'>;
+  ruleExecutorTask: Pick<RuleExecutorTaskApiService, 'countRuns' | 'findReportedRuns'>;
 }): RuleRunnerApiService => {
   const pollUntilAtLeast = (
     min: number,
     count: () => Promise<number>,
     requestRun: () => Promise<number>,
-    intervalMs: number
+    intervalMs: number,
+    timeoutMs: number = POLL_TIMEOUT_MS
   ) =>
     expect
       .poll(
@@ -72,7 +92,7 @@ export const getRuleRunnerApiService = ({
           if (current < min) await requestRun();
           return current;
         },
-        { timeout: POLL_TIMEOUT_MS, intervals: [intervalMs] }
+        { timeout: timeoutMs, intervals: [intervalMs] }
       )
       .toBeGreaterThanOrEqual(min);
 
@@ -87,15 +107,50 @@ export const getRuleRunnerApiService = ({
         )
       ),
 
-    waitForExecutions: ({ ruleId, runs, since = new Date(), spaceId = DEFAULT_SPACE_ID }) =>
+    waitForExecutions: ({
+      ruleId,
+      runs,
+      since = new Date(),
+      spaceId = DEFAULT_SPACE_ID,
+      timeoutMs,
+    }) =>
       measurePerformanceAsync(log, 'ruleRunner.waitForExecutions', () =>
         pollUntilAtLeast(
           runs,
           () => ruleExecutorTask.countRuns({ ruleId, since, spaceId }),
           () => runRule(ruleId, { spaceId }),
-          POLL_INTERVAL_MS
+          POLL_INTERVAL_MS,
+          timeoutMs
         )
       ),
+
+    waitForReportedRun: ({
+      ruleId,
+      match,
+      since,
+      spaceId = DEFAULT_SPACE_ID,
+      timeoutMs = POLL_TIMEOUT_MS,
+    }) =>
+      measurePerformanceAsync(log, 'ruleRunner.waitForReportedRun', async () => {
+        let matched: ReportedRun | undefined;
+
+        await expect
+          .poll(
+            async () => {
+              // A disabled rule rejects the request (swallowed by `runRule`); its
+              // run then arrives from the scheduler instead of this poll.
+              await runRule(ruleId, { spaceId });
+              matched = (await ruleExecutorTask.findReportedRuns({ ruleId, since, spaceId })).find(
+                match
+              );
+              return matched !== undefined;
+            },
+            { timeout: timeoutMs, intervals: [POLL_INTERVAL_MS] }
+          )
+          .toBe(true);
+
+        return matched!;
+      }),
 
     runThen: (ruleId, read) => async () => {
       await runRule(ruleId);

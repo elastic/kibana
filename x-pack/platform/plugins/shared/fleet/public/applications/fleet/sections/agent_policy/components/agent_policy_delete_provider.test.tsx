@@ -21,6 +21,7 @@ import {
 } from '../../../hooks';
 
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../common/services/version_specific_policies_utils';
 
 jest.mock('../../../hooks', () => {
   return {
@@ -192,6 +193,15 @@ describe('AgentPolicyDeleteProvider', () => {
     it('blocks deletion and shows the affected agents count without a confirmation input', async () => {
       const { utils } = renderMenu({ agentPolicy: createAgentPolicy() });
       await openModal(utils);
+
+      // the agents are counted by their base policy id, so agents on `#sentinel` are included
+      expect(sendGetAgentsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: `${buildPolicyBaseIdWithFallbackKuery(
+            'agent-policy-1'
+          )} and not status: unenrolled`,
+        })
+      );
 
       const callout = utils.getByTestId('deleteAgentPolicyAgentsInUseCallout');
       expect(callout.textContent).toContain('3 agents are');
