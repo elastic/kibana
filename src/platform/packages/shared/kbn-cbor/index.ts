@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// NOTE: This can possibly be replaced with node-cbor using encode, and decodeFirstSync if we do need
-// to change into something better maintained but for now we are going to stick with borc as it is
-// a little faster
-import { encode as encodeJS, decode as decodeJS } from 'borc';
+import { encodeOne, decodeFirstSync } from 'cbor';
 
 export class KbnCbor {
-  static encode(data: unknown) {
-    return encodeJS(data);
+  static encode(data: unknown): Buffer {
+    return encodeOne(data);
   }
 
-  static decode(uint8: any) {
-    return decodeJS(uint8);
+  static decode(input: Buffer | Uint8Array): unknown {
+    return decodeFirstSync(input);
   }
 }
 
