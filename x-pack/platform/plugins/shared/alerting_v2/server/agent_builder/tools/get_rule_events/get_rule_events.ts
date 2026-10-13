@@ -14,7 +14,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
 import { alertEpisodeStatusSchema } from '@kbn/alerting-v2-schemas';
-import { z } from '@kbn/zod/v4';
+import { isoDateTime, z } from '@kbn/zod/v4';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { EpisodesClient } from '../../../lib/episodes_client';
@@ -27,14 +27,12 @@ const TOOL_FETCH_LIMIT = TOOL_RESULT_LIMIT + 1;
 
 const getRuleEventsSchema = z
   .object({
-    start: z.iso
-      .datetime()
+    start: isoDateTime()
       .optional()
       .describe(
         'Start of an optional @timestamp window (inclusive), ISO 8601. Pass together with end to narrow the window.'
       ),
-    end: z.iso
-      .datetime()
+    end: isoDateTime()
       .optional()
       .describe(
         'End of an optional @timestamp window (inclusive), ISO 8601. Pass together with start to narrow the window.'

@@ -120,7 +120,10 @@ export type TaskManagerStartContract = Pick<
     removeIfExists: TaskStore['remove'];
   } & {
     getRegisteredTypes: () => string[];
-    registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
+    registerEncryptedSavedObjectsClient: (
+      client: EncryptedSavedObjectsClient,
+      isEncryptionError?: (error: Error) => boolean
+    ) => void;
     registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => void;
     registerUiamApiKeyInvalidateFn: (fn?: UiamApiKeyInvalidationFn) => void;
   };
@@ -557,8 +560,11 @@ export class TaskManagerPlugin
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
-      registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
-        taskStore.registerEncryptedSavedObjectsClient(client);
+      registerEncryptedSavedObjectsClient: (
+        client: EncryptedSavedObjectsClient,
+        isEncryptionError?: (error: Error) => boolean
+      ) => {
+        taskStore.registerEncryptedSavedObjectsClient(client, isEncryptionError);
       },
       registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => {
         this.invalidateApiKeyFn = fn;

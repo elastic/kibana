@@ -76,6 +76,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
 
   services.settings.globalClient.get = <T,>(_key: string) => true as T;
   setSolutionNavId(services, 'oblt');
+  services.settings.globalClient.isDeclared = () => true;
   services.core.application.capabilities = {
     ...services.core.application.capabilities,
     alerting_v2_rules: {
@@ -377,7 +378,9 @@ describe('useTopNavLinks', () => {
 
   describe('save as button', () => {
     it('should disable save as button when session is not persisted', async () => {
-      const appMenuConfig = await setup({ persistedDiscoverSession: undefined });
+      const appMenuConfig = await setup({
+        persistedDiscoverSession: undefined,
+      });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const saveAsItem = items?.find((item) => item.id === 'saveAs');
@@ -395,7 +398,9 @@ describe('useTopNavLinks', () => {
         tabs: [],
         timeRestore: false,
       };
-      const appMenuConfig = await setup({ persistedDiscoverSession: persistedSession });
+      const appMenuConfig = await setup({
+        persistedDiscoverSession: persistedSession,
+      });
 
       const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
       const saveAsItem = items?.find((item) => item.id === 'saveAs');
@@ -510,6 +515,7 @@ describe('useTopNavLinks', () => {
 
       v2Services.settings.globalClient.get = <T,>(_key: string) => alertingV2Enabled as T;
       setSolutionNavId(v2Services, solutionNavId);
+      v2Services.settings.globalClient.isDeclared = () => true;
       if (!alertingV2Enabled) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2Services.core.application.capabilities;
@@ -643,7 +649,11 @@ describe('useTopNavLinks', () => {
 
           const [{ alertsPopoverItems }] = getCreateRuleOptionsSpy.mock.calls[0];
           expect(
-            alertsPopoverItems.map(({ id, label, testId }) => ({ id, label, testId }))
+            alertsPopoverItems.map(({ id, label, testId }) => ({
+              id,
+              label,
+              testId,
+            }))
           ).toContainEqual({
             id: 'custom-threshold-rule',
             label: 'Create custom threshold rule',
@@ -674,7 +684,10 @@ describe('useTopNavLinks', () => {
      * mode. Verifies the parent gate considers v2 access independently.
      */
     const setupV2OnlyServices = (
-      overrides: { alertingVTwoEnabled?: boolean; solutionNavId?: SolutionId | null } = {}
+      overrides: {
+        alertingVTwoEnabled?: boolean;
+        solutionNavId?: SolutionId | null;
+      } = {}
     ): DiscoverServices => {
       const baseMock = createDiscoverServicesMock();
       const { alertingVTwoEnabled = true, solutionNavId = 'oblt' } = overrides;
@@ -697,6 +710,7 @@ describe('useTopNavLinks', () => {
 
       v2OnlyServices.settings.globalClient.get = <T,>(_key: string) => alertingVTwoEnabled as T;
       setSolutionNavId(v2OnlyServices, solutionNavId);
+      v2OnlyServices.settings.globalClient.isDeclared = () => true;
       if (!alertingVTwoEnabled) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2OnlyServices.core.application.capabilities;

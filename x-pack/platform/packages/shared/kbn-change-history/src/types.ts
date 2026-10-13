@@ -253,6 +253,14 @@ export interface GetChangeHistoryOptions {
   spanLabels?: Record<string, string>;
 }
 
+export interface GetChangeHistoryEventOptions {
+  /**
+   * Caller-supplied labels attached to the span this method emits. The caller owns the
+   * keys and values, keeping `kbn-change-history` solution-agnostic.
+   */
+  spanLabels?: Record<string, string>;
+}
+
 /**
  * Result from a history query.
  */

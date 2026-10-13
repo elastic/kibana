@@ -43,6 +43,21 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
       defaultMessage:
         'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
     }),
+  huntSupplyPrerequisitesUnmet: () =>
+    i18n.translate('xpack.alertzero.huntSupplyPrerequisitesUnmetErrorMessage', {
+      defaultMessage:
+        'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
+    }),
+  huntSupplyReportsIndexUnmanaged: () =>
+    i18n.translate('xpack.alertzero.huntSupplyReportsIndexUnmanagedErrorMessage', {
+      defaultMessage:
+        'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it, then try turning on Hunt Watch again.',
+    }),
+  huntSupplyNotInstalled: () =>
+    i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
+      defaultMessage:
+        'Threat intel supply workflows are not installed in this deployment yet. Wait until setup finishes (Machine Learning embeddings available), then try turning on Hunt Watch again. If this persists after a restart, contact an administrator.',
+    }),
   noModel: (displayName) =>
     i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
       defaultMessage:
