@@ -11,6 +11,7 @@ import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookback,
+  SET_UNMAPPED_NULLIFY,
   toList,
 } from './esql';
 import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
@@ -20,9 +21,6 @@ import type { QueryArgs, Row } from '../common';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 import type { ColumnQuerySpec, PageEnricher } from './types';
-
-/** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
-const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 
 /**
  * Final anomaly records of the security jobs in the time range, one row per record with its
