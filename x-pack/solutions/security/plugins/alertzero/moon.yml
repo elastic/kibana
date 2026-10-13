@@ -82,6 +82,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
+  - '@kbn/task-manager-plugin'
   - '@kbn/workflows-execution-engine'
 tags:
   - plugin
@@ -94,7 +95,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - integration_tests/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
