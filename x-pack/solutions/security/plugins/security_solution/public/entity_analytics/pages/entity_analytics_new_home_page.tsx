@@ -32,7 +32,7 @@ import {
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
   useAlertBasedTilesWithDelta as useAlertBasedTiles,
-  useEntitiesWithAnomaliesCount,
+  useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
   useNewEntityCount,
   useRiskMoversCount,
   useNewlyHighCriticalCount,
@@ -146,8 +146,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: anomaliesCount,
+    delta: anomaliesDelta,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
+    isDeltaLoading: anomaliesDeltaLoading,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -295,6 +297,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: anomaliesCount,
+        delta: anomaliesDelta,
+        isDeltaLoading: anomaliesDeltaLoading,
         isLoading: anomaliesLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
@@ -448,6 +452,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       alertBasedLoading,
       isDeltaLoading,
       anomaliesCount,
+      anomaliesDelta,
+      anomaliesDeltaLoading,
       anomaliesLoading,
       riskMoversCount,
       riskMoversLoading,
