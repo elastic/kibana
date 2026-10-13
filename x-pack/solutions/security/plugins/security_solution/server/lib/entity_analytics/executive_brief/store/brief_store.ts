@@ -59,21 +59,24 @@ const isJobStale = (job: BriefJob, now: Date): boolean =>
 export const isJobActive = (job: BriefJob, now: Date): boolean =>
   isInFlight(job) && !isJobStale(job, now);
 
-/** Reports a stale in-flight job as failed with `interrupted`, as GET shows it. */
-export const withStaleJobAsInterrupted = (document: BriefDocument, now: Date): BriefDocument =>
-  isJobStale(document.job, now)
+/** Reports a stale in-flight job as failed with `interrupted`, as the GET routes show it. */
+export const staleJobAsInterrupted = (job: BriefJob, now: Date): BriefJob =>
+  isJobStale(job, now)
     ? {
-        ...document,
-        job: {
-          ...document.job,
-          status: 'failed',
-          error: {
-            code: 'interrupted',
-            message: 'The brief generation stopped responding and was interrupted.',
-          },
+        ...job,
+        status: 'failed',
+        error: {
+          code: 'interrupted',
+          message: 'The brief generation stopped responding and was interrupted.',
         },
       }
-    : document;
+    : job;
+
+/** The document with a stale in-flight job reported as interrupted. */
+export const withStaleJobAsInterrupted = (document: BriefDocument, now: Date): BriefDocument => {
+  const job = staleJobAsInterrupted(document.job, now);
+  return job === document.job ? document : { ...document, job };
+};
 
 export interface StoredBrief {
   docId: string;
@@ -138,10 +141,23 @@ export class BriefStore {
     ownerId: string;
     spaceId: string;
   }): Promise<StoredBrief | undefined> {
-    return this.read(getBriefDocId(ownerId, spaceId), [
-      ...ownerFilters(ownerId, spaceId),
-      { range: { expires_at: { gt: this.now().toISOString() } } },
-    ]);
+    return this.read(getBriefDocId(ownerId, spaceId), this.callerFilters(ownerId, spaceId));
+  }
+
+  /** The job of the caller's unexpired brief in this space, reading only the job fields. */
+  async getJob({
+    ownerId,
+    spaceId,
+  }: {
+    ownerId: string;
+    spaceId: string;
+  }): Promise<BriefJob | undefined> {
+    const hit = await this.findHit(
+      getBriefDocId(ownerId, spaceId),
+      this.callerFilters(ownerId, spaceId),
+      { _source: ['job'] }
+    );
+    return hit?._source?.job;
   }
 
   /** The document a task works on, only while `job.id` still matches. Internal use (task). */
@@ -344,17 +360,33 @@ export class BriefStore {
     }
   }
 
+  /** Owner, space and expiry filters for reads made on behalf of the caller. */
+  private callerFilters(ownerId: string, spaceId: string): QueryDslQueryContainer[] {
+    return [
+      ...ownerFilters(ownerId, spaceId),
+      { range: { expires_at: { gt: this.now().toISOString() } } },
+    ];
+  }
+
+  private async findHit(
+    docId: string,
+    filters: QueryDslQueryContainer[],
+    request: { _source?: string[]; seq_no_primary_term?: boolean } = {}
+  ) {
+    const response = await this.storageClient.search({
+      track_total_hits: false,
+      size: 1,
+      query: { bool: { filter: [{ ids: { values: [docId] } }, ...filters] } },
+      ...request,
+    });
+    return response.hits.hits[0];
+  }
+
   private async read(
     docId: string,
     filters: QueryDslQueryContainer[] = []
   ): Promise<StoredBrief | undefined> {
-    const response = await this.storageClient.search({
-      track_total_hits: false,
-      size: 1,
-      seq_no_primary_term: true,
-      query: { bool: { filter: [{ ids: { values: [docId] } }, ...filters] } },
-    });
-    const hit = response.hits.hits[0];
+    const hit = await this.findHit(docId, filters, { seq_no_primary_term: true });
     if (!hit?._source) {
       return undefined;
     }

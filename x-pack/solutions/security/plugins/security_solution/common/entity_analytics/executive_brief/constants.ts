@@ -6,6 +6,7 @@
  */
 
 export const EXECUTIVE_BRIEF_API_PATH = '/internal/entity_analytics/executive_brief' as const;
+export const EXECUTIVE_BRIEF_STATUS_API_PATH = `${EXECUTIVE_BRIEF_API_PATH}/status` as const;
 export const EXECUTIVE_BRIEF_API_VERSION = '1' as const;
 
 /** Single index for all spaces; every read filters on owner and space. */

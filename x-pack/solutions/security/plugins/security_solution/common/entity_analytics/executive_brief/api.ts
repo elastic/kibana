@@ -36,6 +36,9 @@ export interface BriefJobView {
   error?: { code: BriefErrorCode; message: string };
 }
 
+/** GET status response: the latest job alone, for polling. */
+export type BriefStatusResponse = BriefJobView;
+
 /** POST response: the started (or reused) job. */
 export interface GenerateBriefResponse {
   job: Pick<BriefJobView, 'id' | 'status' | 'stage'>;

@@ -15,6 +15,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { deleteBriefRoute } from './routes/delete_brief';
 import { generateBriefRoute } from './routes/generate_brief';
 import { getBriefRoute } from './routes/get_brief';
+import { getBriefStatusRoute } from './routes/get_brief_status';
 import type { ExecutiveBriefRouteDeps } from './routes/route_utils';
 import { BriefStore } from './store/brief_store';
 import { createBriefStorage } from './store/storage';
@@ -94,6 +95,7 @@ export const setupExecutiveBrief = ({
   };
   generateBriefRoute(routeDeps);
   getBriefRoute(routeDeps);
+  getBriefStatusRoute(routeDeps);
   deleteBriefRoute(routeDeps);
 };
 

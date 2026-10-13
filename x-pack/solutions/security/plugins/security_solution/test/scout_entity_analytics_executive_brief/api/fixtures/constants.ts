@@ -12,6 +12,9 @@ import { EXECUTIVE_BRIEF_API_PATH } from '../../../../common/entity_analytics/ex
 /** The brief route in the default space (no leading slash, the apiClient convention). */
 export const BRIEF_ROUTE = EXECUTIVE_BRIEF_API_PATH.replace(/^\//, '');
 
+/** The status route under a brief route (default space unless `route` is given). */
+export const briefStatusRoute = (route: string = BRIEF_ROUTE): string => `${route}/status`;
+
 /** The brief route in a non-default space. */
 export const briefRouteInSpace = (spaceId: string): string => `s/${spaceId}/${BRIEF_ROUTE}`;
 

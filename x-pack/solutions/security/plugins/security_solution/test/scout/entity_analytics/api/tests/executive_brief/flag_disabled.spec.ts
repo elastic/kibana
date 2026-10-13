@@ -10,9 +10,11 @@ import { expect } from '@kbn/scout-security/api';
 import {
   EXECUTIVE_BRIEF_API_PATH,
   EXECUTIVE_BRIEF_INDEX,
+  EXECUTIVE_BRIEF_STATUS_API_PATH,
 } from '../../../../../../common/entity_analytics/executive_brief/constants';
 
 const BRIEF_ROUTE = EXECUTIVE_BRIEF_API_PATH.replace(/^\//, '');
+const BRIEF_STATUS_ROUTE = EXECUTIVE_BRIEF_STATUS_API_PATH.replace(/^\//, '');
 
 /**
  * The default server config runs with `entityAnalyticsExecutiveBriefEnabled` off. The enabled
@@ -41,6 +43,9 @@ apiTest.describe(
 
         const read = await apiClient.get(BRIEF_ROUTE, { headers, responseType: 'json' });
         expect(read).toHaveStatusCode(404);
+
+        const status = await apiClient.get(BRIEF_STATUS_ROUTE, { headers, responseType: 'json' });
+        expect(status).toHaveStatusCode(404);
 
         const deleted = await apiClient.delete(BRIEF_ROUTE, { headers, responseType: 'json' });
         expect(deleted).toHaveStatusCode(404);

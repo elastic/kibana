@@ -10,6 +10,7 @@ import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type {
   BriefResponse,
+  BriefStatusResponse,
   GenerateBriefResponse,
 } from '../../../../common/entity_analytics/executive_brief/api';
 import {
@@ -21,6 +22,7 @@ import {
   BRIEF_SIGNAL_IDS,
   EXECUTIVE_BRIEF_TAGS,
   INTERNAL_HEADERS,
+  briefStatusRoute,
 } from '../fixtures/constants';
 import {
   createBriefConnector,
@@ -75,6 +77,21 @@ apiTest.describe(
           [...BRIEF_SIGNAL_IDS].sort()
         );
         expect(llmProxy.interceptedRequests).toHaveLength(0);
+
+        // The status route returns the same job, flat: no job, report or metadata keys.
+        const status = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
+          headers,
+          responseType: 'json',
+        });
+        expect(status).toHaveStatusCode(200);
+        expect(Object.keys(status.body).sort()).toStrictEqual([
+          'id',
+          'startedAt',
+          'status',
+          'updatedAt',
+        ]);
+        expect(status.body).toStrictEqual(document.job);
+        expect(status.body).toMatchObject({ id: jobId, status: 'succeeded' });
       }
     );
 
@@ -89,6 +106,8 @@ apiTest.describe(
 
       const read = await apiClient.get(BRIEF_ROUTE, { headers, responseType: 'json' });
       expect(read).toHaveStatusCode(404);
+      const status = await apiClient.get(briefStatusRoute(), { headers, responseType: 'json' });
+      expect(status).toHaveStatusCode(404);
     });
 
     apiTest('rejects an invalid range', async ({ apiClient }) => {
@@ -140,6 +159,12 @@ apiTest.describe(
           status: 'failed',
           error: { code: 'interrupted' },
         });
+
+        const status = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
+          headers,
+          responseType: 'json',
+        });
+        expect(status.body).toStrictEqual(read.body.job);
       }
     );
   }

@@ -14,6 +14,7 @@ import {
   EXECUTIVE_BRIEF_TAGS,
   INTERNAL_HEADERS,
   briefRouteInSpace,
+  briefStatusRoute,
 } from '../fixtures/constants';
 import {
   countStoredBriefs,
@@ -75,6 +76,12 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       responseType: 'json',
     });
     expect(read).toHaveStatusCode(404);
+
+    const status = await apiClient.get(briefStatusRoute(), {
+      headers: otherUserHeaders,
+      responseType: 'json',
+    });
+    expect(status).toHaveStatusCode(404);
 
     const deleted = await apiClient.delete(BRIEF_ROUTE, {
       headers: otherUserHeaders,

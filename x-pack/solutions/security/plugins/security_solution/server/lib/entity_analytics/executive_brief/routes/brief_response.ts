@@ -14,7 +14,8 @@ import type {
   BriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/document';
 
-const toJobView = (job: BriefJob): BriefJobView => ({
+/** Maps a stored job to the job view shown by the GET routes. */
+export const toJobView = (job: BriefJob): BriefJobView => ({
   id: job.id,
   status: job.status,
   ...(job.status === 'running' && job.stage ? { stage: job.stage } : {}),

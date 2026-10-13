@@ -18,6 +18,7 @@ import type { Brief } from '../../../../common/entity_analytics/executive_brief/
 import { EXECUTIVE_BRIEF_INDEX } from '../../../../common/entity_analytics/executive_brief/constants';
 import type {
   BriefResponse,
+  BriefStatusResponse,
   GenerateBriefResponse,
 } from '../../../../common/entity_analytics/executive_brief/api';
 import type { BriefDocument } from '../../../../common/entity_analytics/executive_brief/document';
@@ -27,6 +28,7 @@ import {
   INTERNAL_HEADERS,
   SEEDED_ENTITY,
   SUBMIT_BRIEF_TOOL_NAME,
+  briefStatusRoute,
 } from './constants';
 
 type Headers = Record<string, string>;
@@ -128,7 +130,29 @@ export const holdSubmitBrief = (llmProxy: LlmProxy, brief: Brief = HIGH_RISK_ENT
   return { release: () => interceptor.completeAfterIntercept() };
 };
 
-/** Polls GET until the given job has finished, and returns the GET response. */
+/** Reads the full brief with GET; throws unless it answers 200. */
+const readBrief = async ({
+  apiClient,
+  headers,
+  route,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Headers;
+  route: string;
+}): Promise<BriefResponse> => {
+  const response = await apiClient.get<BriefResponse>(route, {
+    headers: { ...INTERNAL_HEADERS, ...headers },
+    responseType: 'json',
+  });
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `GET ${route} returned ${response.statusCode}: ${JSON.stringify(response.body)}`
+    );
+  }
+  return response.body;
+};
+
+/** Polls the status route until the given job has finished, then returns the full GET response. */
 export const waitForBriefJob = async ({
   apiClient,
   headers,
@@ -144,15 +168,15 @@ export const waitForBriefJob = async ({
   let lastStatus = 'not found';
 
   while (Date.now() < deadline) {
-    const response = await apiClient.get<BriefResponse>(route, {
+    const response = await apiClient.get<BriefStatusResponse>(briefStatusRoute(route), {
       headers: { ...INTERNAL_HEADERS, ...headers },
       responseType: 'json',
     });
     if (response.statusCode === 200) {
-      const { id, status, stage } = response.body.job;
+      const { id, status, stage } = response.body;
       lastStatus = `${id}: ${status}${stage ? ` (${stage})` : ''}`;
       if (id === jobId && (status === 'succeeded' || status === 'failed')) {
-        return response.body;
+        return readBrief({ apiClient, headers, route });
       }
     }
     await sleep(POLL_INTERVAL_MS);
