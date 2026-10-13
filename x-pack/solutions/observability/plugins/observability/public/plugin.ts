@@ -559,6 +559,12 @@ export class Plugin
       );
     });
 
+    if (alertingV2Enabled) {
+      void import('./nav/alerting_nav_tour').then(({ mountAlertingNavTour }) => {
+        mountAlertingNavTour(coreStart);
+      });
+    }
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,

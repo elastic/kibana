@@ -320,6 +320,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     // firewall_metrics has no agentless support yet (tracked: elastic/integrations#19301).
     excludedDataStreams: ['firewall_metrics'],
   },
+  {
+    id: 'firewall_otel',
+    name: 'AWS Network Firewall',
+    category: 'security_identity_compliance',
+    dataFormat: 'otel',
+    policyTemplate: 'firewall',
+    ecfDataStream: 'firewall_logs',
+    excludedDataStreams: ['firewall_metrics'],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    ecfOnly: true,
+    packageName: 'aws',
+    ecfLogType: 'networkfirewall',
+    ecfDedicatedTemplate: 'otel',
+    inputs: ['aws-s3'],
+  },
   // aws_securityhub replaces securityhub policy template in aws (legacy)
   {
     id: 'aws_securityhub',
