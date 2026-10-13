@@ -25,15 +25,6 @@ export const alertActionEnvelopeSchema = lazySchema(() =>
             defaultMessage: 'Stable hash of the alert series the alert belongs to.',
           })
         ),
-      groupHash: z
-        .string()
-        .min(1)
-        .max(128)
-        .describe(
-          i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.groupHash', {
-            defaultMessage: 'Stable hash of the alert series the alert belongs to.',
-          })
-        ),
       alertId: z
         .string()
         .min(1)
