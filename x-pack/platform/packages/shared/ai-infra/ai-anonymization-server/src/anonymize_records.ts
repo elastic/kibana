@@ -6,10 +6,16 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
+import type { Logger } from '@kbn/logging';
+import type {
+  AnonymizationFailureMode,
+  AnonymizationRule,
+  RegexAnonymizationRule,
+} from '@kbn/ai-anonymization-common';
 import { partition } from 'lodash';
 import type { AnonymizationState } from './types';
 import { executeRegexRules } from './execute_regex_rules';
+import { compileRulePattern } from './execute_regex_rule_task';
 import { executeNerRule } from './execute_ner_rule';
 import type { RegexWorkerService } from './regex_worker_service';
 import { resolveOverlapsAndMask } from './resolve_overlaps_and_mask';
@@ -101,6 +107,8 @@ export async function anonymizeRecords<T extends Record<string, string | undefin
   esClient,
   salt,
   knownReplacements,
+  onFailure,
+  logger,
 }: {
   input: T[];
   anonymizationRules: AnonymizationRule[];
@@ -108,6 +116,8 @@ export async function anonymizeRecords<T extends Record<string, string | undefin
   esClient: ElasticsearchClient;
   salt?: string;
   knownReplacements?: Array<{ anonymized: string; original: string }>;
+  onFailure?: AnonymizationFailureMode;
+  logger?: Logger;
 }): Promise<AnonymizationState>;
 
 export async function anonymizeRecords({
@@ -117,6 +127,8 @@ export async function anonymizeRecords({
   esClient,
   salt,
   knownReplacements,
+  onFailure,
+  logger,
 }: {
   input: Array<Record<string, string>>;
   anonymizationRules: AnonymizationRule[];
@@ -124,6 +136,8 @@ export async function anonymizeRecords({
   esClient: ElasticsearchClient;
   salt?: string;
   knownReplacements?: Array<{ anonymized: string; original: string }>;
+  onFailure?: AnonymizationFailureMode;
+  logger?: Logger;
 }): Promise<AnonymizationState> {
   let state: AnonymizationState = {
     records: input.concat(),
@@ -135,24 +149,56 @@ export async function anonymizeRecords({
     knownReplacements,
   });
 
-  const [regexRules, nerRules] = partition(
+  const [declaredRegexRules, nerRules] = partition(
     anonymizationRules,
     (rule): rule is RegexAnonymizationRule => rule.type === 'RegExp'
   );
 
-  const detectedRegexEntities = await executeRegexRules({
-    records: state.records,
-    rules: regexRules,
-    regexWorker,
-  });
+  // Under allow_unsafe, a rule that cannot compile is skipped on its own so it cannot disable the
+  // valid rules next to it. Under block it stays in, and the call fails with the compile error.
+  const regexRules =
+    onFailure === 'allow_unsafe'
+      ? declaredRegexRules.filter((rule) => {
+          try {
+            compileRulePattern(rule);
+            return true;
+          } catch (error) {
+            logger?.warn(
+              `Skipping regex rule; proceeding without it because onFailure is "allow_unsafe": ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return false;
+          }
+        })
+      : declaredRegexRules;
 
-  // Process detected regex matches to resolve overlaps and apply masks
-  state = resolveOverlapsAndMask({
-    detectedMatches: detectedRegexEntities,
-    state,
-    rules: regexRules,
-    salt,
-  });
+  try {
+    const detectedRegexEntities = await executeRegexRules({
+      records: state.records,
+      rules: regexRules,
+      regexWorker,
+    });
+
+    // Process detected regex matches to resolve overlaps and apply masks
+    state = resolveOverlapsAndMask({
+      detectedMatches: detectedRegexEntities,
+      state,
+      rules: regexRules,
+      salt,
+    });
+  } catch (error) {
+    if (onFailure !== 'allow_unsafe') {
+      throw error;
+    }
+    // allow_unsafe: proceed without masking the entities regex detection would have found,
+    // rather than failing the chatComplete call.
+    logger?.warn(
+      `Regex anonymization failed; proceeding unmasked because onFailure is "allow_unsafe": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 
   if (!nerRules.length) {
     return state;
@@ -170,6 +216,15 @@ export async function anonymizeRecords({
       if (!shouldIgnoreNerModelError(error)) {
         throw error;
       }
+      // A missing or undeployed model is the one NER failure that does not fail the request, so
+      // leave a trace: the entities this rule would have masked are sent as-is.
+      logger?.warn(
+        `Skipping NER anonymization rule (model: ${
+          nerRule.modelId ?? 'default'
+        }) because the model is not available; text it would have masked is not masked. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
