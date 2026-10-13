@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { Frequency } from '@kbn/rrule';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
@@ -144,6 +145,10 @@ describe('WorkflowTaskScheduler', () => {
               : undefined,
           })
         );
+        mockTm.bulkUpdateSchedules.mockResolvedValueOnce({
+          tasks: [makeTaskInstance('workflow:test-workflow:scheduled')],
+          errors: [],
+        });
         const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
         await scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest);
         expect(mockTm.schedule).toHaveBeenCalledWith(
@@ -284,6 +289,124 @@ describe('WorkflowTaskScheduler', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to schedule workflow task')
+      );
+    });
+  });
+
+  describe('schedule timing when changing identity', () => {
+    const taskId = 'workflow:test-workflow:scheduled';
+    const scheduledAt = new Date('2030-01-01T10:00:00.000Z');
+    const runAt = new Date('2030-01-01T15:00:00.000Z');
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2030-01-01T14:20:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const createScheduler = (oldAccount?: string, schedule = { interval: '1h' }) => {
+      const mockTm = makeMockTaskManager();
+      mockTm.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTm.get.mockResolvedValue(
+        makeTaskInstance(taskId, {
+          scheduledAt,
+          runAt,
+          schedule,
+          credential: oldAccount
+            ? {
+                type: 'service_account',
+                workloadType: 'workflow',
+                workloadId: 'test-workflow',
+                spaceId: 'default',
+                expectedServiceAccountId: oldAccount,
+              }
+            : undefined,
+        })
+      );
+      return { mockTm, scheduler: new WorkflowTaskScheduler(mockLogger, mockTm) };
+    };
+
+    it.each([
+      { oldAccount: undefined, newAccount: 'account-a' },
+      { oldAccount: 'account-a', newAccount: 'account-b' },
+      { oldAccount: 'account-a', newAccount: undefined },
+    ])(
+      'keeps the next tick when changing $oldAccount to $newAccount',
+      async ({ oldAccount, newAccount }) => {
+        const { mockTm, scheduler } = createScheduler(oldAccount);
+
+        await scheduler.scheduleWorkflowTask(
+          'test-workflow',
+          'default',
+          { type: 'scheduled', with: { every: '1h' } },
+          mockRequest,
+          newAccount
+        );
+
+        expect(mockTm.schedule).toHaveBeenCalledTimes(2);
+        expect(mockTm.schedule).toHaveBeenLastCalledWith(
+          expect.objectContaining({ scheduledAt, runAt, schedule: { interval: '1h' } }),
+          { request: mockRequest }
+        );
+      }
+    );
+
+    it('uses the existing anchor when the identity and interval change together', async () => {
+      const { mockTm, scheduler } = createScheduler('account-a');
+
+      await scheduler.scheduleWorkflowTask(
+        'test-workflow',
+        'default',
+        { type: 'scheduled', with: { every: '8h' } },
+        mockRequest,
+        'account-b'
+      );
+
+      expect(mockTm.schedule).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          scheduledAt,
+          runAt: new Date('2030-01-01T18:00:00.000Z'),
+          schedule: { interval: '8h' },
+        }),
+        { request: mockRequest }
+      );
+    });
+
+    it('keeps the next tick of an unchanged RRule schedule', async () => {
+      const { mockTm, scheduler } = createScheduler('account-a');
+      mockTm.get.mockResolvedValue(
+        makeTaskInstance(taskId, {
+          scheduledAt,
+          runAt,
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 1, tzid: 'UTC', byhour: [15], byminute: [0] },
+          },
+          credential: {
+            type: 'service_account',
+            workloadType: 'workflow',
+            workloadId: 'test-workflow',
+            spaceId: 'default',
+            expectedServiceAccountId: 'account-a',
+          },
+        })
+      );
+
+      await scheduler.scheduleWorkflowTask(
+        'test-workflow',
+        'default',
+        {
+          type: 'scheduled',
+          with: { rrule: { freq: 'DAILY', interval: 1, tzid: 'UTC', byhour: [15], byminute: [0] } },
+        },
+        mockRequest,
+        'account-b'
+      );
+
+      expect(mockTm.schedule).toHaveBeenLastCalledWith(
+        expect.objectContaining({ scheduledAt, runAt }),
+        { request: mockRequest }
       );
     });
   });

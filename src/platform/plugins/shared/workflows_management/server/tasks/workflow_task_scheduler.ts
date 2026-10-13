@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   calculateNextRunAtFromSchedule,
@@ -145,8 +146,22 @@ export class WorkflowTaskScheduler {
           : !credential;
         // TM runAs is immutable; replacing the task is required when its identity changes.
         if (!sameIdentity) {
+          const recreatedTaskInstance = existing
+            ? {
+                ...taskInstance,
+                scheduledAt: existing.scheduledAt,
+                runAt: isEqual(existing.schedule, schedule)
+                  ? existing.runAt
+                  : new Date(
+                      calculateNextRunAtFromSchedule({
+                        schedule,
+                        startDate: existing.scheduledAt,
+                      })
+                    ),
+              }
+            : taskInstance;
           await this.taskManager.removeIfExists(taskId);
-          return (await this.taskManager.schedule(taskInstance, { request })).id;
+          return (await this.taskManager.schedule(recreatedTaskInstance, { request })).id;
         }
 
         // Task already exists — update its schedule in place rather than failing.
