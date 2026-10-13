@@ -10,7 +10,7 @@
 import * as Fs from 'fs';
 
 import { minimatch } from 'minimatch';
-import { getAffectedPackages, getAffectedTasksMoon } from '../../affected-packages/index.ts';
+import { getAffectedPackages, getAffectedTaskReasonsMoon } from '../../affected-packages/index.ts';
 import type { BuildkiteStep } from '../../buildkite/index.ts';
 import { BuildkiteClient } from '../../buildkite/index.ts';
 import { getTrackedBranch } from '../../utils.ts';
@@ -32,12 +32,12 @@ import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
 import { shouldSkipFtrTests } from './selective_ftr.ts';
 import type { FtrDomainSelection } from './selective_ftr_domains.ts';
 import {
-  FTR_MOON_TASKS_PROJECT,
+  FTR_MOON_TASK,
   createMoonFtrModuleGraph,
   createRepoFtrModuleGraph,
   diffFtrDomainSelections,
   resolveFtrDomains,
-  resolveFtrDomainsWithMoonTasks,
+  resolveFtrDomainsWithMoonTask,
   selectedFtrDomains,
   summarizeFtrDomainSelection,
   includesFtrEntry,
@@ -297,7 +297,7 @@ function applyFtrDomainSelection(
 
   const runMoonShadows = () => {
     compareFtrDomainSelectionWithMoon(bk, selection, changedFiles, entries);
-    compareFtrDomainsWithMoonTasks(bk, selection, changedFiles, entries);
+    compareFtrDomainsWithMoonTask(bk, selection, changedFiles, entries);
   };
 
   if (selection.all) {
@@ -395,22 +395,23 @@ function compareFtrDomainSelectionWithMoon(
 }
 
 /**
- * Shadow mode: picks domains from the `ftr-<domain>` moon tasks in `.buildkite/moon.yml` and
- * reports when they differ from the domains the git graph picked. Never changes which configs
- * run; moon errors are logged.
+ * Shadow mode: picks domains from why moon considers the `ftr` task in `.buildkite/moon.yml`
+ * affected and reports when they differ from the domains the git graph picked. Never changes
+ * which configs run; moon errors are logged.
  */
-function compareFtrDomainsWithMoonTasks(
+function compareFtrDomainsWithMoonTask(
   bk: BuildkiteClient,
   gitSelection: FtrDomainSelection,
   changedFiles: string[],
   entries: FTRManifestEntry[]
 ): void {
-  let tasksSelection: FtrDomainSelection;
+  let taskSelection: FtrDomainSelection;
   try {
-    tasksSelection = resolveFtrDomainsWithMoonTasks({
+    taskSelection = resolveFtrDomainsWithMoonTask({
       changedFiles,
       graph: createRepoFtrModuleGraph(),
-      getAffectedTasks: (files) => getAffectedTasksMoon(FTR_MOON_TASKS_PROJECT, files),
+      getAffectedReasons: (files) =>
+        getAffectedTaskReasonsMoon(FTR_MOON_TASK.project, FTR_MOON_TASK.task, files),
     });
   } catch (error) {
     console.error('FTR domain moon-task shadow failed (no effect on this build)', error);
@@ -418,26 +419,26 @@ function compareFtrDomainsWithMoonTasks(
   }
 
   const gitDomains = selectedFtrDomains(gitSelection, entries);
-  const taskDomains = selectedFtrDomains(tasksSelection, entries);
+  const taskDomains = selectedFtrDomains(taskSelection, entries);
   const onlyGit = [...gitDomains].filter((domain) => !taskDomains.has(domain)).sort();
-  const onlyTasks = [...taskDomains].filter((domain) => !gitDomains.has(domain)).sort();
-  if (onlyGit.length === 0 && onlyTasks.length === 0) {
-    console.log(`FTR domain moon-task shadow: matches the git graph (${tasksSelection.reason})`);
+  const onlyTask = [...taskDomains].filter((domain) => !gitDomains.has(domain)).sort();
+  if (onlyGit.length === 0 && onlyTask.length === 0) {
+    console.log(`FTR domain moon-task shadow: matches the git graph (${taskSelection.reason})`);
     return;
   }
 
   const details = [
     `git graph: ${gitSelection.reason}`,
-    `moon tasks: ${tasksSelection.reason}`,
+    `moon ftr task: ${taskSelection.reason}`,
     `Domains only git selects: ${onlyGit.join(', ') || 'none'}`,
-    `Domains only moon tasks select: ${onlyTasks.join(', ') || 'none'}`,
+    `Domains only the moon ftr task selects: ${onlyTask.join(', ') || 'none'}`,
   ];
   console.warn(['FTR domain moon-task shadow: differs from the git graph', ...details].join('\n'));
   bk.setAnnotation(
-    'selective-testing-ftr-domains-moon-tasks',
+    'selective-testing-ftr-domains-moon-task',
     'warning',
     [
-      'FTR domain selection (moon task shadow): the `ftr-<domain>` moon tasks pick different domains than the git graph. The git graph decides this build.',
+      'FTR domain selection (moon task shadow): the moon `ftr` task picks different domains than the git graph. The git graph decides this build.',
       '',
       ...details.map((line) => `- ${line}`),
     ].join('\n')

@@ -54,61 +54,17 @@ tasks:
     inputs:
       - '**/*'
 
-  # FTR domain tasks (shadow mode). Nothing runs them; the pick step asks
-  # `moon query tasks --affected --downstream deep` which ones a diff affects. A domain is
-  # affected when a project of its kibana.jsonc group, or anything that project imports
-  # (`source-upstream`), changes, or when an `ftrCritical` file changes. Projects without a
-  # group load like platform code, so they count as platform.
-  ftr-platform:
+  # FTR task (shadow mode). Nothing runs it; the pick step asks
+  # `moon query tasks --affected --downstream deep` whether a diff affects it and reads moon's
+  # affected reasons: `upstream` lists the `<project>:source-upstream` tasks whose project, or
+  # anything it imports, changed, and code maps those projects' kibana.jsonc groups to FTR
+  # domains; `files` lists changed `ftrCritical` inputs, which run every domain. Every
+  # generated project is tagged `package` or `plugin`, so new projects are covered.
+  ftr:
     command: noop
     deps:
-      - '#group-platform:source-upstream'
-      - '#group-undefined:source-upstream'
-    inputs:
-      - '@group(ftrCritical)'
-    options:
-      cache: false
-      runInCI: false
-  ftr-observability:
-    command: noop
-    deps:
-      - '#group-observability:source-upstream'
-    inputs:
-      - '@group(ftrCritical)'
-    options:
-      cache: false
-      runInCI: false
-  ftr-security:
-    command: noop
-    deps:
-      - '#group-security:source-upstream'
-    inputs:
-      - '@group(ftrCritical)'
-    options:
-      cache: false
-      runInCI: false
-  ftr-search:
-    command: noop
-    deps:
-      - '#group-search:source-upstream'
-    inputs:
-      - '@group(ftrCritical)'
-    options:
-      cache: false
-      runInCI: false
-  ftr-workplaceai:
-    command: noop
-    deps:
-      - '#group-workplaceai:source-upstream'
-    inputs:
-      - '@group(ftrCritical)'
-    options:
-      cache: false
-      runInCI: false
-  ftr-vectordb:
-    command: noop
-    deps:
-      - '#group-vectordb:source-upstream'
+      - '#package:source-upstream'
+      - '#plugin:source-upstream'
     inputs:
       - '@group(ftrCritical)'
     options:

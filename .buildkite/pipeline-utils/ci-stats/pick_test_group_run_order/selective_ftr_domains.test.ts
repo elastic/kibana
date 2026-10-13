@@ -15,7 +15,7 @@ import {
   diffFtrDomainSelections,
   includesFtrEntry,
   resolveFtrDomains,
-  resolveFtrDomainsWithMoonTasks,
+  resolveFtrDomainsWithMoonTask,
   summarizeFtrDomainSelection,
 } from './selective_ftr_domains.ts';
 import { ftrTestChannels } from './test_channels.ts';
@@ -312,32 +312,59 @@ describe('diffFtrDomainSelections', () => {
   });
 });
 
-describe('resolveFtrDomainsWithMoonTasks', () => {
-  const resolveWithTasks = (changedFiles: string[], affectedTasks: string[] = []) => {
-    const getAffectedTasks = jest.fn((_files: readonly string[]) => new Set(affectedTasks));
-    const selection = resolveFtrDomainsWithMoonTasks({
+describe('resolveFtrDomainsWithMoonTask', () => {
+  const resolveWithTask = (
+    changedFiles: string[],
+    reasons?: { files?: string[]; upstream?: string[] }
+  ) => {
+    const getAffectedReasons = jest.fn((_files: readonly string[]) =>
+      reasons ? { files: reasons.files ?? [], upstream: reasons.upstream ?? [] } : undefined
+    );
+    const selection = resolveFtrDomainsWithMoonTask({
       changedFiles,
       graph: fakeGraph,
-      getAffectedTasks,
+      getAffectedReasons,
     });
-    return { selection, moonFiles: getAffectedTasks.mock.calls[0]?.[0] };
+    return { selection, moonFiles: getAffectedReasons.mock.calls[0]?.[0] };
   };
 
-  it('maps affected ftr tasks to domains, with platform adding base', () => {
-    const { selection } = resolveWithTasks(
-      ['x-pack/platform/plugins/fleet/server/index.ts'],
-      ['ftr-platform', 'ftr-security', 'jest']
-    );
+  it('maps affected upstream projects to their groups, with platform and ungrouped adding base', () => {
+    const securityOnly = resolveWithTask(
+      ['x-pack/solutions/security/packages/discoveries/index.ts'],
+      { upstream: ['@kbn/discoveries:source-upstream', '@kbn/security-solution:source-upstream'] }
+    ).selection;
+    const withUngrouped = resolveWithTask(
+      ['x-pack/solutions/security/packages/discoveries/index.ts'],
+      {
+        upstream: ['@kbn/discoveries:source-upstream', '@kbn/test-plugin-no-group:source-upstream'],
+      }
+    ).selection;
 
-    expect(selection.all === false && [...selection.domains].sort()).toEqual([
+    expect(securityOnly.all === false && [...securityOnly.domains]).toEqual(['security']);
+    expect(withUngrouped.all === false && [...withUngrouped.domains].sort()).toEqual([
       'base',
       'platform',
       'security',
     ]);
   });
 
+  it('runs every domain when moon reports changed ftrCritical inputs', () => {
+    const { selection } = resolveWithTask(
+      ['.buildkite/ftr-manifests/ftr_security_serverless_configs.yml'],
+      { files: ['.buildkite/ftr-manifests/ftr_security_serverless_configs.yml'] }
+    );
+
+    expect(selection).toMatchObject({ all: true });
+  });
+
+  it('selects nothing when moon does not consider the task affected', () => {
+    const { selection } = resolveWithTask(['x-pack/solutions/security/test/config.ts']);
+
+    expect(selection.all === false && [...selection.domains]).toEqual([]);
+  });
+
   it('hands moon relevant module files and irrelevant files outside modules only', () => {
-    const { moonFiles } = resolveWithTasks([
+    const { moonFiles } = resolveWithTask([
       'x-pack/solutions/security/plugins/security_solution/server/index.ts',
       'x-pack/platform/plugins/fleet/README.md',
       'src/platform/packages/shared/kbn-scout/src/index.ts',
@@ -354,7 +381,7 @@ describe('resolveFtrDomainsWithMoonTasks', () => {
     ['a relevant file outside any module', ['typings/index.d.ts']],
     ['a module without a group', ['packages/kbn-tooling/src/index.ts']],
   ])('returns all without asking moon for %s', (_, changedFiles) => {
-    const { selection, moonFiles } = resolveWithTasks(changedFiles);
+    const { selection, moonFiles } = resolveWithTask(changedFiles);
 
     expect(selection).toMatchObject({ all: true });
     expect(moonFiles).toBeUndefined();

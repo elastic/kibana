@@ -15,6 +15,7 @@ import {
   getDownstreamProjectsMoon,
   getModuleLookup,
 } from '../../affected-packages/index.ts';
+import type { MoonTaskAffectedReasons } from '../../affected-packages/index.ts';
 
 import type { FTRManifestEntry } from './ftr_manifests.ts';
 import {
@@ -262,25 +263,26 @@ export const diffFtrDomainSelections = (
   return { onlyGit, onlyMoon };
 };
 
-/** Moon project (`.buildkite/moon.yml`) holding one `ftr-<domain>` task per FTR domain. */
-export const FTR_MOON_TASKS_PROJECT = 'kibana-buildkite';
-const FTR_TASK_PREFIX = 'ftr-';
+/** The moon task (`.buildkite/moon.yml`) whose affected reasons give the FTR domains. */
+export const FTR_MOON_TASK = { project: 'kibana-buildkite', task: 'ftr' } as const;
 
 /**
- * Picks FTR domains from the `ftr-<domain>` moon tasks a diff affects. Moon decides groups,
- * imports and `ftrCritical` files; this only handles what moon can't see: FTR-excluded modules,
- * changed modules without a group, and relevant files outside any project. Extra configs
- * (owned, platform-in-solution, always-run) are not part of this answer.
+ * Picks FTR domains from why moon considers the `ftr` task affected. Changed `ftrCritical`
+ * inputs run every domain; each affected `<project>:source-upstream` dep (the project or
+ * something it imports changed) adds its kibana.jsonc group, with `platform` and ungrouped
+ * projects adding `platform` and `base`. Code only handles what moon can't see: FTR-excluded
+ * modules, changed modules without a group, and relevant files outside any project. Extra
+ * configs (owned, platform-in-solution, always-run) are not part of this answer.
  */
-export const resolveFtrDomainsWithMoonTasks = ({
+export const resolveFtrDomainsWithMoonTask = ({
   changedFiles,
   graph,
-  getAffectedTasks,
+  getAffectedReasons,
 }: {
   changedFiles: readonly string[];
   graph: Pick<FtrModuleGraph, 'moduleForPath' | 'groupOf'>;
-  /** IDs of `FTR_MOON_TASKS_PROJECT` tasks the files affect. */
-  getAffectedTasks: (files: readonly string[]) => ReadonlySet<string>;
+  /** Why the files affect `FTR_MOON_TASK`, or undefined when they don't. */
+  getAffectedReasons: (files: readonly string[]) => MoonTaskAffectedReasons | undefined;
 }): FtrDomainSelection => {
   if (changedFiles.length === 0) {
     return all('no changed files');
@@ -305,21 +307,29 @@ export const resolveFtrDomainsWithMoonTasks = ({
     moonFiles.push(file);
   }
 
-  const ftrTasks = [...getAffectedTasks(moonFiles)]
-    .filter((task) => task.startsWith(FTR_TASK_PREFIX))
-    .sort();
-  const domains = new Set<string>();
-  for (const task of ftrTasks) {
-    const domain = task.slice(FTR_TASK_PREFIX.length);
-    domains.add(domain);
-    if (domain === PLATFORM_DOMAIN) domains.add(BASE_DOMAIN);
+  const reasons = getAffectedReasons(moonFiles);
+  if (reasons && reasons.files.length > 0) {
+    return all(`FTR-critical files changed (moon): ${listFiles(reasons.files)}`);
+  }
+
+  // domain → project that pulled it in, for the annotation
+  const triggers = new Map<string, string>();
+  for (const target of reasons?.upstream ?? []) {
+    const project = target.slice(0, target.lastIndexOf(':'));
+    const group = graph.groupOf(project) ?? PLATFORM_DOMAIN;
+    const domains = group === PLATFORM_DOMAIN ? [PLATFORM_DOMAIN, BASE_DOMAIN] : [group];
+    for (const domain of domains) {
+      if (!triggers.has(domain)) triggers.set(domain, project);
+    }
   }
 
   return {
     all: false,
-    domains,
+    domains: new Set(triggers.keys()),
     extraConfigs: new Set(),
-    reason: ftrTasks.length ? `moon tasks: ${ftrTasks.join(', ')}` : 'no moon FTR task affected',
+    reason: triggers.size
+      ? [...triggers].map(([domain, project]) => `${domain} ← ${project}`).join('; ')
+      : 'moon ftr task not affected',
   };
 };
 

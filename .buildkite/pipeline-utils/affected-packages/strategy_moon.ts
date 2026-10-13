@@ -79,19 +79,30 @@ export function getDownstreamProjectsMoon(files: readonly string[]): Set<string>
   return parseProjectIds(output);
 }
 
+/** Why moon considers a task affected: its own changed inputs and its affected deps. */
+export interface MoonTaskAffectedReasons {
+  files: string[];
+  /** Targets (`<project>:<task>`) of affected deps. */
+  upstream: string[];
+}
+
 /**
- * Returns the IDs of `project`'s tasks affected by `files`, following task deps downstream.
- * The files are passed on stdin, so moon skips its own VCS diff.
+ * Returns why `project:task` is affected by `files`, following task deps downstream, or
+ * undefined when it isn't. The files are passed on stdin, so moon skips its own VCS diff.
  */
-export function getAffectedTasksMoon(project: string, files: readonly string[]): Set<string> {
+export function getAffectedTaskReasonsMoon(
+  project: string,
+  task: string,
+  files: readonly string[]
+): MoonTaskAffectedReasons | undefined {
   // With no stdin files moon would fall back to diffing the working tree.
   if (files.length === 0) {
-    return new Set();
+    return undefined;
   }
 
   const output = execFileSync(
     getMoonBinPath(),
-    ['query', 'tasks', '--affected', '--downstream', 'deep', '--project', project],
+    ['query', 'tasks', '--affected', '--downstream', 'deep', '--project', project, '--id', task],
     {
       cwd: getKibanaDir(),
       encoding: 'utf8',
@@ -101,8 +112,15 @@ export function getAffectedTasksMoon(project: string, files: readonly string[]):
     }
   );
 
-  const { tasks }: { tasks?: Record<string, Record<string, unknown>> } = JSON.parse(output);
-  return new Set(Object.keys(tasks?.[project] ?? {}));
+  const { options }: { options?: { affected?: { tasks?: Record<string, unknown> } } } =
+    JSON.parse(output);
+  const reasons = options?.affected?.tasks?.[`${project}:${task}`] as
+    | Partial<MoonTaskAffectedReasons>
+    | undefined;
+  if (!reasons) {
+    return undefined;
+  }
+  return { files: reasons.files ?? [], upstream: reasons.upstream ?? [] };
 }
 
 export function getAffectedProjectsMoon(
