@@ -22,6 +22,7 @@ import type {
 } from '../../../common/types';
 import { PROFILE_TYPE_LABELS, formatBoost } from '../format';
 import { DeleteProfileModal } from './delete_profile_modal';
+import { RuleFlyout } from '../rules/rule_flyout';
 import { ProfileFlyout } from './profile_flyout';
 
 interface ProfilesTabProps {
@@ -65,6 +66,8 @@ const USED_BY_DEFAULT_RULE_DESCRIPTIONS: Record<BoostProfileType, string> = {
 export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesTabProps) => {
   const [flyout, setFlyout] = useState<FlyoutState>();
   const [profileToDelete, setProfileToDelete] = useState<BoostProfile>();
+  // A profile just created with "Save and create rule", which the rule flyout starts with.
+  const [ruleProfileName, setRuleProfileName] = useState<string>();
 
   const rows = useMemo<ProfileRow[]>(() => {
     const ruleCounts = countRulesByProfile(rules);
@@ -246,6 +249,17 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
           duplicateOf={flyout.duplicateOf}
           takenNames={profiles.map(({ name }) => name)}
           onClose={() => setFlyout(undefined)}
+          onCreateRule={(profileName) => {
+            setFlyout(undefined);
+            setRuleProfileName(profileName);
+          }}
+        />
+      )}
+
+      {ruleProfileName && (
+        <RuleFlyout
+          initialProfileName={ruleProfileName}
+          onClose={() => setRuleProfileName(undefined)}
         />
       )}
 

@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   BUILTIN_PROFILES,
+  DEFAULT_DATA_STREAMS_RULE_NAME,
   DEFAULT_SIMPLE_MODE_DEFAULTS,
   NO_CUSTOM_DEFAULTS,
   createDefaultRules,
@@ -50,22 +51,28 @@ const state: BoostState = {
 };
 
 const mutation = { mutate: jest.fn(), isLoading: false };
+const createProfile = {
+  mutate: jest.fn((_profile, { onSuccess }: { onSuccess: () => void }) => onSuccess()),
+  isLoading: false,
+};
 
 jest.mock('../../hooks/use_boost_state', () => ({
   useBoostState: () => ({ data: state }),
   useCreateRule: () => mutation,
   useUpdateRule: () => mutation,
   useUpdateDefaultRule: () => mutation,
+  useCreateProfile: () => createProfile,
+  useUpdateProfile: () => mutation,
 }));
 
 jest.mock('../../hooks/use_boost_services', () => ({
   useBoostServices: () => ({ notifications: { toasts: { addSuccess: jest.fn() } } }),
 }));
 
-const renderFlyout = () => {
+const renderFlyout = (flyoutRule = rule) => {
   render(
     <IntlProvider locale="en">
-      <RuleFlyout rule={rule} onClose={jest.fn()} />
+      <RuleFlyout rule={flyoutRule} onClose={jest.fn()} />
     </IntlProvider>
   );
   const getInput = (): HTMLInputElement =>
@@ -137,5 +144,62 @@ describe('RuleFlyout profile picker', () => {
     await userEvent.click(getInput());
     await userEvent.keyboard('{Control>}a{/Control}{Delete}');
     expect(getInput()).toHaveValue('');
+  });
+});
+
+describe('RuleFlyout profile creation', () => {
+  const getTypeRadio = (type: string) =>
+    within(screen.getByTestId(`boostProfileTypePreset-${type}`)).getByRole('radio');
+
+  it('shows the profile form in place of the rule, starting from its type', async () => {
+    renderFlyout();
+
+    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
+
+    expect(
+      screen.getByRole('heading', { name: 'Create boost profile for rule "catalogs"' })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('boostRuleProfile')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostProfileName')).toHaveFocus();
+    expect(getTypeRadio('indices')).toBeChecked();
+  });
+
+  it('creates the profile and selects it in the rule', async () => {
+    const { getInput } = renderFlyout();
+
+    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
+    await userEvent.type(screen.getByTestId('boostProfileName'), 'new-search');
+    await userEvent.click(screen.getByTestId('boostProfileSaveAndUse'));
+
+    expect(createProfile.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'new-search' }),
+      expect.anything()
+    );
+    expect(screen.queryByTestId('boostProfileSaveAndUse')).not.toBeInTheDocument();
+    expect(getInput()).toHaveValue('new-search');
+    expect(screen.getByTestId('boostRuleCreateProfile')).toHaveFocus();
+  });
+
+  it('returns to the rule unchanged when cancelled', async () => {
+    const { getInput } = renderFlyout();
+
+    await userEvent.clear(screen.getByTestId('boostRulePriority'));
+    await userEvent.type(screen.getByTestId('boostRulePriority'), '7');
+    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
+    await userEvent.click(screen.getByTestId('boostProfileCancel'));
+
+    expect(getInput()).toHaveValue('zeta-search');
+    expect(screen.getByTestId('boostRulePriority')).toHaveValue(7);
+    expect(screen.getByTestId('boostRuleCreateProfile')).toHaveFocus();
+  });
+
+  it("locks a default rule's new profile to the rule's type", async () => {
+    renderFlyout(state.rules.find(({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME));
+
+    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
+
+    expect(getTypeRadio('data_streams')).toBeChecked();
+    expect(getTypeRadio('data_streams')).toBeDisabled();
+    expect(getTypeRadio('indices')).toBeDisabled();
   });
 });

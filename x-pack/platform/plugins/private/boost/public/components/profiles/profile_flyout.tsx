@@ -35,7 +35,7 @@ import { CardLabel } from '../card_label';
 import { PROFILE_TYPE_LABELS } from '../format';
 import { PresetCards } from '../preset_cards';
 import type { PresetOption } from '../preset_options';
-import { FLYOUT_WIDTH, RuleFlyout } from '../rules/rule_flyout';
+import { FLYOUT_WIDTH } from '../flyout_width';
 import { BoostRangeInputs } from './boost_range_inputs';
 import { FormSection, FormSubsection } from './form_section';
 import { FullWidthDivider } from './full_width_divider';
@@ -52,6 +52,18 @@ import {
 import { PROFILE_NAME_ERROR_MESSAGES } from './profile_messages';
 import { CostEstimate } from '../cost_estimate';
 
+/** A new profile created from a rule flyout, which shows this form in place of the rule's. */
+export interface ProfileForRule {
+  /** The rule's name, once it has one, to say which rule the profile is for. */
+  ruleName?: string;
+  /** The rule's current type, which the new profile starts with. */
+  type?: BoostProfileType;
+  /** Default rules can't change type, so their new profile can't either. */
+  isTypeLocked: boolean;
+  /** Called once the profile is created, to select it in the rule. */
+  onCreate: (profileName: string, type: BoostProfileType) => void;
+}
+
 interface ProfileFlyoutProps {
   /** The custom profile to edit. */
   profile?: BoostProfile;
@@ -59,11 +71,24 @@ interface ProfileFlyoutProps {
   duplicateOf?: BoostProfile;
   takenNames: readonly string[];
   onClose: () => void;
+  /** Offers "Save and create rule", called with the new profile's name instead of closing. */
+  onCreateRule?: (profileName: string) => void;
 }
+
+interface ProfileFlyoutContentProps extends ProfileFlyoutProps {
+  /** Shown in a rule flyout, for a new profile the rule then uses. */
+  forRule?: ProfileForRule;
+  /** The id for the title, which labels the flyout this content is in. */
+  titleId: string;
+}
+
+// A stable callback ref, so it only runs when the input mounts.
+const focusOnMount = (element: HTMLInputElement | null) => element?.focus();
 
 const getInitialDraft = (
   profile: BoostProfile | undefined,
   duplicateOf: BoostProfile | undefined,
+  forRule: ProfileForRule | undefined,
   takenNames: readonly string[]
 ): ProfileDraft => {
   if (profile) {
@@ -72,7 +97,8 @@ const getInitialDraft = (
   if (duplicateOf) {
     return { ...draftFromProfile(duplicateOf), name: getCopyName(duplicateOf.name, takenNames) };
   }
-  return createEmptyDraft();
+  const draft = createEmptyDraft();
+  return forRule?.type ? { ...draft, type: forRule.type } : draft;
 };
 
 const TYPE_OPTIONS: ReadonlyArray<PresetOption<BoostProfileType>> = [
@@ -127,22 +153,24 @@ const INDEX_OPTIONS: ReadonlyArray<{
   },
 ];
 
-export const ProfileFlyout = ({
+/** The profile form's header, body, and footer, for a flyout of its own or a rule's. */
+export const ProfileFlyoutContent = ({
   profile,
   duplicateOf,
+  forRule,
   takenNames,
+  titleId,
   onClose,
-}: ProfileFlyoutProps) => {
+  onCreateRule,
+}: ProfileFlyoutContentProps) => {
   const { notifications } = useBoostServices();
-  const titleId = useGeneratedHtmlId();
   const optionsId = useGeneratedHtmlId({ prefix: 'boostProfileOptions' });
   const isEditing = profile !== undefined;
 
   const [draft, setDraft] = useState<ProfileDraft>(() =>
-    getInitialDraft(profile, duplicateOf, takenNames)
+    getInitialDraft(profile, duplicateOf, forRule, takenNames)
   );
   const [showErrors, setShowErrors] = useState(false);
-  const [savedProfileName, setSavedProfileName] = useState<string | undefined>();
 
   const { mutate: createProfile, isLoading: isCreating } = useCreateProfile();
   const { mutate: updateProfile, isLoading: isUpdating } = useUpdateProfile();
@@ -175,8 +203,10 @@ export const ProfileFlyout = ({
           }),
           text: PROVISIONING_NOTE,
         });
-        if (createRule) {
-          setSavedProfileName(draft.name);
+        if (forRule) {
+          forRule.onCreate(draft.name, draft.type);
+        } else if (createRule && onCreateRule) {
+          onCreateRule(draft.name);
         } else {
           onClose();
         }
@@ -184,22 +214,10 @@ export const ProfileFlyout = ({
     });
   };
 
-  if (savedProfileName) {
-    // The second step: a rule that puts the new profile to use.
-    return <RuleFlyout initialProfileName={savedProfileName} onClose={onClose} />;
-  }
-
   const nameError = visibleErrors.name && PROFILE_NAME_ERROR_MESSAGES[visibleErrors.name];
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size={FLYOUT_WIDTH}
-      paddingSize="m"
-      aria-labelledby={titleId}
-      ownFocus
-      data-test-subj="boostProfileFlyout"
-    >
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={titleId}>
@@ -212,6 +230,15 @@ export const ProfileFlyout = ({
               ? i18n.translate('xpack.boost.profileForm.duplicateTitle', {
                   defaultMessage: 'Duplicate boost profile "{name}"',
                   values: { name: duplicateOf.name },
+                })
+              : forRule?.ruleName
+              ? i18n.translate('xpack.boost.profileForm.createForRuleTitle', {
+                  defaultMessage: 'Create boost profile for rule "{ruleName}"',
+                  values: { ruleName: forRule.ruleName },
+                })
+              : forRule
+              ? i18n.translate('xpack.boost.profileForm.createForNewRuleTitle', {
+                  defaultMessage: 'Create boost profile for new rule',
                 })
               : i18n.translate('xpack.boost.profileForm.createTitle', {
                   defaultMessage: 'Create boost profile',
@@ -251,6 +278,8 @@ export const ProfileFlyout = ({
                 isInvalid={Boolean(nameError)}
                 disabled={isSaving}
                 fullWidth
+                // In a rule flyout, the form replaces the rule's, so focus moves to its first field.
+                inputRef={forRule ? focusOnMount : undefined}
                 data-test-subj="boostProfileName"
               />
             </EuiFormRow>
@@ -259,16 +288,22 @@ export const ProfileFlyout = ({
               title={i18n.translate('xpack.boost.profileForm.typeTitle', {
                 defaultMessage: 'Type',
               })}
-              description={i18n.translate('xpack.boost.profileForm.typeDescription', {
-                defaultMessage: "The type can't be changed after the profile is created.",
-              })}
+              description={
+                forRule?.isTypeLocked
+                  ? i18n.translate('xpack.boost.profileForm.lockedTypeDescription', {
+                      defaultMessage: "Matches the default rule's type, which can't change.",
+                    })
+                  : i18n.translate('xpack.boost.profileForm.typeDescription', {
+                      defaultMessage: "The type can't be changed after the profile is created.",
+                    })
+              }
             >
               <PresetCards
                 name="boostProfileType"
                 options={TYPE_OPTIONS}
                 selectedId={draft.type}
                 onChange={(type) => updateDraft({ type })}
-                disabled={isSaving}
+                disabled={isSaving || Boolean(forRule?.isTypeLocked)}
                 direction="row"
               />
             </FormSection>
@@ -416,7 +451,21 @@ export const ProfileFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
-              {isEditing ? (
+              {forRule ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    fill
+                    onClick={() => onSave(false)}
+                    isLoading={isSaving}
+                    data-test-subj="boostProfileSaveAndUse"
+                  >
+                    {i18n.translate('xpack.boost.profileForm.saveAndUseButton', {
+                      defaultMessage: 'Save and use in rule',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : isEditing ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
@@ -435,6 +484,7 @@ export const ProfileFlyout = ({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       size="s"
+                      fill={!onCreateRule}
                       onClick={() => onSave(false)}
                       isLoading={isSaving}
                       data-test-subj="boostProfileSave"
@@ -444,25 +494,45 @@ export const ProfileFlyout = ({
                       })}
                     </EuiButton>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      fill
-                      onClick={() => onSave(true)}
-                      isLoading={isSaving}
-                      data-test-subj="boostProfileSaveAndCreateRule"
-                    >
-                      {i18n.translate('xpack.boost.profileForm.saveAndCreateRuleButton', {
-                        defaultMessage: 'Save and create rule',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
+                  {onCreateRule && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        fill
+                        onClick={() => onSave(true)}
+                        isLoading={isSaving}
+                        data-test-subj="boostProfileSaveAndCreateRule"
+                      >
+                        {i18n.translate('xpack.boost.profileForm.saveAndCreateRuleButton', {
+                          defaultMessage: 'Save and create rule',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
                 </>
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
+    </>
+  );
+};
+
+export const ProfileFlyout = (props: ProfileFlyoutProps) => {
+  const { onClose } = props;
+  const titleId = useGeneratedHtmlId();
+
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      size={FLYOUT_WIDTH}
+      paddingSize="m"
+      aria-labelledby={titleId}
+      ownFocus
+      data-test-subj="boostProfileFlyout"
+    >
+      <ProfileFlyoutContent {...props} titleId={titleId} />
     </EuiFlyout>
   );
 };

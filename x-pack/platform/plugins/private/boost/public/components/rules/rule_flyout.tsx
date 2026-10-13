@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
 import {
@@ -48,6 +48,8 @@ import { estimateRuleImpact } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { ESTIMATE_UNAVAILABLE, LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { CostEstimate } from '../cost_estimate';
+import { FLYOUT_WIDTH } from '../flyout_width';
+import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { FullWidthDivider } from '../profiles/full_width_divider';
 import {
   useBoostState,
@@ -103,9 +105,6 @@ const PATTERN_HELP: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
-// Both boost flyouts share this width.
-export const FLYOUT_WIDTH = 520;
-
 const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.ruleForm.managedBadge', {
   defaultMessage: 'Managed',
 });
@@ -150,6 +149,16 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   );
   // Remounting the picker clears text typed into it, which it otherwise keeps after a restore.
   const [profileFieldKey, setProfileFieldKey] = useState(0);
+  // While creating a profile, the flyout shows the profile form in place of the rule's.
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  // Set when leaving the profile form, so the link that opened it gets focus back.
+  const shouldFocusCreateProfileRef = useRef(false);
+  const createProfileLinkRef = useCallback((element: HTMLElement | null) => {
+    if (element && shouldFocusCreateProfileRef.current) {
+      shouldFocusCreateProfileRef.current = false;
+      element.focus();
+    }
+  }, []);
   // Text typed into the picker, which it shows in place of the selected profile's name.
   const profileSearchRef = useRef('');
   // Set while the picker clears its search after a selection, which isn't the user editing.
@@ -271,6 +280,23 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
     setProfileFieldKey(profileFieldKey + 1);
   };
 
+  const closeProfileForm = () => {
+    shouldFocusCreateProfileRef.current = true;
+    setIsCreatingProfile(false);
+  };
+
+  // A profile created in the profile form is selected as if it were picked from the list.
+  const onProfileCreate = (profileName: string, profileType: BoostProfileType) => {
+    setLastProfileName(profileName);
+    setDraft((current) => ({
+      ...current,
+      profileName,
+      picked: profileType === type ? current.picked : [],
+    }));
+    setProfileFieldKey(profileFieldKey + 1);
+    closeProfileForm();
+  };
+
   // What the pattern reaches, and whether a higher-ranked rule still wins each target.
   const draftRule: BoostRule = {
     name: draft.name,
@@ -353,27 +379,51 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const priorityError =
     visibleErrors.priority && RULE_PRIORITY_ERROR_MESSAGES[visibleErrors.priority];
 
+  const title = isEditing
+    ? i18n.translate('xpack.boost.ruleForm.editTitle', {
+        defaultMessage: 'Edit boost rule "{name}"',
+        values: { name: draft.name },
+      })
+    : i18n.translate('xpack.boost.ruleForm.createTitle', {
+        defaultMessage: 'Create boost rule',
+      });
+
+  // Both views share one flyout, so switching between them doesn't open another.
+  const flyoutProps = {
+    onClose,
+    size: FLYOUT_WIDTH,
+    paddingSize: 'm',
+    'aria-labelledby': titleId,
+    ownFocus: true,
+    'data-test-subj': 'boostRuleFlyout',
+  } as const;
+
+  if (isCreatingProfile) {
+    return (
+      <EuiFlyout
+        {...flyoutProps}
+        flyoutMenuProps={{ showBackButton: true, backButtonProps: { onClick: closeProfileForm } }}
+      >
+        <ProfileFlyoutContent
+          forRule={{
+            ruleName: draft.name || undefined,
+            type,
+            isTypeLocked: isDefaultRule,
+            onCreate: onProfileCreate,
+          }}
+          takenNames={profiles.map(({ name }) => name)}
+          titleId={titleId}
+          onClose={closeProfileForm}
+        />
+      </EuiFlyout>
+    );
+  }
+
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size={FLYOUT_WIDTH}
-      paddingSize="m"
-      aria-labelledby={titleId}
-      ownFocus
-      data-test-subj="boostRuleFlyout"
-    >
+    <EuiFlyout {...flyoutProps}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id={titleId}>
-            {isEditing
-              ? i18n.translate('xpack.boost.ruleForm.editTitle', {
-                  defaultMessage: 'Edit boost rule "{name}"',
-                  values: { name: draft.name },
-                })
-              : i18n.translate('xpack.boost.ruleForm.createTitle', {
-                  defaultMessage: 'Create boost rule',
-                })}
-          </h2>
+          <h2 id={titleId}>{title}</h2>
         </EuiTitle>
         {isDefaultRule && (
           <>
@@ -415,6 +465,20 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
           label={i18n.translate('xpack.boost.ruleForm.profileLabel', {
             defaultMessage: 'Boost profile',
           })}
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink
+                ref={createProfileLinkRef}
+                onClick={() => setIsCreatingProfile(true)}
+                disabled={isSaving}
+                data-test-subj="boostRuleCreateProfile"
+              >
+                {i18n.translate('xpack.boost.ruleForm.createProfileLink', {
+                  defaultMessage: 'Create profile',
+                })}
+              </EuiLink>
+            </EuiText>
+          }
           helpText={
             defaultRuleType === 'indices'
               ? i18n.translate('xpack.boost.ruleForm.defaultIndicesProfileDescription', {
