@@ -68,6 +68,7 @@ interface RelayTriggerResponseBody {
   ref?: string;
   tenant_key?: string;
   channel?: string;
+  conversation_key?: string;
 }
 
 export class RelayClient implements RelayClientContract {
@@ -211,6 +212,9 @@ export class RelayClient implements RelayClientContract {
       ref: body.ref,
       tenantKey: body.tenant_key ?? tenantKey,
       channel: typeof body.channel === 'string' && body.channel.length > 0 ? body.channel : channel,
+      ...(typeof body.conversation_key === 'string' && body.conversation_key.length > 0
+        ? { conversationKey: body.conversation_key }
+        : {}),
     };
   }
 

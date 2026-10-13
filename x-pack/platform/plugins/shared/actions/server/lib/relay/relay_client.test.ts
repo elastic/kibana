@@ -389,6 +389,25 @@ describe('RelayClient', () => {
       );
     });
 
+    it.each([
+      { label: 'returns the', data: { conversation_key: 'slack:team-A:C123:1700000000.000100' } },
+      { label: 'omits a missing', data: {} },
+      { label: 'omits an empty', data: { conversation_key: '' } },
+    ])('$label conversation key from the Relay', async ({ data }) => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000100', tenant_key: 'team-A', ...data },
+      } as never);
+
+      const response = await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'hello',
+      });
+
+      expect(response.conversationKey).toBe(data.conversation_key || undefined);
+    });
+
     it('includes thread_ts only when replying in a thread', async () => {
       requestMock.mockResolvedValue({
         status: 202,
