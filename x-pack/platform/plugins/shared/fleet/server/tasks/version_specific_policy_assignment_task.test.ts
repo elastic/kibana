@@ -1041,6 +1041,59 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       jest.restoreAllMocks();
     });
 
+    describe('run metrics', () => {
+      const createTask = (debugEnabled: boolean) => {
+        const logFactory = loggingSystemMock.create();
+        const logger = loggingSystemMock.createLogger();
+        logger.isLevelEnabled.mockReturnValue(debugEnabled);
+        logFactory.get.mockReturnValue(logger);
+        return {
+          logger,
+          task: new VersionSpecificPolicyAssignmentTask({
+            core: mockCore,
+            taskManager: mockTaskManagerSetup,
+            logFactory,
+            config: { taskInterval: '1m' },
+          }),
+        };
+      };
+      const run = async (task: VersionSpecificPolicyAssignmentTask) => {
+        await task.start({ taskManager: tmStartMock() });
+        return task.runTask(MOCK_TASK_INSTANCE, mockCore, new AbortController().signal);
+      };
+      const findMetricsLog = (logger: ReturnType<typeof loggingSystemMock.createLogger>) =>
+        logger.debug.mock.calls
+          .map(([message]) => message as string)
+          .find((message) => message.includes('Run metrics:'));
+
+      it('logs the duration, the phases and the memory of the run when debug is enabled', async () => {
+        const { task, logger } = createTask(true);
+
+        await run(task);
+
+        const metrics = JSON.parse(findMetricsLog(logger)!.split('Run metrics: ')[1]);
+        expect(metrics).toEqual(
+          expect.objectContaining({
+            sentinelVersionEnabled: true,
+            durationMs: expect.any(Number),
+            heapUsedMbPeak: expect.any(Number),
+            rssMbPeak: expect.any(Number),
+          })
+        );
+        expect(Object.keys(metrics.phaseDurationsMs)).toEqual(
+          expect.arrayContaining(['versionConditionPolicies', 'sentinelAssignment', 'orphanSweep'])
+        );
+      });
+
+      it('does not measure the run when debug is not enabled', async () => {
+        const { task, logger } = createTask(false);
+
+        await run(task);
+
+        expect(findMetricsLog(logger)).toBeUndefined();
+      });
+    });
+
     describe('assigning agents', () => {
       const policy = { id: 'policy-1', revision: 2 } as AgentPolicy;
 
