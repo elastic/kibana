@@ -12,7 +12,7 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import type {
   AttachmentRequestV2,
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest, postCommentEntityReq } from '../../../../common/lib/mock';
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: [
           postCommentEntityReq,
           attackAttachment,
-        ] as unknown as BulkCreateAttachmentsRequestV2,
+        ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         expectedHttpCode: 400,
       });
 

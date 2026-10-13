@@ -32,12 +32,22 @@ export {
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_CATEGORY_URL,
   ALERTZERO_PROPOSALS_CLOSED_URL,
-  ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_WATCHES_URL,
   ALERTZERO_WATCH_URL_TEMPLATE,
   ALERTZERO_WORKERS_URL,
   ALERTZERO_WORKER_URL_TEMPLATE,
+  HUNT_INTERNAL_ROUTE_BASE,
+  HUNT_INDEX_SCOPE_URL,
+  CANDIDATES_URL,
+  HUNT_COORDINATOR_URL,
+  FIND_OR_CREATE_INVESTIGATION_URL,
+  WRITE_HUNT_EVIDENCE_URL,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
+  HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL,
+  SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
+  SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
+  SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WATCH_CATALOG,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -65,17 +75,34 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
+  buildServiceAccountUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';
 
-export type { ScanFailureWorker, ScanFailuresResponse } from './constants';
+export {
+  SECURITY_ROLE_API_VERSION,
+  WORKER_ROLE_DEFINITIONS,
+  buildSecurityRoleUrl,
+} from './worker_roles';
+export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
+
+export type {
+  ScanFailureWorker,
+  ScanFailuresResponse,
+  HuntThreatIntelSupplyScope,
+  HuntThreatIntelSupplyWorkflowKey,
+  HuntThreatIntelSupplyWorkflowStatus,
+  HuntThreatIntelSupplyHardGate,
+  HuntThreatIntelSupplyStatus,
+} from './constants';
 
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  ActionSubjectKind,
   JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
@@ -111,6 +138,7 @@ export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -128,12 +156,11 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
-  HuntIndexScopeRequestQuery,
   HuntIndexScopeResponse,
-  HuntTechnology,
+  HuntScope,
+  HuntScopeResolution,
   IndexScopeStatus,
   IndexScopeWindow,
-  ResolvedIndexScope,
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
   HuntBehaviorRequestBody,
@@ -145,7 +172,13 @@ export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
   HuntCoordinatorStatus,
+  FindOrCreateInvestigationRequestBody,
+  FindOrCreateInvestigationResponse,
+  WriteHuntEvidenceRequestBody,
+  WriteHuntEvidenceResponse,
 } from './impl/schemas';
+
+export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 
 export {
   compareWatchesForDisplay,
@@ -180,16 +213,17 @@ export {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
-  applyMissingWorkerSettingDefaults,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   diffWorkerSettings,
   formatWorkerSettingsIssues,
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
-  projectStoredAutonomyLevel,
+  nearestLowerAutonomyLevel,
   touchesWorkerSettings,
+  upgradeStoredWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {

@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
@@ -14,18 +15,19 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
-import { alertingV2ExperimentalAvailability } from './alerting_v2_experimental_availability';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
-  generateEpisodeLifecycleDoc,
+  generateAlertLifecycleDoc,
   generateSeverityDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
   generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
-export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
+type RuleManagementSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+
+export const createRuleManagementSkill = (deps: RuleManagementSkillDeps) =>
   defineSkillType({
     id: RULE_MANAGEMENT_SKILL_ID,
     name: RULE_MANAGEMENT_SKILL_ID,
@@ -34,7 +36,7 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
       'Compose, discover, and modify alerting V2 rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-management skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
-    availability: alertingV2ExperimentalAvailability,
+    availability: deps.availability,
     referencedContent: [
       {
         name: 'rule-kind',
@@ -42,9 +44,9 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
         content: generateRuleKindDoc(),
       },
       {
-        name: 'episode-lifecycle',
+        name: 'alert-lifecycle',
         relativePath: './references',
-        content: generateEpisodeLifecycleDoc(),
+        content: generateAlertLifecycleDoc(),
       },
       {
         name: 'alert-event-severity',
@@ -125,6 +127,7 @@ ${generateRuleOperationsDoc()}
 - The \`set_query\` operation validates the query against Elasticsearch automatically.
   If the query references an unknown index or field, the tool will return an error
   with the Elasticsearch error message. Inspect the error, fix the query, and retry.
+- If \`set_query\` fails with a time-field error (e.g. federated data, views, or indices without a visible date field), use \`set_time_field\` to specify the timestamp column explicitly, then retry \`set_query\`. Do not guess the field name — ask the user which column to use.
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
@@ -185,8 +188,8 @@ If the user agrees, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via 
 ### Rule Kind
 When the user asks whether a rule should notify, record events only, or about the difference between Alerts and Events, consult the [rule-kind reference](./references/rule-kind.md).
 
-### Episode Lifecycle
-When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+### Alert Lifecycle
+When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [alert-lifecycle reference](./references/alert-lifecycle.md).
 
 ### Severity
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.

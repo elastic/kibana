@@ -42,9 +42,6 @@ const DEFAULTS_SETTINGS = {
     port: 0,
     xsrf: { disableProtection: true },
     restrictInternalApis: true,
-    // Jest integration tests hammer an in-process Kibana; default-on ELU limiting causes 429 flakes.
-    // Temporary until elastic/kibana#293805 (FTR supertest retry / harness). Override per suite to test the limiter.
-    rateLimiter: { enabled: false },
   },
   logging: {
     root: {

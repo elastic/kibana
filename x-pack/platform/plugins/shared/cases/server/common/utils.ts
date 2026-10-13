@@ -215,7 +215,7 @@ export const flattenAttachmentSavedObjects = (
   }, []);
 
 /**
- * Folds migrated types to unified in memory (SO never rewritten); unrecognized types keep the
+ * Folds mapped types to unified in memory (SO never rewritten); unrecognized types keep the
  * legacy shape — no errors channel here, unlike bulkGet. Public routes re-project via `toLegacyCaseResponse`.
  */
 export const flattenAttachmentSavedObject = (

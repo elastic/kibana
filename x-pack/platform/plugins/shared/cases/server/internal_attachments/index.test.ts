@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import { MIGRATED_ATTACHMENT_TYPES } from '../../common/constants/attachments';
+import { isUnifiedOnlyAttachmentType } from '../../common/utils/attachments';
 import { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import { getAttachmentTypeTransformers } from '../common/attachments';
+import { passThroughTransformer } from '../common/attachments/base';
 import { registerInternalAttachments } from '.';
 
 describe('registerInternalAttachments', () => {
-  it('only registers internal attachment type ids that are in MIGRATED_ATTACHMENT_TYPES', () => {
+  it('gives every internal type with a legacy form a legacy <-> unified transformer', () => {
     const registry = new UnifiedAttachmentTypeRegistry();
     registerInternalAttachments(registry);
 
-    const unmapped = registry.list().filter(({ id }) => !MIGRATED_ATTACHMENT_TYPES.has(id));
+    const missingTransformer = registry
+      .list()
+      .map(({ id }) => id)
+      .filter(
+        (id) =>
+          !isUnifiedOnlyAttachmentType(id) &&
+          getAttachmentTypeTransformers(id, '') === passThroughTransformer
+      );
 
-    expect(unmapped.map(({ id }) => id)).toEqual([]);
+    expect(registry.list().length).toBeGreaterThan(0);
+    expect(missingTransformer).toEqual([]);
   });
 });
