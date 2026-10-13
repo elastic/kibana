@@ -117,7 +117,8 @@ const resolveApiKeyOwnerProfileUid = async ({
  * the API key owner's username does not match the originating user.
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
- * back to the ES `_security/_authenticate` API for the username only.
+ * back to the ES `_security/_authenticate` API for the username. When it authenticated an API key,
+ * the id is the key owner's profile uid, as for an HTTP request made with the same key.
  */
 export const getUserFromRequest = async ({
   request,
@@ -143,8 +144,12 @@ export const getUserFromRequest = async ({
   }
 
   const authResponse = await esClient.security.authenticate();
+  const isApiKey = authResponse.authentication_type === 'api_key';
+
   return {
-    id: authUser?.profile_uid,
+    id:
+      authUser?.profile_uid ??
+      (isApiKey ? await resolveApiKeyOwnerProfileUid({ request, esClient }) : undefined),
     username: authResponse.username,
     isAdmin,
   };

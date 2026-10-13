@@ -392,6 +392,49 @@ describe('getUserFromRequest', () => {
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 
+  describe('un-enriched fake requests authenticated with an API key', () => {
+    const apiKeyId = 'task-api-key-id';
+
+    const createTaskRequest = () =>
+      httpServerMock.createFakeKibanaRequest({
+        headers: {
+          authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+        },
+      });
+
+    beforeEach(() => {
+      security.authc.getCurrentUser.mockReturnValue(null);
+      esClient.security.authenticate.mockResolvedValue({
+        username: 'key-owner',
+        authentication_type: 'api_key',
+      } as any);
+    });
+
+    it('resolves the API key owner profile uid', async () => {
+      esClient.security.getApiKey.mockResolvedValue({
+        api_keys: [{ id: apiKeyId, profile_uid: 'key-owner-profile' }],
+      } as any);
+
+      const result = await getUserFromRequest({ request: createTaskRequest(), security, esClient });
+
+      expect(result).toEqual({ id: 'key-owner-profile', username: 'key-owner', isAdmin: false });
+      expect(esClient.security.getApiKey).toHaveBeenCalledWith({
+        with_profile_uid: true,
+        id: apiKeyId,
+      });
+    });
+
+    it('leaves the id undefined when the API key owner has no profile', async () => {
+      esClient.security.getApiKey.mockResolvedValue({
+        api_keys: [{ id: apiKeyId }],
+      } as any);
+
+      const result = await getUserFromRequest({ request: createTaskRequest(), security, esClient });
+
+      expect(result).toEqual({ id: undefined, username: 'key-owner', isAdmin: false });
+    });
+  });
+
   it('includes the id from getCurrentUser when falling back to ES authenticate for the username', async () => {
     const request = httpServerMock.createFakeKibanaRequest({});
 
