@@ -50,6 +50,22 @@ packaging, Proposals, evidence, plus every pending Proposal in the space because
 notes cite other Investigations), so a dip there is a claim the Worker made that none of its
 own data supports.
 
+## Proposal gate (approve and dismiss)
+
+`evals/hunt_watch_approval.spec.ts` is an unscored e2e for the human side of the gate. Each test
+resets and runs the golden hit report in the default space, decides every pending Proposal it
+raised, waits for the Investigation to close, and checks the records:
+
+| Path | Proposal record | Investigation |
+|---|---|---|
+| approve | `decision: approved`; an actioned Proposal runs its action and ends `succeeded`, an actionless one ends `no_action` | `closed` / `resolved` |
+| dismiss | `decision: dismissed`, the `dismissReason` sent, `no_action` for every Proposal (an action that ran would show as `succeeded`) | `closed` / `resolved` |
+
+The gate closes once nothing is pending or executing, whatever was decided, so dismiss ends
+`resolved` too. `src/hitl_contract.test.ts` pins where decisions may come from: approve exists
+only in `src/proposal_gate.ts`, which only this spec imports, and dismiss exists there and in the
+pre-run reset. Scored tasks never decide a Proposal.
+
 ## Datasets
 
 - `datasets/golden.ts`: one row per core path (confirmed hit, clean no-hit, blocked index scope).
@@ -105,8 +121,11 @@ the `models:judge:<id>` PR label, resolved by `normalizeEvaluationConnectorId`.
 
 ## Known Worker behavior pinned by the datasets
 
-- The clean path's benign close currently fails with `Conversation <id> not found`, so no-hit
-  rows end `partial` with `incomplete_stage: packaging` and the Investigation stays open.
-  When the close works those rows flip to `completed` and `closed`.
+- The in-process `ai.conversation.metadata.patch` step cannot close an Investigation the Worker
+  owns (`Conversation <id> not found`). Until the close runs over `kibana.request`, no-hit rows
+  end `partial` with `incomplete_stage: packaging` and the Investigation stays open, and the
+  proposal gate spec fails at `waitForInvestigationClosed` with the Proposal records already
+  settled correctly. With the close fixed, no-hit rows flip to `completed` and `closed` and the
+  gate spec passes as written.
 - A confirmed hit raises more than one Proposal, so the hit rows use a minimum rather than an
   exact count.
