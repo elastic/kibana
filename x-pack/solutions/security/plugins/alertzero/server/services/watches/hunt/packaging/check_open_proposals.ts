@@ -41,6 +41,7 @@ export const createOpenProposalChecker = ({
             size: 1,
             from: 0,
             excludeSuperseded: true,
+            excludeUndecidedSuperseded: false,
             excludeExpired: status === 'pending',
           },
           spaceId,
