@@ -26,7 +26,7 @@ const createDroppedControlPanelsWarning = (
   tab_id: tabId,
   key: 'control_panels',
   value: controlGroupJson,
-  message: `Unable to transform control panels. Error: ${reason}`,
+  message: reason,
 });
 
 const getDroppedPanelDetails = (panel: unknown) => {
@@ -49,10 +49,7 @@ const createDroppedPanelWarning = (
   panel: unknown,
   error: unknown
 ): DiscoverSessionWarning => {
-  const reason =
-    error instanceof ZodError
-      ? prettifyError(error)
-      : `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+  const reason = error instanceof Error ? error.message : 'Unknown error';
 
   return {
     type: 'dropped_item',
@@ -60,7 +57,7 @@ const createDroppedPanelWarning = (
     key: 'control_panels',
     item_id: panelId,
     ...getDroppedPanelDetails(panel),
-    message: `Unable to transform control panel. ${reason}`,
+    message: error instanceof ZodError ? prettifyError(error) : reason,
   };
 };
 
@@ -98,13 +95,7 @@ export const transformControlPanelsOut = (
   } catch {
     return {
       panels: undefined,
-      warnings: [
-        createDroppedControlPanelsWarning(
-          tabId,
-          controlGroupJson,
-          'controlGroupJson is not valid JSON'
-        ),
-      ],
+      warnings: [createDroppedControlPanelsWarning(tabId, controlGroupJson, 'Invalid JSON.')],
     };
   }
 
@@ -112,11 +103,7 @@ export const transformControlPanelsOut = (
     return {
       panels: undefined,
       warnings: [
-        createDroppedControlPanelsWarning(
-          tabId,
-          controlGroupJson,
-          'controlGroupJson must be a JSON object'
-        ),
+        createDroppedControlPanelsWarning(tabId, controlGroupJson, 'Expected a JSON object.'),
       ],
     };
   }

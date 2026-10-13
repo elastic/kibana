@@ -493,8 +493,7 @@ describe('registerInternalRoutes', () => {
               tab_id: 'tab',
               key: 'control_panels',
               value: '{',
-              message:
-                'Unable to transform control panels. Error: controlGroupJson is not valid JSON',
+              message: 'Invalid JSON.',
             },
           ],
         },

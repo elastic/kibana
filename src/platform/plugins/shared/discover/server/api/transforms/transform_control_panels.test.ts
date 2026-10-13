@@ -80,21 +80,29 @@ describe('control panel transforms', () => {
 
     describe('warnings for invalid stored content', () => {
       it.each([
-        { condition: 'invalid JSON', controlGroupJson: 'not-json' },
-        { condition: 'not a JSON object', controlGroupJson: '[]' },
-      ])('drops control_panels when controlGroupJson is $condition', ({ controlGroupJson }) => {
-        const { panels, warnings } = transformControlPanelsOut(controlGroupJson, 'tab-1');
+        { condition: 'invalid JSON', controlGroupJson: 'not-json', reason: 'Invalid JSON.' },
+        {
+          condition: 'not a JSON object',
+          controlGroupJson: '[]',
+          reason: 'Expected a JSON object.',
+        },
+      ])(
+        'drops control_panels when controlGroupJson is $condition',
+        ({ controlGroupJson, reason }) => {
+          const { panels, warnings } = transformControlPanelsOut(controlGroupJson, 'tab-1');
 
-        expect(panels).toBeUndefined();
-        expect(warnings).toEqual([
-          expect.objectContaining({
-            type: 'dropped_property',
-            tab_id: 'tab-1',
-            key: 'control_panels',
-            value: controlGroupJson,
-          }),
-        ]);
-      });
+          expect(panels).toBeUndefined();
+          expect(warnings).toEqual([
+            expect.objectContaining({
+              type: 'dropped_property',
+              tab_id: 'tab-1',
+              key: 'control_panels',
+              value: controlGroupJson,
+              message: reason,
+            }),
+          ]);
+        }
+      );
 
       it('drops only a malformed panel entry', () => {
         const { panels, warnings } = transformControlPanelsOut(
@@ -121,8 +129,7 @@ describe('control panel transforms', () => {
             tab_id: 'tab-1',
             key: 'control_panels',
             item_id: 'bad',
-            message:
-              'Unable to transform control panel. Error: controlGroupJson panels must be JSON objects',
+            message: 'Control configuration must be a JSON object.',
           },
         ]);
       });
@@ -140,8 +147,7 @@ describe('control panel transforms', () => {
             key: 'control_panels',
             item_id: 'untyped',
             item_config: { order: 0, variable_name: 'foo' },
-            message:
-              'Unable to transform control panel. Error: controlGroupJson panels must have a type',
+            message: 'Control type is missing or invalid.',
           },
         ]);
       });
@@ -182,8 +188,7 @@ describe('control panel transforms', () => {
               selected_options: ['US'],
               single_select: true,
             },
-            message:
-              'Unable to transform control panel. ✖ Invalid option: expected one of "small"|"medium"|"large"\n  → at width',
+            message: '✖ Invalid option: expected one of "small"|"medium"|"large"\n  → at width',
           },
         ]);
       });

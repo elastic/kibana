@@ -22,8 +22,8 @@ export const discoverSessionApiMetricsTabTypeStateSchema = z
   .object({
     type: z.literal(`${DiscoverTabType.Metrics}`).meta({
       description:
-        'The tab type. `metrics` tabs include metrics grid settings and require an ES|QL data source. ' +
-        'These settings are used only when Discover shows the metrics grid for the query.',
+        'A tab with saved metrics grid settings. Requires an ES|QL data source. ' +
+        'These settings are used only when the query supports the metrics experience.',
     }),
     dimensions: z
       .array(z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH))

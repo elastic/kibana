@@ -237,7 +237,7 @@ describe('discover session API transforms', () => {
         tab_id: id,
         key: 'control_panels',
         value: '{',
-        message: 'Unable to transform control panels. Error: controlGroupJson is not valid JSON',
+        message: 'Invalid JSON.',
       })),
     });
     expect(session).toStrictEqual(original);

@@ -117,7 +117,7 @@ describe('registerSanitizeRoute', () => {
         tab_id: firstTab.id,
         key: 'control_panels',
         value: 'not-json',
-        message: expect.stringContaining('controlGroupJson is not valid JSON'),
+        message: 'Invalid JSON.',
       },
     ]);
     expect(body.data.tabs).toHaveLength(discoverSessionAttributes.tabs.length);
