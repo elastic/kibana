@@ -15,18 +15,6 @@ import type { Entity } from '@kbn/entity-store/common';
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low';
 
-/** Entity Analytics capabilities, shown as "how it was found" chips. */
-export type EaCapability =
-  | 'attack_discovery'
-  | 'detections'
-  | 'risk_scoring'
-  | 'asset_criticality'
-  | 'watchlists'
-  | 'relationships'
-  | 'entity_resolution'
-  | 'hunting_leads'
-  | 'cases';
-
 export type FactKind =
   | 'attack_discovery'
   | 'alert_activity'
@@ -54,7 +42,7 @@ export interface Fact {
   /** Short human label; becomes the evidence chip label. */
   title: string;
   /** ISO time; facts with a time can appear on threat timelines. */
-  at?: string;
+  timestamp?: string;
   severity?: Severity;
   /** EUIDs of the (golden) entities the fact is about. */
   entityIds: string[];
@@ -104,29 +92,13 @@ export const LINK_VERBS: Record<LinkType, string> = {
   supervises: 'manages',
 };
 
-export const FACT_KIND_CAPABILITY: Record<FactKind, EaCapability> = {
-  attack_discovery: 'attack_discovery',
-  alert_activity: 'detections',
-  high_risk_entity: 'risk_scoring',
-  alert_response: 'detections',
-  case: 'cases',
-  relationship_first_seen: 'relationships',
-  risk_jump: 'risk_scoring',
-  lead: 'hunting_leads',
-};
-
 export type SignalStatus = 'ok' | 'empty' | 'unavailable' | 'timeout' | 'error';
 
+/** What one signal's run came to, as stored and returned. */
 export interface SignalRun {
-  id: string;
-  title: string;
-  capability: EaCapability;
   status: SignalStatus;
-  /** Why it was unavailable or failed, in plain words. */
-  reason?: string;
-  durationMs: number;
-  factCount: number;
-  linkCount: number;
+  /** Duration in milliseconds. */
+  took: number;
 }
 
 export interface Evidence {
@@ -137,7 +109,8 @@ export interface Evidence {
   entities: Record<string, Entity>;
   facts: Fact[];
   links: Link[];
-  signals: SignalRun[];
+  /** Each signal's run, keyed by signal id, in run order. */
+  signals: Record<string, SignalRun>;
 }
 
 /** True when any signal found something; without findings the AI is not called and no brief is written. */

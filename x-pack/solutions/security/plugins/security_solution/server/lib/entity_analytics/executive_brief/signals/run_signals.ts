@@ -7,7 +7,6 @@
 
 import pMap from 'p-map';
 import { BRIEF_LIMITS } from '../../../../../common/entity_analytics/executive_brief/constants';
-import type { SignalRun } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { noopBriefTelemetry } from '../telemetry/types';
 import type { BriefTelemetry } from '../telemetry/types';
 import {
@@ -28,14 +27,22 @@ import type {
   RunSignals,
   SignalContext,
   SignalInput,
+  SignalOutcome,
   SignalOutput,
   SignalScope,
 } from './types';
 
-interface SignalOutcome {
-  run: SignalRun;
+interface SignalRunResult {
+  outcome: SignalOutcome;
   output?: SignalOutput;
 }
+
+/** Statuses whose reason says why a signal could not check its source. */
+const NOT_CHECKED: ReadonlySet<SignalOutcome['status']> = new Set([
+  'unavailable',
+  'timeout',
+  'error',
+]);
 
 /** Rejects as soon as `signal` aborts, even if the wrapped work ignores the signal. */
 const raceAbort = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> => {
@@ -81,26 +88,29 @@ const runOne = async <TScope extends SignalScope>({
   ctx: SignalContext;
   signal: BriefSignal<TScope>;
   input: SignalInput<TScope>;
-}): Promise<SignalOutcome> => {
+}): Promise<SignalRunResult> => {
   const start = Date.now();
   const timeoutMs = signal.timeoutMs ?? BRIEF_LIMITS.signalTimeoutMs;
   const finish = (
-    status: SignalRun['status'],
+    status: SignalOutcome['status'],
     output?: SignalOutput,
     reason?: string
-  ): SignalOutcome => ({
-    run: {
-      id: signal.id,
-      title: signal.title,
-      capability: signal.capability,
-      status,
-      ...(reason ? { reason } : {}),
-      durationMs: Date.now() - start,
-      factCount: output?.facts.length ?? 0,
-      linkCount: output?.links?.length ?? 0,
-    },
-    ...(output ? { output } : {}),
-  });
+  ): SignalRunResult => {
+    if (reason && NOT_CHECKED.has(status)) {
+      ctx.logger.debug(`[executive brief] signal "${signal.id}" ${status}: ${reason}`);
+    }
+    return {
+      outcome: {
+        id: signal.id,
+        status,
+        ...(reason ? { reason } : {}),
+        took: Date.now() - start,
+        factCount: output?.facts.length ?? 0,
+        linkCount: output?.links?.length ?? 0,
+      },
+      ...(output ? { output } : {}),
+    };
+  };
   const timeoutReason = (): string =>
     jobAbort.aborted
       ? 'The brief was cancelled before this source finished.'
@@ -141,14 +151,14 @@ const runPhase = <TScope extends SignalScope>(
   signals: ReadonlyArray<BriefSignal<TScope>>,
   input: SignalInput<TScope>,
   options: PhaseOptions
-): Promise<SignalOutcome[]> =>
+): Promise<SignalRunResult[]> =>
   pMap(
     signals,
     (signal) =>
       options.telemetry.withSignalSpan(signal.id, async () => {
-        const outcome = await runOne({ ctx, signal, input, ...options });
-        options.telemetry.recordSignal(outcome.run);
-        return outcome;
+        const result = await runOne({ ctx, signal, input, ...options });
+        options.telemetry.recordSignal(result.outcome);
+        return result;
       }),
     { concurrency: BRIEF_LIMITS.signalConcurrency }
   );
@@ -240,7 +250,7 @@ const selectCandidates = (
 /**
  * The signal engine: tenant signals → merged candidates → resolution → capped candidate set →
  * entity signals → evidence registry. Signals run through a bounded pool with a per-signal timeout
- * and a gather budget; a failing or slow signal is recorded in its `SignalRun` and never fails
+ * and a gather budget; a failing or slow signal is recorded in its `SignalOutcome` and never fails
  * the run. Only an aborted job (the caller's `abortSignal`) throws.
  */
 export const runSignals: RunSignals = async (
@@ -260,10 +270,10 @@ export const runSignals: RunSignals = async (
     (signal): signal is BriefSignal<'entities'> => signal.scope === 'entities'
   );
 
-  const tenantOutcomes = await runPhase(ctx, tenantSignals, {}, phaseOptions);
+  const tenantResults = await runPhase(ctx, tenantSignals, {}, phaseOptions);
   abortSignal.throwIfAborted();
 
-  const tenantOutputs = tenantOutcomes.flatMap(({ output }) => (output ? [output] : []));
+  const tenantOutputs = tenantResults.flatMap(({ output }) => (output ? [output] : []));
   const tenantRefs = referencedEntities(tenantOutputs);
   const tenantResolution = await resolveSafely(ctx, tenantRefs, gatherAbort);
   abortSignal.throwIfAborted();
@@ -283,25 +293,23 @@ export const runSignals: RunSignals = async (
     return (record && getEntityRisk(record)?.score) ?? signalRisk.get(golden);
   };
   const candidates = selectCandidates(
-    tenantOutcomes.flatMap(({ run, output }) =>
-      output?.candidates ? [{ signalId: run.id, candidates: output.candidates }] : []
+    tenantResults.flatMap(({ outcome, output }) =>
+      output?.candidates ? [{ signalId: outcome.id, candidates: output.candidates }] : []
     ),
     tenantResolution,
     riskOf
   );
 
-  const entityOutcomes: SignalOutcome[] =
+  const entityResults: SignalRunResult[] =
     candidates.length > 0
       ? await runPhase(ctx, entitySignals, { entities: candidates }, phaseOptions)
       : entitySignals.map(
-          (signal): SignalOutcome => ({
-            run: {
+          (signal): SignalRunResult => ({
+            outcome: {
               id: signal.id,
-              title: signal.title,
-              capability: signal.capability,
               status: 'empty',
               reason: 'No entities to look at.',
-              durationMs: 0,
+              took: 0,
               factCount: 0,
               linkCount: 0,
             },
@@ -311,7 +319,7 @@ export const runSignals: RunSignals = async (
 
   const tenantEuids = new Set(tenantRefs.map(({ euid }) => euid));
   const newRefs = referencedEntities(
-    entityOutcomes.flatMap(({ output }) => (output ? [output] : []))
+    entityResults.flatMap(({ output }) => (output ? [output] : []))
   ).filter(({ euid }) => !tenantEuids.has(euid) && tenantResolution.get(euid) === undefined);
   const resolution =
     newRefs.length > 0
@@ -323,16 +331,17 @@ export const runSignals: RunSignals = async (
       : tenantResolution;
   abortSignal.throwIfAborted();
 
-  const outcomeById = new Map(
-    [...tenantOutcomes, ...entityOutcomes].map((outcome) => [outcome.run.id, outcome])
+  const resultById = new Map(
+    [...tenantResults, ...entityResults].map((result) => [result.outcome.id, result])
   );
   const ordered = signals.flatMap((signal) => {
-    const outcome = outcomeById.get(signal.id);
-    return outcome ? [outcome] : [];
+    const result = resultById.get(signal.id);
+    return result ? [result] : [];
   });
-  const results: SignalResult[] = ordered.flatMap(({ run, output }) =>
-    output ? [{ signalId: run.id, output }] : []
+  const results: SignalResult[] = ordered.flatMap(({ outcome, output }) =>
+    output ? [{ signalId: outcome.id, output }] : []
   );
+  const outcomes = ordered.map(({ outcome }) => outcome);
 
-  return buildEvidence({ results, runs: ordered.map(({ run }) => run), resolution });
+  return { evidence: buildEvidence({ results, outcomes, resolution }), outcomes };
 };

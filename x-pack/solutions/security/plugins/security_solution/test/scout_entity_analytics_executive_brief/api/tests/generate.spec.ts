@@ -70,12 +70,17 @@ apiTest.describe(
         const jobId = response.body.job.id;
         const document = await waitForBriefJob({ apiClient, headers, jobId });
         expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
+        expect(document.job.took).toBeGreaterThanOrEqual(0);
         expect(document.report).toStrictEqual({ entities: {}, facts: [], links: [] });
         expect(document.metadata?.tokens).toBeUndefined();
         expect(document.metadata?.verification).toBeUndefined();
-        expect(document.metadata?.signals.map(({ id }) => id).sort()).toStrictEqual(
-          [...BRIEF_SIGNAL_IDS].sort()
-        );
+        // Signals are keyed by id, each with only its status and duration.
+        const signals = document.metadata?.signals ?? {};
+        expect(Object.keys(signals).sort()).toStrictEqual([...BRIEF_SIGNAL_IDS].sort());
+        Object.values(signals).forEach((run) => {
+          expect(Object.keys(run).sort()).toStrictEqual(['status', 'took']);
+          expect(run.took).toBeGreaterThanOrEqual(0);
+        });
         expect(llmProxy.interceptedRequests).toHaveLength(0);
 
         // The status route returns the same job, flat: no job, report or metadata keys.
@@ -88,6 +93,7 @@ apiTest.describe(
           'id',
           'startedAt',
           'status',
+          'took',
           'updatedAt',
         ]);
         expect(status.body).toStrictEqual(document.job);
@@ -154,9 +160,11 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(read).toHaveStatusCode(200);
+        // `took` runs to the last heartbeat, here the start.
         expect(read.body.job).toMatchObject({
           id: jobId,
           status: 'failed',
+          took: 0,
           error: { code: 'interrupted' },
         });
 

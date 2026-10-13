@@ -6,9 +6,11 @@
  */
 
 import type {
+  AssessmentKey,
   AttentionLevel,
   Brief,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
+import { ASSESSMENT_KEYS } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { buildValidBrief, DOCKER, FIXTURE_EVIDENCE, withFacts } from './__fixtures__/evidence';
 import { buildEvidenceIndex } from './evidence_index';
@@ -25,14 +27,28 @@ const toClaim = (claim: Claim) =>
     ? { level: claim }
     : { level: claim[0], factIds: claim[1], linkIds: claim[2] ?? [] };
 
-/** The valid brief with the given levels (and cited ids, where given). */
-const brief = (verdict: Claim, areas: Claim[]): Brief => {
+type Levels = Partial<Record<AssessmentKey, AttentionLevel>>;
+
+/**
+ * The valid brief with only the given assessments, at the given levels (and cited ids, where
+ * given).
+ */
+const brief = (verdict: Claim, assessments: Partial<Record<AssessmentKey, Claim>>): Brief => {
   const valid = buildValidBrief();
   return {
     verdict: { ...valid.verdict, ...toClaim(verdict) },
-    areas: areas.map((area, i) => ({ ...valid.areas[i], ...toClaim(area) })),
+    assessments: ASSESSMENT_KEYS.reduce<Brief['assessments']>((acc, key) => {
+      const claim = assessments[key];
+      return claim ? { ...acc, [key]: { ...valid.assessments[key], ...toClaim(claim) } } : acc;
+    }, {}),
   };
 };
+
+const levelsOf = (assessments: Brief['assessments']): Levels =>
+  ASSESSMENT_KEYS.reduce<Levels>((acc, key) => {
+    const assessment = assessments[key];
+    return assessment ? { ...acc, [key]: assessment.level } : acc;
+  }, {});
 
 const F1_ACKNOWLEDGED = withFacts((facts) =>
   facts.map((fact) =>
@@ -59,42 +75,44 @@ const F1_UNRATED = withFacts((facts) =>
 );
 
 describe('checkGuardrails', () => {
-  it.each<[string, Brief, Evidence, { verdict: string; areas: string[]; lowered: number }]>([
+  it.each<
+    [string, Brief, Evidence, { verdict: AttentionLevel; assessments: Levels; lowered: number }]
+  >([
     [
       'keeps levels the cited facts support',
       buildValidBrief(),
       FIXTURE_EVIDENCE,
-      { verdict: 'urgent', areas: ['urgent', 'action'], lowered: 0 },
+      { verdict: 'urgent', assessments: { threats: 'urgent', response: 'action' }, lowered: 0 },
     ],
     [
       'lowers everything to watch when every fact is low severity',
       buildValidBrief(),
       ALL_LOW,
-      { verdict: 'watch', areas: ['watch', 'watch'], lowered: 3 },
+      { verdict: 'watch', assessments: { threats: 'watch', response: 'watch' }, lowered: 3 },
     ],
     [
       'lowers urgent to action when the severe discovery is already handled',
-      brief(['urgent', [2]], [['urgent', [2]]]),
+      brief(['urgent', [2]], { threats: ['urgent', [2]] }),
       FIXTURE_EVIDENCE,
-      { verdict: 'action', areas: ['action'], lowered: 2 },
+      { verdict: 'action', assessments: { threats: 'action' }, lowered: 2 },
     ],
     [
       'caps an unrated fact at action',
-      brief(['action', [1]], [['urgent', [1]]]),
+      brief(['action', [1]], { threats: ['urgent', [1]] }),
       F1_UNRATED,
-      { verdict: 'action', areas: ['action'], lowered: 1 },
+      { verdict: 'action', assessments: { threats: 'action' }, lowered: 1 },
     ],
     [
-      'lets the verdict rest on what its areas cite',
-      brief(['urgent', [2]], [['urgent', [], [1]]]),
+      'lets the verdict rest on what its assessments cite',
+      brief(['urgent', [2]], { threats: ['urgent', [], [1]] }),
       FIXTURE_EVIDENCE,
-      { verdict: 'urgent', areas: ['urgent'], lowered: 0 },
+      { verdict: 'urgent', assessments: { threats: 'urgent' }, lowered: 0 },
     ],
   ])('level ceiling: %s', (_name, input, evidence, expected) => {
     const outcome = run(input, evidence);
     expect({
       verdict: outcome.brief.verdict.level,
-      areas: outcome.brief.areas.map(({ level }) => level),
+      assessments: levelsOf(outcome.brief.assessments),
       lowered: outcome.lowered,
     }).toEqual(expected);
     expect(outcome.structuralErrors).toEqual([]);
@@ -103,31 +121,23 @@ describe('checkGuardrails', () => {
   it.each<[string, Brief, Evidence, string[]]>([
     [
       'a clear verdict with an unaddressed severe discovery',
-      brief('clear', []),
+      brief('clear', {}),
       FIXTURE_EVIDENCE,
       [
         'cannot be "clear" while unaddressed critical or high attack discoveries exist (fact ids 1)',
       ],
     ],
     [
-      'a verdict below its worst area',
-      brief('action', ['urgent', 'watch']),
+      'a verdict below its worst assessment',
+      brief('action', { threats: 'urgent', response: 'watch' }),
       FIXTURE_EVIDENCE,
-      ['"action" is lower than the most severe area ("urgent")'],
+      ['"action" is lower than the most severe assessment ("urgent")'],
     ],
-    ['no error for an acknowledged discovery', brief('clear', []), F1_ACKNOWLEDGED, []],
-    ['no error for a discovery covered by a case', brief('clear', []), F1_WITH_CASE, []],
+    ['no error for an acknowledged discovery', brief('clear', {}), F1_ACKNOWLEDGED, []],
+    ['no error for a discovery covered by a case', brief('clear', {}), F1_WITH_CASE, []],
   ])('structural: %s', (_name, input, evidence, expected) => {
     expect(run(input, evidence).structuralErrors).toEqual(
       expected.map((text) => expect.stringContaining(text))
     );
-  });
-
-  it('drops duplicate areas', () => {
-    const input = buildValidBrief();
-    input.areas.push({ ...input.areas[1] });
-    expect(run(input).drops).toEqual([
-      { path: 'areas[2]', check: 'guardrail', reason: 'duplicate "response" area' },
-    ]);
   });
 });

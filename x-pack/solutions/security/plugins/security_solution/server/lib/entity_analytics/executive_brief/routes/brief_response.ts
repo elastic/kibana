@@ -14,15 +14,25 @@ import type {
   BriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/document';
 
-/** Maps a stored job to the job view shown by the GET routes. */
-export const toJobView = (job: BriefJob): BriefJobView => ({
-  id: job.id,
-  status: job.status,
-  ...(job.status === 'running' && job.stage ? { stage: job.stage } : {}),
-  startedAt: job.started_at,
-  updatedAt: job.heartbeat_at ?? job.started_at,
-  ...(job.status === 'failed' && job.error ? { error: job.error } : {}),
-});
+const isFinished = ({ status }: BriefJob): boolean => status === 'succeeded' || status === 'failed';
+
+/**
+ * Maps a stored job to the job view shown by the GET routes. `took` runs from the start to the
+ * last heartbeat, which finishing a job sets; for a stale job read as interrupted, that is the last
+ * heartbeat it sent.
+ */
+export const toJobView = (job: BriefJob): BriefJobView => {
+  const updatedAt = job.heartbeat_at ?? job.started_at;
+  return {
+    id: job.id,
+    status: job.status,
+    ...(job.status === 'running' && job.stage ? { stage: job.stage } : {}),
+    startedAt: job.started_at,
+    updatedAt,
+    ...(isFinished(job) ? { took: Date.parse(updatedAt) - Date.parse(job.started_at) } : {}),
+    ...(job.status === 'failed' && job.error ? { error: job.error } : {}),
+  };
+};
 
 /** Maps the stored document to the GET response: the latest job, the report and its metadata. */
 export const toBriefResponse = (document: BriefDocument): BriefResponse => {
@@ -34,7 +44,7 @@ export const toBriefResponse = (document: BriefDocument): BriefResponse => {
   return {
     job,
     report: {
-      ...(brief ? { verdict: brief.verdict, areas: brief.areas } : {}),
+      ...(brief ? { verdict: brief.verdict, assessments: brief.assessments } : {}),
       entities: evidence.entities,
       facts: evidence.facts,
       links: evidence.links,

@@ -52,7 +52,7 @@ export const FIXTURE_EVIDENCE: Evidence = {
       kind: 'attack_discovery',
       signalId: 'attack_discoveries',
       title: 'Stolen privileged credentials used to reach docker-host-prod-01',
-      at: '2026-10-07T08:31:00.000Z',
+      timestamp: '2026-10-07T08:31:00.000Z',
       severity: 'critical',
       entityIds: [ROD, LAPTOP, DOCKER],
       numbers: { alerts: 12 },
@@ -64,7 +64,7 @@ export const FIXTURE_EVIDENCE: Evidence = {
       kind: 'attack_discovery',
       signalId: 'attack_discoveries',
       title: 'Suspicious mailbox rule created by j.chen',
-      at: '2026-10-08T12:00:00.000Z',
+      timestamp: '2026-10-08T12:00:00.000Z',
       severity: 'high',
       entityIds: [CHEN],
       numbers: { alerts: 3 },
@@ -81,26 +81,10 @@ export const FIXTURE_EVIDENCE: Evidence = {
     },
   ],
   links: [{ id: 1, type: 'same_attack', fromEntityId: ROD, toEntityId: DOCKER, factIds: [1] }],
-  signals: [
-    {
-      id: 'attack_discoveries',
-      title: 'Attack discoveries',
-      capability: 'attack_discovery',
-      status: 'ok',
-      durationMs: 120,
-      factCount: 2,
-      linkCount: 1,
-    },
-    {
-      id: 'high_risk_entities',
-      title: 'High-risk entities',
-      capability: 'risk_scoring',
-      status: 'ok',
-      durationMs: 80,
-      factCount: 1,
-      linkCount: 0,
-    },
-  ],
+  signals: {
+    attack_discoveries: { status: 'ok', took: 120 },
+    high_risk_entities: { status: 'ok', took: 80 },
+  },
 };
 
 /** FIXTURE_EVIDENCE with the facts replaced or extended. */
@@ -109,8 +93,11 @@ export const withFacts = (update: (facts: Fact[]) => Fact[]): Evidence => ({
   facts: update(FIXTURE_EVIDENCE.facts),
 });
 
+/** A brief with both assessments present. */
+export type FullBrief = Brief & { assessments: Required<Brief['assessments']> };
+
 /** A brief that passes every check against FIXTURE_EVIDENCE. */
-export const buildValidBrief = (): Brief => ({
+export const buildValidBrief = (): FullBrief => ({
   verdict: {
     level: 'urgent',
     headline: 'A privileged account was used to reach a critical production host',
@@ -119,20 +106,18 @@ export const buildValidBrief = (): Brief => ({
     factIds: [1, 3],
     linkIds: [],
   },
-  areas: [
-    {
-      id: 'threats',
+  assessments: {
+    threats: {
       level: 'urgent',
       summary: 'One critical attack involves a privileged user and a production host.',
       factIds: [1],
       linkIds: [1],
     },
-    {
-      id: 'response',
+    response: {
       level: 'action',
       summary: 'The critical attack is not acknowledged yet; the high one on user:j.chen is.',
       factIds: [1, 2],
       linkIds: [],
     },
-  ],
+  },
 });

@@ -19,11 +19,9 @@ import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import type { VerificationCheck } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { BriefJobStage } from '../../../../../common/entity_analytics/executive_brief/document';
-import type {
-  SignalRun,
-  SignalStatus,
-} from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { SignalStatus } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT } from '../../../telemetry/event_based/events';
+import type { SignalOutcome } from '../signals/types';
 import type {
   BriefCompletedEvent,
   BriefRejectionReason,
@@ -184,17 +182,17 @@ export const createBriefTelemetry = ({
         return context.with(context.active().setValue(SIGNAL_SPAN_KEY, active), fn);
       }),
 
-    recordSignal: (run: SignalRun) => {
-      instruments.signalDuration.record(toSeconds(run.durationMs), {
-        'signal.id': run.id,
-        'signal.status': run.status,
+    recordSignal: (outcome: SignalOutcome) => {
+      instruments.signalDuration.record(toSeconds(outcome.took), {
+        'signal.id': outcome.id,
+        'signal.status': outcome.status,
       });
       const active = context.active().getValue(SIGNAL_SPAN_KEY);
-      if (isActiveSignalSpan(active) && active.signalId === run.id) {
+      if (isActiveSignalSpan(active) && active.signalId === outcome.id) {
         active.span.setAttributes({
-          'signal.status': run.status,
-          'signal.fact_count': run.factCount,
-          'signal.link_count': run.linkCount,
+          'signal.status': outcome.status,
+          'signal.fact_count': outcome.factCount,
+          'signal.link_count': outcome.linkCount,
         });
       }
     },

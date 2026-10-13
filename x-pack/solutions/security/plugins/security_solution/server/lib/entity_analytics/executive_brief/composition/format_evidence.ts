@@ -12,10 +12,11 @@ import type {
   Fact,
   Link,
   Severity,
-  SignalRun,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { LINK_VERBS } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { entityDisplayName, entityTypeOf, watchlistsOf } from '../entity_record';
+import { BRIEF_SIGNALS } from '../signals';
+import type { SignalOutcome } from '../signals/types';
 import { toMention } from '../verification/mentions';
 
 /**
@@ -78,7 +79,7 @@ const formatFact = (fact: Fact, clean: CleanText): string => {
   const head = [
     `${fact.id}.`,
     fact.severity ? `[${fact.severity}]` : undefined,
-    fact.at ? formatTime(fact.at) : undefined,
+    fact.timestamp ? formatTime(fact.timestamp) : undefined,
     `"${clean(fact.title)}"`,
   ]
     .filter((part) => part !== undefined)
@@ -116,32 +117,41 @@ const formatLink = (link: Link): string => {
 
 const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
-const formatSignal = (signal: SignalRun, clean: CleanText): string => {
+const SIGNAL_TITLES: ReadonlyMap<string, string> = new Map(
+  BRIEF_SIGNALS.map(({ id, title }) => [id, title])
+);
+
+const signalTitle = (signalId: string): string => SIGNAL_TITLES.get(signalId) ?? signalId;
+
+const formatSignal = (signal: SignalOutcome, clean: CleanText): string => {
+  const title = signalTitle(signal.id);
   const reason = signal.reason ? `: ${clean(signal.reason)}` : '';
   switch (signal.status) {
     case 'ok':
-      return `- ${signal.title}: checked, ${plural(signal.factCount, 'fact')}, ${plural(
+      return `- ${title}: checked, ${plural(signal.factCount, 'fact')}, ${plural(
         signal.linkCount,
         'link'
       )}`;
     case 'empty':
-      return `- ${signal.title}: checked, nothing found`;
+      return `- ${title}: checked, nothing found`;
     case 'timeout':
-      return `- ${signal.title}: not checked (timed out${reason})`;
+      return `- ${title}: not checked (timed out${reason})`;
     default:
-      return `- ${signal.title}: not checked (${signal.status}${reason})`;
+      return `- ${title}: not checked (${signal.status}${reason})`;
   }
 };
 
 const compareFacts = (a: Fact, b: Fact): number =>
   (a.severity ? SEVERITY_RANK[a.severity] : 4) - (b.severity ? SEVERITY_RANK[b.severity] : 4) ||
-  (Date.parse(b.at ?? '') || 0) - (Date.parse(a.at ?? '') || 0) ||
+  (Date.parse(b.timestamp ?? '') || 0) - (Date.parse(a.timestamp ?? '') || 0) ||
   a.id - b.id;
 
 /** Groups facts by signal, then kind; signals in run order, unknown signals after. */
-const groupFacts = (evidence: Evidence): Array<{ header: string; facts: Fact[] }> => {
-  const titles = new Map(evidence.signals.map(({ id, title }) => [id, title]));
-  const order = [...evidence.signals.map(({ id }) => id)];
+const groupFacts = (
+  evidence: Evidence,
+  signals: readonly SignalOutcome[]
+): Array<{ header: string; facts: Fact[] }> => {
+  const order = signals.map(({ id }) => id);
   const groups = new Map<string, { header: string; facts: Fact[] }>();
   evidence.facts.forEach((fact) => {
     if (!order.includes(fact.signalId)) {
@@ -154,7 +164,7 @@ const groupFacts = (evidence: Evidence): Array<{ header: string; facts: Fact[] }
       .forEach((fact) => {
         const key = `${signalId}\u0000${fact.kind}`;
         const group = groups.get(key) ?? {
-          header: `${titles.get(signalId) ?? signalId} — ${fact.kind}`,
+          header: `${signalTitle(signalId)} — ${fact.kind}`,
           facts: [],
         };
         group.facts.push(fact);
@@ -167,8 +177,11 @@ const groupFacts = (evidence: Evidence): Array<{ header: string; facts: Fact[] }
   }));
 };
 
-/** Renders the evidence as the prompt's evidence block. Deterministic for the same evidence. */
-export const formatEvidence = (evidence: Evidence): string => {
+/**
+ * Renders the evidence, and how each signal's run went, as the prompt's evidence block.
+ * Deterministic for the same input.
+ */
+export const formatEvidence = (evidence: Evidence, signals: readonly SignalOutcome[]): string => {
   const entities = Object.entries(evidence.entities);
   const clean = createTextCleaner(entities.map(([euid]) => euid));
   const lines: string[] = [];
@@ -181,7 +194,7 @@ export const formatEvidence = (evidence: Evidence): string => {
   );
 
   lines.push('', `## Facts (${evidence.facts.length})`);
-  const groups = groupFacts(evidence);
+  const groups = groupFacts(evidence, signals);
   if (groups.length === 0) {
     lines.push('None found in this window.');
   }
@@ -195,9 +208,7 @@ export const formatEvidence = (evidence: Evidence): string => {
 
   lines.push('', '## Signals');
   lines.push(
-    ...(evidence.signals.length > 0
-      ? evidence.signals.map((signal) => formatSignal(signal, clean))
-      : ['None ran'])
+    ...(signals.length > 0 ? signals.map((signal) => formatSignal(signal, clean)) : ['None ran'])
   );
   return lines.join('\n');
 };

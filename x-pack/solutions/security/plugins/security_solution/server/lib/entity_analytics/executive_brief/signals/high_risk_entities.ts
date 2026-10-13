@@ -54,7 +54,6 @@ const toFact = (ref: EntityRef, record: Entity): FactDraft => {
 export const highRiskEntitiesSignal = defineSignal({
   id: 'high_risk_entities',
   title: 'High-risk entities',
-  capability: 'risk_scoring',
   scope: 'tenant',
   isAvailable: async () => ALWAYS_AVAILABLE,
   run: async (ctx, _input, abortSignal) => {

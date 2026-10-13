@@ -20,6 +20,8 @@ const FACT_IDS_DESCRIPTION =
 const LINK_IDS_DESCRIPTION =
   'Ids of the links (numbers from the "Links" section) that back this claim. Never invent ids.';
 
+const ASSESSMENT_SUMMARY_DESCRIPTION = 'One sentence, at most 180 characters';
+
 /**
  * Descriptions added to the JSON schema derived from `briefSchema`, keyed by property path
  * (`[]` stands for array items). They guide the model; the zod schema stays the source of truth.
@@ -32,10 +34,13 @@ const FIELD_DESCRIPTIONS: Readonly<Record<string, string>> = {
   'verdict.summary': 'At most 3 short sentences',
   'verdict.factIds': FACT_IDS_DESCRIPTION,
   'verdict.linkIds': LINK_IDS_DESCRIPTION,
-  areas: 'Exactly one "threats" area and one "response" area',
-  'areas[].summary': 'One sentence, at most 180 characters',
-  'areas[].factIds': FACT_IDS_DESCRIPTION,
-  'areas[].linkIds': LINK_IDS_DESCRIPTION,
+  assessments: 'One "threats" assessment and one "response" assessment',
+  'assessments.threats.summary': ASSESSMENT_SUMMARY_DESCRIPTION,
+  'assessments.threats.factIds': FACT_IDS_DESCRIPTION,
+  'assessments.threats.linkIds': LINK_IDS_DESCRIPTION,
+  'assessments.response.summary': ASSESSMENT_SUMMARY_DESCRIPTION,
+  'assessments.response.factIds': FACT_IDS_DESCRIPTION,
+  'assessments.response.linkIds': LINK_IDS_DESCRIPTION,
 };
 
 /**

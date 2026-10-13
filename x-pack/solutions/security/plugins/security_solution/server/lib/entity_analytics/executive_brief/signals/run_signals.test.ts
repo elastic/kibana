@@ -35,7 +35,6 @@ const signal = <TScope extends SignalScope = 'tenant'>(
 ): BriefSignal<TScope> => ({
   id,
   title: id,
-  capability: 'detections',
   scope: 'tenant' as TScope,
   isAvailable: async () => ({ available: true }),
   run,
@@ -55,7 +54,7 @@ describe('runSignals', () => {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
 
-    const evidence = await run([
+    const { evidence, outcomes } = await run([
       signal('ok', async () => factOf('user:ann')),
       signal('slow', () => new Promise<SignalOutput>(() => undefined), { timeoutMs: 20 }),
       signal('broken', async () => {
@@ -66,12 +65,14 @@ describe('runSignals', () => {
       }),
     ]);
 
-    expect(evidence.signals.map(({ id, status }) => ({ id, status }))).toEqual([
-      { id: 'ok', status: 'ok' },
-      { id: 'slow', status: 'timeout' },
-      { id: 'broken', status: 'error' },
-      { id: 'no_index', status: 'unavailable' },
+    expect(outcomes).toEqual([
+      expect.objectContaining({ id: 'ok', status: 'ok', factCount: 1 }),
+      expect.objectContaining({ id: 'slow', status: 'timeout', reason: expect.any(String) }),
+      expect.objectContaining({ id: 'broken', status: 'error', reason: 'kaboom' }),
+      expect.objectContaining({ id: 'no_index', status: 'unavailable' }),
     ]);
+    // Only the status and duration are kept on the evidence.
+    expect(evidence.signals.broken).toStrictEqual({ status: 'error', took: expect.any(Number) });
     expect(evidence.facts).toHaveLength(1);
   });
 

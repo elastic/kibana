@@ -6,14 +6,17 @@
  */
 
 import type {
+  Assessment,
+  AssessmentKey,
   AttentionLevel,
   Brief,
   VerificationCheck,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
+import { ASSESSMENT_KEYS } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { EvidenceIndex } from './evidence_index';
 
 /** A removable item of the brief. The verdict is never removed: its failures are structural. */
-export type ItemPath = `areas[${number}]`;
+export type ItemPath = `assessments.${AssessmentKey}`;
 
 export interface ItemDrop {
   path: ItemPath;
@@ -67,7 +70,28 @@ export interface Claim {
   level: AttentionLevel;
 }
 
-/** Lists the claims of a brief in a fixed order: verdict, then areas. */
+export const assessmentPath = (key: AssessmentKey): ItemPath => `assessments.${key}`;
+
+/** The assessments that are present, in `ASSESSMENT_KEYS` order. */
+export const presentAssessments = (
+  assessments: Brief['assessments']
+): Array<{ key: AssessmentKey; assessment: Assessment }> =>
+  ASSESSMENT_KEYS.flatMap((key) => {
+    const assessment = assessments[key];
+    return assessment ? [{ key, assessment }] : [];
+  });
+
+/** Applies `update` to each present assessment; absent ones stay absent. */
+export const mapAssessments = (
+  assessments: Brief['assessments'],
+  update: (assessment: Assessment, key: AssessmentKey) => Assessment
+): Brief['assessments'] =>
+  presentAssessments(assessments).reduce<Brief['assessments']>(
+    (acc, { key, assessment }) => ({ ...acc, [key]: update(assessment, key) }),
+    {}
+  );
+
+/** Lists the claims of a brief in a fixed order: verdict, then assessments. */
 export const listClaims = (brief: Brief): Claim[] => [
   {
     path: undefined,
@@ -79,14 +103,14 @@ export const listClaims = (brief: Brief): Claim[] => [
     linkIds: brief.verdict.linkIds,
     level: brief.verdict.level,
   },
-  ...brief.areas.map((area, i): Claim => {
-    const path: ItemPath = `areas[${i}]`;
+  ...presentAssessments(brief.assessments).map(({ key, assessment }): Claim => {
+    const path = assessmentPath(key);
     return {
       path,
-      fields: [{ path: `${path}.summary`, text: area.summary }],
-      factIds: area.factIds,
-      linkIds: area.linkIds,
-      level: area.level,
+      fields: [{ path: `${path}.summary`, text: assessment.summary }],
+      factIds: assessment.factIds,
+      linkIds: assessment.linkIds,
+      level: assessment.level,
     };
   }),
 ];
@@ -94,7 +118,7 @@ export const listClaims = (brief: Brief): Claim[] => [
 export const isDropped = (context: CheckContext, path: ItemPath | undefined): boolean =>
   path !== undefined && context.dropped.has(path);
 
-/** Records a failing claim: a drop for an area, a structural error for the verdict. */
+/** Records a failing claim: a drop for an assessment, a structural error for the verdict. */
 export const reportClaim = (
   outcome: CheckOutcome,
   claim: Claim,

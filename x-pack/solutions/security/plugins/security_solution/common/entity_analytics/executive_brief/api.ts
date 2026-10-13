@@ -32,6 +32,11 @@ export interface BriefJobView {
   startedAt: string;
   /** The last heartbeat. */
   updatedAt: string;
+  /**
+   * Milliseconds from `startedAt` to `updatedAt`; only when succeeded or failed. For a job read as
+   * interrupted (no recent heartbeat), it runs to the last heartbeat.
+   */
+  took?: number;
   /** Only when failed. */
   error?: { code: BriefErrorCode; message: string };
 }
@@ -46,10 +51,13 @@ export interface GenerateBriefResponse {
   reused: boolean;
 }
 
-/** Everything needed to render the brief; `verdict` and `areas` are absent when nothing was found. */
+/**
+ * Everything needed to render the brief; `verdict` and `assessments` are absent when nothing was
+ * found.
+ */
 export interface BriefReport {
   verdict?: Brief['verdict'];
-  areas?: Brief['areas'];
+  assessments?: Brief['assessments'];
   /** Entity Store records of the entities the facts and links reference, keyed by EUID. */
   entities: Record<string, Entity>;
   facts: Fact[];
@@ -65,8 +73,8 @@ export interface BriefMetadata {
   model?: string;
   tokens?: { prompt: number; completion: number; total: number };
   verification?: VerificationSummary;
-  /** What each signal checked, and with what result. */
-  signals: SignalRun[];
+  /** How each signal's run went, keyed by signal id. */
+  signals: Record<string, SignalRun>;
 }
 
 /** GET response. `report` and `metadata` are present together, once a run has succeeded. */

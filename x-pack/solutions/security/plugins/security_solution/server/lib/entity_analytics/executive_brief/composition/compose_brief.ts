@@ -21,7 +21,7 @@ import {
 } from '@kbn/inference-common';
 import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
 import {
-  AREA_IDS,
+  ASSESSMENT_KEYS,
   BRIEF_TEXT_LIMITS,
   MAX_CITED_IDS,
   rawTextLimit,
@@ -111,32 +111,24 @@ const withNormalizedIds = (record: JsonRecord): JsonRecord => ({
   linkIds: normalizeIds(record.linkIds),
 });
 
-/** Keeps the first area of each id, then caps the list. */
-const normalizeAreas = (areas: unknown): unknown => {
-  if (!Array.isArray(areas)) {
-    return areas;
-  }
-  const seen = new Set<unknown>();
-  return areas
-    .filter((area) => {
-      if (!isRecord(area) || seen.has(area.id)) {
-        return !isRecord(area);
-      }
-      seen.add(area.id);
-      return true;
-    })
-    .slice(0, AREA_IDS.length)
-    .map((area) =>
-      isRecord(area)
-        ? clampFields(withNormalizedIds(area), { summary: BRIEF_TEXT_LIMITS.areaSummary })
-        : area
-    );
-};
+const normalizeAssessments = (assessments: unknown): unknown =>
+  isRecord(assessments)
+    ? ASSESSMENT_KEYS.reduce<JsonRecord>((acc, key) => {
+        const assessment = acc[key];
+        return isRecord(assessment)
+          ? {
+              ...acc,
+              [key]: clampFields(withNormalizedIds(assessment), {
+                summary: BRIEF_TEXT_LIMITS.assessmentSummary,
+              }),
+            }
+          : acc;
+      }, assessments)
+    : assessments;
 
 /**
  * Fixes mechanical overshoots before validation, so they don't cost a repair: prose longer than
- * allowed is trimmed, cited ids are deduplicated and cut (non-integers dropped), and repeated
- * areas are removed.
+ * allowed is trimmed, and cited ids are deduplicated and cut (non-integers dropped).
  */
 export const normalizeBriefOutput = (output: unknown): unknown => {
   if (!isRecord(output)) {
@@ -150,7 +142,7 @@ export const normalizeBriefOutput = (output: unknown): unknown => {
           summary: BRIEF_TEXT_LIMITS.verdictSummary,
         })
       : output.verdict,
-    areas: normalizeAreas(output.areas),
+    assessments: normalizeAssessments(output.assessments),
   };
 };
 

@@ -8,7 +8,10 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
+import type {
+  BriefStatusResponse,
+  GenerateBriefResponse,
+} from '../../../../common/entity_analytics/executive_brief/api';
 import type { Brief } from '../../../../common/entity_analytics/executive_brief/brief';
 import {
   BRIEF_ROUTE,
@@ -17,6 +20,7 @@ import {
   INTERNAL_HEADERS,
   SEEDED_ENTITY,
   SUBMIT_BRIEF_TOOL_NAME,
+  briefStatusRoute,
 } from '../fixtures/constants';
 import {
   createBriefConnector,
@@ -81,11 +85,12 @@ apiTest.describe(
 
         expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
         expect(document.report?.verdict).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.verdict);
-        expect(document.report?.areas).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.areas);
+        expect(document.report?.assessments).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.assessments);
         expect(document.metadata).toMatchObject({
           period: { range: '7d' },
           connectorId,
           verification: { lowered: 0, repaired: false },
+          signals: { high_risk_entities: { status: 'ok' } },
         });
         // Entities are Entity Store records keyed by EUID; facts reference them by EUID.
         expect(Object.keys(document.report?.entities ?? {})).toStrictEqual([SEEDED_ENTITY.id]);
@@ -131,6 +136,15 @@ apiTest.describe(
       });
       expect(second).toHaveStatusCode(202);
       expect(second.body).toMatchObject({ job: { id: first.body.job.id }, reused: true });
+
+      // While the job is in flight, the status has no duration yet.
+      const inFlight = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
+        headers,
+        responseType: 'json',
+      });
+      expect(inFlight).toHaveStatusCode(200);
+      expect(['pending', 'running']).toContain(inFlight.body.status);
+      expect(inFlight.body.took).toBeUndefined();
 
       await held.release();
       const document = await waitForBriefJob({ apiClient, headers, jobId: first.body.job.id });
@@ -204,23 +218,22 @@ apiTest.describe(
     );
 
     apiTest(
-      'links name mentions to the entity and drops areas that mention unknown entities',
+      'links name mentions to the entity and drops assessments that mention unknown entities',
       async ({ apiClient }) => {
         mockSubmitBrief(llmProxy, {
           verdict: {
             ...HIGH_RISK_ENTITY_BRIEF.verdict,
             summary: `{{ user.name ${SEEDED_ENTITY.name} }} is at high risk.`,
           },
-          areas: [
-            HIGH_RISK_ENTITY_BRIEF.areas[0],
-            {
-              id: 'response',
+          assessments: {
+            threats: HIGH_RISK_ENTITY_BRIEF.assessments.threats,
+            response: {
               level: 'watch',
               summary: '{{ entity.id user:not-in-evidence }} needs a response.',
               factIds: [1],
               linkIds: [],
             },
-          ],
+          },
         });
 
         const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
@@ -235,7 +248,7 @@ apiTest.describe(
         expect(document.report?.verdict?.summary).toBe(
           `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk.`
         );
-        expect(document.report?.areas?.map(({ id }) => id)).toStrictEqual(['threats']);
+        expect(Object.keys(document.report?.assessments ?? {})).toStrictEqual(['threats']);
         expect(document.metadata?.verification).toMatchObject({
           dropped: { citation: 1 },
           repaired: false,

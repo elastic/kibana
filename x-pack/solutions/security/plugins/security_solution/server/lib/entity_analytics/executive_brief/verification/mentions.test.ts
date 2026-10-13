@@ -20,10 +20,10 @@ const TWO_DOCKER_HOSTS: Evidence = {
   },
 };
 
-/** Runs the check on a brief whose `threats` area says `summary`. */
-const runArea = (summary: string, evidence: Evidence = FIXTURE_EVIDENCE) => {
+/** Runs the check on a brief whose `threats` assessment says `summary`. */
+const runAssessment = (summary: string, evidence: Evidence = FIXTURE_EVIDENCE) => {
   const brief = buildValidBrief();
-  brief.areas[0].summary = summary;
+  brief.assessments.threats.summary = summary;
   return checkMentions(brief, { index: buildEvidenceIndex(evidence), dropped: new Set() });
 };
 
@@ -54,14 +54,14 @@ describe('checkMentions', () => {
       FIXTURE_EVIDENCE,
     ],
   ])('%s', (_name, summary, expected, evidence) => {
-    const outcome = runArea(summary, evidence);
-    expect(outcome.brief.areas[0].summary).toBe(expected);
+    const outcome = runAssessment(summary, evidence);
+    expect(outcome.brief.assessments.threats?.summary).toBe(expected);
     expect(outcome.drops).toEqual([]);
   });
 
   it('fails a claim that mentions an EUID not in the evidence', () => {
-    expect(runArea('{{ entity.id user:mallory }} logged on.').drops).toEqual([
-      expect.objectContaining({ path: 'areas[0]', check: 'citation' }),
+    expect(runAssessment('{{ entity.id user:mallory }} logged on.').drops).toEqual([
+      expect.objectContaining({ path: 'assessments.threats', check: 'citation' }),
     ]);
   });
 

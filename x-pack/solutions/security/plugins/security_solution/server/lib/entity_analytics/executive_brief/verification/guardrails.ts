@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { AttentionLevel } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type {
+  AssessmentKey,
+  AttentionLevel,
+} from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Fact } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { EvidenceIndex } from './evidence_index';
 import { citedFacts } from './evidence_index';
-import type { BriefCheck, CheckOutcome, ItemPath } from './types';
-import { emptyOutcome } from './types';
+import type { BriefCheck, CheckOutcome } from './types';
+import { assessmentPath, emptyOutcome, mapAssessments, presentAssessments } from './types';
 
 const LEVEL_RANK: Record<AttentionLevel, number> = { clear: 0, watch: 1, action: 2, urgent: 3 };
 
@@ -75,27 +78,13 @@ export const supportedLevel = (
  * - Ceiling: a level never exceeds what its cited facts support (the verdict: everything the brief
  *   cites); higher levels are lowered, so little evidence can't read as an emergency.
  * - Floors: the verdict is never `clear` while an unaddressed critical/high attack discovery exists,
- *   and never calmer than its most severe area. These are structural (the model gets one chance
- *   to fix them).
- * Duplicate areas are dropped.
+ *   and never calmer than its most severe assessment. These are structural (the model gets one
+ *   chance to fix them).
  */
 export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
   const { index, dropped } = context;
   const outcome = emptyOutcome(brief);
-
-  const seenAreas = new Set<string>();
-  const isKept = brief.areas.map((area, i) => {
-    const path: ItemPath = `areas[${i}]`;
-    if (dropped.has(path)) {
-      return false;
-    }
-    if (seenAreas.has(area.id)) {
-      outcome.drops.push({ path, check: 'guardrail', reason: `duplicate "${area.id}" area` });
-      return false;
-    }
-    seenAreas.add(area.id);
-    return true;
-  });
+  const isKept = (key: AssessmentKey): boolean => !dropped.has(assessmentPath(key));
 
   const cap = (
     path: string,
@@ -112,22 +101,32 @@ export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
     return ceiling;
   };
 
-  const areas = brief.areas.map((area, i) =>
-    isKept[i]
-      ? { ...area, level: cap(`areas[${i}].level`, area.level, area.factIds, area.linkIds) }
-      : area
+  const assessments = mapAssessments(brief.assessments, (assessment, key) =>
+    isKept(key)
+      ? {
+          ...assessment,
+          level: cap(
+            `${assessmentPath(key)}.level`,
+            assessment.level,
+            assessment.factIds,
+            assessment.linkIds
+          ),
+        }
+      : assessment
   );
-  const keptAreas = areas.filter((_area, i) => isKept[i]);
+  const kept = presentAssessments(assessments)
+    .filter(({ key }) => isKept(key))
+    .map(({ assessment }) => assessment);
   const verdict = {
     ...brief.verdict,
     level: cap(
       'verdict.level',
       brief.verdict.level,
-      [...brief.verdict.factIds, ...keptAreas.flatMap(({ factIds }) => factIds)],
-      [...brief.verdict.linkIds, ...keptAreas.flatMap(({ linkIds }) => linkIds)]
+      [...brief.verdict.factIds, ...kept.flatMap(({ factIds }) => factIds)],
+      [...brief.verdict.linkIds, ...kept.flatMap(({ linkIds }) => linkIds)]
     ),
   };
-  outcome.brief = { verdict, areas };
+  outcome.brief = { verdict, assessments };
 
   const discoveries = unaddressedSevereDiscoveries(index);
   if (verdict.level === 'clear' && discoveries.length > 0) {
@@ -138,14 +137,14 @@ export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
     );
   }
 
-  const worstArea = keptAreas.reduce<AttentionLevel | undefined>(
+  const worstAssessment = kept.reduce<AttentionLevel | undefined>(
     (worst, { level }) =>
       worst === undefined || LEVEL_RANK[level] > LEVEL_RANK[worst] ? level : worst,
     undefined
   );
-  if (worstArea !== undefined && LEVEL_RANK[verdict.level] < LEVEL_RANK[worstArea]) {
+  if (worstAssessment !== undefined && LEVEL_RANK[verdict.level] < LEVEL_RANK[worstAssessment]) {
     outcome.structuralErrors.push(
-      `verdict.level: "${verdict.level}" is lower than the most severe area ("${worstArea}"); the verdict must be at least as severe as every area.`
+      `verdict.level: "${verdict.level}" is lower than the most severe assessment ("${worstAssessment}"); the verdict must be at least as severe as every assessment.`
     );
   }
   return outcome;

@@ -54,6 +54,7 @@ const toCompositionError = (error: unknown, abortSignal: AbortSignal): BriefComp
 export const composeVerifiedBrief: ComposeVerifiedBrief = async ({
   inferenceClient,
   evidence,
+  signals,
   timeRange,
   abortSignal,
   logger,
@@ -64,7 +65,10 @@ export const composeVerifiedBrief: ComposeVerifiedBrief = async ({
   const messages: Message[] = [
     {
       role: MessageRole.User,
-      content: buildUserMessage({ formattedEvidence: formatEvidence(evidence), timeRange }),
+      content: buildUserMessage({
+        formattedEvidence: formatEvidence(evidence, signals),
+        timeRange,
+      }),
     },
   ];
   const tokens = { prompt: 0, completion: 0, total: 0 };

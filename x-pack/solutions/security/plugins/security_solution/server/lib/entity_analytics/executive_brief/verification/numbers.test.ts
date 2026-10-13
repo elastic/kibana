@@ -19,10 +19,10 @@ const EVIDENCE: Evidence = {
   },
 };
 
-/** Runs the check on a brief whose `threats` area says `summary` and cites fact 1. */
-const runArea = (summary: string) => {
+/** Runs the check on a brief whose `threats` assessment says `summary` and cites fact 1. */
+const runAssessment = (summary: string) => {
   const brief = buildValidBrief();
-  brief.areas[0] = { ...brief.areas[0], summary, factIds: [1], linkIds: [] };
+  brief.assessments.threats = { ...brief.assessments.threats, summary, factIds: [1], linkIds: [] };
   return createNumbersCheck('7d')(brief, {
     index: buildEvidenceIndex(EVIDENCE),
     dropped: new Set(),
@@ -31,12 +31,12 @@ const runArea = (summary: string) => {
 
 describe('createNumbersCheck', () => {
   it('keeps a number from a cited fact', () => {
-    expect(runArea('The attack has 12 alerts.').drops).toEqual([]);
+    expect(runAssessment('The attack has 12 alerts.').drops).toEqual([]);
   });
 
   it('drops a claim with an invented number', () => {
-    expect(runArea('The attack has 250 alerts.').drops).toEqual([
-      expect.objectContaining({ path: 'areas[0]', check: 'number' }),
+    expect(runAssessment('The attack has 250 alerts.').drops).toEqual([
+      expect.objectContaining({ path: 'assessments.threats', check: 'number' }),
     ]);
   });
 
@@ -46,6 +46,6 @@ describe('createNumbersCheck', () => {
     ['entity names', 'The 10 finance host is in the attack.'],
     ['EUIDs', `${DIGIT_HOST} is in the attack.`],
   ])('masks %s', (_name, summary) => {
-    expect(runArea(summary).drops).toEqual([]);
+    expect(runAssessment(summary).drops).toEqual([]);
   });
 });

@@ -30,10 +30,14 @@ describe('checkCitations', () => {
 
   it.each<[string, (brief: Brief) => void, { drops: number; structural: number }]>([
     [
-      'drops an area whose only fact id is unknown',
+      'drops an assessment whose only fact id is unknown',
       (b) => {
-        b.areas[1].factIds = [404];
-        b.areas[1].linkIds = [];
+        b.assessments.response = {
+          level: 'action',
+          summary: 'The attack is not acknowledged yet.',
+          factIds: [404],
+          linkIds: [],
+        };
       },
       { drops: 1, structural: 0 },
     ],
@@ -52,8 +56,7 @@ describe('checkCitations', () => {
 
   it('lets a clear claim go without citations', () => {
     const { drops, structuralErrors } = run((b) => {
-      b.areas[1] = {
-        id: 'response',
+      b.assessments.response = {
         level: 'clear',
         summary: 'Nothing to handle.',
         factIds: [],

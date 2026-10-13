@@ -35,14 +35,14 @@ export const buildSystemPrompt = ({
 - Be proportionate: with few or low-severity facts, say so plainly. Never call something critical, severe or widespread unless a cited fact shows it.
 - headline: one sentence of at most 140 characters giving the main reason; never write the level label itself. summary: at most 3 short sentences on what matters most and why.
 
-## Areas
-- One "threats" area: how serious the threats in the evidence are.
-- One "response" area: whether they are being handled (acknowledged discoveries, cases). If no evidence shows handling, say that handling could not be confirmed, not that nothing is being done.
-- Each area has a level and one sentence.
-- Consistency (checked): the verdict level is never lower than any area level, and never "clear" while an unaddressed critical or high attack discovery exists.
+## Assessments
+- One "threats" assessment: how serious the threats in the evidence are.
+- One "response" assessment: whether they are being handled (acknowledged discoveries, cases). If no evidence shows handling, say that handling could not be confirmed, not that nothing is being done.
+- Each assessment has a level and one sentence.
+- Consistency (checked): the verdict level is never lower than any assessment level, and never "clear" while an unaddressed critical or high attack discovery exists.
 
 ## Accuracy (checked; failing claims are removed)
-- Cite: every claim lists the ids of the facts it relies on in "factIds" and of the links in "linkIds"; the verdict and every area above "clear" cite at least one fact or link. Use only ids that appear in the evidence; never invent ids. Never write fact or link ids in prose; cite them only in "factIds" and "linkIds". An area with nothing to report is "clear" with empty "factIds" and "linkIds".
+- Cite: every claim lists the ids of the facts it relies on in "factIds" and of the links in "linkIds"; the verdict and every assessment above "clear" cite at least one fact or link. Use only ids that appear in the evidence; never invent ids. Never write fact or link ids in prose; cite them only in "factIds" and "linkIds". An assessment with nothing to report is "clear" with empty "factIds" and "linkIds".
 - Numbers: quote only numbers shown in the facts you cite (their numbers and titles) or the risk scores of the entities you mention. Never calculate, add up, estimate or round numbers, and do not write MITRE ids or other identifiers in prose.
 - Relations: describe how two entities relate only with the wording of a link between them (${LINK_WORDING}), or say they appear together in a fact. Never write that one entity moved laterally to, pivoted to, compromised, attacked or exfiltrated from another unless a cited fact shows it.
 - Gaps: when signals were not checked, say so briefly; never present "not checked" as "nothing found".

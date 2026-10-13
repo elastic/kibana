@@ -22,7 +22,7 @@ import type { Evidence } from '../../../../../common/entity_analytics/executive_
 import { hasFindings } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { ComposeVerifiedBrief, ComposeVerifiedBriefResult } from '../composition/types';
 import { BriefCompositionError } from '../composition/types';
-import type { BriefSignal, RunSignals, SignalContext } from '../signals/types';
+import type { BriefSignal, RunSignals, SignalContext, SignalOutcome } from '../signals/types';
 import type { BriefStore } from '../store/brief_store';
 import type { BriefCompletedEvent, BriefTelemetry } from '../telemetry/types';
 
@@ -141,6 +141,7 @@ const createStageClock = () => {
 /** What the run produced so far; becomes the completion event however the run ends. */
 interface RunProgress {
   evidence?: Evidence;
+  outcomes?: SignalOutcome[];
   result?: ComposeVerifiedBriefResult;
   /** Usage spent by a composition that then failed. */
   failedTokens?: ComposeVerifiedBriefResult['tokens'];
@@ -151,7 +152,7 @@ const toCompletedEvent = ({
   range,
   startedAtMs,
   stageDurationsMs,
-  progress: { evidence, result, failedTokens },
+  progress: { evidence, outcomes, result, failedTokens },
 }: {
   outcome: RunBriefOutcome;
   range: string;
@@ -175,10 +176,10 @@ const toCompletedEvent = ({
     ...(result?.model ? { model: result.model } : {}),
     durationMs: Date.now() - startedAtMs,
     stageDurationsMs,
-    signals: (evidence?.signals ?? []).map(({ id, status, durationMs, factCount }) => ({
+    signals: (outcomes ?? []).map(({ id, status, took, factCount }) => ({
       id,
       status,
-      durationMs,
+      durationMs: took,
       factCount,
     })),
     entityCount: evidence ? Object.keys(evidence.entities).length : 0,
@@ -246,10 +247,11 @@ export const runBrief = async ({
   const generate = async (): Promise<RunBriefOutcome> => {
     signal.throwIfAborted();
     stageClock.enter('gather');
-    const evidence = await telemetry.withSpan('gather', {}, () =>
+    const { evidence, outcomes } = await telemetry.withSpan('gather', {}, () =>
       deps.runSignals(signalContext, deps.signals, { abortSignal: signal, telemetry })
     );
     progress.evidence = evidence;
+    progress.outcomes = outcomes;
 
     signal.throwIfAborted();
     if (!hasFindings(evidence)) {
@@ -265,6 +267,7 @@ export const runBrief = async ({
       deps.composeVerifiedBrief({
         inferenceClient,
         evidence,
+        signals: outcomes,
         timeRange: { from: params.from, to: params.to, range: params.range },
         abortSignal: signal,
         logger,

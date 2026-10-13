@@ -10,7 +10,8 @@ import type {
   BriefErrorCode,
   BriefJobStage,
 } from '../../../../../common/entity_analytics/executive_brief/document';
-import type { SignalRun } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { SignalStatus } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { SignalOutcome } from '../signals/types';
 
 export type BriefSpanName = 'generate' | BriefJobStage;
 
@@ -29,7 +30,7 @@ export interface BriefCompletedEvent {
   model?: string;
   durationMs: number;
   stageDurationsMs: Partial<Record<BriefJobStage, number>>;
-  signals: Array<Pick<SignalRun, 'id' | 'status' | 'durationMs' | 'factCount'>>;
+  signals: Array<{ id: string; status: SignalStatus; durationMs: number; factCount: number }>;
   entityCount: number;
   factCount: number;
   linkCount: number;
@@ -52,7 +53,7 @@ export interface BriefTelemetry {
   ): Promise<T>;
   /** Runs one signal inside a child span of `gather`. */
   withSignalSpan<T>(signalId: string, fn: () => Promise<T>): Promise<T>;
-  recordSignal(run: SignalRun): void;
+  recordSignal(outcome: SignalOutcome): void;
   recordTokens(tokens: { prompt: number; completion: number }): void;
   recordVerificationDropped(dropped: Partial<Record<VerificationCheck, number>>): void;
   recordRejected(reason: BriefRejectionReason): void;

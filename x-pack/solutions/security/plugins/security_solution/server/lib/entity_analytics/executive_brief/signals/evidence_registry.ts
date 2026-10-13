@@ -11,12 +11,11 @@ import type {
   Fact,
   Link,
   LinkType,
-  SignalRun,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { minimalEntityRecord, nameFromEuid } from '../entity_record';
 import { compareStrings } from './define_signal';
 import type { EntityResolution } from './resolve_entities';
-import type { EntityRef, LinkDraft, SignalOutput } from './types';
+import type { EntityRef, LinkDraft, SignalOutcome, SignalOutput } from './types';
 
 /** Link types with no direction: (a, b) and (b, a) are the same link. */
 const SYMMETRIC_LINK_TYPES: ReadonlySet<LinkType> = new Set<LinkType>([
@@ -41,11 +40,11 @@ export interface SignalResult {
  */
 export const buildEvidence = ({
   results,
-  runs,
+  outcomes,
   resolution,
 }: {
   results: readonly SignalResult[];
-  runs: readonly SignalRun[];
+  outcomes: readonly SignalOutcome[];
   resolution: EntityResolution;
 }): Evidence => {
   const entityRefs = new Map<string, EntityRef>();
@@ -115,7 +114,7 @@ export const buildEvidence = ({
         kind: draft.kind,
         signalId,
         title: draft.title,
-        ...(draft.at ? { at: draft.at } : {}),
+        ...(draft.timestamp ? { timestamp: draft.timestamp } : {}),
         ...(draft.severity ? { severity: draft.severity } : {}),
         entityIds,
         ...(draft.numbers && Object.keys(draft.numbers).length > 0
@@ -144,5 +143,10 @@ export const buildEvidence = ({
       });
   }
 
-  return { entities, facts, links: [...linksByKey.values()], signals: [...runs] };
+  const signals: Evidence['signals'] = {};
+  for (const { id, status, took } of outcomes) {
+    signals[id] = { status, took };
+  }
+
+  return { entities, facts, links: [...linksByKey.values()], signals };
 };

@@ -12,12 +12,15 @@ import type {
   VerificationSummary,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { SignalOutcome } from '../signals/types';
 import type { BriefTelemetry } from '../telemetry/types';
 
 export interface ComposeVerifiedBriefParams {
   /** Bound to the resolved connector. */
   inferenceClient: BoundInferenceClient;
   evidence: Evidence;
+  /** How each signal's run went, for the prompt's "Signals" section. */
+  signals: readonly SignalOutcome[];
   timeRange: { from: string; to: string; range: string };
   abortSignal: AbortSignal;
   logger: Logger;

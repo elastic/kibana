@@ -11,7 +11,7 @@ import type {
 } from '../../../../../common/entity_analytics/executive_brief/brief';
 import { hasFactOrLink, unique } from './evidence_index';
 import type { BriefCheck, CheckOutcome } from './types';
-import { emptyOutcome, isDropped, listClaims, reportClaim } from './types';
+import { emptyOutcome, isDropped, listClaims, mapAssessments, reportClaim } from './types';
 
 /** Only an absence claim ("nothing to report") at level `clear` needs no citation. */
 const needsEvidence = (level: AttentionLevel): boolean => level !== 'clear';
@@ -45,10 +45,10 @@ export const checkCitations: BriefCheck = (input, context): CheckOutcome => {
       factIds: keepKnownFacts(input.verdict.factIds),
       linkIds: keepKnownLinks(input.verdict.linkIds),
     },
-    areas: input.areas.map((area) => ({
-      ...area,
-      factIds: keepKnownFacts(area.factIds),
-      linkIds: keepKnownLinks(area.linkIds),
+    assessments: mapAssessments(input.assessments, (assessment) => ({
+      ...assessment,
+      factIds: keepKnownFacts(assessment.factIds),
+      linkIds: keepKnownLinks(assessment.linkIds),
     })),
   };
 

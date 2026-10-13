@@ -58,20 +58,18 @@ export const HIGH_RISK_ENTITY_BRIEF: Brief = {
     factIds: [1],
     linkIds: [],
   },
-  areas: [
-    {
-      id: 'threats',
+  assessments: {
+    threats: {
       level: 'watch',
       summary: 'One user is at high risk; no discovered attacks.',
       factIds: [1],
       linkIds: [],
     },
-    {
-      id: 'response',
+    response: {
       level: 'clear',
       summary: 'Nothing is waiting for a response.',
       factIds: [],
       linkIds: [],
     },
-  ],
+  },
 };

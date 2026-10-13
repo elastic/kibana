@@ -17,6 +17,7 @@ import { checkGuardrails } from './guardrails';
 import { checkMentions } from './mentions';
 import { createNumbersCheck } from './numbers';
 import type { BriefCheck, ItemDrop } from './types';
+import { assessmentPath, presentAssessments } from './types';
 
 export interface VerifyBriefOptions {
   /** The window label (e.g. "7d"); its number may be quoted. */
@@ -24,7 +25,7 @@ export interface VerifyBriefOptions {
 }
 
 export interface VerifyBriefResult {
-  /** The brief with unknown ids removed, failing areas dropped and levels capped. */
+  /** The brief with unknown ids removed, failing assessments dropped and levels capped. */
   brief: Brief;
   summary: Omit<VerificationSummary, 'repaired'>;
   /** Problems only the model can fix; non-empty means the brief is not usable as is. */
@@ -36,7 +37,7 @@ export interface VerifyBriefResult {
 /**
  * Verifies an AI-written brief against the evidence it was written from. Checks run in order
  * (mentions, citations, numbers, guardrails); each sees the previous one's clean-ups and skips items already
- * marked for removal. Failing areas are dropped at the end; verdict problems are returned as
+ * marked for removal. Failing assessments are dropped at the end; verdict problems are returned as
  * structural errors for the repair round-trip.
  */
 export const verifyBrief = (
@@ -79,7 +80,11 @@ export const verifyBrief = (
   return {
     brief: {
       verdict: checked.verdict,
-      areas: checked.areas.filter((_area, i) => !dropped.has(`areas[${i}]`)),
+      assessments: presentAssessments(checked.assessments).reduce<Brief['assessments']>(
+        (kept, { key, assessment }) =>
+          dropped.has(assessmentPath(key)) ? kept : { ...kept, [key]: assessment },
+        {}
+      ),
     },
     summary: { dropped: droppedCounts, lowered },
     structuralErrors,

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AreaId, AttentionLevel } from './brief';
+import type { AssessmentKey, AttentionLevel } from './brief';
 
 /** Shared labels, so the server (prompts, events) and later UI PRs use one source. */
 
@@ -25,11 +25,13 @@ export const ATTENTION_LEVEL_LABELS: Record<AttentionLevel, string> = {
   }),
 };
 
-export const AREA_LABELS: Record<AreaId, string> = {
-  threats: i18n.translate('xpack.securitySolution.entityAnalytics.executiveBrief.area.threats', {
-    defaultMessage: 'Threat activity',
-  }),
-  response: i18n.translate('xpack.securitySolution.entityAnalytics.executiveBrief.area.response', {
-    defaultMessage: 'Response',
-  }),
+export const ASSESSMENT_LABELS: Record<AssessmentKey, string> = {
+  threats: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.executiveBrief.assessment.threats',
+    { defaultMessage: 'Threat activity' }
+  ),
+  response: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.executiveBrief.assessment.response',
+    { defaultMessage: 'Response' }
+  ),
 };

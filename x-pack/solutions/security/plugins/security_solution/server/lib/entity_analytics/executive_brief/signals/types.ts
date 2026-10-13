@@ -10,12 +10,12 @@ import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Entity } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type {
-  EaCapability,
   Evidence,
   FactKind,
   FactSource,
   LinkType,
   Severity,
+  SignalStatus,
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { BriefTelemetry } from '../telemetry/types';
 
@@ -58,7 +58,8 @@ export type SignalInput<TScope extends SignalScope> = TScope extends 'entities'
 export interface FactDraft {
   kind: FactKind;
   title: string;
-  at?: string;
+  /** ISO time. */
+  timestamp?: string;
   severity?: Severity;
   entities: EntityRef[];
   numbers?: Record<string, number>;
@@ -90,7 +91,6 @@ export interface BriefSignal<TScope extends SignalScope = SignalScope> {
   id: string;
   /** Shown in "Based on" and used as the prompt section header. */
   title: string;
-  capability: EaCapability;
   scope: TScope;
   /** Defaults to BRIEF_LIMITS.signalTimeoutMs. */
   timeoutMs?: number;
@@ -102,9 +102,30 @@ export interface BriefSignal<TScope extends SignalScope = SignalScope> {
   ): Promise<SignalOutput>;
 }
 
+/**
+ * How one signal's run went, kept in memory for the prompt and telemetry. Only `status` and
+ * `took` are stored and returned (`Evidence['signals']`).
+ */
+export interface SignalOutcome {
+  id: string;
+  status: SignalStatus;
+  /** Why it was unavailable, empty or failed, in plain words. */
+  reason?: string;
+  /** Duration in milliseconds. */
+  took: number;
+  factCount: number;
+  linkCount: number;
+}
+
+export interface GatherResult {
+  evidence: Evidence;
+  /** One per signal, in signal-priority order. */
+  outcomes: SignalOutcome[];
+}
+
 /** Engine entry point, implemented in run_signals.ts. */
 export type RunSignals = (
   ctx: SignalContext,
   signals: readonly BriefSignal[],
   options: { abortSignal: AbortSignal; telemetry?: BriefTelemetry }
-) => Promise<Evidence>;
+) => Promise<GatherResult>;

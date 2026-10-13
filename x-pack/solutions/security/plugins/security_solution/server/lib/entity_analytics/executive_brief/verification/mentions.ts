@@ -14,7 +14,14 @@ import { entityDisplayName, entityTypeOf } from '../entity_record';
 import type { EvidenceIndex } from './evidence_index';
 import { unique } from './evidence_index';
 import type { BriefCheck, CheckOutcome } from './types';
-import { emptyOutcome, isDropped, listClaims, reportClaim } from './types';
+import {
+  assessmentPath,
+  emptyOutcome,
+  isDropped,
+  listClaims,
+  mapAssessments,
+  reportClaim,
+} from './types';
 
 /** A `{{ field value }}` token (Attack Discovery's syntax). */
 const MENTION_PATTERN = /\{\{\s*([\w.]+)\s+([^{}]*?)\s*\}\}/g;
@@ -136,9 +143,9 @@ export const checkMentions: BriefCheck = (input, context): CheckOutcome => {
       headline: prose('verdict', input.verdict.headline, BRIEF_TEXT_LIMITS.verdictHeadline),
       summary: prose('verdict', input.verdict.summary, BRIEF_TEXT_LIMITS.verdictSummary),
     },
-    areas: input.areas.map((area, i) => ({
-      ...area,
-      summary: prose(`areas[${i}]`, area.summary, BRIEF_TEXT_LIMITS.areaSummary),
+    assessments: mapAssessments(input.assessments, (assessment, key) => ({
+      ...assessment,
+      summary: prose(assessmentPath(key), assessment.summary, BRIEF_TEXT_LIMITS.assessmentSummary),
     })),
   };
 

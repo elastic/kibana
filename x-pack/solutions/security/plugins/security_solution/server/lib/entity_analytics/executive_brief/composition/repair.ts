@@ -13,7 +13,7 @@ import type { SubmittedToolCall } from './compose_brief';
 const MAX_PROBLEMS = 20;
 const MAX_PROBLEM_LENGTH = 400;
 
-const REPAIR_INSTRUCTIONS = `The brief was rejected. Fix every problem listed and call ${SUBMIT_BRIEF_TOOL_NAME} again with the complete corrected brief (the verdict and every area, not only the fixed parts). Keep what was not listed. Cite only fact ids and link ids from the evidence, and quote only numbers from the facts you cite.`;
+const REPAIR_INSTRUCTIONS = `The brief was rejected. Fix every problem listed and call ${SUBMIT_BRIEF_TOOL_NAME} again with the complete corrected brief (the verdict and every assessment, not only the fixed parts). Keep what was not listed. Cite only fact ids and link ids from the evidence, and quote only numbers from the facts you cite.`;
 
 const clip = (text: string): string =>
   text.length > MAX_PROBLEM_LENGTH ? `${text.slice(0, MAX_PROBLEM_LENGTH - 1)}…` : text;

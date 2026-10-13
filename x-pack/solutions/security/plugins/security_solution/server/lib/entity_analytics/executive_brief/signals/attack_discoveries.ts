@@ -50,7 +50,7 @@ interface DiscoveryInfo {
   workflowStatus: 'open' | 'acknowledged';
   /** Unique and sorted. */
   alertIds: string[];
-  at: string;
+  timestamp: string;
   tactics: string[];
 }
 
@@ -97,8 +97,8 @@ export const parseDiscoveryHit = (hit: estypes.SearchHit<unknown>): DiscoveryInf
   const alertIds = [...new Set(strings(fields['kibana.alert.attack_discovery.alert_ids']))].sort(
     compareStrings
   );
-  const at = first(fields['@timestamp']);
-  if (!hit._id || alertIds.length === 0 || typeof at !== 'string') {
+  const timestamp = first(fields['@timestamp']);
+  if (!hit._id || alertIds.length === 0 || typeof timestamp !== 'string') {
     return undefined;
   }
   const title = first(fields['kibana.alert.attack_discovery.title']);
@@ -110,7 +110,7 @@ export const parseDiscoveryHit = (hit: estypes.SearchHit<unknown>): DiscoveryInf
     workflowStatus:
       first(fields['kibana.alert.workflow_status']) === 'acknowledged' ? 'acknowledged' : 'open',
     alertIds,
-    at,
+    timestamp,
     tactics: strings(fields['kibana.alert.attack_discovery.mitre_attack_tactics']),
   };
 };
@@ -130,7 +130,7 @@ const dedupeDiscoveries = (discoveries: DiscoveryInfo[]): DiscoveryInfo[] => {
   const ordered = [...discoveries].sort(
     (a, b) =>
       (b.riskScore ?? -1) - (a.riskScore ?? -1) ||
-      compareStrings(b.at, a.at) ||
+      compareStrings(b.timestamp, a.timestamp) ||
       compareStrings(a.id, b.id)
   );
   const kept: DiscoveryInfo[] = [];
@@ -302,7 +302,6 @@ export const sameAttackLinks = (entities: EntityRef[], factIndex: number): LinkD
 export const attackDiscoveriesSignal = defineSignal({
   id: 'attack_discoveries',
   title: 'Attack discoveries',
-  capability: 'attack_discovery',
   scope: 'tenant',
   isAvailable: async () => ALWAYS_AVAILABLE,
   run: async (ctx, _input, abortSignal) => {
@@ -356,7 +355,7 @@ export const attackDiscoveriesSignal = defineSignal({
       facts.push({
         kind: 'attack_discovery',
         title: discovery.title,
-        at: discovery.at,
+        timestamp: discovery.timestamp,
         ...(severity ? { severity } : {}),
         entities,
         numbers: { alerts: discovery.alertIds.length },

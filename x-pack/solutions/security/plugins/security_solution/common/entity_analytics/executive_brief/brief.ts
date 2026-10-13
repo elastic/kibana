@@ -8,17 +8,19 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * The brief the AI writes (via a forced tool call) and the server verifies. Every claim cites the
- * facts and links behind it by id, in `factIds` and `linkIds`. Prose mentions entities by EUID
- * (see `ENTITY_MENTION_FIELD`). Versioned through the document's `schema_version`; threats and
- * actions are added in a later schema version.
+ * The brief the AI writes (via a forced tool call) and the server verifies: a verdict and one
+ * assessment per key of `ASSESSMENT_KEYS`. Every claim cites the facts and links behind it by id,
+ * in `factIds` and `linkIds`. Prose mentions entities by EUID (see `ENTITY_MENTION_FIELD`).
+ * Versioned through the document's `schema_version`; threats and actions are added in a later
+ * schema version.
  */
 
 export const ATTENTION_LEVELS = ['urgent', 'action', 'watch', 'clear'] as const;
 export type AttentionLevel = (typeof ATTENTION_LEVELS)[number];
 
-export const AREA_IDS = ['threats', 'response'] as const;
-export type AreaId = (typeof AREA_IDS)[number];
+/** The assessments a brief may hold, in display order. */
+export const ASSESSMENT_KEYS = ['threats', 'response'] as const;
+export type AssessmentKey = (typeof ASSESSMENT_KEYS)[number];
 
 /**
  * Prose mentions an entity as `{{ entity.id <euid> }}`: Attack Discovery's `{{ field value }}`
@@ -34,7 +36,7 @@ export const ENTITY_MENTION_FIELD = 'entity.id';
 export const BRIEF_TEXT_LIMITS = {
   verdictHeadline: 160,
   verdictSummary: 700,
-  areaSummary: 200,
+  assessmentSummary: 200,
 } as const;
 
 /** Mention tokens are longer than the names they show, so raw prose is bounded more loosely. */
@@ -46,6 +48,14 @@ export const MAX_CITED_IDS = 24;
 const citedIds = () => z.array(z.number().int()).max(MAX_CITED_IDS);
 const shortText = (max: number) => z.string().min(1).max(rawTextLimit(max));
 
+const assessmentSchema = () =>
+  z.object({
+    level: z.enum(ATTENTION_LEVELS),
+    summary: shortText(BRIEF_TEXT_LIMITS.assessmentSummary),
+    factIds: citedIds(),
+    linkIds: citedIds(),
+  });
+
 export const briefSchema = lazySchema(() =>
   z.object({
     verdict: z.object({
@@ -55,22 +65,15 @@ export const briefSchema = lazySchema(() =>
       factIds: citedIds(),
       linkIds: citedIds(),
     }),
-    areas: z
-      .array(
-        z.object({
-          id: z.enum(AREA_IDS),
-          level: z.enum(ATTENTION_LEVELS),
-          summary: shortText(BRIEF_TEXT_LIMITS.areaSummary),
-          factIds: citedIds(),
-          linkIds: citedIds(),
-        })
-      )
-      .max(AREA_IDS.length),
+    assessments: z.object({
+      threats: assessmentSchema().optional(),
+      response: assessmentSchema().optional(),
+    }),
   })
 );
 
 export type Brief = z.infer<typeof briefSchema>;
-export type BriefArea = Brief['areas'][number];
+export type Assessment = NonNullable<Brief['assessments'][AssessmentKey]>;
 
 export type VerificationCheck = 'citation' | 'number' | 'guardrail';
 

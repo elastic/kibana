@@ -27,7 +27,7 @@ import {
   waitForBriefJob,
 } from '../fixtures/brief_helpers';
 
-/** A model answer that cites the first discovery at `level` in the verdict and one area. */
+/** A model answer that cites the first discovery at `level` in the verdict and one assessment. */
 const discoveryBrief = (level: AttentionLevel): Brief => ({
   verdict: {
     level,
@@ -36,15 +36,14 @@ const discoveryBrief = (level: AttentionLevel): Brief => ({
     factIds: [1],
     linkIds: [],
   },
-  areas: [
-    {
-      id: 'threats',
+  assessments: {
+    threats: {
       level,
       summary: 'A discovered attack is open.',
       factIds: [1],
       linkIds: [],
     },
-  ],
+  },
 });
 
 apiTest.describe(
@@ -108,6 +107,7 @@ apiTest.describe(
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
         expect(document.job.status).toBe('succeeded');
+        expect(document.metadata?.signals.attack_discoveries.status).toBe('ok');
         const discoveryIds = (document.report?.facts ?? [])
           .filter(({ kind }) => kind === 'attack_discovery')
           .map(({ source }) => source?.id)
@@ -177,7 +177,9 @@ apiTest.describe(
           expect.objectContaining({ id: 1, severity: 'low' }),
         ]);
         expect(document.report?.verdict?.level).toBe('watch');
-        expect(document.report?.areas?.map(({ level }) => level)).toStrictEqual(['watch']);
+        expect(document.report?.assessments).toStrictEqual({
+          threats: expect.objectContaining({ level: 'watch' }),
+        });
         expect(document.metadata?.verification?.lowered).toBeGreaterThanOrEqual(1);
       }
     );
