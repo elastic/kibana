@@ -144,11 +144,6 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
     mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
-    combineQueriesMock.mockReturnValue({
-      filterQuery: '{"bool":{}}',
-      kqlError: undefined,
-      baseKqlQuery: { query: '', language: 'kuery' },
-    });
     mockAlertIdSearch({ events: [], totalCount: 0 });
   });
 
@@ -220,7 +215,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     it('returns empty arrays inside a case where Cases workflow runs are unavailable', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
 
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
       });
 
@@ -231,7 +226,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     it('returns run workflow items inside a case where Cases workflow runs are available', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
       });
 
