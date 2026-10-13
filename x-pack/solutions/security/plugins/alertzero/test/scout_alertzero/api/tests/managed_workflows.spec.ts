@@ -14,14 +14,15 @@ import { expect } from '@kbn/scout-security/api';
  * that entry point pulls in YAML files, which Playwright's esbuild transform
  * cannot load.
  *
- * `detection_coverage` is a static rule workflow, installed into the global
- * space by AlertZero's `setup()`.
+ * `coverage_review` and `coverage_worker` are static rule-coverage workflows, installed into
+ * the global space by AlertZero's `setup()`.
  *
  * `floor_alert_triage` is a dynamic worker: nothing installs it at startup, and
  * installing one uses `workflowIdSuffix: spaceId`, so the stored id is
  * `<worker id>-<space id>`. Querying the bare definition id finds no document.
  */
-const DETECTION_COVERAGE_WORKFLOW_ID = 'system-security-detection-coverage';
+const COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
+const COVERAGE_WORKER_WORKFLOW_ID = 'system-security-coverage-worker';
 const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 const FLOOR_ALERT_TRIAGE_WORKFLOW_ID = `${FLOOR_ALERT_TRIAGE_WORKER_ID}-${DEFAULT_SPACE_ID}`;
 
@@ -30,10 +31,32 @@ const FLOOR_ALERT_TRIAGE_WORKFLOW_ID = `${FLOOR_ALERT_TRIAGE_WORKER_ID}-${DEFAUL
  * `xpack.alertzero.enabled` (and `agenticInvestigations`, which AlertZero
  * requires). AlertZero is off by default, so under plain `test/scout/` neither
  * document below is ever installed.
+ *
+ * Enabling a worker requires an AI model in the space (Kibana answers 400
+ * otherwise), so the dynamic-worker half of this suite skips with an explicit
+ * reason on a stack booted without a preconfigured inference connector. The
+ * static coverage workflows need no model and always run.
  */
 apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic] }, () => {
+  let hasChatCompletionConnector = false;
+
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+
+    const connectors = await apiClient.get('api/actions/connectors', {
+      headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    });
+    expect(connectors.statusCode, JSON.stringify(connectors.body)).toBe(200);
+    hasChatCompletionConnector = (
+      connectors.body as Array<{ actionTypeId: string; config?: { taskType?: string } }>
+    ).some(
+      (connector) =>
+        connector.actionTypeId === '.inference' && connector.config?.taskType === 'chat_completion'
+    );
+    if (!hasChatCompletionConnector) {
+      return;
+    }
 
     // Enabling an uninstalled worker installs its per-space managed document, so
     // this drives the same route the UI drives instead of assuming the document.
@@ -48,8 +71,16 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
   });
 
-  for (const workflowId of [DETECTION_COVERAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_WORKFLOW_ID]) {
+  for (const workflowId of [
+    COVERAGE_REVIEW_WORKFLOW_ID,
+    COVERAGE_WORKER_WORKFLOW_ID,
+    FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  ]) {
     apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
+      apiTest.skip(
+        workflowId === FLOOR_ALERT_TRIAGE_WORKFLOW_ID && !hasChatCompletionConnector,
+        'no preconfigured chat-completion inference connector on this stack; enabling the floor alert triage worker requires an AI model'
+      );
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const headers = { ...PUBLIC_API_HEADERS, ...cookieHeader };
 
