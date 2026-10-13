@@ -120,6 +120,7 @@ Set the time range with \`time_range\` rather than describing it in \`query\`, u
         includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });

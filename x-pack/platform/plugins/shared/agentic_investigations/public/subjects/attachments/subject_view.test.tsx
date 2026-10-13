@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import moment from 'moment';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { subjectAttachmentRenderer } from './subject_attachment_definition';
-import { SubjectView } from './subject_view';
+import type { SubjectRowData } from './subject_title';
+import { SubjectList, SubjectView } from './subject_view';
 
 const base = {
   id: 'doc-1',
@@ -152,6 +154,82 @@ describe('SubjectView', () => {
     const row = screen.getByTestId('investigationSubject-slack_thread');
     expect(row.tagName).toBe('DIV');
     expect(within(row).queryByTestId('investigationSubjectExternal')).not.toBeInTheDocument();
+  });
+});
+
+const alertStart = (id: string): string => `2026-07-28T14:0${id.slice(-1)}:00.000Z`;
+
+const alertSubject = (id: string): SubjectRowData => ({
+  type: 'alert',
+  id,
+  snapshot: {
+    rule_name: `Rule ${id}`,
+    url: `/app/observability/alerts/${id}`,
+    start: alertStart(id),
+  },
+});
+
+const renderList = (subjects: SubjectRowData[]) =>
+  render(
+    <EuiProvider>
+      <I18nProvider>
+        <SubjectList subjects={subjects} />
+      </I18nProvider>
+    </EuiProvider>
+  );
+
+describe('SubjectList', () => {
+  it('renders one row per subject when there is at most one alert', () => {
+    renderList([alertSubject('a-1'), { type: 'manual', id: 'q-1', summary: 'Why is it slow?' }]);
+
+    // A single alert keeps the plain trigger line; only nested alerts show their start.
+    expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+      /^Rule a-1Trigger · Alert$/
+    );
+    expect(screen.getByTestId('investigationSubject-manual')).toHaveTextContent('Why is it slow?');
+    expect(screen.queryByTestId('investigationSubject-alerts')).not.toBeInTheDocument();
+  });
+
+  it('collapses several alerts into one "N alerts" row that shows them when clicked', () => {
+    renderList([
+      alertSubject('a-1'),
+      { type: 'manual', id: 'q-1', summary: 'Why is it slow?' },
+      alertSubject('a-2'),
+      alertSubject('a-3'),
+    ]);
+
+    const summary = screen.getByTestId('investigationSubject-alerts');
+    expect(summary.tagName).toBe('BUTTON');
+    expect(summary).toHaveAttribute('aria-expanded', 'false');
+    expect(summary).toHaveTextContent('3 alerts');
+    expect(summary).toHaveTextContent('Trigger');
+    expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationSubject-manual')).toBeInTheDocument();
+
+    fireEvent.click(summary);
+
+    expect(summary).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getAllByTestId('investigationSubject-alert').map((row) => row.getAttribute('href'))
+    ).toEqual([
+      '/app/observability/alerts/a-1',
+      '/app/observability/alerts/a-2',
+      '/app/observability/alerts/a-3',
+    ]);
+    // Alerts of one rule share a name, so each nested row also says when that alert started.
+    expect(
+      screen
+        .getAllByTestId('investigationSubject-alert')
+        .map((row) => within(row).getByTestId('investigationSubjectTrigger').textContent)
+    ).toEqual(
+      ['a-1', 'a-2', 'a-3'].map(
+        (id) => `Trigger · Alert · ${moment(alertStart(id)).format('MMM D, HH:mm:ss')}`
+      )
+    );
+
+    fireEvent.click(summary);
+
+    expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
   });
 });
 

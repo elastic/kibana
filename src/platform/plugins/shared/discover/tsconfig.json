@@ -99,6 +99,7 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/apm-ui-shared",
+    "@kbn/genai-common",
     "@kbn/core-lifecycle-browser",
     "@kbn/discover-shared-plugin",
     "@kbn/response-ops-rule-form",
@@ -171,7 +172,6 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/discover-session-constants",
-    "@kbn/field-types",
     "@kbn/esql-browser"
   ],
   "exclude": ["target/**/*"]

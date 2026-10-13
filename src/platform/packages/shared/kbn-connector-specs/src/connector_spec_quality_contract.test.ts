@@ -10,7 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { z } from '@kbn/zod/v4';
+import { z, normalizeJsonSchemaTypeArrays } from '@kbn/zod/v4';
 import * as connectorsSpecs from './all_specs';
 import type { ConnectorSpec } from './connector_spec';
 
@@ -69,7 +69,9 @@ const getAvailability = ({ metadata }: ConnectorSpec): Availability | undefined 
 };
 
 const toInputJsonSchema = (schema: z.ZodType): JsonSchema =>
-  z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' }) as JsonSchema;
+  normalizeJsonSchemaTypeArrays(
+    z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' })
+  ) as JsonSchema;
 
 interface InputSchemaViolations {
   unboundedStrings: string[];
