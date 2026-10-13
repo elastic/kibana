@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { AnalysisTarget } from '../../shared/analysis_target';
 import type { ExistingQuerySummary } from './validate_ki_queries';
 
 export const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 const MAX_EXISTING_QUERY_DESCRIPTION_LENGTH = 200;
 
 export function buildKIQueryGenerationUserMessage(
-  target: AnalysisTarget,
+  target: { slug: string; description?: string },
   existingQueries: ExistingQuerySummary[] = []
 ): string {
   const parts: string[] = [];
-  parts.push(`\`target_id\`: ${target.id}`);
+  parts.push(`\`slug\`: ${target.slug}`);
   if (target.description) {
     parts.push(`\`target_description\`: ${target.description}`);
   }

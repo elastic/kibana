@@ -61,11 +61,11 @@ export const deserializeEsqlControls = (controlGroupJson: string | undefined) =>
 /** Converts a possibly malformed controlGroupJson entry to an API object; the server validates its schema. */
 export const convertControlGroupEntryToApi = (id: string, value: unknown) => {
   if (!isRecord(value)) {
-    throw new Error('controlGroupJson panels must be JSON objects');
+    throw new Error('Control configuration must be a JSON object.');
   }
 
   if (typeof value.type !== 'string') {
-    throw new Error('controlGroupJson panels must have a type');
+    throw new Error('Control type is missing or invalid.');
   }
 
   const { order: _order, type, width, grow, ...config } = value;
@@ -94,7 +94,7 @@ const parseControlGroupJsonEntries = (controlGroupJson: string) => {
   const parsed: unknown = JSON.parse(controlGroupJson);
 
   if (!isRecord(parsed)) {
-    throw new Error('controlGroupJson must be a JSON object');
+    throw new Error('Controls configuration must be a JSON object.');
   }
 
   return Object.entries(parsed).sort(

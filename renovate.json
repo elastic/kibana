@@ -508,7 +508,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "isbinaryfile",
         "js-search",
         "openpgp",
         "remark-gfm",
@@ -1198,7 +1197,7 @@
     },
     {
       "groupName": "stylelint",
-      "matchDepNames": ["meow", "stylelint", "stylelint-scss"],
+      "matchDepNames": ["stylelint", "stylelint-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1327,7 +1326,7 @@
       "enabled": true
     },
     {
-      "groupName": "workplace_ai gen-ai dependencies",
+      "groupName": "agent-builder gen-ai dependencies",
       "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk", "just-bash"],
       "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
@@ -2698,7 +2697,7 @@
     {
       "description": "Update Wolfi FIPS base image",
       "customType": "regex",
-      "fileMatch": ["^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"],
+      "fileMatch": ["^src/dev/build/lib/fips_config\\.ts$"],
       "matchStrings": [
         "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base-fips):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],
