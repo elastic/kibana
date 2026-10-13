@@ -12,10 +12,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -52,6 +52,9 @@ type EnableableDependencyId =
   | 'threatIngest'
   | 'threatEnrich';
 
+/** `blocked` stops the Worker from doing its job; `limited` only degrades a hand-off. */
+type DependencySeverity = 'blocked' | 'limited';
+
 const DEPENDENCIES_BY_WORKER: Readonly<Record<string, readonly DependencyId[]>> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: ['alertAnalysis'],
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: ['contextEngine', 'attackDiscoveryWorkflows'],
@@ -64,6 +67,13 @@ const DEPENDENCIES_BY_WORKER: Readonly<Record<string, readonly DependencyId[]>> 
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: ['contextEngine', 'defend'],
 };
 
+const SEVERITY_ORDER: Readonly<Record<DependencyStatus, number>> = {
+  missing: 0,
+  unknown: 1,
+  loading: 2,
+  satisfied: 3,
+};
+
 interface Destination {
   appId: string;
   path?: string;
@@ -73,7 +83,11 @@ interface DependencyMessage {
   id: DependencyId;
   status: DependencyStatus;
   label: string;
-  description: string;
+  /** Verb phrase after the label, e.g. "is off". */
+  state: string;
+  severity: DependencySeverity;
+  /** What the Worker can't do, e.g. "can't generate discoveries". */
+  consequence: string;
   destination?: Destination;
   linkText?: string;
 }
@@ -96,10 +110,36 @@ const enableableDependencyLabel = (id: EnableableDependencyId): string => {
   }
 };
 
+const isPlainLeftClick = (event: React.MouseEvent): boolean =>
+  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+
 interface Props {
   worker: Pick<Worker, 'id'>;
   surface: 'onboarding' | 'settings';
 }
+
+interface DestinationButtonProps {
+  destination: Destination;
+  linkText: string;
+}
+
+const DestinationButton: React.FC<DestinationButtonProps> = ({ destination, linkText }) => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const href = application.getUrlForApp(destination.appId, { path: destination.path });
+  const onClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isPlainLeftClick(event)) return;
+    event.preventDefault();
+    void application.navigateToApp(destination.appId, { path: destination.path });
+  };
+
+  return (
+    <EuiButtonEmpty size="s" flush="right" href={href} onClick={onClick}>
+      {linkText}
+    </EuiButtonEmpty>
+  );
+};
 
 interface DependencyRowProps {
   message: DependencyMessage;
@@ -110,78 +150,89 @@ interface DependencyRowProps {
 }
 
 const DependencyRow: React.FC<DependencyRowProps> = ({
-  message: { id, status, label, description, destination, linkText },
+  message: { id, status, label, state, consequence, destination, linkText },
   onEnable,
   isEnabling,
   enableDisabled,
   enableFailed,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
+  const unverified = status === 'unknown';
 
   return (
     <li data-test-subj={`alertZeroWorkerDependency-${id}`}>
-      <div data-test-subj={`alertZeroDependencyDescription-${id}`}>
-        {status === 'unknown'
-          ? id === 'threatIngest' || id === 'threatEnrich'
-            ? i18n.unableToVerifyThreatWorkflowDescription(label)
-            : i18n.unableToVerifyDescription(label)
-          : description}
-      </div>
-      {onEnable || (destination && linkText) ? (
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          css={css`
-            margin-top: ${euiTheme.size.xs};
-          `}
-          data-test-subj={`alertZeroDependencyActions-${id}`}
-        >
-          {destination && linkText ? (
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                href={application.getUrlForApp(destination.appId, { path: destination.path })}
-                onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                  if (
-                    event.button !== 0 ||
-                    event.metaKey ||
-                    event.ctrlKey ||
-                    event.shiftKey ||
-                    event.altKey
-                  ) {
-                    return;
-                  }
-                  event.preventDefault();
-                  void application.navigateToApp(destination.appId, { path: destination.path });
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem>
+          <EuiText size="s" data-test-subj={`alertZeroDependencyDescription-${id}`}>
+            {unverified ? (
+              <FormattedMessage
+                id="xpack.alertzero.workerDependencies.unverifiedRow"
+                defaultMessage="{label} {description}"
+                values={{
+                  label: <strong>{label}</strong>,
+                  description:
+                    id === 'threatIngest' || id === 'threatEnrich'
+                      ? i18n.UNVERIFIED_THREAT_WORKFLOW_DESCRIPTION
+                      : i18n.UNVERIFIED_DESCRIPTION,
                 }}
-              >
-                {linkText}
-              </EuiLink>
-            </EuiFlexItem>
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.alertzero.workerDependencies.missingRow"
+                defaultMessage="{label} {state}, so {consequence}."
+                values={{
+                  label: <strong>{label}</strong>,
+                  state,
+                  consequence: (
+                    <span
+                      css={css`
+                        color: ${euiTheme.colors.textSubdued};
+                      `}
+                    >
+                      {consequence}
+                    </span>
+                  ),
+                }}
+              />
+            )}
+          </EuiText>
+          {enableFailed ? (
+            <EuiText size="xs" color="danger">
+              <p role="alert">{i18n.enableDependencyFailedDescription(label)}</p>
+            </EuiText>
           ) : null}
-          {onEnable ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                isLoading={isEnabling}
-                isDisabled={enableDisabled}
-                onClick={onEnable}
-              >
-                {i18n.enableDependencyButtonLabel(label)}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      ) : null}
-      {enableFailed ? (
-        <EuiText size="xs" color="danger">
-          <p role="alert">{i18n.enableDependencyFailedDescription(label)}</p>
-        </EuiText>
-      ) : null}
+        </EuiFlexItem>
+        {onEnable || (destination && linkText) ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              data-test-subj={`alertZeroDependencyActions-${id}`}
+            >
+              {destination && linkText && (!onEnable || enableFailed) ? (
+                <EuiFlexItem grow={false}>
+                  <DestinationButton destination={destination} linkText={linkText} />
+                </EuiFlexItem>
+              ) : null}
+              {onEnable ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    flush="right"
+                    isLoading={isEnabling}
+                    isDisabled={enableDisabled}
+                    onClick={onEnable}
+                    aria-label={i18n.enableDependencyButtonLabel(label)}
+                  >
+                    {i18n.ENABLE_BUTTON_LABEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     </li>
   );
 };
@@ -260,22 +311,25 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
             id,
             status: checks.contextEngine,
             label: i18n.CONTEXT_ENGINE_LABEL,
-            description: i18n.contextEngineDescription(worker.id),
+            state: i18n.STATE_OFF,
+            severity: i18n.contextEngineSeverity(worker.id),
+            consequence: i18n.contextEngineConsequence(worker.id),
             destination: advancedSettingsDestination('Context Engine'),
             linkText: i18n.ADVANCED_SETTINGS_LINK_TEXT,
           };
-        case 'alertAnalysis':
+        case 'alertAnalysis': {
+          const workflowMissing = checks.alertAnalysisWorkflow === 'missing';
           return {
             id,
             status: checks.alertAnalysis,
-            label: i18n.ALERT_ANALYSIS_LABEL,
-            description:
-              checks.alertAnalysisWorkflow === 'missing'
-                ? i18n.ALERT_ANALYSIS_WORKFLOW_DESCRIPTION
-                : i18n.ALERT_ANALYSIS_RUNTIME_DESCRIPTION,
+            label: workflowMissing ? i18n.ALERT_ANALYSIS_WORKFLOW_LABEL : i18n.ALERT_ANALYSIS_LABEL,
+            state: workflowMissing ? i18n.STATE_MISSING_OR_DISABLED : i18n.STATE_OFF,
+            severity: 'blocked',
+            consequence: i18n.ALERT_ANALYSIS_CONSEQUENCE,
             destination: { appId: 'security', path: '/rules/alert_analysis_workflow' },
             linkText: i18n.ALERT_ANALYSIS_LINK_TEXT,
           };
+        }
         case 'attackDiscoveryWorkflows':
           return {
             id,
@@ -283,9 +337,13 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
               ? checks.attackDiscoveryWorkflows
               : 'missing',
             label: i18n.ATTACK_DISCOVERY_LABEL,
-            description: checks.attackDiscoveryFeatureAvailable
-              ? i18n.ATTACK_DISCOVERY_DESCRIPTION
-              : i18n.ATTACK_DISCOVERY_DEPLOYMENT_DESCRIPTION,
+            state: checks.attackDiscoveryFeatureAvailable
+              ? i18n.STATE_OFF_PLURAL
+              : i18n.STATE_UNAVAILABLE,
+            severity: 'blocked',
+            consequence: checks.attackDiscoveryFeatureAvailable
+              ? i18n.ATTACK_DISCOVERY_CONSEQUENCE
+              : i18n.ATTACK_DISCOVERY_DEPLOYMENT_CONSEQUENCE,
             destination: checks.attackDiscoveryFeatureAvailable
               ? advancedSettingsDestination('Attack Discovery Workflows')
               : undefined,
@@ -296,7 +354,9 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
             id,
             status: checks.defend,
             label: i18n.DEFEND_LABEL,
-            description: i18n.DEFEND_DESCRIPTION,
+            state: i18n.STATE_NOT_SET_UP,
+            severity: 'blocked',
+            consequence: i18n.DEFEND_CONSEQUENCE,
             destination: { appId: 'integrations', path: '/detail/endpoint/overview' },
             linkText: i18n.DEFEND_LINK_TEXT,
           };
@@ -310,7 +370,9 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
             id,
             status,
             label,
-            description: i18n.THREAT_WORKFLOW_DESCRIPTION(label),
+            state: i18n.STATE_WORKFLOW_OFF,
+            severity: 'limited',
+            consequence: i18n.THREAT_WORKFLOW_CONSEQUENCE,
             // A missing row in the Workflows bulk response may also be unreadable. In that
             // case take the user to the list rather than linking to a possibly inaccessible ID.
             destination:
@@ -323,7 +385,14 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
         }
       }
     });
-    return messages.filter(({ status }) => status === 'missing' || status === 'unknown');
+    // Blocking problems first, then degraded hand-offs, then checks that could not be verified.
+    return messages
+      .filter(({ status }) => status === 'missing' || status === 'unknown')
+      .sort(
+        (a, b) =>
+          SEVERITY_ORDER[a.status] - SEVERITY_ORDER[b.status] ||
+          Number(a.severity === 'limited') - Number(b.severity === 'limited')
+      );
   }, [
     worker.id,
     checks.alertAnalysis,
@@ -341,11 +410,71 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
   const showWarning = surface === 'settings' && hasMissing;
   const hasUnknown = visible.some(({ status }) => status === 'unknown');
 
+  const rows = (
+    <>
+      <ul
+        css={css`
+          list-style: none;
+          margin: 0;
+          padding: 0;
+
+          li + li {
+            margin-top: ${euiTheme.size.xs};
+          }
+
+          /* Keep each line's text vertically centred on its 32px button. */
+          li {
+            min-height: ${euiTheme.size.xl};
+          }
+        `}
+      >
+        {visible.map((message) => {
+          const { id, status } = message;
+          const onEnable = canEnableDependency(id, status)
+            ? () => enableDependency.mutate(id)
+            : undefined;
+          return (
+            <DependencyRow
+              key={id}
+              message={message}
+              onEnable={onEnable}
+              isEnabling={enableDependency.isLoading && enableDependency.variables === id}
+              enableDisabled={enableDependency.isLoading}
+              enableFailed={enableDependency.isError && enableDependency.variables === id}
+            />
+          );
+        })}
+      </ul>
+      {hasUnknown ? (
+        <EuiButtonEmpty size="xs" onClick={checks.retry}>
+          {i18n.RETRY_BUTTON_LABEL}
+        </EuiButtonEmpty>
+      ) : null}
+    </>
+  );
+
+  if (surface === 'onboarding') {
+    return (
+      <div
+        css={css`
+          margin-top: ${euiTheme.size.m};
+          padding-top: ${euiTheme.size.s};
+          border-top: ${euiTheme.border.thin};
+          /* Button hit areas add ~6px below the last line; pull it back so the
+             card's bottom padding visually matches the top. */
+          margin-bottom: -${euiTheme.size.s};
+        `}
+        data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`}
+      >
+        {rows}
+      </div>
+    );
+  }
+
   return (
     <div
       css={css`
-        margin-top: ${surface === 'onboarding' ? euiTheme.size.s : 0};
-        margin-bottom: ${surface === 'settings' ? euiTheme.size.m : 0};
+        margin-bottom: ${euiTheme.size.m};
       `}
       data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`}
     >
@@ -353,45 +482,9 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
         size="s"
         color={showWarning ? 'warning' : 'primary'}
         iconType={showWarning ? 'warning' : 'info'}
-        title={
-          surface === 'settings'
-            ? hasMissing
-              ? i18n.MISSING_TITLE
-              : i18n.UNKNOWN_TITLE
-            : undefined
-        }
+        title={hasMissing ? i18n.MISSING_TITLE : i18n.UNKNOWN_TITLE}
       >
-        <ul
-          css={css`
-            margin-bottom: 0;
-
-            li + li {
-              margin-top: ${euiTheme.size.s};
-            }
-          `}
-        >
-          {visible.map((message) => {
-            const { id, status } = message;
-            const onEnable = canEnableDependency(id, status)
-              ? () => enableDependency.mutate(id)
-              : undefined;
-            return (
-              <DependencyRow
-                key={id}
-                message={message}
-                onEnable={onEnable}
-                isEnabling={enableDependency.isLoading && enableDependency.variables === id}
-                enableDisabled={enableDependency.isLoading}
-                enableFailed={enableDependency.isError && enableDependency.variables === id}
-              />
-            );
-          })}
-        </ul>
-        {hasUnknown ? (
-          <EuiButtonEmpty size="xs" onClick={checks.retry}>
-            {i18n.RETRY_BUTTON_LABEL}
-          </EuiButtonEmpty>
-        ) : null}
+        {rows}
       </EuiCallOut>
     </div>
   );
