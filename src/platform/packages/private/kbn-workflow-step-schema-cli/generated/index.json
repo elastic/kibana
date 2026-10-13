@@ -4,6 +4,7 @@
     ".abuseipdb",
     ".alienvault-otx",
     ".amazon_s3",
+    ".ansible_controller",
     ".aws_lambda",
     ".azure-blob",
     ".bedrock",
@@ -121,6 +122,20 @@
     "amazon_s3.downloadFile",
     "amazon_s3.listBucketObjects",
     "amazon_s3.listBuckets",
+    "ansible_controller.cancelJob",
+    "ansible_controller.getJob",
+    "ansible_controller.getJobStdout",
+    "ansible_controller.getJobTemplate",
+    "ansible_controller.getJobTemplateLaunchOptions",
+    "ansible_controller.getMe",
+    "ansible_controller.launchJobTemplate",
+    "ansible_controller.listHosts",
+    "ansible_controller.listInventories",
+    "ansible_controller.listJobEvents",
+    "ansible_controller.listJobTemplates",
+    "ansible_controller.listJobs",
+    "ansible_controller.listProjects",
+    "ansible_controller.request",
     "aws_lambda.getFunction",
     "aws_lambda.invoke",
     "aws_lambda.listFunctions",
@@ -1012,11 +1027,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "0d38bb7a53923b02eb075287ae7399e97df2b1da258ecbe4dcefc0bdf57f77e9"
+      "sha256": "2a12a4c6c27820bea8ce5e066a3398dbbe9c16a4624a33cf9b6b844100e36daa"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "08f31756706a5afcf8676c845b8313d98b7e8e956e9600b64aa08ac29bd942ef"
+      "sha256": "0f996367909936cca231692e59ec7714be58682f7084f5932b96d47222a4bda1"
     }
   }
 }
