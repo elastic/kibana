@@ -15,8 +15,8 @@ import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SCHEMA_DISCOVER_SESSION_LATEST } from '@kbn/saved-search-plugin/server';
 import { MAX_DISCOVER_SESSION_TAGS } from '@kbn/discover-session-constants';
 import {
-  DISCOVER_SESSION_API_VERSION,
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import { discoverSessionSanitizeResponseSchema } from './schema';
 import { sanitizeDiscoverSession } from './session_sanitize';
@@ -39,7 +39,7 @@ export const registerSanitizeRoute = (
     })
     .addVersion(
       {
-        version: DISCOVER_SESSION_API_VERSION,
+        version: DISCOVER_SESSION_INTERNAL_API_VERSION,
         validate: {
           request: {
             body: schema.object({
