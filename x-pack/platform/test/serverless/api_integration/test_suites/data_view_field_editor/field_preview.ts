@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
   };
 
-  // Migration recommendation: MIXED. See individual tests.
+  // Migration recommendation: MIGRATE TO SCOUT (API). See individual tests.
   // Serverless copy of apis/data_view_field_editor/field_preview.ts: merge into the same Scout API
   // test (`tags.deploymentAgnostic`). The plugin has no `test/scout/api` yet, so scaffold it first
   // (`node scripts/scout generate`). The route has authz disabled and relies on Elasticsearch
@@ -116,10 +116,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // Migration recommendation: REPLACE WITH UNIT/JEST
-    // The 400s only exercise the route's schema validation. The schema is private to field_preview.ts, so
-    // mock the versioned router (precedent: discover `register_sanitize_route.test.ts`).
-    // Target: src/platform/plugins/shared/data_view_field_editor/server/routes/field_preview.test.ts (new)
+    // Migration recommendation: MIGRATE TO SCOUT (API)
+    // The 400s exercise the route's schema validation. A schema-only unit test would change in lockstep
+    // with the schema and not catch an unintended change to the endpoint's payload contract.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertestWithoutAuth

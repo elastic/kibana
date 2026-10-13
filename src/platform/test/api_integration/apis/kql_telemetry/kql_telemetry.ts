@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
-  // Migration recommendation: MIXED. See individual tests.
+  // Migration recommendation: MIGRATE TO SCOUT (API). See individual tests.
   // No Scout coverage of POST /internal/kql_opt_in_stats. Condense with the serverless copy into one
   // Scout API test tagged `tags.deploymentAgnostic`.
   describe('telemetry API', () => {
@@ -111,10 +111,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
-    // REPLACE WITH UNIT/JEST
-    // Only exercises the route schema. The schema is inline in route.ts and not exported, so mock the
-    // versioned router (precedent: discover `register_sanitize_route.test.ts`).
-    // Target: src/platform/plugins/shared/data/server/kql_telemetry/route.test.ts (new)
+    // MIGRATE TO SCOUT (API)
+    // Only exercises the route schema. A schema-only unit test would change in lockstep with the schema
+    // and not catch an unintended change to the endpoint's payload contract.
+    // Target: the same Scout API test as the rest of this file.
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Promise.all([
         supertest

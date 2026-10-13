@@ -116,9 +116,10 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 404);
       });
 
-      // REPLACE WITH UNIT/JEST
+      // MIGRATE TO SCOUT (API)
       // The 404 and its message come from `getSearchStrategy` in search_service.ts, which
-      // search_service.test.ts does not cover. Target: src/platform/plugins/shared/data/server/search/search_service.test.ts
+      // search_service.test.ts does not cover. Keep it at the API level to pin the HTTP contract.
+      // Target: the same Scout API test as the rest of this file.
       it('should return 404 when if unknown strategy is provided', async () => {
         const resp = await supertestAdminWithCookieCredentials
           .post(`/internal/search/banana`)
@@ -207,10 +208,10 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 404);
       });
 
-      // REPLACE WITH UNIT/JEST
+      // MIGRATE TO SCOUT (API)
       // Not covered by Scout (its delete spec uses the `ese` strategy) nor by search.test.ts. The
-      // message comes from search_service.ts, so add a case to a Jest test there.
-      // Target: src/platform/plugins/shared/data/server/search/search_service.test.ts
+      // message comes from search_service.ts; keep it at the API level to pin the HTTP contract.
+      // Target: the same Scout API test as the rest of this file.
       it('should return 400 when trying a delete on a non supporting strategy', async () => {
         const resp = await supertestAdminWithCookieCredentials
           .delete(`/internal/search/es/123`)
