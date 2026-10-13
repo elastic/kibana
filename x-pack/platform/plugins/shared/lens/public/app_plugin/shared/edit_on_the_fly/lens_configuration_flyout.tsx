@@ -297,7 +297,10 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
     if (isNewPanel) {
-      trackCreateUiCounterEvents(isTextBasedAttributes(attributesToSave) ? 'esql' : 'dsl');
+      trackCreateUiCounterEvents(
+        isTextBasedAttributes(attributesToSave) ? 'esql' : 'dsl',
+        'dashboards'
+      );
     }
 
     deleteUserChartTypeFromSessionStorage();

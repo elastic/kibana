@@ -39,11 +39,16 @@ export const trackSaveUiCounterEvents = (
   context?: KibanaExecutionContext
 ) => trackUiCounterEvents(events, context, SAVE_EVENT_PREFIX);
 
-/** @internal **/
+export type LensTelemetrySource = 'dashboards' | 'discover' | 'chat' | 'visualize';
+
+/** Reports a Lens chart creation, only when its source is known. @internal **/
 export const trackCreateUiCounterEvents = (
-  events: string | string[],
-  context?: KibanaExecutionContext
-) => trackUiCounterEvents(events, context, CREATE_EVENT_PREFIX);
+  queryType: 'esql' | 'dsl',
+  source: LensTelemetrySource | undefined
+) => {
+  if (!source) return;
+  trackUiCounterEvents(`${queryType}_${source}`, undefined, CREATE_EVENT_PREFIX);
+};
 
 /** @internal **/
 export const trackUiCounterEvents = (

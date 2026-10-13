@@ -30,7 +30,7 @@ import { getFromPreloaded } from '../state_management/init_middleware/load_initi
 import { redirectToDashboard } from './save_modal_container_helpers';
 import { isLegacyEditorEmbeddable } from './app_helpers';
 import { transformToApiConfig } from '../react_embeddable/helper';
-import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
+import { trackCreateUiCounterEvents, type LensTelemetrySource } from '../lens_ui_telemetry';
 
 type ExtraProps = Simplify<
   Pick<LensAppProps, 'initialInput'> &
@@ -73,6 +73,11 @@ export type SaveModalContainerProps = {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   // is this visualization managed by the system?
   managed?: boolean;
+  /**
+   * Where the chart was created, reported in the Lens creation telemetry.
+   * No creation is reported when omitted.
+   */
+  telemetrySource?: LensTelemetrySource;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -93,6 +98,7 @@ export function SaveModalContainer({
   initialContext,
   managed,
   controlsState,
+  telemetrySource,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -171,7 +177,10 @@ export function SaveModalContainer({
         options
       );
       if (!initialInput?.ref_id) {
-        trackCreateUiCounterEvents(isTextBasedAttributes(lastKnownDoc) ? 'esql' : 'dsl');
+        trackCreateUiCounterEvents(
+          isTextBasedAttributes(lastKnownDoc) ? 'esql' : 'dsl',
+          telemetrySource
+        );
       }
       onSave?.(saveProps);
       onClose();

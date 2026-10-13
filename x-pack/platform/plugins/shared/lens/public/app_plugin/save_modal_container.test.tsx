@@ -463,18 +463,17 @@ describe('SaveModalContainer', () => {
     await waitFor(() => expect(waitForSave).toHaveBeenCalled());
   };
 
-  it('should track a DSL creation when a new chart is saved from outside the Lens app', async () => {
+  it('should track an ES|QL creation with its source when a chart is saved from chat', async () => {
     const onSave = jest.fn();
-    await renderAndSave({ onSave }, onSave);
+    await renderAndSave({ onSave, lastKnownDoc: esqlDoc, telemetrySource: 'chat' }, onSave);
     expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
-    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl');
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql', 'chat');
   });
 
-  it('should track an ES|QL creation when a new ES|QL chart is saved from outside the Lens app', async () => {
+  it('should pass no source for a DSL chart saved by a caller that does not set one', async () => {
     const onSave = jest.fn();
-    await renderAndSave({ onSave, lastKnownDoc: esqlDoc }, onSave);
-    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
-    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql');
+    await renderAndSave({ onSave }, onSave);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', undefined);
   });
 
   it('should not track a creation when the Lens app handles the save', async () => {

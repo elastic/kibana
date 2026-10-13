@@ -423,7 +423,7 @@ describe('LensEditConfigurationFlyout', () => {
       );
       await userEvent.click(screen.getByTestId('applyFlyoutButton'));
       expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
-      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql');
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql', 'dashboards');
     });
 
     it('should track a DSL creation when a new form-based panel is applied', async () => {
@@ -435,7 +435,7 @@ describe('LensEditConfigurationFlyout', () => {
       });
       await userEvent.click(screen.getByTestId('applyFlyoutButton'));
       expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
-      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl');
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'dashboards');
     });
 
     it('should not track a creation when an existing panel is applied', async () => {
