@@ -46,7 +46,7 @@ export interface CaseAttachmentWorkflowRunProps {
   runWorkflow: RunWorkflowExecutor | undefined;
   /** Pass to `RunWorkflowPanel`. */
   showSuccessToast: boolean;
-  /** Pass to `RunWorkflowPanel`. The case attachment origin when routed through Cases, else `fallbackTelemetry`. */
+  /** Pass to `RunWorkflowPanel`. The case attachment origin when routed through Cases, `fallbackTelemetry` outside a case, else `undefined`. */
   telemetry: RunWorkflowTelemetry | undefined;
 }
 
@@ -71,8 +71,12 @@ export const useCaseAttachmentWorkflowRun = ({
   const context = useCaseAttachmentWorkflowContext();
 
   return useMemo(() => {
-    if (context.status !== 'available') {
+    if (context.status === 'outside') {
       return { runWorkflow: undefined, showSuccessToast: true, telemetry: fallbackTelemetry };
+    }
+
+    if (context.status === 'unavailable') {
+      return { runWorkflow: undefined, showSuccessToast: true, telemetry: undefined };
     }
 
     const { caseId, createExecutor, owner } = context;

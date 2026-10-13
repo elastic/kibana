@@ -53,10 +53,12 @@ jest.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow
   );
   const MockAlertWorkflowsPanel = ({
     alertIds,
+    isBulk,
   }: {
     alertIds: Array<{ _id: string; _index: string }>;
+    isBulk?: boolean;
   }) => (
-    <div data-test-subj="bulk-alert-workflows-panel">
+    <div data-test-subj="bulk-alert-workflows-panel" data-is-bulk={String(isBulk)}>
       {alertIds.map((a) => (
         <span key={a._id} data-test-subj={`alert-id-${a._id}`}>
           {`${a._id}:${a._index}`}
@@ -187,6 +189,10 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       render(<TestProviders>{renderContent(props)}</TestProviders>);
 
       expect(screen.getByTestId('bulk-alert-workflows-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-alert-workflows-panel')).toHaveAttribute(
+        'data-is-bulk',
+        'true'
+      );
       expect(screen.getByTestId('alert-id-alert-1')).toHaveTextContent('alert-1:index-1');
       expect(screen.getByTestId('alert-id-alert-2')).toHaveTextContent('alert-2:index-2');
     });

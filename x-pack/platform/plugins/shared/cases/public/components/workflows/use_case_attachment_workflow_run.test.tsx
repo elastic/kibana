@@ -146,7 +146,7 @@ describe('useCaseAttachmentWorkflowRun', () => {
       expect(result.current.telemetry).toBe(fallbackTelemetry);
     });
 
-    it('reports the fallback telemetry when the user cannot run workflows through Cases', () => {
+    it('does not report the fallback telemetry when the user cannot run workflows through Cases', () => {
       mockUseCanRunCaseWorkflow.mockReturnValue(false);
       const { result } = renderHook(
         () =>
@@ -158,7 +158,7 @@ describe('useCaseAttachmentWorkflowRun', () => {
         { wrapper }
       );
 
-      expect(result.current.telemetry).toBe(fallbackTelemetry);
+      expect(result.current.telemetry).toBeUndefined();
     });
 
     it('reports the case attachment origin instead of the fallback telemetry inside a case', () => {
