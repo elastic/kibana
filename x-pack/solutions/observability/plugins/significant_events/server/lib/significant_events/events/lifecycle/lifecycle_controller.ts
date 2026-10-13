@@ -121,11 +121,9 @@ export const decideLifecycle = ({
 };
 
 export type StatusChangeDecision =
-  /** Write `event`, the version that follows `latest`. */
   | { write: true; event: SignificantEvent }
   | {
       write: false;
-      /** The status the series keeps. */
       status: SignificantEventStatus;
       reason: LifecycleSkipReason;
     };
@@ -144,12 +142,7 @@ export const requestedStatus = (change: StatusChange): SignificantEventStatus =>
   }
 };
 
-/**
- * Everything about a status transition: applies a change to an event's latest version and
- * returns the version to write, or why nothing should be written. Pure: the caller reads `latest`,
- * persists the result and guards against concurrent writers, and knows none of the transition
- * rules.
- */
+/** Applies a change to an event's latest version: the version to write, or why not. Pure. */
 export const decideStatusChange = ({
   latest,
   change,
@@ -159,7 +152,6 @@ export const decideStatusChange = ({
   latest: SignificantEvent;
   change: StatusChange;
   assessmentNote?: string;
-  /** `@timestamp` of the version to write. */
   timestamp: string;
 }): StatusChangeDecision => {
   const decision = decideLifecycle({ state: { status: latest.status }, change });

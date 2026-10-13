@@ -75,7 +75,6 @@ const makeEventSearchClient = (
       findLatestByCurrentStatePaginated: jest.fn(),
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
       findByEventId,
-      // Like the real client: the latest version is the last one of the lineage.
       findLatestByEventId: jest
         .fn()
         .mockImplementation(async (eventId: string) => (await findByEventId(eventId)).hits.at(-1)),

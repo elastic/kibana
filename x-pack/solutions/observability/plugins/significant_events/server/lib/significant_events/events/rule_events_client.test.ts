@@ -13,8 +13,9 @@ import {
   EVENT_STATUS_CHANGED_TRIGGER_ID,
 } from '../../../../common/workflows/triggers';
 import { StatusChange } from './lifecycle/lifecycle_controller';
-import { RuleEventsClient } from './rule_events_client';
 import { asRuleEventsClient } from './rule_events_client.mock';
+
+import { RuleEventsClient } from './rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 interface MockRow {
@@ -112,7 +113,6 @@ const makeStatusAlertEventsClient = (
     ...overrides,
   } as jest.Mocked<AlertEventsClientApi>);
 
-/** @param latest - the latest version returned by `findLatestByEventId`, if any. */
 const createStatusSearchClient = (
   latest: SignificantEvent | undefined,
   alertEventsClient: jest.Mocked<AlertEventsClientApi>

@@ -49,7 +49,6 @@ export function createSignificantEventsClients({
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
-  /** Lazily resolves the per-request writer of `.rule-events`. */
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
 }): SignificantEventsClients {
   const eventSearchClient = new RuleEventsClient({

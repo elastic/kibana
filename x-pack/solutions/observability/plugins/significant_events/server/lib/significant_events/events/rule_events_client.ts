@@ -204,10 +204,7 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
 
 export type UpdateEventResult =
   | { updated: true }
-  /**
-   * The version was not written: another writer appended after `prior` was read (`head` is the
-   * version that won), or the series could not be read back at all (no `head`).
-   */
+  /** Not written: another writer got there first (`head`), or the series could not be read back. */
   | { updated: false; head?: SignificantEvent };
 
 export type UpdateEventStatusResult =
@@ -215,26 +212,26 @@ export type UpdateEventStatusResult =
   | {
       updated: 0;
       ignored: 1;
-      /** The status the series has after this call (the requested one when there is no event). */
       status: SignificantEventStatus;
       reason: LifecycleSkipReason | 'not_found' | 'superseded';
     };
 
 /**
- * `.rule-events` client.
+ * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
+ * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
+ * write versions. Query strategy (which ES|QL extraction form to use per field) is validated
+ * per-shape on nightshift-program#1492 and #1517 before this client's output is trusted in
+ * production.
+ *
+ * Not implemented here:
+ * - `findLatestActive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
  */
 export class RuleEventsClient {
-  /**
-   * `getAlertEventsClient` and `emitTrigger` are only needed to write: a read-only client (SML)
-   * omits them, and `createEvent` / `updateEvent` / `updateEventStatus` then throw.
-   */
   constructor(
-    private readonly clients: {
+    private readonly options: {
       esClient: ElasticsearchClient;
       space: string;
-      /** Lazily resolves the per-request writer of `.rule-events`. */
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
-      /** Fire-and-forget workflow trigger emitter; undefined when workflows are unavailable. */
       emitTrigger?: TriggerEmitter;
     }
   ) {}
@@ -244,7 +241,7 @@ export class RuleEventsClient {
   ): ComposerQuery {
     // `created_at` is the earliest `@timestamp` for the series. Compute it across the full lineage
     // before latest-reduction so a later time bound cannot hide the series' true creation time.
-    let query = buildBaseQuery(this.clients.space)
+    let query = buildBaseQuery(this.options.space)
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
@@ -293,7 +290,7 @@ export class RuleEventsClient {
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
-      query: buildBaseQuery(this.clients.space),
+      query: buildBaseQuery(this.options.space),
       from: options.from,
       to: options.to,
     });
@@ -301,7 +298,7 @@ export class RuleEventsClient {
     query = withDataJsonProjection(query).keep('_source', 'data_json');
 
     const hits = await executeEsqlQuery<RuleEventSourceRow>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query,
       fields: ['data_json'],
     });
@@ -328,9 +325,9 @@ export class RuleEventsClient {
       .pipe`STATS total = COUNT(*)`.keep('total');
 
     const [total, hits] = await Promise.all([
-      executeCountQuery({ esClient: this.clients.esClient, query: countQuery }),
+      executeCountQuery({ esClient: this.options.esClient, query: countQuery }),
       executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
-        esClient: this.clients.esClient,
+        esClient: this.options.esClient,
         query: dataQuery,
         fields: ['data_json', 'created_at'],
       }),
@@ -356,7 +353,7 @@ export class RuleEventsClient {
     }
 
     const hits = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query: withDataJsonProjection(query)
         .sort([GROUP_HASH_FIELD, 'ASC'])
         .limit(options.batchSize)
@@ -384,7 +381,7 @@ export class RuleEventsClient {
     options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
-      query: buildBaseQuery(this.clients.space),
+      query: buildBaseQuery(this.options.space),
       from: options.from,
       to: options.to,
     });
@@ -403,7 +400,7 @@ export class RuleEventsClient {
     }
 
     const hits = await executeEsqlQuery<RuleEventSourceRow>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query: withDataJsonProjection(query).keep('_source', 'data_json').limit(MAX_DEDUP_SCAN_LIMIT),
       fields: ['data_json'],
     });
@@ -412,14 +409,14 @@ export class RuleEventsClient {
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
     const query = withDataJsonProjection(
-      buildBaseQuery(this.clients.space).where`${eventIdEquals(eventId)}`
+      buildBaseQuery(this.options.space).where`${eventIdEquals(eventId)}`
         .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`
     )
       .sort(['@timestamp', 'ASC'])
       .keep('_source', 'data_json', 'created_at');
 
     const hits = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query,
       fields: ['data_json', 'created_at'],
     });
@@ -439,12 +436,12 @@ export class RuleEventsClient {
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
     if (!eventIds.length) return new Map();
 
-    let query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`;
+    let query = buildBaseQuery(this.options.space).where`${eventIdIn(eventIds)}`;
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
     query = withDataJsonProjection(query).keep('_source', 'data_json').limit(eventIds.length);
 
     const hits = await executeEsqlQuery<RuleEventSourceRow>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query,
       fields: ['data_json'],
     });
@@ -456,32 +453,20 @@ export class RuleEventsClient {
     return map;
   }
 
-  /**
-   * Writes the first version of an event and notifies subscribed workflows of its creation.
-   * Callers decide the version; this owns how it is persisted. Deliberately unguarded: a new event
-   * has no prior version to compare against, so two writers creating the same series both succeed.
-   */
+  /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
   async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
     await this.writeVersion({ event });
   }
 
-  /**
-   * Writes the next version of an event and notifies subscribed workflows of a status change.
-   * Callers decide the version; this owns how it is persisted.
-   *
-   * The version is written only while `prior` is still the latest one, so a version another writer
-   * added since the read is never overwritten with a stale copy. Best effort, not an atomic
-   * conditional write.
-   */
+  /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
   async updateEvent({
     event,
     prior,
   }: {
     event: SignificantEvent;
-    /** The latest version the caller built `event` from. */
     prior: SignificantEvent;
   }): Promise<UpdateEventResult> {
-    // A head that cannot be read back, though `prior` was just read, is not a version to build on.
+    // A head that cannot be read back is not a version to build on.
     const head = await this.findLatestByEventId(event.event_id);
     if (head === undefined || head['@timestamp'] !== prior['@timestamp']) {
       return { updated: false, head };
@@ -491,11 +476,7 @@ export class RuleEventsClient {
     return { updated: true };
   }
 
-  /**
-   * Applies one status change to one event: reads its latest version, lets the lifecycle
-   * controller decide the status change and writes the version it returns through `updateEvent`.
-   * Shared by the operator route, the chat tool and cleanup.
-   */
+  /** Applies a status change to one event: the lifecycle controller decides, `updateEvent` writes. */
   async updateEventStatus({
     eventId,
     change,
@@ -505,10 +486,7 @@ export class RuleEventsClient {
     eventId: string;
     change: StatusChange;
     assessmentNote?: string;
-    /**
-     * Writes only while the latest version still carries this `@timestamp`. A newer version means
-     * something else (e.g. a discovery write) changed the event since the caller read it.
-     */
+    /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
   }): Promise<UpdateEventStatusResult> {
     const latest = await this.findLatestByEventId(eventId);
@@ -549,14 +527,13 @@ export class RuleEventsClient {
     event: SignificantEvent;
     prior?: SignificantEvent;
   }): Promise<void> {
-    const { getAlertEventsClient, emitTrigger } = this.clients;
+    const { getAlertEventsClient, emitTrigger } = this.options;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
-    const alertEventsClient = await getAlertEventsClient();
 
-    // `createAlertEvent` waits for a refresh, so an immediate re-read (the UI invalidating its
-    // query, the next discovery cycle) sees the new version.
+    const alertEventsClient = await getAlertEventsClient();
+    // `createAlertEvent` waits for a refresh, so the new version is readable immediately.
     await alertEventsClient.createAlertEvent(toRuleEvent(event));
     emitSignificantEventWriteTriggers({
       emitTrigger,

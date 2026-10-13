@@ -17,7 +17,6 @@ import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../common/workflows/tr
 
 const EVENT_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
-/** The `.rule-events` documents written, by event id. */
 const writtenIds = (client: jest.Mocked<AlertEventsClientApi>): Array<string | undefined> =>
   client.createAlertEvent.mock.calls.map(([ruleEvent]) => ruleEvent.fingerprint);
 
