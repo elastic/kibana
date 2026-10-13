@@ -251,6 +251,28 @@ describe('useIacCallback', () => {
     expect(mockedGet).not.toHaveBeenCalled();
   });
 
+  it('cancels a record whose creation finished after unmount and does not poll for it', async () => {
+    let resolveCreate: (value: unknown) => void = () => {};
+    mockedCreate.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)) as any);
+    const { result, unmount } = renderHook(() => useIacCallback({ enabled: true }));
+
+    let params: Record<string, string> | undefined;
+    const started = act(async () => {
+      params = await result.current.start();
+    });
+    // Let start() reach the create request, then take the form away while it is in flight.
+    await act(async () => {});
+    expect(mockedCreate).toHaveBeenCalledTimes(1);
+    unmount();
+    resolveCreate({ data: { item: pendingItem('cb-late'), api_key: 'k' }, error: null });
+    await started;
+
+    expect(params).toBeUndefined();
+    expect(mockedDelete).toHaveBeenCalledWith('cb-late');
+    await poll();
+    expect(mockedGet).not.toHaveBeenCalled();
+  });
+
   it('cancels the pending record on unmount', async () => {
     const { result, unmount } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {

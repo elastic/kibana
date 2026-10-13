@@ -79,6 +79,8 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
   // The record currently being waited on; a poll result for any other id is stale and ignored.
   const activeIdRef = useRef<string | undefined>(undefined);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  // `start` awaits twice; a record created after the form went away must be cancelled, not polled.
+  const mountedRef = useRef(true);
 
   const stopPolling = useCallback(() => {
     if (timerRef.current) {
@@ -159,8 +161,15 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     // A new Launch supersedes whatever record the previous one created.
     await cancel();
 
+    if (!mountedRef.current) {
+      return undefined;
+    }
     const { data, error } = await sendCreateIacCallback({ provider: 'aws' });
     if (error || !data) {
+      return undefined;
+    }
+    if (!mountedRef.current) {
+      sendDeleteIacCallback(data.item.id).catch(() => {});
       return undefined;
     }
     activeIdRef.current = data.item.id;
@@ -177,7 +186,9 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
 
   // Leaving the form cancels the wait so the key dies with it.
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       stopPolling();
       const id = activeIdRef.current;
       activeIdRef.current = undefined;
