@@ -184,7 +184,6 @@ export const ObservabilityAlertingApp = ({
         {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
         <Route path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
           <EuiPageSection paddingSize="m">
-            {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
             <EpisodesPage
               coreStart={coreStart}
               setBreadcrumbs={setBreadcrumbs}
@@ -222,7 +221,6 @@ export const ObservabilityAlertingApp = ({
         {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
         <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
           <EuiPageSection paddingSize="m">
-            {/* Serves both v1 and v2 users, so privilegeCheck grants access via either path */}
             <RuleLibraryPage
               coreStart={coreStart}
               setBreadcrumbs={setBreadcrumbs}
