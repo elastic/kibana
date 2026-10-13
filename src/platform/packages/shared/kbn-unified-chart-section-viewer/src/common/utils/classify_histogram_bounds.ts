@@ -21,6 +21,7 @@ const toFiniteNumber = (value: RawHistogramBound): number | undefined => {
 
 /**
  * Returns MIN/MAX when both values are finite and min is less than max.
+ * Anything else is undefined, and the chart skips the histogram.
  */
 export const parseHistogramBounds = (
   rawMin: RawHistogramBound,

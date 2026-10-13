@@ -1338,7 +1338,6 @@ describe('MetricsGrid', () => {
         expect.objectContaining({
           heatmapConfig: undefined,
           esqlQuery: expect.stringContaining('`host.name`'),
-          emptyMessage: undefined,
         }),
         expect.anything()
       );
@@ -1377,26 +1376,7 @@ describe('MetricsGrid', () => {
       );
     });
 
-    it('does not draw a histogram when min equals max', () => {
-      enableHeatmaps();
-      renderMetricsGrid({
-        metricItems: [histogramItem],
-        histogramBounds: new Map([[getMetricUniqueKey(histogramItem), { min: 5, max: 5 }]]),
-      });
-
-      expect(createESQLQuery).not.toHaveBeenCalled();
-      expect(Chart).toHaveBeenCalledWith(
-        expect.objectContaining({
-          heatmapConfig: undefined,
-          emptyMessage: 'No distribution in this time range',
-          chartLayers: [],
-          isLoading: false,
-        }),
-        expect.anything()
-      );
-    });
-
-    it('shows an empty message when the loaded range is not finite', () => {
+    it('uses the series chart when bounds are missing', () => {
       enableHeatmaps();
       renderMetricsGrid({
         metricItems: [histogramItem],
@@ -1404,8 +1384,13 @@ describe('MetricsGrid', () => {
         histogramBoundsLoading: false,
       });
 
+      expect(createESQLQuery).toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
-        expect.objectContaining({ emptyMessage: 'No distribution in this time range' }),
+        expect.objectContaining({
+          heatmapConfig: undefined,
+          isLoading: false,
+          error: undefined,
+        }),
         expect.anything()
       );
     });
@@ -1419,7 +1404,7 @@ describe('MetricsGrid', () => {
       });
 
       expect(Chart).toHaveBeenCalledWith(
-        expect.objectContaining({ error, heatmapConfig: undefined, emptyMessage: undefined }),
+        expect.objectContaining({ error, heatmapConfig: undefined }),
         expect.anything()
       );
     });

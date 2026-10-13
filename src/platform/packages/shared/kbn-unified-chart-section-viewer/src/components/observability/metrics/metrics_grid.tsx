@@ -123,11 +123,6 @@ export type MetricsGridProps = Pick<
 
 const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
 
-const histogramEmptyMessage = () =>
-  i18n.translate('metricsExperience.heatmap.noDistributionMessage', {
-    defaultMessage: 'No distribution in this time range',
-  });
-
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
 };
@@ -430,12 +425,16 @@ const ChartItem = React.memo(
     const finiteBounds = boundsResult && !('error' in boundsResult) ? boundsResult : undefined;
     // A breakdown splits the series chart. Heatmaps do not encode that split yet.
     const hasBreakdown = applicableDimensions.length > 0;
-    const drawDistribution = isDistribution && !hasBreakdown;
-    // Missing or equal bounds are not a distribution, so the heatmap is not drawn.
-    const hasDistribution = finiteBounds !== undefined && finiteBounds.min < finiteBounds.max;
+    const hasRange = finiteBounds !== undefined && finiteBounds.min < finiteBounds.max;
+    // Missing bounds, including a point, skip the histogram and use the series chart.
+    // Loading and errors stay on the histogram path so the series chart does not flash first.
+    const drawDistribution =
+      isDistribution &&
+      !hasBreakdown &&
+      (histogramBoundsLoading || boundsError !== undefined || hasRange);
 
     const distributionQuery = useMemo(() => {
-      if (!drawDistribution || !hasDistribution || !finiteBounds) {
+      if (!drawDistribution || !finiteBounds || finiteBounds.min >= finiteBounds.max) {
         return undefined;
       }
       return createHistogramDistributionQuery({
@@ -444,7 +443,7 @@ const ChartItem = React.memo(
         whereStatements,
         originalSource: userSource,
       });
-    }, [drawDistribution, hasDistribution, finiteBounds, metricItem, whereStatements, userSource]);
+    }, [drawDistribution, finiteBounds, metricItem, whereStatements, userSource]);
 
     const esqlQuery = useMemo(() => {
       if (drawDistribution) {
@@ -484,10 +483,6 @@ const ChartItem = React.memo(
           : undefined,
       [distributionQuery, metricItem.metricName, description, resolvedUnit]
     );
-    const emptyMessage =
-      drawDistribution && !histogramBoundsLoading && !boundsError && !distributionQuery
-        ? histogramEmptyMessage()
-        : undefined;
 
     const yAxisTitle = useMemo(() => {
       const instrument = firstNonNullable(metricItem.metricTypes);
@@ -541,7 +536,6 @@ const ChartItem = React.memo(
           chartLayers={drawDistribution ? [] : chartLayers}
           yAxisTitle={drawDistribution ? undefined : yAxisTitle}
           heatmapConfig={heatmapConfig}
-          emptyMessage={emptyMessage}
           isLoading={drawDistribution && histogramBoundsLoading}
           error={drawDistribution ? boundsError : undefined}
           syncCursor
