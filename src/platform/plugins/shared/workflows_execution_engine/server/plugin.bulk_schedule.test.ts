@@ -33,6 +33,7 @@ jest.mock('./lib/get_user', () => ({
 }));
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
+const mockCheckExecutionAdmission = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
@@ -139,6 +140,7 @@ describe('bulkScheduleWorkflow', () => {
     mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([]);
     mockIsWorkflowEnabled.mockResolvedValue(true);
     mockCreateWorkflowExecution.mockResolvedValue(undefined);
+    mockCheckExecutionAdmission.mockResolvedValue({ admitted: true });
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
@@ -175,6 +177,7 @@ describe('bulkScheduleWorkflow', () => {
           id: 'connector.test',
           requiresConnectorId: true,
         }),
+        checkExecutionAdmission: mockCheckExecutionAdmission,
       } as any,
       licensing: licensingMock.createStart(),
     });
@@ -498,6 +501,44 @@ describe('bulkScheduleWorkflow', () => {
     expect(result[1]).toEqual({
       status: 'error',
       error: { message: 'Workflow is disabled: wf-bad. Enable the workflow to run it.' },
+    });
+  });
+
+  it('marks an item an admission guard refuses as error and still schedules the rest', async () => {
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([
+        ['default:wf-ok', { enabled: true }],
+        ['default:wf-over-budget', { enabled: true }],
+      ])
+    );
+    mockCheckExecutionAdmission.mockImplementation(async ({ workflowId }) =>
+      workflowId === 'wf-over-budget'
+        ? { admitted: false, guardId: 'contextEngine.budget', reason: 'Budget spent.' }
+        : { admitted: true }
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    const result = await pluginStart.bulkScheduleWorkflow(
+      [
+        { workflow: createWorkflow('wf-ok'), context: { spaceId: 'default' } },
+        { workflow: createWorkflow('wf-over-budget'), context: { spaceId: 'default' } },
+      ],
+      request
+    );
+
+    expect(mockCheckExecutionAdmission).toHaveBeenCalledWith({
+      workflowId: 'wf-over-budget',
+      spaceId: 'default',
+      triggeredBy: 'alert',
+    });
+    const [bulkArgs] = mockBulkCreateWorkflowExecutions.mock.calls[0];
+    expect(bulkArgs).toEqual([expect.objectContaining({ workflowId: 'wf-ok' })]);
+    expect(result[0]).toEqual({ status: 'scheduled', workflowExecutionId: expect.any(String) });
+    expect(result[1]).toEqual({
+      status: 'error',
+      error: { message: expect.stringContaining('Budget spent.') },
     });
   });
 

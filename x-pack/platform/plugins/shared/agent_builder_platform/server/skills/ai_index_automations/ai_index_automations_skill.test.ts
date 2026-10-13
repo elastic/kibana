@@ -272,6 +272,17 @@ describe('aiIndexAutomationsSkill', () => {
         /a workflow you assemble outside the templates carries them too, on each\s+`ai\.prompt` and `ai\.agent` step/
       );
       expect(content).toMatch(/Use a different connector only when the user names one/);
+      expect(content).toMatch(
+        /index's cost tier calls for a different model \(see "Cost tier and budget"\)/
+      );
+    });
+
+    it('shapes the design by the cost tier and the remaining budget the attachment reports', () => {
+      expect(content).toMatch(/## Cost tier and budget/);
+      expect(content).toMatch(/\*\*cheap\*\* — keep the configured model/);
+      expect(content).toMatch(/When you\s+add a schedule, run it daily at most/);
+      expect(content).toMatch(/\*\*expensive\*\* — a larger model is acceptable/);
+      expect(content).toMatch(/propose a narrower design rather than one that will be\s+paused/);
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {

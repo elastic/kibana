@@ -29,6 +29,12 @@ export type {
 
 export type { EventChainContext } from './event_chain_context';
 
+export type {
+  WorkflowExecutionAdmissionDecision,
+  WorkflowExecutionAdmissionGuard,
+  WorkflowExecutionAdmissionRequest,
+} from './execution_admission';
+
 export {
   EVENT_CHAIN_DEPTH_HEADER,
   EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER,

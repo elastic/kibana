@@ -16,6 +16,7 @@ import type {
   AiIndexTrace,
 } from '../../common/http_api/ai_indices';
 import type { AiIndexDreamingConfig, DreamingEntities } from '../../common/dreaming';
+import type { AiIndexBudget } from '../../common/budgets';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
 
@@ -63,6 +64,13 @@ const storageSettings = {
         },
       }),
       dreaming: types.object({ enabled: false }),
+      budget: types.object({
+        properties: {
+          suggestions_monthly_usd: types.double({}),
+          automations_monthly_usd: types.double({}),
+          cost_tier: types.keyword({}),
+        },
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -71,6 +79,7 @@ interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
   dreaming?: AiIndexDreamingConfig;
+  budget?: AiIndexBudget;
   memory_enabled?: boolean;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.

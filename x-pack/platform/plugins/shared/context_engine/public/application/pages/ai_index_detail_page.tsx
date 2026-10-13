@@ -18,6 +18,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
+  BudgetPanel,
   ConnectAgentPanel,
   DescriptionPanel,
   DreamingPanel,
@@ -349,6 +350,12 @@ export const AiIndexDetailPage = () => {
             />
           }
         />
+      )}
+      {showAutomationsPanel && (
+        <>
+          <EuiSpacer size="m" />
+          <BudgetPanel aiIndexId={aiIndex?.id} />
+        </>
       )}
       <EuiSpacer size="m" />
       {showSignalsSection &&

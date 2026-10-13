@@ -19,6 +19,11 @@ import type {
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
+import type {
+  WorkflowExecutionAdmissionDecision,
+  WorkflowExecutionAdmissionGuard,
+  WorkflowExecutionAdmissionRequest,
+} from './execution_admission';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
@@ -70,6 +75,14 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * Register plugin id as a managed workflows owner during setup.
    */
   registerManagedWorkflowOwner(pluginId: string): void;
+
+  /**
+   * Register a guard consulted before every saved workflow run starts (manual, scheduled,
+   * alert, event and child runs). A rejection stops the run before an execution is created.
+   *
+   * @throws Error if the guard id is already registered or registration happens after setup
+   */
+  registerExecutionAdmissionGuard(guardId: string, guard: WorkflowExecutionAdmissionGuard): void;
 }
 
 /**
@@ -109,6 +122,11 @@ export type WorkflowsExtensionsServerPluginStart =
      * Returns all plugin ids registered as managed workflow owners during setup.
      */
     getManagedWorkflowPluginIds(): string[];
+
+    /** Asks every registered admission guard whether a workflow run may start. */
+    checkExecutionAdmission(
+      request: WorkflowExecutionAdmissionRequest
+    ): Promise<WorkflowExecutionAdmissionDecision>;
   };
 
 /**

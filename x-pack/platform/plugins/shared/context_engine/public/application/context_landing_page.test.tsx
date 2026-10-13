@@ -20,6 +20,10 @@ import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { ContextLandingPage } from './context_landing_page';
 import { AI_INDICES_PER_PAGE } from './utils/ai_index_content_list_utils';
 
+jest.mock('./components/space_budget_callout', () => ({
+  SpaceBudgetCallout: () => null,
+}));
+
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
   managed: false,

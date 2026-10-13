@@ -21,6 +21,7 @@ import type {
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
+import { ExecutionAdmissionRegistry } from './execution_admission';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -47,6 +48,7 @@ export class WorkflowsExtensionsServerPlugin
   private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
+  private readonly executionAdmissionRegistry: ExecutionAdmissionRegistry;
   private readonly managedWorkflowPluginIds = new Set<string>();
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
   private managedWorkflowsSystemApiProvider: ManagedWorkflowsSystemApiProvider | undefined;
@@ -55,6 +57,7 @@ export class WorkflowsExtensionsServerPlugin
     this.logger = initializerContext.logger.get();
     this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
+    this.executionAdmissionRegistry = new ExecutionAdmissionRegistry(this.logger);
   }
 
   public setup(
@@ -105,6 +108,9 @@ export class WorkflowsExtensionsServerPlugin
         }
         this.managedWorkflowPluginIds.add(pluginId);
       },
+      registerExecutionAdmissionGuard: (guardId, guard) => {
+        this.executionAdmissionRegistry.register(guardId, guard);
+      },
     };
   }
 
@@ -113,6 +119,7 @@ export class WorkflowsExtensionsServerPlugin
     _plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
     this.triggerRegistry.freeze();
+    this.executionAdmissionRegistry.freeze();
 
     return {
       getStepDefinition: (stepTypeId: string) => {
@@ -151,6 +158,7 @@ export class WorkflowsExtensionsServerPlugin
         return this.createPluginScopedManagedWorkflowsClient(pluginId, systemClient);
       },
       getManagedWorkflowPluginIds: () => Array.from(this.managedWorkflowPluginIds),
+      checkExecutionAdmission: (request) => this.executionAdmissionRegistry.check(request),
     };
   }
 
