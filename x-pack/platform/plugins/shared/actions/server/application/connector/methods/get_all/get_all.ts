@@ -19,7 +19,11 @@ import { connectorWithExtraFindDataSchema } from '../../schemas';
 import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector';
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
+import {
+  connectorFromSavedObject,
+  isConnectorDeprecated,
+  isSandboxCapableConnector,
+} from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
@@ -35,11 +39,13 @@ interface GetAllHelperOpts {
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
   connectorTypeRegistry: ActionTypeRegistry;
+  sandboxCapableOnly?: boolean;
 }
 
 export async function getAll({
   context,
   includeSystemActions = false,
+  sandboxCapableOnly = false,
 }: GetAllParams): Promise<ConnectorWithExtraFindData[]> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
@@ -63,6 +69,7 @@ export async function getAll({
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     connectorTypeRegistry: context.actionTypeRegistry,
+    sandboxCapableOnly,
   });
 }
 
@@ -99,6 +106,7 @@ async function getAllHelper({
   namespace,
   savedObjectsClient,
   connectorTypeRegistry,
+  sandboxCapableOnly = false,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const connectorIdsWithIdentity = new Set<string>();
   const connectorIdsWithEventsEnabled = new Set(
@@ -146,7 +154,17 @@ async function getAllHelper({
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
     }),
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  ]
+    .filter((connector) =>
+      sandboxCapableOnly
+        ? isSandboxCapableConnector({
+            actionTypeId: connector.actionTypeId,
+            config: connector.config,
+            actionTypeRegistry: connectorTypeRegistry,
+          })
+        : true
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({
     kibanaIndices,

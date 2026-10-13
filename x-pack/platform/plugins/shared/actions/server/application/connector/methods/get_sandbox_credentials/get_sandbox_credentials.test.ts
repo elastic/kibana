@@ -177,6 +177,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: defaultConnectorTypeId,
+        sandboxSupportedAuthTypes: ['basic', 'oauth_authorization_code'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
           secrets: secretsSchema,
@@ -229,6 +230,7 @@ describe('getSandboxCredentials()', () => {
     actionTypeRegistry.register(
       getConnectorType({
         id: inMemoryConnectorTypeId,
+        sandboxSupportedAuthTypes: ['basic'],
         validate: {
           config: { schema: z.object({ apiUrl: z.string().optional() }).passthrough() },
           secrets: secretsSchema,
@@ -279,9 +281,9 @@ describe('getSandboxCredentials()', () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
       actionsClient = createClient({ isESOCanEncrypt: false });
 
-      await expect(
-        actionsClient.getSandboxCredentials({ id: defaultConnectorId })
-      ).rejects.toThrow(/Encrypted Saved Objects plugin is missing encryption key/);
+      await expect(actionsClient.getSandboxCredentials({ id: defaultConnectorId })).rejects.toThrow(
+        /Encrypted Saved Objects plugin is missing encryption key/
+      );
     });
 
     it('fails when decrypted secrets do not match the connector secrets schema', async () => {
@@ -334,6 +336,7 @@ describe('getSandboxCredentials()', () => {
         getConnectorType({
           id: inMemoryConnectorTypeId,
           isSystemActionType: true,
+          sandboxSupportedAuthTypes: ['basic'],
           validate: {
             config: { schema: z.object({}).passthrough() },
             secrets: secretsSchema,
@@ -345,6 +348,24 @@ describe('getSandboxCredentials()', () => {
       await expect(
         actionsClient.getSandboxCredentials({ id: inMemoryConnectorId })
       ).rejects.toThrow(/system connectors are not supported/);
+    });
+
+    it('rejects auth types that do not support sandbox', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        ...connectorSavedObject,
+        attributes: {
+          ...connectorSavedObject.attributes,
+          secrets: {
+            authType: 'api_key_header',
+            apiKey: 'secret-key',
+          },
+        },
+      });
+
+      await expect(actionsClient.getSandboxCredentials({ id: defaultConnectorId })).rejects.toThrow(
+        /auth type "api_key_header" does not support sandbox/
+      );
     });
   });
 

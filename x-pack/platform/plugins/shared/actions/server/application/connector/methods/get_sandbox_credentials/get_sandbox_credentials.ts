@@ -11,7 +11,12 @@ import type { ActionsClientContext } from '../../../../actions_client';
 import { getConnectorAuth } from '../../lib/get_connector_auth';
 import type { GetSandboxCredentialsOptions, ResolvedSandboxCredentials } from './types';
 
-/** Returns execute-authorized connector config and auth headers without exposing stored secrets. */
+const getSelectedAuthTypeId = (secrets: Record<string, unknown>): string | undefined => {
+  const { authType } = secrets;
+  return typeof authType === 'string' && authType.length > 0 ? authType : undefined;
+};
+
+/** Returns sandbox-injectable connector config and auth headers without exposing stored secrets. */
 export async function getSandboxCredentials(
   context: ActionsClientContext,
   { id: connectorId }: GetSandboxCredentialsOptions
@@ -22,6 +27,17 @@ export async function getSandboxCredentials(
   if (isSystemAction(context, connectorId) || actionType.isSystemActionType) {
     throw new Error(
       `Unable to get sandbox credentials for ${actionTypeId}: system connectors are not supported`
+    );
+  }
+
+  const authTypeId = getSelectedAuthTypeId(validatedSecrets);
+  const sandboxSupportedAuthTypes = actionType.sandboxSupportedAuthTypes ?? [];
+
+  if (!authTypeId || !sandboxSupportedAuthTypes.includes(authTypeId)) {
+    throw new Error(
+      `Unable to get sandbox credentials for ${actionTypeId}: auth type${
+        authTypeId ? ` "${authTypeId}"` : ''
+      } does not support sandbox`
     );
   }
 

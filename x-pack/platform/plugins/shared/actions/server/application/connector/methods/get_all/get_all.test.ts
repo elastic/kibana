@@ -367,6 +367,70 @@ describe('getAll()', () => {
       ]);
     });
 
+    test('filters to sandbox-capable connectors when sandboxCapableOnly is true', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'github-1',
+            type: 'action',
+            attributes: {
+              name: 'GitHub sandbox',
+              actionTypeId: '.github',
+              isMissingSecrets: false,
+              config: { authType: 'bearer' },
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'slack-1',
+            type: 'action',
+            attributes: {
+              name: 'Slack',
+              actionTypeId: '.slack',
+              isMissingSecrets: false,
+              config: { authType: 'webhook' },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'github-1': { doc_count: 0 },
+          },
+        }
+      );
+
+      actionTypeRegistry.has = jest.fn((id: string) => id === '.github' || id === '.slack');
+      actionTypeRegistry.get = jest.fn((id: string) => {
+        if (id === '.github') {
+          return {
+            sandboxSupportedAuthTypes: ['bearer', 'oauth_authorization_code'],
+            isSystemActionType: false,
+          };
+        }
+        return { sandboxSupportedAuthTypes: [], isSystemActionType: false };
+      }) as ActionTypeRegistry['get'];
+
+      const result = await actionsClient.getAll({ sandboxCapableOnly: true });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'github-1',
+          actionTypeId: '.github',
+          config: { authType: 'bearer' },
+        })
+      );
+    });
+
     test.skip('get system actions correctly', async () => {
       const expectedResult = {
         total: 1,
