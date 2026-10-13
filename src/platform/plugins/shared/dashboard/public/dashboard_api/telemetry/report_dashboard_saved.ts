@@ -73,9 +73,9 @@ export const reportDashboardSaved = ({
   dashboardState: DashboardState;
   changedBy: readonly DashboardChangeSource[];
 }): void => {
-  const isNew = previousDashboardId !== dashboardId;
-  const panelTypes = getPanelTypes(dashboardState.panels);
   try {
+    const isNew = previousDashboardId !== dashboardId;
+    const panelTypes = getPanelTypes(dashboardState.panels);
     coreServices.analytics.reportEvent<DashboardSavedEvent>(DASHBOARD_SAVED_EVENT, {
       is_new: isNew,
       is_copy: isNew && previousDashboardId !== undefined,

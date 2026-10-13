@@ -101,4 +101,22 @@ describe('reportDashboardSaved', () => {
       expect.stringContaining('Event type "dashboard_saved" is not registered')
     );
   });
+
+  it('logs an error reading the dashboard state instead of throwing it', () => {
+    const warnSpy = jest.spyOn(logger, 'warn');
+
+    expect(() =>
+      reportDashboardSaved({
+        previousDashboardId: 'existing-id',
+        dashboardId: 'existing-id',
+        dashboardState: {
+          ...DEFAULT_DASHBOARD_STATE,
+          panels: undefined,
+        } as unknown as DashboardState,
+        changedBy: [],
+      })
+    ).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to report'));
+    expect(coreServices.analytics.reportEvent).not.toHaveBeenCalled();
+  });
 });
