@@ -24,6 +24,11 @@ export interface ArtifactListPageUrlParams {
   sortOrder?: 'asc' | 'desc';
 }
 
+/** Props for the artifact-specific body rendered under Definition in the view flyout. */
+export interface ArtifactViewModeComponentProps {
+  item: ExceptionListItemSchema;
+}
+
 export interface ArtifactFormComponentProps {
   item: ExceptionListItemSchema | CreateExceptionListItemSchema;
   /** Contains an array of additional entries for artifacts that

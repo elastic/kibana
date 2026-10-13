@@ -28,6 +28,7 @@ import {
 import {
   createTabRuntimeState,
   selectCurrentProfileUrlState,
+  getTabDataView,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -240,7 +241,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
-        const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+        const currentDataView = getTabDataView(currentTabRuntimeState);
 
         tab.skipInitialFetch = true;
         const currentRefreshInterval =
@@ -478,7 +479,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const initialTabsState = tabsStorageManager.loadLocally({
+    const { draftSessionTitle, ...initialTabsState } = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       persistedDiscoverSession,
@@ -502,6 +503,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       replace: true,
     });
 
+    dispatch(internalStateSlice.actions.setDraftSessionTitle(draftSessionTitle));
     dispatch(setTabs(initialTabsState));
 
     return {

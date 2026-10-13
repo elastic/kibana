@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 const activityPausedTooltip = i18n.translate('xpack.nightshift.settings.activityPausedTooltip', {
-  defaultMessage: 'Significant Events activity is paused. Resume it in Settings.',
+  defaultMessage: 'Significant events activity is paused. Resume it in settings.',
 });
 
 const activityStatusLoadingTooltip = i18n.translate(
   'xpack.nightshift.settings.activityStatusLoadingTooltip',
   {
-    defaultMessage: 'Checking Significant Events activity status…',
+    defaultMessage: 'Checking significant events activity status…',
   }
 );
 
@@ -22,7 +22,7 @@ const activityStatusErrorTooltip = i18n.translate(
   'xpack.nightshift.settings.activityStatusErrorTooltip',
   {
     defaultMessage:
-      'Could not load Significant Events activity status. New activity stays blocked until status is available.',
+      'Could not load significant events activity status. New activity stays blocked until status is available.',
   }
 );
 

@@ -26,7 +26,6 @@ import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
-import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import {
@@ -118,9 +117,9 @@ export const WatchDetailPage: React.FC = () => {
     const storedEnabledById = new Map(
       (workersData?.workers ?? []).map((worker) => [worker.id, worker.enabled])
     );
-    let savedWorkerIds: string[];
+    let savedWorkers: Worker[];
     try {
-      savedWorkerIds = await save();
+      savedWorkers = await save();
       setSaveBlockedByInvalidDraft(false);
     } catch (saveError) {
       if (saveError instanceof Error && saveError.message === 'invalid') {
@@ -133,15 +132,15 @@ export const WatchDetailPage: React.FC = () => {
     if (currentWatchId.current !== savedFromWatchId) {
       return;
     }
-    const savedIds = new Set(savedWorkerIds);
+    const savedEnabledById = new Map(savedWorkers.map((worker) => [worker.id, worker.enabled]));
     const enabledAfterSave: WorkerEnabledById = new Map(
       [...enabledSavedFrom].map(([workerId, enabled]) => [
         workerId,
-        savedIds.has(workerId) ? enabled : storedEnabledById.get(workerId) ?? enabled,
+        savedEnabledById.get(workerId) ?? storedEnabledById.get(workerId) ?? enabled,
       ])
     );
     setBlockedNoticeQueue(
-      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkerIds)
+      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkers)
     );
   }, [save, hasInvalidDraft, watchId, enabledById, workersData?.workers]);
 
@@ -334,7 +333,9 @@ export const WatchDetailPage: React.FC = () => {
                 enabled={draft.enabled}
                 settings={draft.settings}
                 error={draft.error}
-                warningReasons={getWorkerWarningReasons(worker.id, enabledById)}
+                warningReasons={getWorkerWarningReasons(worker, enabledById, {
+                  includeBlocking: canWrite,
+                })}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
                 canWrite={canWrite}
@@ -382,14 +383,8 @@ export const WatchDetailPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        <EuiFlexItem grow={false}>
-          <SettingsSection
-            title={settingsI18n.WORKERS_SECTION_TITLE}
-            subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
-            data-test-subj="alertZeroWatchWorkersSection"
-          >
-            {renderWorkers()}
-          </SettingsSection>
+        <EuiFlexItem grow={false} data-test-subj="alertZeroWatchWorkersSection">
+          {renderWorkers()}
         </EuiFlexItem>
       </EuiFlexGroup>
       {pendingDisable ? (
