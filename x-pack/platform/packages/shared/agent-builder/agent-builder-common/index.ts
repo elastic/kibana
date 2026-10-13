@@ -252,6 +252,7 @@ export {
   type CompactionStepData,
   type CompactionStep,
   type RoundModelUsageStats,
+  type ConnectorModelUsageStats,
   ZERO_MODEL_USAGE,
   isZeroModelUsage,
   type CompactionSummary,

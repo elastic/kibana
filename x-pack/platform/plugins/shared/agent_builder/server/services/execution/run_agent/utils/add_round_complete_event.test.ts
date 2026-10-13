@@ -378,6 +378,22 @@ describe('addRoundCompleteEvent', () => {
       llm_calls: 2,
       input_tokens: 110,
       output_tokens: 55,
+      connectors: [
+        {
+          connector_id: 'default-connector',
+          model: 'anthropic-claude-4.5-sonnet',
+          llm_calls: 1,
+          input_tokens: 100,
+          output_tokens: 50,
+        },
+        {
+          connector_id: 'fast-connector',
+          model: 'anthropic-claude-4.5-haiku',
+          llm_calls: 1,
+          input_tokens: 10,
+          output_tokens: 5,
+        },
+      ],
     });
   });
 
