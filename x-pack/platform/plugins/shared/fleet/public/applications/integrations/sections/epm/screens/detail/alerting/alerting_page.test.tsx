@@ -17,6 +17,11 @@ const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
 const mockUseAlertingAssets = jest.fn();
 const mockIsAlertingV2Enabled = jest.fn();
+const mockGetRuleLibraryRedirectUrl = jest.fn(
+  ({ templateId }: { templateId?: string }) =>
+    `/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=${templateId}`
+);
+let mockProjectType: string | undefined;
 
 jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
@@ -39,18 +44,22 @@ jest.mock('../../../../../hooks', () => ({
     version: '1.0.0',
   })),
   useLink: jest.fn().mockReturnValue({ getPath: jest.fn().mockReturnValue('/mock') }),
-  useStartServices: jest.fn().mockReturnValue({
+  useStartServices: () => ({
     notifications: {
       toasts: { addInfo: jest.fn(), addSuccess: jest.fn(), addError: jest.fn() },
     },
     http: {
       basePath: { prepend: (path: string) => `/mock${path}` },
     },
+    cloud: mockProjectType ? { serverless: { projectType: mockProjectType } } : undefined,
   }),
   useFleetStatus: jest.fn().mockReturnValue({ spaceId: 'default' }),
   useAuthz: (...args: any[]) => mockUseAuthz(...args),
   sendRequestInstallRuleAssets: jest.fn(),
   useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
+  useAlertingV2RuleLibraryLocator: () => ({
+    getRedirectUrl: mockGetRuleLibraryRedirectUrl,
+  }),
 }));
 
 import { useGetPackageInstallStatus } from '../../../../../hooks';
@@ -102,6 +111,7 @@ describe('AlertingPage', () => {
     jest.clearAllMocks();
 
     mockIsAlertingV2Enabled.mockReturnValue(false);
+    mockProjectType = undefined;
 
     mockUseGetPackageInstallStatus.mockReturnValue(() => ({
       status: InstallStatus.installed,
@@ -188,6 +198,38 @@ describe('AlertingPage', () => {
       'Universal'
     );
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
+  });
+
+  it('should link v2 templates to the Observability rule library in Observability projects', async () => {
+    mockIsAlertingV2Enabled.mockReturnValue(true);
+    mockProjectType = 'observability';
+    renderComponent();
+
+    const link = await screen.findByRole('link', { name: '[System] Metrics template' });
+
+    expect(link).toHaveAttribute(
+      'href',
+      '/mock/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=template-2'
+    );
+    expect(mockGetRuleLibraryRedirectUrl).toHaveBeenCalledWith({
+      templateId: 'template-2',
+      host: { app: 'observabilityAlerting', pathPrefix: '/rule-library' },
+    });
+  });
+
+  it('should not link v2 templates in non-Observability projects', async () => {
+    mockIsAlertingV2Enabled.mockReturnValue(true);
+    mockProjectType = 'security';
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
+    });
+
+    expect(
+      screen.queryByRole('link', { name: '[System] Metrics template' })
+    ).not.toBeInTheDocument();
+    expect(mockGetRuleLibraryRedirectUrl).not.toHaveBeenCalled();
   });
 
   it('should show v1 templates on the Kibana Classic rules tab', async () => {

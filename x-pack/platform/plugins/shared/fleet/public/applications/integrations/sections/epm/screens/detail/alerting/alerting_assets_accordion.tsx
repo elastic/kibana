@@ -10,8 +10,13 @@ import { EuiBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+} from '@kbn/deeplinks-observability';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 
-import { useStartServices } from '../../../../../hooks';
+import { useAlertingV2RuleLibraryLocator, useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
 import { AssetsAccordion, type DisplayedAssetType } from '../assets/assets_accordion';
 
@@ -48,13 +53,19 @@ const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaL
   return { label: ALERTING_ENGINE_CLASSIC_BADGE, ariaLabel: ALERTING_ENGINE_CLASSIC_ARIA_LABEL };
 };
 
+const OBSERVABILITY_RULE_LIBRARY_HOST: LocatorHost = {
+  app: OBSERVABILITY_ALERTING_APP_ID,
+  pathPrefix: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+};
+
 const getAlertingAssetTitleHref = (
-  asset: Pick<AlertingAsset, 'attributes' | 'appLink'>,
-  type: DisplayedAssetType
+  asset: Pick<AlertingAsset, 'id' | 'attributes' | 'appLink'>,
+  type: DisplayedAssetType,
+  getRuleLibraryUrl?: (templateId: string) => string | undefined
 ): string | undefined => {
-  // Alerting v2 rule templates have no management destination.
   if (type === KibanaAssetType.alertingRuleTemplate && isV2AlertingAsset(asset)) {
-    return undefined;
+    // Alerting v2 rule templates have no management destination; only link where a rule library exists.
+    return getRuleLibraryUrl?.(asset.id);
   }
   return asset.appLink;
 };
@@ -149,6 +160,13 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
   type: DisplayedAssetType;
   savedObjects: AlertingAsset[];
 }> = ({ savedObjects, type }) => {
+  const { cloud } = useStartServices();
+  const ruleLibraryLocator = useAlertingV2RuleLibraryLocator();
+  const isObservabilityProject = cloud?.serverless?.projectType === 'observability';
+  const getRuleLibraryUrl = isObservabilityProject
+    ? (templateId: string) =>
+        ruleLibraryLocator?.getRedirectUrl({ templateId, host: OBSERVABILITY_RULE_LIBRARY_HOST })
+    : undefined;
   const {
     listedSavedObjects,
     visibleSavedObjects,
@@ -179,7 +197,7 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
           ? (asset) => <AlertingEngineBadge engine={asset.attributes?.engine} />
           : undefined
       }
-      getTitleHref={(asset) => getAlertingAssetTitleHref(asset, type)}
+      getTitleHref={(asset) => getAlertingAssetTitleHref(asset, type, getRuleLibraryUrl)}
     />
   );
 };
