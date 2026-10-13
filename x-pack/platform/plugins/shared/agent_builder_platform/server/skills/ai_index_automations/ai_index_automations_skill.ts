@@ -12,7 +12,11 @@ import {
   platformCoreTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import { kiShapesReference, strategyCatalogReference } from '../context_engine_shared';
+import {
+  kiShapesReference,
+  strategyCatalogReference,
+  unitProfileTemplateReference,
+} from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import content from './ai_index_automations.skill.md.text';
 
@@ -26,8 +30,10 @@ export const aiIndexAutomationsSkill = defineSkillType({
     'Read, draft and change the workflow automations that generate Knowledge Indicators for a Context Engine AI Index. Load when authoring a KI generation workflow, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when validating or piloting an automation.',
   content,
   // The KI shape and strategy catalog are the shared references the analysis skill also reads,
-  // so the brief and the templates speak the same vocabulary.
-  referencedContent: [kiShapesReference, strategyCatalogReference],
+  // so the brief and the templates speak the same vocabulary. The unit-profile template is the
+  // shape a subagent starts a template-less strategy from; it must be listed here so `load_skill`
+  // can actually return a readable path for it.
+  referencedContent: [kiShapesReference, strategyCatalogReference, unitProfileTemplateReference],
   getRegistryTools: () => [
     platformCoreTools.executeWorkflow,
     platformCoreTools.getWorkflowExecutionStatus,

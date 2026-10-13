@@ -15,6 +15,7 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
+  UNIT_PROFILE_TEMPLATE_REFERENCE_NAME,
 } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { aiIndexAutomationsSkill } from './ai_index_automations_skill';
@@ -40,10 +41,23 @@ describe('aiIndexAutomationsSkill', () => {
     expect(aiIndexAutomationsSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('carries only the shared references', () => {
+  it('carries only the shared references, plus the unit-profile template a subagent can read', () => {
     const names = (aiIndexAutomationsSkill.referencedContent ?? []).map(({ name }) => name);
 
-    expect(names).toEqual([KI_SHAPES_REFERENCE_NAME, STRATEGY_CATALOG_REFERENCE_NAME]);
+    expect(names).toEqual([
+      KI_SHAPES_REFERENCE_NAME,
+      STRATEGY_CATALOG_REFERENCE_NAME,
+      UNIT_PROFILE_TEMPLATE_REFERENCE_NAME,
+    ]);
+  });
+
+  it('exposes the unit-profile template content a template-less strategy is told to start from', () => {
+    const reference = (aiIndexAutomationsSkill.referencedContent ?? []).find(
+      ({ name }) => name === UNIT_PROFILE_TEMPLATE_REFERENCE_NAME
+    );
+
+    expect(reference?.content).toContain('Unit profile KI automation');
+    expect(reference?.content.length ?? 0).toBeGreaterThan(0);
   });
 
   it('documents the null-omits-attribute contract for attributes.esql in the step contract', () => {
