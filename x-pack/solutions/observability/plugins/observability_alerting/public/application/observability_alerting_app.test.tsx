@@ -136,7 +136,7 @@ const MockPageTemplate = ({
   children,
   pageSectionProps,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   pageSectionProps?: { paddingSize?: string };
 }) => (
   <div data-test-subj="mockPageTemplate" data-padding={pageSectionProps?.paddingSize}>

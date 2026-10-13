@@ -27,6 +27,7 @@ const setSettings = (
   core: CoreStart,
   { v2Enabled, showV1Table }: { v2Enabled: boolean; showV1Table: boolean }
 ) => {
+  core.settings.globalClient.isDeclared = () => true;
   core.settings.globalClient.get = <T>(_key: string) => v2Enabled as T;
   core.settings.client.get = <T>(_key: string) => showV1Table as T;
 };
@@ -68,7 +69,6 @@ describe('getAlertingClassicNavSection', () => {
 
     expect(getEntries(core)).toEqual([
       { label: 'Alerts', app: 'observabilityAlerting', path: '/alerts' },
-      { label: 'Rule Library', app: 'observabilityAlerting', path: '/rule-library' },
       { label: 'Action Policies', app: 'observabilityAlerting', path: '/action-policies' },
       { label: 'Execution History', app: 'observabilityAlerting', path: '/execution-history' },
     ]);
@@ -90,20 +90,20 @@ describe('getAlertingClassicNavSection', () => {
     ]);
   });
 
-  it('adds Alerts (V1) after Alerts when the V1 table setting is on', () => {
+  it('adds Alerts (Classic) after Alerts when the V1 table setting is on', () => {
     setSettings(core, { v2Enabled: true, showV1Table: true });
     setCapabilities(core, { ...V2_CAPABILITIES, observabilityAlerts: { show: true } });
 
     expect(getEntries(core).slice(0, 2)).toEqual([
       { label: 'Alerts', app: 'observabilityAlerting', path: '/alerts' },
-      { label: 'Alerts (V1)', app: 'observability-overview', path: '/alerts' },
+      { label: 'Alerts (Classic)', app: 'observability-overview', path: '/alerts' },
     ]);
   });
 
-  it('hides Alerts (V1) from users without v1 alerts privileges even when the setting is on', () => {
+  it('hides Alerts (Classic) from users without v1 alerts privileges even when the setting is on', () => {
     setSettings(core, { v2Enabled: true, showV1Table: true });
     setCapabilities(core, V2_CAPABILITIES);
 
-    expect(getEntries(core).map(({ label }) => label)).not.toContain('Alerts (V1)');
+    expect(getEntries(core).map(({ label }) => label)).not.toContain('Alerts (Classic)');
   });
 });

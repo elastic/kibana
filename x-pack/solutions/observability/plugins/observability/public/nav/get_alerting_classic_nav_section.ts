@@ -17,7 +17,6 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
 } from '@kbn/deeplinks-observability';
 import type { NavigationEntry, NavigationSection } from '@kbn/observability-shared-plugin/public';
 import { observabilityAppId } from '../../common';
@@ -27,6 +26,7 @@ import { canReadV1Alerts, getObservabilityAlertsLinkTitle } from './get_alerts_n
 // After the unlabeled top section (100) and Streams (101), before the Logs/Infra sections (200+).
 const ALERTING_SECTION_SORT_KEY = 102;
 
+// Rule Library has no entry: its deep link is hidden in every nav surface.
 const getAlertingEntries = (core: CoreStart): NavigationEntry[] => {
   const entries: NavigationEntry[] = [];
 
@@ -43,16 +43,6 @@ const getAlertingEntries = (core: CoreStart): NavigationEntry[] => {
       label: getObservabilityAlertsLinkTitle(true),
       app: observabilityAppId,
       path: ALERTS_PATH,
-    });
-  }
-
-  if (hasAlertingV2Capability(core, 'rules')) {
-    entries.push({
-      label: i18n.translate('xpack.observability.nav.ruleLibrary', {
-        defaultMessage: 'Rule Library',
-      }),
-      app: OBSERVABILITY_ALERTING_APP_ID,
-      path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
     });
   }
 
