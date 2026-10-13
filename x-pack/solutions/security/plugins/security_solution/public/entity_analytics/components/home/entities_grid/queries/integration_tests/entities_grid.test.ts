@@ -13,9 +13,11 @@ import type { PageCursor, QueryArgs, Row, SortDir } from '../../common';
 import { COLUMN_ENRICHERS, findSortPageFetcher } from '../../grid_columns';
 import { toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
+import { withGroupValues } from '../group_values';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from '../split_sort';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';
+import { DAY_MS, HOUR_MS } from './fixture/fixture_index';
 import type { FixtureCluster } from './fixture';
 
 /** The general queries run below the threshold; the split plans at or above it. */
@@ -240,6 +242,46 @@ describe('entities grid on Elasticsearch', () => {
         const rows = await fetchFilteredPage(filterCase);
 
         expect(getIds(rows)).toEqual(filterCase[4]);
+      });
+    });
+  });
+
+  describe('the values of the groups', () => {
+    const fetchGroupRows = async (ids: string[]): Promise<Map<unknown, Row>> => {
+      const rows = await withGroupValues(
+        ids.map((id) => ({ 'entity.id': id })),
+        BASE_ARGS,
+        cluster.runQuery
+      );
+      return new Map(rows.map((row) => [row['entity.id'], row]));
+    };
+
+    it('shows the highest criticality, the distinct sources and watchlists, and the first and last time seen of the members', async () => {
+      const { 'host:h1': group } = Object.fromEntries(await fetchGroupRows(['host:h1']));
+
+      expect(group['asset.criticality']).toBe('extreme_impact');
+      expect([group['entity.source']].flat().sort()).toEqual(['aws', 'gcp', 'okta']);
+      expect([group['entity.attributes.watchlists']].flat().sort()).toEqual(['wl-2', 'wl-3']);
+      // host:h4 was first seen 40 days ago, and last seen half an hour ago.
+      expect(Date.now() - Date.parse(String(group['entity.lifecycle.first_seen']))).toBeGreaterThan(
+        39 * DAY_MS
+      );
+      expect(Date.now() - Date.parse(String(group['@timestamp']))).toBeLessThan(HOUR_MS * 0.75);
+    });
+
+    it('leaves a row without aliases as it is', async () => {
+      const rows = await fetchGroupRows(['host:h2']);
+
+      expect(rows.get('host:h2')).toEqual({ 'entity.id': 'host:h2' });
+    });
+
+    it('has no value for a group in which no member has one', async () => {
+      const rows = await fetchGroupRows(['user:bob@okta']);
+
+      expect(rows.get('user:bob@okta')).toMatchObject({
+        'asset.criticality': null,
+        'entity.source': null,
+        'entity.attributes.watchlists': null,
       });
     });
   });

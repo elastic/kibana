@@ -75,6 +75,27 @@ export const ESQL_MAX_QUERY_LENGTH = 1_000_000;
 
 export const toList = (items: readonly string[]) => items.map(escapeStringValue).join(', ');
 
+/**
+ * Ids per IN list.
+ *
+ * Why: an ES|QL statement is capped at 1MB, and entity ids run to about 100 characters, so a
+ * 10k-id list fails ("ESQL statement is too large"). 2,000 ids stays well under the cap.
+ */
+const ID_LIST_CHUNK_SIZE = 2_000;
+
+/** Runs one query per chunk of ids, in parallel, and concatenates the rows. */
+export const fetchPerIdChunk = async (
+  runQuery: EsqlRunner,
+  ids: readonly string[],
+  buildQuery: (chunk: readonly string[]) => string
+): Promise<Row[]> => {
+  const chunks: Array<readonly string[]> = [];
+  for (let i = 0; i < ids.length; i += ID_LIST_CHUNK_SIZE) {
+    chunks.push(ids.slice(i, i + ID_LIST_CHUNK_SIZE));
+  }
+  return (await Promise.all(chunks.map((chunk) => runQuery(buildQuery(chunk))))).flat();
+};
+
 /** Raw identity fields that EUIDs are built from. */
 const IDENTITY_SOURCE_FIELDS = [
   ...new Set(

@@ -25,6 +25,7 @@ import {
   buildCursorClause,
   buildJoinedPageSteps,
   compareEntityIds,
+  fetchPerIdChunk,
 } from './esql';
 import { buildEntitiesInViewSteps } from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
@@ -196,27 +197,6 @@ const isAfterCursor =
  * groups; a broad search 2.5–4s, where the single search query timed out.
  */
 const MAX_DIRECT_TARGETS = ESQL_MAX_RESULT_ROWS - 1;
-
-/**
- * Ids per IN list.
- *
- * Why: an ES|QL statement is capped at 1MB, and entity ids run to about 100 characters, so a
- * 10k-id list fails ("ESQL statement is too large"). 2,000 ids stays well under the cap.
- */
-const ID_LIST_CHUNK_SIZE = 2_000;
-
-/** Runs one query per chunk of ids, in parallel, and concatenates the rows. */
-const fetchPerIdChunk = async (
-  runQuery: EsqlRunner,
-  ids: readonly string[],
-  buildQuery: (chunk: readonly string[]) => string
-): Promise<Row[]> => {
-  const chunks: Array<readonly string[]> = [];
-  for (let i = 0; i < ids.length; i += ID_LIST_CHUNK_SIZE) {
-    chunks.push(ids.slice(i, i + ID_LIST_CHUNK_SIZE));
-  }
-  return (await Promise.all(chunks.map((chunk) => runQuery(buildQuery(chunk))))).flat();
-};
 
 /** Size of the whole group of each target: its aliases and itself. */
 const buildGroupSizesQuery = ({ namespace }: QueryArgs, targetIds: readonly string[]): string => {

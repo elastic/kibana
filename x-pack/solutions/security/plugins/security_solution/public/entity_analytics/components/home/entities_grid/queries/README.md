@@ -43,6 +43,25 @@ see the comment on `useEntityGridData` in `../hooks/use_entity_grid_data.ts`.
   cases, records, risk change) reads them for just those rows. If the sort query already read a
   column, it is skipped (an alert sort already has the alert counts).
 
+## Resolved rows show their group's values
+
+A resolved row is a group: its main entity and the entities resolved to it. Its columns show
+the group's value, and the records of an expanded group show their own.
+
+- **Risk score**: the group's score, which the risk engine stores on the main entity
+  (`entity.relationships.resolution.risk.*`), or the entity's own score when it has none. The
+  sort, the cursor and the risk level filter use it too (`buildEffectiveRiskSteps`).
+- **Risk score change**: the group's score now minus the group's last score before the window,
+  from the group's risk score docs (`score_type` is `resolution`). An entity without a group
+  score compares its own scores. Individual rows read only the own scores.
+- **Criticality**: the highest of the members. **Sources** and **watchlists**: the distinct
+  values of the members. **First seen** and **last seen**: the earliest and the latest of the
+  members (`group_values.ts`).
+
+Most entities are alone in their group and keep their own values, so only the groups with
+aliases are read: `withGroupValues` reads them for each page of resolved rows, after the page is
+sorted. The cursor comes from the rows as sorted, so paging is not affected.
+
 ## Which query runs
 
 A view is **large** when it has at least `SPLIT_SORT_MIN_VIEW_SIZE` entities (`split_sort.ts`).
