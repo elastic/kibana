@@ -124,6 +124,11 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onChangeDataView: (id: string) => void;
   /**
+   * Callback to move a field column to `targetIndex` within `columns` (remove, then insert).
+   * When omitted, the selected fields can't be reordered in the sidebar.
+   */
+  onMoveField?: (fieldName: string, targetIndex: number) => void;
+  /**
    * Callback to remove a field column from the table
    * @param fieldName
    */
@@ -188,6 +193,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onDataViewCreated,
     onChangeDataView,
     onAddField,
+    onMoveField,
     onRemoveField,
     onRemoveFields,
     sidebarToggleState$,
@@ -377,6 +383,16 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [onRemoveFields]
   );
 
+  const onMoveFieldInWorkspace = useMemo(
+    () =>
+      onMoveField
+        ? (field: DataViewField, targetIndex: number) => {
+            onMoveField(field.name, targetIndex);
+          }
+        : undefined,
+    [onMoveField]
+  );
+
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
@@ -455,6 +471,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
+            onMoveFieldInWorkspace={onMoveFieldInWorkspace}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
             onRemoveFieldsFromWorkspace={onRemoveFieldsFromWorkspace}
             prependInFlyout={prependDataViewPickerForMobile}
