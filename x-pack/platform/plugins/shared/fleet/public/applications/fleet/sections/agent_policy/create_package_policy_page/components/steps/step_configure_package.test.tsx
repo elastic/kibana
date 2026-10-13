@@ -490,6 +490,22 @@ describe('StepConfigurePackage', () => {
       expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
     });
 
+    it('tells the user when the integration no longer supports the mode they opted in to', () => {
+      packageInfo.data_streams = [
+        ...(packageInfo.data_streams ?? []).map((dataStream) => ({
+          ...dataStream,
+          elasticsearch: { logsdb_columnar: 'unsupported' as const },
+        })),
+      ];
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: true };
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeWithdrawn')).toBeInTheDocument();
+    });
+
     it('reflects the pending choice carried by the policy', () => {
       declareReadiness();
       packagePolicy.package = {

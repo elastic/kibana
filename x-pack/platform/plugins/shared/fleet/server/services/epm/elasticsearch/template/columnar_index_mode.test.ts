@@ -271,7 +271,25 @@ describe('resolveColumnarIndexModes', () => {
 
     expect(modes.get('logs-pkg.ds')).toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(
-      'logs-pkg.ds is marked unsupported for logsdb_columnar by pkg 2.0.0; moved back to LogsDB at next rollover'
+      'logs-pkg.ds is marked unsupported for logsdb_columnar in pkg 2.0.0; it moves back to LogsDB at the next rollover'
+    );
+  });
+
+  it('says why when the package no longer declares readiness', async () => {
+    const esClient = setupEsClient('logsdb_columnar');
+    const logger = loggerMock.create();
+
+    const modes = await resolveColumnarIndexModes({
+      esClient,
+      logger,
+      packageInfo: { name: 'pkg', version: '2.0.0' },
+      dataStreams: [dataStream({})],
+      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
+    });
+
+    expect(modes.get('logs-pkg.ds')).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      'logs-pkg.ds no longer declares logsdb_columnar readiness in pkg 2.0.0; it moves back to LogsDB at the next rollover'
     );
   });
 

@@ -233,8 +233,12 @@ export async function resolveColumnarIndexModes({
     // ready (explicitly `unsupported`, or the readiness was dropped altogether). Fleet removes
     // the mode and the data stream goes back to LogsDB at the next rollover, so say why.
     if (currentIndexMode === LOGSDB_COLUMNAR_INDEX_MODE && !isLogsdbColumnarReady(readiness)) {
+      const reason =
+        readiness === 'unsupported'
+          ? 'is marked unsupported for logsdb_columnar'
+          : 'no longer declares logsdb_columnar readiness';
       logger?.warn(
-        `${templateName} is marked unsupported for logsdb_columnar by ${packageInfo.name} ${packageInfo.version}; moved back to LogsDB at next rollover`
+        `${templateName} ${reason} in ${packageInfo.name} ${packageInfo.version}; it moves back to LogsDB at the next rollover`
       );
     }
 

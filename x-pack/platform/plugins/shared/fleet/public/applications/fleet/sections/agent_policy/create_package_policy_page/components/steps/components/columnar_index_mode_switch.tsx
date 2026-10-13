@@ -29,6 +29,11 @@ interface Props {
    * matter what the toggle says, so the user is told which ones and why.
    */
   unsupportedDataStreams?: string[];
+  /**
+   * The user opted in, but this package version has no columnar-ready logs data stream left:
+   * the switch stays visible to tell the user the data streams go back to LogsDB.
+   */
+  withdrawn?: boolean;
 }
 
 export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
@@ -36,6 +41,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
   disabled = false,
   onChange,
   unsupportedDataStreams = [],
+  withdrawn = false,
 }) => (
   <>
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -77,7 +83,25 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {unsupportedDataStreams.length > 0 && (
+      {withdrawn && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span data-test-subj="columnarIndexModeWithdrawn">
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeWithdrawn"
+                  defaultMessage="This version of the integration no longer supports columnar storage. Its log data streams move back to LogsDB at the next rollover."
+                />
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+      {!withdrawn && unsupportedDataStreams.length > 0 && (
         <>
           <EuiSpacer size="xs" />
           <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -88,7 +112,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
               <span data-test-subj="columnarIndexModeUnsupportedDataStreams">
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeUnsupportedDataStreams"
-                  defaultMessage="These data streams do not support columnar storage and stay on LogsDB: {dataStreams}"
+                  defaultMessage="These data streams do not support columnar storage and use LogsDB, from the next rollover if they were columnar: {dataStreams}"
                   values={{ dataStreams: unsupportedDataStreams.join(', ') }}
                 />
               </span>

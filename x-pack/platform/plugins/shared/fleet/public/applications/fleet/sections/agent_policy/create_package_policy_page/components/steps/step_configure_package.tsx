@@ -121,6 +121,12 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     columnarReadyDataStreams.some(
       (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'default'
     );
+  // The user opted in, but this version has no columnar-ready logs data stream left: show the
+  // switch off and disabled so the user learns why the data streams go back to LogsDB.
+  const isColumnarIndexModeWithdrawn =
+    packageInfo.type !== 'input' &&
+    columnarReadyDataStreams.length === 0 &&
+    installationInfo?.logsdb_columnar_enabled === true;
   const toggleColumnarIndexMode = () =>
     updatePackagePolicy({
       package: {
@@ -137,10 +143,12 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     packagePolicyTemplates.length ? (
       <>
         {!noTopRule && <EuiHorizontalRule margin="m" />}
-        {columnarReadyDataStreams.length > 0 && (
+        {(columnarReadyDataStreams.length > 0 || isColumnarIndexModeWithdrawn) && (
           <>
             <ColumnarIndexModeSwitch
-              checked={isColumnarIndexModeEnabled}
+              checked={isColumnarIndexModeEnabled && !isColumnarIndexModeWithdrawn}
+              disabled={isColumnarIndexModeWithdrawn}
+              withdrawn={isColumnarIndexModeWithdrawn}
               onChange={toggleColumnarIndexMode}
               unsupportedDataStreams={columnarUnsupportedDataStreams}
             />
