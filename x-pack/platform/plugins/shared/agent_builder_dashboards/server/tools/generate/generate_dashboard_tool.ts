@@ -34,7 +34,7 @@ import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 import { createLayoutArranger } from './layout_arranger';
-import { findLayoutSummary } from './layout_summary';
+import { findLayoutOverrides } from './layout_overrides';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
@@ -151,13 +151,13 @@ Panel positions and sizes are arranged automatically after the changes are appli
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const { dashboardData, created, updated, failures, panelAuthoringNotes, layoutSummary } =
+        const { dashboardData, created, updated, failures, panelAuthoringNotes, layoutOverrides } =
           await executeDashboardUpsert({
             dashboardData: latestVersion?.data,
             upsert,
             logger,
-            layoutSummary: previousAttachmentId
-              ? await findLayoutSummary(resultStore, previousAttachmentId)
+            layoutOverrides: previousAttachmentId
+              ? await findLayoutOverrides(resultStore, previousAttachmentId)
               : undefined,
             resolvePanelContent: createPanelResolver({
               logger,
@@ -199,7 +199,7 @@ Panel positions and sizes are arranged automatically after the changes are appli
                 created,
                 updated,
                 failures: failures.length > 0 ? failures : undefined,
-                layout_summary: layoutSummary,
+                layout_overrides: layoutOverrides,
               },
             },
           ],

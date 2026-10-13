@@ -68,8 +68,8 @@ interface ExecuteDashboardUpsertParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
-  /** Summary of the user's earlier layout requests, from the previous call. */
-  layoutSummary?: string;
+  /** The user's layout overrides of the defaults, from the previous call. */
+  layoutOverrides?: string;
   arrangeLayout?: ArrangeDashboardLayout;
   finalizeDashboard?: FinalizeDashboard;
   validateDashboard?: ValidateDashboard;
@@ -88,8 +88,8 @@ export interface DashboardUpsertResult {
   updated: string[];
   failures: DashboardFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
-  /** Summary of the user's layout requests that still apply, to pass to the next call. */
-  layoutSummary?: string;
+  /** The user's layout overrides of the defaults, to pass to the next call. */
+  layoutOverrides?: string;
 }
 
 const findDuplicates = (ids: string[]): Set<string> =>
@@ -495,7 +495,7 @@ export const executeDashboardUpsert = async ({
     'Attachment panel resolver is required for attachment-source panels.'
   ),
   resolveControlFieldCapabilities,
-  layoutSummary,
+  layoutOverrides,
   arrangeLayout,
   finalizeDashboard,
   validateDashboard,
@@ -565,7 +565,7 @@ export const executeDashboardUpsert = async ({
     dashboardData: nextDashboardData,
     editedPanelIds,
     instructions: upsert.layout,
-    layoutSummary,
+    layoutOverrides,
     authoringNotesByPanelId: new Map(
       panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
     ),
@@ -598,6 +598,6 @@ export const executeDashboardUpsert = async ({
     panelAuthoringNotes: panelAuthoringNotes.filter(
       ({ panelId }) => !validationResult.discardedPanelIds.has(panelId)
     ),
-    layoutSummary: arrangedLayout.layoutSummary,
+    layoutOverrides: arrangedLayout.layoutOverrides,
   };
 };

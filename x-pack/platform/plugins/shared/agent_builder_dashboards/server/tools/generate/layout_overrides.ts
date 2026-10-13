@@ -16,7 +16,7 @@ const generateDashboardCallSchema = z.object({
 
 const dashboardResultDataSchema = z.object({
   attachment_id: z.string(),
-  layout_summary: z.string().optional(),
+  layout_overrides: z.string().optional(),
 });
 
 const getGenerateDashboardResultIds = async (
@@ -34,10 +34,10 @@ const getGenerateDashboardResultIds = async (
 };
 
 /**
- * Summary of the user's layout requests from the latest `generate_dashboard` result for the
+ * The user's layout overrides from the latest `generate_dashboard` result for the
  * attachment. The store lists tool calls in the order they were made.
  */
-export const findLayoutSummary = async (
+export const findLayoutOverrides = async (
   resultStore: ToolResultStore,
   attachmentId: string
 ): Promise<string | undefined> => {
@@ -50,7 +50,7 @@ export const findLayoutSummary = async (
   const summaries = resultIds.flatMap((resultId) => {
     const result = dashboardResultDataSchema.safeParse(resultStore.get(resultId).data);
     return result.success && result.data.attachment_id === attachmentId
-      ? [result.data.layout_summary]
+      ? [result.data.layout_overrides]
       : [];
   });
   return summaries.at(-1);

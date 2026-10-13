@@ -904,7 +904,7 @@ describe('executeDashboardUpsert', () => {
               rows: [{ h: 6, items: [{ id: 'section-panel-1', w: 12 }] }],
             },
           ],
-          layoutSummary: 'section-panel-1 is 12 wide and 6 high.',
+          layoutOverrides: 'section-panel-1 is 12 wide and 6 high.',
         }),
       });
 

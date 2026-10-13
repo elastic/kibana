@@ -71,8 +71,8 @@ interface ArrangeLayoutParams {
   editedPanelIds: ReadonlySet<string>;
   /** Layout instructions; when set, every container is arranged again. */
   instructions?: string;
-  /** Summary of the user's earlier layout requests, which still apply. */
-  layoutSummary?: string;
+  /** The user's earlier layout overrides of the defaults, which still apply. */
+  layoutOverrides?: string;
   authoringNotesByPanelId: ReadonlyMap<string, string>;
   arrangeLayout?: ArrangeDashboardLayout;
   logger: Logger;
@@ -80,8 +80,8 @@ interface ArrangeLayoutParams {
 
 export interface ArrangedDashboardLayout {
   dashboardData: DashboardAttachmentData;
-  /** Summary of the user's layout requests that still apply, to pass to the next call. */
-  layoutSummary?: string;
+  /** The user's layout overrides of the defaults, to pass to the next call. */
+  layoutOverrides?: string;
 }
 
 /**
@@ -89,14 +89,14 @@ export interface ArrangedDashboardLayout {
  * or edited items (or every container, when `instructions` are given) are arranged into rows by the
  * injected `arrangeLayout` call; code turns the rows into grid positions. Without the call, or when
  * it fails, existing items keep their position and new ones are packed below them. With
- * `instructions`, the layout call also rewrites the summary of the user's layout requests.
+ * `instructions`, the layout call also rewrites the user's layout overrides.
  */
 export const arrangeDashboardLayout = async ({
   originalDashboardData,
   dashboardData,
   editedPanelIds,
   instructions,
-  layoutSummary,
+  layoutOverrides,
   authoringNotesByPanelId,
   arrangeLayout,
   logger,
@@ -135,7 +135,7 @@ export const arrangeDashboardLayout = async ({
   );
 
   if (dirtyContainers.length === 0) {
-    return { dashboardData, layoutSummary };
+    return { dashboardData, layoutOverrides };
   }
 
   const toLayoutItem = (
@@ -197,7 +197,7 @@ export const arrangeDashboardLayout = async ({
       dashboardTitle: dashboardData.title,
       ...(dashboardData.description ? { dashboardDescription: dashboardData.description } : {}),
       ...(instructions !== undefined ? { instructions } : {}),
-      ...(layoutSummary ? { layoutSummary } : {}),
+      ...(layoutOverrides ? { layoutOverrides } : {}),
       containers: layoutContainers,
     },
   });
@@ -212,14 +212,12 @@ export const arrangeDashboardLayout = async ({
     containerPlacements.forEach((grid, id) => placements.set(id, grid));
   });
 
-  const nextLayoutSummary =
-    instructions === undefined
-      ? layoutSummary
-      : arrangement?.layoutSummary ?? [layoutSummary, instructions].filter(Boolean).join(' ');
+  const nextLayoutOverrides =
+    instructions === undefined ? layoutOverrides : arrangement?.layoutOverrides ?? layoutOverrides;
 
   return {
     dashboardData: applyPlacements(dashboardData, placements),
-    layoutSummary: nextLayoutSummary || undefined,
+    layoutOverrides: nextLayoutOverrides || undefined,
   };
 };
 
