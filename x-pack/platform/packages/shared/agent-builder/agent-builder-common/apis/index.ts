@@ -6,3 +6,10 @@
  */
 
 export { apiTargets, type ApiTarget } from './targets';
+export {
+  allApisSelector,
+  toApiNamespace,
+  toNamespaceSelector,
+  isApiWildcardSelector,
+  matchesApiSelector,
+} from './api_selectors';
