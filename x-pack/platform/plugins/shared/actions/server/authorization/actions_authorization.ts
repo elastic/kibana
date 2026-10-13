@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
+import { fromKueryExpression, nodeBuilder, type KueryNode } from '@kbn/es-query';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   ACTION_SAVED_OBJECT_TYPE,
@@ -91,5 +92,64 @@ export class ActionsAuthorization {
       this.authorizationMode === AuthorizationMode.Legacy &&
       LEGACY_RBAC_EXEMPT_OPERATIONS.has(operation)
     );
+  }
+
+  public async getFindAuthorizationFilter({
+    operation,
+    namespaces,
+  }: {
+    operation: string;
+    namespaces?: Array<string | undefined>;
+  }): Promise<{ filter: KueryNode }> {
+    const spaces =
+      namespaces && namespaces.length > 0
+        ? namespaces.map((space) => (space === undefined ? 'default' : space))
+        : ['default'];
+
+    if (
+      !this.authorization?.mode?.useRbacForRequest(this.request) ||
+      this.isOperationExemptDueToLegacyRbac(operation)
+    ) {
+      return { filter: this.buildFilterForAuthorizedNamespaces(spaces) };
+    }
+
+    const privilege = this.authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'get');
+    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+    const { privileges } = await checkPrivileges.atSpaces(spaces, {
+      kibana: [privilege],
+    });
+
+    const authorizedSpaces = [
+      ...new Set(
+        privileges.kibana.flatMap((entry) =>
+          entry.authorized && entry.privilege === privilege && entry.resource
+            ? [entry.resource]
+            : []
+        )
+      ),
+    ];
+
+    const unauthorizedSpaces = spaces.filter((spaceId) => !authorizedSpaces.includes(spaceId));
+    if (unauthorizedSpaces.length > 0) {
+      throw Boom.forbidden(
+        `Unauthorized to get actions. Validate that you have permissions to access spaces: ${unauthorizedSpaces.join(
+          ', '
+        )}.`
+      );
+    }
+
+    if (authorizedSpaces.length === 0) {
+      throw Boom.forbidden('Unauthorized to get actions.');
+    }
+
+    return { filter: this.buildFilterForAuthorizedNamespaces(authorizedSpaces) };
+  }
+
+  private buildFilterForAuthorizedNamespaces(spaces?: string[]): KueryNode {
+    if (!spaces || spaces.length === 0) {
+      return fromKueryExpression('*');
+    }
+
+    return nodeBuilder.or(spaces.map((spaceId) => nodeBuilder.is('kibana.space_ids', spaceId)));
   }
 }
