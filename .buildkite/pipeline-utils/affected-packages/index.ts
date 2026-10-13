@@ -17,6 +17,7 @@ export { getDownstreamDependents, listChangedFiles } from './strategy_git.ts';
 export { findModuleForPath, getModuleLookup } from './module_lookup.ts';
 export {
   getAffectedProjectsMoon,
+  getAffectedTasksMoon,
   getDownstreamProjectsMoon,
   listChangedFilesMoon,
 } from './strategy_moon.ts';

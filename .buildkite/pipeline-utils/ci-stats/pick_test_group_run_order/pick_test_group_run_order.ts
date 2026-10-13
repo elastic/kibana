@@ -10,7 +10,7 @@
 import * as Fs from 'fs';
 
 import { minimatch } from 'minimatch';
-import { getAffectedPackages } from '../../affected-packages/index.ts';
+import { getAffectedPackages, getAffectedTasksMoon } from '../../affected-packages/index.ts';
 import type { BuildkiteStep } from '../../buildkite/index.ts';
 import { BuildkiteClient } from '../../buildkite/index.ts';
 import { getTrackedBranch } from '../../utils.ts';
@@ -32,10 +32,13 @@ import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
 import { shouldSkipFtrTests } from './selective_ftr.ts';
 import type { FtrDomainSelection } from './selective_ftr_domains.ts';
 import {
+  FTR_MOON_TASKS_PROJECT,
   createMoonFtrModuleGraph,
   createRepoFtrModuleGraph,
   diffFtrDomainSelections,
   resolveFtrDomains,
+  resolveFtrDomainsWithMoonTasks,
+  selectedFtrDomains,
   summarizeFtrDomainSelection,
   includesFtrEntry,
 } from './selective_ftr_domains.ts';
@@ -65,6 +68,8 @@ export async function pickTestGroupRunOrder() {
   const selectiveChangedFiles = config.useSelectiveTesting
     ? resolveSelectiveTestingChanges(config.selectionBase, config.isMergeQueue)
     : null;
+  // Moon shadow comparisons never change the steps, so they run after the upload.
+  let runFtrMoonShadows: (() => void) | undefined;
 
   // A diff containing only Scout test files cannot affect any Jest unit/integration
   // or FTR config, so skip those steps.
@@ -132,7 +137,7 @@ export async function pickTestGroupRunOrder() {
     }
 
     if (ftrManifestEntriesByQueue.size && config.ftrDomainSelection !== 'off') {
-      applyFtrDomainSelection(
+      runFtrMoonShadows = applyFtrDomainSelection(
         bk,
         config.ftrDomainSelection,
         selectiveChangedFiles,
@@ -262,18 +267,20 @@ export async function pickTestGroupRunOrder() {
   });
 
   bk.uploadSteps(steps);
+  runFtrMoonShadows?.();
 }
 
 /**
  * Narrows FTR entries in place to the manifest domains the diff affects ('enabled'), or only
- * annotates what would be skipped ('dry-run'). Detection errors keep every entry.
+ * annotates what would be skipped ('dry-run'). Detection errors keep every entry. Returns the
+ * moon shadow comparisons for the caller to run once the steps are uploaded.
  */
 function applyFtrDomainSelection(
   bk: BuildkiteClient,
   mode: Exclude<RunOrderConfig['ftrDomainSelection'], 'off'>,
   changedFiles: string[],
   entriesByQueue: Map<string, FTRManifestEntry[]>
-): void {
+): (() => void) | undefined {
   const entries = [...entriesByQueue.values()].flat();
 
   let selection: FtrDomainSelection;
@@ -288,11 +295,14 @@ function applyFtrDomainSelection(
     return;
   }
 
-  compareFtrDomainSelectionWithMoon(bk, selection, changedFiles, entries);
+  const runMoonShadows = () => {
+    compareFtrDomainSelectionWithMoon(bk, selection, changedFiles, entries);
+    compareFtrDomainsWithMoonTasks(bk, selection, changedFiles, entries);
+  };
 
   if (selection.all) {
     console.log(`FTR domain selection: running every domain (${selection.reason})`);
-    return;
+    return runMoonShadows;
   }
 
   const { selected, skipped } = summarizeFtrDomainSelection(selection, entries);
@@ -314,7 +324,7 @@ function applyFtrDomainSelection(
     ].join('\n')
   );
 
-  if (mode === 'dry-run') return;
+  if (mode === 'dry-run') return runMoonShadows;
 
   for (const [queue, queueEntries] of entriesByQueue) {
     const kept = queueEntries.filter((entry) => includesFtrEntry(selection, entry));
@@ -324,6 +334,7 @@ function applyFtrDomainSelection(
       entriesByQueue.delete(queue);
     }
   }
+  return runMoonShadows;
 }
 
 /**
@@ -379,6 +390,56 @@ function compareFtrDomainSelectionWithMoon(
       '',
       ...details.map((line) => `- ${line}`),
       '</details>',
+    ].join('\n')
+  );
+}
+
+/**
+ * Shadow mode: picks domains from the `ftr-<domain>` moon tasks in `.buildkite/moon.yml` and
+ * reports when they differ from the domains the git graph picked. Never changes which configs
+ * run; moon errors are logged.
+ */
+function compareFtrDomainsWithMoonTasks(
+  bk: BuildkiteClient,
+  gitSelection: FtrDomainSelection,
+  changedFiles: string[],
+  entries: FTRManifestEntry[]
+): void {
+  let tasksSelection: FtrDomainSelection;
+  try {
+    tasksSelection = resolveFtrDomainsWithMoonTasks({
+      changedFiles,
+      graph: createRepoFtrModuleGraph(),
+      getAffectedTasks: (files) => getAffectedTasksMoon(FTR_MOON_TASKS_PROJECT, files),
+    });
+  } catch (error) {
+    console.error('FTR domain moon-task shadow failed (no effect on this build)', error);
+    return;
+  }
+
+  const gitDomains = selectedFtrDomains(gitSelection, entries);
+  const taskDomains = selectedFtrDomains(tasksSelection, entries);
+  const onlyGit = [...gitDomains].filter((domain) => !taskDomains.has(domain)).sort();
+  const onlyTasks = [...taskDomains].filter((domain) => !gitDomains.has(domain)).sort();
+  if (onlyGit.length === 0 && onlyTasks.length === 0) {
+    console.log(`FTR domain moon-task shadow: matches the git graph (${tasksSelection.reason})`);
+    return;
+  }
+
+  const details = [
+    `git graph: ${gitSelection.reason}`,
+    `moon tasks: ${tasksSelection.reason}`,
+    `Domains only git selects: ${onlyGit.join(', ') || 'none'}`,
+    `Domains only moon tasks select: ${onlyTasks.join(', ') || 'none'}`,
+  ];
+  console.warn(['FTR domain moon-task shadow: differs from the git graph', ...details].join('\n'));
+  bk.setAnnotation(
+    'selective-testing-ftr-domains-moon-tasks',
+    'warning',
+    [
+      'FTR domain selection (moon task shadow): the `ftr-<domain>` moon tasks pick different domains than the git graph. The git graph decides this build.',
+      '',
+      ...details.map((line) => `- ${line}`),
     ].join('\n')
   );
 }

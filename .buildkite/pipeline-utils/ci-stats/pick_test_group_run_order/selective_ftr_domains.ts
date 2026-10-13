@@ -261,3 +261,73 @@ export const diffFtrDomainSelections = (
   }
   return { onlyGit, onlyMoon };
 };
+
+/** Moon project (`.buildkite/moon.yml`) holding one `ftr-<domain>` task per FTR domain. */
+export const FTR_MOON_TASKS_PROJECT = 'kibana-buildkite';
+const FTR_TASK_PREFIX = 'ftr-';
+
+/**
+ * Picks FTR domains from the `ftr-<domain>` moon tasks a diff affects. Moon decides groups,
+ * imports and `ftrCritical` files; this only handles what moon can't see: FTR-excluded modules,
+ * changed modules without a group, and relevant files outside any project. Extra configs
+ * (owned, platform-in-solution, always-run) are not part of this answer.
+ */
+export const resolveFtrDomainsWithMoonTasks = ({
+  changedFiles,
+  graph,
+  getAffectedTasks,
+}: {
+  changedFiles: readonly string[];
+  graph: Pick<FtrModuleGraph, 'moduleForPath' | 'groupOf'>;
+  /** IDs of `FTR_MOON_TASKS_PROJECT` tasks the files affect. */
+  getAffectedTasks: (files: readonly string[]) => ReadonlySet<string>;
+}): FtrDomainSelection => {
+  if (changedFiles.length === 0) {
+    return all('no changed files');
+  }
+
+  const isIrrelevant = createScopeMatcher(FTR_IRRELEVANT_PATHS);
+  const moonFiles: string[] = [];
+  for (const file of changedFiles) {
+    const moduleId = graph.moduleForPath(file);
+    const outsideModules = moduleId === undefined || moduleId === UNCATEGORIZED_MODULE_ID;
+    if (outsideModules) {
+      // Irrelevant files outside modules still go to moon: `ftrCritical` inputs match some of
+      // them (e.g. .buildkite/ftr-manifests), and moon ignores the rest.
+      if (!isIrrelevant(file)) return all(`file outside any module changed: ${file}`);
+      moonFiles.push(file);
+      continue;
+    }
+    if (isIrrelevant(file) || FTR_EXCLUDED_MODULES.has(moduleId)) continue;
+    if (graph.groupOf(moduleId) === undefined) {
+      return all(`changed module has no group: ${moduleId}`);
+    }
+    moonFiles.push(file);
+  }
+
+  const ftrTasks = [...getAffectedTasks(moonFiles)]
+    .filter((task) => task.startsWith(FTR_TASK_PREFIX))
+    .sort();
+  const domains = new Set<string>();
+  for (const task of ftrTasks) {
+    const domain = task.slice(FTR_TASK_PREFIX.length);
+    domains.add(domain);
+    if (domain === PLATFORM_DOMAIN) domains.add(BASE_DOMAIN);
+  }
+
+  return {
+    all: false,
+    domains,
+    extraConfigs: new Set(),
+    reason: ftrTasks.length ? `moon tasks: ${ftrTasks.join(', ')}` : 'no moon FTR task affected',
+  };
+};
+
+/** Domains a selection runs; `all` means every domain in the manifests. */
+export const selectedFtrDomains = (
+  selection: FtrDomainSelection,
+  manifestEntries: readonly FTRManifestEntry[]
+): Set<string> =>
+  selection.all
+    ? new Set(manifestEntries.map((entry) => entry.domain))
+    : new Set(selection.domains);

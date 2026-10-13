@@ -158,6 +158,12 @@ Some integration suites boot a full Kibana and snapshot a *global registry* (rul
 
 The git (tsconfig `kbn_references`) graph decides the selection. Alongside it, `createMoonFtrModuleGraph` resolves the same rules with moon's project graph: each changed module's `kibana.jsonc` is piped to `moon query projects --affected --downstream deep`, so moon never diffs on its own. When the two select different configs, the build gets a `selective-testing-ftr-domains-moon-shadow` warning annotation listing them; a failure of this query is logged and has no effect.
 
+### Moon FTR tasks (shadow mode)
+
+`.buildkite/moon.yml` (project `kibana-buildkite`) has one noop `ftr-<domain>` task per domain. Each depends on `#group-<domain>:source-upstream`, so it is affected when a project of that group, or anything it imports, changes; `ftr-platform` also depends on `#group-undefined:source-upstream`. Every task takes the `ftrCritical` file group (a copy of `FTR_CRITICAL_PATHS`) as inputs. `resolveFtrDomainsWithMoonTasks` asks `moon query tasks --affected --downstream deep --project kibana-buildkite` which tasks the diff affects and maps them to domains (`ftr-platform` adds `base`). It keeps in code only what moon can't see: excluded modules and irrelevant files inside modules are dropped, and a relevant file outside any module or a changed module without a group runs every domain. When its domains differ from the git graph's, the build gets a `selective-testing-ftr-domains-moon-tasks` warning annotation; failures are logged and have no effect. It compares domains only: configs owned by affected modules, platform configs in solution manifests and always-run configs are not part of this answer.
+
+Both moon shadows run after the pick step uploads its steps, because the task query takes about 10 seconds.
+
 ## Scout selective testing: git -> Moon (shadow mode)
 
 `resolve_selective_testing.ts` still uses **git** as the authoritative strategy (written to `.scout/code_changes.json`, no behavior change). In parallel, it runs the **Moon** strategy above for observation only, and writes the result plus a diff of `affectedModules` to `.scout/code_changes.moon_shadow.json` (uploaded as a Buildkite artifact). Mismatches are logged as a warning via `ToolingLog`; a Moon failure is swallowed and logged, never fails the build.

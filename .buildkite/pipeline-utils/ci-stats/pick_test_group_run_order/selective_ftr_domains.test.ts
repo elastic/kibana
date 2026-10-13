@@ -15,6 +15,7 @@ import {
   diffFtrDomainSelections,
   includesFtrEntry,
   resolveFtrDomains,
+  resolveFtrDomainsWithMoonTasks,
   summarizeFtrDomainSelection,
 } from './selective_ftr_domains.ts';
 import { ftrTestChannels } from './test_channels.ts';
@@ -308,5 +309,54 @@ describe('diffFtrDomainSelections', () => {
         'x-pack/solutions/security/test/config.ts',
       ],
     });
+  });
+});
+
+describe('resolveFtrDomainsWithMoonTasks', () => {
+  const resolveWithTasks = (changedFiles: string[], affectedTasks: string[] = []) => {
+    const getAffectedTasks = jest.fn((_files: readonly string[]) => new Set(affectedTasks));
+    const selection = resolveFtrDomainsWithMoonTasks({
+      changedFiles,
+      graph: fakeGraph,
+      getAffectedTasks,
+    });
+    return { selection, moonFiles: getAffectedTasks.mock.calls[0]?.[0] };
+  };
+
+  it('maps affected ftr tasks to domains, with platform adding base', () => {
+    const { selection } = resolveWithTasks(
+      ['x-pack/platform/plugins/fleet/server/index.ts'],
+      ['ftr-platform', 'ftr-security', 'jest']
+    );
+
+    expect(selection.all === false && [...selection.domains].sort()).toEqual([
+      'base',
+      'platform',
+      'security',
+    ]);
+  });
+
+  it('hands moon relevant module files and irrelevant files outside modules only', () => {
+    const { moonFiles } = resolveWithTasks([
+      'x-pack/solutions/security/plugins/security_solution/server/index.ts',
+      'x-pack/platform/plugins/fleet/README.md',
+      'src/platform/packages/shared/kbn-scout/src/index.ts',
+      '.buildkite/ftr-manifests/ftr_security_serverless_configs.yml',
+    ]);
+
+    expect(moonFiles).toEqual([
+      'x-pack/solutions/security/plugins/security_solution/server/index.ts',
+      '.buildkite/ftr-manifests/ftr_security_serverless_configs.yml',
+    ]);
+  });
+
+  it.each([
+    ['a relevant file outside any module', ['typings/index.d.ts']],
+    ['a module without a group', ['packages/kbn-tooling/src/index.ts']],
+  ])('returns all without asking moon for %s', (_, changedFiles) => {
+    const { selection, moonFiles } = resolveWithTasks(changedFiles);
+
+    expect(selection).toMatchObject({ all: true });
+    expect(moonFiles).toBeUndefined();
   });
 });

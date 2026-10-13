@@ -19,6 +19,25 @@ workspace:
   inheritedTasks:
     include: []
 
+fileGroups:
+  # Files that make every FTR domain run. Mirrors FTR_CRITICAL_PATHS in
+  # pipeline-utils/ci-stats/pick_test_group_run_order/selective_ftr.ts.
+  ftrCritical:
+    - '/.buildkite/ftr-manifests/**'
+    - '/.buildkite/scripts/steps/test/ftr_configs.sh'
+    - '/.buildkite/scripts/steps/functional/**'
+    - '/.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/**'
+    - '/.buildkite/pipeline-utils/affected-packages/**'
+    - '/scripts/functional_tests.js'
+    - '/scripts/functional_tests_server.js'
+    - '/scripts/functional_test_runner.js'
+    - '/package.json'
+    - '/pnpm-lock.yaml'
+    - '/.node-version'
+    - '/.nvmrc'
+    - '/config/**/*.yml'
+    - '/config/node.options'
+
 tasks:
   # `.buildkite` tests read fixtures via process.cwd() expecting the repo root
   # (matching how the pipeline scripts run in CI), so jest must run from the
@@ -34,3 +53,64 @@ tasks:
       runFromWorkspaceRoot: true
     inputs:
       - '**/*'
+
+  # FTR domain tasks (shadow mode). Nothing runs them; the pick step asks
+  # `moon query tasks --affected --downstream deep` which ones a diff affects. A domain is
+  # affected when a project of its kibana.jsonc group, or anything that project imports
+  # (`source-upstream`), changes, or when an `ftrCritical` file changes. Projects without a
+  # group load like platform code, so they count as platform.
+  ftr-platform:
+    command: noop
+    deps:
+      - '#group-platform:source-upstream'
+      - '#group-undefined:source-upstream'
+    inputs:
+      - '@group(ftrCritical)'
+    options:
+      cache: false
+      runInCI: false
+  ftr-observability:
+    command: noop
+    deps:
+      - '#group-observability:source-upstream'
+    inputs:
+      - '@group(ftrCritical)'
+    options:
+      cache: false
+      runInCI: false
+  ftr-security:
+    command: noop
+    deps:
+      - '#group-security:source-upstream'
+    inputs:
+      - '@group(ftrCritical)'
+    options:
+      cache: false
+      runInCI: false
+  ftr-search:
+    command: noop
+    deps:
+      - '#group-search:source-upstream'
+    inputs:
+      - '@group(ftrCritical)'
+    options:
+      cache: false
+      runInCI: false
+  ftr-workplaceai:
+    command: noop
+    deps:
+      - '#group-workplaceai:source-upstream'
+    inputs:
+      - '@group(ftrCritical)'
+    options:
+      cache: false
+      runInCI: false
+  ftr-vectordb:
+    command: noop
+    deps:
+      - '#group-vectordb:source-upstream'
+    inputs:
+      - '@group(ftrCritical)'
+    options:
+      cache: false
+      runInCI: false

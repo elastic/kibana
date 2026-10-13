@@ -79,6 +79,32 @@ export function getDownstreamProjectsMoon(files: readonly string[]): Set<string>
   return parseProjectIds(output);
 }
 
+/**
+ * Returns the IDs of `project`'s tasks affected by `files`, following task deps downstream.
+ * The files are passed on stdin, so moon skips its own VCS diff.
+ */
+export function getAffectedTasksMoon(project: string, files: readonly string[]): Set<string> {
+  // With no stdin files moon would fall back to diffing the working tree.
+  if (files.length === 0) {
+    return new Set();
+  }
+
+  const output = execFileSync(
+    getMoonBinPath(),
+    ['query', 'tasks', '--affected', '--downstream', 'deep', '--project', project],
+    {
+      cwd: getKibanaDir(),
+      encoding: 'utf8',
+      maxBuffer: 30 * 1024 * 1024,
+      timeout: 120000, // a cold agent first downloads moon's toolchain plugins
+      input: JSON.stringify({ files }),
+    }
+  );
+
+  const { tasks }: { tasks?: Record<string, Record<string, unknown>> } = JSON.parse(output);
+  return new Set(Object.keys(tasks?.[project] ?? {}));
+}
+
 export function getAffectedProjectsMoon(
   mergeBase: string,
   includeDownstream: boolean
