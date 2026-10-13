@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { Row } from '@tanstack/react-table';
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
-import { useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { getTanStackDataGridStyles } from './tanstack_data_grid.styles';
@@ -39,7 +38,6 @@ const VirtualRow = React.memo(
       columnDefs: unknown;
       isExpanded: boolean;
       isSelected: boolean;
-      indicatorColor: string | undefined;
       rowHeight: number;
       isAutoHeight: boolean;
       styles: ReturnType<typeof getTanStackDataGridStyles>;
@@ -58,7 +56,6 @@ const VirtualRow = React.memo(
       rowIndexOffset,
       isExpanded,
       isSelected,
-      indicatorColor,
       rowHeight,
       isAutoHeight,
       styles,
@@ -84,13 +81,9 @@ const VirtualRow = React.memo(
           isExpanded && styles.rowExpanded,
           isSelected && styles.selectedRow,
           row.original.isAnchor && styles.anchorRow,
-          indicatorColor && styles.rowWithIndicator,
         ]}
         style={{
           height: isAutoHeight ? undefined : rowHeight,
-          ...(indicatorColor
-            ? ({ ['--tsg-row-indicator-color' as string]: indicatorColor } as React.CSSProperties)
-            : undefined),
         }}
         role="row"
         aria-rowindex={rowIndex + 2}
@@ -200,7 +193,6 @@ interface TanStackGridBodyProps {
   styles: ReturnType<typeof getTanStackDataGridStyles>;
   selectedRows: Set<string>;
   expandedDocId: string | undefined;
-  getRowIndicator?: UnifiedDataTableProps['getRowIndicator'];
   focusedCell: { row: number; col: number } | null;
   onFilter?: UnifiedDataTableProps['onFilter'];
   setPopoverState: SetCellPopoverState;
@@ -232,7 +224,6 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
   styles,
   selectedRows,
   expandedDocId,
-  getRowIndicator,
   focusedCell,
   onFilter,
   setPopoverState,
@@ -244,7 +235,6 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
   useRowVirtualizer,
   isFullScreen,
 }: TanStackGridBodyProps) {
-  const { euiTheme } = useEuiTheme();
   const estimateSize = useCallback(() => rowHeight, [rowHeight]);
   // Must be stable: a new function invalidates the virtualizer's measurement cache every render.
   const getItemKey = useCallback(
@@ -314,7 +304,6 @@ export const TanStackGridBody = React.memo(function TanStackGridBody({
                 columnDefs={columnDefs}
                 isExpanded={expandedDocId === record.id}
                 isSelected={selectedRows.has(record.id)}
-                indicatorColor={getRowIndicator?.(record, euiTheme)?.color}
                 rowHeight={rowHeight}
                 isAutoHeight={isAutoRowHeight}
                 styles={styles}

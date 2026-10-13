@@ -12,6 +12,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 
 export const CONTROL_COL_WIDTH = 24;
 export const SELECT_COL_WIDTH = 32;
+export const ROW_INDICATOR_COL_WIDTH = 4;
 export const DEFAULT_COL_WIDTH = 180;
 export const MIN_COL_WIDTH = 60;
 const RESIZE_HANDLE_WIDTH = 4;
@@ -230,19 +231,19 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     },
   }),
 
-  rowWithIndicator: css({
-    position: 'relative',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      left: 0,
-      width: 3,
-      backgroundColor: 'var(--tsg-row-indicator-color)',
-      pointerEvents: 'none',
-      zIndex: 1,
-    },
+  rowIndicatorCell: css({
+    display: 'flex',
+    alignSelf: 'stretch',
+    flexShrink: 0,
+    padding: 0,
+    boxSizing: 'border-box',
+  }),
+
+  rowIndicatorHeaderCell: css({
+    flexShrink: 0,
+    padding: 0,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    boxSizing: 'border-box',
   }),
 
   rowAutoHeight: css({

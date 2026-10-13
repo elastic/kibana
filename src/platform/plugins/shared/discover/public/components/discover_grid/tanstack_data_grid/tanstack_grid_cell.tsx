@@ -156,7 +156,11 @@ export const VirtualCell = React.memo(
         <div
           className={getCellClassName(isPinned && 'tsg-pinnedCell')}
           css={[
-            isSelect ? styles.selectCell : styles.controlCell,
+            isSelect
+              ? styles.selectCell
+              : meta?.isRowIndicator
+              ? styles.rowIndicatorCell
+              : styles.controlCell,
             isLastLeftPinned && styles.pinnedCellShadow,
             isFocused && styles.focusedCell,
           ]}

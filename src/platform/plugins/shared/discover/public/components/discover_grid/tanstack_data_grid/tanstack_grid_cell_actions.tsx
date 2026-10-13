@@ -217,11 +217,15 @@ const CellPopover = React.memo(
     const maxInlineSize = isWidePopover
       ? Math.min(window.innerWidth * 0.75, 600)
       : Math.min(window.innerWidth * 0.75, Math.max(cellWidth, 400));
-    const maxBlockSize = window.innerHeight * 0.5;
+    const preferredBlockSize = window.innerHeight * 0.5;
 
     // Prefer below the cell; flip above when there isn't enough room.
     const spaceBelow = window.innerHeight - cellRect.bottom - 8;
-    const openAbove = spaceBelow < Math.min(160, maxBlockSize) && cellRect.top > spaceBelow;
+    const spaceAbove = cellRect.top - 8;
+    const openAbove = spaceBelow < Math.min(160, preferredBlockSize) && spaceAbove > spaceBelow;
+    // Fit the fixed panel into the viewport, so the footer actions stay reachable and the
+    // panel scrolls instead of overflowing off-screen.
+    const maxBlockSize = Math.min(preferredBlockSize, openAbove ? spaceAbove : spaceBelow);
     const left = Math.max(8, Math.min(cellRect.left, window.innerWidth - maxInlineSize - 8));
 
     useEffect(() => {

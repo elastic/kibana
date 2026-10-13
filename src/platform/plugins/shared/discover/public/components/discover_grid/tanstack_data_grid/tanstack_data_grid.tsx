@@ -120,6 +120,7 @@ import {
   getTanStackDataGridStyles,
   CONTROL_COL_WIDTH,
   SELECT_COL_WIDTH,
+  ROW_INDICATOR_COL_WIDTH,
   DEFAULT_COL_WIDTH,
   MIN_COL_WIDTH,
 } from './tanstack_data_grid.styles';
@@ -153,6 +154,7 @@ import type { useDiscoverServices } from '../../../hooks/use_discover_services';
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
     isControl?: boolean;
+    isRowIndicator?: boolean;
     isSelect?: boolean;
     isSummary?: boolean;
     isTimestamp?: boolean;
@@ -571,6 +573,7 @@ const FindInTableBar = React.memo(
 // Same ids as UnifiedDataTable control columns, so tests can target either grid.
 const EXPAND_COLUMN_ID = 'actions';
 const SELECT_COLUMN_ID = 'select';
+const ROW_INDICATOR_COLUMN_ID = 'colorIndicator';
 const SOURCE_COLUMN_ID = SOURCE_COLUMN;
 
 // -- STATS ... BY column reordering --
@@ -616,6 +619,29 @@ const parseStatsByColumns = (
 
 // ── Cell popover content (value + filter/copy footer) ──
 const CONTROL_COLUMN_IDS = [SELECT_COLUMN_ID, EXPAND_COLUMN_ID] as const;
+
+// ── Leading row indicator cell, same DOM contract as UnifiedDataTable's color indicator ──
+const RowIndicatorCell = React.memo(function RowIndicatorCell({
+  record,
+  getRowIndicator,
+}: {
+  record: DataTableRecord;
+  getRowIndicator: NonNullable<UnifiedDataTableProps['getRowIndicator']>;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const indicator = getRowIndicator(record, euiTheme);
+  return (
+    <div
+      data-test-subj="unifiedDataTableRowColorIndicatorCell"
+      title={indicator?.label}
+      style={{
+        width: ROW_INDICATOR_COL_WIDTH,
+        height: '100%',
+        background: indicator?.color ?? 'transparent',
+      }}
+    />
+  );
+});
 
 // ── Leading control cell: expand toggle + profile-provided row controls ──
 const RowControlsCell = React.memo(function RowControlsCell({
@@ -1484,9 +1510,13 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
 
   const columnPinning = useMemo<ColumnPinningState>(
     () => ({
-      left: [...CONTROL_COLUMN_IDS, ...pinnedDataColumnIds],
+      left: [
+        ...(getRowIndicator ? [ROW_INDICATOR_COLUMN_ID] : []),
+        ...CONTROL_COLUMN_IDS,
+        ...pinnedDataColumnIds,
+      ],
     }),
-    [pinnedDataColumnIds]
+    [getRowIndicator, pinnedDataColumnIds]
   );
 
   const handleTogglePinColumn = useCallback((columnId: string) => {
@@ -1721,6 +1751,24 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
   const tanstackColumns: ColumnDef<DataTableRecord>[] = useMemo(() => {
     const defs: ColumnDef<DataTableRecord>[] = [];
 
+    // Row indicator column, only when a profile provides one (like UnifiedDataTable).
+    if (getRowIndicator) {
+      defs.push({
+        id: ROW_INDICATOR_COLUMN_ID,
+        header: '',
+        size: ROW_INDICATOR_COL_WIDTH,
+        minSize: ROW_INDICATOR_COL_WIDTH,
+        maxSize: ROW_INDICATOR_COL_WIDTH,
+        enableResizing: false,
+        enableSorting: false,
+        enablePinning: false,
+        meta: { isControl: true, isRowIndicator: true },
+        cell: function IndicatorCell({ row }) {
+          return <RowIndicatorCell record={row.original} getRowIndicator={getRowIndicator} />;
+        },
+      });
+    }
+
     // Select column
     defs.push({
       id: SELECT_COLUMN_ID,
@@ -1803,17 +1851,20 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
             onFilter={onFilter}
           />
         ) : externalCustomRenderers?.[SOURCE_COLUMN_ID] ? (
-          <CustomDataCell
-            Renderer={externalCustomRenderers[SOURCE_COLUMN_ID]}
-            row={row.original}
-            rowIndex={row.index}
-            columnId={SOURCE_COLUMN_ID}
-            colIndex={effectiveColumns.indexOf(SOURCE_COLUMN_ID)}
-            dataView={dataView}
-            fieldFormats={fieldFormats}
-            dataSource={dataSource}
-            isCompressed={dataGridDensity === DataGridDensity.COMPACT}
-          />
+          // Same value wrapper UnifiedDataTable puts around custom renderers.
+          <span className="unifiedDataTable__cellValue">
+            <CustomDataCell
+              Renderer={externalCustomRenderers[SOURCE_COLUMN_ID]}
+              row={row.original}
+              rowIndex={row.index}
+              columnId={SOURCE_COLUMN_ID}
+              colIndex={effectiveColumns.indexOf(SOURCE_COLUMN_ID)}
+              dataView={dataView}
+              fieldFormats={fieldFormats}
+              dataSource={dataSource}
+              isCompressed={dataGridDensity === DataGridDensity.COMPACT}
+            />
+          </span>
         ) : (
           <SummaryCellContent
             row={row.original}
@@ -2001,6 +2052,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     displayedRows,
     hideFilteringOnComputedColumns,
     shouldPrependTimeFieldColumn,
+    getRowIndicator,
   ]);
 
   const dataColumns = useMemo<TanStackDataColumnDescriptor[]>(() => {
@@ -2043,10 +2095,12 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
         timeFieldName: showTimeCol ? timeFieldName : undefined,
         columnSizing,
         settings,
-        leadingControlColumnsWidth: SELECT_COL_WIDTH + actionsColumnWidth,
+        leadingControlColumnsWidth:
+          (getRowIndicator ? ROW_INDICATOR_COL_WIDTH : 0) + SELECT_COL_WIDTH + actionsColumnWidth,
       }),
     [
       actionsColumnWidth,
+      getRowIndicator,
       containerWidth,
       dataColumns,
       columnSizing,
@@ -2203,6 +2257,42 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
       scrollEl.removeEventListener('scroll', handleScroll);
     };
   }, [scrollKey]);
+
+  // Single page mode only shows the footer once scrolled to the bottom, like UnifiedDataTable.
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+
+  useEffect(() => {
+    if (loadingState === DataLoadingState.loadingMore) {
+      setHasScrolledToBottom(false);
+    }
+  }, [loadingState]);
+
+  useEffect(() => {
+    const scrollEl = parentRef.current;
+    if (!scrollEl || paginationMode === 'multiPage' || loadingState !== DataLoadingState.loaded) {
+      return;
+    }
+    let rafId: number;
+    const handleScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setHasScrolledToBottom((prevHasScrolledToBottom) => {
+          // Account for footer height when it's visible to avoid flickering
+          const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+          const isScrollable = scrollEl.scrollHeight > scrollEl.offsetHeight;
+          const isScrolledToBottom =
+            scrollEl.scrollTop + scrollEl.offsetHeight >=
+            scrollEl.scrollHeight - scrollBottomMargin;
+          return isScrollable && isScrolledToBottom;
+        });
+      });
+    };
+    scrollEl.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      scrollEl.removeEventListener('scroll', handleScroll);
+    };
+  }, [loadingState, paginationMode]);
 
   // ── Ctrl+F to open find bar ──
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -3013,7 +3103,6 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
             styles={styles}
             selectedRows={selectedRows}
             expandedDocId={currentExpandedDoc?.id}
-            getRowIndicator={getRowIndicator}
             focusedCell={focusedCell}
             onFilter={onFilterRef.current}
             setPopoverState={setPopoverState}
@@ -3033,6 +3122,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
               >
                 {headerGroup.headers.map((header) => {
                   const isControl = header.column.columnDef.meta?.isControl;
+                  const isRowIndicator = header.column.columnDef.meta?.isRowIndicator;
                   const isSelect = header.column.columnDef.meta?.isSelect;
                   const isSummary = header.column.columnDef.meta?.isSummary;
                   const sortDir = header.column.getIsSorted();
@@ -3110,7 +3200,11 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
                       key={header.id}
                       className={isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
                       css={[
-                        isControl ? styles.controlHeaderCell : styles.headerCell,
+                        isRowIndicator
+                          ? styles.rowIndicatorHeaderCell
+                          : isControl
+                          ? styles.controlHeaderCell
+                          : styles.headerCell,
                         !isControl && isHeaderMultiline && styles.headerCellMultiline,
                         !isControl &&
                           !isSummary &&
@@ -3339,7 +3433,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
             data={data}
             fieldFormats={fieldFormats}
             paginationMode={paginationMode}
-            hasScrolledToBottom={true}
+            hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
           />
         )}
     </div>

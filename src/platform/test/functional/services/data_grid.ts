@@ -43,7 +43,7 @@ const ROW_CELL_SELECTOR = '[data-test-subj="dataGridRowCell"]';
 const HEADER_CELL_SELECTOR = '[data-test-subj="dataGridHeader"] [role="columnheader"]';
 const HEADER_CELL_CONTENT_SELECTOR =
   '.euiDataGridHeaderCell__content, [data-test-subj="dataGridHeaderCellTitle"]';
-const CONTROL_COLUMN_IDS = ['select', 'actions'];
+const CONTROL_COLUMN_IDS = ['colorIndicator', 'select', 'actions'];
 const CONTROL_HEADER_CELL_SELECTOR = [
   '.euiDataGridHeaderCell--controlColumn',
   ...CONTROL_COLUMN_IDS.map((id) => `${HEADER_CELL_SELECTOR}[data-gridcell-column-id="${id}"]`),
