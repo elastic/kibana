@@ -9,10 +9,12 @@ import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
-import { getAlertsIndex } from '../../../entities_grid/queries/esql';
+import { getAlertsIndex, getRiskScoreIndex } from '../../../entities_grid/queries/esql';
 import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
 import { buildEntitiesWithAnomaliesCountQuery } from '../entities_with_anomalies_query';
 import { buildNewEntityCountQuery } from '../new_entity_query';
+import { buildNewlyHighCriticalCountQuery } from '../tile_newly_high_critical_query';
+import { buildRiskMoversCountQuery } from '../tile_risk_movers_query';
 
 /*
  * The tile counts must be exact, however many entities there are. ES|QL's COUNT_DISTINCT is only
@@ -22,6 +24,8 @@ import { buildNewEntityCountQuery } from '../new_entity_query';
  * - 6,000 host entities, each with one high severity alert and one anomaly record in the last day.
  * - The first 3,500 are watchlisted.
  * - Every entity was first seen in the last day and has a risk score above 0.
+ * - Risk history: a score of 40 (Low) two days ago and 60 (High) one day ago, now 80 (Critical), so
+ *   every entity is a risk mover and newly high or critical in both the current and previous 24h.
  * - 100 more entities are aliases that resolve to one of the 6,000, so they must not add to a count.
  */
 
@@ -33,6 +37,8 @@ const ENTITIES = 6000;
 const WATCHLISTED = 3500;
 const ALIASES = 100;
 const BULK_SIZE = 10_000;
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
 
 const KEYWORD: MappingProperty = { type: 'keyword' };
 const DATE: MappingProperty = { type: 'date' };
@@ -61,6 +67,8 @@ const loadFixture = async (client: Client) => {
         'entity.attributes.watchlists': KEYWORD,
         'entity.lifecycle.first_seen': DATE,
         'entity.risk.calculated_score': { type: 'double' },
+        'entity.risk.calculated_score_norm': { type: 'double' },
+        'entity.risk.calculated_level': KEYWORD,
         'entity.relationships.resolution.resolved_to': KEYWORD,
       },
     },
@@ -89,9 +97,38 @@ const loadFixture = async (client: Client) => {
     },
   });
 
+  await client.indices.create({
+    index: getRiskScoreIndex(NAMESPACE),
+    mappings: {
+      properties: {
+        '@timestamp': DATE,
+        'host.risk.id_field': KEYWORD,
+        'host.risk.id_value': KEYWORD,
+        'host.risk.calculated_score_norm': { type: 'float' },
+        'host.risk.calculated_level': KEYWORD,
+      },
+    },
+  });
+
   const entityOps: object[] = [];
   const alertOps: object[] = [];
   const anomalyOps: object[] = [];
+  const riskOps: object[] = [];
+  const riskDocs = (id: string) => {
+    const doc = (daysAgo: number, score: number, level: string) => ({
+      '@timestamp': new Date(Date.now() - daysAgo * DAY_MS - HOUR_MS / 2).toISOString(),
+      'host.risk.id_field': 'entity.id',
+      'host.risk.id_value': id,
+      'host.risk.calculated_score_norm': score,
+      'host.risk.calculated_level': level,
+    });
+    riskOps.push(
+      { index: { _index: getRiskScoreIndex(NAMESPACE) } },
+      doc(2, 40, 'Low'),
+      { index: { _index: getRiskScoreIndex(NAMESPACE) } },
+      doc(1, 60, 'High')
+    );
+  };
   for (let i = 0; i < ENTITIES; i++) {
     entityOps.push(
       { index: { _index: ENTITY_INDEX } },
@@ -100,6 +137,8 @@ const loadFixture = async (client: Client) => {
         'entity.name': `exact-${i}`,
         'entity.lifecycle.first_seen': timestamp,
         'entity.risk.calculated_score': 10,
+        'entity.risk.calculated_score_norm': 80,
+        'entity.risk.calculated_level': 'Critical',
         ...(i < WATCHLISTED ? { 'entity.attributes.watchlists': 'w1' } : {}),
       }
     );
@@ -111,6 +150,7 @@ const loadFixture = async (client: Client) => {
         'kibana.alert.severity': 'high',
       }
     );
+    riskDocs(idOf(i));
     anomalyOps.push(
       { index: { _index: ANOMALY_INDEX } },
       {
@@ -133,6 +173,8 @@ const loadFixture = async (client: Client) => {
         'entity.name': `alias-${i}`,
         'entity.lifecycle.first_seen': timestamp,
         'entity.risk.calculated_score': 10,
+        'entity.risk.calculated_score_norm': 80,
+        'entity.risk.calculated_level': 'Critical',
         'entity.relationships.resolution.resolved_to': idOf(i),
         ...(i < WATCHLISTED ? { 'entity.attributes.watchlists': 'w1' } : {}),
       }
@@ -145,6 +187,7 @@ const loadFixture = async (client: Client) => {
         'kibana.alert.severity': 'high',
       }
     );
+    riskDocs(aliasId);
     anomalyOps.push(
       { index: { _index: ANOMALY_INDEX } },
       {
@@ -160,7 +203,10 @@ const loadFixture = async (client: Client) => {
   await bulk(client, entityOps);
   await bulk(client, alertOps);
   await bulk(client, anomalyOps);
-  await client.indices.refresh({ index: [ENTITY_INDEX, getAlertsIndex(NAMESPACE), ANOMALY_INDEX] });
+  await bulk(client, riskOps);
+  await client.indices.refresh({
+    index: [ENTITY_INDEX, getAlertsIndex(NAMESPACE), ANOMALY_INDEX, getRiskScoreIndex(NAMESPACE)],
+  });
 };
 
 describe('tile counts above the COUNT_DISTINCT precision, on Elasticsearch', () => {
@@ -207,6 +253,20 @@ describe('tile counts above the COUNT_DISTINCT precision, on Elasticsearch', () 
     expect(Number(result.value)).toBe(ENTITIES);
   });
 
+  it.each(['current', 'previous'] as const)(
+    'counts the risk movers and the newly high/critical entities exactly for the %s period',
+    async (period) => {
+      const movers = await row(
+        buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, '24h', [], period)
+      );
+      expect(Number(movers.value)).toBe(ENTITIES);
+      const newly = await row(
+        buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, '24h', [], period)
+      );
+      expect(Number(newly.value)).toBe(ENTITIES);
+    }
+  );
+
   it('returns as many entity ids as the count says', async () => {
     const alerts = await row(buildAlertBasedTilesQuery(ENTITY_INDEX, NAMESPACE, '24h'));
     expect([alerts.severe_alerts_entity_ids].flat()).toHaveLength(
@@ -216,5 +276,9 @@ describe('tile counts above the COUNT_DISTINCT precision, on Elasticsearch', () 
       buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, '24h', [], JOBS)
     );
     expect([anomalies.entity_ids].flat()).toHaveLength(Number(anomalies.value));
+    const movers = await row(buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, '24h'));
+    expect([movers.entity_ids].flat()).toHaveLength(Number(movers.value));
+    const newly = await row(buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, '24h'));
+    expect([newly.entity_ids].flat()).toHaveLength(Number(newly.value));
   });
 });

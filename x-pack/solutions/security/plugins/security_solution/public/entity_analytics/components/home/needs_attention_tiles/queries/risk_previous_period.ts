@@ -32,7 +32,9 @@ const buildJoinTail = (entitiesIndexName: string, entityFilterClauses: string[])
   `| WHERE entity.name IS NOT NULL`,
   ...entityFilterClauses,
   `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-  `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
+  // One row per resolved entity, then a plain COUNT: exact, unlike the approximate COUNT_DISTINCT.
+  `| STATS BY effective_id`,
+  `| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)`,
 ];
 
 /** Builds the Risk movers query for the previous period: score up by 10 or more over that period. */

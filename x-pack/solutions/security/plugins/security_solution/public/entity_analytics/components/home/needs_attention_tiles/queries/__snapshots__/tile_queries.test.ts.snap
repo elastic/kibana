@@ -180,7 +180,8 @@ FROM (
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 24h without entity filters builds the risk movers query 1`] = `
@@ -205,7 +206,8 @@ FROM (
         effective_id   = MAX(effective_id)
         BY \`entity.id\`
 | WHERE current_score - boundary_score >= 10
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the alert based tiles query 1`] = `
@@ -391,7 +393,8 @@ FROM (
 | WHERE entity.name IS NOT NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the risk movers query 1`] = `
@@ -417,5 +420,6 @@ FROM (
         effective_id   = MAX(effective_id)
         BY \`entity.id\`
 | WHERE current_score - boundary_score >= 10
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;

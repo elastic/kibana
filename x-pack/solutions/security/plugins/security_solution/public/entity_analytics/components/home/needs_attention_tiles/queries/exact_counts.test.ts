@@ -8,6 +8,8 @@
 import type { TimeRange } from '../../entities_grid/common';
 import { buildAlertBasedTilesQuery } from './entities_with_alerts_query';
 import { buildEntitiesWithAnomaliesCountQuery } from './entities_with_anomalies_query';
+import { buildNewlyHighCriticalCountQuery } from './tile_newly_high_critical_query';
+import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
 
 const INDEX = '.entities-v1';
 const RANGES: TimeRange[] = ['24h', '7d', '30d'];
@@ -41,6 +43,19 @@ describe('exact tile counts', () => {
       const query = buildEntitiesWithAnomaliesCountQuery(INDEX, range, [], ['job_a'], period);
       expect(query).not.toContain('COUNT_DISTINCT');
       expect(finalStats(query)).toContain('value = COUNT(effective_id)');
+    });
+
+    it.each([
+      ['risk movers', buildRiskMoversCountQuery],
+      ['newly high/critical', buildNewlyHighCriticalCountQuery],
+    ] as const)('counts %s with a plain COUNT over one row per resolved entity', (_name, build) => {
+      RANGES.forEach((range) => {
+        const query = build('default', INDEX, range, [], period);
+        expect(query).not.toContain('COUNT_DISTINCT');
+        expect(query).toContain(
+          '| STATS BY effective_id\n| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)'
+        );
+      });
     });
 
     it('reduces the anomalies to one row per resolved entity before counting', () => {

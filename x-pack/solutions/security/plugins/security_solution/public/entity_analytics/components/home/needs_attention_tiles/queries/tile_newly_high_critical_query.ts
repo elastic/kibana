@@ -81,6 +81,9 @@ export const buildNewlyHighCriticalCountQuery = (
     `| WHERE entity.name IS NOT NULL`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
+    // One row per resolved entity, because several ids can resolve to the same one. A plain COUNT of
+    // those rows is exact; COUNT_DISTINCT would only estimate, and is approximate above about 3,000.
+    `| STATS BY effective_id`,
+    `| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)`,
   ].join('\n');
 };
