@@ -197,6 +197,30 @@ apiTest.describe(
       }
     });
 
+    apiTest('runs as the bound service account', async ({ apiClient, esClient }) => {
+      const workloadId = await bindWorkload(apiClient, accountA);
+      // Metrics reset every 30s; resetting now leaves the next run's counts in place until then.
+      await getTaskTypeRunMetrics(apiClient, true);
+      const id = await scheduleTask(apiClient, {
+        enabled: true,
+        runAs: runAsFor(workloadId, accountA),
+      });
+
+      await expect
+        .poll(() => readTaskState(esClient, id), {
+          timeout: RUN_TIMEOUT_MS,
+          message: 'the task did not record a run',
+        })
+        .toStrictEqual(ranAs(accountA));
+
+      await expect
+        .poll(() => getTaskTypeRunMetrics(apiClient, false), {
+          timeout: RUN_TIMEOUT_MS,
+          message: 'the run was not counted as a success',
+        })
+        .toMatchObject({ total: 1, success: 1, user_errors: 0, framework_errors: 0 });
+    });
+
     apiTest(
       'removes a service account task without marking an API key for invalidation',
       async ({ apiClient, esClient }) => {
@@ -225,38 +249,6 @@ apiTest.describe(
           ({ id }) => !markerIds.has(id)
         );
         expect(newMarkers.map(({ apiKeyId }) => apiKeyId)).toStrictEqual([userScope?.apiKeyId]);
-      }
-    );
-
-    apiTest(
-      'rejects a run-time service account that differs from the stored one as a user error',
-      async ({ apiClient, esClient }) => {
-        const workloadId = await bindWorkload(apiClient, accountA);
-        // Metrics reset every 30s; resetting now leaves the next run's counts in place until then.
-        await getTaskTypeRunMetrics(apiClient, true);
-        const id = await scheduleTask(apiClient, {
-          enabled: true,
-          runAs: runAsFor(workloadId, accountA),
-          params: { expectedServiceAccountId: accountB },
-        });
-
-        await expect
-          .poll(
-            async () => {
-              const { status, attempts } = await readStoredTask(esClient, id);
-              return { status, attempts };
-            },
-            { timeout: RUN_TIMEOUT_MS, message: 'the task did not finish a failed run' }
-          )
-          .toStrictEqual({ status: 'idle', attempts: 1 });
-        expect(await readTaskState(esClient, id)).toStrictEqual({});
-
-        await expect
-          .poll(() => getTaskTypeRunMetrics(apiClient, false), {
-            timeout: RUN_TIMEOUT_MS,
-            message: 'the run was not counted as a user error',
-          })
-          .toMatchObject({ total: 1, success: 0, user_errors: 1, framework_errors: 0 });
       }
     );
 
@@ -296,6 +288,37 @@ apiTest.describe(
         expect(await esClient.exists({ index: TASK_MANAGER_INDEX, id: `task:${oldTaskId}` })).toBe(
           false
         );
+      }
+    );
+
+    apiTest(
+      'rejects a run-time service account that differs from the stored one as a user error',
+      async ({ apiClient, esClient }) => {
+        const workloadId = await bindWorkload(apiClient, accountA);
+        await getTaskTypeRunMetrics(apiClient, true);
+        const id = await scheduleTask(apiClient, {
+          enabled: true,
+          runAs: runAsFor(workloadId, accountA),
+          params: { expectedServiceAccountId: accountB },
+        });
+
+        await expect
+          .poll(
+            async () => {
+              const { status, attempts } = await readStoredTask(esClient, id);
+              return { status, attempts };
+            },
+            { timeout: RUN_TIMEOUT_MS, message: 'the task did not finish a failed run' }
+          )
+          .toStrictEqual({ status: 'idle', attempts: 1 });
+        expect(await readTaskState(esClient, id)).toStrictEqual({});
+
+        await expect
+          .poll(() => getTaskTypeRunMetrics(apiClient, false), {
+            timeout: RUN_TIMEOUT_MS,
+            message: 'the run was not counted as a user error',
+          })
+          .toMatchObject({ total: 1, success: 0, user_errors: 1, framework_errors: 0 });
       }
     );
 
