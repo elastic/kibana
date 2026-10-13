@@ -159,7 +159,7 @@
     "@elastic/elasticsearch": "9.5.1",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.29.0",
-    "@elastic/eui": "file:./eui_123.1.0_toast_highlight_001.tgz",
+    "@elastic/eui": "file:./eui_123.1.0_markdown_tooltip_001.tgz",
     "@elastic/eui-illustrations": "1.1.0",
     "@elastic/eui-theme-borealis": "8.1.0",
     "@elastic/filesaver": "1.1.2",
