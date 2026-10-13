@@ -891,8 +891,9 @@ function GraphWorkspace(options) {
       self.addUndoLogEntry(lastOps);
     }
 
-    self.topologyChangeHandler?.();
+    // Layout must initialize edge.topSrc/topTarget before the topology callback snapshots their IDs.
     this.runLayout();
+    self.topologyChangeHandler?.();
   };
 
   this.mergeIds = function (parentId, childId) {

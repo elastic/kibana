@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createWorkspaceState } from '../../state_management/workspace';
 import { createWorkspace } from './graph_client_workspace';
 
 describe('graphui-workspace', function () {
@@ -68,6 +69,29 @@ describe('graphui-workspace', function () {
       expect(topologyChangeHandler).toHaveBeenCalledTimes(1);
       expect(changeHandler).not.toHaveBeenCalled();
       expect(workspace.runLayout).toHaveBeenCalledTimes(1);
+    });
+
+    it('initializes edge layout references before snapshotting topology changes', function () {
+      const { workspace, topologyChangeHandler } = init();
+      topologyChangeHandler.mockImplementation(() => createWorkspaceState(workspace));
+
+      try {
+        workspace.mergeGraph({
+          nodes: [
+            { field: 'field1', term: 'a', weight: 1, depth: 0 },
+            { field: 'field1', term: 'b', weight: 1, depth: 1 },
+          ],
+          edges: [{ source: 0, target: 1, weight: 1, doc_count: 5 }],
+        });
+
+        expect(topologyChangeHandler).toHaveBeenCalledTimes(1);
+        const snapshot = topologyChangeHandler.mock.results[0].value;
+        const edge = snapshot.edgesById[snapshot.edgeIds[0]];
+        expect(edge.topSourceId).toBe(workspace.nodes[0].id);
+        expect(edge.topTargetId).toBe(workspace.nodes[1].id);
+      } finally {
+        workspace.stopLayout();
+      }
     });
 
     it('simpleSearch', function () {
