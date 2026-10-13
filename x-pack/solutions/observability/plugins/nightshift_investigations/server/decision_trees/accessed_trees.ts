@@ -14,7 +14,9 @@ import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_too
 /** One post-execution tool call, matching Agent Builder's after-execution workflow payload. */
 export interface InvestigationToolCall {
   tool_id?: string;
+  tool_call_id?: string;
   params?: Record<string, unknown>;
+  results?: unknown[];
 }
 
 const TREE_FILE_RE = /(?:^|\/)decision_tree_([a-z0-9]+(?:-[a-z0-9]+)*)\.md(?:$|[^a-z0-9-])/g;

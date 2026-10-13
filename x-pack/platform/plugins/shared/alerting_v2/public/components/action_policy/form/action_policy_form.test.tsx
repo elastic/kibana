@@ -7,7 +7,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -19,6 +19,7 @@ const mockGetUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
 let mockWorkflowsEnabled = true;
+const mockRefetchWorkflows = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -91,14 +92,15 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: { results: [], total: 0, page: 1, size: 100 },
     isLoading: false,
+    refetch: mockRefetchWorkflows,
   }),
 }));
 
@@ -106,6 +108,7 @@ const renderForm = (
   defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
   config?: ActionPolicyFormConfig
 ) => {
+  const onSubmit = jest.fn();
   const TestComponent = () => {
     const methods = useForm<ActionPolicyFormState>({
       mode: 'onBlur',
@@ -116,15 +119,26 @@ const renderForm = (
       <I18nProvider>
         <FormProvider {...methods}>
           <ActionPolicyForm config={config} />
+          <button type="button" data-test-subj="submit" onClick={methods.handleSubmit(onSubmit)}>
+            submit
+          </button>
         </FormProvider>
       </I18nProvider>
     );
   };
 
-  return render(<TestComponent />);
+  return { ...render(<TestComponent />), onSubmit };
+};
+
+const NAMED_FORM_STATE: ActionPolicyFormState = { ...DEFAULT_FORM_STATE, name: 'My policy' };
+
+const VALID_FORM_STATE: ActionPolicyFormState = {
+  ...NAMED_FORM_STATE,
+  destinations: [{ type: 'workflow', id: 'workflow-1' }],
 };
 
 const TEST_SUBJ = {
+  submit: 'submit',
   nameInput: 'nameInput',
   groupingModeToggle: 'groupingModeToggle',
   strategySelect: 'strategySelect',
@@ -162,7 +176,7 @@ describe('ActionPolicyForm', () => {
       screen.getByTestId(TEST_SUBJ.nameInput)
     );
     expect(screen.getByTestId('actionPolicyFormSection-policyScope')).toContainElement(
-      screen.getByTestId('ruleTagsSelector')
+      screen.getByTestId('routingTagsSelector')
     );
 
     const notificationControlsButton = within(
@@ -193,17 +207,84 @@ describe('ActionPolicyForm', () => {
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
   });
 
-  it('renders grouping mode toggle with Per Episode selected by default', () => {
+  it('shows the name error for a whitespace-only name on blur', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), '   ');
+    await user.tab();
+    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+  });
+
+  describe('on submit', () => {
+    it('blocks submit and shows the name and destination errors for an empty form', async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+      expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('submits a valid form', async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm(VALID_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    });
+
+    it('clears the destination error once a simple workflow is added', async () => {
+      const user = userEvent.setup();
+      renderForm(NAMED_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+      expect(await screen.findByText('At least one destination is required')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('simpleWorkflowAdd-email'));
+
+      await waitFor(() =>
+        expect(screen.queryByText('At least one destination is required')).not.toBeInTheDocument()
+      );
+    });
+
+    it('blocks submit without destinations when workflows are disabled', async () => {
+      mockWorkflowsEnabled = false;
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm(NAMED_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      expect(await screen.findByText('At least one destination is required')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowsDisabledCallout')).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('submits existing destinations when workflows are disabled', async () => {
+      mockWorkflowsEnabled = false;
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm(VALID_FORM_STATE);
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  it('renders grouping mode toggle with Per Alert selected by default', () => {
     renderForm();
 
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     expect(toggle).toBeInTheDocument();
-    const perEpisodeButton = toggle.querySelector('button[aria-pressed="true"]');
-    expect(perEpisodeButton).toBeInTheDocument();
+    const perAlertButton = toggle.querySelector('button[aria-pressed="true"]');
+    expect(perAlertButton).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
   });
 
-  it('shows strategy select for per_episode mode', () => {
+  it('shows strategy select for per_alert mode', () => {
     renderForm();
 
     const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
@@ -291,7 +372,7 @@ describe('ActionPolicyForm', () => {
     const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
     const buttons = toggle.querySelectorAll('button');
 
-    // Switch to Per Episode
+    // Switch to Per Alert
     await user.click(buttons[0]);
     expect(screen.queryByTestId(TEST_SUBJ.groupByInput)).not.toBeInTheDocument();
 
@@ -325,6 +406,14 @@ describe('ActionPolicyForm', () => {
       '/app/workflows/create'
     );
     expect(screen.getByTestId('createWorkflowLink')).toHaveAttribute('target', '_blank');
+  });
+
+  it('refetches workflows when the selector receives focus', () => {
+    renderForm();
+
+    fireEvent.focus(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
+
+    expect(mockRefetchWorkflows).toHaveBeenCalled();
   });
 
   it('renders warning callout when workflows are disabled', () => {

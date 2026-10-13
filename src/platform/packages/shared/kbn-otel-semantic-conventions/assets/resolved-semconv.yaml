@@ -7289,116 +7289,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-  - id: attributes.log
-    type: attribute_group
-    brief: Describes Log attributes
-    attributes:
-      - name: log.iostream
-        type:
-          members:
-            - id: stdout
-              value: stdout
-              brief: Logs from stdout stream
-              stability: development
-            - id: stderr
-              value: stderr
-              brief: Events from stderr stream
-              stability: development
-        brief: |
-          The stream associated with the log. See below for a list of well-known values.
-        requirement_level: opt_in
-        stability: development
-    lineage:
-      provenance:
-        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/log/common.yaml
-      attributes:
-        log.iostream:
-          source_group: registry.log
-          inherited_fields:
-            - brief
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-  - id: attributes.log.file
-    type: attribute_group
-    brief: |
-      A file to which log was emitted.
-    attributes:
-      - name: log.file.name
-        type: string
-        brief: |
-          The basename of the file.
-        examples:
-          - audit.log
-        requirement_level: recommended
-        stability: development
-      - name: log.file.name_resolved
-        type: string
-        brief: |
-          The basename of the file, with symlinks resolved.
-        examples:
-          - uuid.log
-        requirement_level: opt_in
-        stability: development
-      - name: log.file.path
-        type: string
-        brief: |
-          The full path to the file.
-        examples:
-          - /var/log/mysql/audit.log
-        requirement_level: opt_in
-        stability: development
-      - name: log.file.path_resolved
-        type: string
-        brief: |
-          The full path to the file, with symlinks resolved.
-        examples:
-          - /var/lib/docker/uuid.log
-        requirement_level: opt_in
-        stability: development
-    lineage:
-      provenance:
-        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/log/common.yaml
-      attributes:
-        log.file.name:
-          source_group: registry.log.file
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        log.file.name_resolved:
-          source_group: registry.log.file
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        log.file.path:
-          source_group: registry.log.file
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        log.file.path_resolved:
-          source_group: registry.log.file
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
   - id: attributes.messaging.common.minimal
     type: attribute_group
     brief: Common cross-signal messaging attributes.
@@ -11147,6 +11037,7 @@ groups:
           The CPU architecture the host system is running on.
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: host.id
         type: string
         brief: |
@@ -11181,6 +11072,7 @@ groups:
           privileged lookup of `host.id` is required, the value should be injected via the
           `OTEL_RESOURCE_ATTRIBUTES` environment variable.
         stability: development
+        role: identifying
       - name: host.image.id
         type: string
         brief: |
@@ -11189,6 +11081,7 @@ groups:
           - ami-07b06b442921831e5
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: host.image.name
         type: string
         brief: |
@@ -11198,6 +11091,7 @@ groups:
           - CentOS-8-x86_64-1905
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: host.image.version
         type: string
         brief: |
@@ -11206,6 +11100,7 @@ groups:
           - "0.1"
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: host.ip
         type: string[]
         brief: |
@@ -11217,6 +11112,7 @@ groups:
         note: |
           IPv4 Addresses MUST be specified in dotted-quad notation. IPv6 addresses MUST be specified in the [RFC 5952](https://www.rfc-editor.org/rfc/rfc5952.html) format.
         stability: development
+        role: descriptive
       - name: host.mac
         type: string[]
         brief: |
@@ -11228,6 +11124,7 @@ groups:
         note: |
           MAC Addresses MUST be represented in [IEEE RA hexadecimal form](https://standards.ieee.org/wp-content/uploads/import/documents/tutorials/eui.pdf): as hyphen-separated octets in uppercase hexadecimal form from most to least significant.
         stability: development
+        role: descriptive
       - name: host.name
         type: string
         brief: |
@@ -11236,6 +11133,7 @@ groups:
           - opentelemetry-test
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: host.type
         type: string
         brief: |
@@ -11244,6 +11142,7 @@ groups:
           - n1-standard-1
         requirement_level: recommended
         stability: development
+        role: descriptive
     name: host
     lineage:
       provenance:
@@ -11257,6 +11156,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         host.id:
           source_group: registry.host
           inherited_fields:
@@ -11266,6 +11167,7 @@ groups:
             - stability
           locally_overridden_fields:
             - note
+            - role
         host.image.id:
           source_group: registry.host
           inherited_fields:
@@ -11274,6 +11176,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         host.image.name:
           source_group: registry.host
           inherited_fields:
@@ -11282,6 +11186,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         host.image.version:
           source_group: registry.host
           inherited_fields:
@@ -11290,6 +11196,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         host.ip:
           source_group: registry.host
           inherited_fields:
@@ -11299,6 +11207,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         host.mac:
           source_group: registry.host
           inherited_fields:
@@ -11308,6 +11217,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         host.name:
           source_group: registry.host
           inherited_fields:
@@ -11316,6 +11226,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         host.type:
           source_group: registry.host
           inherited_fields:
@@ -11324,6 +11236,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.host.cpu
     type: entity
     brief: |
@@ -19820,56 +19734,6 @@ groups:
           locally_overridden_fields:
             - brief
             - examples
-  - id: log.record
-    type: attribute_group
-    brief: |
-      The attributes described in this section are rather generic. They may be used in any Log Record they apply to.
-    attributes:
-      - name: log.record.original
-        type: string
-        brief: |
-          The complete original Log Record.
-        examples:
-          - 77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened
-          - "[INFO] 8/3/24 12:34:56 Something happened"
-        requirement_level: opt_in
-        note: |
-          This value MAY be added when processing a Log Record which was originally transmitted as a string or equivalent data type AND the Body field of the Log Record does not contain the same value. (e.g. a syslog or a log record read from a file.)
-        stability: development
-      - name: log.record.uid
-        type: string
-        brief: |
-          A unique identifier for the Log Record.
-        examples:
-          - 01ARZ3NDEKTSV4RRFFQ69G5FAV
-        requirement_level: opt_in
-        note: |
-          If an ID is provided, other log records with the same ID will be considered duplicates and can be removed safely. This means, that two distinguishable log records MUST have different values.
-          The ID MAY be an [Universally Unique Lexicographically Sortable Identifier (ULID)](https://github.com/ulid/spec), but other identifiers (e.g. UUID) may be used as needed.
-        stability: development
-    lineage:
-      provenance:
-        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/log/common.yaml
-      attributes:
-        log.record.original:
-          source_group: registry.log.record
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        log.record.uid:
-          source_group: registry.log.record
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
   - id: mcp.common.attributes
     type: attribute_group
     brief: Common MCP attributes
@@ -26792,10 +26656,47 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: metric.db.client.connection.max
+  - id: metric.db.client.connection.limit
     type: metric
     brief: The maximum number of open connections allowed.
     stability: development
+    attributes:
+      - name: db.client.connection.pool.name
+        type: string
+        brief: |
+          The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.
+        examples:
+          - myDataSource
+        requirement_level: required
+        stability: development
+    metric_name: db.client.connection.limit
+    instrument: updowncounter
+    unit: "{connection}"
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
+        path: /home/weaver/source/db/metrics.yaml
+      attributes:
+        db.client.connection.pool.name:
+          source_group: registry.db
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.db.client.connection.max
+    type: metric
+    brief: Deprecated, use `db.client.connection.limit` instead.
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: db.client.connection.limit
+      note: Replaced by `db.client.connection.limit`.
     attributes:
       - name: db.client.connection.pool.name
         type: string
@@ -26811,7 +26712,7 @@ groups:
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/db/metrics.yaml
+        path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
       attributes:
         db.client.connection.pool.name:
           source_group: registry.db
@@ -27081,12 +26982,12 @@ groups:
         metric_value_type: int
   - id: metric.db.client.connections.max
     type: metric
-    brief: Deprecated, use `db.client.connection.max` instead.
+    brief: Deprecated, use `db.client.connection.limit` instead.
     stability: development
     deprecated:
       reason: renamed
-      renamed_to: db.client.connection.max
-      note: Replaced by `db.client.connection.max`.
+      renamed_to: db.client.connection.limit
+      note: Replaced by `db.client.connection.limit`.
     attributes:
       - name: db.client.connections.pool.name
         type: string
@@ -27845,7 +27746,7 @@ groups:
               stability: development
             - id: ibm.db2
               value: ibm.db2
-              brief: "[IBM Db2](https://www.ibm.com/db2)"
+              brief: "[IBM Db2](https://www.ibm.com/products/db2)"
               stability: development
             - id: ibm.informix
               value: ibm.informix
@@ -28342,7 +28243,7 @@ groups:
               stability: development
             - id: ibm.db2
               value: ibm.db2
-              brief: "[IBM Db2](https://www.ibm.com/db2)"
+              brief: "[IBM Db2](https://www.ibm.com/products/db2)"
               stability: development
             - id: ibm.informix
               value: ibm.informix
@@ -72979,7 +72880,7 @@ groups:
               stability: development
             - id: ibm.db2
               value: ibm.db2
-              brief: "[IBM Db2](https://www.ibm.com/db2)"
+              brief: "[IBM Db2](https://www.ibm.com/products/db2)"
               stability: development
             - id: ibm.informix
               value: ibm.informix
@@ -79985,7 +79886,7 @@ groups:
               brief: Events from stderr stream
               stability: development
         brief: |
-          The stream associated with the log. See below for a list of well-known values.
+          The stream the log record was emitted to.
         requirement_level: recommended
         stability: development
     lineage:
@@ -79996,12 +79897,12 @@ groups:
   - id: registry.log.file
     type: attribute_group
     brief: |
-      Attributes for a file to which log was emitted.
+      Attributes for a file to which the log record was emitted.
     attributes:
       - name: log.file.name
         type: string
         brief: |
-          The basename of the file.
+          The basename of the file to which the log record was emitted.
         examples:
           - audit.log
         requirement_level: recommended
@@ -80009,7 +79910,7 @@ groups:
       - name: log.file.name_resolved
         type: string
         brief: |
-          The basename of the file, with symlinks resolved.
+          The basename of the file to which the log record was emitted, with symlinks resolved.
         examples:
           - uuid.log
         requirement_level: recommended
@@ -80017,7 +79918,7 @@ groups:
       - name: log.file.path
         type: string
         brief: |
-          The full path to the file.
+          The full path to the file to which the log record was emitted.
         examples:
           - /var/log/mysql/audit.log
         requirement_level: recommended
@@ -80025,7 +79926,7 @@ groups:
       - name: log.file.path_resolved
         type: string
         brief: |
-          The full path to the file, with symlinks resolved.
+          The full path to the file to which the log record was emitted, with symlinks resolved.
         examples:
           - /var/lib/docker/uuid.log
         requirement_level: recommended
@@ -91600,7 +91501,7 @@ groups:
               stability: development
             - id: ibm.db2
               value: ibm.db2
-              brief: "[IBM Db2](https://www.ibm.com/db2)"
+              brief: "[IBM Db2](https://www.ibm.com/products/db2)"
               stability: development
             - id: ibm.informix
               value: ibm.informix
@@ -111286,6 +111187,7 @@ groups:
           locally_overridden_fields:
             - sampling_relevant
       includes_group:
+        - messaging.attributes.network
         - messaging.attributes.consumer
         - messaging.attributes.network
   - id: span.messaging.eventhubs.process.consumer
@@ -126193,6 +126095,7 @@ groups:
           locally_overridden_fields:
             - sampling_relevant
       includes_group:
+        - messaging.attributes.network
         - messaging.attributes.consumer
         - messaging.attributes.network
   - id: span.messaging.servicebus.process.consumer
@@ -133431,7 +133334,7 @@ groups:
               stability: development
             - id: ibm.db2
               value: ibm.db2
-              brief: "[IBM Db2](https://www.ibm.com/db2)"
+              brief: "[IBM Db2](https://www.ibm.com/products/db2)"
               stability: development
             - id: ibm.informix
               value: ibm.informix

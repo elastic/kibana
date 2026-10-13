@@ -8,15 +8,31 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
+  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_USAGE_PARENT_ID,
+  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+} from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE } from '../telemetry';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
-import { optimizeCortex } from './optimize';
+import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
+
+// Mirrors the resolver's precedence; the resolver itself is covered in @kbn/nightshift-ai.
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: jest.fn(
+    async ({
+      requestedId,
+      roundConnectorId,
+    }: {
+      requestedId?: string;
+      roundConnectorId?: string;
+    }) => requestedId || roundConnectorId || 'nightshift-default'
+  ),
+}));
 
 jest.mock('./optimize', () => ({
   createLlmProposeCortexEdits: jest.fn(() => jest.fn()),
@@ -99,61 +115,131 @@ describe('hydrateCortexWorkspace', () => {
 describe('runCortexOptimize', () => {
   const esClient = { search: jest.fn() } as never;
   const request = { headers: {} } as never;
-  const getClient = jest.fn().mockReturnValue({});
-  const getInference = jest.fn().mockReturnValue({ getClient });
-  const getSearchInferenceEndpoints = jest.fn().mockReturnValue({
-    endpoints: {
-      getForFeature: jest.fn().mockResolvedValue({
-        endpoints: [{ connectorId: 'connector-1' }],
-      }),
-    },
+  const analytics = coreMock.createSetup().analytics;
+  const inferenceClient = { output: jest.fn() };
+  const createModelProvider = jest.fn();
+  const getAgentBuilder = jest.fn().mockReturnValue({
+    runtime: { createModelProvider },
   });
+  const getInference = jest.fn().mockReturnValue({});
+  const getSavedObjects = jest.fn().mockReturnValue({});
+  const getUiSettings = jest.fn().mockReturnValue({});
 
-  const run = (agentId?: string) =>
+  const toolCalls: InvestigationToolCall[] = [
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
+    { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+  ];
+  const progressReport: InvestigationToolCall = {
+    tool_id: 'platform.streams.investigation_progress_report',
+    params: { step: 'triage' },
+  };
+
+  const run = (
+    agentId?: string,
+    {
+      calls = toolCalls,
+      connectorId,
+      roundConnectorId,
+    }: { calls?: InvestigationToolCall[]; connectorId?: string; roundConnectorId?: string } = {}
+  ) =>
     runCortexOptimize({
       request,
       agentId,
       userMessage: 'why?',
       assistantMessage: 'redis',
+      toolCalls: calls,
       esClient,
       spaceId: 'default',
       interactionId: 'execution-1',
-      analytics: coreMock.createSetup().analytics,
+      analytics,
+      conversationId: 'conversation-1',
+      roundId: 'round-1',
+      getAgentBuilder,
       getInference,
-      getSearchInferenceEndpoints,
+      getSavedObjects,
+      getUiSettings,
       logger: loggerMock.create(),
+      requestedConnectorId: connectorId,
+      roundConnectorId,
     });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    createModelProvider.mockReturnValue({
+      getDefaultModel: jest.fn().mockResolvedValue({
+        inferenceClient,
+        connector: { connectorId: 'connector-1' },
+      }),
+    });
+    getAgentBuilder.mockReturnValue({ runtime: { createModelProvider } });
+    getInference.mockReturnValue({});
+    getSavedObjects.mockReturnValue({});
+    getUiSettings.mockReturnValue({});
   });
 
   it('runs for the Nightshift investigation agent', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-    expect(optimizeCortex).toHaveBeenCalled();
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
   });
 
-  it('attributes the optimize LLM call to significant events investigation spend', async () => {
-    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-    expect(getClient).toHaveBeenCalledWith({
+  // A reply that made almost no tool calls answered from what the wiki already said, or was a
+  // smoke test. Neither should mint pages.
+  it('skips a round with fewer than three tool calls', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { calls: toolCalls.slice(0, 2) });
+    expect(optimizeCortex).not.toHaveBeenCalled();
+    expect(createModelProvider).not.toHaveBeenCalled();
+  });
+
+  it('attributes inherited connector calls to the Nightshift investigation feature', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { roundConnectorId: 'anthropic-sonnet' });
+    expect(createModelProvider).toHaveBeenCalledWith({
       request,
-      bindTo: {
-        connectorId: 'connector-1',
-        metadata: {
-          connectorTelemetry: {
-            pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-            aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-            productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-            productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-            interactionId: 'execution-1',
-          },
-        },
+      defaultConnectorId: 'anthropic-sonnet',
+      telemetryMetadata: {
+        pluginId: NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+        aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
+        productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+        productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+        interactionId: 'execution-1',
       },
+    });
+    expect(optimizeCortex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetry: expect.objectContaining({
+          reportEditsApplied: expect.any(Function),
+        }),
+      })
+    );
+  });
+
+  it('reports applied Cortex edits with the completed round identifiers', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { roundConnectorId: 'anthropic-sonnet' });
+    const call = jest.mocked(optimizeCortex).mock.calls[0]?.[0];
+    if (!call) {
+      throw new Error('Cortex optimizer was not invoked');
+    }
+    call.telemetry.reportEditsApplied([{ action: 'upsert', entityType: 'service' }]);
+    expect(analytics.reportEvent).toHaveBeenCalledWith(NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE, {
+      conversation_id: 'conversation-1',
+      round_id: 'round-1',
+      action: 'upsert',
+      entity_type: 'service',
+      edit_count: 1,
     });
   });
 
-  it('skips another agent', async () => {
-    await run('other-agent');
+  it('passes only sandbox tool calls to the optimizer', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: [progressReport, ...toolCalls, progressReport],
+    });
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
+  });
+
+  it('does not count non-sandbox tool calls towards the minimum', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: [...toolCalls.slice(0, 2), progressReport, progressReport],
+    });
     expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
@@ -168,5 +254,43 @@ describe('runCortexOptimize', () => {
   it('skips a different agent', async () => {
     await run('some-other-agent');
     expect(optimizeCortex).not.toHaveBeenCalled();
+  });
+
+  it('treats connector_id as a strict override over the round model', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      connectorId: 'manual-model',
+      roundConnectorId: 'round-model',
+    });
+
+    expect(createModelProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultConnectorId: 'manual-model' })
+    );
+  });
+
+  it('uses the Nightshift default when no model is passed', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+
+    expect(createModelProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultConnectorId: 'nightshift-default' })
+    );
+  });
+
+  it('fails the optimize run when the model cannot be loaded', async () => {
+    createModelProvider.mockReturnValue({
+      getDefaultModel: jest.fn().mockRejectedValue(new Error('connector gone')),
+    });
+
+    await expect(run(NIGHTSHIFT_INVESTIGATION_AGENT_ID)).rejects.toThrow('connector gone');
+    expect(optimizeCortex).not.toHaveBeenCalled();
+  });
+
+  it('inherits the triggering agent connector via createModelProvider', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { roundConnectorId: 'anthropic-sonnet' });
+
+    expect(createModelProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ request, defaultConnectorId: 'anthropic-sonnet' })
+    );
+    expect(createLlmProposeCortexEdits).toHaveBeenCalledWith({ inferenceClient });
+    expect(optimizeCortex).toHaveBeenCalled();
   });
 });

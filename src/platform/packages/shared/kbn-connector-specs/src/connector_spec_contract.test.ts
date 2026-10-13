@@ -45,11 +45,8 @@ describe('connector spec contracts', () => {
     // Catch it here instead. New connectors are scaffolded at enterprise by policy, but
     // gold is the floor the platform enforces, so existing gold specs stay valid.
     expect(LICENSE_TYPE[metadata.minimumLicense]).toBeGreaterThanOrEqual(LICENSE_TYPE.gold);
-    // supportedFeatureIds may be [] for support-only connectors (not yet feature-enabled).
-    // Non-empty entries must be valid feature ID strings.
-    if (metadata.supportedFeatureIds.length > 0) {
-      expect(metadata.supportedFeatureIds.every((id) => typeof id === 'string')).toBe(true);
-    }
+    expect(metadata.supportedFeatureIds.length).toBeGreaterThan(0);
+    expect(metadata.supportedFeatureIds.every((id) => typeof id === 'string')).toBe(true);
   });
 
   it.each(allSpecs)('%s has valid authentication configuration', (_exportName, spec) => {
@@ -113,6 +110,13 @@ describe('connector spec contracts', () => {
     }
     for (const [eventKey, def] of Object.entries(spec.events.definitions)) {
       expect(def.eventId).toBe(buildEventId(spec.metadata.id, eventKey));
+    }
+  });
+
+  it.each(allSpecs)('%s forwards only lowercase non-credential headers', (_exportName, spec) => {
+    for (const name of spec.events?.headers ?? []) {
+      expect(name).toBe(name.toLowerCase());
+      expect(['authorization', 'cookie']).not.toContain(name);
     }
   });
 

@@ -21,22 +21,28 @@ import moment from 'moment';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
 import { isEmpty } from 'lodash';
-import { registerCleanUpTask } from './private_location/clean_up_task';
+import { registerCleanUpTask } from '../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
+  syntheticsMonitorSOTypes,
   syntheticsParamType,
 } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
-import { getAPIKeyForSyntheticsService } from './get_api_key';
+import {
+  getAPIKeyForSyntheticsService,
+  getApiKeyInvalidTelemetryPayload,
+  type ApiKeyInvalidReason,
+} from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
 import type { ServiceConfig } from '../config';
 import type { ServiceData } from './service_api_client';
 import { ServiceAPIClient } from './service_api_client';
 
 import type {
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
@@ -44,7 +50,7 @@ import type {
   SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
-import { ConfigKey } from '../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
@@ -54,6 +60,15 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
+
+type MonitorToDelete = Pick<
+  MonitorFields,
+  | ConfigKey.MONITOR_QUERY_ID
+  | ConfigKey.MONITOR_TYPE
+  | ConfigKey.LOCATIONS
+  | ConfigKey.SCHEDULE
+  | ConfigKey.NAMESPACE
+>;
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -346,6 +361,24 @@ export class SyntheticsService {
     );
   }
 
+  /** Pages through every monitor without decrypting it, reading only what a delete request needs. */
+  private getDeleteSOClientFinder({ pageSize }: { pageSize: number }) {
+    return this.server.coreStart.savedObjects
+      .createInternalRepository()
+      .createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+        type: syntheticsMonitorSOTypes,
+        perPage: pageSize,
+        namespaces: [ALL_SPACES_ID],
+        fields: [
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.MONITOR_TYPE,
+          ConfigKey.LOCATIONS,
+          ConfigKey.SCHEDULE,
+          ConfigKey.NAMESPACE,
+        ],
+      });
+  }
+
   private getESClient() {
     if (!this.server.coreStart) {
       return;
@@ -353,8 +386,14 @@ export class SyntheticsService {
     return this.server.coreStart?.elasticsearch.client.asInternalUser;
   }
 
-  async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+  async getOutput({ inspect }: { inspect: boolean } = { inspect: false }): Promise<{
+    output: ServiceData['output'] | null;
+    invalidDetails?: {
+      reason: ApiKeyInvalidReason;
+      missingPrivileges?: string[];
+    };
+  }> {
+    const { apiKey, isValid, reason, missingPrivileges } = await getAPIKeyForSyntheticsService({
       server: this.server,
     });
     // do not check for api key validity if inspecting
@@ -363,12 +402,20 @@ export class SyntheticsService {
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;
-      return null;
+      return {
+        output: null,
+        invalidDetails: {
+          reason: reason ?? 'invalid',
+          missingPrivileges,
+        },
+      };
     }
 
     return {
-      hosts: this.esHosts,
-      api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
+      output: {
+        hosts: this.esHosts,
+        api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
+      },
     };
   }
 
@@ -379,7 +426,7 @@ export class SyntheticsService {
     const monitors = this.formatConfigs(config, mws);
     const license = await this.getLicense();
 
-    const output = await this.getOutput({ inspect: true });
+    const { output } = await this.getOutput({ inspect: true });
     if (output) {
       return await this.apiClient.inspect({
         monitors,
@@ -399,7 +446,7 @@ export class SyntheticsService {
       const monitors = this.formatConfigs(configs, mws);
       const license = await this.getLicense();
 
-      const output = await this.getOutput();
+      const { output } = await this.getOutput();
       if (output) {
         this.logger.debug(`1 monitor will be pushed to synthetics service.`);
 
@@ -430,7 +477,7 @@ export class SyntheticsService {
       const license = await this.getLicense();
       const monitors = this.formatConfigs(monitorConfig, mws);
 
-      const output = await this.getOutput();
+      const { output } = await this.getOutput();
       if (output) {
         const data = {
           monitors,
@@ -496,12 +543,18 @@ export class SyntheticsService {
       if (result.saved_objects.length > 0) {
         try {
           if (!output) {
-            output = await this.getOutput();
+            const outputResult = await this.getOutput();
+            output = outputResult.output;
             if (!output) {
+              const { code, reason, message } = getApiKeyInvalidTelemetryPayload({
+                reason: outputResult.invalidDetails?.reason ?? 'invalid',
+                missingPrivileges: outputResult.invalidDetails?.missingPrivileges,
+              });
               sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                reason: 'API key is not valid.',
-                message: 'Failed to push configs. API key is not valid.',
                 type: 'invalidApiKey',
+                code,
+                reason,
+                message,
                 stackVersion: service.server.stackVersion,
               });
               return;
@@ -561,7 +614,7 @@ export class SyntheticsService {
     }
     const license = await this.getLicense();
 
-    const output = await this.getOutput();
+    const { output } = await this.getOutput();
     if (!output) {
       return;
     }
@@ -589,14 +642,14 @@ export class SyntheticsService {
       );
 
       if (hasPublicLocations) {
-        const output = await this.getOutput();
+        const { output } = await this.getOutput();
         if (!output) {
           return;
         }
 
         const data = {
           output,
-          monitors: this.formatConfigs(configs, []),
+          monitors: this.formatDeleteConfigs(configs),
           license,
         };
         return await this.apiClient.delete(data);
@@ -608,16 +661,19 @@ export class SyntheticsService {
 
   async deleteAllConfigs() {
     const license = await this.getLicense();
-    const finder = await this.getSOClientFinder({ pageSize: 100 });
-    const output = await this.getOutput();
+    const finder = this.getDeleteSOClientFinder({ pageSize: 100 });
+    const { output } = await this.getOutput();
     if (!output) {
       return;
     }
 
+    const pushErrors: ServiceLocationErrors = [];
     for await (const result of finder.find()) {
-      const monitors = this.normalizeConfigs(result.saved_objects, {}, []);
+      const monitors = this.formatDeleteConfigs(
+        result.saved_objects.map(({ attributes }) => ({ monitor: attributes }))
+      );
       const hasPublicLocations = monitors.some((config) =>
-        config.locations.some(({ isServiceManaged }) => isServiceManaged)
+        config.locations?.some(({ isServiceManaged }) => isServiceManaged)
       );
 
       if (hasPublicLocations) {
@@ -626,9 +682,12 @@ export class SyntheticsService {
           monitors,
           license,
         };
-        return await this.apiClient.delete(data);
+        pushErrors.push(...(await this.apiClient.delete(data)));
       }
     }
+
+    finder.close().catch(() => {});
+    return pushErrors;
   }
 
   async getSyntheticsParams({
@@ -721,6 +780,38 @@ export class SyntheticsService {
         params ?? {},
         mws
       );
+    });
+  }
+
+  /**
+   * The service finds the monitors to delete by id and type alone, so unlike the other pushes the
+   * body is never formatted: it carries no config, params or secrets. `locations` only routes the
+   * request and is dropped before it is sent. The namespace is kept so the body never claims the
+   * default one for a monitor that has its own. Browser monitors keep their schedule because services
+   * older than synthetics-service#2049 (v1.13.14) take it from the request to unschedule the monitor.
+   */
+  formatDeleteConfigs(
+    configs: Array<{ monitor: MonitorToDelete; heartbeatId?: string }>
+  ): Array<Partial<MonitorFields>> {
+    return configs.map(({ monitor, heartbeatId }) => {
+      const type = monitor[ConfigKey.MONITOR_TYPE];
+      const schedule = monitor[ConfigKey.SCHEDULE];
+
+      return {
+        [ConfigKey.MONITOR_QUERY_ID]: heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID],
+        [ConfigKey.MONITOR_TYPE]: type,
+        [ConfigKey.NAMESPACE]: monitor[ConfigKey.NAMESPACE],
+        [ConfigKey.LOCATIONS]: monitor[ConfigKey.LOCATIONS],
+        ...(type === MonitorTypeEnum.BROWSER && schedule
+          ? formatMonitorConfigFields(
+              [ConfigKey.SCHEDULE],
+              { [ConfigKey.SCHEDULE]: schedule },
+              this.logger,
+              {},
+              []
+            )
+          : {}),
+      };
     });
   }
 

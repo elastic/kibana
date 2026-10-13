@@ -41,7 +41,7 @@ export GCS_CREDENTIALS='{"type":"service_account",...}'
 The default run ID is pinned in code (`SIGEVENTS_SNAPSHOT_RUN`). Override it at runtime:
 
 ```bash
-SIGEVENTS_SNAPSHOT_RUN=2026-03-27 node scripts/evals run --suite significant-events --judge gemini-3-pro
+SIGEVENTS_SNAPSHOT_RUN=2026-09-18 node scripts/evals run --suite significant-events --judge gemini-3-pro
 ```
 
 ### Tracing setup (optional — for token and latency metrics)
@@ -173,7 +173,7 @@ node scripts/evals run \
 
 | Variable                                | Description                                                                 | Default                    |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
-| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder for run-scoped GCS snapshots; fixed incident paths ignore it | `2026-03-27`               |
+| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder for run-scoped GCS snapshots; fixed incident paths ignore it | `2026-09-18`               |
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | registered datasets without `optIn: true` (`otel-demo`, `bank-of-anthos`, `quarkus-super-heroes`) |
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
 | `KI_QUERY_GENERATION_SCENARIOS`         | Comma-separated KI query generation scenario ids to run (focused local runs); unset runs every scenario | `all`                      |

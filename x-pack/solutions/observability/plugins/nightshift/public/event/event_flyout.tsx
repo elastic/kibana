@@ -102,9 +102,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
       isInvestigationInvestigated(investigationStatus) ||
       isInvestigationTerminalFailure(investigationStatus)
     ) {
-      markEventInvestigationCompleteInCache(queryClient, event.event_uuid);
+      markEventInvestigationCompleteInCache(queryClient, event.event_id);
     }
-  }, [event.event_uuid, investigationStatus, latestInvestigation, queryClient]);
+  }, [event.event_id, investigationStatus, latestInvestigation, queryClient]);
 
   useEffect(() => {
     if (

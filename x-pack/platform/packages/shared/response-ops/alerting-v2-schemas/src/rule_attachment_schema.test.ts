@@ -59,6 +59,22 @@ describe('ruleAttachmentDataSchema', () => {
     });
   });
 
+  it('still resolves an attachment stored with the saved-object version token', () => {
+    const result = ruleAttachmentDataSchema.parse({
+      ...baseRule,
+      id: 'rule-1',
+      version: 'WzEsMV0=',
+    });
+
+    expect(result).not.toHaveProperty('version');
+  });
+
+  it('drops the rule version counter rather than storing it on the attachment', () => {
+    const result = ruleAttachmentDataSchema.parse({ ...baseRule, id: 'rule-1', version: 4 });
+
+    expect(result).not.toHaveProperty('version');
+  });
+
   it('still resolves an attachment stored with the removed metadata.owner', () => {
     const result = ruleAttachmentDataSchema.parse({
       ...baseRule,

@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { HuntTechnology, IndexScopeWindow, ResolvedIndexScope } from '@kbn/alertzero-common';
-import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
+import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { HuntScope, HuntScopeResolution, IndexScopeWindow } from '@kbn/alertzero-common';
+import { classifyActionableIndices } from './classify_actionable_indices';
+import { discoverHuntDatasets } from './discover_hunt_datasets';
+import type { DiscoveredDataset } from './discover_hunt_datasets';
+import { buildMatchesRequired } from './matches_required';
+import { matchDatasetsDeterministic } from './match_hunt_datasets';
+import type { HuntScopeReportContext } from './match_hunt_datasets';
+import { fitsRequestPath, vendorWildcards } from './scope_bounds';
 
 /** Default lookback window: 30 days. */
 const DEFAULT_WINDOW_DAYS = 30;
@@ -16,198 +23,172 @@ const DEFAULT_WINDOW_DAYS = 30;
 const DEFAULT_ROW_LIMIT = 25;
 
 /**
- * Per-technology index pattern requirements.
- *
- * `required`: patterns the hunt cannot run without — zero resolved required
- * patterns means `blocked`.
- * `optional`: extension patterns whose absence only degrades coverage.
- * `.alerts-security.alerts-{spaceId}` is appended by `resolveIndexScope`
- * for every technology since it is space-derived, not technology-derived.
- *
- * Adding a technology means adding both a `HuntTechnology` union member and
- * an entry here; the type system will not do it for you.
+ * The wire `HuntScope` plus the datasets stage 1 discovered, which stay server-side.
+ * Stage 1 of hunt scoping: it runs before Tier 1 and reads only the caller's universe,
+ * never an alerts index or a seed list.
  */
-const TECHNOLOGY_INDEX_MAP: Record<HuntTechnology, { required: string[]; optional: string[] }> = {
-  aws_iam: {
-    required: ['logs-aws.*'],
-    optional: ['logs-endpoint.events.*'],
-  },
-  fortigate: {
-    required: ['logs-fortinet.*'],
-    optional: [],
-  },
-};
+export interface ResolvedHuntScope extends HuntScope {
+  /** Datasets discovered inside the universe (data streams only). */
+  discovered: DiscoveredDataset[];
+}
 
-const alertsIndexPattern = (spaceId: string): string =>
-  `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${spaceId}`;
+const uniq = (values: string[]): string[] => Array.from(new Set(values));
 
 const defaultWindow = (): IndexScopeWindow => ({
   from: new Date(Date.now() - DEFAULT_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString(),
   to: new Date().toISOString(),
 });
 
-const deriveStatus = (blocked: boolean, degraded: boolean): ResolvedIndexScope['status'] =>
-  blocked ? 'blocked' : degraded ? 'degraded' : 'ok';
+const isExclusion = (pattern: string): boolean => pattern.startsWith('-');
 
 /**
- * Resolves whether a technology's target indices actually exist in the given
- * space. Every pattern — required, optional, and the space-derived alerts
- * pattern — is checked with `resolveIndex` so a missing integration reads as
- * `blocked` or `degraded` instead of a hunt silently querying nothing.
+ * The universe patterns no resolved name globs to. A name counts whether it resolved as an
+ * index, an alias, a data stream, or a data stream's backing index.
  */
-export const resolveIndexScope = async ({
-  esClient,
-  technology,
-  spaceId,
-  window,
-  row_limit = DEFAULT_ROW_LIMIT,
-}: {
-  esClient: ElasticsearchClient;
-  technology: HuntTechnology;
-  spaceId: string;
-  window?: IndexScopeWindow;
-  row_limit?: number;
-}): Promise<ResolvedIndexScope> => {
-  const { required, optional } = TECHNOLOGY_INDEX_MAP[technology];
-  const alertsPattern = alertsIndexPattern(spaceId);
-  const resolvedWindow = window ?? defaultWindow();
-
-  // A wildcard that matches nothing resolves to an empty list, but a concrete
-  // name that does not exist (the space-derived alerts index before any alert
-  // is written there) is a 404 unless `ignore_unavailable` is set. Either way
-  // the answer is "absent", never an error. A name can resolve as an index, a
-  // data stream, or an alias: `.alerts-security.alerts-{space}` is an alias
-  // over the hidden `.internal.alerts-*` write index, so it only ever shows up
-  // under `aliases`.
-  const checkPattern = async (pattern: string): Promise<[string, boolean]> => {
-    try {
-      const response = await esClient.indices.resolveIndex({
-        name: pattern,
-        expand_wildcards: 'open',
-        ignore_unavailable: true,
-      });
-      return [
-        pattern,
-        response.indices.length > 0 ||
-          response.data_streams.length > 0 ||
-          response.aliases.length > 0,
-      ];
-    } catch (err) {
-      if ((err as { statusCode?: number }).statusCode === 404) return [pattern, false];
-      throw err;
-    }
-  };
-
-  const [requiredResults, optionalResults] = await Promise.all([
-    Promise.all(required.map(checkPattern)),
-    Promise.all([...optional, alertsPattern].map(checkPattern)),
-  ]);
-
-  const missing: string[] = [];
-  for (const [pattern, present] of [...requiredResults, ...optionalResults]) {
-    if (!present) {
-      missing.push(pattern);
-    }
-  }
-
-  // Every required pattern must resolve; `.some` would mark a multi-required
-  // technology `ok`/`degraded` while still listing a missing required pattern.
-  const hasAllRequired = requiredResults.every(([, present]) => present);
-  const missingOptionalCount = optionalResults.filter(([, present]) => !present).length;
-  const status = deriveStatus(!hasAllRequired, missingOptionalCount > 0);
-
-  return {
-    technology,
-    required,
-    optional: [...optional, alertsPattern],
-    missing,
-    status,
-    window: resolvedWindow,
-    row_limit,
-  };
+const unresolvedPatterns = (
+  patterns: string[],
+  resolved: IndicesResolveIndexResponse
+): string[] => {
+  const names = [
+    ...resolved.indices.map(({ name }) => name),
+    ...resolved.aliases.map(({ name }) => name),
+    ...resolved.data_streams.flatMap(({ name, backing_indices: backing }) => [name, ...backing]),
+  ];
+  return patterns.filter((pattern) => !names.some(buildMatchesRequired([pattern])));
 };
 
-/** Every technology the hunt knows how to scope. Derived from the map so the two cannot drift. */
-export const HUNT_TECHNOLOGIES = Object.keys(TECHNOLOGY_INDEX_MAP) as HuntTechnology[];
-
 /**
- * Required + optional patterns from every known technology (no space-derived
- * alerts pattern). Used to allowlist caller-supplied Tier 2 generation targets
- * when the hunt has no resolved required-index scope yet.
+ * The report's deterministic matches as a bounded target list. A list that does not fit
+ * the request path collapses onto one wildcard pair per matched vendor, which still covers
+ * only the matched vendors; one that still does not fit is dropped rather than sent.
  */
-export const getKnownHuntIndexPatterns = (): string[] =>
-  Array.from(
-    new Set(
-      Object.values(TECHNOLOGY_INDEX_MAP).flatMap((entry) => [...entry.required, ...entry.optional])
-    )
+const boundReportMatches = (
+  matches: DiscoveredDataset[],
+  logger?: Logger
+): { patterns: string[]; collapsed: boolean } => {
+  const targets = uniq(matches.flatMap((match) => match.search_patterns));
+  if (fitsRequestPath(targets)) return { patterns: targets, collapsed: false };
+
+  const byVendor = vendorWildcards(matches);
+  const fits = fitsRequestPath(byVendor);
+  logger?.warn(
+    `Hunt report matched ${targets.length} index patterns (${
+      targets.join(',').length
+    } chars), more than a request may carry; ${
+      fits ? `keeping ${byVendor.length} vendor wildcard(s)` : 'keeping none'
+    }`
   );
-
-/**
- * The scope a hunt actually runs against: one or more technologies' patterns
- * merged. `technologies` lists the technologies whose required indices exist in
- * the space; empty means nothing resolved and the hunt must not run.
- */
-export type HuntScope = Omit<ResolvedIndexScope, 'technology'> & {
-  technologies: HuntTechnology[];
+  return { patterns: fits ? byVendor : [], collapsed: true };
 };
 
-const uniq = (values: string[]): string[] => Array.from(new Set(values));
-
 /**
- * Resolves the hunt scope for a space. With an explicit `technology` it resolves
- * that one entry. Without one it resolves every known technology and keeps the
- * ones whose required indices exist, so a hunt never assumes a vendor the
- * environment does not have; when none are present the result is `blocked` and
- * `missing` lists every pattern that was checked.
+ * Resolves the hunt scope for a space from the caller's universe: the space's Security
+ * Solution default data view patterns, exclusions included.
+ *
+ * One `_resolve/index` call over the universe answers whether anything is visible
+ * (`blocked:empty_universe` when nothing is), which patterns resolved nothing
+ * (`missing`), and which data streams discovery parses into datasets. The report's vendor
+ * and product are then matched deterministically against those datasets, and one
+ * `_field_caps` call names the `actionable_indices`. Nothing here picks what Tier 1 may
+ * read: Tier 1 searches the universe as given. The model matcher is not called here; it
+ * runs in stage 2, after Tier 1, only when the deterministic signals found nothing.
+ *
+ * `status` is `degraded` when `_field_caps` failed or a bounded list had to collapse.
+ * `_resolve/index` failing blocks (fail closed).
  */
 export const resolveHuntScope = async ({
   esClient,
   spaceId,
-  technology,
+  indexPatterns,
   window,
-  row_limit,
+  row_limit = DEFAULT_ROW_LIMIT,
+  report,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
-  technology?: HuntTechnology;
+  /** The space's default data view patterns, exclusions included. Caller-supplied. */
+  indexPatterns: string[];
   window?: IndexScopeWindow;
   row_limit?: number;
-}): Promise<HuntScope> => {
-  const candidates = technology ? [technology] : HUNT_TECHNOLOGIES;
-  const scopes = await Promise.all(
-    candidates.map((candidate) =>
-      resolveIndexScope({ esClient, technology: candidate, spaceId, window, row_limit })
-    )
-  );
-  const present = scopes.filter((scope) => scope.status !== 'blocked');
-  const source = present.length > 0 ? present : scopes;
-  const status = deriveStatus(
-    present.length === 0,
-    present.some((scope) => scope.status === 'degraded')
-  );
-
-  return {
-    technologies: present.map((scope) => scope.technology),
-    status,
-    required: uniq(source.flatMap((scope) => scope.required)),
-    optional: uniq(source.flatMap((scope) => scope.optional)),
-    missing: uniq(source.flatMap((scope) => scope.missing)),
-    window: scopes[0].window,
-    row_limit: scopes[0].row_limit,
+  report?: HuntScopeReportContext;
+  logger?: Logger;
+}): Promise<ResolvedHuntScope> => {
+  const resolvedWindow = window ?? defaultWindow();
+  const positivePatterns = indexPatterns.filter((pattern) => !isExclusion(pattern));
+  const blocked = (
+    resolution: Extract<HuntScopeResolution, `blocked:${string}`>,
+    missing: string[]
+  ): ResolvedHuntScope => {
+    logger?.debug(`Hunt scope for space ${spaceId} blocked: ${resolution}`);
+    return {
+      status: 'blocked',
+      resolution,
+      index_patterns: [],
+      missing,
+      discovered: [],
+      report_matches: [],
+      actionable_indices: [],
+      window: resolvedWindow,
+      row_limit,
+    };
   };
-};
 
-const isHuntTechnology = (value: string): value is HuntTechnology =>
-  (HUNT_TECHNOLOGIES as string[]).includes(value);
+  // An empty name would resolve every index, not none: nothing to hunt without a pattern.
+  if (positivePatterns.length === 0) return blocked('blocked:empty_universe', []);
 
-/**
- * Interprets a caller-supplied `technology`: undefined, null, and the empty
- * string all mean "resolve from the environment" (a workflow renders an unset
- * input as ""), a known technology pins the hunt, anything else is invalid.
- */
-export const parseTechnologyInput = (
-  value: string | null | undefined
-): { technology?: HuntTechnology } | { invalid: string } => {
-  if (value === undefined || value === null || value === '') return {};
-  return isHuntTechnology(value) ? { technology: value } : { invalid: value };
+  let resolved: IndicesResolveIndexResponse;
+  try {
+    resolved = await esClient.indices.resolveIndex({
+      name: indexPatterns,
+      allow_no_indices: true,
+      expand_wildcards: ['open'],
+    });
+  } catch (err) {
+    logger?.warn(
+      `Hunt universe resolution failed for space ${spaceId}; scope stays blocked: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return blocked('blocked:discovery_failed', []);
+  }
+
+  const missing = unresolvedPatterns(positivePatterns, resolved);
+  if (
+    resolved.indices.length === 0 &&
+    resolved.data_streams.length === 0 &&
+    resolved.aliases.length === 0
+  ) {
+    return blocked('blocked:empty_universe', missing);
+  }
+
+  const discovered = await discoverHuntDatasets({
+    esClient,
+    patterns: indexPatterns,
+    logger,
+    resolved,
+  });
+  const matches = matchDatasetsDeterministic({
+    datasets: discovered,
+    vendor: report?.vendor,
+    product: report?.product,
+  });
+  const reportMatches = boundReportMatches(matches, logger);
+  const actionable = await classifyActionableIndices({ esClient, indexPatterns, logger });
+
+  const degraded = actionable.degraded || reportMatches.collapsed;
+  logger?.info(
+    `Hunt scope resolved for space ${spaceId}: ${positivePatterns.length} universe pattern(s), ${discovered.length} dataset(s), ${reportMatches.patterns.length} report match pattern(s), ${actionable.patterns.length} actionable pattern(s)`
+  );
+  return {
+    status: degraded ? 'degraded' : 'ok',
+    resolution: 'universe',
+    index_patterns: indexPatterns,
+    missing,
+    discovered,
+    report_matches: reportMatches.patterns,
+    actionable_indices: actionable.patterns,
+    window: resolvedWindow,
+    row_limit,
+  };
 };

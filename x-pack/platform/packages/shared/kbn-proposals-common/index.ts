@@ -11,6 +11,8 @@ export type { ProposalAttachmentData } from './src/attachment';
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_API_VERSION,
+  PROPOSALS_CREATE_TOOL_ID,
+  PROPOSALS_REVISE_TOOL_ID,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
@@ -42,6 +44,9 @@ export {
   listProposalsQuerySchema,
   MAX_PROPOSALS_PAGE_OFFSET,
   MAX_PROPOSALS_PAGE_SIZE,
+  DEFAULT_PROPOSAL_TITLE,
+  MAX_COMMENT_LENGTH,
+  MAX_TITLE_LENGTH,
   proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,

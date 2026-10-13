@@ -91,7 +91,13 @@ export const noDataExample = ({
         ? 'The rule carries a `no_data.query` ES|QL query that counts documents per host.name, distinct from the breach query.'
         : 'The rule carries no `no_data.query`.',
       `The final rule sets \`no_data.strategy\` to \`${strategy}\`.`,
-      'The no-data change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
+      ...(strategy !== 'ignore'
+        ? [
+            'The no-data change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
+          ]
+        : [
+            'The assistant confirms that the requested no-data behavior (ignore) is already the default, OR re-applies it with a manage_rule call ending with validate.',
+          ]),
       PERSIST_VIA_ATTACHMENT_CRITERION,
     ],
     ...MANAGE_RULE_SKILL_OUTPUT,

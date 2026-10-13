@@ -24,9 +24,15 @@ export {
 } from './access_control';
 export {
   DEFAULT_CONVERSATION_TITLE,
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
+  MODEL_CONTEXT_MAX_LENGTH,
+  WORKFLOW_CONTEXT_MAX_NAMESPACES,
+  WORKFLOW_CONTEXT_NAMESPACE_MAX_LENGTH,
+  WORKFLOW_CONTEXT_MAX_BYTES,
+  WORKFLOW_CONTEXT_MAX_DEPTH,
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,
@@ -35,6 +41,8 @@ export {
   type ConversationParentLink,
   type ConversationAction,
   type RoundInput,
+  type WorkflowContext,
+  type WorkflowContextEnvelope,
   type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,
@@ -76,6 +84,8 @@ export {
   ZERO_MODEL_USAGE,
   isZeroModelUsage,
   type CompactionSummary,
+  type CompactionCursor,
+  type ToolCallRef,
   type CompactionStructuredData,
   type CompactionToolCallSummary,
   type CompactionEntity,
@@ -92,11 +102,19 @@ export {
   type RelevantSkillsStepData,
   createRelevantSkillsStep,
   isRelevantSkillsStep,
+  type PreExecutionWorkflowStep,
+  type PreExecutionWorkflowStepData,
+  createPreExecutionWorkflowStep,
+  isPreExecutionWorkflowStep,
   type SubagentRosterEntry,
   type SubagentRosterUpdatedStep,
   type SubagentRosterUpdatedStepData,
   createSubagentRosterUpdatedStep,
   isSubagentRosterUpdatedStep,
+  type SubstitutionStep,
+  type SubstitutionStepData,
+  createSubstitutionStep,
+  isSubstitutionStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -172,6 +190,10 @@ export {
   type SubagentRosterUpdatedEventData,
   createSubagentRosterUpdatedEvent,
   isSubagentRosterUpdatedEvent,
+  type SubstitutionAppliedEvent,
+  type SubstitutionAppliedEventData,
+  createSubstitutionAppliedEvent,
+  isSubstitutionAppliedEvent,
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
@@ -184,6 +206,7 @@ export {
   createUserQuestionAskedEvent,
   createUserQuestionAnsweredEvent,
 } from './events';
+export type { SlackPayload, SurfacePayload } from './surface_payload';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
 export {

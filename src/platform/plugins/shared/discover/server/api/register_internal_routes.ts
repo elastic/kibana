@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMeta } from '@kbn/as-code-shared-schemas';
-import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
+import { asCodeIdSchema, getMeta } from '@kbn/as-code-shared-schemas';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import { AuthzDisabled } from '@kbn/core-security-server';
+import { prettifyError, ZodError } from '@kbn/zod';
 import type {
   CoreSetup,
   KibanaRequest,
@@ -27,12 +27,18 @@ import {
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
 } from '../../common/constants';
 import {
-  storedDiscoverSessionParamsSchema,
-  storedDiscoverSessionResponseSchema,
-  storedDiscoverSessionSchema,
+  discoverSessionInternalParamsSchema,
+  discoverSessionInternalResponseSchema,
+  discoverSessionInternalGetResponseSchema,
+  discoverSessionInternalDataSchema,
+  type DiscoverSessionInternalResponse,
 } from './internal_schema';
+import type { DiscoverSessionWarning } from './schema';
+import { transformInternalDiscoverSessionIn } from './transforms/transform_discover_session_in';
+import { transformInternalDiscoverSessionOut } from './transforms/transform_discover_session_out';
 import {
   createStoredDiscoverSession,
+  getStoredDiscoverSession,
   resolveStoredDiscoverSession,
   updateStoredDiscoverSession,
 } from './stored_session';
@@ -44,7 +50,7 @@ const routeConfig = {
   security: { authz: AuthzDisabled.delegateToSOClient },
 } as const;
 
-/** Registers internal routes that read and write Discover sessions in their stored format. */
+/** Registers as-code routes for Discover that also preserve inline Data View IDs. */
 export const registerInternalRoutes = (
   router: VersionedRouter<RequestHandlerContext>,
   userActivity: CoreSetup['userActivity'],
@@ -53,16 +59,16 @@ export const registerInternalRoutes = (
   router
     .post({
       path: DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
-      summary: 'Create a Discover session from its stored format',
+      summary: 'Create a Discover session with inline Data View IDs',
       ...routeConfig,
     })
     .addVersion(
       {
         version: DISCOVER_SESSION_API_VERSION,
         validate: {
-          request: { body: storedDiscoverSessionSchema },
+          request: { body: discoverSessionInternalDataSchema },
           response: {
-            201: { body: () => storedDiscoverSessionResponseSchema, description: 'Created' },
+            201: { body: () => discoverSessionInternalResponseSchema, description: 'Created' },
             400: { description: 'Invalid request' },
             403: { description: 'Forbidden' },
           },
@@ -70,10 +76,12 @@ export const registerInternalRoutes = (
       },
       async (context, request, response) => {
         try {
-          const savedObject = await createStoredDiscoverSession(context, request.body);
-          trackStoredSessionAction(userActivity, 'create', savedObject);
+          const storedSession = transformInternalDiscoverSessionIn(request.body);
+          const savedObject = await createStoredDiscoverSession(context, storedSession);
+          const { body } = toInternalSessionResponse(savedObject);
+          trackDiscoverSessionAction(userActivity, 'create', body);
 
-          return response.created({ body: toStoredSessionResponse(savedObject) });
+          return response.created({ body });
         } catch (error) {
           return writeErrorHandler(error, response, logger, request);
         }
@@ -83,8 +91,9 @@ export const registerInternalRoutes = (
   router
     .put({
       path: `${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/{id}`,
-      summary: 'Update a Discover session from its stored format',
-      description: 'Replaces an existing session with this exact ID. Aliases are not resolved.',
+      summary: 'Upsert a Discover session with inline Data View IDs',
+      description:
+        'Creates a session with the specified ID, or fully replaces the existing session. Aliases are not resolved.',
       ...routeConfig,
     })
     .addVersion(
@@ -92,11 +101,12 @@ export const registerInternalRoutes = (
         version: DISCOVER_SESSION_API_VERSION,
         validate: {
           request: {
-            params: storedDiscoverSessionParamsSchema,
-            body: storedDiscoverSessionSchema,
+            params: discoverSessionInternalParamsSchema,
+            body: discoverSessionInternalDataSchema,
           },
           response: {
-            200: { body: () => storedDiscoverSessionResponseSchema, description: 'Updated' },
+            200: { body: () => discoverSessionInternalResponseSchema, description: 'Updated' },
+            201: { body: () => discoverSessionInternalResponseSchema, description: 'Created' },
             400: { description: 'Invalid request' },
             403: { description: 'Forbidden' },
             404: { description: 'Not found' },
@@ -108,10 +118,25 @@ export const registerInternalRoutes = (
         const { id } = request.params;
 
         try {
-          const savedObject = await updateStoredDiscoverSession(context, id, request.body);
-          trackStoredSessionAction(userActivity, 'update', savedObject);
+          const storedSession = transformInternalDiscoverSessionIn(request.body);
+          const existing = await getStoredDiscoverSession(context, id);
 
-          return response.ok({ body: toStoredSessionResponse(savedObject) });
+          if (!existing) {
+            // Like the public PUT, validate new IDs without rejecting existing legacy IDs.
+            asCodeIdSchema.parse(id);
+
+            const savedObject = await createStoredDiscoverSession(context, storedSession, id);
+            const { body } = toInternalSessionResponse(savedObject);
+            trackDiscoverSessionAction(userActivity, 'create', body);
+
+            return response.created({ body });
+          }
+
+          const savedObject = await updateStoredDiscoverSession(context, id, storedSession);
+          const { body } = toInternalSessionResponse(savedObject);
+          trackDiscoverSessionAction(userActivity, 'update', body);
+
+          return response.ok({ body });
         } catch (error) {
           return handleSessionError(error, id, logger, request, response);
         }
@@ -121,18 +146,19 @@ export const registerInternalRoutes = (
   router
     .get({
       path: `${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/{id}`,
-      summary: 'Get a Discover session in its stored format',
+      summary: 'Get a Discover session with inline Data View IDs',
       ...routeConfig,
     })
     .addVersion(
       {
         version: DISCOVER_SESSION_API_VERSION,
         validate: {
-          request: { params: storedDiscoverSessionParamsSchema },
+          request: { params: discoverSessionInternalParamsSchema },
           response: {
-            200: { body: () => storedDiscoverSessionResponseSchema, description: 'Success' },
+            200: { body: () => discoverSessionInternalGetResponseSchema, description: 'Success' },
             403: { description: 'Forbidden' },
             404: { description: 'Not found' },
+            500: { description: 'Internal server error' },
           },
         },
       },
@@ -141,35 +167,41 @@ export const registerInternalRoutes = (
 
         try {
           const { savedObject, resolveHeaders } = await resolveStoredDiscoverSession(context, id);
+          const { body, warnings } = toInternalSessionResponse(savedObject);
 
           return response.ok({
-            body: toStoredSessionResponse(savedObject),
+            body: { ...body, ...(warnings.length > 0 && { warnings }) },
             headers: resolveHeaders,
           });
         } catch (error) {
+          if (error instanceof ZodError) {
+            logRequest(logger, request, 'error', error.stack ?? prettifyError(error));
+            throw error;
+          }
+
           return handleSessionError(error, id, logger, request, response);
         }
       }
     );
 };
 
-const toStoredSessionResponse = (savedObject: SavedObject<DiscoverSessionAttributes>) => ({
-  id: savedObject.id,
-  data: { attributes: savedObject.attributes, references: savedObject.references },
-  meta: getMeta(savedObject),
-});
+/** Builds the response body and returns conversion warnings separately for GET responses. */
+const toInternalSessionResponse = (
+  savedObject: SavedObject<DiscoverSessionAttributes>
+): { body: DiscoverSessionInternalResponse; warnings: DiscoverSessionWarning[] } => {
+  const { sessionState, warnings } = transformInternalDiscoverSessionOut(
+    savedObject.attributes,
+    savedObject.references
+  );
 
-/** Records the same activity as the as-code routes, with tag IDs read from the references. */
-const trackStoredSessionAction = (
-  userActivity: CoreSetup['userActivity'],
-  operation: 'create' | 'update',
-  { id, attributes, references }: SavedObject<DiscoverSessionAttributes>
-) => {
-  const { tags } = toAsCodeTags(references);
-  trackDiscoverSessionAction(userActivity, operation, {
-    id,
-    data: { title: attributes.title, tags },
-  });
+  return {
+    body: {
+      id: savedObject.id,
+      data: sessionState,
+      meta: getMeta(savedObject),
+    },
+    warnings,
+  };
 };
 
 /** Returns 404 for a missing session and handles other errors like the as-code routes. */

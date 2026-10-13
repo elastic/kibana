@@ -149,13 +149,25 @@ describe('create-investigation-proposal workflow', () => {
       expect(manualTrigger?.inputs?.properties).toEqual(
         expect.objectContaining({
           conversationId: expect.anything(),
+          title: expect.anything(),
           actionWorkflowId: expect.anything(),
           actionInput: expect.anything(),
           impact: expect.anything(),
           category: expect.anything(),
+          origin: expect.anything(),
           autoApprove: expect.anything(),
         })
       );
+    });
+
+    it('forwards the caller-owned display and provenance fields rather than naming any itself', () => {
+      // This workflow is solution-agnostic: an `origin` hardcoded here would
+      // stamp every caller with one solution's name, and a `title` dropped here
+      // would leave the queue showing the action's name for all of them.
+      const create = findStep(workflow.steps, 'create_proposal');
+
+      expect(String(create?.with?.origin)).toContain('inputs.origin');
+      expect(String(create?.with?.title)).toContain('inputs.title');
     });
 
     it('forwards the grouping overrides, or a non-action proposal cannot be grouped', () => {
@@ -178,10 +190,37 @@ describe('create-investigation-proposal workflow', () => {
     it('requires a comment so every proposal carries something a human can read', () => {
       const manualTrigger = workflow.triggers.find(({ type }) => type === 'manual');
 
-      expect(manualTrigger?.inputs?.required).toEqual(['conversationId', 'comment']);
+      // `origin` is required for a different reason: it is an open vocabulary,
+      // so an omitted one would be stored as a value nothing ever filters on.
+      expect(manualTrigger?.inputs?.required).toEqual(['conversationId', 'comment', 'origin']);
     });
 
     it('declares the outputs a caller gets back from workflow.execute', () => {
+      expect(workflow.outputs?.map(({ name }) => name)).toEqual([
+        'proposalId',
+        'status',
+        'decision',
+      ]);
+    });
+  });
+
+  describe('a caller-supplied proposalId', () => {
+    it('takes an optional proposalId and forwards it to the create step', () => {
+      const manual = workflow.triggers.find(({ type }) => type === 'manual');
+      const input = manual?.inputs?.properties?.proposalId as { type?: string } | undefined;
+
+      expect(input?.type).toBe('string');
+      expect(manual?.inputs?.required).not.toContain('proposalId');
+      expect(String(findStep(workflow.steps, 'create_proposal')?.with?.proposalId)).toContain(
+        'inputs.proposalId'
+      );
+    });
+
+    it('adds no branch of its own: a duplicate id fails the create step, before any gate', () => {
+      // A duplicate is an error from the service, and the workflow does not
+      // interpret it. Nothing before the create step could park a gate or
+      // record a proposal id, so a failed create has nothing to settle.
+      expect(findStep(workflow.steps, 'stop_if_reused')).toBeUndefined();
       expect(workflow.outputs?.map(({ name }) => name)).toEqual([
         'proposalId',
         'status',
@@ -263,16 +302,11 @@ describe('create-investigation-proposal workflow', () => {
      *
      * Managed workflows install under `lightweightValidation`, which does not
      * validate steps at all, so production neither rejects nor strips such a
-     * key: whether it does anything is entirely up to the engine. Both keys
-     * below are honoured by it — `handleStepLevelOnFailure` wraps any step
-     * that declares `on-failure`, with no exclusion by type — but neither
-     * `WaitForApprovalStepSchema` nor `WorkflowExecuteStepSchema` merges
-     * `StepWithOnFailureSchema`, unlike the connector-derived schema every
-     * custom step gets. This is the only place that names what is load-bearing
-     * by accident, so the list shrinks when
-     * elastic/security-team#19315 lands rather than silently staying stale.
+     * key: whether it does anything is entirely up to the engine. This keeps
+     * every key the proposal steps declare — including `on-failure` on the
+     * gate and the action, which both handlers rely on — modelled by a schema.
      */
-    it('declares no unmodelled key beyond the two the platform still owes us', () => {
+    it('declares no key its step schema does not model', () => {
       const unmodelled = allSteps().flatMap((step) => {
         const schema = step.type ? BUILT_IN_STEP_SCHEMAS[step.type] : undefined;
         if (!schema) {
@@ -288,15 +322,7 @@ describe('create-investigation-proposal workflow', () => {
           .map((key) => `${step.name} (${step.type}): ${key}`);
       });
 
-      // Both are load-bearing and covered end to end by the plugin's
-      // integration tests: the gate's handler keeps an unanswered proposal
-      // inside the loop to be settled as `expired`, and the action's keeps a
-      // failed action inside the loop so it can be cloned and re-offered.
-      // Pinned, not removed.
-      expect(unmodelled.sort()).toEqual([
-        'await_decision (waitForApproval): on-failure',
-        'execute_action (workflow.execute): on-failure',
-      ]);
+      expect(unmodelled).toEqual([]);
     });
   });
 

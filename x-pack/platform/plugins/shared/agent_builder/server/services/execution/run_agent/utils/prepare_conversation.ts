@@ -6,7 +6,6 @@
  */
 
 import type {
-  CompactionSummary,
   ConversationEvent,
   ConversationRoundAuthor,
   ConverseInput,
@@ -45,14 +44,12 @@ import {
 export interface ProcessedConversation {
   /**
    * The agent-context timeline: the previous rounds' events in order, with each `user_message`
-   * payload processed. Compaction drops the events of summarized rounds.
+   * payload processed. Never trimmed: what a compaction summary covers is hidden at render time.
    */
   timeline: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
   attachmentStateManager: AttachmentStateManager;
-  /** Compaction summary covering older rounds that were replaced by this summary */
-  compactionSummary?: CompactionSummary;
   /** Persistent sub-agent roster */
   subagentRosterFallback?: Record<string, SubagentEntry>;
   /**
@@ -63,6 +60,11 @@ export interface ProcessedConversation {
   metadata?: Record<string, MetadataFieldValue>;
   /** ID of the template applied to this conversation, used to look up field definitions. */
   template_id?: string;
+  /**
+   * Id of the paused round this run resumes. Only that round is left out of the history; a paused
+   * round the run does not resume is rendered as history.
+   */
+  resumedRoundId?: string;
 }
 
 export const prepareConversation = async ({

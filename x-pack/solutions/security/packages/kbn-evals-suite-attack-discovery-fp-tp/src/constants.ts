@@ -17,12 +17,6 @@
  *   - APIRoutes.GET/PUT_INFERENCE_SETTINGS (search_inference_endpoints common)
  */
 
-/**
- * Which workflow the suite runs. `managed` runs the shipped analysis.
- * `sample` installs the YAML in `src/sample_workflow/` for the run.
- */
-export const FP_TP_WORKFLOW_SOURCE: 'sample' | 'managed' = 'managed';
-
 export const FP_TP_MANAGED_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysis';
 
 /** Public workflows_management and agent_builder API version. */

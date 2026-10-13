@@ -107,8 +107,6 @@ export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemAc
 export const TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN =
   '[data-test-subj="create-template-from-timeline"]';
 
-export const TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN = '[data-test-subj="create-from-template"]';
-
 export const TIMELINE_CORRELATION_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const TIMELINE_CORRELATION_TAB = '[data-test-subj="timelineTabs-eql"]';
@@ -181,9 +179,6 @@ export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
 
 export const TIMELINE_SAVE_MODAL_SAVE_BUTTON = '[data-test-subj="save-timeline-modal-save-button"]';
 
-export const TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH =
-  '[data-test-subj="save-timeline-modal-save-as-new-switch"]';
-
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="timeline-portal-ref"]';
 
 export const TIMELINE_WRAPPER = '[data-test-subj="timeline-portal-overlay-mask"]';
@@ -216,8 +211,6 @@ export const TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER =
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
-
-export const TIMELINE_STATUS = '[data-test-subj="timeline-save-status"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
@@ -267,10 +260,6 @@ export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector(
 
 export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('timeline-modal-save-timeline');
 export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('timeline-modal-save-timeline');
-
-export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(
-  'timeline-modal-save-timeline-tooltip'
-);
 
 export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');
 

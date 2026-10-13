@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from './alert_action_schema';
 import {
   ID_MAX_LENGTH,
@@ -75,8 +75,7 @@ const createAlertEventBodyBaseObjectSchema = z
           });
         }
       }),
-    timestamp: z.iso
-      .datetime()
+    timestamp: isoDateTime()
       .optional()
       .describe(
         'The ISO datetime when the event occurred at the source. Defaults to the time the request is received.'
@@ -111,7 +110,7 @@ export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
 
 export const createAlertEventResponseSchema = z.object({
   group_hash: z.string(),
-  episode_id: z.string(),
+  alert_id: z.string(),
 });
 
 /** Normalized ingest payload — `source` is always present past the HTTP edge. */

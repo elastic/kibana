@@ -24,6 +24,12 @@ import {
 jest.mock('./hooks/use_rule_details_link');
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_author_display_names');
 
+jest.mock('../../shared/components/flyout_header_actions', () => ({
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mockFlyoutHeaderActions">{children}</div>
+  ),
+}));
+
 const defaultProps: HeaderProps = {
   rule: { id: 'id', name: 'rule name' } as RuleResponse,
   isSuppressed: false,
@@ -50,6 +56,7 @@ describe('<Header />', () => {
     expect(getByTestId(RULE_DETAILS_CREATED_BY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_DETAILS_UPDATED_BY_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(RULE_DETAILS_SUPPRESSED_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 
   it('should render title without link when href is not available', () => {

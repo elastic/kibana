@@ -6,17 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApprovalProposal } from './types';
-import type { ApprovalDecision } from './approval_content';
+import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-
-/**
- * Shared with anything that opens the approval decision for a proposal (the modal itself, the
- * flyout's proposed-action row), so they title it identically.
- */
-export const getProposalTitle = (proposal: ApprovalProposal): string =>
-  proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
+import { formatDismissReason } from './dismiss_reason';
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
@@ -103,11 +96,21 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
       proposal.decidedBy?.username ??
       APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
     : undefined;
+  const status = approvedStatusFor(proposal);
   return {
-    status: approvedStatusFor(proposal),
+    status,
     actorName,
     decidedAt: proposal.decidedAt,
-    reason: proposal.rationale,
+    // A failed action reports why it failed, so the analyst is not left with "Action failed"
+    // alone. A decline's reason is structured (`dismissReason`), with the free-text rationale
+    // folded in when the decliner left one; an approval has no `dismissReason` at all, so it
+    // falls back to `rationale` alone.
+    reason:
+      status === 'failed' && proposal.executionError
+        ? proposal.executionError
+        : proposal.dismissReason
+        ? formatDismissReason(proposal.dismissReason, proposal.rationale)
+        : proposal.rationale,
   };
 };
 
@@ -154,9 +157,10 @@ export const getProposalTone = (proposal: ApprovalProposal): 'primary' | 'danger
 };
 
 /**
- * `expired` is the computed flag for a deadline that has passed; `status: 'expired'` is the
- * durable settlement, which the workflow can write before the deadline when no decision was
- * reached. Without both, a proposal settled early still offers a decision that would be refused.
+ * `status: 'expired'` is the workflow's reliable settlement for an unanswered proposal (on
+ * attempt exhaustion, or a failure) before the deadline itself passes. A deadline that has passed
+ * but not yet been swept to this status still reads `pending` here; that lag is accepted rather
+ * than compared against `expiresAt` directly.
  */
 export const isProposalExpired = (proposal: ApprovalProposal): boolean =>
-  proposal.expired || proposal.status === 'expired';
+  proposal.status === 'expired';

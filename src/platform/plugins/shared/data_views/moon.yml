@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/shared/data_views
 dependsOn:
   - '@kbn/core'
+  - '@kbn/data-views-types'
   - '@kbn/data-view-validation'
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-utils-plugin'

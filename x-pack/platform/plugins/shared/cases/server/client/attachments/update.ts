@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { UnifiedAttachmentPatchRequestRt } from '../../../common/types/api';
+import { UnifiedAttachmentPutRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { Case } from '../../../common/types/domain';
@@ -19,11 +19,6 @@ import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
 import { validateUnifiedAttachments } from './validators';
 
-/**
- * Update an attachment.
- *
- * @ignore
- */
 export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
@@ -36,11 +31,10 @@ export async function update(
   } = clientArgs;
 
   try {
-    const {
-      id: queryCommentId,
-      version: queryCommentVersion,
-      ...queryRestAttributes
-    } = decodeWithExcessOrThrow(UnifiedAttachmentPatchRequestRt)(queryParams);
+    const { id: queryCommentId, ...putRequest } = queryParams;
+    const { version: queryCommentVersion, ...queryRestAttributes } = decodeWithExcessOrThrow(
+      UnifiedAttachmentPutRequestRt
+    )(putRequest);
 
     await validateMaxUserActions({
       caseId: caseID,
@@ -48,8 +42,6 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    // Enforce registry registration and the unified zod schema; mirrors the
-    // add/bulk_create paths so PATCH stays in sync with POST.
     validateUnifiedAttachments({
       query: queryRestAttributes,
       unifiedAttachmentTypeRegistry,
@@ -81,13 +73,13 @@ export async function update(
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
     if (caseRef == null || (caseRef != null && caseRef.id !== model.savedObject.id)) {
       throw Boom.notFound(
-        `This comment ${queryCommentId} does not exist in ${model.savedObject.id}).`
+        `This comment ${queryCommentId} does not exist in case ${model.savedObject.id}.`
       );
     }
 
     if (queryCommentVersion !== myComment.version) {
       throw Boom.conflict(
-        'This case has been updated. Please refresh before saving additional updates.'
+        'This attachment has been updated. Please refresh before saving additional updates.'
       );
     }
 
@@ -106,7 +98,7 @@ export async function update(
     return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
-      message: `Failed to patch comment case id: ${caseID}: ${error}`,
+      message: `Failed to replace attachment case id: ${caseID}: ${error}`,
       error,
       logger,
     });
