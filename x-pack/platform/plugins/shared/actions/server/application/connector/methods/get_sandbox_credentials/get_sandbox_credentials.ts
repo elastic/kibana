@@ -9,19 +9,19 @@ import { getCredentialWithAuth } from '../../../../lib/get_axios_instance';
 import { isSystemAction } from '../../../../lib/is_system_action';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { getConnectorAuth } from '../../lib/get_connector_auth';
-import type { GetConnectorCredentialsOptions, ResolvedConnectorCredentials } from './types';
+import type { GetSandboxCredentialsOptions, ResolvedSandboxCredentials } from './types';
 
 /** Returns execute-authorized connector config and auth headers without exposing stored secrets. */
-export async function getConnectorCredentials(
+export async function getSandboxCredentials(
   context: ActionsClientContext,
-  { id: connectorId }: GetConnectorCredentialsOptions
-): Promise<ResolvedConnectorCredentials> {
+  { id: connectorId }: GetSandboxCredentialsOptions
+): Promise<ResolvedSandboxCredentials> {
   const { actionTypeId, actionType, authMode, config, validatedSecrets, profileUid } =
     await getConnectorAuth(context, connectorId);
 
   if (isSystemAction(context, connectorId) || actionType.isSystemActionType) {
     throw new Error(
-      `Unable to get connector credentials for ${actionTypeId}: system connectors are not supported`
+      `Unable to get sandbox credentials for ${actionTypeId}: system connectors are not supported`
     );
   }
 

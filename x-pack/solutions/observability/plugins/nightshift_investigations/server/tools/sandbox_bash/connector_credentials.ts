@@ -153,7 +153,7 @@ export const createConnectorCredentialResolver =
 
     try {
       const actionsClient = await actions.getActionsClientWithRequest(callContext.request);
-      const credentials = await actionsClient.getConnectorCredentials({ id: connectorId });
+      const credentials = await actionsClient.getSandboxCredentials({ id: connectorId });
 
       logger.debug(
         `Injecting credentials for connector ${connectorId} into a single sandbox command`

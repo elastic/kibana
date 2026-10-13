@@ -293,7 +293,7 @@ export default function oauthFullFlowTests({ getService }: FtrProviderContext) {
       let apiUrl: string;
 
       const credentialsPath = (id: string, spaceId = space.id) =>
-        `${getUrlPrefix(spaceId)}/api/alerts_fixture/${id}/_test_get_connector_credentials`;
+        `${getUrlPrefix(spaceId)}/api/alerts_fixture/${id}/_test_get_sandbox_credentials`;
 
       before(async () => {
         proxyServer = await getHttpProxyServer(

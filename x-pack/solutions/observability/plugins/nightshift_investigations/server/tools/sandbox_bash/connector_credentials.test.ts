@@ -46,9 +46,9 @@ const setup = ({
 } = {}) => {
   const actionsClient = actionsClientMock.create();
   if (credentialsError) {
-    actionsClient.getConnectorCredentials.mockRejectedValue(credentialsError);
+    actionsClient.getSandboxCredentials.mockRejectedValue(credentialsError);
   } else {
-    actionsClient.getConnectorCredentials.mockResolvedValue(credentials);
+    actionsClient.getSandboxCredentials.mockResolvedValue(credentials);
   }
   const actions = actionsMock.createStart();
   actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
@@ -127,7 +127,7 @@ describe('createConnectorCredentialResolver', () => {
       },
       secretValues: [BEARER_AUTHORIZATION],
     });
-    expect(actionsClient.getConnectorCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
     expect(actionsClient.get).not.toHaveBeenCalled();
   });
 
@@ -164,7 +164,7 @@ describe('createConnectorCredentialResolver', () => {
         "Connector 'other-connector' is not assigned to this agent"
       ),
     });
-    expect(actionsClient.getConnectorCredentials).not.toHaveBeenCalled();
+    expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
   });
 
   it('denies by default when the agent has no connectors', async () => {

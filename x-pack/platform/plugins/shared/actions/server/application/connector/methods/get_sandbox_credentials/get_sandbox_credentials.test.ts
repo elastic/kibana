@@ -127,7 +127,7 @@ const inMemoryConnectors = [
   }),
 ];
 
-describe('getConnectorCredentials()', () => {
+describe('getSandboxCredentials()', () => {
   let actionsClient: ActionsClient;
   let actionTypeRegistry: ActionTypeRegistry;
   let authTypeRegistry: AuthTypeRegistry;
@@ -195,7 +195,7 @@ describe('getConnectorCredentials()', () => {
   it('returns static basic-auth headers and config for a persisted connector', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
-    const result = await actionsClient.getConnectorCredentials({ id: defaultConnectorId });
+    const result = await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
 
     expect(result).toEqual({
       connectorId: defaultConnectorId,
@@ -216,7 +216,7 @@ describe('getConnectorCredentials()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
     actionsClient = createClient({ spaceId: 'space-1' });
 
-    await actionsClient.getConnectorCredentials({ id: defaultConnectorId });
+    await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       ACTION_SAVED_OBJECT_TYPE,
@@ -237,7 +237,7 @@ describe('getConnectorCredentials()', () => {
       })
     );
 
-    const result = await actionsClient.getConnectorCredentials({ id: inMemoryConnectorId });
+    const result = await actionsClient.getSandboxCredentials({ id: inMemoryConnectorId });
 
     expect(result).toEqual({
       connectorId: inMemoryConnectorId,
@@ -253,7 +253,7 @@ describe('getConnectorCredentials()', () => {
     it('ensures the caller can execute the connector', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
-      await actionsClient.getConnectorCredentials({ id: defaultConnectorId });
+      await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         actionTypeId: defaultConnectorTypeId,
@@ -269,7 +269,7 @@ describe('getConnectorCredentials()', () => {
       );
 
       await expect(
-        actionsClient.getConnectorCredentials({ id: defaultConnectorId })
+        actionsClient.getSandboxCredentials({ id: defaultConnectorId })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
     });
   });
@@ -280,7 +280,7 @@ describe('getConnectorCredentials()', () => {
       actionsClient = createClient({ isESOCanEncrypt: false });
 
       await expect(
-        actionsClient.getConnectorCredentials({ id: defaultConnectorId })
+        actionsClient.getSandboxCredentials({ id: defaultConnectorId })
       ).rejects.toThrow(/Encrypted Saved Objects plugin is missing encryption key/);
     });
 
@@ -308,7 +308,7 @@ describe('getConnectorCredentials()', () => {
         actionTypeIdFromSavedObjectMock(newActionTypeId)
       );
 
-      await expect(actionsClient.getConnectorCredentials({ id: defaultConnectorId })).rejects
+      await expect(actionsClient.getSandboxCredentials({ id: defaultConnectorId })).rejects
         .toMatchInlineSnapshot(`
         [Error: error validating connector type secrets: ✖ Invalid input: expected string, received boolean
           → at foobar]
@@ -343,7 +343,7 @@ describe('getConnectorCredentials()', () => {
       );
 
       await expect(
-        actionsClient.getConnectorCredentials({ id: inMemoryConnectorId })
+        actionsClient.getSandboxCredentials({ id: inMemoryConnectorId })
       ).rejects.toThrow(/system connectors are not supported/);
     });
   });
@@ -398,7 +398,7 @@ describe('getConnectorCredentials()', () => {
     it('returns the OAuth access-token header without client or refresh secrets', async () => {
       mockOAuthConnector();
 
-      const result = await actionsClient.getConnectorCredentials({ id: defaultConnectorId });
+      const result = await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
 
       expect(result.headers.Authorization).toBe('Bearer oauth-access-token');
       expect(JSON.stringify(result)).not.toContain('oauth-client-secret');

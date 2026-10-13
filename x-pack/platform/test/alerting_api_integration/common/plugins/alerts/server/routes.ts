@@ -883,7 +883,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/api/alerts_fixture/{id}/_test_get_connector_credentials',
+      path: '/api/alerts_fixture/{id}/_test_get_sandbox_credentials',
       security: {
         authz: {
           enabled: false,
@@ -906,7 +906,7 @@ export function defineRoutes(
 
       try {
         return res.ok({
-          body: await actionsClient.getConnectorCredentials({ id: req.params.id }),
+          body: await actionsClient.getSandboxCredentials({ id: req.params.id }),
         });
       } catch (err) {
         if (err.isBoom && err.output.statusCode === 403) {

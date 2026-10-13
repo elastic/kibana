@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export interface GetConnectorCredentialsOptions {
+export interface GetSandboxCredentialsOptions {
   id: string;
 }
 
-export interface ResolvedConnectorCredentials {
+export interface ResolvedSandboxCredentials {
   connectorId: string;
   actionTypeId: string;
   config: Record<string, unknown>;

@@ -131,9 +131,7 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
     describe('connector credential handoff', () => {
       it('returns basic-auth headers and config without secrets', async () => {
         const response = await supertest
-          .post(
-            `/api/alerts_fixture/${defaultSingleFileConnectorId}/_test_get_connector_credentials`
-          )
+          .post(`/api/alerts_fixture/${defaultSingleFileConnectorId}/_test_get_sandbox_credentials`)
           .set('kbn-xsrf', 'foo')
           .expect(200);
 

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getConnectorCredentials } from './get_connector_credentials';
-export type { GetConnectorCredentialsOptions, ResolvedConnectorCredentials } from './types';
+export { getSandboxCredentials } from './get_sandbox_credentials';
+export type { GetSandboxCredentialsOptions, ResolvedSandboxCredentials } from './types';
