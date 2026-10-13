@@ -112,7 +112,7 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
       expect(createResponse).toHaveStatusCode(201);
       const { id } = createResponse.body;
       const createdAt = createResponse.body.meta.created_at;
-      expect(createdAt).toStrictEqual(expect.any(String));
+      expect(Number.isNaN(Date.parse(createdAt ?? ''))).toBe(false);
 
       const updateResponse = await apiClient.put(`${LENS_API_PATH}/${id}`, {
         headers: {
