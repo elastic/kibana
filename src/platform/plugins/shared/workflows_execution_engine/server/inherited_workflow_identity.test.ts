@@ -17,6 +17,7 @@ import type {
 import {
   ensureInheritedBindingCurrent,
   getWorkflowTaskRunAs,
+  resolveInheritedEventWorkflowIdentity,
   resolveInheritedWorkflowIdentity,
   withWorkflowExecutionIdentity,
 } from './service_account_execution';
@@ -85,6 +86,113 @@ describe('inherited workflow execution identity', () => {
     jest
       .mocked(runAs.withScopedRequest)
       .mockImplementation(async (run) => run(httpServerMock.createKibanaRequest()));
+  });
+
+  describe('event subscribers', () => {
+    it('inherits from the emitting managed workflow without a child-call step', async () => {
+      await withWorkflowExecutionIdentity(
+        core,
+        parent(),
+        caller,
+        async (request) => {
+          expect(resolveInheritedEventWorkflowIdentity(request, child, 'default')).toEqual(
+            identity
+          );
+        },
+        runAs
+      );
+    });
+
+    it('retains the root binding across an inherited emitter', async () => {
+      await withWorkflowExecutionIdentity(
+        core,
+        {
+          ...parent(),
+          effectiveIdentity: { ...identity, inheritedFrom: { workloadId: 'root' } },
+        },
+        caller,
+        async (request) => {
+          expect(resolveInheritedEventWorkflowIdentity(request, child, 'default')).toEqual({
+            ...identity,
+            inheritedFrom: { workloadId: 'root' },
+          });
+        },
+        runAs
+      );
+    });
+
+    it.each([
+      { managedEmitter: false, managedSubscriber: true },
+      { managedEmitter: true, managedSubscriber: false },
+    ])(
+      'rejects unbound subscriptions for $managedEmitter/$managedSubscriber',
+      async ({ managedEmitter, managedSubscriber }) => {
+        await withWorkflowExecutionIdentity(
+          core,
+          { ...parent(), managed: managedEmitter },
+          caller,
+          async (request) => {
+            expect(() =>
+              resolveInheritedEventWorkflowIdentity(
+                request,
+                { ...child, managed: managedSubscriber },
+                'default'
+              )
+            ).toThrow('must have its own service account');
+          },
+          runAs
+        );
+      }
+    );
+
+    it('does not inherit across spaces', async () => {
+      await withWorkflowExecutionIdentity(
+        core,
+        parent(),
+        caller,
+        async (request) => {
+          expect(() => resolveInheritedEventWorkflowIdentity(request, child, 'other')).toThrow(
+            'emitting workflow space'
+          );
+        },
+        runAs
+      );
+    });
+
+    it('keeps the subscriber own account even for unmanaged workflows', async () => {
+      await withWorkflowExecutionIdentity(
+        core,
+        { ...parent(), managed: false },
+        caller,
+        async (request) => {
+          expect(
+            resolveInheritedEventWorkflowIdentity(
+              request,
+              {
+                ...child,
+                managed: false,
+                definition: { ...child.definition, settings: { run_as: 'subscriber-account' } },
+              },
+              'default'
+            )
+          ).toBeUndefined();
+        },
+        runAs
+      );
+    });
+
+    it('keeps ordinary caller scheduling and does not infer identity from headers', () => {
+      expect(resolveInheritedEventWorkflowIdentity(caller, child, 'default')).toBeUndefined();
+      expect(
+        resolveInheritedEventWorkflowIdentity(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'Bearer untrusted' },
+          }),
+          child,
+          'default'
+        )
+      ).toBeUndefined();
+    });
   });
 
   it('inherits by default inside an SA execution', async () => {

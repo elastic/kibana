@@ -56,6 +56,7 @@ import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
+import { failPendingExecutionAfterSchedulingError } from './lib/fail_pending_execution_after_scheduling_error';
 import { getAuthenticatedUser } from './lib/get_user';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
@@ -84,6 +85,7 @@ import {
   ensureInheritedBindingCurrent,
   getWorkflowInitiatingUser,
   getWorkflowTaskRunAs,
+  resolveInheritedEventWorkflowIdentity,
   resolveInheritedWorkflowIdentity,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
@@ -1383,7 +1385,7 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       request: KibanaRequest | undefined,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      options: { refresh: boolean | 'wait_for'; eventSubscriber?: boolean } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
@@ -1392,20 +1394,22 @@ export class WorkflowsExecutionEnginePlugin
       await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
       const inheritedIdentity = request
-        ? resolveInheritedWorkflowIdentity(request, workflow, {
-            inheritParentIdentity: context.inheritParentIdentity === true,
-            parentWorkflowId:
-              typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined,
-            parentWorkflowExecutionId:
-              typeof context.parentWorkflowExecutionId === 'string'
-                ? context.parentWorkflowExecutionId
-                : undefined,
-            parentStepId:
-              typeof context.parentStepId === 'string' ? context.parentStepId : undefined,
-            parentStepName:
-              typeof context.parentStepName === 'string' ? context.parentStepName : undefined,
-            spaceId,
-          })
+        ? options.eventSubscriber
+          ? resolveInheritedEventWorkflowIdentity(request, workflow, spaceId)
+          : resolveInheritedWorkflowIdentity(request, workflow, {
+              inheritParentIdentity: context.inheritParentIdentity === true,
+              parentWorkflowId:
+                typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined,
+              parentWorkflowExecutionId:
+                typeof context.parentWorkflowExecutionId === 'string'
+                  ? context.parentWorkflowExecutionId
+                  : undefined,
+              parentStepId:
+                typeof context.parentStepId === 'string' ? context.parentStepId : undefined,
+              parentStepName:
+                typeof context.parentStepName === 'string' ? context.parentStepName : undefined,
+              spaceId,
+            })
         : undefined;
       if (inheritedIdentity) {
         await ensureInheritedBindingCurrent(coreStart, inheritedIdentity, spaceId);
@@ -1601,7 +1605,8 @@ export class WorkflowsExecutionEnginePlugin
     const scheduleWorkflowWithIdentity = async (
       workflow: Parameters<ScheduleWorkflow>[0],
       context: Parameters<ScheduleWorkflow>[1],
-      request?: KibanaRequest
+      request?: KibanaRequest,
+      eventSubscriber = false
     ): ReturnType<ScheduleWorkflow> => {
       await checkLicense(plugins.licensing);
 
@@ -1610,7 +1615,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         'alert',
         request,
-        { refresh: 'wait_for' }
+        { refresh: 'wait_for', eventSubscriber }
       );
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
@@ -1645,10 +1650,20 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(
-        taskInstance,
-        request ? { request, cloneApiKey: true } : undefined
-      );
+      try {
+        await plugins.taskManager.schedule(
+          taskInstance,
+          request ? { request, cloneApiKey: true } : undefined
+        );
+      } catch (error) {
+        await failPendingExecutionAfterSchedulingError({
+          workflowExecutionRepository,
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -2115,7 +2130,8 @@ export class WorkflowsExecutionEnginePlugin
       workflowRepository,
       workflowsExtensions: plugins.workflowsExtensions,
       spaces: plugins.spaces?.spacesService,
-      scheduleWorkflow,
+      scheduleWorkflow: (workflow, context, request) =>
+        scheduleWorkflowWithIdentity(workflow, context, request, true),
       scheduleBoundSubscription: (workflow, context) =>
         scheduleWorkflowWithIdentity(workflow, context),
       logger: this.logger,

@@ -8,10 +8,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 jest.mock('./repositories/data_access_layer', () => {
@@ -32,12 +34,16 @@ jest.mock('./lib/get_user', () => ({
 const mockBulkCreateWorkflowExecutions = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
+const mockGetWorkflowExecutionWithVersion = jest.fn();
+const mockTryUpdateWorkflowExecutionWithVersion = jest.fn();
 const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
     createWorkflowExecution: mockCreateWorkflowExecution,
     getWorkflowExecutionById: mockGetWorkflowExecutionById,
+    getWorkflowExecutionWithVersion: mockGetWorkflowExecutionWithVersion,
+    tryUpdateWorkflowExecutionWithVersion: mockTryUpdateWorkflowExecutionWithVersion,
     discardUnstartedExecution: mockDiscardUnstartedExecution,
   })),
 }));
@@ -45,6 +51,8 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
 const mockGetWorkflowExecutionStates = jest.fn();
 const mockIsWorkflowEnabledRealtime = jest.fn().mockResolvedValue(true);
 const mockGetWorkflow = jest.fn();
+const mockGetWorkflowsSubscribedToTrigger = jest.fn();
+const mockIsManagedChildAdmissibleRealtime = jest.fn();
 const mockIsWorkflowEnabled = jest.fn().mockResolvedValue(true);
 jest.mock('@kbn/workflows', () => {
   const actual = jest.requireActual('@kbn/workflows');
@@ -55,6 +63,8 @@ jest.mock('@kbn/workflows', () => {
       isWorkflowEnabled: mockIsWorkflowEnabled,
       isWorkflowEnabledRealtime: mockIsWorkflowEnabledRealtime,
       getWorkflow: mockGetWorkflow,
+      getWorkflowsSubscribedToTrigger: mockGetWorkflowsSubscribedToTrigger,
+      isManagedChildAdmissibleRealtime: mockIsManagedChildAdmissibleRealtime,
     })),
   };
 });
@@ -76,6 +86,7 @@ import {
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
+import { withWorkflowExecutionIdentity } from './service_account_execution';
 
 const makeGate = () => {
   let resolve!: (value: boolean) => void;
@@ -118,6 +129,10 @@ describe('bulkScheduleWorkflow', () => {
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
     mockIsWorkflowEnabled.mockResolvedValue(true);
     mockCreateWorkflowExecution.mockResolvedValue(undefined);
+    mockGetWorkflowExecutionWithVersion.mockReset().mockResolvedValue(null);
+    mockTryUpdateWorkflowExecutionWithVersion.mockReset().mockResolvedValue(true);
+    mockGetWorkflowsSubscribedToTrigger.mockReset().mockResolvedValue([]);
+    mockIsManagedChildAdmissibleRealtime.mockReset().mockResolvedValue(true);
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
@@ -140,7 +155,9 @@ describe('bulkScheduleWorkflow', () => {
       taskManager,
       actions: {} as any,
       cloud: {} as any,
-      workflowsExtensions: {} as any,
+      workflowsExtensions: {
+        getTriggerDefinition: jest.fn().mockReturnValue({ id: 'alert' }),
+      } as any,
       licensing: licensingMock.createStart(),
     });
   });
@@ -159,6 +176,115 @@ describe('bulkScheduleWorkflow', () => {
     );
     return workflow;
   };
+
+  it.each([false, true])(
+    'event subscriber uses a native identity (own binding: %s)',
+    async (ownBinding) => {
+      const subscriber = createWorkflow('subscriber', { managed: !ownBinding });
+      if (!subscriber.definition) throw new Error('Missing definition');
+      subscriber.definition.triggers = [{ type: 'alert' }];
+      if (ownBinding) subscriber.definition.settings = { run_as: 'subscriber-account' };
+      mockGetWorkflow.mockResolvedValue(subscriber);
+      mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([{ ...subscriber, valid: true }]);
+      jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+      jest.spyOn(coreStart.security.serviceAccounts, 'getWorkloadBinding').mockResolvedValue({
+        serviceAccountId: ownBinding ? 'subscriber-account' : 'emitter-account',
+      } as never);
+      const runAs: NonNullable<RunContext['runAs']> = { withScopedRequest: jest.fn() };
+      jest
+        .mocked(runAs.withScopedRequest)
+        .mockImplementation(async (run) =>
+          run(httpServerMock.createKibanaRequest({ headers: { authorization: 'Bearer sa-token' } }))
+        );
+      await withWorkflowExecutionIdentity(
+        coreStart,
+        {
+          id: 'emitter-execution',
+          workflowId: 'emitter',
+          managed: true,
+          spaceId: 'default',
+          workflowDefinition: { ...subscriber.definition, settings: { run_as: 'emitter-account' } },
+        },
+        request,
+        async (scopedRequest) => {
+          await pluginStart.triggerEvents.emitEvent({
+            triggerId: 'alert',
+            payload: {},
+            request: scopedRequest,
+          });
+        },
+        runAs
+      );
+      expect(mockCreateWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(taskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runAs: {
+            workloadType: 'workflow',
+            workloadId: ownBinding ? 'subscriber' : 'emitter',
+            spaceId: 'default',
+            expectedServiceAccountId: ownBinding ? 'subscriber-account' : 'emitter-account',
+          },
+        }),
+        expect.anything()
+      );
+    }
+  );
+
+  it('rejects an unmanaged unbound event subscriber before persistence', async () => {
+    const subscriber = createWorkflow('subscriber');
+    if (!subscriber.definition) throw new Error('Missing definition');
+    subscriber.definition.triggers = [{ type: 'alert' }];
+    mockGetWorkflow.mockResolvedValue(subscriber);
+    mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([{ ...subscriber, valid: true }]);
+    jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+    const runAs: NonNullable<RunContext['runAs']> = { withScopedRequest: jest.fn() };
+    jest
+      .mocked(runAs.withScopedRequest)
+      .mockImplementation(async (run) => run(httpServerMock.createKibanaRequest()));
+    await withWorkflowExecutionIdentity(
+      coreStart,
+      {
+        id: 'emitter-execution',
+        workflowId: 'emitter',
+        managed: true,
+        spaceId: 'default',
+        workflowDefinition: { ...subscriber.definition, settings: { run_as: 'emitter-account' } },
+      },
+      request,
+      async (scopedRequest) => {
+        await pluginStart.triggerEvents.emitEvent({
+          triggerId: 'alert',
+          payload: {},
+          request: scopedRequest,
+        });
+      },
+      runAs
+    );
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('terminalizes a pending execution when task scheduling fails', async () => {
+    const workflow = createWorkflow('subscriber');
+    mockGetWorkflow.mockResolvedValue(workflow);
+    mockGetWorkflowExecutionWithVersion.mockResolvedValue({
+      execution: { id: 'pending', status: ExecutionStatus.PENDING },
+      seqNo: 3,
+      primaryTerm: 1,
+    });
+    taskManager.schedule.mockRejectedValue(new Error('Credential creation failed'));
+    await expect(
+      pluginStart.scheduleWorkflow(workflow, { spaceId: 'default' }, request)
+    ).rejects.toThrow('Credential creation failed');
+    expect(mockTryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: ExecutionStatus.FAILED,
+        error: { type: 'WorkflowSchedulingError', message: 'Credential creation failed' },
+        finishedAt: expect.any(String),
+      }),
+      { seqNo: 3, primaryTerm: 1 }
+    );
+  });
 
   it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
     '%s rejects a bound execution when deletion wins during persistence',

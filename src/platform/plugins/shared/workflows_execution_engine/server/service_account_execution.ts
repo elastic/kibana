@@ -115,6 +115,34 @@ export const resolveInheritedWorkflowIdentity = (
   };
 };
 
+/** Inherits an event emitter's live identity only between managed workflows in the same space. */
+export const resolveInheritedEventWorkflowIdentity = (
+  request: KibanaRequest,
+  workflow: WorkflowExecutionEngineModel,
+  spaceId: string
+): EsWorkflowExecution['effectiveIdentity'] => {
+  const emitter = executionContexts.get(request)?.execution;
+  const accountId = emitter && getExecutionServiceAccountId(emitter);
+  if (!accountId || workflow.definition?.settings?.run_as) return undefined;
+  if (emitter?.managed !== true || workflow.managed !== true) {
+    throw Boom.forbidden(
+      'A workflow that subscribes to events from a service account must have its own service account unless both the emitting workflow and subscriber are managed.'
+    );
+  }
+  if (emitter.spaceId !== spaceId) {
+    throw Boom.forbidden(
+      'An event subscriber can only inherit a service account in the emitting workflow space.'
+    );
+  }
+  return {
+    type: 'service_account',
+    id: accountId,
+    inheritedFrom: {
+      workloadId: emitter.effectiveIdentity?.inheritedFrom?.workloadId ?? emitter.workflowId,
+    },
+  };
+};
+
 /** Rejects changed delegation before persistence; credential acquisition checks again at run/resume. */
 export const ensureInheritedBindingCurrent = async (
   core: CoreStart,

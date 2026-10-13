@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Client } from '@elastic/elasticsearch';
+import { SYSTEM_INDICES_SUPERUSER, SYSTEM_INDICES_SUPERUSER_PASSWORD } from '@kbn/es';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { workflowSystemIndex } from '../../../../server/storage/indices';
 import {
   authenticationStep,
   createServiceAccountSuite,
@@ -23,11 +27,182 @@ apiTest.describe(
   () => {
     const { getContext, setup, teardown, cleanupWorkflows } = createServiceAccountSuite();
 
-    apiTest.beforeAll(setup);
+    const managedIds = new Set<string>();
 
-    apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
+    let systemClient: Client;
 
-    apiTest.afterAll(teardown);
+    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient }) => {
+      await setup({ apiClient, samlAuth, config, esClient });
+      systemClient = createEsClientForTesting({
+        esUrl: config.hosts.elasticsearch,
+        authOverride: {
+          username: SYSTEM_INDICES_SUPERUSER,
+          password: SYSTEM_INDICES_SUPERUSER_PASSWORD,
+        },
+        isCloud: config.isCloud,
+      });
+    });
+
+    apiTest.afterEach(async ({ apiClient }) => {
+      for (const id of managedIds) {
+        await systemClient.update({
+          index: workflowSystemIndex('workflows'),
+          id,
+          doc: { managed: false },
+          refresh: 'wait_for',
+        });
+      }
+      managedIds.clear();
+      await cleanupWorkflows(apiClient);
+    });
+
+    apiTest.afterAll(async ({ apiClient, esClient, config }) => {
+      try {
+        await teardown({ apiClient, esClient, config });
+      } finally {
+        await systemClient?.close();
+      }
+    });
+
+    for (const mode of ['inherit', 'rebind', 'user'] as const) {
+      apiTest(
+        `event subscribers retain their execution identity: ${mode}`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(180_000);
+          const {
+            headers,
+            accountId,
+            otherAccountId,
+            create,
+            run,
+            wait,
+            resume,
+            updateYaml,
+            expectAccount,
+          } = getContext();
+          const markManaged = async (id: string) => {
+            // Seed trusted managed definitions without adding a production installation route for the test.
+            await systemClient.update({
+              index: workflowSystemIndex('workflows'),
+              id,
+              doc: { managed: true },
+              refresh: 'wait_for',
+            });
+            managedIds.add(id);
+          };
+          const sourceYaml = workflowYaml(
+            accountId,
+            `  - name: fail
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /cp2-no-event-index-${Date.now()}/_doc/missing
+`
+          );
+          const sourceId = await create(
+            apiClient,
+            mode === 'user'
+              ? sourceYaml.replace(
+                  `settings:
+  run_as: ${accountId}
+`,
+                  ''
+                )
+              : sourceYaml
+          );
+          if (mode !== 'user') await markManaged(sourceId);
+          const subscriptionYaml = (yaml: string) =>
+            yaml.replace(
+              '  - type: manual',
+              `  - type: workflows.failed
+    on:
+      condition: 'event.workflow.id: "${sourceId}"'`
+            );
+          const unboundYaml = workflowYaml(accountId).replace(
+            `settings:
+  run_as: ${accountId}
+`,
+            ''
+          );
+          const ordinaryId = await create(apiClient, subscriptionYaml(unboundYaml));
+          const boundId = await create(apiClient, subscriptionYaml(workflowYaml(otherAccountId)));
+          const managedYaml = subscriptionYaml(
+            workflowYaml(accountId, waitStep + authenticationStep).replace(
+              `settings:
+  run_as: ${accountId}
+`,
+              ''
+            )
+          );
+          const managedId = await create(apiClient, managedYaml);
+          await markManaged(managedId);
+          const executions = async (id: string): Promise<WorkflowExecutionDto[]> => {
+            const result = await apiClient.get(`api/workflows/workflow/${id}/executions`, {
+              headers,
+              responseType: 'json',
+            });
+            expect(result).toHaveStatusCode(200);
+            return result.body.results;
+          };
+          await wait(apiClient, await run(apiClient, sourceId), 'failed');
+          await expect
+            .poll(async () => (await executions(managedId)).length, { timeout: 30_000 })
+            .toBe(1);
+          const [handler] = await executions(managedId);
+          const paused = await wait(apiClient, handler.id, 'waiting_for_input');
+          const expectedIdentity =
+            mode === 'user'
+              ? undefined
+              : {
+                  type: 'service_account',
+                  id: accountId,
+                  inheritedFrom: { workloadId: sourceId },
+                };
+          expect(paused.effectiveIdentity).toStrictEqual(expectedIdentity);
+          await expect
+            .poll(async () => (await executions(boundId)).length, { timeout: 30_000 })
+            .toBe(1);
+          expectAccount(await wait(apiClient, (await executions(boundId))[0].id), otherAccountId);
+          await expect
+            .poll(async () => (await executions(ordinaryId)).length, { timeout: 30_000 })
+            .toBe(mode === 'user' ? 1 : 0);
+          for (const ordinary of await executions(ordinaryId)) {
+            expect((await wait(apiClient, ordinary.id)).effectiveIdentity).toBeUndefined();
+          }
+          if (mode === 'rebind') {
+            await systemClient.update({
+              index: workflowSystemIndex('workflows'),
+              id: sourceId,
+              doc: { managed: false },
+              refresh: 'wait_for',
+            });
+            await updateYaml(apiClient, sourceId, sourceYaml.replace(accountId, otherAccountId));
+            await markManaged(sourceId);
+          }
+          await resume(apiClient, {
+            id: managedId,
+            yaml: managedYaml,
+            executionId: handler.id,
+            stepExecutionId: paused.stepExecutions?.find((step) => step.stepId === 'approval')?.id,
+          });
+          const finished = await wait(
+            apiClient,
+            handler.id,
+            mode === 'rebind' ? 'failed' : 'completed'
+          );
+          expect(finished.effectiveIdentity).toStrictEqual(expectedIdentity);
+          expect(finished.error?.type).toBe(
+            mode === 'rebind' ? 'ServiceAccountExecutionError' : undefined
+          );
+          const authenticate = finished.stepExecutions?.find(
+            (step) => step.stepId === 'authenticate'
+          );
+          expect(JSON.stringify(authenticate?.output ?? null)).toContain(
+            mode === 'inherit' ? accountId : mode === 'user' ? 'username' : 'null'
+          );
+        }
+      );
+    }
 
     apiTest(
       'SA continuation audit: binding failure dispatches the failure handler',
