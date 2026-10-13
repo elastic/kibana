@@ -31,6 +31,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiOverflowScroll,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -52,7 +53,6 @@ import {
   useUpdateRule,
 } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
-import { FormSection } from '../profiles/form_section';
 import type { RuleDraft } from './rule_draft';
 import {
   createEmptyRuleDraft,
@@ -100,6 +100,10 @@ const PATTERN_HELP: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
+const SELECT_PROFILE_FIRST = i18n.translate('xpack.boost.ruleForm.selectProfileFirst', {
+  defaultMessage: 'Select a boost profile to choose targets.',
+});
+
 interface TargetPreview {
   name: string;
   /** A higher-ranked rule that still applies to this target, if any. */
@@ -134,6 +138,8 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const { profiles, rules, data_sources: dataSources } = state;
   const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
   const type = profilesByName.get(draft.profileName)?.type;
+  // Wording for the disabled target controls until a profile sets the type.
+  const targetType = type ?? 'indices';
   // A default rule keeps its type, so it only offers profiles of that type.
   const defaultRuleType =
     isDefaultRule && rule ? profilesByName.get(rule.boost_profile)?.type : undefined;
@@ -229,6 +235,33 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
     ),
   }));
 
+  const modeToggle = (
+    <EuiButtonGroup
+      legend={i18n.translate('xpack.boost.ruleForm.targetModeLegend', {
+        defaultMessage: 'How this rule chooses what it applies to',
+      })}
+      buttonSize="compressed"
+      isFullWidth
+      idSelected={`${modeIdPrefix}-${draft.mode}`}
+      onChange={(id) =>
+        updateDraft({
+          mode: id === `${modeIdPrefix}-pick` ? 'pick' : 'pattern',
+        })
+      }
+      options={[
+        {
+          id: `${modeIdPrefix}-pattern`,
+          label: i18n.translate('xpack.boost.ruleForm.patternMode', {
+            defaultMessage: 'Index pattern',
+          }),
+        },
+        { id: `${modeIdPrefix}-pick`, label: PICK_LABELS[targetType] },
+      ]}
+      isDisabled={isSaving || !type}
+      data-test-subj="boostRuleTargetMode"
+    />
+  );
+
   const nameError = visibleErrors.name && RULE_NAME_ERROR_MESSAGES[visibleErrors.name];
   const patternError = visibleErrors.pattern && INDEX_PATTERN_ERROR_MESSAGES[visibleErrors.pattern];
   const pickedError = visibleErrors.picked && type ? PICKED_REQUIRED_MESSAGES[type] : undefined;
@@ -292,13 +325,12 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
           </EuiFormRow>
         )}
 
-        <FormSection
-          // When editing, this is the first section, right under the header's own border.
-          hasDivider={!isEditing}
-          title={i18n.translate('xpack.boost.ruleForm.profileTitle', {
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.translate('xpack.boost.ruleForm.profileLabel', {
             defaultMessage: 'Boost profile',
           })}
-          description={
+          helpText={
             defaultRuleType === 'indices'
               ? i18n.translate('xpack.boost.ruleForm.defaultIndicesProfileDescription', {
                   defaultMessage:
@@ -314,41 +346,38 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
                     "The profile's type decides whether this rule applies to indices or data streams.",
                 })
           }
+          isInvalid={Boolean(visibleErrors.profile)}
+          error={visibleErrors.profile && PROFILE_REQUIRED_MESSAGE}
+          fullWidth
         >
-          <EuiFormRow
-            display="rowCompressed"
-            isInvalid={Boolean(visibleErrors.profile)}
-            error={visibleErrors.profile && PROFILE_REQUIRED_MESSAGE}
+          <EuiComboBox<string>
+            compressed
             fullWidth
-          >
-            <EuiComboBox<string>
-              compressed
-              fullWidth
-              singleSelection={{ asPlainText: true }}
-              options={profileOptions}
-              selectedOptions={
-                draft.profileName ? [{ label: draft.profileName, value: draft.profileName }] : []
-              }
-              onChange={onProfileChange}
-              isInvalid={Boolean(visibleErrors.profile)}
-              isDisabled={isSaving}
-              aria-label={i18n.translate('xpack.boost.ruleForm.profileLabel', {
-                defaultMessage: 'Boost profile',
-              })}
-              data-test-subj="boostRuleProfile"
-            />
-          </EuiFormRow>
-        </FormSection>
+            singleSelection={{ asPlainText: true }}
+            options={profileOptions}
+            selectedOptions={
+              draft.profileName ? [{ label: draft.profileName, value: draft.profileName }] : []
+            }
+            onChange={onProfileChange}
+            isInvalid={Boolean(visibleErrors.profile)}
+            isDisabled={isSaving}
+            data-test-subj="boostRuleProfile"
+          />
+        </EuiFormRow>
 
         {/* Default rules always apply to everything else, so only their profile can change. */}
         {!isDefaultRule && (
           <>
-            <FormSection
-              title={i18n.translate('xpack.boost.ruleForm.targetsTitle', {
+            <EuiFormRow
+              display="rowCompressed"
+              labelType="legend"
+              label={i18n.translate('xpack.boost.ruleForm.targetsLabel', {
                 defaultMessage: 'Targets',
               })}
-              description={
-                type === 'data_streams'
+              helpText={
+                !type
+                  ? SELECT_PROFILE_FIRST
+                  : type === 'data_streams'
                   ? i18n.translate('xpack.boost.ruleForm.dataStreamsAppliesToDescription', {
                       defaultMessage:
                         'Enter one name or pattern, or select individual data streams.',
@@ -357,189 +386,163 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
                       defaultMessage: 'Enter one name or pattern, or select individual indices.',
                     })
               }
+              fullWidth
             >
-              {!type ? (
-                <EuiText size="s" color="subdued">
-                  <p>
-                    {i18n.translate('xpack.boost.ruleForm.selectProfileFirst', {
-                      defaultMessage: 'Select a boost profile first.',
-                    })}
-                  </p>
-                </EuiText>
-              ) : (
-                <>
-                  <EuiButtonGroup
-                    legend={i18n.translate('xpack.boost.ruleForm.targetModeLegend', {
-                      defaultMessage: 'How this rule chooses what it applies to',
-                    })}
-                    buttonSize="compressed"
-                    isFullWidth
-                    idSelected={`${modeIdPrefix}-${draft.mode}`}
-                    onChange={(id) =>
-                      updateDraft({
-                        mode: id === `${modeIdPrefix}-pick` ? 'pick' : 'pattern',
-                      })
-                    }
-                    options={[
-                      {
-                        id: `${modeIdPrefix}-pattern`,
-                        label: i18n.translate('xpack.boost.ruleForm.patternMode', {
-                          defaultMessage: 'Index pattern',
-                        }),
-                      },
-                      { id: `${modeIdPrefix}-pick`, label: PICK_LABELS[type] },
-                    ]}
-                    isDisabled={isSaving}
-                    data-test-subj="boostRuleTargetMode"
-                  />
-                  <EuiSpacer size="m" />
-                  {draft.mode === 'pattern' ? (
-                    <>
-                      <EuiFormRow
-                        display="rowCompressed"
-                        label={i18n.translate('xpack.boost.ruleForm.patternLabel', {
-                          defaultMessage: 'Index pattern',
-                        })}
-                        helpText={PATTERN_HELP[type]}
-                        isInvalid={Boolean(patternError)}
-                        error={patternError}
-                        fullWidth
-                      >
-                        <EuiFieldText
-                          compressed
-                          fullWidth
-                          value={draft.pattern}
-                          onChange={({ target: { value } }) => updateDraft({ pattern: value })}
-                          placeholder={type === 'data_streams' ? 'logs-*' : 'products-*'}
-                          isInvalid={Boolean(patternError)}
-                          disabled={isSaving}
-                          data-test-subj="boostRulePattern"
-                        />
-                      </EuiFormRow>
-                      {draft.pattern.trim() && !errors.pattern && (
-                        <>
-                          <EuiSpacer size="m" />
-                          <EuiFormLabel>
-                            {i18n.translate('xpack.boost.ruleForm.matchesLabel', {
-                              defaultMessage: 'Matches {targets}',
-                              values: {
-                                targets: formatDataSourceCount(type, patternPreview.length),
-                              },
-                            })}
-                          </EuiFormLabel>
-                          <EuiSpacer size="xs" />
-                          {patternPreview.length > 0 ? (
-                            <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-                              <div
-                                tabIndex={0}
-                                role="region"
-                                aria-label={formatDataSourceCount(type, patternPreview.length)}
-                                css={css`
-                                  ${scrollStyles}
-                                  max-block-size: ${euiTheme.base * 12}px;
-                                  padding: ${euiTheme.size.s};
-                                  border-radius: inherit;
-                                `}
-                              >
-                                {patternPreview.map(({ name, overriddenBy }) => (
-                                  <EuiFlexGroup
-                                    key={name}
-                                    gutterSize="s"
-                                    justifyContent="spaceBetween"
-                                    responsive={false}
-                                    css={{ paddingBlock: euiTheme.size.xs }}
-                                  >
-                                    <EuiFlexItem grow={false}>
-                                      <EuiText size="xs">
-                                        <EuiCode>{name}</EuiCode>
-                                      </EuiText>
-                                    </EuiFlexItem>
-                                    {overriddenBy && (
-                                      <EuiFlexItem grow={false}>
-                                        <EuiText size="xs" color="subdued">
-                                          {i18n.translate('xpack.boost.ruleForm.overriddenBy', {
-                                            defaultMessage: 'Higher-ranked rule: {rule}',
-                                            values: { rule: overriddenBy },
-                                          })}
-                                        </EuiText>
-                                      </EuiFlexItem>
-                                    )}
-                                  </EuiFlexGroup>
-                                ))}
-                              </div>
-                            </EuiPanel>
-                          ) : (
-                            <EuiText size="s" color="subdued">
-                              <p>
-                                {i18n.translate('xpack.boost.ruleForm.noMatchesYet', {
-                                  defaultMessage: 'Nothing matches yet.',
-                                })}
-                              </p>
-                            </EuiText>
-                          )}
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <EuiFormRow
-                      display="rowCompressed"
-                      label={PROFILE_TYPE_LABELS[type]}
-                      labelAppend={
-                        <EuiText size="xs" color="subdued">
-                          {i18n.translate('xpack.boost.ruleForm.pickedCount', {
-                            defaultMessage: '{count} selected',
-                            values: { count: draft.picked.length },
-                          })}
-                        </EuiText>
-                      }
-                      isInvalid={Boolean(pickedError)}
-                      error={pickedError}
-                      fullWidth
-                    >
-                      <EuiSelectable
-                        aria-label={PICK_LABELS[type]}
-                        searchable
-                        searchProps={{
-                          compressed: true,
-                          placeholder: i18n.translate(
-                            'xpack.boost.ruleForm.pickSearchPlaceholder',
-                            {
-                              defaultMessage: 'Search',
-                            }
-                          ),
-                        }}
-                        options={pickOptions}
-                        onChange={(options) =>
-                          updateDraft({
-                            picked: options
-                              .filter(({ checked }) => checked === 'on')
-                              .map(({ label }) => label),
-                          })
-                        }
-                        listProps={{ bordered: true }}
-                        height={euiTheme.base * 15}
-                        isLoading={isSaving}
-                        data-test-subj="boostRulePicker"
-                      >
-                        {(list, search) => (
-                          <>
-                            {search}
-                            <EuiSpacer size="s" />
-                            {list}
-                          </>
-                        )}
-                      </EuiSelectable>
-                    </EuiFormRow>
-                  )}
-                </>
-              )}
-            </FormSection>
+              {/* A wrapper takes the row's id, so the tooltip keeps its own. The tooltip only
+                  explains the disabled state, so it's dropped once a profile is chosen. */}
+              <div>
+                {type ? (
+                  modeToggle
+                ) : (
+                  <EuiToolTip content={SELECT_PROFILE_FIRST} display="block">
+                    {modeToggle}
+                  </EuiToolTip>
+                )}
+              </div>
+            </EuiFormRow>
 
-            <FormSection
-              title={i18n.translate('xpack.boost.ruleForm.priorityTitle', {
+            {draft.mode === 'pattern' ? (
+              <>
+                <EuiFormRow
+                  display="rowCompressed"
+                  label={i18n.translate('xpack.boost.ruleForm.patternLabel', {
+                    defaultMessage: 'Index pattern',
+                  })}
+                  helpText={PATTERN_HELP[targetType]}
+                  isInvalid={Boolean(patternError)}
+                  error={patternError}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    compressed
+                    fullWidth
+                    value={draft.pattern}
+                    onChange={({ target: { value } }) => updateDraft({ pattern: value })}
+                    placeholder={targetType === 'data_streams' ? 'logs-*' : 'products-*'}
+                    isInvalid={Boolean(patternError)}
+                    disabled={isSaving || !type}
+                    data-test-subj="boostRulePattern"
+                  />
+                </EuiFormRow>
+                {type && draft.pattern.trim() && !errors.pattern && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiFormLabel>
+                      {i18n.translate('xpack.boost.ruleForm.matchesLabel', {
+                        defaultMessage: 'Matches {targets}',
+                        values: {
+                          targets: formatDataSourceCount(type, patternPreview.length),
+                        },
+                      })}
+                    </EuiFormLabel>
+                    <EuiSpacer size="xs" />
+                    {patternPreview.length > 0 ? (
+                      <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+                        <div
+                          tabIndex={0}
+                          role="region"
+                          aria-label={formatDataSourceCount(type, patternPreview.length)}
+                          css={css`
+                            ${scrollStyles}
+                            max-block-size: ${euiTheme.base * 12}px;
+                            padding: ${euiTheme.size.s};
+                            border-radius: inherit;
+                          `}
+                        >
+                          {patternPreview.map(({ name, overriddenBy }) => (
+                            <EuiFlexGroup
+                              key={name}
+                              gutterSize="s"
+                              justifyContent="spaceBetween"
+                              responsive={false}
+                              css={{ paddingBlock: euiTheme.size.xs }}
+                            >
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="xs">
+                                  <EuiCode>{name}</EuiCode>
+                                </EuiText>
+                              </EuiFlexItem>
+                              {overriddenBy && (
+                                <EuiFlexItem grow={false}>
+                                  <EuiText size="xs" color="subdued">
+                                    {i18n.translate('xpack.boost.ruleForm.overriddenBy', {
+                                      defaultMessage: 'Higher-ranked rule: {rule}',
+                                      values: { rule: overriddenBy },
+                                    })}
+                                  </EuiText>
+                                </EuiFlexItem>
+                              )}
+                            </EuiFlexGroup>
+                          ))}
+                        </div>
+                      </EuiPanel>
+                    ) : (
+                      <EuiText size="s" color="subdued">
+                        <p>
+                          {i18n.translate('xpack.boost.ruleForm.noMatchesYet', {
+                            defaultMessage: 'Nothing matches yet.',
+                          })}
+                        </p>
+                      </EuiText>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <EuiFormRow
+                display="rowCompressed"
+                label={PROFILE_TYPE_LABELS[targetType]}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('xpack.boost.ruleForm.pickedCount', {
+                      defaultMessage: '{count} selected',
+                      values: { count: draft.picked.length },
+                    })}
+                  </EuiText>
+                }
+                isInvalid={Boolean(pickedError)}
+                error={pickedError}
+                fullWidth
+              >
+                <EuiSelectable
+                  aria-label={PICK_LABELS[targetType]}
+                  searchable
+                  searchProps={{
+                    compressed: true,
+                    placeholder: i18n.translate('xpack.boost.ruleForm.pickSearchPlaceholder', {
+                      defaultMessage: 'Search',
+                    }),
+                  }}
+                  options={pickOptions}
+                  onChange={(options) =>
+                    updateDraft({
+                      picked: options
+                        .filter(({ checked }) => checked === 'on')
+                        .map(({ label }) => label),
+                    })
+                  }
+                  listProps={{ bordered: true }}
+                  height={euiTheme.base * 15}
+                  isLoading={isSaving}
+                  data-test-subj="boostRulePicker"
+                >
+                  {(list, search) => (
+                    <>
+                      {search}
+                      <EuiSpacer size="s" />
+                      {list}
+                    </>
+                  )}
+                </EuiSelectable>
+              </EuiFormRow>
+            )}
+
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.translate('xpack.boost.ruleForm.priorityLabel', {
                 defaultMessage: 'Priority',
               })}
-              description={
+              helpText={
                 <>
                   {i18n.translate('xpack.boost.ruleForm.priorityDescription', {
                     defaultMessage:
@@ -550,27 +553,22 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
                   </EuiLink>
                 </>
               }
+              isInvalid={Boolean(priorityError)}
+              error={priorityError}
+              fullWidth
             >
-              <EuiFormRow
-                display="rowCompressed"
+              <EuiFieldNumber
+                compressed
+                fullWidth
+                value={draft.priority}
+                onChange={({ target: { value } }) => updateDraft({ priority: value })}
+                min={0}
+                step={1}
                 isInvalid={Boolean(priorityError)}
-                error={priorityError}
-              >
-                <EuiFieldNumber
-                  compressed
-                  value={draft.priority}
-                  onChange={({ target: { value } }) => updateDraft({ priority: value })}
-                  min={0}
-                  step={1}
-                  isInvalid={Boolean(priorityError)}
-                  disabled={isSaving}
-                  aria-label={i18n.translate('xpack.boost.ruleForm.priorityLabel', {
-                    defaultMessage: 'Priority',
-                  })}
-                  data-test-subj="boostRulePriority"
-                />
-              </EuiFormRow>
-            </FormSection>
+                disabled={isSaving}
+                data-test-subj="boostRulePriority"
+              />
+            </EuiFormRow>
           </>
         )}
       </EuiFlyoutBody>

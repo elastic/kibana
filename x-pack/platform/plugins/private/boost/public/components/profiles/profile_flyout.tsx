@@ -210,7 +210,8 @@ export const ProfileFlyout = ({
                 })
               : duplicateOf
               ? i18n.translate('xpack.boost.profileForm.duplicateTitle', {
-                  defaultMessage: 'Duplicate boost profile',
+                  defaultMessage: 'Duplicate boost profile "{name}"',
+                  values: { name: duplicateOf.name },
                 })
               : i18n.translate('xpack.boost.profileForm.createTitle', {
                   defaultMessage: 'Create boost profile',
