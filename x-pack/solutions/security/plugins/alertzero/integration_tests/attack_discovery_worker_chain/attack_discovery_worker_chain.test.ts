@@ -12,6 +12,7 @@ import {
   FAKE_INVESTIGATION_ID,
 } from './attack_discovery_chain_fixture';
 import type { AttackDiscoveryChainFixture } from './attack_discovery_chain_fixture';
+import { createFakeAlertZeroBackend } from './chain_step_registry';
 
 /**
  * Drives the REAL execution engine through the REAL, UNMODIFIED AlertZero
@@ -269,6 +270,30 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
     it('never called the ai.agent step at all', () => {
       // The required-source failure happens before `analyze` runs.
       expect(fixture.backend.agentCallCount()).toBe(0);
+    });
+  });
+
+  describe('fake ai.conversation.metadata.read step', () => {
+    // The review derives its Investigation id and creates that conversation
+    // itself, so a chain run can never reach the metadata read with an unknown
+    // conversation — this branch is exercised at the handler seam instead.
+    it('errors for a conversation the chain never created, like the real step', async () => {
+      const { stepDefinitions } = createFakeAlertZeroBackend();
+      const step = stepDefinitions.find(
+        (definition) =>
+          (definition as unknown as { id?: string }).id === 'ai.conversation.metadata.read'
+      ) as unknown as {
+        handler: (context: { input: unknown }) => Promise<{
+          error?: Error;
+          output?: { metadata: Record<string, unknown> };
+        }>;
+      };
+      const result = await step.handler({ input: { conversation_id: 'missing-conversation' } });
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error?.message).toBe(
+        'fake backend: conversation missing-conversation not found'
+      );
+      expect(result.output).toBeUndefined();
     });
   });
 });
