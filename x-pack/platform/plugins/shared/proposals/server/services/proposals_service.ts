@@ -53,6 +53,7 @@ import type { ProposalDocument, ProposalsStorageClient } from '../storage/propos
 import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalConflictError,
+  ProposalGateNotResumableError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -426,7 +427,19 @@ export class ProposalsService {
       { seqNo, primaryTerm }
     );
 
-    await this.resumeGate(annotated, { spaceId, request, approved });
+    try {
+      await this.resumeGate(annotated, { spaceId, request, approved });
+    } catch (error) {
+      // Only the refusals raised BEFORE the resume call was made clear the
+      // marker: the resume was definitely not accepted, so no decision is
+      // coming and leaving the marker set would refuse revisions forever. A
+      // failure from the resume call itself leaves the marker alone — the
+      // workflow may have resumed and be recording the decision right now.
+      if (error instanceof ProposalGateNotResumableError) {
+        await this.clearPendingDecisionMarker(id, spaceId);
+      }
+      throw error;
+    }
 
     return stripRanks(annotated);
   }
@@ -1124,6 +1137,36 @@ export class ProposalsService {
         `Proposal [${proposal.id}] has settled as ${proposal.status}`
       );
     }
+    if (proposal.decisionPending) {
+      // A release is already in flight: rewriting the row here would advance
+      // its seq_no and conflict the decision write the first release set up.
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] is already being released; wait for its decision to be recorded`
+      );
+    }
+  }
+
+  /**
+   * Best-effort undo of the release marker after a refusal that proved the
+   * resume never happened. Re-reads the row so the clear is guarded by the
+   * seq_no the first write left behind: if the workflow's decision write won
+   * the race, this write conflicts and is simply dropped — the decision is
+   * the stronger state.
+   */
+  private async clearPendingDecisionMarker(id: string, spaceId: string): Promise<void> {
+    try {
+      const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+      if (proposal.decisionPending) {
+        const { decisionPending: _marker, ...document } = proposal;
+        await this.writeDocument(id, document, { seqNo, primaryTerm });
+      }
+    } catch (error) {
+      // Cleanup, not a guarantee: report and move on. The original refusal is
+      // the error the caller should see.
+      this.deps.logger.warn(
+        `Failed to clear the pending-decision marker on proposal [${id}]: ${error}`
+      );
+    }
   }
 
   /** Optimistically-concurrent write, with the lost race reported as a conflict. */
@@ -1164,7 +1207,7 @@ export class ProposalsService {
       // as a refusal rather than an early return because the decision is
       // written behind the gate: returning would answer the caller with a 200
       // for a record that nothing will ever decide.
-      throw new ProposalConflictError(
+      throw new ProposalGateNotResumableError(
         `Proposal [${proposal.id}] has no gate execution, so its decision cannot be recorded`
       );
     }
@@ -1174,12 +1217,12 @@ export class ProposalsService {
       request,
     });
     if (!execution) {
-      throw new ProposalConflictError(
+      throw new ProposalGateNotResumableError(
         `Execution [${proposal.workflowExecutionId}] for proposal [${proposal.id}] not found`
       );
     }
     if (execution.status !== ExecutionStatus.WAITING_FOR_INPUT || execution.finishedAt) {
-      throw new ProposalConflictError(
+      throw new ProposalGateNotResumableError(
         `Execution [${proposal.workflowExecutionId}] is not waiting for input (status: ${execution.status})`
       );
     }
