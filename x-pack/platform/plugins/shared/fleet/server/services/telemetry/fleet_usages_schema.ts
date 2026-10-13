@@ -393,6 +393,14 @@ export const fleetUsagesSchema: RootSchema<any> = {
           type: 'boolean',
           _meta: { description: 'true if package is agent-based', optional: true },
         },
+        logsdb_columnar: {
+          type: 'boolean',
+          _meta: {
+            description:
+              "The user's logsdb_columnar choice for the installation; absent when the user made none",
+            optional: true,
+          },
+        },
       },
     },
   },
