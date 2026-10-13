@@ -24,6 +24,7 @@ export function getNextRunAt(
     nextCalculatedRunAt = calculateNextRunAtFromSchedule({
       schedule,
       startDate: scheduleFromDate,
+      previousRunAt: runAt,
     });
   } catch (e) {
     logger.error(
@@ -38,9 +39,11 @@ export function getNextRunAt(
 export function calculateNextRunAtFromSchedule({
   schedule,
   startDate,
+  previousRunAt,
 }: {
   schedule?: IntervalSchedule | RruleSchedule;
   startDate: Date;
+  previousRunAt?: Date;
 }): number {
   const { rrule, interval } = schedule || {};
 
@@ -54,8 +57,22 @@ export function calculateNextRunAtFromSchedule({
     });
     // adding 1ms to ensure the next run is always in the future
     // if scheduleFromDate is equal to now (very low possibility), the next run will be now again, which causes loops
-    nextRunAt = _rrule.after(new Date(Date.now() + 1));
+    // previousRunAt keeps an early run (now < runAt) from selecting the occurrence it just ran
+    nextRunAt = _rrule.after(new Date(Math.max(Date.now(), previousRunAt?.getTime() ?? 0) + 1));
   }
   // Ensure we also don't schedule in the past by performing the Math.max with Date.now
   return Math.max(nextRunAt!.getTime(), Date.now());
+}
+
+/** Returns the gap in ms between the next two rrule occurrences after `from`. */
+export function getRRuleScheduleDurationMs(rrule: RruleSchedule['rrule'], from: Date): number {
+  const _rrule = new RRule({ ...rrule, dtstart: from });
+  const nextRunAt = _rrule.after(new Date(from.getTime() + 1));
+  const runAfterNext = nextRunAt ? _rrule.after(new Date(nextRunAt.getTime() + 1)) : null;
+  if (!nextRunAt || !runAfterNext) {
+    throw new Error(
+      'Unable to determine the schedule duration: the rrule has no upcoming occurrences'
+    );
+  }
+  return runAfterNext.getTime() - nextRunAt.getTime();
 }
