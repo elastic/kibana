@@ -1478,13 +1478,12 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(subjectsClient.claimSubjects).toHaveBeenCalled();
   });
 
-  it('opens a new investigation rather than continue one owned by another identity', async () => {
+  it('continues an open investigation another identity owns', async () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-theirs' }]);
     withConversations(makeConversation({ id: 'inv-theirs', owner: false }));
 
-    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-theirs'));
-    expect(runInputs().message).not.toContain('This continues the investigation');
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-theirs' });
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
   });
 
   it('opens a new investigation rather than continue one without room for the new subjects', async () => {
@@ -1546,11 +1545,11 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-pending' });
   });
 
-  it('is not blocked by a claim held by an investigation it cannot write', async () => {
+  it('continues a claim holder another identity owns', async () => {
     subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-theirs' });
     withConversations(makeConversation({ id: 'inv-theirs', owner: false }));
 
-    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-theirs' });
   });
 
   it('treats a closed or missing claim holder as no longer holding the subject', async () => {
@@ -1666,15 +1665,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', { status: 'open' });
   });
 
-  it('writes nothing to an investigation the run does not own', async () => {
+  it('reopens an investigation another identity owns', async () => {
     withExecution();
     withConversations(makeConversation({ id: 'inv-1', status: 'closed', owner: false }));
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
 
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('does not own'));
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', { status: 'open' });
   });
 
   it('starts an investigation for a run started without one, from its context', async () => {
@@ -1855,7 +1852,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     ]);
   });
 
-  it('does not write the status message to an investigation another identity owns', async () => {
+  it('writes the status message to an investigation another identity owns', async () => {
     subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1', owner: false }));
 
@@ -1865,8 +1862,11 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       statusMessageTs: '2.0',
     });
 
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      expect.objectContaining({
+        slack: expect.objectContaining({ status_message_ts: '2.0' }),
+      }),
+    ]);
   });
 
   it('records a delivered event and answers one another execution handled as a duplicate', async () => {

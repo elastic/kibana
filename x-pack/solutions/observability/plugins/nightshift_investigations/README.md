@@ -70,13 +70,9 @@ Readers use the shared query API: the Nightshift landing page (list, severity co
 
 `deleteAllInvestigations()` on the start contract deletes the legacy saved objects in every space. It leaves the investigation conversations and their shared data (subjects, claims, impact, hypotheses) alone: Agent Builder has no cross-space delete, and the shared data has no owner that would limit a sweep to Nightshift's investigations.
 
-### One identity per investigation
+### Continuing an investigation
 
-Agent Builder lets only the conversation owner write subjects, metadata, and attachments. So one identity must create and continue an investigation. Use a service account for the investigation workflow, its automations, and the Slack thread workflow.
-
-A start will not continue an investigation it does not own. It opens a new one instead and logs a warning.
-
-The start judges ownership by Agent Builder's owner check. (Agent Builder resolves the user profile id of an API key's creator for fake requests too, so a workflow step and the HTTP calls it makes count as the same owner.) If a run reaches an investigation it does not own anyway, the agent still works in the conversation, but subjects and the reopen are skipped. Cross-identity follow-ups need converse-access writes in Agent Builder.
+Investigations are public conversations, and Agent Builder lets anyone who can converse in one write its subjects, metadata, and attachments. So any identity that can read an open investigation continues it: a workflow step, its automations, the Slack thread workflow, and a user over HTTP all add to the same investigation.
 
 ### Slack threads
 

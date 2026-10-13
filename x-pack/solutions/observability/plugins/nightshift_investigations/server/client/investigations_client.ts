@@ -700,20 +700,11 @@ export class NightshiftInvestigationsClient {
       conversations,
       open.map(({ id }) => id)
     );
-    const owned = candidates.filter(({ isOwner, status }) => isOwner && status === 'open');
-    for (const candidate of owned) {
+    for (const candidate of candidates.filter(({ status }) => status === 'open')) {
       const target = await withRoom(candidate.id);
       if (target) {
         return target;
       }
-    }
-    if (candidates.length > owned.length) {
-      this.logger.warn(
-        `Open investigations [${candidates
-          .filter((candidate) => !owned.includes(candidate))
-          .map(({ id }) => id)
-          .join(', ')}] share a subject but are owned by another identity; starting a new one`
-      );
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
@@ -739,11 +730,11 @@ export class NightshiftInvestigationsClient {
     if (!holder) {
       return { id: claim.heldBy, recorded: [] };
     }
-    if (holder.isOwner && holder.status === 'open') {
+    if (holder.status === 'open') {
       return (await withRoom(holder.id)) ?? newInvestigation;
     }
     this.logger.warn(
-      `Investigation "${claim.heldBy}" holds a subject of this start but is closed or owned by another identity; starting a new one`
+      `Investigation "${claim.heldBy}" holds a subject of this start but is closed; starting a new one`
     );
     return newInvestigation;
   }
@@ -779,16 +770,6 @@ export class NightshiftInvestigationsClient {
       conversations,
       id: investigationId,
     });
-
-    if (!conversation.isOwner) {
-      // The agent can still work in a public conversation, but subjects and metadata are
-      // owner-only. Starts avoid this by never continuing an investigation they do not own.
-      // TODO(ns-1619): record subjects and reopen once Agent Builder allows converse-access writes.
-      this.logger.warn(
-        `Run "${executionId}" does not own investigation "${investigationId}"; continuing without recording subjects or reopening it`
-      );
-      return conversation.id;
-    }
 
     const subjects = recoverSubjectsFromInputs(inputs, investigationId);
     if (subjects.length > 0) {
@@ -957,15 +938,6 @@ export class NightshiftInvestigationsClient {
           statusMessageTs: recorded?.status_message_ts,
         });
       }
-      if (!existing.isOwner) {
-        this.logger.warn(
-          `Cannot record the Slack status message or event on investigation "${existing.id}": it is owned by another identity`
-        );
-        return toSlackThreadInvestigation(existing, {
-          ...response,
-          statusMessageTs: recorded?.status_message_ts,
-        });
-      }
       await subjectsClient.upsertSubjects(existing.id, [
         { ...subjectKey, slack: { channel, thread_ts: threadTs, ...update } },
       ]);
@@ -1011,7 +983,7 @@ export class NightshiftInvestigationsClient {
       : await findThreadSubject(conversation.id);
     const recorded = threadSubject?.slack;
     const update = toSlackThreadUpdate(recorded, activity);
-    if (conversation.isOwner && (!threadSubject || update)) {
+    if (!threadSubject || update) {
       const summary = collapseSlackText(text).slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
       await subjectsClient.upsertSubjects(conversation.id, [
         {

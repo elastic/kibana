@@ -23,12 +23,6 @@ export interface InvestigationConversation {
   title: string;
   /** `metadata.status`; a missing status reads as open. */
   status: 'open' | 'closed';
-  /**
-   * Whether the caller owns the conversation. Subject attachments and metadata writes are
-   * owner-only in Agent Builder, so a caller that does not own an investigation cannot follow up
-   * on it.
-   */
-  isOwner: boolean;
   /** This call created the conversation. */
   created: boolean;
 }
@@ -49,7 +43,6 @@ const toInvestigationConversation = (
     id: conversation.id,
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
-    isOwner: conversation.permissions.update_access_control === true,
     created,
   };
 };
