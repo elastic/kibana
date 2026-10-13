@@ -1407,8 +1407,8 @@ each request. Plugins consuming this contract have access to that id via
 ### Reacting to `execute_api` state changes
 
 The agent can create, update and delete resources through the `execute_api` tool. To keep a page
-in sync with those changes without parsing the tool's result, subscribe to
-`events.getApiStateChanges$({ apis })`.
+in sync with those changes without parsing the tool's result, pipe a chat event stream through the
+`filterApiStateChanges({ apis })` operator from `@kbn/agent-builder-browser`.
 
 After each successful call to an API that is not read-only, `execute_api` emits a `tool_ui` event
 whose `custom_event` is `API_STATE_CHANGED_UI_EVENT` (`'api_state_changed'`). The read-only flag
@@ -1423,15 +1423,25 @@ events to the browser. The payload is `ApiStateChangedEventData`:
 - `method` - the HTTP method the call was dispatched with
 - `path` - the request path, with path parameters resolved
 
-`getApiStateChanges$` follows `events.ui.activeConversation$`, so you only receive changes from the
-conversation the user is focused on. Events are live and not replayed to late subscribers, so keep
-fetching fresh data when your view mounts. The `apis` option selects operations per target with
-`*`, a namespace wildcard such as `cases.*`, or an exact operation id.
+The operator only filters, so the source stream decides which conversations you hear from. Pipe
+`getChatEvents$(conversationId)` for a known conversation, or the `ui.activeConversation$` and
+`switchMap` pattern above to follow the conversation the user is focused on. Events are live and not
+replayed to late subscribers, so keep fetching fresh data when your view mounts. The `apis` option
+selects operations per target with `*`, a namespace wildcard such as `cases.*`, or an exact
+operation id.
 
 ```ts
+import { filterApiStateChanges } from '@kbn/agent-builder-browser';
+
 useEffect(() => {
-  const subscription = agentBuilder.events
-    .getApiStateChanges$({ apis: [{ target: 'kibana', api: 'cases.*' }] })
+  const subscription = agentBuilder.events.ui.activeConversation$
+    .pipe(
+      map((activeConversation) => activeConversation?.id),
+      filter((conversationId): conversationId is string => conversationId != null),
+      distinctUntilChanged(),
+      switchMap((conversationId) => agentBuilder.events.getChatEvents$(conversationId)),
+      filterApiStateChanges({ apis: [{ target: 'kibana', api: 'cases.*' }] })
+    )
     .subscribe(() => {
       queryClient.invalidateQueries({ queryKey: ['cases', 'list'], exact: true });
     });

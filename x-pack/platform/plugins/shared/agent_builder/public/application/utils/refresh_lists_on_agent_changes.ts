@@ -6,9 +6,11 @@
  */
 
 import type { Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs';
 import type { QueryClient, QueryKey } from '@kbn/react-query';
 import type { ApiReference } from '@kbn/agent-builder-common';
 import { matchesAnyApiSelector } from '@kbn/agent-builder-common';
+import { filterApiStateChanges } from '@kbn/agent-builder-browser';
 import type { EventsService } from '../../services/events';
 import { queryKeys } from '../query_keys';
 
@@ -71,7 +73,7 @@ const listRefreshes: readonly ListRefresh[] = [
   },
 ];
 
-const allListApis = listRefreshes.flatMap(({ apis }) => apis);
+export const allListApis: readonly ApiReference[] = listRefreshes.flatMap(({ apis }) => apis);
 
 /**
  * Refreshes the agents, tools, skills and plugins lists when the agent changes them through
@@ -86,10 +88,18 @@ export const refreshListsOnAgentChanges = ({
   eventsService: EventsService;
   queryClient: QueryClient;
 }): Subscription =>
-  eventsService.getApiStateChanges$({ apis: allListApis }).subscribe((change) => {
-    listRefreshes
-      .filter(({ apis }) => matchesAnyApiSelector(apis, change))
-      .forEach(({ queryKey, exact = true }) => {
-        queryClient.invalidateQueries({ queryKey, exact });
-      });
-  });
+  eventsService.activeConversation$
+    .pipe(
+      map((activeConversation) => activeConversation?.id),
+      filter((conversationId): conversationId is string => conversationId != null),
+      distinctUntilChanged(),
+      switchMap((conversationId) => eventsService.getChatEvents$(conversationId)),
+      filterApiStateChanges({ apis: allListApis })
+    )
+    .subscribe((change) => {
+      listRefreshes
+        .filter(({ apis }) => matchesAnyApiSelector(apis, change))
+        .forEach(({ queryKey, exact = true }) => {
+          queryClient.invalidateQueries({ queryKey, exact });
+        });
+    });

@@ -15,7 +15,7 @@ import {
 import { findUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import { EventsService } from '../../services/events';
 import { queryKeys } from '../query_keys';
-import { refreshListsOnAgentChanges } from './refresh_lists_on_agent_changes';
+import { allListApis, refreshListsOnAgentChanges } from './refresh_lists_on_agent_changes';
 
 const kibanaChange = (api: string): ApiStateChangedEventData => ({
   target: 'kibana',
@@ -30,8 +30,8 @@ describe('refreshListsOnAgentChanges', () => {
   let invalidateQueries: jest.SpyInstance;
   let listRefresh: Subscription;
 
-  const reportChange = (change: ApiStateChangedEventData) => {
-    eventsService.propagateChatEvent('conversation-1', {
+  const reportChange = (change: ApiStateChangedEventData, conversationId = 'conversation-1') => {
+    eventsService.propagateChatEvent(conversationId, {
       type: ChatEventType.toolUi,
       data: {
         tool_id: 'execute_api',
@@ -140,6 +140,33 @@ describe('refreshListsOnAgentChanges', () => {
     expect(invalidateQueries).not.toHaveBeenCalled();
   });
 
+  it('ignores changes made in conversations other than the focused one', () => {
+    startListRefresh();
+
+    reportChange(kibanaChange('agent-builder.post-agent-builder-agents'), 'conversation-2');
+
+    expect(invalidateQueries).not.toHaveBeenCalled();
+  });
+
+  it('follows the focused conversation when it changes', () => {
+    startListRefresh();
+
+    eventsService.setActiveConversation({ id: 'conversation-2' });
+    reportChange(kibanaChange('agent-builder.post-agent-builder-agents'), 'conversation-1');
+    reportChange(kibanaChange('agent-builder.post-agent-builder-tools'), 'conversation-2');
+
+    expect(invalidateQueries.mock.calls.map(([filters]) => filters)).toEqual([toolsList]);
+  });
+
+  it('keeps refreshing for the last focused conversation once the chat closes', () => {
+    startListRefresh();
+
+    eventsService.clearActiveConversation();
+    reportChange(kibanaChange('agent-builder.post-agent-builder-agents'));
+
+    expect(invalidateQueries.mock.calls.map(([filters]) => filters)).toEqual([agentsList]);
+  });
+
   it('stops refreshing once unsubscribed', () => {
     startListRefresh();
 
@@ -150,11 +177,7 @@ describe('refreshListsOnAgentChanges', () => {
   });
 
   it('only maps operations the Kibana API registry ships', () => {
-    const getApiStateChanges = jest.spyOn(eventsService, 'getApiStateChanges$');
-    startListRefresh();
-
-    const [[{ apis }]] = getApiStateChanges.mock.calls;
-    expect(apis).not.toHaveLength(0);
-    expect(findUnknownApis(apis)).toEqual([]);
+    expect(allListApis).not.toHaveLength(0);
+    expect(findUnknownApis(allListApis)).toEqual([]);
   });
 });

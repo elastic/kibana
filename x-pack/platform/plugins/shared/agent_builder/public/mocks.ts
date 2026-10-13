@@ -117,7 +117,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     events: {
       chat$: EMPTY,
       getChatEvents$: jest.fn().mockReturnValue(EMPTY),
-      getApiStateChanges$: jest.fn().mockReturnValue(EMPTY),
       ui: {
         activeConversation$: new BehaviorSubject(null),
       },
