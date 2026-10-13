@@ -84,6 +84,7 @@ export {
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
   buildSecurityRoleUrl,
+  getPredefinedWorkerRoleName,
 } from './worker_roles';
 export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
 
@@ -195,6 +196,15 @@ export type {
 
 export {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
+  BUDGET_PER_HOUR_DEFAULT,
+  BUDGET_PER_HOUR_MAX,
+  BUDGET_PER_HOUR_MIN,
+  TRIAGE_ALERT_COST,
+  TRIAGE_BATCH_OVERHEAD_COST,
+  getMinBudgetPerHour,
+  LOOKBACK_HOURS_DEFAULT,
+  LOOKBACK_HOURS_MAX,
+  LOOKBACK_HOURS_MIN,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
@@ -216,6 +226,7 @@ export {
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   diffWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
   getAllowedAutonomyLevels,
   isWorkerScheduleIntervalReadOnly,

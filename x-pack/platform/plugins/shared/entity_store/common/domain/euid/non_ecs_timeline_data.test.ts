@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 import {
   getEuidFromTimelineNonEcsData,
   getEntityIdentifiersFromTimelineNonEcsData,
@@ -59,27 +60,35 @@ describe('nonEcsTimelineDataToDocument', () => {
 
 describe('getEuidFromTimelineNonEcsData', () => {
   it('returns undefined when no identity fields are present', () => {
-    expect(getEuidFromTimelineNonEcsData('host', [{ field: 'host.domain', value: ['d'] }])).toBe(
-      undefined
-    );
+    expect(
+      getEuidFromTimelineNonEcsData(getBuiltInEntityDefinition('host'), [
+        { field: 'host.domain', value: ['d'] },
+      ])
+    ).toBe(undefined);
   });
 
   it('derives host euid from dotted host.id row', () => {
-    expect(getEuidFromTimelineNonEcsData('host', [{ field: 'host.id', value: ['h-1'] }])).toBe(
-      'host:h-1'
-    );
+    expect(
+      getEuidFromTimelineNonEcsData(getBuiltInEntityDefinition('host'), [
+        { field: 'host.id', value: ['h-1'] },
+      ])
+    ).toBe('host:h-1');
   });
 
   it('returns undefined for empty rows', () => {
-    expect(getEuidFromTimelineNonEcsData('host', undefined)).toBeUndefined();
-    expect(getEuidFromTimelineNonEcsData('host', [])).toBeUndefined();
+    expect(
+      getEuidFromTimelineNonEcsData(getBuiltInEntityDefinition('host'), undefined)
+    ).toBeUndefined();
+    expect(getEuidFromTimelineNonEcsData(getBuiltInEntityDefinition('host'), [])).toBeUndefined();
   });
 });
 
 describe('getEntityIdentifiersFromTimelineNonEcsData', () => {
   it('returns identifier map from timeline rows', () => {
     expect(
-      getEntityIdentifiersFromTimelineNonEcsData('host', [{ field: 'host.id', value: ['h-1'] }])
+      getEntityIdentifiersFromTimelineNonEcsData(getBuiltInEntityDefinition('host'), [
+        { field: 'host.id', value: ['h-1'] },
+      ])
     ).toEqual({ 'host.id': 'h-1' });
   });
 });

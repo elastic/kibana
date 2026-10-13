@@ -149,17 +149,12 @@ describe('buildLogsExtractionEsqlQuery', () => {
   it.each(Object.values(EXTRACTION_MODE))(
     '%s applies custom user exclusions while generating the extraction query',
     async (extractionMode) => {
-      const entityDefinitionOptions = { excludedUserNames: ['svc-deploy'] };
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],
         latestIndex: 'latest-index',
-        entityDefinition: getEntityDefinition(
-          'user',
-          'default',
-          extractionMode,
-          entityDefinitionOptions
-        ),
-        entityDefinitionOptions,
+        entityDefinition: getEntityDefinition('user', 'default', extractionMode, {
+          excludedUserNames: ['svc-deploy'],
+        }),
         docsLimit: 10000,
         fromDateISO: '2022-01-01T00:00:00.000Z',
         toDateISO: '2022-01-01T23:59:59.999Z',

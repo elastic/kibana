@@ -23,7 +23,9 @@ const workload = {
   pluginId: 'workflows',
   workloadType: 'workflow',
   workloadId: 'workflow-1',
-  displayName: 'workflow-1',
+  displayName: 'Nightly report',
+  typeName: 'Workflow',
+  href: '/s/marketing/app/workflows/workflow-1',
 };
 
 describe('Delete service account route', () => {

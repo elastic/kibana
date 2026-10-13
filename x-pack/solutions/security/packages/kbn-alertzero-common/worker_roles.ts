@@ -20,6 +20,12 @@ export const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
 export const buildSecurityRoleUrl = (roleName: string) =>
   `/api/security/role/${encodeURIComponent(roleName)}`;
 
+/**
+ * On Serverless each worker role ships as a reserved predefined role, whose name must start with
+ * `_`. Defined in elasticsearch-controller and mirrored in `kbn-es`.
+ */
+export const getPredefinedWorkerRoleName = (name: string) => `_${name}`;
+
 interface IndexPrivileges {
   names: string[];
   privileges: string[];
@@ -115,6 +121,8 @@ const buildRole = (
  * and the actions it can auto-approve, in every space. Actions that always need a human
  * (`approvalPolicy: always-gate`) run as the approver, so their privileges are left out. Mirrors
  * "AlertZero prebuilt service accounts — Minimum privileges", including its conditional rows.
+ * Serverless ships these as predefined roles, so update elasticsearch-controller and the `kbn-es`
+ * mirror whenever a role changes here.
  */
 export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefinition>> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {
@@ -122,6 +130,17 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
     role: buildRole(
       'Alert Triage',
       {
+        // The sweep lists the batch's live executions, starts its batches, and cancels a batch
+        // whose execution it could not record.
+        workflowsManagement: [
+          'minimal_read',
+          'workflow_read',
+          'workflow_read_managed',
+          'workflow_execution_read',
+          'workflow_execution_read_managed',
+          'workflow_execute',
+          'workflow_execution_cancel',
+        ],
         securitySolutionRulesV4: ['minimal_read'],
         securitySolutionNotes: ['all'],
         securitySolutionAlertsV1: ['all'],

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
 import type {
   AccessedDecisionTree,
   InvestigationExample,
+  InvestigationReport,
   InvestigationTaskOutput,
   TrajectoryStep,
 } from '../types';
@@ -103,12 +103,12 @@ export const extractReferenceAnswer = (
 };
 
 /**
- * Compose the candidate "final answer" text the judges score, from the persisted structured
- * report. Deductive judges read a single `final_answer` string; the investigation agent instead
- * emits a structured report whose `conclusion` is the root-cause narrative, so we lead with it and
- * append the supporting summary and confirmed/likely hypotheses.
+ * Compose the candidate "final answer" text the judges score, from what the investigation
+ * recorded. Deductive judges read a single `final_answer` string; the investigation agent instead
+ * records a verdict (the root-cause narrative, `conclusion` here), so we lead with it and append
+ * the summary of what happened and the confirmed/likely hypotheses.
  */
-export const composeAnswerText = (report: InvestigationStructuredOutput | undefined): string => {
+export const composeAnswerText = (report: InvestigationReport | undefined): string => {
   if (!report) return '';
   const parts: string[] = [];
   if (report.conclusion) parts.push(`Conclusion: ${report.conclusion}`);
@@ -133,23 +133,26 @@ export const composeAnswerText = (report: InvestigationStructuredOutput | undefi
 /**
  * Compose the report's own evidence text, per-hypothesis evidence tagged with that hypothesis's
  * candidate and status so a judge cannot attribute a rejected/secondary hypothesis's evidence to
- * the primary conclusion, plus the recommendations the agent derived. This is the model's own
- * *selected* evidence, not what it actually accessed — see `composeTrajectoryText` for that.
+ * the primary conclusion, plus the impact evidence and the actions the agent proposed. This is the
+ * model's own *selected* evidence, not what it actually accessed — see `composeTrajectoryText`.
+ * Evidence descriptions carry the ES|QL the agent ran; chart points are left out.
  */
-export const composeEvidenceText = (report: InvestigationStructuredOutput | undefined): string => {
+export const composeEvidenceText = (report: InvestigationReport | undefined): string => {
   if (!report) return '';
   const lines: string[] = [];
   for (const hypothesis of report.hypotheses ?? []) {
     for (const evidence of hypothesis.evidence ?? []) {
-      const parts = [
-        evidence.description,
-        evidence.chart && `[chart: ${evidence.chart.title}]`,
-      ].filter(Boolean);
-      lines.push(`- [${hypothesis.status}] ${hypothesis.candidate}: ${parts.join(' ')}`);
+      const chart = evidence.chart ? ` [chart: ${evidence.chart.title}]` : '';
+      lines.push(
+        `- [${hypothesis.status}] ${hypothesis.candidate}: ${evidence.description ?? ''}${chart}`
+      );
     }
   }
-  for (const recommendation of report.recommendations ?? []) {
-    lines.push(`- recommendation: ${recommendation.title}`);
+  if (report.impact?.summary) {
+    lines.push(`- impact: ${report.impact.summary}`);
+  }
+  for (const proposal of report.proposals ?? []) {
+    lines.push(`- proposed action: ${proposal.title}`);
   }
   return lines.join('\n');
 };

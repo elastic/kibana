@@ -12,7 +12,7 @@ import type { UiSettingValues } from '@kbn/kbn-client';
 /**
  * Solution view types for Kibana spaces.
  * Should match: 'oblt' | 'security' | 'es' | 'classic'
- * (excludes 'workplaceai' from the full SolutionView type)
+ * (excludes 'vectordb' from the full SolutionView type)
  */
 export type SpaceSolutionView = 'oblt' | 'security' | 'es' | 'classic';
 
