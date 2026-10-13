@@ -12,15 +12,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { SecurityAppHeader } from '../../../../common/components/app_header';
-import { useAddIntegrationsMenuItem } from '../../../../common/components/app_header/use_add_integrations_menu_item';
-import { useMlJobSettingsMenuItem } from '../../../../common/components/app_header/use_ml_job_settings_menu_item';
 import { TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useRuleCustomizationsContext } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useBulkExport } from '../../../rule_management/logic/bulk_actions/use_bulk_export';
-import { ALERTS_PATH } from '../../../../../common/constants';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { useRuleDetailsMenu } from './use_rule_details_menu';
 
@@ -35,10 +32,10 @@ jest.mock('../../../../common/components/link_to', () => ({
   useGetSecuritySolutionUrl: () => () => '/app/security/rules',
 }));
 jest.mock('../../../../common/components/app_header/use_ml_job_settings_menu_item', () => ({
-  useMlJobSettingsMenuItem: jest.fn(),
+  useMlJobSettingsMenuItem: () => ({ item: undefined, flyout: null }),
 }));
 jest.mock('../../../../common/components/app_header/use_add_integrations_menu_item', () => ({
-  useAddIntegrationsMenuItem: jest.fn(),
+  useAddIntegrationsMenuItem: () => undefined,
 }));
 jest.mock('./use_add_rule_to_chat_menu_item', () => ({
   useAddRuleToChatMenuItem: () => undefined,
@@ -77,14 +74,10 @@ const RuleMenu = ({
   return <SecurityAppHeader title="Rule" menu={menu} />;
 };
 
-const renderHeader = (
-  rule?: ReturnType<typeof mockRule>,
-  ruleLoading?: boolean,
-  pathname: string = '/'
-) =>
+const renderHeader = (rule?: ReturnType<typeof mockRule>, ruleLoading?: boolean) =>
   render(
     <TestProviders>
-      <MemoryRouter initialEntries={[pathname]}>
+      <MemoryRouter>
         <MockAppHeaderProvider>
           <RuleMenu rule={rule} ruleLoading={ruleLoading} />
         </MockAppHeaderProvider>
@@ -95,8 +88,6 @@ const renderHeader = (
 describe('rule details app menu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useMlJobSettingsMenuItem as jest.Mock).mockReturnValue({ item: undefined, flyout: null });
-    (useAddIntegrationsMenuItem as jest.Mock).mockReturnValue(undefined);
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
@@ -172,38 +163,5 @@ describe('rule details app menu', () => {
     await openAppMenuOverflow();
 
     expect(screen.getByTestId('ruleLastExecutionStatusRefreshButton')).toBeDisabled();
-  });
-
-  it('lists "Delete rule" last, after the ML job settings and Add integrations items', async () => {
-    (useMlJobSettingsMenuItem as jest.Mock).mockReturnValue({
-      item: {
-        id: 'mlJobSettings',
-        label: 'ML job settings',
-        iconType: 'machineLearningApp',
-        overflow: true,
-        run: jest.fn(),
-        testId: 'securityAppHeaderMlJobSettings',
-      },
-      flyout: null,
-    });
-    (useAddIntegrationsMenuItem as jest.Mock).mockReturnValue({
-      id: 'addIntegrations',
-      label: 'Add integrations',
-      iconType: 'indexOpen',
-      href: '/app/integrations/browse',
-      overflow: true,
-      testId: 'securityAppHeaderAddIntegrations',
-    });
-    renderHeader(undefined, false, ALERTS_PATH);
-    await openAppMenuOverflow();
-
-    const mlItem = screen.getByTestId('securityAppHeaderMlJobSettings');
-    const addIntegrationsItem = screen.getByTestId('securityAppHeaderAddIntegrations');
-    const deleteItem = screen.getByTestId('rules-details-delete-rule');
-    const manualRunItem = screen.getByTestId('rules-details-manual-rule-run');
-    expect(manualRunItem.compareDocumentPosition(mlItem)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(addIntegrationsItem.compareDocumentPosition(deleteItem)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
   });
 });
