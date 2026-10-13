@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import Fs from 'fs';
 import Os from 'os';
@@ -541,15 +540,16 @@ describe('bundlePluginServer', () => {
   });
 
   it('keeps one instance when another package requires a module by name', async () => {
-    const root = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-plugin-bundle-scope-'));
+    const root = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-plugin-bundle-build-'));
     directories.push(root);
-    const scope = Path.join(root, 'node_modules', '@kbn');
-    const owner = Path.join(scope, 'owner-plugin');
-    const consumer = Path.join(scope, 'consumer-plugin');
+    const build = Path.join(root, 'kibana');
+    const owner = Path.join(build, 'x-pack', 'plugins', 'owner');
+    const consumer = Path.join(build, 'x-pack', 'plugins', 'consumer');
     const ownerServer = Path.join(owner, 'server');
     const consumerServer = Path.join(consumer, 'server');
     Fs.mkdirSync(ownerServer, { recursive: true });
     Fs.mkdirSync(consumerServer, { recursive: true });
+    Fs.writeFileSync(Path.join(build, 'package.json'), '{"name":"kibana"}\n');
     Fs.writeFileSync(Path.join(owner, 'package.json'), '{"name":"@kbn/owner-plugin"}\n');
     Fs.writeFileSync(Path.join(consumer, 'package.json'), '{"name":"@kbn/consumer-plugin"}\n');
 
@@ -583,19 +583,9 @@ describe('bundlePluginServer', () => {
     expect(bundle).toContain('require("./token.js")');
 
     const loaded = requireFromTest(Path.join(ownerServer, 'plugin.js'));
+    const onDisk = requireFromTest(Path.join(ownerServer, 'token.js'));
     expect(loaded.inner.marker).toBe('inner-marker');
-    // Jest resolves @kbn/* itself, so check the shared instance with Node.
-    const same = execFileSync(
-      process.execPath,
-      [
-        '-e',
-        'const owner = require(process.argv[1]); const other = require(process.argv[2]); process.exit(owner.token.state === other.token.state ? 0 : 1);',
-        Path.join(ownerServer, 'plugin.js'),
-        Path.join(consumerServer, 'read.js'),
-      ],
-      { encoding: 'utf8' }
-    );
-    expect(same).toBe('');
+    expect(loaded.token.state).toBe(onDisk.state);
   });
 
   it('leaves a plugin entry with no local files unchanged', async () => {

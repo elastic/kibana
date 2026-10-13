@@ -608,28 +608,35 @@ function excludeCrossPackageModules(
 }
 
 function crossPackageRequiredFiles(packageRoot: string): ReadonlySet<string> {
-  const scopeDir = kbnScopeDir(packageRoot);
+  // Packages are still at their repo paths under the kibana build root.
+  // pnpm copies them into node_modules only after this task.
+  const scanRoot = kibanaBuildRoot(packageRoot);
   const packageName = readPackageName(packageRoot);
-  if (!scopeDir || !packageName) {
+  if (!scanRoot || !packageName) {
     return new Set();
   }
 
-  let byPackage = crossPackageRequiredFilesCache.get(scopeDir);
+  let byPackage = crossPackageRequiredFilesCache.get(scanRoot);
   if (!byPackage) {
-    byPackage = indexCrossPackageRequires(scopeDir);
-    crossPackageRequiredFilesCache.set(scopeDir, byPackage);
+    byPackage = indexCrossPackageRequires(scanRoot);
+    crossPackageRequiredFilesCache.set(scanRoot, byPackage);
   }
   return byPackage.get(packageName) ?? new Set();
 }
 
-function kbnScopeDir(packageRoot: string): string | null {
-  const scopeDir = Path.dirname(packageRoot);
-  const inKbnScope =
-    Path.basename(scopeDir) === '@kbn' && Path.basename(Path.dirname(scopeDir)) === 'node_modules';
-  if (!inKbnScope) {
-    return null;
+function kibanaBuildRoot(packageRoot: string): string | null {
+  let dir = packageRoot;
+  for (let depth = 0; depth < 16; depth++) {
+    if (readPackageName(dir) === 'kibana') {
+      return Fs.realpathSync(dir);
+    }
+    const parent = Path.dirname(dir);
+    if (parent === dir) {
+      return null;
+    }
+    dir = parent;
   }
-  return Fs.realpathSync(scopeDir);
+  return null;
 }
 
 function readPackageName(packageRoot: string): string | null {
@@ -649,18 +656,26 @@ function readPackageName(packageRoot: string): string | null {
   }
 }
 
-function indexCrossPackageRequires(scopeDir: string): ReadonlyMap<string, ReadonlySet<string>> {
+function discoverPackageRoots(scanRoot: string): Map<string, string> {
   const rootsByName = new Map<string, string>();
-  for (const entry of Fs.readdirSync(scopeDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || entry.name === 'node_modules') {
-      continue;
+  const visit = (dir: string) => {
+    const name = readPackageName(dir);
+    if (name?.startsWith('@kbn/')) {
+      rootsByName.set(name, Fs.realpathSync(dir));
     }
-    const packageDir = Path.join(scopeDir, entry.name);
-    const name = readPackageName(packageDir);
-    if (name) {
-      rootsByName.set(name, Fs.realpathSync(packageDir));
+    for (const entry of Fs.readdirSync(dir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name === 'node_modules' || entry.name === 'target') {
+        continue;
+      }
+      visit(Path.join(dir, entry.name));
     }
-  }
+  };
+  visit(scanRoot);
+  return rootsByName;
+}
+
+function indexCrossPackageRequires(scanRoot: string): ReadonlyMap<string, ReadonlySet<string>> {
+  const rootsByName = discoverPackageRoots(scanRoot);
 
   const required = new Map<string, Set<string>>();
   const files: string[] = [];
@@ -679,7 +694,9 @@ function indexCrossPackageRequires(scopeDir: string): ReadonlyMap<string, Readon
       }
     }
   };
-  visit(scopeDir);
+  for (const packageDir of rootsByName.values()) {
+    visit(packageDir);
+  }
 
   for (const file of files) {
     let code: string;
