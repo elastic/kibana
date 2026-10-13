@@ -172565,6 +172565,8 @@ components:
               - error
           maxItems: 10
           type: array
+        logsdb_columnar_active:
+          type: boolean
         logsdb_columnar_enabled:
           type: boolean
         name:
