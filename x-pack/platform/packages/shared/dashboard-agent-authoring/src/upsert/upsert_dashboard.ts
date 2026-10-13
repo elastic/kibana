@@ -521,6 +521,7 @@ export const executeDashboardUpsert = async ({
 
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
   const fixedSizePanelIds = new Set<string>();
+  const editedPanelIds = new Set<string>();
   plans.forEach((plan, planIndex) => {
     const attempt = attempts[planIndex];
     const { id, size } = plan.item;
@@ -530,6 +531,9 @@ export const executeDashboardUpsert = async ({
     }
     if (size) {
       fixedSizePanelIds.add(id);
+    }
+    if (plan.existingPanel && attempt) {
+      editedPanelIds.add(id);
     }
     nextDashboardData = applyPanel({ dashboardData: nextDashboardData, plan, attempt });
     if (attempt?.authoringNote) {
@@ -560,6 +564,7 @@ export const executeDashboardUpsert = async ({
     originalDashboardData,
     dashboardData: nextDashboardData,
     fixedSizePanelIds,
+    editedPanelIds,
     instructions: upsert.layout,
     authoringNotesByPanelId: new Map(
       panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])

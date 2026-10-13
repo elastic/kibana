@@ -22,11 +22,12 @@ const LAYOUT_SYSTEM_PROMPT = `You arrange the panels of a Kibana dashboard. You 
 ## Panel sizes
 
 ${panelSizeRules}
+- Panels with \`contentChanged: true\` were edited in this call: size them again for their new content, and keep their place.
 - \`size\` is the panel's current size. Panels with \`fixedSize: true\` keep their size: give them their current \`w\`, and put them in a row whose \`h\` matches their \`h\`.
 
 ## Current arrangement
 
-\`currentRows\` lists the ids of the existing items of a container as they are arranged now, row by row, top to bottom and left to right. The user may have arranged them by hand, so keep these rows: the same items, in the same order, with their current widths. Change them only when the \`instructions\` or \`rules\` ask for it, to close a gap left by a removed item, or to fit a new item into a row with room.
+\`currentRows\` lists the ids of the existing items of a container as they are arranged now, row by row, top to bottom and left to right. The user may have arranged them by hand, so keep these rows: the same items, in the same order, with their current widths. Change them only when the \`instructions\` or \`rules\` ask for it, to close a gap left by a removed item, to resize a panel whose content changed, or to fit a new item into a row with room.
 
 ## Order
 

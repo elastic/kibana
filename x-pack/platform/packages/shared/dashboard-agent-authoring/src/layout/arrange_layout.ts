@@ -15,7 +15,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { getSectionIdByPanelId, getSectionsById } from '../dashboard_state';
 import { getErrorMessage } from '../utils';
-import { getLensChartType } from './panel_sizes';
+import { getLensChartType, getMarkdownTextLines } from './panel_sizes';
 import {
   GRID_COLUMNS,
   layoutArrangementSchema,
@@ -66,6 +66,8 @@ interface ArrangeLayoutParams {
   dashboardData: DashboardAttachmentData;
   /** Panels sized explicitly in this call; the layout keeps their size. */
   fixedSizePanelIds: ReadonlySet<string>;
+  /** Existing panels whose content was edited in this call. */
+  editedPanelIds: ReadonlySet<string>;
   /** Layout instructions; when set, every container is arranged again. */
   instructions?: string;
   authoringNotesByPanelId: ReadonlyMap<string, string>;
@@ -74,8 +76,8 @@ interface ArrangeLayoutParams {
 }
 
 /**
- * Places the panels and sections a change touched. Containers with added, moved, removed, or
- * resized items (or every container, when `instructions` are given) are arranged into rows by the
+ * Places the panels and sections a change touched. Containers with added, moved, removed,
+ * edited, or resized items (or every container, when `instructions` are given) are arranged into rows by the
  * injected `arrangeLayout` call; code turns the rows into grid positions. Without the call, or when
  * it fails, existing items keep their position and the others are packed below them. The user's
  * layout instructions are kept in `layout_rules` and passed to every later layout call.
@@ -84,6 +86,7 @@ export const arrangeDashboardLayout = async ({
   originalDashboardData,
   dashboardData,
   fixedSizePanelIds,
+  editedPanelIds,
   instructions,
   authoringNotesByPanelId,
   arrangeLayout,
@@ -118,7 +121,7 @@ export const arrangeDashboardLayout = async ({
     ({ key, widgets }) =>
       instructions !== undefined ||
       getRemovedCount(key, widgets) > 0 ||
-      widgets.some(({ id }) => fixedSizePanelIds.has(id)) ||
+      widgets.some(({ id }) => fixedSizePanelIds.has(id) || editedPanelIds.has(id)) ||
       widgets.some((widget) => isNewItem(widget, key))
   );
 
@@ -143,6 +146,7 @@ export const arrangeDashboardLayout = async ({
     const authoringNote = authoringNotesByPanelId.get(widget.id);
     const chartType = getLensChartType(widget);
     const title = getPanelTitle(widget);
+    const textLines = getMarkdownTextLines(widget);
     return {
       kind: 'panel',
       id: widget.id,
@@ -151,7 +155,9 @@ export const arrangeDashboardLayout = async ({
       ...(title ? { title } : {}),
       ...(authoringNote ? { authoringNote } : {}),
       size: { w: widget.grid.w, h: widget.grid.h },
+      ...(textLines !== undefined ? { textLines } : {}),
       isNew: isNewItem(widget, key),
+      contentChanged: editedPanelIds.has(widget.id),
       fixedSize: fixedSizePanelIds.has(widget.id),
     };
   };

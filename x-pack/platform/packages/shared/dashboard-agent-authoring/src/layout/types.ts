@@ -28,8 +28,12 @@ export interface LayoutPanel {
   /** One-sentence description of what the panel shows, when the panel was authored this turn. */
   authoringNote?: string;
   size: PanelSize;
+  /** Lines the text of a markdown panel takes at full width. */
+  textLines?: number;
   /** Added in this call, or moved into this container. */
   isNew: boolean;
+  /** Existing panel whose content was edited in this call, so its size may no longer fit. */
+  contentChanged: boolean;
   /** Sized explicitly in this call; the layout keeps its size. */
   fixedSize: boolean;
 }

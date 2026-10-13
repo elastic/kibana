@@ -31,6 +31,13 @@ interface PanelSizeRule {
 
 const DEFAULT_SIZE: PanelSize = { w: 24, h: 10 };
 
+/** Characters of markdown text that fit on one line of a full-width panel. */
+const MARKDOWN_CHARACTERS_PER_LINE = 150;
+/** Rows a markdown panel needs around its text. */
+const MARKDOWN_PADDING_ROWS = 2;
+const MARKDOWN_MIN_HEIGHT = 3;
+const MARKDOWN_MAX_HEIGHT = 10;
+
 /** Chart-type rules come before the rule of their embeddable type, so they match first. */
 const PANEL_SIZE_RULES: readonly PanelSizeRule[] = [
   {
@@ -77,7 +84,7 @@ const PANEL_SIZE_RULES: readonly PanelSizeRule[] = [
     label: 'Markdown',
     embeddableType: markdownPanelKind.embeddableType,
     defaultSize: { w: GRID_COLUMNS, h: 6 },
-    rule: '`w: 24–48, h: 4–9`, depending on the length of its content.',
+    rule: `\`w: 24–48\`. \`h\` fits the text: \`textLines\` + ${MARKDOWN_PADDING_ROWS} at \`w: 48\`, twice the text lines at \`w: 24\`, between ${MARKDOWN_MIN_HEIGHT} and ${MARKDOWN_MAX_HEIGHT}.`,
   },
   {
     label: 'Custom content',
@@ -103,8 +110,24 @@ export const getLensChartType = ({ type, config }: PanelContentFields): string |
     ? config.type
     : undefined;
 
+/** Lines the text of a markdown panel takes at full width, or undefined for other panels. */
+export const getMarkdownTextLines = ({ type, config }: PanelContentFields): number | undefined => {
+  if (type !== markdownPanelKind.embeddableType || typeof config.content !== 'string') {
+    return undefined;
+  }
+  return config.content
+    .split('\n')
+    .filter((line) => line.trim().length > 0)
+    .reduce((lines, line) => lines + Math.ceil(line.length / MARKDOWN_CHARACTERS_PER_LINE), 0);
+};
+
 /** Default size of a panel placed without a size. */
 export const getDefaultPanelSize = (panel: PanelContentFields): PanelSize => {
+  const textLines = getMarkdownTextLines(panel);
+  if (textLines !== undefined) {
+    const h = textLines + MARKDOWN_PADDING_ROWS;
+    return { w: GRID_COLUMNS, h: Math.min(Math.max(h, MARKDOWN_MIN_HEIGHT), MARKDOWN_MAX_HEIGHT) };
+  }
   const chartType = getLensChartType(panel);
   return (
     PANEL_SIZE_RULES.find(

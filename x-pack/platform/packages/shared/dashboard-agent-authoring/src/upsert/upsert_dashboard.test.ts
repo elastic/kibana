@@ -405,7 +405,7 @@ describe('executeDashboardUpsert', () => {
     expect(result.failures).toEqual([]);
     expect(findPanel(result.dashboardData, 'existing')?.grid).toEqual({ x: 0, y: 0, w: 24, h: 9 });
     expect(findPanel(result.dashboardData, 'beside')?.grid).toEqual({ x: 0, y: 9, w: 24, h: 9 });
-    expect(findPanel(result.dashboardData, 'below')?.grid).toEqual({ x: 0, y: 18, w: 48, h: 6 });
+    expect(findPanel(result.dashboardData, 'below')?.grid).toEqual({ x: 0, y: 18, w: 48, h: 3 });
   });
 
   describe('rejected changes', () => {
