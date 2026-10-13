@@ -17,7 +17,7 @@ import { getMockConfig } from '../../lib/__mocks__/get_config';
 import { CLOUD_PLATFORMS, DOWNLOAD_PLATFORMS, SERVERLESS_PLATFORMS } from '../../lib/platform';
 import { CopyBinScripts } from './copy_bin_scripts_task';
 
-describe('bin/kibana memory-based Node selection', () => {
+describe('bin/kibana Node selection', () => {
   const config = getMockConfig();
   const build = new Build(config);
   let directory: string;
@@ -85,20 +85,20 @@ describe('bin/kibana memory-based Node selection', () => {
   };
 
   it.each(['536870912', '1073741823', '1073741824'])(
-    'selects pointer compression at %s bytes',
-    async (memory) => {
-      expect((await runLauncher({ TEST_CGROUP_V2: memory }))[0]).toBe('pointer-compression');
-    }
-  );
-
-  it.each(['1073741825', '2147483648', '0', '', 'invalid', 'max'])(
-    'keeps default Node at %s bytes or when no small limit is detected',
+    'keeps default Node at %s bytes',
     async (memory) => {
       expect((await runLauncher({ TEST_CGROUP_V2: memory }))[0]).toBe('default');
     }
   );
 
-  it('uses the cgroup v1 limit when cgroup v2 is unavailable', async () => {
+  it.each(['1073741825', '2147483648', '0', '', 'invalid', 'max'])(
+    'keeps default Node at %s bytes or with an invalid limit',
+    async (memory) => {
+      expect((await runLauncher({ TEST_CGROUP_V2: memory }))[0]).toBe('default');
+    }
+  );
+
+  it('keeps default Node with a cgroup v1 limit', async () => {
     expect(
       (
         await runLauncher({
@@ -106,11 +106,11 @@ describe('bin/kibana memory-based Node selection', () => {
           TEST_CGROUP_V1: '1073741824',
         })
       )[0]
-    ).toBe('pointer-compression');
+    ).toBe('default');
   });
 
   it.each(['max', '', 'invalid', '9223372036854771712'])(
-    'falls back to host memory for a cgroup limit of %s',
+    'keeps default Node with small host memory for a cgroup limit of %s',
     async (memory) => {
       expect(
         (
@@ -119,7 +119,7 @@ describe('bin/kibana memory-based Node selection', () => {
             TEST_MEM_TOTAL_KB: '1048576',
           })
         )[0]
-      ).toBe('pointer-compression');
+      ).toBe('default');
     }
   );
 
@@ -135,7 +135,7 @@ describe('bin/kibana memory-based Node selection', () => {
     expect((await runLauncher({ KBN_ENABLE_POINTER_COMPRESSION: 'false' }))[0]).toBe('default');
   });
 
-  it('preserves an explicit opt-in above the automatic threshold', async () => {
+  it('preserves an explicit opt-in', async () => {
     expect(
       (
         await runLauncher({
@@ -170,8 +170,11 @@ describe('bin/kibana memory-based Node selection', () => {
     expect((await runLauncher({}, DOWNLOAD_PLATFORMS[0], true))[0]).toBe('pointer-compression');
   });
 
-  it('selects pointer compression even with an explicit heap size', async () => {
-    const [variant, options] = await runLauncher({ NODE_OPTIONS: '--max-old-space-size=600' });
+  it('selects pointer compression with an explicit heap size', async () => {
+    const [variant, options] = await runLauncher({
+      KBN_ENABLE_POINTER_COMPRESSION: 'true',
+      NODE_OPTIONS: '--max-old-space-size=600',
+    });
     expect(variant).toBe('pointer-compression');
     expect(options.match(/--max-old-space-size=\d+/g)).toEqual(['--max-old-space-size=600']);
   });
