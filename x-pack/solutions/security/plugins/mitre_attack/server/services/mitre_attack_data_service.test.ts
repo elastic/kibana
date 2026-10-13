@@ -265,6 +265,71 @@ describe('MitreAttackDataService', () => {
     expect(savedObjectsRepository.bulkCreate).toHaveBeenCalledTimes(2);
   });
 
+  describe('a degraded service with a repair run', () => {
+    const entities = [getMockMitreTactic({ id: 'TA0001' }), getMockMitreTactic({ id: 'TA0002' })];
+    const toResponse = (failedIds: string[]) =>
+      ({
+        saved_objects: entities.map((entity) =>
+          failedIds.includes(entity.id)
+            ? {
+                id: `enterprise:15.1:${entity.id}`,
+                type: 'mitre-attack-entity',
+                error: { statusCode: 500, error: 'Internal Server Error', message: 'ES error' },
+              }
+            : {
+                id: `enterprise:15.1:${entity.id}`,
+                type: 'mitre-attack-entity',
+                attributes: entity,
+                references: [],
+                version: '1',
+              }
+        ),
+      } as SavedObjectsBulkResponse<MitreEntity>);
+
+    beforeEach(() => {
+      mockLoadMitreArtifact.mockReturnValue(entities);
+    });
+
+    it('keeps serving when the repair fails for every entity', async () => {
+      savedObjectsRepository.bulkCreate
+        .mockResolvedValueOnce(toResponse(['TA0002']))
+        .mockResolvedValueOnce(toResponse(['TA0001', 'TA0002']));
+
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+
+      nowSpy.mockReturnValue(1_000_000 + POPULATION_RETRY_COOLDOWN_MS);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+      await service.populate(); // joins the repair run
+
+      expect(service.isInitialized).toBe(true);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+    });
+
+    it('serves without waiting while the repair is in flight', async () => {
+      let resolveRepair!: (value: SavedObjectsBulkResponse<MitreEntity>) => void;
+      savedObjectsRepository.bulkCreate
+        .mockResolvedValueOnce(toResponse(['TA0002']))
+        .mockReturnValueOnce(
+          new Promise<SavedObjectsBulkResponse<MitreEntity>>((resolve) => {
+            resolveRepair = resolve;
+          })
+        );
+
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+
+      nowSpy.mockReturnValue(1_000_000 + POPULATION_RETRY_COOLDOWN_MS);
+      await expect(service.ensureInitialized()).resolves.toBe(true);
+      await expect(service.ensureInitialized()).resolves.toBe(true); // repair still pending
+      expect(savedObjectsRepository.bulkCreate).toHaveBeenCalledTimes(2);
+
+      resolveRepair(toResponse([]));
+      await service.populate();
+      expect(service.isInitialized).toBe(true);
+    });
+  });
+
   it('a failure of every entity sets the state to failed', async () => {
     const entities = [getMockMitreTactic({ id: 'TA0001' }), getMockMitreTactic({ id: 'TA0002' })];
     mockLoadMitreArtifact.mockReturnValue(entities);

@@ -19,7 +19,7 @@ export const POPULATION_RETRY_COOLDOWN_MS = 60 * 1000;
 
 type InitializationState =
   | { status: 'idle' }
-  | { status: 'initializing'; promise: Promise<boolean> }
+  | { status: 'initializing'; promise: Promise<boolean>; servesPartialData: boolean }
   | { status: 'ready' }
   | { status: 'degraded'; failedAt: number }
   | { status: 'failed'; failedAt: number };
@@ -70,10 +70,11 @@ export class MitreAttackDataService {
         return Promise.resolve(this.state.status === 'degraded');
       }
     }
+    const wasDegraded = this.state.status === 'degraded';
     // runPopulation runs synchronously up to its first await; a sync failure would set
     // `failed` and then be overwritten by `initializing` if the state were assigned afterwards.
-    const promise = Promise.resolve().then(() => this.runPopulation());
-    this.state = { status: 'initializing', promise };
+    const promise = Promise.resolve().then(() => this.runPopulation(wasDegraded));
+    this.state = { status: 'initializing', promise, servesPartialData: wasDegraded };
     return promise;
   }
 
@@ -90,10 +91,13 @@ export class MitreAttackDataService {
       void this.populate();
       return Promise.resolve(true);
     }
+    if (this.state.status === 'initializing' && this.state.servesPartialData) {
+      return Promise.resolve(true);
+    }
     return this.populate();
   }
 
-  private async runPopulation(): Promise<boolean> {
+  private async runPopulation(wasDegraded: boolean): Promise<boolean> {
     try {
       if (this.savedObjectsRepository === undefined) {
         throw new Error(
@@ -141,7 +145,8 @@ export class MitreAttackDataService {
         this.logger.error(
           `Failed to populate MITRE data: ${allErrors.length} error(s) out of ${entities.length} entities. First failures: ${firstFailures}`
         );
-        this.state = { status: 'failed', failedAt: Date.now() };
+        // A failed repair must not take already-served data offline.
+        this.state = { status: wasDegraded ? 'degraded' : 'failed', failedAt: Date.now() };
         return false;
       }
 
@@ -165,7 +170,7 @@ export class MitreAttackDataService {
       this.logger.error(
         `Failed to populate MITRE data: ${err instanceof Error ? err.message : String(err)}`
       );
-      this.state = { status: 'failed', failedAt: Date.now() };
+      this.state = { status: wasDegraded ? 'degraded' : 'failed', failedAt: Date.now() };
       return false;
     }
   }
