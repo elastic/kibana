@@ -53,15 +53,13 @@ interface PageLookup {
  * from "page offline". Disabling the workflow takes the page offline; removing the page
  * trigger or rotating retires the secret.
  */
-export const resolvePage = async (
-  { verifyPageSecret, getPageWorkflow }: PageLookup,
-  ref: PageRef
-): Promise<ResolvedPage> => {
+export const resolvePage = async (lookup: PageLookup, ref: PageRef): Promise<ResolvedPage> => {
   const notFound = new ExternalResumeError('Page not found', 404);
-  if (!(await verifyPageSecret(ref))) {
+  // Called as methods, not destructured: the lookup is usually a service instance.
+  if (!(await lookup.verifyPageSecret(ref))) {
     throw notFound;
   }
-  const workflow = await getPageWorkflow(ref.workflowId, ref.spaceId);
+  const workflow = await lookup.getPageWorkflow(ref.workflowId, ref.spaceId);
   if (!workflow?.enabled || !workflow.valid || !workflow.definition) {
     throw notFound;
   }

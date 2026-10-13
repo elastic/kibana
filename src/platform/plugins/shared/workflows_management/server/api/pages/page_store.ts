@@ -8,7 +8,7 @@
  */
 
 import { v5 as uuidv5 } from 'uuid';
-import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowPageAttributes } from './page_saved_object';
@@ -33,7 +33,8 @@ export const getPageId = ({ spaceId, workflowId }: PageRef): string =>
 export class WorkflowPageStore {
   constructor(
     private readonly deps: {
-      repository: ISavedObjectsRepository;
+      /** Must run the encryption extension, or the secret is written in plaintext. */
+      client: SavedObjectsClientContract;
       encryptedClient: EncryptedSavedObjectsClient;
     }
   ) {}
@@ -67,7 +68,7 @@ export class WorkflowPageStore {
   /** Deletes the page, so a page trigger added later gets a new secret. */
   async retire(ref: PageRef): Promise<void> {
     try {
-      await this.deps.repository.delete(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, getPageId(ref), {
+      await this.deps.client.delete(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, getPageId(ref), {
         namespace: SavedObjectsUtils.namespaceStringToId(ref.spaceId),
       });
     } catch (error) {
@@ -81,7 +82,7 @@ export class WorkflowPageStore {
   async verify(ref: PageRef & { secret: string }): Promise<boolean> {
     const { spaceId, workflowId, secret } = ref;
     try {
-      const { attributes } = await this.deps.repository.get<WorkflowPageAttributes>(
+      const { attributes } = await this.deps.client.get<WorkflowPageAttributes>(
         WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
         getPageId(ref),
         { namespace: SavedObjectsUtils.namespaceStringToId(spaceId) }
@@ -119,7 +120,7 @@ export class WorkflowPageStore {
   private async write(ref: PageRef, { overwrite }: { overwrite: boolean }): Promise<string> {
     const { spaceId, workflowId } = ref;
     const secret = generatePageSecret();
-    await this.deps.repository.create<WorkflowPageAttributes>(
+    await this.deps.client.create<WorkflowPageAttributes>(
       WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
       {
         workflowId,

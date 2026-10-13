@@ -8,7 +8,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { WorkflowPageAttributes } from './page_saved_object';
@@ -20,10 +20,10 @@ const notFound = () =>
   SavedObjectsErrorHelpers.createGenericNotFoundError(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, 'id');
 
 const setup = () => {
-  const repository = savedObjectsRepositoryMock.create();
+  const client = savedObjectsClientMock.create();
   const encryptedClient = encryptedSavedObjectsMock.createClient();
-  const store = new WorkflowPageStore({ repository, encryptedClient });
-  return { repository, encryptedClient, store };
+  const store = new WorkflowPageStore({ client, encryptedClient });
+  return { client, encryptedClient, store };
 };
 
 const storedPage = (attributes: Partial<WorkflowPageAttributes> & { secret: string }) => ({
@@ -49,20 +49,20 @@ describe('getPageId', () => {
 
 describe('WorkflowPageStore', () => {
   it('returns the existing secret without creating a page', async () => {
-    const { repository, encryptedClient, store } = setup();
+    const { client, encryptedClient, store } = setup();
     encryptedClient.getDecryptedAsInternalUser.mockResolvedValue(storedPage({ secret: 'kept' }));
 
     await expect(store.getOrCreateSecret(ref)).resolves.toBe('kept');
-    expect(repository.create).not.toHaveBeenCalled();
+    expect(client.create).not.toHaveBeenCalled();
   });
 
   it('creates a page in the space the first time', async () => {
-    const { repository, encryptedClient, store } = setup();
+    const { client, encryptedClient, store } = setup();
     encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(notFound());
 
     const secret = await store.getOrCreateSecret(ref);
 
-    expect(repository.create).toHaveBeenCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
       expect.objectContaining({
         workflowId: ref.workflowId,
@@ -75,11 +75,11 @@ describe('WorkflowPageStore', () => {
   });
 
   it('returns the page another request created at the same time', async () => {
-    const { repository, encryptedClient, store } = setup();
+    const { client, encryptedClient, store } = setup();
     encryptedClient.getDecryptedAsInternalUser
       .mockRejectedValueOnce(notFound())
       .mockResolvedValueOnce(storedPage({ secret: 'winner' }));
-    repository.create.mockRejectedValue(
+    client.create.mockRejectedValue(
       SavedObjectsErrorHelpers.createConflictError(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, 'id')
     );
 
@@ -87,11 +87,11 @@ describe('WorkflowPageStore', () => {
   });
 
   it('overwrites the secret on rotate', async () => {
-    const { repository, store } = setup();
+    const { client, store } = setup();
 
     const secret = await store.rotate(ref);
 
-    expect(repository.create).toHaveBeenCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
       expect.objectContaining({ secret }),
       expect.objectContaining({ overwrite: true })
@@ -99,32 +99,30 @@ describe('WorkflowPageStore', () => {
   });
 
   it('accepts only the stored secret of an enabled page', async () => {
-    const { repository, store } = setup();
-    repository.get.mockResolvedValue(storedPage({ secret: 'right' }));
+    const { client, store } = setup();
+    client.get.mockResolvedValue(storedPage({ secret: 'right' }));
 
     await expect(store.verify({ ...ref, secret: 'right' })).resolves.toBe(true);
     await expect(store.verify({ ...ref, secret: 'wrong' })).resolves.toBe(false);
 
-    repository.get.mockResolvedValue(storedPage({ secret: 'right', enabled: false }));
+    client.get.mockResolvedValue(storedPage({ secret: 'right', enabled: false }));
     await expect(store.verify({ ...ref, secret: 'right' })).resolves.toBe(false);
   });
 
   it('rejects a secret when the workflow has no page', async () => {
-    const { repository, store } = setup();
-    repository.get.mockRejectedValue(notFound());
+    const { client, store } = setup();
+    client.get.mockRejectedValue(notFound());
 
     await expect(store.verify({ ...ref, secret: 'any' })).resolves.toBe(false);
   });
 
   it('ignores a missing page on retire', async () => {
-    const { repository, store } = setup();
-    repository.delete.mockRejectedValue(notFound());
+    const { client, store } = setup();
+    client.delete.mockRejectedValue(notFound());
 
     await expect(store.retire(ref)).resolves.toBeUndefined();
-    expect(repository.delete).toHaveBeenCalledWith(
-      WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-      getPageId(ref),
-      { namespace: 'marketing' }
-    );
+    expect(client.delete).toHaveBeenCalledWith(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, getPageId(ref), {
+      namespace: 'marketing',
+    });
   });
 });

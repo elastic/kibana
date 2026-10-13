@@ -16,6 +16,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CreateWorkflowCommand,
@@ -309,9 +310,12 @@ export class WorkflowsService {
     const { encryptedSavedObjects } = pluginsStart;
     if (encryptedSavedObjects) {
       this.pageStore = new WorkflowPageStore({
-        repository: coreStart.savedObjects.createInternalRepository([
-          WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-        ]),
+        // The internal repository skips extensions and would store the secret in plaintext.
+        // Spaces is excluded because the store passes each page's namespace itself.
+        client: coreStart.savedObjects.getUnsafeInternalClient({
+          includedHiddenTypes: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
+          excludedExtensions: [SPACES_EXTENSION_ID],
+        }),
         encryptedClient: encryptedSavedObjects.getClient({
           includedHiddenTypes: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
         }),
