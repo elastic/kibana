@@ -221,10 +221,15 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   }, [currentProps, persistedConversationId]);
 
   useEffect(() => {
-    if (conversationId && currentProps.initialMessage) {
+    if (conversationId && currentProps.initialMessage && !currentProps.autoSendInitialMessage) {
       resetInitialMessage();
     }
-  }, [conversationId, currentProps.initialMessage, resetInitialMessage]);
+  }, [
+    conversationId,
+    currentProps.initialMessage,
+    currentProps.autoSendInitialMessage,
+    resetInitialMessage,
+  ]);
 
   const conversationActions = useConversationActions({
     conversationId,

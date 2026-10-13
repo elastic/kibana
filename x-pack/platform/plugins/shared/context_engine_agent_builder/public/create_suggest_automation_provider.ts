@@ -50,8 +50,11 @@ const getAutomationToolAiIndexId = (result: ToolResult): string | undefined => {
   return result.data.aiIndexId;
 };
 
-export const buildSuggestAutomationSessionTag = (spaceId: string, aiIndexId: string): string =>
-  `context-engine-ai-index:${spaceId}:${aiIndexId}`;
+export const buildSuggestAutomationSessionTag = (
+  spaceId: string,
+  aiIndexId: string,
+  dateCreated: string
+): string => `context-engine-ai-index:${spaceId}:${aiIndexId}:${dateCreated}`;
 
 export const createSuggestAutomationProvider = ({
   agentBuilder,
@@ -85,7 +88,7 @@ export const createSuggestAutomationProvider = ({
     agentBuilder.openChat({
       autoSendInitialMessage: true,
       initialMessage: SUGGEST_AUTOMATION_INITIAL_MESSAGE,
-      sessionTag: buildSuggestAutomationSessionTag(spaceId, aiIndex.id),
+      sessionTag: buildSuggestAutomationSessionTag(spaceId, aiIndex.id, aiIndex.date_created),
       agentId: CONTEXT_ENGINE_SETUP_AGENT_ID,
       attachments: [
         {

@@ -208,30 +208,33 @@ describe('EmbeddableConversationsProvider initial message', () => {
     expect(screen.getByText('autoSend:true')).toBeInTheDocument();
   });
 
-  it('drops the initial message once a persisted conversation is restored', async () => {
+  it('keeps the initial message when a persisted conversation is restored and autoSendInitialMessage is true', async () => {
     seedPersistedConversation(TAG_A, 'conversation-a');
 
     renderEmbeddableProvider();
 
-    expect(await screen.findByText('initialMessage:none')).toBeInTheDocument();
-    expect(screen.getByText('conversationId:conversation-a')).toBeInTheDocument();
-    expect(screen.getByText('autoSend:false')).toBeInTheDocument();
+    expect(await screen.findByText('conversationId:conversation-a')).toBeInTheDocument();
+    expect(screen.getByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
+    expect(screen.getByText('autoSend:true')).toBeInTheDocument();
   });
 
-  it('does not replay the initial message when a restored thread is followed by New chat', async () => {
+  it('preserves the initial message when a restored thread is followed by New chat, so the auto-send hook can consume it', async () => {
     seedPersistedConversation(TAG_A, 'conversation-a');
 
     renderEmbeddableProvider();
-    expect(await screen.findByText('initialMessage:none')).toBeInTheDocument();
+    // message is kept so the auto-send hook (in conversation.tsx) can send it and then clear it
+    expect(await screen.findByText('conversationId:conversation-a')).toBeInTheDocument();
+    expect(screen.getByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('new-chat'));
 
     expect(await screen.findByText('conversationId:none')).toBeInTheDocument();
-    expect(screen.getByText('initialMessage:none')).toBeInTheDocument();
-    expect(screen.getByText('autoSend:false')).toBeInTheDocument();
+    // message stays present at the provider level; the hook clears it after sending in the real app
+    expect(screen.getByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
+    expect(screen.getByText('autoSend:true')).toBeInTheDocument();
   });
 
-  it('drops the initial message when an open sidebar is re-opened on a session with a thread', async () => {
+  it('keeps the initial message when an open sidebar is re-opened on a session with a thread and autoSendInitialMessage is true', async () => {
     seedPersistedConversation(TAG_B, 'conversation-b');
 
     const { reopenWith } = renderEmbeddableProvider({ sessionTag: TAG_A });
@@ -239,8 +242,8 @@ describe('EmbeddableConversationsProvider initial message', () => {
 
     reopenWith(TAG_B);
 
-    expect(await screen.findByText('initialMessage:none')).toBeInTheDocument();
-    expect(screen.getByText('conversationId:conversation-b')).toBeInTheDocument();
+    expect(await screen.findByText('conversationId:conversation-b')).toBeInTheDocument();
+    expect(screen.getByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
   });
 
   it('keeps the initial message when an open sidebar is re-opened on a session with no thread', async () => {
