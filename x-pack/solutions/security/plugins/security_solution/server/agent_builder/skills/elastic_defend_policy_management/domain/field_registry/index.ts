@@ -22,3 +22,5 @@ export {
   getProtectionKeyPathEntries,
   isWritablePath,
 } from './derive_field_registry';
+export type { PolicyFieldSearchHit, PolicyFieldSearchResult } from './field_search';
+export { searchPolicyFields } from './field_search';

@@ -13,6 +13,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { policyFactory } from '../../../../../common/endpoint/models/policy_config';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
+import { z } from '@kbn/zod/v4';
 import { hashPolicyConfig } from '../domain/hash_policy_config';
 import { normalize } from '../domain/normalize_policy_config';
 import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
@@ -66,7 +67,7 @@ const createContext = () =>
     { spaceId: SPACE_ID }
   );
 
-const getResult = async (reference: { idOrName?: string; preset?: 'EDRComplete' }) => {
+const getResult = async (reference: z.infer<typeof getPolicySchema>) => {
   const tool = createGetPolicyTool({
     endpointAppContextService: createMockEndpointAppContextService(),
     getStartServices,
@@ -134,6 +135,28 @@ describe('createGetPolicyTool', () => {
     mockedGetPolicyBaseline.mockReset();
   });
 
+  it('emits native Zod v4 JSON Schema with a required root selector and strict exclusive branches', () => {
+    const jsonSchema = z.toJSONSchema(getPolicySchema, { io: 'input' });
+
+    expect(jsonSchema.type).toBe('object');
+    expect(jsonSchema.required).toEqual(['selector']);
+
+    const selectorSchema = jsonSchema.properties?.selector;
+    expect(selectorSchema).toBeDefined();
+    if (typeof selectorSchema !== 'object') {
+      throw new Error('expected a selector object schema');
+    }
+    const branches = selectorSchema.anyOf ?? [];
+    expect(branches).toHaveLength(2);
+    for (const field of ['idOrName', 'preset'] as const) {
+      const branch = branches.find((b) => field in (b.properties ?? {}));
+      expect(branch).toBeDefined();
+      expect(branch?.type).toBe('object');
+      expect(branch?.required).toEqual([field]);
+      expect(branch?.additionalProperties).toBe(false);
+    }
+  });
+
   it('registers the approved id, schema, and 12000-token budget without wrapper authorization', () => {
     createGetPolicyTool({
       endpointAppContextService: createMockEndpointAppContextService(),
@@ -155,7 +178,7 @@ describe('createGetPolicyTool', () => {
     const read = createPolicyRead();
     mockedGetPolicy.mockResolvedValue(read);
 
-    const result = await getResult({ idOrName: 'policy-1' });
+    const result = await getResult({ selector: { idOrName: 'policy-1' } });
     const dto = result.data as {
       policy: { id: string };
       normalizedHash: string;
@@ -176,7 +199,7 @@ describe('createGetPolicyTool', () => {
       })
     );
 
-    const result = await getResult({ idOrName: 'policy-1' });
+    const result = await getResult({ selector: { idOrName: 'policy-1' } });
     const dto = result.data as {
       policy: { id: string; name: string; version: string };
       normalizedHash: string;
@@ -204,7 +227,7 @@ describe('createGetPolicyTool', () => {
     const baseline = createBaseline();
     mockedGetPolicyBaseline.mockResolvedValue(baseline);
 
-    const result = await getResult({ preset: 'EDRComplete' });
+    const result = await getResult({ selector: { preset: 'EDRComplete' } });
     const dto = result.data as {
       baseline: { type: string; preset: string; environment: unknown };
       normalizedHash: string;
