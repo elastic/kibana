@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
+import type { ServiceAccountMintOptions } from './fake_requests';
 import {
   SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS,
   ServiceAccountFakeRequests,
@@ -23,7 +24,7 @@ const REQUEST_LIFETIME_MS = 10 * 60 * 1000;
 
 describe('ServiceAccountFakeRequests', () => {
   let logger: Logger;
-  let mintToken: jest.Mock<Promise<string>, [string]>;
+  let mintToken: jest.Mock<Promise<string>, [string, ServiceAccountMintOptions]>;
   let fakeRequests: ServiceAccountFakeRequests;
 
   beforeEach(() => {
@@ -45,7 +46,7 @@ describe('ServiceAccountFakeRequests', () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
 
       expect(mintToken).toHaveBeenCalledTimes(1);
-      expect(mintToken).toHaveBeenCalledWith('sa-id');
+      expect(mintToken).toHaveBeenCalledWith('sa-id', { boundAt: undefined });
       expect(request.isFakeRequest).toBe(true);
       // The exact lowercase key is load-bearing for the ES client's fake-request header filtering.
       expect(Object.keys(request.headers)).toEqual(['authorization']);
@@ -113,6 +114,51 @@ describe('ServiceAccountFakeRequests', () => {
     });
   });
 
+  describe('#getServiceAccountId', () => {
+    it('returns the id the request was minted for', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      expect(fakeRequests.getServiceAccountId(request)).toBe('sa-id');
+    });
+
+    it('returns undefined for requests it did not mint', () => {
+      expect(
+        fakeRequests.getServiceAccountId(httpServerMock.createKibanaRequest())
+      ).toBeUndefined();
+      expect(
+        fakeRequests.getServiceAccountId(httpServerMock.createFakeKibanaRequest({}))
+      ).toBeUndefined();
+    });
+
+    it('returns undefined once the request has been released', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      fakeRequests.release(request);
+      expect(fakeRequests.getServiceAccountId(request)).toBeUndefined();
+    });
+
+    it('keeps identifying the request after its token has been replaced', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      await fakeRequests.ensureFreshToken(request, 0);
+
+      expect(request.headers.authorization).toBe('Bearer essu_token_2');
+      expect(fakeRequests.getServiceAccountId(request)).toBe('sa-id');
+    });
+
+    it('returns undefined when the authorization header has been swapped for another credential', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      (request.headers as Record<string, string>).authorization = 'ApiKey someone-else';
+
+      expect(fakeRequests.getServiceAccountId(request)).toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('was replaced'));
+    });
+
+    it('returns undefined when the authorization header has been removed', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      delete (request.headers as Record<string, string>).authorization;
+
+      expect(fakeRequests.getServiceAccountId(request)).toBeUndefined();
+    });
+  });
+
   describe('#ensureFreshToken', () => {
     it('throws for requests it did not mint', async () => {
       await expect(
@@ -143,8 +189,20 @@ describe('ServiceAccountFakeRequests', () => {
       );
 
       expect(mintToken).toHaveBeenCalledTimes(1);
-      expect(mintToken).toHaveBeenCalledWith('sa-id');
+      expect(mintToken).toHaveBeenCalledWith('sa-id', { boundAt: undefined });
       expect(request.headers.authorization).toBe('Bearer essu_token_2');
+    });
+
+    it('tells every mint when the workload was bound', async () => {
+      const boundAt = '2026-10-01T00:00:00.000Z';
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id', boundAt });
+      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt });
+
+      jest.advanceTimersByTime(MAX_AGE_MS);
+      await fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
+
+      expect(mintToken).toHaveBeenCalledTimes(2);
+      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt });
     });
 
     it('deduplicates concurrent refreshes into a single mint', async () => {

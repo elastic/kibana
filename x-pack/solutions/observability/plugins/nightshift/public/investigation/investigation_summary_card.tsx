@@ -26,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { buildRecommendationChatOptions } from './open_investigation_item_in_chat';
 import { useKibana } from '../hooks/use_kibana';
 import { InvestigationItemChatButton } from './investigation_item_chat_button';
-import { BlindSpotsTable } from './blind_spots_table';
 import {
   InvestigationCompleteStatus,
   InvestigationFailedStatus,
@@ -49,7 +48,6 @@ import {
   type RecommendationItem,
 } from './investigation_presentation';
 
-const INLINE_BLIND_SPOT_LIMIT = 4;
 const tryNextRowActionClassName = 'nightshiftInvestigationTryNextRowAction';
 
 const recommendationChatTooltip = i18n.translate(
@@ -291,8 +289,6 @@ export function InvestigationSummaryCard({
   const goalText = getInvestigationGoalText(state);
   const conclusionBody = getConclusionText(state);
   const primaryRecommendation = status === 'complete' ? getPrimaryRecommendation(state) : undefined;
-  const blindSpots =
-    status === 'complete' ? (state?.blind_spots ?? []).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
 
   return (
     <>
@@ -358,17 +354,6 @@ export function InvestigationSummaryCard({
           <TryNextPanel
             recommendation={primaryRecommendation}
             onShowMoreRecommendations={onShowMoreRecommendations}
-          />
-        </>
-      )}
-
-      {status === 'complete' && blindSpots.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <BlindSpotsTable
-            items={blindSpots}
-            showTitle
-            testSubj="nightshiftInvestigationBlindSpotsPanel"
           />
         </>
       )}

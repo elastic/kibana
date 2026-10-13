@@ -56,5 +56,6 @@
     "@kbn/ml-plugin",
     "@kbn/saved-search-component",
     "@kbn/core-execution-context-common",
+    "@kbn/core-http-browser"
   ]
 }

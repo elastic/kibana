@@ -326,7 +326,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                       id="generated-id-wrapper"
                     >
                       <button
-                        class="euiLink emotion-euiLink-primary"
+                        class="euiLink emotion-euiLink-text"
                         data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
@@ -683,7 +683,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                       id="generated-id-wrapper"
                     >
                       <button
-                        class="euiLink emotion-euiLink-primary"
+                        class="euiLink emotion-euiLink-text"
                         data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >

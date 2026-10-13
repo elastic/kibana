@@ -9,7 +9,7 @@ import React, { useContext, useEffect } from 'react';
 import type { OnRefreshChangeProps } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useUrlParams } from '../../../hooks';
@@ -45,7 +45,7 @@ export const SyntheticsDatePicker = ({
 
   // `getUrlParams` already merges in the app-wide default, so detect absence via
   // the raw URL: only then does `defaultDateRange` take over.
-  const rawParams = parse(search[0] === '?' ? search.slice(1) : search);
+  const rawParams = queryString.parse(search[0] === '?' ? search.slice(1) : search);
   const start = rawParams.dateRangeStart != null ? urlStart : defaultDateRange?.from ?? urlStart;
   const end = rawParams.dateRangeEnd != null ? urlEnd : defaultDateRange?.to ?? urlEnd;
 

@@ -11,6 +11,7 @@ import {
   ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   buildAlertEvent,
+  getAckEpisodeActionUrl,
   getUnackEpisodeActionUrl,
   NO_ACCESS_ROLE,
   testData,
@@ -43,9 +44,15 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       }),
     ]);
+    const ackResponse = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: {},
+    });
+    expect(ackResponse).toHaveStatusCode(204);
+
     const response = await apiClient.post(getUnackEpisodeActionUrl(episodeId), {
       headers: writerHeaders,
       body: {},
@@ -60,7 +67,7 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
     expect(actions[0]).toMatchObject({
       action_type: 'unack',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
     });
@@ -85,15 +92,21 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
+
+      const ackResponse = await apiClient.post(getAckEpisodeActionUrl(olderEpisodeId), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(ackResponse).toHaveStatusCode(204);
 
       const response = await apiClient.post(getUnackEpisodeActionUrl(olderEpisodeId), {
         headers: writerHeaders,
@@ -109,23 +122,54 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
       expect(actions[0]).toMatchObject({
         action_type: 'unack',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
       });
     }
   );
 
   apiTest(
-    'schema: rejects episode_id in the body (strict mode) with 400',
-    async ({ apiClient }) => {
-      // The episode id moved to the path; the unack body must be empty.
-      const response = await apiClient.post(getUnackEpisodeActionUrl('any-episode'), {
+    'unack: unacking an alert that is not acknowledged returns 409',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'unack-no-op-rule';
+      const groupHash = 'unack-no-op-group';
+      const episodeId = 'unack-no-op-episode';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getUnackEpisodeActionUrl(episodeId), {
         headers: writerHeaders,
-        body: { episode_id: 'any-episode' },
+        body: {},
       });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+      expect(response.body.details).toMatchObject({
+        alert_id: episodeId,
+        group_hash: groupHash,
+        action_type: 'unack',
+      });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['unack'],
+      });
+      expect(actions).toHaveLength(0);
     }
   );
+
+  apiTest('schema: rejects alert_id in the body (strict mode) with 400', async ({ apiClient }) => {
+    // The episode id moved to the path; the unack body must be empty.
+    const response = await apiClient.post(getUnackEpisodeActionUrl('any-episode'), {
+      headers: writerHeaders,
+      body: { alert_id: 'any-episode' },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getUnackEpisodeActionUrl('any-episode'), {
@@ -136,7 +180,7 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects alert_id over 150 chars with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getUnackEpisodeActionUrl('a'.repeat(151)), {
       headers: writerHeaders,
       body: {},
@@ -145,14 +189,14 @@ apiTest.describe('Create unack episode action API', { tag: '@local-stateful-clas
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('returns 404 when episode_id matches no events', async ({ apiClient }) => {
+  apiTest('returns 404 when alert_id matches no events', async ({ apiClient }) => {
     const response = await apiClient.post(getUnackEpisodeActionUrl('unknown-episode'), {
       headers: writerHeaders,
       body: {},
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(

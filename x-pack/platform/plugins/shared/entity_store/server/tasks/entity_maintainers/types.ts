@@ -11,6 +11,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { EntityUpdateClient } from '../../domain/crud';
 import type { ResolutionRulesClient } from '../../domain/resolution/rules';
 import type { EntityMetadataClient } from '../../domain/entity_metadata';
+import type { RelationshipsClient } from '../../domain/relationships';
 import type { MaintainerTelemetryClient } from './maintainer_telemetry_client';
 
 export const EntityMaintainerTaskStatus = {
@@ -90,6 +91,7 @@ export interface EntityMaintainerTaskMethodContext {
   crudClient: EntityUpdateClient;
   resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
   telemetry: MaintainerTelemetryClient;
 }
 

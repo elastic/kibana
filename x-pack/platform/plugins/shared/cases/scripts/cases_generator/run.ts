@@ -302,10 +302,10 @@ export async function runGenerator(): Promise<void> {
           alertsByOwner = await indexAlertsForOwners(esClient, cases, config.alerts, docCtx);
         }
         if (config.events > 0) {
-          const nonObservabilityCaseCount = cases.filter(
-            (oneCase) => oneCase.owner !== 'observability'
+          const securityCaseCount = cases.filter(
+            (oneCase) => oneCase.owner === 'securitySolution'
           ).length;
-          const totalEvents = nonObservabilityCaseCount * config.events;
+          const totalEvents = securityCaseCount * config.events;
           if (totalEvents > 0) {
             indexedEvents = await indexOrReuseEvents(
               esClient,
@@ -464,16 +464,13 @@ export function buildExecutionPlan(config: GeneratorConfig, targetSpaces: string
       }
     }
 
-    const nonObservabilityCaseCount = Object.entries(ownerCaseCounts).reduce(
-      (sum, [owner, caseCount]) => sum + (owner === 'observability' ? 0 : caseCount),
-      0
-    );
-    const eventDocsToIndex = nonObservabilityCaseCount * config.events;
+    const securityCaseCount = ownerCaseCounts.securitySolution ?? 0;
+    const eventDocsToIndex = securityCaseCount * config.events;
 
     const attachmentsForSpace =
       config.comments * config.count +
       config.alerts * config.count +
-      config.events * nonObservabilityCaseCount;
+      config.events * securityCaseCount;
 
     totalCases += config.count;
     totalAttachments += attachmentsForSpace;

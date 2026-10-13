@@ -5,7 +5,7 @@ Development-only in-page comments.
 ## How to use
 
 1. Click the comment button in the developer toolbar, or press `⌘⇧K` / `Ctrl+Shift+K`.
-2. Click any element to comment on it; reply to and resolve comments from their pins or the "Comments" panel.
+2. Click any element to comment on it, or hold `Alt` (`⌥`) to click through to the page (open a flyout, navigate); reply to and resolve comments from their pins or the "Comments" panel.
 3. The navigate action of a comment whose element is not on screen opens the page it was made on and replays the author's clicks until the element appears.
 
 ## How it works

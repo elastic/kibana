@@ -12,7 +12,7 @@ import type {
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
-import type { PaginatedResponse } from '@kbn/streams-plugin/common';
+import type { PaginatedResponse } from '@kbn/significant-events-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
@@ -21,8 +21,10 @@ interface UseFetchSignificantEventsParams {
   to: string | number;
   status?: SignificantEventStatus[];
   severity?: Severity[];
-  stream?: string[];
+  source_id?: string[];
   search?: string;
+  /** Knowledge Indicator feature ids matched against `causal_features` and `blast_radius`. */
+  topologyFeatureIds?: string[];
   eventId?: string;
 }
 
@@ -31,8 +33,9 @@ export const useFetchSignificantEvents = ({
   to,
   status,
   severity,
-  stream,
+  source_id,
   search,
+  topologyFeatureIds,
   eventId,
 }: UseFetchSignificantEventsParams) => {
   const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
@@ -42,7 +45,7 @@ export const useFetchSignificantEvents = ({
 
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to, status, severity, stream, search, eventId]);
+  }, [from, to, status, severity, source_id, search, topologyFeatureIds, eventId]);
 
   const query = useQuery<PaginatedResponse<SignificantEventResponse>, Error>({
     // Deep-link lookups must not depend on time or filters. DateRangeRedirect writing
@@ -57,8 +60,9 @@ export const useFetchSignificantEvents = ({
           to,
           status,
           severity,
-          stream,
+          source_id,
           search,
+          topologyFeatureIds,
         ],
     queryFn: async ({
       signal,
@@ -73,8 +77,9 @@ export const useFetchSignificantEvents = ({
               to: new Date(to).toISOString(),
               ...(status?.length ? { status } : {}),
               ...(severity?.length ? { severity } : {}),
-              ...(stream?.length ? { stream } : {}),
+              ...(source_id?.length ? { source_id } : {}),
               ...(search ? { search } : {}),
+              ...(topologyFeatureIds?.length ? { topology_feature_id: topologyFeatureIds } : {}),
             }),
       };
 

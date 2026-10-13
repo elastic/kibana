@@ -5,27 +5,32 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from '../../../common/feature_flags';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './is_significant_events_semantic_code_search_grounding_enabled';
 
 describe('isSignificantEventsSemanticCodeSearchGroundingEnabled', () => {
-  it('reads the semantic code search grounding flag and defaults to false', () => {
-    const getBooleanValue = jest.fn().mockReturnValue(false);
-    const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
+  it('reads the semantic code search grounding flag and defaults to false', async () => {
+    const getBooleanValue$ = jest.fn().mockReturnValue(of(false));
+    const featureFlags = { getBooleanValue$ } as unknown as FeatureFlagsStart;
 
-    expect(isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags)).toBe(false);
-    expect(getBooleanValue).toHaveBeenCalledWith(
+    await expect(isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags)).resolves.toBe(
+      false
+    );
+    expect(getBooleanValue$).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
       false
     );
   });
 
-  it('returns true when the flag is enabled', () => {
+  it('returns true when the flag is enabled', async () => {
     const featureFlags = {
-      getBooleanValue: jest.fn().mockReturnValue(true),
+      getBooleanValue$: jest.fn().mockReturnValue(of(true)),
     } as unknown as FeatureFlagsStart;
 
-    expect(isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags)).toBe(true);
+    await expect(isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags)).resolves.toBe(
+      true
+    );
   });
 });

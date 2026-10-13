@@ -38,7 +38,6 @@ jest.mock('../../../../../hooks', () => ({
       getUrlForApp: jest.fn().mockReturnValue('/app/onboarding/aws'),
     },
   }),
-  useLink: () => ({ getHref: jest.fn().mockReturnValue('/app/integrations/detail/aws/overview') }),
 }));
 
 jest.mock('../../../../../hooks/use_merge_epr_with_replacements', () => ({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
   mapClassicAlertToEpisode,
@@ -144,7 +145,7 @@ describe('mapClassicAlertToEpisode', () => {
     const episode = mapClassicAlertToEpisode(baseSource, TEST_INDEX);
     expect(episode.last_ack_action).toBeNull();
     expect(episode).not.toHaveProperty('last_snooze_action');
-    expect(episode).not.toHaveProperty('snooze_expiry');
+    expect(episode).not.toHaveProperty('snoozed_until');
   });
 
   it('preserves classic warning severity without mapping it to medium', () => {
@@ -183,5 +184,15 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode.source_grouping).toEqual({
       'service.name': 'api',
     });
+  });
+
+  it('maps kibana.alert.flapping true to is_flapping true', () => {
+    const episode = mapClassicAlertToEpisode({ ...baseSource, [ALERT_FLAPPING]: true }, TEST_INDEX);
+    expect(episode.is_flapping).toBe(true);
+  });
+
+  it('defaults is_flapping to false when kibana.alert.flapping is absent', () => {
+    const episode = mapClassicAlertToEpisode(baseSource, TEST_INDEX);
+    expect(episode.is_flapping).toBe(false);
   });
 });

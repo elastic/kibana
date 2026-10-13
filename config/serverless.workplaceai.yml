@@ -6,6 +6,14 @@ plugins.allowlistPluginGroups: ['platform', 'workplaceai']
 ## Enable the Serverless Workplace AI plugin
 xpack.serverless.workplaceAI.enabled: true
 
+## Fine-tune the Workplace AI feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Alerting V2 is Observability-only, so its features are hidden in Role management.
+  alerting_v2_rules.hidden: true
+  alerting_v2_alerts.hidden: true
+  alerting_v2_action_policies.hidden: true
+  alerting_v2_execution_history.hidden: true
+
 ## Cloud settings
 xpack.cloud.serverless.project_type: workplaceai
 
@@ -28,6 +36,10 @@ xpack.spaces.maxSpaces: 1
 
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: false
+
+## ES|QL Data Federation is not offered here, and the dataFederation:enabled
+## advanced setting is not allowlisted for this project type
+xpack.dataFederation.enabled: false
 
 ## Disable Kibana Product Intercept
 xpack.product_intercept.enabled: false

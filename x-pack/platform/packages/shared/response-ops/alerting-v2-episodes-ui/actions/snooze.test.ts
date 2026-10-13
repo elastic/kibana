@@ -57,7 +57,7 @@ describe('createSnoozeAction', () => {
         episodes: [
           makeEpisode({
             last_snooze_action: 'snooze',
-            snooze_expiry: '2020-01-01T00:00:00.000Z',
+            snoozed_until: '2020-01-01T00:00:00.000Z',
           }),
         ],
       })
@@ -80,7 +80,7 @@ describe('createSnoozeAction', () => {
       onSuccess,
     });
     expect(bulk.bulkSnoozeSeriesActions).toHaveBeenCalledWith(deps.http, [
-      { group_hash: 'g1', expiry: '2026-05-01T00:00:00Z' },
+      { group_hash: 'g1', snoozed_until: '2026-05-01T00:00:00Z' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();

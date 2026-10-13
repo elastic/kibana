@@ -98,7 +98,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
         }),
         object: await getUserActivityObject({ id: req.params.id, data: req.body }, req),
         ...(req.body.meta && {
-          metadata: req.body.meta,
+          kibana: { dashboard: req.body.meta },
         }),
       });
       return res.ok();

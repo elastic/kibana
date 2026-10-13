@@ -9,7 +9,7 @@ import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
-import { EpisodeTriage, RuleCatalog } from '../state';
+import { AlertTriage, RuleCatalog } from '../state';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -32,7 +32,7 @@ export class FetchRulesStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { triage = EpisodeTriage.empty() } = state;
+    const { triage = AlertTriage.empty() } = state;
 
     const uniqueRuleIds = triage.dispatchableRuleIds();
     if (uniqueRuleIds.length === 0) {
@@ -47,7 +47,7 @@ export class FetchRulesStep implements DispatcherStep {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.metadata.name,
-        tags: doc.attributes.metadata.tags ?? [],
+        routingTags: doc.attributes.metadata.routing_tags ?? [],
       });
     }
 

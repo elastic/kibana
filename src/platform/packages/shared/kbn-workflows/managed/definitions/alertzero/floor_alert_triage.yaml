@@ -1,55 +1,790 @@
 version: "1"
 name: Alert Triage
-description: Watch Floor alert triage worker stub.
+description: >
+  AlertZero Worker that triages alert batches produced by detection rule
+  executions. Classifies each alert as true_positive / false_positive /
+  inconclusive using the Security Alert Analysis workflow, records the
+  reasoning in an Investigation conversation, writes each verdict as an
+  alert tag and note, and — gated by the Worker's autonomy level — proposes
+  closing false positives through a separate review workflow, so this run
+  never waits for a human.
 enabled: false
 tags:
   - watch
   - watch-floor
+
+settings:
+  __WORKER_RUN_AS_LINE__:
 triggers:
+  - type: alert
+  # Keep manual for desk testing without a rule execution.
   - type: manual
+
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
-steps:
-  - name: triage_alerts
-    type: ai.agent
-    agent-id: alertzero-thin-agent
-    # Keep in sync with ALERTZERO_FAST_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-    connector-id-by-feature: alertzero_fast
-    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
-    plugin-id: alertzero_alert_triage
-    aggregate-by: alertzero_parent
-    timeout: "10m"
-    create-conversation: true
-    with:
-      configuration_overrides:
-        skill_ids:
-          - alert-analysis
-        tools:
-          - tool_ids:
-              - security.alertzero.actions.list
-      message: >
-        Triage the security alert context below. Prefer
-        recall over precision when unsure. Return a structured
-        classification.
+    # Minimum confidence score for a false_positive verdict to qualify for
+    # proposal / auto-close. Alerts below this floor are tagged and noted
+    # but not proposed for closure (R6).
+    autoCloseConfidenceScoreMinThreshold: __WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__
 
-        Alert / event context:
-        {{ event | json }}
-      schema:
-        type: object
-        properties:
-          classification:
-            type: string
-            enum:
-              - true_positive
-              - false_positive
-              - inconclusive
-            description: Classification of the alert based on analysis
-          confidence_score:
-            type: number
-            minimum: 0
-            maximum: 1
-            description: Confidence from 0.0–1.0
-          rationale:
-            type: string
+# =============================================================================
+# Steps
+# =============================================================================
+#
+# ORDERING IS LOAD-BEARING — do not rearrange.
+#
+# Preflight steps MUST stay above create_investigation: a disabled Alert Analysis path must
+# not open an Investigation.
+#
+# Tags and notes MUST be written before the review is started (`workflow.executeAsync`
+# system-security-floor-alert-triage-review). The review's dismissal branch swaps
+# `az:false_positive` for the analyst's verdict, which only works once the first tag exists, and it
+# can run as soon as it is started.
+#
+# This run has no long-lived wait: the closure proposal, which waits for an analyst, lives in the
+# review workflow. The default workflow timeout applies.
+#
+# Pipeline:
+#   1. require_analysis_enabled  — fail the run before create_investigation when the space
+#                                  has Alert Analysis turned off
+#   2. create_investigation      — open an Investigation conversation
+#   3. attach_alerts             — attach the alert batch
+#   4. classify_alerts           — run the classification sub-workflow
+#   5. compute_fp_candidates     — filter verdicts to false_positive at or above the floor
+#   6. attach_impact             — record impacted hosts/users (shared Impact)
+#   7. set_az_*_tags             — static AZ classification tags (R5, always), in bulk
+#   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always),
+#                                  written 20 at a time
+#   9. gate_fp_close             — start the closure review and record its dispatch (if any FP candidates)
+#  10. close_investigation_no_fp — explicit close when there are no FP candidates
+#
+# Investigation narrative: progress and outcome lines use `ai.conversation.add_user_message`
+# (elastic/kibana#293743) so they are recorded without running the Investigation's agent.
+
+steps:
+  # ---------------------------------------------------------------------------
+  # 1. Abort before opening an Investigation when Alert Analysis is off in this
+  #    space. Enablement is checked at Worker turn-on; this is the runtime
+  #    complement for the case where the operator later turns analysis off and
+  #    leaves the Worker running. Empty verdicts are not a substitute — the
+  #    sub-workflow also returns [] when no connector resolves for the model tier.
+  #
+  #    Same runtime_config endpoint the analysis workflow reads. Fail-closed: a
+  #    failed fetch after retries fails the run rather than creating a hollow
+  #    Investigation.
+  # ---------------------------------------------------------------------------
+  - name: fetch_analysis_runtime_config
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/security_solution/alert_analysis_workflow/runtime_config"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        Content-Type: application/json
+
+  - name: require_analysis_enabled
+    type: if
+    condition: "${{ steps.fetch_analysis_runtime_config.output.workflowEnabled == false }}"
+    steps:
+      - name: abort_analysis_disabled
+        type: workflow.fail
+        with:
+          message: >-
+            Alert Triage requires Alert Analysis to be enabled in this space.
+            Turn it on under Alert analysis settings, or turn this Worker off.
+
+  # ---------------------------------------------------------------------------
+  # 2. Open an Investigation conversation seeded from the `investigation`
+  #    template. Seeds status, severity, and the workflow_execution_ids that link
+  #    the Investigation to this run.
+  # ---------------------------------------------------------------------------
+  - name: create_investigation
+    type: ai.conversation.create
+    with:
+      template_id: investigation
+      title: "Alert Triage — {{ event.rule.name }}"
+      access_control:
+        access_mode: public
+      metadata:
+        status: open
+        # `event.rule` carries no severity (id, name, tags, consumer, producer, ruleTypeId only),
+        # so it is read off the first alert. A rule's alerts share one severity unless the rule
+        # maps it per alert. Both alert document shapes are read: dotted keys and nested objects.
+        severity: "{{ event.alerts[0]['kibana.alert.severity'] | default: event.alerts[0].kibana.alert.severity | default: 'medium' }}"
+        description: >-
+          Automated triage of {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %} from rule
+          "{{ event.rule.name }}" ({{ event.rule.id }}).
+        workflow_execution_ids: ["{{ execution.id }}"]
+
+  # ---------------------------------------------------------------------------
+  # 3. Attach the analysed alerts to the Investigation in chunks of 20.
+  #    security.alerts caps at 20 ids per call; foreach+chunk splits larger
+  #    batches into multiple chips. render_inline: true so chips show in the
+  #    Investigation flyout without a separate attachment panel.
+  # ---------------------------------------------------------------------------
+  - name: init_attach_chunk_tracking
+    type: data.set
+    with:
+      failed_attach_chunk_count: 0
+      total_attach_chunk_count: "${{ event.alerts | map: '_id' | chunk: 20 | size }}"
+
+  - name: attach_alerts
+    type: foreach
+    foreach: "${{ event.alerts | map: '_id' | chunk: 20 | json }}"
+    steps:
+      - name: attach_alert_chunk
+        type: ai.attachment.add
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+          type: security.alerts
+          render_inline: true
+          data:
+            alertIds: "${{ foreach.item }}"
+          description: "Alerts analysed in this triage run"
+
+      # Retries exhaust before continue: true takes over, so an error here means this
+      # chunk never attached — those alert ids have no evidence chip in the
+      # Investigation. Counted so post_comment_triage_started reports accurate
+      # coverage instead of unconditionally claiming every alert is attached.
+      - name: record_attach_alert_chunk_failure
+        type: data.set
+        if: "${{ steps.attach_alert_chunk.error != blank }}"
+        with:
+          failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
+
+  - name: post_comment_triage_started
+    type: ai.conversation.add_user_message
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        Triage started for rule **{{ event.rule.name }}** ({{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %}). Model routed via the `alertzero_reasoning` Model Management feature.
+        {% if variables.failed_attach_chunk_count > 0 %}
+        ⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach as evidence after retries; some alerts are not visible in this Investigation.
+        {% else %}
+        Alerts attached above.
+        {% endif %}
+
+        [View execution]({{ execution.url }})
+  # ---------------------------------------------------------------------------
+  # 4. Run the Security Alert Analysis sub-workflow.
+  #
+  #    autoCloseEnabled: false — the Worker owns the close decision (R11: every
+  #    close is a Proposal, so the sub-workflow must not close inline).
+  #
+  #    calledByWorker: true — the sub-workflow classifies and tags but leaves the
+  #    verdict note to this Worker (add_verdict_notes), so each alert gets one note.
+  #
+  #    connectorIdByFeature: alertzero_reasoning — the Reasoning tier rather than
+  #    Fast. Each verdict drives a tag, a note, and potentially a HITL proposal, so
+  #    classification quality matters more than throughput here. Operators pick the
+  #    model for the tier in Stack Management → Model Settings.
+  #
+  #    autoCloseConfidenceScoreMinThreshold is passed through so the sub-workflow
+  #    reports against the same floor this Worker applies in compute_fp_candidates.
+  #
+  #    investigationConversationId lets the sub-workflow post per-batch progress
+  #    comments into the Investigation.
+  # ---------------------------------------------------------------------------
+  - name: classify_alerts
+    type: workflow.execute
+    on-failure:
+      fallback:
+        - name: post_comment_classify_failed
+          type: ai.conversation.add_user_message
+          on-failure:
+            continue: true
+          with:
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            message: >-
+              ⚠️ Classification step failed for {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %}.
+              The Alert Analysis workflow may be disabled, or `workflow.execute` threw.
+              Alerts have NOT been tagged or closed.
+
+        # Fallback handles the comment only. Without this fail the parent continues into
+        # empty FP candidates and close_investigation_no_fp — a hollow "triage complete".
+        - name: abort_classify_failed
+          type: workflow.fail
+          with:
+            message: >-
+              Alert Triage classification failed. The Alert Analysis workflow may be
+              disabled in this deployment, or the sub-workflow threw. Alerts were not
+              tagged or closed.
+    with:
+      workflow-id: system-security-alert-analysis
+      run-as-mode: inherit
+      inputs:
+        # A child run has no trigger event of its own, so the batch must be passed
+        # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
+        alerts: "${{ event.alerts }}"
+        autoCloseEnabled: false
+        autoCloseConfidenceScoreMinThreshold: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
+        connectorIdByFeature: alertzero_reasoning
+        calledByWorker: true
+        investigationConversationId: "{{ steps.create_investigation.output.conversation_id }}"
+
+  # ---------------------------------------------------------------------------
+  # 5. Compute the FP candidate list: verdicts classified as false_positive
+  #    at or above the configured confidence floor.
+  # ---------------------------------------------------------------------------
+  # The confidence floor is applied here rather than in the sub-workflow: this path passes
+  # autoCloseEnabled: false, so the Worker owns the close decision (R11) and therefore owns
+  # R6's threshold too. Built as a string first because the expression filters take a
+  # pre-rendered predicate, matching `reject_exp` usage in alert_analysis_workflow.yaml.
+  - name: build_fp_threshold_expr
+    type: data.set
+    with:
+      fp_threshold_expr: "v.confidence_score >= {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
+
+  - name: compute_fp_candidates
+    type: data.set
+    with:
+      fp_candidate_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
+            | map: 'alert_id' }}
+
+  # Counted in its own step so the filter above stays the single source of truth. The review
+  # dispatch and the no-FP branch both gate on this value, so leaving it unset makes every run a
+  # silent no-op: no review is started and the Investigation is never closed.
+  - name: count_fp_candidates
+    type: data.set
+    with:
+      fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
+
+  # Guard: analysis is on (or this run would have aborted at step 1) but the
+  # sub-workflow returned 0 verdicts for a non-empty batch — a missing Model
+  # Management connector, or the sub-workflow skipped.
+  # Counts are materialised first: `${{ event.alerts | size > 0 }}` is invalid Liquid
+  # (the engine parses `size > 0` as a filter name), so a condition takes no filters.
+  # `and`/`or` do work, but Liquid gives them no grouping or precedence, so the two
+  # comparisons stay nested rather than combined.
+  - name: compute_classification_guard_counts
+    type: data.set
+    with:
+      alert_count: "${{ event.alerts | size }}"
+      verdict_count: "${{ steps.classify_alerts.output.verdicts | size }}"
+      missing_alert_count: "${{ steps.classify_alerts.output.missing_alert_ids | size }}"
+
+  - name: guard_classification_nonempty
+    type: if
+    condition: "${{ variables.alert_count > 0 }}"
+    steps:
+      - name: guard_classification_nonempty_inner
+        type: if
+        condition: "${{ variables.verdict_count == 0 }}"
+        steps:
+          - name: post_comment_classification_empty
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                ⚠️ Alert Analysis returned no verdicts for {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %}.
+                Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
+                Likely causes: the `alertzero_reasoning` Model Management feature has no connector,
+                or the sub-workflow skipped the batch.
+                Alerts have NOT been tagged or closed.
+        else:
+          # Partial miss: at least one verdict came back (the all-empty case is handled
+          # above), but the sub-workflow's missing_alert_ids is nonempty — the model
+          # dropped one or more alerts from its reply, or a batch failed after retries.
+          # Those alerts get no az: tag, note, or FP-candidate consideration, so the
+          # Investigation would otherwise look fully triaged with no record that some
+          # alerts still need a verdict.
+          - name: guard_missing_alert_ids
+            type: if
+            condition: "${{ variables.missing_alert_count > 0 }}"
+            steps:
+              - name: post_comment_missing_alert_ids
+                type: ai.conversation.add_user_message
+                on-failure:
+                  continue: true
+                with:
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: >-
+                    ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
+                    {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %} in this batch (see the sub-workflow's
+                    missing_alert_ids). {% if variables.missing_alert_count == 1 %}That alert was{% else %}Those alerts were{% endif %} NOT tagged, noted, or considered for
+                    closure by this Worker; only the {{ variables.verdict_count }} matched
+                    alert{% if variables.verdict_count != 1 %}s{% endif %} will be triaged below. Re-run the Worker or follow up manually on
+                    the missing alert{% if variables.missing_alert_count != 1 %}s{% endif %}.
+
+  - name: post_comment_classification_results
+    type: ai.conversation.add_user_message
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+
+        {{ steps.classify_alerts.output.grouped_counts_summary }}
+
+        {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
+
+  # ---------------------------------------------------------------------------
+  # 6. Record the impacted hosts and users on the Investigation through the shared
+  #    investigations.attachImpact step (the landing-page entity pills read it).
+  #    The sub-workflow caps impacted_entities at 100. The step rejects an empty list
+  #    and needs manage_investigations; a failure is not worth failing the run for.
+  # ---------------------------------------------------------------------------
+  - name: attach_impact_gate
+    type: if
+    condition: "${{ steps.classify_alerts.output.impacted_entities.size > 0 }}"
+    steps:
+      - name: attach_impact
+        type: investigations.attachImpact
+        on-failure:
+          continue: true
+        with:
+          conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+          entities: "${{ steps.classify_alerts.output.impacted_entities }}"
+
+  # ---------------------------------------------------------------------------
+  # 7. Apply static AZ classification tags to every analysed alert (R5).
+  #    Tags are always written — never gated on autonomy level or FP count.
+  #    Replaces any stale AZ classification tag before adding the current one.
+  # ---------------------------------------------------------------------------
+  # Each verdict class is one call per chunk that adds its own tag and removes the other two.
+  # kibana.SetAlertTags rejects a tag present in both lists ("Duplicate tags ... were found"),
+  # so the tag being added is never in tags_to_remove. Removing and adding in one call also
+  # means a failed call leaves an alert with its previous verdict tag, never with none.
+  # An alert id sits in exactly one class: the Alert Analysis Worker path rejects duplicate
+  # alert ids before batching and returns one verdict per id. Were an id in two classes, the
+  # last class written would win.
+  #
+  # Written in bulk, not per alert: kibana.SetAlertTags takes a list of ids, so the batch costs
+  # one call per verdict class (per chunk of 500) instead of one call
+  # per alert. Every step of a loop is recorded in the execution, so a per-alert loop over a
+  # thousand alerts is thousands of step records on the same event loop as the UI.
+  # The ids are partitioned by classification here.
+  - name: compute_az_tag_ids
+    type: data.set
+    with:
+      az_true_positive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'true_positive'
+            | map: 'alert_id' }}
+      az_false_positive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | map: 'alert_id' }}
+      az_inconclusive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'inconclusive'
+            | map: 'alert_id' }}
+
+  # Each list is walked in chunks of 500 ids, as floor_alert_triage_review.yaml does for its
+  # re-tag. One call carries the whole chunk, so a batch costs a call per chunk and class rather
+  # than per alert, yet no call grows with the batch: the route turns `ids` into a `terms` query
+  # (capped by index.max_terms_count) and emits one alert-tags-changed trigger event per call,
+  # which is truncated beyond 10000 ids. A batch with no verdicts (missing connector, skipped
+  # sub-workflow) chunks to an empty list, so each loop below runs zero times and `ids` is never
+  # sent empty.
+  - name: set_az_true_positive_tags
+    type: foreach
+    foreach: "${{ variables.az_true_positive_ids | chunk: 500 | json }}"
+    steps:
+      - name: set_az_true_positive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove:
+              - "az:false_positive"
+              - "az:inconclusive"
+            tags_to_add:
+              - "az:true_positive"
+
+  - name: set_az_false_positive_tags
+    type: foreach
+    foreach: "${{ variables.az_false_positive_ids | chunk: 500 | json }}"
+    steps:
+      - name: set_az_false_positive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove:
+              - "az:true_positive"
+              - "az:inconclusive"
+            tags_to_add:
+              - "az:false_positive"
+
+  - name: set_az_inconclusive_tags
+    type: foreach
+    foreach: "${{ variables.az_inconclusive_ids | chunk: 500 | json }}"
+    steps:
+      - name: set_az_inconclusive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove:
+              - "az:true_positive"
+              - "az:false_positive"
+            tags_to_add:
+              - "az:inconclusive"
+
+  # ---------------------------------------------------------------------------
+  # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
+  #    Always written — never gated on autonomy level. The only verdict note on the
+  #    Worker path: the sub-workflow skips its own when calledByWorker is true.
+  #
+  #    The notes API takes one note per call and each call takes about a second (the write
+  #    waits for the next index refresh), so a serial loop costs about a second per alert.
+  #    Notes are written 20 at a time instead: each chunk is a `parallel` fan-out of 20
+  #    branches at concurrency 20, which finishes within one tick because the fan-out does not
+  #    exceed the concurrency. That is the schema ceiling for concurrency, and well under the
+  #    fan-out ceiling of 100.
+  #
+  #    A parallel branch cannot carry `on-failure`, so a note that fails here is not retried in
+  #    place. `settled` lets every note in the chunk run, the failed ones are collected, and
+  #    they are retried serially afterwards with the same retry as before. A note that still
+  #    fails fails the run, as it always did.
+  # ---------------------------------------------------------------------------
+  - name: init_failed_verdict_notes
+    type: data.set
+    with:
+      failed_note_verdicts: []
+
+  - name: add_verdict_notes
+    type: foreach
+    foreach: "${{ steps.classify_alerts.output.verdicts | chunk: 20 | json }}"
+    steps:
+      # Copied out of `foreach.item`: inside the parallel step below `foreach.item` is a single
+      # verdict, not the chunk.
+      - name: current_note_chunk
+        type: data.set
+        with:
+          verdicts: "${{ foreach.item }}"
+
+      - name: write_note_chunk
+        type: parallel
+        foreach: "${{ steps.current_note_chunk.output.verdicts }}"
+        mode: settled
+        concurrency:
+          max: 20
+        steps:
+          - name: add_verdict_note
+            type: kibana.request
+            with:
+              method: PATCH
+              path: "/s/{{ workflow.spaceId }}/api/note"
+              body:
+                note:
+                  eventId: "{{ foreach.item.alert_id }}"
+                  timelineId: ''
+                  note: |
+                    [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+
+                    **Verdict:** {{ foreach.item.classification }}
+                    **Confidence:** {{ foreach.item.confidence_score }}
+
+                    {{ foreach.item.rationale }}
+                    {% if foreach.item.contributing_factors.size > 0 %}
+                    **Contributing factors**
+                    {% for factor in foreach.item.contributing_factors %}
+                    - {{ factor }}
+                    {%- endfor %}
+                    {% endif %}
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+
+      # A branch's `key` is the verdict it was given, so the verdicts of the notes that did not
+      # complete can be read straight off the results. Anything but `completed` counts, so a
+      # timed-out branch is retried as well. The cost is that each verdict is stored twice in the
+      # branch state and in `results[].key`; attack_discovery_batched_generation.yaml avoids that
+      # by fanning out over integer offsets. Here a branch needs the whole verdict to render its
+      # note and the retry needs it back, and a branch cannot look it up by index without
+      # reading shared variables other branches are writing, so the key stays the verdict.
+      # A verdict is at most about 1.5 KB under the classify schema (512-character id, 500-character
+      # rationale, three 100-character factors), so a 1000-alert batch (the input maximum) holds
+      # at most about 3 MB of duplicated state, and a 100-alert batch about 0.3 MB. That is an
+      # upper bound from the schema, not a measurement of a run.
+      #
+      # The failed verdicts are read from this step's own output, not from `variables`: the
+      # variables are a merge of every `data.set` output in run order, and an empty list does
+      # not reliably shadow the previous chunk's, which would retry a failed note twice.
+      - name: collect_chunk_failed_notes
+        type: data.set
+        with:
+          chunk_failed_verdicts: >-
+            ${{ steps.write_note_chunk.output.results
+                | where_exp: 'r', 'r.status != "completed"'
+                | map: 'key' }}
+
+      - name: record_failed_verdict_notes
+        type: data.set
+        with:
+          failed_note_verdicts: "${{ variables.failed_note_verdicts | concat: steps.collect_chunk_failed_notes.output.chunk_failed_verdicts }}"
+
+  # Empty on a clean run, so this loop does nothing. The note is the same one as above: keep the
+  # two in step.
+  - name: retry_failed_verdict_notes
+    type: foreach
+    foreach: "${{ variables.failed_note_verdicts | json }}"
+    steps:
+      - name: retry_verdict_note
+        type: kibana.request
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/note"
+          body:
+            note:
+              eventId: "{{ foreach.item.alert_id }}"
+              timelineId: ''
+              note: |
+                [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+
+                **Verdict:** {{ foreach.item.classification }}
+                **Confidence:** {{ foreach.item.confidence_score }}
+
+                {{ foreach.item.rationale }}
+                {% if foreach.item.contributing_factors.size > 0 %}
+                **Contributing factors**
+                {% for factor in foreach.item.contributing_factors %}
+                - {{ factor }}
+                {%- endfor %}
+                {% endif %}
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+
+  # Tags are reported as submitted, not written: SetAlertTags returns the update-by-query body on
+  # HTTP 200, so a call whose `updated` is below the chunk size (ids matching no alert) passes
+  # unchecked. Notes are confirmed, since a failed note retries and then fails the run.
+  - name: post_comment_alert_updates
+    type: ai.conversation.add_user_message
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: >-
+        Verdict notes written and classification tags submitted for {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
+
+  # ---------------------------------------------------------------------------
+  # 9. Hand the closure proposal to the review workflow (if any FP candidates).
+  #
+  #    The proposal waits for an analyst for up to 72 h at Manual autonomy, and a noisy rule
+  #    produces one every run. Waiting here would park this run, the proposal bridge and the gate
+  #    per batch, so the proposal lives in `system-security-floor-alert-triage-review`, started
+  #    with `workflow.executeAsync`. This run finishes in minutes. The review raises the
+  #    proposal, applies the outcome (re-tag on dismissal) and closes the Investigation.
+  #
+  #    The review drops a batch when the rule already has its limit of reviews waiting for a
+  #    decision. The engine decides that while starting the child, so the dispatch itself still
+  #    succeeds and `workflow.executeAsync` reports the child's status as `skipped`. That status
+  #    is read below, because nothing else closes the Investigation of a batch whose review never
+  #    ran.
+  #
+  #    Autonomy (`manual` gates, `supervised` auto-approves) is passed to the review, which owns
+  #    the mapping to `autoApprove`.
+  # ---------------------------------------------------------------------------
+  - name: gate_fp_close
+    type: if
+    condition: "${{ variables.fp_candidate_count > 0 }}"
+    steps:
+      - name: start_fp_review
+        type: workflow.executeAsync
+        # Reached only when the review could not be started at all. A review that was started
+        # and then skipped or failed is handled from its reported status below. The fallback
+        # re-throws afterwards, so the run fails and shows up in execution history.
+        on-failure:
+          fallback:
+            - name: post_comment_review_not_started
+              type: ai.conversation.add_user_message
+              on-failure:
+                continue: true
+              with:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                message: >-
+                  ⚠️ The closure review could not be started: {{ error.message }}.
+                  {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
+        with:
+          workflow-id: system-security-floor-alert-triage-review
+          run-as-mode: inherit
+          inputs:
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            rule_id: "{{ event.rule.id }}"
+            rule_name: "{{ event.rule.name }}"
+            fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
+            confidence_floor: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
+            autonomy: "{{ consts.worker_settings.autonomy }}"
+
+      # `workflow.executeAsync` reports the child's status as it was when the engine returned
+      # the execution id, and the engine applies the concurrency policy and validates the inputs
+      # before that, so `skipped` and `failed` are already final here. No separate read of the
+      # execution is needed.
+      #
+      # One value per outcome so every branch below is a single comparison (if-conditions take
+      # no filters, and `and`/`or` have no precedence).
+      #   limit   → skipped by the per-rule limit
+      #   failed  → the review never ran to a decision (rejected inputs, cancelled, timed out)
+      #   started → pending, running, parked or already finished
+      - name: resolve_review_dispatch
+        type: data.set
+        with:
+          review_dispatch: >-
+            {% if steps.start_fp_review.output.status == 'skipped' %}limit{% elsif steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+
+      - name: handle_review_started
+        type: if
+        condition: "${{ variables.review_dispatch == 'started' }}"
+        steps:
+          - name: post_comment_review_started
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                Closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor was handed to the closure review.
+                Autonomy level: {{ consts.worker_settings.autonomy }}.
+                {% if consts.worker_settings.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
+                The outcome is posted here and this Investigation is closed when it is decided.
+
+      # The rule is at its limit of closure proposals waiting for a decision, so this one is not
+      # raised. Same end state as a false positive below the confidence floor: the alerts stay
+      # open and tagged az:false_positive, and the Investigation closes.
+      - name: handle_review_limit
+        type: if
+        condition: "${{ variables.review_dispatch == 'limit' }}"
+        steps:
+          - name: close_investigation_review_limit
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_review_limit_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      The closure proposal was skipped by the per-rule limit, but the Investigation
+                      could not be marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+
+          - name: post_comment_review_limit
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                No closure proposal was created. Rule "{{ event.rule.name }}" already has 10 closure proposals waiting for a decision, the most that wait at once for one rule.
+                {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor {% if variables.fp_candidate_count == 1 %}stays{% else %}stay{% endif %} open and tagged az:false_positive.
+                Decide the pending proposals for this rule to let new ones through.
+
+      - name: handle_review_failed
+        type: if
+        condition: "${{ variables.review_dispatch == 'failed' }}"
+        steps:
+          - name: post_comment_review_failed
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
+                {% if consts.worker_settings.autonomy == 'supervised' %}The {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive, since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
+
+          # Fails the run so a review that never ran shows up in execution history, like a
+          # dispatch that could not be started does.
+          - name: abort_review_failed
+            type: workflow.fail
+            with:
+              message: >-
+                The Alert Triage closure review ended as {{ steps.start_fp_review.output.status }}
+                before it reached a decision. The alerts were classified, tagged and noted.
+
+  # ---------------------------------------------------------------------------
+  # 10. No-FP branch: close the Investigation immediately.
+  #
+  #     This branch MUST be explicit. A batch that classifies nothing as a
+  #     false positive still needs a closed Investigation — it is the branch
+  #     that gets forgotten in tests and in code review.
+  #
+  #     Nested rather than `and`-combined (see compute_classification_guard_counts):
+  #     fp_candidate_count is also 0 for a zero-verdict batch (missing connector,
+  #     skipped sub-workflow), and that case already posted a warning via
+  #     guard_classification_nonempty_inner above. Requiring verdict_count > 0 here
+  #     stops that batch from ALSO closing the Investigation and posting "Triage
+  #     complete" as if a real zero-FP analysis had run; it stays open instead.
+  # ---------------------------------------------------------------------------
+  - name: close_investigation_no_fp
+    type: if
+    condition: "${{ variables.fp_candidate_count == 0 }}"
+    steps:
+      - name: close_investigation_no_fp_when_analyzed
+        type: if
+        condition: "${{ variables.verdict_count > 0 }}"
+        steps:
+          # This is the most common branch (no FP candidates), so an unhandled patch failure
+          # here would fail most triage runs. `ai.conversation.metadata.patch` errors when
+          # `agentBuilder:experimentalFeatures` is off; `continue: true` is required alongside
+          # `fallback` — fallback alone still re-throws the original error afterwards (see
+          # on_failure/README.md) and would skip post_comment_outcome_no_fp below.
+          - name: close_no_fp
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_no_fp_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      Triage completed with no false-positive candidates, but the Investigation
+                      could not be marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+
+          - name: post_comment_outcome_no_fp
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
+                {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.

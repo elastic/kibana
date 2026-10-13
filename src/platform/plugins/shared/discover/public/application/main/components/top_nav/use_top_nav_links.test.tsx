@@ -67,6 +67,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
   };
 
   services.settings.globalClient.get = <T,>(_key: string) => true as T;
+  services.settings.globalClient.isDeclared = () => true;
   services.core.application.capabilities = {
     ...services.core.application.capabilities,
     alerting_v2_rules: {
@@ -268,6 +269,68 @@ describe('useTopNavLinks', () => {
       expect(fallbackItem?.testId).toBe('exportMenuItem-newIntegration');
       expect(fallbackItem?.order).toBe(100);
     });
+
+    it('includes Schedule export when CSV reporting is available', async () => {
+      const services = createTestServices();
+
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'export') {
+            return [
+              {
+                id: 'csvReports',
+                shareType: 'integration' as const,
+                groupId: 'export',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'scheduledReports',
+                shareType: 'integration' as const,
+                groupId: 'exportDerivatives',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
+      const appMenuConfig = await setup({ services });
+
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
+      expect(exportItem?.items?.map((item) => item.id)).toEqual(
+        expect.arrayContaining(['csvReports', 'scheduledReports', 'exportJson'])
+      );
+    });
+
+    it('hides Schedule export when CSV reporting is not available', async () => {
+      const services = createTestServices();
+
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'scheduledReports',
+                shareType: 'integration' as const,
+                groupId: 'exportDerivatives',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
+      const appMenuConfig = await setup({ services });
+
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
+      expect(exportItem?.items?.map((item) => item.id)).not.toContain('scheduledReports');
+    });
   });
 
   describe('when background search is enabled', () => {
@@ -437,6 +500,7 @@ describe('useTopNavLinks', () => {
       });
 
       v2Services.settings.globalClient.get = <T,>(_key: string) => alertingV2Enabled as T;
+      v2Services.settings.globalClient.isDeclared = () => true;
       if (!alertingV2Enabled) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2Services.core.application.capabilities;
@@ -602,6 +666,7 @@ describe('useTopNavLinks', () => {
       });
 
       v2OnlyServices.settings.globalClient.get = <T,>(_key: string) => alertingVTwoEnabled as T;
+      v2OnlyServices.settings.globalClient.isDeclared = () => true;
       if (!alertingVTwoEnabled) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2OnlyServices.core.application.capabilities;

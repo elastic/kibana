@@ -14,36 +14,56 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import type { NightshiftInvestigationsConfig } from './config';
+import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
-import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
+import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
+import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
-import { installDeductiveInvestigationAgent } from './lib/install_deductive_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
-import { isInvestigationAvailable } from './is_investigation_available';
+import {
+  isInvestigationInfrastructureAvailable,
+  isInvestigationRunAvailable,
+} from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
+import { notificationRoutingAttachment } from './lib/notifications/notification_routing';
+import type { StoredNotificationRouting } from './lib/notifications/notification_routing';
+import { NotificationRoutingClient } from './lib/notifications/notification_routing_client';
+import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
+import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
+import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
+import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
+import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
+import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { registerMemoryAiIndex } from './memory/register_memory';
+import { registerCortexTelemetryEvents } from './telemetry';
+import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
+import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
-import { registerDeductiveInvestigationAgentType } from './agents/deductive_investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
@@ -54,10 +74,22 @@ import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_workspace_manager';
 import {
+  createSandboxOutputRedactorProvider,
+  withSandboxOutputRedaction,
+} from './tools/sandbox_bash/sandbox_output_redaction';
+import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
+import {
   nightshiftInvestigationSavedObjectType,
+  nightshiftSecretsEncryptionParams,
+  nightshiftSecretsSavedObjectType,
+  nightshiftCustomContextSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+  nightshiftAutomationSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
-import { SavedObjectInvestigationRepository } from './storage';
+import { createSandboxSecretsClient } from './sandbox_secrets';
+import { createCustomContextClient } from './custom_context';
+import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
   scheduleInvestigationReconciliationTask,
@@ -84,17 +116,21 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
-  private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
-  private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
-  private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private inference?: NightshiftInvestigationsStartDeps['inference'];
+  private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
+  private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
+  private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
+  private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
+  private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
+  private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
 
@@ -106,17 +142,26 @@ export class NightshiftInvestigationsPlugin
     core: CoreSetup<NightshiftInvestigationsStartDeps, NightshiftInvestigationsServerStart>,
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
-    // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
+    const investigationLocator = plugins.share.url.locators.create(
+      new InvestigationLocatorDefinition()
+    );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    const telemetry = setupNightshiftTelemetry({
+      analytics: core.analytics,
+      logger: this.logger.get('telemetry'),
+    });
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
+    this.memoryEnabled = this.ctx.config.get().memory.enabled;
     if (this.cortexEnabled) {
       registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
+      registerCortexTelemetryEvents(core.analytics);
+    }
+    if (this.memoryEnabled) {
+      registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
     }
 
-    // Decision trees are edited in the sandbox and read the Cortex investigator context, so the
-    // feature only works when Cortex and the sandbox are both configured.
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
       this.cortexEnabled &&
@@ -126,6 +171,32 @@ export class NightshiftInvestigationsPlugin
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
+    core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
+    core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
+    plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
+
+    const customContextClient = createCustomContextClient({
+      getDeps: () => ({
+        featureFlags: this.featureFlags,
+        savedObjects: this.savedObjects,
+        security: this.security,
+        securityPlugin: this.securityStart,
+        spaces: this.spaces,
+      }),
+    });
+
+    const sandboxSecretsClient = createSandboxSecretsClient({
+      getDeps: () => ({
+        featureFlags: this.featureFlags,
+        savedObjects: this.savedObjects,
+        encryptedSavedObjects: this.encryptedSavedObjectsStart,
+        security: this.securityStart,
+        spaces: this.spaces,
+      }),
+      canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
+      logger: this.logger.get('sandbox_secrets'),
+    });
 
     registerInvestigationReconciliationTask({
       core,
@@ -146,16 +217,29 @@ export class NightshiftInvestigationsPlugin
     );
 
     if (plugins.agentBuilder) {
+      notificationRoutingAttachment.registerAttachmentType(plugins.agentBuilder, {
+        getService: () => this.getNotificationRoutingService(),
+        assertCanRead: async () => {},
+        assertCanReadConversation: async (request, conversationId) => {
+          if (!this.agentBuilder) {
+            throw new Error('agentBuilder is not available');
+          }
+          const conversations = await this.agentBuilder.conversations.getScopedClient({ request });
+          await conversations.get(conversationId);
+        },
+        logger: this.logger,
+      });
       const config = this.ctx.config.get();
       const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
-      // The significant-events investigator keeps its own prompt and Elastic tools; only the
-      // deductive agent runs from the sandbox and talks to Cortex.
-      registerInvestigationAgentType(plugins.agentBuilder);
-      registerDeductiveInvestigationAgentType(plugins.agentBuilder, {
+      registerInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
+        memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
         telemetryConnectorId,
+        getCustomContextInstructions: ({ request, spaceId }) =>
+          customContextClient.getInstructions(request, spaceId),
+        logger: this.logger.get('custom_context'),
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
@@ -170,41 +254,60 @@ export class NightshiftInvestigationsPlugin
       if (plugins.sandbox?.isAvailable) {
         const sandboxLogger = this.logger.get('sandbox');
 
-        // Start deps are read lazily: tools are registered in setup() but only run after start().
+        // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = () => this.sandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart }),
+          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           telemetryConnectorId,
+          telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
         });
+        const redaction = {
+          getOutputRedactor: createSandboxOutputRedactorProvider({
+            getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+          }),
+          logger: sandboxLogger.get('output_redaction'),
+        };
+        const availability = createSandboxToolAvailability({
+          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+        });
+        const { agentBuilder } = plugins;
+        const registerSandboxTool = <TSchema extends ZodObject>(
+          tool: BuiltinToolDefinition<TSchema>
+        ) =>
+          agentBuilder.tools.register({
+            ...withSandboxOutputRedaction(tool, redaction),
+            availability,
+          });
 
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxBashTool({
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
+            sandboxSecretsClient,
             logger: sandboxLogger,
           })
         );
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxViewFileTool({
             getSandboxStart,
             sandboxWorkspaceManager,
             logger: sandboxLogger,
           })
         );
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxStrReplaceTool({
             getSandboxStart,
             sandboxWorkspaceManager,
             logger: sandboxLogger,
           })
         );
-        plugins.agentBuilder.tools.register(
+        registerSandboxTool(
           createSandboxWriteFileTool({
             getSandboxStart,
             sandboxWorkspaceManager,
@@ -241,36 +344,97 @@ export class NightshiftInvestigationsPlugin
             getAgentAvailability: () => this.getInvestigationAvailability(),
           })
         );
-        if (this.cortexEnabled) {
-          plugins.workflowsExtensions.registerStepDefinition(
-            cortexHydrateStepDefinition({
-              getSandboxStart: () => this.sandboxStart,
-              logger: this.logger.get('cortex'),
-            })
-          );
-          plugins.workflowsExtensions.registerStepDefinition(
-            cortexOptimizeStepDefinition({
-              getInference: () => this.inference,
-              getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
-              logger: this.logger.get('cortex'),
-            })
-          );
-        }
-        if (this.decisionTreesEnabled) {
-          const decisionTreeLogger = this.logger.get('decision_trees');
-          plugins.workflowsExtensions.registerStepDefinition(
-            decisionTreeHydrateStepDefinition({
-              getSandboxStart: () => this.sandboxStart,
-              logger: decisionTreeLogger,
-            })
-          );
-          plugins.workflowsExtensions.registerStepDefinition(
-            decisionTreePrepareStepDefinition({
-              getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
-              logger: decisionTreeLogger,
-            })
-          );
-        }
+        plugins.workflowsExtensions.registerStepDefinition(
+          resolveModelStepDefinition({
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            logger: this.logger.get('resolve_model'),
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          sendNotificationsStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
+            getRoutingClient: this.getNotificationRoutingClient,
+          })
+        );
+        // Registered even when disabled: the combined workflow no-ops a writer branch instead
+        // of failing on an unknown step type, and obtain runs first to hand both writers a sandbox.
+        plugins.workflowsExtensions.registerStepDefinition(
+          obtainSandboxStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('sandbox'),
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          cortexHydrateStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            analytics: core.analytics,
+            logger: this.logger.get('cortex'),
+            isEnabled: () => this.cortexEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          memoryMaterializeToSandboxStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('memory'),
+            isEnabled: () => this.memoryEnabled,
+            telemetry,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          composeHydrateNotificationsStepDefinition()
+        );
+        // Registered unconditionally: the combined materialize workflow installs with Cortex
+        // or Memory, so a trees-off install would otherwise reference an unknown step type.
+        // The handler no-ops on the flag instead, matching cortex/memory above.
+        plugins.workflowsExtensions.registerStepDefinition(
+          decisionTreeHydrateStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('decision_trees'),
+            isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          cortexOptimizeStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            analytics: core.analytics,
+            logger: this.logger.get('cortex'),
+            isEnabled: () => this.cortexEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          memoryOptimizeStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            logger: this.logger.get('memory'),
+            isEnabled: () => this.memoryEnabled,
+            telemetry,
+          })
+        );
+        // Registered unconditionally for the same reason as the tree hydrate above: the
+        // combined optimize workflow installs with Cortex or Memory and now runs the
+        // reinforcement phase too. The handler no-ops on the flag.
+        plugins.workflowsExtensions.registerStepDefinition(
+          decisionTreePrepareStepDefinition({
+            getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+            logger: this.logger.get('decision_trees'),
+            isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          decisionTreeReinforceStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
       }
 
       registerRoutes({
@@ -280,7 +444,11 @@ export class NightshiftInvestigationsPlugin
           getTriggerEmitter,
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
+          getAutomationsSoClient: this.getAutomationsSoClient,
+          getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
+          sandboxSecretsClient,
+          customContextClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -303,6 +471,19 @@ export class NightshiftInvestigationsPlugin
             return createDecisionTreeStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('decision_trees'),
+              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+            });
+          },
+          isMemoryEnabled: () => this.memoryEnabled,
+          getMemoryPageStore: (request: KibanaRequest) => {
+            if (!this.elasticsearch) {
+              throw new Error(
+                'elasticsearch is not available — plugin start() has not been called'
+              );
+            }
+            return createMemoryPageStore({
+              esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
+              logger: this.logger.get('memory'),
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
@@ -334,19 +515,23 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
-    this.sandboxStart = plugins.sandbox;
-    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
-    this.ruleRegistry = plugins.ruleRegistry;
     this.inference = plugins.inference;
+    this.sandboxStart = plugins.sandbox;
+    this.ruleRegistry = plugins.ruleRegistry;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
+    this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
+    this.securityStart = plugins.security;
     this.security = coreStart.security;
+    this.notificationRoutingService = notificationRoutingAttachment.createService({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    });
 
-    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-    // agent exists wherever an investigation runs. This narrower install exists so the agent is
-    // visible and editable in the Agent Builder UI before the first investigation ever runs.
+    // Installed here so the agent is visible in the Agent Builder UI before the first run.
     if (plugins.agentBuilder) {
       const { agentBuilder } = plugins;
       void installInvestigationAgent({
@@ -355,21 +540,6 @@ export class NightshiftInvestigationsPlugin
         availability: this.getInvestigationAvailability(),
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
-      });
-
-      // Availability for a persisted agent is held in memory and only registered by `ensure`, so
-      // an agent that is merely persisted is listed with no gate at all. The deductive agent is
-      // otherwise only ensured once an investigation runs, which cannot happen while the feature
-      // is off — without this call it would stay visible after a restart with `nightshift.enabled`
-      // disabled.
-      void installDeductiveInvestigationAgent({
-        agentBuilder,
-        spaceId: DEFAULT_SPACE_ID,
-        availability: this.getInvestigationAvailability(),
-      }).catch((err) => {
-        this.logger.error(
-          `Failed to install deductive investigation agent in default space: ${err.message}`
-        );
       });
     }
 
@@ -387,15 +557,21 @@ export class NightshiftInvestigationsPlugin
       });
     }
 
+    const investigationSweepRepository = createInvestigationSweepRepository(
+      coreStart.savedObjects,
+      this.logger
+    );
+
     return {
       getInvestigationsClient: this.getInvestigationsClient,
+      deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
-        isInvestigationAvailable({
+        isInvestigationRunAvailable({
           request,
           featureFlags: coreStart.featureFlags,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
@@ -403,11 +579,7 @@ export class NightshiftInvestigationsPlugin
     };
   }
 
-  /**
-   * Created once and reused so every `agents.ensure` call for these agent ids registers the same
-   * gate. Dependencies are read lazily because the tool and the workflow step are registered at
-   * setup, while availability is only evaluated once a request arrives.
-   */
+  /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {
     this.investigationAvailability ??= createInvestigationAvailability({
       getDeps: () => {
@@ -417,8 +589,8 @@ export class NightshiftInvestigationsPlugin
         return {
           featureFlags: this.featureFlags,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
@@ -445,19 +617,81 @@ export class NightshiftInvestigationsPlugin
       agentAvailability: this.getInvestigationAvailability(),
       investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
-      isAvailable: () =>
-        isInvestigationAvailable({
+      inference: this.inference,
+      savedObjects: this.savedObjects,
+      uiSettings: this.uiSettings,
+      isAvailable: (connectorId) =>
+        isInvestigationRunAvailable({
           request,
           featureFlags: this.featureFlags!,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
+          connectorId,
+          spaceId: resolvedSpaceId,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
+        }),
+      isInfrastructureAvailable: () =>
+        isInvestigationInfrastructureAvailable({
+          request,
+          featureFlags: this.featureFlags!,
+          agentBuilder: this.agentBuilder,
+          inference: this.inference,
+          logger: this.logger,
           spaceId: resolvedSpaceId,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
         }),
     });
+  };
+
+  private getNotificationRoutingService =
+    (): InvestigationAttachmentDocService<StoredNotificationRouting> => {
+      if (!this.notificationRoutingService) {
+        throw new Error('Notification routing storage is not available');
+      }
+      return this.notificationRoutingService;
+    };
+
+  private getNotificationRoutingClient = async (
+    request: KibanaRequest,
+    spaceId: string,
+    conversationId: string,
+    investigationId: string
+  ): Promise<NotificationRoutingClient> => {
+    if (!this.agentBuilder) {
+      throw new Error('agentBuilder is not available');
+    }
+    if (request.spaceId !== spaceId) {
+      throw new Error('Notification request and execution spaces do not match');
+    }
+    const [attachments, conversations] = await Promise.all([
+      this.agentBuilder.attachments.getScopedClient({ request }),
+      this.agentBuilder.conversations.getScopedClient({ request }),
+    ]);
+    return new NotificationRoutingClient({
+      service: this.getNotificationRoutingService(),
+      attachments,
+      conversations,
+      spaceId,
+      conversationId,
+      investigationId,
+    });
+  };
+
+  private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {
+    if (!this.savedObjects) {
+      throw new Error('savedObjects is not available — plugin start() has not been called');
+    }
+    return this.savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE],
+      })
+      .asScopedToNamespace(spaceId);
   };
 
   private createInvestigationRepository = (
@@ -473,13 +707,12 @@ export class NightshiftInvestigationsPlugin
         includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
       })
       .asScopedToNamespace(spaceId);
-    return new SavedObjectInvestigationRepository({ savedObjectsClient });
+    return new SavedObjectInvestigationRepository({
+      savedObjectsClient,
+      logger: this.logger.get('investigation_repository'),
+    });
   };
 
-  /**
-   * Installs the static managed workflows this plugin owns and signals readiness so the
-   * platform can reconcile (prune orphans / apply upgrades) for this plugin's workflows.
-   */
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart
   ): Promise<void> {
@@ -487,8 +720,9 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
-    if (this.cortexEnabled) {
-      await installCortexWorkflows({ client });
+    if (this.cortexEnabled || this.memoryEnabled) {
+      await installSandboxMaterializeWorkspaceWorkflow({ client });
+      await installAgentOptimizationsWorkflow({ client });
     }
     if (this.decisionTreesEnabled) {
       await installDecisionTreeWorkflows({ client });

@@ -7,33 +7,38 @@
 
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 export async function updateEventStatusToolHandler({
-  eventClient,
-  eventUuid,
+  eventSearchClient,
+  eventId,
   status,
+  assessmentNote,
   alertEventsClient,
-  logger,
+  emitTrigger,
 }: {
-  eventClient: EventClient;
-  eventUuid: string;
+  eventSearchClient: RuleEventsClient;
+  eventId: string;
   status: SignificantEventStatus;
-  alertEventsClient?: AlertEventsClientApi;
-  logger: Logger;
+  assessmentNote?: string;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
 }): Promise<{
-  event_uuid: string;
+  event_id: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  return updateSignificantEventStatus({
-    eventClient,
-    eventUuid,
+  const result = await updateSignificantEventStatus({
+    eventSearchClient,
+    eventId,
     status,
+    assessmentNote,
     alertEventsClient,
-    logger,
+    emitTrigger,
   });
+
+  return { event_id: eventId, ...result };
 }

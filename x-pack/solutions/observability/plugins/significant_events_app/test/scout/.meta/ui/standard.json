@@ -1,12 +1,12 @@
 {
-  "sha1": "985fc9557d53dab6156ac5678a520038a86f10ec",
+  "sha1": "943f5940e23702ee7078e02974e92762acb8151a",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "0bd58b8ab7d8a12-4976b6ba39021f6",
-      "title": "Significant Events app loads and redirects / to /streams tab by default",
+      "id": "0bd58b8ab7d8a12-4cd7c0f5de69760",
+      "title": "Significant Events app loads and redirects / to /sources tab by default",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -16,13 +16,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 45,
-        "column": 9
+        "line": 46,
+        "column": 25
       }
     },
     {
-      "id": "0bd58b8ab7d8a12-f3790f45e740342",
-      "title": "Significant Events app renders navigation tabs and links to Settings",
+      "id": "0bd58b8ab7d8a12-03d40d846322c7b",
+      "title": "Significant Events app renders navigation tabs without Detections and links to Settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
-        "line": 54,
-        "column": 82
+        "line": 57,
+        "column": 10
       }
     },
     {

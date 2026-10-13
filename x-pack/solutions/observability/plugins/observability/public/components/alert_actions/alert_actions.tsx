@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -42,34 +43,58 @@ function InvestigateAlertActionItem({
 }) {
   const {
     showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
+    ebtElement: 'alertsTableRowActions',
     enabled,
     onInvestigate: onActionExecuted,
   });
 
-  if (!showInvestigateAction && !viewInvestigationUrl) return null;
+  if (!showInvestigateAction) return null;
+
+  if (isInvestigating) {
+    return (
+      <EuiContextMenuItem
+        data-test-subj="investigateAlert"
+        disabled
+        icon={<EuiLoadingSpinner size="m" />}
+      >
+        {investigateActionLabel}
+      </EuiContextMenuItem>
+    );
+  }
 
   return (
     <>
-      {viewInvestigationUrl && (
+      {showViewInvestigation && (
         <EuiContextMenuItem
           data-test-subj="viewAlertInvestigation"
+          {...viewInvestigationEbtProps}
           href={viewInvestigationUrl}
-          onClick={onActionExecuted}
+          icon="eye"
+          onClick={() => {
+            markInvestigationViewed();
+            onActionExecuted();
+          }}
         >
           {viewInvestigationActionLabel}
         </EuiContextMenuItem>
       )}
-      {showInvestigateAction && (
+      {showInvestigateButton && (
         <EuiContextMenuItem
           data-test-subj="investigateAlert"
-          disabled={isInvestigating}
+          {...investigateEbtProps}
+          icon="inspect"
           onClick={handleInvestigate}
         >
           {investigateActionLabel}

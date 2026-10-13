@@ -48,6 +48,8 @@ export type {
   RuleQueryInspectorTimeRange,
 } from './rule_query_inspector/types';
 export type { RulesClientCreateOptions } from './rules_client_factory';
+export { RulesNotFoundError } from './rules_client/lib/rules_not_found_error';
+export { RulesNotVisibleError } from './rules_client/lib/rules_not_visible_error';
 export type {
   FindResult,
   BulkEditOperation,
@@ -71,10 +73,6 @@ export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
-// Imported from the module rather than the `./lib` barrel to keep this a leaf: the definition of a
-// UIAM missing-key rejection has to be reachable from the plugins whose own error handling can hide
-// one, without pulling the healer's dependencies in behind it.
-export { isMissingUiamApiKeyMessage } from './lib/uiam_api_key_error';
 export type { AlertingRulesConfig } from './config';
 export {
   AlertingAuthorizationFilterType,

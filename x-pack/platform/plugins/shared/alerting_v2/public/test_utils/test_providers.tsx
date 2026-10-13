@@ -15,8 +15,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
-import { LocatorProvider, type AlertingV2Locators } from '../application/locator_context';
+import type { AlertsKibanaServices } from '../alerts_kibana_services';
+import {
+  LocatorProvider,
+  type AlertingV2Locators,
+  type WithOptionalHost,
+} from '../application/locator_context';
 import type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
@@ -34,11 +38,13 @@ const createMockLocator = <P extends SerializableRecord>() => {
 };
 
 export const createMockLocators = (): AlertingV2Locators => ({
-  rulesLocators: createMockLocator<AlertingV2RulesLocatorParams>(),
-  ruleLibraryLocators: createMockLocator<AlertingV2RuleLibraryLocatorParams>(),
-  episodesLocators: createMockLocator<AlertingV2EpisodesLocatorParams>(),
-  actionPolicyLocators: createMockLocator<AlertingV2ActionPoliciesLocatorParams>(),
-  executionHistoryLocators: createMockLocator<AlertingV2ExecutionHistoryLocatorParams>(),
+  rulesLocators: createMockLocator<WithOptionalHost<AlertingV2RulesLocatorParams>>(),
+  ruleLibraryLocators: createMockLocator<WithOptionalHost<AlertingV2RuleLibraryLocatorParams>>(),
+  episodesLocators: createMockLocator<WithOptionalHost<AlertingV2EpisodesLocatorParams>>(),
+  actionPolicyLocators:
+    createMockLocator<WithOptionalHost<AlertingV2ActionPoliciesLocatorParams>>(),
+  executionHistoryLocators:
+    createMockLocator<WithOptionalHost<AlertingV2ExecutionHistoryLocatorParams>>(),
 });
 
 export function MockLocatorProvider({
@@ -48,14 +54,14 @@ export function MockLocatorProvider({
   return <LocatorProvider locators={locators}>{children}</LocatorProvider>;
 }
 
-export const createDefaultServicesMock = (): AlertEpisodesKibanaServices => {
+export const createDefaultServicesMock = (): AlertsKibanaServices => {
   return {
     ...coreMock.createStart(),
     data: dataPluginMock.createStartContract(),
     share: sharePluginMock.createStartContract(),
     expressions: {} as unknown,
     rendering: {} as unknown,
-  } as unknown as AlertEpisodesKibanaServices;
+  } as unknown as AlertsKibanaServices;
 };
 
 export const createTestQueryClient = () =>
@@ -84,7 +90,7 @@ export const createHookTestProviders = ({
 };
 
 export type TestProvidersProps = PropsWithChildren<{
-  services?: AlertEpisodesKibanaServices;
+  services?: AlertsKibanaServices;
   queryClient?: QueryClient;
   locators?: AlertingV2Locators;
 }>;

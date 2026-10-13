@@ -11,6 +11,8 @@ applies_to:
 
 The ThreatQ connector searches and updates intelligence in a hosted or on-premises ThreatQ instance through its REST API. Use it in Workflows or Agent Builder to read indicator context, record investigation findings, and link objects. Workflows can also run configured ThreatQ operations.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Before you begin
 
 The connector supports OAuth 2.0 API credentials (recommended), user authentication, and bearer tokens. The account needs read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.

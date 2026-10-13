@@ -25,6 +25,8 @@ import React, { useState } from 'react';
 import { formatSnoozeFullDate } from './format_snooze_date';
 import { isSnoozed } from './is_snoozed';
 import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from './labels';
+import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -83,6 +85,10 @@ export const ActionPolicyActionsMenu = ({
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
+  const licenseTooltip = isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE;
+  const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
+
   const canSnooze = onSnooze != null && onCancelSnooze != null && policy.enabled;
   const snoozedActive = isSnoozed(policy.snoozed_until);
 
@@ -106,6 +112,8 @@ export const ActionPolicyActionsMenu = ({
         defaultMessage: 'Edit',
       }),
       icon: 'pencil',
+      disabled: !isLicenseValid,
+      toolTipContent: licenseTooltip,
       'data-test-subj': `editActionPolicy-${policy.id}`,
       onClick: () => {
         closePopover();
@@ -150,6 +158,8 @@ export const ActionPolicyActionsMenu = ({
       defaultMessage: 'Clone',
     }),
     icon: 'copy',
+    disabled: !isLicenseValid,
+    toolTipContent: licenseTooltip,
     'data-test-subj': `cloneActionPolicy-${policy.id}`,
     onClick: () => {
       closePopover();
@@ -166,7 +176,8 @@ export const ActionPolicyActionsMenu = ({
             defaultMessage: 'Enable',
           }),
       icon: policy.enabled ? 'stop' : 'play',
-      disabled: isStateLoading,
+      disabled: isStateLoading || isEnableBlockedByLicense,
+      toolTipContent: isEnableBlockedByLicense ? licenseTooltip : undefined,
       'data-test-subj': `toggleEnabledActionPolicy-${policy.id}`,
       onClick: () => {
         closePopover();

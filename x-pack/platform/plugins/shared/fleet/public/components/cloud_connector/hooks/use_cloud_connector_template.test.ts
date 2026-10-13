@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
 import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
 
 import { useCloudConnectorTemplate } from './use_cloud_connector_template';
 
@@ -28,6 +29,7 @@ const CLOUD = {
   cloudId: CLOUD_ID,
   cloudHost: 'cloud.example',
   deploymentUrl: 'https://cloud.example/deployments/abc123',
+  deploymentId: 'abc123',
   serverless: {},
 } as any;
 
@@ -116,6 +118,46 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
     });
 
+    it('adds the workload identity stack params to the static template URL', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          cloud: { ...CLOUD, organizationId: '2070044029', csp: 'aws', region: 'eu-west-1' },
+          iacTemplateUrl:
+            'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ftemplate.yml',
+        })
+      );
+
+      const { launchButtonProps } = result.current;
+      if (!('href' in launchButtonProps)) {
+        throw new Error('expected href launch button props');
+      }
+      const params = new URLSearchParams(launchButtonProps.href?.split('?')[1]);
+      expect(params.get('templateURL')).toBe('https://static.example/template.yml');
+      expect(params.get('param_ElasticOrganizationId')).toBe('2070044029');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eu-west-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('production');
+      expect(params.get('param_ElasticResourceType')).toBe('deployment');
+      expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
+    });
+
+    it('links to a static URL that is not a quick-create link unchanged', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          cloud: { ...CLOUD, organizationId: '2070044029' },
+          iacTemplateUrl: 'https://static.example/template.yml',
+        })
+      );
+
+      const { launchButtonProps } = result.current;
+      if (!('href' in launchButtonProps)) {
+        throw new Error('expected href launch button props');
+      }
+      expect(launchButtonProps.href).toBe('https://static.example/template.yml');
+    });
+
     it('is disabled when no static template URL can be built', () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
@@ -123,12 +165,40 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(result.current.isDisabled).toBe(true);
     });
+
+    it('names the template tokens this Kibana cannot resolve', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: `${IAC_TEMPLATE_URL}&param_ElasticOrganizationId=ORGANIZATION_ID`,
+        })
+      );
+
+      expect(result.current.isDisabled).toBe(true);
+      expect(result.current.templateGenerationError).toContain('ORGANIZATION_ID');
+    });
   });
 
   describe('when the IaC Provisioner is enabled', () => {
     beforeEach(() => {
       mockedUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockedSendRenderIacTemplate.mockResolvedValue(RENDERED as any);
+    });
+
+    it('renders even when the static URL has tokens this Kibana cannot resolve', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: `${IAC_TEMPLATE_URL}&param_ElasticOrganizationId=ORGANIZATION_ID`,
+        })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalled();
+      expect(cloudFormationTab.location.href).toContain(
+        `templateURL=${encodeURIComponent(ARTIFACT_URL)}`
+      );
+      expect(result.current.templateGenerationError).toBeUndefined();
     });
 
     it('returns onClick button props instead of an href', () => {
@@ -145,7 +215,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: 'cloud_connector',
         integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
       });
@@ -161,6 +231,42 @@ describe('useCloudConnectorTemplate', () => {
       });
     });
 
+    it('keeps the quick-create params the package URL carries on the rendered artifact', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: `${IAC_TEMPLATE_URL}&stackName=Elastic-Cloud-Connector`,
+        })
+      );
+      await launch(result);
+
+      const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+      expect(params.get('templateURL')).toBe(ARTIFACT_URL);
+      expect(params.get('stackName')).toBe('Elastic-Cloud-Connector');
+      expect(params.getAll('param_ElasticResourceId')).toEqual(['kibana-component-id']);
+    });
+
+    it('passes the workload identity stack params even when the package URL has no tokens', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          cloud: { ...CLOUD, organizationId: '2070044029', csp: 'aws', region: 'eu-west-1' },
+          iacTemplateUrl:
+            'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ftemplate.yml',
+        })
+      );
+      await launch(result);
+
+      const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+      expect(params.get('templateURL')).toBe(ARTIFACT_URL);
+      expect(params.get('param_ElasticOrganizationId')).toBe('2070044029');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eu-west-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('production');
+      expect(params.get('param_ElasticResourceType')).toBe('deployment');
+      expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
+    });
+
     it('sends every enabled policy template of the package', async () => {
       const policyTemplates = [
         { name: 'guardduty', enabledInputs: ['aws-s3'] },
@@ -173,7 +279,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: 'cloud_connector',
         integrations: [{ name: 'aws', policyTemplates }],
       });
@@ -244,6 +350,26 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.templateGenerationError).toBeUndefined();
     });
 
+    it('adds the workload identity stack params to the static fallback when the render fails', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: null,
+        error: { message: 'unrenderable', statusCode: 422 },
+      } as any);
+
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          cloud: { ...CLOUD, organizationId: '2070044029' },
+        })
+      );
+      await launch(result);
+
+      const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+      expect(params.get('templateURL')).toBe('https://static.example/template.yml');
+      expect(params.get('param_ElasticOrganizationId')).toBe('2070044029');
+      expect(params.getAll('param_ElasticResourceId')).toEqual(['kibana-component-id']);
+    });
+
     it('does not call onTemplateRendered when the render fails', async () => {
       mockedSendRenderIacTemplate.mockResolvedValue({
         data: null,
@@ -259,18 +385,20 @@ describe('useCloudConnectorTemplate', () => {
       expect(onTemplateRendered).not.toHaveBeenCalled();
     });
 
-    it('does not attempt a render when no static scaffold exists', async () => {
+    it('renders and opens the artifact when the package has no static template URL', async () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
       );
       await launch(result);
 
-      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
-      expect(windowOpenSpy).not.toHaveBeenCalled();
-      expect(result.current.templateGenerationError).toBeDefined();
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalled();
+      expect(cloudFormationTab.location.href).toContain(
+        `templateURL=${encodeURIComponent(ARTIFACT_URL)}`
+      );
+      expect(result.current.templateGenerationError).toBeUndefined();
     });
 
-    it('opens the static URL without rendering when it has no templateURL param to swap', async () => {
+    it('renders and opens the artifact even when the static URL has no templateURL param', async () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({
           ...HOOK_PARAMS,
@@ -279,13 +407,11 @@ describe('useCloudConnectorTemplate', () => {
       );
       await launch(result);
 
-      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
-      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
-        flow: 'cloud_connector',
-        reason: 'missing_render_context',
-      });
-      expect(windowOpenSpy).toHaveBeenCalledTimes(1);
-      expect(windowOpenSpy.mock.calls[0][0]).toContain('static.example');
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalled();
+      expect(cloudFormationTab.location.href).toContain(
+        `templateURL=${encodeURIComponent(ARTIFACT_URL)}`
+      );
+      expect(cloudFormationTab.location.href).not.toContain('static.example');
     });
 
     it('closes the pre-opened tab and surfaces an error when the render request throws', async () => {
@@ -599,7 +725,7 @@ describe('useCloudConnectorTemplate', () => {
 
         expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
           provider: 'aws',
-          workflow: 'federated_identity',
+          workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           flow: 'cloud_connector',
           integrations,
         });

@@ -6,18 +6,7 @@
  */
 
 import type { SupportedAggs } from './field_stats';
-import type { Percentile, SupportedFieldType, FieldVisStats } from '.';
-export interface MetricFieldVisStats {
-  avg?: number;
-  distribution?: {
-    percentiles: Percentile[];
-    maxPercentile: number;
-    minPercentile: 0;
-  };
-  max?: number;
-  median?: number;
-  min?: number;
-}
+import type { SupportedFieldType, FieldVisStats } from '.';
 
 // The internal representation of the configuration used to build the visuals
 // which display the field information.
@@ -49,12 +38,6 @@ export interface FileBasedUnknownFieldVisConfig {
   fieldName: string;
   type: 'text' | 'unknown';
   stats: { mean: number; count: number; sampleCount: number; cardinality: number };
-}
-
-export function isFileBasedFieldVisConfig(
-  field: FieldVisConfig | FileBasedFieldVisConfig
-): field is FileBasedFieldVisConfig {
-  return !Object.hasOwn(field, 'existsInDocs');
 }
 
 export function isIndexBasedFieldVisConfig(

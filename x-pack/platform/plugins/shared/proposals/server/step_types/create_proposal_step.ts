@@ -50,14 +50,16 @@ export const getCreateProposalStepDefinition = ({
         const proposal = await getProposalsService().create(
           {
             conversationId: input.conversationId,
+            title: input.title,
             comment: input.comment,
             actionWorkflowId: input.actionWorkflowId,
             actionInput: input.actionInput,
             impact: input.impact,
             category: input.category,
             confidence: input.confidence ?? 'medium',
-            origin: input.origin ?? 'worker',
+            origin: input.origin,
             expiresAt: resolveExpiresAt(input.expiresIn),
+            id: input.proposalId,
             workflowExecutionId,
           },
           {

@@ -36,6 +36,18 @@ describe('describeAiIndexHandler', () => {
     );
   });
 
+  it('propagates a not-readable error from the service', async () => {
+    const { deps, readService } = createAiIndexToolDepsMock();
+    const error = Object.assign(new Error("AI index 'parks' is not readable: unauthorized"), {
+      name: 'AiIndexNotReadableError',
+    });
+    readService.describe.mockRejectedValue(error);
+
+    await expect(describeAiIndexHandler({ deps, aiIndexId: 'parks', context })).rejects.toThrow(
+      "AI index 'parks' is not readable"
+    );
+  });
+
   it('fails closed without the read privilege', async () => {
     const { deps, readService } = createAiIndexToolDepsMock({ authorized: false });
 

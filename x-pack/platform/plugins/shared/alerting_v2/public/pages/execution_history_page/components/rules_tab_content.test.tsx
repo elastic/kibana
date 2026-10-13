@@ -92,14 +92,13 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => (
 
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',
-  rule: { id: 'rule-1', version: null },
+  rule: { id: 'rule-1' },
   space_id: 'default',
   started_at: '2026-05-05T10:00:00.000Z',
   ended_at: '2026-05-05T10:00:01.500Z',
-  timings: { duration: 1500, scheduled_delay: 0 },
+  timings: { duration_ms: 1500, scheduled_delay_ms: 0 },
   outcome: 'success',
   reason: 'Completed successfully',
-  error: null,
   ...overrides,
 });
 
@@ -166,8 +165,8 @@ describe('RulesTabContent', () => {
     expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
-      sort: 'startedAt',
+      outcomes: undefined,
+      sortField: 'startedAt',
       sortOrder: 'desc',
     });
   });
@@ -204,7 +203,7 @@ describe('RulesTabContent', () => {
       loading: false,
       error: undefined,
     });
-    mockResult(withRows([buildItem({ rule: { id: 'rule-orphan', version: null } })]));
+    mockResult(withRows([buildItem({ rule: { id: 'rule-orphan' } })]));
     renderComponent();
 
     expect(screen.getByText('rule-orphan')).toBeInTheDocument();
@@ -218,8 +217,8 @@ describe('RulesTabContent', () => {
       withRows([
         buildItem({
           outcome: 'failure',
-          reason: null,
-          error: { message: 'Index not found', stack_trace: null },
+          reason: undefined,
+          error: { message: 'Index not found' },
         }),
       ])
     );
@@ -230,14 +229,14 @@ describe('RulesTabContent', () => {
   });
 
   it('shows "Rule executed successfully" when outcome is success and no reason or error', () => {
-    mockResult(withRows([buildItem({ outcome: 'success', reason: null, error: null })]));
+    mockResult(withRows([buildItem({ outcome: 'success', reason: undefined, error: undefined })]));
     renderComponent();
 
     expect(screen.getByText('Rule executed successfully')).toBeInTheDocument();
   });
 
   it('shows em dash when outcome is failure but neither reason nor error.message is present', () => {
-    mockResult(withRows([buildItem({ outcome: 'failure', reason: null, error: null })]));
+    mockResult(withRows([buildItem({ outcome: 'failure', reason: undefined, error: undefined })]));
     renderComponent();
 
     expect(screen.getByText('—')).toBeInTheDocument();
@@ -266,8 +265,8 @@ describe('RulesTabContent', () => {
       expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 10,
-        outcome: ['failure'],
-        sort: 'startedAt',
+        outcomes: ['failure'],
+        sortField: 'startedAt',
         sortOrder: 'desc',
       });
     });
@@ -286,7 +285,7 @@ describe('RulesTabContent', () => {
   });
 
   it('formats duration in ms for sub-second values', () => {
-    mockResult(withRows([buildItem({ timings: { duration: 250, scheduled_delay: 0 } })]));
+    mockResult(withRows([buildItem({ timings: { duration_ms: 250, scheduled_delay_ms: 0 } })]));
     renderComponent();
 
     expect(screen.getByText('250 ms')).toBeInTheDocument();
@@ -303,7 +302,7 @@ describe('RulesTabContent', () => {
 
       await waitFor(() => {
         expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
-          expect.objectContaining({ page: 1, sort: 'duration', sortOrder: 'asc' })
+          expect.objectContaining({ page: 1, sortField: 'duration', sortOrder: 'asc' })
         );
       });
     });
@@ -321,7 +320,7 @@ describe('RulesTabContent', () => {
 
       await waitFor(() => {
         expect(mockUseFetchRuleExecutions).toHaveBeenLastCalledWith(
-          expect.objectContaining({ sort: 'startedAt', sortOrder: 'desc' })
+          expect.objectContaining({ sortField: 'startedAt', sortOrder: 'desc' })
         );
       });
     });

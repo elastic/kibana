@@ -49,7 +49,7 @@ export const useHeaderButtonStyleVars = () => {
     '--header-btn-border': euiTheme.colors.borderBasePlain,
     '--header-btn-hover': euiTheme.colors.backgroundBaseInteractiveHover,
     '--header-btn-focus': euiTheme.colors.primary,
-    borderRadius: euiTheme.border.radius.medium,
+    borderRadius: euiTheme.border.radius.control,
   } as React.CSSProperties;
 };
 

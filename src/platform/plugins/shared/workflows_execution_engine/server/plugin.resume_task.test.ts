@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { TaskAlreadyRunningError, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -74,6 +74,7 @@ import {
   getWorkflowGlobalTimeoutResumeTaskId,
   getWorkflowImmediateResumeTaskId,
   getWorkflowWakeTaskId,
+  WORKFLOW_PARKED_RUNNER_DELAY_MS,
 } from './workflow_task_manager/workflow_task_manager';
 
 describe('workflow:resume task runner event fields', () => {
@@ -175,12 +176,152 @@ describe('workflow:resume task runner event fields', () => {
       })
     );
     // A new caller may ensure this same task while the current dispatch finishes.
-    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(await runner.run()).toEqual({
+      runAt: expect.any(Date),
+      state: {},
+      priority: TaskPriority.Standard,
+    });
     expect(mockResumeWorkflow).not.toHaveBeenCalled();
     taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
-    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(await runner.run()).toEqual({
+      runAt: expect.any(Date),
+      state: {},
+      priority: TaskPriority.Standard,
+    });
+    expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
     mockGetWorkflowExecutionById.mockResolvedValue({ status: 'completed' });
+    const idleTasks = [
+      getWorkflowImmediateResumeTaskId('retained'),
+      getWorkflowGlobalTimeoutResumeTaskId('retained'),
+    ].map((id) => ({ ...taskManagerMock.createTask(), id, status: TaskStatus.Idle, attempts: 0 }));
+    taskManagerStart.fetch.mockResolvedValue({ docs: idleTasks, versionMap: new Map() });
+    taskManagerStart.bulkGet.mockResolvedValue(
+      idleTasks.map((value) => ({ tag: 'ok' as const, value }))
+    );
     expect(await runner.run()).toBeUndefined();
+    expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(idleTasks.map(({ id }) => id));
+  });
+
+  it('parks the immediate runner while the execution is still waiting', async () => {
+    setupPlugin();
+    const workflowRunId = 'exec-parked';
+    mockResumeWorkflow.mockResolvedValue({});
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId: 'wf-parked',
+      spaceId: 'default',
+      status: 'waiting_for_input',
+    });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
+          params: { workflowRunId, spaceId: 'default' },
+          attempts: 1,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+
+    const before = Date.now();
+    const result = await runner.run();
+
+    expect(mockResumeWorkflow).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ runAt: expect.any(Date), state: {} });
+    expect((result as { runAt: Date }).runAt.getTime()).toBeGreaterThanOrEqual(
+      before + WORKFLOW_PARKED_RUNNER_DELAY_MS
+    );
+  });
+
+  it('deletes the immediate runner when the resumed execution is terminal', async () => {
+    setupPlugin();
+    const workflowRunId = 'exec-runner-done';
+    mockResumeWorkflow.mockResolvedValue({});
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId: 'wf-runner-done',
+      spaceId: 'default',
+      status: 'completed',
+    });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowImmediateResumeTaskId(workflowRunId),
+          params: { workflowRunId, spaceId: 'default' },
+          attempts: 1,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+
+    expect(await runner.run()).toBeUndefined();
+  });
+
+  it('does not remove a claimed runner when the retained wake sees a terminal execution', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'failed' });
+    const claimedRunner = {
+      ...taskManagerMock.createTask(),
+      id: getWorkflowImmediateResumeTaskId('claimed'),
+      status: TaskStatus.Running,
+    };
+    // The search still reports the runner idle; the fresh read sees the claim.
+    taskManagerStart.fetch.mockResolvedValue({
+      docs: [{ ...claimedRunner, status: TaskStatus.Idle }],
+      versionMap: new Map(),
+    });
+    taskManagerStart.bulkGet.mockResolvedValue([{ tag: 'ok', value: claimedRunner }]);
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowWakeTaskId('claimed'),
+          params: { workflowRunId: 'claimed', spaceId: 'default' },
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+
+    expect(await runner.run()).toBeUndefined();
+    expect(taskManagerStart.bulkGet).toHaveBeenCalledWith([claimedRunner.id]);
+    expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
+  });
+
+  it('retains interactive priority through a busy handoff and resets it after consumption', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      status: 'waiting_for_input',
+      context: { pendingInteractiveResume: true, resumeInput: { approved: true } },
+    });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowWakeTaskId('interactive'),
+          params: { workflowRunId: 'interactive', spaceId: 'default' },
+          priority: TaskPriority.UserInteractive,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
+    expect(await runner.run()).toMatchObject({ priority: TaskPriority.UserInteractive });
+    expect(await runner.run()).toMatchObject({ priority: TaskPriority.UserInteractive });
+    expect(taskManagerStart.runSoon).toHaveBeenLastCalledWith(
+      getWorkflowImmediateResumeTaskId('interactive'),
+      { priority: TaskPriority.UserInteractive }
+    );
+
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      status: 'waiting',
+      context: { pendingInteractiveResume: false, resumeInput: null, isUserInteractive: true },
+    });
+    expect(await runner.run()).toMatchObject({ priority: TaskPriority.Standard });
+    expect(taskManagerStart.runSoon).toHaveBeenLastCalledWith(
+      getWorkflowImmediateResumeTaskId('interactive')
+    );
   });
 
   it('dispatches a timeout task through the same immediate runner', async () => {

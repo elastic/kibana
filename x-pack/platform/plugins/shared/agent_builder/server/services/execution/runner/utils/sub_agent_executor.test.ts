@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
@@ -26,7 +27,7 @@ describe('createSubAgentExecutor', () => {
   };
 
   beforeEach(() => {
-    executeAgent = jest.fn().mockResolvedValue({});
+    executeAgent = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
     request = httpServerMock.createKibanaRequest();
   });
 
@@ -48,6 +49,7 @@ describe('createSubAgentExecutor', () => {
       subagentPurpose: 'testing',
     });
     await executor.sendToSubAgent({
+      agentId: 'child',
       conversationId: 'conversation-id',
       prompt: 'go',
       parentExecutionId: 'parent-execution-id',
@@ -57,6 +59,27 @@ describe('createSubAgentExecutor', () => {
     for (const [params] of executeAgent.mock.calls) {
       expect(params.interactive).toEqual({ enabled: false, auto_approved_apis: autoApprovedApis });
     }
+  });
+
+  it('runs a follow-up as the agent backing the sub-agent', async () => {
+    const executor = createExecutor({ enabled: true });
+
+    await executor.sendToSubAgent({
+      agentId: 'child',
+      conversationId: 'conversation-id',
+      prompt: 'go again',
+      parentExecutionId: 'parent-execution-id',
+    });
+
+    expect(executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          agentId: 'child',
+          conversationId: 'conversation-id',
+          autoCreateConversationWithId: false,
+        }),
+      })
+    );
   });
 
   it('omits the grant entirely when the parent has none', async () => {
@@ -121,6 +144,7 @@ describe('createSubAgentExecutor', () => {
         autoApprovedApis: delegated,
       });
       await executor.sendToSubAgent({
+        agentId: 'child',
         conversationId: 'conversation-id',
         prompt: 'go again',
         parentExecutionId: 'parent-execution-id',

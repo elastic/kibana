@@ -1,0 +1,107 @@
+version: '1'
+name: Nightshift Sandbox Materialize Workspace
+description: >
+  Pre-execution workflow that allocates the investigator sandbox once, then
+  materializes Cortex, Semantic Memory, and the decision trees into that same
+  workspace. Writers run as parallel branches so they share the sandbox_id from
+  obtain rather than each triggering GetContainer.
+enabled: true
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - cortex
+  - semantic-memory
+  - decision-tree
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: The user message for this round, forwarded by the agent's beforeAgent hook.
+        conversation_id:
+          type: string
+          description: Conversation id that namespaces the sandbox. Absent for standalone runs.
+        agent_id:
+          type: string
+          description: Agent id for this round. Memory materialize is skipped when it is absent.
+        round_execution_index:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Zero for the first execution, positive on HITL resume.
+      additionalProperties: false
+
+steps:
+  - name: obtain_sandbox
+    type: nightshift.obtainSandbox
+    # `${{ }}` must render a boolean. A bare conversation id becomes a KQL string
+    # and evaluateCondition treats it as a field query, which skips the step.
+    if: '${{ inputs.round_execution_index == 0 and inputs.conversation_id != null }}'
+    timeout: 60s
+    with:
+      conversation_id: '{{ inputs.conversation_id }}'
+  - name: materialize_workspaces
+    type: parallel
+    if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
+    # `settled`, not `fail-fast`: a writer that fails (or blows `branch-timeout`) must not
+    # abort the round. This is a before-agent hook, and run_before_agent_workflows.ts turns a
+    # failed execution into a thrown error. Each writer degrades on its own to a
+    # <system_update> line naming its own directory; compose_prompt covers the
+    # branch-timeout case, where the branch produced no output to report it with.
+    mode: settled
+    # `timeout` must stay strictly above `branch-timeout`. The engine measures the step timeout
+    # over the whole parallel, so with both at 45s the zone trips in the same tick that kills the
+    # branch, the parallel step itself fails, and `settled` never gets to report the branch —
+    # compose_prompt is then never reached and the round aborts, which is what this shape exists
+    # to prevent. Executed end to end in the nightshift plugin's integration tests.
+    timeout: 60s
+    branch-timeout: 45s
+    branches:
+      - name: cortex
+        steps:
+          - name: hydrate_cortex
+            type: nightshift.cortexHydrate
+            with:
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+      - name: memory
+        steps:
+          - name: memory_materialize_to_sandbox
+            type: nightshift.memoryMaterializeToSandbox
+            with:
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              prompt: '{{ inputs.prompt }}'
+              agent_id: '{{ inputs.agent_id }}'
+              conversation_id: '{{ inputs.conversation_id }}'
+      # No `if`, `on-failure`, or `timeout` on this step: a parallel branch body must be a
+      # straight line of atomic steps, and anything else is rejected at graph-build time.
+      # The feature flag is honored inside the handler, which no-ops when trees are off.
+      - name: decision_trees
+        steps:
+          - name: hydrate_decision_trees
+            type: nightshift.decisionTreeHydrate
+            with:
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              prompt: '{{ inputs.prompt }}'
+  - name: compose_prompt
+    type: nightshift.composeHydrateNotifications
+    if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
+    with:
+      # Every writer, so a directory that never reported (branch-timeout, which produces
+      # no step output at all) still gets its incomplete-materialization line. `completed`
+      # is false in exactly that case; a writer that ran reports its own failure in
+      # `notification` instead.
+      writers:
+        - directory: /workspace/cortex
+          notification: '{{ steps.hydrate_cortex.output.notification }}'
+          completed: '${{ steps.hydrate_cortex.output != null }}'
+        - directory: /workspace/memories
+          notification: '{{ steps.memory_materialize_to_sandbox.output.notification }}'
+          completed: '${{ steps.memory_materialize_to_sandbox.output != null }}'
+        - directory: /workspace/decision-trees
+          notification: '{{ steps.hydrate_decision_trees.output.notification }}'
+          completed: '${{ steps.hydrate_decision_trees.output != null }}'
+      # ${{ }} preserves the array; Liquid `{{ }}` stringifies a one-item array.
+      recalled_ids: '${{ steps.memory_materialize_to_sandbox.output.recalled_ids }}'

@@ -11,9 +11,10 @@ import { omit } from 'lodash';
 import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DataViewField, DataViewType, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { DataViewField, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import { getOrRegisterEsqlDataView } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchParamsExternal,
@@ -24,7 +25,7 @@ const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_ESQL_VARIABLES: ESQLControlVariable[] = [];
 const DEFAULT_TIME_INTERVAL = 'auto';
 
-export const processFetchParams = ({
+export const buildFetchParams = ({
   params,
   services,
   initialBreakdownField,
@@ -36,13 +37,13 @@ export const processFetchParams = ({
   const query = params.query ?? services.data.query.queryString.getDefaultQuery();
   const relativeTimeRange =
     params.relativeTimeRange ?? services.data.query.timefilter.timefilter.getTimeDefaults();
-  const dataView = params.dataView;
-  const columns = params.columns;
-  const isTimeBased = dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  const isESQLQuery = Boolean(query && isOfAggregateQueryType(query));
+  const { dataSource } = params;
+
+  const columns = dataSource.kind === 'esql' ? dataSource.resultColumns : undefined;
+  const isTimeBased = dataSource.isTimeBased() && !dataSource.isRollup();
   const breakdownField = 'breakdownField' in params ? params.breakdownField : initialBreakdownField;
 
-  return {
+  const fetchParams: UnifiedHistogramFetchParams = {
     ...omit(params, 'breakdownField'),
     query,
     filters: params.filters ?? EMPTY_FILTERS,
@@ -52,36 +53,55 @@ export const processFetchParams = ({
     // additional
     lastReloadRequestTime: Date.now(),
     isTimeBased,
-    isESQLQuery,
-    columnsMap: params.columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
+    columns,
+    columnsMap: columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
       acc[column.id] = column;
       return acc;
     }, {}),
     breakdown: getProcessedBreakdownField({
-      dataView,
+      dataSource,
       query,
       columns,
       isTimeBased,
-      isESQLQuery,
       breakdownField,
     }),
     timeInterval: params.timeInterval ?? DEFAULT_TIME_INTERVAL,
   };
+
+  return fetchParams;
+};
+
+export const processFetchParams = async ({
+  params,
+  services,
+  initialBreakdownField,
+}: {
+  params: UnifiedHistogramFetchParamsExternal;
+  services: UnifiedHistogramServices;
+  initialBreakdownField: string | undefined;
+}): Promise<UnifiedHistogramFetchParams> => {
+  const { dataSource } = params;
+  const fetchParams = buildFetchParams({ params, services, initialBreakdownField });
+
+  // The Lens suggestions API still takes a DataView, which LensVisService looks up synchronously
+  if (dataSource.kind === 'esql') {
+    await getOrRegisterEsqlDataView(services.dataViews, dataSource);
+  }
+
+  return fetchParams;
 };
 
 function getProcessedBreakdownField({
   isTimeBased,
-  isESQLQuery,
-  dataView,
+  dataSource,
   query,
   columns,
   breakdownField,
 }: {
   isTimeBased: boolean;
-  isESQLQuery: boolean;
-  dataView: UnifiedHistogramFetchParams['dataView'];
+  dataSource: UnifiedHistogramFetchParamsExternal['dataSource'];
   query: UnifiedHistogramFetchParams['query'];
-  columns: UnifiedHistogramFetchParamsExternal['columns'];
+  columns: UnifiedHistogramFetchParams['columns'];
   breakdownField: string | undefined;
 }) {
   if (!isTimeBased) {
@@ -93,7 +113,7 @@ function getProcessedBreakdownField({
     return undefined;
   }
 
-  if (isESQLQuery) {
+  if (dataSource.kind === 'esql') {
     const breakdownColumn = columns?.find((column) => column.name === breakdownField);
     const field = breakdownColumn
       ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
@@ -103,7 +123,8 @@ function getProcessedBreakdownField({
     };
   }
 
+  const dvs = dataSource.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
   return {
-    field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
+    field: breakdownField ? dvs?.getFieldByName(breakdownField) : undefined,
   };
 }

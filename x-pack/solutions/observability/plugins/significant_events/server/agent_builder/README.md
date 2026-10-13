@@ -22,7 +22,7 @@ Registered from `register.ts`. Tool ids live in `tools/tool_ids.ts` under the
 | Discovery            | `discovery_write`                                                            |
 
 `search_knowledge_indicators` is also consumed outside this plugin, by the
-`observability_agent_builder` RCA skill.
+`observability_agent_builder` investigation skill.
 
 ### Skills (`skills/`)
 

@@ -173,14 +173,19 @@ export function HeaderActions({
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
   const {
-    showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
+    ebtElement: 'alertDetailsPageActions',
     enabled: isPopoverOpen,
     onInvestigate: () => setIsPopoverOpen(false),
   });
@@ -252,30 +257,50 @@ export function HeaderActions({
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
 
-                    {viewInvestigationUrl && (
+                    {isInvestigating && (
                       <EuiButtonEmpty
                         size="s"
                         color="text"
-                        iconType="eye"
-                        href={viewInvestigationUrl}
-                        onClick={handleClosePopover}
-                        data-test-subj="alertDetailsViewInvestigation"
-                      >
-                        <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
-                      </EuiButtonEmpty>
-                    )}
-
-                    {showInvestigateAction && (
-                      <EuiButtonEmpty
-                        size="s"
-                        color="text"
-                        iconType="inspect"
-                        onClick={handleInvestigate}
-                        disabled={isInvestigating}
+                        isLoading
+                        disabled
                         data-test-subj="alertDetailsInvestigate"
                       >
                         <EuiText size="s">{investigateActionLabel}</EuiText>
                       </EuiButtonEmpty>
+                    )}
+
+                    {!isInvestigating && (
+                      <>
+                        {showViewInvestigation && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="eye"
+                            href={viewInvestigationUrl}
+                            onClick={() => {
+                              markInvestigationViewed();
+                              handleClosePopover();
+                            }}
+                            data-test-subj="alertDetailsViewInvestigation"
+                            {...viewInvestigationEbtProps}
+                          >
+                            <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
+
+                        {showInvestigateButton && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="inspect"
+                            onClick={handleInvestigate}
+                            data-test-subj="alertDetailsInvestigate"
+                            {...investigateEbtProps}
+                          >
+                            <EuiText size="s">{investigateActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
+                      </>
                     )}
 
                     {cases && canAddToCase && (
@@ -292,7 +317,7 @@ export function HeaderActions({
                         size="s"
                         color="text"
                         href={discoverUrl}
-                        iconType="discoverApp"
+                        iconType="productDiscover"
                         target="_blank"
                         onClick={handleClosePopover}
                         data-test-subj={`alertDetailsPage_viewInDiscover${

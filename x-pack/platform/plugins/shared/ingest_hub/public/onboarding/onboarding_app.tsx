@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -20,6 +21,7 @@ import {
   KibanaVersionContext,
   sendGetCloudOnboardingDeployment,
 } from '@kbn/fleet-plugin/public';
+import { fromSOAuthMethod } from './step_components/authenticate_and_deploy_step/agent_based_section/credential_method_selector';
 import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
@@ -86,17 +88,52 @@ export async function hydrateOnboardingSession(
         serviceVars: item.serviceVars ?? {},
       })
     );
+    const isAgentBased = item.mechanisms?.includes('agent_based') ?? false;
+    const policyIds = item.agentPolicyIds ?? [];
+    // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: only UI selector enums are
+    // stored ('static_keys', 'assume_role', 'identity_federation', etc.). Actual credentials
+    // (access keys, ARNs, tokens) are never written to sessionStorage.
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'authenticateAndDeployStep'),
-      item.connectorId
+      isAgentBased
+        ? JSON.stringify({
+            deploymentMethod: 'agent_based',
+            // The saved settings were confirmed under agent-based, so Step 3 must not report them
+            // as collected for another method (the "Service settings have changed" callout).
+            serviceSettingsMethod: 'agent_based',
+            // Any persisted policy ids mean the policies already exist, so resume in
+            // 'existing' mode — otherwise the hook's new-policy route would create another.
+            agentHostsMode: policyIds.length ? 'existing' : 'new',
+            selectedAgentPolicyIds: policyIds,
+            // agentPolicyId is intentionally NOT seeded here: useAgentPolicySummary falls back to
+            // selectedAgentPolicyIds[0] for enrollment-token/count queries, and seeding it would
+            // cause useAgentBasedDeploy to narrow a multi-policy deployment to only the first id.
+            agentCredentialMethod: fromSOAuthMethod(item.authMethod ?? undefined),
+          })
+        : item.connectorId
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
         : JSON.stringify({ authMethod: 'static_keys' })
     );
+    // Seed policyIdsByInstance from packagePolicyIds so isAlreadyDeployed evaluates correctly
+    // on resume. Without this, Back→Next would re-run deployToExistingAgentPolicies and create
+    // duplicate package policies for every service instance.
+    // packagePolicyIds is a flat list — we don't know which id maps to which instance, but any
+    // truthy value per instance is enough to satisfy the isAlreadyDeployed check. Use the first
+    // id as a placeholder for all services in the SO's services list.
+    // Only seed for fully succeeded deploys — a failed status means some services need retry
+    // and fabricating completion for them would prevent that retry path from running.
+    // Fallback for V1 docs that lack policyIdsByInstance: use packagePolicyIds[0] for every
+    // service — we can't reconstruct the per-instance mapping from a flat list, but any truthy
+    // value satisfies the isAlreadyDeployed check on resume.
+    const policyIdsByInstance: Record<string, string> =
+      item.status === 'succeeded' && item.packagePolicyIds?.length && item.services?.length
+        ? Object.fromEntries(item.services.map((svc) => [svc, item.packagePolicyIds![0]]))
+        : {};
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),
       JSON.stringify({
         serviceStatuses: {},
-        policyIdsByInstance: item.policyIdsByInstance ?? {},
+        policyIdsByInstance: item.policyIdsByInstance ?? policyIdsByInstance,
         ...(item.ecfStacks ? { ecfStacks: item.ecfStacks } : {}),
         failedInstances: [],
         deployErrors: {},
@@ -120,6 +157,14 @@ export async function hydrateOnboardingSession(
   }
 }
 
+export function getCloudService(
+  cloudSetup: CloudSetup | undefined,
+  cloudStart: CloudStart | undefined
+): (CloudStart & Partial<CloudSetup>) | undefined {
+  if (!cloudStart) return undefined;
+  return { ...cloudSetup, ...cloudStart };
+}
+
 export async function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
@@ -127,7 +172,8 @@ export async function renderOnboardingApp(
   // kibanaVersion is threaded here so Fleet components that call useKibanaVersion() (e.g.
   // AgentEnrollmentFlyout → installation_message.tsx) don't throw. The context is provided
   // at app root alongside FleetStatusProvider. See: fleet/public/hooks/use_kibana_version.ts
-  kibanaVersion?: string
+  kibanaVersion?: string,
+  cloudSetup?: CloudSetup
 ) {
   // Write session storage before any hooks initialize.
   // useSessionStorage (react-use) writes its default on first mount and re-serializes
@@ -175,7 +221,7 @@ export async function renderOnboardingApp(
         <KibanaContextProvider
           services={{
             ...coreStart,
-            cloud: deps.cloud,
+            cloud: getCloudService(cloudSetup, deps.cloud),
             fleet: deps.fleet,
             spaces: deps.spaces,
             authz: deps.fleet.authz,

@@ -74,6 +74,16 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   };
 };
 
+// 2 — email watermark (case-insensitive match)
+const EMAIL_WATERMARK_RESET_VERSION = 2;
+// 3 — SID watermarks: `local` entities created while windows scanned empty
+// feeders, and CrowdStrike same-namespace SID buckets the old guard declined
+const SID_WATERMARK_RESET_VERSION = 3;
+const SID_WATERMARK_RESET_RULE_IDS = [
+  RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+  RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+] as const;
+
 const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
   if (!isRecord(value)) {
     return {};
@@ -130,12 +140,29 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  if (storedVersion < AUTOMATED_RESOLUTION_STATE_VERSION && Object.hasOwn(rules, emailRuleId)) {
+  if (storedVersion < EMAIL_WATERMARK_RESET_VERSION && Object.hasOwn(rules, emailRuleId)) {
     const emailState = rules[emailRuleId];
     rules[emailRuleId] = {
       lastProcessedTimestamp: null,
       lastRun: sanitizeLastRun(emailState.lastRun),
     };
+  }
+
+  // The SID rules kept advancing their watermarks: windows over empty
+  // `windows`/`system` scans after the IdP gate change, CrowdStrike over
+  // same-namespace SID buckets the old guard declined. Those entities sit
+  // behind the watermark and would never be re-examined without a reset.
+  if (storedVersion < SID_WATERMARK_RESET_VERSION) {
+    for (const ruleId of SID_WATERMARK_RESET_RULE_IDS) {
+      if (!Object.hasOwn(rules, ruleId)) {
+        continue;
+      }
+      const ruleState = rules[ruleId];
+      rules[ruleId] = {
+        lastProcessedTimestamp: null,
+        lastRun: sanitizeLastRun(ruleState.lastRun),
+      };
+    }
   }
 
   return { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules };

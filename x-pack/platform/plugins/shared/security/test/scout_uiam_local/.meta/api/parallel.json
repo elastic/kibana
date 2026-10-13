@@ -1,5 +1,5 @@
 {
-  "sha1": "bea40de9cfa9723818922a0ccda7c37fe91ddabb",
+  "sha1": "949bff5778f77996473a471e4e31f42258de71aa",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -397,6 +397,46 @@
       }
     },
     {
+      "id": "26e841eed7d5649-93028d84c37a40e",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies a session-authenticated request as a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 18,
+        "column": 1
+      }
+    },
+    {
+      "id": "26e841eed7d5649-fb67ddb14300b0f",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies an external UIAM API key as a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 46,
+        "column": 25
+      }
+    },
+    {
       "id": "1e3fcf6c9db6e26-d57ad83f33154d2",
       "title": "[NON-MKI] Refresh UIAM session should be able to authenticate as UIAM user even if the access token has expired",
       "expectedStatus": "passed",
@@ -478,6 +518,46 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
         "line": 91,
         "column": 21
+      }
+    },
+    {
+      "id": "c4c9212de6726a5-25bfdde0cc2a1f6",
+      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Kibana-minted internal UIAM API key self-call stamps and the receiver attaches the ES secret",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
+        "line": 77,
+        "column": 44
+      }
+    },
+    {
+      "id": "c4c9212de6726a5-641c7b2f3eba339",
+      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Cookie session on the UI Run path (not Task Manager worker) stamps and the acceptUiamOAuth receiver skips exchange",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
+        "line": 113,
+        "column": 16
       }
     },
     {
