@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toReadableAttackIndexPattern } from './utils';
+import { toReadableAttackIndexPattern } from './constants';
 
 describe('toReadableAttackIndexPattern', () => {
   it.each([
