@@ -96,6 +96,10 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      */
     refusal?: string;
     /**
+     * Optional reasoning (thinking) text chunk.
+     */
+    reasoning?: string;
+    /**
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
@@ -127,11 +131,11 @@ export interface ChatCompletionTokenCount {
    */
   completion: number;
   /**
-   * Thinking token count, if available
+   * Thinking token count, if available. Included in `completion` for OpenAI-compatible providers.
    */
   thinking?: number;
   /**
-   * Total token count (prompt + completion + thinking)
+   * Total token count (prompt + completion, plus thinking if not already part of completion)
    */
   total: number;
   /**
