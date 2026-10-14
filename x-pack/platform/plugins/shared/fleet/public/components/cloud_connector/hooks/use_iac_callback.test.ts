@@ -8,12 +8,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 import { useStartServices } from '../../../hooks';
-import {
-  sendCreateIacCallback,
-  sendDeleteIacCallback,
-  sendGetIacCallback,
-  sendPrepareIacCallback,
-} from '../../../hooks/use_request/iac_callback';
+import { sendCreateIacCallback, sendGetIacCallback } from '../../../hooks/use_request/iac_callback';
 import type { IacCallback } from '../../../../common/types/models/iac_callback';
 
 import {
@@ -28,8 +23,6 @@ jest.mock('../../../hooks/use_request/iac_callback');
 const mockedUseStartServices = jest.mocked(useStartServices);
 const mockedCreate = jest.mocked(sendCreateIacCallback);
 const mockedGet = jest.mocked(sendGetIacCallback);
-const mockedDelete = jest.mocked(sendDeleteIacCallback);
-const mockedPrepare = jest.mocked(sendPrepareIacCallback);
 
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 const EXPIRES_AT = '2026-10-13T12:00:00.000Z';
@@ -89,25 +82,34 @@ describe('useIacCallback', () => {
       error: null,
     } as any);
     mockedGet.mockResolvedValue({ data: { item: pendingItem() }, error: null } as any);
-    mockedDelete.mockResolvedValue({
-      data: { id: 'cb-1', status: 'cancelled' },
-      error: null,
-    } as any);
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('start() creates a record and returns the stack params', async () => {
+  it('start() creates a record with the identity details and returns the stack params', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
     let params: Record<string, string> | undefined;
     await act(async () => {
-      params = await result.current.start();
+      params = await result.current.start({
+        connectorName: '  my-identity  ',
+        accountType: 'single-account',
+        iacKey: 'sha256:abc',
+        iacBlueprintId: 'federated-identity',
+        iacBlueprintVersion: '1.0.0',
+      });
     });
 
-    expect(mockedCreate).toHaveBeenCalledWith({ provider: 'aws' });
+    expect(mockedCreate).toHaveBeenCalledWith({
+      provider: 'aws',
+      connector_name: 'my-identity',
+      account_type: 'single-account',
+      iac_key: 'sha256:abc',
+      iac_blueprint_id: 'federated-identity',
+      iac_blueprint_version: '1.0.0',
+    });
     expect(params).toEqual({
       ElasticKibanaUrl: 'https://kb.example.com',
       ElasticApiKey: 'encoded-key',
@@ -116,37 +118,19 @@ describe('useIacCallback', () => {
     expect(result.current.status).toBe('pending');
   });
 
-  it('stores the form name on the pending record', async () => {
-    mockedPrepare.mockResolvedValue({ data: { item: pendingItem() }, error: null } as any);
+  it('leaves out a blank name and unset details', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
-      await result.current.start();
+      await result.current.start({ connectorName: '   ' });
     });
 
-    act(() => {
-      result.current.prepare({
-        connectorName: '  my-identity  ',
-        accountType: 'single-account',
-        iacKey: 'sha256',
-      });
-    });
-    expect(mockedPrepare).not.toHaveBeenCalled();
-
-    await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
-
-    expect(mockedPrepare).toHaveBeenCalledWith('cb-1', {
-      connector_name: 'my-identity',
-      account_type: 'single-account',
-      iac_key: 'sha256',
-    });
+    expect(mockedCreate).toHaveBeenCalledWith({ provider: 'aws' });
   });
 
   it('polls while pending and exposes the created connector once received', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
 
     await poll();
@@ -175,26 +159,36 @@ describe('useIacCallback', () => {
     expect(mockedGet).toHaveBeenCalledTimes(2);
   });
 
-  it('stops polling when the server reports the record cancelled', async () => {
+  it('stops polling as error when the record is gone', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
-    mockedGet.mockResolvedValue({
-      data: { item: pendingItem('cb-1', { status: 'cancelled' }) },
-      error: null,
-    } as any);
+    mockedGet.mockResolvedValue({ data: null, error: { statusCode: 404 } } as any);
 
     await poll();
-    expect(result.current.status).toBe('cancelled');
+    expect(result.current.status).toBe('error');
     await poll();
     expect(mockedGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps polling through a transient error', async () => {
+    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    await act(async () => {
+      await result.current.start({});
+    });
+    mockedGet.mockResolvedValueOnce({ data: null, error: { statusCode: 503 } } as any);
+
+    await poll();
+    expect(result.current.status).toBe('pending');
+    await poll();
+    expect(mockedGet).toHaveBeenCalledTimes(2);
   });
 
   it('stops polling as expired once expires_at has passed', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
 
     jest.setSystemTime(new Date('2026-10-13T12:00:01.000Z'));
@@ -206,7 +200,7 @@ describe('useIacCallback', () => {
     expect(mockedGet).not.toHaveBeenCalled();
   });
 
-  it('a second start() cancels the first record', async () => {
+  it('a second start() waits on the new record only', async () => {
     mockedCreate
       .mockResolvedValueOnce({
         data: { item: pendingItem('cb-1'), api_key: 'k1' },
@@ -216,20 +210,21 @@ describe('useIacCallback', () => {
         data: { item: pendingItem('cb-2'), api_key: 'k2' },
         error: null,
       } as any);
+    mockedGet.mockResolvedValue({ data: { item: pendingItem('cb-2') }, error: null } as any);
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
 
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
     let params: Record<string, string> | undefined;
     await act(async () => {
-      params = await result.current.start();
+      params = await result.current.start({});
     });
 
-    expect(mockedDelete).toHaveBeenCalledWith('cb-1');
     expect(params?.ElasticCallbackId).toBe('cb-2');
     await poll();
-    expect(mockedGet).toHaveBeenLastCalledWith('cb-2');
+    expect(mockedGet).toHaveBeenCalledTimes(1);
+    expect(mockedGet).toHaveBeenCalledWith('cb-2');
   });
 
   it('returns undefined and creates nothing when Kibana has no https URL', async () => {
@@ -238,7 +233,7 @@ describe('useIacCallback', () => {
 
     let params: Record<string, string> | undefined;
     await act(async () => {
-      params = await result.current.start();
+      params = await result.current.start({});
     });
 
     expect(params).toBeUndefined();
@@ -250,7 +245,7 @@ describe('useIacCallback', () => {
     const { result } = renderHook(() => useIacCallback({ enabled: false }));
     let params: Record<string, string> | undefined;
     await act(async () => {
-      params = await result.current.start();
+      params = await result.current.start({});
     });
     expect(params).toBeUndefined();
     expect(mockedCreate).not.toHaveBeenCalled();
@@ -261,7 +256,7 @@ describe('useIacCallback', () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     let params: Record<string, string> | undefined;
     await act(async () => {
-      params = await result.current.start();
+      params = await result.current.start({});
     });
     expect(params).toBeUndefined();
     expect(result.current.status).toBe('idle');
@@ -270,7 +265,7 @@ describe('useIacCallback', () => {
   it('a new start() leaves a previous received status behind even when no record is created', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
     mockedGet.mockResolvedValue({
       data: {
@@ -287,35 +282,34 @@ describe('useIacCallback', () => {
 
     mockedCreate.mockResolvedValue({ data: null, error: { message: 'boom' } } as any);
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
 
     expect(result.current.status).toBe('idle');
   });
 
-  it('cancel() deletes the record and stops polling', async () => {
+  it('stop() stops polling and returns to idle', async () => {
     const { result } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
-    await act(async () => {
-      await result.current.cancel();
+    act(() => {
+      result.current.stop();
     });
 
-    expect(mockedDelete).toHaveBeenCalledWith('cb-1');
     expect(result.current.status).toBe('idle');
     await poll();
     expect(mockedGet).not.toHaveBeenCalled();
   });
 
-  it('cancels a record whose creation finished after unmount and does not poll for it', async () => {
+  it('does not poll for a record whose creation finished after unmount', async () => {
     let resolveCreate: (value: unknown) => void = () => {};
     mockedCreate.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)) as any);
     const { result, unmount } = renderHook(() => useIacCallback({ enabled: true }));
 
     let params: Record<string, string> | undefined;
     const started = act(async () => {
-      params = await result.current.start();
+      params = await result.current.start({});
     });
     // Let start() reach the create request, then take the form away while it is in flight.
     await act(async () => {});
@@ -325,19 +319,19 @@ describe('useIacCallback', () => {
     await started;
 
     expect(params).toBeUndefined();
-    expect(mockedDelete).toHaveBeenCalledWith('cb-late');
     await poll();
     expect(mockedGet).not.toHaveBeenCalled();
   });
 
-  it('cancels the pending record on unmount', async () => {
+  it('stops polling on unmount', async () => {
     const { result, unmount } = renderHook(() => useIacCallback({ enabled: true }));
     await act(async () => {
-      await result.current.start();
+      await result.current.start({});
     });
 
     unmount();
+    await poll();
 
-    expect(mockedDelete).toHaveBeenCalledWith('cb-1');
+    expect(mockedGet).not.toHaveBeenCalled();
   });
 });

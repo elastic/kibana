@@ -8,12 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useStartServices } from '../../../hooks';
-import {
-  sendCreateIacCallback,
-  sendDeleteIacCallback,
-  sendGetIacCallback,
-  sendPrepareIacCallback,
-} from '../../../hooks/use_request/iac_callback';
+import { sendCreateIacCallback, sendGetIacCallback } from '../../../hooks/use_request/iac_callback';
 import type {
   IacCallback,
   IacCallbackIdentity,
@@ -23,15 +18,8 @@ import type { AccountType } from '../../../../common/types/models/cloud_connecto
 export const IAC_CALLBACK_POLL_INTERVAL_MS = 3_000;
 /** Stop polling after this even if the record has not expired yet. */
 export const IAC_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
-const PREPARE_DEBOUNCE_MS = 300;
 
-export type IacCallbackClientStatus =
-  | 'idle'
-  | 'pending'
-  | 'received'
-  | 'cancelled'
-  | 'expired'
-  | 'error';
+export type IacCallbackClientStatus = 'idle' | 'pending' | 'received' | 'expired' | 'error';
 
 /** The cloud connector receive created. The form does not copy ARNs out of the callback. */
 export interface IacCallbackCreated {
@@ -39,8 +27,8 @@ export interface IacCallbackCreated {
   name: string;
 }
 
-/** What the form already knows, sent to the pending record so receive can create the connector. */
-export interface IacCallbackPrepareInput {
+/** What the form knows at launch, stored on the record so receive can create the connector. */
+export interface IacCallbackStartInput {
   connectorName?: string;
   accountType?: AccountType;
   iacKey?: string | null;
@@ -53,16 +41,14 @@ export interface UseIacCallbackResult {
   /** Set once receive has created the cloud connector. */
   created?: IacCallbackCreated;
   /**
-   * Creates a callback record (cancelling the previous one) and returns the stack parameters to
-   * put on the quick-create link. Undefined when the callback cannot be used — disabled, no public
-   * https Kibana URL, or the record could not be created — in which case the launch proceeds
-   * without it and the user pastes the values.
+   * Creates a callback record and returns the stack parameters to put on the quick-create link.
+   * Undefined when the callback cannot be used — disabled, no public https Kibana URL, or the
+   * record could not be created — in which case the launch proceeds without it and the user
+   * pastes the values.
    */
-  start: () => Promise<Record<string, string> | undefined>;
-  /** Cancels the current record (if any) and invalidates its key. */
-  cancel: () => Promise<void>;
-  /** Stores the form's name and template details on the pending record. No-op without one. */
-  prepare: (identity: IacCallbackPrepareInput) => void;
+  start: (identity: IacCallbackStartInput) => Promise<Record<string, string> | undefined>;
+  /** Stops waiting on the current record. Its key expires on its own. */
+  stop: () => void;
 }
 
 /**
@@ -83,7 +69,7 @@ const toCreated = (item: IacCallback): IacCallbackCreated | undefined =>
     ? { id: item.cloud_connector_id, name: item.connector_name ?? item.cloud_connector_id }
     : undefined;
 
-const toPrepareBody = (identity: IacCallbackPrepareInput): IacCallbackIdentity => {
+const toIdentityBody = (identity: IacCallbackStartInput): IacCallbackIdentity => {
   const body: IacCallbackIdentity = {};
   const name = identity.connectorName?.trim();
   if (name) {
@@ -111,10 +97,8 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
   // The record currently being waited on; a poll result for any other id is stale and ignored.
   const activeIdRef = useRef<string | undefined>(undefined);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
-  // `start` awaits twice; a record created after the form went away must be cancelled, not polled.
+  // `start` awaits the create; a record created after the form went away must not be polled.
   const mountedRef = useRef(true);
-  const prepareTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const lastPrepareRef = useRef<string | undefined>(undefined);
 
   const stopPolling = useCallback(() => {
     if (timerRef.current) {
@@ -123,20 +107,10 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     }
   }, []);
 
-  const cancel = useCallback(async () => {
+  const stop = useCallback(() => {
     stopPolling();
-    const id = activeIdRef.current;
     activeIdRef.current = undefined;
     setStatus((current) => (current === 'received' ? current : 'idle'));
-    if (!id) {
-      return;
-    }
-    // Best effort: the key expires on its own; a failed delete must not block the user.
-    try {
-      await sendDeleteIacCallback(id);
-    } catch {
-      // ignore
-    }
   }, [stopPolling]);
 
   const startPolling = useCallback(
@@ -168,103 +142,60 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
           }
           return;
         }
-        const { item } = data;
-        if (item.status === 'received') {
+        if (data.item.status === 'received') {
           stopPolling();
           activeIdRef.current = undefined;
-          setCreated(toCreated(item));
+          setCreated(toCreated(data.item));
           setStatus('received');
-        } else if (item.status === 'cancelled') {
-          stopPolling();
-          activeIdRef.current = undefined;
-          setStatus('cancelled');
         }
       }, IAC_CALLBACK_POLL_INTERVAL_MS);
     },
     [stopPolling]
   );
 
-  const start = useCallback(async () => {
-    if (!enabled) {
-      return undefined;
-    }
-    const kibanaUrl = getIacCallbackKibanaUrl(http.basePath);
-    if (!kibanaUrl) {
-      return undefined;
-    }
-    // A new Launch supersedes whatever record the previous one created, including a received one.
-    await cancel();
-    setStatus('idle');
-
-    if (!mountedRef.current) {
-      return undefined;
-    }
-    const { data, error } = await sendCreateIacCallback({ provider: 'aws' });
-    if (error || !data) {
-      return undefined;
-    }
-    if (!mountedRef.current) {
-      sendDeleteIacCallback(data.item.id).catch(() => {});
-      return undefined;
-    }
-    activeIdRef.current = data.item.id;
-    lastPrepareRef.current = undefined;
-    setCreated(undefined);
-    setStatus('pending');
-    startPolling(data.item.id, data.item.expires_at);
-
-    return {
-      ElasticKibanaUrl: kibanaUrl,
-      ElasticApiKey: data.api_key,
-      ElasticCallbackId: data.item.id,
-    };
-  }, [enabled, http.basePath, cancel, startPolling]);
-
-  const prepare = useCallback((identity: IacCallbackPrepareInput) => {
-    if (prepareTimerRef.current) {
-      clearTimeout(prepareTimerRef.current);
-    }
-    prepareTimerRef.current = setTimeout(() => {
-      prepareTimerRef.current = undefined;
-      const id = activeIdRef.current;
-      if (!id) {
-        return;
+  const start = useCallback(
+    async (identity: IacCallbackStartInput) => {
+      if (!enabled) {
+        return undefined;
       }
-      const body = toPrepareBody(identity);
-      if (Object.keys(body).length === 0) {
-        return;
+      const kibanaUrl = getIacCallbackKibanaUrl(http.basePath);
+      if (!kibanaUrl) {
+        return undefined;
       }
-      const serialized = JSON.stringify(body);
-      if (serialized === lastPrepareRef.current) {
-        return;
-      }
-      lastPrepareRef.current = serialized;
-      sendPrepareIacCallback(id, body).catch(() => {
-        // The next edit retries. A missed prepare still leaves the role name as a fallback.
-        if (lastPrepareRef.current === serialized) {
-          lastPrepareRef.current = undefined;
-        }
+      // A new Launch supersedes whatever the previous one was waiting on, including a received one.
+      stopPolling();
+      activeIdRef.current = undefined;
+      setStatus('idle');
+
+      const { data, error } = await sendCreateIacCallback({
+        provider: 'aws',
+        ...toIdentityBody(identity),
       });
-    }, PREPARE_DEBOUNCE_MS);
-  }, []);
+      if (error || !data || !mountedRef.current) {
+        return undefined;
+      }
+      activeIdRef.current = data.item.id;
+      setCreated(undefined);
+      setStatus('pending');
+      startPolling(data.item.id, data.item.expires_at);
 
-  // Leaving the form cancels the wait so the key dies with it.
+      return {
+        ElasticKibanaUrl: kibanaUrl,
+        ElasticApiKey: data.api_key,
+        ElasticCallbackId: data.item.id,
+      };
+    },
+    [enabled, http.basePath, stopPolling, startPolling]
+  );
+
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      if (prepareTimerRef.current) {
-        clearTimeout(prepareTimerRef.current);
-        prepareTimerRef.current = undefined;
-      }
       stopPolling();
-      const id = activeIdRef.current;
       activeIdRef.current = undefined;
-      if (id) {
-        sendDeleteIacCallback(id).catch(() => {});
-      }
     };
   }, [stopPolling]);
 
-  return { status, created, start, cancel, prepare };
+  return { status, created, start, stop };
 };

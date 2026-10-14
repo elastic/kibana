@@ -20,7 +20,6 @@ const CallbackIdParamsSchema = schema.object({
 const IacCallbackStatusSchema = schema.oneOf([
   schema.literal('pending'),
   schema.literal('received'),
-  schema.literal('cancelled'),
 ]);
 
 export const IacCallbackItemSchema = schema.object({
@@ -49,6 +48,32 @@ export const IacCallbackItemSchema = schema.object({
 export const CreateIacCallbackRequestSchema = {
   body: schema.object({
     provider: schema.literal('aws'),
+    connector_name: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: { description: 'Name of the cloud connector the report creates.' },
+      })
+    ),
+    account_type: schema.maybe(
+      schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')])
+    ),
+    // Same limits as the cloud connector fields these are copied to.
+    iac_key: schema.maybe(
+      schema.nullable(
+        schema.string({
+          minLength: 1,
+          maxLength: 512,
+          meta: { description: 'Digest of the rendered template, stored on the cloud connector.' },
+        })
+      )
+    ),
+    iac_blueprint_id: schema.maybe(
+      schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))
+    ),
+    iac_blueprint_version: schema.maybe(
+      schema.nullable(schema.string({ minLength: 1, maxLength: 64 }))
+    ),
   }),
 };
 
@@ -67,32 +92,6 @@ export const GetIacCallbackRequestSchema = {
 };
 
 export const GetIacCallbackResponseSchema = schema.object({
-  item: IacCallbackItemSchema,
-});
-
-export const DeleteIacCallbackRequestSchema = {
-  params: CallbackIdParamsSchema,
-};
-
-export const DeleteIacCallbackResponseSchema = schema.object({
-  id: schema.string(),
-  status: IacCallbackStatusSchema,
-});
-
-export const PrepareIacCallbackRequestSchema = {
-  params: CallbackIdParamsSchema,
-  body: schema.object({
-    connector_name: schema.maybe(schema.string({ minLength: 1, maxLength: 255 })),
-    account_type: schema.maybe(
-      schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')])
-    ),
-    iac_key: schema.maybe(schema.nullable(schema.string({ maxLength: 2048 }))),
-    iac_blueprint_id: schema.maybe(schema.nullable(schema.string({ maxLength: 256 }))),
-    iac_blueprint_version: schema.maybe(schema.nullable(schema.string({ maxLength: 128 }))),
-  }),
-};
-
-export const PrepareIacCallbackResponseSchema = schema.object({
   item: IacCallbackItemSchema,
 });
 

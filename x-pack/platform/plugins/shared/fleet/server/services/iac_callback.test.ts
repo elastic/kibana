@@ -157,6 +157,48 @@ describe('iacCallbackService', () => {
       expect(JSON.stringify(item)).not.toContain('secret');
       expect(item).not.toHaveProperty('api_key_id');
     });
+
+    it('stores the name, account type and template details on the record', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.security.createApiKey.mockResolvedValue({
+        id: 'key-1',
+        name: 'fleet-iac-callback-cb-1',
+        api_key: 'secret',
+        encoded: 'ignored',
+        expiration: new Date(FUTURE).getTime(),
+      });
+      soClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'cb-1',
+        type,
+        references: [],
+        attributes: attributes as IacCallbackSOAttributes,
+      }));
+
+      const { item } = await iacCallbackService.create(soClient, esClient, {
+        provider: 'aws',
+        identity: {
+          connector_name: 'my-identity',
+          account_type: 'single-account',
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'fleet-iac-callback',
+        expect.objectContaining({
+          status: 'pending',
+          connector_name: 'my-identity',
+          account_type: 'single-account',
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        }),
+        { id: 'cb-1' }
+      );
+      expect(item).toMatchObject({ connector_name: 'my-identity', iac_key: 'sha256:abc' });
+    });
   });
 
   describe('get', () => {
@@ -179,47 +221,6 @@ describe('iacCallbackService', () => {
         space_id: 'default',
         expires_at: FUTURE,
       });
-    });
-  });
-
-  describe('prepare', () => {
-    it('stores the identity details on a pending record', async () => {
-      soClient.get.mockResolvedValue(soWith(pendingAttrs()));
-      soClient.update.mockResolvedValue({
-        id: 'cb-1',
-        type: IAC_CALLBACK_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: {},
-      });
-
-      const result = await iacCallbackService.prepare(soClient, 'cb-1', {
-        connector_name: 'my-identity',
-        account_type: 'single-account',
-        iac_key: 'sha256:abc',
-        iac_blueprint_id: 'federated-identity',
-        iac_blueprint_version: '1.0.0',
-      });
-
-      expect(soClient.update).toHaveBeenCalledWith(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1', {
-        connector_name: 'my-identity',
-        account_type: 'single-account',
-        iac_key: 'sha256:abc',
-        iac_blueprint_id: 'federated-identity',
-        iac_blueprint_version: '1.0.0',
-      });
-      expect(result).toMatchObject({
-        outcome: 'prepared',
-        item: { connector_name: 'my-identity', iac_key: 'sha256:abc' },
-      });
-    });
-
-    it('is a conflict once the record has been received', async () => {
-      soClient.get.mockResolvedValue(soWith(pendingAttrs({ status: 'received' })));
-      const result = await iacCallbackService.prepare(soClient, 'cb-1', {
-        connector_name: 'late',
-      });
-      expect(result).toEqual({ outcome: 'conflict' });
-      expect(soClient.update).not.toHaveBeenCalled();
     });
   });
 
@@ -254,16 +255,6 @@ describe('iacCallbackService', () => {
         payload: PAYLOAD,
       });
       expect(result).toEqual({ outcome: 'not_found' });
-    });
-
-    it('is gone for a cancelled record', async () => {
-      soClient.get.mockResolvedValue(soWith(pendingAttrs({ status: 'cancelled' })));
-      const result = await iacCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
-        payload: PAYLOAD,
-      });
-      expect(result).toEqual({ outcome: 'gone' });
-      expect(soClient.update).not.toHaveBeenCalled();
     });
 
     it('is gone for an expired pending record and invalidates its key', async () => {
@@ -451,44 +442,6 @@ describe('iacCallbackService', () => {
       });
       expect(result).toMatchObject({ outcome: 'conflict' });
       expect(soClient.update).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('cancel', () => {
-    it('marks a pending record cancelled and invalidates its key', async () => {
-      soClient.get.mockResolvedValue(soWith(pendingAttrs()));
-      soClient.update.mockResolvedValue({
-        id: 'cb-1',
-        type: IAC_CALLBACK_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: {},
-      });
-      const item = await iacCallbackService.cancel(soClient, 'cb-1');
-      expect(soClient.update).toHaveBeenCalledWith(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'cb-1', {
-        status: 'cancelled',
-      });
-      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
-      expect(item).toMatchObject({ id: 'cb-1', status: 'cancelled' });
-    });
-
-    it('still invalidates the key of a received record', async () => {
-      soClient.get.mockResolvedValue(soWith(pendingAttrs({ status: 'received', ...PAYLOAD })));
-      soClient.update.mockResolvedValue({
-        id: 'cb-1',
-        type: IAC_CALLBACK_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: {},
-      });
-      await iacCallbackService.cancel(soClient, 'cb-1');
-      expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
-    });
-
-    it('returns undefined for an unknown record', async () => {
-      soClient.get.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(IAC_CALLBACK_SAVED_OBJECT_TYPE, 'nope')
-      );
-      expect(await iacCallbackService.cancel(soClient, 'nope')).toBeUndefined();
-      expect(mockedInvalidate).not.toHaveBeenCalled();
     });
   });
 });

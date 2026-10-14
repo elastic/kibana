@@ -31,9 +31,7 @@ import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
 import type {
   CreateIacCallbackRequestSchema,
-  DeleteIacCallbackRequestSchema,
   GetIacCallbackRequestSchema,
-  PrepareIacCallbackRequestSchema,
   ReceiveIacCallbackRequestSchema,
 } from '../../types/rest_spec/iac_callback';
 import type { IacCallback } from '../../../common/types/models/iac_callback';
@@ -216,13 +214,14 @@ export const createIacCallbackHandler: FleetRequestHandler<
   }
   const { spaceId } = await context.fleet;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const { provider, ...identity } = request.body;
 
   // Internal clients: minting the key must not require `manage_api_key` of the end user (it is
   // unavailable on Serverless), and the type is space-agnostic.
   const { item, apiKey } = await iacCallbackService.create(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     appContextService.getInternalUserESClient(),
-    { provider: request.body.provider, createdBy: user?.username, spaceId }
+    { provider, createdBy: user?.username, spaceId, identity }
   );
 
   return response.ok({ body: { item, api_key: apiKey } });
@@ -237,54 +236,6 @@ export const getIacCallbackHandler: FleetRequestHandler<
     return response.notFound(CALLBACK_NOT_FOUND);
   }
   return response.ok({ body: { item } });
-};
-
-export const deleteIacCallbackHandler: FleetRequestHandler<
-  TypeOf<typeof DeleteIacCallbackRequestSchema.params>
-> = async (context, request, response) => {
-  const { spaceId } = await context.fleet;
-  const existing = await getCallbackInSpace(request.params.callbackId, spaceId);
-  if (!existing) {
-    return response.notFound(CALLBACK_NOT_FOUND);
-  }
-  const cancelled = await iacCallbackService.cancel(
-    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    existing.id
-  );
-  if (!cancelled) {
-    return response.notFound(CALLBACK_NOT_FOUND);
-  }
-  return response.ok({ body: { id: cancelled.id, status: cancelled.status } });
-};
-
-/**
- * Stores the name and template details the form already has onto the pending callback, so the
- * Lambda's later report can create the cloud connector without the user pasting ARNs.
- */
-export const prepareIacCallbackHandler: FleetRequestHandler<
-  TypeOf<typeof PrepareIacCallbackRequestSchema.params>,
-  undefined,
-  TypeOf<typeof PrepareIacCallbackRequestSchema.body>
-> = async (context, request, response) => {
-  const { spaceId } = await context.fleet;
-  const existing = await getCallbackInSpace(request.params.callbackId, spaceId);
-  if (!existing) {
-    return response.notFound(CALLBACK_NOT_FOUND);
-  }
-  const result = await iacCallbackService.prepare(
-    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    existing.id,
-    request.body
-  );
-  if (result.outcome === 'not_found') {
-    return response.notFound(CALLBACK_NOT_FOUND);
-  }
-  if (result.outcome === 'conflict') {
-    return response.conflict({
-      body: { message: 'Callback is no longer accepting identity details' },
-    });
-  }
-  return response.ok({ body: { item: result.item } });
 };
 
 /**

@@ -27,9 +27,7 @@ import {
 
 import {
   createIacCallbackHandler,
-  deleteIacCallbackHandler,
   getIacCallbackHandler,
-  prepareIacCallbackHandler,
   receiveIacCallbackHandler,
   renderIacTemplateHandler,
 } from './handlers';
@@ -530,8 +528,41 @@ describe('IaC callback handlers', () => {
         provider: 'aws',
         createdBy: 'elastic',
         spaceId: 'marketing',
+        identity: {},
       });
       expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
+    });
+
+    it('passes the name, account type and template details to the record', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          provider: 'aws',
+          connector_name: 'my-identity',
+          account_type: 'single-account',
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        },
+      });
+
+      await createIacCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        expect.objectContaining({
+          provider: 'aws',
+          identity: {
+            connector_name: 'my-identity',
+            account_type: 'single-account',
+            iac_key: 'sha256:abc',
+            iac_blueprint_id: 'federated-identity',
+            iac_blueprint_version: '1.0.0',
+          },
+        })
+      );
     });
   });
 
@@ -561,68 +592,6 @@ describe('IaC callback handlers', () => {
 
       await getIacCallbackHandler(buildCallbackContext(), request, response);
 
-      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
-    });
-  });
-
-  describe('prepareIacCallbackHandler', () => {
-    it('stores identity details on the pending record in this space', async () => {
-      mockedService.get.mockResolvedValue(ITEM);
-      mockedService.prepare.mockResolvedValue({
-        outcome: 'prepared',
-        item: { ...ITEM, connector_name: 'my-identity' },
-      });
-      const request = httpServerMock.createKibanaRequest({
-        params: { callbackId: 'cb-1' },
-        body: { connector_name: 'my-identity', account_type: 'single-account' },
-      });
-
-      await prepareIacCallbackHandler(buildCallbackContext(), request, response);
-
-      expect(mockedService.prepare).toHaveBeenCalledWith(soClient, 'cb-1', {
-        connector_name: 'my-identity',
-        account_type: 'single-account',
-      });
-      expect(response.ok).toHaveBeenCalledWith({
-        body: { item: { ...ITEM, connector_name: 'my-identity' } },
-      });
-    });
-
-    it('returns 409 when the record is no longer pending', async () => {
-      mockedService.get.mockResolvedValue(ITEM);
-      mockedService.prepare.mockResolvedValue({ outcome: 'conflict' });
-      const request = httpServerMock.createKibanaRequest({
-        params: { callbackId: 'cb-1' },
-        body: { connector_name: 'late' },
-      });
-
-      await prepareIacCallbackHandler(buildCallbackContext(), request, response);
-
-      expect(response.conflict).toHaveBeenCalledWith({
-        body: { message: 'Callback is no longer accepting identity details' },
-      });
-    });
-  });
-
-  describe('deleteIacCallbackHandler', () => {
-    it('cancels the record', async () => {
-      mockedService.get.mockResolvedValue(ITEM);
-      mockedService.cancel.mockResolvedValue({ ...ITEM, status: 'cancelled' });
-      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
-
-      await deleteIacCallbackHandler(buildCallbackContext(), request, response);
-
-      expect(mockedService.cancel).toHaveBeenCalledWith(soClient, 'cb-1');
-      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'cb-1', status: 'cancelled' } });
-    });
-
-    it('returns 404 for a record created in another space without cancelling it', async () => {
-      mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
-      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
-
-      await deleteIacCallbackHandler(buildCallbackContext('default'), request, response);
-
-      expect(mockedService.cancel).not.toHaveBeenCalled();
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
     });
   });
@@ -672,7 +641,7 @@ describe('IaC callback handlers', () => {
       });
     });
 
-    it('answers 410 when the record is cancelled or expired', async () => {
+    it('answers 410 when the record has expired', async () => {
       mockedService.receive.mockResolvedValue({ outcome: 'gone' });
       await receive(apiKeyUser('key-1'));
       expect(response.customError).toHaveBeenCalledWith({

@@ -885,7 +885,14 @@ describe('useCloudConnectorTemplate', () => {
         );
         await launch(result);
 
+        // Asked only after the render, so the record can carry the rendered template's details.
         expect(getLaunchStackParams).toHaveBeenCalledTimes(1);
+        expect(getLaunchStackParams).toHaveBeenCalledWith({
+          key: 'sha256:661cb7def1c7101f',
+          integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
+          blueprintId: 'federated-identity',
+          blueprintVersion: 'v1',
+        });
         const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
         expect(params.get('templateURL')).toBe(ARTIFACT_URL);
         expect(params.get('param_ElasticKibanaUrl')).toBe('https://kb.example.com');
@@ -910,6 +917,7 @@ describe('useCloudConnectorTemplate', () => {
         expect(openedUrl).toContain('static.example');
         expect(openedUrl).not.toContain('param_ElasticCallbackId');
         expect(openedUrl).not.toContain('param_ElasticApiKey');
+        expect(getLaunchStackParams).not.toHaveBeenCalled();
       });
 
       it('does not ask for callback params when there is nothing to render', async () => {

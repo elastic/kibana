@@ -8,10 +8,7 @@
 import type {
   CreateIacCallbackRequest,
   CreateIacCallbackResponse,
-  DeleteIacCallbackResponse,
   GetIacCallbackResponse,
-  PrepareIacCallbackRequest,
-  PrepareIacCallbackResponse,
 } from '../../../common/types/rest_spec/iac_callback';
 import { API_VERSIONS, IAC_PROVISIONER_API_ROUTES } from '../../../common/constants';
 
@@ -32,23 +29,6 @@ export function sendCreateIacCallback(body: CreateIacCallbackRequest['body']) {
 export function sendGetIacCallback(id: string) {
   return sendRequest<GetIacCallbackResponse>({
     method: 'get',
-    path: callbackPath(id),
-    version: API_VERSIONS.internal.v1,
-  });
-}
-
-export function sendPrepareIacCallback(id: string, body: PrepareIacCallbackRequest['body']) {
-  return sendRequest<PrepareIacCallbackResponse>({
-    method: 'put',
-    path: callbackPath(id),
-    version: API_VERSIONS.internal.v1,
-    body,
-  });
-}
-
-export function sendDeleteIacCallback(id: string) {
-  return sendRequest<DeleteIacCallbackResponse>({
-    method: 'delete',
     path: callbackPath(id),
     version: API_VERSIONS.internal.v1,
   });

@@ -7,7 +7,7 @@
 
 import type { AccountType } from './cloud_connector';
 
-export type IacCallbackStatus = 'pending' | 'received' | 'cancelled';
+export type IacCallbackStatus = 'pending' | 'received';
 
 /** What the stack's Lambda reports once the IAM role exists. */
 export interface IacCallbackReceivedValues {
@@ -18,7 +18,7 @@ export interface IacCallbackReceivedValues {
 }
 
 /**
- * Identity details the browser records on the pending callback so the Lambda's report can be
+ * Identity details the browser sends when it creates the callback so the Lambda's report can be
  * written straight onto a cloud connector. The Lambda never sends these.
  */
 export interface IacCallbackIdentity {

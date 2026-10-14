@@ -13,7 +13,7 @@ import type {
 } from '../models/iac_callback';
 
 export interface CreateIacCallbackRequest {
-  body: {
+  body: IacCallbackIdentity & {
     provider: 'aws';
   };
 }
@@ -29,24 +29,6 @@ export interface GetIacCallbackRequest {
 }
 
 export interface GetIacCallbackResponse {
-  item: IacCallback;
-}
-
-export interface DeleteIacCallbackRequest {
-  params: { callbackId: string };
-}
-
-export interface DeleteIacCallbackResponse {
-  id: string;
-  status: IacCallbackStatus;
-}
-
-export interface PrepareIacCallbackRequest {
-  params: { callbackId: string };
-  body: IacCallbackIdentity;
-}
-
-export interface PrepareIacCallbackResponse {
   item: IacCallback;
 }
 

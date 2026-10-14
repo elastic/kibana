@@ -51,6 +51,14 @@ export interface RenderArtifactTemplateParams {
    */
   deploymentId?: string;
   stackParams?: Readonly<Record<string, string>>;
+  /**
+   * More stack parameters for a rendered template, resolved after the render with its details and
+   * merged over `stackParams`. Undefined adds none.
+   */
+  getExtraStackParams?: (rendered: {
+    templateSha: string;
+    blueprint: RenderedIacBlueprint;
+  }) => Promise<Record<string, string> | undefined>;
   /** Package's static quick-create URL; the launch URL keeps its console host and query params. */
   staticUrl?: string;
 }
@@ -77,6 +85,7 @@ export const renderArtifactTemplate = async ({
   templateSha,
   deploymentId,
   stackParams,
+  getExtraStackParams,
   staticUrl,
 }: RenderArtifactTemplateParams): Promise<ArtifactRenderResult> => {
   const { data, error } = await sendRenderIacTemplate({
@@ -98,11 +107,15 @@ export const renderArtifactTemplate = async ({
     return { status: 'failed' };
   }
 
+  const extraStackParams = await getExtraStackParams?.({
+    templateSha: data.templateSha,
+    blueprint: data.blueprint,
+  });
   const launchUrl = getArtifactLaunchUrl({
     provider,
     artifactUrl: data.artifactUrl,
     deploymentId,
-    stackParams,
+    stackParams: extraStackParams ? { ...stackParams, ...extraStackParams } : stackParams,
     staticUrl,
   });
   return launchUrl

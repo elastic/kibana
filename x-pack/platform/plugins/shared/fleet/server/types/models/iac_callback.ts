@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 const IacCallbackStatusSchema = schema.oneOf([
   schema.literal('pending'),
   schema.literal('received'),
-  schema.literal('cancelled'),
 ]);
 
 const AccountTypeSchema = schema.oneOf([
@@ -40,7 +39,7 @@ const iacCallbackFieldsV1 = {
 export const IacCallbackSchemaV1 = schema.object(iacCallbackFieldsV1);
 
 /**
- * Identity fields the browser writes while the record is pending, and the cloud connector id
+ * Identity fields the browser sends when it creates the record, and the cloud connector id
  * receive writes once it has created that connector. None of these are indexed.
  */
 export const IacCallbackSchemaV2 = schema.object({

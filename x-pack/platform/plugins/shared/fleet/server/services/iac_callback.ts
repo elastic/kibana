@@ -32,7 +32,17 @@ export interface CreateIacCallbackOptions {
   provider: 'aws';
   createdBy?: string;
   spaceId?: string;
+  /** Name, account type and template details receive writes onto the cloud connector. */
+  identity?: IacCallbackIdentity;
 }
+
+const IDENTITY_FIELDS: Array<keyof IacCallbackIdentity> = [
+  'connector_name',
+  'account_type',
+  'iac_key',
+  'iac_blueprint_id',
+  'iac_blueprint_version',
+];
 
 const CONNECTOR_NAME_MAX_LENGTH = 255;
 
@@ -59,7 +69,7 @@ export type IacCallbackReceiveResult =
   | { outcome: 'not_found' }
   /** A different payload arrived after the record was already received. */
   | { outcome: 'conflict'; item: IacCallback }
-  /** Cancelled, or past its expiry. */
+  /** Past its expiry. */
   | { outcome: 'gone' }
   /** Fields are individually well-formed but disagree with each other. */
   | { outcome: 'invalid'; message: string };
@@ -97,7 +107,7 @@ class IacCallbackService {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    { provider, createdBy, spaceId }: CreateIacCallbackOptions
+    { provider, createdBy, spaceId, identity = {} }: CreateIacCallbackOptions
   ): Promise<{ item: IacCallback; apiKey: string }> {
     const id = uuidv4();
     const now = new Date();
@@ -132,6 +142,11 @@ class IacCallbackService {
       ...(spaceId ? { space_id: spaceId } : {}),
       expires_at: new Date(key.expiration ?? now.getTime() + IAC_CALLBACK_TTL_MS).toISOString(),
     };
+    for (const field of IDENTITY_FIELDS) {
+      if (identity[field] !== undefined) {
+        Object.assign(attributes, { [field]: identity[field] });
+      }
+    }
 
     auditLoggingService.writeCustomAuditLog({
       message: `User creating IaC callback [id=${id}] [api_key_id=${key.id}]`,
@@ -158,51 +173,6 @@ class IacCallbackService {
   }
 
   /**
-   * Records the name, account type, and template details the browser already has, so receive
-   * can create the cloud connector without asking the user to paste ARNs. Only a pending record
-   * accepts this; a received or cancelled one is a conflict.
-   */
-  public async prepare(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    identity: IacCallbackIdentity
-  ): Promise<
-    { outcome: 'prepared'; item: IacCallback } | { outcome: 'not_found' } | { outcome: 'conflict' }
-  > {
-    const so = await this.getSavedObject(soClient, id);
-    if (!so) {
-      return { outcome: 'not_found' };
-    }
-    if (so.attributes.status !== 'pending') {
-      return { outcome: 'conflict' };
-    }
-
-    const update: Partial<IacCallbackSOAttributes> = {};
-    if (identity.connector_name !== undefined) {
-      update.connector_name = identity.connector_name;
-    }
-    if (identity.account_type !== undefined) {
-      update.account_type = identity.account_type;
-    }
-    if (identity.iac_key !== undefined) {
-      update.iac_key = identity.iac_key;
-    }
-    if (identity.iac_blueprint_id !== undefined) {
-      update.iac_blueprint_id = identity.iac_blueprint_id;
-    }
-    if (identity.iac_blueprint_version !== undefined) {
-      update.iac_blueprint_version = identity.iac_blueprint_version;
-    }
-
-    if (Object.keys(update).length === 0) {
-      return { outcome: 'prepared', item: toItem(so.id, so.attributes) };
-    }
-
-    await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, so.id, update);
-    return { outcome: 'prepared', item: toItem(so.id, { ...so.attributes, ...update }) };
-  }
-
-  /**
    * Applies what the stack's Lambda reported. The caller must present the key bound to the
    * record; anything else looks like a missing record so an attacker learns nothing.
    *
@@ -220,9 +190,6 @@ class IacCallbackService {
     }
     const { attributes } = so;
 
-    if (attributes.status === 'cancelled') {
-      return { outcome: 'gone' };
-    }
     if (
       attributes.status === 'pending' &&
       new Date(attributes.expires_at).getTime() <= Date.now()
@@ -320,26 +287,6 @@ class IacCallbackService {
       const suffix = ` ${callbackId.slice(0, 8)}`;
       return create(`${preferred.slice(0, CONNECTOR_NAME_MAX_LENGTH - suffix.length)}${suffix}`);
     }
-  }
-
-  /** Marks the record cancelled and kills its key, whatever state it was in. */
-  public async cancel(
-    soClient: SavedObjectsClientContract,
-    id: string
-  ): Promise<IacCallback | undefined> {
-    const so = await this.getSavedObject(soClient, id);
-    if (!so) {
-      return undefined;
-    }
-    const update: Partial<IacCallbackSOAttributes> = { status: 'cancelled' };
-    await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, so.id, update);
-    await invalidateAPIKeys([so.attributes.api_key_id]);
-
-    auditLoggingService.writeCustomAuditLog({
-      message: `User cancelling IaC callback [id=${so.id}] [api_key_id=${so.attributes.api_key_id}]`,
-    });
-
-    return toItem(so.id, { ...so.attributes, ...update });
   }
 
   private async getSavedObject(soClient: SavedObjectsClientContract, id: string) {

@@ -145,8 +145,7 @@ describe('AwsIdentityFederationSetup', () => {
   const mockMutate = jest.fn();
   const mockLaunchOnClick = jest.fn();
   const mockCallbackStart = jest.fn();
-  const mockCallbackCancel = jest.fn();
-  const mockCallbackPrepare = jest.fn();
+  const mockCallbackStop = jest.fn();
   const mockAddSuccess = jest.fn();
 
   const mockGetConnectors = (overrides: Partial<ReturnType<typeof useGetCloudConnectors>> = {}) => {
@@ -205,8 +204,7 @@ describe('AwsIdentityFederationSetup', () => {
       status: 'idle',
       created: undefined,
       start: mockCallbackStart,
-      cancel: mockCallbackCancel,
-      prepare: mockCallbackPrepare,
+      stop: mockCallbackStop,
     });
     mockUseCloudConnectorTemplate.mockReset();
     mockUseCloudConnectorTemplate.mockReturnValue(staticTemplateHookResult);
@@ -334,8 +332,7 @@ describe('AwsIdentityFederationSetup', () => {
         status: 'expired',
         created: undefined,
         start: mockCallbackStart,
-        cancel: mockCallbackCancel,
-        prepare: mockCallbackPrepare,
+        stop: mockCallbackStop,
       });
     });
 
@@ -520,8 +517,7 @@ describe('AwsIdentityFederationSetup', () => {
       status: 'idle',
       created: undefined,
       start: mockCallbackStart,
-      cancel: mockCallbackCancel,
-      prepare: mockCallbackPrepare,
+      stop: mockCallbackStop,
       ...overrides,
     });
 
@@ -531,13 +527,30 @@ describe('AwsIdentityFederationSetup', () => {
       mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
     });
 
-    it('enables the callback with the provisioner and hands its start to the launch', () => {
+    it('starts the callback at Launch with the typed name and the rendered template details', async () => {
+      const user = userEvent.setup();
       renderSetup({ cloud, integrations });
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
+        'my-identity'
+      );
 
       expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: true });
-      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ getLaunchStackParams: mockCallbackStart })
-      );
+      const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
+      await getLaunchStackParams?.({
+        key: 'sha256:abc',
+        integrations: [],
+        blueprintId: 'federated-identity',
+        blueprintVersion: '1.0.0',
+      });
+
+      expect(mockCallbackStart).toHaveBeenCalledWith({
+        connectorName: 'my-identity',
+        accountType: 'single-account',
+        iacKey: 'sha256:abc',
+        iacBlueprintId: 'federated-identity',
+        iacBlueprintVersion: '1.0.0',
+      });
     });
 
     it('shows a waiting hint while the stack has not called back yet', () => {
@@ -562,25 +575,22 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.queryByTestId('awsIdentityFederationSetup-roleArn')).not.toBeInTheDocument();
       expect(screen.queryByTestId('awsIdentityFederationSetup-stackArn')).not.toBeInTheDocument();
       expect(onConnectorIdChange).toHaveBeenCalledWith('cc-1', 'my-identity');
-      expect(mockCallbackCancel).toHaveBeenCalled();
       expect(
         screen.queryByTestId('awsIdentityFederationSetup-callbackPending')
       ).not.toBeInTheDocument();
     });
 
-    it('sends the typed name to the pending callback', async () => {
-      const user = userEvent.setup();
+    it('locks the name while waiting, since the record already holds it', () => {
       mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
       renderSetup({ cloud, integrations });
 
-      await user.type(
-        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
-        'my-identity'
-      );
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeDisabled();
+    });
 
-      expect(mockCallbackPrepare).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorName: 'my-identity', accountType: 'single-account' })
-      );
+    it('leaves the name editable before Launch', () => {
+      renderSetup({ cloud, integrations });
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeEnabled();
     });
 
     const expectManualEntry = (shown: boolean) => {
@@ -644,7 +654,6 @@ describe('AwsIdentityFederationSetup', () => {
     );
 
     it('shows the ARN fields without a hint after a static-template fallback', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'cancelled' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
           iacConfirm: { iac_key: null, iac_blueprint_id: null, iac_blueprint_version: null },
@@ -667,7 +676,7 @@ describe('AwsIdentityFederationSetup', () => {
       );
       renderSetup({ cloud, integrations });
 
-      expect(mockCallbackCancel).toHaveBeenCalled();
+      expect(mockCallbackStop).toHaveBeenCalled();
     });
 
     it('stops waiting when the launch failed', () => {
@@ -677,7 +686,7 @@ describe('AwsIdentityFederationSetup', () => {
       );
       renderSetup({ cloud, integrations });
 
-      expect(mockCallbackCancel).toHaveBeenCalled();
+      expect(mockCallbackStop).toHaveBeenCalled();
     });
 
     it('keeps waiting on a rendered launch', () => {
@@ -687,24 +696,7 @@ describe('AwsIdentityFederationSetup', () => {
       );
       renderSetup({ cloud, integrations });
 
-      expect(mockCallbackCancel).not.toHaveBeenCalled();
-    });
-
-    it('cancels the callback once the identity is created', () => {
-      let onSuccess: ((connector: { id: string; name: string }) => void) | undefined;
-      mockUseCreateCloudConnector.mockImplementation((cb) => {
-        onSuccess = cb as typeof onSuccess;
-        return { mutate: mockMutate, isLoading: false } as unknown as ReturnType<
-          typeof useCreateCloudConnector
-        >;
-      });
-      renderSetup({ cloud, integrations });
-
-      act(() => {
-        onSuccess?.({ id: 'new-connector', name: 'Freshly Created' });
-      });
-
-      expect(mockCallbackCancel).toHaveBeenCalledTimes(1);
+      expect(mockCallbackStop).not.toHaveBeenCalled();
     });
 
     it('does not enable the callback with the provisioner off', () => {

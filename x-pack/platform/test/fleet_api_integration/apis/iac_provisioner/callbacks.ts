@@ -35,11 +35,11 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
 
-  const createCallback = async () => {
+  const createCallback = async (identity: Record<string, unknown> = {}) => {
     const { body } = await supertest
       .post(CALLBACKS_PATH)
       .set(INTERNAL_ROUTE_HEADERS)
-      .send({ provider: 'aws' })
+      .send({ provider: 'aws', ...identity })
       .expect(200);
     return body as { item: { id: string; status: string; expires_at: string }; api_key: string };
   };
@@ -157,28 +157,48 @@ export default function (providerContext: FtrProviderContext) {
         .expect(404);
     });
 
-    it('answers 410 after the record was cancelled, and the key is dead', async () => {
-      const { item, api_key: apiKey } = await createCallback();
+    it('creates the identity with the name, account type and template details sent at create', async () => {
+      const { item, api_key: apiKey } = await createCallback({
+        connector_name: 'iac-callback-named',
+        account_type: 'single-account',
+        iac_key: 'sha256:abc',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+      const stackArn = `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/66666666-7777-8888-9999-000000000000`;
+
+      await receive(item.id, apiKey, { ...PAYLOAD, stack_arn: stackArn }).expect(200);
 
       const { body } = await supertest
-        .delete(`${CALLBACKS_PATH}/${item.id}`)
+        .get(`${CALLBACKS_PATH}/${item.id}`)
         .set(INTERNAL_ROUTE_HEADERS)
         .expect(200);
-      expect(body).to.eql({ id: item.id, status: 'cancelled' });
-
-      // Cancel invalidates the key, so the auth chain rejects it; a still-valid key for a
-      // cancelled record would get 410 from the handler (covered by the unit tests).
-      const res = await receive(item.id, apiKey);
-      expect([401, 410]).to.contain(res.status);
+      const connectors = await supertest
+        .get('/api/fleet/cloud_connectors')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      const created = connectors.body.items.find(
+        (connector: { id: string }) => connector.id === body.item.cloud_connector_id
+      );
+      expect(created.name).to.be('iac-callback-named');
+      expect(created.accountType).to.be('single-account');
+      expect(created.iac_key).to.be('sha256:abc');
+      expect(created.iac_blueprint_id).to.be('federated-identity');
+      expect(created.iac_blueprint_version).to.be('1.0.0');
+      expect(created.iac_deployment_id).to.be(stackArn);
     });
 
-    it('answers 404 for an unknown record on the browser routes', async () => {
+    it('rejects an unknown create field', async () => {
+      await supertest
+        .post(CALLBACKS_PATH)
+        .set(INTERNAL_ROUTE_HEADERS)
+        .send({ provider: 'aws', role_arn: PAYLOAD.role_arn })
+        .expect(400);
+    });
+
+    it('answers 404 for an unknown record', async () => {
       await supertest
         .get(`${CALLBACKS_PATH}/does-not-exist`)
-        .set(INTERNAL_ROUTE_HEADERS)
-        .expect(404);
-      await supertest
-        .delete(`${CALLBACKS_PATH}/does-not-exist`)
         .set(INTERNAL_ROUTE_HEADERS)
         .expect(404);
     });

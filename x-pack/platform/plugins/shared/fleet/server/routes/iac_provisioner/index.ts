@@ -17,21 +17,15 @@ import {
 import {
   CreateIacCallbackRequestSchema,
   CreateIacCallbackResponseSchema,
-  DeleteIacCallbackRequestSchema,
-  DeleteIacCallbackResponseSchema,
   GetIacCallbackRequestSchema,
   GetIacCallbackResponseSchema,
-  PrepareIacCallbackRequestSchema,
-  PrepareIacCallbackResponseSchema,
   ReceiveIacCallbackRequestSchema,
   ReceiveIacCallbackResponseSchema,
 } from '../../types/rest_spec/iac_callback';
 
 import {
   createIacCallbackHandler,
-  deleteIacCallbackHandler,
   getIacCallbackHandler,
-  prepareIacCallbackHandler,
   receiveIacCallbackHandler,
   renderIacTemplateHandler,
 } from './handlers';
@@ -54,7 +48,7 @@ const IAC_PROVISIONER_ROUTE_SECURITY = {
 
 const IAC_CALLBACK_WRITE_SECURITY = {
   authz: {
-    // Mints an API key (create) or kills one (delete): same level as creating an identity.
+    // Mints an API key: same level as creating an identity.
     requiredPrivileges: [
       {
         anyRequired: [
@@ -101,7 +95,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
       summary: 'Create an IaC callback',
       description:
-        'Create a one-time record and a short-lived, zero-privilege API key that a launched CloudFormation stack uses to report its role back to Kibana.',
+        'Create a one-time record and a short-lived, zero-privilege API key that a launched CloudFormation stack uses to report its role back to Kibana. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
       access: 'internal',
       security: IAC_CALLBACK_WRITE_SECURITY,
     })
@@ -148,61 +142,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       getIacCallbackHandler
     );
 
-  router.versioned
-    .delete({
-      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_DELETE_PATTERN,
-      summary: 'Cancel an IaC callback',
-      description: 'Cancel a callback record and invalidate its API key.',
-      access: 'internal',
-      security: IAC_CALLBACK_WRITE_SECURITY,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: {
-          request: DeleteIacCallbackRequestSchema,
-          response: {
-            200: {
-              description: 'OK: A successful request.',
-              body: () => DeleteIacCallbackResponseSchema,
-            },
-            404: { description: 'Not found.', body: notFoundResponse },
-          },
-        },
-      },
-      deleteIacCallbackHandler
-    );
-
-  router.versioned
-    .put({
-      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN,
-      summary: 'Prepare an IaC callback',
-      description:
-        'Store the federated identity name, account type, and template details on a pending callback so the stack report can create the cloud connector.',
-      access: 'internal',
-      security: IAC_CALLBACK_WRITE_SECURITY,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: {
-          request: PrepareIacCallbackRequestSchema,
-          response: {
-            200: {
-              description: 'OK: A successful request.',
-              body: () => PrepareIacCallbackResponseSchema,
-            },
-            404: { description: 'Not found.', body: notFoundResponse },
-            409: {
-              description: 'The callback is no longer pending.',
-              body: genericErrorResponse,
-            },
-          },
-        },
-      },
-      prepareIacCallbackHandler
-    );
-
   // Public: the stack's Lambda calls this with the per-callback key. Kibana's auth chain rejects
   // any other key before the handler; the handler then binds the key to the record.
   router.versioned
@@ -243,7 +182,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
             },
             410: {
-              description: 'The callback was cancelled or has expired.',
+              description: 'The callback has expired.',
               body: genericErrorResponse,
             },
           },

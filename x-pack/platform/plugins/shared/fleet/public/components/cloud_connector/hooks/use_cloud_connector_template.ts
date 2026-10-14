@@ -113,13 +113,16 @@ export interface UseCloudConnectorTemplateParams {
    */
   onTemplateRendered?: (rendered: TemplateRendered) => void;
   /**
-   * Extra stack parameters for the rendered template only, resolved at click time (the AWS
-   * Identity Federation form uses it to create a callback record and pass its key). Not applied
-   * to the static template nor to a stack update: those templates/stacks have no such parameters
-   * and the quick-create console rejects unknown ones. A rejection or undefined result launches
-   * without them.
+   * Extra stack parameters for the rendered template only, resolved once the render succeeded and
+   * before the console opens (the AWS Identity Federation form uses it to create a callback record
+   * that carries the rendered template's details, and pass its key). Not applied to the static
+   * template nor to a stack update: those templates/stacks have no such parameters and the
+   * quick-create console rejects unknown ones. A rejection or undefined result launches without
+   * them.
    */
-  getLaunchStackParams?: () => Promise<Record<string, string> | undefined>;
+  getLaunchStackParams?: (
+    rendered: TemplateRendered
+  ) => Promise<Record<string, string> | undefined>;
 }
 
 export type CloudConnectorLaunchButtonProps =
@@ -214,12 +217,14 @@ export const useCloudConnectorTemplate = ({
     };
 
     /** Never throws: the callback is a convenience; a failure must not block the launch. */
-    const resolveLaunchStackParams = async (): Promise<Record<string, string> | undefined> => {
+    const resolveLaunchStackParams = async (
+      rendered: TemplateRendered
+    ): Promise<Record<string, string> | undefined> => {
       if (!getLaunchStackParams) {
         return undefined;
       }
       try {
-        return await getLaunchStackParams();
+        return await getLaunchStackParams(rendered);
       } catch (e) {
         return undefined;
       }
@@ -258,14 +263,22 @@ export const useCloudConnectorTemplate = ({
 
     setIsGeneratingTemplate(true);
     try {
-      // Only a fresh quick-create carries extra parameters; an update keeps the stack's own.
-      const launchStackParams = deploymentId ? undefined : await resolveLaunchStackParams();
       const result = await renderArtifactTemplate({
         provider,
         integrations: renderIntegrations,
         templateSha,
         deploymentId,
-        stackParams: launchStackParams ? { ...stackParams, ...launchStackParams } : stackParams,
+        stackParams,
+        // Only a fresh quick-create carries extra parameters; an update keeps the stack's own.
+        getExtraStackParams: deploymentId
+          ? undefined
+          : (rendered) =>
+              resolveLaunchStackParams({
+                key: rendered.templateSha,
+                integrations: renderIntegrations,
+                blueprintId: rendered.blueprint.id,
+                blueprintVersion: rendered.blueprint.version,
+              }),
         staticUrl: staticTemplate.url,
       });
 
