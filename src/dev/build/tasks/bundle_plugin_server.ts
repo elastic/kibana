@@ -145,7 +145,10 @@ async function buildChunk(options: BuildChunkOptions): Promise<void> {
     outfile: options.outfile,
     minify: false,
     treeShaking: false,
-    keepNames: true,
+    // Screenshotting stringifies nested functions into the page. keepNames
+    // inserts a Node-only `__name` helper into those bodies, so the browser
+    // throws `ReferenceError: __name is not defined` during render.
+    keepNames: false,
     legalComments: 'inline' as const,
     logLevel: 'silent' as const,
     absWorkingDir: options.packageRoot,

@@ -588,6 +588,44 @@ describe('bundlePluginServer', () => {
     expect(loaded.token.state).toBe(onDisk.state);
   });
 
+  it('keeps browser-evaluated functions free of the esbuild __name helper', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    Fs.mkdirSync(server, { recursive: true });
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      '"use strict";\nexports.run = require("./render").run;\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'render.js'),
+      [
+        '"use strict";',
+        'exports.run = (evaluate) =>',
+        '  evaluate({',
+        '    fn: async (selector) => {',
+        '      function waitForRender(visualization) {',
+        '        return visualization;',
+        '      }',
+        '      return waitForRender(selector);',
+        '    },',
+        '  });',
+        '',
+      ].join('\n')
+    );
+
+    await bundlePluginServer(root);
+
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    let fn: ((selector: string) => Promise<string>) | undefined;
+    loaded.run(({ fn: evaluateFn }: { fn: (selector: string) => Promise<string> }) => {
+      fn = evaluateFn;
+    });
+    expect(fn).toBeDefined();
+    // Puppeteer sends this source to the browser, dropping the bundle's scope.
+    expect(fn!.toString()).toContain('function waitForRender');
+    expect(fn!.toString()).not.toContain('__name');
+  });
+
   it('leaves a plugin entry with no local files unchanged', async () => {
     const root = makePlugin();
     const server = Path.join(root, 'server');
