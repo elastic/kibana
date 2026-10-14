@@ -25,6 +25,8 @@ export type {
   LensAnnotationLayer,
   LensGaugeConfig,
   LensHeatmapConfig,
+  LensHeatmapAxisOptions,
+  LensHeatmapColorStep,
   LensMetricConfig,
   LensMosaicConfig,
   LensPieConfig,

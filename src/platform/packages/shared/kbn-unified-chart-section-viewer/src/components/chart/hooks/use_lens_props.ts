@@ -9,10 +9,10 @@
 
 import {
   LensConfigBuilder,
-  type HeatmapConfig,
   type LensAttributes,
   type LensConfig,
   type LensESQLDataset,
+  type LensHeatmapConfig,
   type LensLegendConfig,
   type LensSeriesLayer,
   type LensYBoundsConfig,
@@ -87,8 +87,8 @@ export const useLensProps = ({
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
   yAxisTitle?: string;
-  /** When set, builds a heatmap with the Lens API instead of the XY chart. */
-  heatmapConfig?: HeatmapConfig;
+  /** When set, builds a heatmap with the same config builder as the XY chart. */
+  heatmapConfig?: LensHeatmapConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -127,10 +127,12 @@ export const useLensProps = ({
   const buildAttributesFn = useLatest(async () => {
     const builder = new LensConfigBuilder(services.dataViews);
 
-    // Distribution charts build a heatmap in the API format. The older heatmap
-    // builder hides axis labels and forces the legend on, so this path does not use it.
     if (heatmapConfig) {
-      return builder.fromAPIFormat(heatmapConfig);
+      return (await builder.build(heatmapConfig, {
+        query: {
+          esql: (heatmapConfig.dataset as LensESQLDataset).esql,
+        },
+      })) as LensAttributes;
     }
 
     // keep Lens from building if there are no chart layers and no error

@@ -103,9 +103,6 @@ describe('useLensProps', () => {
     LensConfigBuilderMock.prototype.build.mockImplementation(() =>
       Promise.resolve(createMockLensAttributes())
     );
-    LensConfigBuilderMock.prototype.fromAPIFormat.mockImplementation(() =>
-      createMockLensAttributes()
-    );
     useChartLayersMock.mockReturnValue(mockChartLayers);
   });
 
@@ -449,10 +446,11 @@ describe('useLensProps', () => {
     });
   });
 
-  it('builds a heatmap with the Lens API and leaves the XY builder unused', async () => {
+  it('builds a heatmap with the same config builder as XY charts', async () => {
     const chartRef = createMockChartRef();
+    const query = 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)';
     const heatmapConfig = buildHistogramHeatmapConfig({
-      query: 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)',
+      query,
       title: 'latency',
       seriesColor: '#54B399',
       colorMode: 'LIGHT',
@@ -463,7 +461,7 @@ describe('useLensProps', () => {
       useLensProps({
         chartId: 'testChartId',
         title: 'latency',
-        query: heatmapConfig.data_source.query,
+        query,
         services: servicesMock as UnifiedHistogramServices,
         fetchParams,
         discoverFetch$,
@@ -479,8 +477,12 @@ describe('useLensProps', () => {
     });
 
     await waitFor(() => {
-      expect(LensConfigBuilder.prototype.fromAPIFormat).toHaveBeenCalledWith(heatmapConfig);
-      expect(LensConfigBuilder.prototype.build).not.toHaveBeenCalled();
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        heatmapConfig,
+        expect.objectContaining({
+          query: { esql: query },
+        })
+      );
       expect(result.current).toBeDefined();
     });
   });

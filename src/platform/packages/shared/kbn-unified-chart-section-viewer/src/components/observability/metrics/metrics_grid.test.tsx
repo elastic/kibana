@@ -1306,17 +1306,20 @@ describe('MetricsGrid', () => {
           esqlQuery: expect.stringContaining('BUCKET(latency.exp, 10, 1, 9)'),
           chartLayers: [],
           heatmapConfig: expect.objectContaining({
-            type: 'heatmap',
-            legend: { visibility: 'hidden', position: 'right' },
-            metric: expect.objectContaining({
-              label: 'Count',
-              color: expect.objectContaining({ type: 'dynamic', range: 'percentage' }),
-            }),
-            x: expect.objectContaining({ label: 'Time' }),
-            y: expect.objectContaining({
-              label: 'Value',
-              format: { type: 'duration', from: 'ms', to: 'auto', decimals: 0 },
-            }),
+            chartType: 'heatmap',
+            legend: { show: false, position: 'right' },
+            label: 'Count',
+            xAxisOptions: expect.objectContaining({ label: 'Time' }),
+            yAxisOptions: expect.objectContaining({ label: 'Value' }),
+            breakdownFormat: {
+              format: 'duration',
+              fromUnit: 'milliseconds',
+              toUnit: 'humanizePrecise',
+              decimals: 0,
+            },
+            colorSteps: expect.arrayContaining([
+              expect.objectContaining({ color: expect.any(String) }),
+            ]),
           }),
         }),
         expect.anything()
@@ -1335,12 +1338,14 @@ describe('MetricsGrid', () => {
       });
 
       const [firstCall, secondCall] = jest.mocked(Chart).mock.calls;
-      const firstColor = firstCall[0].heatmapConfig?.metric.color;
-      const secondColor = secondCall[0].heatmapConfig?.metric.color;
+      const firstColor = firstCall[0].heatmapConfig?.colorSteps;
+      const secondColor = secondCall[0].heatmapConfig?.colorSteps;
 
-      expect(firstColor).toEqual(expect.objectContaining({ type: 'dynamic', range: 'percentage' }));
+      expect(firstColor).toEqual(
+        expect.arrayContaining([expect.objectContaining({ color: expect.any(String) })])
+      );
       expect(secondColor).toEqual(
-        expect.objectContaining({ type: 'dynamic', range: 'percentage' })
+        expect.arrayContaining([expect.objectContaining({ color: expect.any(String) })])
       );
       expect(firstColor).not.toEqual(secondColor);
     });
@@ -1357,7 +1362,7 @@ describe('MetricsGrid', () => {
         expect.objectContaining({
           esqlQuery: expect.stringContaining('BUCKET(latency.exp, 10, 5, 5.000005)'),
           chartLayers: [],
-          heatmapConfig: expect.objectContaining({ type: 'heatmap' }),
+          heatmapConfig: expect.objectContaining({ chartType: 'heatmap' }),
         }),
         expect.anything()
       );
@@ -1393,7 +1398,9 @@ describe('MetricsGrid', () => {
       expect(createESQLQuery).toHaveBeenCalledTimes(1);
       expect(Chart).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ heatmapConfig: expect.objectContaining({ type: 'heatmap' }) }),
+        expect.objectContaining({
+          heatmapConfig: expect.objectContaining({ chartType: 'heatmap' }),
+        }),
         expect.anything()
       );
     });

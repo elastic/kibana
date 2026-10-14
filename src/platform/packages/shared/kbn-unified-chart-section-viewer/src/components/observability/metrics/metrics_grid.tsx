@@ -34,11 +34,11 @@ import {
   createHistogramDistributionQuery,
   firstNonNullable,
   getAggregationLabel,
+  getLensMetricFormat,
   getMetricUniqueKey,
   resolveMetricUnit,
 } from '../../../common/utils';
 import { isHistogramMetric } from '../../../common/utils/histogram_metric';
-import { getHeatmapValueFormat } from '../../../common/utils/metric_unit/get_heatmap_value_format';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks';
 import {
@@ -483,7 +483,7 @@ const ChartItem = React.memo(
               query: distributionQuery,
               title: metricItem.metricName,
               description,
-              valueFormat: getHeatmapValueFormat(resolvedUnit),
+              valueFormat: getLensMetricFormat(resolvedUnit),
               seriesColor: color,
               colorMode,
               backgroundColor: euiTheme.colors.emptyShade,

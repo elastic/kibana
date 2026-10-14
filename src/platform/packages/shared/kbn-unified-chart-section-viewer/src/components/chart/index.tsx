@@ -10,7 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
-  HeatmapConfig,
+  LensHeatmapConfig,
   LensLegendConfig,
   LensSeriesLayer,
   LensYBoundsConfig,
@@ -40,8 +40,8 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     yBounds?: LensYBoundsConfig;
     legend?: LensLegendConfig;
     yAxisTitle?: string;
-    /** Lens API heatmap. When set, the chart is not an XY series chart. */
-    heatmapConfig?: HeatmapConfig;
+    /** Lens heatmap. When set, the chart is not an XY series chart. */
+    heatmapConfig?: LensHeatmapConfig;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];

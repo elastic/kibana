@@ -8,11 +8,11 @@
  */
 
 import { makeHighContrastColor, shade, tint } from '@elastic/eui';
+import { getLensMetricFormat } from '../../common/utils';
 import {
   buildHistogramHeatmapColor,
   buildHistogramHeatmapConfig,
 } from './build_histogram_heatmap_config';
-import { getHeatmapValueFormat } from '../../common/utils/metric_unit/get_heatmap_value_format';
 
 const query = 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)';
 const seriesColor = '#54B399';
@@ -25,14 +25,14 @@ describe('buildHistogramHeatmapColor', () => {
     const pale = buildHistogramHeatmapColor(paleSeriesColor, 'LIGHT', lightBackground);
     const readablePale = makeHighContrastColor(paleSeriesColor, 2.5)(lightBackground);
 
-    expect(pale.steps[4].color).toBe(readablePale);
-    expect(pale.steps[4].color).not.toBe(paleSeriesColor);
-    expect(pale.steps[0].color).toBe(tint(readablePale, 0.7));
+    expect(pale[4].color).toBe(readablePale);
+    expect(pale[4].color).not.toBe(paleSeriesColor);
+    expect(pale[0].color).toBe(tint(readablePale, 0.7));
 
     const alreadyVisible = '#61A2FF';
-    expect(
-      buildHistogramHeatmapColor(alreadyVisible, 'LIGHT', lightBackground).steps[4].color
-    ).toBe(alreadyVisible.toLowerCase());
+    expect(buildHistogramHeatmapColor(alreadyVisible, 'LIGHT', lightBackground)[4].color).toBe(
+      alreadyVisible.toLowerCase()
+    );
   });
 
   it('separates dark-theme low counts from a brighter high band', () => {
@@ -40,57 +40,46 @@ describe('buildHistogramHeatmapColor', () => {
     const dark = buildHistogramHeatmapColor(darkSeriesColor, 'DARK', darkBackground);
     const readable = makeHighContrastColor(darkSeriesColor, 2.5)(darkBackground);
 
-    expect(dark.steps[0].color).toBe(shade(readable, 0.45));
-    expect(dark.steps[4].color).toBe(tint(readable, 0.4));
-    expect(dark.steps[0].color).not.toBe(dark.steps[4].color);
+    expect(dark[0].color).toBe(shade(readable, 0.45));
+    expect(dark[4].color).toBe(tint(readable, 0.4));
+    expect(dark[0].color).not.toBe(dark[4].color);
   });
 });
 
 describe('buildHistogramHeatmapConfig', () => {
-  it('builds the Lens API heatmap with the distribution defaults', () => {
+  it('builds the heatmap with the same config builder XY charts use', () => {
     expect(
       buildHistogramHeatmapConfig({
         query,
         title: 'latency',
         description: 'from metrics-a',
-        valueFormat: getHeatmapValueFormat('ms'),
+        valueFormat: getLensMetricFormat('ms'),
         seriesColor,
         colorMode: 'LIGHT',
         backgroundColor: lightBackground,
       })
     ).toEqual({
-      type: 'heatmap',
+      chartType: 'heatmap',
       title: 'latency',
       description: 'from metrics-a',
-      sampling: 1,
-      ignore_global_filters: false,
-      data_source: { type: 'esql', query },
-      metric: {
-        column: 'count',
-        label: 'Count',
-        format: { type: 'number', compact: true, decimals: 0 },
-        color: buildHistogramHeatmapColor(seriesColor, 'LIGHT', lightBackground),
+      dataset: { esql: query },
+      value: 'count',
+      label: 'Count',
+      format: 'number',
+      decimals: 0,
+      compactValues: true,
+      xAxis: { type: 'dateHistogram', field: 'TBUCKET(100)' },
+      breakdown: 'bucket',
+      breakdownFormat: {
+        format: 'duration',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        decimals: 0,
       },
-      x: { column: 'TBUCKET(100)', label: 'Time' },
-      y: {
-        column: 'bucket',
-        label: 'Value',
-        format: { type: 'duration', from: 'ms', to: 'auto', decimals: 0 },
-      },
-      axis: {
-        x: {
-          labels: { visible: true },
-          title: { visible: false },
-          scale: 'temporal',
-        },
-        y: {
-          labels: { visible: true },
-          title: { visible: false },
-          sort: 'desc',
-        },
-      },
-      legend: { visibility: 'hidden', position: 'right' },
-      styling: { cells: { labels: { visible: false } } },
+      legend: { show: false, position: 'right' },
+      xAxisOptions: { showLabels: true, label: 'Time' },
+      yAxisOptions: { showLabels: true, sort: 'desc', label: 'Value' },
+      colorSteps: buildHistogramHeatmapColor(seriesColor, 'LIGHT', lightBackground),
     });
   });
 
@@ -102,7 +91,7 @@ describe('buildHistogramHeatmapConfig', () => {
         seriesColor,
         colorMode: 'LIGHT',
         backgroundColor: lightBackground,
-      }).y
-    ).toEqual({ column: 'bucket', label: 'Value' });
+      })
+    ).not.toHaveProperty('breakdownFormat');
   });
 });
