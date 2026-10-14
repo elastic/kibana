@@ -1310,7 +1310,7 @@ describe('MetricsGrid', () => {
             legend: { visibility: 'hidden', position: 'right' },
             metric: expect.objectContaining({
               label: 'Count',
-              color: { type: 'distributed_palette', palette: 'cool' },
+              color: expect.objectContaining({ type: 'dynamic', range: 'percentage' }),
             }),
             x: expect.objectContaining({ label: 'Time' }),
             y: expect.objectContaining({
@@ -1318,6 +1318,46 @@ describe('MetricsGrid', () => {
               format: { type: 'duration', from: 'ms', to: 'auto', decimals: 0 },
             }),
           }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('colors each heatmap from its place in the chart color sequence', () => {
+      enableHeatmaps();
+      const secondItem = { ...histogramItem, metricName: 'errors.exp' };
+      renderMetricsGrid({
+        metricItems: [histogramItem, secondItem],
+        histogramBounds: new Map([
+          [getMetricUniqueKey(histogramItem), { min: 1, max: 9 }],
+          [getMetricUniqueKey(secondItem), { min: 1, max: 9 }],
+        ]),
+      });
+
+      const [firstCall, secondCall] = jest.mocked(Chart).mock.calls;
+      const firstColor = firstCall[0].heatmapConfig?.metric.color;
+      const secondColor = secondCall[0].heatmapConfig?.metric.color;
+
+      expect(firstColor).toEqual(expect.objectContaining({ type: 'dynamic', range: 'percentage' }));
+      expect(secondColor).toEqual(
+        expect.objectContaining({ type: 'dynamic', range: 'percentage' })
+      );
+      expect(firstColor).not.toEqual(secondColor);
+    });
+
+    it('draws a heatmap when the upper and lower bounds are the same', () => {
+      enableHeatmaps();
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        histogramBounds: new Map([[getMetricUniqueKey(histogramItem), { min: 5, max: 5 }]]),
+      });
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: expect.stringContaining('BUCKET(latency.exp, 10, 5, 5.000005)'),
+          chartLayers: [],
+          heatmapConfig: expect.objectContaining({ type: 'heatmap' }),
         }),
         expect.anything()
       );

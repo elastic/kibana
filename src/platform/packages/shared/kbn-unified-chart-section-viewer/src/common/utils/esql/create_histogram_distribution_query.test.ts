@@ -82,6 +82,15 @@ TS metrics-a
   | EVAL bucket = RANGE_MIN(bucket)`);
   });
 
+  it('opens a positive span when min equals max', () => {
+    expect(
+      createHistogramDistributionQuery({
+        metricItem: createMetric(),
+        bounds: { min: 5, max: 5 },
+      })
+    ).toContain('BUCKET(latency.exp, 10, 5, 5.000005)');
+  });
+
   it('returns undefined for a non-histogram instrument', () => {
     expect(
       createHistogramDistributionQuery({

@@ -74,9 +74,14 @@ export const createHistogramDistributionQuery = ({
   }
 
   const timeBucket = createTimeBucketAggregation({ targetBuckets: HISTOGRAM_TIME_BUCKET_COUNT });
+  // BUCKET emits a null bucket when from equals to. A tiny span still places the constant value in one bucket.
+  const max =
+    bounds.min < bounds.max
+      ? bounds.max
+      : bounds.min + Math.max(Math.abs(bounds.min) * 1e-6, Number.EPSILON);
   query.pipe(
     `STATS ${HISTOGRAM_COUNT_COLUMN} = COUNT(${expression}, ${HISTOGRAM_BUCKET_COLUMN}) ` +
-      `BY ${HISTOGRAM_BUCKET_COLUMN} = BUCKET(${expression}, ${HISTOGRAM_BUCKET_COUNT}, ${bounds.min}, ${bounds.max}), ${timeBucket}`
+      `BY ${HISTOGRAM_BUCKET_COLUMN} = BUCKET(${expression}, ${HISTOGRAM_BUCKET_COUNT}, ${bounds.min}, ${max}), ${timeBucket}`
   );
   query.pipe(`EVAL ${HISTOGRAM_BUCKET_COLUMN} = RANGE_MIN(${HISTOGRAM_BUCKET_COLUMN})`);
 

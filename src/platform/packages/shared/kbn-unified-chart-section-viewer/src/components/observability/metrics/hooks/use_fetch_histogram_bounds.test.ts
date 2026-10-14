@@ -129,7 +129,7 @@ describe('useFetchHistogramBounds', () => {
     mockExecuteEsqlQuery.mockImplementation(() => resolved([{ min_value: 1, max_value: 5 }]));
   });
 
-  it('runs one request per chart in parallel and keeps only min < max', async () => {
+  it('runs one request per chart in parallel and keeps a point where min equals max', async () => {
     mockExecuteEsqlQuery
       .mockImplementationOnce(() => resolved([{ min_value: 1, max_value: 5 }]))
       .mockImplementationOnce(() => resolved([{ min_value: 3, max_value: 3 }]));
@@ -141,7 +141,7 @@ describe('useFetchHistogramBounds', () => {
     );
 
     expect(getQueriedSources()).toEqual(['TS metrics-a', 'TS metrics-b']);
-    expect(result.current.bounds.has('metrics-b::latency.exp')).toBe(false);
+    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 3, max: 3 });
     expect(result.current.loading).toBe(false);
   });
 

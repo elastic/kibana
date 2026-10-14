@@ -454,6 +454,9 @@ describe('useLensProps', () => {
     const heatmapConfig = buildHistogramHeatmapConfig({
       query: 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)',
       title: 'latency',
+      seriesColor: '#54B399',
+      colorMode: 'LIGHT',
+      backgroundColor: '#FFFFFF',
     });
 
     const { result } = renderHook(() =>

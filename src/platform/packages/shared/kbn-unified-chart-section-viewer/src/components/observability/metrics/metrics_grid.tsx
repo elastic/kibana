@@ -374,7 +374,7 @@ const ChartItem = React.memo(
     histogramBounds,
     histogramBoundsLoading,
   }: ChartItemProps) => {
-    const { euiTheme } = useEuiTheme();
+    const { euiTheme, colorMode } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
@@ -425,16 +425,16 @@ const ChartItem = React.memo(
     const finiteBounds = boundsResult && !('error' in boundsResult) ? boundsResult : undefined;
     // A breakdown splits the series chart. Heatmaps do not encode that split yet.
     const hasBreakdown = applicableDimensions.length > 0;
-    const hasRange = finiteBounds !== undefined && finiteBounds.min < finiteBounds.max;
-    // Missing bounds, including a point, skip the histogram and use the series chart.
+    const hasBounds = finiteBounds !== undefined && finiteBounds.min <= finiteBounds.max;
+    // Missing bounds skip the histogram and use the series chart. A point (min === max) still draws.
     // Loading and errors stay on the histogram path so the series chart does not flash first.
     const drawDistribution =
       isDistribution &&
       !hasBreakdown &&
-      (histogramBoundsLoading || boundsError !== undefined || hasRange);
+      (histogramBoundsLoading || boundsError !== undefined || hasBounds);
 
     const distributionQuery = useMemo(() => {
-      if (!drawDistribution || !finiteBounds || finiteBounds.min >= finiteBounds.max) {
+      if (!drawDistribution || !finiteBounds || finiteBounds.min > finiteBounds.max) {
         return undefined;
       }
       return createHistogramDistributionQuery({
@@ -471,6 +471,7 @@ const ChartItem = React.memo(
     ]);
 
     const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const heatmapConfig = useMemo(
       () =>
         distributionQuery
@@ -479,9 +480,20 @@ const ChartItem = React.memo(
               title: metricItem.metricName,
               description,
               valueFormat: getHeatmapValueFormat(resolvedUnit),
+              seriesColor: color,
+              colorMode,
+              backgroundColor: euiTheme.colors.emptyShade,
             })
           : undefined,
-      [distributionQuery, metricItem.metricName, description, resolvedUnit]
+      [
+        distributionQuery,
+        metricItem.metricName,
+        description,
+        resolvedUnit,
+        color,
+        colorMode,
+        euiTheme.colors.emptyShade,
+      ]
     );
 
     const yAxisTitle = useMemo(() => {
@@ -489,7 +501,6 @@ const ChartItem = React.memo(
       return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
     }, [metricItem.metricTypes, gridSettings]);
 
-    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
