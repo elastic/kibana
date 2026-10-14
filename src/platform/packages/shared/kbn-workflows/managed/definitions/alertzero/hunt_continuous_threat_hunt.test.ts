@@ -39,6 +39,7 @@ describe('AlertZero continuous threat hunt worker', () => {
   const readiness = stepByName('check_threat_intel_readiness');
   const gate = stepByName('readiness_gate');
   const fuelGate = stepByName('fuel_gate');
+  const statsGate = stepByName('stats_gate');
 
   it('renders with no unreplaced __TOKEN__', () => {
     expect(yaml.match(/__[A-Z][A-Z0-9_]*__/g)).toBeNull();
@@ -92,10 +93,24 @@ describe('AlertZero continuous threat hunt worker', () => {
     ]);
   });
 
-  it('logs hunt_idle with a console step, not a failure, when there are no hunt-usable reports', () => {
-    expect(fuelGate?.else?.map(({ name, type }) => [name, type])).toEqual([
+  it('checks usable_stats_unavailable before treating zero reports as idle', () => {
+    expect(statsGate?.condition).toContain("contains 'usable_stats_unavailable'");
+  });
+
+  it('fails the run with hunt_stats_unavailable when the hunt-usable count could not be read', () => {
+    expect(statsGate?.steps?.map(({ name, type }) => [name, type])).toEqual([
+      ['hunt_stats_unavailable', 'workflow.fail'],
+    ]);
+  });
+
+  it('logs hunt_idle with a console step, not a failure, when readiness read zero hunt-usable reports', () => {
+    expect(statsGate?.else?.map(({ name, type }) => [name, type])).toEqual([
       ['hunt_idle', 'console'],
     ]);
+  });
+
+  it('nests the stats gate under the zero-report branch of fuel_gate', () => {
+    expect(fuelGate?.else?.map(({ name }) => name)).toEqual(['stats_gate']);
   });
 
   it('has no hunting steps', () => {

@@ -24,11 +24,7 @@ import type { estypes } from '@elastic/elasticsearch';
  * consume these bars.
  */
 
-/**
- * Hunt-usable bar: supply finished the report (`lineage.extraction_method` is
- * present and not `pending`), plus title or body text and severity.level.
- * Denylist on `pending`, so `seeded` and any future adapter value count as finished.
- */
+/** Hunt-usable bar; see the contract comment at the top of this file. */
 export const HUNT_USABLE_FILTER: estypes.QueryDslQueryContainer = {
   bool: {
     filter: [
@@ -49,9 +45,8 @@ export const HUNT_USABLE_FILTER: estypes.QueryDslQueryContainer = {
 };
 
 /**
- * Indicator-eligible bar: at least one nested IOC. Callers AND this with
- * `HUNT_USABLE_FILTER`. `extracted.iocs` is nested, so exists on the parent
- * path matches nothing.
+ * Indicator-eligible bar; AND with `HUNT_USABLE_FILTER`. `extracted.iocs` is
+ * nested, so exists on the parent path matches nothing.
  */
 export const INDICATOR_ELIGIBLE_FILTER: estypes.QueryDslQueryContainer = {
   nested: {

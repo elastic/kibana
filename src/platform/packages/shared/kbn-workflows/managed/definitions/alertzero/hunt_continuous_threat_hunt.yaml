@@ -1,6 +1,6 @@
 version: "1"
 name: Continuous Threat Hunt
-description: Hunt Watch continuous threat hunt worker stub.
+description: Hunt Watch continuous threat hunt worker. Checks threat intel readiness; hunt dispatch is not implemented yet.
 enabled: false
 tags:
   - watch
@@ -42,10 +42,21 @@ steps:
             with:
               message: "Continuous Threat Hunt: {{ steps.check_threat_intel_readiness.output.usableReportCount }} hunt-usable report(s); hunt dispatch not implemented yet"
         else:
-          - name: hunt_idle
-            type: console
-            with:
-              message: "Continuous Threat Hunt: no hunt-usable reports yet (reasons={{ steps.check_threat_intel_readiness.output.reasonCodes | join: ',' }}); nothing to hunt"
+          # A count of 0 is only idle when readiness could actually read it.
+          - name: stats_gate
+            type: if
+            condition: "${{ steps.check_threat_intel_readiness.output.reasonCodes contains 'usable_stats_unavailable' }}"
+            steps:
+              - name: hunt_stats_unavailable
+                type: workflow.fail
+                with:
+                  reason: "threat_intel_stats_unavailable"
+                  message: "Continuous Threat Hunt: hunt-usable report count could not be read (reasons={{ steps.check_threat_intel_readiness.output.reasonCodes | join: ',' }})"
+            else:
+              - name: hunt_idle
+                type: console
+                with:
+                  message: "Continuous Threat Hunt: no hunt-usable reports yet (reasons={{ steps.check_threat_intel_readiness.output.reasonCodes | join: ',' }}); nothing to hunt"
     else:
       # Fail the run so the Watch UI shows red: blocked supply or an unreachable
       # readiness route are operator-visible problems.
