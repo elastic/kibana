@@ -6,7 +6,7 @@
  */
 
 import { EntityType } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId, getBuiltInEntityDefinition } from '../definitions/registry';
+import { getBuiltInEntityDefinition } from '../definitions/registry';
 import {
   getEuidSourceFields,
   getEuidNamespaceSourceFields,
@@ -36,16 +36,16 @@ describe('getEuidSourceFields', () => {
   });
 
   it('includes user.entity.id for user (ranked first for cloud.provider aws)', () => {
-    const result = getEuidSourceFields(EntityType.enum.user);
+    const result = getEuidSourceFields(getBuiltInEntityDefinition(EntityType.enum.user));
 
     expect(result.identitySourceFields).toContain('user.entity.id');
     expect(result.identitySourceFields).not.toContain('cloud.provider');
   });
 
   it('stores every user identity source field on the entity record (record-based lookups rank on them)', () => {
-    const { fields } = getEntityDefinitionWithoutId(EntityType.enum.user);
-    const storedFields = new Set(fields.map(({ destination }) => destination));
-    const { identitySourceFields } = getEuidSourceFields(EntityType.enum.user);
+    const userDefinition = getBuiltInEntityDefinition(EntityType.enum.user);
+    const storedFields = new Set(userDefinition.fields.map(({ destination }) => destination));
+    const { identitySourceFields } = getEuidSourceFields(userDefinition);
 
     expect(identitySourceFields.filter((field) => !storedFields.has(field))).toEqual([]);
   });

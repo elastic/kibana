@@ -319,15 +319,18 @@ describe('getEuidFromObject', () => {
       });
 
       it('resolves an inventory IAM role to user:<role ARN>@aws', () => {
-        expect(getEuidFromObject('user', inventoryDoc(IAM_ROLE_ARN, 'Admin'))).toBe(
-          `user:${IAM_ROLE_ARN}@aws`
-        );
+        expect(
+          getEuidFromObject(getBuiltInEntityDefinition('user'), inventoryDoc(IAM_ROLE_ARN, 'Admin'))
+        ).toBe(`user:${IAM_ROLE_ARN}@aws`);
       });
 
       it('resolves a CloudTrail IAM user to the same id as the inventory IAM user', () => {
-        const inventoryId = getEuidFromObject('user', inventoryDoc(IAM_USER_ARN, 'alice'));
+        const inventoryId = getEuidFromObject(
+          getBuiltInEntityDefinition('user'),
+          inventoryDoc(IAM_USER_ARN, 'alice')
+        );
         const cloudTrailId = getEuidFromObjectForSearch(
-          'user',
+          getBuiltInEntityDefinition('user'),
           cloudTrailDoc({ id: 'AIDAEXAMPLE', name: 'alice', entity: { id: IAM_USER_ARN } })
         );
 
@@ -338,7 +341,7 @@ describe('getEuidFromObject', () => {
       it('resolves a CloudTrail assumed role (principalId in user.id) to the role ARN', () => {
         expect(
           getEuidFromObjectForSearch(
-            'user',
+            getBuiltInEntityDefinition('user'),
             cloudTrailDoc({
               id: 'AROAEXAMPLE:session-1',
               name: 'session-1',
@@ -351,7 +354,7 @@ describe('getEuidFromObject', () => {
       it('ranks user.entity.id above user.email', () => {
         expect(
           getEuidFromObjectForSearch(
-            'user',
+            getBuiltInEntityDefinition('user'),
             cloudTrailDoc({
               email: 'alice@example.com',
               id: 'AROAEXAMPLE:alice@example.com',
@@ -364,19 +367,22 @@ describe('getEuidFromObject', () => {
       it('treats a single-element user.entity.id array like the scalar value', () => {
         expect(
           getEuidFromObjectForSearch(
-            'user',
+            getBuiltInEntityDefinition('user'),
             cloudTrailDoc({ id: 'AIDAEXAMPLE', entity: { id: [IAM_USER_ARN] } })
           )
         ).toBe(`user:${IAM_USER_ARN}@aws`);
       });
 
       it('falls back to user.id when user.entity.id is missing or empty', () => {
-        expect(getEuidFromObjectForSearch('user', cloudTrailDoc({ id: 'AIDAEXAMPLE' }))).toBe(
-          'user:AIDAEXAMPLE@aws'
-        );
         expect(
           getEuidFromObjectForSearch(
-            'user',
+            getBuiltInEntityDefinition('user'),
+            cloudTrailDoc({ id: 'AIDAEXAMPLE' })
+          )
+        ).toBe('user:AIDAEXAMPLE@aws');
+        expect(
+          getEuidFromObjectForSearch(
+            getBuiltInEntityDefinition('user'),
             cloudTrailDoc({ id: 'AIDAEXAMPLE', entity: { id: '' } })
           )
         ).toBe('user:AIDAEXAMPLE@aws');
@@ -385,7 +391,7 @@ describe('getEuidFromObject', () => {
       it('does not create a user from a CloudTrail event alone (creation gate unchanged)', () => {
         expect(
           getEuidFromObject(
-            'user',
+            getBuiltInEntityDefinition('user'),
             cloudTrailDoc({ id: 'AIDAEXAMPLE', name: 'alice', entity: { id: IAM_USER_ARN } })
           )
         ).toBeUndefined();
@@ -393,7 +399,7 @@ describe('getEuidFromObject', () => {
 
       it('keeps the local namespace first when user.name and host.id are present', () => {
         expect(
-          getEuidFromObject('user', {
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
             user: { name: 'alice', entity: { id: IAM_USER_ARN } },
             host: { id: 'host-1' },
             cloud: { provider: 'aws' },
@@ -403,7 +409,7 @@ describe('getEuidFromObject', () => {
 
       it('keeps the default ranking for aws-hosted logs without user.entity.id', () => {
         expect(
-          getEuidFromObject('user', {
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
             user: { email: 'alice@example.com' },
             event: { kind: 'asset', module: 'okta' },
             cloud: { provider: 'aws' },
@@ -413,13 +419,13 @@ describe('getEuidFromObject', () => {
 
       it('ignores user.entity.id when cloud.provider is not aws', () => {
         expect(
-          getEuidFromObject('user', {
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
             user: { email: 'alice@example.com', entity: { id: 'okta-entity-id' } },
             event: { kind: 'asset', module: 'okta' },
           })
         ).toBe('user:alice@example.com@okta');
         expect(
-          getEuidFromObject('user', {
+          getEuidFromObject(getBuiltInEntityDefinition('user'), {
             user: { id: 'gcp-user-id', entity: { id: 'gcp-entity-id' } },
             event: { kind: 'asset', module: 'asset_discovery' },
             cloud: { provider: 'gcp' },

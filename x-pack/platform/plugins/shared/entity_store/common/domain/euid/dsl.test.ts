@@ -429,7 +429,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       const IAM_ROLE_ARN = 'arn:aws:iam::123456789012:role/Admin';
 
       it('filters on user.entity.id with no higher-ranked guards when it is present', () => {
-        const result = getEuidDslFilterBasedOnDocument('user', {
+        const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { id: IAM_ROLE_ARN, name: 'Admin', entity: { id: IAM_ROLE_ARN } },
           event: { kind: 'asset', module: 'aws' },
           cloud: { provider: 'aws' },
@@ -445,7 +445,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       it('guards user.entity.id as missing-or-empty when an aws document ranks by user.id', () => {
-        const result = getEuidDslFilterBasedOnDocument('user', {
+        const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { id: 'AIDAEXAMPLE' },
           event: { kind: 'asset', module: 'aws' },
           cloud: { provider: 'aws' },
@@ -463,7 +463,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       it('does not guard user.entity.id when cloud.provider is not aws', () => {
-        const result = getEuidDslFilterBasedOnDocument('user', {
+        const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
           user: { id: 'AIDAEXAMPLE' },
           event: { kind: 'asset', module: 'aws' },
         });
@@ -737,7 +737,7 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
 
     it('aws IAM record: filters on the stored user.entity.id with no higher-ranked guards', () => {
       const roleArn = 'arn:aws:iam::123456789012:role/Admin';
-      const result = getEuidDslFilterBasedOnEntityRecord('user', {
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { id: `user:${roleArn}@aws`, namespace: 'aws' },
         cloud: { provider: 'aws' },
         user: { id: [roleArn, 'AROAEXAMPLE:session-1'], entity: { id: [roleArn] }, name: 'Admin' },
