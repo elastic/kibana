@@ -11,9 +11,8 @@ export const spec: Record<string, unknown> = {
   data: {
     url: {
       '%type%': 'esql',
-      '%timefield%': '@timestamp',
       query:
-        'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | EVAL hour = DATE_EXTRACT("HOUR_OF_DAY", @timestamp), day = DATE_FORMAT("EEE", @timestamp) | STATS count = COUNT(*) BY hour, day | SORT hour ASC',
+        'FROM logs-* | EVAL hour = DATE_EXTRACT("HOUR_OF_DAY", @timestamp), day = DATE_FORMAT("EEE", @timestamp) | STATS count = COUNT(*) BY hour, day | SORT hour ASC',
     },
   },
   mark: 'rect',

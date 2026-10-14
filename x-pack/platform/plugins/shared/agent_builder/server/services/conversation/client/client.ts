@@ -1226,7 +1226,7 @@ class ConversationClientImpl implements ConversationClient {
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    { access = 'owner', source }: ConversationWriteOptions & { access?: ConversationAccess }
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
 
