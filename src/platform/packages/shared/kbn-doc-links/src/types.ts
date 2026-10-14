@@ -325,7 +325,12 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
+    readonly alertsPage: string;
     readonly attacksPage: string;
+    readonly dashboardsPage: string;
+    readonly detectionResponsePage: string;
+    readonly notesPage: string;
+    readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
     readonly attackDiscovery: string;
     readonly mitreCoverage: string;
@@ -770,6 +775,7 @@ export interface DocLinks {
     readonly dataSources: string;
     readonly datasets: string;
     readonly datasetSettings: string;
+    readonly datasetMappings: string;
     readonly authentication: string;
     readonly grantReadAccess: string;
     readonly staticCredentials: string;

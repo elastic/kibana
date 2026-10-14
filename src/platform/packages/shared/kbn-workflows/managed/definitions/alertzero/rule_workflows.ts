@@ -49,7 +49,7 @@ export const ALERTZERO_RULE_PREVIEW_WORKFLOW = {
   id: ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: RULE_PREVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -58,7 +58,7 @@ export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 28,
+  version: 29,
   yaml: RULE_TUNING_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -67,7 +67,7 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 29,
+  version: 31,
   yaml: RULE_TUNING_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

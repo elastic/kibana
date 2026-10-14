@@ -28,6 +28,7 @@ import {
   internalStateActions,
   selectAllTabs,
   selectDataSourceProfileId,
+  getTabDataView,
   selectTabRuntimeState,
 } from './redux';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
@@ -174,10 +175,12 @@ describe('test getDataStateContainer', () => {
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith(
       {
         dataSource: stateContainer.getCurrentTab().appState.dataSource,
-        dataView: selectTabRuntimeState(
-          stateContainer.runtimeStateManager,
-          stateContainer.getCurrentTab().id
-        ).currentDataView$.getValue(),
+        dataView: getTabDataView(
+          selectTabRuntimeState(
+            stateContainer.runtimeStateManager,
+            stateContainer.getCurrentTab().id
+          )
+        ),
         query: stateContainer.getCurrentTab().appState.query,
       },
       expect.any(Function)
