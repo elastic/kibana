@@ -6,10 +6,7 @@
  */
 
 import { newestValue } from './field_retention_operations';
-import type {
-  EntityDefinitionManagedBy,
-  ExtractedEntityDefinitionWithoutId,
-} from './entity_schema';
+import type { EntityDefinitionManagedBy, ManagedEntityDefinitionWithoutId } from './entity_schema';
 import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
@@ -67,4 +64,4 @@ export const genericEntityDefinition = {
       ...getCommonFieldDescriptions('entity'),
     ],
   },
-} satisfies ExtractedEntityDefinitionWithoutId & { managedBy: EntityDefinitionManagedBy };
+} satisfies ManagedEntityDefinitionWithoutId & { managedBy: EntityDefinitionManagedBy };

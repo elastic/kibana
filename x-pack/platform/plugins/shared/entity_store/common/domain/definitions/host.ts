@@ -6,10 +6,7 @@
  */
 
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
-import type {
-  EntityDefinitionManagedBy,
-  ExtractedEntityDefinitionWithoutId,
-} from './entity_schema';
+import type { EntityDefinitionManagedBy, ManagedEntityDefinitionWithoutId } from './entity_schema';
 import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
@@ -20,7 +17,7 @@ import {
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
-export const hostEntityDefinition: ExtractedEntityDefinitionWithoutId & {
+export const hostEntityDefinition: ManagedEntityDefinitionWithoutId & {
   managedBy: EntityDefinitionManagedBy;
 } = {
   type: 'host',
@@ -121,4 +118,4 @@ export const hostEntityDefinition: ExtractedEntityDefinitionWithoutId & {
       ...getEntityFieldsDescriptions('host'),
     ],
   },
-} as const satisfies ExtractedEntityDefinitionWithoutId;
+} as const satisfies ManagedEntityDefinitionWithoutId;

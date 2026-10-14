@@ -9,9 +9,9 @@ import assert from 'assert';
 
 import { EXTRACTION_MODE, EntityType, type ExtractionMode } from './entity_schema';
 import {
-  type ExtractedEntityDefinitionWithoutId,
   type GatedEntityDefinition,
   type ManagedEntityDefinition,
+  type ManagedEntityDefinitionWithoutId,
 } from './entity_schema';
 import { resolveExtractionGate } from './extraction_gate';
 import { hostEntityDefinition } from './host';
@@ -29,9 +29,9 @@ const entitiesDefinitionRegistry = {
   user: userEntityDefinition,
   service: serviceEntityDefinition,
   generic: genericEntityDefinition,
-} as const satisfies Record<EntityType, ExtractedEntityDefinitionWithoutId>;
+} as const satisfies Record<EntityType, ManagedEntityDefinitionWithoutId>;
 
-const getRegisteredDefinition = (type: EntityType): ExtractedEntityDefinitionWithoutId => {
+const getRegisteredDefinition = (type: EntityType): ManagedEntityDefinitionWithoutId => {
   const definition = entitiesDefinitionRegistry[type];
   assert(
     definition,
@@ -107,7 +107,7 @@ export function getBuiltInEntityDefinition(
   type: EntityType,
   extractionMode: ExtractionMode = EXTRACTION_MODE.single,
   options?: EntityDefinitionOptions
-): GatedEntityDefinition<ExtractedEntityDefinitionWithoutId> {
+): GatedEntityDefinition<ManagedEntityDefinitionWithoutId> {
   const definition =
     type === EntityType.enum.user && options?.excludedUserNames?.length
       ? buildUserEntityDefinition({ excludedUserNames: options.excludedUserNames })

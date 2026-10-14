@@ -13,10 +13,7 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
-import type {
-  EntityDefinitionManagedBy,
-  ExtractedEntityDefinitionWithoutId,
-} from './entity_schema';
+import type { EntityDefinitionManagedBy, ManagedEntityDefinitionWithoutId } from './entity_schema';
 import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_CONFIDENCE,
@@ -47,7 +44,7 @@ function buildLocalNamespaceGate(excludedUserNames: string[]): Condition {
 
 export function buildUserEntityDefinition(
   options: UserEntityDefinitionOptions = {}
-): ExtractedEntityDefinitionWithoutId & { managedBy: EntityDefinitionManagedBy } {
+): ManagedEntityDefinitionWithoutId & { managedBy: EntityDefinitionManagedBy } {
   const excluded = [...LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, ...(options.excludedUserNames ?? [])];
   const localNamespaceGate = buildLocalNamespaceGate(excluded);
   return {
@@ -262,9 +259,9 @@ export function buildUserEntityDefinition(
         newestValue({ source: 'host.name' }),
       ],
     },
-  } satisfies ExtractedEntityDefinitionWithoutId;
+  } satisfies ManagedEntityDefinitionWithoutId;
 }
 
-export const userEntityDefinition: ExtractedEntityDefinitionWithoutId & {
+export const userEntityDefinition: ManagedEntityDefinitionWithoutId & {
   managedBy: EntityDefinitionManagedBy;
 } = buildUserEntityDefinition();

@@ -342,6 +342,10 @@ export type ExtractedEntityDefinition = EntityDefinition & { extraction: Extract
 export type ExtractedEntityDefinitionWithoutId = EntityDefinitionWithoutId & {
   extraction: ExtractionBlock;
 };
+/** A built-in definition as registered: extraction config present and `type` one of the store's own. */
+export type ManagedEntityDefinitionWithoutId = ExtractedEntityDefinitionWithoutId & {
+  type: EntityType;
+};
 export type ManagedEntityDefinition = ExtractedEntityDefinition & { type: EntityType }; // built-in entity with a known 'type'
 
 /**

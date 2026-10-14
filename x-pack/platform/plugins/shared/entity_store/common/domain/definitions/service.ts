@@ -10,14 +10,11 @@ import {
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
 } from './common_fields';
-import type {
-  EntityDefinitionManagedBy,
-  ExtractedEntityDefinitionWithoutId,
-} from './entity_schema';
+import type { EntityDefinitionManagedBy, ManagedEntityDefinitionWithoutId } from './entity_schema';
 import { PLUGIN_ID } from '../../plugin_id';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
-export const serviceEntityDefinition: ExtractedEntityDefinitionWithoutId & {
+export const serviceEntityDefinition: ManagedEntityDefinitionWithoutId & {
   managedBy: EntityDefinitionManagedBy;
 } = {
   type: 'service',
@@ -48,4 +45,4 @@ export const serviceEntityDefinition: ExtractedEntityDefinitionWithoutId & {
       ...getEntityFieldsDescriptions('service'),
     ],
   },
-} as const satisfies ExtractedEntityDefinitionWithoutId;
+} as const satisfies ManagedEntityDefinitionWithoutId;
