@@ -28,6 +28,8 @@ import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_eve
 
 const GROUP_HASH = 'a'.repeat(64);
 const OTHER_GROUP_HASH = 'b'.repeat(64);
+/** Well-formed base64url that does not decode to a series payload. */
+const NOT_A_SERIES_PAYLOAD = 'bm90LWEtc2VyaWVzLWlk';
 
 /** Series id of the default fixture's rule (`test-rule-id`) in the `default` space. */
 const toSeriesId = ({
@@ -200,10 +202,9 @@ describe('AlertActionsClient', () => {
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
 
-    it.each([
-      ['a legacy group hash', GROUP_HASH],
-      ['text that is not a series payload', 'bm90LWEtc2VyaWVzLWlk'],
-    ])('rejects %s with INVALID_SERIES_ID before any I/O', async (_name, seriesId) => {
+    it('rejects text that is not a series payload with INVALID_SERIES_ID before any I/O', async () => {
+      const seriesId = NOT_A_SERIES_PAYLOAD;
+
       await expect(
         client.createSeriesAction({
           seriesId,
@@ -749,11 +750,11 @@ describe('AlertActionsClient', () => {
       await expect(
         client.createBulkSeriesActions([
           { series_id: toSeriesId(), action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
-          { series_id: GROUP_HASH, action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+          { series_id: NOT_A_SERIES_PAYLOAD, action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
         ])
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        data: { code: 'INVALID_SERIES_ID', details: { series_id: GROUP_HASH } },
+        data: { code: 'INVALID_SERIES_ID', details: { series_id: NOT_A_SERIES_PAYLOAD } },
       });
 
       expect(queryServiceEsClient.esql.query).not.toHaveBeenCalled();

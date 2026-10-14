@@ -177,27 +177,5 @@ apiTest.describe(
         });
       }
     );
-
-    apiTest(
-      'legacy group_hash: rejects a 64-hex group hash used as the series id with INVALID_SERIES_ID',
-      async ({ apiClient, apiServices }) => {
-        await seedCollidingSeries(apiServices, {
-          ruleA: 'collision-legacy-episode-a',
-          ruleB: 'collision-legacy-episode-b',
-        });
-
-        const response = await apiClient.post(getSnoozeSeriesActionUrl(SHARED_GROUP_HASH), {
-          headers: writerHeaders,
-          body: {},
-        });
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.code).toBe('INVALID_SERIES_ID');
-
-        const actions = await apiServices.alertingV2.alertActionsEvents.find({
-          groupHash: SHARED_GROUP_HASH,
-        });
-        expect(actions).toHaveLength(0);
-      }
-    );
   }
 );

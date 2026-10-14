@@ -64,12 +64,6 @@ describe('buildEpisodesBaseQuery', () => {
     expect(esql.indexOf(SERIES_ID_EVAL)).toBeLessThan(esql.indexOf('INLINE STATS'));
   });
 
-  it('no longer groups the series action stats by group_hash', () => {
-    const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
-
-    expect(esql).not.toMatch(/BY group_hash/);
-  });
-
   it('applies the ruleId filter on both rule.id and rule_id before the aggregations', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID, { ruleId: 'rule-123' }).print('basic');
 

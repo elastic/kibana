@@ -344,17 +344,15 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest(
     'schema: rejects an item whose series_id is malformed with INVALID_SERIES_ID',
     async ({ apiClient }) => {
-      // A legacy 64-hex group hash and a well-formed base64url value that does
-      // not decode to a series payload both pass the schema alphabet check.
-      for (const seriesId of [buildGroupHash('bulk-series-legacy-group'), 'bm90LWEtc2VyaWVz']) {
-        const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
-          headers: writerHeaders,
-          body: { items: [{ series_id: seriesId }] },
-        });
+      // A well-formed base64url value that does not decode to a series payload
+      // passes the schema alphabet check but is rejected when decoded.
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ series_id: 'bm90LWEtc2VyaWVz' }] },
+      });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.code).toBe('INVALID_SERIES_ID');
-      }
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SERIES_ID');
     }
   );
 

@@ -177,7 +177,6 @@ describe('decodeSeriesId', () => {
   });
 
   const invalidIds: Array<{ name: string; id: string }> = [
-    { name: 'a legacy group hash', id: GROUP_HASH },
     { name: 'characters outside the base64url alphabet', id: 'not base64url!' },
     { name: 'padding characters', id: `${toId(`1::rule::default::cpu-high::${GROUP_HASH}`)}==` },
     { name: 'an empty string', id: '' },

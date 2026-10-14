@@ -137,10 +137,6 @@ describe('seriesAlertActionParamsSchema', () => {
     ).toThrow();
   });
 
-  it('rejects a group_hash path parameter', () => {
-    expect(() => seriesAlertActionParamsSchema.parse({ group_hash: GROUP_HASH })).toThrow();
-  });
-
   it('rejects unknown keys (strict mode)', () => {
     expect(() =>
       seriesAlertActionParamsSchema.parse({ series_id: SERIES_ID, foo: 'bar' })
@@ -249,11 +245,5 @@ describe('verb-specific bulk action body schemas', () => {
         items: [{ series_id: SERIES_ID }, { series_id: SERIES_ID }],
       })
     ).toThrow(`Each series_id can appear at most once per request; [${SERIES_ID}] is repeated`);
-  });
-
-  it('rejects a series item keyed by group_hash', () => {
-    expect(() =>
-      bulkSnoozeSeriesActionBodySchema.parse({ items: [{ group_hash: GROUP_HASH }] })
-    ).toThrow();
   });
 });

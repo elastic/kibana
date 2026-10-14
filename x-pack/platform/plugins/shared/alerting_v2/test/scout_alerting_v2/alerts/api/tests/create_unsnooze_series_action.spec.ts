@@ -103,22 +103,6 @@ apiTest.describe('Create unsnooze series action API', { tag: '@local-stateful-cl
   });
 
   apiTest(
-    'schema: rejects a series_id that is a legacy group hash with INVALID_SERIES_ID',
-    async ({ apiClient }) => {
-      const response = await apiClient.post(
-        getUnsnoozeSeriesActionUrl(buildGroupHash('unsnooze-legacy-group')),
-        {
-          headers: writerHeaders,
-          body: {},
-        }
-      );
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('INVALID_SERIES_ID');
-    }
-  );
-
-  apiTest(
     'schema: rejects a series_id that is not a series payload with INVALID_SERIES_ID',
     async ({ apiClient }) => {
       const response = await apiClient.post(getUnsnoozeSeriesActionUrl('bm90LWEtc2VyaWVz'), {

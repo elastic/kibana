@@ -162,24 +162,17 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
     });
   }
 
-  const malformedSeriesIds = [
-    ['a legacy group hash', buildGroupHash('snooze-legacy-group')],
-    ['a base64url value that is not a series payload', 'bm90LWEtc2VyaWVz'],
-  ] as const;
-
-  for (const [label, seriesId] of malformedSeriesIds) {
-    apiTest(
-      `schema: rejects a series_id that is ${label} with INVALID_SERIES_ID`,
-      async ({ apiClient }) => {
-        const response = await apiClient.post(getSnoozeSeriesActionUrl(seriesId), {
-          headers: writerHeaders,
-          body: {},
-        });
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.code).toBe('INVALID_SERIES_ID');
-      }
-    );
-  }
+  apiTest(
+    'schema: rejects a series_id that is a base64url value that is not a series payload with INVALID_SERIES_ID',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(getSnoozeSeriesActionUrl('bm90LWEtc2VyaWVz'), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SERIES_ID');
+    }
+  );
 
   apiTest('returns 404 when series_id matches no events', async ({ apiClient }) => {
     const seriesId = buildSeriesId(

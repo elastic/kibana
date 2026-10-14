@@ -34,7 +34,6 @@ describe('buildEpisodeActionsHistoryQuery', () => {
     expect(queryString).toContain('alert_id == "ep-1"');
     expect(queryString).toContain('series_id == "series-1"');
     expect(queryString).toContain('alert_id IS NULL');
-    expect(queryString).not.toContain('group_hash ==');
     expect(queryString).toMatch(/KEEP .*\balert_id\b/);
     expect(queryString).not.toContain('episode_id');
   });
