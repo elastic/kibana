@@ -186,15 +186,15 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
   layout_gap: dashboardRule('appearance', (dashboard) =>
     getPanelContainers(dashboard).flatMap(({ sectionTitle, panels }) => {
       const gap = findFirstGap(panels);
+      const container = describeContainer(sectionTitle);
       return gap === undefined
         ? []
         : [
             {
               rule: 'layout_gap' as const,
               panelIds: [],
-              detail: `empty cell at x=${gap.x} y=${gap.y} in ${describeContainer(
-                sectionTitle
-              )}, above other panels`,
+              container,
+              detail: `empty cell at x=${gap.x} y=${gap.y} in ${container}, above other panels`,
             },
           ];
     })
