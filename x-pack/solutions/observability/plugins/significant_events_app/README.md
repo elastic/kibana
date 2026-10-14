@@ -4,10 +4,11 @@ Owner: `@elastic/nightshift`
 
 Browser-only plugin serving the Significant Events UI at `/app/significant_events`.
 
-The application covers the Significant Events management surface: the sources catalog
-(create, edit and onboard the ES|QL queries Nightshift learns from), knowledge
-indicators, rules (queries), detections and events. Settings is served by Nightshift at
-`/app/nightshift/settings`. The application consumes the `significant_events` plugin
+The application covers the Significant Events management surface: rules (queries),
+detections and events. Sources, knowledge indicators, Cortex, Memory and Decision Trees
+are served by Nightshift (`/app/nightshift/sources`, `/app/nightshift/knowledge`). Settings
+is served by Nightshift at `/app/nightshift/settings`. The application consumes the
+`significant_events` plugin
 (server APIs via the typed `significantEventsRepositoryClient`) and the `nightshiftSources`
 plugin (the sources API via `getClient()`).
 

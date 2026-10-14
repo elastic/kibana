@@ -10,12 +10,12 @@ import { SignificantEventsAppLocatorDefinition } from './significant_events_app_
 describe('SignificantEventsAppLocatorDefinition', () => {
   const locator = new SignificantEventsAppLocatorDefinition();
 
-  it('defaults to the sources tab with no query params', async () => {
+  it('defaults to the queries tab with no query params', async () => {
     const location = await locator.getLocation({});
 
     expect(location).toEqual({
       app: 'significantEvents',
-      path: '/sources',
+      path: '/queries',
       state: {},
     });
   });
