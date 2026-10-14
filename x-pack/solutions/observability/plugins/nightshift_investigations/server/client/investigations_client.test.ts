@@ -942,14 +942,12 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });
 
-  it('leaves every write to the workflow: the start only reads, claims, and runs', async () => {
+  it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
     await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
       investigation_id: 'inv-new',
     });
 
-    expect(conversations.create).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
     expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
       expect.objectContaining({
         conversationId: 'inv-new',
@@ -966,6 +964,59 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         { type: 'alert', id: 'alert-2', triggerType: 'automatic', snapshot: makeAlert('alert-2') },
       ],
     });
+  });
+
+  it('creates the conversation of a new investigation once the start is accepted, with the run recorded', async () => {
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'inv-new', templateId: 'investigation' })
+    );
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-new', {
+      workflow_execution_ids: ['exec-1'],
+    });
+    // After the claim and the run, so a denied or failed start creates nothing.
+    expect(subjectsClient.claimSubjects.mock.invocationCallOrder[0]).toBeLessThan(
+      conversations.create.mock.invocationCallOrder[0]
+    );
+    expect(mockManagement.runWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
+      conversations.create.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not record the run again when the workflow created the conversation first', async () => {
+    withConversations(makeConversation({ id: 'inv-new', workflowExecutionIds: ['exec-1'] }));
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+
+    expect(conversations.create).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('still starts the investigation when creating its conversation fails', async () => {
+    conversations.create.mockRejectedValueOnce(new Error('boom'));
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+  });
+
+  it('creates no conversation when a start fails to run the workflow', async () => {
+    mockManagement.runWorkflow.mockRejectedValueOnce(new Error('Workflow launch failed'));
+
+    await expect(startAlerts('alert-1')).rejects.toThrow('Workflow launch failed');
+
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it('creates no conversation for a follow-up', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-pending' });
+
+    expect(conversations.create).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
   it('continues the most recently updated open investigation sharing any subject', async () => {

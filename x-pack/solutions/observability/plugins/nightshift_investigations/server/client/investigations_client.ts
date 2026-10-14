@@ -505,6 +505,10 @@ export class NightshiftInvestigationsClient {
       'nightshift-investigations'
     );
 
+    if (!isFollowUp) {
+      await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
+    }
+
     this.logger.info(
       `${isFollowUp ? 'Continued' : 'Started'} investigation "${investigationId}" for ${
         subject.type
@@ -512,6 +516,43 @@ export class NightshiftInvestigationsClient {
     );
 
     return { investigation_id: investigationId };
+  }
+
+  /**
+   * Creates the conversation of a new investigation as soon as its start is accepted, with the
+   * accepted run recorded, so the investigation is listed as in progress right away and the
+   * subject claims point at an open investigation even while the run waits in a busy task queue.
+   * Without it, a claim older than its pending window would look abandoned and the next start for
+   * the same subject would open a second investigation. The run's `_ensure` step gets this
+   * conversation and records the subjects. A failure here does not fail the start: the run creates
+   * the conversation itself.
+   */
+  private async createAcceptedInvestigation({
+    conversations,
+    investigationId,
+    executionId,
+  }: {
+    conversations: ConversationPublicClient;
+    investigationId: string;
+    executionId: string;
+  }): Promise<void> {
+    try {
+      const { workflowExecutionIds } = await getOrCreateInvestigationConversation({
+        conversations,
+        id: investigationId,
+      });
+      if (!workflowExecutionIds.includes(executionId)) {
+        await conversations.patchMetadata(investigationId, {
+          workflow_execution_ids: [...workflowExecutionIds, executionId],
+        });
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Could not create the conversation of investigation "${investigationId}" on start; its run creates it: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   /** Charges the daily automatic quota for a start that opens a new investigation. */
