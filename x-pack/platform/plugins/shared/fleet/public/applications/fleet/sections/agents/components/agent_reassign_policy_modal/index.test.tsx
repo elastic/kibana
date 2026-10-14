@@ -361,4 +361,22 @@ describe('AgentReassignAgentPolicyModal', () => {
       expect(mockSendPostAgentReassign).not.toHaveBeenCalled();
     });
   });
+
+  describe('policy ordering', () => {
+    it('lists policies alphabetically, case-insensitive', async () => {
+      mockPolicies([
+        { id: 'p-c', name: 'charlie', is_managed: false },
+        { id: 'p-a', name: 'Alpha', is_managed: false },
+        { id: 'p-b', name: 'bravo', is_managed: false },
+      ]);
+      const { utils } = render({ agents: [{ id: 'agent-1', policy_id: 'p-a' } as any] });
+
+      act(() => {
+        fireEvent.click(utils.getByTestId('comboBoxToggleListButton'));
+      });
+
+      const options = await utils.findAllByRole('option');
+      expect(options.map((o) => o.textContent)).toEqual(['Alpha', 'bravo', 'charlie']);
+    });
+  });
 });

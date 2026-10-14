@@ -19,8 +19,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { internalStateActions } from '../../state_management/redux';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import * as resolveEsqlSourceModule from '../../data_fetching/resolve_esql_source';
 
 // Mock ControlGroupRendererApi
@@ -189,10 +188,7 @@ describe('useESQLVariables', () => {
       const { toolkit } = await renderUseESQLVariables({ isEsqlMode: true });
       const resolveSpy = jest
         .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
-        .mockResolvedValue({
-          esqlSource: createMockEsqlSource(),
-          dataView: dataViewMockWithTimeField,
-        });
+        .mockResolvedValue(await createResolvedMockEsqlSource());
 
       act(() => {
         toolkit.internalState.dispatch(

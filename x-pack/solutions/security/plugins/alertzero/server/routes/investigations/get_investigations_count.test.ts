@@ -70,6 +70,20 @@ describe('registerGetInvestigationsCountRoute', () => {
     });
   });
 
+  it('counts closed investigations by not filtering on status', async () => {
+    const list = jest.fn().mockResolvedValue({ results: [], total: 2 });
+    const { handler } = makeDeps(list);
+
+    await handler(
+      makeContext(),
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    const [{ filter }] = list.mock.calls[0];
+    expect(filter).not.toMatch(/status|closed/i);
+  });
+
   it('returns { total } from the list response', async () => {
     const list = jest.fn().mockResolvedValue({ results: [], total: 7 });
     const { handler } = makeDeps(list);

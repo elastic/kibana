@@ -29,6 +29,7 @@ import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
 import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -96,6 +97,10 @@ jest.mock('../hooks/use_feedback_loop_enabled', () => ({
   useFeedbackLoopEnabled: jest.fn(() => true),
 }));
 
+jest.mock('../hooks/use_memory_enabled', () => ({
+  useMemoryEnabled: jest.fn(() => true),
+}));
+
 jest.mock('../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => ({
     agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
@@ -105,6 +110,7 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
 }));
 
 const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
+const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 
 jest.mock('../hooks/use_signals', () => ({
   useSignals: () => ({
@@ -119,6 +125,7 @@ jest.mock('../hooks/use_signals', () => ({
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -216,6 +223,7 @@ describe('AiIndexDetailPage', () => {
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
     mockUseKiList.mockImplementation(() => defaultKiListMock);
+    mockUseMemoryEnabled.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -225,7 +233,7 @@ describe('AiIndexDetailPage', () => {
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
     const services = createServices();
-    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [], memory_enabled: true });
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
@@ -246,6 +254,27 @@ describe('AiIndexDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss AI index created message' }));
 
     expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['the global memory setting is disabled', false, true],
+    ['memory is disabled for the AI index', true, false],
+  ])('hides memory wording when %s', async (_scenario, globalMemoryEnabled, indexMemoryEnabled) => {
+    mockUseMemoryEnabled.mockReturnValue(globalMemoryEnabled);
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [],
+      memory_enabled: indexMemoryEnabled,
+    });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+    const callout = screen.getByTestId('contextAiIndexCreatedCallout');
+    expect(callout).toHaveTextContent('Add sources to build agent context from your data.');
+    expect(callout).not.toHaveTextContent(/memory/i);
   });
 
   it('does not show the success callout without creation navigation state', async () => {
@@ -363,6 +392,29 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
+  });
+
+  it('renders the per-index memory toggle when memory is globally enabled', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexMemoryToggle')).toBeInTheDocument();
+  });
+
+  it('hides the per-index memory toggle when memory is globally disabled', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    mockUseMemoryEnabled.mockReturnValue(false);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexMemoryToggle')).not.toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -521,6 +573,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -557,6 +610,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -611,6 +665,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -729,6 +784,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [{ type: 'workflow', value: 'wf-created' }],
             sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -828,6 +884,7 @@ describe('AiIndexDetailPage', () => {
         '/api/context_engine/ai_index/my-ai-index',
         expect.objectContaining({
           body: JSON.stringify({
+            memory_enabled: false,
             dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
             automations: [],
             sources: [{ type: 'esql', value: 'FROM My view' }],

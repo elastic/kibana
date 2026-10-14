@@ -45,7 +45,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
-import { isMac } from '@kbn/shared-ux-utility';
+import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
@@ -53,6 +53,7 @@ import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
+import { getEditorPlaceholder } from './get_editor_placeholder';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
 import { useNlToEsqlCheck } from './hooks/use_nl_to_esql_check';
@@ -141,8 +142,10 @@ const ESQLEditorInternal = function ESQLEditor({
   dataErrorsControl,
   mergeExternalMessages,
   hideQuickSearch,
+  hasExternalVisor,
   queryStats,
   enableResourceBrowser = false,
+  enableCreateView = false,
   onESQLDocsFlyoutVisibilityChanged,
   onVisorNlResultReady,
   editorApiRef,
@@ -214,7 +217,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const esqlService = kibana.services?.esql;
   const variablesService = esqlService?.variablesService;
-  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
+  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? DEFAULT_HISTOGRAM_BAR_TARGET;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
 
   // To make server side errors less "sticky", register the query that last errored
@@ -398,7 +401,8 @@ const ESQLEditorInternal = function ESQLEditor({
         return;
       }
 
-      if (!editorRef.current) {
+      // Focus may have moved on since (e.g. to the visor input); triggerSuggest would steal it back
+      if (!editorRef.current?.hasTextFocus()) {
         return;
       }
 
@@ -503,6 +507,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     minimalQueryRef,
     getJoinIndicesCallback,
+    effectiveProjectRouting,
   } = useMemoizedCaches({
     code,
     core,
@@ -577,6 +582,7 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
     getJoinIndicesCallback,
     enableResourceBrowser,
+    projectRouting: effectiveProjectRouting,
   });
 
   const {
@@ -602,6 +608,7 @@ const ESQLEditorInternal = function ESQLEditor({
   });
 
   const isNlToEsqlEnabled = useNlToEsqlCheck();
+  const placeholder = getEditorPlaceholder({ hasExternalVisor, isNlToEsqlEnabled });
 
   const onUpdateAndSubmitQueryRef = useRef(onUpdateAndSubmitQuery);
   onUpdateAndSubmitQueryRef.current = onUpdateAndSubmitQuery;
@@ -692,7 +699,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
 
   const visorNlOnSubmit = useCallback(
-    (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH),
+    (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH_NL),
     [onUpdateAndSubmitQuery]
   );
 
@@ -701,6 +708,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorModel,
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
+    telemetryService,
   });
 
   useEffect(() => {
@@ -807,17 +815,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
-                placeholder={
-                  isNlToEsqlEnabled
-                    ? i18n.translate('esqlEditor.placeholder', {
-                        defaultMessage:
-                          "Start typing ES|QL, or describe what you're looking for in a // comment, then press {commandKey}+J to generate the query",
-                        values: { commandKey: isMac ? '⌘' : 'Ctrl' },
-                      })
-                    : i18n.translate('esqlEditor.placeholder.basic', {
-                        defaultMessage: 'Start typing ES|QL',
-                      })
-                }
+                placeholder={placeholder}
                 options={codeEditorOptions}
                 width="100%"
                 suggestionProvider={suggestionProvider}
@@ -988,7 +986,7 @@ const ESQLEditorInternal = function ESQLEditor({
           isVisible={isVisorOpen}
           onNlResult={showVisorReview}
           onUpdateAndSubmitQuery={(newQuery) =>
-            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH_KQL)
           }
           isDisabled={Boolean(isDisabled)}
           disableSubmitAction={Boolean(disableSubmitAction)}
@@ -1038,6 +1036,7 @@ const ESQLEditorInternal = function ESQLEditor({
         starredQueriesService={starredQueriesService}
         queryStats={queryStats}
         hideQueryHistory={hideQueryHistory}
+        enableCreateView={enableCreateView}
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         {...editorMessages}
         onErrorClick={onErrorClick}

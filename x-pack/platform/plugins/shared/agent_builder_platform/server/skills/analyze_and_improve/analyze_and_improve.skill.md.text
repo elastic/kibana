@@ -104,8 +104,8 @@ A **KI** is a structured fact stored in a searchable AI index or datastream (bac
 Agents retrieve through `platform.context_engine.query_ai_indices`, which returns only current,
 active, unexpired KIs: on a data stream the newest revision per `id`, never one whose
 `governance.lifecycle.status` is `deleted` or whose `expires_at` has passed, and with
-`governance` dropped. Those are the KIs an agent can retrieve. Naming
-`governance.lifecycle.status` or `expires_at` in a query switches off that one filter, and naming
+`governance` dropped. Those are the KIs an agent can retrieve. A top-level `WHERE` command on
+`governance.lifecycle.status` or `expires_at` switches off that one filter, and naming
 any `governance.*` field keeps it in the result, so diagnosis can read tombstones, expired KIs and
 provenance through the same tool.
 
@@ -139,10 +139,10 @@ Access patterns live in the KI's `content`, and any ES|QL among them is mirrored
 
 ```
 Access patterns:
-  Q: Status of a specific support case
-  ESQL: FROM raw-cases-all | WHERE case_number == ?case_number | KEEP status, priority | LIMIT 1
-  params: case_number (keyword, e.g. "02115676")
-  returns: status, priority for one case
+  Q: Status of a specific order
+  ESQL: FROM orders | WHERE order_id == ?order_id | KEEP status, updated_at | LIMIT 1
+  params: order_id (keyword, e.g. "A-20481")
+  returns: status, updated_at for one order
 ```
 
 **Connector — `execute_connector_sub_action` call:**
@@ -172,7 +172,7 @@ documents that triggered it, and the full-text `field : "value"` match operator.
    A few high-leverage KIs beat many thin ones.
 
 2. **Precompute the path, not the value.** Cache stable things — themes, when-to-use, joins, query
-   templates. Materialize a literal answer only for **immutable** facts, such as a resolved case's
+   templates. Materialize a literal answer only for **immutable** facts, such as a closed incident's
    root cause. Never materialize volatile facts (status, priority, counts, dates): they rot and
    produce confidently wrong answers. Immutability sets the durability tier — immutable-fact KIs
    omit `expires_at`; anything that can drift gets a TTL and is refreshed on re-run.
@@ -206,9 +206,10 @@ Choosing the strategy is this skill's job, and a strategy is three answers, stat
 
 The `strategy_catalog` reference attached to this skill has the six named strategies (Index/Table
 Metadata, Bottom-Up, Selective / Outlier, Atomic Facts, Cumulative / Wiki-style, Detection /
-Feature) as worked examples of those three answers, with their `type` values, the quick guide and
-the default: unsure means Index/Table Metadata, which is cheap, fast and always useful. When the
-findings fit an example, name it. When they do not — a case corpus with a root-cause structure, a
+Feature) as worked examples of those three answers, with their `type` values and the signals in the
+data that call for each. Choose from those signals, not from a default: a strategy the data does not
+call for spends the KI budget on indicators nobody retrieves. When the findings fit an example,
+name it. When they do not — an incident corpus with a root-cause structure, a
 unit grounded from three indices — write the three answers from the findings rather than picking
 the nearest name and inheriting a shape that does not fit. State the strategy in the proposal as
 the three answers even when it has a name, because the person reading it has not read the catalog.
@@ -255,7 +256,7 @@ is a hallucination wearing a number.
 
 **Evidence discipline.** Two to five short, specific evidence lines quoting real observed values —
 `service.name=checkout`, `error.type=timeout (312 of 1,204)`,
-`customer_flight_activity.Loyalty Number: 0 of 31,901 populated`. When derived from specific
+`inventory.supplier_id: 0 of 31,901 populated`. When derived from specific
 documents, record the minimal covering set of source ids: enough to trace every claim, no more.
 
 ## Ground the proposal in the data before writing it
@@ -298,7 +299,8 @@ proposals for the same index read the same way:
 
 - **Suggested automation** — the strategy by name where a catalog strategy fits (or "custom" with
   the unit named), the template it starts from, and whether it is new or replaces an automation,
-  naming which.
+  naming which. Then the runner-up: the next-best strategy and the evidence line that decided
+  against it, so the reader can see the choice was made rather than defaulted.
 - **Unit** — what one KI is about, and how many units the filtered corpus holds (a count you ran
   with the corpus filter applied).
 - **Carries** — what one KI carries: the orientation and the access patterns, and the grounded
@@ -311,9 +313,10 @@ proposals for the same index read the same way:
   is not ready.
 - **Cost** — required. The corpus size, how many units one run writes (the unit count, or the
   automation's own KI cap when that is lower), how many model calls that is (one per unit for the
-  profile templates, one per document for the document template), and, once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
+  profile templates, one per document for the document template, one per source for index metadata), and, once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
   `ai-index-automations` lays out. Before the pilot, say the time is not yet measured rather than
-  guessing.
+  guessing. For a template install, the pilot is a `run_automation` call with `pilotSize`;
+  `ai-index-automations` says when a template install gets a pilot and how big it is.
 - **Example questions** — optional. Include it only when you are sure: a question belongs here
   only if an access pattern the KI will carry answers it, and every field that pattern filters or
   aggregates on was non-null in the sampled rows or had a probe count above zero. Do not run extra
@@ -473,8 +476,8 @@ stays in `attributes.error_text`.
   calls when trace details are available. Determine whether the agent composed the query or followed
   an access pattern from a previously retrieved KI. If the KI contains the malformed query, inspect
   its producing workflow and propose correcting the generation step — and note that a query in
-  `attributes.esql` passed `verifyKi`, which only parses, so a query can be syntactically valid and
-  still fail on unknown fields at execution time.
+  `attributes.esql` passed the verifiers, which parse it and run it, so a failure since then points
+  at the data changing under it: a renamed field, a dropped index, a mapping change.
 - **Repeated `coverage_gap` on the same raw index, especially with `fell_back_to_raw`.** Agents
   keep reaching for data no indicator covers, and the raw queries tell you what an automation
   should be producing. Check the corpus filter first — the data may be excluded rather than
@@ -555,8 +558,8 @@ against data you cannot see.
 index nobody has built cannot have been queried, and a probe that comes back empty only costs a
 turn. The analysis is of the data itself: what it contains (`platform.core.get_index_mapping`,
 then the sampling queries, join probes and unit count from "Ground the proposal in the data"), what questions
-it could answer, and which strategy fits, stated as the three answers. Start at Index/Table
-Metadata, and say that the proposal rests on the shape of the data rather than on observed
+it could answer, and which strategy fits, stated as the three answers. Choose the strategy from the
+signals in `strategy_catalog`, and say that the proposal rests on the shape of the data rather than on observed
 retrieval — with the Evidence section carrying the counts that shape was read from.
 Load `ai-index-sources` after the strategy, to write the source query and the filter the strategy
 calls for — not before, because the filter depends on the unit.

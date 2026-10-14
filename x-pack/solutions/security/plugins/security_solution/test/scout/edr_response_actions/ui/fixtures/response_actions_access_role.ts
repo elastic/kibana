@@ -26,9 +26,14 @@ export const getResponseActionsAccessRole = (): KibanaRole => {
     },
     kibana: role.kibana.map(({ base, feature, spaces }) => ({
       base: [...base],
-      feature: Object.fromEntries(
-        Object.entries(feature).map(([featureName, privileges]) => [featureName, [...privileges]])
-      ),
+      feature: {
+        ...Object.fromEntries(
+          Object.entries(feature).map(([featureName, privileges]) => [featureName, [...privileges]])
+        ),
+        // The Security cases app checks securitySolutionCasesV3. generalCasesV3
+        // does not grant that page.
+        securitySolutionCasesV3: ['all'],
+      },
       spaces: [...spaces],
     })),
   };

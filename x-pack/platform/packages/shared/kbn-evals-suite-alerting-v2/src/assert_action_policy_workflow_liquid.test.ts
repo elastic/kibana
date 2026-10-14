@@ -15,8 +15,8 @@ describe('isActionPolicyPayloadLiquidPath', () => {
   it.each([
     'inputs.payload',
     'inputs.payload.policyId',
-    'inputs.payload.episodes',
-    'inputs.payload.episodes[0].data.host.name',
+    'inputs.payload.alerts',
+    'inputs.payload.alerts[0].data.host.name',
     'inputs.payload.rules',
   ])('matches %s', (path) => {
     expect(isActionPolicyPayloadLiquidPath(path)).toBe(true);
@@ -36,22 +36,24 @@ describe('isActionPolicyPayloadPathInSchema', () => {
     'id',
     'policyId',
     'groupKey',
-    'episodes',
-    'episodes[0].episode_status',
-    'episodes[0].data.host.name',
+    'alerts',
+    'alerts[0].alert_status',
+    'alerts[0].data.host.name',
     'rules',
-    'rules[ep.rule_id].name',
+    'rules[alert.rule_id].name',
   ])('accepts %s', (relativePath) => {
     expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(true);
   });
 
   it.each([
     'foo',
-    'episodes[0].bogus',
-    'episodes.foo',
+    'alerts[0].bogus',
+    'alerts.foo',
+    'episodes',
+    'episodes[0].episode_status',
     'policy_id',
     'policyId.anything',
-    'rules[ep.rule_id].nmae',
+    'rules[alert.rule_id].nmae',
   ])('rejects %s', (relativePath) => {
     expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(false);
   });
@@ -71,12 +73,12 @@ steps:
     with:
       to:
         - oncall@example.com
-      subject: "Alert — {{ inputs.payload.episodes | size }} episode(s)"
+      subject: "Alert — {{ inputs.payload.alerts | size }} alert(s)"
       message: >
-        {% for ep in inputs.payload.episodes %}
-        - Host: {{ ep.data.host.name | default: "unknown" }}
-          Status: {{ ep.episode_status }}
-          Rule: {{ inputs.payload.rules[ep.rule_id].name }}
+        {% for alert in inputs.payload.alerts %}
+        - Host: {{ alert.data.host.name | default: "unknown" }}
+          Status: {{ alert.alert_status }}
+          Rule: {{ inputs.payload.rules[alert.rule_id].name }}
         {% endfor %}
         View: {{ execution.url }}
 `;
@@ -84,7 +86,7 @@ steps:
   it('accepts a workflow with valid inputs.payload.* fields', () => {
     const { variables } = assertActionPolicyWorkflowLiquid(validWorkflowYaml);
 
-    expect(variables).toEqual(expect.arrayContaining(['inputs.payload.episodes', 'execution.url']));
+    expect(variables).toEqual(expect.arrayContaining(['inputs.payload.alerts', 'execution.url']));
   });
 
   it('returns the parsed workflow document', () => {
@@ -110,13 +112,13 @@ steps:
   - name: send_email
     type: email
     with:
-      message: "{{ inputs.payload.episodes | "
+      message: "{{ inputs.payload.alerts | "
 `;
 
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
       new Error(
         'Generated workflow contains invalid Liquid template syntax: ' +
-          'output "{{ inputs.payload.episodes | " not closed, line:1, col:1'
+          'output "{{ inputs.payload.alerts | " not closed, line:1, col:1'
       )
     );
   });
@@ -127,14 +129,14 @@ steps:
   - name: send_email
     type: email
     with:
-      message: "{{ inputs.payload.policy_id }} {{ inputs.payload.alerts }}"
+      message: "{{ inputs.payload.policy_id }} {{ inputs.payload.episodes }}"
 `;
 
     expect(() => assertActionPolicyWorkflowLiquid(yaml)).toThrow(
       new Error(
         'Generated workflow Liquid references unknown `inputs.payload` fields: ' +
-          '`inputs.payload.alerts`, `inputs.payload.policy_id`. ' +
-          'Allowed top-level payload fields: id, policyId, groupKey, episodes, rules.'
+          '`inputs.payload.episodes`, `inputs.payload.policy_id`. ' +
+          'Allowed top-level payload fields: id, policyId, groupKey, alerts, rules.'
       )
     );
   });

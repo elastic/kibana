@@ -66,16 +66,17 @@ describe('buildEpisodesBaseQuery', () => {
     expect(esql.indexOf('WHERE group_hash ==')).toBeLessThan(esql.indexOf('INLINE STATS'));
   });
 
-  it('unifies episode.id and episode_id before computing per-episode action stats', () => {
+  it('unifies alert.id and alert_id before computing per-episode action stats', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
-    expect(esql).toMatch(/EVAL\s+episode_id\s*=\s*COALESCE\(`episode\.id`,\s*episode_id\)/);
+    expect(esql).toMatch(/EVAL\s+alert_id\s*=\s*COALESCE\(`alert\.id`,\s*alert_id\)/);
     expect(esql).toMatch(
       /last_ack_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("ack",\s*"unack"\)\)/
     );
     expect(esql).toMatch(
       /last_assignee_uid\s*=\s*LAST\(assignee_uid,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"assign"/
     );
-    expect(esql).toMatch(/BY\s*episode_id/);
+    expect(esql).toMatch(/BY\s*alert_id/);
+    expect(esql).not.toContain('episode_id');
   });
 });
 
@@ -89,6 +90,12 @@ describe('duration lower bound flag', () => {
     expect(queryString).toContain(
       'first_series_event_timestamp = MIN(@timestamp) WHERE type == "alert"'
     );
+  });
+
+  it('keeps the source field in the list query', () => {
+    const listQuery = buildEpisodesQuery(SPACE_ID).print('basic');
+
+    expect(listQuery).toMatch(/KEEP .*\bsource\b/);
   });
 
   it('flags episodes whose start was not seen, in the list query only', () => {
@@ -447,11 +454,11 @@ describe('buildEpisodesQuery', () => {
       'action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")'
     );
 
-    expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
+    expect(queryString).toContain('EVAL alert_id = COALESCE(`alert.id`, alert_id)');
     expect(queryString).toContain(
       'last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"'
     );
-    expect(queryString).toContain('BY episode_id');
+    expect(queryString).toContain('BY alert_id');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
   });
 
@@ -466,7 +473,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain(
       'action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")'
     );
-    expect(queryString).toContain('EVAL episode_id = COALESCE(`episode.id`, episode_id)');
+    expect(queryString).toContain('EVAL alert_id = COALESCE(`alert.id`, alert_id)');
     expect(queryString).toContain('last_assignee_uid');
     expect(queryString).not.toContain('WHERE last_assignee_uid');
   });

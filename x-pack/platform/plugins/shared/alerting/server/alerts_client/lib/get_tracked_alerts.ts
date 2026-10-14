@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -17,76 +17,18 @@ import {
   ALERT_STATUS_DELAYED,
   ALERT_TRACKED,
   ALERT_UUID,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import type { RawAlertInstance, RuleAlertData } from '../../types';
 import type { TrackedAADAlerts, SearchResult } from '../types';
-import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 
 // Tracked docs cannot exceed ~2x maxAlerts; 10k is the ES default window and a safe cap.
 const TRACKED_ALERTS_FETCH_SIZE = 10000;
 
-export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
-  ruleId: string;
-  activeAlertsFromState: Record<string, RawAlertInstance>;
-  recoveredAlertsFromState: Record<string, RawAlertInstance>;
-  search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
-  logger: Logger;
-  ruleInfoMessage: string;
-  logTags: { tags: string[] };
-}
-
-export async function getTrackedAlerts<AlertData extends RuleAlertData>({
-  ruleId,
-  activeAlertsFromState,
-  recoveredAlertsFromState,
-  search,
-  logger,
-  ruleInfoMessage,
-  logTags,
-}: GetTrackedAlertsParams<AlertData>): Promise<TrackedAADAlerts<AlertData>> {
-  const trackedAlerts = createEmptyTrackedAlerts<AlertData>();
-
-  const searchWithRetry = (queryBody: Record<string, unknown>) =>
-    retryTransientEsErrors(() => search(queryBody), { logger });
-
-  const hits = await fetchTrackedAlerts({
-    ruleId,
-    search: searchWithRetry,
-  });
-
-  populateTrackedAlerts(trackedAlerts, hits);
-
-  const alertUuidsFromState = getAlertUuidsFromState(
-    activeAlertsFromState,
-    recoveredAlertsFromState
-  );
-  const missingUuids = findMissingAlertUuids(alertUuidsFromState, trackedAlerts);
-
-  if (missingUuids.length > 0) {
-    logger.warn(
-      `Found ${missingUuids.length} alerts in task state not returned by tracked alerts query ${ruleInfoMessage}. Fetching them directly to restore tracking info.`,
-      logTags
-    );
-    try {
-      const missingHits = await fetchAlertsByIds({
-        ruleId,
-        alertUuids: missingUuids,
-        search: searchWithRetry,
-      });
-
-      populateTrackedAlerts(trackedAlerts, missingHits);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      logger.error(`Error fetching missing tracked alerts ${ruleInfoMessage} - ${errorMessage}`, {
-        tags: logTags.tags,
-        error: { stack_trace: err.stack },
-      });
-    }
-  }
-
-  return trackedAlerts;
-}
+export type TrackedAlertsSearch<AlertData extends RuleAlertData> = (
+  queryBody: Record<string, unknown>
+) => Promise<SearchResult<AlertData>>;
 
 export function createEmptyTrackedAlerts<
   AlertData extends RuleAlertData
@@ -99,26 +41,27 @@ export function createEmptyTrackedAlerts<
     all: {},
     seqNo: {},
     primaryTerm: {},
+    instanceIdIndex: { active: {}, recovered: {}, delayed: {} },
     get(uuid: string) {
       return this.all[uuid];
     },
     getById(id: string) {
-      return (
-        Object.values(this.active).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
-        Object.values(this.recovered).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
-        Object.values(this.delayed).find((alert) => get(alert, ALERT_INSTANCE_ID) === id)
-      );
+      const uuid =
+        this.instanceIdIndex.active[id] ??
+        this.instanceIdIndex.recovered[id] ??
+        this.instanceIdIndex.delayed[id];
+      return uuid ? this.all[uuid] : undefined;
     },
   };
 }
 
-async function fetchTrackedAlerts<AlertData extends RuleAlertData>({
+export async function fetchTrackedAlerts<AlertData extends RuleAlertData>({
   ruleId,
   search,
 }: {
   ruleId: string;
-  search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
-}) {
+  search: TrackedAlertsSearch<AlertData>;
+}): Promise<SearchResult<AlertData>['hits']> {
   const alerts = await search({
     size: TRACKED_ALERTS_FETCH_SIZE,
     seq_no_primary_term: true,
@@ -133,15 +76,15 @@ async function fetchTrackedAlerts<AlertData extends RuleAlertData>({
   return alerts.hits;
 }
 
-async function fetchAlertsByIds<AlertData extends RuleAlertData>({
+export async function fetchAlertsByIds<AlertData extends RuleAlertData>({
   ruleId,
   alertUuids,
   search,
 }: {
   ruleId: string;
   alertUuids: string[];
-  search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
-}) {
+  search: TrackedAlertsSearch<AlertData>;
+}): Promise<SearchResult<AlertData>['hits']> {
   const result = await search({
     size: alertUuids.length,
     seq_no_primary_term: true,
@@ -164,23 +107,65 @@ export function populateTrackedAlerts<AlertData extends RuleAlertData>(
   for (const hit of hits) {
     const alertHit = hit._source as Alert & AlertData;
     const alertUuid = get(alertHit, ALERT_UUID);
+    const instanceId = get(alertHit, ALERT_INSTANCE_ID);
+    const status = get(alertHit, ALERT_STATUS);
 
     trackedAlerts.all[alertUuid] = alertHit;
-
-    const status = get(alertHit, ALERT_STATUS);
-    if (status === ALERT_STATUS_ACTIVE) {
-      trackedAlerts.active[alertUuid] = alertHit;
-    }
-    if (status === ALERT_STATUS_RECOVERED) {
-      trackedAlerts.recovered[alertUuid] = alertHit;
-    }
-    if (status === ALERT_STATUS_DELAYED) {
-      trackedAlerts.delayed[alertUuid] = alertHit;
-    }
     trackedAlerts.indices[alertUuid] = hit._index;
     trackedAlerts.seqNo[alertUuid] = hit._seq_no;
     trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
+
+    const bucket = getStatusBucket(trackedAlerts, status);
+    if (!bucket) {
+      continue;
+    }
+    bucket.alerts[alertUuid] = alertHit;
+    indexByInstanceId(bucket.index, instanceId, alertUuid, alertHit, trackedAlerts.all);
   }
+}
+
+function getStatusBucket<AlertData extends RuleAlertData>(
+  trackedAlerts: TrackedAADAlerts<AlertData>,
+  status: string | undefined
+): { alerts: Record<string, Alert & AlertData>; index: Record<string, string> } | undefined {
+  switch (status) {
+    case ALERT_STATUS_ACTIVE:
+      return { alerts: trackedAlerts.active, index: trackedAlerts.instanceIdIndex.active };
+    case ALERT_STATUS_RECOVERED:
+      return { alerts: trackedAlerts.recovered, index: trackedAlerts.instanceIdIndex.recovered };
+    case ALERT_STATUS_DELAYED:
+      return { alerts: trackedAlerts.delayed, index: trackedAlerts.instanceIdIndex.delayed };
+    default:
+      return undefined;
+  }
+}
+
+// Keeps one uuid per instance id within a status bucket. When two documents share an
+// instance id, the one that started most recently wins; ties keep the first one seen.
+function indexByInstanceId<AlertData extends RuleAlertData>(
+  index: Record<string, string>,
+  instanceId: string | undefined,
+  alertUuid: string | undefined,
+  alertHit: Alert & AlertData,
+  allAlerts: Record<string, Alert & AlertData>
+): void {
+  if (!instanceId || !alertUuid) {
+    return;
+  }
+  const existingUuid = index[instanceId];
+  if (!existingUuid) {
+    index[instanceId] = alertUuid;
+    return;
+  }
+  if (getAlertStartTime(alertHit) > getAlertStartTime(allAlerts[existingUuid])) {
+    index[instanceId] = alertUuid;
+  }
+}
+
+function getAlertStartTime(alert: Alert | undefined): number {
+  const start = get(alert, ALERT_START) ?? get(alert, TIMESTAMP);
+  const time = start ? new Date(start).getTime() : NaN;
+  return Number.isNaN(time) ? 0 : time;
 }
 
 export function findMissingAlertUuids<AlertData extends RuleAlertData>(

@@ -429,7 +429,11 @@ export function registerConversationRoutes({
           conversationsService.getScopedClient({ request }),
           agentsService.getRegistry({ request }),
         ]);
-        const publicClient = createConversationPublicClient({ client, agentRegistry });
+        const publicClient = createConversationPublicClient({
+          client,
+          agentRegistry,
+          source: 'http_api',
+        });
 
         let conversation: CreateConversationResponse;
         try {
@@ -515,7 +519,8 @@ export function registerConversationRoutes({
         const client = await conversationsService.getScopedClient({ request });
         const accessControl = await client.updateAccessControl(
           conversationId,
-          request.body as UpdateConversationAccessControlRequestBody
+          request.body as UpdateConversationAccessControlRequestBody,
+          { source: 'http_api' }
         );
 
         return response.ok<UpdateConversationAccessControlResponse>({
@@ -592,10 +597,10 @@ export function registerConversationRoutes({
         const { conversation_id: conversationId } = request.params;
 
         const client = await conversationsService.getScopedClient({ request });
-        const events = await client.addCustomEvents({
-          id: conversationId,
-          events: request.body.events,
-        });
+        const events = await client.addCustomEvents(
+          { id: conversationId, events: request.body.events },
+          { source: 'http_api' }
+        );
 
         return response.ok<AddConversationEventsResponse>({ body: { events } });
       })

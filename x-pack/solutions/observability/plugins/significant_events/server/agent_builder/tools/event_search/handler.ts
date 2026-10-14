@@ -13,8 +13,8 @@ import {
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
-  type SignificantEventsReadClient,
 } from '../../../lib/significant_events/events';
+import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
 export const EVENT_SEARCH_MAX_PER_PAGE = 50;
@@ -35,7 +35,7 @@ export interface EventSearchInput {
   query?: string;
   page?: number;
   per_page?: number;
-  stream_names?: string[];
+  source_ids?: string[];
   status?: SignificantEventStatus;
   rule_uuids?: string[];
   event_ids?: string[];
@@ -52,7 +52,7 @@ type SignalSummary = {
 } & Record<Signal['verdict'], number>;
 
 interface DetailedEventSignal {
-  stream_name: string;
+  source_id: string;
   rule_uuid?: string;
   verdict: Signal['verdict'];
   description?: string;
@@ -69,7 +69,7 @@ export interface CompactEventSearchItem
     | 'event_id'
     | 'severity'
     | 'status'
-    | 'stream_names'
+    | 'source_ids'
     | 'summary'
     | 'symptom_hypothesis'
     | 'title'
@@ -87,7 +87,7 @@ interface DetailedEventSearchItem
     | 'event_id'
     | 'severity'
     | 'status'
-    | 'stream_names'
+    | 'source_ids'
     | 'symptom_hypothesis'
     | 'title'
   > {
@@ -172,7 +172,7 @@ const toEventSearchItemBase = (
   | 'event_id'
   | 'severity'
   | 'status'
-  | 'stream_names'
+  | 'source_ids'
   | 'symptom_hypothesis'
   | 'title'
 > => ({
@@ -183,7 +183,7 @@ const toEventSearchItemBase = (
   status: event.status,
   severity: event.severity,
   confidence: event.confidence,
-  stream_names: event.stream_names,
+  source_ids: event.source_ids,
 });
 
 const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
@@ -216,7 +216,7 @@ const toDetailedEvent = (
   return {
     ...toEventSearchItemBase(event),
     signals: pageSignals.map((signal) => ({
-      stream_name: signal.stream_name,
+      source_id: signal.source_id,
       rule_uuid: getRuleUuid(signal),
       verdict: signal.verdict,
       description: truncateSignalDescription(signal.description),
@@ -237,7 +237,7 @@ const buildSearchParams = (view: EventSearchView, params: EventSearchInput) => {
     page: view === 'full' ? 1 : params.page ?? 1,
     perPage: Math.min(requestedPerPage, maxPerPage),
     search: normalizeEventSearchQuery(params.query),
-    stream: params.stream_names,
+    sourceIds: params.source_ids,
     from: params.from ?? DEFAULT_EVENTS_SEARCH_FROM,
     to: params.to ?? DEFAULT_EVENTS_SEARCH_TO,
   };
@@ -263,10 +263,10 @@ const toEnvelope = (response: {
 // The generic lets a call site passing `view: 'full'` (or omitting it, defaulting to 'compact')
 // get back the matching response member, so callers don't need to narrow on `.view` themselves.
 export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
-  eventClient,
+  eventSearchClient,
   params,
 }: {
-  eventClient: SignificantEventsReadClient;
+  eventSearchClient: RuleEventsClient;
   params: EventSearchInput & { view?: V };
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
@@ -276,14 +276,14 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
 
   const sharedParams = buildSearchParams(view, params);
   const response = hasEventSearchFilters(params)
-    ? await eventClient.findLatestByCurrentStatePaginated({
+    ? await eventSearchClient.findLatestByCurrentStatePaginated({
         ...sharedParams,
         status: params.status ? [params.status] : undefined,
         ruleUuids: params.rule_uuids,
         eventIds: params.event_ids,
         topologyFeatureIds: params.topology_feature_ids,
       })
-    : await eventClient.findLatestPaginated(sharedParams);
+    : await eventSearchClient.findLatestPaginated(sharedParams);
 
   const envelope = toEnvelope(response);
 

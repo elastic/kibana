@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, type KibanaRole } from '@kbn/scout';
+import { getPlaywrightTagsFor, type KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { mockFinalAnswer, mockTitleGeneration } from '../../common/llm_mocks';
@@ -32,41 +32,46 @@ const refineWithChatRole: KibanaRole = {
   ],
 };
 
-test.describe('Custom content panel Refine with chat', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.load(DASHBOARD_ARCHIVE);
-  });
+// Local-only: the LLM proxy binds to the runner's loopback, unreachable from a Cloud Kibana.
+test.describe(
+  'Custom content panel Refine with chat',
+  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
+  () => {
+    test.beforeAll(async ({ kbnClient }) => {
+      await kbnClient.importExport.load(DASHBOARD_ARCHIVE);
+    });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(refineWithChatRole);
-    await pageObjects.dashboard.openNewDashboard();
-  });
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginWithCustomRole(refineWithChatRole);
+      await pageObjects.dashboard.openNewDashboard();
+    });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(DASHBOARD_ARCHIVE);
-  });
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.importExport.unload(DASHBOARD_ARCHIVE);
+    });
 
-  test('applies the agent update to the open panel', async ({ pageObjects, llmProxy }) => {
-    const { dashboard, customContentPanel } = pageObjects;
+    test('applies the agent update to the open panel', async ({ pageObjects, llmProxy }) => {
+      const { dashboard, customContentPanel } = pageObjects;
 
-    await dashboard.openAddPanelFlyout();
-    await customContentPanel.openFromAddPanelFlyout();
-    await customContentPanel.setTemplate('<p id="greeting">{{ rows[0]["greeting"].value }}</p>');
-    await customContentPanel.setEsqlQuery('ROW greeting = "hello"');
-    await customContentPanel.applyAndClose();
+      await dashboard.openAddPanelFlyout();
+      await customContentPanel.openFromAddPanelFlyout();
+      await customContentPanel.setTemplate('<p id="greeting">{{ rows[0]["greeting"].value }}</p>');
+      await customContentPanel.setEsqlQuery('ROW greeting = "hello"');
+      await customContentPanel.applyAndClose();
 
-    const iframe = customContentPanel.getPanelIframe();
-    await expect(iframe.getByText('hello', { exact: true })).toBeVisible();
+      const iframe = customContentPanel.getPanelIframe();
+      await expect(iframe.getByText('hello', { exact: true })).toBeVisible();
 
-    mockTitleGeneration(llmProxy, 'Refine custom panel');
-    mockUpdatePanelToolCall(llmProxy, 'ROW greeting = "refined"');
-    mockFinalAnswer(llmProxy, 'I updated the panel.');
+      mockTitleGeneration(llmProxy, 'Refine custom panel');
+      mockUpdatePanelToolCall(llmProxy, 'ROW greeting = "refined"');
+      mockFinalAnswer(llmProxy, 'I updated the panel.');
 
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-    await customContentPanel.refineWithChatButton.click();
-    await customContentPanel.sendChatMessage('Change the greeting');
+      await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+      await customContentPanel.refineWithChatButton.click();
+      await customContentPanel.sendChatMessage('Change the greeting');
 
-    await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-    await expect(iframe.getByText('refined', { exact: true })).toBeVisible();
-  });
-});
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      await expect(iframe.getByText('refined', { exact: true })).toBeVisible();
+    });
+  }
+);

@@ -17,6 +17,7 @@ import type {
   HuntIncompleteness,
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
+import type { HuntBehaviorModels } from '../types';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -168,6 +169,8 @@ const ESQL_GENERATION_CONCURRENCY = 3;
  * `behaviors`, they just do not spend a generation call.
  */
 const MAX_GENERATED_BEHAVIORS = 20;
+/** Matches the `evidence_quote` cap of the package-report step input. */
+const MAX_EVIDENCE_QUOTE_CHARS = 2000;
 /** LIMIT the generator writes into a hunt query when the caller has no row bound. */
 const DEFAULT_HUNT_QUERY_LIMIT = 100;
 /**
@@ -432,7 +435,7 @@ const buildGenerationContext = ({
  * falls back to a non-executable placeholder (no FROM clause).
  */
 const generateGroundedEsql = async ({
-  model,
+  esqlModel,
   esClient,
   logger,
   behaviors,
@@ -442,7 +445,7 @@ const generateGroundedEsql = async ({
   allowedIndices,
   rowLimit,
 }: {
-  model: ScopedModel;
+  esqlModel: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   behaviors: ValidatedBehavior[];
@@ -464,7 +467,7 @@ const generateGroundedEsql = async ({
     async (behavior): Promise<[string, string] | undefined> => {
       try {
         const { query, error } = await generateEsql({
-          model,
+          model: esqlModel,
           esClient: probeClient,
           logger,
           nlQuery:
@@ -557,7 +560,7 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
 };
 
 export const huntBehavior = async (
-  model: ScopedModel,
+  models: HuntBehaviorModels,
   logger: Logger,
   params: HuntBehaviorParams,
   esClient?: ElasticsearchClient
@@ -581,7 +584,9 @@ export const huntBehavior = async (
     allowedIndices.length > 0 &&
     esClient !== undefined;
 
-  const structured = model.chatModel.withStructuredOutput(huntBehaviorLlmExtractionSchema);
+  const structured = models.extraction.chatModel.withStructuredOutput(
+    huntBehaviorLlmExtractionSchema
+  );
   const contextBlock = renderArticleContext(articleContext);
   const result = (await structured.invoke(
     `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
@@ -648,6 +653,8 @@ export const huntBehavior = async (
     const parentTechniqueId = subtechnique?.parentTechniqueId;
     validated.push({
       ...candidate,
+      // Bounded for packaging's input schema; grounding above already used the full quote.
+      evidence_quote: candidate.evidence_quote.slice(0, MAX_EVIDENCE_QUOTE_CHARS),
       technique_id: techniqueId,
       confidence: candidate.llm_confidence,
       technique_name: entry.name,
@@ -735,7 +742,7 @@ export const huntBehavior = async (
       );
     }
     const groundedEsql = await generateGroundedEsql({
-      model,
+      esqlModel: models.esql,
       esClient,
       logger,
       behaviors: generationTargets,

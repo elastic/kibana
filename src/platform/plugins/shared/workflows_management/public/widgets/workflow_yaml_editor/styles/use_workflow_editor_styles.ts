@@ -63,6 +63,15 @@ const editorStyleMap = {
         lineHeight: '1.4',
       },
 
+      '.service-account-placeholder': {
+        color: euiTheme.colors.textSubdued,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBasePlain}`,
+        borderRadius: euiTheme.border.radius.small,
+        padding: `0 ${euiTheme.size.xs}`,
+        cursor: 'pointer',
+      },
+
       '.service-account-name-badge-unavailable': {
         display: 'inline-block',
         backgroundColor: euiTheme.colors.lightShade,
