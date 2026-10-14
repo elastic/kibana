@@ -7,19 +7,19 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useFetchAutomations } from '../automations/hooks/use_automations';
-import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
+import { useFetchLatestInvestigation } from './use_fetch_latest_investigation';
 import { useOnboardingVisibility } from './use_onboarding_visibility';
 
 jest.mock('../automations/hooks/use_automations');
-jest.mock('../hooks/use_fetch_investigations');
+jest.mock('./use_fetch_latest_investigation');
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: { basePath: { get: () => '/s/team-a' } } } }),
 }));
 
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
-const mockUseFetchInvestigations = useFetchInvestigations as jest.Mock;
+const mockUseFetchLatestInvestigation = useFetchLatestInvestigation as jest.Mock;
 
-const investigation = { investigation_id: 'inv-1', status: 'running' };
+const investigation = { id: 'inv-1', in_progress: true };
 
 const setup = ({
   automations = [],
@@ -39,8 +39,8 @@ const setup = ({
     isInitialLoading: false,
     isError: false,
   });
-  mockUseFetchInvestigations.mockReturnValue({
-    investigations,
+  mockUseFetchLatestInvestigation.mockReturnValue({
+    latestInvestigation: investigations[0],
     isInitialLoading: false,
     error: null,
   });

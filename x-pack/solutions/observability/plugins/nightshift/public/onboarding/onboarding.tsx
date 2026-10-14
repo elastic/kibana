@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -17,14 +17,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NightshiftHeader } from '../app/header';
+import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
 import {
+  buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
   setNightshiftInvestigationIdParam,
 } from '../common/url_params';
-import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
+import { useKibana } from '../hooks/use_kibana';
 import { OnboardingIntroBanner } from './intro_banner';
 import {
   OnboardingStepsCard,
@@ -66,12 +68,13 @@ export function NightshiftOnboarding({
   automationsHref,
   onFinish,
 }: {
-  latestInvestigation?: ListInvestigationItem;
+  latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
   /** "I'll do it later" on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const { agentBuilder } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
   const { data, isInitialLoading } = useOnboarding();
@@ -104,7 +107,7 @@ export function NightshiftOnboarding({
     [search]
   );
   const openInvestigation = useCallback(
-    ({ investigation_id: investigationId }: Pick<ListInvestigationItem, 'investigation_id'>) => {
+    ({ id: investigationId }: Pick<InvestigationSummary, 'id'>) => {
       const params = new URLSearchParams(history.location.search);
       setNightshiftInvestigationIdParam(params, investigationId);
       history.replace({ search: params.toString() });
@@ -116,6 +119,46 @@ export function NightshiftOnboarding({
     clearNightshiftInvestigationIdParam(params);
     history.replace({ search: params.toString() });
   }, [history]);
+
+  const getInvestigationShareUrl = useCallback(
+    () =>
+      selectedInvestigationId
+        ? buildNightshiftInvestigationFlyoutShareUrl(selectedInvestigationId)
+        : window.location.href,
+    [selectedInvestigationId]
+  );
+  const shareInvestigationAction = useFlyoutShareUrlCustomAction(getInvestigationShareUrl);
+
+  // `?investigationId=` opens the investigation's Agent Builder conversation details flyout.
+  useEffect(() => {
+    if (!selectedInvestigationId || !agentBuilder) {
+      return;
+    }
+    let closeFlyout: (() => void) | undefined;
+    let isCancelled = false;
+    void agentBuilder
+      .openConversationDetails({
+        conversationId: selectedInvestigationId,
+        trailingActions: [shareInvestigationAction],
+        // Closed by the user, not replaced by another selection or unmounted.
+        onClose: () => {
+          if (!isCancelled) {
+            closeInvestigation();
+          }
+        },
+      })
+      .then((close) => {
+        if (isCancelled) {
+          close();
+        } else {
+          closeFlyout = close;
+        }
+      });
+    return () => {
+      isCancelled = true;
+      closeFlyout?.();
+    };
+  }, [agentBuilder, closeInvestigation, selectedInvestigationId, shareInvestigationAction]);
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     connect: {
@@ -258,13 +301,6 @@ export function NightshiftOnboarding({
         </div>
         <OnboardingStepsCard steps={steps} action={stepAction} />
       </div>
-      {selectedInvestigationId && (
-        <InvestigationDetailFlyout
-          key={selectedInvestigationId}
-          investigationId={selectedInvestigationId}
-          onClose={closeInvestigation}
-        />
-      )}
     </EuiFlexGroup>
   );
 }

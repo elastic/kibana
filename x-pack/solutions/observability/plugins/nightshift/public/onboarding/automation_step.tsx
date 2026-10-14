@@ -22,9 +22,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
-import { InvestigationListItem } from '../investigation/investigation_list_item';
 import { useFetchSandboxSecrets } from '../sandbox_secrets/use_fetch_sandbox_secrets';
 
 interface SuggestedAutomation {
@@ -89,10 +88,10 @@ export function OnboardingAutomationStep({
   automationsHref,
   onInvestigationClick,
 }: {
-  investigation: ListInvestigationItem;
+  investigation: InvestigationSummary;
   /** Unset when automations are unavailable. */
   automationsHref?: string;
-  onInvestigationClick: (investigation: ListInvestigationItem) => void;
+  onInvestigationClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
   const secretKeys = new Set(useFetchSandboxSecrets().data?.keys ?? []);
   const automations = SUGGESTED_AUTOMATIONS.filter(
@@ -146,12 +145,12 @@ function TrialInvestigationCard({
   investigation,
   onClick,
 }: {
-  investigation: ListInvestigationItem;
-  onClick: (investigation: ListInvestigationItem) => void;
+  investigation: InvestigationSummary;
+  onClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { status } = investigation;
-  const isActive = status === 'pending' || status === 'running';
+  const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
+  const { in_progress: isActive } = investigation;
 
   return (
     <EuiPanel
@@ -162,7 +161,7 @@ function TrialInvestigationCard({
         overflow: hidden;
       `}
     >
-      <InvestigationListItem investigation={investigation} onClick={onClick} />
+      {InvestigationCard && <InvestigationCard investigation={investigation} onClick={onClick} />}
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
@@ -181,11 +180,7 @@ function TrialInvestigationCard({
           {isActive ? (
             <EuiLoadingSpinner size="m" />
           ) : (
-            <EuiIcon
-              type={status === 'completed' ? 'checkCircleFill' : 'warning'}
-              color={status === 'completed' ? 'success' : 'warning'}
-              aria-hidden={true}
-            />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           )}
         </EuiFlexItem>
         <EuiFlexItem>
@@ -203,16 +198,10 @@ function TrialInvestigationCard({
                     'It might take a few minutes. Meanwhile, set up an automation for future investigations.',
                 })}
               </>
-            ) : status === 'completed' ? (
+            ) : (
               <strong>
                 {i18n.translate('xpack.nightshift.onboarding.automate.completedTitle', {
                   defaultMessage: 'Results are ready',
-                })}
-              </strong>
-            ) : (
-              <strong>
-                {i18n.translate('xpack.nightshift.onboarding.automate.failedTitle', {
-                  defaultMessage: 'The investigation did not finish',
                 })}
               </strong>
             )}

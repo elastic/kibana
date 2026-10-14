@@ -7,16 +7,10 @@
 
 import { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  INVESTIGATION_STATUSES,
-  type InvestigationStatus,
-  type ListInvestigationItem,
-} from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useFetchAutomations } from '../automations/hooks/use_automations';
-import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
 import { useKibana } from '../hooks/use_kibana';
-
-const ALL_INVESTIGATION_STATUSES: InvestigationStatus[] = [...INVESTIGATION_STATUSES];
+import { useFetchLatestInvestigation } from './use_fetch_latest_investigation';
 
 /** Per space: the base path carries the space prefix (`/s/<space id>`). */
 const getDismissedStorageKey = (basePath: string): string =>
@@ -30,7 +24,7 @@ export interface OnboardingVisibility {
   isLoading: boolean;
   showOnboarding: boolean;
   /** The space's most recent investigation: the trial investigation of steps 2 and 3. */
-  latestInvestigation?: ListInvestigationItem;
+  latestInvestigation?: InvestigationSummary;
   /** "I'll do it later": hides onboarding in this space and browser (local storage). */
   dismiss: () => void;
 }
@@ -60,11 +54,11 @@ export const useOnboardingVisibility = ({
   const isOnboardingCandidate =
     isEnabled && (forceOnboarding || (!isDismissed && canUseAutomations && !hasAutomation));
 
-  const investigations = useFetchInvestigations({
-    statuses: ALL_INVESTIGATION_STATUSES,
+  const investigations = useFetchLatestInvestigation({
+    enabled: isEnabled,
     refetchInterval: isOnboardingCandidate ? TRIAL_INVESTIGATION_REFETCH_INTERVAL_MS : false,
   });
-  const [latestInvestigation] = investigations.investigations;
+  const { latestInvestigation } = investigations;
 
   const isLoading =
     isEnabled &&
