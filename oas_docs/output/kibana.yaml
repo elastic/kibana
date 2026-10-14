@@ -154401,8 +154401,6 @@ components:
       additionalProperties: false
       type: object
       properties:
-        __ui:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         alert:
           additionalProperties: {}
           description: 'The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.'
@@ -154431,10 +154429,6 @@ components:
         certificate_error_spki_allowlist:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: PEM certificates whose public keys (SPKI) are allowlisted so Chromium bypasses certificate errors for matching presented certificates. This does not add a CA to Chromium's trust store.
-        config_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        custom_heartbeat_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
@@ -154443,17 +154437,6 @@ components:
         filter_journeys.match:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         filter_journeys.tags:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        form_monitor_type:
-          enum:
-            - single
-            - multistep
-            - api
-            - http
-            - tcp
-            - icmp
-          type: string
-        hash:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         id:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -154464,8 +154447,6 @@ components:
           description: The inline script.
           maxLength: 1000000
           type: string
-        journey_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         labels:
           additionalProperties:
             maxLength: 1000000
@@ -154512,13 +154493,6 @@ components:
         namespace:
           description: 'The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`. Defaults to `default`.'
           type: string
-        origin:
-          enum:
-            - ui
-            - project
-          type: string
-        original_space:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         params:
           anyOf:
             - maxLength: 1000000
@@ -154559,13 +154533,9 @@ components:
                 type: object
           maxItems: 1000
           type: array
-        project_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         retest_on_failure:
           description: Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error is created and, if configured, an alert is sent. Using `retest_on_failure` can reduce noise related to transient problems.
           type: boolean
-        revision:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
             - title: Minutes
@@ -154588,8 +154558,6 @@ components:
               title: Number and unit
               type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
-        service:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         service.name:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
@@ -154653,12 +154621,6 @@ components:
           description: The monitor type.
           enum:
             - api
-          type: string
-        url.port:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        urls:
-          maxLength: 4096
-          nullable: true
           type: string
       required:
         - type
@@ -155538,8 +155500,6 @@ components:
       additionalProperties: false
       type: object
       properties:
-        __ui:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         alert:
           additionalProperties: {}
           description: 'The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.'
@@ -155568,10 +155528,6 @@ components:
         certificate_error_spki_allowlist:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: PEM certificates whose public keys (SPKI) are allowlisted so Chromium bypasses certificate errors for matching presented certificates. This does not add a CA to Chromium's trust store.
-        config_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        custom_heartbeat_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
@@ -155580,17 +155536,6 @@ components:
         filter_journeys.match:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         filter_journeys.tags:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        form_monitor_type:
-          enum:
-            - single
-            - multistep
-            - api
-            - http
-            - tcp
-            - icmp
-          type: string
-        hash:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         id:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -155601,8 +155546,6 @@ components:
           description: The inline script.
           maxLength: 1000000
           type: string
-        journey_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         labels:
           additionalProperties:
             maxLength: 1000000
@@ -155649,13 +155592,6 @@ components:
         namespace:
           description: 'The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`. Defaults to `default`.'
           type: string
-        origin:
-          enum:
-            - ui
-            - project
-          type: string
-        original_space:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         params:
           anyOf:
             - maxLength: 1000000
@@ -155696,13 +155632,9 @@ components:
                 type: object
           maxItems: 1000
           type: array
-        project_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         retest_on_failure:
           description: Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error is created and, if configured, an alert is sent. Using `retest_on_failure` can reduce noise related to transient problems.
           type: boolean
-        revision:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
             - title: Minutes
@@ -155728,8 +155660,6 @@ components:
         screenshots:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: 'The screenshot option: `on`, `off`, or `only-on-failure`. Defaults to `on`.'
-        service:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         service.name:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
@@ -155795,12 +155725,6 @@ components:
           description: The monitor type.
           enum:
             - browser
-          type: string
-        url.port:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        urls:
-          maxLength: 4096
-          nullable: true
           type: string
       required:
         - type
@@ -158950,8 +158874,6 @@ components:
       description: Partial monitor update. type is optional; when present, only fields for that monitor type are allowed.
       type: object
       properties:
-        __ui:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         alert:
           additionalProperties: {}
           description: 'The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.'
@@ -159007,10 +158929,6 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         check.send:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        config_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        custom_heartbeat_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
@@ -159020,22 +158938,8 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         filter_journeys.tags:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        form_monitor_type:
-          enum:
-            - single
-            - multistep
-            - api
-            - http
-            - tcp
-            - icmp
-          type: string
-        hash:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         host:
           description: The host to monitor; it can be an IP address or a hostname.
-          maxLength: 4096
-          type: string
-        hosts:
           maxLength: 4096
           type: string
         id:
@@ -159053,8 +158957,6 @@ components:
         ipv6:
           description: If `true`, ping using the ipv6 protocol. Defaults to `true`.
           type: boolean
-        journey_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         kerberos:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         labels:
@@ -159119,13 +159021,6 @@ components:
           type: string
         ntlm:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        origin:
-          enum:
-            - ui
-            - project
-          type: string
-        original_space:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         params:
           anyOf:
             - maxLength: 1000000
@@ -159169,8 +159064,6 @@ components:
                 type: object
           maxItems: 1000
           type: array
-        project_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         proxy_headers:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: Additional headers to send to proxies during CONNECT requests.
@@ -159192,8 +159085,6 @@ components:
         retest_on_failure:
           description: Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error is created and, if configured, an alert is sent. Using `retest_on_failure` can reduce noise related to transient problems.
           type: boolean
-        revision:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
             - title: Minutes
@@ -159219,8 +159110,6 @@ components:
         screenshots:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: 'The screenshot option: `on`, `off`, or `only-on-failure`. Defaults to `on`.'
-        service:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         service.name:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
@@ -159293,12 +159182,6 @@ components:
         url:
           description: The URL to monitor.
           maxLength: 4096
-          type: string
-        url.port:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        urls:
-          maxLength: 4096
-          nullable: true
           type: string
         username:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -161649,8 +161532,6 @@ components:
       additionalProperties: false
       type: object
       properties:
-        __ui:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         alert:
           additionalProperties: {}
           description: 'The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.'
@@ -161699,24 +161580,9 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         check.response.status:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        config_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        custom_heartbeat_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
-        form_monitor_type:
-          enum:
-            - single
-            - multistep
-            - api
-            - http
-            - tcp
-            - icmp
-          type: string
-        hash:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         id:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         ipv4:
@@ -161725,8 +161591,6 @@ components:
         ipv6:
           description: If `true`, ping using the ipv6 protocol. Defaults to `true`.
           type: boolean
-        journey_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         kerberos:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         labels:
@@ -161791,13 +161655,6 @@ components:
           type: string
         ntlm:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        origin:
-          enum:
-            - ui
-            - project
-          type: string
-        original_space:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         params:
           anyOf:
             - maxLength: 1000000
@@ -161836,8 +161693,6 @@ components:
                 type: object
           maxItems: 1000
           type: array
-        project_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         proxy_headers:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: Additional headers to send to proxies during CONNECT requests.
@@ -161856,8 +161711,6 @@ components:
         retest_on_failure:
           description: Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error is created and, if configured, an alert is sent. Using `retest_on_failure` can reduce noise related to transient problems.
           type: boolean
-        revision:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
             - title: Minutes
@@ -161880,8 +161733,6 @@ components:
               title: Number and unit
               type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
-        service:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         service.name:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
@@ -161939,12 +161790,6 @@ components:
           description: The URL to monitor.
           maxLength: 4096
           type: string
-        url.port:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        urls:
-          maxLength: 4096
-          nullable: true
-          type: string
         username:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The username for authenticating with the server. The credentials are passed with the request.
@@ -161979,29 +161824,11 @@ components:
                   type: string
               required:
                 - enabled
-        config_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        custom_heartbeat_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
-        form_monitor_type:
-          enum:
-            - single
-            - multistep
-            - api
-            - http
-            - tcp
-            - icmp
-          type: string
-        hash:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         host:
           description: The host to ping.
-          maxLength: 4096
-          type: string
-        hosts:
           maxLength: 4096
           type: string
         id:
@@ -162012,8 +161839,6 @@ components:
         ipv6:
           description: If `true`, ping using the ipv6 protocol. Defaults to `true`.
           type: boolean
-        journey_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         labels:
           additionalProperties:
             maxLength: 1000000
@@ -162066,13 +161891,6 @@ components:
         namespace:
           description: 'The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`. Defaults to `default`.'
           type: string
-        origin:
-          enum:
-            - ui
-            - project
-          type: string
-        original_space:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         params:
           anyOf:
             - maxLength: 1000000
@@ -162108,13 +161926,9 @@ components:
                 type: object
           maxItems: 1000
           type: array
-        project_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         retest_on_failure:
           description: Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error is created and, if configured, an alert is sent. Using `retest_on_failure` can reduce noise related to transient problems.
           type: boolean
-        revision:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
             - title: Minutes
@@ -162137,8 +161951,6 @@ components:
               title: Number and unit
               type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
-        service:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         service.name:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
@@ -178467,8 +178279,6 @@ components:
       additionalProperties: false
       type: object
       properties:
-        __ui:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         alert:
           additionalProperties: {}
           description: 'The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.'
@@ -178501,29 +178311,11 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         check.send:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        config_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        custom_heartbeat_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
-        form_monitor_type:
-          enum:
-            - single
-            - multistep
-            - api
-            - http
-            - tcp
-            - icmp
-          type: string
-        hash:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         host:
           description: The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon, for example "example.com:9200".
-          maxLength: 4096
-          type: string
-        hosts:
           maxLength: 4096
           type: string
         id:
@@ -178534,8 +178326,6 @@ components:
         ipv6:
           description: If `true`, ping using the ipv6 protocol. Defaults to `true`.
           type: boolean
-        journey_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         labels:
           additionalProperties:
             maxLength: 1000000
@@ -178588,13 +178378,6 @@ components:
         namespace:
           description: 'The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`. Defaults to `default`.'
           type: string
-        origin:
-          enum:
-            - ui
-            - project
-          type: string
-        original_space:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         params:
           anyOf:
             - maxLength: 1000000
@@ -178630,8 +178413,6 @@ components:
                 type: object
           maxItems: 1000
           type: array
-        project_id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         proxy_url:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of `socks5://`. If the SOCKS5 proxy server requires client authentication, a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client, unless `proxy_use_local_resolver` is set.
@@ -178641,8 +178422,6 @@ components:
         retest_on_failure:
           description: Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error is created and, if configured, an alert is sent. Using `retest_on_failure` can reduce noise related to transient problems.
           type: boolean
-        revision:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         schedule:
           anyOf:
             - title: Minutes
@@ -178665,8 +178444,6 @@ components:
               title: Number and unit
               type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
-        service:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         service.name:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
@@ -178719,12 +178496,6 @@ components:
           description: The monitor type.
           enum:
             - tcp
-          type: string
-        url.port:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-        urls:
-          maxLength: 4096
-          nullable: true
           type: string
       required:
         - type
