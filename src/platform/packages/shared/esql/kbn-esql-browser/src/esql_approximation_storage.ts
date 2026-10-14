@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const STORAGE_KEY = 'kibana.esql.fastMode';
+export const STORAGE_KEY ='kibana.esql.fastMode';
 
 /**
  * Persists the user's Fast mode (ES|QL approximation) preference across browser sessions.

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esqlApproximationStorage } from './esql_approximation_storage';
-
-const STORAGE_KEY = 'kibana.esql.fastMode';
+import { esqlApproximationStorage, STORAGE_KEY } from './esql_approximation_storage';
 
 describe('esqlApproximationStorage', () => {
   beforeEach(() => {
