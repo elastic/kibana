@@ -36,8 +36,6 @@ An investigation is an Agent Builder conversation with the `investigation` templ
 - **Impact, hypotheses, and proposed actions.** The agent records these.
 - **The query API.** `GET /internal/investigations/investigations[/{id}]`, used for reads.
 
-Earlier versions stored investigations as Nightshift saved objects, settled by a reconciliation task and served by `GET`/`PATCH /internal/nightshift/investigations[/{id}]` and `/follow`. That saved object type, the task, and those routes are removed. The type name is reserved in core's `removed_types.json`, so an upgrade drops leftover documents, and the task type is listed in Task Manager's removed types, so a scheduled task is marked unrecognized instead of run.
-
 ### Starting an investigation
 
 The start route, the `nightshift.triggerInvestigation` workflow step, and `client.start` work out which subjects the start covers. For an alert, that is one subject per alert in `context.alerts`.
