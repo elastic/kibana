@@ -499,7 +499,9 @@ describe('generateWorkflowYaml', () => {
     });
 
     describe('for a slack-triggered run', () => {
-      const slackAutomationWith = (completion: NightshiftAutomationAttributes['completions'][number]) => {
+      const slackAutomationWith = (
+        completion: NightshiftAutomationAttributes['completions'][number]
+      ) => {
         const automation = baseAutomation();
         automation.trigger.rows = [{ kind: 'slack', event: 'message' }];
         automation.completions = [completion];
