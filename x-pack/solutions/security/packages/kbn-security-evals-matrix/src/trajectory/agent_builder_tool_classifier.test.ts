@@ -6,8 +6,8 @@
  */
 
 import { attachmentTools, internalTools, platformCoreTools } from '@kbn/agent-builder-common';
-import { createTrajectoryEvaluator } from '.';
-import type { TrajectoryToolCall } from '.';
+import { createSecurityTrajectoryEvaluator } from './security_trajectory_evaluator';
+import type { TrajectoryToolCall } from './agent_builder_tool_classifier';
 import {
   createAgentBuilderToolClassifier,
   createUnclassifiedToolsEvaluator,
@@ -19,7 +19,7 @@ describe('getAgentBuilderToolCalls', () => {
     expect(
       getAgentBuilderToolCalls({
         steps: [
-          { type: 'reasoning', reasoning: 'x' },
+          { type: 'reasoning', reasoning: 'x', tool_id: 'not_a_tool_call' },
           { type: 'tool_call', tool_id: 'attachments.read', tool_origin: 'internal' },
           { type: 'tool_call', tool_id: 'platform.core.list_indices', tool_origin: 'registry' },
           { type: 'tool_call', tool_id: 'legacy_round_tool' },
@@ -92,7 +92,7 @@ describe('createAgentBuilderToolClassifier', () => {
   });
 
   it('does not silently drop an unknown attachments.* tool (N/A, not a false match)', async () => {
-    const evaluator = createTrajectoryEvaluator({
+    const evaluator = createSecurityTrajectoryEvaluator({
       extractToolCalls: (output) => output as TrajectoryToolCall[],
       goldenPathExtractor: () => [],
       classifyTool: classify,
@@ -112,7 +112,7 @@ describe('createAgentBuilderToolClassifier', () => {
   });
 
   it('makes a trajectory with a simulated new Agent Builder tool N/A instead of 0', async () => {
-    const evaluator = createTrajectoryEvaluator({
+    const evaluator = createSecurityTrajectoryEvaluator({
       extractToolCalls: (output) => output as string[],
       goldenPathExtractor: () => [],
       classifyTool: classify,
@@ -159,7 +159,7 @@ describe('createUnclassifiedToolsEvaluator', () => {
     const args = { input: {}, output: ['my_custom'], expected: {}, metadata: null };
 
     expect(
-      await createTrajectoryEvaluator({
+      await createSecurityTrajectoryEvaluator({
         extractToolCalls,
         goldenPathExtractor,
         classifyTool,

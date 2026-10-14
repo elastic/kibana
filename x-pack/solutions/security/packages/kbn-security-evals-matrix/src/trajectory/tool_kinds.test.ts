@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  attachmentTools,
-  getInternalToolKind,
-  internalTools,
-  platformCoreTools,
-} from './constants';
+import { attachmentTools, internalTools, platformCoreTools } from '@kbn/agent-builder-common';
+import { getInternalToolKind } from './tool_kinds';
 
 describe('getInternalToolKind', () => {
   it('classifies every internal tool', () => {

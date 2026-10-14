@@ -6,3 +6,6 @@
  */
 
 export * as cli from './src/cli';
+
+// Agent Builder tool classification + security-owned trajectory evaluator
+export * from './src/trajectory';

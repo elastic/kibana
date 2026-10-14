@@ -41,8 +41,6 @@ export {
   platformSignificantEventsTools,
   attachmentTools,
   internalTools,
-  getInternalToolKind,
-  type InternalToolKind,
   defaultAgentToolIds,
   editableToolTypes,
   isReservedToolId,

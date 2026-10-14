@@ -5,19 +5,45 @@
  * 2.0.
  */
 
-import { getInternalToolKind, isInProtectedNamespace } from '@kbn/agent-builder-common';
-import type { Evaluator, TaskOutput } from '../../types';
-import { getToolCallSteps } from '../../utils/evaluation_helpers';
-import type { ToolCallClass, TrajectoryToolCall } from '.';
-
-/** Tool calls of an Agent Builder converse output, with the origin the runtime recorded. */
-export const getAgentBuilderToolCalls = (output: unknown): TrajectoryToolCall[] =>
-  getToolCallSteps(output as TaskOutput).flatMap(({ tool_id: id, tool_origin: origin }) =>
-    id ? [{ id, ...(origin && { origin }) }] : []
-  );
+import { isInProtectedNamespace } from '@kbn/agent-builder-common';
+import type { Evaluator } from '@kbn/evals';
+import { getInternalToolKind } from './tool_kinds';
 
 /**
- * Classifies Agent Builder tool calls for {@link createTrajectoryEvaluator} using Agent Builder's
+ * How a called tool takes part in trajectory scoring:
+ * - `scored`: counts toward order/coverage and the no-tools-expected guardrail.
+ * - `runtime`: agent runtime scaffolding; dropped before scoring.
+ * - `unclassified`: unknown tool; the trajectory is unmeasured (N/A) rather than scored.
+ */
+export type ToolCallClass = 'scored' | 'runtime' | 'unclassified';
+
+export interface TrajectoryToolCall {
+  id: string;
+  /** Where the agent runtime sourced the tool from (Agent Builder `ToolOrigin`), when known. */
+  origin?: string;
+}
+
+/**
+ * Tool calls of an Agent Builder converse output, with the origin the runtime recorded.
+ * Read from the round steps directly: `@kbn/evals` `getToolCallSteps` drops `tool_origin`.
+ */
+export const getAgentBuilderToolCalls = (output: unknown): TrajectoryToolCall[] => {
+  const steps =
+    (
+      output as {
+        steps?: Array<{ type?: string; tool_id?: string; tool_origin?: string }>;
+      }
+    )?.steps ?? [];
+
+  return steps.flatMap((step) =>
+    step?.type === 'tool_call' && step.tool_id
+      ? [{ id: step.tool_id, ...(step.tool_origin && { origin: step.tool_origin }) }]
+      : []
+  );
+};
+
+/**
+ * Classifies Agent Builder tool calls for `createSecurityTrajectoryEvaluator` using Agent Builder's
  * own exports, so a tool Agent Builder adds later can never silently change a trajectory score:
  * 1. internal tools Agent Builder marks as `runtime` (attachments, todos, skill loading, ...) are
  *    dropped; those marked `data_access` (files, shell, APIs, sub-agents) are scored.
