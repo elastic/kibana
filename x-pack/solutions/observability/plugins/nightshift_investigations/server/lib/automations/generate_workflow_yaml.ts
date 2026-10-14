@@ -37,51 +37,17 @@ export function generateWorkflowYaml(
     (r): r is Extract<NightshiftTriggerRow, { kind: 'alert' }> => r.kind === 'alert'
   );
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
-  const isAlertTrigger = alertRows.length > 0;
+  const alertWorkflow =
+    alertRows.length > 0 || !schedule
+      ? generateAlertWorkflow(automationId, automation, alertRows, Boolean(schedule))
+      : undefined;
+  const scheduledWorkflow = schedule
+    ? generateScheduledWorkflow(automationId, automation, schedule, alertRows.length > 0)
+    : undefined;
 
   const strategy = automation.runtime.overlapPolicy
     ? OVERLAP_POLICY_TO_STRATEGY[automation.runtime.overlapPolicy]
     : 'drop';
-  const notificationDestinations = buildNotificationDestinations(automationId, automation);
-
-  const investigationStep = (scheduled: boolean, name: string, triggeredBy?: string) => ({
-    name,
-    type: 'nightshift.triggerInvestigation',
-    ...(triggeredBy ? { if: `execution.triggeredBy: "${triggeredBy}"` } : {}),
-    with: {
-      subject_type: scheduled ? 'manual' : 'alert',
-      subject_id: scheduled
-        ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID
-        : isAlertTrigger
-        ? '{{ trigger.alert.uuid }}'
-        : automationId,
-      title: scheduled || !isAlertTrigger ? automation.name : '{{ trigger.rule.name }}',
-      summary: automation.name,
-      trigger_type: 'automatic',
-      ...(automation.execution.promptTemplate
-        ? { message: automation.execution.promptTemplate }
-        : {}),
-      ...(scheduled && schedule?.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
-      ...(automation.runtime.timeoutSeconds !== undefined
-        ? { timeout_seconds: automation.runtime.timeoutSeconds }
-        : {}),
-      ...(notificationDestinations ? { notificationDestinations } : {}),
-    },
-  });
-  const steps = schedule
-    ? [
-        investigationStep(true, 'trigger_investigation', isAlertTrigger ? 'scheduled' : undefined),
-        ...(isAlertTrigger
-          ? [
-              investigationStep(
-                false,
-                'trigger_alert_investigation',
-                'alerting.v1.alertStatusChanged'
-              ),
-            ]
-          : []),
-      ]
-    : [investigationStep(false, 'trigger_investigation')];
 
   const workflowObj = {
     name: automation.name,
@@ -93,11 +59,92 @@ export function generateWorkflowYaml(
         : {}),
       concurrency: { key: automationId, strategy, max: 1 },
     },
-    triggers: buildTriggers(alertRows, schedule),
-    steps,
+    triggers: [...(alertWorkflow?.triggers ?? []), ...(scheduledWorkflow?.triggers ?? [])],
+    steps: [...(scheduledWorkflow?.steps ?? []), ...(alertWorkflow?.steps ?? [])],
   };
 
   return stringify(workflowObj, { lineWidth: 0 });
+}
+
+function generateAlertWorkflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
+  hasScheduledTrigger: boolean
+) {
+  const condition = buildCondition(alertRows);
+  const notificationDestinations = buildNotificationDestinations(automationId, automation);
+
+  return {
+    triggers: [
+      alertRows.length > 0
+        ? {
+            type: 'alerting.v1.alertStatusChanged',
+            ...(condition ? { on: { condition } } : {}),
+          }
+        : { type: 'manual' },
+    ],
+    steps: [
+      {
+        name: hasScheduledTrigger ? 'trigger_alert_investigation' : 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        ...(hasScheduledTrigger
+          ? { if: 'execution.triggeredBy: "alerting.v1.alertStatusChanged"' }
+          : {}),
+        with: {
+          subject_type: 'alert',
+          subject_id: alertRows.length > 0 ? '{{ trigger.alert.uuid }}' : automationId,
+          title: alertRows.length > 0 ? '{{ trigger.rule.name }}' : automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { message: automation.execution.promptTemplate }
+            : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+    ],
+  };
+}
+
+function generateScheduledWorkflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  schedule: Extract<NightshiftTriggerRow, { kind: 'schedule' }>,
+  hasAlertTrigger: boolean
+) {
+  const parsed = parsePresetSchedule(schedule);
+  if (!parsed.success) throw new Error(parsed.error);
+  const notificationDestinations = buildNotificationDestinations(automationId, automation);
+
+  return {
+    triggers: [parsed.trigger],
+    steps: [
+      {
+        name: 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        ...(hasAlertTrigger ? { if: 'execution.triggeredBy: "scheduled"' } : {}),
+        with: {
+          subject_type: 'manual',
+          subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+          title: automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { message: automation.execution.promptTemplate }
+            : {}),
+          ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+    ],
+  };
 }
 
 /**
@@ -129,26 +176,6 @@ function buildNotificationDestinations(
     });
   }
   return destinations.length > 0 ? destinations : undefined;
-}
-
-function buildTriggers(
-  alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
-  schedule?: Extract<NightshiftTriggerRow, { kind: 'schedule' }>
-): unknown[] {
-  const triggers: unknown[] = [];
-  if (alertRows.length) {
-    const condition = buildCondition(alertRows);
-    triggers.push({
-      type: 'alerting.v1.alertStatusChanged',
-      ...(condition ? { on: { condition } } : {}),
-    });
-  }
-  if (schedule) {
-    const parsed = parsePresetSchedule(schedule);
-    if (!parsed.success) throw new Error(parsed.error);
-    triggers.push(parsed.trigger);
-  }
-  return triggers.length ? triggers : [{ type: 'manual' }];
 }
 
 function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>): string {
