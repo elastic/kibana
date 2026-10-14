@@ -49,7 +49,7 @@ export class AgentBuilderDashboardsPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.dashboard.client;
     };
-    const getValidateDashboard = async () => {
+    const getDashboardValidator = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return createDashboardAppStateValidator(startDeps.embeddable);
     };
@@ -62,7 +62,7 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder, { getValidateDashboard });
+    registerSkills(setupDeps.agentBuilder, { getDashboardValidator });
 
     return {};
   }

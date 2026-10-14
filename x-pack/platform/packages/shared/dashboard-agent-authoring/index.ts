@@ -6,7 +6,6 @@
  */
 
 export { dashboardOperationSchema, executeDashboardOperations } from './src/operations';
-export type { FinalizeDashboard } from './src/operations';
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
 
@@ -17,7 +16,7 @@ export type {
   PanelContentAttempt,
 } from './src/resolve_panel';
 
-export type { DashboardValidationIssue, ValidateDashboard } from './src/validate_dashboard';
+export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
 
 export { getRendererEmbeddableType } from './src/operations/panels';
 export type {

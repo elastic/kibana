@@ -10,14 +10,8 @@ import type { z } from '@kbn/zod';
 import { getDashboardDataSchema } from '@kbn/as-code-dashboard-schema';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import {
-  isSection,
-  type AttachmentPanel,
-  type DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
-import type { DashboardValidationIssue, ValidateDashboard } from '@kbn/dashboard-agent-authoring';
-
-type IssuePath = DashboardValidationIssue['path'];
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import type { DashboardValidationIssue, DashboardValidator } from '@kbn/dashboard-agent-authoring';
 
 // Panels are loose objects in the dashboard application schema, so embeddable schemas are not needed.
 const getDashboardAppStateSchema = once(() =>
@@ -49,50 +43,37 @@ const formatIssueMessage = (issue: z.core.$ZodIssue): string => {
   return issue.message;
 };
 
-const toValidationIssues = (
-  issues: z.core.$ZodIssue[],
-  basePath: IssuePath = []
-): DashboardValidationIssue[] =>
+const toValidationIssues = (issues: z.core.$ZodIssue[]): DashboardValidationIssue[] =>
   issues.flatMap((issue) => {
-    const path = [...basePath, ...issue.path];
     if (issue.code === 'unrecognized_keys') {
-      return issue.keys.map((key) => ({ path: [...path, key], message: 'Unrecognized key' }));
+      return issue.keys.map((key) => ({ path: [...issue.path, key], message: 'Unrecognized key' }));
     }
-    return [{ path, message: formatIssueMessage(issue) }];
+    return [{ path: issue.path, message: formatIssueMessage(issue) }];
   });
-
-const getPanelLocations = (
-  widgets: DashboardAttachmentData['panels']
-): Array<{ panel: AttachmentPanel; path: IssuePath }> =>
-  widgets.flatMap((widget, widgetIndex) =>
-    isSection(widget)
-      ? widget.panels.map((panel, panelIndex) => ({
-          panel,
-          path: ['panels', widgetIndex, 'panels', panelIndex],
-        }))
-      : [{ panel: widget, path: ['panels', widgetIndex] }]
-  );
 
 /**
  * Validates a dashboard the way the dashboard application validates it on save: dashboard fields
  * against the dashboard application schema, then each panel config against the schema of its type.
- * Panels of a type without a schema are not validated.
+ * Panels of a type without a schema are not validated. Vega panels are skipped because the
+ * attachment stores them in an interim shape that is converted before the dashboard is rendered.
  */
-export const createDashboardAppStateValidator =
-  ({ getTransforms }: Pick<EmbeddableStart, 'getTransforms'>): ValidateDashboard =>
-  (dashboardData) => {
-    const stateResult = getDashboardAppStateSchema().safeParse(dashboardData);
-    const stateIssues = stateResult.success ? [] : toValidationIssues(stateResult.error.issues);
-
-    const panelIssues = getPanelLocations(dashboardData.panels).flatMap(
-      ({ panel: { type, config }, path }) => {
-        const transformType = type === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : type;
-        const configResult = getTransforms(transformType)?.schema?.safeParse(config);
-        return configResult?.success === false
-          ? toValidationIssues(configResult.error.issues, [...path, 'config'])
-          : [];
-      }
-    );
-
-    return [...stateIssues, ...panelIssues];
-  };
+export const createDashboardAppStateValidator = ({
+  getTransforms,
+}: Pick<EmbeddableStart, 'getTransforms'>): DashboardValidator => ({
+  validatePanel: ({ type, config }) => {
+    if (type === VEGA_VIS_TYPE) {
+      return [];
+    }
+    const transformType = type === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : type;
+    const configResult = getTransforms(transformType)?.schema?.safeParse(config);
+    return configResult?.success === false
+      ? toValidationIssues(configResult.error.issues).map(
+          ({ path, message }) => `${['config', ...path].map(String).join('.')}: ${message}`
+        )
+      : [];
+  },
+  validateDashboardFields: (dashboardData) => {
+    const result = getDashboardAppStateSchema().safeParse(dashboardData);
+    return result.success ? [] : toValidationIssues(result.error.issues);
+  },
+});

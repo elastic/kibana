@@ -26,7 +26,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 import type { ControlFieldCapability, ResolveControlFieldCapabilities } from './operations/types';
-import type { ValidateDashboard } from './validate_dashboard';
+import type { DashboardValidator } from './validate_dashboard';
 
 const usable = (type: string): ControlFieldCapability => ({ status: 'usable', type });
 const NOT_AGGREGATABLE: ControlFieldCapability = { status: 'not_aggregatable' };
@@ -436,18 +436,12 @@ describe('executeDashboardOperations', () => {
     });
   });
 
-  describe('validateDashboard', () => {
-    const validateDashboard: ValidateDashboard = ({ panels }) =>
-      panels.flatMap((widget, widgetIndex) =>
-        !isSection(widget) && 'unrecognizedKey' in widget.config
-          ? [
-              {
-                path: ['panels', widgetIndex, 'config', 'unrecognizedKey'],
-                message: 'Unrecognized key',
-              },
-            ]
-          : []
-      );
+  describe('validator', () => {
+    const validator: DashboardValidator = {
+      validatePanel: ({ config }) =>
+        'unrecognizedKey' in config ? ['config.unrecognizedKey: Unrecognized key'] : [],
+      validateDashboardFields: () => [],
+    };
 
     it('discards invalid panels after all operations and drops their authoring notes', async () => {
       const result = await executeDashboardOperations({
@@ -482,7 +476,7 @@ describe('executeDashboardOperations', () => {
             'Created a metric showing p95 latency.'
           ),
         }),
-        validateDashboard,
+        validator,
       });
 
       const [validPanel, ...otherPanels] = getPanelsOnly(result.dashboardData.panels);
@@ -496,30 +490,6 @@ describe('executeDashboardOperations', () => {
       ]);
       expect(result.panelAuthoringNotes).toEqual([
         { panelId: validPanel.id, authoringNote: 'Created a metric showing total requests.' },
-      ]);
-    });
-
-    it('validates what finalizeDashboard adds', async () => {
-      const result = await executeDashboardOperations({
-        dashboardData: { title: 'Dashboard', panels: [] },
-        operations: [{ operation: 'set_metadata', title: 'Renamed' }],
-        logger,
-        finalizeDashboard: async (dashboardData) => ({
-          ...dashboardData,
-          time_range: { from: 'invalid', to: 'now' },
-        }),
-        validateDashboard: ({ time_range: timeRange }) =>
-          timeRange?.from === 'invalid'
-            ? [{ path: ['time_range', 'from'], message: 'Invalid' }]
-            : [],
-      });
-
-      expect(result.dashboardData).toEqual({ title: 'Renamed', panels: [] });
-      expect(result.failures).toEqual([
-        expect.objectContaining({
-          type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
-          identifier: 'time_range',
-        }),
       ]);
     });
   });

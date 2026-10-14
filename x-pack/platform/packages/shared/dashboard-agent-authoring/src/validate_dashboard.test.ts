@@ -10,8 +10,7 @@ import type {
   DashboardAttachmentData,
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
-import { isSection } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardValidationIssue, ValidateDashboard } from './validate_dashboard';
+import type { DashboardValidator } from './validate_dashboard';
 import { discardInvalidChanges } from './validate_dashboard';
 
 const MAX_PANELS = 4;
@@ -37,47 +36,35 @@ const createSection = (
   panels,
 });
 
-const getPanelIssues = (
-  { config }: AttachmentPanel,
-  path: DashboardValidationIssue['path']
-): DashboardValidationIssue[] =>
-  config.invalid ? [{ path: [...path, 'config', 'invalid'], message: 'Unrecognized key' }] : [];
-
 /**
  * Flags panels and controls with an `invalid` key, empty titles, and more than `MAX_PANELS`
  * top-level entries, reporting each at the path the real dashboard schema would.
  */
-const validateDashboard: ValidateDashboard = ({ title, panels, pinned_panels: pinnedPanels }) => [
-  ...(title === '' ? [{ path: ['title'], message: 'Too small' }] : []),
-  ...panels.flatMap((widget, widgetIndex) => {
-    if (!isSection(widget)) {
-      return getPanelIssues(widget, ['panels', widgetIndex]);
-    }
-    return [
-      ...(widget.title === ''
-        ? [{ path: ['panels', widgetIndex, 'title'], message: 'Too small' }]
-        : []),
-      ...widget.panels.flatMap((panel, panelIndex) =>
-        getPanelIssues(panel, ['panels', widgetIndex, 'panels', panelIndex])
-      ),
-    ];
-  }),
-  ...(pinnedPanels ?? []).flatMap((pinnedPanel, index) =>
-    pinnedPanel.invalid
-      ? [{ path: ['pinned_panels', index, 'invalid'], message: 'Unrecognized key' }]
-      : []
-  ),
-  ...(panels.length > MAX_PANELS ? [{ path: [], message: `${panels.length} panels` }] : []),
-];
+const validator: DashboardValidator = {
+  validatePanel: ({ config }) => (config.invalid ? ['config.invalid: Unrecognized key'] : []),
+  validateDashboardFields: ({ title, panels, pinned_panels: pinnedPanels }) => [
+    ...(title === '' ? [{ path: ['title'], message: 'Too small' }] : []),
+    ...(pinnedPanels ?? []).flatMap((pinnedPanel, index) =>
+      pinnedPanel.invalid
+        ? [{ path: ['pinned_panels', index, 'invalid'], message: 'Unrecognized key' }]
+        : []
+    ),
+    ...(panels.length > MAX_PANELS
+      ? [{ path: ['panels'], message: `${panels.length} panels` }]
+      : []),
+  ],
+};
 
 describe('discardInvalidChanges', () => {
   it('returns the dashboard unchanged when it is valid', () => {
     const originalDashboardData = { title: 'Dashboard', panels: [createPanel('a')] };
     const dashboardData = { ...originalDashboardData, panels: [createPanel('b')] };
 
-    expect(
-      discardInvalidChanges({ originalDashboardData, dashboardData, validateDashboard })
-    ).toEqual({ dashboardData, failures: [], discardedPanelIds: new Set() });
+    expect(discardInvalidChanges({ originalDashboardData, dashboardData, validator })).toEqual({
+      dashboardData,
+      failures: [],
+      discardedPanelIds: new Set(),
+    });
   });
 
   it('drops an invalid new panel and keeps the panels after it', () => {
@@ -91,7 +78,7 @@ describe('discardInvalidChanges', () => {
         ...originalDashboardData,
         panels: [existingPanel, createInvalidPanel('b'), nextPanel],
       },
-      validateDashboard,
+      validator,
     });
 
     expect(result.dashboardData.panels).toEqual([existingPanel, nextPanel]);
@@ -119,7 +106,7 @@ describe('discardInvalidChanges', () => {
         ...originalDashboardData,
         panels: [createSection('section', [existingPanel, createInvalidPanel('b')])],
       },
-      validateDashboard,
+      validator,
     });
 
     expect(result.dashboardData.panels).toEqual([createSection('section', [existingPanel])]);
@@ -140,7 +127,7 @@ describe('discardInvalidChanges', () => {
         ...originalDashboardData,
         panels: [createSection('section', [createInvalidPanel('b')], 'Errors')],
       },
-      validateDashboard,
+      validator,
     });
 
     expect(result.dashboardData.panels).toEqual([]);
@@ -164,7 +151,7 @@ describe('discardInvalidChanges', () => {
         ...originalDashboardData,
         panels: [emptySection, createInvalidPanel('b')],
       },
-      validateDashboard,
+      validator,
     });
 
     expect(result.dashboardData.panels).toEqual([emptySection]);
@@ -183,7 +170,7 @@ describe('discardInvalidChanges', () => {
     const result = discardInvalidChanges({
       originalDashboardData,
       dashboardData: { ...originalDashboardData, panels: [editedPanel] },
-      validateDashboard,
+      validator,
     });
 
     expect(result.dashboardData.panels).toEqual([
@@ -212,7 +199,7 @@ describe('discardInvalidChanges', () => {
     const result = discardInvalidChanges({
       originalDashboardData,
       dashboardData,
-      validateDashboard,
+      validator,
     });
 
     expect(result).toEqual({ dashboardData, failures: [], discardedPanelIds: new Set() });
@@ -229,31 +216,45 @@ describe('discardInvalidChanges', () => {
     const result = discardInvalidChanges({
       originalDashboardData,
       dashboardData,
-      validateDashboard,
+      validator,
     });
 
     expect(result).toEqual({ dashboardData, failures: [], discardedPanelIds: new Set() });
   });
 
-  it('keeps an edit to a panel that was already invalid', () => {
-    const originalDashboardData = { title: 'Dashboard', panels: [createInvalidPanel('a')] };
-    const dashboardData = {
-      ...originalDashboardData,
-      panels: [createPanel('a', { content: 'edited', invalid: true })],
-    };
+  it('reverts an invalid edit to a panel that was already invalid', () => {
+    const originalPanel = createInvalidPanel('a');
+    const originalDashboardData = { title: 'Dashboard', panels: [originalPanel] };
 
     const result = discardInvalidChanges({
       originalDashboardData,
-      dashboardData,
-      validateDashboard,
+      dashboardData: {
+        ...originalDashboardData,
+        panels: [createPanel('a', { content: 'edited', invalid: true })],
+      },
+      validator,
     });
 
-    expect(result).toEqual({ dashboardData, failures: [], discardedPanelIds: new Set() });
+    expect(result.dashboardData.panels).toEqual([originalPanel]);
+    expect(result.discardedPanelIds).toEqual(new Set(['a']));
+  });
+
+  it('names a panel by its title in failures', () => {
+    const result = discardInvalidChanges({
+      originalDashboardData: { title: 'Dashboard', panels: [] },
+      dashboardData: {
+        title: 'Dashboard',
+        panels: [createPanel('b', { title: 'Errors', invalid: true })],
+      },
+      validator,
+    });
+
+    expect(result.failures).toEqual([expect.objectContaining({ identifier: '"Errors" (b)' })]);
   });
 
   it('drops invalid new controls and keeps invalid controls that already existed', () => {
-    const existingControl = { invalid: true };
-    const validControl = { field: 'host.name' };
+    const existingControl = { id: 'existing', invalid: true };
+    const validControl = { id: 'valid', field: 'host.name' };
     const originalDashboardData = {
       title: 'Dashboard',
       panels: [],
@@ -264,9 +265,13 @@ describe('discardInvalidChanges', () => {
       originalDashboardData,
       dashboardData: {
         ...originalDashboardData,
-        pinned_panels: [existingControl, { field: 'host.os', invalid: true }, validControl],
+        pinned_panels: [
+          existingControl,
+          { id: 'new', field: 'host.os', invalid: true },
+          validControl,
+        ],
       },
-      validateDashboard,
+      validator,
     });
 
     expect(result.dashboardData.pinned_panels).toEqual([existingControl, validControl]);
@@ -275,7 +280,7 @@ describe('discardInvalidChanges', () => {
         type: 'validate_dashboard',
         identifier: 'pinned_panels',
         error:
-          'New controls were not added because the result does not match the dashboard schema: 1.invalid: Unrecognized key',
+          'Invalid control changes were discarded because the result does not match the dashboard schema: 1.invalid: Unrecognized key',
       },
     ]);
   });
@@ -286,7 +291,7 @@ describe('discardInvalidChanges', () => {
     const result = discardInvalidChanges({
       originalDashboardData,
       dashboardData: { ...originalDashboardData, title: '' },
-      validateDashboard,
+      validator,
     });
 
     expect(result.dashboardData.title).toBe('Dashboard');
@@ -306,8 +311,11 @@ describe('discardInvalidChanges', () => {
     const result = discardInvalidChanges({
       originalDashboardData,
       dashboardData: { ...originalDashboardData, time_range: { from: 'invalid', to: 'now' } },
-      validateDashboard: ({ time_range: timeRange }) =>
-        timeRange ? [{ path: ['time_range', 'from'], message: 'Invalid' }] : [],
+      validator: {
+        ...validator,
+        validateDashboardFields: ({ time_range: timeRange }) =>
+          timeRange ? [{ path: ['time_range', 'from'], message: 'Invalid' }] : [],
+      },
     });
 
     expect(result.dashboardData).toEqual(originalDashboardData);
@@ -321,13 +329,16 @@ describe('discardInvalidChanges', () => {
     const result = discardInvalidChanges({
       originalDashboardData,
       dashboardData: { ...originalDashboardData, title: '' },
-      validateDashboard: ({ title }) =>
-        title === ''
-          ? Array.from({ length: 12 }, (_, index) => ({
-              path: ['title'],
-              message: `Issue ${index}`,
-            }))
-          : [],
+      validator: {
+        ...validator,
+        validateDashboardFields: ({ title }) =>
+          title === ''
+            ? Array.from({ length: 12 }, (_, index) => ({
+                path: ['title'],
+                message: `Issue ${index}`,
+              }))
+            : [],
+      },
     });
 
     const [{ error }] = result.failures;
@@ -349,7 +360,7 @@ describe('discardInvalidChanges', () => {
         title: 'Renamed',
         panels: [...originalDashboardData.panels, ...newPanels],
       },
-      validateDashboard,
+      validator,
     });
 
     expect(result).toEqual({
@@ -359,64 +370,10 @@ describe('discardInvalidChanges', () => {
           type: 'validate_dashboard',
           identifier: 'dashboard',
           error:
-            'All changes were discarded because the result does not match the dashboard schema: 5 panels',
+            'All changes were discarded because the result does not match the dashboard schema: panels: 5 panels',
         },
       ],
       discardedPanelIds: new Set(['a', 'b', 'c', 'd', 'e']),
-    });
-  });
-
-  it('keeps changes when a dashboard-level issue already existed, even if its message changed', () => {
-    const originalDashboardData = {
-      title: 'Dashboard',
-      panels: ['a', 'b', 'c', 'd', 'e'].map((id) => createPanel(id)),
-    };
-    const dashboardData = {
-      ...originalDashboardData,
-      panels: [...originalDashboardData.panels, createPanel('f')],
-    };
-
-    const result = discardInvalidChanges({
-      originalDashboardData,
-      dashboardData,
-      validateDashboard,
-    });
-
-    expect(result).toEqual({ dashboardData, failures: [], discardedPanelIds: new Set() });
-  });
-
-  it('matches section issues by section id and discards every change for a new one', () => {
-    const untitledSection = createSection('untitled', [], '');
-    const originalDashboardData = { title: 'Dashboard', panels: [untitledSection] };
-    const dashboardData = {
-      ...originalDashboardData,
-      panels: [createSection('new', []), untitledSection],
-    };
-
-    expect(
-      discardInvalidChanges({ originalDashboardData, dashboardData, validateDashboard }).failures
-    ).toEqual([]);
-
-    expect(
-      discardInvalidChanges({
-        originalDashboardData,
-        dashboardData: {
-          ...dashboardData,
-          panels: [createSection('new', [], ''), untitledSection],
-        },
-        validateDashboard,
-      })
-    ).toEqual({
-      dashboardData: originalDashboardData,
-      failures: [
-        {
-          type: 'validate_dashboard',
-          identifier: 'dashboard',
-          error:
-            'All changes were discarded because the result does not match the dashboard schema: panels.0.title: Too small',
-        },
-      ],
-      discardedPanelIds: new Set(),
     });
   });
 });

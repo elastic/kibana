@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
@@ -15,22 +16,22 @@ import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 import type { OperationFailure } from './utils';
 
 export interface DashboardValidationIssue {
-  /** Location of the invalid value in the dashboard payload, e.g. `['panels', 0, 'config']`. */
+  /** Location of the invalid value in the dashboard payload, e.g. `['time_range', 'from']`. */
   path: ReadonlyArray<PropertyKey>;
   message: string;
 }
 
-/**
- * Validates a whole dashboard payload against the host's dashboard schema, returning one issue per
- * invalid location (empty when the dashboard is valid).
- */
-export type ValidateDashboard = (
-  dashboardData: DashboardAttachmentData
-) => DashboardValidationIssue[];
+/** Validates a dashboard against the host's dashboard schema. */
+export interface DashboardValidator {
+  /** Returns the problems of a panel, empty when the panel is valid. */
+  validatePanel: (panel: AttachmentPanel) => string[];
+  /** Validates the dashboard without the content of its panels. */
+  validateDashboardFields: (dashboardData: DashboardAttachmentData) => DashboardValidationIssue[];
+}
 
 type DashboardField = Exclude<keyof DashboardAttachmentData, 'panels'>;
 
-type PinnedPanel = NonNullable<DashboardAttachmentData['pinned_panels']>[number];
+type Control = NonNullable<DashboardAttachmentData['pinned_panels']>[number];
 
 interface ValidationResult {
   dashboardData: DashboardAttachmentData;
@@ -38,102 +39,6 @@ interface ValidationResult {
   /** Ids of panels that were dropped or restored. */
   discardedPanelIds: ReadonlySet<string>;
 }
-
-/**
- * The part of the dashboard an issue belongs to. Each unit is kept, dropped or restored as a
- * whole. `pathLength` is the length of the unit's own path, so messages can be shown relative to
- * the unit.
- */
-type DashboardUnit =
-  | { kind: 'panel'; key: string; pathLength: number; panel: AttachmentPanel }
-  | { kind: 'pinnedPanel'; key: string; pathLength: number; pinnedPanel: PinnedPanel }
-  | { kind: 'field'; key: string; pathLength: number; field: DashboardField }
-  | { kind: 'dashboard'; key: string; pathLength: number };
-
-interface InvalidUnit {
-  unit: DashboardUnit;
-  issues: DashboardValidationIssue[];
-}
-
-const TOP_LEVEL_WIDGET_PATH_LENGTH = 2;
-const SECTION_PANEL_PATH_LENGTH = 4;
-const FIELD_PATH_LENGTH = 1;
-
-const getPinnedPanelKey = (pinnedPanel: PinnedPanel): string =>
-  `pinned_panel:${JSON.stringify(pinnedPanel)}`;
-
-const isDashboardField = (
-  dashboardData: DashboardAttachmentData,
-  key: PropertyKey | undefined
-): key is DashboardField => typeof key === 'string' && key !== 'panels' && key in dashboardData;
-
-/**
- * Finds the unit an issue path points into. Panels are keyed by id, so they match their original
- * after moving. Controls have no stable id and are keyed by content, which is enough because no
- * operation edits a control in place.
- */
-const getIssueUnit = (
-  dashboardData: DashboardAttachmentData,
-  path: ReadonlyArray<PropertyKey>
-): DashboardUnit => {
-  const [location, index, sectionKey, sectionPanelIndex] = path;
-
-  const widget =
-    location === 'panels' && typeof index === 'number' ? dashboardData.panels[index] : undefined;
-  const sectionPanel =
-    widget && isSection(widget) && sectionKey === 'panels' && typeof sectionPanelIndex === 'number'
-      ? widget.panels[sectionPanelIndex]
-      : undefined;
-  const panel = widget && !isSection(widget) ? widget : sectionPanel;
-  if (panel) {
-    return {
-      kind: 'panel',
-      key: `panel:${panel.id}`,
-      pathLength: sectionPanel ? SECTION_PANEL_PATH_LENGTH : TOP_LEVEL_WIDGET_PATH_LENGTH,
-      panel,
-    };
-  }
-
-  const pinnedPanel =
-    location === 'pinned_panels' && typeof index === 'number'
-      ? dashboardData.pinned_panels?.[index]
-      : undefined;
-  if (pinnedPanel) {
-    return {
-      kind: 'pinnedPanel',
-      key: getPinnedPanelKey(pinnedPanel),
-      pathLength: FIELD_PATH_LENGTH,
-      pinnedPanel,
-    };
-  }
-
-  if (isDashboardField(dashboardData, location)) {
-    return {
-      kind: 'field',
-      key: `field:${location}`,
-      pathLength: FIELD_PATH_LENGTH,
-      field: location,
-    };
-  }
-
-  // Sections are keyed by id, so an issue in a moved section still matches its original. The
-  // message is left out of the key because it can describe the current value.
-  const keyPath = widget ? ['panels', widget.id, ...path.slice(2)] : path;
-  return { kind: 'dashboard', key: `dashboard:${keyPath.map(String).join('.')}`, pathLength: 0 };
-};
-
-const getAllPanels = (panels: DashboardAttachmentData['panels']): AttachmentPanel[] =>
-  panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]));
-
-/** Formats the issues of a unit, with paths relative to the unit unless `pathLength` is given. */
-const formatIssues = (
-  { unit, issues }: InvalidUnit,
-  pathLength: number = unit.pathLength
-): string[] =>
-  issues.map(({ path, message }) => {
-    const relativePath = path.slice(pathLength).map(String).join('.');
-    return relativePath ? `${relativePath}: ${message}` : message;
-  });
 
 const MAX_REPORTED_ISSUES = 10;
 
@@ -151,6 +56,26 @@ const toFailure = (identifier: string, messages: string[], outcome: string): Ope
   };
 };
 
+/** Formats issues with paths relative to the first `pathOffset` path segments. */
+const formatIssues = (issues: DashboardValidationIssue[], pathOffset: number): string[] =>
+  issues.map(({ path, message }) => {
+    const relativePath = path.slice(pathOffset).map(String).join('.');
+    return relativePath ? `${relativePath}: ${message}` : message;
+  });
+
+const appendIssue = <Key>(
+  issuesByKey: Map<Key, DashboardValidationIssue[]>,
+  key: Key,
+  issue: DashboardValidationIssue
+) => issuesByKey.set(key, [...(issuesByKey.get(key) ?? []), issue]);
+
+/** Names a panel by its title when it has one, since the agent never saw the id of a new panel. */
+const getPanelIdentifier = ({ id, config: { title } }: AttachmentPanel): string =>
+  typeof title === 'string' && title ? `"${title}" (${id})` : id;
+
+const getAllPanels = (panels: DashboardAttachmentData['panels']): AttachmentPanel[] =>
+  panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]));
+
 /** Restores a dashboard field, removing it when the original dashboard did not have it. */
 const restoreField = (
   dashboardData: DashboardAttachmentData,
@@ -165,77 +90,57 @@ const restoreField = (
 };
 
 /**
- * Groups issues by unit, leaving out units that were already invalid in the original dashboard:
- * the operations did not make those worse, so existing invalid content never blocks an update.
- */
-const getNewInvalidUnits = (
-  originalDashboardData: DashboardAttachmentData,
-  dashboardData: DashboardAttachmentData,
-  issues: DashboardValidationIssue[],
-  validateDashboard: ValidateDashboard
-): Map<string, InvalidUnit> => {
-  const originalInvalidUnitKeys = new Set(
-    validateDashboard(originalDashboardData).map(
-      ({ path }) => getIssueUnit(originalDashboardData, path).key
-    )
-  );
-
-  const newInvalidUnits = new Map<string, InvalidUnit>();
-  for (const issue of issues) {
-    const unit = getIssueUnit(dashboardData, issue.path);
-    if (!originalInvalidUnitKeys.has(unit.key)) {
-      const unitIssues = newInvalidUnits.get(unit.key)?.issues ?? [];
-      newInvalidUnits.set(unit.key, { unit, issues: [...unitIssues, issue] });
-    }
-  }
-  return newInvalidUnits;
-};
-
-/**
- * Discards the changes behind validation issues, one unit (panel, control or dashboard field) at a
- * time:
- * - a unit invalid only in the result is dropped when it is new, or restored to its original;
- * - a unit that was already invalid before the operations is kept as is;
- * - a new issue that belongs to no single unit (e.g. in a section) discards every change.
+ * Discards the changes that make the dashboard invalid, one panel, control or dashboard field at a
+ * time: a new invalid one is dropped and a changed invalid one is restored. Anything that is the
+ * same as before this call is kept even when invalid, so existing invalid content never blocks an
+ * update. An issue that belongs to none of them discards every change.
  */
 export const discardInvalidChanges = ({
   originalDashboardData,
   dashboardData,
-  validateDashboard,
+  validator: { validatePanel, validateDashboardFields },
 }: {
   originalDashboardData: DashboardAttachmentData;
   dashboardData: DashboardAttachmentData;
-  validateDashboard: ValidateDashboard;
+  validator: DashboardValidator;
 }): ValidationResult => {
-  const unchangedResult = { dashboardData, failures: [], discardedPanelIds: new Set<string>() };
+  const originalControls = originalDashboardData.pinned_panels ?? [];
+  // Controls get an id when added; matching by content covers controls stored without one.
+  const findOriginalControl = (control: Control): Control | undefined =>
+    originalControls.find((originalControl) =>
+      control.id === undefined
+        ? isEqual(originalControl, control)
+        : originalControl.id === control.id
+    );
 
-  const issues = validateDashboard(dashboardData);
-  if (issues.length === 0) {
-    return unchangedResult;
+  const dashboardIssues: DashboardValidationIssue[] = [];
+  const controlIssues = new Map<Control, DashboardValidationIssue[]>();
+  const fieldIssues = new Map<DashboardField, DashboardValidationIssue[]>();
+  for (const issue of validateDashboardFields(dashboardData)) {
+    const [field, controlIndex] = issue.path;
+    const control =
+      field === 'pinned_panels' && typeof controlIndex === 'number'
+        ? dashboardData.pinned_panels?.[controlIndex]
+        : undefined;
+    if (control) {
+      if (!isEqual(control, findOriginalControl(control))) {
+        appendIssue(controlIssues, control, issue);
+      }
+    } else if (typeof field === 'string' && field !== 'panels') {
+      const dashboardField = field as DashboardField;
+      if (!isEqual(dashboardData[dashboardField], originalDashboardData[dashboardField])) {
+        appendIssue(fieldIssues, dashboardField, issue);
+      }
+    } else {
+      dashboardIssues.push(issue);
+    }
   }
 
-  const newInvalidUnits = getNewInvalidUnits(
-    originalDashboardData,
-    dashboardData,
-    issues,
-    validateDashboard
-  );
-  if (newInvalidUnits.size === 0) {
-    return unchangedResult;
-  }
-
-  const dashboardInvalidUnits = [...newInvalidUnits.values()].filter(
-    ({ unit }) => unit.kind === 'dashboard'
-  );
-  if (dashboardInvalidUnits.length > 0) {
+  if (dashboardIssues.length > 0) {
     return {
       dashboardData: originalDashboardData,
       failures: [
-        toFailure(
-          'dashboard',
-          dashboardInvalidUnits.flatMap((invalidUnit) => formatIssues(invalidUnit, 0)),
-          'All changes were discarded'
-        ),
+        toFailure('dashboard', formatIssues(dashboardIssues, 0), 'All changes were discarded'),
       ],
       discardedPanelIds: new Set(getAllPanels(dashboardData.panels).map(({ id }) => id)),
     };
@@ -252,22 +157,23 @@ export const discardInvalidChanges = ({
   const discardedPanelIds = new Set<string>();
 
   const resolvePanel = (panel: AttachmentPanel): AttachmentPanel[] => {
-    const invalidUnit = newInvalidUnits.get(`panel:${panel.id}`);
-    if (!invalidUnit) {
+    const originalPanel = originalPanelsById.get(panel.id);
+    const hasSameContent =
+      originalPanel?.type === panel.type && isEqual(originalPanel.config, panel.config);
+    const problems = hasSameContent ? [] : validatePanel(panel);
+    if (problems.length === 0) {
       return [panel];
     }
 
     discardedPanelIds.add(panel.id);
-    const originalPanel = originalPanelsById.get(panel.id);
     if (!originalPanel) {
-      failures.push(toFailure(panel.id, formatIssues(invalidUnit), 'Panel was not added'));
+      failures.push(toFailure(getPanelIdentifier(panel), problems, 'Panel was not added'));
       return [];
     }
-
     failures.push(
       toFailure(
-        panel.id,
-        formatIssues(invalidUnit),
+        getPanelIdentifier(panel),
+        problems,
         'Panel was reverted to its state before this call'
       )
     );
@@ -299,34 +205,30 @@ export const discardInvalidChanges = ({
     ),
   };
 
-  const invalidPinnedPanels = [...newInvalidUnits.values()].filter(
-    ({ unit }) => unit.kind === 'pinnedPanel'
-  );
-  if (invalidPinnedPanels.length > 0) {
-    const invalidPinnedPanelKeys = new Set(invalidPinnedPanels.map(({ unit }) => unit.key));
-    nextDashboardData = {
-      ...nextDashboardData,
-      pinned_panels: dashboardData.pinned_panels?.filter(
-        (pinnedPanel) => !invalidPinnedPanelKeys.has(getPinnedPanelKey(pinnedPanel))
-      ),
-    };
+  if (controlIssues.size > 0) {
+    const controls = (dashboardData.pinned_panels ?? []).flatMap((control) => {
+      if (!controlIssues.has(control)) {
+        return [control];
+      }
+      const originalControl = findOriginalControl(control);
+      return originalControl ? [originalControl] : [];
+    });
+    nextDashboardData =
+      controls.length === 0 && !originalDashboardData.pinned_panels
+        ? restoreField(nextDashboardData, originalDashboardData, 'pinned_panels')
+        : { ...nextDashboardData, pinned_panels: controls };
     failures.push(
       toFailure(
         'pinned_panels',
-        invalidPinnedPanels.flatMap((invalidUnit) => formatIssues(invalidUnit)),
-        'New controls were not added'
+        formatIssues([...controlIssues.values()].flat(), 1),
+        'Invalid control changes were discarded'
       )
     );
   }
 
-  for (const invalidUnit of newInvalidUnits.values()) {
-    const { unit } = invalidUnit;
-    if (unit.kind === 'field') {
-      nextDashboardData = restoreField(nextDashboardData, originalDashboardData, unit.field);
-      failures.push(
-        toFailure(unit.field, formatIssues(invalidUnit), `Change to "${unit.field}" was reverted`)
-      );
-    }
+  for (const [field, issues] of fieldIssues) {
+    nextDashboardData = restoreField(nextDashboardData, originalDashboardData, field);
+    failures.push(toFailure(field, formatIssues(issues, 1), `Change to "${field}" was reverted`));
   }
 
   return { dashboardData: nextDashboardData, failures, discardedPanelIds };

@@ -23,7 +23,7 @@ import {
   getErrorMessage,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
-  type ValidateDashboard,
+  type DashboardValidator,
 } from '@kbn/dashboard-agent-authoring';
 import {
   dashboardTools,
@@ -102,7 +102,7 @@ const summarizeDashboard = (
 });
 
 export interface GenerateDashboardToolDeps {
-  getValidateDashboard: () => Promise<ValidateDashboard>;
+  getDashboardValidator: () => Promise<DashboardValidator>;
 }
 
 /**
@@ -118,7 +118,7 @@ export interface GenerateDashboardToolDeps {
  * the attachment id to render it rather than copying it into the next tool call.
  */
 export const generateDashboardTool = ({
-  getValidateDashboard,
+  getDashboardValidator,
 }: GenerateDashboardToolDeps): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
@@ -150,7 +150,11 @@ Use operations[] to:
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
+        const {
+          dashboardData: generatedDashboardData,
+          failures,
+          panelAuthoringNotes,
+        } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -164,16 +168,14 @@ Use operations[] to:
           resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
             esClient: esClient.asCurrentUser,
           }),
-          finalizeDashboard: (generatedDashboardData) =>
-            applyDefaultDashboardTimeRange({
-              dashboardData: generatedDashboardData,
-              esClient,
-              logger,
-            }),
-          validateDashboard: await getValidateDashboard(),
+          validator: await getDashboardValidator(),
         });
 
-        const toDashboardResult = (attachmentId: string, version: number) => ({
+        const toDashboardResult = (
+          dashboardData: DashboardAttachmentData,
+          attachmentId: string,
+          version: number
+        ) => ({
           results: [
             {
               type: ToolResultType.dashboard,
@@ -198,7 +200,7 @@ Use operations[] to:
 
         // Nothing survived, so no attachment version is persisted; the failures reach the agent
         // through the tool result.
-        if (failures.length > 0 && isNewDashboard && isEmptyDashboard(dashboardData)) {
+        if (failures.length > 0 && isNewDashboard && isEmptyDashboard(generatedDashboardData)) {
           logger.info('Dashboard was not created because none of the changes were applied');
           return {
             results: [
@@ -212,10 +214,21 @@ Use operations[] to:
             ],
           };
         }
-        if (latestVersion && isEqual(dashboardData, latestVersion.data)) {
+        if (latestVersion && isEqual(generatedDashboardData, latestVersion.data)) {
           logger.info('Dashboard was not updated because it did not change');
-          return toDashboardResult(dashboardAttachmentId, latestVersion.version);
+          return toDashboardResult(
+            generatedDashboardData,
+            dashboardAttachmentId,
+            latestVersion.version
+          );
         }
+
+        // Data-aware default time range computation
+        const dashboardData = await applyDefaultDashboardTimeRange({
+          dashboardData: generatedDashboardData,
+          esClient,
+          logger,
+        });
 
         const description = `Dashboard: ${dashboardData.title}`;
         const attachment = isNewDashboard
@@ -248,7 +261,7 @@ Use operations[] to:
           }
         );
 
-        return toDashboardResult(attachment.id, attachment.current_version ?? 1);
+        return toDashboardResult(dashboardData, attachment.id, attachment.current_version ?? 1);
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         logger.error(`Error in generate_dashboard tool: ${errorMessage}`);

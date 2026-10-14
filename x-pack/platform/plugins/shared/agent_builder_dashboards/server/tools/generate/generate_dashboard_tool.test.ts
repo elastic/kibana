@@ -56,7 +56,7 @@ const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', 
 
 const callHandler = async (dashboardAttachmentId?: string) => {
   const tool = generateDashboardTool({
-    getValidateDashboard: jest.fn(async () => jest.fn(() => [])),
+    getDashboardValidator: jest.fn(),
   });
   const sendUiEvent = jest.fn();
   const ctx = {
@@ -80,13 +80,11 @@ describe('generateDashboardTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockHasValidCreateMetadataOperations.mockReturnValue(true);
-    mockExecuteDashboardOperations.mockImplementation(async ({ finalizeDashboard }) => ({
-      dashboardData: finalizeDashboard
-        ? await finalizeDashboard(generatedDashboard)
-        : generatedDashboard,
+    mockExecuteDashboardOperations.mockResolvedValue({
+      dashboardData: generatedDashboard,
       failures: [],
       panelAuthoringNotes: [],
-    }));
+    });
   });
 
   it.each([
@@ -94,7 +92,11 @@ describe('generateDashboardTool handler', () => {
     ['updated', 'dashboard-attachment-id', 'saved-id'],
   ])('sends a dashboard updated UI event with the %s attachment', async (_, id, origin) => {
     mockRetrieveLatestVersion.mockReturnValue(
-      id ? ({ data: generatedDashboard } as ReturnType<typeof retrieveLatestVersion>) : undefined
+      id
+        ? ({
+            data: { ...generatedDashboard, description: 'Before the update' },
+          } as ReturnType<typeof retrieveLatestVersion>)
+        : undefined
     );
 
     const { sendUiEvent } = await callHandler(id);
