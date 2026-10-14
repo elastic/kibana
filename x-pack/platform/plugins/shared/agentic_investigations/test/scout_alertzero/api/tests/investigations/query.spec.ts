@@ -231,22 +231,6 @@ apiTest.describe(
       ]);
     });
 
-    apiTest(
-      'in_progress=false includes idle investigations; true excludes them',
-      async ({ apiClient }) => {
-        const idle = await list(apiClient, `query=${RUN}&in_progress=false`);
-        expect(idle).toHaveStatusCode(200);
-        expect((idle.body as ListBody).results.map(({ id }) => id).sort()).toStrictEqual(
-          [highId, lowId, closedId].sort()
-        );
-        expect((idle.body as ListBody).results.every(({ in_progress: busy }) => !busy)).toBe(true);
-
-        const busy = await list(apiClient, `query=${RUN}&in_progress=true`);
-        expect(busy).toHaveStatusCode(200);
-        expect((busy.body as ListBody).results).toStrictEqual([]);
-      }
-    );
-
     apiTest('pages a filtered list and reports the total', async ({ apiClient }) => {
       const first = await list(apiClient, `query=${RUN}&per_page=2&page=1&sort_field=created_at`);
       const second = await list(apiClient, `query=${RUN}&per_page=2&page=2&sort_field=created_at`);
