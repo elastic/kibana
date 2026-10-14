@@ -23,8 +23,6 @@ export const MAX_ATTACK_TIMESTAMP_LENGTH = 64;
 export const MAX_ATTACK_INDEX_LENGTH = 256;
 export const MAX_ATTACK_ATTACHMENT_ID_LENGTH = 1000;
 export const MAX_ATTACK_OWNER_LENGTH = 100;
-/** Matches the 0-100 range the entity attachment schema caps `riskScore` at. */
-export const MAX_ATTACK_RISK_SCORE = 100;
 
 /**
  * Snapshot of the attack document taken at attach time. The activity-log preview card
@@ -70,8 +68,15 @@ const AttackAttachmentMetadataSchema = z
       .optional(),
     /** ISO timestamp the attack was detected on, rendered as the card's "Detected on" line. */
     timestamp: z.string().max(MAX_ATTACK_TIMESTAMP_LENGTH).optional(),
-    /** Optional risk score (0-100) captured at attach time. The attack document has no `severity`. */
-    riskScore: z.number().int().min(0).max(MAX_ATTACK_RISK_SCORE).optional(),
+    /**
+     * Optional risk score captured at attach time. The attack document has no `severity`.
+     *
+     * Deliberately unbounded above, matching `AttackDiscoveryAlert.riskScore`: an attack's risk
+     * score is the *sum* of its constituent alerts' scores, so it routinely exceeds any single
+     * alert's 0-100 range. Do not borrow the entity attachment's 0-100 bound — that is a
+     * normalised entity score, a different quantity.
+     */
+    riskScore: z.number().int().min(0).optional(),
     /** Number of de-anonymised constituent alerts attached alongside the attack. */
     alertCount: z.number().int().min(0),
     /**
