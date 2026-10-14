@@ -14,10 +14,10 @@ export const GlobalKQLHeader = React.memo(() => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
   const { euiTheme } = useEuiTheme();
 
-  // Above DashboardTopNav (levels.mask) so the Security search bar stays on top when both stick.
+  // Above Security-embedded DashboardTopNav (overridden to levels.menu), below overlay mask.
   const stickyStyles = css`
     position: sticky;
-    z-index: ${Number(euiTheme.levels.mask) + 1};
+    z-index: ${Number(euiTheme.levels.menu) + 1};
     top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
   `;
 

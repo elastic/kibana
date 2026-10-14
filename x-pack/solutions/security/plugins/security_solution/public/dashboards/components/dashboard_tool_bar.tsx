@@ -10,14 +10,13 @@ import type { DashboardApi, RedirectToProps } from '@kbn/dashboard-plugin/public
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 import { SecurityPageName } from '../../../common';
-import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_NAME } from '../../../common/constants';
 
 const DashboardToolBarComponent = ({
@@ -73,21 +72,25 @@ const DashboardToolBarComponent = ({
     }),
     []
   );
-  const { showWriteControls } = useCapabilities<DashboardCapabilities>('dashboard_v2');
 
-  // Security-only: recessed controls strip + top padding (beats TopNav's paddingTop: 0).
+  // Security-only: TopNav under overlay mask; recessed controls + top padding.
   const controlsOverrideStyles = useMemo(
     () =>
       css({
+        // Below mask so KQL (menu + 1) can stack above TopNav when both stick.
+        '.kbnBody & > div': {
+          zIndex: euiTheme.levels.menu,
+        },
         '.controlGroup[data-test-subj="controls-group-wrapper"]': {
           backgroundColor: euiTheme.colors.backgroundBaseRecessed,
           paddingTop: euiTheme.size.s,
         },
       }),
-    [euiTheme.colors.backgroundBaseRecessed, euiTheme.size.s]
+    [euiTheme.colors.backgroundBaseRecessed, euiTheme.levels.menu, euiTheme.size.s]
   );
 
-  return showWriteControls ? (
+  // Always mount so App Header title shows for read-only; write actions stay in Dashboard.
+  return (
     <div css={controlsOverrideStyles}>
       <DashboardTopNav
         customLeadingBreadCrumbs={landingBreadcrumb}
@@ -101,7 +104,7 @@ const DashboardToolBarComponent = ({
         showResetChange={false}
       />
     </div>
-  ) : null;
+  );
 };
 
 export const DashboardToolBar = React.memo(DashboardToolBarComponent);
