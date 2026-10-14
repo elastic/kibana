@@ -562,8 +562,7 @@ export class UiamService implements UiamServicePublic {
       (request.isFakeRequest
         ? isExternalUiamCredential(request)
         : !this.#hasValidInternalCallerAttestation(request, authorization));
-    const clientAuthentication =
-      isExternalApiKey ? null : getUiamClientAuthentication(request);
+    const clientAuthentication = isExternalApiKey ? null : getUiamClientAuthentication(request);
     return {
       ...this.#getClientAuthenticationHeaders(clientAuthentication),
       Authorization: `${scheme} ${getUiamCredentialsFromRequest(request)}`,
