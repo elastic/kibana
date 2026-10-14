@@ -10,6 +10,13 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EventVia as EventViaData } from '../../common/conversation_events/via';
 
+/** People get the user icon; automation gets the icon of what ran. */
+export const getViaIcon = (via?: EventViaData) => {
+  if (via?.type === 'workflow') return 'workflow';
+  if (via?.type === 'agent') return 'productAgent';
+  return 'user';
+};
+
 /** Names the automation behind an event. Renders nothing for a direct user action. */
 export const EventVia = ({ via }: { via?: EventViaData }) => {
   if (!via) return null;

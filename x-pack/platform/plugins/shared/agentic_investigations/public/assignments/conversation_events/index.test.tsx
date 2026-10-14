@@ -72,4 +72,22 @@ describe('assignees changed event UI definition', () => {
       'via workflow Triage'
     );
   });
+
+  it('uses the user icon for people and the icon of the automation otherwise', () => {
+    const definition = createAssigneesChangedEventUiDefinition({ core: coreMock.createStart() });
+    const icon = (data: object) =>
+      definition.getHeader?.({ data } as never, { conversationId: 'c1' })?.icon;
+
+    expect(icon({ added: ['u1'], removed: [] })).toBe('user');
+    expect(
+      icon({
+        added: ['u1'],
+        removed: [],
+        via: { type: 'workflow', workflow_id: 'wf-1', execution_id: 'e1' },
+      })
+    ).toBe('workflow');
+    expect(
+      icon({ added: ['u1'], removed: [], via: { type: 'agent', agent_id: 'a1' } })
+    ).toBe('productAgent');
+  });
 });

@@ -17,7 +17,7 @@ import {
   STATUS_CHANGED_EVENT_TYPE,
   type StatusChangedEventData,
 } from '../../../common/investigations/conversation_events';
-import { EventVia } from '../../conversation_events/event_via';
+import { EventVia, getViaIcon } from '../../conversation_events/event_via';
 
 const statusLabels = {
   open: i18n.translate('xpack.agenticInvestigations.statusEvents.open', {
@@ -28,20 +28,13 @@ const statusLabels = {
   }),
 };
 
-/** People get the same icon as assignee events; automation gets the icon of what ran. */
-const getIcon = (via: StatusChangedEventData['via']) => {
-  if (via?.type === 'workflow') return 'workflow';
-  if (via?.type === 'agent') return 'productAgent';
-  return 'user';
-};
-
 export const createStatusChangedEventUiDefinition = (): ConversationEventUIDefinition<
   typeof STATUS_CHANGED_EVENT_TYPE,
   StatusChangedEventData
 > => ({
   type: STATUS_CHANGED_EVENT_TYPE,
   getHeader: ({ data }) => ({
-    icon: getIcon(data.via),
+    icon: getViaIcon(data.via),
     label: i18n.translate('xpack.agenticInvestigations.statusEvents.headerLabel', {
       defaultMessage: 'Status',
     }),

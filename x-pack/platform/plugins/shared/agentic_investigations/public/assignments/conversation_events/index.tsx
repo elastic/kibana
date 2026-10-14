@@ -20,7 +20,7 @@ import {
   ASSIGNEES_CHANGED_EVENT_TYPE,
   type AssigneesChangedEventData,
 } from '../../../common/assignments/conversation_events';
-import { EventVia } from '../../conversation_events/event_via';
+import { EventVia, getViaIcon } from '../../conversation_events/event_via';
 import { useUserProfiles } from '../../user_profiles';
 
 /** Renders the names of the given uids, falling back to the uid for a profile that can't be resolved. */
@@ -95,8 +95,8 @@ export const createAssigneesChangedEventUiDefinition = ({
 
   return {
     type: ASSIGNEES_CHANGED_EVENT_TYPE,
-    getHeader: () => ({
-      icon: 'user',
+    getHeader: ({ data }) => ({
+      icon: getViaIcon(data.via),
       label: i18n.translate('xpack.agenticInvestigations.assignments.events.headerLabel', {
         defaultMessage: 'Assignees',
       }),
