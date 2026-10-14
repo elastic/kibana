@@ -38,7 +38,11 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
-import { MAX_KI_ID_LENGTH } from '../../../common/step_types/ki';
+import {
+  KI_LIFECYCLE_STATUSES,
+  MAX_KI_ID_LENGTH,
+  type KiLifecycleStatus,
+} from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
   validateAiIndexId,
@@ -298,6 +302,15 @@ export const createAiIndexBodySchema = schema.object({
 });
 export const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
+const kiLifecycleStatusQuerySchema = schema.oneOf(
+  KI_LIFECYCLE_STATUSES.map((status) => schema.literal(status)) as [Type<KiLifecycleStatus>],
+  {
+    meta: {
+      description: 'Knowledge Indicator governance.lifecycle.status value.',
+    },
+  }
+);
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
@@ -319,6 +332,22 @@ export const getKiQuerySchema = schema.object({
     maxLength: MAX_INDEX_NAME_BYTES,
     meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
   }),
+  lifecycle_status: schema.maybe(
+    schema.oneOf(
+      [
+        kiLifecycleStatusQuerySchema,
+        schema.arrayOf(kiLifecycleStatusQuerySchema, {
+          maxSize: KI_LIFECYCLE_STATUSES.length,
+        }),
+      ],
+      {
+        meta: {
+          description:
+            'When set, return the KI only if its governance.lifecycle.status is in this list (unset counts as active). When omitted, deleted KIs are excluded.',
+        },
+      }
+    )
+  ),
 });
 
 export const queryAiIndicesBodySchema = schema.object({
