@@ -15,7 +15,6 @@
 import { dagLayout, resolveShiftedEdgePoints } from '@kbn/dag-layout';
 import { transformWorkflowToGraph } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { buildContainerDescendants, centreForkOwners } from './enforce_lane_order';
 import {
   computeWorkflowLayout,
   WORKFLOW_COMPOUND_PADDING,
@@ -343,8 +342,8 @@ describe('workflow layout pipeline', () => {
     /**
      * An if whose `else` branch is much deeper (foreach with 2 inner steps)
      * than its `then` branch (1 step). Dagre places the deeper branch first
-     * (lower cross-axis / further left in TB). After enforceForkLaneOrder the
-     * `then` (true) branch must be left of `else` (false).
+     * (lower cross-axis / further left in TB). The layout keeps declaration order:
+     * the `then` (true) branch must be left of `else` (false).
      */
     const buildIfWithLongElse = () =>
       runLayout(
@@ -555,7 +554,7 @@ describe('workflow layout pipeline', () => {
 
 // ─── spec 02 regression — named fixtures ──────────────────────────────────────
 //
-// Before this fix, enforceForkLaneOrder permuted lane *starts*, which is only
+// Regression fixtures for a layout that once permuted lane *starts*, which is only
 // overlap-safe for equal-width lanes. The reported YAML combined a nested
 // fallback lane with an asymmetric if (foreach in then, single step in else),
 // triggering overlaps of 232 / 209 / 14 px. All four variants below now produce
@@ -684,8 +683,7 @@ describe('spec 02 regression — named fixtures', () => {
   });
 
   it('owner with fallback and a plain following step share the spine column', () => {
-    // Speculative anchoring (pass 3) translates the owner onto its spine
-    // successor's column. Owner and next-step should share the same x-centre.
+    // The owner sits on its spine successor's column: owner and next step share the same x-centre.
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1001,14 +999,7 @@ describe('spec 02 regression — named fixtures', () => {
     }
   );
 
-  it('edge whose endpoints move by different deltas: reconcileEdgePoints clears it', () => {
-    // Build a fallback owner whose lane head moves a different amount than the
-    // owner itself after the post-dagre passes. The failure edge's waypoints
-    // should be cleared (points.length < 2), not translated.
-    //
-    // We can't easily control the exact movements, but we can assert that the
-    // pipeline produces a valid result (no throws, finite positions) even when
-    // waypoints are cleared — the smooth-step fallback renders correctly.
+  it('drops the layout engine waypoints, so edges are routed from the final handle positions', () => {
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1027,12 +1018,8 @@ describe('spec 02 regression — named fixtures', () => {
       expect(isFinite(n.x)).toBe(true);
       expect(isFinite(n.y)).toBe(true);
     }
-    for (const e of result.edges) {
-      for (const p of e.points) {
-        expect(isFinite(p.x)).toBe(true);
-        expect(isFinite(p.y)).toBe(true);
-      }
-    }
+    expect(result.edges.length).toBeGreaterThan(0);
+    expect(result.edges.every((e) => e.points.length === 0)).toBe(true);
   });
 });
 
@@ -1044,25 +1031,17 @@ describe('spec 02 regression — named fixtures', () => {
  * the root graph. The lane must land in the +cross margin (to the right of its
  * owner in TB direction) so it is visually separate from the spine.
  *
- * Current defect: pass 1 (enforceForkLaneOrder) filters isFailure edges before
- * building the fork map, so it cannot see the fallback edge inside the group.
- * Pass 1b (enforceForkBranchCompoundOrder) only processes outer-graph lanes
- * (graphId === undefined) and skips group-hosted lanes entirely.
+ * A lane hosted by a container body is packed with the fork branches of that body, so
+ * it must sit beside its owner's branch and the next branch must start beyond it.
  *
- * As a result, after all post-dagre passes the fallback node ends up at the
- * wrong cross position.
- *
- * The assertion is PLACEMENT (lane is in the +cross margin), not overlap. Pass 3
- * already guarantees no overlap on raw dagLayout output, so an overlap assertion
- * would be green regardless.
+ * The assertion is PLACEMENT (lane is in the +cross margin), not overlap: the packer
+ * rules out overlap by construction, so an overlap assertion would be green regardless.
  */
 describe('Cycle C — group-hosted lane placement (foreach body on-failure)', () => {
   it('fallback step inside a foreach body is in the +cross margin of its owner (TB)', () => {
     // Topology: loop(foreach) → body: [ if-fork → { then: [good + on-failure/recover], else: [bad] } ]
-    // The lane (recover) is group-hosted (graphId = 'loop'). Pass 1b skips it.
-    // After pass 1 reorders the fork branches, pass 1b would normally shift recover
-    // to stay right of good's NEW position. Since pass 1b skips it, recover may
-    // end up left of bad (i.e., NOT in the +cross margin relative to good).
+    // The lane (recover) is group-hosted (graphId = 'loop'). It belongs to the branch
+    // of `good`, so it must end up right of good and left of bad (the next branch).
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1096,14 +1075,11 @@ describe('Cycle C — group-hosted lane placement (foreach body on-failure)', ()
     const recover = findNode(result.nodes, 'recover');
     const bad = findNode(result.nodes, 'bad');
 
-    // In TB layout the cross axis is x. After pass 1b packs the fork branches
-    // as compound units (good+recover, then bad), the order must be:
+    // In TB layout the cross axis is x. The fork branches are packed as compound units
+    // (good+recover, then bad), so the order must be:
     //   good.x < recover.x < bad.x
     //
     // Specifically: bad must start at or beyond recover's right edge + nodeSep.
-    // Without pass 1b handling group-hosted lanes, dagLayout places recover at
-    // the right of ALL spine nodes in the band (including bad), so the order
-    // becomes good < bad < recover — bad is between good and recover.
     expect(bad.x).toBeGreaterThanOrEqual(
       recover.x + recover.width + WORKFLOW_NODE_SEP - 1 // -1: float tolerance
     );
@@ -1330,26 +1306,75 @@ describe('fork owners stay centred over real (non-bypass) lanes', () => {
     }
   });
 
+  it('the rejoin node stays on the fork owner column', () => {
+    const { result } = runLayout(nestedIfElse());
+    expect(
+      Math.abs(
+        centerX(findNode(result.nodes, 'log-summary')) -
+          centerX(findNode(result.nodes, 'validate-user-sid'))
+      )
+    ).toBeLessThan(CENTER_TOLERANCE);
+  });
+
+  it('the rejoin node stays on the fork owner column inside a container body', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          { name: 'loop', type: 'foreach', foreach: 'items', steps: nestedSteps },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(
+      Math.abs(
+        centerX(findNode(result.nodes, 'log-summary')) -
+          centerX(findNode(result.nodes, 'validate-user-sid'))
+      )
+    ).toBeLessThan(CENTER_TOLERANCE);
+  });
+
+  it('a container joining a fork stays on the owner column when its body is re-centred', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'leaf', type: 'http' }],
+            else: [
+              { name: 'wide_a', type: 'http' },
+              { name: 'wide_b', type: 'if', condition: 'true', steps: nestedSteps, else: [] },
+            ],
+          },
+          { name: 'loop', type: 'foreach', foreach: 'items', steps: nestedSteps },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(
+      Math.abs(centerX(findNode(result.nodes, 'loop')) - centerX(findNode(result.nodes, 'gate')))
+    ).toBeLessThan(CENTER_TOLERANCE);
+  });
+
   it('no pairwise overlap', () => {
     const { result, transformed } = runLayout(nestedIfElse());
     const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
     expect(findOverlappingPairs(result.nodes, groupIds)).toHaveLength(0);
   });
 
-  it('leaves forks with fallback lanes untouched (reference workflow)', () => {
+  it('centres the gates of forks whose branches have fallback lanes (reference workflow)', () => {
     const { result, transformed } = runLayout(referenceFallbackWorkflow());
-    // Knock one lane head off-centre: centring would move its fork's lanes.
-    const perturbed = result.nodes.map((n) =>
-      n.id === 'else-ai-agent-fails' ? { ...n, x: n.x + 100 } : n
-    );
-    const again = centreForkOwners(
-      perturbed,
-      result.edges,
-      transformed,
-      'TB',
-      buildContainerDescendants(transformed.foreachGroups)
-    );
-    expect(again.nodes).toEqual(perturbed);
+    const headsByGate = new Map<string, string[]>();
+    for (const e of transformed.edges.filter((edge) => edge.branchType && !edge.isFailure)) {
+      headsByGate.set(e.source, [...(headsByGate.get(e.source) ?? []), e.target]);
+    }
+    expect(headsByGate.size).toBeGreaterThan(0);
+    for (const [gate, heads] of headsByGate) {
+      const centres = heads.map((id) => centerX(findNode(result.nodes, id)));
+      const midpoint = (Math.min(...centres) + Math.max(...centres)) / 2;
+      expect(Math.abs(centerX(findNode(result.nodes, gate)) - midpoint)).toBeLessThan(
+        CENTER_TOLERANCE
+      );
+    }
   });
 
   it('3-lane switch with a default bypass: gate is centred on the outermost lane heads', () => {
@@ -1479,5 +1504,69 @@ describe('fork lanes and owners inside nested forks and container bodies', () =>
     }
     const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
     expect(findOverlappingPairs(result.nodes, groupIds)).toHaveLength(0);
+  });
+});
+
+describe('container box fits its body (live Censys enrichment shape)', () => {
+  // A foreach whose body is far wider on one side of its spine than the other: a 5-case
+  // switch under an `if` without `else`, followed by a step, like the Censys workflows.
+  const censysLoop = () =>
+    minimal({
+      steps: [
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: 'items',
+          steps: [
+            { name: 'fetch', type: 'http' },
+            {
+              name: 'dispatch',
+              type: 'if',
+              condition: 'x',
+              steps: [
+                {
+                  name: 'route',
+                  type: 'switch',
+                  expression: 'v',
+                  cases: ['a', 'b', 'c', 'd', 'e'].map((match) => ({
+                    match,
+                    steps: [{ name: `write_${match}`, type: 'http' }],
+                  })),
+                },
+              ],
+            },
+            { name: 'note', type: 'http' },
+          ],
+        },
+        { name: 'after', type: 'http' },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+
+  it.each(['TB', 'LR'] as const)(
+    '%s: the box is the body extent plus the padding, with nothing left over on either side',
+    (direction) => {
+      const { result, transformed } = runLayout(censysLoop(), direction);
+      const [group] = transformed.foreachGroups;
+      const box = findNode(result.nodes, 'loop');
+      const body = [...group.innerNodes, ...group.bypassLaneNodes].map((n) =>
+        findNode(result.nodes, n.id)
+      );
+      const isTB = direction === 'TB';
+      const start = (n: typeof box) => (isTB ? n.x : n.y);
+      const end = (n: typeof box) => (isTB ? n.x + n.width : n.y + n.height);
+      const paddingStart = isTB ? WORKFLOW_COMPOUND_PADDING.left : WORKFLOW_COMPOUND_PADDING.top;
+      const paddingEnd = isTB ? WORKFLOW_COMPOUND_PADDING.right : WORKFLOW_COMPOUND_PADDING.bottom;
+
+      expect(
+        Math.abs(Math.min(...body.map(start)) - start(box) - paddingStart)
+      ).toBeLessThanOrEqual(1);
+      expect(Math.abs(end(box) - Math.max(...body.map(end)) - paddingEnd)).toBeLessThanOrEqual(1);
+    }
+  );
+
+  it('keeps the box centred on the spine of the steps around it', () => {
+    const { result } = runLayout(censysLoop());
+    const spine = centerX(findNode(result.nodes, 'after'));
+    expect(Math.abs(centerX(findNode(result.nodes, 'loop')) - spine)).toBeLessThanOrEqual(1);
   });
 });

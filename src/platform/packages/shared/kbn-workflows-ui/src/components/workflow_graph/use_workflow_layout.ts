@@ -33,6 +33,7 @@ const EMPTY_TRANSFORM: TransformResult = {
   bypassLaneNodes: [],
   nodeRefs: {},
   fallbackLanes: [],
+  structure: { triggers: [], items: [] },
 };
 
 const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
