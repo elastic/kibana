@@ -36,11 +36,17 @@ export class PubSubExamplePlugin implements Plugin {
 
   public setup(core: CoreSetup) {
     core.pubsub.registerTopic(pingTopic);
-    core.pubsub.subscribe(pingTopic, 'echo', (event) => {
-      this.logger.info(`echo ${event.id} from ${event.data.source}: ${event.data.message}`);
+    core.pubsub.subscribe(pingTopic, {
+      consumer: 'echo',
+      handler: (event) => {
+        this.logger.info(`echo ${event.id} from ${event.data.source}: ${event.data.message}`);
+      },
     });
-    core.pubsub.subscribe(pingTopic, 'length', (event) => {
-      this.logger.info(`length ${event.id} ${event.data.message.length}`);
+    core.pubsub.subscribe(pingTopic, {
+      consumer: 'length',
+      handler: (event) => {
+        this.logger.info(`length ${event.id} ${event.data.message.length}`);
+      },
     });
 
     const router = core.http.createRouter();
