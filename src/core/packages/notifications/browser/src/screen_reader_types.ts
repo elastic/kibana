@@ -21,6 +21,10 @@ export interface ScreenReaderStart {
    * Messages share one queue with toast and page change announcements, so they don't
    * interrupt each other. Messages sent close together are announced as one.
    *
+   * Announcements are assertive: they interrupt what the screen reader is reading, so they're
+   * still heard when the same action moves focus. Only announce meaningful status changes,
+   * and not on every keystroke, e.g. wait until the user stops typing.
+   *
    * VoiceOver doesn't read announcements while a modal (e.g. EuiModal, EuiFlyout) is open.
    * For feedback about content inside an open modal, e.g. form errors, show it inside the modal.
    *

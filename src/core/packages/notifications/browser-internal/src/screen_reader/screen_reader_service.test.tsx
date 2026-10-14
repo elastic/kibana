@@ -51,12 +51,12 @@ describe('ScreenReaderService', () => {
     document.body.innerHTML = '';
   });
 
-  it('renders a polite live region into the target element', () => {
+  it('renders an assertive live region into the target element', () => {
     startService();
 
     expect(targetDomElement.contains(getLiveRegion())).toBe(true);
-    expect(getLiveRegion().getAttribute('role')).toBe('status');
-    expect(getLiveRegion().getAttribute('aria-live')).toBe('polite');
+    expect(getLiveRegion().getAttribute('role')).toBe('alert');
+    expect(getLiveRegion().getAttribute('aria-live')).toBe('assertive');
   });
 
   it('announces notified messages through the live region', () => {

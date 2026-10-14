@@ -75,16 +75,13 @@ describe('AnnouncementQueue', () => {
     expect(getAnnouncedMessages()).toEqual([['First'], ['Second']]);
   });
 
-  it('waits while the live region is hidden, then until it has been visible for the settle time', () => {
+  it('waits while the live region is hidden from screen readers', () => {
     isHidden = true;
     queue.add('Synonyms set deleted');
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS * 10);
     expect(onAnnounce).not.toHaveBeenCalled();
 
     isHidden = false;
-    jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
-    expect(onAnnounce).not.toHaveBeenCalled();
-
     jest.advanceTimersByTime(ANNOUNCEMENT_SETTLE_MS);
     expect(getAnnouncedMessages()).toEqual([['Synonyms set deleted']]);
   });

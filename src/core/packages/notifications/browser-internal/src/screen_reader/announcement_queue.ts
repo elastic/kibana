@@ -26,9 +26,10 @@ interface AnnouncementQueueOptions {
 }
 
 /**
- * How long to wait after the latest message, and after the live region becomes visible to screen
- * readers again. Messages caused by the same action (e.g. a toast and a page change) are announced
- * together, and focus changes (e.g. a modal returning focus) settle before announcing.
+ * How long to wait after the latest message. Messages caused by the same action (e.g. a toast and a
+ * page change) are announced together, and focus changes caused by that action (e.g. a closed flyout
+ * returning focus) happen first, so the announcement interrupts their readout instead of the other
+ * way around.
  */
 export const ANNOUNCEMENT_SETTLE_MS = 500;
 
@@ -40,22 +41,20 @@ const MIN_READING_TIME_MS = 1000;
 const READING_TIME_PER_CHARACTER_MS = 60;
 
 /**
- * Rough time screen readers need to read an announcement. A new announcement often interrupts the
- * previous one, so the next announcement waits until the previous one is likely read.
+ * Rough time screen readers need to read an announcement. Announcements are assertive and interrupt
+ * whatever is being read, so the next announcement waits until the previous one is likely read.
  */
 export const estimateReadingTimeMs = (messages: string[]): number =>
   Math.max(MIN_READING_TIME_MS, messages.join(' ').length * READING_TIME_PER_CHARACTER_MS);
 
 /**
- * Collects messages for screen readers and decides when to announce them: in batches, once the
+ * Collects messages for screen readers and decides when to announce them: in batches, while the
  * live region is visible to screen readers, and without interrupting the previous announcement.
  */
 export class AnnouncementQueue {
   private pending: Array<() => string> = [];
   private firstQueuedAt = 0;
   private lastQueuedAt = 0;
-  private isExposed = true;
-  private exposedSince = 0;
   private readingUntil = 0;
   private lastId = 0;
   private timeoutId?: ReturnType<typeof setTimeout>;
@@ -82,7 +81,7 @@ export class AnnouncementQueue {
       this.lastQueuedAt + ANNOUNCEMENT_SETTLE_MS,
       this.firstQueuedAt + ANNOUNCEMENT_MAX_BATCH_MS
     );
-    return Math.max(batchReadyAt, this.exposedSince + ANNOUNCEMENT_SETTLE_MS, this.readingUntil);
+    return Math.max(batchReadyAt, this.readingUntil);
   }
 
   private scheduleCheck(delayMs = this.getReadyAt() - Date.now()) {
@@ -94,15 +93,9 @@ export class AnnouncementQueue {
     const now = Date.now();
 
     if (this.options.isHidden()) {
-      this.isExposed = false;
       this.scheduleCheck(ANNOUNCEMENT_SETTLE_MS);
       return;
     }
-    if (!this.isExposed) {
-      this.isExposed = true;
-      this.exposedSince = now;
-    }
-
     if (now < this.getReadyAt()) {
       this.scheduleCheck();
       return;

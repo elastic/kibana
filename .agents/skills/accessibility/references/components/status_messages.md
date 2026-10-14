@@ -2,10 +2,13 @@
 
 **Applies to:** core `notifications.toasts`, core `notifications.screenReader`, `EuiLiveAnnouncer`, `EuiScreenReaderLive`
 
-Status messages (WCAG 2.2 SC 4.1.3) must reach screen reader users without moving focus. Kibana announces them through **one shared live region** owned by core. That region:
+Status messages (WCAG 2.2 SC 4.1.3) must reach screen reader users without moving focus. Kibana announces them through **one shared, assertive live region** owned by core. That region:
 
+- announces assertively, so messages are heard even when the same action moves focus (e.g. a closed flyout returning focus to its trigger), which screen readers would otherwise read instead;
 - reads messages that arrive close together (e.g. a toast and a page change) as one announcement;
 - waits until the previous announcement is likely read, so they don't interrupt each other.
+
+Because announcements interrupt the screen reader, only announce meaningful status changes, and not on every keystroke.
 
 ## Canonical usage
 
