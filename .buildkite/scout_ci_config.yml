@@ -38,6 +38,7 @@ plugins:
     - embeddable_alerts_table
     - entity_store
     - error_boundary_example
+    - esql_views
     - event_annotation_listing
     - exploratory_view
     - files_management
@@ -101,6 +102,7 @@ plugins:
     - stack_connectors
     - streams
     - streams_app
+    - subscription_status
     - synthetics
     - task_manager
     - transform

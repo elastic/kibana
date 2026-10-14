@@ -30,6 +30,7 @@ import {
   QuickSearchVisor,
   type ESQLEditorProps,
   type ESQLEditorApi,
+  type QuickSearchVisorProps,
   type VisorNlResultHandler,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
@@ -239,6 +240,12 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
 
   /**
+   * Restorable state of the ES|QL quick search visor (KQL vs. natural language mode), persisted by the host.
+   */
+  visorInitialState?: QuickSearchVisorProps['initialState'];
+  onVisorInitialStateChange?: QuickSearchVisorProps['onInitialStateChange'];
+
+  /**
    * Optional configuration for ES|QL variables.
    *
    * This prop allows you to define and manage variables used within ES|QL queries,
@@ -383,11 +390,6 @@ export const QueryBarTopRow = React.memo(
     const esqlEditorRef = useRef<ESQLEditorApi>(null);
 
     const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
-
-    // Temporary, the empty page will change and we wont need to control it
-    useEffect(() => {
-      esqlEditorRef.current?.refreshInitialState();
-    }, [props.esqlEditorInitialState]);
 
     const {
       showQueryInput = true,
@@ -1407,6 +1409,7 @@ export const QueryBarTopRow = React.memo(
             enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
+            hasExternalVisor
           />
         )
       );
@@ -1454,6 +1457,8 @@ export const QueryBarTopRow = React.memo(
                     isDisabled={Boolean(isDateRangeInvalid || props.isDisabled)}
                     disableSubmitAction={Boolean(props.disableSubmitAction)}
                     onKqlSubmitted={focusEsqlEditor}
+                    initialState={props.visorInitialState}
+                    onInitialStateChange={props.onVisorInitialStateChange}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}
