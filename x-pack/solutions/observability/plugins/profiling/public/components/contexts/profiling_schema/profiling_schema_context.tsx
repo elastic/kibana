@@ -17,10 +17,21 @@ import { useProfilingDependencies } from '../profiling_dependencies/use_profilin
 import { useEnabledProfilingStatus } from '../profiling_status/use_enabled_profiling_status';
 import { useSelectDefaultSchema } from '../../../hooks/use_select_default_schema';
 import { getSupportedSchemas } from '../../../utils/get_supported_schemas';
-import type { SchemaSelectorProps } from '../../schema_selector';
 
 /** The schema selected in the URL and the schemas the selector offers */
-export type ProfilingSchemaContextValue = SchemaSelectorProps;
+export interface ProfilingSchemaContextValue {
+  /** Undefined until a default is selected */
+  selectedSchema?: ProfilingSchema;
+  onSchemaChange: (schema: ProfilingSchema) => void;
+  /** Schemas with data, undefined while unknown */
+  schemas?: ProfilingSchema[];
+  /** Schemas the deployment supports, regardless of their data */
+  supportedSchemas: ProfilingSchema[];
+  /** Whether the schemas with data or the supported schemas are loading */
+  isLoading: boolean;
+  /** Set when the schemas with data cannot be fetched */
+  error?: Error;
+}
 
 export const ProfilingSchemaContext = React.createContext<ProfilingSchemaContextValue | undefined>(
   undefined
