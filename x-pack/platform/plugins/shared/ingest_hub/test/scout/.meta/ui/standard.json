@@ -1,5 +1,5 @@
 {
-  "sha1": "a3c11165584cc881e5410e7df8b2fdb8b22883a9",
+  "sha1": "900fbf9f27e62796505d5c1de144caf43a2fce5c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 118,
+        "line": 127,
         "column": 20
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 215,
+        "line": 224,
         "column": 23
       }
     },
@@ -42,8 +42,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 369,
+        "line": 378,
         "column": 8
+      }
+    },
+    {
+      "id": "a002a5dadd7e00b-8088fa7b6e5b8b3",
+      "title": "Onboarding Authenticate and Deploy step ecf-only services: switching to agent-based warns first, then removes them on Save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 456,
+        "column": 24
+      }
+    },
+    {
+      "id": "a002a5dadd7e00b-d4043bc05c92bda",
+      "title": "Onboarding Authenticate and Deploy step ecf-only services: switching back to managed does not bring back their ECF deployment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 487,
+        "column": 24
+      }
+    },
+    {
+      "id": "a002a5dadd7e00b-ca96ad2efdecf26",
+      "title": "Onboarding Authenticate and Deploy step ecf-only services: the deployment method cannot be changed when only they are selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
+        "line": 507,
+        "column": 24
       }
     },
     {
@@ -154,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 260,
+        "line": 258,
         "column": 13
       }
     },
@@ -168,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 320,
+        "line": 318,
         "column": 16
       }
     },
@@ -182,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 366,
+        "line": 364,
         "column": 25
       }
     },
@@ -196,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
-        "line": 534,
+        "line": 529,
         "column": 23
       }
     },
@@ -282,6 +324,76 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
         "line": 36,
         "column": 23
+      }
+    },
+    {
+      "id": "51afa91d49fe28e-35fabcf6bd8d405",
+      "title": "Onboarding — agent-based add a service to the existing package policy the added service goes into the first package policy with a PUT, not a new POST",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_agent_based.spec.ts",
+        "line": 39,
+        "column": 5
+      }
+    },
+    {
+      "id": "cac3a28fa43b605-df9e267d31fd948",
+      "title": "Onboarding — managed integrations add a service to the existing package policy after a reload, the added service goes into the first policy with a PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
+        "line": 23,
+        "column": 15
+      }
+    },
+    {
+      "id": "cac3a28fa43b605-0359f2d9f65dda6",
+      "title": "Onboarding — managed integrations add a service to the existing package policy a failed update marks the deployment failed and Retry updates the same policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
+        "line": 46,
+        "column": 14
+      }
+    },
+    {
+      "id": "cac3a28fa43b605-f68d8446dd46be4",
+      "title": "Onboarding — managed integrations add a service to the existing package policy a service with its own namespace gets its own policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
+        "line": 70,
+        "column": 13
+      }
+    },
+    {
+      "id": "cac3a28fa43b605-2ff2fa08bb6f90c",
+      "title": "Onboarding — managed integrations add a service to the existing package policy a duplicated service gets its own policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
+        "line": 87,
+        "column": 13
       }
     },
     {
@@ -630,7 +742,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 17,
+        "line": 22,
         "column": 14
       }
     },
@@ -644,7 +756,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 24
       }
     },
@@ -658,7 +770,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 36,
+        "line": 41,
         "column": 74
       }
     },
@@ -672,7 +784,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 52,
+        "line": 57,
         "column": 23
       }
     },
@@ -686,7 +798,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 62,
+        "line": 67,
+        "column": 11
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-6bd495d9301fbc2",
+      "title": "Onboarding services step ecf-only services: warns when one is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 90,
+        "column": 5
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-7ef6e1241b16ce6",
+      "title": "Onboarding services step ecf-only services: cannot be selected while agent-based is the deployment method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 105,
         "column": 11
       }
     },
@@ -719,8 +859,8 @@
       }
     },
     {
-      "id": "7f9cbf00b4a7ca7-3af4512cd2bfc72",
-      "title": "Onboarding SO persistence static-keys ?deploymentId= resume renders StaticKeysReplaceView",
+      "id": "7f9cbf00b4a7ca7-7e287296a5179c9",
+      "title": "Onboarding SO persistence static-keys ?deploymentId= resume renders the key form",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -728,7 +868,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
-        "line": 198,
+        "line": 195,
         "column": 24
       }
     },
@@ -743,7 +883,119 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
         "line": 63,
-        "column": 8
+        "column": 7
+      }
+    },
+    {
+      "id": "987d8f3ed53a350-2ff88bb5e118947",
+      "title": "Onboarding — downstream step invalidation path 2 — switching to agent-based marks service-settings incomplete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
+        "line": 86,
+        "column": 11
+      }
+    },
+    {
+      "id": "52853464453d623-3f20ef11fe76dae",
+      "title": "Onboarding resume with stored secrets — agent-based, static keys shows the stored keys and does not ask to re-enter credentials",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_agent_based.spec.ts",
+        "line": 138,
+        "column": 7
+      }
+    },
+    {
+      "id": "52853464453d623-97f610f8aa28ffb",
+      "title": "Onboarding resume with stored secrets — agent-based, static keys replacing the stored keys makes Next redeploy with the new values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_agent_based.spec.ts",
+        "line": 144,
+        "column": 26
+      }
+    },
+    {
+      "id": "8507b333537c306-f73bee89d06d0ee",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys shows the stored keys as placeholders, not inputs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 194,
+        "column": 20
+      }
+    },
+    {
+      "id": "8507b333537c306-885e7387eb6bbc3",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys a settings change redeploys without retyping and sends the stored refs back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 209,
+        "column": 53
+      }
+    },
+    {
+      "id": "8507b333537c306-e8c096c72d81b38",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys replacing the keys alone redeploys, sending the new values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 232,
+        "column": 7
+      }
+    },
+    {
+      "id": "8507b333537c306-37c1e7946fe30f0",
+      "title": "Onboarding resume with stored secrets — managed integrations, static keys Keep the stored secrets goes back to the placeholders and clears the change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_mi.spec.ts",
+        "line": 279,
+        "column": 11
+      }
+    },
+    {
+      "id": "b624b3d925e730b-56a3f1750542b4c",
+      "title": "Onboarding — adding a service in the same session reuses the stored keys the second service joins the first policy and keeps its secret refs, not typed keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_same_session.spec.ts",
+        "line": 64,
+        "column": 10
       }
     },
     {

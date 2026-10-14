@@ -140,7 +140,7 @@ export const TrackingCoverageCallout = ({ coverage }: { coverage: TokenTrackingC
       <p>
         {i18n.translate('xpack.nightshift.settings.costEstimate.trackingCoverageDescription', {
           defaultMessage:
-            'This deployment-wide estimate includes all Significant Events calls recorded during the selected period. Calls made while tracking was disabled are not included.',
+            'This deployment-wide estimate includes all significant events calls recorded during the selected period. Calls made while tracking was disabled are not included.',
         })}
       </p>
     </EuiCallOut>

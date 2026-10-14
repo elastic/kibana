@@ -29,20 +29,20 @@ import { useBlocksNewActivity } from '../../../hooks/use_significant_events_main
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 
 interface Props {
-  streamName: string;
+  sourceId: string;
   knowledgeIndicator: KnowledgeIndicator;
   onDeleteRequest: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
 export function KnowledgeIndicatorActionsCell({
-  streamName,
+  sourceId,
   knowledgeIndicator,
   onDeleteRequest,
 }: Props) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const { excludeFeature, restoreFeature, promoteQuery, setDurability, isMutating } =
-    useKnowledgeIndicatorActions({ streamName });
+    useKnowledgeIndicatorActions({ sourceId });
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {

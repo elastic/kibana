@@ -21,13 +21,18 @@ import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsTelemetry } from '../../telemetry/synthetics_telemetry';
 
-import { MONITOR_UPDATE_EVENT_TYPE, MONITOR_CURRENT_EVENT_TYPE } from '../../telemetry/constants';
+import {
+  MONITOR_UPDATE_EVENT_TYPE,
+  MONITOR_CURRENT_EVENT_TYPE,
+  MONITOR_ERROR_EVENT_TYPE,
+} from '../../telemetry/constants';
 import { createHash } from 'crypto';
 import {
   formatTelemetryEvent,
   formatTelemetryUpdateEvent,
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
+  sendErrorTelemetryEvents,
 } from './monitor_upgrade_sender';
 
 const stackVersion = '8.2.0';
@@ -245,5 +250,41 @@ describe('sendTelemetryEvents', () => {
 
     expect(() => sendTelemetryEvents(loggerMock, telemetry, event)).not.toThrow();
     expect(loggerMock.error).toHaveBeenCalled();
+  });
+});
+
+describe('sendErrorTelemetryEvents', () => {
+  const errorEvent = { type: 'syncError', message: 'boom', stackVersion };
+  let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+  let telemetry: SyntheticsTelemetry;
+  const loggerMock = loggingSystemMock.createLogger() as jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    analyticsMock = coreMock.createSetup().analytics as jest.Mocked<AnalyticsServiceSetup>;
+    telemetry = new SyntheticsTelemetry(analyticsMock, loggerMock);
+  });
+
+  it('reports an error once and suppresses repeats within the throttle window', () => {
+    sendErrorTelemetryEvents(loggerMock, telemetry, errorEvent);
+    sendErrorTelemetryEvents(loggerMock, telemetry, errorEvent);
+
+    expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsMock.reportEvent).toHaveBeenCalledWith(MONITOR_ERROR_EVENT_TYPE, {
+      ...errorEvent,
+      issuedTo: undefined,
+    });
+  });
+
+  it('drops noisy errors without consuming the throttle', () => {
+    sendErrorTelemetryEvents(loggerMock, telemetry, {
+      ...errorEvent,
+      url: 'http://127.0.0.1:1',
+    });
+    sendErrorTelemetryEvents(loggerMock, telemetry, {
+      ...errorEvent,
+      message: 'Cannot sync monitors with the Synthetics service. License is expired.',
+    });
+
+    expect(analyticsMock.reportEvent).not.toHaveBeenCalled();
   });
 });

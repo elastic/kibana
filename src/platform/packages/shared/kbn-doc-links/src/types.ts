@@ -497,6 +497,7 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    compareAlertingSystems: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -769,6 +770,7 @@ export interface DocLinks {
     readonly datasets: string;
     readonly datasetSettings: string;
     readonly authentication: string;
+    readonly grantReadAccess: string;
     readonly staticCredentials: string;
     readonly federatedIdentity: string;
     readonly querying: string;

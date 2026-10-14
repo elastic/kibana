@@ -42,6 +42,47 @@ export const collapseIndexName = (name: string): string =>
 
 const withoutWildcard = (pattern: string): string => pattern.replace(/\*$/, '');
 
+/** Beats / legacy families whose universe pattern is `<family>-*`. */
+const BEATS_FAMILIES = [
+  'auditbeat',
+  'filebeat',
+  'packetbeat',
+  'winlogbeat',
+  'heartbeat',
+  'metricbeat',
+  'endgame',
+];
+
+/** Integration data stream types, which must resolve to a real `{type}-{dataset}-*`. */
+const INTEGRATION_TYPES = ['logs', 'metrics', 'traces'];
+
+/**
+ * Collapses a concrete index name (or an existing pattern) to the durable dataset pattern a
+ * detection rule would query: `.ds-logs-aws.cloudtrail-default-2026.10.08-000001` becomes
+ * `logs-aws.cloudtrail-*`. Returns undefined when no dataset can be named, so callers drop
+ * the entry instead of emitting a near-concrete name or a bare `logs-*`: plain pack indices
+ * (`logs-endpoint.events.00e5ea78.2026.10.08`), alert indices (`.alerts-*` and Defend
+ * `*.alerts` datasets), and agent-internal datasets. Beats and legacy families collapse to
+ * `<family>-*`, which is the Security Solution pattern for them.
+ */
+export const collapseToDataSourcePattern = (name: string): string | undefined => {
+  if (name.startsWith('.') && !name.startsWith(DATA_STREAM_BACKING_PREFIX)) return undefined;
+
+  const stripped = withoutWildcard(collapseIndexName(withoutWildcard(name)));
+  const family = stripped.split('-')[0];
+  if (BEATS_FAMILIES.includes(family)) return `${family}-*`;
+  if (!INTEGRATION_TYPES.includes(family)) return undefined;
+
+  // An existing `{type}-{dataset}-*` pattern has no namespace segment left to parse.
+  const dataset = name.endsWith('-*')
+    ? name.slice(family.length + 1, -2)
+    : parseDataStreamName(stripped)?.dataset;
+  if (dataset === undefined || dataset === '') return undefined;
+  if (dataset.includes('.alerts')) return undefined;
+  if (INTERNAL_DATASET_PREFIXES.some((prefix) => dataset.startsWith(prefix))) return undefined;
+  return `${family}-${dataset}-*`;
+};
+
 const isInternalPattern = (pattern: string): boolean => {
   const parsed = parseDataStreamName(withoutWildcard(pattern));
   return (
