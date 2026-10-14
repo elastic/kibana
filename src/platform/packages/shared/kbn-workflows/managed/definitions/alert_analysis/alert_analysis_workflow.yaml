@@ -311,6 +311,80 @@ consts:
   # Related alerts summarised per alert. Same cap as the shipped per-alert workflow.
   max_related_alerts: 20
 
+  # Structured reply both runAgent_step and runPrompt_step must return: one verdict object per
+  # alert in the batch. Shared so the two ways of calling the model cannot drift apart. The root
+  # must stay an object (the steps' schema contract does not accept a root-level array), so the
+  # verdicts are carried in a property.
+  batch_reply_schema:
+    type: object
+    properties:
+      verdicts:
+        type: array
+        # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
+        # more than 50 verdicts is hallucination/injection. Without this bound a
+        # 10 MB response can inflate all_verdicts across up to 20 batches.
+        maxItems: 50
+        description: One verdict per alert in the batch, in the order the alerts were given.
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              # Matches alerts items._id maxLength — the model must echo a real id.
+              maxLength: 512
+              description: The alert id, copied verbatim from the <alert id="..."> block being classified
+            classification:
+              type: string
+              enum:
+                - false_positive
+                - true_positive
+                - inconclusive
+              description: Classification of the alert based on analysis
+            confidence_score:
+              type: number
+              minimum: 0
+              maximum: 1
+              description: Confidence score from 0.0-1.0 indicating certainty of the classification
+            rationale:
+              type: string
+              # Matches workflow.output / AlertAnalysisVerdict — unbounded rationale
+              # would pass the agent schema then fail final output validation after
+              # tags/notes have already been written.
+              maxLength: 500
+              description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
+            contributing_factors:
+              type: array
+              maxItems: 3
+              items:
+                type: string
+                # Matches workflow.output / AlertAnalysisVerdict — unbounded factors
+                # would pass the agent schema then fail final output validation after
+                # tags/notes have already been written.
+                maxLength: 100
+              description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
+          required:
+            - id
+            - classification
+            - confidence_score
+            - rationale
+            - contributing_factors
+      batch_summary:
+        type: string
+        # The prompt still asks for 45 words; this is only a safety net. A reply is rejected
+        # whole when one field breaks a schema limit, and models write this summary at about
+        # 500 characters (measured: median 518, max 655, over 500 in half of the replies), so
+        # a limit of 500 failed a quarter of the batches. 1000 leaves room for that and still
+        # stops a runaway summary, and the summary is cut to the same length in
+        # normalize_batch_result.
+        maxLength: 1000
+        description: >-
+          Optional 1–2 sentences (≤45 words) grouped by host or user explaining
+          why the batch verdicts came out as they did. Present only when
+          calledByWorker; per-alert detail stays in each rationale. Not required —
+          omit entirely if there is nothing to add beyond counts.
+    required:
+      - verdicts
+
 # NOTE: the tag prefix, connector, auto-close, create-conversation, and enabled settings are NOT
 # constants here. They are per-space and read at run time from the invoking space's uiSettings (see
 # the fetch_runtime_config step below), so a single global install serves every space with live
@@ -1531,76 +1605,8 @@ steps:
                 skill_ids: []
               message: "{{ steps.build_agent_message.output.message }}"
 
-              # Structured output schema the AI agent must conform to: one verdict object per
-              # alert in the batch. The root must stay an object (the step's schema contract
-              # does not accept a root-level array), so the verdicts are carried in a property.
-              schema:
-                type: object
-                properties:
-                  verdicts:
-                    type: array
-                    # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
-                    # more than 50 verdicts is hallucination/injection. Without this bound a
-                    # 10 MB response can inflate all_verdicts across up to 20 batches.
-                    maxItems: 50
-                    description: One verdict per alert in the batch, in the order the alerts were given.
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          # Matches alerts items._id maxLength — the model must echo a real id.
-                          maxLength: 512
-                          description: The alert id, copied verbatim from the <alert id="..."> block being classified
-                        classification:
-                          type: string
-                          enum:
-                            - false_positive
-                            - true_positive
-                            - inconclusive
-                          description: Classification of the alert based on analysis
-                        confidence_score:
-                          type: number
-                          minimum: 0
-                          maximum: 1
-                          description: Confidence score from 0.0-1.0 indicating certainty of the classification
-                        rationale:
-                          type: string
-                          # Matches workflow.output / AlertAnalysisVerdict — unbounded rationale
-                          # would pass the agent schema then fail final output validation after
-                          # tags/notes have already been written.
-                          maxLength: 500
-                          description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
-                        contributing_factors:
-                          type: array
-                          maxItems: 3
-                          items:
-                            type: string
-                            # Matches workflow.output / AlertAnalysisVerdict — unbounded factors
-                            # would pass the agent schema then fail final output validation after
-                            # tags/notes have already been written.
-                            maxLength: 100
-                          description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
-                      required:
-                        - id
-                        - classification
-                        - confidence_score
-                        - rationale
-                        - contributing_factors
-                  batch_summary:
-                    type: string
-                    # Prompt asks ≤45 words; bound at the producer so up to ~20 batch
-                    # summaries cannot inflate execution state before join+truncate.
-                    # 500 chars leaves headroom while staying well under generated_summary's
-                    # 2000-char emit cap (20 × 500 would be truncated at join anyway).
-                    maxLength: 500
-                    description: >-
-                      Optional 1–2 sentences (≤45 words) grouped by host or user explaining
-                      why the batch verdicts came out as they did. Present only when
-                      calledByWorker; per-alert detail stays in each rationale. Not required —
-                      omit entirely if there is nothing to add beyond counts.
-                required:
-                  - verdicts
+              # One verdict object per alert in the batch (see consts.batch_reply_schema).
+              schema: "${{ consts.batch_reply_schema }}"
 
           # -------------------------------------------------------------------
           # Direct prompt (the space's "use a prompt" setting, and always the Worker path)
@@ -1639,80 +1645,8 @@ steps:
             with:
               prompt: "{{ steps.build_agent_message.output.message }}"
 
-              # Structured output schema the model must conform to. Keep it the same as the schema of
-              # runAgent_step above except for batch_summary.maxLength, which is 1000 here and 500
-              # there on purpose (see below); a test compares them. One verdict object per
-              # alert in the batch. The root must stay an object (the step's schema contract
-              # does not accept a root-level array), so the verdicts are carried in a property.
-              schema:
-                type: object
-                properties:
-                  verdicts:
-                    type: array
-                    # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
-                    # more than 50 verdicts is hallucination/injection. Without this bound a
-                    # 10 MB response can inflate all_verdicts across up to 20 batches.
-                    maxItems: 50
-                    description: One verdict per alert in the batch, in the order the alerts were given.
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          # Matches alerts items._id maxLength — the model must echo a real id.
-                          maxLength: 512
-                          description: The alert id, copied verbatim from the <alert id="..."> block being classified
-                        classification:
-                          type: string
-                          enum:
-                            - false_positive
-                            - true_positive
-                            - inconclusive
-                          description: Classification of the alert based on analysis
-                        confidence_score:
-                          type: number
-                          minimum: 0
-                          maximum: 1
-                          description: Confidence score from 0.0-1.0 indicating certainty of the classification
-                        rationale:
-                          type: string
-                          # Matches workflow.output / AlertAnalysisVerdict — unbounded rationale
-                          # would pass the agent schema then fail final output validation after
-                          # tags/notes have already been written.
-                          maxLength: 500
-                          description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
-                        contributing_factors:
-                          type: array
-                          maxItems: 3
-                          items:
-                            type: string
-                            # Matches workflow.output / AlertAnalysisVerdict — unbounded factors
-                            # would pass the agent schema then fail final output validation after
-                            # tags/notes have already been written.
-                            maxLength: 100
-                          description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
-                      required:
-                        - id
-                        - classification
-                        - confidence_score
-                        - rationale
-                        - contributing_factors
-                  batch_summary:
-                    type: string
-                    # The prompt still asks for 45 words; this is only a safety net. ai.prompt rejects
-                    # the whole reply when one field breaks a schema limit, and models write this
-                    # summary at about 500 characters (measured: median 518, max 655, over 500 in
-                    # half of the replies), so the agent step's limit of 500 failed a quarter of the
-                    # batches. 1000 leaves room for that and still stops a runaway summary, and the
-                    # summary is cut to the same length in normalize_batch_result.
-                    maxLength: 1000
-                    description: >-
-                      Optional 1–2 sentences (≤45 words) grouped by host or user explaining
-                      why the batch verdicts came out as they did. Present only when
-                      calledByWorker; per-alert detail stays in each rationale. Not required —
-                      omit entirely if there is nothing to add beyond counts.
-                required:
-                  - verdicts
+              # The same reply as runAgent_step (see consts.batch_reply_schema).
+              schema: "${{ consts.batch_reply_schema }}"
 
           # -------------------------------------------------------------------
           # One shape for both ways of calling the model

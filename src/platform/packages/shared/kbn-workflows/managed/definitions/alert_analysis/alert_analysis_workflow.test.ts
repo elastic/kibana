@@ -309,42 +309,41 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(workflow.consts.batch_size).toBeGreaterThan(1);
   });
 
-  it('asks the agent for one verdict per alert id, on a 0-1 confidence scale', () => {
-    const agentStep = findStepByType(workflow.steps, 'ai.agent') as {
-      with: {
-        schema: {
+  it('asks the model for one verdict per alert id, on a 0-1 confidence scale', () => {
+    const agentStep = findStepByType(workflow.steps, 'ai.agent') as { with: { schema: string } };
+    const schema = evaluateExpression(createWorkflowLiquidEngine(), agentStep.with.schema, {
+      consts: workflow.consts,
+    }) as {
+      type: string;
+      required: string[];
+      properties: {
+        verdicts: {
           type: string;
-          required: string[];
-          properties: {
-            verdicts: {
-              type: string;
-              maxItems: number;
-              items: {
-                required: string[];
-                properties: {
-                  id: { type: string; maxLength: number };
-                  classification: { enum: string[] };
-                  confidence_score: { minimum: number; maximum: number };
-                  rationale: { type: string; maxLength: number };
-                  contributing_factors: {
-                    maxItems: number;
-                    items: { type: string; maxLength: number };
-                  };
-                };
+          maxItems: number;
+          items: {
+            required: string[];
+            properties: {
+              id: { type: string; maxLength: number };
+              classification: { enum: string[] };
+              confidence_score: { minimum: number; maximum: number };
+              rationale: { type: string; maxLength: number };
+              contributing_factors: {
+                maxItems: number;
+                items: { type: string; maxLength: number };
               };
             };
-            batch_summary?: { type: string; maxLength: number };
           };
         };
+        batch_summary?: { type: string; maxLength: number };
       };
     };
 
     // The root of an ai.agent schema must stay an object, so the per-alert verdicts are carried in
     // an array property.
-    expect(agentStep.with.schema.type).toBe('object');
-    expect(agentStep.with.schema.required).toEqual(['verdicts']);
+    expect(schema.type).toBe('object');
+    expect(schema.required).toEqual(['verdicts']);
 
-    const verdicts = agentStep.with.schema.properties.verdicts;
+    const verdicts = schema.properties.verdicts;
     expect(verdicts.type).toBe('array');
     // Cap at consts.batch_size — more than 50 verdicts cannot pair to real alerts in a batch.
     expect(verdicts.maxItems).toBe(50);
@@ -370,7 +369,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(verdicts.items.properties.contributing_factors.maxItems).toBe(3);
     expect(verdicts.items.properties.contributing_factors.items.maxLength).toBe(100);
     // Bound at the producer so accumulated batch_summaries cannot inflate execution state.
-    expect(agentStep.with.schema.properties.batch_summary?.maxLength).toBe(500);
+    expect(schema.properties.batch_summary?.maxLength).toBe(1000);
   });
 
   it('tells the model how to behave in a batch: one verdict per id, judged independently', () => {
@@ -2673,28 +2672,27 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
 
     it('sends the same message and expects the same structured reply as the agent', () => {
       const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
-        with: { message: string; schema: unknown };
+        with: { message: string; schema: string };
       };
       const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as {
-        with: { prompt: string; schema: unknown };
+        with: { prompt: string; schema: string };
       };
+      const render = (expression: string) =>
+        evaluateExpression(engine, expression, { consts: workflow.consts });
 
       expect(promptStep.with.prompt).toBe(agentStep.with.message);
-      // The one difference is the summary length limit, see the next test.
-      const withPromptSummaryLimit = structuredClone(agentStep.with.schema) as {
-        properties: { batch_summary: Record<string, unknown> };
-      };
-      withPromptSummaryLimit.properties.batch_summary.maxLength = 1000;
-      expect(promptStep.with.schema).toEqual(withPromptSummaryLimit);
+      // Both read one shared schema, so the two ways of calling the model cannot drift apart.
+      expect(promptStep.with.schema).toBe(agentStep.with.schema);
+      expect(render(promptStep.with.schema)).toEqual(workflow.consts.batch_reply_schema);
     });
 
     it('allows a summary longer than the prompt asks for and cuts a runaway one', () => {
-      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as {
-        with: { schema: { properties: { batch_summary: { maxLength?: number } } } };
+      const { batch_reply_schema: schema } = workflow.consts as {
+        batch_reply_schema: { properties: { batch_summary: { maxLength?: number } } };
       };
-      // Looser than the agent's 500: models write about 500 and a reply over the limit is rejected
-      // whole. Measured replies reached 655 characters.
-      expect(promptStep.with.schema.properties.batch_summary.maxLength).toBe(1000);
+      // Models write about 500 characters and a reply over the limit is rejected whole. Measured
+      // replies reached 655 characters.
+      expect(schema.properties.batch_summary.maxLength).toBe(1000);
 
       const summary = 'word '.repeat(400);
       const result = normalize({
