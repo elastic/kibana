@@ -81,12 +81,18 @@ export const getUnionWatchlistIds = (records: ReadonlyArray<Pick<Entity, 'entity
 
 /**
  * The records a query should cover for the open entity: the target followed by its aliases, with
- * missing entries dropped. Outside the group view this is just `[entityRecord]`.
+ * missing entries dropped and repeated records (same reference) kept once, at their first position.
+ * Outside the group view this is just `[entityRecord]`.
  */
 export const getEntityGroupRecords = <T>(
   entityRecord: T | null | undefined,
   aliasRecords: readonly T[] | undefined
-): T[] => [entityRecord, ...(aliasRecords ?? [])].filter((record): record is T => record != null);
+): T[] => {
+  const records = [entityRecord, ...(aliasRecords ?? [])].filter(
+    (record): record is T => record != null
+  );
+  return Array.from(new Set(records));
+};
 
 /**
  * Combines per-record identity filters into one query: a single filter is returned as is (so
@@ -120,10 +126,23 @@ const toValueArray = (value: unknown): unknown[] => {
   return Array.isArray(value) ? value : [value];
 };
 
+const sortObjectKeys = (_key: string, value: unknown): unknown =>
+  isPlainRecord(value)
+    ? Object.fromEntries(
+        Object.keys(value)
+          .sort()
+          .map((key) => [key, value[key]])
+      )
+    : value;
+
+/** Structural identity of a value: ignores object key order, keeps array order and value types. */
+const toDedupeKey = (value: unknown): string =>
+  JSON.stringify(value, sortObjectKeys) ?? String(value);
+
 const dedupe = (values: unknown[]): unknown[] => {
   const seen = new Set<string>();
   return values.filter((value) => {
-    const key = isPlainRecord(value) ? JSON.stringify(value) : `${typeof value}:${String(value)}`;
+    const key = toDedupeKey(value);
     if (seen.has(key)) {
       return false;
     }
@@ -132,19 +151,34 @@ const dedupe = (values: unknown[]): unknown[] => {
   });
 };
 
+/** Sets an own data property, so keys such as `__proto__` stay plain data instead of changing the prototype. */
+const setOwnProperty = (target: Record<string, unknown>, key: string, value: unknown): void => {
+  Object.defineProperty(target, key, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+};
+
 const unionValues = (target: unknown, source: unknown): unknown => {
   if (isPlainRecord(target) && isPlainRecord(source)) {
     const merged: Record<string, unknown> = { ...target };
     for (const [key, value] of Object.entries(source)) {
-      merged[key] = key in merged ? unionValues(merged[key], value) : value;
+      setOwnProperty(
+        merged,
+        key,
+        Object.hasOwn(merged, key) ? unionValues(merged[key], value) : value
+      );
     }
     return merged;
   }
-  if (target === undefined) {
-    return source;
-  }
-  if (source === undefined) {
+  // `null` is as good as absent: it must not turn a scalar into `[null, value]`.
+  if (source == null) {
     return target;
+  }
+  if (target == null) {
+    return source;
   }
   const values = dedupe([...toValueArray(target), ...toValueArray(source)]);
   // Two scalars that agree stay a scalar; anything else (disagreement or an array on either
@@ -157,54 +191,67 @@ const unionValues = (target: unknown, source: unknown): unknown => {
 /**
  * Merges the alias records' attributes into the target's observed details for the group view.
  * Nested objects merge key by key; scalars that disagree between records become a de-duplicated
- * array instead of one record winning. Returns `details` untouched when there are no aliases.
+ * array instead of one record winning; `null`/`undefined` values never contribute. Alias entries
+ * that are not plain objects are ignored. Returns `details` untouched when nothing is merged.
  */
 export const mergeEntityGroupDetails = <T extends object>(
   details: T,
   aliasRecords: readonly object[] | undefined
 ): T => {
-  if (!aliasRecords?.length) {
+  const records = aliasRecords?.filter(isPlainRecord) ?? [];
+  if (!isPlainRecord(details) || records.length === 0) {
     return details;
   }
-  return aliasRecords.reduce<T>((merged, record) => unionValues(merged, record) as T, details);
+  return records.reduce<T>((merged, record) => unionValues(merged, record) as T, details);
 };
 
 interface LifecycleRecord {
   entity?: { lifecycle?: { first_seen?: string; last_seen?: string; last_activity?: string } };
 }
 
-const getRecordFirstSeen = (record: LifecycleRecord): string | undefined =>
-  record.entity?.lifecycle?.first_seen;
+interface ParsedTimestamp {
+  value: string;
+  epoch: number;
+}
 
-const getRecordLastSeen = (record: LifecycleRecord): string | undefined =>
-  record.entity?.lifecycle?.last_activity ?? record.entity?.lifecycle?.last_seen;
-
-const isEarlier = (candidate: string, current: string | null): boolean =>
-  current === null || Date.parse(candidate) < Date.parse(current);
-
-const isLater = (candidate: string, current: string | null): boolean =>
-  current === null || Date.parse(candidate) > Date.parse(current);
+/** The first non-empty value that parses as a date; malformed or empty values are skipped. */
+const parseFirstValidTimestamp = (
+  ...values: Array<string | undefined>
+): ParsedTimestamp | undefined => {
+  for (const value of values) {
+    if (value) {
+      const epoch = Date.parse(value);
+      if (!Number.isNaN(epoch)) {
+        return { value, epoch };
+      }
+    }
+  }
+  return undefined;
+};
 
 /**
  * Earliest first-seen and latest last-seen across the records (same lifecycle fields the single
- * entity view reads), so the group's activity window spans every member. `null` when unknown.
+ * entity view reads), so the group's activity window spans every member. A record's last seen is
+ * its `last_activity`, falling back to `last_seen`. Malformed or empty timestamps are ignored;
+ * `null` when no record has a valid one.
  */
 export const getEntityGroupLifecycle = (
   records: ReadonlyArray<LifecycleRecord>
 ): { firstSeen: string | null; lastSeen: string | null } => {
-  let firstSeen: string | null = null;
-  let lastSeen: string | null = null;
+  let firstSeen: ParsedTimestamp | undefined;
+  let lastSeen: ParsedTimestamp | undefined;
   for (const record of records) {
-    const recordFirstSeen = getRecordFirstSeen(record);
-    if (recordFirstSeen && isEarlier(recordFirstSeen, firstSeen)) {
+    const { first_seen, last_seen, last_activity } = record.entity?.lifecycle ?? {};
+    const recordFirstSeen = parseFirstValidTimestamp(first_seen);
+    if (recordFirstSeen && (!firstSeen || recordFirstSeen.epoch < firstSeen.epoch)) {
       firstSeen = recordFirstSeen;
     }
-    const recordLastSeen = getRecordLastSeen(record);
-    if (recordLastSeen && isLater(recordLastSeen, lastSeen)) {
+    const recordLastSeen = parseFirstValidTimestamp(last_activity, last_seen);
+    if (recordLastSeen && (!lastSeen || recordLastSeen.epoch > lastSeen.epoch)) {
       lastSeen = recordLastSeen;
     }
   }
-  return { firstSeen, lastSeen };
+  return { firstSeen: firstSeen?.value ?? null, lastSeen: lastSeen?.value ?? null };
 };
 
 /** De-duplicated `entity.source` values across the records, preserving first-seen order. */

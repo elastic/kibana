@@ -263,6 +263,7 @@ describe('useAlertsByStatus', () => {
     mockUseUiSetting.mockReturnValue(true);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+      getBuiltInEntityDefinition,
     });
 
     renderUseAlertsByStatus({

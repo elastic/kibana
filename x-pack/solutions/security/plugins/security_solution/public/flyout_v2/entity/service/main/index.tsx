@@ -12,7 +12,7 @@ import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../../common/typed_json';
-import { buildEntityNameFilter } from '../../../../../common/search_strategy';
+import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -27,11 +27,7 @@ import {
   type EntityDetailsPath,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { getHeaderRiskLevel } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import {
-  getResolvedFromRecordCount,
-  isEntityGroupView,
-} from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import {
   useEntityPanelTabs,
   TABLE_TAB_ID,
@@ -46,23 +42,12 @@ import { ServicePanelHeader } from '../../../../flyout/entity_details/service_ri
 import { ServicePanelFooter } from '../../../../flyout/entity_details/service_right/footer';
 import { useObservedService } from '../../../../flyout/entity_details/service_right/hooks/use_observed_service';
 import { useFlyoutApi } from '../../../use_flyout_api';
-import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_actions';
-import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
-import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
-import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */
   serviceName: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
-  /**
-   * `single` (default) shows the `entityId` record only. `resolved` also loads every record that
-   * resolves to `entityId`; when aliases exist the flyout renders the group view: summary fields
-   * are aggregated across the group and asset criticality is read-only.
-   */
-  mode?: EntityViewMode;
   /** Scope id (timeline id, table id, etc.) — used for downstream containers and queries. */
   scopeId?: string;
   /** Stable identifier for the service panel context (defaults to `scopeId` or a static fallback). */
@@ -84,15 +69,10 @@ const FIRST_RECORD_PAGINATION = {
 export const Service: FC<ServiceProps> = memo(function Service({
   serviceName,
   entityId,
-  mode: requestedMode = 'single',
   scopeId = '',
   contextID,
 }) {
   const { euiTheme } = useEuiTheme();
-  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
-  // Resolution-group view is only available on the new Entity Analytics page; otherwise fall back
-  // to the single-entity view so the header, summary grid and copy link stay consistent.
-  const mode: EntityViewMode = isNewEntityAnalyticsPage ? requestedMode : 'single';
   const {
     openServiceFlyoutAsChild,
     openEntityDetailsAsChild,
@@ -109,13 +89,10 @@ export const Service: FC<ServiceProps> = memo(function Service({
   );
   const entityFromStoreResult = useEntityFromStore({
     entityId,
-    mode,
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: false,
   });
-  const { aliasRecords } = entityFromStoreResult;
-  const isGroupView = isEntityGroupView(aliasRecords);
 
   const euidApi = useEntityStoreEuidApi();
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -141,15 +118,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
 
   const { inspect, loading } = riskScoreState;
   const { setQuery, deleteQuery } = useGlobalTime();
-  const observedServiceGroup = useMemo(
-    () => ({ entityRecord: entityFromStoreResult.entityRecord, aliasRecords }),
-    [entityFromStoreResult.entityRecord, aliasRecords]
-  );
-  const observedService = useObservedService(
-    documentEntityIdentifiers,
-    scopeId,
-    observedServiceGroup
-  );
+  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
 
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
@@ -159,7 +128,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityStoreV2Enabled: true,
       entityFromStoreResult,
       riskScoreState,
-      isGroupView,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
@@ -180,27 +148,21 @@ export const Service: FC<ServiceProps> = memo(function Service({
   });
 
   const entityStoreEntityId = entityFromStoreResult.entityRecord?.entity?.id;
-  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords);
-  // Group view shows the resolution-group risk level; a lone target shows its own.
-  const riskLevel = getHeaderRiskLevel(entityFromStoreResult.entityRecord, isGroupView);
 
-  // Group view is read-only: a single criticality edit can't target every member.
-  const onCriticalitySave =
-    !isGroupView && entityFromStoreResult.entityRecord
-      ? (level: CriticalityLevelWithUnassigned) =>
-          updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
-      : undefined;
+  const onCriticalitySave = entityFromStoreResult.entityRecord
+    ? (level: CriticalityLevelWithUnassigned) =>
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+    : undefined;
 
   const onShowService = useCallback(() => {
     openServiceFlyoutAsChild({
       serviceName,
       entityId,
-      mode,
       scopeId,
       title: serviceName,
       origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     });
-  }, [openServiceFlyoutAsChild, serviceName, entityId, mode, scopeId]);
+  }, [openServiceFlyoutAsChild, serviceName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
     (
@@ -312,35 +274,23 @@ export const Service: FC<ServiceProps> = memo(function Service({
         serviceName={serviceName}
         observedService={observedService}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        resolvedFromCount={resolvedFromCount}
         flyoutHeaderProps={{
           css: css`
             padding-block: ${euiTheme.size.s} !important;
           `,
           panelProps: { paddingSize: 'none' },
         }}
-        riskLevel={riskLevel}
-        headerActions={
-          isNewEntityAnalyticsPage ? (
-            <FlyoutHeaderActions>
-              <EntityAnalyticsFlyoutCopyLink
-                target={{
-                  kind: 'service',
-                  serviceName,
-                  entityId: entityStoreEntityId ?? entityId,
-                  scopeId,
-                  mode: toEntityDescriptorMode(mode),
-                }}
-              />
-            </FlyoutHeaderActions>
-          ) : undefined
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
         }
       />
       <FlyoutBody panelProps={{ paddingSize: 'none' }}>
         {entityFromStoreResult.entityRecord && (
           <EntitySummaryGrid
             entityRecord={entityFromStoreResult.entityRecord}
-            aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
           />
@@ -366,7 +316,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
-            isGroupView={isGroupView}
             hideHeaderIcons
           />
         )}
