@@ -401,7 +401,11 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
   const { delta, trend } = card;
   const shownDelta =
     interactive && !card.isDeltaLoading && delta !== undefined && delta !== 0 ? delta : undefined;
-  const shownTrend = interactive && trend !== undefined && trend.length > 1 ? trend : undefined;
+  // No line next to "Not enough history to compare": the short history would make it misleading.
+  const shownTrend =
+    interactive && card.isDeltaUnavailable !== true && trend !== undefined && trend.length > 1
+      ? trend
+      : undefined;
   const showNoHistory =
     interactive &&
     card.isDeltaUnavailable === true &&

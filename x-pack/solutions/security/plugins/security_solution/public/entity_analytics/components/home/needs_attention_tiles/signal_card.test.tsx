@@ -180,6 +180,17 @@ describe('SignalCard', () => {
     ]);
   });
 
+  it('leaves the sparkline out while the tile says there is not enough history to compare', () => {
+    renderCard({ trend: [3, 5, 4], isDeltaUnavailable: true });
+    expect(mockSeriesData).toBeUndefined();
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaUnavailable')).toBeInTheDocument();
+  });
+
+  it('still draws the sparkline when the history is long enough', () => {
+    renderCard({ trend: [3, 5, 4], isDeltaUnavailable: false });
+    expect(mockSeriesData).toHaveLength(3);
+  });
+
   it('leaves the sparkline out until the series has at least two points', () => {
     renderCard({ trend: undefined });
     expect(mockSeriesData).toBeUndefined();
