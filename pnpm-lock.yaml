@@ -3529,8 +3529,8 @@ importers:
         specifier: 1.0.16
         version: 1.0.16
       fflate:
-        specifier: 0.6.9
-        version: 0.6.9
+        specifier: 0.6.11
+        version: 0.6.11
       file-saver:
         specifier: 1.3.8
         version: 1.3.8
@@ -16533,8 +16533,8 @@ packages:
       node-fetch:
         optional: true
 
-  fflate@0.6.9:
-    resolution: {integrity: sha512-hmAdxNHub7fw36hX7BHiuAO0uekp6ufY2sjxBXWxIf0sw5p7tnS9GVrdM4D12SDYQUHVpiC50fPBYPTjOzRU2Q==}
+  fflate@0.6.11:
+    resolution: {integrity: sha512-3JyEFWGjFn7zHmoa9+zG1BmW7X2okcmAB+0Cnu9UFbVs/jCBnl2A8o065ZlXiw145K3eBM3uLuzrYXC0RK7eDg==}
 
   figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
@@ -34094,7 +34094,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fflate@0.6.9: {}
+  fflate@0.6.11: {}
 
   figures@3.2.0:
     dependencies:
