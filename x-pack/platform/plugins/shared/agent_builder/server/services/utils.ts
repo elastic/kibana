@@ -164,18 +164,8 @@ export const getUserFromRequest = async ({
 
   // A user on this path may have a profile that `getCurrentUser` could not see; a realm id would
   // stop matching their profile-owned conversations, whereas username matching still finds them.
-  const { username, authentication_type: authenticationType } =
-    await esClient.security.authenticate();
-
-  const id = await toStableUserId({
-    authUser: {
-      username,
-      profile_uid: authUser?.profile_uid,
-      authentication_type: authenticationType,
-    },
-    request,
-    resolveApiKeyProfileUid,
-  });
+  const { username } = await esClient.security.authenticate();
+  const id = await toStableUserId({ authUser: authUser ?? {}, request, resolveApiKeyProfileUid });
 
   return { id, username, type: 'user', isAdmin };
 };
