@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
 
 import type { DashboardApi, DashboardInitializationState } from '..';
@@ -32,8 +33,12 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   useEffect(() => {
     if (!dashboardApi) return;
     setPreviewTitle((change.snapshot as DashboardState).title);
-    dashboardApi.setState(change.snapshot as DashboardState);
-  }, [change, dashboardApi, setPreviewTitle]);
+    const snapshot = change.snapshot as DashboardState;
+    /** `setState` leaves the previous time range in place when the snapshot has none, so re-apply the inherited one */
+    dashboardApi.setState(
+      snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange }
+    );
+  }, [change, dashboardApi, inheritedTimeRange, setPreviewTitle]);
 
   const memoized = useMemo(() => {
     /** Prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
@@ -49,6 +54,7 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
     );
   }, []);
 
+  const timeRange = (change.snapshot as DashboardState).time_range ?? inheritedTimeRange;
   const searchBarVisibilityProps = useMemo(() => {
     return {
       showFilterBar: ((change.snapshot as DashboardState).filters ?? []).length > 0,
@@ -67,6 +73,9 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
         <unifiedSearchService.ui.SearchBar
           appName={DASHBOARD_APP_ID}
           filters={toStoredFilters((change.snapshot as DashboardState).filters)}
+          query={toStoredQuery((change.snapshot as DashboardState).query)}
+          dateRangeFrom={timeRange?.from}
+          dateRangeTo={timeRange?.to}
           disableSubscribingToGlobalDataServices
           isDisabled={true}
           {...searchBarVisibilityProps}

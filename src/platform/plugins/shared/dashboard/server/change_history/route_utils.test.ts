@@ -22,20 +22,22 @@ const mockedGetClient = getChangeHistoryClient as jest.MockedFunction<
   typeof getChangeHistoryClient
 >;
 
-const getContext = (hasAllRequested: boolean) =>
-  ({
+const hasPrivileges = jest.fn();
+
+const getContext = (hasAllRequested: boolean) => {
+  hasPrivileges.mockResolvedValue({ has_all_requested: hasAllRequested });
+  return {
     core: Promise.resolve({
       elasticsearch: {
         client: {
           asCurrentUser: {
-            security: {
-              hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: hasAllRequested }),
-            },
+            security: { hasPrivileges },
           },
         },
       },
     }),
-  } as unknown as RequestHandlerContext);
+  } as unknown as RequestHandlerContext;
+};
 
 describe('getChangeHistoryContext', () => {
   const req = { id: 'req-1' } as unknown as KibanaRequest<unknown, unknown, unknown, 'get'>;
@@ -50,6 +52,21 @@ describe('getChangeHistoryContext', () => {
 
     expect(result).toEqual({ error: forbidden });
     expect(mockedGetClient).not.toHaveBeenCalled();
+  });
+
+  it('checks dashboard edit privileges on the space of the request', async () => {
+    mockedGetClient.mockReturnValue({} as never);
+    await getChangeHistoryContext(getContext(true), req, httpServerMock.createResponseFactory());
+
+    expect(hasPrivileges).toHaveBeenCalledWith({
+      application: [
+        {
+          application: 'kibana-.kibana',
+          resources: ['space:space-for-req-1'],
+          privileges: ['feature_dashboard_v2.edit'],
+        },
+      ],
+    });
   });
 
   it('returns a 503 when the change history client is not ready', async () => {

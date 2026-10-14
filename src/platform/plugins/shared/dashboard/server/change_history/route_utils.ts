@@ -34,12 +34,13 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   res: KibanaResponseFactory
 ) => {
   const core = await ctx.core;
+  const spaceId = spacesService?.getSpaceId(req) ?? 'default';
   const { has_all_requested: hasAllPrivileges } =
     await core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
       application: [
         {
           application: 'kibana-.kibana',
-          resources: ['*'],
+          resources: [`space:${spaceId}`],
           privileges: ['feature_dashboard_v2.edit'],
         },
       ],
@@ -54,5 +55,5 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
       error: res.customError({ statusCode: 503, body: 'Change history service is not ready' }),
     };
   }
-  return { client, spaceId: spacesService?.getSpaceId(req) ?? 'default' };
+  return { client, spaceId };
 };

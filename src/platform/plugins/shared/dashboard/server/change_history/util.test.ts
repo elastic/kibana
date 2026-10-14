@@ -11,9 +11,11 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getChangeHistoryClient } from './change_history_service';
-import { addToHistory } from './util';
+import { transformDashboardOut } from '../api/transforms';
+import { addToHistory, getHistorySnapshot } from './util';
 
 jest.mock('./change_history_service');
+jest.mock('../api/transforms');
 
 const mockedGetClient = getChangeHistoryClient as jest.MockedFunction<
   typeof getChangeHistoryClient
@@ -41,10 +43,13 @@ const baseArgs = {
 describe('addToHistory', () => {
   beforeEach(() => jest.resetAllMocks());
 
-  it('throws when there is no authenticated user', async () => {
+  it('skips logging when there is no authenticated user', async () => {
+    const client = getClient();
+    mockedGetClient.mockReturnValue(client as never);
     await expect(
       addToHistory({ ...baseArgs, ctx: getContext(null), sequence: { current: 1 } })
-    ).rejects.toThrow('User not authenticated');
+    ).resolves.toBeUndefined();
+    expect(client.log).not.toHaveBeenCalled();
   });
 
   it('does nothing when the change history client is not ready', async () => {
@@ -116,5 +121,36 @@ describe('addToHistory', () => {
     await expect(
       addToHistory({ ...baseArgs, ctx: getContext(), sequence: { current: 1 } })
     ).resolves.toBeUndefined();
+  });
+});
+
+describe('getHistorySnapshot', () => {
+  const args = {
+    attributes: {} as never,
+    references: [],
+    strictValidationSchema: {} as never,
+  };
+
+  it('transforms the stored state using the dashboard-app panel format', () => {
+    (transformDashboardOut as jest.Mock).mockReturnValue({
+      dashboardState: { title: 'New' },
+      warnings: [],
+    });
+    const snapshot = getHistorySnapshot({ ...args, accessControl: { access_mode: 'default' } });
+
+    expect(transformDashboardOut).toHaveBeenCalledWith(
+      args.attributes,
+      args.references,
+      true,
+      args.strictValidationSchema
+    );
+    expect(snapshot).toEqual({ title: 'New', access_control: { access_mode: 'default' } });
+  });
+
+  it('returns undefined when the state cannot be transformed', () => {
+    (transformDashboardOut as jest.Mock).mockImplementation(() => {
+      throw new Error('bad panel');
+    });
+    expect(getHistorySnapshot(args)).toBeUndefined();
   });
 });

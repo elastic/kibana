@@ -27,7 +27,7 @@ import {
   getNextHistorySequence,
   INITIAL_HISTORY_SEQUENCE,
 } from '../../change_history/history_sequence';
-import { addToHistory } from '../../change_history/util';
+import { addToHistory, getHistorySnapshot } from '../../change_history/util';
 
 export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
   /** Sequence number of the history version this update restores */
@@ -105,6 +105,7 @@ export async function update(
   const shouldChangeAccessMode =
     desiredAccessMode !== undefined && desiredAccessMode !== currentAccessMode;
 
+  let expectedVersion = existing.version;
   if (shouldChangeAccessMode) {
     const changeAccessModeResponse = await core.savedObjects.client.changeAccessMode(
       [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
@@ -116,6 +117,14 @@ export async function update(
     if (changeAccessModeResponse.objects[0]?.error) {
       throw changeAccessModeResponse.objects[0].error;
     }
+
+    // changeAccessMode updates the same saved object and advances its version, so the version
+    // read earlier is stale; re-read it to use for the optimistic concurrency check below.
+    ({ version: expectedVersion } =
+      await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+        DASHBOARD_SAVED_OBJECT_TYPE,
+        id
+      ));
   }
 
   let savedObject: SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>;
@@ -134,22 +143,30 @@ export async function update(
         references: soReferences,
         /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
         mergeAttributes: false,
-        /** optimistic concurrency control: throws a 409 if the document changed since `existing` was read */
-        version: existing.version,
+        /** optimistic concurrency control: throws a 409 if the document changed since `expectedVersion` was read */
+        version: expectedVersion,
       }
     );
-    await addToHistory({
-      ctx: requestCtx,
-      dashboardId: id,
-      snapshot: updateBody,
-      spaceId,
-      sequence: {
-        previous: existing.attributes.historySequence,
-        current: savedObject.attributes.historySequence ?? INITIAL_HISTORY_SEQUENCE,
-      },
-      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
-      restoredFrom,
+    const snapshot = getHistorySnapshot({
+      attributes: soAttributes,
+      references: soReferences,
+      accessControl,
+      strictValidationSchema,
     });
+    if (snapshot) {
+      await addToHistory({
+        ctx: requestCtx,
+        dashboardId: id,
+        snapshot,
+        spaceId,
+        sequence: {
+          previous: existing.attributes.historySequence,
+          current: savedObject.attributes.historySequence ?? INITIAL_HISTORY_SEQUENCE,
+        },
+        timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+        restoredFrom,
+      });
+    }
   } catch (e) {
     // if update failed, let's attempt to roll back the access mode change if we changed it
     if (shouldChangeAccessMode) {

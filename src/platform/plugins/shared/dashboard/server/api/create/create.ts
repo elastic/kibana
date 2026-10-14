@@ -16,7 +16,7 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
-import { addToHistory } from '../../change_history/util';
+import { addToHistory, getHistorySnapshot } from '../../change_history/util';
 
 export interface CreateOptions {
   id?: string;
@@ -58,16 +58,24 @@ export async function create(
     }
   );
 
-  await addToHistory({
-    ctx: requestCtx,
-    dashboardId: savedObject.id,
-    snapshot: createBody,
-    spaceId,
-    sequence: {
-      current: INITIAL_HISTORY_SEQUENCE,
-    },
-    timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+  const snapshot = getHistorySnapshot({
+    attributes: soAttributes,
+    references: soReferences,
+    accessControl,
+    strictValidationSchema,
   });
+  if (snapshot) {
+    await addToHistory({
+      ctx: requestCtx,
+      dashboardId: savedObject.id,
+      snapshot,
+      spaceId,
+      sequence: {
+        current: INITIAL_HISTORY_SEQUENCE,
+      },
+      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+    });
+  }
 
   return getDashboardCRUResponseBody(
     savedObject,

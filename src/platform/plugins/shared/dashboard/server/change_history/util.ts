@@ -13,8 +13,42 @@ import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import type { ObjectChange } from '@kbn/change-history';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
+import type { getDashboardStateSchema } from '../api/dashboard_state_schemas';
+import { transformDashboardOut } from '../api/transforms';
 import { getChangeHistoryClient } from './change_history_service';
+
+/**
+ * Builds the snapshot to record in history from the stored attributes, always in the dashboard-app
+ * panel format. Restoring always treats the snapshot as a dashboard-app request, so snapshots must
+ * not depend on which API (public as-code or dashboard-app) performed the save. Returns undefined
+ * if the snapshot cannot be built, since history is best-effort.
+ */
+export const getHistorySnapshot = ({
+  attributes,
+  references,
+  accessControl,
+  strictValidationSchema,
+}: {
+  attributes: DashboardSavedObjectAttributes;
+  references: SavedObjectReference[];
+  accessControl?: DashboardState['access_control'];
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>;
+}): DashboardState | undefined => {
+  try {
+    const { dashboardState } = transformDashboardOut(
+      attributes,
+      references,
+      true,
+      strictValidationSchema
+    );
+    return { ...dashboardState, ...(accessControl && { access_control: accessControl }) };
+  } catch {
+    return undefined;
+  }
+};
 
 export const addToHistory = async ({
   ctx,
@@ -35,7 +69,7 @@ export const addToHistory = async ({
 }) => {
   const core = await ctx.core;
   const user = core.security.authc.getCurrentUser();
-  if (!user) throw new Error('User not authenticated');
+  if (!user) return; // just skip history logging if there is an authentication error; saving was already succesful
 
   let client;
   try {
