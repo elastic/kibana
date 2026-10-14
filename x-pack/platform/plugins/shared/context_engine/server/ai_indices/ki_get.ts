@@ -29,7 +29,7 @@ export const kiIdQuery = (kiId: string) => ({
   },
 });
 
-const isKiLifecycleAllowed = (
+const matchesLifecycleFilter = (
   document: KiDocument,
   lifecycleStatuses?: KiLifecycleStatus[]
 ): boolean => {
@@ -97,7 +97,7 @@ export const getKi = async (
   if (
     _id === undefined ||
     document === undefined ||
-    !isKiLifecycleAllowed(document, lifecycleStatuses)
+    !matchesLifecycleFilter(document, lifecycleStatuses)
   ) {
     throw new KiNotFoundError(aiIndexId, kiId);
   }

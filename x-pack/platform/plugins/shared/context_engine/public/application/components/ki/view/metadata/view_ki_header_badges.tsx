@@ -36,7 +36,8 @@ export const getViewKiHeaderBadges = (
   document: KiDocument,
   lifecycleStatus?: KiLifecycleStatus
 ): AppHeaderBadge[] | undefined => {
-  const type = document.type && document.type.length > 0 ? document.type : undefined;
+  const type =
+    typeof document.type === 'string' && document.type.length > 0 ? document.type : undefined;
   const kiStatus = resolveKiStatus(lifecycleStatus, document.expires_at);
 
   const badges: AppHeaderBadge[] = [

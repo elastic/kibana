@@ -84,4 +84,14 @@ describe('getViewKiHeaderBadges', () => {
 
     expect(badgeTestSubjs(badges)).toEqual([STATUS_BADGE_TEST_SUBJ]);
   });
+
+  it('omits the type badge when type is not a string', () => {
+    const badges = getViewKiHeaderBadges({
+      type: ['playbook'] as unknown as string, // force type to be non-string
+      expires_at: FUTURE_EXPIRES_AT,
+    });
+
+    expect(badgeTestSubjs(badges)).toEqual([]);
+    expect(badges).toBeUndefined();
+  });
 });
