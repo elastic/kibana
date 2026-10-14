@@ -144,7 +144,6 @@ describe('getScoutTargetDomain', () => {
       ],
       'security_ease',
     ],
-    [['--serverless=vectordb'], 'vectordb'],
   ])('resolves %j to %s', (serverArgs, domain) => {
     expect(getScoutTargetDomain(createServerlessConfig(serverArgs))).toBe(domain);
   });
@@ -170,7 +169,11 @@ describe('getScoutTargetDomain', () => {
 
   it('maps every serverless Scout test target domain', () => {
     const serverlessDomains = new Set(
-      testTargets.all.filter(({ arch }) => arch === 'serverless').map(({ domain }) => domain)
+      testTargets.all
+        .filter(({ arch }) => arch === 'serverless')
+        .map(({ domain }) => domain)
+        // 8.19 has no workplaceai serverless project type
+        .filter((domain) => domain !== 'workplaceai')
     );
     expect(new Set(Object.values(SERVERLESS_DOMAINS))).toEqual(serverlessDomains);
   });
