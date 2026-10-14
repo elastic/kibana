@@ -1057,11 +1057,57 @@ function injectModulePaths(source: string, filename: string, serverDir: string):
   )});\nvar __dirname = require("path").join(__kbnBundleDirname, ${JSON.stringify(
     relativeDir
   )});\n`;
-  const directive = source.match(/^(?:\s|\/\*[\s\S]*?\*\/|\/\/.*\n)*["']use strict["'];?\n?/);
-  if (!directive) {
+  const directiveLength = leadingUseStrictLength(source);
+  if (directiveLength === 0) {
     return injected + source;
   }
-  return source.slice(0, directive[0].length) + injected + source.slice(directive[0].length);
+  return source.slice(0, directiveLength) + injected + source.slice(directiveLength);
+}
+
+/**
+ * Length of a leading `"use strict"` directive, including the comments and
+ * whitespace in front of it. Scanned directly so a long block comment cannot
+ * make a matcher backtrack.
+ */
+function leadingUseStrictLength(source: string): number {
+  let index = 0;
+  while (index < source.length) {
+    const char = source[index] ?? '';
+    if (/\s/.test(char)) {
+      index++;
+      continue;
+    }
+    if (source.startsWith('/*', index)) {
+      const close = source.indexOf('*/', index + 2);
+      if (close === -1) {
+        return 0;
+      }
+      index = close + 2;
+      continue;
+    }
+    if (source.startsWith('//', index)) {
+      const newline = source.indexOf('\n', index + 2);
+      if (newline === -1) {
+        return 0;
+      }
+      index = newline + 1;
+      continue;
+    }
+    break;
+  }
+
+  const quote = source[index];
+  if ((quote !== '"' && quote !== "'") || !source.startsWith(`${quote}use strict${quote}`, index)) {
+    return 0;
+  }
+  index += '"use strict"'.length;
+  if (source[index] === ';') {
+    index++;
+  }
+  if (source[index] === '\n') {
+    index++;
+  }
+  return index;
 }
 
 function isInside(root: string, file: string): boolean {

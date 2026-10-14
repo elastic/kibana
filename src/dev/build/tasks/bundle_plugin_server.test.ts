@@ -213,7 +213,10 @@ describe('bundlePluginServer', () => {
       Path.join(server, 'plugin.js'),
       '"use strict";\nexports.dir = require("./lib/service").dir;\n'
     );
-    Fs.writeFileSync(Path.join(lib, 'service.js'), '"use strict";\nexports.dir = __dirname;\n');
+    Fs.writeFileSync(
+      Path.join(lib, 'service.js'),
+      '/* header *//* still a comment */\n// line comment\n"use strict";\nexports.dir = __dirname;\n'
+    );
 
     await bundlePluginServer(root);
 
@@ -223,6 +226,12 @@ describe('bundlePluginServer', () => {
 
     const bundle = Fs.readFileSync(Path.join(moved, 'server', 'plugin.js'), 'utf8');
     expect(bundle).not.toContain(root);
+    const serviceBody = bundle.slice(bundle.indexOf('"server/lib/service.js"'));
+    const strictAt = serviceBody.indexOf('"use strict";');
+    const filenameAt = serviceBody.indexOf(
+      'var __filename2 = require("path").join(__kbnBundleDirname, "lib/service.js")'
+    );
+    expect(serviceBody.slice(strictAt, filenameAt)).toMatch(/^"use strict";\s*$/);
     const loaded = requireFromTest(Path.join(moved, 'server', 'plugin.js'));
     expect(Fs.realpathSync(loaded.dir)).toBe(Fs.realpathSync(Path.join(moved, 'server', 'lib')));
   });
