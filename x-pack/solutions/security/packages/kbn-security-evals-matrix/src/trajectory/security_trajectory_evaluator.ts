@@ -10,7 +10,7 @@ import type { Evaluator } from '@kbn/evals';
 import { getAgentBuilderToolCalls } from './agent_builder_tool_classifier';
 import type { ToolCallClass, TrajectoryToolCall } from './agent_builder_tool_classifier';
 
-const UNCLASSIFIED_TOOL_LABEL_PREFIX = 'unclassified-tool:';
+const UNCLASSIFIED_TOOL_EXPLANATION_PREFIX = 'unclassified-tool:';
 
 const unique = (ids: string[]): string[] => [...new Set(ids)];
 
@@ -80,7 +80,7 @@ export function createSecurityTrajectoryEvaluator(config: {
         return {
           score: null,
           label: 'N/A',
-          explanation: `${UNCLASSIFIED_TOOL_LABEL_PREFIX}${ids.join(',')}`,
+          explanation: `${UNCLASSIFIED_TOOL_EXPLANATION_PREFIX}${ids.join(',')}`,
           metadata: { unclassifiedToolIds: ids, runtimeToolIds: unique(runtimeToolIds) },
         };
       }

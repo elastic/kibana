@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isInProtectedNamespace } from '@kbn/agent-builder-common';
+import { isInProtectedNamespace, toolNamespaces } from '@kbn/agent-builder-common';
 import type { Evaluator } from '@kbn/evals';
 import { getInternalToolKind } from './tool_kinds';
 
@@ -49,8 +49,9 @@ export const getAgentBuilderToolCalls = (output: unknown): TrajectoryToolCall[] 
  *    dropped; those marked `data_access` (files, shell, APIs, sub-agents) are scored.
  * 2. a call the runtime reports as `registry` or `inline` is a domain tool and is scored.
  * 3. a call the runtime reports as `internal` that Agent Builder does not classify is unknown.
- * 4. without an origin (trace spans carry none): ids in a protected namespace are built-in domain
- *    tools, and `knownToolIds` (e.g. custom tools the suite registers) are scored.
+ * 4. without an origin (trace spans carry none): an `attachments.*` id that step 1 did not place is
+ *    unknown; other ids in a protected namespace are built-in domain tools, and `knownToolIds`
+ *    (e.g. custom tools the suite registers) are scored.
  * Anything else is `unclassified`, which makes the trajectory N/A instead of a score.
  *
  * `knownToolIds` only applies on the trace path (no origin); it never rescues a call the runtime
@@ -76,6 +77,11 @@ export const createAgentBuilderToolClassifier = ({
       return 'scored';
     }
     if (call.origin === 'internal') {
+      return 'unclassified';
+    }
+    // `attachments` is a protected namespace, but known attachment tools were returned as runtime
+    // above; any other `attachments.*` id is an attachment tool Agent Builder has not classified.
+    if (call.id.startsWith(`${toolNamespaces.attachments}.`)) {
       return 'unclassified';
     }
     if (isInProtectedNamespace(call.id) || known.has(call.id)) {

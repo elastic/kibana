@@ -82,6 +82,18 @@ describe('createAgentBuilderToolClassifier', () => {
     expect(classify({ id: 'plan_next_step' })).toBe('unclassified');
   });
 
+  it('leaves an unknown attachments.* id unclassified, with or without origin', () => {
+    expect(classify({ id: 'attachments.fetch_from_es' })).toBe('unclassified');
+    expect(classify({ id: 'attachments.fetch_from_es', origin: 'internal' })).toBe('unclassified');
+    // Known attachment tools stay runtime.
+    expect(classify({ id: attachmentTools.read })).toBe('runtime');
+  });
+
+  it('does not treat a known custom tool that merely starts with "attachments" as an attachment tool', () => {
+    const withCustom = createAgentBuilderToolClassifier({ knownToolIds: ['attachments_search'] });
+    expect(withCustom({ id: 'attachments_search' })).toBe('scored');
+  });
+
   it('pins browser API tools (origin internal, not classified by Agent Builder) as unclassified', () => {
     expect(
       createAgentBuilderToolClassifier({ knownToolIds: ['browser_api_navigate'] })({
@@ -101,6 +113,26 @@ describe('createAgentBuilderToolClassifier', () => {
       await evaluator.evaluate({
         input: {},
         output: [{ id: 'attachments.fetch_from_es', origin: 'internal' }],
+        expected: {},
+        metadata: null,
+      })
+    ).toMatchObject({
+      score: null,
+      label: 'N/A',
+      explanation: 'unclassified-tool:attachments.fetch_from_es',
+    });
+  });
+
+  it('makes an unknown attachments.* id without origin N/A instead of a false 0', async () => {
+    const evaluator = createSecurityTrajectoryEvaluator({
+      extractToolCalls: (output) => output as TrajectoryToolCall[],
+      goldenPathExtractor: () => [],
+      classifyTool: classify,
+    });
+    expect(
+      await evaluator.evaluate({
+        input: {},
+        output: [{ id: 'attachments.fetch_from_es' }],
         expected: {},
         metadata: null,
       })
