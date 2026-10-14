@@ -80,12 +80,12 @@ export type {
 export { defineTopic } from '@kbn/core-pubsub-server';
 export type {
   PubSubEvent,
+  PubSubEventInit,
   PubSubHandler,
+  PubSubPublishResult,
   PubSubSetup,
   PubSubStart,
-  PubSubPublishResult,
   PubSubSubscription,
-  PubSubEventInit,
   Topic,
 } from '@kbn/core-pubsub-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';

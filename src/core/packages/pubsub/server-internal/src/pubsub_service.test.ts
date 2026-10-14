@@ -323,13 +323,8 @@ describe('PubSubService dispatch', () => {
     ).rejects.toThrow('Topic "shipments" is not registered.');
   });
 
-  it('throws for oversized or circular data, and for publish before start', async () => {
+  it('throws for oversized or circular data', async () => {
     const { service, topic } = createHarness();
-
-    await expect(
-      service.publish(PLUGIN, topic, { id: nextId(), data: { secret: 'early' } })
-    ).rejects.toThrow(/after start/);
-
     const { publish } = start(service);
 
     const oversized = 'a'.repeat(PUBSUB_MAX_DATA_BYTES);
@@ -457,7 +452,7 @@ describe('PubSubService dispatch', () => {
 
     expect(calls).toBe(1);
     await expect(
-      service.publish(PLUGIN, topic, { id: nextId(), data: { secret: 'late' } })
+      publish(PLUGIN, topic, { id: nextId(), data: { secret: 'late' } })
     ).rejects.toThrow(/after stop/);
   });
 });

@@ -35,7 +35,6 @@ interface Subscription {
   readonly topic: string;
   /** Full consumer name, `${pluginId}.${consumer}`. */
   readonly consumer: string;
-  readonly pluginId: string;
   readonly handler: SubscriptionHandler;
   readonly queue: AcceptedEvent[];
   running: boolean;
@@ -56,7 +55,6 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   /** Topic name to the plugin that registered it. Kept for diagnostics; it does not restrict publishing. */
   private readonly topics = new Map<string, string>();
   private readonly subscriptions: Subscription[] = [];
-  private readonly subscriptionKeys = new Set<string>();
   private phase: Phase = 'created';
 
   constructor(coreContext: CoreContext) {
@@ -105,12 +103,14 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     this.phase = 'stopped';
   }
 
-  public async publish<TData>(
+  private async publish<TData>(
     pluginId: string,
     topic: Topic<TData>,
     init: PubSubEventInit<TData>
   ): Promise<PubSubPublishResult> {
-    this.assertCanPublish();
+    if (this.phase !== 'started') {
+      throw new Error('Pubsub publish is not available after stop.');
+    }
 
     if (!this.topics.has(topic.name)) {
       throw new Error(`Topic "${topic.name}" is not registered.`);
@@ -159,18 +159,19 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     const scopedConsumer = scopeConsumerName(pluginId, consumer);
-    const key = `${topic.name}\n${scopedConsumer}`;
-    if (this.subscriptionKeys.has(key)) {
+    const alreadySubscribed = this.subscriptions.some(
+      (subscription) =>
+        subscription.topic === topic.name && subscription.consumer === scopedConsumer
+    );
+    if (alreadySubscribed) {
       throw new Error(
         `Consumer "${scopedConsumer}" is already subscribed to topic "${topic.name}".`
       );
     }
 
-    this.subscriptionKeys.add(key);
     this.subscriptions.push({
       topic: topic.name,
       consumer: scopedConsumer,
-      pluginId,
       handler: (event) => handler(event as PubSubEvent<TData>),
       queue: [],
       running: false,
@@ -205,7 +206,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   }
 
   private async drain(subscription: Subscription): Promise<void> {
-    while (this.phase === 'started' && subscription.queue.length > 0) {
+    while (this.phase === 'started') {
       const accepted = subscription.queue.shift();
       if (!accepted) {
         break;
@@ -223,10 +224,6 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     subscription.running = false;
-
-    if (this.phase === 'started' && subscription.queue.length > 0) {
-      this.schedule(subscription);
-    }
   }
 
   /** Each consumer gets its own parsed copy, as it would from a durable store. */
@@ -239,17 +236,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     return Object.freeze({ id, topic, acceptedAt, data: JSON.parse(serializedData) });
   }
 
-  private assertCanPublish(): void {
-    if (this.phase === 'stopped') {
-      throw new Error('Pubsub publish is not available after stop.');
-    }
-
-    if (this.phase !== 'started') {
-      throw new Error('Pubsub publish is only available after start.');
-    }
-  }
-
-  private assertEventId(id: unknown): void {
+  private assertEventId(id: string): void {
     if (typeof id !== 'string' || id.length === 0) {
       throw new Error('Pubsub event id must be a non-empty string.');
     }
@@ -261,18 +248,9 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
   }
 
-  private serializeData(data: unknown): string {
-    let serialized: string;
-    try {
-      const encoded = JSON.stringify(data);
-      if (typeof encoded !== 'string') {
-        throw new Error('Pubsub event data must be JSON-serializable.');
-      }
-      serialized = encoded;
-    } catch (error) {
-      if (error instanceof Error && error.message.startsWith('Pubsub event data')) {
-        throw error;
-      }
+  private serializeData<TData>(data: TData): string {
+    const serialized = this.tryStringify(data);
+    if (serialized === undefined) {
       throw new Error('Pubsub event data must be JSON-serializable.');
     }
 
@@ -284,5 +262,14 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     return serialized;
+  }
+
+  /** `JSON.stringify` throws on cycles and BigInt, and returns `undefined` for non-JSON values. */
+  private tryStringify<TData>(data: TData): string | undefined {
+    try {
+      return JSON.stringify(data);
+    } catch {
+      return undefined;
+    }
   }
 }

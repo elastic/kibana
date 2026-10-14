@@ -8,10 +8,7 @@
  */
 
 import type { PubSubSetup, PubSubStart } from '@kbn/core-pubsub-server';
-import type {
-  InternalPubSubSetup,
-  InternalPubSubStart,
-} from '@kbn/core-pubsub-server-internal';
+import type { InternalPubSubSetup, InternalPubSubStart } from '@kbn/core-pubsub-server-internal';
 
 const createSetupContract = (): jest.Mocked<PubSubSetup> => {
   return {
