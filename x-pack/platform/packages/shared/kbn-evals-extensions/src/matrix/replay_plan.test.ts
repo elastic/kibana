@@ -41,6 +41,7 @@ function doc(overrides: Record<string, any> = {}): EvaluationScoreDocument {
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: { id: 'eis-openai-gpt-5-4-nano' },
       output: {
         messages: [
@@ -116,6 +117,7 @@ describe('planReplay', () => {
       [
         doc({
           task: {
+            repetition_index: 0,
             model: { id: 'eis-openai-gpt-5-4-nano' },
             output: {
               messages: [{ message: { content: 'host-42 triggered the alert.' } }],
@@ -147,6 +149,7 @@ describe('planReplay', () => {
     const first = doc();
     const later = doc({
       task: {
+        repetition_index: 0,
         model: { id: 'eis-openai-gpt-5-4-nano' },
         output: { messages: [{ message: { content: 'a different answer' } }] },
       },
@@ -196,7 +199,9 @@ describe('planReplay', () => {
   });
 
   it('skips ungradeable cells instead of grading empty strings', () => {
-    const noAnswer = doc({ task: { model: { id: 'm' }, output: { messages: [] } } });
+    const noAnswer = doc({
+      task: { repetition_index: 0, model: { id: 'm' }, output: { messages: [] } },
+    });
     const plan = planReplay([noAnswer], refs);
     expect(plan.cells).toHaveLength(0);
     expect(plan.skipped).toHaveLength(1);
@@ -207,14 +212,15 @@ describe('planReplay', () => {
     const bare = doc({
       // Id absent from the dataset, so all three judge inputs are missing.
       example: { id: 'not-in-dataset', input: {}, output: {} },
-      task: { model: { id: 'm' }, output: { messages: [] } },
+      task: { repetition_index: 0, model: { id: 'm' }, output: { messages: [] } },
     });
     const plan = planReplay([bare], refs);
     expect(plan.skipped[0].reason).toBe('missing question, dataset reference, agent response');
   });
 
   it('reports an unreplayable cell once, not once per evaluator', () => {
-    const broken = () => doc({ task: { model: { id: 'm' }, output: { messages: [] } } });
+    const broken = () =>
+      doc({ task: { repetition_index: 0, model: { id: 'm' }, output: { messages: [] } } });
     expect(planReplay([broken(), broken(), broken()], refs).skipped).toHaveLength(1);
   });
 
@@ -222,7 +228,9 @@ describe('planReplay', () => {
     // Evaluator documents for one cell arrive in no guaranteed order. If the
     // incomplete one is seen first, the cell must still count as replayable
     // exactly once -- never as a cell AND a skip, which would double-count it.
-    const incomplete = doc({ task: { model: { id: 'm' }, output: { messages: [] } } });
+    const incomplete = doc({
+      task: { repetition_index: 0, model: { id: 'm' }, output: { messages: [] } },
+    });
     const forward = planReplay([incomplete, doc()], refs);
     const reverse = planReplay([doc(), incomplete], refs);
     expect(forward.cells).toHaveLength(1);
@@ -264,7 +272,7 @@ describe('summarizePlan', () => {
   it('surfaces unreplayable cells in the summary', () => {
     const broken = doc({
       example: { id: 'persona-broken', input: { question: 'q' }, output: { expected: 'e' } },
-      task: { model: { id: 'm' }, output: { messages: [] } },
+      task: { repetition_index: 0, model: { id: 'm' }, output: { messages: [] } },
     });
     expect(summarizePlan(planReplay([doc(), broken], refs))).toContain('1 unreplayable');
   });
@@ -287,6 +295,7 @@ describe('planReplay with a suite jury', () => {
     example: { id: '0', input: { question: 'Run attack discovery' }, output: {} },
     metadata: { execution_id: 'exec-ad', suite_id: 'attack-discovery-agent-builder' },
     task: {
+      repetition_index: 0,
       model: { id: 'm' },
       output: { messages: [], insights: [{ title: 'Suspicious curl' }] },
     },
@@ -312,7 +321,7 @@ describe('planReplay with a suite jury', () => {
     const empty = doc({
       example: { id: '0', input: { question: 'q' }, output: {} },
       metadata: { execution_id: 'exec-ad', suite_id: 'attack-discovery-agent-builder' },
-      task: { model: { id: 'm' }, output: { messages: [], insights: [] } },
+      task: { repetition_index: 0, model: { id: 'm' }, output: { messages: [], insights: [] } },
     });
     const plan = planReplay([empty], refs, { jury: adJury as any });
     expect(plan.cells).toHaveLength(0);
@@ -340,7 +349,7 @@ describe('planReplay with a suite jury', () => {
           output: {},
         },
         metadata: { execution_id: 'exec-ad', suite_id: 'attack-discovery-agent-builder' },
-        task: { model: { id: 'm' }, output: { insights: [{ title: key }] } },
+        task: { repetition_index: 0, model: { id: 'm' }, output: { insights: [{ title: key }] } },
       })
     );
 

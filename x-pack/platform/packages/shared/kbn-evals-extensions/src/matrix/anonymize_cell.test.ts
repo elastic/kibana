@@ -11,6 +11,7 @@ import type { ReplayCell } from './replay_plan';
 const cell = (overrides: Partial<ReplayCell> = {}): ReplayCell => ({
   executionId: 'exec-1',
   exampleId: 'alert-analysis-a',
+  repetitionIndex: 0,
   modelId: 'anthropic-claude-4.6-sonnet',
   question: 'Take a look at this alert.',
   expected: 'The alert is a true positive.',

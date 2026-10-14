@@ -90,7 +90,7 @@ describe('fetchScoreDocs', () => {
 
     expect(body(0).collapse).toEqual({
       field: 'metadata.execution_id',
-      inner_hits: { name: 'members', size: 50, _source: expect.any(Array) },
+      inner_hits: { name: 'members', size: 200, _source: expect.any(Array) },
     });
   });
 
@@ -131,9 +131,12 @@ describe('fetchScoreDocs', () => {
   });
 
   it('prefers a payload-bearing group member over an empty representative', async () => {
-    const empty = { _source: { task: { output: {} } } };
+    const empty = { _source: { task: { repetition_index: 0, output: {} } } };
     const withInsights = {
-      _source: { task: { output: { insights: [{ title: 'x' }] } }, example: { id: 'a' } },
+      _source: {
+        task: { repetition_index: 0, output: { insights: [{ title: 'x' }] } },
+        example: { id: 'a' },
+      },
     };
 
     fetchMock.mockResolvedValueOnce({

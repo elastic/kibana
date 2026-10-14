@@ -29,6 +29,8 @@ export interface RejudgeResult {
   sourceExecutionId: string;
   modelId: string;
   exampleId: string;
+  /** Repetition this verdict grades; reps of one example stay separate cells. */
+  repetitionIndex: number;
   recordedAt: string;
   scores: RejudgeScore[];
   analyses?: Record<string, unknown>;
@@ -96,6 +98,7 @@ export async function runRejudge({
             sourceExecutionId: cell.executionId,
             modelId: cell.modelId,
             exampleId: cell.exampleId,
+            repetitionIndex: cell.repetitionIndex,
             recordedAt: cell.recordedAt,
             scores,
             analyses,
@@ -104,6 +107,7 @@ export async function runRejudge({
           failures.push({
             executionId: cell.executionId,
             exampleId: cell.exampleId,
+            repetitionIndex: cell.repetitionIndex,
             reason: describeJudgeFailure(error),
           });
         }
@@ -112,9 +116,15 @@ export async function runRejudge({
   );
 
   // Deterministic order regardless of completion order, so artifacts diff cleanly.
-  results.sort((a, b) => `${a.modelId}${a.exampleId}`.localeCompare(`${b.modelId}${b.exampleId}`));
-  failures.sort((a, b) =>
-    `${a.executionId}${a.exampleId}`.localeCompare(`${b.executionId}${b.exampleId}`)
+  results.sort(
+    (a, b) =>
+      `${a.modelId}${a.exampleId}`.localeCompare(`${b.modelId}${b.exampleId}`) ||
+      a.repetitionIndex - b.repetitionIndex
+  );
+  failures.sort(
+    (a, b) =>
+      `${a.executionId}${a.exampleId}`.localeCompare(`${b.executionId}${b.exampleId}`) ||
+      (a.repetitionIndex ?? 0) - (b.repetitionIndex ?? 0)
   );
 
   return { results, failures };

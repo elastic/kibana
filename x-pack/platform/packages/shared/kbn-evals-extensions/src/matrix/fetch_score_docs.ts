@@ -14,6 +14,7 @@ import { DEFAULT_JOIN_FIELD } from './reference_adapters';
 export interface RawScoreDoc {
   metadata?: { execution_id?: string; suite_id?: string };
   task?: {
+    repetition_index?: number;
     model?: { id?: string };
     output?: { messages?: Array<{ message?: { content?: unknown } }> };
   };
@@ -30,14 +31,16 @@ const SCORES_INDEX = '.ds-.evaluation-scores*';
 // payloads total ~7 MB per example (~56 min for 21 examples). Callers scope by
 // execution id or model, so this only has to bound a pathological request.
 const PAGE_SIZE = 200;
-// Evaluator count per (execution, example) group. A suite writes one document
-// per evaluator (~15 today); 50 leaves headroom without pulling whole runs.
-const MEMBERS_PER_EXECUTION = 50;
+// Documents per (execution, example) group: one per evaluator (~15 today) per
+// repetition. 200 covers ~13 repetitions; a larger group is an error, not a
+// silent truncation (see `selectRepetitionDocs`).
+const MEMBERS_PER_EXECUTION = 200;
 
 const SOURCE_FIELDS = [
   'metadata.execution_id',
   'metadata.suite_id',
   'task.model.id',
+  'task.repetition_index',
   'task.output',
   'example.id',
   'example.metadata',
@@ -63,6 +66,41 @@ const hasGradablePayload = (doc: RawScoreDoc): boolean => {
     (Array.isArray(insights) && insights.length > 0)
   );
 };
+
+/**
+ * One representative document per repetition of a collapsed group.
+ *
+ * `collapse` yields one hit per execution, but an execution that ran an example
+ * N times holds N trajectories, each written once per evaluator. Picking one
+ * document for the whole group replays one repetition and drops the rest.
+ * Within a repetition, prefer a payload-bearing document over an empty
+ * evaluator sibling. A document without `task.repetition_index` cannot be
+ * attributed to a repetition, so it fails loudly instead of being merged.
+ */
+export function selectRepetitionDocs(
+  members: RawScoreDoc[],
+  fallback?: RawScoreDoc
+): RawScoreDoc[] {
+  if (members.length === 0) {
+    return fallback ? [fallback] : [];
+  }
+  const byRepetition = new Map<number, RawScoreDoc[]>();
+  for (const member of members) {
+    const index = member.task?.repetition_index;
+    if (typeof index !== 'number' || !Number.isInteger(index)) {
+      throw new Error(
+        `score document for execution "${member.metadata?.execution_id ?? ''}" has no ` +
+          `task.repetition_index; refusing to merge repetitions`
+      );
+    }
+    const group = byRepetition.get(index);
+    if (group) group.push(member);
+    else byRepetition.set(index, [member]);
+  }
+  return [...byRepetition.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([, group]) => group.find(hasGradablePayload) ?? group[0]);
+}
 
 /**
  * Reads score documents directly from Elasticsearch.
@@ -198,7 +236,11 @@ export const fetchScoreDocs = async ({
       hits?: {
         hits?: Array<{
           _source?: RawScoreDoc;
-          inner_hits?: { members?: { hits?: { hits?: Array<{ _source?: RawScoreDoc }> } } };
+          inner_hits?: {
+            members?: {
+              hits?: { total?: { value?: number }; hits?: Array<{ _source?: RawScoreDoc }> };
+            };
+          };
         }>;
       };
     };
@@ -207,14 +249,21 @@ export const fetchScoreDocs = async ({
       // Prefer a group member that actually carries the graded payload; fall
       // back to the collapse representative so behaviour is unchanged for
       // groups where no member has one.
-      const members = (hit.inner_hits?.members?.hits?.hits ?? [])
+      const membersHits = hit.inner_hits?.members?.hits;
+      const members = (membersHits?.hits ?? [])
         .map((member) => member._source)
         .filter((source): source is RawScoreDoc => Boolean(source));
 
-      const chosen = members.find(hasGradablePayload) ?? hit._source;
-      if (chosen) {
-        docs.push(chosen);
+      const total = membersHits?.total?.value;
+      if (typeof total === 'number' && total > members.length) {
+        throw new Error(
+          `execution "${hit._source?.metadata?.execution_id ?? ''}" / example "${exampleId}" ` +
+            `has ${total} score documents but only ${members.length} were fetched; ` +
+            `repetitions would be silently dropped`
+        );
       }
+
+      docs.push(...selectRepetitionDocs(members, hit._source));
     }
   }
 

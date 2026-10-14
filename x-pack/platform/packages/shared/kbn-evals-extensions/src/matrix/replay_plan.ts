@@ -57,10 +57,17 @@ function joinValue(doc: unknown, path: string): string {
  */
 export type ReferenceLookup = (exampleId: string) => string | undefined;
 
-/** One unit of replayable work: a single (execution, example) trajectory. */
+/** One unit of replayable work: a single (execution, example, repetition) trajectory. */
 export interface ReplayCell {
   executionId: string;
   exampleId: string;
+  /**
+   * Which repetition of the example produced this trajectory. An execution that
+   * ran an example N times holds N distinct trajectories under one
+   * (execution, example) pair; keying on the pair alone replays one and drops
+   * the rest without any signal.
+   */
+  repetitionIndex: number;
   modelId: string;
   /** The question put to the agent. */
   question: string;
@@ -109,6 +116,7 @@ export interface ReplayCell {
 export interface PlanIssue {
   executionId: string;
   exampleId: string;
+  repetitionIndex?: number;
   reason: string;
 }
 
@@ -116,6 +124,27 @@ export interface ReplayPlan {
   cells: ReplayCell[];
   /** Cells that cannot be replayed, with why. Never silently dropped. */
   skipped: PlanIssue[];
+}
+
+/**
+ * The repetition a score document belongs to. Throws rather than defaulting to
+ * 0: a document without an index cannot be told apart from its sibling
+ * repetitions, and guessing would collapse them into one replayed cell.
+ */
+export function repetitionIndexOf(doc: EvaluationScoreDocument): number {
+  const index = doc.task?.repetition_index;
+  if (typeof index !== 'number' || !Number.isInteger(index) || index < 0) {
+    throw new Error(
+      `score document for execution "${doc.metadata?.execution_id ?? ''}" has no valid ` +
+        `task.repetition_index (got ${JSON.stringify(index)}); refusing to collapse repetitions`
+    );
+  }
+  return index;
+}
+
+/** Stable identity of a cell within a plan. */
+function cellKey(executionId: string, exampleId: string, repetitionIndex: number): string {
+  return `${executionId}::${exampleId}::${repetitionIndex}`;
 }
 
 /** Extract the graded text from a task output's message list. */
@@ -185,7 +214,8 @@ export function planReplay(
   for (const doc of docs) {
     const executionId = doc.metadata?.execution_id ?? '';
     const exampleId = joinValue(doc, joinField);
-    const key = `${executionId}::${exampleId}`;
+    const repetitionIndex = repetitionIndexOf(doc);
+    const key = cellKey(executionId, exampleId, repetitionIndex);
     if (cells.has(key)) {
       continue;
     }
@@ -198,6 +228,7 @@ export function planReplay(
     const candidate: ReplayCell = {
       executionId,
       exampleId,
+      repetitionIndex,
       modelId: doc.task?.model?.id ?? '',
       question: typeof question === 'string' ? question : '',
       expected: typeof expected === 'string' ? expected : '',
@@ -231,6 +262,7 @@ export function planReplay(
         skipped.push({
           executionId,
           exampleId,
+          repetitionIndex,
           reason: `missing ${missing.join(', ')}`,
         });
       }
@@ -247,7 +279,9 @@ export function planReplay(
   const resolved = new Set(cells.keys());
   return {
     cells: [...cells.values()],
-    skipped: skipped.filter((s) => !resolved.has(`${s.executionId}::${s.exampleId}`)),
+    skipped: skipped.filter(
+      (s) => !resolved.has(cellKey(s.executionId, s.exampleId, s.repetitionIndex ?? 0))
+    ),
   };
 }
 

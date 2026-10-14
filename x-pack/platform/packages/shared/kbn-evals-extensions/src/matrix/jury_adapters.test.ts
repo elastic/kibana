@@ -17,6 +17,7 @@ import type { ReplayCell } from './replay_plan';
 const cell = (overrides: Partial<ReplayCell> = {}): ReplayCell => ({
   executionId: 'exec-1',
   exampleId: '0',
+  repetitionIndex: 0,
   modelId: 'model-a',
   question: 'What happened?',
   expected: 'A reference answer.',
