@@ -33,6 +33,7 @@ import {
 } from './chain_plumbing_helpers';
 import { createFakeAlertZeroBackend } from './chain_step_registry';
 import { installKibanaRequestFake, withFakeAuthorizationHeader } from './kibana_request_fake';
+import { WorkflowChainRunner } from './workflow_chain_runner';
 
 /** Deterministic per-attack ids the review's UUIDv8 derivation would otherwise
  * compute from a hash — the suite pins its own so assertions can key on it
@@ -138,6 +139,8 @@ const createInMemoryProposalsStorage = () => {
 
 export interface AttackDiscoveryChainFixture {
   engine: WorkflowRunFixture;
+  /** Multi-execution runner over `engine` (see `workflow_chain_runner.ts`). */
+  chain: WorkflowChainRunner;
   backend: ReturnType<typeof createFakeAlertZeroBackend>['backend'];
   proposals: () => Array<Proposal & { id: string }>;
   onlyProposal: () => Proposal & { id: string };
@@ -168,6 +171,7 @@ export interface AttackDiscoveryChainFixture {
 
 export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture => {
   const engine = new WorkflowRunFixture();
+  const chain = new WorkflowChainRunner(engine);
   const { backend, stepDefinitions: alertZeroStepDefinitions } = createFakeAlertZeroBackend();
   const { documents: proposalDocuments, client: proposalsStorageClient } =
     createInMemoryProposalsStorage();
@@ -398,13 +402,14 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
   const drive = () =>
     driveChain({
       repository: engine.workflowExecutionRepositoryMock,
-      run: (id) => engine.runExistingExecution(id),
-      resume: (id) => engine.resumeExecution(id),
+      run: (id) => chain.runExistingExecution(id),
+      resume: (id) => chain.resumeExecution(id),
       childToParent,
     });
 
   return {
     engine,
+    chain,
     backend,
     proposals,
     onlyProposal: () => {
@@ -457,7 +462,7 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
         gateExecution.id,
         gateExecution
       );
-      await engine.resumeExecution(gateExecution.id);
+      await chain.resumeExecution(gateExecution.id);
       await drive();
     },
     timeOutEscalationGate: async () => {
@@ -476,7 +481,7 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
       // workflow's own step-level `on-failure` settles as `status: expired`.
       jest.useFakeTimers({ now: new Date(Date.now() + GATE_TIMEOUT_MS + 60_000) });
       try {
-        await engine.resumeExecution(gateExecution.id);
+        await chain.resumeExecution(gateExecution.id);
       } finally {
         jest.useRealTimers();
       }

@@ -43,7 +43,7 @@ node scripts/jest_integration.js \
   --runInBand
 ```
 
-26/26 passing as of this suite's introduction.
+26/26 chain tests passing as of this suite's introduction, plus 7 contract tests for `workflow_chain_runner.ts`.
 
 ## Files
 
@@ -55,6 +55,10 @@ node scripts/jest_integration.js \
   that inserts each `workflow.execute` child's PENDING row into the SAME
   shared execution repository the parent reads from — this is what turns the
   isolated single-workflow fixture into a multi-workflow CHAIN harness.
+- `workflow_chain_runner.ts` — multi-execution runner over the fixture's public
+  surface (`runExecution`, `runExistingExecution`, `resumeExecution`,
+  `getExecution`), kept here so the platform fixture needs no change; pinned by
+  `workflow_chain_runner.test.ts`.
 - `chain_step_registry.ts` — fake step definitions for `ai.agent`,
   `ai.conversation.create/metadata.read/metadata.patch`, `ai.attachment.add/
   read/update`, `security.setAttackStatus`, and `context-engine.createKi`.
