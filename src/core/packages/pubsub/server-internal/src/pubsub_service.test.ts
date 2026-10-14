@@ -88,13 +88,18 @@ describe('PubSubService registration', () => {
     expect(() => service.start()).not.toThrow();
   });
 
-  it('fails start when a subscription topic was never registered', () => {
-    const service = createService();
+  it('starts and warns when a subscription topic was never registered, for example because the producer is disabled', () => {
+    const logger = loggerMock.create();
+    const service = new PubSubService(mockCoreContext.create({ logger }));
     const setup = service.setup();
 
     setup.subscribe(PLUGIN, defineTopic('orders'), { consumer: 'sync', handler: () => {} });
 
-    expect(() => service.start()).toThrow(/not registered/);
+    expect(() => service.start()).not.toThrow();
+    const [warning] = loggerMock.collect(logger).warn.map(([message]) => String(message));
+    expect(warning).toContain('ordersPlugin.sync');
+    expect(warning).toContain('orders');
+    expect(warning).toContain('no plugin registered');
   });
 
   it('scopes the consumer name with the plugin id and rejects a second subscription under the same name', () => {

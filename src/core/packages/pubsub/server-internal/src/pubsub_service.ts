@@ -86,13 +86,13 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       throw new Error('Pubsub cannot start before setup.');
     }
 
-    this.subscriptions.forEach((subscription) => {
-      if (!this.topics.has(subscription.topic)) {
-        throw new Error(
-          `Cannot start pubsub: consumer "${subscription.consumer}" subscribed to topic "${subscription.topic}", which is not registered.`
+    this.subscriptions
+      .filter((subscription) => !this.topics.has(subscription.topic))
+      .forEach((subscription) => {
+        this.logger.warn(
+          `Pubsub consumer "${subscription.consumer}" subscribed to topic "${subscription.topic}", which no plugin registered. It will receive no events.`
         );
-      }
-    });
+      });
 
     this.phase = 'started';
 
