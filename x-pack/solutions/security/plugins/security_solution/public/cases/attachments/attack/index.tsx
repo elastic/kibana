@@ -239,8 +239,18 @@ export interface AttackAttachmentsResult {
   alertCount: number;
   /** How many alert ids the alert attachment carries — at most `MAX_ALERTS_PER_CASE`. */
   attachedAlertCount: number;
-  /** True when the attack has more constituent alerts than a single request may carry. */
+  /** True when some of the attack's constituent alerts had to be left off. */
   truncated: boolean;
+}
+
+/** Options narrowing what {@link buildAttackAttachments} may put in the alert attachment. */
+export interface BuildAttackAttachmentsOptions {
+  /**
+   * How many alert ids the alert attachment may carry, which is the target case's remaining
+   * alert budget: `MAX_ALERTS_PER_CASE` minus the alerts it already holds. Clamped into
+   * `[0, MAX_ALERTS_PER_CASE]`. Defaults to the full budget, i.e. an empty case.
+   */
+  maxAlerts?: number;
 }
 
 /**
@@ -257,26 +267,30 @@ export interface AttackAttachmentsResult {
  * needs the attack's `replacements` map.
  *
  * Returns the truncation counts alongside the attachments so the caller can warn the user when
- * an attack carries more alerts than one request may hold. Use
- * {@link generateAttackAttachmentsWithoutOwner} where that reporting isn't needed.
+ * not every constituent alert fits. Use {@link generateAttackAttachmentsWithoutOwner} where that
+ * reporting isn't needed.
  *
  * @param attack the attack we're attaching to a case
+ * @param options how many alert ids the target case still has room for
  */
-export const buildAttackAttachments = ({
-  id,
-  index,
-  title,
-  summaryMarkdown,
-  detailsMarkdown,
-  entitySummaryMarkdown,
-  mitreAttackTactics,
-  timestamp,
-  riskScore,
-  entityCount,
-  alertIds,
-  replacements,
-  alertsIndex,
-}: AttackToAttach): AttackAttachmentsResult => {
+export const buildAttackAttachments = (
+  {
+    id,
+    index,
+    title,
+    summaryMarkdown,
+    detailsMarkdown,
+    entitySummaryMarkdown,
+    mitreAttackTactics,
+    timestamp,
+    riskScore,
+    entityCount,
+    alertIds,
+    replacements,
+    alertsIndex,
+  }: AttackToAttach,
+  { maxAlerts = MAX_ALERTS_PER_CASE }: BuildAttackAttachmentsOptions = {}
+): AttackAttachmentsResult => {
   if (!id) {
     return { attachments: [], alertCount: 0, attachedAlertCount: 0, truncated: false };
   }
@@ -286,9 +300,11 @@ export const buildAttackAttachments = ({
   const originalAlertIds = [
     ...new Set(getOriginalAlertIds({ alertIds: alertIds ?? [], replacements })),
   ];
-  // Cases rejects a request carrying more than MAX_ALERTS_PER_CASE alerts, so cap the batch and
-  // let the caller surface what was left off rather than failing the whole attach.
-  const attachedAlertIds = originalAlertIds.slice(0, MAX_ALERTS_PER_CASE);
+  // A case holds at most MAX_ALERTS_PER_CASE alerts in total, counting the ones it already has, so
+  // cap the batch at what the target case still has room for and let the caller surface what was
+  // left off rather than having the server reject the whole attach.
+  const alertSlots = Math.min(MAX_ALERTS_PER_CASE, Math.max(0, maxAlerts));
+  const attachedAlertIds = originalAlertIds.slice(0, alertSlots);
 
   // Snapshot the narrative de-anonymised: the activity card renders straight from metadata and
   // is never handed a replacements map, so anything left anonymised here stays that way on screen.
