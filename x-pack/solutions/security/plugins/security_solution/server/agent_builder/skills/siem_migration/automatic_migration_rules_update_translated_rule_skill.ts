@@ -21,17 +21,16 @@ import {
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './rules/content';
-import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_catalog';
+
+/** Number of candidate rules shown per page when the user has not named a specific rule. */
+const CANDIDATE_PAGE_SIZE = 5;
 
 export const automaticMigrationRulesUpdateTranslatedRuleSkill = defineSkillType({
-  id: RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE,
-  name: RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE,
+  id: RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE.id,
+  name: RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE.id,
   basePath: 'skills/security/siem_migrations',
-  description: `Fix one or more aspects of a specific SIEM migration translated rule: the ES|QL query, the prebuilt rule match, or the matched integration (for prebuilt-matched rules, integrations follow the prebuilt rule).
-
-Use when the user reports that the translated rule is wrong — the query has errors, it was matched to the wrong prebuilt rule, or it was matched to the wrong integration.
-Multiple aspects can be corrected in one call (e.g. a new ES|QL query together with a corrected integration).
-Internally there are two write paths: (1) prebuilt rule match via prebuilt_rule_id (integrations derived from the prebuilt rule), (2) ES|QL query update (always with integration_ids, [] if none). Integration is never written on its own.`,
+  description: RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE.description,
   content: `
 # When to use this skill
 
@@ -52,6 +51,11 @@ update workflow). Integration is never written on its own.
 This skill is mutating: it writes the correction back to a single migration rule and requires user
 confirmation before applying. If user asks to update multiple rules, take them one at a time and confirm each update.
 
+If the user has not named a specific rule (e.g. "find the rules missing an index pattern",
+"update the ES|QL query of the translated rule"), follow **Choosing which rules to work on** first.
+If specific rules are already given — named by title, or as rule ids in a Rule Migration Context
+attachment ("Add to chat") — skip it and go straight to **Workflow**.
+
 **This skill applies only to rules that have not been installed yet.** A migration rule with
 \`elastic_rule.id\` set has already been installed as a detection rule and is immutable from the
 migration's perspective — no write path applies to it. Check for this after the mandatory rule
@@ -60,7 +64,7 @@ fetch (see Workflow) and stop if it is already installed.
 **Failed and untranslatable rules cannot be corrected with this skill — they must be reprocessed.**
 A rule with \`status: failed\` or \`translation_result: untranslatable\` has no usable translation to
 correct. Do not call \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\` for it; reprocess the rule
-instead with the \`${RULE_MIGRATION_SKILLS.START}\` skill.
+instead with the \`${RULE_MIGRATION_SKILLS.START.id}\` skill.
 
 ${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
 
@@ -74,7 +78,9 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 - \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — Fetch the current rule details including
   the original query, vendor, current translated ES|QL, prebuilt rule match, integration ids,
-  and any comments. Always fetch first to understand what needs fixing.
+  and any comments. Always fetch the rule you are fixing with \`detail: "full"\` (the default
+  \`"summary"\` has no queries or comments); use the default only to list candidates (see
+  *Choosing which rules to work on*).
 - \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\` — Apply corrections to the translated rule.
   Requires user confirmation. Two mutually exclusive write paths:
   - **Path 1 — prebuilt rule match**: supply \`prebuilt_rule_id\` (the prebuilt rule UUID). Title,
@@ -89,9 +95,25 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
     appended to the rule's comment history and shown to the user in the rule details flyout.
     See *Writing the change comment* below.
 
+## Choosing which rules to work on
+
+The user defines the scope — never pick rules on their behalf.
+
+1. Resolve the migration by name (see *Migration Identity* above).
+2. List candidates with \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` (default summary detail,
+   \`per_page: ${CANDIDATE_PAGE_SIZE}\`, \`is_installed: false\`, plus the filter matching the request:
+   \`is_missing_index: true\` for a missing index pattern, \`is_partially_translated: true\` for
+   partially translated rules, \`search_term\` for a title or keyword).
+3. Show them as a numbered list by translated title with "Showing **N** of **TOTAL** matching rules (not
+   yet installed)", then ask (multiple choice): pick a rule by number, narrow by a keyword from the
+   translated title (\`search_term\` matches translated titles), or show the next ${CANDIDATE_PAGE_SIZE}.
+   If \`total\` is 0, say no uninstalled rules match and stop.
+4. Fetch the selected rule(s) by \`ids\` with \`detail: "full"\`, then continue with
+   **Workflow** below.
+
 ## Workflow
 
-1. **Fetch the rule first**: call \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` to retrieve the
+1. **Fetch the rule first**: call \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` with \`detail: "full"\` to retrieve the
    current state — original query, vendor, translated ES|QL, prebuilt rule match, integration ids,
    and any comments. Always do this before presenting options or asking questions.
 2. **Stop if the rule is already installed.** If the fetched rule has \`elastic_rule.id\` set, do
@@ -101,7 +123,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 3. **Stop if the rule failed or is untranslatable.** If the fetched rule has \`status: failed\` or
    \`translation_result: untranslatable\`, do not present the correction options and do not call
    \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`. Explain that the rule can only be fixed by
-   reprocessing it, and offer to reprocess it with the \`${RULE_MIGRATION_SKILLS.START}\` skill
+   reprocessing it, and offer to reprocess it with the \`${RULE_MIGRATION_SKILLS.START.id}\` skill
    (retry only this rule by its id). Stop there.
 4. **Present multiple choice options**: Ask the user what they want to fix:
    - if Rule already has a prebuilt match, present options to either:
@@ -277,7 +299,7 @@ and \`CommandLine\` → \`process.args\`. Detection logic unchanged.
 ## Constraints
 
 - **Never call the tool for a rule with \`status: failed\` or \`translation_result: untranslatable\`.**
-  These can only be fixed by reprocessing the rule with the \`${RULE_MIGRATION_SKILLS.START}\` skill.
+  These can only be fixed by reprocessing the rule with the \`${RULE_MIGRATION_SKILLS.START.id}\` skill.
 - **Do not rely on querying the system for index existence or field mappings.** Migration rule
   indices typically do not exist in the system yet. If a system query returns nothing or fails,
   fall back immediately to \`platform.core.product_documentation\` as the authoritative source
