@@ -152,6 +152,13 @@ export const FLYOUT_INFO_BLOCK_ASSIGNEE = i18n.translate(
   }
 );
 
+export const FLYOUT_INFO_BLOCK_SOURCE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.source',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
 export const FLYOUT_INFO_BLOCK_DURATION = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.duration',
   {
@@ -388,7 +395,7 @@ export const METADATA_LIST_TAGS_LABEL = i18n.translate(
 export const METADATA_LIST_SOURCE_URL_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLabel',
   {
-    defaultMessage: 'Source',
+    defaultMessage: 'Alert URL',
   }
 );
 

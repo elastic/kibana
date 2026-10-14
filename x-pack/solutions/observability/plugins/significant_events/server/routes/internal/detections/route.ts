@@ -10,7 +10,7 @@ import {
   MAX_RULE_NAME_LENGTH,
   type Detection,
 } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { DetectionClient, StoredDetection } from '../../../lib/significant_events/detections';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -32,8 +32,8 @@ const detectionsSearchRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
+      from: isoDateTime().optional(),
+      to: isoDateTime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       rule_uuid: z
@@ -103,7 +103,7 @@ const createDetectionSchema = z.object({
   detection_id: z.string().max(MAX_ID_LENGTH),
   rule_uuid: z.string().max(MAX_ID_LENGTH),
   rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
-  stream_name: z.string().max(MAX_ID_LENGTH).optional(),
+  source_id: z.string().max(MAX_ID_LENGTH).optional(),
   // Not narrowed to CHANGE_POINT_TYPES: Elasticsearch can also report `indeterminable`,
   // which the Detection workflow persists like any other non-stationary observation.
   change_point_type: z.string().min(1).max(64),

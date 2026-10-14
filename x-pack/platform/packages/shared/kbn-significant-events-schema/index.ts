@@ -81,6 +81,7 @@ export {
   type SignificantEvent,
   type SignificantEventResponse,
   type SignificantEventStatus,
+  type SignificantEventManualStatus,
   type SignificantEventsTuningConfig,
   type TuningConfigFieldBounds,
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -97,7 +98,7 @@ export {
   type EvidenceChartSeries,
   type EvidenceChartAnnotation,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
@@ -133,6 +134,8 @@ export {
   SIGNAL_VERDICTS,
   significantEventSchema,
   significantEventStatusSchema,
+  significantEventManualStatusSchema,
+  SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
   resolveSignificantEventsTuningConfig,
@@ -172,5 +175,3 @@ export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_erro
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
 
 export { NIGHTSHIFT_DEFAULT_MODELS, type NightshiftModelStep } from './src/nightshift_models';
-
-export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';

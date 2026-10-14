@@ -18,32 +18,7 @@ import { emptyDatasetFormValues } from '../dataset_form_initial_values';
 import type { DatasetWizardStepContent } from '../types';
 import { WizardStepProvider } from '../wizard_step_context';
 import { StepMapping } from './step_mapping';
-
-const docLinksMock = {
-  links: {
-    elasticsearch: {
-      mappingReference: '',
-      mappingKeyword: '',
-      mappingBoolean: '',
-      mappingIp: '',
-      mappingDate: '',
-      mappingUnsignedLong: '',
-      mappingNumber: '',
-    },
-    dataFederation: {
-      overview: '',
-      quickstart: '',
-      dataSources: '',
-      datasets: '',
-      datasetSettings: '',
-      authentication: '',
-      staticCredentials: '',
-      federatedIdentity: '',
-      querying: '',
-      security: '',
-    },
-  },
-};
+import { docLinksMock } from '../../doc_links_mock';
 
 const renderStep = () => {
   const updateContent = jest.fn<void, [DatasetWizardStepContent]>();

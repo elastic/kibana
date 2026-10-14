@@ -25,6 +25,7 @@ import {
 const INDEX_BY_DATA_SOURCE: Record<DataSource, string> = {
   logs: 'kibana_sample_data_logs',
   ecommerce: 'kibana_sample_data_ecommerce',
+  flights: 'kibana_sample_data_flights',
   host_metrics: HOST_METRICS_INDEX,
 };
 
