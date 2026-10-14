@@ -15,7 +15,6 @@ import {
 } from '@kbn/nightshift-shared';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
 import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { isValidSignificantEventsTab } from './significant_events_tabs';
 import { useKibana } from '../../hooks/use_kibana';
@@ -44,7 +43,6 @@ import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { PausedActivityCallout } from './components/paused_activity_callout';
 import { RunLimitsBanner } from './components/run_limits_banner';
-import { MOVED_TAB_PATHS } from './moved_tabs';
 
 export function SignificantEventsPage() {
   const {
@@ -54,7 +52,10 @@ export function SignificantEventsPage() {
   const router = useSignificantEventsAppRouter();
   const {
     core: {
-      application,
+      application: {
+        getUrlForApp,
+        capabilities: { nightshift },
+      },
       chrome,
       notifications: { toasts },
     },
@@ -62,10 +63,6 @@ export function SignificantEventsPage() {
       start: { share },
     },
   } = useKibana();
-  const {
-    getUrlForApp,
-    capabilities: { nightshift },
-  } = application;
 
   const { canShow, canManageAndConfigure } = getNightshiftCapabilities(nightshift);
   const { isDeveloperMode } = useDeveloperMode();
@@ -184,22 +181,6 @@ export function SignificantEventsPage() {
     () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
     [allTabs, isDeveloperMode]
   );
-
-  const { search } = useLocation();
-  const movedTabPath = MOVED_TAB_PATHS.get(tab);
-
-  useEffect(() => {
-    if (movedTabPath) {
-      void application.navigateToApp(NIGHTSHIFT_APP_ID, {
-        path: `${movedTabPath}${search}`,
-        replace: true,
-      });
-    }
-  }, [application, movedTabPath, search]);
-
-  if (movedTabPath) {
-    return <SignificantEventsAppLoading />;
-  }
 
   if (isAvailabilityLoading) {
     return <SignificantEventsAppLoading />;

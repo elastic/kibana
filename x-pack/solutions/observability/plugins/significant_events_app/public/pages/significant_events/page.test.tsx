@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppHeaderTab } from '@kbn/app-header';
@@ -14,18 +13,20 @@ import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { SignificantEventsPage } from './page';
 
-const mockNavigateToApp = jest.fn();
-const mockApplication = {
-  getUrlForApp: jest.fn(() => '/app/nightshift'),
-  navigateToApp: mockNavigateToApp,
-  capabilities: { nightshift: { show: true, manage: true, configure: true } },
-};
-
 jest.mock('../../hooks/use_developer_mode');
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     core: {
-      application: mockApplication,
+      application: {
+        getUrlForApp: jest.fn(() => '/app/nightshift'),
+        capabilities: {
+          nightshift: {
+            show: true,
+            manage: true,
+            configure: true,
+          },
+        },
+      },
       chrome: {
         setBreadcrumbs: jest.fn(),
       },
@@ -127,15 +128,7 @@ const mockUseSignificantEventsAppParams = useSignificantEventsAppParams as jest.
   typeof useSignificantEventsAppParams
 >;
 
-const setup = ({
-  tab,
-  isDeveloperMode,
-  search = '',
-}: {
-  tab: string;
-  isDeveloperMode: boolean;
-  search?: string;
-}) => {
+const setup = ({ tab, isDeveloperMode }: { tab: string; isDeveloperMode: boolean }) => {
   mockUseDeveloperMode.mockReturnValue({
     isDeveloperMode,
     isSaving: false,
@@ -147,9 +140,7 @@ const setup = ({
 
   return render(
     <I18nProvider>
-      <MemoryRouter initialEntries={[`/${tab}${search}`]}>
-        <SignificantEventsPage />
-      </MemoryRouter>
+      <SignificantEventsPage />
     </I18nProvider>
   );
 };
@@ -158,21 +149,6 @@ describe('SignificantEventsPage developer mode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  it.each(['cortex', 'memory', 'decision_trees'])(
-    'redirects /%s to Knowledge and preserves repeated query parameters',
-    (tab) => {
-      setup({ tab, isDeveloperMode: false, search: '?source=a&source=b' });
-
-      expect(mockNavigateToApp).toHaveBeenCalledTimes(1);
-      expect(mockNavigateToApp).toHaveBeenCalledWith('nightshift', {
-        path: `/knowledge/${tab}?source=a&source=b`,
-        replace: true,
-      });
-      expect(screen.getByTestId('app-loading')).toBeInTheDocument();
-      expect(screen.queryByTestId('app-header-tabs')).not.toBeInTheDocument();
-    }
-  );
 
   it('hides the Detections tab when developer mode is off', () => {
     setup({ tab: 'sources', isDeveloperMode: false });
