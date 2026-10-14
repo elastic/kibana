@@ -39,7 +39,10 @@ const getEuidFromFindingDocument = (
     return undefined;
   }
   for (const entityType of EUID_FROM_DOCUMENT_ENTITY_ORDER) {
-    const value = euidApi?.euid.getEuidFromObject(entityType, source);
+    const value = euidApi?.euid.getEuidFromObject(
+      euidApi.getBuiltInEntityDefinition(entityType),
+      source
+    );
     if (value !== undefined && value.length > 0) {
       return value;
     }

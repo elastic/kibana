@@ -132,8 +132,9 @@ steps:
   # stale. `ids` works because a persisted discovery is indexed under its
   # `kibana.alert.uuid`, making `_id` the same value.
   #
-  # A required source, so no `on-failure`: a failed search fails the run, which the
-  # review records as `failed`.
+  # A required source, so no `on-failure`: a failed search, including a missing
+  # privilege, fails the run, which the review records as `failed`. An empty hit
+  # set is a successful search and is rejected by `require_attack_discovery`.
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
@@ -170,7 +171,8 @@ steps:
 
   # Required source: every alert the discovery cites. `found` counts returned hits,
   # not `hits.total`, so a discovery citing more than `size` alerts fails instead of
-  # being judged on a subset.
+  # being judged on a subset. A failed search, including a missing privilege, fails
+  # the run. An empty hit set is a successful search and is rejected below.
   - name: load_alerts
     type: elasticsearch.search
     with:

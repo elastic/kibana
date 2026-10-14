@@ -15,7 +15,7 @@ const getFocusedEvent = (service: FocusedSignificantEventService) =>
 const createEvent = (eventId: string): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: eventId,
-  stream_names: ['logs.payment'],
+  source_ids: ['logs.payment'],
   title: `Event ${eventId}`,
   summary: 'Summary',
   symptom_hypothesis: 'Root cause',
