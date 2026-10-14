@@ -27,6 +27,7 @@ import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
 import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
@@ -88,16 +89,18 @@ const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
 };
 
 interface AnomaliesTabProps {
-  /** Entity Store ids to cover: the target first, then any resolution-group aliases. */
-  entityIds: string[];
+  entityId: string;
   entityName: string;
   entityType: EntityType;
+  /** `resolved` shows the anomalies of the whole resolution group; defaults to `single`. */
+  mode?: EntityViewMode;
 }
 
 export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
-  entityIds,
+  entityId,
   entityName,
   entityType,
+  mode,
 }) => {
   const [datePickerValue, setDatePickerValue] = useState<string>(DEFAULT_DATE_PICKER_VALUE);
   const [start, setStart] = useState<string>(DEFAULT_TIME_RANGE.from);
@@ -172,8 +175,8 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
 
   const [selectedTactic, setSelectedTactic] = useState<string | null>(null);
   const entityToAttach = useMemo<EntityToAttach>(
-    () => ({ id: entityIds[0] ?? '', name: entityName, type: entityType }),
-    [entityIds, entityName, entityType]
+    () => ({ id: entityId, name: entityName, type: entityType }),
+    [entityId, entityName, entityType]
   );
   const handleSelectTactic = useCallback(
     (tactic: string) => {
@@ -197,8 +200,9 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
   }, []);
 
   const anomalyOverview = useAnomalyOverview({
-    entityIds,
+    entityId,
     entityType,
+    mode,
     from: timeRangeMs.from,
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
@@ -217,8 +221,9 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
   const isEmpty = anomalyOverview.data?.totalAnomaliesCount === 0;
 
   const anomalySummary = useAnomalySummary({
-    entityIds,
+    entityId,
     entityType,
+    mode,
     body: {
       from: timeRangeMs.from,
       to: timeRangeMs.to,

@@ -37,10 +37,7 @@ import {
   getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
-import {
-  getEntityGroupIds,
-  isEntityGroupView,
-} from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -163,11 +160,6 @@ export const Host: FC<HostProps> = memo(function Host({
   });
   const { aliasRecords } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
-  // Alias ids forwarded to the anomaly insights tool so it covers the whole resolution group.
-  const anomalyAliasEntityIds = useMemo(
-    () => (isGroupView ? getEntityGroupIds(undefined, aliasRecords) : undefined),
-    [isGroupView, aliasRecords]
-  );
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     const legacyFields =
@@ -356,7 +348,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             value: hostName,
             entityId: entityStoreEntityId,
-            aliasEntityIds: anomalyAliasEntityIds,
+            mode,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -433,7 +425,6 @@ export const Host: FC<HostProps> = memo(function Host({
       scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
-      anomalyAliasEntityIds,
       mode,
       onShowHost,
       onShowRelatedEntityFromGraph,
@@ -490,6 +481,7 @@ export const Host: FC<HostProps> = memo(function Host({
             noEntityInStore={noEntityInStore}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}

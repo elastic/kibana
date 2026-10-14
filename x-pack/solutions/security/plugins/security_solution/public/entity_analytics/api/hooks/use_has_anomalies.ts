@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useAnomalyOverview } from './use_anomaly_overview';
 
 interface UseHasAnomaliesParams {
-  /** Entity Store ids to cover: the target first, then any resolution-group aliases. */
-  entityIds: string[];
+  entityId: string;
   entityType: string;
+  /** Must match the mode of the panel's overview query for the cached answer to be reused. */
+  mode?: EntityViewMode;
   enabled?: boolean;
 }
 
@@ -23,11 +25,12 @@ interface UseHasAnomaliesParams {
  * cache when the left panel opens after the right panel has loaded.
  */
 export const useHasAnomalies = ({
-  entityIds,
+  entityId,
   entityType,
+  mode,
   enabled = true,
 }: UseHasAnomaliesParams) => {
-  const { data } = useAnomalyOverview({ entityIds, entityType, enabled });
+  const { data } = useAnomalyOverview({ entityId, entityType, mode, enabled });
   if (data === undefined) return undefined;
   return data.totalAnomaliesCount > 0;
 };

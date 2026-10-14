@@ -1053,20 +1053,16 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
-    /**
-     * `entityIds` lists the Entity Store ids the request covers: the target first, followed by
-     * any resolution-group aliases whose anomalies should be included.
-     */
     const fetchAnomalySummary = ({
       entityType,
-      entityIds,
+      entityId,
       body,
       signal,
       context,
     }: {
       entityType: string;
-      entityIds: string[];
-      body?: Omit<AnomalySummaryRequestBody, 'entity_ids'>;
+      entityId: string;
+      body?: AnomalySummaryRequestBody;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>
@@ -1074,11 +1070,11 @@ export const useEntityAnalyticsRoutes = () => {
         ENTITY_ANOMALY_SUMMARY_INTERNAL_URL.replace(
           '{entity_type}',
           encodeURIComponent(entityType)
-        ),
+        ).replace('{entity_id}', encodeURIComponent(entityId)),
         {
           version: API_VERSIONS.internal.v1,
           method: 'POST',
-          body: JSON.stringify({ ...body, entity_ids: entityIds }),
+          body: JSON.stringify(body ?? {}),
           signal,
           context,
         }
@@ -1086,14 +1082,14 @@ export const useEntityAnalyticsRoutes = () => {
 
     const fetchAnomalyOverview = ({
       entityType,
-      entityIds,
+      entityId,
       body,
       signal,
       context,
     }: {
       entityType: string;
-      entityIds: string[];
-      body?: Omit<AnomalyOverviewRequestBody, 'entity_ids'>;
+      entityId: string;
+      body?: AnomalyOverviewRequestBody;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>
@@ -1101,11 +1097,11 @@ export const useEntityAnalyticsRoutes = () => {
         ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL.replace(
           '{entity_type}',
           encodeURIComponent(entityType)
-        ),
+        ).replace('{entity_id}', encodeURIComponent(entityId)),
         {
           version: API_VERSIONS.internal.v1,
           method: 'POST',
-          body: JSON.stringify({ ...body, entity_ids: entityIds }),
+          body: JSON.stringify(body ?? {}),
           signal,
           context,
         }

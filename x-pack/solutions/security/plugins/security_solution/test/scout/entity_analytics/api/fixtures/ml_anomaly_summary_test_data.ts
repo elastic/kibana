@@ -85,9 +85,11 @@ export const entityTestData = [
       source: 'security',
       id: DAVID_EUID,
       type: 'Identity',
+      // David is an alias in Carol's resolution group; `mode: 'resolved'` requests for Carol
+      // include his anomalies.
       relationships: {
         resolution: {
-          resolved_to: 'user:david.martinez@a1b2c3d4e5f6789012345678901234ab@local',
+          resolved_to: CAROL_EUID,
         },
       },
     },

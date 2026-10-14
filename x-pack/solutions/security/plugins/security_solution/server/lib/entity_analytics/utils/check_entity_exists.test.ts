@@ -8,10 +8,14 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import {
-  checkEntitiesExist,
   checkEntityExists,
   EntityStoreAccessError,
+  getEntityRecordsForMode,
 } from './check_entity_exists';
+import {
+  RESOLVED_MODE_MAX_RECORDS,
+  RESOLVED_TO_FIELD,
+} from '../../../../common/entity_analytics/entity_store/resolution_group';
 
 describe('checkEntityExists', () => {
   const listEntities = jest.fn();
@@ -70,7 +74,7 @@ describe('checkEntityExists', () => {
     expect(listEntities).toHaveBeenCalledWith(
       expect.objectContaining({
         filter: [
-          { terms: { 'entity.id': ['user:jane@okta'] } },
+          { term: { 'entity.id': 'user:jane@okta' } },
           { term: { 'entity.EngineMetadata.Type': 'user' } },
         ],
         size: 1,
@@ -123,7 +127,7 @@ describe('checkEntityExists', () => {
   });
 });
 
-describe('checkEntitiesExist', () => {
+describe('getEntityRecordsForMode', () => {
   const listEntities = jest.fn();
   const latestIndexName = jest.fn();
   const hasPrivileges = jest.fn();
@@ -131,6 +135,10 @@ describe('checkEntitiesExist', () => {
   const esClient = {
     security: { hasPrivileges },
   } as unknown as ElasticsearchClient;
+
+  const target = { entity: { id: 'host:target' } };
+  const aliasA = { entity: { id: 'host:a' } };
+  const aliasB = { entity: { id: 'host:b' } };
 
   beforeEach(() => {
     listEntities.mockReset();
@@ -140,46 +148,112 @@ describe('checkEntitiesExist', () => {
     hasPrivileges.mockResolvedValue({ has_all_requested: true });
   });
 
-  it('looks up every id in one query sized to the request', async () => {
-    listEntities.mockResolvedValue({ entities: [] });
+  describe('single mode', () => {
+    it('looks up the target record only and defaults to single mode', async () => {
+      listEntities.mockResolvedValue({ entities: [target] });
 
-    await checkEntitiesExist({
-      crudClient,
-      esClient,
-      entityIds: ['host:a', 'host:b'],
-      entityType: 'host',
+      const result = await getEntityRecordsForMode({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+      });
+
+      expect(result).toEqual([target]);
+      expect(listEntities).toHaveBeenCalledWith({
+        filter: [
+          { term: { 'entity.id': 'host:target' } },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
+        size: 1,
+      });
     });
 
-    expect(listEntities).toHaveBeenCalledWith({
-      filter: [
-        { terms: { 'entity.id': ['host:a', 'host:b'] } },
-        { term: { 'entity.EngineMetadata.Type': 'host' } },
-      ],
-      size: 2,
+    it('returns an empty list when the target is missing', async () => {
+      listEntities.mockResolvedValue({ entities: [] });
+
+      const result = await getEntityRecordsForMode({
+        crudClient,
+        esClient,
+        entityId: 'host:missing',
+        entityType: 'host',
+        mode: 'single',
+      });
+
+      expect(result).toEqual([]);
     });
   });
 
-  it('returns the found records in request order and omits ids without a record', async () => {
-    const a = { entity: { id: 'host:a' } };
-    const c = { entity: { id: 'host:c' } };
-    listEntities.mockResolvedValue({ entities: [c, a] });
+  describe('resolved mode', () => {
+    it('queries the target and every record resolved to it in one request', async () => {
+      listEntities.mockResolvedValue({ entities: [target] });
 
-    const result = await checkEntitiesExist({
-      crudClient,
-      esClient,
-      entityIds: ['host:a', 'host:missing', 'host:c'],
-      entityType: 'host',
+      await getEntityRecordsForMode({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
+
+      expect(listEntities).toHaveBeenCalledWith({
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'entity.id': 'host:target' } },
+                { term: { [RESOLVED_TO_FIELD]: 'host:target' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
+        size: RESOLVED_MODE_MAX_RECORDS,
+      });
     });
 
-    expect(result).toEqual([a, c]);
-  });
+    it('returns the target first followed by its aliases', async () => {
+      listEntities.mockResolvedValue({ entities: [aliasA, target, aliasB] });
 
-  it('throws EntityStoreAccessError when user lacks read privilege on the index', async () => {
-    hasPrivileges.mockResolvedValue({ has_all_requested: false });
+      const result = await getEntityRecordsForMode({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
 
-    await expect(
-      checkEntitiesExist({ crudClient, esClient, entityIds: ['host:a'], entityType: 'host' })
-    ).rejects.toThrow(EntityStoreAccessError);
-    expect(listEntities).not.toHaveBeenCalled();
+      expect(result).toEqual([target, aliasA, aliasB]);
+    });
+
+    it('returns an empty list when only aliases match but the target is missing', async () => {
+      listEntities.mockResolvedValue({ entities: [aliasA, aliasB] });
+
+      const result = await getEntityRecordsForMode({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('throws EntityStoreAccessError when user lacks read privilege on the index', async () => {
+      hasPrivileges.mockResolvedValue({ has_all_requested: false });
+
+      await expect(
+        getEntityRecordsForMode({
+          crudClient,
+          esClient,
+          entityId: 'host:target',
+          entityType: 'host',
+          mode: 'resolved',
+        })
+      ).rejects.toThrow(EntityStoreAccessError);
+      expect(listEntities).not.toHaveBeenCalled();
+    });
   });
 });

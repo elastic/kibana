@@ -11,7 +11,7 @@ import { HOST_FLYOUT_ENTITY_ID } from '../page_objects/entity_flyout_anomalies_p
  * Mock response returned by the anomaly overview API when the entity has anomalies.
  */
 export const MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES = {
-  entityIds: [HOST_FLYOUT_ENTITY_ID],
+  entityId: HOST_FLYOUT_ENTITY_ID,
   entityType: 'host',
   totalAnomaliesCount: 5,
   tacticCounts: { 'Credential Access': 3, 'Initial Access': 2 },
@@ -46,7 +46,7 @@ export const MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES_NO_TACTICS = {
  * Mock response returned by the anomaly overview API when the entity has no anomalies.
  */
 export const MOCK_ANOMALY_OVERVIEW_EMPTY = {
-  entityIds: [HOST_FLYOUT_ENTITY_ID],
+  entityId: HOST_FLYOUT_ENTITY_ID,
   entityType: 'host',
   totalAnomaliesCount: 0,
   tacticCounts: {},
@@ -60,7 +60,7 @@ export const MOCK_ANOMALY_OVERVIEW_EMPTY = {
  * Mock response returned by the anomaly summary API.
  */
 export const MOCK_ANOMALY_SUMMARY = {
-  entity_ids: [HOST_FLYOUT_ENTITY_ID],
+  entity_id: HOST_FLYOUT_ENTITY_ID,
   entity_type: 'host',
   anomalies: [
     {

@@ -11,15 +11,20 @@ import type {
   AnomalySummaryRequestBody,
   GetAnomalySummaryRequestBodyInput,
 } from '../../../../common/api/entity_analytics';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const ANOMALY_SUMMARY_QUERY_KEY = ['POST', 'FETCH_ANOMALY_SUMMARY'] as const;
 
 interface UseAnomalySummaryParams {
-  /** Entity Store ids to cover: the target first, then any resolution-group aliases. */
-  entityIds: string[];
+  entityId: string;
   entityType: string;
-  body?: Omit<GetAnomalySummaryRequestBodyInput, 'entity_ids'>;
+  /**
+   * `single` (default) covers `entityId` only; `resolved` makes the server include the whole
+   * resolution group (the target plus every entity resolved to it).
+   */
+  mode?: EntityViewMode;
+  body?: Omit<GetAnomalySummaryRequestBodyInput, 'mode'>;
   enabled?: boolean;
   /**
    * Optional Kibana execution context forwarded to the anomaly-summary fetch so slow logs and
@@ -28,7 +33,7 @@ interface UseAnomalySummaryParams {
   executionContext?: KibanaExecutionContext;
 }
 
-type AnomalySummaryBody = Omit<AnomalySummaryRequestBody, 'entity_ids'>;
+type AnomalySummaryBody = AnomalySummaryRequestBody;
 
 const DEFAULT_BODY: Required<Pick<AnomalySummaryBody, 'page' | 'page_size' | 'sort'>> = {
   page: 1,
@@ -37,28 +42,34 @@ const DEFAULT_BODY: Required<Pick<AnomalySummaryBody, 'page' | 'page_size' | 'so
 };
 
 export const useAnomalySummary = ({
-  entityIds,
+  entityId,
   entityType,
+  mode,
   body,
   enabled = true,
   executionContext,
 }: UseAnomalySummaryParams) => {
   const { fetchAnomalySummary } = useEntityAnalyticsRoutes();
 
-  const resolvedBody: AnomalySummaryBody = { ...DEFAULT_BODY, ...body };
+  // Only the non-default mode is sent, so single-entity requests keep their original shape.
+  const resolvedBody: AnomalySummaryBody = {
+    ...DEFAULT_BODY,
+    ...body,
+    ...(mode === 'resolved' ? { mode } : {}),
+  };
 
   return useQuery(
-    [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityIds, resolvedBody],
+    [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityId, resolvedBody],
     ({ signal }) =>
       fetchAnomalySummary({
         entityType,
-        entityIds,
+        entityId,
         body: resolvedBody,
         signal,
         context: executionContext,
       }),
     {
-      enabled: enabled && entityIds.length > 0,
+      enabled: enabled && !!entityId,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       retry: (failureCount, error) =>

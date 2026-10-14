@@ -36,16 +36,16 @@ export const AnomalyScoreRange = lazySchema(() =>
 export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
 
 /**
- * Entity Store ids (`entity.id`) of the entities to query. Pass one id for a single entity, or the target plus its aliases for a resolution group; anomalies of every listed entity are returned together. The first id is treated as the primary entity.
+ * Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group), returning their anomalies together as if they were one entity.
  */
-export const AnomalyEntityIds = lazySchema(() =>
-  z.array(z.string().min(1).max(1000)).min(1).max(100)
-);
-export type AnomalyEntityIds = z.infer<typeof AnomalyEntityIds>;
+export const AnomalyEntityMode = lazySchema(() => z.enum(['single', 'resolved']).default('single'));
+export type AnomalyEntityMode = z.infer<typeof AnomalyEntityMode>;
+export type AnomalyEntityModeEnum = typeof AnomalyEntityMode.enum;
+export const AnomalyEntityModeEnum = AnomalyEntityMode.enum;
 
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
-    entity_ids: AnomalyEntityIds,
+    mode: AnomalyEntityMode.optional(),
     /**
      * Page number (1-indexed)
      */
@@ -215,7 +215,7 @@ export type AnomalySummaryEntry = z.infer<typeof AnomalySummaryEntry>;
 
 export const AnomalySummaryResponse = lazySchema(() =>
   z.object({
-    entity_ids: AnomalyEntityIds,
+    entity_id: z.string().max(200),
     entity_type: z.string().max(100).optional(),
     anomalies: z.array(AnomalySummaryEntry),
     total: z.number().int(),
@@ -227,7 +227,7 @@ export type AnomalySummaryResponse = z.infer<typeof AnomalySummaryResponse>;
 
 export const AnomalyOverviewRequestBody = lazySchema(() =>
   z.object({
-    entity_ids: AnomalyEntityIds,
+    mode: AnomalyEntityMode.optional(),
     /**
      * Start time as epoch milliseconds; defaults to now-30d when omitted
      */
@@ -330,7 +330,7 @@ export type AnomalyOverviewHit = z.infer<typeof AnomalyOverviewHit>;
 
 export const AnomalyOverviewResponse = lazySchema(() =>
   z.object({
-    entityIds: AnomalyEntityIds,
+    entityId: z.string().max(200),
     entityType: z.string().max(100).optional(),
     anomalyByTimeBucket: z.array(AnomalyOverviewEntry),
     /**
@@ -386,6 +386,14 @@ export const GetAnomalyOverviewRequestParams = lazySchema(() =>
       .describe(
         'Entity type — determines which EUID runtime mapping is used when searching the anomalies index'
       ),
+    /**
+     * Entity Store id (`entity.id`) of the target entity
+     */
+    entity_id: z
+      .string()
+      .min(1)
+      .max(1000)
+      .describe('Entity Store id (`entity.id`) of the target entity'),
   })
 );
 export type GetAnomalyOverviewRequestParams = z.infer<typeof GetAnomalyOverviewRequestParams>;
@@ -408,6 +416,14 @@ export const GetAnomalySummaryRequestParams = lazySchema(() =>
       .describe(
         'Entity type — determines which EUID runtime mapping is used when searching the anomalies index'
       ),
+    /**
+     * Entity Store id (`entity.id`) of the target entity
+     */
+    entity_id: z
+      .string()
+      .min(1)
+      .max(1000)
+      .describe('Entity Store id (`entity.id`) of the target entity'),
   })
 );
 export type GetAnomalySummaryRequestParams = z.infer<typeof GetAnomalySummaryRequestParams>;

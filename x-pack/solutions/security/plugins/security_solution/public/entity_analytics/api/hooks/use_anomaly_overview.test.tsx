@@ -39,7 +39,7 @@ describe('useAnomalyOverview', () => {
     };
 
     renderHook(
-      () => useAnomalyOverview({ entityIds: ['host-1'], entityType: 'host', executionContext }),
+      () => useAnomalyOverview({ entityId: 'host-1', entityType: 'host', executionContext }),
       { wrapper: TestWrapper }
     );
 
@@ -51,7 +51,7 @@ describe('useAnomalyOverview', () => {
   });
 
   it('omits context when the caller does not supply executionContext', async () => {
-    renderHook(() => useAnomalyOverview({ entityIds: ['host-1'], entityType: 'host' }), {
+    renderHook(() => useAnomalyOverview({ entityId: 'host-1', entityType: 'host' }), {
       wrapper: TestWrapper,
     });
 
@@ -60,21 +60,38 @@ describe('useAnomalyOverview', () => {
     expect(callArg.context).toBeUndefined();
   });
 
-  it('passes every entity id of a resolution group to fetchAnomalyOverview', async () => {
+  it('sends no body in single mode when no filters are set', async () => {
     renderHook(
-      () => useAnomalyOverview({ entityIds: ['host-1', 'host-alias'], entityType: 'host' }),
+      () => useAnomalyOverview({ entityId: 'host-1', entityType: 'host', mode: 'single' }),
       { wrapper: TestWrapper }
     );
 
     await waitFor(() =>
       expect(mockFetchAnomalyOverview).toHaveBeenCalledWith(
-        expect.objectContaining({ entityIds: ['host-1', 'host-alias'], entityType: 'host' })
+        expect.objectContaining({ entityId: 'host-1', entityType: 'host', body: undefined })
       )
     );
   });
 
-  it('does not fetch when no entity ids are provided', async () => {
-    const { result } = renderHook(() => useAnomalyOverview({ entityIds: [], entityType: 'host' }), {
+  it('sends the resolved mode in the body so the server covers the resolution group', async () => {
+    renderHook(
+      () => useAnomalyOverview({ entityId: 'host-1', entityType: 'host', mode: 'resolved' }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() =>
+      expect(mockFetchAnomalyOverview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityId: 'host-1',
+          entityType: 'host',
+          body: expect.objectContaining({ mode: 'resolved' }),
+        })
+      )
+    );
+  });
+
+  it('does not fetch when no entity id is provided', async () => {
+    const { result } = renderHook(() => useAnomalyOverview({ entityId: '', entityType: 'host' }), {
       wrapper: TestWrapper,
     });
 

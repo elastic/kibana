@@ -4,13 +4,13 @@ info:
   version: '1'
 
 paths:
-  /internal/entity_analytics/entities/{entity_type}/anomaly_overview:
+  /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: GetAnomalyOverview
-      summary: Get anomaly overview for one or more entities
-      description: Returns time-bucketed anomaly counts and tactic distribution for the given entities (e.g. a resolution group), combined as if they were one entity.
+      summary: Get anomaly overview for an entity
+      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
       parameters:
         - name: entity_type
           in: path
@@ -19,6 +19,14 @@ paths:
             type: string
             enum: [user, host]
           description: Entity type — determines which EUID runtime mapping is used when searching the anomalies index
+        - name: entity_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+          description: Entity Store id (`entity.id`) of the target entity
       requestBody:
         required: true
         content:
@@ -33,7 +41,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnomalyOverviewResponse'
               example:
-                entityIds: [admin]
+                entityId: admin
                 entityType: user
                 anomalyByTimeBucket:
                   - timestamp: '2024-01-15T00:00:00.000Z'
@@ -62,13 +70,13 @@ paths:
                 to: 1705622400000
                 hasJobsMissingThreatTactics: false
 
-  /internal/entity_analytics/entities/{entity_type}/anomaly_summary:
+  /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: GetAnomalySummary
-      summary: Get anomaly summary for one or more entities
-      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for the given entities (e.g. a resolution group), combined as if they were one entity.
+      summary: Get anomaly summary for an entity
+      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
       parameters:
         - name: entity_type
           in: path
@@ -77,6 +85,14 @@ paths:
             type: string
             enum: [user, host]
           description: Entity type — determines which EUID runtime mapping is used when searching the anomalies index
+        - name: entity_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+          description: Entity Store id (`entity.id`) of the target entity
       requestBody:
         required: true
         content:
@@ -91,7 +107,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnomalySummaryResponse'
               example:
-                entity_ids: [admin]
+                entity_id: admin
                 entity_type: user
                 total: 2
                 page: 1
@@ -164,22 +180,17 @@ components:
           maximum: 100
           description: Maximum record_score (exclusive); omit for an unbounded upper end
 
-    AnomalyEntityIds:
-      type: array
-      minItems: 1
-      maxItems: 100
-      items:
-        type: string
-        minLength: 1
-        maxLength: 1000
-      description: Entity Store ids (`entity.id`) of the entities to query. Pass one id for a single entity, or the target plus its aliases for a resolution group; anomalies of every listed entity are returned together. The first id is treated as the primary entity.
+    AnomalyEntityMode:
+      type: string
+      enum: [single, resolved]
+      default: single
+      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group), returning their anomalies together as if they were one entity.
 
     AnomalySummaryRequestBody:
       type: object
-      required: [entity_ids]
       properties:
-        entity_ids:
-          $ref: '#/components/schemas/AnomalyEntityIds'
+        mode:
+          $ref: '#/components/schemas/AnomalyEntityMode'
         page:
           type: integer
           minimum: 1
@@ -348,14 +359,15 @@ components:
     AnomalySummaryResponse:
       type: object
       required:
-        - entity_ids
+        - entity_id
         - anomalies
         - total
         - page
         - page_size
       properties:
-        entity_ids:
-          $ref: '#/components/schemas/AnomalyEntityIds'
+        entity_id:
+          type: string
+          maxLength: 200
         entity_type:
           type: string
           maxLength: 100
@@ -372,10 +384,9 @@ components:
 
     AnomalyOverviewRequestBody:
       type: object
-      required: [entity_ids]
       properties:
-        entity_ids:
-          $ref: '#/components/schemas/AnomalyEntityIds'
+        mode:
+          $ref: '#/components/schemas/AnomalyEntityMode'
         from:
           type: integer
           format: int64
@@ -461,7 +472,7 @@ components:
     AnomalyOverviewResponse:
       type: object
       required:
-        - entityIds
+        - entityId
         - anomalyByTimeBucket
         - recentAnomalies
         - tacticCounts
@@ -470,8 +481,9 @@ components:
         - to
         - hasJobsMissingThreatTactics
       properties:
-        entityIds:
-          $ref: '#/components/schemas/AnomalyEntityIds'
+        entityId:
+          type: string
+          maxLength: 200
         entityType:
           type: string
           maxLength: 100

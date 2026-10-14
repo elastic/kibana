@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
-import { getEntityGroupIds } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -73,6 +73,8 @@ export interface ContentProps {
   entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
+  /** Entity view mode of the panel; `resolved` loads anomalies for the whole resolution group. */
+  mode?: EntityViewMode;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
   /**
@@ -125,6 +127,7 @@ export const Content = ({
   noEntityInStore = false,
   entityStoreV2Enabled,
   entityStoreEntityId,
+  mode,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
@@ -139,13 +142,9 @@ export const Content = ({
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
-  // Target first, then resolution-group aliases: anomalies of the whole group are shown.
-  const anomalyEntityIds = useMemo(
-    () => getEntityGroupIds(entityStoreEntityId, aliasRecords),
-    [entityStoreEntityId, aliasRecords]
-  );
   const anomalyOverview = useAnomalyOverview({
-    entityIds: anomalyEntityIds,
+    entityId: entityStoreEntityId ?? '',
+    mode,
     entityType: EntityType.host,
     enabled: loadAnomalies,
   });

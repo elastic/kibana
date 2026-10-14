@@ -39,7 +39,7 @@ describe('useAnomalySummary', () => {
     };
 
     renderHook(
-      () => useAnomalySummary({ entityIds: ['host-1'], entityType: 'host', executionContext }),
+      () => useAnomalySummary({ entityId: 'host-1', entityType: 'host', executionContext }),
       { wrapper: TestWrapper }
     );
 
@@ -51,7 +51,7 @@ describe('useAnomalySummary', () => {
   });
 
   it('omits context when the caller does not supply executionContext', async () => {
-    renderHook(() => useAnomalySummary({ entityIds: ['host-1'], entityType: 'host' }), {
+    renderHook(() => useAnomalySummary({ entityId: 'host-1', entityType: 'host' }), {
       wrapper: TestWrapper,
     });
 
@@ -60,18 +60,38 @@ describe('useAnomalySummary', () => {
     expect(callArg.context).toBeUndefined();
   });
 
-  it('passes every entity id of a resolution group and the default body to fetchAnomalySummary', async () => {
+  it('sends the default body without a mode in single mode', async () => {
     renderHook(
-      () => useAnomalySummary({ entityIds: ['host-1', 'host-alias'], entityType: 'host' }),
+      () => useAnomalySummary({ entityId: 'host-1', entityType: 'host', mode: 'single' }),
+      {
+        wrapper: TestWrapper,
+      }
+    );
+
+    await waitFor(() => expect(mockFetchAnomalySummary).toHaveBeenCalled());
+    const [callArg] = mockFetchAnomalySummary.mock.calls[0];
+    expect(callArg).toEqual(
+      expect.objectContaining({
+        entityId: 'host-1',
+        entityType: 'host',
+        body: expect.objectContaining({ page: 1, page_size: 10 }),
+      })
+    );
+    expect(callArg.body).not.toHaveProperty('mode');
+  });
+
+  it('sends the resolved mode in the body so the server covers the resolution group', async () => {
+    renderHook(
+      () => useAnomalySummary({ entityId: 'host-1', entityType: 'host', mode: 'resolved' }),
       { wrapper: TestWrapper }
     );
 
     await waitFor(() =>
       expect(mockFetchAnomalySummary).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityIds: ['host-1', 'host-alias'],
+          entityId: 'host-1',
           entityType: 'host',
-          body: expect.objectContaining({ page: 1, page_size: 10 }),
+          body: expect.objectContaining({ mode: 'resolved', page: 1, page_size: 10 }),
         })
       )
     );

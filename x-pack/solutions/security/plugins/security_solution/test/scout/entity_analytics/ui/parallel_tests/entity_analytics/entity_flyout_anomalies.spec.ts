@@ -20,8 +20,8 @@ import {
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const ANOMALY_OVERVIEW_ROUTE = '**/internal/entity_analytics/entities/host/anomaly_overview';
-const ANOMALY_SUMMARY_ROUTE = '**/internal/entity_analytics/entities/host/anomaly_summary';
+const ANOMALY_OVERVIEW_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_overview`;
+const ANOMALY_SUMMARY_ROUTE = `**/internal/entity_analytics/entities/host/${HOST_FLYOUT_ENTITY_ID}/anomaly_summary`;
 const ANOMALY_PRIVILEGES_ROUTE = '**/internal/entity_analytics/anomalies/privileges';
 const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
@@ -237,7 +237,7 @@ spaceTest.describe(
             status: 200,
             contentType: 'application/json',
             body: JSON.stringify({
-              entity_ids: [HOST_FLYOUT_ENTITY_ID],
+              entity_id: HOST_FLYOUT_ENTITY_ID,
               entity_type: 'host',
               anomalies: [],
               total: 0,

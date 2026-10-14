@@ -785,7 +785,7 @@ Removes a privileged user from monitoring by their document ID.
     );
   },
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for the given entities (e.g. a resolution group), combined as if they were one entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
    */
   async getAnomalyOverview<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalyOverviewProps,
@@ -794,7 +794,7 @@ Removes a privileged user from monitoring by their document ID.
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
-      '/internal/entity_analytics/entities/{entity_type}/anomaly_overview',
+      '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
       encodePathParams(props.params)
     )}`;
 
@@ -810,7 +810,7 @@ Removes a privileged user from monitoring by their document ID.
     });
   },
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for the given entities (e.g. a resolution group), combined as if they were one entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
    */
   async getAnomalySummary<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalySummaryProps,
@@ -819,7 +819,7 @@ Removes a privileged user from monitoring by their document ID.
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
     const path = `${basePath}${replaceParams(
-      '/internal/entity_analytics/entities/{entity_type}/anomaly_summary',
+      '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary',
       encodePathParams(props.params)
     )}`;
 

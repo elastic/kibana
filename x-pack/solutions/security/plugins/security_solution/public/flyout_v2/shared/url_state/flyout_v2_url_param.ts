@@ -262,8 +262,7 @@ export interface EntityAnomalyInsightsDescriptor {
   entityType: string;
   value: string;
   entityId?: string;
-  /** Resolution-group alias ids included in the anomalies query. */
-  aliasEntityIds?: string[];
+  mode?: EntityDescriptorMode;
 }
 
 export interface EntityAlertsInsightsDescriptor {

@@ -95,22 +95,6 @@ export const getEntityGroupRecords = <T>(
 };
 
 /**
- * Entity Store ids of a resolution group, target first then aliases, de-duplicated and without
- * blanks. Intended for APIs that accept `entity_ids`.
- */
-export const getEntityGroupIds = (
-  entityId: string | null | undefined,
-  aliasRecords: readonly { entity?: { id?: string } }[] | undefined
-): string[] =>
-  Array.from(
-    new Set(
-      [entityId, ...(aliasRecords ?? []).map((record) => record.entity?.id)].filter(
-        (id): id is string => typeof id === 'string' && id.length > 0
-      )
-    )
-  );
-
-/**
  * Combines per-record identity filters into one query: a single filter is returned as is (so
  * single-entity callers keep their existing query shape), several are OR-ed in a `bool.should`.
  * Records that yield no filter are skipped; `undefined` when none does.

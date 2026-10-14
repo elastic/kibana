@@ -10,10 +10,10 @@ export const ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS = 30;
 export const ENTITY_ANOMALY_DEFAULT_LOOKBACK = `${ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS}d` as const;
 
 export const ENTITY_ANOMALY_SUMMARY_INTERNAL_URL =
-  '/internal/entity_analytics/entities/{entity_type}/anomaly_summary';
+  '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary';
 
 export const ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL =
-  '/internal/entity_analytics/entities/{entity_type}/anomaly_overview';
+  '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview';
 
 export const ENTITY_ANOMALY_PRIVILEGES_INTERNAL_URL =
   '/internal/entity_analytics/anomalies/privileges' as const;

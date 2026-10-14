@@ -29,7 +29,7 @@ import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/co
 import { AnomaliesOverview } from './anomalies_overview';
 
 export const EMPTY_ANOMALY_OVERVIEW: GetAnomalyOverviewResponse = {
-  entityIds: [],
+  entityId: '',
   anomalyByTimeBucket: [],
   recentAnomalies: [],
   tacticCounts: {},

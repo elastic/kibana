@@ -509,18 +509,31 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
-  it('openEntityAnomalyInsights persists resolution-group alias ids in the descriptor', () => {
+  it('openEntityAnomalyInsights persists the resolved mode in the descriptor', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAnomalyInsights({
       entityType: EntityType.user,
       value: 'user-1',
       entityId: 'e-2',
-      aliasEntityIds: ['e-3', 'e-4'],
+      mode: 'resolved',
     });
 
     expect(mockWriteOnOpen).toHaveBeenCalledWith(
-      expect.objectContaining({ entityId: 'e-2', aliasEntityIds: ['e-3', 'e-4'] })
+      expect.objectContaining({ entityId: 'e-2', mode: 'resolved' })
     );
+  });
+
+  it('openEntityAnomalyInsights omits the mode from the descriptor in single mode', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      mode: 'single',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'e-2' }));
+    expect(mockWriteOnOpen.mock.calls[0][0]).not.toHaveProperty('mode', 'single');
   });
 
   it('openEntityAlertsInsights writes null fallback for generic entity (no scopeId available)', () => {

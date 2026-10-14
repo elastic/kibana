@@ -9,4 +9,4 @@
  * `single` loads only the record whose `entity.id` matches; `resolved` also loads every record that
  * resolves to that id (the target plus its aliases), so the caller can render the whole resolution group.
  */
-export type EntityViewMode = 'single' | 'resolved';
+export type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';

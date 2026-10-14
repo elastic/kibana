@@ -1752,14 +1752,14 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for the given entities (e.g. a resolution group), combined as if they were one entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
    */
   async getAnomalyOverview(props: GetAnomalyOverviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAnomalyOverview`);
     return this.kbnClient
       .request<GetAnomalyOverviewResponse>({
         path: replaceParams(
-          '/internal/entity_analytics/entities/{entity_type}/anomaly_overview',
+          '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
           props.params
         ),
         headers: {
@@ -1771,14 +1771,14 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for the given entities (e.g. a resolution group), combined as if they were one entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
    */
   async getAnomalySummary(props: GetAnomalySummaryProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAnomalySummary`);
     return this.kbnClient
       .request<GetAnomalySummaryResponse>({
         path: replaceParams(
-          '/internal/entity_analytics/entities/{entity_type}/anomaly_summary',
+          '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary',
           props.params
         ),
         headers: {

@@ -161,11 +161,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 
-const defaultProps = {
-  entityIds: ['entity-1'],
-  entityName: 'host-1',
-  entityType: 'host' as const,
-};
+const defaultProps = { entityId: 'entity-1', entityName: 'host-1', entityType: 'host' as const };
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
