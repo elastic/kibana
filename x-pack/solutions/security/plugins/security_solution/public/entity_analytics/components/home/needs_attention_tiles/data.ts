@@ -25,6 +25,10 @@ export interface SignalCardData {
   noDataMessage?: string;
   description: string;
   delta?: number;
+  /** True while the delta query is in flight, to show a spinner in place of the badge number. */
+  isDeltaLoading?: boolean;
+  /** True when the history is too short to compare with the previous period: the tile says so. */
+  isDeltaUnavailable?: boolean;
   filterLabel: string;
   trend?: number[];
 }

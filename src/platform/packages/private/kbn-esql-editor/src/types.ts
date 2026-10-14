@@ -70,6 +70,8 @@ export interface ESQLEditorProps {
   hideQueryHistory?: boolean;
   /** hide quick search **/
   hideQuickSearch?: boolean;
+  /** set when the quick search visor is rendered next to the editor, so the empty editor doesn't advertise its own AI entry point **/
+  hasExternalVisor?: boolean;
   /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
