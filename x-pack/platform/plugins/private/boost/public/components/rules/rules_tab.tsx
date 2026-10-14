@@ -152,7 +152,6 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       name: i18n.translate('xpack.boost.rulesTab.targetsColumn', {
         defaultMessage: 'Targets',
       }),
-      width: '16%',
       render: (patterns: string[], { profileType }: RuleRow) => (
         <RuleTargets patterns={patterns} type={profileType} />
       ),

@@ -9,12 +9,9 @@ import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCode,
-  EuiFieldSearch,
-  EuiLink,
+  EuiNotificationBadge,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSpacer,
-  EuiText,
   useEuiOverflowScroll,
   useEuiTheme,
 } from '@elastic/eui';
@@ -28,12 +25,10 @@ interface RuleTargetsProps {
   type?: BoostProfileType;
 }
 
-// Names shown before the rest collapse into "+N more".
+// Names shown before the rest collapse into a "+N" badge.
 const VISIBLE_PATTERNS = 2;
-// Longer lists get a search field.
-const SEARCHABLE_FROM = 10;
 
-/** A rule's pattern, or the first of its picked names with the rest in a searchable list. */
+/** A rule's pattern, or the first of its picked names with the rest in a scrollable list. */
 export const RuleTargets = ({ patterns, type }: RuleTargetsProps) => {
   const hiddenCount = patterns.length - VISIBLE_PATTERNS;
 
@@ -44,7 +39,8 @@ export const RuleTargets = ({ patterns, type }: RuleTargetsProps) => {
       {patterns.slice(0, VISIBLE_PATTERNS).map((pattern, index) => (
         <Fragment key={pattern}>
           {index > 0 && ' '}
-          <EuiCode>{pattern}</EuiCode>
+          {/* Names wrap between each other, not at their hyphens. */}
+          <EuiCode css={{ whiteSpace: 'nowrap' }}>{pattern}</EuiCode>
         </Fragment>
       ))}
       {hiddenCount > 0 && (
@@ -65,50 +61,42 @@ const AllPatternsPopover = ({ patterns, type, hiddenCount }: AllPatternsPopoverP
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState('');
 
   const title = formatDataSourceCount(type, patterns.length);
-  const visiblePatterns = patterns.filter((pattern) =>
-    pattern.toLowerCase().includes(query.trim().toLowerCase())
-  );
 
   return (
     <EuiPopover
       aria-label={title}
       isOpen={isOpen}
-      closePopover={() => {
-        setIsOpen(false);
-        setQuery('');
-      }}
+      closePopover={() => setIsOpen(false)}
       anchorPosition="downLeft"
+      // The list sets its own padding, inside its scroll area, so its scroll fade covers only that.
+      panelPaddingSize="none"
       button={
-        <EuiLink onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen}>
-          {i18n.translate('xpack.boost.ruleTargets.moreButton', {
-            defaultMessage: '+{count} more',
-            values: { count: hiddenCount },
+        // The notification badge isn't interactive, so a plain button makes it one. In the popover's
+        // inline anchor, aligning it to the top of the text centers it on the names beside it.
+        <button
+          type="button"
+          css={{ display: 'inline-flex', verticalAlign: 'text-top' }}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-label={i18n.translate('xpack.boost.ruleTargets.showAllButtonLabel', {
+            defaultMessage: 'Show all {targets}',
+            values: { targets: title },
           })}
-        </EuiLink>
+          data-test-subj="boostRuleTargetsMore"
+        >
+          {/* EUI has no hover style for notification badges, and sets a default cursor on them. */}
+          <EuiNotificationBadge color="subdued" css={{ cursor: 'pointer' }}>
+            {i18n.translate('xpack.boost.ruleTargets.moreBadge', {
+              defaultMessage: '+{count}',
+              values: { count: hiddenCount },
+            })}
+          </EuiNotificationBadge>
+        </button>
       }
     >
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
-      {patterns.length >= SEARCHABLE_FROM && (
-        <>
-          <EuiFieldSearch
-            compressed
-            fullWidth
-            value={query}
-            onChange={({ target: { value } }) => setQuery(value)}
-            placeholder={i18n.translate('xpack.boost.ruleTargets.searchPlaceholder', {
-              defaultMessage: 'Search',
-            })}
-            aria-label={i18n.translate('xpack.boost.ruleTargets.searchLabel', {
-              defaultMessage: 'Search {title}',
-              values: { title },
-            })}
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
       <div
         tabIndex={0}
         role="region"
@@ -117,25 +105,20 @@ const AllPatternsPopover = ({ patterns, type, hiddenCount }: AllPatternsPopoverP
           ${scrollStyles}
           max-block-size: ${euiTheme.base * 15}px;
           min-inline-size: ${euiTheme.base * 15}px;
+          /* As tall as the scroll fade, so the first and last names stay clear of it until the list
+             scrolls. */
+          padding: ${euiTheme.size.s};
         `}
       >
-        {visiblePatterns.length > 0 ? (
-          <ul css={{ display: 'grid', gap: euiTheme.size.xs }}>
-            {visiblePatterns.map((pattern) => (
-              <li key={pattern}>
-                <EuiCode>{pattern}</EuiCode>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.boost.ruleTargets.noMatches', {
-                defaultMessage: 'No matches',
-              })}
-            </p>
-          </EuiText>
-        )}
+        <ul css={{ display: 'grid', gap: euiTheme.size.s }}>
+          {patterns.map((pattern) => (
+            // A flex item, so each name's padded background takes up space in the list instead of
+            // overlapping the next one.
+            <li key={pattern} css={{ display: 'flex' }}>
+              <EuiCode>{pattern}</EuiCode>
+            </li>
+          ))}
+        </ul>
       </div>
     </EuiPopover>
   );

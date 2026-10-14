@@ -311,9 +311,9 @@ export const CostEstimate = ({ impact, type, isEditing }: CostEstimateProps) => 
 
   return (
     <div
-      // The row grows and shrinks with the estimate anchored to its bottom, so the estimate slides up
-      // from behind the buttons as it fades in, and back down as it fades out. Once collapsed, it's
-      // hidden from everyone.
+      // The row grows and shrinks with the estimate anchored to its top, so the estimate rises and
+      // falls with the footer's top edge as it fades in and out. Once collapsed, it's hidden from
+      // everyone.
       css={css`
         position: relative;
         display: grid;
@@ -329,15 +329,14 @@ export const CostEstimate = ({ impact, type, isEditing }: CostEstimateProps) => 
       data-shown={isShown}
       data-stale={isStale}
     >
+      {/* Clipped at the divider, which doesn't move, so the estimate slides out from behind it and
+          back in. */}
       <div
         css={[
           fade,
           css`
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
             min-block-size: 0;
-            overflow: hidden;
+            clip-path: inset(0 0 calc(${dividerGap} + ${euiTheme.border.width.thin}) 0);
           `,
         ]}
       >
