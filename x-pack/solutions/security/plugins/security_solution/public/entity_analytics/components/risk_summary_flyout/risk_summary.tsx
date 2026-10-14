@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash/fp';
+import { capitalize, noop } from 'lodash/fp';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useNewEntityAnalyticsPage } from '../../hooks/use_new_entity_analytics_page';
 import type { EntityType } from '../../../../common/entity_analytics/types';
@@ -29,6 +29,8 @@ import type { EntityRiskScoresState } from '../../api/hooks/use_entity_risk_scor
 import type { EntityRiskScore } from '../../../../common/search_strategy';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
 
 import { getEntityData, getItems, LAST_30_DAYS } from './common';
 import { RiskContributionsPanel } from './risk_contributions_panel';
@@ -47,6 +49,8 @@ const resolutionRiskScoreMetricLabel = i18n.translate(
     defaultMessage: 'Resolution group risk score',
   }
 );
+
+export const RESOLUTION_RISK_SCORE_QUERY_ID = 'riskSummaryResolutionRiskScoreQuery';
 
 const entityCaseAttachmentLabel = (entityType: EntityType, entityName?: string) =>
   i18n.translate('xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel', {
@@ -119,6 +123,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const fallbackRiskData = data && data.length > 0 ? data[0] : undefined;
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
+  const { setQuery, deleteQuery } = useGlobalTime();
 
   const entityBaseRiskScore = entityRiskScores?.base;
   const entityResolutionRiskScore = entityRiskScores?.resolution.state;
@@ -248,6 +253,16 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const showOnlyResolutionRisk =
     isGroupView &&
     (Boolean(resolutionEntityData?.risk) || (entityResolutionRiskScore?.loading ?? false));
+  // The group table is backed by the resolution-score query, which has no inspect registration of
+  // its own (`queryId` belongs to the entity-store / name-based risk lookups), so register it here.
+  useQueryInspector({
+    queryId: RESOLUTION_RISK_SCORE_QUERY_ID,
+    loading: entityResolutionRiskScore?.loading ?? false,
+    refetch: entityResolutionRiskScore?.refetch ?? noop,
+    inspect: entityResolutionRiskScore?.inspect,
+    setQuery,
+    deleteQuery,
+  });
   const showResolutionPanel = showResolutionRiskSummary || showOnlyResolutionRisk;
   const displayedUpdatedAt = showOnlyResolutionRisk
     ? resolutionRiskData?.['@timestamp']
@@ -425,7 +440,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
               caption: showOnlyResolutionRisk ? entityTableCaption : resolutionTableCaption,
               items: resolutionRows,
               loading: (entityResolutionRiskScore?.loading ?? false) || recalculatingScore,
-              inspectQueryId: showOnlyResolutionRisk ? queryId : undefined,
+              inspectQueryId: showOnlyResolutionRisk ? RESOLUTION_RISK_SCORE_QUERY_ID : undefined,
             }}
           />
         </>
