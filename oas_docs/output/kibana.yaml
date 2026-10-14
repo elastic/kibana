@@ -134291,7 +134291,7 @@ paths:
                   total:
                     type: integer
           description: A successful response.
-      summary: Get monitors
+      summary: Search monitors
       tags:
         - synthetics
       x-metaTags:
@@ -135202,7 +135202,7 @@ paths:
                   type: object
                 type: array
           description: A successful response.
-      summary: Get parameters
+      summary: Search parameters
       tags:
         - synthetics
       x-metaTags:
