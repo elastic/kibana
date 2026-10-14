@@ -36,7 +36,10 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ kbnClient }) => {
       try {
-        await kbnClient.request({ method: 'DELETE', path: getDataSourceByIdApiPath(dataSourceName) });
+        await kbnClient.request({
+          method: 'DELETE',
+          path: getDataSourceByIdApiPath(dataSourceName),
+        });
       } catch {
         // ignore cleanup errors
       }
