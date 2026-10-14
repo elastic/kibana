@@ -862,6 +862,27 @@ describe('DatatableComponent', () => {
           ['3', 'red'],
         ]);
       });
+
+      test('should build the default palette with percent stop bounds instead of data bounds', () => {
+        args.columns[2].colorMode = 'cell';
+        data.rows = [150, 300, 450].map((c) => ({ a: 'shoes', b: 1588024800000, c }));
+
+        renderDatatableComponent({ getType: jest.fn().mockReturnValue({ type: 'metrics' }) });
+
+        expect(getCellColorFn).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          { type: 'ranges', bins: 0, min: 150, max: 450 },
+          false,
+          false,
+          false,
+          expect.objectContaining({
+            name: 'custom',
+            params: expect.objectContaining({ range: 'percent', rangeMin: 0, rangeMax: 100 }),
+          }),
+          undefined
+        );
+      });
     });
   });
 

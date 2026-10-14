@@ -128,7 +128,7 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
 
     render(React.createElement(EuiProvider, null, React.createElement(I18nProvider, null, view)));
 
-    fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));
+    fireEvent.click(screen.getByRole('button', { name: /cfo@corp/ }));
 
     expect(open).toHaveBeenCalledWith({ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' });
   });
