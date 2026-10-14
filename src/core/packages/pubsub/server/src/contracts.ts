@@ -15,5 +15,5 @@ export interface PubSubSetup {
    * Registers a topic during plugin setup.
    * A second registration of the same name throws.
    */
-  registerTopic<TPayload>(topic: Topic<TPayload>): void;
+  registerTopic<TData>(topic: Topic<TData>): void;
 }

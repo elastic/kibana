@@ -94,7 +94,7 @@ export function createCoreSetupMock({
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createSetupContract(),
     dataStreams: dataStreamServiceMock.createSetupContract(),
-    pubsub: pubSubServiceMock.createSetup(),
+    pubsub: pubSubServiceMock.createSetupContract(),
     userStorage: userStorageServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()

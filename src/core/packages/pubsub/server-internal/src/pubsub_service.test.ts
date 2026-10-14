@@ -13,26 +13,29 @@ import { PubSubService } from './pubsub_service';
 
 describe('PubSubService registration', () => {
   const createService = () => new PubSubService(mockCoreContext.create());
-  const owned = (name: string, pluginId = 'ordersPlugin') => ({
-    ...defineTopic(name),
-    pluginId,
-  });
 
-  it('leaves a defined topic without an owner until a plugin registers it', () => {
+  it('registers a topic during setup', () => {
     const setup = createService().setup();
 
-    expect(defineTopic('orders').pluginId).toBeUndefined();
-    expect(() => setup.registerTopic(defineTopic('orders'))).toThrow(
-      'Cannot register topic "orders" without a plugin id.'
+    expect(() => setup.registerTopic('ordersPlugin', defineTopic('orders'))).not.toThrow();
+  });
+
+  it('throws when the same topic name is registered twice, naming the first registrant', () => {
+    const setup = createService().setup();
+
+    setup.registerTopic('ordersPlugin', defineTopic('orders'));
+
+    expect(() => setup.registerTopic('shippingPlugin', defineTopic('orders'))).toThrow(
+      'Topic "orders" is already registered by "ordersPlugin".'
     );
   });
 
-  it('throws when the same topic name is registered twice', () => {
+  it('throws when the same plugin registers the same topic twice', () => {
     const setup = createService().setup();
 
-    setup.registerTopic(owned('orders', 'ordersPlugin'));
+    setup.registerTopic('ordersPlugin', defineTopic('orders'));
 
-    expect(() => setup.registerTopic(owned('orders', 'shippingPlugin'))).toThrow(
+    expect(() => setup.registerTopic('ordersPlugin', defineTopic('orders'))).toThrow(
       'Topic "orders" is already registered by "ordersPlugin".'
     );
   });
@@ -42,7 +45,7 @@ describe('PubSubService registration', () => {
     const setup = service.setup();
     service.start();
 
-    expect(() => setup.registerTopic(owned('orders'))).toThrow(
+    expect(() => setup.registerTopic('ordersPlugin', defineTopic('orders'))).toThrow(
       'Cannot register topic "orders" outside of setup.'
     );
   });

@@ -67,7 +67,7 @@ export function createInternalCoreSetupMock() {
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createInternalSetupContract(),
     dataStreams: dataStreamServiceMock.createSetupContract(),
-    pubsub: pubSubServiceMock.createSetup(),
+    pubsub: pubSubServiceMock.createInternalSetupContract(),
     userStorage: userStorageServiceMock.createSetupContract(),
   });
   return setupDeps;

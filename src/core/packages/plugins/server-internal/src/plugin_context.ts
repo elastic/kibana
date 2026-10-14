@@ -333,8 +333,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
     },
     pubsub: {
-      registerTopic: (topic) =>
-        deps.pubsub.registerTopic({ name: topic.name, pluginId: plugin.name }),
+      registerTopic: (topic) => deps.pubsub.registerTopic(plugin.name, topic),
     },
     userStorage: {
       register: deps.userStorage.register,
