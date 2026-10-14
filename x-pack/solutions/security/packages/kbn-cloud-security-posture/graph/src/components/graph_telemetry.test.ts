@@ -140,7 +140,6 @@ describe('GraphTelemetryEvent node_action typing', () => {
         type: 'node_action';
         nodeType: 'grouped_event';
         action: 'show_related_events';
-        state: 'show';
       }>,
       IsAssignable<{
         type: 'node_action';
@@ -189,9 +188,15 @@ describe('GraphTelemetryEvent node_action typing', () => {
         type: 'node_action';
         nodeType: 'grouped_event';
         action: 'show_grouped_events';
+      }>,
+      IsAssignable<{
+        type: 'node_action';
+        nodeType: 'grouped_event';
+        action: 'show_related_events';
+        state: 'hide';
       }>
-    ] = [true, true, true, true, true, true, true];
+    ] = [true, true, true, true, true, true, true, true];
 
-    expect(accepted).toEqual([true, true, true, true, true, true, true]);
+    expect(accepted).toEqual([true, true, true, true, true, true, true, true]);
   });
 });

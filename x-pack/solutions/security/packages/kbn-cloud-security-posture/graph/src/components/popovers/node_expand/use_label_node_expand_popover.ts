@@ -63,7 +63,7 @@ export const useLabelNodeExpandPopover = (
         toggleFilter: (field, value, action) => {
           onTelemetryEvent?.({
             type: 'node_action',
-            nodeType: 'event',
+            nodeType: isGroupedEvents ? 'grouped_event' : 'event',
             action: 'show_related_events',
             state: action,
           });

@@ -42,7 +42,7 @@ export type GraphNodeActionEvent =
       'entity',
       'show_entity_relationships' | 'show_actions_by' | 'show_actions_on' | 'show_related_events'
     >
-  | ToggleNodeActionEvent<'event', 'show_related_events'>
+  | ToggleNodeActionEvent<'event' | 'grouped_event', 'show_related_events'>
   | NodeActionEvent<'entity' | 'event', 'show_details'>
   | NodeActionEvent<'grouped_entity', 'show_grouped_entities'>
   | NodeActionEvent<'grouped_event', 'show_grouped_events'>;
