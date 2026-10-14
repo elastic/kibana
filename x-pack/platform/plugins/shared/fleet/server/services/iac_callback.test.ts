@@ -33,8 +33,6 @@ const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/u
 const PAYLOAD = {
   role_arn: ROLE_ARN,
   stack_arn: STACK_ARN,
-  aws_account_id: '123456789012',
-  region: 'us-east-1',
 };
 
 const NOW = new Date('2026-10-13T10:00:00.000Z');
@@ -268,7 +266,7 @@ describe('iacCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('is invalid when the role ARN account differs from aws_account_id', async () => {
+    it('is invalid when the role ARN and the stack ARN are in different accounts', async () => {
       soClient.get.mockResolvedValue(soWith(pendingAttrs()));
       const result = await iacCallbackService.receive(soClient, 'cb-1', {
         apiKeyId: 'key-1',
@@ -276,21 +274,9 @@ describe('iacCallbackService', () => {
       });
       expect(result).toEqual({
         outcome: 'invalid',
-        message: 'aws_account_id must match the account of role_arn and stack_arn',
+        message: 'role_arn and stack_arn must be in the same AWS account',
       });
       expect(soClient.update).not.toHaveBeenCalled();
-    });
-
-    it('is invalid when the stack ARN account differs from aws_account_id', async () => {
-      soClient.get.mockResolvedValue(soWith(pendingAttrs()));
-      const result = await iacCallbackService.receive(soClient, 'cb-1', {
-        apiKeyId: 'key-1',
-        payload: {
-          ...PAYLOAD,
-          stack_arn: 'arn:aws:cloudformation:us-east-1:999999999999:stack/elastic/uuid-1',
-        },
-      });
-      expect(result).toMatchObject({ outcome: 'invalid' });
     });
 
     it('stores the values, invalidates the key and audit-logs on first receive', async () => {
@@ -323,7 +309,7 @@ describe('iacCallbackService', () => {
       });
       expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `IaC callback received [id=cb-1] [api_key_id=key-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}] [aws_account_id=123456789012]`,
+        message: `IaC callback received [id=cb-1] [api_key_id=key-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
       });
       expect(result).toEqual({
         outcome: 'received',

@@ -74,12 +74,7 @@ export type IacCallbackReceiveResult =
   /** Fields are individually well-formed but disagree with each other. */
   | { outcome: 'invalid'; message: string };
 
-const RECEIVED_FIELDS: Array<keyof IacCallbackReceivedValues> = [
-  'role_arn',
-  'stack_arn',
-  'aws_account_id',
-  'region',
-];
+const RECEIVED_FIELDS: Array<keyof IacCallbackReceivedValues> = ['role_arn', 'stack_arn'];
 
 const accountIdOfArn = (arn: string): string | undefined => arn.split(':')[4];
 
@@ -199,14 +194,10 @@ class IacCallbackService {
       return { outcome: 'gone' };
     }
 
-    const accountId = payload.aws_account_id;
-    if (
-      accountIdOfArn(payload.role_arn) !== accountId ||
-      accountIdOfArn(payload.stack_arn) !== accountId
-    ) {
+    if (accountIdOfArn(payload.role_arn) !== accountIdOfArn(payload.stack_arn)) {
       return {
         outcome: 'invalid',
-        message: 'aws_account_id must match the account of role_arn and stack_arn',
+        message: 'role_arn and stack_arn must be in the same AWS account',
       };
     }
 
@@ -225,8 +216,6 @@ class IacCallbackService {
       received_at: new Date().toISOString(),
       role_arn: payload.role_arn,
       stack_arn: payload.stack_arn,
-      aws_account_id: payload.aws_account_id,
-      region: payload.region,
       connector_name: connector.name,
       cloud_connector_id: connector.id,
     };
@@ -236,7 +225,7 @@ class IacCallbackService {
     await invalidateAPIKeys([attributes.api_key_id]);
 
     auditLoggingService.writeCustomAuditLog({
-      message: `IaC callback received [id=${so.id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${payload.role_arn}] [aws_account_id=${payload.aws_account_id}]`,
+      message: `IaC callback received [id=${so.id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${payload.role_arn}]`,
     });
     this.logger.debug(`IaC callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`);
 

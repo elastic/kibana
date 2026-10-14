@@ -39,8 +39,6 @@ const pendingItem = (id = 'cb-1', overrides: Partial<IacCallback> = {}): IacCall
 const RECEIVED_VALUES = {
   role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
   stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
-  aws_account_id: '123456789012',
-  region: 'us-east-1',
 };
 
 const setBasePath = (basePath: { publicBaseUrl?: string; serverBasePath: string }) =>

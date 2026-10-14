@@ -19,8 +19,6 @@ const ACCOUNT = '123456789012';
 const PAYLOAD = {
   role_arn: `arn:aws:iam::${ACCOUNT}:role/ElasticWorkloadIdentity-abc`,
   stack_arn: `arn:aws:cloudformation:us-east-1:${ACCOUNT}:stack/elastic-wif/11111111-2222-3333-4444-555555555555`,
-  aws_account_id: ACCOUNT,
-  region: 'us-east-1',
 };
 
 /**
@@ -95,8 +93,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(body.item.status).to.be('received');
       expect(body.item.role_arn).to.be(PAYLOAD.role_arn);
       expect(body.item.stack_arn).to.be(PAYLOAD.stack_arn);
-      expect(body.item.aws_account_id).to.be(ACCOUNT);
-      expect(body.item.region).to.be('us-east-1');
       expect(body.item.cloud_connector_id).to.be.a('string');
 
       const connectors = await supertest
@@ -130,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(body.item.status).to.be('pending');
     });
 
-    it('rejects a payload whose account ids disagree', async () => {
+    it('rejects a role and a stack from different accounts', async () => {
       const { item, api_key: apiKey } = await createCallback();
 
       await receive(item.id, apiKey, {
@@ -143,7 +139,7 @@ export default function (providerContext: FtrProviderContext) {
       const { item, api_key: apiKey } = await createCallback();
 
       await receive(item.id, apiKey, { ...PAYLOAD, stack_arn: 'not-an-arn' }).expect(400);
-      await receive(item.id, apiKey, { ...PAYLOAD, aws_account_id: '12' }).expect(400);
+      await receive(item.id, apiKey, { ...PAYLOAD, role_arn: 'not-an-arn' }).expect(400);
     });
 
     it('answers 404 to a caller that did not authenticate with an API key', async () => {

@@ -32,8 +32,6 @@ const iacCallbackFieldsV1 = {
   received_at: schema.maybe(schema.string({ maxLength: 64 })),
   role_arn: schema.maybe(schema.string({ maxLength: 2048 })),
   stack_arn: schema.maybe(schema.string({ maxLength: 2048 })),
-  aws_account_id: schema.maybe(schema.string({ maxLength: 12 })),
-  region: schema.maybe(schema.string({ maxLength: 64 })),
 };
 
 export const IacCallbackSchemaV1 = schema.object(iacCallbackFieldsV1);

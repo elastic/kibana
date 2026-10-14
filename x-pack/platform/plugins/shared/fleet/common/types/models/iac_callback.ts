@@ -13,8 +13,6 @@ export type IacCallbackStatus = 'pending' | 'received';
 export interface IacCallbackReceivedValues {
   role_arn: string;
   stack_arn: string;
-  aws_account_id: string;
-  region: string;
 }
 
 /**

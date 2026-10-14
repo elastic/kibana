@@ -437,8 +437,6 @@ export interface IacCallbackSOAttributes {
   received_at?: string;
   role_arn?: string;
   stack_arn?: string;
-  aws_account_id?: string;
-  region?: string;
   /** Name the browser wants on the cloud connector created when the stack reports back. */
   connector_name?: string;
   account_type?: 'single-account' | 'organization-account';
