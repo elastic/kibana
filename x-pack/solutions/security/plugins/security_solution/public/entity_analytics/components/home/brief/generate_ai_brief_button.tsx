@@ -8,7 +8,7 @@
 /* PoC (do not merge): "Generate AI brief" entry point. Not production code. */
 
 import React, { useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
@@ -91,7 +91,7 @@ export const GenerateAiBriefButton: React.FC<GenerateAiBriefButtonProps> = ({
     autoSendInitialMessage: true,
   });
 
-  return (
+  const button = (
     <EuiButton
       iconType="sparkles"
       size="s"
@@ -103,5 +103,19 @@ export const GenerateAiBriefButton: React.FC<GenerateAiBriefButtonProps> = ({
         defaultMessage: 'Generate AI brief',
       })}
     </EuiButton>
+  );
+
+  if (!scope.query && !scope.filters) return button;
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('xpack.securitySolution.entityAnalytics.home.aiBrief.scopeTooltip', {
+        defaultMessage:
+          'Headline counts follow the period and entity filters, as on the page. Your search narrows the priorities.',
+      })}
+      data-test-subj="generateAiBriefScopeTooltip"
+    >
+      {button}
+    </EuiToolTip>
   );
 };
