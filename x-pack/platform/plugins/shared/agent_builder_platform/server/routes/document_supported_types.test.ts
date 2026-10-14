@@ -7,18 +7,29 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
+import type {
+  DocumentConverter,
+  DocumentConverters,
+} from '../attachment_types/document/converters';
+import {
+  documentSupportedTypesPath,
+  registerDocumentSupportedTypesRoute,
+} from './document_supported_types';
 
-const mockIsPdfExtractionAvailable = jest.fn();
-jest.mock('../attachment_types/document/extraction/extraction_availability', () => ({
-  isPdfExtractionAvailable: () => mockIsPdfExtractionAvailable(),
-}));
+describe('registerDocumentSupportedTypesRoute', () => {
+  const createConverter = (available: boolean): DocumentConverter => ({
+    isAvailable: () => available,
+    toText: jest.fn(),
+  });
 
-import { pdfAvailabilityPath, registerPdfAvailabilityRoute } from './document_supported_types';
-
-describe('registerPdfAvailabilityRoute', () => {
-  const setup = () => {
+  const setup = ({ pdfAvailable }: { pdfAvailable: boolean }) => {
+    const documentConverters: DocumentConverters = {
+      'application/pdf': createConverter(pdfAvailable),
+      'text/markdown': createConverter(true),
+      'text/plain': createConverter(true),
+    };
     const router = httpServiceMock.createRouter();
-    registerPdfAvailabilityRoute({ router });
+    registerDocumentSupportedTypesRoute({ router, documentConverters });
     const [config, handler] = router.get.mock.calls[0];
     return { config, handler };
   };
@@ -30,21 +41,32 @@ describe('registerPdfAvailabilityRoute', () => {
   };
 
   it('registers an internal route that needs the read privilege', () => {
-    const { config } = setup();
-    expect(config.path).toBe('/internal/agent_builder/attachments/pdf/_available');
-    expect(config.path).toBe(pdfAvailabilityPath);
+    const { config } = setup({ pdfAvailable: true });
+    expect(config.path).toBe('/internal/agent_builder/attachments/document/_supported_types');
+    expect(config.path).toBe(documentSupportedTypesPath);
     expect(config.options).toEqual({ access: 'internal' });
     expect(config.security).toEqual({
       authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
     });
   });
 
-  it.each([true, false])('returns available: %s', async (available) => {
-    mockIsPdfExtractionAvailable.mockReturnValue(available);
-    const { handler } = setup();
+  it('returns all mime types when all are available', async () => {
+    const { handler } = setup({ pdfAvailable: true });
 
     const response = await callHandler(handler);
 
-    expect(response.ok).toHaveBeenCalledWith({ body: { available } });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { mime_types: ['application/pdf', 'text/markdown', 'text/plain'] },
+    });
+  });
+
+  it('leaves out PDF when it is not available', async () => {
+    const { handler } = setup({ pdfAvailable: false });
+
+    const response = await callHandler(handler);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { mime_types: ['text/markdown', 'text/plain'] },
+    });
   });
 });

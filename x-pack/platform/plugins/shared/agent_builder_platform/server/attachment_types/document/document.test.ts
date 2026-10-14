@@ -8,44 +8,49 @@
 import { Readable } from 'stream';
 import { Subject } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Attachment, PdfAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type {
+  Attachment,
+  DocumentAttachmentData,
+  SupportedDocumentMimeType,
+} from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
+  CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
-  CHAT_ATTACHMENT_PDFS_FILE_KIND,
-  MAX_PDF_BYTES,
-  MAX_PDF_TEXT_LENGTH,
+  MAX_DOCUMENT_BYTES,
+  MAX_DOCUMENT_TEXT_LENGTH,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
-import { pdfErrors } from './errors';
+import type { DocumentConverter, DocumentConverters } from './converters';
+import { documentErrors } from './errors';
+import { createDocumentAttachmentType } from './document';
 
-const mockExtractDocument = jest.fn();
-jest.mock('./extraction/extract_document', () => ({
-  extractDocument: (params: unknown) => mockExtractDocument(params),
-}));
-
-const mockIsPdfExtractionAvailable = jest.fn();
-jest.mock('./extraction/extraction_availability', () => ({
-  isPdfExtractionAvailable: () => mockIsPdfExtractionAvailable(),
-}));
-
-import { createPdfAttachmentType } from './document';
-
-const validData: PdfAttachmentData = { file_id: 'file-abc', name: 'invoice.pdf', text: 'Hello' };
+const validData: DocumentAttachmentData = {
+  file_id: 'file-abc',
+  name: 'invoice.pdf',
+  mime_type: 'application/pdf',
+  text: 'Hello',
+};
 
 const createFilesPluginStub = ({
-  fileKind = CHAT_ATTACHMENT_PDFS_FILE_KIND,
+  fileKind = CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND,
+  mimeType = 'application/pdf',
+  name = 'invoice.pdf',
   size = 100,
   bytes = Buffer.from('%PDF-1.7 fake'),
-}: { fileKind?: string; size?: number; bytes?: Buffer } = {}) => {
+}: {
+  fileKind?: string;
+  mimeType?: string | null;
+  name?: string;
+  size?: number;
+  bytes?: Buffer;
+} = {}) => {
   const deleteFile = jest.fn(async () => {});
   const downloadContent = jest.fn(async () => Readable.from(bytes));
   const getById = jest.fn(async () => ({
-    data: { fileKind, name: 'invoice.pdf', size },
+    data: { fileKind, mimeType: mimeType ?? undefined, name, size },
     downloadContent,
     delete: deleteFile,
   }));
@@ -54,15 +59,27 @@ const createFilesPluginStub = ({
   return { plugin, getById, downloadContent, deleteFile };
 };
 
-describe('pdf attachment type', () => {
-  const logger = loggingSystemMock.createLogger();
-  const esClient = {} as ElasticsearchClient;
+const createConverterMock = () => ({
+  isAvailable: jest.fn<boolean, []>(() => true),
+  toText: jest.fn<ReturnType<DocumentConverter['toText']>, Parameters<DocumentConverter['toText']>>(
+    async () => '# Invoice\n\nHello'
+  ),
+});
+
+describe('document attachment type', () => {
+  const converterMocks: Record<SupportedDocumentMimeType, ReturnType<typeof createConverterMock>> =
+    {
+      'application/pdf': createConverterMock(),
+      'text/markdown': createConverterMock(),
+      'text/plain': createConverterMock(),
+    };
+  const documentConverters: DocumentConverters = converterMocks;
+  const pdfConverter = converterMocks['application/pdf'];
 
   const createDefinition = (plugin: FilesStart) =>
-    createPdfAttachmentType({
+    createDocumentAttachmentType({
       getFilesPlugin: async () => plugin,
-      getEsClient: async () => esClient,
-      logger,
+      documentConverters,
     });
 
   const createResolveContext = (request: KibanaRequest): AttachmentResolveContext => ({
@@ -72,9 +89,10 @@ describe('pdf attachment type', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockIsPdfExtractionAvailable.mockReturnValue(true);
-    mockExtractDocument.mockResolvedValue('# Invoice\n\nHello');
+    Object.values(converterMocks).forEach((converter) => {
+      converter.isAvailable.mockReset().mockReturnValue(true);
+      converter.toText.mockReset().mockResolvedValue('# Invoice\n\nHello');
+    });
   });
 
   describe('validate', () => {
@@ -89,7 +107,16 @@ describe('pdf attachment type', () => {
     it('rejects data without text', async () => {
       const { plugin } = createFilesPluginStub();
       const result = await createDefinition(plugin).validate(
-        { file_id: 'file-abc', name: 'invoice.pdf' },
+        { file_id: 'file-abc', name: 'invoice.pdf', mime_type: 'application/pdf' },
+        validateContext
+      );
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects an unknown mime type', async () => {
+      const { plugin } = createFilesPluginStub();
+      const result = await createDefinition(plugin).validate(
+        { ...validData, mime_type: 'application/zip' },
         validateContext
       );
       expect(result.valid).toBe(false);
@@ -98,7 +125,7 @@ describe('pdf attachment type', () => {
     it('rejects text that is too long', async () => {
       const { plugin } = createFilesPluginStub();
       const result = await createDefinition(plugin).validate(
-        { ...validData, text: 'a'.repeat(500_001) },
+        { ...validData, text: 'a'.repeat(MAX_DOCUMENT_TEXT_LENGTH + 1) },
         validateContext
       );
       expect(result.valid).toBe(false);
@@ -120,20 +147,20 @@ describe('pdf attachment type', () => {
 
       const result = await createDefinition(plugin).validate(validData, validateContext);
 
-      expect(result).toEqual({ valid: false, error: 'PDF file not found.' });
+      expect(result).toEqual({ valid: false, error: 'File not found.' });
     });
 
-    it('rejects when the file is not a PDF file kind', async () => {
+    it('rejects when the file is not a document file kind', async () => {
       const { plugin } = createFilesPluginStub({ fileKind: CHAT_ATTACHMENT_IMAGES_FILE_KIND });
       const result = await createDefinition(plugin).validate(validData, validateContext);
-      expect(result).toEqual({ valid: false, error: 'PDF file not found.' });
+      expect(result).toEqual({ valid: false, error: 'File not found.' });
     });
   });
 
   describe('resolve', () => {
     const request = httpServerMock.createKibanaRequest();
 
-    it('returns the file id, the name and the extracted text', async () => {
+    it('returns the file id, the name, the mime type and the text', async () => {
       const { plugin, getById } = createFilesPluginStub();
 
       const data = await createDefinition(plugin).resolve!(
@@ -145,26 +172,63 @@ describe('pdf attachment type', () => {
       expect(data).toEqual({
         file_id: 'file-abc',
         name: 'invoice.pdf',
+        mime_type: 'application/pdf',
         text: '# Invoice\n\nHello',
       });
-      expect(mockExtractDocument).toHaveBeenCalledWith(
+      expect(pdfConverter.toText).toHaveBeenCalledWith(
         expect.objectContaining({
-          pdf: Buffer.from('%PDF-1.7 fake'),
+          bytes: Buffer.from('%PDF-1.7 fake'),
           fileId: 'file-abc',
           fileName: 'invoice.pdf',
-          esClient,
         })
       );
     });
 
-    it('fails when PDF extraction is not available and does not read the file', async () => {
-      mockIsPdfExtractionAvailable.mockReturnValue(false);
-      const { plugin, getById } = createFilesPluginStub();
+    it('uses the converter of the markdown mime type', async () => {
+      const { plugin } = createFilesPluginStub({
+        mimeType: 'text/markdown',
+        name: 'notes.md',
+        bytes: Buffer.from('# Notes'),
+      });
+      converterMocks['text/markdown'].toText.mockResolvedValue('# Notes');
+
+      const data = await createDefinition(plugin).resolve!(
+        'file-abc',
+        createResolveContext(request)
+      );
+
+      expect(data).toEqual({
+        file_id: 'file-abc',
+        name: 'notes.md',
+        mime_type: 'text/markdown',
+        text: '# Notes',
+      });
+      expect(converterMocks['text/markdown'].toText).toHaveBeenCalledWith(
+        expect.objectContaining({ bytes: Buffer.from('# Notes'), fileName: 'notes.md' })
+      );
+      expect(pdfConverter.toText).not.toHaveBeenCalled();
+    });
+
+    it.each([null, 'application/zip'])(
+      'fails without a download when the file mime type is %s',
+      async (mimeType) => {
+        const { plugin, downloadContent } = createFilesPluginStub({ mimeType });
+
+        await expect(
+          createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
+        ).rejects.toThrow('This file type is not supported.');
+        expect(downloadContent).not.toHaveBeenCalled();
+      }
+    );
+
+    it('fails when the converter is not available and does not download the file', async () => {
+      pdfConverter.isAvailable.mockReturnValue(false);
+      const { plugin, downloadContent } = createFilesPluginStub();
 
       await expect(
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('PDF reading is not available on this deployment.');
-      expect(getById).not.toHaveBeenCalled();
+      ).rejects.toThrow('Reading this file type is not available on this deployment.');
+      expect(downloadContent).not.toHaveBeenCalled();
     });
 
     it('fails when the file is not found', async () => {
@@ -177,66 +241,80 @@ describe('pdf attachment type', () => {
 
       await expect(
         createDefinition(plugin).resolve!('does-not-exist', createResolveContext(request))
-      ).rejects.toThrow('PDF file not found.');
+      ).rejects.toThrow('File not found.');
     });
 
-    it('fails with the same message when the file is not a PDF file kind', async () => {
+    it('fails with the same message when the file is not a document file kind', async () => {
       const { plugin, downloadContent } = createFilesPluginStub({
         fileKind: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
       });
 
       await expect(
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('PDF file not found.');
+      ).rejects.toThrow('File not found.');
       expect(downloadContent).not.toHaveBeenCalled();
     });
 
     it('fails before the download when the file size is over the limit', async () => {
-      const { plugin, downloadContent } = createFilesPluginStub({ size: MAX_PDF_BYTES + 1 });
+      const { plugin, downloadContent } = createFilesPluginStub({
+        size: MAX_DOCUMENT_BYTES['application/pdf'] + 1,
+      });
 
       await expect(
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('The PDF is larger than 10 MB.');
+      ).rejects.toThrow('The file is larger than 10 MB.');
       expect(downloadContent).not.toHaveBeenCalled();
     });
 
     it('fails when the downloaded bytes are over the limit', async () => {
       const { plugin } = createFilesPluginStub({
         size: 100,
-        bytes: Buffer.alloc(MAX_PDF_BYTES + 1),
+        bytes: Buffer.alloc(MAX_DOCUMENT_BYTES['application/pdf'] + 1),
       });
 
       await expect(
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('The PDF is larger than 10 MB.');
-      expect(mockExtractDocument).not.toHaveBeenCalled();
+      ).rejects.toThrow('The file is larger than 10 MB.');
+      expect(pdfConverter.toText).not.toHaveBeenCalled();
     });
 
-    it('fails when the extracted text is too long', async () => {
-      mockExtractDocument.mockResolvedValue('a'.repeat(MAX_PDF_TEXT_LENGTH + 1));
+    it('takes the size limit from the mime type', async () => {
+      const threeMb = 3 * 1024 * 1024;
+      const textFile = createFilesPluginStub({
+        mimeType: 'text/plain',
+        name: 'notes.txt',
+        size: threeMb,
+        bytes: Buffer.alloc(threeMb),
+      });
+
+      await expect(
+        createDefinition(textFile.plugin).resolve!('file-abc', createResolveContext(request))
+      ).rejects.toThrow('The file is larger than 2 MB.');
+      expect(textFile.downloadContent).not.toHaveBeenCalled();
+
+      const pdfFile = createFilesPluginStub({ size: threeMb, bytes: Buffer.alloc(threeMb) });
+
+      await expect(
+        createDefinition(pdfFile.plugin).resolve!('file-abc', createResolveContext(request))
+      ).resolves.toEqual(expect.objectContaining({ mime_type: 'application/pdf' }));
+    });
+
+    it('fails when the text is too long', async () => {
+      pdfConverter.toText.mockResolvedValue('a'.repeat(MAX_DOCUMENT_TEXT_LENGTH + 1));
       const { plugin } = createFilesPluginStub();
 
       await expect(
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('The text of the PDF is too long. Try a smaller PDF.');
+      ).rejects.toThrow('The text of the file is too long. Try a smaller file.');
     });
 
-    it('fails when the file does not start with the PDF header', async () => {
-      const { plugin } = createFilesPluginStub({ bytes: Buffer.from('hello') });
-
-      await expect(
-        createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('The file is not a valid PDF.');
-      expect(mockExtractDocument).not.toHaveBeenCalled();
-    });
-
-    it('passes the error of the extraction on and keeps the file', async () => {
-      mockExtractDocument.mockRejectedValue(pdfErrors.timeout());
+    it('passes the error of the converter on and keeps the file', async () => {
+      pdfConverter.toText.mockRejectedValue(documentErrors.timeout());
       const { plugin, deleteFile } = createFilesPluginStub();
 
       await expect(
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
-      ).rejects.toThrow('Reading the PDF took too long. Try a smaller PDF.');
+      ).rejects.toThrow('Reading the file took too long. Try a smaller file.');
       expect(deleteFile).not.toHaveBeenCalled();
     });
 
@@ -244,8 +322,8 @@ describe('pdf attachment type', () => {
       const setup = () => {
         const aborted$ = new Subject<void>();
         const abortedRequest = { events: { aborted$ } } as unknown as KibanaRequest;
-        mockExtractDocument.mockImplementation(
-          ({ signal }: { signal: AbortSignal }) =>
+        pdfConverter.toText.mockImplementation(
+          ({ signal }) =>
             new Promise((_resolve, reject) => {
               signal.addEventListener('abort', () => reject(new Error('aborted')), {
                 once: true,
@@ -269,11 +347,11 @@ describe('pdf attachment type', () => {
   });
 
   describe('format', () => {
-    it('returns the text of the PDF', async () => {
+    it('returns the text of the document', async () => {
       const { plugin } = createFilesPluginStub();
-      const attachment: Attachment<AttachmentType.pdf, PdfAttachmentData> = {
+      const attachment: Attachment<AttachmentType.document, DocumentAttachmentData> = {
         id: 'attachment-1',
-        type: AttachmentType.pdf,
+        type: AttachmentType.document,
         data: validData,
       };
 
