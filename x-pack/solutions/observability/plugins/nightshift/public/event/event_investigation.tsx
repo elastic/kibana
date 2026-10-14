@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -17,49 +16,39 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { InvestigationStatus } from '@kbn/investigation-output';
-import type {
-  InvestigationState,
-  SignificantEvent,
-  SignificantEventInvestigation,
-} from '@kbn/significant-events-schema';
-import {
-  InvestigationFlyout,
-  type InvestigationFlyoutTabId,
-} from '../investigation/investigation_flyout';
-import { InvestigationSummaryCard } from '../investigation/investigation_summary_card';
-import { isInvestigationInvestigated } from '../common/investigation_progress_status';
+import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
+import { InvestigationOutput, type InvestigationStatus } from '@kbn/investigation-output';
+import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { useKibana } from '../hooks/use_kibana';
 
 export interface EventInvestigationProps {
-  event: SignificantEvent;
+  /** The latest investigation the significant event records. */
   investigation?: SignificantEventInvestigation;
   status: InvestigationStatus;
-  state?: InvestigationState;
+  /** The investigation from the shared investigations API, once read. */
+  details?: Investigation;
   error?: string;
-  conversationId?: string;
 }
 
+/**
+ * The significant event's latest investigation, read from the shared investigations API.
+ * "Show details" opens the investigation's Agent Builder conversation details flyout.
+ */
 export function EventInvestigation({
-  event,
   investigation,
   status,
-  state,
+  details,
   error,
-  conversationId,
 }: EventInvestigationProps): React.ReactElement {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [flyoutTab, setFlyoutTab] = useState<InvestigationFlyoutTabId>('recommendations');
-  const [tabRequestId, setTabRequestId] = useState(0);
+  const { agentBuilder } = useKibana().services;
+  const conversationId = details?.id;
 
-  const openFlyout = useCallback((tab: InvestigationFlyoutTabId = 'recommendations') => {
-    setFlyoutTab(tab);
-    setTabRequestId((current) => current + 1);
-    setIsFlyoutOpen(true);
-  }, []);
-
-  const canOpenInvestigationFlyout =
-    Boolean(investigation?.workflow_execution_id) && isInvestigationInvestigated(status);
+  const openDetails = useCallback(() => {
+    if (conversationId) {
+      void agentBuilder?.openConversationDetails({ conversationId });
+    }
+  }, [agentBuilder, conversationId]);
 
   return (
     <>
@@ -73,13 +62,13 @@ export function EventInvestigation({
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        {canOpenInvestigationFlyout && (
+        {agentBuilder && conversationId && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
               color="primary"
               data-test-subj="nightshiftInvestigationShowDetailsButton"
-              onClick={() => openFlyout()}
+              onClick={openDetails}
               {...getEbtProps({
                 action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
                 element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_INVESTIGATION,
@@ -104,47 +93,8 @@ export function EventInvestigation({
             })}
           </p>
         </EuiText>
-      ) : !investigation.workflow_execution_id ? (
-        <EuiCallOut
-          announceOnMount
-          color="warning"
-          iconType="warning"
-          size="s"
-          title={i18n.translate('xpack.nightshift.flyout.investigationMissingWorkflowTitle', {
-            defaultMessage: 'Investigation unavailable',
-          })}
-          data-test-subj="nightshiftInvestigationMissingWorkflowCallout"
-        >
-          <EuiText size="s">
-            {i18n.translate('xpack.nightshift.flyout.investigationMissingWorkflowDescription', {
-              defaultMessage:
-                'This investigation is missing workflow details and cannot be loaded.',
-            })}
-          </EuiText>
-        </EuiCallOut>
       ) : (
-        <InvestigationSummaryCard
-          eventTitle={event.title}
-          status={status}
-          state={state}
-          error={error}
-          startedAt={investigation.started_at}
-          completedAt={investigation.completed_at}
-          onShowMoreRecommendations={() => openFlyout('recommendations')}
-        />
-      )}
-
-      {isFlyoutOpen && canOpenInvestigationFlyout && investigation && (
-        <InvestigationFlyout
-          eventTitle={event.title}
-          investigation={investigation}
-          status={status}
-          state={state}
-          conversationId={conversationId}
-          initialTab={flyoutTab}
-          tabRequestId={tabRequestId}
-          onClose={() => setIsFlyoutOpen(false)}
-        />
+        <InvestigationOutput status={status} investigation={details} error={error} />
       )}
     </>
   );

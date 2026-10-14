@@ -55,7 +55,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
     workerEnabled,
-    () => history.push('/watches'),
+    () => history.push('/'),
     onSavingChange
   );
 

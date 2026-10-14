@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/alerting-api-integration-helpers'
   - '@kbn/alerting-plugin'
   - '@kbn/rule-data-utils'
+  - '@kbn/elastic-assistant-common'
   - '@kbn/actions-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-archiver'

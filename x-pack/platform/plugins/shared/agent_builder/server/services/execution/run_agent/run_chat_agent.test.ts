@@ -29,7 +29,7 @@ import { createAgentHandlerContextMock } from '../../../test_utils/runner';
 import { createEmptyConversation, createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
-import { runDefaultAgentMode } from './run_chat_agent';
+import { getRecursionLimit, runDefaultAgentMode } from './run_chat_agent';
 import {
   addRoundCompleteEvent,
   prepareConversation,
@@ -44,6 +44,7 @@ import { createPromptFactory } from './prompts';
 import { registerInternalTools } from './tools/register_internal_tools';
 import { createImageResolver } from './utils/image_resolver';
 import { RunTracker } from './run_tracker';
+import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { steps as nodeNames } from './constants';
 import { applyStepUpdates, stepUpdates } from './step_state';
 import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
@@ -671,6 +672,83 @@ describe('runDefaultAgentMode', () => {
       expect(command.update).toMatchObject({ cycleLimit: 30, steps: new Overwrite([]) });
     });
 
+    it('starts the cycle hooks before the tool setup and hands the runtime to the graph', async () => {
+      const { context } = setup();
+      const start = jest.spyOn(CycleHookRuntime.prototype, 'start');
+      const getHandler = jest.fn(() => undefined);
+      (context.hooks.listCycleHooks as jest.Mock).mockReturnValue([{ id: 'memory', getHandler }]);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          agentId: 'agent-1',
+          executionId: 'exec-1',
+        },
+        context
+      );
+
+      expect(getHandler).toHaveBeenCalledTimes(1);
+      expect(getHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: context.request,
+          spaceId: context.spaceId,
+          agent: expect.objectContaining({ id: 'agent-1' }),
+          execution: expect.objectContaining({ id: 'exec-1', resumed: false }),
+          input: { message: 'hello', attachments: [] },
+          conversation: expect.objectContaining({ events: [], executions: [] }),
+        })
+      );
+      // created and started before the tools are selected, so a 'first' hook overlaps the setup
+      expect(getHandler.mock.invocationCallOrder[0]).toBeLessThan(
+        selectToolsMock.mock.invocationCallOrder[0]
+      );
+      expect(createAgentGraphMock.mock.calls[0][0].cycleHooks).toBeInstanceOf(CycleHookRuntime);
+      // the early calls get the summary the first model call will use (none stored here)
+      expect(start).toHaveBeenCalledWith([], undefined);
+      start.mockRestore();
+    });
+
+    it('closes the cycle hook runtime once the round is extracted, before the post-round hooks', async () => {
+      const close = jest.spyOn(CycleHookRuntime.prototype, 'close');
+      const { context } = setup();
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      const runMock = context.hooks.run as jest.Mock;
+      const afterExecutionCall = runMock.mock.calls.findIndex(
+        ([lifecycle]) => lifecycle === HookLifecycle.afterExecution
+      );
+      expect(afterExecutionCall).toBeGreaterThanOrEqual(0);
+      expect(close.mock.invocationCallOrder[0]).toBeGreaterThan(
+        extractRoundMock.mock.invocationCallOrder[0]
+      );
+      expect(close.mock.invocationCallOrder[0]).toBeLessThan(
+        runMock.mock.invocationCallOrder[afterExecutionCall]
+      );
+
+      close.mockRestore();
+    });
+
+    it('closes the cycle hook runtime when the run fails', async () => {
+      const close = jest.spyOn(CycleHookRuntime.prototype, 'close');
+      const { context } = setup();
+      extractRoundMock.mockRejectedValueOnce(new Error('stream failed'));
+
+      await expect(
+        runDefaultAgentMode(
+          { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+          context
+        )
+      ).rejects.toThrow('stream failed');
+
+      expect(close).toHaveBeenCalledTimes(1);
+      close.mockRestore();
+    });
+
     it('also cuts the inherited abort signals for a standalone run', async () => {
       const { context, streamEvents } = setup();
       context.executionMode = AgentExecutionMode.standalone;
@@ -1117,5 +1195,17 @@ describe('runDefaultAgentMode', () => {
         })
       );
     });
+  });
+});
+
+describe('getRecursionLimit', () => {
+  it('covers a run that spends its whole cycle budget and then answers, with room to spare', () => {
+    // start, init, five nodes per tool-calling cycle, then the answering cycle and finalize (pinned in graph.test)
+    const fullBudget = (cycleLimit: number) => 5 * cycleLimit + 7;
+
+    for (const cycleLimit of [1, 10, 30]) {
+      expect(getRecursionLimit(cycleLimit)).toBeGreaterThan(fullBudget(cycleLimit));
+    }
+    expect(getRecursionLimit(30)).toBe(185);
   });
 });
