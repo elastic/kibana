@@ -201,7 +201,7 @@ test.describe('Maps - MVT scaling', { tag: '@local-stateful-classic' }, () => {
       const hasDisabledSetting = Object.values(scenario).includes(false);
       if (hasDisabledSetting) {
         await maps.openLayerPanel('logstash-*');
-        for (const setting in SETTING_CHECKBOX_TEST_SUBJ) {
+        for (const setting of Object.keys(SETTING_CHECKBOX_TEST_SUBJ)) {
           const key = setting as keyof LayerSettings;
           if (!scenario[key]) {
             await page.testSubj.click(SETTING_CHECKBOX_TEST_SUBJ[key]);
