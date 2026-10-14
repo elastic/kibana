@@ -57,7 +57,7 @@ export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavN
   );
   const executionsViewEnabled = core.settings.globalClient.get<boolean>(
     WORKFLOWS_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
-    false
+    true
   );
 
   const links: NonNullable<WorkflowsNavNode['children']> = [];

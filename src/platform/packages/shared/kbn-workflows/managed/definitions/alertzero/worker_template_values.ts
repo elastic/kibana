@@ -116,19 +116,16 @@ const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
 ].join('\n');
 
 /**
- * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
- * schedule plus manual.
+ * Hunt always emits scheduled (locked 4h default) plus manual with optional reportIds.
+ * Autonomy is fixed Manual; the schedule still runs on its own.
  */
 export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
-  const triggers =
-    values.autonomyLevel === 'manual'
-      ? MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT
-      : [
-          '  - type: scheduled',
-          '    with:',
-          `      every: ${JSON.stringify(values.scheduleInterval)}`,
-          MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
-        ].join('\n');
+  const triggers = [
+    '  - type: scheduled',
+    '    with:',
+    `      every: ${JSON.stringify(values.scheduleInterval)}`,
+    MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
+  ].join('\n');
 
   return renderScheduledWorkerYaml(yaml, values)
     .replaceAll('__WORKER_TRIGGERS__', triggers)
@@ -137,20 +134,37 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
     .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
 };
 
-export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {
     autoCloseConfidenceScoreMinThreshold: number;
+    budgetPerHour: number;
+    lookbackHours: number;
   };
 }
+
+const SCHEDULE_INTERVAL_PATTERN = /^([1-9][0-9]*)([mhd])$/;
+const MINUTES_PER_UNIT = { m: 1, h: 60, d: 1440 } as const;
+
+/** Minutes in a schedule interval such as `15m`, `2h` or `1d`, the units the settings allow. */
+export const scheduleIntervalToMinutes = (interval: string): number => {
+  const match = SCHEDULE_INTERVAL_PATTERN.exec(interval);
+  if (!match) {
+    throw new Error(`Unsupported schedule interval: ${interval}`);
+  }
+  return Number(match[1]) * MINUTES_PER_UNIT[match[2] as keyof typeof MINUTES_PER_UNIT];
+};
 
 export const renderAlertTriageWorkerYaml = (
   yaml: string,
   values: AlertTriageWorkerTemplateValues
 ): string =>
-  renderCommonWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
-    String(values.extras.autoCloseConfidenceScoreMinThreshold)
-  );
+  renderScheduledWorkerYaml(yaml, values)
+    // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
+    .replaceAll('__WORKER_EXTRAS__', JSON.stringify(values.extras))
+    .replaceAll(
+      '__WORKER_SCHEDULE_INTERVAL_MINUTES__',
+      String(scheduleIntervalToMinutes(values.scheduleInterval))
+    );
 
 export interface RuleCoverageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {

@@ -77,6 +77,33 @@ describe('getServicesAlerts', () => {
     expect(filters.find((f) => f.range)).toBeDefined();
   });
 
+  it('extends a past end to now so currently-active alerts are not missed', async () => {
+    const client = createMockAlertsClient();
+    const nowMs = Date.parse('2026-05-12T13:00:00.000Z');
+    const start = nowMs - 3600000;
+    const pastEnd = nowMs - 60000;
+    const realDateNow = Date.now;
+    Date.now = jest.fn(() => nowMs);
+
+    try {
+      await getServicesAlerts({
+        apmAlertsClient: client as unknown as ApmAlertsClient,
+        start,
+        end: pastEnd,
+      });
+    } finally {
+      Date.now = realDateNow;
+    }
+
+    const rangeFilter = getFilters(client).find((f) => f.range);
+    expect(rangeFilter?.range?.['@timestamp']).toEqual(
+      expect.objectContaining({
+        gte: start,
+        lte: nowMs,
+      })
+    );
+  });
+
   it('filters by serviceName when provided', async () => {
     const client = createMockAlertsClient();
 

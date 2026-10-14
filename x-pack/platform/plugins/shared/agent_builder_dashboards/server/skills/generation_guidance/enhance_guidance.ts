@@ -6,6 +6,14 @@
  */
 
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
+import type { ReferencedContent } from '@kbn/agent-builder-server/skills/type_definition';
+
+/**
+ * Agent-visible path of the enhance workflow. Matches the skill mount
+ * (`/skills`), base path (`skills/platform/dashboard`), skill name, and this
+ * reference's `relativePath` of `.`.
+ */
+export const ENHANCE_GUIDANCE_PATH = '/skills/platform/dashboard/dashboards/enhance.md';
 
 /** Assesses an existing dashboard, asks which mode to apply, then coordinates layout and chart enhancement. */
 export const enhanceGuidancePrompt = `## Improving an Existing Dashboard (Enhance)
@@ -25,3 +33,9 @@ There are two modes. **Appearance mode** keeps every chart panel, query, control
    - **Content mode.** Do everything appearance mode does, and in the same batched call apply the analytical changes from your assessment. Keep panels that make sense and give them the enhancement edit. Remove panels that meet the removal criteria with \`remove_panels\`, replace non-ES|QL panels with new ES|QL Lens panels without asking again, and change a surviving panel's query by omitting \`preserveESQL\` and describing the change alongside the enhancement request. Add the panels the dashboard is missing with \`add_panels\`, following the new-dashboard rules for additions: chart type guidance, at least one primary time-series XY overview when none exists, and 3 to 5 \`options_list_control\` controls on useful categorical fields unless the dashboard is already scoped to a single entity. Keep the existing time range. Arrange sections and layout for the final panel set.
 6. **Verify.** Read the updated attachment using the returned attachment ID and version. In appearance mode, compare original and resulting chart panel IDs and each panel's queries and data sources, and confirm that only requested analytical changes occurred. In content mode, confirm the resulting panel set matches what you intended: removed panels are gone, replacements and additions exist with sensible queries against the assessed indices, and surviving panels kept their queries unless you changed them deliberately. In both modes, check that the dashboard title, description, section names, and markdown describe the same measures as the final charts, and inspect section membership, sizes, and positions. Address discrepancies and reported failures before declaring success. Chart-specific settings are the chart author's responsibility.
 7. **Report.** Briefly summarize changes and anything that failed or could not be enhanced. In content mode, list the panels you added, changed, replaced, and removed, and why. Do not claim the updated dashboard was visually checked.`;
+
+export const enhanceGuidanceReference: ReferencedContent = {
+  name: 'enhance',
+  relativePath: '.',
+  content: enhanceGuidancePrompt,
+};

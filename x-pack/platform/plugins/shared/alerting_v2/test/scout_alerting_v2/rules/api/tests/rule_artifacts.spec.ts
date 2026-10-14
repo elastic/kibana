@@ -341,6 +341,19 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
     expect(response.body.message).toContain('must be unique within the rule');
   });
 
+  apiTest('validation: rejects an empty artifacts list', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body: {
+        ...buildCreateRuleData({ metadata: { name: 'create-empty-artifacts' } }),
+        artifacts: [],
+      },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
   apiTest(
     'validation: an unregistered type is never rejected, even with large data',
     async ({ apiClient }) => {

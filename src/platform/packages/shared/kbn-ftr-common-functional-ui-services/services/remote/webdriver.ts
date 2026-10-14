@@ -129,6 +129,13 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     'enable-unsafe-swiftshader'
   );
 
+  if (process.env.USE_CITADEL_PROXY === 'true') {
+    // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
+    // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
+    // the FTR process and the rest of the job remain proxied.
+    options.addArguments('no-proxy-server');
+  }
+
   if (process.platform === 'linux') {
     // The /dev/shm partition is too small in certain VM environments, causing
     // Chrome to fail or crash. Use this flag to work-around this issue

@@ -14,12 +14,12 @@ import { useQueriesApi } from '../../../hooks/use_queries_api';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 
 interface UseStreamKnowledgeIndicatorsBulkDeleteParams {
-  streamName: string;
+  sourceId: string;
   onSuccess?: () => void;
 }
 
 export function useStreamKnowledgeIndicatorsBulkDelete({
-  streamName,
+  sourceId,
   onSuccess,
 }: UseStreamKnowledgeIndicatorsBulkDeleteParams) {
   const {
@@ -28,7 +28,7 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { deleteFeaturesInBulk } = useStreamFeaturesApi(streamName);
+  const { deleteFeaturesInBulk } = useStreamFeaturesApi(sourceId);
   const { deleteQueriesInBulk } = useQueriesApi();
 
   const mutation = useMutation<void, Error, KnowledgeIndicator[]>({
@@ -68,7 +68,7 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: ['features', streamName] }),
+        queryClient.invalidateQueries({ queryKey: ['features', sourceId] }),
         queryClient.invalidateQueries({ queryKey: ['features', 'all'] }),
       ]);
     },
