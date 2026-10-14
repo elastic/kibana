@@ -458,6 +458,24 @@ describe('NightshiftPage', () => {
       expect(screen.queryByTestId('nightshiftInvestigationsPrimaryAction')).not.toBeInTheDocument();
     });
 
+    it.each([
+      ['/sources', 'sourcesPageStub'],
+      ['/sources/new', 'sourcesPageStub'],
+      ['/knowledge/knowledge_indicators', 'knowledgePageStub'],
+      ['/settings/detections', 'settingsPageStub'],
+    ])('keeps %s accessible while onboarding is active', async (path, pageTestSubject) => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        dismiss: jest.fn(),
+      });
+      renderPage(path);
+
+      expect(await screen.findByTestId(pageTestSubject)).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftOnboardingStub')).not.toBeInTheDocument();
+    });
+
     it('forces onboarding with ?onboarding=1', async () => {
       withInvestigationsClient();
       renderPage('/?onboarding=1');
