@@ -76,6 +76,10 @@ describe('detectChangePointsTool', () => {
     (interpolateEsqlQuery as jest.Mock).mockImplementation((q: string) => q);
   });
 
+  it('is excluded from MCP because it reads and writes conversation attachments', () => {
+    expect(detectChangePointsTool().excludeFromMcp).toBe(true);
+  });
+
   describe('max_charts schema validation', () => {
     const tool = detectChangePointsTool();
 

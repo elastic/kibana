@@ -93,6 +93,7 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
     },
     schema: detectChangePointsSchema,
     tags: [],
+    excludeFromMcp: true,
     handler: async (
       {
         query,
