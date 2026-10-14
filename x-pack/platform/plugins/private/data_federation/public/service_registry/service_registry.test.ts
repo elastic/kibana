@@ -117,12 +117,4 @@ describe('service definitions', () => {
       expect(options.every(({ description }) => description.length > 0)).toBe(true);
     }
   });
-
-  it('flags only anonymous as having no auth fields', () => {
-    for (const options of allAuthOptions) {
-      expect(
-        options.filter(({ hasAuthFields }) => !hasAuthFields).map(({ value }) => value)
-      ).toEqual(['anonymous']);
-    }
-  });
 });

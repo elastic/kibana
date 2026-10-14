@@ -14,7 +14,6 @@ export interface AuthOption {
   text: string;
   description: string;
   recommended?: boolean;
-  hasAuthFields: boolean;
 }
 
 export function federatedIdentitySourceType(dataSourceType: DataSourceType): AuthOption {
@@ -23,7 +22,6 @@ export function federatedIdentitySourceType(dataSourceType: DataSourceType): Aut
     text: authenticationStrings.federatedIdentityLabel,
     description: authenticationStrings.federatedIdentityDescription[dataSourceType],
     recommended: true,
-    hasAuthFields: true,
   };
 }
 
@@ -32,7 +30,6 @@ export function accessAndSecretKeysSourceType(dataSourceType: DataSourceType): A
     value: 'access_and_secret_keys',
     text: authenticationStrings.accessAndSecretKeysLabel,
     description: authenticationStrings.storedCredentialsDescription[dataSourceType],
-    hasAuthFields: true,
   };
 }
 
@@ -41,7 +38,6 @@ export function anonymousSourceType(dataSourceType: DataSourceType): AuthOption 
     value: 'anonymous',
     text: authenticationStrings.anonymousLabel,
     description: authenticationStrings.anonymousDescription[dataSourceType],
-    hasAuthFields: false,
   };
 }
 
@@ -49,7 +45,6 @@ export const azureCredentialsSourceType: AuthOption = {
   value: 'credentials',
   text: authenticationStrings.azureCredentialsLabel,
   description: authenticationStrings.storedCredentialsDescription.azure,
-  hasAuthFields: true,
 };
 
 export const azureAuthOptions: AuthOption[] = [
