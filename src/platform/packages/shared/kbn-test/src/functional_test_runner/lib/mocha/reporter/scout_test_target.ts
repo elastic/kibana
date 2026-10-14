@@ -27,7 +27,7 @@ export const SERVERLESS_DOMAINS: Readonly<
   'security:complete': 'security_complete',
   'security:essentials': 'security_essentials',
   'security:search_ai_lake': 'security_ease',
-  vectordb: 'vectordb',
+  workplaceai: 'workplaceai',
 };
 
 /**
