@@ -240,7 +240,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         });
         tab.uiState = {
           ...tab.uiState,
-          visorMode: recentlyClosedTabToRestore.uiState.visorMode,
+          visor: recentlyClosedTabToRestore.uiState.visor,
         };
       } else if (!('appState' in item)) {
         // the new tab is a fresh one

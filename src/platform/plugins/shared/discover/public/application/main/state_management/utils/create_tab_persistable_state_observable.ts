@@ -10,13 +10,14 @@
 import { isEqual } from 'lodash';
 import { distinctUntilChanged, map, type Observable, skip } from 'rxjs';
 import { type DiscoverInternalState, selectTab, type TabState } from '../redux';
+import type { TabStateInLocalStorage } from '../tabs_storage_manager';
 import { isEqualState } from './state_comparators';
 
 export type TabPersistableState = Pick<
   TabState,
   'appState' | 'globalState' | 'attributes' | 'profileState'
 > &
-  Pick<TabState['uiState'], 'visorMode'>;
+  Pick<TabStateInLocalStorage, 'visorMode'>;
 
 export const createTabPersistableStateObservable = ({
   tabId,
@@ -35,7 +36,7 @@ export const createTabPersistableStateObservable = ({
       globalState: tabState.globalState,
       attributes: tabState.attributes,
       profileState: tabState.profileState,
-      visorMode: tabState.uiState.visorMode,
+      visorMode: tabState.uiState.visor?.visorMode,
     };
   };
 

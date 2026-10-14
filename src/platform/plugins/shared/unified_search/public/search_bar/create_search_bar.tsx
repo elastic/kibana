@@ -315,8 +315,8 @@ export function createSearchBar({
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
-            visorMode={props.visorMode}
-            onVisorModeChange={props.onVisorModeChange}
+            visorInitialState={props.visorInitialState}
+            onVisorInitialStateChange={props.onVisorInitialStateChange}
             hasDirtyState={props.hasDirtyState}
             esqlVariablesConfig={props.esqlVariablesConfig}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
