@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
@@ -168,20 +167,11 @@ const buildShowEntityCallback = (
  *
  * Exported for reuse by `useLegacyFlyoutUrlInterop`.
  */
-export interface OpenDescriptorAsStartOptions {
-  /**
-   * Forwarded to an attack, document, or rule main flyout.
-   * Other kinds ignore it, and callers that omit it keep the persisted Security width.
-   */
-  originFlyoutSize?: EuiFlyoutProps['size'];
-}
-
 export const openDescriptorAsStart = (
   descriptor: FlyoutDescriptor,
   ctx: RestoreContext,
   api: FlyoutApi,
-  originOverride?: FlyoutOrigin,
-  options?: OpenDescriptorAsStartOptions
+  originOverride?: FlyoutOrigin
 ): void => {
   const { kind } = descriptor;
   const origin = originOverride ?? descriptor.origin;
@@ -195,9 +185,6 @@ export const openDescriptorAsStart = (
         documentId,
         indexName,
         ...originParams,
-        ...(options?.originFlyoutSize !== undefined
-          ? { originFlyoutSize: options.originFlyoutSize }
-          : {}),
       });
       break;
     }
@@ -207,9 +194,6 @@ export const openDescriptorAsStart = (
         documentId,
         indexName,
         ...originParams,
-        ...(options?.originFlyoutSize !== undefined
-          ? { originFlyoutSize: options.originFlyoutSize }
-          : {}),
       });
       break;
     }
@@ -370,9 +354,6 @@ export const openDescriptorAsStart = (
         attackId,
         indexName,
         ...originParams,
-        ...(options?.originFlyoutSize !== undefined
-          ? { originFlyoutSize: options.originFlyoutSize }
-          : {}),
       });
       break;
     }
@@ -588,9 +569,6 @@ export const openDescriptorAsStart = (
       api.openRuleFlyout({
         ruleId,
         ...originParams,
-        ...(options?.originFlyoutSize !== undefined
-          ? { originFlyoutSize: options.originFlyoutSize }
-          : {}),
       });
       break;
     }
@@ -661,18 +639,18 @@ export const openDescriptorAsChild = (
       break;
     }
     case 'host': {
-      const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, ...originParams });
+      const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
+      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'user': {
-      const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId, ...originParams });
+      const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
+      api.openUserFlyoutAsChild({ userName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'service': {
-      const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, ...originParams });
+      const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
+      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'genericEntity': {

@@ -113,7 +113,7 @@ export const useHostDetails = ({
     // resolution-group view the target's and aliases' filters are OR-ed together.
     const recordFilter = combineEntityGroupFilters(
       getEntityGroupRecords(entityRecord, aliasRecords),
-      (record) => euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord('host', record)
+      (record) => euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(euidApi.getBuiltInEntityDefinition('host'), record)
     );
     if (recordFilter) {
       return recordFilter;
@@ -122,7 +122,7 @@ export const useHostDetails = ({
     if (hostName) {
       return { term: { 'host.name': hostName } };
     }
-  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, aliasRecords, euidApi?.euid]);
+  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, aliasRecords, euidApi]);
 
   const {
     loading,

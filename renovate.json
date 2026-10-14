@@ -1705,9 +1705,9 @@
     {
       "groupName": "zod",
       "matchDepNames": ["zod"],
-      "reviewers": ["team:security-detection-engineering", "team:security-threat-hunting"],
+      "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Detection Engineering", "Team:Threat Hunting"],
+      "addLabels": ["Team:Core", "backport:skip"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1968,7 +1968,6 @@
         "@types/chromedriver",
         "@types/selenium-webdriver",
         "geckodriver",
-        "ms-chromium-edge-driver",
         "selenium-webdriver"
       ],
       "reviewers": ["team:kibana-operations"],

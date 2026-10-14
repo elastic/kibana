@@ -64,13 +64,23 @@ const resolutionScoreFilterFor = (entityId: string) =>
 
 const resolutionCall = () => mockUseRiskScore.mock.calls[1][0];
 
+/** Mirrors react-query: a disabled query yields no data. */
+const mockResolutionGroupData = (data: unknown) =>
+  mockUseResolutionGroup.mockImplementation(
+    (_entityId: string, options?: { enabled?: boolean }) => ({
+      data: options?.enabled === false ? undefined : data,
+    })
+  );
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseRiskScore.mockReturnValue(stubRiskScoreState);
   mockUseNewEntityAnalyticsPage.mockReturnValue(false);
   // group_size > 1 activates the resolution branch so both useRiskScore calls fire
-  mockUseResolutionGroup.mockReturnValue({
-    data: { target: { 'user.name': 'target-user' }, aliases: [], group_size: 2 },
+  mockResolutionGroupData({
+    target: { 'user.name': 'target-user' },
+    aliases: [],
+    group_size: 2,
   });
 });
 
@@ -110,9 +120,7 @@ describe('useEntityRiskScores', () => {
     });
 
     it('skips the resolution score when the entity is not part of a group', () => {
-      mockUseResolutionGroup.mockReturnValue({
-        data: { target: { 'user.name': 'user-1' }, aliases: [], group_size: 1 },
-      });
+      mockResolutionGroupData({ target: { 'user.name': 'user-1' }, aliases: [], group_size: 1 });
 
       const { result } = renderHook(() => useEntityRiskScores(EntityType.user, 'user-1'));
 
@@ -122,9 +130,9 @@ describe('useEntityRiskScores', () => {
       expect(result.current.resolution.hasResolutionGroup).toBe(false);
     });
 
-    it('ignores isGroupView', () => {
+    it('keeps the legacy group lookup enabled (callers never render a group view with the flag off)', () => {
       const { result } = renderHook(() =>
-        useEntityRiskScores(EntityType.user, 'user-1', { isGroupView: true })
+        useEntityRiskScores(EntityType.user, 'user-1', { isGroupView: false })
       );
 
       expect(mockUseResolutionGroup).toHaveBeenCalledWith(

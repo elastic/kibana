@@ -111,7 +111,7 @@ export const useObservedUserDetails = ({
     // resolution-group view the target's and aliases' filters are OR-ed together.
     const recordFilter = combineEntityGroupFilters(
       getEntityGroupRecords(entityRecord, aliasRecords),
-      (record) => euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord('user', record)
+      (record) => euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(euidApi.getBuiltInEntityDefinition('user'), record)
     );
     if (recordFilter) {
       return recordFilter;
@@ -120,7 +120,7 @@ export const useObservedUserDetails = ({
     if (userName) {
       return { term: { 'user.name': userName } };
     }
-  }, [entityStoreV2Enabled, shouldSkip, userName, entityRecord, aliasRecords, euidApi?.euid]);
+  }, [entityStoreV2Enabled, shouldSkip, userName, entityRecord, aliasRecords, euidApi]);
 
   const {
     loading,

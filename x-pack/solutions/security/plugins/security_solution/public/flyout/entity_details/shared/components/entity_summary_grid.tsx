@@ -61,18 +61,10 @@ export const EntitySummaryGrid = memo(
     const entityId = entityRecord.entity?.id;
     const isGroupView = isEntityGroupView(aliasRecords);
 
-    const groupRecords = useMemo(
-      () => (isGroupView ? [entityRecord, ...aliasRecords] : [entityRecord]),
-      [isGroupView, entityRecord, aliasRecords]
-    );
-
-    const dataSources = useMemo(() => getUnionEntitySources(groupRecords), [groupRecords]);
-    const watchlistIds = useMemo(() => getUnionWatchlistIds(groupRecords), [groupRecords]);
-
-    const displayedCriticality = useMemo(
-      () => (isGroupView ? getMaxCriticality(groupRecords) : criticalityLevel),
-      [isGroupView, groupRecords, criticalityLevel]
-    );
+    const groupRecords = isGroupView ? [entityRecord, ...aliasRecords] : [entityRecord];
+    const dataSources = getUnionEntitySources(groupRecords);
+    const watchlistIds = getUnionWatchlistIds(groupRecords);
+    const displayedCriticality = isGroupView ? getMaxCriticality(groupRecords) : criticalityLevel;
 
     const criticalitySaveHandler = isGroupView ? undefined : onCriticalitySave;
 
