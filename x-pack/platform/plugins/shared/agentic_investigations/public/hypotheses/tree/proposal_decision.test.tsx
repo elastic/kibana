@@ -59,10 +59,7 @@ const setup = ({ canDecide = true, isMissing = false } = {}) => {
     <EuiProvider>
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
-          <ProposalDecision
-            investigationId="conv-1"
-            proposalId="p-1"
-          />
+          <ProposalDecision investigationId="conv-1" proposalId="p-1" />
         </QueryClientProvider>
       </I18nProvider>
     </EuiProvider>
