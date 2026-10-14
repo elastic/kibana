@@ -271,6 +271,42 @@ describe('bulkEnableRules', () => {
     });
   });
 
+  test('does not invalidate the UIAM key of a rule that fails before it is queued for the write', async () => {
+    const attributes = {
+      ...disabledRule1.attributes,
+      apiKey: null,
+      apiKeyCreatedByUser: false,
+      uiamApiKey: Buffer.from('uiam-id:essu_key').toString('base64'),
+    };
+    // Building the updated attributes reads `lastRun`, after the new key set is minted.
+    Object.defineProperty(attributes, 'lastRun', {
+      enumerable: true,
+      get: () => {
+        throw new Error('Failed to build the rule attributes');
+      },
+    });
+    const disabledUiamOnlyRule = {
+      ...disabledRule1,
+      attributes,
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [disabledUiamOnlyRule] });
+    mockUnsecuredSavedObjectFind(1);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
+
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalled();
+    expect(result.errors).toEqual([
+      expect.objectContaining({ message: 'Failed to build the rule attributes' }),
+    ]);
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+  });
+
   test('does not invalidate the UIAM key of a rule that failed to enable', async () => {
     const disabledUiamOnlyRule: SavedObject<RawRule> = {
       ...disabledRule1,

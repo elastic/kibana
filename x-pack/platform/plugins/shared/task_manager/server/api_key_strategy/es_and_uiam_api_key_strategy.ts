@@ -218,6 +218,9 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     const uiamKeyByTaskIdMap = new Map<string, UiamApiKeyResult>();
 
     if (!uiam) {
+      if (required) {
+        throw new Error('Failed to create UIAM API key for task: UIAM is not enabled');
+      }
       return uiamKeyByTaskIdMap;
     }
 
@@ -238,6 +241,11 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     }
 
     if (!isUiamRequest) {
+      if (required) {
+        throw new Error(
+          'Failed to create UIAM API key for task: Invalid or missing UIAM credentials'
+        );
+      }
       this.logger.debug(
         'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
         { tags: UIAM_LOGS_CREDENTIALS_TAGS }

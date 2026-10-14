@@ -262,16 +262,6 @@ const bulkEnableRulesWithOCC = async (
                 })
               : undefined;
 
-            // A rule with only a UIAM key, such as one created by a UIAM service account, no
-            // longer uses that key once it gets a new key set. Invalidate it after the write.
-            if (
-              newApiKeyAttributes &&
-              rule.attributes.uiamApiKey &&
-              !rule.attributes.apiKeyCreatedByUser
-            ) {
-              replacedUiamApiKeys.set(rule.id, rule.attributes.uiamApiKey);
-            }
-
             const updatedAttributes = updateMetaAttributes(context, {
               ...(newApiKeyAttributes
                 ? {
@@ -326,6 +316,18 @@ const bulkEnableRulesWithOCC = async (
               ...rule,
               attributes: updatedAttributes,
             });
+
+            // A rule with only a UIAM key, such as one created by a UIAM service account, no
+            // longer uses that key once it gets a new key set. Invalidate it after the write.
+            // Recorded only once the rule is queued for the write, so a rule that fails before
+            // then keeps the key it still holds.
+            if (
+              newApiKeyAttributes &&
+              rule.attributes.uiamApiKey &&
+              !rule.attributes.apiKeyCreatedByUser
+            ) {
+              replacedUiamApiKeys.set(rule.id, rule.attributes.uiamApiKey);
+            }
 
             context.auditLogger?.log(
               ruleAuditEvent({

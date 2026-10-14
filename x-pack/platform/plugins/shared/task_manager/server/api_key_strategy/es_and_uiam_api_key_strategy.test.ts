@@ -453,6 +453,32 @@ describe('EsAndUiamApiKeyStrategy', () => {
         expect(createApiKeyMock).not.toHaveBeenCalled();
       });
 
+      test('names the cause when UIAM is not enabled', async () => {
+        const { strategy, coreStart } = setUp(ApiKeyType.ES);
+        coreStart.security.authc.apiKeys.uiam = null;
+
+        await expect(
+          strategy.grantApiKeys(tasks, serviceAccountRequest(), coreStart.security)
+        ).rejects.toThrow('Failed to create UIAM API key for task: UIAM is not enabled');
+        expect(createApiKeyMock).not.toHaveBeenCalled();
+      });
+
+      test('names the cause when the request has no UIAM credential', async () => {
+        const { strategy, coreStart, mockUiam } = setUp(ApiKeyType.ES);
+
+        await expect(
+          strategy.grantApiKeys(
+            tasks,
+            httpServerMock.createKibanaRequest({ headers: { authorization: 'Bearer not-uiam' } }),
+            coreStart.security
+          )
+        ).rejects.toThrow(
+          'Failed to create UIAM API key for task: Invalid or missing UIAM credentials'
+        );
+        expect(mockUiam.grant).not.toHaveBeenCalled();
+        expect(createApiKeyMock).not.toHaveBeenCalled();
+      });
+
       test('keeps the ES path when the caller asks for an ES key only', async () => {
         const { strategy, coreStart, mockUiam } = setUp(ApiKeyType.ES);
         createApiKeyMock.mockResolvedValueOnce(
