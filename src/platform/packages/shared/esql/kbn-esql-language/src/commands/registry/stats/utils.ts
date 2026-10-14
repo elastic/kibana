@@ -364,11 +364,13 @@ const getCommandAtCursor = (query: string, cursorPosition: number): ESQLCommand 
     return undefined;
   }
 
+  // Try parsing the query as is.
   const fromFullQuery = statsWithByAtCursor(Parser.parse(query).root, cursorPosition);
   if (fromFullQuery) {
     return fromFullQuery;
   }
 
+  // If the query errored when parsed, add an editor marker and close the brackets left open at the cursor.
   const beforeCursor = `${query.slice(0, cursorPosition)} ${EDITOR_MARKER} `;
   const corrected = `${beforeCursor}${getBracketsToClose(beforeCursor).join('')}${afterCursor}`;
   const root = removeAutocompleteMarkers(Parser.parse(corrected).root);
@@ -378,7 +380,7 @@ const getCommandAtCursor = (query: string, cursorPosition: number): ESQLCommand 
 /**
  * Returns the context and callbacks used to autocomplete the aggregation expressions and the
  * per-aggregation WHERE clause: the columns defined in the BY clause are overlaid so they
- * resolve correctly and are offered as suggestions. Leaves the BY clause scope untouched.
+ * resolve correctly and are offered as suggestions.
  */
 export const getAggregationScope = (
   fullQuery: string,

@@ -130,15 +130,20 @@ describe('STATS Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
-  const suggest = async (query: string, context = mockContext, offset?: number) => {
-    const cursorPosition = offset ?? query.length;
-    const { innerText, root, command, tokens } = findAutocompleteAstPosition(query, cursorPosition);
+  // `/` marks the cursor. Queries without it are completed at the end.
+  const caret = '^';
+  const suggest = async (query: string, context = mockContext) => {
+    const caretPosition = query.indexOf(caret);
+    const hasCaret = caretPosition >= 0;
+    const cursorPosition = hasCaret ? caretPosition : query.length;
+    const text = hasCaret ? query.slice(0, caretPosition) + query.slice(caretPosition + 1) : query;
+    const { innerText, root, command, tokens } = findAutocompleteAstPosition(text, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
     const contextWithRoot = { ...context, rootAst: root };
     const suggestions = await autocomplete(
-      query,
+      text,
       command,
       mockCallbacks,
       contextWithRoot,
@@ -1048,37 +1053,28 @@ describe('STATS Autocomplete', () => {
     });
 
     describe('columns defined in the BY clause', () => {
-      const suggestBefore = async (prefix: string, suffix: string) =>
-        (await suggest(prefix + suffix, mockContext, prefix.length)).map(({ label }) => label);
-
       it('suggests a BY-defined column inside an aggregation function argument', async () => {
-        const labels = await suggestBefore('FROM a | STATS AVG(', ') BY abc = doubleField');
+        const suggestions = await suggest('FROM a | STATS AVG(^) BY abc = doubleField');
 
-        expect(labels).toContain('abc');
+        expect(suggestions.map(({ label }) => label)).toContain('abc');
       });
 
       it('suggests a BY-defined column inside an unclosed aggregation function argument', async () => {
-        const labels = await suggestBefore('FROM a | STATS AVG(', ' BY abc = doubleField');
+        const suggestions = await suggest('FROM a | STATS AVG(^ BY abc = doubleField');
 
-        expect(labels).toContain('abc');
+        expect(suggestions.map(({ label }) => label)).toContain('abc');
       });
 
       it('suggests a BY-defined column in the per-aggregation WHERE clause', async () => {
-        const labels = await suggestBefore(
-          'FROM a | STATS COUNT() WHERE ',
-          'BY abc = keywordField'
-        );
+        const suggestions = await suggest('FROM a | STATS COUNT() WHERE ^BY abc = keywordField');
 
-        expect(labels).toContain('abc');
+        expect(suggestions.map(({ label }) => label)).toContain('abc');
       });
 
       it('does not suggest a BY-defined column within the BY clause itself', async () => {
-        const labels = await suggestBefore(
-          'FROM a | STATS COUNT() BY abc = keywordField, def = ',
-          ''
-        );
+        const suggestions = await suggest('FROM a | STATS COUNT() BY abc = keywordField, def = ^');
 
-        expect(labels).not.toContain('abc');
+        expect(suggestions.map(({ label }) => label)).not.toContain('abc');
       });
     });
   });
