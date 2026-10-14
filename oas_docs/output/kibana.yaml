@@ -154556,9 +154556,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -154566,6 +154566,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         maintenance_windows:
@@ -154595,10 +154597,12 @@ components:
         params:
           anyOf:
             - maxLength: 1000000
+              title: JSON string
               type: string
             - additionalProperties:
                 maxLength: 1000000
                 type: string
+              title: Key-value object
               type: object
           description: The monitor parameters, as a JSON string or an object.
         playwright_options:
@@ -154616,9 +154620,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -154626,6 +154630,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         project_id:
@@ -154639,9 +154645,9 @@ components:
           anyOf:
             - maximum: 9007199254740991
               minimum: -9007199254740991
+              title: Minutes
               type: number
             - additionalProperties: false
-              type: object
               properties:
                 number:
                   anyOf:
@@ -154656,6 +154662,8 @@ components:
               required:
                 - number
                 - unit
+              title: Number and unit
+              type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
         service:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -154697,18 +154705,22 @@ components:
         tags:
           anyOf:
             - maxLength: 4096
+              title: Single value
               type: string
             - items:
                 maxLength: 4096
                 type: string
               maxItems: 1000
+              title: Multiple values
               type: array
           description: An array of tags.
         timeout:
           anyOf:
             - maxLength: 32
+              title: Seconds as string
               type: string
-            - type: number
+            - title: Seconds
+              type: number
           description: |-
             The monitor timeout in seconds. The monitor fails if it doesn't complete within this time. Defaults to `16`.
 
@@ -155685,9 +155697,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -155695,6 +155707,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         maintenance_windows:
@@ -155724,10 +155738,12 @@ components:
         params:
           anyOf:
             - maxLength: 1000000
+              title: JSON string
               type: string
             - additionalProperties:
                 maxLength: 1000000
                 type: string
+              title: Key-value object
               type: object
           description: The monitor parameters, as a JSON string or an object.
         playwright_options:
@@ -155745,9 +155761,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -155755,6 +155771,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         project_id:
@@ -155768,9 +155786,9 @@ components:
           anyOf:
             - maximum: 9007199254740991
               minimum: -9007199254740991
+              title: Minutes
               type: number
             - additionalProperties: false
-              type: object
               properties:
                 number:
                   anyOf:
@@ -155785,6 +155803,8 @@ components:
               required:
                 - number
                 - unit
+              title: Number and unit
+              type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
         screenshots:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -155829,11 +155849,13 @@ components:
         tags:
           anyOf:
             - maxLength: 4096
+              title: Single value
               type: string
             - items:
                 maxLength: 4096
                 type: string
               maxItems: 1000
+              title: Multiple values
               type: array
           description: An array of tags.
         throttling:
@@ -155841,8 +155863,10 @@ components:
         timeout:
           anyOf:
             - maxLength: 32
+              title: Seconds as string
               type: string
-            - type: number
+            - title: Seconds
+              type: number
           description: |-
             The monitor timeout in seconds. The monitor fails if it doesn't complete within this time. Defaults to `16`.
 
@@ -159131,9 +159155,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -159141,6 +159165,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         maintenance_windows:
@@ -159156,8 +159182,10 @@ components:
         max_redirects:
           anyOf:
             - maxLength: 32
+              title: Count as string
               type: string
-            - type: number
+            - title: Count
+              type: number
           description: The maximum number of redirects to follow. Defaults to `0`.
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
@@ -159184,10 +159212,12 @@ components:
         params:
           anyOf:
             - maxLength: 1000000
+              title: JSON string
               type: string
             - additionalProperties:
                 maxLength: 1000000
                 type: string
+              title: Key-value object
               type: object
           description: The monitor parameters, as a JSON string or an object.
         password:
@@ -159208,9 +159238,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -159218,6 +159248,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         project_id:
@@ -159249,9 +159281,9 @@ components:
           anyOf:
             - maximum: 9007199254740991
               minimum: -9007199254740991
+              title: Minutes
               type: number
             - additionalProperties: false
-              type: object
               properties:
                 number:
                   anyOf:
@@ -159266,6 +159298,8 @@ components:
               required:
                 - number
                 - unit
+              title: Number and unit
+              type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
         screenshots:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -159310,11 +159344,13 @@ components:
         tags:
           anyOf:
             - maxLength: 4096
+              title: Single value
               type: string
             - items:
                 maxLength: 4096
                 type: string
               maxItems: 1000
+              title: Multiple values
               type: array
           description: An array of tags.
         throttling:
@@ -159322,8 +159358,10 @@ components:
         timeout:
           anyOf:
             - maxLength: 32
+              title: Seconds as string
               type: string
-            - type: number
+            - title: Seconds
+              type: number
           description: |-
             The monitor timeout in seconds. The monitor fails if it doesn't complete within this time. Defaults to `16`.
 
@@ -161793,9 +161831,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -161803,6 +161841,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         maintenance_windows:
@@ -161818,8 +161858,10 @@ components:
         max_redirects:
           anyOf:
             - maxLength: 32
+              title: Count as string
               type: string
-            - type: number
+            - title: Count
+              type: number
           description: The maximum number of redirects to follow. Defaults to `0`.
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
@@ -161846,10 +161888,12 @@ components:
         params:
           anyOf:
             - maxLength: 1000000
+              title: JSON string
               type: string
             - additionalProperties:
                 maxLength: 1000000
                 type: string
+              title: Key-value object
               type: object
           description: The monitor parameters, as a JSON string or an object.
         password:
@@ -161865,9 +161909,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -161875,6 +161919,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         project_id:
@@ -161903,9 +161949,9 @@ components:
           anyOf:
             - maximum: 9007199254740991
               minimum: -9007199254740991
+              title: Minutes
               type: number
             - additionalProperties: false
-              type: object
               properties:
                 number:
                   anyOf:
@@ -161920,6 +161966,8 @@ components:
               required:
                 - number
                 - unit
+              title: Number and unit
+              type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
         service:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -161950,18 +161998,22 @@ components:
         tags:
           anyOf:
             - maxLength: 4096
+              title: Single value
               type: string
             - items:
                 maxLength: 4096
                 type: string
               maxItems: 1000
+              title: Multiple values
               type: array
           description: An array of tags.
         timeout:
           anyOf:
             - maxLength: 32
+              title: Seconds as string
               type: string
-            - type: number
+            - title: Seconds
+              type: number
           description: |-
             The monitor timeout in seconds. The monitor fails if it doesn't complete within this time. Defaults to `16`.
 
@@ -162068,9 +162120,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -162078,6 +162130,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         maintenance_windows:
@@ -162113,10 +162167,12 @@ components:
         params:
           anyOf:
             - maxLength: 1000000
+              title: JSON string
               type: string
             - additionalProperties:
                 maxLength: 1000000
                 type: string
+              title: Key-value object
               type: object
           description: The monitor parameters, as a JSON string or an object.
         private_locations:
@@ -162129,9 +162185,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -162139,6 +162195,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         project_id:
@@ -162152,9 +162210,9 @@ components:
           anyOf:
             - maximum: 9007199254740991
               minimum: -9007199254740991
+              title: Minutes
               type: number
             - additionalProperties: false
-              type: object
               properties:
                 number:
                   anyOf:
@@ -162169,6 +162227,8 @@ components:
               required:
                 - number
                 - unit
+              title: Number and unit
+              type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
         service:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -162184,18 +162244,22 @@ components:
         tags:
           anyOf:
             - maxLength: 4096
+              title: Single value
               type: string
             - items:
                 maxLength: 4096
                 type: string
               maxItems: 1000
+              title: Multiple values
               type: array
           description: An array of tags.
         timeout:
           anyOf:
             - maxLength: 32
+              title: Seconds as string
               type: string
-            - type: number
+            - title: Seconds
+              type: number
           description: |-
             The monitor timeout in seconds. The monitor fails if it doesn't complete within this time. Defaults to `16`.
 
@@ -178409,21 +178473,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicStreamUpsertRequest'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_QueryStreamUpsertRequest'
     Kibana_HTTP_APIs_syntheticsJsonValue:
-      anyOf:
-        - maxLength: 1000000
-          type: string
-        - maximum: 9007199254740991
-          minimum: -9007199254740991
-          type: number
-        - type: boolean
-        - items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-          maxItems: 1000
-          type: array
-        - additionalProperties:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
-          type: object
-      nullable: true
+      description: Any JSON value.
     Kibana_HTTP_APIs_tagcloudLibItemNoESQL:
       additionalProperties: false
       properties:
@@ -178596,9 +178646,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -178606,6 +178656,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         maintenance_windows:
@@ -178641,10 +178693,12 @@ components:
         params:
           anyOf:
             - maxLength: 1000000
+              title: JSON string
               type: string
             - additionalProperties:
                 maxLength: 1000000
                 type: string
+              title: Key-value object
               type: object
           description: The monitor parameters, as a JSON string or an object.
         private_locations:
@@ -178657,9 +178711,9 @@ components:
             anyOf:
               - maxLength: 1024
                 minLength: 1
+                title: Location ID
                 type: string
               - additionalProperties: {}
-                type: object
                 properties:
                   id:
                     maxLength: 1024
@@ -178667,6 +178721,8 @@ components:
                     type: string
                 required:
                   - id
+                title: Location object
+                type: object
           maxItems: 1000
           type: array
         project_id:
@@ -178686,9 +178742,9 @@ components:
           anyOf:
             - maximum: 9007199254740991
               minimum: -9007199254740991
+              title: Minutes
               type: number
             - additionalProperties: false
-              type: object
               properties:
                 number:
                   anyOf:
@@ -178703,6 +178759,8 @@ components:
               required:
                 - number
                 - unit
+              title: Number and unit
+              type: object
           description: The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.
         service:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
@@ -178733,18 +178791,22 @@ components:
         tags:
           anyOf:
             - maxLength: 4096
+              title: Single value
               type: string
             - items:
                 maxLength: 4096
                 type: string
               maxItems: 1000
+              title: Multiple values
               type: array
           description: An array of tags.
         timeout:
           anyOf:
             - maxLength: 32
+              title: Seconds as string
               type: string
-            - type: number
+            - title: Seconds
+              type: number
           description: |-
             The monitor timeout in seconds. The monitor fails if it doesn't complete within this time. Defaults to `16`.
 
