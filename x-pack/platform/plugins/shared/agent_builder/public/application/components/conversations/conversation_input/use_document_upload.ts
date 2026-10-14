@@ -12,7 +12,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import { rejectIfTooManyPdfs, rejectInvalidPdf, uploadPdf } from './upload_pdf';
+import { rejectIfTooManyPdfs, rejectInvalidPdf, uploadPdf } from './upload_document';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';

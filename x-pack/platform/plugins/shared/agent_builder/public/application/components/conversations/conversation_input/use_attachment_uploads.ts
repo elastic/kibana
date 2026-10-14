@@ -14,8 +14,8 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
 import { useImageUpload } from './use_image_upload';
-import { usePdfUpload } from './use_pdf_upload';
-import { useIsPdfUploadAvailable } from '../../../hooks/use_is_pdf_upload_available';
+import { usePdfUpload } from './use_document_upload';
+import { useIsPdfUploadAvailable } from '../../../hooks/use_supported_document_types';
 
 export interface UseAttachmentUploadsParams {
   addErrorToast: (input: ToastInput) => void;

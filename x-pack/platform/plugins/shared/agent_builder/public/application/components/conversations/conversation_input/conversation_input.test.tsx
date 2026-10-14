@@ -28,8 +28,8 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
-import { usePdfUpload } from './use_pdf_upload';
-import { useIsPdfUploadAvailable } from '../../../hooks/use_is_pdf_upload_available';
+import { usePdfUpload } from './use_document_upload';
+import { useIsPdfUploadAvailable } from '../../../hooks/use_supported_document_types';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useInputDraft } from '../../../hooks/use_input_draft';
@@ -81,8 +81,8 @@ jest.mock('./use_image_upload', () => {
     }),
   };
 });
-jest.mock('./use_pdf_upload', () => ({ usePdfUpload: jest.fn() }));
-jest.mock('../../../hooks/use_is_pdf_upload_available', () => ({
+jest.mock('./use_document_upload', () => ({ usePdfUpload: jest.fn() }));
+jest.mock('../../../hooks/use_supported_document_types', () => ({
   useIsPdfUploadAvailable: jest.fn(),
 }));
 let mockMessageEditorProps: {

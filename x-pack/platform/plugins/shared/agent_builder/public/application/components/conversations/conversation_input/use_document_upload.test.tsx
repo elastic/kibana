@@ -11,8 +11,8 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { queryKeys } from '../../../query_keys';
-import { uploadPdf, type UploadPdfResult } from './upload_pdf';
-import { usePdfUpload } from './use_pdf_upload';
+import { uploadPdf, type UploadPdfResult } from './upload_document';
+import { usePdfUpload } from './use_document_upload';
 
 jest.mock('../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
@@ -24,8 +24,8 @@ jest.mock('../../../hooks/use_conversation', () => ({ useAgentId: () => 'agent-1
 jest.mock('../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
 }));
-jest.mock('./upload_pdf', () => ({
-  ...jest.requireActual('./upload_pdf'),
+jest.mock('./upload_document', () => ({
+  ...jest.requireActual('./upload_document'),
   uploadPdf: jest.fn(),
 }));
 

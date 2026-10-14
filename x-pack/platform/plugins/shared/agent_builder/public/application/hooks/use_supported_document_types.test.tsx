@@ -9,7 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useIsPdfUploadAvailable } from './use_is_pdf_upload_available';
+import { useIsPdfUploadAvailable } from './use_supported_document_types';
 
 const mockIsPdfAvailable = jest.fn();
 

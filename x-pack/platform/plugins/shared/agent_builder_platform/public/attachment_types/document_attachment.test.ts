@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pdfAttachmentDefinition } from './pdf_attachment';
+import { pdfAttachmentDefinition } from './document_attachment';
 
 describe('pdfAttachmentDefinition', () => {
   it('uses the stored file name as the label', () => {

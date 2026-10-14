@@ -25,7 +25,7 @@ import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
 import { createSkillAttachmentDefinition } from './skill_attachment/skill_attachment';
 import { createConnectorSetupAttachmentDefinition } from './connector_setup/connector_setup_attachment';
 import { createImageAttachmentDefinition } from './image_attachment';
-import { pdfAttachmentDefinition } from './pdf_attachment';
+import { pdfAttachmentDefinition } from './document_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,

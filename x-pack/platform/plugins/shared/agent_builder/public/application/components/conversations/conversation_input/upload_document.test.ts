@@ -11,7 +11,7 @@ import {
   rejectIfTooManyPdfs,
   rejectInvalidPdf,
   uploadPdf,
-} from './upload_pdf';
+} from './upload_document';
 
 jest.mock('@kbn/agent-builder-browser', () => ({
   formatAgentBuilderErrorMessage: (error: Error) => error.message,
