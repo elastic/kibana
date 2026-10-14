@@ -112,7 +112,7 @@ export const ATTACK_ALERTS_TRUNCATED = ({
     'xpack.securitySolution.detections.hooks.attacks.bulkActions.attackAlertsTruncatedWarningTitle',
     {
       defaultMessage:
-        'Added {attachedAlertCount} of the {alertCount} alerts in this attack. A case accepts at most {attachedAlertCount} alerts per request.',
+        'Only {attachedAlertCount} of the {alertCount} alerts in this attack will be added. A case accepts at most {attachedAlertCount} alerts per request.',
       values: {
         alertCount,
         attachedAlertCount,
