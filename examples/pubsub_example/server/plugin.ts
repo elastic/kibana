@@ -59,12 +59,14 @@ export class PubSubExamplePlugin implements Plugin {
           validate: {
             request: {
               body: schema.object({
+                /** Stable per logical publish, so a retried call publishes the same event id. */
+                idempotencyKey: schema.string({ minLength: 1, maxLength: 256 }),
                 message: schema.string({ minLength: 1, maxLength: 1024 }),
               }),
             },
             response: {
               200: {
-                body: () => schema.object({ id: schema.string({ minLength: 1, maxLength: 36 }) }),
+                body: () => schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) }),
               },
             },
           },
@@ -73,7 +75,10 @@ export class PubSubExamplePlugin implements Plugin {
           const [start] = await core.getStartServices();
           const event = await start.pubsub.publish(
             pingTopic,
-            { data: { source: 'http', message: request.body.message } },
+            {
+              id: request.body.idempotencyKey,
+              data: { source: 'http', message: request.body.message },
+            },
             { request }
           );
 
@@ -85,7 +90,10 @@ export class PubSubExamplePlugin implements Plugin {
   public start(core: CoreStart) {
     this.timer = setInterval(() => {
       void core.pubsub
-        .publish(pingTopic, { data: { source: 'timer', message: 'tick' } })
+        .publish(pingTopic, {
+          id: `timer:${new Date().toISOString()}`,
+          data: { source: 'timer', message: 'tick' },
+        })
         .catch((error: unknown) => {
           const detail = error instanceof Error ? error.message : 'unknown failure';
           this.logger.warn(`timer publish failed: ${detail}`);
