@@ -34,7 +34,13 @@ const queryResult = (overrides = {}) => ({
   isError: false,
   ...overrides,
 });
-const opts = { spaceId: 'default', timeRange: '24h' as const, isReady: true, count: 7 };
+const opts = {
+  spaceId: 'default',
+  timeRange: '24h' as const,
+  isReady: true,
+  reachesBack: true,
+  count: 7,
+};
 const lastCall = () => mockUseQuery.mock.calls[mockUseQuery.mock.calls.length - 1];
 
 describe('useEntitiesWithAnomaliesSeries', () => {
@@ -81,6 +87,31 @@ describe('useEntitiesWithAnomaliesSeries', () => {
     (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: false });
     renderHook(() => useEntitiesWithAnomaliesSeries(opts));
     expect(lastCall()[2].enabled).toBe(false);
+  });
+
+  it('leaves the line out, with no spinner and no query, when the history is too short', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() =>
+      useEntitiesWithAnomaliesSeries({ ...opts, reachesBack: false })
+    );
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current).toEqual({ trend: undefined, isTrendLoading: false });
+  });
+
+  it('leaves the line out, with no spinner and no query, when the count is 0', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() => useEntitiesWithAnomaliesSeries({ ...opts, count: 0 }));
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current).toEqual({ trend: undefined, isTrendLoading: false });
+  });
+
+  it('waits for the history check before it decides, with the spinner on', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() =>
+      useEntitiesWithAnomaliesSeries({ ...opts, isReady: false, reachesBack: undefined })
+    );
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current.isTrendLoading).toBe(true);
   });
 
   it('stops the spinner when no job is installed or no index resolves, but not while loading', () => {

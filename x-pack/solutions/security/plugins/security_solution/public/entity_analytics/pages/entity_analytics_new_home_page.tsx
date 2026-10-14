@@ -219,6 +219,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedDelta,
     isDeltaLoading,
     isHistoryMissing: alertBasedHistoryMissing,
+    reachesBack: alertBasedReachesBack,
   } = useAlertBasedTilesDelta({
     ...deltaOptions,
     severeAlertsCount: alertsCount,
@@ -228,48 +229,58 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     delta: anomaliesDelta,
     isDeltaLoading: anomaliesDeltaLoading,
     isHistoryMissing: anomaliesHistoryMissing,
+    reachesBack: anomaliesReachesBack,
   } = useEntitiesWithAnomaliesDelta({ ...deltaOptions, count: anomaliesCount });
   const {
     delta: newEntityDelta,
     isDeltaLoading: newEntityDeltaLoading,
     isHistoryMissing: newEntityHistoryMissing,
+    reachesBack: newEntityReachesBack,
   } = useNewEntityDelta({ ...deltaOptions, count: newEntityCount });
   const {
     delta: riskMoversDelta,
     isDeltaLoading: riskMoversDeltaLoading,
     isHistoryMissing: riskMoversHistoryMissing,
+    reachesBack: riskMoversReachesBack,
   } = useRiskMoversDelta({ ...deltaOptions, count: riskMoversCount });
   const {
     delta: newlyHCDelta,
     isDeltaLoading: newlyHCDeltaLoading,
     isHistoryMissing: newlyHCHistoryMissing,
+    reachesBack: newlyHCReachesBack,
   } = useNewlyHighCriticalDelta({ ...deltaOptions, count: newlyHCCount });
 
-  // The sparklines start after the counts and their deltas, so they never delay them.
+  // The sparklines follow the deltas: they start once the counts and the deltas have settled, and
+  // only for a tile whose history reaches back twice the range, so they never delay them.
   const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
     ...deltaOptions,
     isReady: areCountsLoaded && !isDeltaLoading,
+    reachesBack: alertBasedReachesBack,
     severeAlertsCount: alertsCount,
     watchlistedCount,
   });
   const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
     ...deltaOptions,
     isReady: areCountsLoaded && !anomaliesDeltaLoading,
+    reachesBack: anomaliesReachesBack,
     count: anomaliesCount,
   });
   const { trend: newEntityTrend } = useNewEntitySeries({
     ...deltaOptions,
     isReady: areCountsLoaded && !newEntityDeltaLoading,
+    reachesBack: newEntityReachesBack,
     count: newEntityCount,
   });
   const { trend: riskMoversTrend } = useRiskMoversSeries({
     ...deltaOptions,
     isReady: areCountsLoaded && !riskMoversDeltaLoading,
+    reachesBack: riskMoversReachesBack,
     count: riskMoversCount,
   });
   const { trend: newlyHCTrend } = useNewlyHighCriticalSeries({
     ...deltaOptions,
     isReady: areCountsLoaded && !newlyHCDeltaLoading,
+    reachesBack: newlyHCReachesBack,
     count: newlyHCCount,
   });
 

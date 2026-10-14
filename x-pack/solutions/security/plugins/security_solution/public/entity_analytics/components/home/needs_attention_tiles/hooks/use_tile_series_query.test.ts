@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { getTileTrend, useTileSeriesQuery } from './use_tile_series_query';
+import { getSeriesGate, getTileTrend, useTileSeriesQuery } from './use_tile_series_query';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -137,5 +137,30 @@ describe('getTileTrend', () => {
     expect(getTileTrend({ ...base, dots: undefined, isError: true })).toEqual(none);
     expect(getTileTrend({ ...base, dots: undefined, skip: true })).toEqual(none);
     expect(getTileTrend({ ...base, dots: undefined, isUnavailable: true })).toEqual(none);
+  });
+
+  it('shows neither a line nor a spinner when the series is left out on purpose', () => {
+    const none = { trend: undefined, isTrendLoading: false };
+    expect(getTileTrend({ ...base, isHidden: true })).toEqual(none);
+    expect(getTileTrend({ ...base, dots: undefined, isHidden: true })).toEqual(none);
+  });
+});
+
+describe('getSeriesGate', () => {
+  const ready = { isReady: true, reachesBack: true, count: 5 };
+
+  it('runs when everything has settled, the history reaches back and the count is above 0', () => {
+    expect(getSeriesGate(ready)).toEqual({ canRun: true, isHidden: false });
+  });
+
+  it('hides the line once settled when the history is too short, unknown or the count is 0', () => {
+    const hidden = { canRun: false, isHidden: true };
+    expect(getSeriesGate({ ...ready, reachesBack: false })).toEqual(hidden);
+    expect(getSeriesGate({ ...ready, reachesBack: undefined })).toEqual(hidden);
+    expect(getSeriesGate({ ...ready, count: 0 })).toEqual(hidden);
+  });
+
+  it('neither runs nor hides while the counts and the delta are still loading', () => {
+    expect(getSeriesGate({ ...ready, isReady: false })).toEqual({ canRun: false, isHidden: false });
   });
 });

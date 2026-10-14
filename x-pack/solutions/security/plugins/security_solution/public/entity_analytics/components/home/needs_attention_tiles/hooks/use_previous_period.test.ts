@@ -78,19 +78,30 @@ describe('usePreviousPeriod', () => {
     setQueries({ guard: settled(false) });
     const { result } = renderHook(() => usePreviousPeriod(options));
     expect(callOf('PrevPeriod')[2].enabled).toBe(false);
-    expect(result.current).toEqual({ previous: undefined, isHistoryMissing: true, isError: false });
+    expect(result.current).toEqual({
+      previous: undefined,
+      reachesBack: false,
+      isHistoryMissing: true,
+      isError: false,
+    });
   });
 
   it('returns the previous period once both queries have settled', () => {
     setQueries({ guard: settled(true), previous: settled(40) });
     const { result } = renderHook(() => usePreviousPeriod(options));
-    expect(result.current).toEqual({ previous: 40, isHistoryMissing: false, isError: false });
+    expect(result.current).toEqual({
+      previous: 40,
+      reachesBack: true,
+      isHistoryMissing: false,
+      isError: false,
+    });
   });
 
   it('decides nothing while the history check is in flight or shows another range', () => {
     setQueries({ guard: { ...settled(false), isFetching: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
+      reachesBack: undefined,
       isHistoryMissing: false,
       isError: false,
     });
@@ -118,6 +129,7 @@ describe('usePreviousPeriod', () => {
     setQueries({ guard: settled(true), previous: { ...settled(40), isError: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
+      reachesBack: undefined,
       isHistoryMissing: false,
       isError: true,
     });
@@ -125,6 +137,7 @@ describe('usePreviousPeriod', () => {
     setQueries({ guard: { ...settled(false), isError: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
+      reachesBack: undefined,
       isHistoryMissing: false,
       isError: true,
     });

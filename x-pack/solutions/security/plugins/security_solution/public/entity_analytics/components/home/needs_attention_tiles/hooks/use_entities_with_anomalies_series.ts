@@ -16,7 +16,7 @@ import {
   buildEntitiesWithAnomaliesSeriesQuery,
 } from '../queries/entities_with_anomalies_series_query';
 import { readSeriesDots } from '../queries/tile_series_window';
-import { getTileTrend, useTileSeriesQuery } from './use_tile_series_query';
+import { getSeriesGate, getTileTrend, useTileSeriesQuery } from './use_tile_series_query';
 
 interface AnomaliesSeriesOptions {
   spaceId: string;
@@ -25,6 +25,8 @@ interface AnomaliesSeriesOptions {
   entityFilters?: EntityFilters;
   /** True once the count and its delta have loaded; the series never delays them. */
   isReady: boolean;
+  /** From the tile's delta hook: the series follows the same history rule. */
+  reachesBack: boolean | undefined;
   /** The live count, which replaces the newest dot so the line ends on the number shown. */
   count: number;
 }
@@ -33,7 +35,9 @@ interface AnomaliesSeriesOptions {
  * The sparkline dots of the Entities with anomalies tile for the selected range, oldest first,
  * ending on the live count. Like the count it needs installed security ML jobs. While the series
  * runs the dots are undefined and `isTrendLoading` is true; if it fails or cannot run the dots stay
- * undefined and no spinner is shown, and the count and delta are untouched.
+ * undefined and no spinner is shown, and the count and delta are untouched. Like the delta, it
+ * runs only when the history reaches back twice the range and the count is above 0; otherwise there
+ * is no line.
  */
 export const useEntitiesWithAnomaliesSeries = ({
   spaceId,
@@ -41,6 +45,7 @@ export const useEntitiesWithAnomaliesSeries = ({
   timeRange = '24h',
   entityFilters = EMPTY_ENTITY_FILTERS,
   isReady,
+  reachesBack,
   count,
 }: AnomaliesSeriesOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
   const { data: resolvedIndex, isLoading: isIndexLoading } =
@@ -62,10 +67,11 @@ export const useEntitiesWithAnomaliesSeries = ({
     [index, jobIds, timeRange, entityFilters]
   );
 
+  const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack, count });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'entitiesWithAnomaliesSeries',
     query,
-    enabled: !skip && isReady && !isLoadingInputs,
+    enabled: !skip && canRun && !isLoadingInputs,
     parse: (raw) => readSeriesDots(raw, timeRange, anomaliesSeriesColumn),
   });
 
@@ -75,6 +81,7 @@ export const useEntitiesWithAnomaliesSeries = ({
     skip,
     isFetching,
     isError,
+    isHidden,
     // Once the inputs have loaded, no installed job or no index means the query can never run.
     isUnavailable: !skip && !isLoadingInputs && !query,
   });

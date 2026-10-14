@@ -68,6 +68,25 @@ export const useTileSeriesQuery = <T>({
   return { series, isFetching, isError };
 };
 
+/**
+ * Whether a tile's series may run: the same rule as its delta. It needs the page's counts and the
+ * delta to have settled, a history that reaches back twice the range, and a count above 0. Once
+ * those have settled and it may not run, the tile has no line (`isHidden`) and no spinner.
+ */
+export const getSeriesGate = ({
+  isReady,
+  reachesBack,
+  count,
+}: {
+  isReady: boolean;
+  /** From the tile's delta hook; undefined until its history check settles, or after it failed. */
+  reachesBack: boolean | undefined;
+  count: number;
+}): { canRun: boolean; isHidden: boolean } => {
+  const canRun = isReady && reachesBack === true && count > 0;
+  return { canRun, isHidden: isReady && !canRun };
+};
+
 interface TileTrendOptions {
   dots: number[] | undefined;
   /** The live count, which replaces the newest dot so the line ends on the number shown. */
@@ -77,6 +96,8 @@ interface TileTrendOptions {
   isError: boolean;
   /** The query can never run, for example the entities index is missing. */
   isUnavailable?: boolean;
+  /** The series is left out on purpose (see {@link getSeriesGate}): no line and no spinner. */
+  isHidden?: boolean;
 }
 
 /**
@@ -91,10 +112,11 @@ export const getTileTrend = ({
   isFetching,
   isError,
   isUnavailable = false,
+  isHidden = false,
 }: TileTrendOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
-  const hasSeries = dots !== undefined && !isFetching;
+  const hasSeries = dots !== undefined && !isFetching && !isHidden;
   return {
     trend: hasSeries ? [...dots.slice(0, -1), liveCount] : undefined,
-    isTrendLoading: !skip && !hasSeries && !isError && !isUnavailable,
+    isTrendLoading: !skip && !hasSeries && !isError && !isUnavailable && !isHidden,
   };
 };

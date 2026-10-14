@@ -30,7 +30,13 @@ const queryResult = (overrides = {}) => ({
   isError: false,
   ...overrides,
 });
-const opts = { spaceId: 'default', timeRange: '7d' as const, isReady: true, count: 4 };
+const opts = {
+  spaceId: 'default',
+  timeRange: '7d' as const,
+  isReady: true,
+  reachesBack: true,
+  count: 4,
+};
 const lastCall = () => mockUseQuery.mock.calls[mockUseQuery.mock.calls.length - 1];
 
 describe('useNewEntitySeries', () => {
@@ -64,6 +70,29 @@ describe('useNewEntitySeries', () => {
     });
     renderHook(() => useNewEntitySeries(opts));
     expect(lastCall()[2].enabled).toBe(false);
+  });
+
+  it('leaves the line out, with no spinner and no query, when the history is too short', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() => useNewEntitySeries({ ...opts, reachesBack: false }));
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current).toEqual({ trend: undefined, isTrendLoading: false });
+  });
+
+  it('leaves the line out, with no spinner and no query, when the count is 0', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() => useNewEntitySeries({ ...opts, count: 0 }));
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current).toEqual({ trend: undefined, isTrendLoading: false });
+  });
+
+  it('waits for the history check before it decides, with the spinner on', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() =>
+      useNewEntitySeries({ ...opts, isReady: false, reachesBack: undefined })
+    );
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current.isTrendLoading).toBe(true);
   });
 
   it('stops the spinner when no index resolves, but not while it loads', () => {

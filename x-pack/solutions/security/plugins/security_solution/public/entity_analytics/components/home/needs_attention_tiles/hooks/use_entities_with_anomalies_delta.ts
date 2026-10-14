@@ -43,6 +43,8 @@ export const useEntitiesWithAnomaliesDelta = ({
   delta: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
+  /** True once the history check passed, so the sparkline can follow the same rule. */
+  reachesBack: boolean | undefined;
 } => {
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
@@ -67,7 +69,7 @@ export const useEntitiesWithAnomaliesDelta = ({
     [index, jobIds, timeRange, entityFilters]
   );
 
-  const { previous, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
     tileKey: 'entitiesWithAnomalies',
     guardQuery,
     previousQuery,
@@ -78,6 +80,7 @@ export const useEntitiesWithAnomaliesDelta = ({
   return {
     delta: previous !== undefined ? count - previous : undefined,
     isHistoryMissing,
+    reachesBack,
     isDeltaLoading: isDeltaStillComing({
       skip,
       count,

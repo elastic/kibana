@@ -47,7 +47,12 @@ const useRiskTileDelta = (
     isReady,
     count,
   }: RiskTileDeltaOptions
-): { delta: number | undefined; isDeltaLoading: boolean; isHistoryMissing: boolean } => {
+): {
+  delta: number | undefined;
+  isDeltaLoading: boolean;
+  isHistoryMissing: boolean;
+  reachesBack: boolean | undefined;
+} => {
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
   const index = resolvedIndex?.indexName;
@@ -61,7 +66,7 @@ const useRiskTileDelta = (
     [buildPrevious, spaceId, index, timeRange, entityFilters]
   );
 
-  const { previous, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
     tileKey,
     guardQuery,
     previousQuery,
@@ -72,6 +77,7 @@ const useRiskTileDelta = (
   return {
     delta: previous !== undefined ? count - previous : undefined,
     isHistoryMissing,
+    reachesBack,
     isDeltaLoading: isDeltaStillComing({
       skip,
       count,

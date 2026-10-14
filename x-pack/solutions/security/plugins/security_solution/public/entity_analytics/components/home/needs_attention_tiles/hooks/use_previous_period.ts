@@ -109,6 +109,8 @@ export const usePreviousPeriod = <T>({
   localOnly,
 }: PreviousPeriodOptions<T>): {
   previous: T | undefined;
+  /** True or false once the history check has settled without an error, otherwise undefined. */
+  reachesBack: boolean | undefined;
   isHistoryMissing: boolean;
   isError: boolean;
 } => {
@@ -120,12 +122,12 @@ export const usePreviousPeriod = <T>({
     localOnly,
   });
   const guardSettled = guard.data !== undefined && !guard.isPending;
-  const reachesBack = guardSettled && guard.data === true;
+  const hasHistory = guardSettled && guard.data === true;
 
   const previousPeriod = usePreviousPeriodQuery({
     queryKey: `${tileKey}PrevPeriod`,
     query: previousQuery,
-    enabled: enabled && reachesBack,
+    enabled: enabled && hasHistory,
     parse,
     localOnly,
   });
@@ -134,7 +136,8 @@ export const usePreviousPeriod = <T>({
   const isPreviousSettled = previousPeriod.data !== undefined && !previousPeriod.isPending;
 
   return {
-    previous: !isError && reachesBack && isPreviousSettled ? previousPeriod.data : undefined,
+    previous: !isError && hasHistory && isPreviousSettled ? previousPeriod.data : undefined,
+    reachesBack: !isError && guardSettled ? guard.data : undefined,
     isHistoryMissing: !isError && guardSettled && guard.data === false,
     isError,
   };

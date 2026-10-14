@@ -46,6 +46,7 @@ const opts = {
   spaceId: 'default',
   timeRange: '24h' as const,
   isReady: true,
+  reachesBack: true,
   severeAlertsCount: 7,
   watchlistedCount: 3,
 };
@@ -80,6 +81,40 @@ describe('useAlertBasedTilesSeries', () => {
 
     renderHook(() => useAlertBasedTilesSeries(opts));
     expect(lastCall()[2].enabled).toBe(true);
+  });
+
+  it('leaves the lines out, with no spinner and no query, when the history is too short', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() => useAlertBasedTilesSeries({ ...opts, reachesBack: false }));
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current.alertsTrend).toBeUndefined();
+    expect(result.current.watchlistedTrend).toBeUndefined();
+    expect(result.current.isTrendLoading).toBe(false);
+  });
+
+  it('hides only the tile whose count is 0, and runs while the other has a count', () => {
+    const { result } = renderHook(() => useAlertBasedTilesSeries({ ...opts, watchlistedCount: 0 }));
+    expect(lastCall()[2].enabled).toBe(true);
+    expect(result.current.alertsTrend?.[DOTS_24H - 1]).toBe(7);
+    expect(result.current.watchlistedTrend).toBeUndefined();
+  });
+
+  it('does not run when both counts are 0', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() =>
+      useAlertBasedTilesSeries({ ...opts, severeAlertsCount: 0, watchlistedCount: 0 })
+    );
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current.isTrendLoading).toBe(false);
+  });
+
+  it('waits for the history check before it decides, with the spinner on', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    const { result } = renderHook(() =>
+      useAlertBasedTilesSeries({ ...opts, isReady: false, reachesBack: undefined })
+    );
+    expect(lastCall()[2].enabled).toBe(false);
+    expect(result.current.isTrendLoading).toBe(true);
   });
 
   it('does not run when skipped or while the entities index loads', () => {

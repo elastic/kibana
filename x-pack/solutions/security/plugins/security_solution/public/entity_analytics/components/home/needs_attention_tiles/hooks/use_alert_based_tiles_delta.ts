@@ -47,6 +47,8 @@ export const useAlertBasedTilesDelta = ({
   watchlistedDelta: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
+  /** True once the history check passed, so the sparkline can follow the same rule. */
+  reachesBack: boolean | undefined;
 } => {
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
@@ -68,7 +70,7 @@ export const useAlertBasedTilesDelta = ({
   );
 
   const highestCount = Math.max(severeAlertsCount, watchlistedCount);
-  const { previous, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
     tileKey: 'alertBasedTiles',
     guardQuery,
     previousQuery,
@@ -80,6 +82,7 @@ export const useAlertBasedTilesDelta = ({
     severeAlertsDelta: previous ? severeAlertsCount - previous.severeAlertsCount : undefined,
     watchlistedDelta: previous ? watchlistedCount - previous.watchlistedCount : undefined,
     isHistoryMissing,
+    reachesBack,
     isDeltaLoading: isDeltaStillComing({
       skip,
       count: highestCount,
