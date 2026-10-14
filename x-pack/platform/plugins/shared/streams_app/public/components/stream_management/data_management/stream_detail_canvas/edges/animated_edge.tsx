@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css, keyframes } from '@emotion/react';
 import {
@@ -16,7 +16,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { BaseEdge, EdgeToolbar, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 
 const DASH = 4;
@@ -65,14 +65,6 @@ export function AnimatedEdge({
   const canUnhook = Boolean(
     data && typeof data === 'object' && 'unitConnection' in data && data.unitConnection
   );
-
-  useEffect(() => {
-    if (selected) {
-      menu.on();
-    } else {
-      menu.off();
-    }
-  }, [selected, menu]);
 
   // The built-in unhook circles sit on the line just outside each handle and are
   // easy to miss. Pressing the line itself starts that same drag from the
@@ -129,8 +121,27 @@ export function AnimatedEdge({
     borderRadius: 12,
   });
 
+  const labelPositionStyle = useMemo(
+    () => ({
+      position: 'absolute' as const,
+      transform: `translate(-50%, -50%) translate(${centerX}px, ${centerY}px)`,
+      pointerEvents: 'all' as const,
+      zIndex: 5,
+    }),
+    [centerX, centerY]
+  );
+
   const isActive = isHovered || Boolean(selected);
   const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
+
+  const edgeStyle = useMemo(
+    () => ({
+      ...style,
+      stroke: strokeColor,
+      strokeWidth: 1,
+    }),
+    [style, strokeColor]
+  );
 
   const MenuButton = (
     <EuiIcon
@@ -141,7 +152,7 @@ export function AnimatedEdge({
       })}
       type="plusCircle"
       color="primary"
-      size="xxl"
+      size="l"
       css={css`
         border-radius: 99px;
         background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -160,15 +171,8 @@ export function AnimatedEdge({
         data-test-subj="streamsCanvasBasicEdge"
         path={edgePath}
         markerEnd={markerEnd}
-        style={style}
+        style={edgeStyle}
         interactionWidth={24}
-        css={css`
-          stroke: ${strokeColor} !important;
-          stroke-width: 1;
-          .react-flow__edge:focus & {
-            stroke: ${isActive ? 'transparent' : euiTheme.colors.borderStrongPrimary} !important;
-          }
-        `}
       />
       {isActive ? (
         <path
@@ -180,36 +184,41 @@ export function AnimatedEdge({
           style={PATH_OPACITY}
         />
       ) : null}
-      <EdgeToolbar edgeId={id} x={centerX} y={centerY} isVisible={isActive}>
-        <EuiPopover
-          data-test-subj="streamsCanvasEdgeMenu"
-          aria-labelledby={edgeMenuId}
-          button={MenuButton}
-          isOpen={showMenu}
-          closePopover={menu.off}
-          panelPaddingSize="none"
-          anchorPosition="upCenter"
-        >
-          <EuiContextMenuPanel>
-            <EuiContextMenuItem
-              data-test-subj="streamsCanvasEdgeMenu-addProcessing"
-              onClick={() => {}}
+      {isActive ? (
+        <EdgeLabelRenderer>
+          <div className="nopan nodrag" style={labelPositionStyle}>
+            <EuiPopover
+              data-test-subj="streamsCanvasEdgeMenu"
+              aria-labelledby={edgeMenuId}
+              button={MenuButton}
+              isOpen={showMenu}
+              closePopover={menu.off}
+              panelPaddingSize="none"
+              anchorPosition="upCenter"
+              attachToAnchor
             >
-              {i18n.translate('xpack.streams.animatedEdge.addProcessingContextMenuItemLabel', {
-                defaultMessage: 'Add processing',
-              })}
-            </EuiContextMenuItem>
-            <EuiContextMenuItem
-              data-test-subj="streamsCanvasEdgeMenu-addRouting"
-              onClick={() => {}}
-            >
-              {i18n.translate('xpack.streams.animatedEdge.addRoutingContextMenuItemLabel', {
-                defaultMessage: 'Add routing',
-              })}
-            </EuiContextMenuItem>
-          </EuiContextMenuPanel>
-        </EuiPopover>
-      </EdgeToolbar>
+              <EuiContextMenuPanel>
+                <EuiContextMenuItem
+                  data-test-subj="streamsCanvasEdgeMenu-addProcessing"
+                  onClick={() => {}}
+                >
+                  {i18n.translate('xpack.streams.animatedEdge.addProcessingContextMenuItemLabel', {
+                    defaultMessage: 'Add processing',
+                  })}
+                </EuiContextMenuItem>
+                <EuiContextMenuItem
+                  data-test-subj="streamsCanvasEdgeMenu-addRouting"
+                  onClick={() => {}}
+                >
+                  {i18n.translate('xpack.streams.animatedEdge.addRoutingContextMenuItemLabel', {
+                    defaultMessage: 'Add routing',
+                  })}
+                </EuiContextMenuItem>
+              </EuiContextMenuPanel>
+            </EuiPopover>
+          </div>
+        </EdgeLabelRenderer>
+      ) : null}
     </g>
   );
 }

@@ -822,7 +822,6 @@ function StreamsCanvasInner() {
           isValidConnection={isValidConnection}
           nodesConnectable={!isSaving}
           edgesReconnectable={!isSaving}
-          edgesFocusable
           connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}
