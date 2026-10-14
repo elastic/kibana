@@ -56,7 +56,7 @@ export function inboundEventsRoute({
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (`.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (JSON or a plain-text body) and does not emit.',
       options: {
         // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
         // Auth is the ingest token (Bearer, or `token` query if Authorization is
@@ -72,6 +72,7 @@ export function inboundEventsRoute({
             'application/json',
             'application/*+json',
             'application/x-www-form-urlencoded',
+            'text/plain',
             '*/*',
           ],
           maxBytes: maxBodyBytes,
@@ -90,7 +91,7 @@ export function inboundEventsRoute({
           response: {
             200: {
               description:
-                'Connector HTTP 200 ack. No event is emitted. `.inboundWebhook` handshake is `{ challenge }`.',
+                'Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.',
               body: () => ingestEventsAckResponseSchemaV1,
             },
             202: {

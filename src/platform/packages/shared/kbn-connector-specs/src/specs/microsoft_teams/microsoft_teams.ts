@@ -10,6 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import { MICROSOFT_TEAMS_CONNECTOR_TYPE_ID } from './constants';
+import { microsoftTeamsEvents } from './events';
 import {
   ListJoinedTeamsInputSchema,
   ListChannelsInputSchema,
@@ -53,7 +55,7 @@ const GraphCollectionOutputSchema = lazySchema(() =>
 
 export const MicrosoftTeams: ConnectorSpec = {
   metadata: {
-    id: '.microsoft-teams',
+    id: MICROSOFT_TEAMS_CONNECTOR_TYPE_ID,
     displayName: 'Microsoft Teams (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.metadata.description', {
       defaultMessage:
@@ -567,6 +569,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     },
   },
 
+  events: microsoftTeamsEvents,
+
   skill: [
     'Microsoft Teams connector — usage guidance:',
     '',
@@ -579,6 +583,11 @@ export const MicrosoftTeams: ConnectorSpec = {
     '- Send to an existing chat: listChats → sendChatMessage (with chatId + content)',
     "- DM a user by email: getUser (your own UPN/email) + getUser (other person's UPN/email) → createChat (both IDs in memberIds) → sendChatMessage (with returned chatId)",
     '- Update a posted message: updateMessage (with messageId + teamId+channelId for channel, or chatId for chat)',
+    '',
+    'INBOUND EVENTS:',
+    '- channel_message and chat_message carry ids only. Message content is not on the event.',
+    '- After a channel_message event, call listChannelMessages with teamId set to event.team_id and channelId set to event.channel_id. Select the item whose id equals event.message_id. The action returns the newest root messages, at most 50. A reply is not in that page.',
+    '- After a chat_message event, call listChatMessages with chatId set to event.chat_id. Select the item whose id equals event.message_id.',
     '',
     'AUTH DIFFERENCES (delegated vs app-only):',
     '- Delegated auth (bearer token or oauth_authorization_code or ears): userId is optional — omit it to operate as the signed-in user.',
