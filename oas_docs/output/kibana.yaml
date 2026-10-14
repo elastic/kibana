@@ -200035,7 +200035,10 @@ components:
         value:
           description: Array of hash values
           items:
+            maxLength: 4096
+            minLength: 1
             type: string
+          maxItems: 2000
           minItems: 1
           type: array
       required:
@@ -200057,7 +200060,8 @@ components:
           items:
             oneOf:
               - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
-              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -200090,7 +200094,8 @@ components:
           items:
             oneOf:
               - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
-              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -200111,7 +200116,43 @@ components:
           $ref: '#/components/schemas/Security_Exceptions_API_EndpointArtifactTags'
       required:
         - list_id
-    Security_Exceptions_API_BlocklistPathOrFileNameEntry:
+    Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry:
+      properties:
+        field:
+          description: File path or file name field (available on all OS)
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be `match_any` ("is one of")
+          enum:
+            - match_any
+          type: string
+        value:
+          description: Array of values
+          items:
+            maxLength: 4096
+            minLength: 1
+            type: string
+          maxItems: 2000
+          minItems: 1
+          type: array
+      required:
+        - field
+        - type
+        - value
+        - operator
+      title: Blocklist path or file name "is one of" entry
+      type: object
+    Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry:
       properties:
         field:
           description: |
@@ -200129,27 +200170,21 @@ components:
             - included
           type: string
         type:
-          description: |
-            Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)
+          description: Must be `wildcard` ("Match", supports `*` and `?` wildcards)
           enum:
-            - match_any
             - wildcard
           type: string
         value:
-          oneOf:
-            - description: Single value (used with wildcard)
-              type: string
-            - description: Array of values (used with match_any)
-              items:
-                type: string
-              minItems: 1
-              type: array
+          description: Single value
+          maxLength: 4096
+          minLength: 1
+          type: string
       required:
         - field
         - type
         - value
         - operator
-      title: Blocklist path or file name entry
+      title: Blocklist path or file name "Match" entry
       type: object
     Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry:
       properties:
@@ -200219,7 +200254,8 @@ components:
           items:
             oneOf:
               - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
-              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
               - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry'
           minItems: 1
           type: array
