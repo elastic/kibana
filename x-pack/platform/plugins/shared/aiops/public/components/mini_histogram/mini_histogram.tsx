@@ -28,6 +28,8 @@ interface MiniHistogramProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  width?: string;
+  height?: string;
 }
 
 export const MiniHistogram: FC<MiniHistogramProps> = ({
@@ -36,6 +38,8 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
   label,
   barColorOverride,
   barHighlightColorOverride,
+  width,
+  height,
 }) => {
   const { charts } = useAiopsAppContext();
 
@@ -65,8 +69,8 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
   };
 
   const cssChartSize = css({
-    width: '80px',
-    height: euiTheme.size.l,
+    width: width ?? '80px',
+    height: height ?? euiTheme.size.l,
     margin: '0px',
   });
 

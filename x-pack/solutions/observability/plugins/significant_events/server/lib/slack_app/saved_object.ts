@@ -44,7 +44,13 @@ const relayAppConnectionAttributesV1 = schema.object({
   updatedAt: schema.maybe(schema.string()),
 });
 
-export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV1>;
+const relayAppConnectionAttributesV2 = relayAppConnectionAttributesV1.extends({
+  // Workspace name and URL the Relay reported for `tenantKey`, shown to the admin to confirm.
+  tenantName: schema.maybe(schema.string()),
+  tenantUrl: schema.maybe(schema.string()),
+});
+
+export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV2>;
 
 export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
   name: RELAY_APP_CONNECTION_SO_TYPE,
@@ -68,6 +74,13 @@ export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
       schemas: {
         forwardCompatibility: relayAppConnectionAttributesV1.extends({}, { unknowns: 'ignore' }),
         create: relayAppConnectionAttributesV1,
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: relayAppConnectionAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: relayAppConnectionAttributesV2,
       },
     },
   },

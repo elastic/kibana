@@ -434,6 +434,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
         uiSettings: core.uiSettings,
+        rendering: core.rendering,
+        registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
@@ -570,7 +572,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       search: plugins.data.search.search,
       resolveSecurityCanvasContext,
     });
-    registerAttacksFlyoutGroupedAttachment({ register, getSpaceId, resolveSecurityCanvasContext });
+    registerAttacksFlyoutGroupedAttachment({
+      register,
+      application: core.application,
+      getSpaceId,
+      resolveSecurityCanvasContext,
+    });
     registerRulesFlyoutGroupedAttachment({
       register,
       application: core.application,

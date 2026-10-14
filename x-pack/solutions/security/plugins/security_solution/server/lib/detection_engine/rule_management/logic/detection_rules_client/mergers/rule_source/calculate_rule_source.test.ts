@@ -146,6 +146,99 @@ describe('calculateRuleSource', () => {
     );
   });
 
+  describe('required_fields', () => {
+    const baseRequiredFields = [
+      { name: 'host.name', type: 'keyword' },
+      { name: 'custom.field', type: 'keyword' },
+    ];
+
+    const getRuleAssetWithRequiredFields = () => ({
+      ...getSampleRuleAsset(),
+      required_fields: [
+        { name: 'host.name', type: 'keyword', ecs: true },
+        { name: 'custom.field', type: 'keyword', ecs: false },
+      ],
+    });
+
+    const getRuleWithRequiredFields = () => ({
+      ...getSampleRule(),
+      immutable: true,
+      required_fields: getRuleAssetWithRequiredFields().required_fields,
+    });
+
+    it('returns is_customized false when required_fields differ only in order', async () => {
+      const rule = getRuleWithRequiredFields();
+      rule.required_fields = [...rule.required_fields].reverse();
+
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
+        assets: [getRuleAssetWithRequiredFields()],
+      });
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: getRuleWithRequiredFields(),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+        })
+      );
+    });
+
+    it('returns is_customized false when required_fields differ only in "ecs"', async () => {
+      const rule = getRuleWithRequiredFields();
+      rule.required_fields = baseRequiredFields.map((field) => ({ ...field, ecs: true }));
+
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
+        assets: [getRuleAssetWithRequiredFields()],
+      });
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: getRuleWithRequiredFields(),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+        })
+      );
+    });
+
+    it('returns is_customized true when required_fields have an extra field', async () => {
+      const rule = getRuleWithRequiredFields();
+      rule.required_fields = [
+        ...rule.required_fields,
+        { name: 'user.name', type: 'keyword', ecs: true },
+      ];
+
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
+        assets: [getRuleAssetWithRequiredFields()],
+      });
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: getRuleWithRequiredFields(),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'required_fields' }],
+        })
+      );
+    });
+  });
+
   describe('missing base versions', () => {
     it('return is_customized false when the base version and current version are missing', async () => {
       const rule = getSampleRule();

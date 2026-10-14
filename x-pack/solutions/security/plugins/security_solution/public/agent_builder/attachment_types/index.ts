@@ -10,6 +10,7 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { CoreStart } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -17,6 +18,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -157,6 +159,8 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext,
   searchSession,
   uiSettings,
+  rendering,
+  registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -166,7 +170,18 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
+  rendering: CoreStart['rendering'];
+  registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
+  registerImpactEntityOpener?.((entity) => {
+    void import(
+      /* webpackChunkName: "security_impact_entity_flyout" */
+      './open_impact_entity_flyout'
+    ).then(({ openImpactEntityFlyout }) =>
+      openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+    );
+  });
+
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
     './entity_attachment'
