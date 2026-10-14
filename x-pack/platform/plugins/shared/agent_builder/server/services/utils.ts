@@ -45,14 +45,14 @@ export const toStableUserId = async ({
   resolveApiKeyProfileUid,
 }: {
   authUser: StableUserIdAuthUser;
-  request?: KibanaRequest;
-  resolveApiKeyProfileUid?: () => Promise<string | undefined>;
+  request: KibanaRequest;
+  resolveApiKeyProfileUid: () => Promise<string | undefined>;
 }): Promise<string | undefined> => {
   // Fake requests always authenticate with an API key, even when their identity hides it.
-  const isApiKey = request?.isFakeRequest || authUser.authentication_type === 'api_key';
+  const isApiKey = request.isFakeRequest || authUser.authentication_type === 'api_key';
   let profileUid = authUser.profile_uid;
 
-  if (isApiKey && profileUid === undefined && resolveApiKeyProfileUid) {
+  if (isApiKey && profileUid === undefined) {
     profileUid = await resolveApiKeyProfileUid();
   }
 
@@ -157,12 +157,9 @@ export const getUserFromRequest = async ({
   const resolveApiKeyProfileUid = () => resolveApiKeyOwnerProfileUid({ request, esClient });
 
   if (authUser?.username) {
-    return {
-      id: await toStableUserId({ authUser, request, resolveApiKeyProfileUid }),
-      username: authUser.username,
-      type: 'user',
-      isAdmin,
-    };
+    const id = await toStableUserId({ authUser, request, resolveApiKeyProfileUid });
+
+    return { id, username: authUser.username, type: 'user', isAdmin };
   }
 
   // A user on this path may have a profile that `getCurrentUser` could not see; a realm id would
@@ -170,20 +167,17 @@ export const getUserFromRequest = async ({
   const { username, authentication_type: authenticationType } =
     await esClient.security.authenticate();
 
-  return {
-    id: await toStableUserId({
-      authUser: {
-        username,
-        profile_uid: authUser?.profile_uid,
-        authentication_type: authenticationType,
-      },
-      request,
-      resolveApiKeyProfileUid,
-    }),
-    username,
-    type: 'user',
-    isAdmin,
-  };
+  const id = await toStableUserId({
+    authUser: {
+      username,
+      profile_uid: authUser?.profile_uid,
+      authentication_type: authenticationType,
+    },
+    request,
+    resolveApiKeyProfileUid,
+  });
+
+  return { id, username, type: 'user', isAdmin };
 };
 
 const ADMIN_PRIVILEGE = 'agent_builder:admin'; // intentionally unregistered privilege

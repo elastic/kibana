@@ -34,6 +34,8 @@ describe('toStableUserId', () => {
   it('prefers profile uid when present', async () => {
     await expect(
       toStableUserId({
+        request: httpServerMock.createKibanaRequest(),
+        resolveApiKeyProfileUid: jest.fn(),
         authUser: {
           username: 'shareduser',
           profile_uid: 'profile-123',
@@ -47,6 +49,8 @@ describe('toStableUserId', () => {
   it('falls back to a realm-qualified id when profile uid is missing', async () => {
     await expect(
       toStableUserId({
+        request: httpServerMock.createKibanaRequest(),
+        resolveApiKeyProfileUid: jest.fn(),
         authUser: {
           username: 'shareduser',
           authentication_type: 'realm',
@@ -56,6 +60,8 @@ describe('toStableUserId', () => {
     ).resolves.toBe('realm:["file","file1","shareduser"]');
     await expect(
       toStableUserId({
+        request: httpServerMock.createKibanaRequest(),
+        resolveApiKeyProfileUid: jest.fn(),
         authUser: {
           username: 'shareduser',
           authentication_type: 'realm',
@@ -68,6 +74,8 @@ describe('toStableUserId', () => {
   it('returns undefined when neither profile uid nor realm identity is available', async () => {
     await expect(
       toStableUserId({
+        request: httpServerMock.createKibanaRequest(),
+        resolveApiKeyProfileUid: jest.fn(),
         authUser: { username: 'shareduser', authentication_type: 'realm' },
       })
     ).resolves.toBeUndefined();
@@ -78,6 +86,7 @@ describe('toStableUserId', () => {
 
     await expect(
       toStableUserId({
+        request: httpServerMock.createKibanaRequest(),
         authUser: {
           username: 'shareduser',
           authentication_type: 'api_key',
@@ -107,6 +116,7 @@ describe('toStableUserId', () => {
 
     await expect(
       toStableUserId({
+        request: httpServerMock.createKibanaRequest(),
         authUser: {
           username: 'shareduser',
           authentication_type: 'api_key',
@@ -123,6 +133,7 @@ describe('toStableUserId', () => {
 
     await expect(
       toStableUserId({
+        request: httpServerMock.createKibanaRequest(),
         authUser: {
           username: 'shareduser',
           profile_uid: 'profile-123',
