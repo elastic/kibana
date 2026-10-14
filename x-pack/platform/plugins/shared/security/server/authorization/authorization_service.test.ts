@@ -170,13 +170,6 @@ describe('#start', () => {
     statusSubject.next({ scheduleRetry: retryScheduler });
     await nextTick();
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
-    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.anything(),
-      expect.any(String),
-      expect.anything(),
-      expect.any(AbortSignal)
-    );
 
     // New changes still trigger privileges re-registration.
     statusSubject.next({ scheduleRetry: retryScheduler });
@@ -185,7 +178,7 @@ describe('#start', () => {
     expect(retryScheduler).not.toHaveBeenCalled();
   });
 
-  it('waits for an in-flight registration to stop before registering again', async () => {
+  it('waits for an in-flight registration to finish before registering again', async () => {
     let rejectFirstRun!: (err: Error) => void;
     mockRegisterPrivilegesWithCluster.mockImplementationOnce(
       () =>
@@ -197,16 +190,14 @@ describe('#start', () => {
     const firstRetryScheduler = jest.fn();
     statusSubject.next({ scheduleRetry: firstRetryScheduler });
     await nextTick();
-    const [[, , , , firstSignal]] = mockRegisterPrivilegesWithCluster.mock.calls;
 
     // A license change arrives while the first registration is still running.
     const secondRetryScheduler = jest.fn();
     statusSubject.next({ scheduleRetry: secondRetryScheduler });
     await nextTick();
-    expect(firstSignal.aborted).toBe(true);
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
 
-    rejectFirstRun(new Error('This operation was aborted'));
+    rejectFirstRun(new Error('Some error'));
     await nextTick();
 
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);

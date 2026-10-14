@@ -13,28 +13,29 @@ import type { OnlineStatusRetryScheduler } from './elasticsearch_service';
  * Wraps a task for `switchMap` over `watchOnlineStatus$`, so a newer run replaces an older one and the two never overlap.
  */
 export const createOnlineStatusTaskRunner = (
-  task: (signal: AbortSignal) => Promise<void>
+  task: () => Promise<void>
 ): ((retryScheduler: OnlineStatusRetryScheduler) => Observable<never>) => {
   let previousRun: Promise<void> = Promise.resolve();
 
   return ({ scheduleRetry }) =>
     new Observable<never>((subscriber) => {
-      const abortController = new AbortController();
-      const { signal } = abortController;
+      let isReplaced = false;
 
-      // `switchMap` aborts this run when a newer status arrives, and the task stops at its next
-      // checkpoint. We still wait for the previous run to settle before starting, because
-      // Elasticsearch finishes a request that's already in flight even if we stop waiting on it.
+      // A newer run waits for the previous one to finish instead of cancelling it. The status can
+      // flap while Elasticsearch is under load, and cancelling on every flap could keep a run from
+      // ever reaching its last step. Every task call is an Elasticsearch request bounded by
+      // `elasticsearch.requestTimeout`, so the wait is bounded too.
       const run = previousRun.then(async () => {
-        if (signal.aborted) {
+        // Skip runs that a newer status replaced while they were waiting.
+        if (isReplaced) {
           return;
         }
 
         try {
-          await task(signal);
+          await task();
         } catch {
-          // Only a run that's still current retries. A cancelled run was replaced or stopped.
-          if (!signal.aborted) {
+          // A replaced or stopped run doesn't retry, the newer run (if any) does the work instead.
+          if (!isReplaced) {
             scheduleRetry();
           }
         }
@@ -44,6 +45,8 @@ export const createOnlineStatusTaskRunner = (
       // `run` never rejects, since the task's errors are caught above.
       void run.then(() => subscriber.complete());
 
-      return () => abortController.abort();
+      return () => {
+        isReplaced = true;
+      };
     });
 };

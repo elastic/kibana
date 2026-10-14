@@ -222,13 +222,12 @@ export class AuthorizationService {
     this.statusSubscription = online$
       .pipe(
         switchMap(
-          createOnlineStatusTaskRunner((signal) =>
+          createOnlineStatusTaskRunner(() =>
             registerPrivilegesWithCluster(
               this.logger,
               this.privileges,
               this.applicationName,
-              clusterClient,
-              signal
+              clusterClient
             )
           )
         )

@@ -59,8 +59,7 @@ export async function registerPrivilegesWithCluster(
   logger: Logger,
   privileges: PrivilegesService,
   application: string,
-  clusterClient: IClusterClient,
-  signal?: AbortSignal
+  clusterClient: IClusterClient
 ) {
   const startTime = performance.now();
 
@@ -103,8 +102,6 @@ export async function registerPrivilegesWithCluster(
   logger.debug(`Registering Kibana Privileges with Elasticsearch for ${application}`);
 
   try {
-    signal?.throwIfAborted();
-
     // we only want to post the privileges when they're going to change as Elasticsearch has
     // to clear the role cache to get these changes reflected in the _has_privileges API
     const existingPrivileges = await clusterClient.asInternalUser.security.getPrivileges({
@@ -116,38 +113,37 @@ export async function registerPrivilegesWithCluster(
     }
 
     const privilegesToDelete = getPrivilegesToDelete(existingPrivileges, expectedPrivileges);
+    // Names another instance already deleted come back with `found: false`, so we count from the
+    // responses instead of from `privilegesToDelete`.
+    let deletedPrivileges = 0;
     for (const batch of batchPrivilegeNames(privilegesToDelete)) {
-      signal?.throwIfAborted();
       const names = batch.join(', ');
       logger.debug(`Deleting Kibana Privileges ${names} from Elasticsearch for ${application}`);
       try {
         // A 404 means none of these privileges exist anymore, usually because another Kibana
         // instance deleted them first. That's the state we want, so it isn't an error.
-        await clusterClient.asInternalUser.security.deletePrivileges(
+        const response = await clusterClient.asInternalUser.security.deletePrivileges(
           { application, name: batch },
           { ignore: [404] }
         );
+        deletedPrivileges += Object.values(response?.[application] ?? {}).filter(
+          ({ found }) => found
+        ).length;
       } catch (err) {
         logger.error(`Error deleting Kibana Privileges ${names}`);
         throw err;
       }
     }
 
-    signal?.throwIfAborted();
     await clusterClient.asInternalUser.security.putPrivileges({ body: expectedPrivileges });
     logger.debug(`Updated Kibana Privileges with Elasticsearch for ${application}`);
 
     securityTelemetry.recordPrivilegeRegistrationDuration(performance.now() - startTime, {
       application,
       outcome: 'success',
-      deletedPrivileges: privilegesToDelete.length,
+      deletedPrivileges,
     });
   } catch (err) {
-    if (signal?.aborted) {
-      logger.debug(`Cancelled registering Kibana Privileges with Elasticsearch for ${application}`);
-      throw err;
-    }
-
     logger.error(
       `Error registering Kibana Privileges with Elasticsearch for ${application}: ${err.message}`
     );

@@ -24,28 +24,15 @@ const createDeferred = () => {
 
 describe('createOnlineStatusTaskRunner', () => {
   let online$: Subject<OnlineStatusRetryScheduler>;
-  let task: jest.Mock<Promise<void>, [AbortSignal]>;
-  // The runner aborts a signal once its run completes too, so record what the task saw on entry.
-  let abortedOnEntry: boolean[];
+  let task: jest.Mock<Promise<void>, []>;
   beforeEach(() => {
     online$ = new Subject();
-    abortedOnEntry = [];
     task = jest.fn();
   });
 
-  const subscribe = () =>
-    online$
-      .pipe(
-        switchMap(
-          createOnlineStatusTaskRunner((signal) => {
-            abortedOnEntry.push(signal.aborted);
-            return task(signal);
-          })
-        )
-      )
-      .subscribe();
+  const subscribe = () => online$.pipe(switchMap(createOnlineStatusTaskRunner(task))).subscribe();
 
-  it('runs the task with a signal that is not aborted', async () => {
+  it('runs the task', async () => {
     task.mockResolvedValue();
     subscribe();
 
@@ -54,7 +41,6 @@ describe('createOnlineStatusTaskRunner', () => {
     await nextTick();
 
     expect(task).toHaveBeenCalledTimes(1);
-    expect(abortedOnEntry).toEqual([false]);
     expect(scheduleRetry).not.toHaveBeenCalled();
   });
 
@@ -69,26 +55,31 @@ describe('createOnlineStatusTaskRunner', () => {
     expect(scheduleRetry).toHaveBeenCalledTimes(1);
   });
 
-  it('aborts the running task when a newer status arrives, and waits for it to settle', async () => {
+  it('waits for the running task to finish before starting a newer run', async () => {
     const firstRun = createDeferred();
-    task.mockReturnValueOnce(firstRun.promise).mockResolvedValue();
+    const events: string[] = [];
+    task
+      .mockImplementationOnce(async () => {
+        events.push('first started');
+        await firstRun.promise;
+        events.push('first finished');
+      })
+      .mockImplementation(async () => {
+        events.push('second started');
+      });
     subscribe();
 
     online$.next({ scheduleRetry: jest.fn() });
     await nextTick();
-    const [[firstSignal]] = task.mock.calls;
 
     online$.next({ scheduleRetry: jest.fn() });
     await nextTick();
-
-    expect(firstSignal.aborted).toBe(true);
-    expect(task).toHaveBeenCalledTimes(1);
+    expect(events).toEqual(['first started']);
 
     firstRun.resolve();
     await nextTick();
 
-    expect(task).toHaveBeenCalledTimes(2);
-    expect(abortedOnEntry).toEqual([false, false]);
+    expect(events).toEqual(['first started', 'first finished', 'second started']);
   });
 
   it(`doesn't schedule a retry when a replaced run fails`, async () => {
@@ -102,7 +93,7 @@ describe('createOnlineStatusTaskRunner', () => {
 
     const secondScheduleRetry = jest.fn();
     online$.next({ scheduleRetry: secondScheduleRetry });
-    firstRun.reject(new Error('Aborted'));
+    firstRun.reject(new Error('Some error'));
     await nextTick();
 
     expect(firstScheduleRetry).not.toHaveBeenCalled();
@@ -125,10 +116,9 @@ describe('createOnlineStatusTaskRunner', () => {
 
     // The second run was replaced while it waited for the first, so only the third one runs.
     expect(task).toHaveBeenCalledTimes(2);
-    expect(abortedOnEntry).toEqual([false, false]);
   });
 
-  it('aborts the running task on unsubscribe', async () => {
+  it(`doesn't schedule a retry when a run fails after unsubscribe`, async () => {
     const firstRun = createDeferred();
     task.mockReturnValueOnce(firstRun.promise);
     const subscription = subscribe();
@@ -136,13 +126,11 @@ describe('createOnlineStatusTaskRunner', () => {
     const scheduleRetry = jest.fn();
     online$.next({ scheduleRetry });
     await nextTick();
-    const [[signal]] = task.mock.calls;
 
     subscription.unsubscribe();
-    firstRun.reject(new Error('Aborted'));
+    firstRun.reject(new Error('Some error'));
     await nextTick();
 
-    expect(signal.aborted).toBe(true);
     expect(scheduleRetry).not.toHaveBeenCalled();
   });
 });

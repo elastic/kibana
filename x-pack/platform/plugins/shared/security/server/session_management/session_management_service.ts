@@ -95,14 +95,13 @@ export class SessionManagementService {
     this.statusSubscription = online$
       .pipe(
         switchMap(
-          createOnlineStatusTaskRunner(async (signal) => {
+          createOnlineStatusTaskRunner(async () => {
             // Initialize the index first so the session index and its shards are fully ready
             // before the cleanup task is registered. Task Manager fires newly created tasks
             // immediately, so registering before initialization completes would cause the
             // cleanup task to open a PIT on an index whose shards may not yet be available,
             // resulting in 503 errors on first-ever project bootstrap.
             await this.sessionIndex.initialize();
-            signal.throwIfAborted();
             await this.scheduleCleanupTask(taskManager);
           })
         )
