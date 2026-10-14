@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConversationPublicClient, MetadataPatchContext } from '@kbn/agent-builder-server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { DismissReason } from '@kbn/proposals-common';
+import { waitForMetadataChangeEvents } from '../../conversation_events/metadata_change_events';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type {
@@ -309,6 +310,8 @@ export class InvestigationStatusService {
       { status: body.status },
       { access: 'converse', ...(context ? { context } : {}) }
     );
+
+    await waitForMetadataChangeEvents(request);
 
     return {
       conversation_id: updated.id,

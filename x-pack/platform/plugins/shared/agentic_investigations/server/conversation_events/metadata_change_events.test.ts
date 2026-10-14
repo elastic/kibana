@@ -8,7 +8,11 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConversationMetadataPatchedEvent } from '@kbn/agent-builder-server';
-import { registerMetadataChangeEvents, toTimelineEvents } from './metadata_change_events';
+import {
+  registerMetadataChangeEvents,
+  toTimelineEvents,
+  waitForMetadataChangeEvents,
+} from './metadata_change_events';
 
 const patched = (
   overrides: Partial<ConversationMetadataPatchedEvent>
@@ -162,15 +166,76 @@ describe('registerMetadataChangeEvents', () => {
     expect(getConversationClient).not.toHaveBeenCalled();
   });
 
+  it('retries a transient failure and stores the events', async () => {
+    const addEvents = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('unavailable'))
+      .mockResolvedValue([]);
+    const { listener, logger } = setup(addEvents);
+    const request = httpServerMock.createKibanaRequest();
+
+    listener(request, patched({ changes: { status: { to: 'closed' } } }));
+    await waitForMetadataChangeEvents(request);
+
+    expect(addEvents).toHaveBeenCalledTimes(2);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not retry a rejected write', async () => {
+    const addEvents = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error('no'), { statusCode: 403 }));
+    const { listener, logger } = setup(addEvents);
+    const request = httpServerMock.createKibanaRequest();
+
+    listener(request, patched({ changes: { status: { to: 'closed' } } }));
+    await waitForMetadataChangeEvents(request);
+
+    expect(addEvents).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no'));
+  });
+
   it('logs a warning when the event cannot be written', async () => {
     const { listener, logger } = setup(jest.fn().mockRejectedValue(new Error('denied')));
 
-    listener(
-      httpServerMock.createKibanaRequest(),
-      patched({ changes: { status: { to: 'closed' } } })
-    );
-    await new Promise(process.nextTick);
+    const request = httpServerMock.createKibanaRequest();
+    listener(request, patched({ changes: { status: { to: 'closed' } } }));
+    await waitForMetadataChangeEvents(request);
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('denied'));
+  });
+
+  describe('waitForMetadataChangeEvents', () => {
+    it('resolves once the write of the same request is stored, without blocking the listener', async () => {
+      let finishWrite!: () => void;
+      const { listener, addEvents } = setup(
+        jest.fn().mockReturnValue(new Promise<void>((resolve) => (finishWrite = resolve)))
+      );
+      const request = httpServerMock.createKibanaRequest();
+
+      listener(request, patched({ changes: { status: { from: 'open', to: 'closed' } } }));
+
+      let waited = false;
+      const waiting = waitForMetadataChangeEvents(request).then(() => (waited = true));
+      await new Promise(process.nextTick);
+      expect(addEvents).toHaveBeenCalled();
+      expect(waited).toBe(false);
+
+      finishWrite();
+      await waiting;
+      expect(waited).toBe(true);
+    });
+
+    it('resolves even when the write failed, and ignores other requests', async () => {
+      const { listener } = setup(jest.fn().mockRejectedValue(new Error('denied')));
+      const request = httpServerMock.createKibanaRequest();
+
+      listener(request, patched({ changes: { status: { to: 'closed' } } }));
+
+      await expect(waitForMetadataChangeEvents(request)).resolves.toBeUndefined();
+      await expect(
+        waitForMetadataChangeEvents(httpServerMock.createKibanaRequest())
+      ).resolves.toBeUndefined();
+    });
   });
 });

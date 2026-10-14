@@ -350,10 +350,10 @@ describe('AssignmentsService.assign', () => {
     expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
   });
 
-  it('returns the conversation from patchMetadata', async () => {
-    const updatedConv = { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: ['user-1'] } };
+  it('returns the conversation re-read after the timeline events are written', async () => {
+    const reread = { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: ['user-1'] } };
     const client = makeClient({
-      patchMetadata: jest.fn().mockResolvedValue({ conversation: updatedConv }),
+      get: jest.fn().mockResolvedValueOnce(MOCK_CONVERSATION_PUBLIC).mockResolvedValueOnce(reread),
     });
     const service = makeService(client);
 
@@ -364,6 +364,27 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(result).toBe(updatedConv);
+    expect(result).toBe(reread);
+  });
+
+  it('falls back to the patched conversation when the caller can no longer read it', async () => {
+    const patchedConv = { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: [] } };
+    const client = makeClient({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_CONVERSATION_PUBLIC)
+        .mockRejectedValueOnce(new Error('forbidden')),
+      patchMetadata: jest.fn().mockResolvedValue({ conversation: patchedConv }),
+    });
+    const service = makeService(client);
+
+    const result = await service.assign({
+      request,
+      conversationId: 'conv-1',
+      assignees: [],
+      expectedTemplate: 'escalation',
+    });
+
+    expect(result).toBe(patchedConv);
   });
 });

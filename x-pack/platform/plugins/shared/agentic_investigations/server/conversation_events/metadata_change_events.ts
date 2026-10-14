@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   AgentBuilderPluginSetup,
@@ -85,13 +86,49 @@ export const toTimelineEvents = (
   return events;
 };
 
+const WRITE_RETRIES = 2;
+const WRITE_MIN_TIMEOUT_MS = 100;
+
+const getStatusCode = (error: unknown): number | undefined => {
+  const e = error as {
+    statusCode?: number;
+    output?: { statusCode?: number };
+    meta?: { statusCode?: number };
+  };
+  return e?.statusCode ?? e?.output?.statusCode ?? e?.meta?.statusCode;
+};
+
+/** Client errors such as a missing access or conversation will fail the same way again. */
+const isPermanentFailure = (error: unknown): boolean => {
+  const status = getStatusCode(error);
+  return status !== undefined && status >= 400 && status < 500 && status !== 408 && status !== 429;
+};
+
+/**
+ * Timeline writes in flight per request. The bus is fire-and-forget, so a route that must respond
+ * with the event already on the timeline awaits its own request's writes through
+ * `waitForMetadataChangeEvents`. Writes by automation have no route waiting and stay best-effort.
+ * Each write retries transient failures, so both kinds benefit.
+ */
+const pendingWrites = new WeakMap<KibanaRequest, Array<Promise<void>>>();
+
+/** Resolves once the timeline events produced by metadata writes of this request are stored. */
+export const waitForMetadataChangeEvents = async (request: KibanaRequest): Promise<void> => {
+  const writes = pendingWrites.get(request);
+  if (!writes) return;
+  pendingWrites.delete(request);
+  // The writes handle their own errors, so this never rejects.
+  await Promise.all(writes);
+};
+
 /**
  * Records status and assignee changes of investigations and escalations on their timeline, however
  * the change was made: UI, API, workflow step or agent run. Registers the status event type and
  * listens to Agent Builder's metadata changes.
  *
  * Best-effort: the event is written after the change, so a failed write (e.g. a user who removed
- * their own access) is logged and never fails the change itself.
+ * their own access) is logged and never fails the change itself. The listener does not hold up the
+ * write; callers that need the event stored before they respond use `waitForMetadataChangeEvents`.
  */
 export const registerMetadataChangeEvents = ({
   agentBuilder,
@@ -111,10 +148,21 @@ export const registerMetadataChangeEvents = ({
     const events = toTimelineEvents(event);
     if (events.length === 0) return;
 
-    void (async () => {
+    const write = (async () => {
       try {
-        const client = await getConversationClient(request);
-        await client.addEvents({ conversationId: event.conversationId, events });
+        await pRetry(
+          async () => {
+            try {
+              const client = await getConversationClient(request);
+              await client.addEvents({ conversationId: event.conversationId, events });
+            } catch (error) {
+              // Retrying a rejected write can't succeed, so give up at once.
+              if (isPermanentFailure(error)) throw new pRetry.AbortError(error as Error);
+              throw error;
+            }
+          },
+          { retries: WRITE_RETRIES, minTimeout: WRITE_MIN_TIMEOUT_MS }
+        );
       } catch (error) {
         logger.warn(
           `Failed to add metadata change events to ${event.conversationId}: ${
@@ -123,5 +171,6 @@ export const registerMetadataChangeEvents = ({
         );
       }
     })();
+    pendingWrites.set(request, [...(pendingWrites.get(request) ?? []), write]);
   });
 };
