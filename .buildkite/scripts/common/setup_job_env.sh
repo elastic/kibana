@@ -20,9 +20,12 @@ source .buildkite/scripts/common/util.sh
     kibana-deploy-project-from-pr | \
     kibana-chromium-linux-build | \
     kibana-console-definitions-sync | \
+    kibana-emergency-release | \
     kibana-es-ql-grammar-sync | \
     kibana-opentelemetry-semantic-conventions-sync | \
-    kibana-scout-update-metadata)
+    kibana-scout-update-metadata | \
+    kibana-tests | \
+    kibana-tests-emergency)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
       ;;
     *)
