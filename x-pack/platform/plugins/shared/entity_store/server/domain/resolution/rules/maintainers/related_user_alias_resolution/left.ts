@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getEuidFromObject } from '../../../../../../common/domain/euid';
+import { getBuiltInEntityDefinition } from '../../../../../../common/domain/definitions/registry';
 import { SEED_IDENTITY_PREFILTER_FIELDS, type RelatedUserBundle, type SeedEntity } from './types';
 
 // User identities — and the `related.user` alias list this rule reads — live in
@@ -125,7 +126,7 @@ export const readRelatedUserBundleForSeed = async ({
     if (!source) {
       return false;
     }
-    return getEuidFromObject('user', source) === seed.entityId;
+    return getEuidFromObject(getBuiltInEntityDefinition('user'), source) === seed.entityId;
   });
 
   const source = matchingHit?._source;

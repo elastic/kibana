@@ -35,13 +35,13 @@ export const OBSERVABILITY_ALERTING_SURFACES = [
 ] as const;
 
 export const OBSERVABILITY_ALERTING_RULES_V1_URL_RE =
-  /\/app\/observability\/alerting\/rules\/v1(\/|$|\?|#)/;
+  /\/app\/observability\/alerting\/rules\/classic(\/|$|\?|#)/;
 export const OBSERVABILITY_ALERTING_RULES_V2_URL_RE =
-  /\/app\/observability\/alerting\/rules\/v2(\/|$|\?|#)/;
+  /\/app\/observability\/alerting\/rules\/universal(\/|$|\?|#)/;
 export const OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE =
   /\/app\/observability\/alerting\/alerts\/[^/?#]+/;
 export const OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE =
-  /\/app\/observability\/alerting\/rules\/v2\/[^/?#]+/;
+  /\/app\/observability\/alerting\/rules\/universal\/[^/?#]+/;
 export const MANAGEMENT_ALERTING_V2_EPISODES_URL_RE = /\/app\/management\/alertingV2\/episodes/;
 export const MANAGEMENT_ALERTING_V2_RULES_URL_RE = /\/app\/management\/alertingV2\/rules/;
 export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2(\/|$|\?|#)/;
