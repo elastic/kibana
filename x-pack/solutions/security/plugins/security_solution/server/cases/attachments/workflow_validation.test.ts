@@ -65,7 +65,8 @@ describe('attachment workflow validation', () => {
     ).toThrow('Attack attachment workflow origins require selected attack inputs.');
   });
 
-  it('rejects event targets without document inputs', () => {    expect(() =>
+  it('rejects event targets without document inputs', () => {
+    expect(() =>
       validateEventWorkflowTargets({
         targets: [{ id: 'event-1' }],
         inputs: {},
