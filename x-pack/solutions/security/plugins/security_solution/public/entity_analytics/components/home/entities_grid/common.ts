@@ -57,7 +57,9 @@ const IDENTITY_KEEP_FIELDS = [
   ...new Set([
     ...ALLOWED_ENTITY_TYPES.flatMap((t) => {
       const definition = getBuiltInEntityDefinition(t);
-      const storedFields = new Set(definition.fields.map(({ destination }) => destination));
+      const storedFields = new Set(
+        definition.extraction.fields.map(({ destination }) => destination)
+      );
       const { exactMatchFields, prefixMatchFields } = getEuidNamespaceSourceFields(definition);
       return [
         ...getEuidSourceFields(definition).identitySourceFields.filter((field) =>
