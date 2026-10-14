@@ -89,6 +89,31 @@ describe('AppMenuActionButton', () => {
     expect(await screen.findByText('Save tooltip')).toBeInTheDocument();
   });
 
+  it('should keep a disabled main action with a tooltip focusable and the secondary action working', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppMenuActionButton
+        {...defaultProps}
+        tooltipContent="Save disabled tooltip"
+        splitButtonProps={{ ...splitButtonProps, isMainButtonDisabled: true }}
+        testId="test-split-button"
+      />
+    );
+
+    const mainButton = screen.getByTestId('test-split-button');
+    expect(mainButton).toHaveAttribute('aria-disabled', 'true');
+
+    await user.tab();
+    expect(mainButton).toHaveFocus();
+    expect(await screen.findByText('Save disabled tooltip')).toBeInTheDocument();
+
+    await user.keyboard('{Enter}');
+    expect(defaultProps.run).not.toHaveBeenCalled();
+
+    await user.click(screen.getByLabelText('More options'));
+    expect(splitButtonProps.run).toHaveBeenCalledTimes(1);
+  });
+
   it('should call split button run function when secondary button is clicked', async () => {
     const user = userEvent.setup();
     render(<AppMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
