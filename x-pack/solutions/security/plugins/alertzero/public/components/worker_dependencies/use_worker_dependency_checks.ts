@@ -122,8 +122,11 @@ export const useWorkerDependencyChecks = (workerId: string) => {
   const threatReportWorkflows = useQuery({
     queryKey: queryKeys.workerDependencies.threatReportWorkflows(spaceBasePath),
     enabled: needsThreatReports,
+    // Ingest and enrich are installed once in the default space, so they are addressed there
+    // from every space: the server base path has no `/s/{id}` prefix.
     queryFn: () =>
-      http.post<WorkflowState[]>(WORKFLOWS_MGET_PATH, {
+      http.post<WorkflowState[]>(`${http.basePath.serverBasePath}${WORKFLOWS_MGET_PATH}`, {
+        prependBasePath: false,
         version: '2023-10-31',
         body: JSON.stringify({
           ids: THREAT_REPORT_WORKFLOWS.map(({ id }) => id),
