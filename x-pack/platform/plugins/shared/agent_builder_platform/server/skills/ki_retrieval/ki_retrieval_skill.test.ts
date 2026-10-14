@@ -7,6 +7,7 @@
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { kiRetrievalSkill } from './ki_retrieval_skill';
 
 describe('kiRetrievalSkill', () => {
@@ -20,8 +21,9 @@ describe('kiRetrievalSkill', () => {
     expect(isAllowedBuiltinSkill(kiRetrievalSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(kiRetrievalSkill.experimental).toBe(true);
+  it('is hidden in spaces where the Context Engine is off', () => {
+    expect(kiRetrievalSkill.experimental).toBeFalsy();
+    expect(kiRetrievalSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
   it('ships non-empty markdown content', () => {

@@ -73,19 +73,13 @@ FROM .alerts-security.alerts-default
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
 | EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL
 | STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
-| RENAME effective_id AS \`entity.id\`
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
-| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 1 days
-| EVAL severe_id = CASE(has_severe_alert, entity.id, null)
-| EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)
-| EVAL new_alerting_id = CASE(is_new, entity.id, null)
+| EVAL severe_id = CASE(has_severe_alert, effective_id, null)
+| EVAL watchlisted_id = CASE(is_watchlisted, effective_id, null)
 | STATS
-    severe_alerts_count      = COUNT_DISTINCT(severe_id),
+    severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
-    watchlisted_count        = COUNT_DISTINCT(watchlisted_id),
-    watchlisted_entity_ids   = VALUES(watchlisted_id),
-    new_alerting_count       = COUNT_DISTINCT(new_alerting_id),
-    new_alerting_entity_ids  = VALUES(new_alerting_id)"
+    watchlisted_count        = COUNT(watchlisted_id),
+    watchlisted_entity_ids   = VALUES(watchlisted_id)"
 `;
 
 exports[`needs attention tile queries over 24h without entity filters builds the entities with anomalies query 1`] = `
@@ -149,7 +143,8 @@ TRUE, _euid_branch_1_formula, NULL))
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 24h without entity filters builds the newly high or critical query 1`] = `
@@ -179,7 +174,8 @@ FROM (
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 24h without entity filters builds the risk movers query 1`] = `
@@ -204,7 +200,8 @@ FROM (
         effective_id   = MAX(effective_id)
         BY \`entity.id\`
 | WHERE current_score - boundary_score >= 10
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the alert based tiles query 1`] = `
@@ -281,19 +278,13 @@ FROM .alerts-security.alerts-default
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
 | EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL
 | STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
-| RENAME effective_id AS \`entity.id\`
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
-| EVAL is_new = entity.lifecycle.first_seen >= NOW() - 30 days
-| EVAL severe_id = CASE(has_severe_alert, entity.id, null)
-| EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)
-| EVAL new_alerting_id = CASE(is_new, entity.id, null)
+| EVAL severe_id = CASE(has_severe_alert, effective_id, null)
+| EVAL watchlisted_id = CASE(is_watchlisted, effective_id, null)
 | STATS
-    severe_alerts_count      = COUNT_DISTINCT(severe_id),
+    severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
-    watchlisted_count        = COUNT_DISTINCT(watchlisted_id),
-    watchlisted_entity_ids   = VALUES(watchlisted_id),
-    new_alerting_count       = COUNT_DISTINCT(new_alerting_id),
-    new_alerting_entity_ids  = VALUES(new_alerting_id)"
+    watchlisted_count        = COUNT(watchlisted_id),
+    watchlisted_entity_ids   = VALUES(watchlisted_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the entities with anomalies query 1`] = `
@@ -358,7 +349,8 @@ TRUE, _euid_branch_1_formula, NULL))
 | WHERE entity.name IS NOT NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the newly high or critical query 1`] = `
@@ -389,7 +381,8 @@ FROM (
 | WHERE entity.name IS NOT NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the risk movers query 1`] = `
@@ -415,5 +408,6 @@ FROM (
         effective_id   = MAX(effective_id)
         BY \`entity.id\`
 | WHERE current_score - boundary_score >= 10
-| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)"
+| STATS BY effective_id
+| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
