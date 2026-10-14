@@ -7,7 +7,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { KI_STATUS_BADGE_COLOR, resolveKiStatus } from '../../../utils/ki_expiry';
+import { KI_STATUS_BADGE_COLOR, resolveKiStatus } from '../../../../../common/ki_expiry';
 import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
 import { kiLabelCapitalizeCss } from './ki_type_display';
 

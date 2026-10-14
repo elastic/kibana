@@ -8,7 +8,7 @@
 import type { AppHeaderBadge } from '@kbn/app-header';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { KI_STATUS_BADGE_COLOR, resolveKiStatus } from '../../../../utils/ki_expiry';
+import { KI_STATUS_BADGE_COLOR, resolveKiStatus } from '../../../../../../common/ki_expiry';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
 import type { KiLifecycleStatus } from '../../../../../../common/step_types/ki';
 import { formatKiTypeLabel } from '../../../../utils/ki_display';
@@ -32,12 +32,16 @@ const customAppHeaderBadge = ({
   renderCustomBadge: () => renderBadge(dataTestSubj),
 });
 
+const readKiDocumentType = (document: KiDocument): string | undefined => {
+  const typeValue = document.type;
+  return typeof typeValue === 'string' && typeValue.length > 0 ? typeValue : undefined;
+};
+
 export const getViewKiHeaderBadges = (
   document: KiDocument,
   lifecycleStatus?: KiLifecycleStatus
 ): AppHeaderBadge[] | undefined => {
-  const type =
-    typeof document.type === 'string' && document.type.length > 0 ? document.type : undefined;
+  const type = readKiDocumentType(document);
   const kiStatus = resolveKiStatus(lifecycleStatus, document.expires_at);
 
   const badges: AppHeaderBadge[] = [

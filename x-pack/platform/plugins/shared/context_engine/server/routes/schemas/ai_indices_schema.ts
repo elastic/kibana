@@ -324,6 +324,15 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
+  lifecycle_status: schema.maybe(
+    schema.arrayOf(kiLifecycleStatusQuerySchema, {
+      maxSize: KI_LIFECYCLE_STATUSES.length,
+      meta: {
+        description:
+          'When set, return only KIs whose governance.lifecycle.status is in this list (unset counts as active). When omitted, deleted KIs are excluded.',
+      },
+    })
+  ),
 });
 
 export const getKiQuerySchema = schema.object({
