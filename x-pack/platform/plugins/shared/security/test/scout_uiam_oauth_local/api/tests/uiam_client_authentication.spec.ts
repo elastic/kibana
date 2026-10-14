@@ -6,8 +6,14 @@
  */
 
 import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
+import {
   MOCK_IDP_GATEWAY_SHARED_SECRET,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
+  MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -94,22 +100,27 @@ apiTest.describe(
 
     apiTest(
       'preserves the API key authorization scheme for direct UIAM calls',
-      async ({ apiClient, esClient, ephemeralToken }) => {
-        const grantResponse = await apiClient.post('test_endpoints/api_keys/_grant', {
-          headers: {
-            ...COMMON_UNSAFE_HEADERS,
-            Authorization: `Bearer ${ephemeralToken}`,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
-          },
+      async ({ apiClient, ephemeralToken }) => {
+        const grantResponse = await apiClient.post('test_endpoints/uiam/api_keys/_grant', {
+          headers: { ...COMMON_UNSAFE_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            name: 'scout-oauth-client-internal-key',
+            authcScheme: 'Bearer',
+            credential: ephemeralToken,
+          },
         });
 
         expect(grantResponse).toHaveStatusCode(200);
-        const { id, encoded }: { id: string; encoded: string } = grantResponse.body;
+        const { id, api_key: apiKey }: { id: string; api_key: string } = grantResponse.body;
+        const credential = new HTTPAuthorizationHeader('ApiKey', apiKey);
         const apiKeyHeaders = {
           ...COMMON_UNSAFE_HEADERS,
-          Authorization: `ApiKey ${encoded}`,
+          Authorization: credential.toString(),
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            MOCK_IDP_UIAM_SHARED_SECRET,
+            credential
+          ),
         };
         const createResponse = await apiClient.post('internal/security/oauth/clients', {
           headers: apiKeyHeaders,
@@ -126,11 +137,17 @@ apiTest.describe(
           expect(createResponse).toHaveStatusCode(200);
           expect(clientId).toBeDefined();
         } finally {
-          await apiClient.delete(
-            `internal/security/oauth/clients/${encodeURIComponent(clientId)}`,
-            { headers: apiKeyHeaders }
-          );
-          await esClient.security.invalidateApiKey({ ids: [id] });
+          if (clientId) {
+            await apiClient.delete(
+              `internal/security/oauth/clients/${encodeURIComponent(clientId)}`,
+              { headers: apiKeyHeaders }
+            );
+          }
+          await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
+            headers: { ...COMMON_UNSAFE_HEADERS },
+            responseType: 'json',
+            body: { id, authcScheme: 'ApiKey', credential: apiKey },
+          });
         }
       }
     );
