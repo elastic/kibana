@@ -403,7 +403,8 @@ export const significantEventBaseSchema = lazySchema(() =>
       .describe(
         dedent`
         Provisional, evidence-grounded technical mechanism for this incident. Max ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} chars.
-        In one sentence, name the deepest supported failing component or dependency, its concrete failure signature or mechanism, and how it propagates to the affected operation.
+        One plain sentence, the one you would say aloud to the on-call engineer: the deepest supported failing component or dependency, its concrete failure signature or mechanism, and how it propagates to the affected operation.
+        Good: "inventory-db refuses connections on port 5432, so checkout stock reads fail." Bad: "A backend connectivity issue is impacting multiple flows."
 
         ${SYMPTOM_HYPOTHESIS_ROLE_RULE}
         Do not restate the title or summary. Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
@@ -417,12 +418,12 @@ export const significantEventBaseSchema = lazySchema(() =>
       .describe(
         dedent`
         Objective, self-contained account of the observed state and potential impact. Max ${MAX_SUMMARY_LENGTH} chars.
-        Lead with the normalized observed error signature — including the error type or code, operation, protocol, endpoint, port, and relevant non-sensitive address — and the affected component or dependency path, then state whether impact is confirmed, possible, or not established. When no failure signature is observed, lead with the concise observed success, health, or off-topic signature instead. Include onset, current or recovery state, and magnitude only when known, stating magnitude in plain words (for example "about half of the operation's log lines"); exact counts and percentages belong in the signal descriptions and assessment_note.
+        Open with one plain sentence stating the observed failure in concrete terms: the normalized error signature (error type or code, operation, protocol, endpoint, port, relevant non-sensitive address) and the affected component or dependency path. When no failure signature is observed, open with the concise observed success, health, or off-topic signature instead. Then, in at most two more plain sentences, state whether impact is confirmed, possible, or not established, plus onset, current or recovery state, and magnitude only when known, stating magnitude in plain words (for example "about half of the operation's log lines"); exact counts and percentages belong in the signal descriptions and assessment_note. Stop there.
 
         ${SUMMARY_ROLE_RULE}
         Use matched query KI descriptions or resolved feature metadata to name the observed component or dependency path when it clarifies the failure for an operator. Possible impact may come from the same context, but must be conditional and scoped.
 
-        On a continuation, build on the stored summary: keep its existing wording for the signatures and paths it already covers (rephrase only to fit the limit), add new sentences only for what is newly confirmed, and leave it unchanged when nothing new matters to an operator. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
+        On a continuation, build on the stored summary: keep its existing wording, including its opening sentence, for the signatures and paths it already covers (rephrase only to fit the limit), add new sentences only for what is newly confirmed, and never rewrite it; leave it unchanged when nothing new matters to an operator. Counts and timestamps change every cycle, so keep them out of it. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
         Do not repeat the title or symptom_hypothesis narrative. Preserve decisive technical details from the canonical error signature when they identify the observed state. Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, detection artifacts (p_value or severity_score), memory-page presence, or unsupported impact claims.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
