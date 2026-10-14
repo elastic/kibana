@@ -19,7 +19,6 @@ import {
   EuiTitle,
   logicalCSS,
   useEuiMinBreakpoint,
-  useEuiMaxBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
@@ -32,7 +31,10 @@ import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
+import {
+  getGroupAction,
+  useFetchGroupActions,
+} from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
@@ -44,22 +46,23 @@ import { AlertEpisodeTrendChartSection } from '@kbn/alerting-v2-episodes-ui/comp
 import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
+import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_layout';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
-import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { useAlertAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { useAlertingLocators } from '../../application/locator_context';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
+import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
+import { getDiscoverHrefForRuleAndAlertTimestamp } from '../../utils/discover_href_for_alert';
 import {
-  filterEpisodeActionsByPrivilege,
-  EPISODE_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_episode_actions_by_privilege';
+  filterAlertActionsByPrivilege,
+  ALERT_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_alert_actions_by_privilege';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
@@ -81,15 +84,14 @@ export function EpisodeDetailsPage() {
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
-  const { services } = useKibana<AlertEpisodesKibanaServices>();
+  const { services } = useKibana<AlertsKibanaServices>();
   const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
-    ? EPISODE_ACTIONS_PRIVILEGE.all
-    : EPISODE_ACTIONS_PRIVILEGE.read;
+    ? ALERT_ACTIONS_PRIVILEGE.all
+    : ALERT_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
 
-  const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
@@ -126,7 +128,7 @@ export function EpisodeDetailsPage() {
   });
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
-  const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
+  const groupAction = groupHash ? getGroupAction(groupActionsMap, ruleId, groupHash) : undefined;
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
@@ -138,7 +140,7 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
-  useEpisodeAutoAttach(
+  useAlertAutoAttach(
     episode,
     {
       ruleName: episodeRuleName,
@@ -199,7 +201,7 @@ export function EpisodeDetailsPage() {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      filterEpisodeActionsByPrivilege(
+      filterAlertActionsByPrivilege(
         createEpisodeActions({
           http: services.http,
           overlays: services.overlays,
@@ -211,13 +213,15 @@ export function EpisodeDetailsPage() {
           expressions: services.expressions,
           spaces: services.spaces,
           queryClient,
+          isRuleAvailable: (selectedRuleId) =>
+            isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
           getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
-            getDiscoverHrefForRuleAndEpisodeTimestamp({
+            getDiscoverHrefForRuleAndAlertTimestamp({
               share: services.share,
               capabilities: services.application.capabilities,
               uiSettings: services.uiSettings,
               ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
-              episodeIsoTimestamp: ts,
+              alertIsoTimestamp: ts,
             }),
         }),
         alertsCapability
@@ -395,7 +399,7 @@ export function EpisodeDetailsPage() {
     <KibanaPageTemplate
       paddingSize="none"
       bottomBorder={false}
-      data-test-subj="alertingV2EpisodeDetailsPage"
+      data-test-subj="alertingV2AlertDetailsPage"
       minHeight={0}
       grow={false}
       css={css`
@@ -456,27 +460,7 @@ export function EpisodeDetailsPage() {
               paddingSize="none"
               css={css`
                 min-width: 0;
-
-                ${smallMediaQuery} {
-                  [class*='InternalDocViewerTable'] {
-                    display: block;
-                    height: unset;
-                  }
-                }
-
-                ${largeMediaQuery} {
-                  // The doc-viewer table uses a fixed height by default; set
-                  // it to 100% so it fills the available flex height instead
-                  // of measuring against \`window.innerHeight\`.
-                  [class*='InternalDocViewerTable'] {
-                    height: 100%;
-
-                    & > :nth-child(2),
-                    & > :nth-child(4) {
-                      padding-right: ${euiTheme.size.s};
-                    }
-                  }
-                }
+                min-block-size: 0;
               `}
             >
               {actualMainPanel === 'timeline' ? (
@@ -493,8 +477,20 @@ export function EpisodeDetailsPage() {
                   episodeStart={episode?.first_timestamp}
                 />
               ) : actualMainPanel === 'metadata' ? (
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-                  <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
+                <EuiPanel
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="l"
+                  css={css`
+                    block-size: 100%;
+                    min-block-size: 0;
+                  `}
+                >
+                  <AlertEpisodeMetadataSection
+                    episodeId={episodeId}
+                    services={metadataServices}
+                    decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
+                  />
                 </EuiPanel>
               ) : (
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">

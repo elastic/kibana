@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
@@ -14,20 +14,27 @@ import type { CriteriaFields } from '../types';
 interface HostToCriteriaOptions {
   hostItem: HostItem;
   entityRecord?: EntityStoreRecord | null;
-  euid?: EntityStoreEuid;
+  euidApi?: EntityStoreEuidApi;
 }
 export const hostToCriteria = (opts: HostToCriteriaOptions): CriteriaFields[] => {
-  const { hostItem, entityRecord, euid } = opts;
+  const { hostItem, entityRecord, euidApi } = opts;
   if (hostItem == null) {
     return [];
   }
-  if (euid) {
+  if (euidApi) {
+    const { euid, getBuiltInEntityDefinition } = euidApi;
     const inputDoc = entityRecord ? entityRecord : hostItem;
-    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument('host', inputDoc);
+    const scopedDsl = euid.dsl.getEuidFilterBasedOnDocument(
+      getBuiltInEntityDefinition('host'),
+      inputDoc
+    );
     if (scopedDsl != null) {
       return [];
     }
-    const identifiers = euid.getEntityIdentifiersFromDocument('host', inputDoc);
+    const identifiers = euid.getEntityIdentifiersFromDocument(
+      getBuiltInEntityDefinition('host'),
+      inputDoc
+    );
     if (identifiers != null && Object.keys(identifiers).length > 0) {
       return Object.entries(identifiers).map(([fieldName, fieldValue]) => ({
         fieldName,

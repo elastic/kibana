@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { registerAttachmentUiDefinitions } from './attachment_types';
 import { registerConversationTemplateTabs } from './conversation_template_tabs';
+import { registerConversationEventUiDefinitions } from './conversation_events';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -44,6 +45,10 @@ export class AgentBuilderPlatformPlugin
 
     registerConversationTemplateTabs({
       conversationTemplates: agentBuilder.conversationTemplates,
+    });
+
+    registerConversationEventUiDefinitions({
+      conversationEvents: agentBuilder.conversationEvents,
     });
 
     return {};

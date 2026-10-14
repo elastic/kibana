@@ -24,7 +24,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { EisModelStatus, CspRegion } from '../common/types';
+import type { EisModelStatus } from '../common/types';
 
 export * from '../common/types';
 
@@ -110,11 +110,7 @@ export interface RegionPolicyConflictArtifact {
   endpointIds: string[];
 }
 
-export interface RegionZoneCount {
-  geo: string;
-  modelCount: number;
-  totalCount: number;
-  modelRegions: CspRegion[];
-  /** True when the model only has geo-level availability (no csp+region data). Show badge without counter. */
-  geoOnly: boolean;
+export interface RegionOption {
+  key: string;
+  label: string;
 }

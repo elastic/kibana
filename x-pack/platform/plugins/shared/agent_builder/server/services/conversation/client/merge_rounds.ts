@@ -48,6 +48,8 @@ export const mergeRounds = (
     origin: previous.origin,
     author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
+    // The folded round is interrupted iff its last execution is.
+    ...(next.interruption ? { interruption: next.interruption } : {}),
   };
 
   return mergedRound;
@@ -67,6 +69,8 @@ export const mergeModelUsage = (
   a: RoundModelUsageStats,
   b: RoundModelUsageStats
 ): RoundModelUsageStats => {
+  // the last call of the merged round is the later execution's
+  const lastCallInputTokens = b.last_call_input_tokens ?? a.last_call_input_tokens;
   return {
     connector_id: a.connector_id,
     llm_calls: a.llm_calls + b.llm_calls,
@@ -76,6 +80,7 @@ export const mergeModelUsage = (
       ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
       : {}),
     model: a.model ?? b.model,
+    ...(lastCallInputTokens !== undefined ? { last_call_input_tokens: lastCallInputTokens } : {}),
   };
 };
 
@@ -107,12 +112,16 @@ export const applyResumeResolution = (
     if (isToolCallStep(step) && step.results.length === 0) {
       const resolved = resolvedByToolCallId.get(step.tool_call_id);
       if (resolved) {
+        // The resolving copy owns the mark: an earlier interrupted resume may have marked the
+        // pending call, and a later successful retry clears it.
+        const { interrupted, ...unmarked } = step;
         return {
-          ...step,
+          ...unmarked,
           results: resolved.results,
           ...(resolved.progression !== undefined
             ? { progression: [...(step.progression ?? []), ...resolved.progression] }
             : {}),
+          ...(resolved.interrupted ? { interrupted: true as const } : {}),
         };
       }
     }

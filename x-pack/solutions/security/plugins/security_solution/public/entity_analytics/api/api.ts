@@ -47,7 +47,6 @@ import type {
   PrivMonPrivilegesResponse,
   PrivmonBulkUploadUsersCSVResponse,
   ReadRiskEngineSettingsResponse,
-  RiskEngineScheduleNowResponse,
   RiskEngineStatusResponse,
   RiskScoreHistoryEntry,
   RiskScoreHistoryResponse,
@@ -97,7 +96,6 @@ import {
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
-  RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_SETTINGS_URL,
   RISK_ENGINE_STATUS_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
@@ -395,31 +393,6 @@ export const useEntityAnalyticsRoutes = () => {
 
       return http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
         version: '1',
-        method: 'POST',
-      });
-    };
-
-    /**
-     * Enable risk score engine
-     */
-    const scheduleNowRiskEngine = async () => {
-      if (isMaintainerRiskScoreV2Enabled) {
-        await http.fetch<{ ok: true }>(
-          getMaintainerRouteWithId(
-            ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN,
-            RISK_SCORE_MAINTAINER_ID
-          ),
-          {
-            method: 'POST',
-            query: ENTITY_STORE_V2_QUERY,
-            body: JSON.stringify({}),
-          }
-        );
-        return { success: true } as RiskEngineScheduleNowResponse;
-      }
-
-      return http.fetch<RiskEngineScheduleNowResponse>(RISK_ENGINE_SCHEDULE_NOW_URL, {
-        version: API_VERSIONS.public.v1,
         method: 'POST',
       });
     };
@@ -782,7 +755,11 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
-    const fetchEntityDetailsHighlights = (
+    const fetchEntityDetailsHighlights = ({
+      params,
+      signal,
+      context,
+    }: {
       params: {
         entityType: string;
         entityIdentifier: string;
@@ -790,23 +767,30 @@ export const useEntityAnalyticsRoutes = () => {
         from: number;
         to: number;
         connectorId: string;
-      },
-      signal?: AbortSignal
-    ): Promise<EntityDetailsHighlightsResponse> =>
+      };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<EntityDetailsHighlightsResponse> =>
       http.fetch(ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
         signal,
+        context,
       });
 
-    const saveEntityAiSummary = (
-      params: SaveEntityAiSummaryParams
-    ): Promise<{ created: boolean }> =>
+    const saveEntityAiSummary = ({
+      params,
+      context,
+    }: {
+      params: SaveEntityAiSummaryParams;
+      context?: KibanaExecutionContext;
+    }): Promise<{ created: boolean }> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
+        context,
       });
 
     /**
@@ -814,15 +798,21 @@ export const useEntityAnalyticsRoutes = () => {
      * `canRead: false` in the response means the user lacks metadata read access
      * and the caller should fall back to on-demand generation.
      */
-    const fetchPersistedAiSummary = (
-      params: { entityType: string; entityIdentifier: string },
-      signal?: AbortSignal
-    ): Promise<GetPersistedAiSummaryResponse> =>
+    const fetchPersistedAiSummary = ({
+      params,
+      signal,
+      context,
+    }: {
+      params: { entityType: string; entityIdentifier: string };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<GetPersistedAiSummaryResponse> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
         query: { entityId: params.entityIdentifier, entityType: params.entityType },
         signal,
+        context,
       });
 
     /**
@@ -1124,7 +1114,6 @@ export const useEntityAnalyticsRoutes = () => {
       initRiskEngine,
       enableRiskEngine,
       disableRiskEngine,
-      scheduleNowRiskEngine,
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,

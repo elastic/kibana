@@ -70,11 +70,15 @@ const buildDefaultDeps = (
 } => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.indices.exists.mockResolvedValue(true);
+  esClient.indices.getMapping.mockResolvedValue({
+    '.kibana-threat-reports': { mappings: { dynamic: 'strict' } },
+  } as never);
   esClient.indices.getFieldMapping.mockResolvedValue(semanticFieldMappings as never);
   esClient.inference.get.mockResolvedValue({} as never);
   esClient.search.mockResolvedValue(buildUsableStatsResponse() as never);
 
   const searchInferenceEndpoints = {
+    features: { get: jest.fn().mockImplementation((featureId: string) => ({ featureId })) },
     endpoints: {
       getForFeature: jest.fn().mockResolvedValue({
         endpoints: [{ connectorId: 'enrich-connector' }],
@@ -141,6 +145,34 @@ describe('getThreatIntelReadiness', () => {
         reasonCodes: ['reports_index_check_failed'],
       })
     );
+  });
+
+  describe('when the reports index exists without its template', () => {
+    const buildUnmanagedDeps = () => {
+      const deps = buildDefaultDeps();
+      deps.esClient.indices.getMapping.mockResolvedValue({
+        '.kibana-threat-reports': { mappings: { dynamic: 'true' } },
+      } as never);
+      return deps;
+    };
+
+    it('returns blocked', async () => {
+      const result = await getThreatIntelReadiness(buildUnmanagedDeps());
+
+      expect(result.status).toBe('blocked');
+    });
+
+    it('returns reports_index_unmanaged', async () => {
+      const result = await getThreatIntelReadiness(buildUnmanagedDeps());
+
+      expect(result.reasonCodes).toEqual(['reports_index_unmanaged']);
+    });
+  });
+
+  it('does not return reports_index_unmanaged for a strict-mapped index', async () => {
+    const result = await getThreatIntelReadiness(buildDefaultDeps());
+
+    expect(result.reasonCodes).not.toContain('reports_index_unmanaged');
   });
 
   it('returns ready when dependencies and usable reports are present', async () => {
@@ -227,6 +259,7 @@ describe('getThreatIntelReadiness', () => {
   it('returns degraded with no_enrich_connector when the enrich feature has no endpoint', async () => {
     const deps = buildDefaultDeps({
       getSearchInferenceEndpoints: jest.fn().mockReturnValue({
+        features: { get: jest.fn().mockImplementation((featureId: string) => ({ featureId })) },
         endpoints: {
           getForFeature: jest.fn().mockResolvedValue({ endpoints: [] }),
         },
@@ -236,6 +269,32 @@ describe('getThreatIntelReadiness', () => {
     const result = await getThreatIntelReadiness(deps);
 
     expect(result.reasonCodes).toContain('no_enrich_connector');
+  });
+
+  it.each([
+    ['alertzero_efficient', 'no_enrich_connector'],
+    ['alertzero_frontier', 'diamond_unavailable'],
+  ])('reports %s as unavailable when the tier is unregistered', async (missingTier, reason) => {
+    const getForFeature = jest.fn().mockResolvedValue({
+      endpoints: [{ connectorId: 'genai-default' }],
+    });
+    const deps = buildDefaultDeps({
+      getSearchInferenceEndpoints: jest.fn().mockReturnValue({
+        features: {
+          get: jest
+            .fn()
+            .mockImplementation((featureId: string) =>
+              featureId === missingTier ? undefined : { featureId }
+            ),
+        },
+        endpoints: { getForFeature },
+      }),
+    });
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect([...result.reasonCodes, ...(result.optional ?? [])]).toContain(reason);
+    expect(getForFeature).not.toHaveBeenCalledWith(missingTier, deps.request);
   });
 
   it('returns degraded with no_enrich_connector when inference plugin is missing', async () => {

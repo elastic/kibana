@@ -53,7 +53,8 @@
       "fileUpload",
       "cps",
       "alertingVTwo",
-      "feedback"
+      "feedback",
+      "searchSessionsManagement"
     ],
     "requiredBundles": [
       "kibanaUtils",

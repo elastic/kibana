@@ -10,10 +10,10 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import {
-  createActionPolicyDataSchema,
+  putActionPolicyDataSchema,
   actionPolicyResponseSchema,
   errorResponseSchema,
-  type CreateActionPolicyData,
+  type PutActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { upsertActionPolicyOasExamples } from './upsert_action_policy_oas_example';
@@ -22,7 +22,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import {
-  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
   ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
@@ -50,7 +50,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
 
   static schemas = {
     request: {
-      body: createActionPolicyDataSchema,
+      body: putActionPolicyDataSchema,
       params: actionPolicyIdParamsSchema,
     },
     response: {
@@ -66,9 +66,9 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
-      404: {
+      403: {
         body: () => errorResponseSchema,
-        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+        description: ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
@@ -85,7 +85,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
-      CreateActionPolicyData
+      PutActionPolicyData
     >,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient
   ) {

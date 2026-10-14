@@ -157,16 +157,16 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       return (
         Boolean(ctx?.instanceId) &&
         Boolean(ctx?.ruleId) &&
-        !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+        !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
       );
     },
     execute: async (eps, http, context) => {
-      const expiry: string | null = context?.expiry ?? null;
+      const snoozedUntil: string | null = context?.snoozedUntil ?? null;
       let succeeded = 0;
       let failed = 0;
       const errors: string[] = [];
 
-      if (expiry === null) {
+      if (snoozedUntil === null) {
         const rules = groupByRule(eps);
         try {
           await bulkMuteAlerts({ http, rules });
@@ -193,7 +193,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
                   http,
                   id: ctx.ruleId,
                   instanceId: ctx.instanceId!,
-                  expiresAt: expiry,
+                  expiresAt: snoozedUntil,
                 });
                 succeeded++;
               } catch (e) {
@@ -215,7 +215,7 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       return (
         Boolean(ctx?.instanceId) &&
         Boolean(ctx?.ruleId) &&
-        isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+        isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
       );
     },
     execute: async (eps, http) => {
@@ -224,13 +224,13 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       const errors: string[] = [];
 
       const epsToUnmute = eps.filter((ep) => ep.is_muted === true);
-      const epsToUnsnooze = eps.filter((ep) => ep.snooze_expiry != null);
+      const epsToUnsnooze = eps.filter((ep) => ep.snoozed_until != null);
 
       let unmuteFailed = false;
 
       if (epsToUnmute.length > 0) {
         const rules = groupByRule(epsToUnmute);
-        const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snooze_expiry == null).length;
+        const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snoozed_until == null).length;
         try {
           await bulkUnmuteAlerts({ http, rules });
           succeeded += mutedOnlyCount;

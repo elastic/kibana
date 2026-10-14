@@ -63,8 +63,12 @@ describe('registerSkills', () => {
   const deps = () =>
     ({
       logger: logger as unknown as LoggerServiceContract,
-      getWorkflow: jest.fn(),
+      getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn() })),
       getAvailableConnectors: jest.fn(),
+      availability: {
+        cacheMode: 'none',
+        handler: jest.fn().mockResolvedValue({ status: 'available' }),
+      },
     } as const);
 
   it('registers both skills and logs success at debug', () => {

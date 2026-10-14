@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/css-utils'
 tags:
   - shared-browser
   - package

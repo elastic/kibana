@@ -22,12 +22,22 @@ export const WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE = 5000;
 /** Max step executions embedded on GET .../executions/{id}. */
 export const WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT = 5000;
 
-/** Page size the execution-detail UI requests (tree budget). */
-export const WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE = 1000;
+/** Page size the execution-detail UI requests. */
+export const WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE = 5000;
 
-/** Count of steps past the UI page budget. Ignores transient mget gaps on the loaded page. */
-export const getOmittedStepExecutionsCount = (stepExecutionsTotal: number): number =>
-  Math.max(0, stepExecutionsTotal - WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE);
+/**
+ * Pages fitting the 10000-step automatic budget. Also the hard limit for legacy runs without
+ * `stepExecutionIds`, whose search fallback is bounded by Elasticsearch's `max_result_window`.
+ */
+export const WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT =
+  10_000 / WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE;
+
+/** Count of steps past the pages loaded so far. Ignores transient mget gaps on a loaded page. */
+export const getOmittedStepExecutionsCount = (
+  stepExecutionsTotal: number,
+  loadedPageCount = 1
+): number =>
+  Math.max(0, stepExecutionsTotal - loadedPageCount * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE);
 
 /**
  * True when the server reported steps but none loaded, and that is not an

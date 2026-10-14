@@ -10,7 +10,10 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
+import {
+  apmEnableServiceInventoryTableSearchBar,
+  apmMaxNumberOfServices,
+} from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
@@ -418,6 +421,7 @@ export function ApmServicesTable({
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core, share } = useApmPluginContext();
+  const maxServicesLimit: number = core.uiSettings.get(apmMaxNumberOfServices);
   const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
   const locators = share?.url?.locators;
   const { slo } = useKibana<ApmPluginStartDeps>().services;
@@ -604,7 +608,8 @@ export function ApmServicesTable({
                 color="danger"
                 content={i18n.translate('xpack.apm.servicesTable.tooltip.maxCountExceededWarning', {
                   defaultMessage:
-                    'The limit of 1,000 services is exceeded. Please use the query bar to narrow down the results or create service groups.',
+                    'The limit of {maxServicesLimit} services is exceeded. Use the query bar to narrow down the results, create service groups, or raise the limit in Advanced Settings.',
+                  values: { maxServicesLimit },
                 })}
               />
             </EuiFlexItem>

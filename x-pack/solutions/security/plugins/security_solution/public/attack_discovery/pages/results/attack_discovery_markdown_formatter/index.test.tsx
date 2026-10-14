@@ -60,4 +60,50 @@ This appears to be a malware attack delivered via spearphishing, likely exploiti
 
     expect(entities.length).toEqual(0); // <-- no interactive buttons
   });
+
+  // Agent Builder renders Attack Discovery attachments outside the Security app, so none of
+  // the Security providers (e.g. the expandable flyout) are mounted.
+  describe('outside the Security app providers', () => {
+    it('renders field chips when disableActions is true', () => {
+      render(<AttackDiscoveryMarkdownFormatter disableActions={true} markdown={markdown} />);
+
+      expect(screen.getAllByTestId('disabledActionsBadge')).toHaveLength(3);
+    });
+
+    it('clips field chip labels by default', () => {
+      render(<AttackDiscoveryMarkdownFormatter disableActions={true} markdown={markdown} />);
+
+      expect(screen.getAllByTestId('disabledChipLabel')[0]).toHaveStyleRule('max-width', '10rem');
+    });
+
+    it('wraps field chip labels when wrapFieldValues is true', () => {
+      render(
+        <AttackDiscoveryMarkdownFormatter
+          disableActions={true}
+          markdown={markdown}
+          wrapFieldValues={true}
+        />
+      );
+
+      expect(screen.getAllByTestId('disabledChipLabel')[0]).toHaveStyleRule(
+        'white-space',
+        'normal'
+      );
+    });
+
+    it('lets the markdown shrink and wrap when wrapFieldValues is true', () => {
+      render(
+        <AttackDiscoveryMarkdownFormatter
+          disableActions={true}
+          markdown={markdown}
+          wrapFieldValues={true}
+        />
+      );
+
+      const formatter = screen.getByTestId('attackDiscoveryMarkdownFormatter');
+
+      expect(formatter).toHaveStyleRule('min-width', '0');
+      expect(formatter).toHaveStyleRule('overflow-wrap', 'anywhere');
+    });
+  });
 });

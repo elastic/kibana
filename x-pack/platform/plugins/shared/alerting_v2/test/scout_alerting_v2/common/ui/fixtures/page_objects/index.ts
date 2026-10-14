@@ -11,6 +11,7 @@ import { ActionPoliciesListPage } from './action_policies_list_page';
 import { ActionPolicyFormPage } from './action_policy_form_page';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import { AlertingNavigation } from './alerting_navigation';
+import { OBSERVABILITY_MOUNT_CONFIG } from './alerting_mount_config';
 import { ComposeDiscoverPage } from './compose_discover_page';
 import { DiscoverAppMenu } from './discover_app_menu';
 import { EpisodeDetailsPage } from './episode_details_page';
@@ -32,6 +33,8 @@ export { RuleBuilderPage } from './rule_builder_page';
 export { RuleFormPage } from './rule_form_page';
 export { RulesListPage } from './rules_list_page';
 export { ThresholdBuilderPage } from './threshold_builder_page';
+export { OBSERVABILITY_MOUNT_CONFIG } from './alerting_mount_config';
+export type { AlertingMountConfig } from './alerting_mount_config';
 
 export type AlertingPageObjects = PageObjects & {
   actionPoliciesList: ActionPoliciesListPage;
@@ -53,21 +56,22 @@ export const extendPageObjects = (
   page: ScoutPage,
   kbnUrl: KibanaUrl
 ): AlertingPageObjects => {
+  const mountConfig = OBSERVABILITY_MOUNT_CONFIG;
   const discoverAppMenu = createLazyPageObject(DiscoverAppMenu, page);
 
   return {
     ...pageObjects,
-    actionPoliciesList: createLazyPageObject(ActionPoliciesListPage, page),
-    actionPolicyForm: createLazyPageObject(ActionPolicyFormPage, page),
-    alertEpisodesList: createLazyPageObject(AlertEpisodesListPage, page),
-    alertingNavigation: createLazyPageObject(AlertingNavigation, page),
+    actionPoliciesList: createLazyPageObject(ActionPoliciesListPage, page, mountConfig),
+    actionPolicyForm: createLazyPageObject(ActionPolicyFormPage, page, mountConfig),
+    alertEpisodesList: createLazyPageObject(AlertEpisodesListPage, page, mountConfig),
+    alertingNavigation: createLazyPageObject(AlertingNavigation, page, mountConfig),
     composeDiscover: createLazyPageObject(ComposeDiscoverPage, page),
     discoverAppMenu,
-    episodeDetails: createLazyPageObject(EpisodeDetailsPage, page, kbnUrl),
-    executionHistory: createLazyPageObject(ExecutionHistoryPage, page, kbnUrl),
+    episodeDetails: createLazyPageObject(EpisodeDetailsPage, page, kbnUrl, mountConfig),
+    executionHistory: createLazyPageObject(ExecutionHistoryPage, page, kbnUrl, mountConfig),
     ruleBuilder: createLazyPageObject(RuleBuilderPage, page),
-    ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu),
-    rulesList: createLazyPageObject(RulesListPage, page),
+    ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu, mountConfig),
+    rulesList: createLazyPageObject(RulesListPage, page, mountConfig),
     thresholdBuilder: createLazyPageObject(ThresholdBuilderPage, page),
   };
 };

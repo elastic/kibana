@@ -21,10 +21,9 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
  * editor actually requests them.
  *
  * The caller is expected to invoke this only when the optional
- * `workflowsExtensions` plugin is present and the
- * `threatIntelSupplyEnabled` experimental feature is on, matching
- * the gating policy applied server-side. Without that gate, dark-flagged
- * deployments would advertise a step type whose handler is never
+ * `workflowsExtensions` plugin is present and `xpack.alertzero.enabled` is
+ * on, matching the gating policy applied server-side. Without that gate,
+ * disabled deployments would advertise a step type whose handler is never
  * registered.
  */
 export const registerThreatIntelWorkflowSteps = (

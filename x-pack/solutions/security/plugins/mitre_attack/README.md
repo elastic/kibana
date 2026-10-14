@@ -14,11 +14,13 @@ It replaces the hardcoded `mitre_tactics_techniques.ts` blob in `security_soluti
 
 ## Configuration
 
-The plugin is disabled by default. Nothing is registered and nothing is populated unless this key is set:
+The plugin is enabled by default. To turn the managed source off, set:
 
 ```yaml
-xpack.mitreAttack.managedSourceEnabled: true
+xpack.mitreAttack.managedSourceEnabled: false
 ```
+
+With the flag off nothing is registered and nothing is populated, and `security_solution` consumers fall back to the legacy `mitre_tactics_techniques.ts` blob. The flag and the legacy blob are scheduled for removal once the cutover is confirmed (tracked in https://github.com/elastic/security-team/issues/19076).
 
 The value is exposed to the browser, so the public `start` contract reports it as `isEnabled` for UI code that needs to choose between this data source and the legacy blob.
 
@@ -62,7 +64,7 @@ In `setup()`, the plugin registers a `mitreAttack` request handler context via `
 
 ## Internal API route
 
-`GET /internal/mitre/entities` (version `1`) returns all indexed MITRE ATT&CK entities grouped by type, with the `description` field omitted for compactness.
+`GET /internal/mitre/entities` (version `1`) returns all indexed MITRE ATT&CK entities grouped by type, with the `description` field omitted for compactness. Bucket order is part of the contract: tactics are returned in matrix order (ascending `position`), techniques and subtechniques alphabetically by `name`, so consumers do not need to sort.
 
 | Query parameter | Type | Default | Notes |
 |---|---|---|---|
@@ -73,7 +75,7 @@ In `setup()`, the plugin registers a `mitreAttack` request handler context via `
 
 **Authorization:** the route opts out of authorization (`authz: { enabled: false }`) with a documented reason. It serves public MITRE reference data bundled with Kibana, holds no user or tenant data, and is consumed by features whose privileges differ, so gating on any single privilege would deny legitimate callers. Requests are still authenticated.
 
-**404 when flag off:** the route is only registered when `managedSourceEnabled: true`. Requests when the flag is off receive a 404 rather than a 403, because the route does not exist at all. A request that arrives after the flag is on but before `start()` has finished returns 503, signalling that the client is not yet ready and the caller should retry.
+**404 when flag off:** the route is only registered when `managedSourceEnabled` is `true` (the default). Requests when the flag is off receive a 404 rather than a 403, because the route does not exist at all. A request that arrives after the flag is on but before `start()` has finished returns 503, signalling that the client is not yet ready and the caller should retry.
 
 ## Saved Object mappings
 

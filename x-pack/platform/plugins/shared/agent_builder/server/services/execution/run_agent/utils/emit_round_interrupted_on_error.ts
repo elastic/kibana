@@ -15,9 +15,6 @@ import type { RoundInterruptedEvent } from '@kbn/agent-builder-common';
  * re-throws the original error. Building the event is best effort: if it throws, the failure is
  * logged and the original error is re-thrown alone, so an interruption summary can never mask the
  * error that caused it.
- *
- * Meant to sit after `evictInternalEvents`, so the emitted event reaches the runner like any other
- * chat event.
  */
 export const emitRoundInterruptedOnError = <T>({
   buildEvent,

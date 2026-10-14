@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse } from 'query-string';
+import queryString from 'query-string';
 
 import type { PackagePolicy, OnSaveQueryParamKeys } from '../../../../types';
 import type { AgentlessPolicy } from '../../../../../../../common';
@@ -18,8 +18,8 @@ const mockPolicy: SavedPolicyResult = {
 };
 
 function parseHref(href: string) {
-  const [basePath, queryString] = href.split('?');
-  const parsedQueryString = parse(queryString);
+  const [basePath, search] = href.split('?');
+  const parsedQueryString = queryString.parse(search);
 
   return [basePath, parsedQueryString];
 }

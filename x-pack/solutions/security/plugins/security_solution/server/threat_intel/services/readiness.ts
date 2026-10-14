@@ -9,9 +9,11 @@ import type { KibanaRequest, Logger, ElasticsearchClient } from '@kbn/core/serve
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
+import {
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
-  THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
   THREAT_REPORTS_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
   type ReadinessResponse,
@@ -61,6 +63,23 @@ const checkReportsIndexState = async (
       : 'missing';
   } catch {
     return 'check_failed';
+  }
+};
+
+/**
+ * The reports index template sets `dynamic: strict`; an index auto-created by a write
+ * before the template existed does not. Anything else (including a failed read) is
+ * treated as managed so unrelated errors do not masquerade as a template-free index.
+ */
+const checkReportsIndexManaged = async (esClient: ElasticsearchClient): Promise<boolean> => {
+  try {
+    const response = await esClient.indices.getMapping({
+      index: THREAT_REPORTS_INDEX,
+      expand_wildcards: ['open', 'hidden'],
+    });
+    return Object.values(response).every((entry) => entry.mappings?.dynamic === 'strict');
+  } catch {
+    return true;
   }
 };
 
@@ -123,6 +142,8 @@ const featureHasEndpoint = async ({
 }): Promise<boolean> => {
   if (!searchInferenceEndpoints) return false;
   try {
+    // An unregistered tier can still resolve the global connector catalog.
+    if (!searchInferenceEndpoints.features.get(featureId)) return false;
     const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
       featureId,
       request
@@ -220,7 +241,13 @@ export const getThreatIntelReadiness = async ({
     reasonCodes.push('reports_index_check_failed');
   }
 
-  if (!bootstrapComplete || reportsIndexState !== 'exists') {
+  const reportsIndexUnmanaged =
+    reportsIndexState === 'exists' && !(await checkReportsIndexManaged(esClient));
+  if (reportsIndexUnmanaged) {
+    reasonCodes.push('reports_index_unmanaged');
+  }
+
+  if (!bootstrapComplete || reportsIndexState !== 'exists' || reportsIndexUnmanaged) {
     return {
       status: 'blocked',
       reasonCodes,
@@ -244,7 +271,7 @@ export const getThreatIntelReadiness = async ({
     Boolean(inference) &&
     (await featureHasEndpoint({
       searchInferenceEndpoints,
-      featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+      featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
       request,
       logger,
     }));
@@ -258,7 +285,7 @@ export const getThreatIntelReadiness = async ({
     Boolean(inference) &&
     (await featureHasEndpoint({
       searchInferenceEndpoints,
-      featureId: THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
+      featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
       request,
       logger,
     }));

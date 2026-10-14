@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows/managed';
 import { ManualTriggerSchema } from '@kbn/workflows';
 import type { JsonSchema, WorkflowListDto } from '@kbn/workflows';
@@ -38,7 +39,11 @@ export class ActionsService {
     private readonly logger: Logger
   ) {}
 
-  async list(spaceId: string, categories?: string[]): Promise<ListActionsResponse> {
+  async list(
+    spaceId: string,
+    request: KibanaRequest,
+    categories?: string[]
+  ): Promise<ListActionsResponse> {
     const management = this.getManagement();
     if (!management) {
       throw new Error('Workflows management is not available');
@@ -61,7 +66,8 @@ export class ActionsService {
           // service's `unmanaged` default would filter them all out.
           managedFilter: 'managed',
         },
-        spaceId
+        spaceId,
+        request
       );
       for (const item of response.results) {
         const entry = this.toEntry(item.id, item.definition as ActionWorkflowDefinition | null);
@@ -102,8 +108,9 @@ export class ActionsService {
       );
       return undefined;
     }
-    const { name, description, category, impact, approvalPolicy } = parsed.data;
+    const { name, description, category, impact, approvalPolicy, subject } = parsed.data;
     const inputSchema = this.readInputSchema(definition);
+    const subjects = subject === undefined || Array.isArray(subject) ? subject : [subject];
     return {
       workflowId,
       name,
@@ -111,6 +118,7 @@ export class ActionsService {
       ...(category !== undefined && { category }),
       ...(impact !== undefined && { impact }),
       ...(approvalPolicy !== undefined && { approvalPolicy }),
+      ...(subjects !== undefined && { subjects }),
       ...(inputSchema !== undefined && { inputSchema }),
     };
   }

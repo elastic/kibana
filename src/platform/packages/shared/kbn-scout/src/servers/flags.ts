@@ -19,7 +19,7 @@ import {
 } from '@kbn/scout-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
-export type StartServerOptions = ReturnType<typeof parseServerFlags>;
+export type StartServerOptions = ReturnType<typeof parseStartServerFlags>;
 
 const supportedArchitectures: Set<string> = new Set();
 const supportedDomains: Set<string> = new Set();
@@ -31,21 +31,37 @@ testTargets.local.forEach((target) => {
 
 const supportedLocations: ScoutTargetLocation[] = ScoutTargetLocationSchema.options;
 
+/**
+ * Flags shared by `start-server` and `run-tests`.
+ */
 export const SERVER_FLAG_OPTIONS: FlagOptions = {
-  string: ['location', 'arch', 'domain', 'serverConfigSet', 'esFrom', 'kibanaInstallDir'],
+  string: ['location', 'arch', 'domain', 'esFrom', 'kibanaInstallDir'],
   boolean: ['logToFile', 'preserveEsData'],
-  default: { location: 'local', serverConfigSet: 'default' },
+  default: { location: 'local' },
   help: `
     --location          Where is the test target located (one of: ${supportedLocations.join(
       ', '
     )})) [default: 'local']
     --arch              Server architecture (one of: ${[...supportedArchitectures].join(', ')})
     --domain            Server domain (one of: ${[...supportedDomains].join(', ')})
-    --serverConfigSet   Server configuration name (maps to server config directory name under servers/configs/config_sets, e.g. uiam_local) [default: 'default']
     --esFrom            Build Elasticsearch from source or run snapshot or serverless. [default: $TEST_ES_FROM or "snapshot"]
     --kibanaInstallDir  Run Kibana from existing install directory instead of from source
     --logToFile         Write the log output from Kibana/ES to files instead of to stdout
     --preserveEsData    Reuse existing serverless ES object store data instead of cleaning it on startup
+  `,
+};
+
+/**
+ * Flags for `start-server`. `--serverConfigSet` is only meaningful here: `run-tests`
+ * derives the server config set from the Playwright config path instead.
+ */
+export const START_SERVER_FLAG_OPTIONS: FlagOptions = {
+  ...SERVER_FLAG_OPTIONS,
+  string: [...(SERVER_FLAG_OPTIONS.string || []), 'serverConfigSet'],
+  default: { ...SERVER_FLAG_OPTIONS.default, serverConfigSet: 'default' },
+  help: `
+    ${SERVER_FLAG_OPTIONS.help}
+    --serverConfigSet   Server configuration name (maps to server config directory name under servers/configs/config_sets, e.g. uiam_local) [default: 'default']
   `,
 };
 
@@ -69,7 +85,6 @@ export function parseServerFlags(flags: FlagsReader) {
     throw createFlagError(`Unsupported target: ${testTarget.tag}`);
   }
 
-  const serverConfigSet = flags.requiredString('serverConfigSet');
   const esFrom = flags.enum('esFrom', ['source', 'snapshot', 'serverless']);
   const installDir = flags.string('kibanaInstallDir');
   const preserveEsData = flags.boolean('preserveEsData');
@@ -79,10 +94,16 @@ export function parseServerFlags(flags: FlagsReader) {
 
   return {
     testTarget,
-    serverConfigSet,
     esFrom,
     preserveEsData,
     installDir,
     logsDir,
+  };
+}
+
+export function parseStartServerFlags(flags: FlagsReader) {
+  return {
+    ...parseServerFlags(flags),
+    serverConfigSet: flags.requiredString('serverConfigSet'),
   };
 }

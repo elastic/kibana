@@ -106,7 +106,7 @@ describe('createAckAction', () => {
     expect(createAckAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
-  it('execute: POSTs per-episode ACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
+  it('execute: POSTs per-episode ACK items with distinct alert_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(bulk, 'bulkAckEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
@@ -118,8 +118,8 @@ describe('createAckAction', () => {
       onSuccess,
     });
     expect(bulk.bulkAckEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1' },
-      { episode_id: 'e2' },
+      { alert_id: 'e1' },
+      { alert_id: 'e2' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();

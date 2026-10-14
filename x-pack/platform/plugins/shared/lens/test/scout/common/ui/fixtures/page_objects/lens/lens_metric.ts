@@ -19,6 +19,9 @@ export class LensMetric {
   readonly metricTilesLocator;
   readonly secondaryMetricBadge;
   private readonly secondaryMetricLabel;
+  private readonly secondaryMetric;
+  /** Name tooltip shown on hover when the secondary metric name display is set to `tooltip`. */
+  readonly secondaryMetricNameTooltip;
   /**
    * Added in a render pass after the one `waitForVisualization` settles on — callers that need
    * to assert it appears should poll `count()` before snapshotting via `getMetricVisualizationData`.
@@ -32,15 +35,25 @@ export class LensMetric {
     this.metricTilesLocator = this.metricTiles();
     this.secondaryMetricBadge = this.metricRoot().locator('.echBadge__content');
     this.secondaryMetricLabel = this.metricRoot().locator('.echSecondaryMetric__label');
+    this.secondaryMetric = this.metricRoot().locator('.echSecondaryMetric');
+    this.secondaryMetricNameTooltip = this.page.getByTestId('mtrVisSecondaryNameTooltip');
     this.metricProgressBar = this.progressBar();
-    this.legacyMetricLabel = this.page.testSubj.locator('metric_label');
-    this.legacyMetricValue = this.page.testSubj.locator('metric_value');
+    this.legacyMetricLabel = this.page.getByTestId('metric_label');
+    this.legacyMetricValue = this.page.getByTestId('metric_value');
     this.trendline = this.metricRoot().locator('.echSingleMetricSparkline');
+  }
+
+  async setBackgroundChart(type: 'none' | 'bar' | 'line'): Promise<void> {
+    const button = this.page.testSubj.locator(`lnsMetric_background_chart_${type}`);
+    await button.click();
+    await button
+      .and(this.page.getByRole('button', { pressed: true }))
+      .waitFor({ state: 'visible' });
   }
 
   /** Root `[data-test-subj="mtrVis"]` locator, optionally limited to a dashboard panel. */
   private metricRoot(scope?: Locator): Locator {
-    return (scope ?? this.page).locator('[data-test-subj="mtrVis"]');
+    return (scope ?? this.page).getByTestId('mtrVis');
   }
 
   /** Metric tiles currently rendered, optionally limited to a dashboard panel. */
@@ -53,7 +66,7 @@ export class LensMetric {
    * pass after `waitForVisualization`; wait on this locator before snapshotting tile data.
    */
   progressBar(scope?: Locator): Locator {
-    return this.metricRoot(scope).locator('.echSingleMetricProgress');
+    return this.metricRoot(scope).getByRole('meter');
   }
 
   /** Returns locators for each Elastic Charts metric tile currently rendered. */
@@ -122,6 +135,11 @@ export class LensMetric {
       return undefined;
     }
     return (await this.secondaryMetricBadge.innerText()).trim();
+  }
+
+  /** Hovers the secondary metric, which reveals its name tooltip in `tooltip` name display mode. */
+  async hoverSecondaryMetric() {
+    await this.secondaryMetric.hover();
   }
 
   /** Returns the secondary metric's label text, or `undefined` if not rendered. */

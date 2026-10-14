@@ -10,6 +10,7 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   createInternalError,
   createRequestAbortedError,
+  deserializeExecutionError,
   isExecutionAbortedEvent,
   isExecutionTerminalEvent,
   isRequestAbortedError,
@@ -17,7 +18,6 @@ import {
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
-import { deserializeExecutionError } from './utils/serialize_execution_error';
 import {
   FOLLOW_ABORT_DRAIN_TIMEOUT_MS,
   FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS,
@@ -91,9 +91,10 @@ async function* pollExecutionEvents(
   }
 ): AsyncGenerator<ChatEvent> {
   let lastEventIndex = since ?? 0;
-  // Latched across polls: a terminal timeline event read while the status was still `running`
-  // must be remembered when `failed` / `aborted` arrives on a later poll.
+  // Latched across polls: a terminal timeline event (or `round_complete`) read while the status was
+  // still `running` must be remembered when the terminal status arrives on a later poll.
   let receivedExecutionTerminal = false;
+  let receivedRoundComplete = false;
   let lastStatus: ExecutionStatus | undefined;
   let lastHeartbeat: string | undefined;
   let hasStartedRunning = false;
@@ -136,7 +137,6 @@ async function* pollExecutionEvents(
     }
 
     // 3. Fetch new events only if the count has increased
-    let receivedRoundComplete = false;
     const hasNewEvents = eventCount > lastEventIndex;
     if (hasNewEvents) {
       const { events: newEvents } = await executionClient.readEvents(executionId, lastEventIndex);
