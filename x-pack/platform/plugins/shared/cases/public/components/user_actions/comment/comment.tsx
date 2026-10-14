@@ -45,6 +45,7 @@ const getDeleteLabelTitle = ({
     registry: unifiedAttachmentTypeRegistry,
     getId: () => resolveUnifiedAttachmentType(comment, owner),
     getAttachmentProps: () => ({
+      savedObjectId: userAction.commentId ?? userAction.id,
       attachmentId: getReferenceAttachmentId(comment),
       metadata: 'metadata' in comment ? comment.metadata : undefined,
     }),
@@ -121,6 +122,7 @@ const getCreateCommentUserAction = ({
   unifiedAttachmentTypeRegistry,
   permissions,
   attachment,
+  isDeleted,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
@@ -129,6 +131,7 @@ const getCreateCommentUserAction = ({
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   attachment: AttachmentUIV2;
+  isDeleted: boolean;
 } & Omit<
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
@@ -156,6 +159,7 @@ const getCreateCommentUserAction = ({
       permissions,
       caseData,
       isLoading: loadingCommentIds.includes(attachment.id),
+      isDeleted,
       handleDeleteComment,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
@@ -169,6 +173,22 @@ const getCreateCommentUserAction = ({
 
   return [];
 };
+
+/** Rebuilds a deleted attachment from its create user action payload. */
+const buildAttachmentFromPayload = (
+  userAction: SnakeToCamelCase<CommentUserAction>
+): AttachmentUIV2 =>
+  ({
+    ...userAction.payload.comment,
+    id: userAction.commentId ?? userAction.id,
+    createdAt: userAction.createdAt,
+    createdBy: userAction.createdBy,
+    pushedAt: null,
+    pushedBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    version: '',
+  } as AttachmentUIV2);
 
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   appId,
@@ -200,13 +220,12 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const attachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
-
-    if (attachment == null) {
-      return [];
-    }
     if (attachmentUserAction.action === UserActionActions.create) {
-      const commentAction = getCreateCommentUserAction({
+      const liveAttachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
+      const isDeleted = liveAttachment == null;
+      const attachment = liveAttachment ?? buildAttachmentFromPayload(attachmentUserAction);
+
+      return getCreateCommentUserAction({
         appId,
         caseData,
         casesConfiguration,
@@ -215,6 +234,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         unifiedAttachmentTypeRegistry,
         permissions,
         attachment,
+        isDeleted,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         loadingCommentIds,
@@ -223,8 +243,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         caseConnectors,
         attachments,
       });
-
-      return commentAction;
     }
 
     const label = getUpdateLabelTitle();

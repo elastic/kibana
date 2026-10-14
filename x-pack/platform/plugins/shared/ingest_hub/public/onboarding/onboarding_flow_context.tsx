@@ -68,7 +68,12 @@ export interface DetectAndReviewStepState {
   /** SO id of the cloud-onboarding-deployment record created at Deploy time. Used to update the record after allSettled and on retry. */
   onboardingDeploymentId?: string;
   /** ECF stacks last written to the SO. Used to skip redundant PUT calls on Back→Next. */
-  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    stackArn?: string;
+  }>;
   /**
    * instanceId → policyId for instances removed from Step 1 whose deployed policy has not yet
    * been cleaned up. Populated by removeDeployInstance; consumed and cleared by handleDeploy.
@@ -141,7 +146,12 @@ interface PersistedDetectAndReviewStep {
   failedInstances: string[];
   deployErrors: Record<string, string>;
   onboardingDeploymentId?: string;
-  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    stackArn?: string;
+  }>;
   pendingCleanupPolicyIds?: Record<string, string>;
   isDirty?: boolean;
   isAuthDirty?: boolean;

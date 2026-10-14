@@ -69,6 +69,7 @@ const parityTests = {
   no_wrapped_error_in_logger: () => require('../no_wrapped_error_in_logger.test.js'),
   require_include_in_check_a11y: () => require('../require_include_in_check_a11y.test.js'),
   require_kbn_fs: () => require('../require_kbn_fs.test.js'),
+  require_lazy_zod_schema: () => require('../require_lazy_zod_schema.test.js'),
   require_kibana_feature_privileges_naming: () =>
     require('../require_kibana_feature_privileges_naming.test.js'),
   scout_expect_import: () => require('../scout_expect_import.test.js'),
