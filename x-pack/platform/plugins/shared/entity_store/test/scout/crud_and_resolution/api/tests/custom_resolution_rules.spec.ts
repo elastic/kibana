@@ -118,10 +118,9 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         },
         kibana: [{ base: [], feature: { siemV5: [privilege] }, spaces: ['*'] }],
       });
+      // Scout has one custom role per worker, so each asInteractiveUser call redefines it.
       const manager = await samlAuth.asInteractiveUser(securityRole('all'));
-      const reader = await samlAuth.asInteractiveUser(securityRole('read'));
       const managerHeaders = { ...manager.cookieHeader, ...INTERNAL_HEADERS };
-      const readerHeaders = { ...reader.cookieHeader, ...INTERNAL_HEADERS };
 
       const created = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
         headers: managerHeaders,
@@ -129,6 +128,9 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         body: { name: 'Security all rule', ...LOCAL_USERS_TO_AD_RULE },
       });
       expect(created.statusCode).toBe(200);
+
+      const reader = await samlAuth.asInteractiveUser(securityRole('read'));
+      const readerHeaders = { ...reader.cookieHeader, ...INTERNAL_HEADERS };
 
       const listedByReader = await apiClient.get(
         ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES,
@@ -155,6 +157,7 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
       );
       expect(deletedByReader.statusCode).toBe(403);
 
+      await samlAuth.asInteractiveUser(securityRole('all'));
       const deletedByManager = await apiClient.delete(
         ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(created.body.id),
         { headers: managerHeaders, responseType: 'json' }
