@@ -134,6 +134,7 @@ export async function cloneRule<Params extends RuleParams = never>(
   // Throws an error if alert type isn't registered
   const ruleType = context.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const createTime = Date.now();
   const lastRunTimestamp = new Date();
   const legacyId = Semver.lt(context.kibanaVersion, '8.0.0') ? id : null;
@@ -141,6 +142,7 @@ export async function cloneRule<Params extends RuleParams = never>(
     id: ruleType.id,
     ruleName,
     username,
+    profileUid,
     shouldUpdateApiKey: ruleSavedObject.attributes.enabled,
     errorMessage: 'Error creating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: ruleSavedObject.attributes.apiKeyCreatedByUser },
@@ -162,6 +164,8 @@ export async function cloneRule<Params extends RuleParams = never>(
     legacyId,
     createdBy: username,
     updatedBy: username,
+    createdByProfileUid: profileUid,
+    updatedByProfileUid: profileUid,
     createdAt: new Date(createTime).toISOString(),
     updatedAt: new Date(createTime).toISOString(),
     snoozeSchedule: [],

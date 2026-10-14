@@ -29,6 +29,7 @@ export type {
   ConvertUiamAPIKeysResponse,
   UiamAPIKeysType,
   ClientAuthentication,
+  SystemIdentity,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,
@@ -89,6 +90,7 @@ export type {
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
+  GrantAPIKeyOptions,
   GrantAPIKeyResult,
   CloneAPIKeyParams,
   CloneAPIKeyResult,

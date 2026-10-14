@@ -11,12 +11,14 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { AsyncStatus } from '../../../hooks/use_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function FlameGraphView() {
   const {
@@ -32,18 +34,23 @@ export function FlameGraphView() {
   } = useProfilingDependencies();
 
   const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+  const { selectedSchema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!selectedSchema) {
+        return undefined;
+      }
       return fetchElasticFlamechart({
         http,
         timeFrom: new Date(timeRange.start).getTime(),
         timeTo: new Date(timeRange.end).getTime(),
         kuery,
         showErrorFrames,
+        schema: selectedSchema,
       });
     },
-    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames]
+    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames, selectedSchema]
   );
 
   const { data } = state;
@@ -77,12 +84,14 @@ export function FlameGraphView() {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
-          <FlameGraph
-            id="flamechart"
-            primaryFlamegraph={data}
-            searchText={searchText}
-            onChangeSearchText={handleSearchTextChange}
-          />
+          <NoProfilingDataPrompt hasData={data?.TotalSamples !== 0}>
+            <FlameGraph
+              id="flamechart"
+              primaryFlamegraph={data}
+              searchText={searchText}
+              onChangeSearchText={handleSearchTextChange}
+            />
+          </NoProfilingDataPrompt>
         </AsyncComponent>
       </EuiFlexItem>
     </EuiFlexGroup>

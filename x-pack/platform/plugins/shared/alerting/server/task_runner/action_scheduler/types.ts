@@ -79,9 +79,9 @@ export interface ActionSchedulerOptions<
   apiKey: string | null;
   /**
    * Id of the UIAM API key in `apiKey`, so the enqueued connector tasks record it and the API key
-   * invalidation task's in-use guard can find them. Only ad hoc (backfill) runs supply it today,
-   * and only when `apiKey` resolved to the UIAM key rather than to an Elasticsearch fallback —
-   * see `credentialType` from `getFakeKibanaRequest`.
+   * invalidation task's in-use guard can find them. Supplied only when `apiKey` resolved to the
+   * UIAM key rather than to an Elasticsearch fallback — see `credentialType` from
+   * `getFakeKibanaRequest`.
    */
   uiamApiKeyId?: string;
   /**

@@ -255,6 +255,30 @@ describe('inferenceAdapter', () => {
       });
     });
 
+    it('forwards only connector-supported telemetry metadata', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            connectorTelemetry: {
+              pluginId: 'feature',
+              aggregateBy: 'parent',
+              productSolution: 'solution',
+              productFeature: 'product-feature',
+              interactionId: 'interaction-1',
+            },
+          },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke.mock.calls[0]?.[0].subActionParams?.telemetryMetadata).toEqual({
+        pluginId: 'feature',
+        aggregateBy: 'parent',
+      });
+    });
+
     it('defaults reasoning effort to none when native tools are present and the model requires it', () => {
       inferenceAdapter
         .chatComplete({

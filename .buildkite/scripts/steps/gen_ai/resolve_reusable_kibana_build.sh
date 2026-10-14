@@ -33,19 +33,11 @@ if [[ -z "${BUILDKITE_TOKEN:-}" ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Only depends on .buildkite/node_modules (ts-node, #pipeline-utils) — same as
-# gate_failure/cancel.sh. No full repo bootstrap required.
-TS_NODE=".buildkite/node_modules/.bin/ts-node"
-
-if [[ ! -x "${TS_NODE}" ]]; then
-  echo "--- ${TS_NODE} not found; cannot look up a reusable build (will build Kibana)"
-  return 0 2>/dev/null || exit 0
-fi
 
 # Logs go to stderr from the TS script; stdout is only the build UUID on success.
 # Failures soft-fall back to a fresh Kibana build.
 reusable_id="$(
-  "${TS_NODE}" "${SCRIPT_DIR}/resolve_reusable_kibana_build.ts" || true
+  node "${SCRIPT_DIR}/resolve_reusable_kibana_build.ts" || true
 )"
 reusable_id="$(tr -d '[:space:]' <<<"${reusable_id}")"
 

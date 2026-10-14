@@ -12,7 +12,6 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 export const createAiNavigationTree = (
@@ -137,6 +136,7 @@ export const createAiNavigationTree = (
           title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
           children: [
             { link: 'management:index_management' },
+            { link: 'management:esql_views' },
             { link: 'management:transform' },
             { link: 'management:data_quality' },
           ],
@@ -154,6 +154,7 @@ export const createAiNavigationTree = (
           children: [
             { link: 'management:api_keys' },
             { link: 'management:application_connections' },
+            { link: 'management:service_accounts' },
             { link: 'management:roles' },
           ],
         },
@@ -169,7 +170,6 @@ export const createAiNavigationTree = (
             },
           ],
         },
-        ...getAlertingV2ManagementNavPanel(core),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [

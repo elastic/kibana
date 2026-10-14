@@ -7,6 +7,7 @@
 
 import { mapValues } from 'lodash';
 import type { ToolOptions, ToolSchemaType } from '@kbn/inference-common';
+import { inlineRootJsonSchemaRef, normalizeJsonSchemaTypeArrays } from '@kbn/zod/v4';
 
 export const sanitizeToolSchemasForVertex = (tools: ToolOptions['tools']): ToolOptions['tools'] => {
   if (!tools) {
@@ -57,7 +58,7 @@ const VERTEX_SCHEMA_FIELDS = new Set([
 interface SchemaPart {
   [key: string]: unknown;
   const?: unknown;
-  type?: string;
+  type?: string | string[];
   nullable?: boolean;
   enum?: unknown[];
   properties?: Record<string, ToolSchemaType>;
@@ -75,7 +76,10 @@ interface SchemaPart {
  * `null` branch in `anyOf` (zod's representation of nullable values) becomes
  * `nullable: true`.
  */
-const toVertexSchema = <T extends ToolSchemaType>(schemaPart: T): T => {
+const toVertexSchema = <T extends ToolSchemaType>(schemaPart: T): T =>
+  toVertexSchemaPart(normalizeJsonSchemaTypeArrays(inlineRootJsonSchemaRef(schemaPart)) as T);
+
+const toVertexSchemaPart = <T extends ToolSchemaType>(schemaPart: T): T => {
   const source = schemaPart as SchemaPart;
   const schema: SchemaPart = {};
 
@@ -94,16 +98,16 @@ const toVertexSchema = <T extends ToolSchemaType>(schemaPart: T): T => {
   }
 
   if (schema.properties) {
-    schema.properties = mapValues(schema.properties, toVertexSchema);
+    schema.properties = mapValues(schema.properties, toVertexSchemaPart);
   }
   if (schema.items) {
-    schema.items = toVertexSchema(schema.items);
+    schema.items = toVertexSchemaPart(schema.items);
   }
   if (typeof schema.additionalProperties === 'object') {
-    schema.additionalProperties = toVertexSchema(schema.additionalProperties);
+    schema.additionalProperties = toVertexSchemaPart(schema.additionalProperties);
   }
   if (schema.anyOf) {
-    const branches = schema.anyOf.map(toVertexSchema);
+    const branches = schema.anyOf.map(toVertexSchemaPart);
     const nonNullBranches = branches.filter((branch) => (branch as SchemaPart).type !== 'null');
 
     if (nonNullBranches.length === branches.length) {

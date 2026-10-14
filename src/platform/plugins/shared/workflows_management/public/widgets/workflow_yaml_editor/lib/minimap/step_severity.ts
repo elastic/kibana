@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepInfo } from '@kbn/workflows-yaml';
-import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
+import type { StepInfo, YamlValidationResult } from '@kbn/workflows-yaml';
 
 export type StepSeverity = 'error' | 'warning' | null;
 

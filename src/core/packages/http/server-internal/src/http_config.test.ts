@@ -249,7 +249,8 @@ describe('selfHttp', () => {
   test('defaults to automatic targeting', () => {
     expect(config.schema.validate({}).selfHttp).toEqual({
       target: 'auto',
-      ssl: {},
+      maxRedirects: 0,
+      ssl: { verificationMode: 'full' },
     });
   });
 
@@ -267,7 +268,8 @@ describe('selfHttp', () => {
       }).selfHttp
     ).toEqual({
       target: 'auto',
-      ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+      maxRedirects: 0,
+      ssl: { verificationMode: 'full', certificateAuthorities: ['/path/to/ca.pem'] },
     });
   });
 
@@ -305,6 +307,52 @@ describe('selfHttp', () => {
     expect(() => config.schema.validate({ selfHttp: { target: 'inject' } })).toThrow(
       '[selfHttp.target]'
     );
+  });
+
+  test.each(['none', 'certificate', 'full'] as const)(
+    'accepts outbound verification mode %s',
+    (verificationMode) => {
+      expect(
+        config.schema.validate({ selfHttp: { ssl: { verificationMode } } }).selfHttp.ssl
+          .verificationMode
+      ).toBe(verificationMode);
+    }
+  );
+
+  test('accepts maxRedirects in range', () => {
+    expect(config.schema.validate({ selfHttp: { maxRedirects: 5 } }).selfHttp.maxRedirects).toBe(5);
+  });
+
+  test.each([-1, 21, 1.5])('rejects invalid maxRedirects %s', (maxRedirects) => {
+    expect(() => config.schema.validate({ selfHttp: { maxRedirects } })).toThrow(
+      '[selfHttp.maxRedirects]'
+    );
+  });
+
+  test('rejects unsupported verification modes', () => {
+    expect(() =>
+      config.schema.validate({ selfHttp: { ssl: { verificationMode: 'partial' } } })
+    ).toThrow('[selfHttp.ssl.verificationMode]');
+  });
+
+  test.each([
+    {
+      name: 'local target',
+      value: { selfHttp: { target: 'local' as const, ssl: { verificationMode: 'none' as const } } },
+    },
+    {
+      name: 'missing public base URL',
+      value: { selfHttp: { ssl: { verificationMode: 'none' as const } } },
+    },
+    {
+      name: 'HTTPS public target',
+      value: {
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: { ssl: { verificationMode: 'none' as const } },
+      },
+    },
+  ])('accepts an outbound verification mode with $name', ({ value }) => {
+    expect(() => config.schema.validate(value)).not.toThrow();
   });
 });
 
@@ -927,7 +975,8 @@ describe('HttpConfig', () => {
 
     expect(httpConfig.selfHttp).toEqual({
       target: 'local',
-      ssl: { certificateAuthorities: undefined },
+      maxRedirects: 0,
+      ssl: { verificationMode: 'full', certificateAuthorities: undefined },
     });
   });
 });

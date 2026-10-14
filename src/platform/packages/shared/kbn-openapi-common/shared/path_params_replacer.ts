@@ -40,3 +40,13 @@ export function replaceParams(path: string, params: Record<string, string | numb
   });
   return output;
 }
+
+/**
+ * Percent-encodes every path param value so reserved characters such as `/`, `?` or `#` stay part
+ * of the value instead of changing the URL structure. Meant to feed `replaceParams`.
+ */
+export function encodePathParams(params: Record<string, string | number>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(params).map(([param, value]) => [param, encodeURIComponent(value)])
+  );
+}

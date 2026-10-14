@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import path from 'path';
+import { z } from '@kbn/zod';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
@@ -14,6 +15,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { MAX_PARAM_BULK_SIZE, MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
   SyntheticsParamRequest,
@@ -24,27 +26,47 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
-const ParamsObjectSchema = schema.object({
-  key: schema.string({
-    minLength: 1,
-  }),
-  value: schema.string({
-    minLength: 1,
-  }),
-  description: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
-  share_across_spaces: schema.maybe(schema.boolean()),
-});
+export const ParamsObjectSchema = z
+  .strictObject({
+    key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH).describe('The key of the parameter.'),
+    value: z
+      .string()
+      .min(1)
+      .max(MAX_PARAM_VALUE_LENGTH)
+      .describe('The value associated with the parameter.'),
+    description: z.string().max(4096).optional().describe('A description of the parameter.'),
+    tags: z
+      .array(z.string().max(256))
+      .max(100)
+      .optional()
+      .describe('An array of tags to categorize the parameter.'),
+    share_across_spaces: z
+      .boolean()
+      .optional()
+      .describe('Specify whether the parameter should be shared across spaces.'),
+  })
+  .meta({ id: 'parameterRequest' });
 
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsParams | SyntheticsParams[]
 > = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS,
+  options: {
+    summary: 'Add parameters',
+    description:
+      'Add one or more parameters to the Synthetics app.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'post-parameters',
+    oasOperationObject: () => path.join(__dirname, 'examples/post_parameters.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
+      body: z
+        .union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(MAX_PARAM_BULK_SIZE)])
+        .describe(
+          'The request body can contain either a single parameter object or an array of parameter objects.'
+        ),
     },
   },
   handler: async ({ request, response, server, savedObjectsClient }) => {

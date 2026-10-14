@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import {
   alertEpisodeStatus,
@@ -17,6 +16,7 @@ import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getCannotDeactivateEpisodeMessage } from '../../errors/alert_error_messages';
 import type { ActionHandler } from '../handler';
 import type { AlertEventRecord } from '../types';
+import { noOpConflict } from './no_op_conflict';
 
 type DeactivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -28,10 +28,10 @@ type DeactivateAlertActionBody = Extract<
  * Every other state (`active`, `recovering`, `pending`, or a defensively-nullable status)
  * is treated as deactivatable.
  *
- * Failures throw `Boom.badRequest` carrying
- * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path catches that
- * (400-class) and records it as a per-item error, the single path lets it
- * propagate to the route as a 400 response.
+ * Failures throw `Boom.conflict` carrying
+ * `INVALID_EPISODE_STATE_TRANSITION`; the bulk path records it as a
+ * per-item error, the single path lets it propagate to the route as a
+ * 409 response.
  */
 const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
   const status = alertEvent.episode_status;
@@ -39,14 +39,12 @@ const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
     return;
   }
 
-  throw Boom.badRequest(getCannotDeactivateEpisodeMessage(alertEvent.episode_id), {
+  throw noOpConflict({
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-    details: {
-      group_hash: alertEvent.group_hash,
-      episode_id: alertEvent.episode_id,
-      episode_status: status,
-      action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-    },
+    message: getCannotDeactivateEpisodeMessage(alertEvent.episode_id),
+    alertEvent,
+    actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+    details: { alert_status: status },
   });
 };
 
@@ -65,7 +63,6 @@ export const deactivateHandler: ActionHandler<DeactivateAlertActionBody> = {
     assertEpisodeIsDeactivatable(alertEvent);
 
     const ruleEvent = buildRuleEventDocument({
-      '@timestamp': new Date().toISOString(),
       rule:
         alertEvent.rule_id != null
           ? { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 }
@@ -76,7 +73,7 @@ export const deactivateHandler: ActionHandler<DeactivateAlertActionBody> = {
       source: alertEvent.source,
       type: alertEventType.alert,
       space_id: alertEvent.space_id,
-      episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.inactive },
+      alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.inactive },
       severity: alertEvent.severity ?? undefined,
     });
 

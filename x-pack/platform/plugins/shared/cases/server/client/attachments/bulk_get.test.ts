@@ -12,8 +12,9 @@ import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
-  const attachmentSO = mockCaseComments[0];
+  const attachmentSO = mockCaseUnifiedAttachments[0];
   const unifiedAttachmentSO = mockCaseUnifiedAttachments[0];
+  const legacyAttachmentSO = mockCaseComments[0];
 
   describe('errors', () => {
     const casesClient = createCasesClientMock();
@@ -119,6 +120,73 @@ describe('bulkGet', () => {
         status: 404,
       });
     });
+
+    it('keeps a not found error that has no references', async () => {
+      clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+        saved_objects: [
+          attachmentSO,
+          {
+            id: 'missing',
+            type: 'cases-attachments',
+            error: { error: 'Not Found', message: 'not found', statusCode: 404 },
+          } as never,
+        ],
+      });
+
+      const res = await bulkGet(
+        { savedObjectIds: ['missing'], caseID: 'mock-id-1' },
+        clientArgs,
+        casesClient
+      );
+
+      expect(res.errors).toEqual([
+        { savedObjectId: 'missing', error: 'Not Found', message: 'not found', status: 404 },
+      ]);
+    });
+
+    it('reports decode errors from another case as association errors', async () => {
+      const decodeError = (id: string, caseId: string) => ({
+        id,
+        type: 'cases-attachments',
+        error: {
+          error: 'Bad Request',
+          message: 'Attachment type "security.secret" is not recognized.',
+          statusCode: 400,
+        },
+        references: [{ id: caseId, name: 'associated-cases', type: 'cases' }],
+      });
+      clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+        saved_objects: [
+          attachmentSO,
+          decodeError('same-case', 'mock-id-1'),
+          decodeError('other-case', 'other-case-id'),
+        ],
+      });
+
+      const res = await bulkGet(
+        { savedObjectIds: ['same-case', 'other-case'], caseID: 'mock-id-1' },
+        clientArgs,
+        casesClient
+      );
+
+      expect(res.errors).toEqual(
+        expect.arrayContaining([
+          {
+            savedObjectId: 'same-case',
+            error: 'Bad Request',
+            message: 'Attachment type "security.secret" is not recognized.',
+            status: 400,
+          },
+          {
+            savedObjectId: 'other-case',
+            error: 'Bad Request',
+            message: 'Attachment is not attached to case id=mock-id-1',
+            status: 400,
+          },
+        ])
+      );
+      expect(res.errors).toHaveLength(2);
+    });
   });
 
   describe('returns unified attachments', () => {
@@ -151,6 +219,38 @@ describe('bulkGet', () => {
           id: unifiedAttachmentSO.id,
           type: 'comment',
           data: { content: 'test' },
+        })
+      );
+    });
+  });
+
+  describe('returns a legacy attachment as unified', () => {
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+        authorized: [legacyAttachmentSO],
+        unauthorized: [],
+      });
+      clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+        saved_objects: [legacyAttachmentSO],
+      });
+    });
+
+    it('returns a legacy attachment as unified', async () => {
+      const res = await bulkGet(
+        { savedObjectIds: [legacyAttachmentSO.id], caseID: 'mock-id-1' },
+        clientArgs,
+        casesClient
+      );
+
+      expect(res.attachments[0]).toEqual(
+        expect.objectContaining({
+          id: legacyAttachmentSO.id,
+          type: 'comment',
+          data: { content: 'Wow, good luck catching that bad meanie!' },
         })
       );
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
@@ -16,13 +16,15 @@ export enum NetworkTlsFields {
   _id = '_id',
 }
 
-export const networkTlsSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().optional(),
-  flowTarget,
-  sort,
-  timerange,
-  factoryQueryType: z.literal(NetworkQueries.tls),
-});
+export const networkTlsSchema = lazySchema(() =>
+  requestOptionsPaginatedSchema.extend({
+    ip: z.string().optional(),
+    flowTarget,
+    sort,
+    timerange,
+    factoryQueryType: z.literal(NetworkQueries.tls),
+  })
+);
 
 export type NetworkTlsRequestOptionsInput = z.input<typeof networkTlsSchema>;
 

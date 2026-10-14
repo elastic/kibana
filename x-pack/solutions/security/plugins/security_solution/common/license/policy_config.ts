@@ -16,6 +16,7 @@ import {
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
+import { hasCustomYaraSignaturesAdvancedSettings } from '../endpoint/models/policy_config_helpers';
 
 function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   if (isAtLeast(license, 'platinum')) {
@@ -302,6 +303,30 @@ function isEndpointDeviceControlPolicyValidForLicense(
   return true;
 }
 
+function isEndpointCustomYaraSignaturesPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'enterprise')) {
+    return true;
+  }
+
+  // An absent field means the feature is not enabled (pre-backfill policies omit it).
+  if (
+    policy.windows.memory_protection.custom_yara_signatures === true ||
+    policy.mac.memory_protection.custom_yara_signatures === true ||
+    policy.linux.memory_protection.custom_yara_signatures === true
+  ) {
+    return false;
+  }
+
+  if (hasCustomYaraSignaturesAdvancedSettings(policy)) {
+    return false;
+  }
+
+  return true;
+}
+
 function isEndpointProtectionUpdatesValidForLicense(
   policy: PolicyConfig,
   license: ILicense | null
@@ -331,6 +356,7 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointAdvancedPolicyValidForLicense(policy, license) &&
     isEndpointCredentialDumpingPolicyValidForLicense(policy, license) &&
     isEndpointDeviceControlPolicyValidForLicense(policy, license) &&
+    isEndpointCustomYaraSignaturesPolicyValidForLicense(policy, license) &&
     isEndpointProtectionUpdatesValidForLicense(policy, license)
   );
 };

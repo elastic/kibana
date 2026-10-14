@@ -253,15 +253,16 @@ function expectApisToCallServicesSuccessfully(
 
   test('client.getAgentStatusForAgentPolicy calls getAgentStatusForAgentPolicy and returns results', async () => {
     mockGetAgentStatusForAgentPolicy.mockResolvedValue('getAgentStatusForAgentPolicy success');
-    await expect(agentClient.getAgentStatusForAgentPolicy('foo-id', 'foo-filter')).resolves.toEqual(
-      'getAgentStatusForAgentPolicy success'
-    );
+    await expect(
+      agentClient.getAgentStatusForAgentPolicy('foo-id', 'foo-filter', ['foo-id', 'bar-id'])
+    ).resolves.toEqual('getAgentStatusForAgentPolicy success');
     expect(mockGetAgentStatusForAgentPolicy).toHaveBeenCalledWith(
       mockEsClient,
       mockSoClient,
       'foo-id',
       'foo-filter',
-      spaceId
+      spaceId,
+      ['foo-id', 'bar-id']
     );
   });
 

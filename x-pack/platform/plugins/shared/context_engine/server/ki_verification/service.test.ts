@@ -32,8 +32,8 @@ describe('KiVerificationService', () => {
     };
   });
 
-  const run = (...verifierIds: string[]) =>
-    service.verifyKi({}, { ...context, verifiers: verifierIds });
+  const run = (...verifiers: Array<string | KiVerifier>) =>
+    service.verifyKi({}, { ...context, verifiers });
 
   it('throws when verifiers is not specified', async () => {
     await expect(service.verifyKi({}, context)).rejects.toEqual(
@@ -185,6 +185,31 @@ describe('KiVerificationService', () => {
       })
     );
     expect(known.verify).not.toHaveBeenCalled();
+  });
+
+  it('runs verifier instances in order alongside registered ids', async () => {
+    registry.register(makeVerifier('builtin', { passed: true }));
+    const custom = makeVerifier('workflow:custom', { passed: false, reason: 'nope' });
+
+    const summary = await run(custom, 'builtin');
+
+    expect(summary.passed).toBe(false);
+    expect(summary.results).toEqual([
+      { verifier: 'workflow:custom', passed: false, reason: 'nope' },
+      { verifier: 'builtin', passed: true },
+    ]);
+  });
+
+  it('throws when a verifier instance duplicates another entry', async () => {
+    const custom = makeVerifier('workflow:custom', { passed: true });
+
+    await expect(run(custom, custom)).rejects.toEqual(
+      expect.objectContaining({
+        name: KiVerificationInputError.name,
+        message: 'Duplicate verifier id: "workflow:custom"',
+      })
+    );
+    expect(custom.verify).not.toHaveBeenCalled();
   });
 
   it('is a no-op that passes with no results when the feature flag is disabled', async () => {

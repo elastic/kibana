@@ -7,14 +7,20 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { TabsProvider } from '../../application/tabs_context';
 import { RulesListHeader } from './rules_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
+let mockExperimentalFeaturesEnabled = true;
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
+};
 
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
 const MOCK_BASE_PATH = '/mock-base';
@@ -51,6 +57,15 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+}));
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
 const onCreateRule = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
@@ -75,13 +90,12 @@ describe('RulesListHeader', () => {
     jest.clearAllMocks();
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
-  });
-
-  it('renders the page title and experimental badge', () => {
-    renderHeader();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    mockExperimentalFeaturesEnabled = true;
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
+    };
   });
 
   it('renders V1 rules and V2 rules tabs with V2 selected', async () => {
@@ -92,10 +106,12 @@ describe('RulesListHeader', () => {
 
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveAttribute('aria-selected', 'true');
+    expect(v1Tab).toHaveTextContent('Classic');
+    expect(v2Tab).toHaveTextContent('Universal');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
-  it('orders the V2 rules tab before the V1 rules tab', async () => {
+  it('orders the Universal tab before the Classic tab', async () => {
     renderHeader();
 
     const tabs = await screen.findAllByRole('tab');
@@ -135,5 +151,43 @@ describe('RulesListHeader', () => {
     expect(screen.getByTestId('v1RulesTab')).toBeInTheDocument();
     expect(screen.getByTestId('v2RulesTab')).toBeInTheDocument();
     expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+  });
+
+  it('renders host-provided tabs instead of management hrefs', async () => {
+    const hostTabs = [
+      {
+        id: 'v2Rules',
+        label: 'V2 rules',
+        isSelected: true,
+        href: '/obs/rules/v2',
+        'data-test-subj': 'v2RulesTab',
+      },
+      {
+        id: 'v1Rules',
+        label: 'V1 rules',
+        isSelected: false,
+        href: '/obs/rules/v1',
+        'data-test-subj': 'v1RulesTab',
+      },
+    ];
+
+    render(
+      <ListPageTestProviders>
+        <TabsProvider tabs={hostTabs}>
+          <RulesListHeader
+            canWrite={true}
+            onCreateRule={onCreateRule}
+            onCreateEsqlRule={onCreateEsqlRule}
+            onCreateWithAgent={onCreateWithAgent}
+            onBuildSequence={onBuildSequence}
+          />
+        </TabsProvider>
+      </ListPageTestProviders>
+    );
+
+    expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute('href', '/obs/rules/v2');
+    expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('href', '/obs/rules/v1');
+    expect(screen.getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'false');
   });
 });

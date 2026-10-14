@@ -29,6 +29,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let authTypeId: string | undefined;
   let defaults: Record<string, unknown> | undefined;
   let meta: Record<string, Record<string, unknown>> | undefined;
+  let fields: Record<string, z.ZodType> | undefined;
 
   let labelOverride: string | undefined;
   let isRecommendedOverride: boolean | undefined;
@@ -41,6 +42,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     authTypeId = def.type;
     defaults = def.defaults;
     meta = def?.overrides?.meta;
+    fields = def.overrides?.fields;
     labelOverride = def.overrides?.label;
     isRecommendedOverride = def.isRecommended;
     isLegacyOverride = def.isLegacy;
@@ -74,6 +76,17 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
 
   if (authType.normalizeSchema) {
     schemaToUse = authType.normalizeSchema(defaults);
+  }
+
+  if (fields) {
+    for (const [key, fieldSchema] of Object.entries(fields)) {
+      if (schemaToUse.shape[key]) {
+        schemaToUse.shape[key] = fieldSchema.meta({
+          ...schemaToUse.shape[key].meta(),
+          ...fieldSchema.meta(),
+        });
+      }
+    }
   }
 
   if (meta) {

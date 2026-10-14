@@ -6,7 +6,6 @@
  */
 import {
   getIndexPatternFromESQLQuery,
-  getESQLAdHocDataview,
   getESQLResults,
   formatESQLColumns,
   mapVariableToColumn,
@@ -32,6 +31,7 @@ import type {
 } from '@kbn/lens-common';
 import { buildTrendlineQueryWithMetricFieldMap } from '@kbn/lens-common';
 
+import { createEsqlAdHocDataView } from '../../../data_views_service/create_esql_ad_hoc_data_view';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 
@@ -103,15 +103,15 @@ export const getGridAttrs = async (
     return adHoc.title === indexPattern;
   });
 
-  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
-  // which detects the time field via HTTP (with a promise cache to avoid
-  // redundant requests).
+  // Resolve the dataset when the spec has no timeFieldName, which detects the time
+  // field via HTTP (with a promise cache to avoid redundant requests).
   const dataView = dataViewSpec?.timeFieldName
     ? await data.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview({
-        dataViewsService: data.dataViews,
+    : await createEsqlAdHocDataView({
+        dataViews: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true, id: dataViewSpec?.id },
+        id: dataViewSpec?.id,
+        skipFetchFields: true,
         http,
       });
 
@@ -315,6 +315,7 @@ const preserveTrendlineLayer = (
   let trendlineQuery = prevTrendlineLayer.query;
   let metricFieldMap = new Map<string, string>();
   let trendlineTimeField: string | undefined;
+  let unavailableMetricFields: string[] = [];
   if (prevTrendlineLayer.timeField) {
     try {
       const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
@@ -326,6 +327,7 @@ const preserveTrendlineLayer = (
       trendlineQuery = { esql: trendlineQueryResult.query };
       metricFieldMap = trendlineQueryResult.metricFieldMap;
       trendlineTimeField = trendlineQueryResult.timeField;
+      unavailableMetricFields = trendlineQueryResult.unavailableMetricFields;
     } catch {
       // If the query can't be parsed, keep the existing trendline query unchanged.
     }
@@ -337,7 +339,10 @@ const preserveTrendlineLayer = (
     for (const { from, to } of accessorPairs) {
       if (!to) continue;
       const sourceCol = from ? newMainLayer.columns.find((c) => c.columnId === from) : undefined;
-      if (!sourceCol) {
+      // Drop the trendline column when the main layer no longer has the source
+      // column, or when the trendline query cannot produce its field (e.g. a
+      // secondary metric from a FORK branch other than the flattened one).
+      if (!sourceCol || unavailableMetricFields.includes(sourceCol.fieldName)) {
         updatedColumns = updatedColumns.filter((c) => c.columnId !== to);
         continue;
       }

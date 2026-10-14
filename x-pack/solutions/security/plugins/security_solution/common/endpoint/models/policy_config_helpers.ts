@@ -7,8 +7,9 @@
 
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
 import { DefaultPolicyNotificationMessage } from './policy_config';
-import type { PolicyConfig } from '../types';
+import type { PolicyConfig, UIPolicyConfig } from '../types';
 import {
   PolicyOperatingSystem,
   ProtectionModes,
@@ -159,6 +160,11 @@ const disableCommonProtections = (policy: PolicyConfig) => {
   }, policy);
 };
 
+/**
+ * `custom_yara_signatures` is left absent when it was never configured: this helper backs both
+ * `disableProtections` and `ensureOnlyEventCollectionIsAllowed`, and forcing an explicit `false`
+ * here would opt a policy out of the future `??=` backfill for a feature it never had.
+ */
 const getDisabledCommonProtectionsForOS = (
   policy: PolicyConfig,
   os: PolicyOperatingSystem
@@ -170,6 +176,9 @@ const getDisabledCommonProtectionsForOS = (
   memory_protection: {
     ...policy[os].memory_protection,
     mode: ProtectionModes.off,
+    ...(policy[os].memory_protection.custom_yara_signatures === undefined
+      ? {}
+      : { custom_yara_signatures: false }),
   },
   malware: {
     ...policy[os].malware,
@@ -298,6 +307,29 @@ export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyCon
   });
 };
 
+export interface DeviceControlNotificationConflict {
+  readonly os: PolicyOperatingSystem.windows | PolicyOperatingSystem.mac;
+  readonly accessLevel: DeviceControlAccessLevel;
+}
+
+export const getDeviceControlNotificationConflicts = (
+  policy: PolicyConfig
+): readonly DeviceControlNotificationConflict[] => {
+  const osList: readonly (PolicyOperatingSystem.windows | PolicyOperatingSystem.mac)[] = [
+    PolicyOperatingSystem.windows,
+    PolicyOperatingSystem.mac,
+  ];
+
+  return osList.flatMap((os) => {
+    const accessLevel = policy[os]?.device_control?.usb_storage;
+    const notificationEnabled = policy[os]?.popup?.device_control?.enabled;
+
+    return notificationEnabled && accessLevel && accessLevel !== DeviceControlAccessLevel.deny_all
+      ? [{ os, accessLevel }]
+      : [];
+  });
+};
+
 export const resetCustomNotifications = (
   customNotification = DefaultPolicyNotificationMessage
 ): Partial<PolicyConfig> => {
@@ -361,4 +393,303 @@ export const removeLinuxDnsEvents = (policy: PolicyConfig): PolicyConfig => {
       },
     },
   };
+};
+
+export const POLICY_COUPLING_PROTECTIONS = [
+  'malware',
+  'ransomware',
+  'memory_protection',
+  'behavior_protection',
+] as const;
+
+export type PolicyCouplingProtection = (typeof POLICY_COUPLING_PROTECTIONS)[number];
+
+export const POLICY_COUPLING_MALWARE_BOOLEAN_FIELDS = ['blocklist', 'on_write_scan'] as const;
+
+export type PolicyCouplingMalwareBooleanField =
+  (typeof POLICY_COUPLING_MALWARE_BOOLEAN_FIELDS)[number];
+
+const forEachCouplingOs = (
+  osList: readonly (keyof UIPolicyConfig)[],
+  write: (os: keyof UIPolicyConfig) => void
+) => {
+  for (const os of osList) {
+    write(os);
+  }
+};
+
+export const setProtectionModeAndPopup = ({
+  policy,
+  protection,
+  osList,
+  mode,
+  syncPopupEnabled,
+  popupEnabled,
+}: {
+  policy: PolicyConfig;
+  protection: PolicyCouplingProtection;
+  osList: readonly (keyof UIPolicyConfig)[];
+  mode: ProtectionModes;
+  syncPopupEnabled: boolean;
+  popupEnabled: boolean;
+}): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    set(policy, `${os}.${protection}.mode`, mode);
+    if (syncPopupEnabled) {
+      set(policy, `${os}.popup.${protection}.enabled`, popupEnabled);
+    }
+  });
+  return policy;
+};
+
+export const setBehaviorReputationService = (
+  policy: PolicyConfig,
+  value: boolean
+): PolicyConfig => {
+  policy.windows.behavior_protection.reputation_service = value;
+  policy.mac.behavior_protection.reputation_service = value;
+  policy.linux.behavior_protection.reputation_service = value;
+  return policy;
+};
+
+export const setMalwareBoolean = (
+  policy: PolicyConfig,
+  field: PolicyCouplingMalwareBooleanField,
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    policy[os].malware[field] = value;
+  });
+  return policy;
+};
+
+export const setCustomYaraSignatures = (
+  policy: PolicyConfig,
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    policy[os].memory_protection.custom_yara_signatures = value;
+  });
+  return policy;
+};
+
+/**
+ * Turns off custom YARA signatures only where they are currently enabled.
+ *
+ * An absent field is left absent: it means "never configured", and manufacturing an explicit
+ * `false` would opt the policy out of the future backfill for a feature the user never had
+ * access to. An enabled field still has to be cleared, otherwise the save is rejected by
+ * license validation.
+ */
+export const clearCustomYaraSignaturesIfEnabled = (
+  policy: PolicyConfig,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    if (policy[os].memory_protection.custom_yara_signatures) {
+      policy[os].memory_protection.custom_yara_signatures = false;
+    }
+  });
+  return policy;
+};
+
+/** Leaf field of every path in `CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS`. */
+const CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD = 'user_yara_rescan_interval_seconds';
+
+type AdvancedSettings = Record<string, unknown>;
+
+/**
+ * `advanced` and everything under it is free-form, so a stored policy can hold any value where a
+ * settings namespace is expected. Narrowing before use keeps `in` from throwing on a primitive.
+ */
+const isAdvancedSettings = (value: unknown): value is AdvancedSettings =>
+  typeof value === 'object' && value !== null;
+
+/**
+ * Whether the policy carries any of the Enterprise-gated custom YARA advanced settings.
+ */
+export const hasCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig): boolean =>
+  [...CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS].some((key) => get(policy, key) !== undefined);
+
+const removeYaraAdvancedSettingsForOs = <T extends { advanced?: unknown }>(osPolicy: T): T => {
+  const { advanced } = osPolicy;
+
+  if (!isAdvancedSettings(advanced)) {
+    return osPolicy;
+  }
+
+  const memoryProtection = advanced.memory_protection;
+
+  if (
+    !isAdvancedSettings(memoryProtection) ||
+    !(CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD in memoryProtection)
+  ) {
+    return osPolicy;
+  }
+
+  const remainingMemoryProtection: AdvancedSettings = { ...memoryProtection };
+  delete remainingMemoryProtection[CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD];
+
+  const nextAdvanced: AdvancedSettings = { ...advanced };
+  if (Object.keys(remainingMemoryProtection).length > 0) {
+    nextAdvanced.memory_protection = remainingMemoryProtection;
+  } else {
+    delete nextAdvanced.memory_protection;
+  }
+
+  return { ...osPolicy, advanced: nextAdvanced } as T;
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the Enterprise-gated custom YARA advanced
+ * settings removed.
+ *
+ * The license downgrade factories need this as much as the feature-gating path does: while these
+ * settings are inert without `custom_yara_signatures`, leaving them in place would make a
+ * downgraded policy keep failing `isEndpointPolicyValidForLicense`, so `license_watch` could
+ * never bring it into compliance.
+ */
+export const removeCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig): PolicyConfig => ({
+  ...policy,
+  windows: removeYaraAdvancedSettingsForOs(policy.windows),
+  mac: removeYaraAdvancedSettingsForOs(policy.mac),
+  linux: removeYaraAdvancedSettingsForOs(policy.linux),
+});
+
+const removeEnabledCustomYaraSignaturesForOs = <
+  T extends { memory_protection: { custom_yara_signatures?: boolean } }
+>(
+  osPolicy: T
+): T => {
+  if (osPolicy.memory_protection.custom_yara_signatures === false) {
+    return osPolicy;
+  }
+
+  const { custom_yara_signatures: customYaraSignatures, ...memoryProtection } =
+    osPolicy.memory_protection;
+
+  return { ...osPolicy, memory_protection: memoryProtection } as T;
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with custom YARA signatures sanitized for a
+ * deployment where the feature is gated off, along with the Enterprise-gated custom YARA
+ * advanced settings.
+ *
+ * The field is deleted rather than set to `false`, because an explicit `false` would destroy the
+ * "never set" signal, making the future `??=` backfill a no-op and leaving existing customers
+ * permanently opted out. An existing `false` is kept for the same reason in reverse: it records a
+ * deliberate opt-out, so dropping it would let the backfill turn the feature back on.
+ *
+ * @param policy
+ * @returns PolicyConfig with no enabled custom_yara_signatures
+ */
+export const removeCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig =>
+  removeCustomYaraSignaturesAdvancedSettings({
+    ...policy,
+    windows: removeEnabledCustomYaraSignaturesForOs(policy.windows),
+    mac: removeEnabledCustomYaraSignaturesForOs(policy.mac),
+    linux: removeEnabledCustomYaraSignaturesForOs(policy.linux),
+  });
+
+export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): PolicyConfig => {
+  if (value === false) {
+    policy.windows.device_control = {
+      enabled: false,
+      usb_storage: DeviceControlAccessLevel.audit,
+    };
+    policy.windows.popup.device_control = {
+      enabled: false,
+      message: policy.windows.popup.device_control?.message || '',
+    };
+
+    policy.mac.device_control = {
+      enabled: false,
+      usb_storage: DeviceControlAccessLevel.audit,
+    };
+    policy.mac.popup.device_control = {
+      enabled: false,
+      message: policy.mac.popup.device_control?.message || '',
+    };
+
+    return policy;
+  }
+
+  policy.windows.device_control = {
+    enabled: true,
+    usb_storage: DeviceControlAccessLevel.deny_all,
+  };
+  policy.windows.popup = policy.windows.popup || {};
+  policy.windows.popup.device_control = {
+    enabled: true,
+    message: policy.windows.popup.device_control?.message || '',
+  };
+
+  policy.mac.device_control = {
+    enabled: true,
+    usb_storage: DeviceControlAccessLevel.deny_all,
+  };
+  policy.mac.popup = policy.mac.popup || {};
+  policy.mac.popup.device_control = {
+    enabled: true,
+    message: policy.mac.popup.device_control?.message || '',
+  };
+
+  return policy;
+};
+
+export const setDeviceControlUsbStorage = (
+  policy: PolicyConfig,
+  value: DeviceControlAccessLevel
+): PolicyConfig => {
+  if (!policy.windows.device_control) {
+    policy.windows.device_control = { enabled: true, usb_storage: value };
+  } else {
+    policy.windows.device_control.usb_storage = value;
+  }
+
+  if (!policy.mac.device_control) {
+    policy.mac.device_control = { enabled: true, usb_storage: value };
+  } else {
+    policy.mac.device_control.usb_storage = value;
+  }
+
+  if (value === DeviceControlAccessLevel.deny_all) {
+    if (policy.windows.popup.device_control) {
+      policy.windows.popup.device_control.enabled = true;
+    }
+    if (policy.mac.popup.device_control) {
+      policy.mac.popup.device_control.enabled = true;
+    }
+  } else {
+    if (policy.windows.popup.device_control) {
+      policy.windows.popup.device_control.enabled = false;
+    }
+    if (policy.mac.popup.device_control) {
+      policy.mac.popup.device_control.enabled = false;
+    }
+  }
+
+  return policy;
+};
+
+export const constrainLinuxTtyIo = (policy: PolicyConfig): PolicyConfig => {
+  if (policy.linux.events.session_data === false) {
+    policy.linux.events.tty_io = false;
+  }
+  return policy;
+};
+
+export const setPopupEnabled = (
+  policy: PolicyConfig,
+  protection: PolicyCouplingProtection,
+  osList: readonly (keyof UIPolicyConfig)[],
+  enabled: boolean
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    set(policy, `${os}.popup.${protection}.enabled`, enabled);
+  });
+  return policy;
 };

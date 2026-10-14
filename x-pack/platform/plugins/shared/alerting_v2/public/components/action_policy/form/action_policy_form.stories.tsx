@@ -56,8 +56,7 @@ export const EditMode: Story = {
     defaultValues: {
       name: 'Critical production alerts',
       description: 'Routes critical production alerts to escalation workflows',
-      tags: ['production', 'critical'],
-      matcher: 'data.severity : "critical" and data.env : "prod"',
+      matcher: { expression: 'data.severity : "critical" and data.env : "prod"' },
       groupingMode: 'per_field',
       groupBy: ['host.name', 'service.name'],
       throttleStrategy: 'time_interval',
@@ -68,14 +67,13 @@ export const EditMode: Story = {
   },
 };
 
-export const PerEpisodeWithInterval: Story = {
+export const PerAlertWithInterval: Story = {
   args: {
     defaultValues: {
       name: 'Status change with reminders',
       description: 'Notifies on status change and repeats every hour',
-      tags: [],
-      matcher: '',
-      groupingMode: 'per_episode',
+      matcher: null,
+      groupingMode: 'per_alert',
       groupBy: [],
       throttleStrategy: 'per_status_interval',
       throttleInterval: '1h',
@@ -89,9 +87,8 @@ export const DigestMode: Story = {
   args: {
     defaultValues: {
       name: 'Digest summary',
-      description: 'Bundles all episodes into a single digest',
-      tags: [],
-      matcher: '',
+      description: 'Bundles all alerts into a single digest',
+      matcher: null,
       groupingMode: 'all',
       groupBy: [],
       throttleStrategy: 'time_interval',

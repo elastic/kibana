@@ -18,7 +18,9 @@ export type FetchMlInferencePipelineProcessorsResponse = InferencePipeline[];
 export const fetchMlInferencePipelineProcessors = async ({
   indexName,
 }: FetchMlInferencePipelineProcessorsApiLogicArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/ml_inference/pipeline_processors`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/ml_inference/pipeline_processors`;
 
   return await HttpLogic.values.http.get<FetchMlInferencePipelineProcessorsResponse>(route);
 };

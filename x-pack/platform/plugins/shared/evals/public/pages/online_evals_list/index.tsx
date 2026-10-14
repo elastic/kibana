@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlyout,
@@ -22,9 +21,9 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiToolTip,
-  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -50,7 +49,6 @@ const tableCaption = i18n.translate('xpack.evals.onlineEvaluations.list.tableCap
 
 export const OnlineEvalsListPage: React.FC = () => {
   const history = useHistory();
-  const { euiTheme } = useEuiTheme();
   const { canManage } = useEvalsPermissions();
   const [workflowPendingDelete, setWorkflowPendingDelete] =
     React.useState<OnlineEvalWorkflowListItem | null>(null);
@@ -178,12 +176,12 @@ export const OnlineEvalsListPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => setIsCreateFlyoutOpen(true)}
               isDisabled={isCreateDisabled}
               data-test-subj="createOnlineEvalButton"
@@ -197,13 +195,11 @@ export const OnlineEvalsListPage: React.FC = () => {
         <EuiSpacer size="m" />
         {!canManage ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               title={i18n.translate('xpack.evals.onlineEvaluations.list.permissionsCallout.title', {
                 defaultMessage: 'You need additional privileges to manage online evaluations',
               })}
-              iconType="lock"
-              color="warning"
               data-test-subj="onlineEvalsListNoPermissionCallout"
             />
             <EuiSpacer size="m" />
@@ -229,7 +225,7 @@ export const OnlineEvalsListPage: React.FC = () => {
             }
             actions={[
               <EuiButtonEmpty
-                iconType="visLine"
+                iconType="chartLine"
                 onClick={() => history.push(TRACING_PAGE_PATH)}
                 data-test-subj="onlineEvalsUnavailableTracingButton"
               >
@@ -276,7 +272,7 @@ export const OnlineEvalsListPage: React.FC = () => {
           />
         ) : noWorkflows ? (
           <EuiEmptyPrompt
-            iconType="visLine"
+            iconType="chartLine"
             title={
               <h2>
                 {i18n.translate('xpack.evals.onlineEvaluations.list.empty.title', {
@@ -299,7 +295,7 @@ export const OnlineEvalsListPage: React.FC = () => {
                   })}
                 </p>
                 {hasNoLlmConnectors ? (
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount={false}
                     title={i18n.translate(
                       'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutTitle',
@@ -307,34 +303,33 @@ export const OnlineEvalsListPage: React.FC = () => {
                         defaultMessage: 'No AI connector configured',
                       }
                     )}
-                    color="warning"
-                    iconType="warning"
                     size="s"
-                  >
-                    <p>
-                      {i18n.translate(
-                        'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutBody',
-                        {
-                          defaultMessage:
-                            'Set up an AI connector in Stack Management before creating an online evaluation.',
-                        }
-                      )}{' '}
-                      <EuiLink href={CONNECTORS_MANAGEMENT_URL}>
+                    text={
+                      <p>
                         {i18n.translate(
-                          'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutLink',
+                          'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutBody',
                           {
-                            defaultMessage: 'Open connectors',
+                            defaultMessage:
+                              'Set up an AI connector in Stack Management before creating an online evaluation.',
                           }
-                        )}
-                      </EuiLink>
-                    </p>
-                  </EuiCallOut>
+                        )}{' '}
+                        <EuiLink href={CONNECTORS_MANAGEMENT_URL}>
+                          {i18n.translate(
+                            'xpack.evals.onlineEvaluations.list.empty.noConnectorCalloutLink',
+                            {
+                              defaultMessage: 'Open connectors',
+                            }
+                          )}
+                        </EuiLink>
+                      </p>
+                    }
+                  />
                 ) : null}
               </>
             }
             actions={[
               <EuiButtonEmpty
-                iconType="visLine"
+                iconType="chartLine"
                 onClick={() => history.push(TRACING_PAGE_PATH)}
                 data-test-subj="onlineEvalsEmptyStateTracingButton"
               >
@@ -347,7 +342,7 @@ export const OnlineEvalsListPage: React.FC = () => {
                 : [
                     <EuiButton
                       fill
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       onClick={() => setIsCreateFlyoutOpen(true)}
                       isDisabled={!canManage}
                       data-test-subj="createOnlineEvalEmptyStateButton"

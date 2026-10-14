@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { Suspense, useRef, useState } from 'react';
-import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { isMac } from '@kbn/shared-ux-utility';
+import { EuiButtonIcon, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
-import { searchPlaceholder } from '../editor_visor';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { searchPlaceholder } from '../editor_visor/visor_i18n';
+import { KeyboardShortcuts } from '../editor_footer/keyboard_shortcuts';
+import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
 import { MagnifySparklesIcon } from './magnify_sparkles_icon';
+import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
+import { ViewCreatedSource } from '../telemetry/telemetry_service';
+import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
+import { useCanCreateView } from '../save_as_view/use_can_create_view';
 import {
   addStarredQueryLabel,
   helpLabel,
   hideHistoryLabel,
+  removeStarredQueryLabel,
   searchTooltipLabel,
   searchWithNlTooltipLabel,
-  removeStarredQueryLabel,
   showHistoryLabel,
 } from './menu_i18n';
 
@@ -32,18 +37,35 @@ const LazyHelpPopover = React.lazy(async () => {
 
 export function ESQLMenu({
   hideHistory,
+  hideVisor,
+  hideRecommendedQueries,
   onESQLDocsFlyoutVisibilityChanged,
+  onPrettifyQuery,
+  docsFlyoutSize,
+  enableCreateView = false,
 }: {
   hideHistory?: boolean;
+  /** Shows the action to create an ES|QL view. Hidden unless a host opts in. */
+  enableCreateView?: boolean;
+  /**
+   * Hides the visor (KQL / natural-language search) button. Use when embedding the menu
+   * without the full editor, which owns the visor surface the button would toggle.
+   */
+  hideVisor?: boolean;
+  /**
+   * Hides the recommended-queries section. Use when no `submitEsqlQuery` action is wired,
+   * so picks can't be applied (e.g. the split fragment editors).
+   */
+  hideRecommendedQueries?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  onPrettifyQuery?: () => void;
+  /** Size for the docs flyout. Pass a named size when embedding the menu in another flyout. */
+  docsFlyoutSize?: EuiFlyoutProps['size'];
 } = {}) {
   const editorActions = useEsqlEditorActions();
-  const { euiTheme } = useEuiTheme();
   const isNlToEsqlEnabled = useNlToEsqlCheck();
-  const commandKey = isMac ? '⌘' : 'Ctrl';
-  const visorTooltip = isNlToEsqlEnabled
-    ? searchWithNlTooltipLabel(commandKey)
-    : searchTooltipLabel(commandKey);
+  const visorTooltip = isNlToEsqlEnabled ? searchWithNlTooltipLabel : searchTooltipLabel;
+  const isInline = editorActions?.editorIsInline;
   const onToggleVisor = editorActions?.toggleVisor;
   const onToggleHistory = editorActions?.toggleHistory;
   const onToggleStarredQuery = editorActions?.toggleStarredQuery;
@@ -52,6 +74,10 @@ export function ESQLMenu({
   const starredQueryLabel = isStarred ? removeStarredQueryLabel : addStarredQueryLabel;
 
   const [showStardust, setShowStardust] = useState(false);
+  const [queryToSave, setQueryToSave] = useState<string>();
+  const applySavedView = useApplySavedView();
+  const canCreateView = useCanCreateView(enableCreateView);
+  const currentQuery = editorActions?.currentQuery ?? '';
   const wasStarredRef = useRef(isStarred);
   if (isStarred && !wasStarredRef.current) {
     setShowStardust(true);
@@ -61,31 +87,38 @@ export function ESQLMenu({
   wasStarredRef.current = isStarred;
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="center"
-      responsive={false}
-      css={css`
-        border-radius: ${euiTheme.border.radius.small};
-        border: ${euiTheme.border.thin};
-        background: ${euiTheme.colors.emptyShade};
-        padding: ${euiTheme.size.xs};
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
-            size="xs"
-            aria-label={searchPlaceholder}
-            onClick={onToggleVisor}
-            isDisabled={!onToggleVisor}
-            data-test-subj="esql-menu-button"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+    <>
+      {onPrettifyQuery && <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />}
+      <KeyboardShortcuts />
+      {canCreateView && (
+        <EuiFlexItem grow={false}>
+          <span css={{ position: 'relative', display: 'inline-flex' }}>
+            <EuiToolTip position="top" content={createViewLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="tablePlus"
+                size="xs"
+                aria-label={createViewLabel}
+                onClick={() => setQueryToSave(currentQuery)}
+                isDisabled={currentQuery.trim().length === 0}
+                data-test-subj="ESQLEditor-create-view-icon"
+                color="text"
+              />
+            </EuiToolTip>
+            <EuiIcon
+              type="dot"
+              color="primary"
+              data-test-subj="ESQLEditor-create-view-dot"
+              aria-hidden={true}
+              css={{
+                position: 'absolute',
+                insetBlockStart: '-1px',
+                insetInlineEnd: '-1px',
+                pointerEvents: 'none',
+              }}
+            />
+          </span>
+        </EuiFlexItem>
+      )}
       {!hideHistory && (
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
@@ -137,9 +170,36 @@ export function ESQLMenu({
             </EuiToolTip>
           }
         >
-          <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
+          <LazyHelpPopover
+            onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+            docsFlyoutSize={docsFlyoutSize}
+            hideRecommendedQueries={hideRecommendedQueries}
+          />
         </Suspense>
       </EuiFlexItem>
-    </EuiFlexGroup>
+      {isInline && !hideVisor && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
+              size="xs"
+              aria-label={searchPlaceholder}
+              onClick={onToggleVisor}
+              isDisabled={!onToggleVisor}
+              data-test-subj="esql-menu-button"
+              color="text"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {queryToSave !== undefined && (
+        <CreateViewModal
+          query={queryToSave}
+          onClose={() => setQueryToSave(undefined)}
+          onSaved={applySavedView}
+          source={ViewCreatedSource.EDITOR_MENU}
+        />
+      )}
+    </>
   );
 }

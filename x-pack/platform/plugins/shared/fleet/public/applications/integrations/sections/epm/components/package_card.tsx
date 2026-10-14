@@ -42,6 +42,7 @@ import {
   shouldShowInstallationStatus,
 } from './installation_status';
 import { buildPackageCardNavigateState } from './package_card_navigate_state';
+import { SearchMemberMatchDescription } from './search_member_match_description';
 import { wrapTitleWithDeprecated } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
@@ -81,8 +82,10 @@ export function PackageCard({
   showDescription = true,
   showReleaseBadge = true,
   hasDataStreams,
+  searchMemberMatch,
 }: PackageCardProps) {
   const theme = useEuiTheme();
+  const defaultPackageCardMinHeight = theme.euiTheme.base * 8;
   let releaseBadge: React.ReactNode | null = null;
   if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
@@ -270,7 +273,7 @@ export function PackageCard({
             ${getLineClampStyles(titleLineClamp)}
           }
 
-          min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
+          min-height: ${minCardHeight ? `${minCardHeight}px` : `${defaultPackageCardMinHeight}px`};
           border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
           max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
           overflow: ${maxCardHeight ? 'hidden' : null};
@@ -288,7 +291,20 @@ export function PackageCard({
           )
         }
         titleSize={titleSize}
-        description={showDescription ? description : ''}
+        description={
+          showDescription ? (
+            searchMemberMatch ? (
+              <SearchMemberMatchDescription
+                memberTitles={searchMemberMatch.memberTitles}
+                collectionTitle={searchMemberMatch.collectionTitle}
+              />
+            ) : (
+              description
+            )
+          ) : (
+            ''
+          )
+        }
         hasBorder
         icon={
           <CardIcon

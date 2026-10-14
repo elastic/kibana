@@ -12,8 +12,39 @@ import { i18n } from '@kbn/i18n';
 import { isZod } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import { extractSchemaPropertyPaths } from '../extract_schema_property_paths/extract_schema_property_paths';
+import { getSchemaAtPath } from '../zod/get_schema_at_path';
+import { getZodSchemaType, type ZodTypeKind } from '../zod/get_zod_schema_type';
+import { unwrapSchema } from '../zod/unwrap_schema';
 
 export type ValidateKqlAgainstSchemaResult = { valid: true } | { valid: false; error: string };
+
+/**
+ * Schema types whose nested keys are not declared (generic inbound payloads,
+ * maps). Descendants of these paths are allowed in KQL, e.g. event.body.team_id
+ * when body is z.unknown().
+ */
+const OPEN_ENDED_PROPERTY_TYPES = new Set<ZodTypeKind>(['unknown', 'any', 'record']);
+
+function isOpenEndedDescendant(pathToCheck: string, openEndedPrefixes: readonly string[]): boolean {
+  return openEndedPrefixes.some(
+    (prefix) => pathToCheck === prefix || pathToCheck.startsWith(`${prefix}.`)
+  );
+}
+
+function isOpenEndedSchemaPath(
+  schema: z.ZodType,
+  path: string,
+  extractedType: ZodTypeKind
+): boolean {
+  if (OPEN_ENDED_PROPERTY_TYPES.has(extractedType)) {
+    return true;
+  }
+  const { schema: fieldSchema } = getSchemaAtPath(schema, path);
+  if (!fieldSchema) {
+    return false;
+  }
+  return OPEN_ENDED_PROPERTY_TYPES.has(getZodSchemaType(unwrapSchema(fieldSchema)));
+}
 
 function normalizeFieldPath(field: string | null | undefined): string {
   if (field === null || field === undefined) {
@@ -85,6 +116,7 @@ export function validateKqlAgainstSchema(
 
   const schemaPathEntries = extractSchemaPropertyPaths(schema);
   const allowedSet = new Set<string>();
+  const openEndedPrefixes: string[] = [];
 
   if (fieldPrefix) {
     allowedSet.add(fieldPrefix);
@@ -92,9 +124,12 @@ export function validateKqlAgainstSchema(
       allowedSet.add(fieldPrefix.slice(0, -1));
     }
   }
-  for (const { path } of schemaPathEntries) {
+  for (const { path, type } of schemaPathEntries) {
     const fullPath = fieldPrefix ? `${fieldPrefix}${path}` : path;
     allowedSet.add(fullPath);
+    if (isOpenEndedSchemaPath(schema, path, type)) {
+      openEndedPrefixes.push(fullPath);
+    }
   }
 
   const kqlFieldPaths = getKqlFieldNames(ast);
@@ -104,7 +139,7 @@ export function validateKqlAgainstSchema(
     const isWildcard = field.endsWith('.*');
     const pathToCheck = isWildcard ? field.slice(0, -2) : field;
 
-    if (!allowedSet.has(pathToCheck)) {
+    if (!allowedSet.has(pathToCheck) && !isOpenEndedDescendant(pathToCheck, openEndedPrefixes)) {
       return {
         valid: false,
         error: fieldPrefix

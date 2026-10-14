@@ -65,7 +65,6 @@ import {
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
   POLICIES_URL,
-  ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
   DISCOVER_URL,
   RULES_COVERAGE_URL,
@@ -158,12 +157,6 @@ describe(
         'cloud_security_posture-vulnerability_dashboard',
         CLOUD_NATIVE_VULN_MGMT_URL
       );
-    });
-
-    it('navigates to the Entity Analytics page from dashboard', () => {
-      cy.visit(DASHBOARDS_URL);
-      verifyNavigatesFromDashboardLandingTo('entity_analytics', ENTITY_ANALYTICS_URL);
-      cy.url().should('include', ENTITY_ANALYTICS_URL);
     });
 
     it('navigates to Data quality page from dashboard', () => {

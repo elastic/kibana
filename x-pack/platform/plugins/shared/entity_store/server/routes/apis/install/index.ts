@@ -25,6 +25,8 @@ export function registerInstall(router: EntityStorePluginRouter) {
         'Install the Entity Store and create engines for the specified entity types. ' +
         'A single `logExtraction` configuration is shared across all entity types. ' +
         'Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. ' +
+        'Omitting a field leaves it unchanged. ' +
+        'Sending `null` for a field clears that override and reverts to the default value. ' +
         'To change settings after install, use the update endpoint.',
       options: {
         tags: ['oas-tag:Security entity store'],
@@ -53,14 +55,14 @@ export function registerInstall(router: EntityStorePluginRouter) {
           assetManagerClient: assetManager,
           entityMaintainersClient,
         } = entityStoreCtx;
-        const { entityTypes, logExtraction, historySnapshot } = req.body;
+        const { entityTypes, logExtraction, historySnapshot, excludedUserNames } = req.body;
         logger.debug('Install api called');
 
         const forbidden = await enforceEntityStorePrivileges(
           assetManager,
           req,
           res,
-          logExtraction?.additionalIndexPatterns
+          logExtraction?.additionalIndexPatterns ?? undefined
         );
         if (forbidden) return forbidden;
         const { engines } = await assetManager.getStatus();
@@ -71,7 +73,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await assetManager.init(req, toInstall, logExtraction, historySnapshot);
+        await assetManager.init(req, toInstall, logExtraction, historySnapshot, excludedUserNames);
         await entityMaintainersClient.init(req);
 
         return res.created({ body: { ok: true } });

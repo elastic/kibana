@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type { AlertEpisodeStatus, AlertEvent } from '../../../resources/datastreams/alert_events';
+import type {
+  AlertEpisodeStatus,
+  AlertEventDocument,
+} from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import type { LatestAlertEventState } from '../queries';
 
 export interface StateTransitionContext {
   rule: RuleResponse;
-  alertEvent: AlertEvent;
+  alertEvent: AlertEventDocument;
   previousEpisode?: LatestAlertEventState;
+  /** ISO timestamp of the director run; `@timestamp` is not set on the event until ES indexes it. */
+  evaluatedAt: string;
 }
 
 export interface StateTransitionResult {

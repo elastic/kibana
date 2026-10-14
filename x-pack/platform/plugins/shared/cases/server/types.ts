@@ -57,6 +57,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { CasesClient } from './client';
+import type { GetCasesClientOptions } from './client/types';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
@@ -134,7 +135,10 @@ export interface CasesServerStart {
    * @param request a KibanaRequest
    * @returns a {@link CasesClient}
    */
-  getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
+  getCasesClientWithRequest(
+    request: KibanaRequest,
+    options?: GetCasesClientOptions
+  ): Promise<CasesClient>;
   getUnifiedAttachmentTypeRegistry(): UnifiedAttachmentTypeRegistry;
   getCasesEventBus(): CasesEventBus;
   config: ConfigType;

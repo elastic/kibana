@@ -1,5 +1,5 @@
 {
-  "sha1": "259bac0a76a1cabd8da0a8f2af39267108bcb1a9",
+  "sha1": "e14b2d4140a938177c7dad676d750e71306f10ce",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "d6a5596416886d5-5d87a4be1a90011",
+      "title": "serverless security dashboard-only landing redirects a dashboard-only user from Get started to dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/dashboard_only_landing.spec.ts",
+        "line": 62,
+        "column": 40
+      }
+    },
+    {
+      "id": "d6a5596416886d5-b44a816d587963f",
+      "title": "serverless security dashboard-only landing redirects a discover-only user from Get started to discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/dashboard_only_landing.spec.ts",
+        "line": 69,
+        "column": 72
+      }
+    },
+    {
+      "id": "d6a5596416886d5-f0e222dae35a6ef",
+      "title": "serverless security dashboard-only landing keeps a privileged user on Get started",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/dashboard_only_landing.spec.ts",
+        "line": 73,
+        "column": 25
       }
     },
     {

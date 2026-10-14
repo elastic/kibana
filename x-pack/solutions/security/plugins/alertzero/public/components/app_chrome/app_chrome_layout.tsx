@@ -10,9 +10,7 @@ import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-
-/** Routes that render a fixed-height layout of their own and must not be scrolled as one block. */
-const FIXED_HEIGHT_ROUTES = ['/chats'];
+import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
 
 /**
  * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
@@ -26,6 +24,14 @@ const FIXED_HEIGHT_ROUTES = ['/chats'];
  */
 const CHROME_SCROLLED_ROUTES = ['/watches'];
 
+/**
+ * Routes that need the same `overflow: visible` (for a sticky element) but keep the app heading.
+ * Matched exactly: `/` is the landing page, which every other route's path also starts with. The
+ * app root can also report an empty pathname.
+ * The landing page pins the onboarding intro's Continue footer.
+ */
+const CHROME_SCROLLED_EXACT_ROUTES = ['', '/'];
+
 const matchesRoute = (pathname: string, prefixes: string[]) =>
   prefixes.some((prefix) => pathname.startsWith(prefix));
 
@@ -38,18 +44,20 @@ interface AppChromeLayoutProps {
  * and left rail (including Launchpad, Dev Tools, Settings, collapse).
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
+  const docLink = useAlertZeroDocumentationLink();
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
 
-  const overflow = matchesRoute(pathname, FIXED_HEIGHT_ROUTES)
-    ? 'hidden'
-    : matchesRoute(pathname, CHROME_SCROLLED_ROUTES)
-    ? 'visible'
-    : 'auto';
+  const isWatchesShell = matchesRoute(pathname, CHROME_SCROLLED_ROUTES);
+  const isChromeScrolled = isWatchesShell || CHROME_SCROLLED_EXACT_ROUTES.includes(pathname);
+  const overflow = isChromeScrolled ? 'visible' : 'auto';
+  const hideAppHeading = isWatchesShell;
 
   return (
     <>
-      <AppHeaderView title="AlertZero" spacing="compact" />
+      {hideAppHeading ? null : (
+        <AppHeaderView title="AlertZero" spacing="compact" docLink={docLink} />
+      )}
       <div
         css={css`
           display: flex;

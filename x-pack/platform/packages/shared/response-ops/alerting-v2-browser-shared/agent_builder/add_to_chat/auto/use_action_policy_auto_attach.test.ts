@@ -22,17 +22,14 @@ const policy = {
   description: 'Routes critical alerts',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  matcher: 'data.severity : "critical"',
-  group_by: ['host.name'],
+  matcher: { expression: 'data.severity : "critical"' },
+  grouping: { mode: 'per_field', fields: ['host.name'] },
   tags: ['production'],
-  grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
-  created_by: 'alice',
+  created_by: { profile_uid: 'alice' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'alice',
+  updated_by: { profile_uid: 'alice' },
   updated_at: '2026-01-01T00:00:00.000Z',
-  auth: { owner: 'alice', created_by_user: true },
 } as ActionPolicyResponse;
 
 describe('useActionPolicyAutoAttach', () => {

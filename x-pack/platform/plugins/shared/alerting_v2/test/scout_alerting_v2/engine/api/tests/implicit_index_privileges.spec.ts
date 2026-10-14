@@ -283,7 +283,7 @@ apiTest.describe(
         SEEDED_SPACES.map((space) => ({
           '@timestamp': now,
           last_series_event_timestamp: now,
-          actor: null,
+          actor: { type: 'user' },
           action_type: 'ack',
           rule_id: `impl-priv-${space}`,
           group_hash: `impl-priv-${space}`,

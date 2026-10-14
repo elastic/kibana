@@ -26,6 +26,7 @@ describe('EpisodesKpis', () => {
       data: undefined,
       isLoading: true,
       isError: false,
+      sourceErrors: [],
     });
 
     render(
@@ -61,6 +62,7 @@ describe('EpisodesKpis', () => {
       },
       isLoading: false,
       isError: false,
+      sourceErrors: [],
     });
 
     render(
@@ -84,6 +86,7 @@ describe('EpisodesKpis', () => {
       data: undefined,
       isLoading: false,
       isError: true,
+      sourceErrors: [],
     });
 
     render(
@@ -106,6 +109,7 @@ describe('EpisodesKpis', () => {
       data: undefined,
       isLoading: false,
       isError: false,
+      sourceErrors: [],
     });
 
     const specificTimeRange: TimeRange = { from: 'now-7d', to: 'now' };

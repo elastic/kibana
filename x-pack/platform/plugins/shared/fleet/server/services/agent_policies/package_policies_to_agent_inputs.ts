@@ -46,8 +46,16 @@ const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
 };
 
-const combineConditions = (conditions: Array<string | null | undefined>): string | undefined => {
-  const filtered = conditions.map((c) => c?.trim()).filter((c): c is string => Boolean(c));
+const combineConditions = (
+  conditions: Array<string | boolean | null | undefined>
+): string | undefined => {
+  const filtered = conditions
+    .map((c) => {
+      if (typeof c === 'string') return c.trim();
+      if (typeof c === 'boolean') return String(c);
+      return undefined;
+    })
+    .filter((c): c is string => Boolean(c));
   if (filtered.length === 0) return undefined;
   if (filtered.length === 1) return filtered[0];
   return filtered.map((c) => `(${c})`).join(' and ');
@@ -311,6 +319,7 @@ const backfillInputsForVersion = async ({
   savedObjectType,
   inputsForVersions,
   version,
+  namespace,
 }: {
   packageInfo: PackageInfo;
   packagePolicy: PackagePolicy;
@@ -319,6 +328,7 @@ const backfillInputsForVersion = async ({
   savedObjectType: string;
   inputsForVersions?: Record<string, PackagePolicyInput[]>;
   version?: string;
+  namespace?: string;
 }): Promise<PackagePolicyInput[] | undefined> => {
   const logger = appContextService.getLogger();
   const span = apm.startSpan(
@@ -355,7 +365,7 @@ const backfillInputsForVersion = async ({
             [agentVersion]: versionInputs,
           },
         },
-        { version }
+        { version, ...(namespace ? { namespace } : {}) }
       );
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
@@ -387,7 +397,8 @@ export const storedPackagePoliciesToAgentInputs = async (
   globalDataTags?: GlobalDataTag[],
   agentVersion?: string,
   soClient?: SavedObjectsClientContract,
-  hasAgentVersionConditions?: boolean
+  hasAgentVersionConditions?: boolean,
+  packagePoliciesNamespace?: string
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -422,7 +433,8 @@ export const storedPackagePoliciesToAgentInputs = async (
       );
       const packagePolicySO = await soClient?.get<PackagePolicySOAttributes>(
         savedObjectType,
-        packagePolicy.id
+        packagePolicy.id,
+        packagePoliciesNamespace ? { namespace: packagePoliciesNamespace } : undefined
       );
       readSpan?.end();
 
@@ -455,6 +467,7 @@ export const storedPackagePoliciesToAgentInputs = async (
             savedObjectType,
             inputsForVersions,
             version: packagePolicySO?.version,
+            namespace: packagePoliciesNamespace,
           });
         }
 

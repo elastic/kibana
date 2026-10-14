@@ -24,7 +24,7 @@ jest.mock('./workflow_executions_data_grid', () => ({
 
 jest.mock('./workflow_execution_detail_flyout', () => ({
   WorkflowExecutionDetailFlyout: ({ executionId }: { executionId: string }) => (
-    <div data-test-subj="workflowExecutionDetailFlyout">{executionId}</div>
+    <div data-test-subj="workflowExecutionFlyout">{executionId}</div>
   ),
 }));
 
@@ -93,7 +93,7 @@ describe('WorkflowExecutionsPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('workflowExecutionsPageContent')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('workflowExecutionDetailFlyout')).toHaveTextContent('exec-1');
+    expect(screen.getByTestId('workflowExecutionFlyout')).toHaveTextContent('exec-1');
     expect(mockSetSelectedExecution).not.toHaveBeenCalled();
   });
 });

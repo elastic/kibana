@@ -12,6 +12,9 @@ import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 
 const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
+/** TOOL spans for calls the LLM issued; a tool's internal helper spans carry no tool.call.id.
+ *  Shared by the probe and the evaluators so the two cannot drift apart. */
+export const LLM_ISSUED_TOOL_SPAN = `${TOOL_KIND} AND attributes.gen_ai.tool.call.id IS NOT NULL`;
 
 interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
@@ -196,7 +199,7 @@ export const assertToolSpansReachable = async ({
   for (const clause of clauses) {
     try {
       const response = (await traceEsClient.esql.query({
-        query: `FROM traces-*\n| WHERE ${clause.where} AND ${TOOL_KIND}\n| STATS tool_spans = COUNT(*)`,
+        query: `FROM traces-*\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
       })) as unknown as EsqlResponse;
       if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
         log.info(`Tool spans reachable via ${clause.name}`);

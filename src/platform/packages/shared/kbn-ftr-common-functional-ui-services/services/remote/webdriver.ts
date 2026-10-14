@@ -129,11 +129,24 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     'enable-unsafe-swiftshader'
   );
 
+  if (process.env.USE_CITADEL_PROXY === 'true') {
+    // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
+    // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
+    // the FTR process and the rest of the job remain proxied.
+    options.addArguments('no-proxy-server');
+  }
+
   if (process.platform === 'linux') {
     // The /dev/shm partition is too small in certain VM environments, causing
     // Chrome to fail or crash. Use this flag to work-around this issue
     // (a temporary directory will always be used to create anonymous shared memory files).
     options.addArguments('disable-dev-shm-usage');
+  }
+
+  if (process.env.KIBANA_TEST_IPV6_ONLY === 'true') {
+    // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+    // The address must be bracketed or the rule parser silently drops it.
+    options.addArguments('host-resolver-rules=MAP localhost [::1]');
   }
 
   if (headlessBrowser === '1') {

@@ -156,8 +156,8 @@ export const DashboardAppNoDataPage = ({
 };
 
 export const isDashboardAppInNoDataState = async () => {
-  const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
-  if (hasUserDataView) return false;
+  const hasDataView = await dataService.dataViews.hasData.hasDataView().catch(() => false);
+  if (hasDataView) return false;
 
   // consider has data if there is at least one dataset
   const hasDatasets = await coreServices.http

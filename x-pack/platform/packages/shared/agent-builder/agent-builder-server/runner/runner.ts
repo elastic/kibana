@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest, PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
-import type { AutoApprovedApi, ToolType } from '@kbn/agent-builder-common';
+import type { AutoApprovedApi, ConversationOriginType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 import type { InternalToolDefinition } from '../tools/internal';
@@ -107,8 +107,10 @@ export interface RunContext {
 export interface RunAgentStackEntry {
   type: 'agent';
   agentId: string;
+  agentName?: string;
   conversationId?: string;
   executionId?: string;
+  origin?: ConversationOriginType;
 }
 
 export interface RunToolStackEntry {

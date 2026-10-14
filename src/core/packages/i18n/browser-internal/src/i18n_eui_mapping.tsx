@@ -1535,12 +1535,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
       defaultMessage: 'Filter options',
     }),
-    'euiSelectableListItem.checkedOption': i18n.translate(
-      'core.euiSelectableListItem.checkedOption',
-      {
-        defaultMessage: 'Checked option.',
-      }
-    ),
     'euiSelectableListItem.excludedOption': i18n.translate(
       'core.euiSelectableListItem.excludedOption',
       {
@@ -1900,5 +1894,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Back to {previousPage}',
         values: { previousPage },
       }),
+    'euiKeyboardShortcuts.cmd': i18n.translate('core.euiKeyboardShortcuts.cmd', {
+      defaultMessage: 'Cmd',
+    }),
+    'euiKeyboardShortcuts.copyDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.copyDescription',
+      {
+        defaultMessage: 'Copy the focused cell value',
+      }
+    ),
+    'euiKeyboardShortcuts.copyTitle': i18n.translate('core.euiKeyboardShortcuts.copyTitle', {
+      defaultMessage: 'C',
+    }),
   };
 };

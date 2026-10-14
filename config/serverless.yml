@@ -137,6 +137,9 @@ xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 xpack.cloud_connect.enabled: false
 
+# Shared Elasticsearch home page: re-enabled only by the project types that render it.
+xpack.elasticsearchHome.enabled: false
+
 xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
@@ -173,8 +176,6 @@ xpack.cloud_integrations.data_migration.enabled: false
 
 # Other disabled plugins
 xpack.canvas.enabled: false
-# Significant Events is re-enabled only for Observability Complete
-xpack.significantEvents.enabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false
