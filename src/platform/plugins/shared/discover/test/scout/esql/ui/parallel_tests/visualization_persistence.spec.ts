@@ -16,7 +16,8 @@ const ESQL_LIMIT_QUERY = 'from logstash-* | limit 10';
 const ESQL_STATS_QUERY = 'from logstash-* | stats averageB = avg(bytes) by extension';
 const ESQL_CONTROL_QUERY_PREFIX = 'from logstash-* | where extension == ';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/296046
+spaceTest.describe.skip(
   'Discover ES|QL visualization persistence',
   { tag: '@local-stateful-classic' },
   () => {

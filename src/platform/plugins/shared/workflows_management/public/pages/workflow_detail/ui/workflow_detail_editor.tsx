@@ -83,9 +83,11 @@ const WorkflowVisualEditor = React.lazy(() =>
 
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
+  onAgentProposalHeld?: () => void;
 }
 
-export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
+export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props) => {
+  const { highlightDiff, onAgentProposalHeld } = props;
   const styles = useMemoCss(componentStyles);
   const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -386,6 +388,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
                 onValidationPanelHeightChange={setValidationPanelHeight}
                 openActionsRef={openActionsRef}
                 onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+                onAgentProposalHeld={onAgentProposalHeld}
               />
             </React.Suspense>
           </div>

@@ -1954,6 +1954,47 @@ describe('config schema', () => {
       });
     });
 
+    it('accepts UIAM unsafe API key default expiration', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'some-secret',
+              unsafe: { grantedApiKeyDefaultExpiration: '4h' },
+            },
+          },
+          { serverless: true }
+        ).uiam.unsafe?.grantedApiKeyDefaultExpiration?.asMilliseconds()
+      ).toBe(14_400_000);
+    });
+
+    it.each([0, -1, Infinity, -Infinity, NaN, '0h', '-1h', 'invalid'])(
+      'rejects invalid UIAM unsafe API key default expiration %s',
+      (grantedApiKeyDefaultExpiration) => {
+        expect(() =>
+          ConfigSchema.validate(
+            {
+              uiam: {
+                enabled: true,
+                url: 'https://uiam.service',
+                sharedSecret: 'some-secret',
+                unsafe: { grantedApiKeyDefaultExpiration },
+              },
+            },
+            { serverless: true }
+          )
+        ).toThrow('uiam.unsafe.grantedApiKeyDefaultExpiration');
+      }
+    );
+
+    it('does not allow UIAM unsafe API key default expiration outside of serverless', () => {
+      expect(() =>
+        ConfigSchema.validate({ uiam: { unsafe: { grantedApiKeyDefaultExpiration: '4h' } } })
+      ).toThrow("[uiam]: a value wasn't expected to be present");
+    });
+
     it('should throw error if ssl.certificate is specified without ssl.key', () => {
       expect(() =>
         ConfigSchema.validate(

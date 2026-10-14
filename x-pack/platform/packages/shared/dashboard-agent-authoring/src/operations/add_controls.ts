@@ -430,6 +430,10 @@ export const addControlsOperation = defineOperation({
       failures: context.failures,
     });
 
+    if (controlsToAdd.length === 0) {
+      return dashboardData;
+    }
+
     const newControls = controlsToAdd.map(buildStoredControl);
     return {
       ...dashboardData,

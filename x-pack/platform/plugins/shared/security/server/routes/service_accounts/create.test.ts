@@ -27,6 +27,7 @@ import {
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from '../../../common/service_accounts';
+import { auditServiceMock } from '../../audit/mocks';
 import {
   ES_SERVICE_ACCOUNT_ROLE_LIMITS,
   UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
@@ -283,6 +284,7 @@ describe('Create service account route', () => {
         license,
         uiam,
         checkPrivilegesWithRequest,
+        audit: auditServiceMock.create(),
         getCurrentUser: () => null,
         cloudProjectContext: {
           organizationId: 'organization-id',

@@ -16,7 +16,9 @@ export type {
   PanelContentAttempt,
 } from './src/resolve_panel';
 
-export { EMBEDDABLE_TYPE_BY_RENDERER } from './src/operations/panels';
+export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
+
+export { getRendererEmbeddableType } from './src/operations/panels';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
@@ -24,10 +26,6 @@ export type {
   ResolvePanelContent,
   VisPanelResolutionRequest,
 } from './src/operations/panels';
-export {
-  MARKDOWN_EMBEDDABLE_TYPE,
-  markdownPanelConfigSchema,
-} from './src/operations/panels/markdown';
 
 export type {
   ControlFieldCapability,
