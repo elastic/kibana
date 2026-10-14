@@ -52,9 +52,43 @@ describe('onDrop', () => {
       valueSource: { type: 'unconfigured' },
     },
   ])('reference column $valueSource.type', (referenceColumn) => {
-    it.each<DropType>(['duplicate_compatible', 'replace_duplicate_compatible', 'move_compatible'])(
-      'preserves the column configuration for %s',
-      (dropType) => {
+    it.each([
+      {
+        dropType: 'duplicate_compatible' as const,
+        target: emptyDimensionTarget,
+        expectedColumns: [
+          referenceColumn,
+          column2,
+          column3,
+          { ...referenceColumn, columnId: emptyDimensionTarget.columnId },
+        ],
+      },
+      {
+        dropType: 'replace_duplicate_compatible' as const,
+        target: {
+          ...emptyDimensionTarget,
+          columnId: column2.columnId,
+          id: column2.columnId,
+          isNewColumn: false,
+        },
+        expectedColumns: [
+          referenceColumn,
+          column3,
+          { ...referenceColumn, columnId: column2.columnId },
+        ],
+      },
+      {
+        dropType: 'move_compatible' as const,
+        target: emptyDimensionTarget,
+        expectedColumns: [
+          column2,
+          column3,
+          { ...referenceColumn, columnId: emptyDimensionTarget.columnId },
+        ],
+      },
+    ])(
+      'preserves the column configuration for $dropType',
+      ({ dropType, target, expectedColumns }) => {
         const state = {
           ...defaultProps.state,
           layers: {
@@ -68,16 +102,10 @@ describe('onDrop', () => {
         const result = onDrop({
           ...defaultProps,
           state,
-          target: emptyDimensionTarget,
+          target,
           dropType,
         });
-        expect(result?.layers.first.columns).toContainEqual({
-          ...referenceColumn,
-          columnId: emptyDimensionTarget.columnId,
-        });
-        expect(
-          result?.layers.first.columns.some(({ columnId }) => columnId === column1.columnId)
-        ).toBe(dropType !== 'move_compatible');
+        expect(result?.layers.first.columns).toEqual(expectedColumns);
       }
     );
   });

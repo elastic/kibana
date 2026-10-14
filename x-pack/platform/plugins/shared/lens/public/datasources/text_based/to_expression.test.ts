@@ -82,13 +82,12 @@ describe('toExpression', () => {
         },
       },
     };
-    expect(toExpression(state, 'a')?.chain.map(({ function: name }) => name)).toEqual([
+    const expression = toExpression(state, 'a');
+    expect(expression?.chain.map(({ function: name }) => name)).toEqual([
       'createTable',
       'mathColumn',
     ]);
-    expect(
-      findExpressionFunction(toExpression(state, 'a'), 'mathColumn').arguments.expression
-    ).toEqual(['42']);
+    expect(findExpressionFunction(expression, 'mathColumn').arguments.expression).toEqual(['42']);
   });
 
   it('appends static thresholds after mapping query columns', () => {
