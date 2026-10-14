@@ -271,13 +271,10 @@ describe('MemoryKeywordTreemap', () => {
   });
 
   /**
-   * The label asks for the middle of its cell, and the pinned `@elastic/charts`
-   * ignores the request: 73.2.2 has no alignment control for a treemap's fill
-   * labels and drops the keys it does not know (elastic/elastic-charts#2912 adds
-   * them). Asserting them here pins the intent — the screenshot shows them doing
-   * nothing until the charts bump, and this shows the day they start.
+   * Treemap fill labels default to the top of their cell; the fill label
+   * alignment options (elastic/elastic-charts#2912, since 73.3.0) center them.
    */
-  it('asks the chart for a centered fill label, which the pinned charts version ignores', () => {
+  it('asks the chart for a centered fill label', () => {
     renderTreemap();
 
     expect(layer().fillLabel).toMatchObject({

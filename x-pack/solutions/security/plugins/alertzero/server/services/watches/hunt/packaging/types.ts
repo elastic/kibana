@@ -240,8 +240,11 @@ export interface CoverageWriteResult {
   skipped: Array<{ kiId: string; subject: string; reason: CoverageSkipReason }>;
 }
 
+/** A mint payload before packaging has resolved the id it will be created under. */
+export type UnresolvedMintPayload = Omit<PackageReportMintPayload, 'proposalId'>;
+
 export interface DecidePackageReportResult {
   dismiss: boolean;
-  proposals: PackageReportMintPayload[];
+  proposals: UnresolvedMintPayload[];
   closureSummary: string;
 }

@@ -8,12 +8,15 @@
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
+import { buildHuntProposalId } from '../common/hunt_proposal_id';
 import {
   PackageReportIdentityError,
   computeExpectedProposalCount,
   runPackageReport,
 } from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
+import { buildProposalSubjectKey } from './decide_package_report';
+import type { LiveProposal, ProposalSlot, WantedProposal } from './resolve_proposal_slot';
 import type { CoverageSubject } from './types';
 
 const reportId = 'rpt-package-1';
@@ -173,6 +176,23 @@ const sseAttachment = ({
   ],
 });
 
+/** The subject key of "isolate host-a" as the default fixtures resolve it (agent `agent-1`). */
+const isolateKey = buildProposalSubjectKey({
+  subjectId: 'agent-1',
+  actionWorkflowId: isolateHost.workflowId,
+});
+
+/** A live Proposal that another Investigation raised, which a finding can converge onto. */
+const liveProposal = (overrides: Partial<LiveProposal> = {}): LiveProposal => ({
+  proposalId: 'proposal-live',
+  conversationId: 'conv-other',
+  title: 'Isolate host',
+  comment: 'Isolate host.',
+  revision: 1,
+  revisable: true,
+  ...overrides,
+});
+
 const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDeps => ({
   listRespondActions: async () => ({ ok: true, actions: [isolateHost] }),
   writeCoverageKis: async (subjects) => ({
@@ -182,6 +202,12 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
   resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1', capabilities: [] }),
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
+  // Every subject is free by default, at the first generation, as it is in an empty space.
+  resolveProposalSlot: async ({ subjectKey }) => ({
+    kind: 'mint',
+    proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+  }),
+  appendAlsoRaisedBy: async () => 'revised',
   hasOpenProposal: async () => false,
   ...overrides,
 });
@@ -366,7 +392,7 @@ describe('runPackageReport', () => {
       expect(subjects.map((subject) => subject.severity)).toEqual(subjects.map(() => 'high'));
     });
 
-    it('does not claim actions were proposed when the existing-Proposal guard suppressed the mint', async () => {
+    it('does not claim actions were proposed when every finding converged onto an existing proposal', async () => {
       await runPackageReport({
         spaceId: 'default',
         reportId,
@@ -379,12 +405,12 @@ describe('runPackageReport', () => {
         deps: deps({
           writeCoverageKis,
           getEsReportContextClient,
-          countExistingProposals: async () => 1,
+          resolveProposalSlot: async () => ({ kind: 'converge', live: liveProposal() }),
         }),
       });
 
       expect(writeCoverageKis.mock.calls[0][0][0].investigationSummary).toContain(
-        'Packaging: no new proposals, the Investigation already has proposals from an earlier run'
+        'Packaging: no new proposals, 1 already raised by another Investigation'
       );
     });
 
@@ -527,6 +553,15 @@ describe('runPackageReport', () => {
     expect(result.proposals[0].actionWorkflowId).toBe(isolateHost.workflowId);
     expect(result.expectedProposalCount).toBe(1);
     expect(result.mintSuppression).toBe('none');
+    expect(result.converged).toEqual([]);
+    // Created under the id derived from what it proposes, which is what lets a second run meet it.
+    expect(result.proposals[0].proposalId).toBe(
+      buildHuntProposalId({
+        spaceId: 'default',
+        subjectKey: result.proposals[0].subjectKey,
+        generation: 0,
+      })
+    );
   });
 
   it('mints only a recommendation when Fleet is unavailable (no host resolves as enrolled)', async () => {
@@ -710,64 +745,273 @@ describe('runPackageReport', () => {
     });
   });
 
-  // Phase 1 of the Proposals-side dedup Sergi/Astra raised: a rerun that lands back on an
-  // Investigation that already has a Proposal (any status, including settled) must not mint a
-  // second, independent chain for what may be the same finding.
-  describe('existing-Proposals guard', () => {
-    it('suppresses the mint when the Investigation already has a Proposal, but leaves it open', async () => {
-      const result = await runPackageReport({
+  // Per-subject convergence, which replaces phase 1's blunt guard (an Investigation with any
+  // Proposal, even a settled one, minted nothing). What decides now is whether a live Proposal
+  // already holds *this* finding's subject, and it does not matter which Investigation raised it.
+  describe('converging findings onto live proposals', () => {
+    const hitRun = (depsOverrides: Partial<RunPackageReportDeps> = {}, attachment = {}) =>
+      runPackageReport({
         spaceId: 'default',
         reportId,
         investigationConversationId: conversationId,
         runId,
         huntStatus: 'success',
         hasConfirmedHit: true,
-        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        attachments: [sseAttachment({ hit: true, hostName: 'host-a', ...attachment })],
         expectedSseCount: 1,
-        deps: deps({ countExistingProposals: async () => 1 }),
+        deps: deps(depsOverrides),
       });
-      expect(result.status).toBe('packaged');
+
+    const packaged = async (...args: Parameters<typeof hitRun>) => {
+      const result = await hitRun(...args);
       if (result.status !== 'packaged') {
-        return;
+        throw new Error(`expected packaged, got ${result.status}`);
       }
+      return result;
+    };
+
+    it('asks for each finding’s slot by its subject key and the action input it wants to run, once', async () => {
+      const resolveProposalSlot = jest.fn(
+        async ({ subjectKey }: WantedProposal): Promise<ProposalSlot> => ({
+          kind: 'mint',
+          proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+        })
+      );
+
+      const result = await packaged({ resolveProposalSlot });
+
+      expect(resolveProposalSlot.mock.calls.map(([wanted]) => wanted.subjectKey)).toEqual(
+        result.proposals.map((proposal) => proposal.subjectKey)
+      );
+      // The input is what lets the resolver tell a proposal revised to act on something else from
+      // one that still covers this finding.
+      expect(resolveProposalSlot.mock.calls.map(([wanted]) => wanted.actionInput)).toEqual(
+        result.proposals.map((proposal) => proposal.actionInput)
+      );
+    });
+
+    it('mints under the id the slot gave, not a random one', async () => {
+      const result = await packaged({
+        resolveProposalSlot: async () => ({
+          kind: 'mint',
+          proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+        }),
+      });
+
+      expect(result.proposals.map((p) => p.proposalId)).toEqual([
+        '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      ]);
+    });
+
+    it('mints nothing for a finding a live proposal already covers, and says where it went', async () => {
+      const appendAlsoRaisedBy = jest.fn(async () => 'revised' as const);
+
+      const result = await packaged({
+        resolveProposalSlot: async () => ({ kind: 'converge', live: liveProposal() }),
+        appendAlsoRaisedBy,
+      });
+
       expect(result.proposals).toEqual([]);
-      expect(result.expectedProposalCount).toBe(0);
-      expect(result.mintSuppression).toBe('existing_proposals');
-      // Not a benign dismissal: this run found a real hit, so the Investigation has to stay
-      // open for the analyst the summary tells to go review the existing Proposal.
+      expect(result.converged).toEqual([
+        {
+          // What this run found, in its own words; the note below names the live proposal's.
+          title: 'Isolate host host-a',
+          proposalId: 'proposal-live',
+          ownerConversationId: 'conv-other',
+          outcome: 'revised',
+          note: expect.stringContaining('conv-other'),
+        },
+      ]);
+      expect(appendAlsoRaisedBy).toHaveBeenCalledWith({
+        live: liveProposal(),
+        investigationConversationId: conversationId,
+      });
+      expect(result.mintSuppression).toBe('none');
+      // Not a benign dismissal: the finding is real and an analyst has yet to decide it.
       expect(result.dismiss).toBe(false);
     });
 
-    // Fails closed: a lookup failure must never risk letting a duplicate mint through. But it
-    // is not "a Proposal already exists" either, so the two stay distinguishable in the output.
-    it('fails closed when the lookup itself throws, and marks it as a check failure', async () => {
-      const result = await runPackageReport({
-        spaceId: 'default',
-        reportId,
-        investigationConversationId: conversationId,
-        runId,
-        huntStatus: 'success',
-        hasConfirmedHit: true,
-        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
-        expectedSseCount: 1,
-        deps: deps({
+    it('converges the finding that matches and mints the one that is new', async () => {
+      // The changed-finding rerun the coarse guard could not do: an Investigation that already
+      // has a Proposal for one subject still gets its own for a different one.
+      const live = liveProposal();
+      const result = await packaged(
+        {
+          listRespondActions: async () => ({
+            ok: true,
+            actions: [isolateHost, setAssetCriticality],
+          }),
+          resolveProposalSlot: async ({ subjectKey }) =>
+            subjectKey === isolateKey
+              ? { kind: 'converge', live }
+              : {
+                  kind: 'mint',
+                  proposalId: buildHuntProposalId({
+                    spaceId: 'default',
+                    subjectKey,
+                    generation: 0,
+                  }),
+                },
+        },
+        { userName: 'dev-user' }
+      );
+
+      expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([
+        setAssetCriticality.workflowId,
+        undefined,
+      ]);
+      expect(result.converged.map((c) => c.proposalId)).toEqual([live.proposalId]);
+    });
+
+    it('says nothing, and adds nothing, when the live proposal is this Investigation’s own', async () => {
+      const appendAlsoRaisedBy = jest.fn(async () => 'same_investigation' as const);
+
+      const result = await packaged({
+        resolveProposalSlot: async () => ({
+          kind: 'converge',
+          live: liveProposal({ conversationId }),
+        }),
+        appendAlsoRaisedBy,
+      });
+
+      expect(result.proposals).toEqual([]);
+      expect(result.converged).toEqual([]);
+      // Reported by count instead, so the run's summary does not read as a dismissal while the
+      // Investigation stays open on its own pending proposal.
+      expect(result.alreadyOpenCount).toBe(1);
+    });
+
+    it('writes a summary that says the finding is already open here, not that the run was dismissed', async () => {
+      const writeCoverageKis = jest.fn(async (subjects: CoverageSubject[]) => ({
+        written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
+        skipped: [],
+      }));
+
+      await packaged({
+        writeCoverageKis,
+        resolveProposalSlot: async () => ({
+          kind: 'converge',
+          live: liveProposal({ conversationId }),
+        }),
+        appendAlsoRaisedBy: async () => 'same_investigation',
+      });
+
+      const summary = writeCoverageKis.mock.calls[0][0][0].investigationSummary;
+      expect(summary).toContain(
+        'Packaging: no new proposals, 1 already open on this Investigation'
+      );
+      expect(summary).not.toContain('dismissed');
+    });
+
+    it('does not count what converged onto another Investigation as already open here', async () => {
+      const result = await packaged({
+        resolveProposalSlot: async () => ({ kind: 'converge', live: liveProposal() }),
+      });
+
+      expect(result.converged).toHaveLength(1);
+      expect(result.alreadyOpenCount).toBe(0);
+    });
+
+    it('still converges when the revision fails, and does not claim it was added', async () => {
+      const result = await packaged({
+        resolveProposalSlot: async () => ({ kind: 'converge', live: liveProposal() }),
+        appendAlsoRaisedBy: async () => 'failed',
+      });
+
+      expect(result.proposals).toEqual([]);
+      expect(result.converged[0].outcome).toBe('failed');
+      expect(result.converged[0].note).not.toContain('added to it');
+    });
+
+    it('settles the Investigation only against what this run mints, never what converged', async () => {
+      // 2 Proposals already on this Investigation, 2 minted now, and a third finding that
+      // converged onto another Investigation's: the gate's all-time count has to reach 2 + 2.
+      // The converged one lives in the other Investigation's conversation, so it adds nothing.
+      const result = await packaged(
+        {
+          listRespondActions: async () => ({
+            ok: true,
+            actions: [isolateHost, setAssetCriticality],
+          }),
+          countExistingProposals: async () => 2,
+          resolveProposalSlot: async ({ subjectKey }) =>
+            subjectKey === isolateKey
+              ? { kind: 'converge', live: liveProposal() }
+              : {
+                  kind: 'mint',
+                  proposalId: buildHuntProposalId({
+                    spaceId: 'default',
+                    subjectKey,
+                    generation: 0,
+                  }),
+                },
+        },
+        { userName: 'dev-user' }
+      );
+
+      expect(result.proposals).toHaveLength(2);
+      expect(result.expectedProposalCount).toBe(2 + 2);
+    });
+
+    describe('when it cannot tell what already exists', () => {
+      it('fails closed when the slot lookup throws: mints nothing, converges nothing', async () => {
+        const result = await packaged({
+          resolveProposalSlot: async () => {
+            throw new Error('proposals index unavailable');
+          },
+        });
+
+        expect(result.proposals).toEqual([]);
+        expect(result.converged).toEqual([]);
+        expect(result.expectedProposalCount).toBe(0);
+        expect(result.mintSuppression).toBe('check_failed');
+        expect(result.dismiss).toBe(false);
+      });
+
+      it('fails closed when the baseline count throws, without looking up any slot', async () => {
+        const resolveProposalSlot = jest.fn();
+
+        const result = await packaged({
           countExistingProposals: async () => {
             throw new Error('proposals index unavailable');
           },
-        }),
+          resolveProposalSlot,
+        });
+
+        expect(result.proposals).toEqual([]);
+        expect(result.mintSuppression).toBe('check_failed');
+        expect(resolveProposalSlot).not.toHaveBeenCalled();
       });
-      expect(result.status).toBe('packaged');
-      if (result.status !== 'packaged') {
-        return;
-      }
-      expect(result.proposals).toEqual([]);
-      expect(result.expectedProposalCount).toBe(0);
-      expect(result.mintSuppression).toBe('check_failed');
-      expect(result.dismiss).toBe(false);
+
+      it('a lookup that fails after one finding converged still mints nothing', async () => {
+        let calls = 0;
+        const result = await packaged(
+          {
+            listRespondActions: async () => ({
+              ok: true,
+              actions: [isolateHost, setAssetCriticality],
+            }),
+            resolveProposalSlot: async () => {
+              calls += 1;
+              if (calls === 1) {
+                return { kind: 'converge', live: liveProposal() };
+              }
+              throw new Error('boom');
+            },
+          },
+          { userName: 'dev-user' }
+        );
+
+        expect(result.mintSuppression).toBe('check_failed');
+        expect(result.proposals).toEqual([]);
+        expect(result.converged).toEqual([]);
+        expect(result.alreadyOpenCount).toBe(0);
+      });
     });
 
-    it('never looks up existing Proposals on a clean run: there is nothing to suppress', async () => {
+    it('never looks anything up on a clean run: there is nothing to propose', async () => {
       const countExistingProposals = jest.fn(async () => 1);
+      const resolveProposalSlot = jest.fn();
       const result = await runPackageReport({
         spaceId: 'default',
         reportId,
@@ -777,7 +1021,7 @@ describe('runPackageReport', () => {
         hasConfirmedHit: false,
         attachments: [sseAttachment({ hit: false })],
         expectedSseCount: 1,
-        deps: deps({ countExistingProposals }),
+        deps: deps({ countExistingProposals, resolveProposalSlot }),
       });
       expect(result.status).toBe('packaged');
       if (result.status !== 'packaged') {
@@ -786,42 +1030,16 @@ describe('runPackageReport', () => {
       expect(result.dismiss).toBe(true);
       expect(result.mintSuppression).toBe('none');
       expect(countExistingProposals).not.toHaveBeenCalled();
-    });
-
-    // A nonzero baseline always means the guard above suppressed this run's mint, so
-    // expectedProposalCount stays 0 along with proposals -- see the `computeExpectedProposalCount`
-    // suite below for the formula itself, including the `existingProposalCount > 0` +
-    // `mintSuppression: 'none'` combination this guard currently never lets through.
-    it('reports no expected count when a nonzero baseline suppresses the mint', async () => {
-      const result = await runPackageReport({
-        spaceId: 'default',
-        reportId,
-        investigationConversationId: conversationId,
-        runId,
-        huntStatus: 'success',
-        hasConfirmedHit: true,
-        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
-        expectedSseCount: 1,
-        deps: deps({ countExistingProposals: async () => 4 }),
-      });
-      expect(result.status).toBe('packaged');
-      if (result.status !== 'packaged') {
-        return;
-      }
-      expect(result.proposals).toEqual([]);
-      expect(result.mintSuppression).toBe('existing_proposals');
-      expect(result.expectedProposalCount).toBe(0);
+      expect(resolveProposalSlot).not.toHaveBeenCalled();
     });
   });
 
-  // `runPackageReport` can never reach `computeExpectedProposalCount` with a nonzero
-  // `existingProposalCount` and `mintSuppression: 'none'` together today -- the existing-Proposals
-  // guard above suppresses minting entirely whenever any Proposal already exists. Tested directly
-  // here, independent of that coupling, because the formula is the fix for
-  // elastic/security-team#19822's future (the coarse guard is explicitly temporary) and has to stay
-  // correct even while nothing in this file's own integration tests can exercise it end to end.
+  // The settlement barrier's arithmetic, tested directly: the baseline is every Proposal the
+  // Investigation already carries, because the gate's `created_count` is its all-time total, and
+  // this run adds only what it mints. A rerun that mints a new Proposal beside older ones is the
+  // case it exists for.
   describe('computeExpectedProposalCount', () => {
-    it("sums the pre-run baseline and this run's new proposals when not suppressed", () => {
+    it("sums the pre-run baseline and this run's new proposals", () => {
       expect(
         computeExpectedProposalCount({
           mintSuppression: 'none',
@@ -831,21 +1049,21 @@ describe('runPackageReport', () => {
       ).toBe(7);
     });
 
-    it('is 0 when minting was suppressed, regardless of baseline', () => {
+    it('is the baseline alone when this run mints nothing', () => {
       expect(
         computeExpectedProposalCount({
-          mintSuppression: 'existing_proposals',
+          mintSuppression: 'none',
           existingProposalCount: 4,
           newProposalCount: 0,
         })
-      ).toBe(0);
+      ).toBe(4);
     });
 
-    it('is 0 when the existing-Proposals check itself failed', () => {
+    it('is 0 when the Proposals look-up failed, regardless of baseline', () => {
       expect(
         computeExpectedProposalCount({
           mintSuppression: 'check_failed',
-          existingProposalCount: 0,
+          existingProposalCount: 4,
           newProposalCount: 0,
         })
       ).toBe(0);

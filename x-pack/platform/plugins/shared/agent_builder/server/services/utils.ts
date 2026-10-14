@@ -11,7 +11,11 @@ import {
   extractApiKeyIdFromAuthzHeader,
   type SecurityServiceStart,
 } from '@kbn/core-security-server';
-import type { CurrentUser } from '@kbn/agent-builder-common';
+import {
+  REALM_USER_ID_PREFIX,
+  serviceAccountUserId,
+  type CurrentUser,
+} from '@kbn/agent-builder-common';
 import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -64,7 +68,7 @@ export const toStableUserId = async ({
     return undefined;
   }
 
-  return `realm:${JSON.stringify([realmType, realmName, username])}`;
+  return `${REALM_USER_ID_PREFIX}${JSON.stringify([realmType, realmName, username])}`;
 };
 
 /**
@@ -118,6 +122,8 @@ const resolveApiKeyOwnerProfileUid = async ({
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
  * back to the ES `_security/_authenticate` API for the username only.
+ *
+ * Service accounts are recognised first, through `security.authc.getPrincipal`.
  */
 export const getUserFromRequest = async ({
   request,
@@ -128,8 +134,19 @@ export const getUserFromRequest = async ({
   security: SecurityServiceStart;
   esClient: ElasticsearchClient;
 }): Promise<CurrentUser> => {
-  const authUser = security.authc.getCurrentUser(request);
   const isAdmin = await isAdminFromRequest({ esClient });
+  const authUser = security.authc.getCurrentUser(request);
+
+  const principal = security.authc.getPrincipal(request);
+  if (principal?.type === 'service_account') {
+    return {
+      id: serviceAccountUserId(principal.serviceAccountId),
+      // A fake request Kibana minted for the account carries a credential but no stored user.
+      username: authUser?.username ?? (await esClient.security.authenticate()).username,
+      type: 'service_account',
+      isAdmin,
+    };
+  }
 
   if (authUser?.username) {
     return {
@@ -138,14 +155,18 @@ export const getUserFromRequest = async ({
         resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
       }),
       username: authUser.username,
+      type: 'user',
       isAdmin,
     };
   }
 
+  // A user on this path may have a profile that `getCurrentUser` could not see; a realm id would
+  // stop matching their profile-owned conversations, whereas username matching still finds them.
   const authResponse = await esClient.security.authenticate();
   return {
     id: authUser?.profile_uid,
     username: authResponse.username,
+    type: 'user',
     isAdmin,
   };
 };
