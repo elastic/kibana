@@ -156,6 +156,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('local', 'serverless', 'observability_complete'),
     });
   });
@@ -182,6 +183,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
     });
   });
@@ -207,6 +209,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('cloud', 'serverless', 'security_ease'),
     });
   });
@@ -233,6 +236,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('cloud', 'stateful', 'classic'),
     });
   });
@@ -259,6 +263,7 @@ describe('parseTestFlags', () => {
       installDir: undefined,
       logsDir: undefined,
       preserveEsData: false,
+      targetAttributes: [],
       testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
     });
   });
@@ -353,6 +358,7 @@ describe('parseTestFlags', () => {
         logsDir: undefined,
         preserveEsData: false,
         testFiles: [testFile],
+        targetAttributes: [],
         testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });
@@ -393,6 +399,7 @@ describe('parseTestFlags', () => {
         logsDir: undefined,
         preserveEsData: false,
         testFiles,
+        targetAttributes: [],
         testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });

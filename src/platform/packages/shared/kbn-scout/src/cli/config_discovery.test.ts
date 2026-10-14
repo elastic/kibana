@@ -419,6 +419,73 @@ describe('runDiscoverPlaywrightConfigs', () => {
     });
   });
 
+  describe('"--targetAttribute" flag (test limits)', () => {
+    const setLimitTagsOnPackageA = (limitTags: string[]) => {
+      const packageA = mockTestableModules.modules.find((module) => module.name === 'packageA')!;
+      packageA.configs[0].manifest.tests[0].tags = [
+        '@local-stateful-classic',
+        '@cloud-stateful-classic',
+        '@cloud-serverless-observability_complete',
+        ...limitTags,
+      ];
+    };
+
+    const discoveredModuleCounts = (): string => {
+      const foundMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('Found Playwright config files')
+      );
+      expect(foundMessage).toBeDefined();
+      return foundMessage![0];
+    };
+
+    it('drops configs whose only tests require an undeclared attribute', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('keeps those configs when the attribute is declared', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('1 package(s)');
+      expect(log.info).toHaveBeenCalledWith('Test target attributes: fips');
+    });
+
+    it('drops configs limited to the attribute being absent when it is declared', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('never reports limit tags as test target tags', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const packageAMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('src/platform/packages/shared/packageA')
+      );
+      expect(packageAMessage).toBeDefined();
+      expect(packageAMessage![0]).not.toContain('@limit/');
+    });
+  });
+
   it('filters configs based on target tags for "all" target (tags.deploymentAgnostic)', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
