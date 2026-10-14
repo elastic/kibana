@@ -27,7 +27,13 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
+import { EntitySourceValue, TruncatedBadgeList } from './entity_source_value';
+import {
+  getMaxCriticality,
+  getUnionEntitySources,
+  getUnionWatchlistIds,
+  isEntityGroupView,
+} from '../entity_store_group_utils';
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
@@ -35,24 +41,32 @@ const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
 );
 
 interface EntitySummaryGridProps {
+  /** Primary record: drives the Entity ID panel. */
   entityRecord: Entity;
+  /**
+   * Other records that resolve to `entityRecord` (its aliases). When non-empty, asset criticality
+   * shows the most severe level across the group, and data sources and watchlists are the union
+   * across the group; criticality is read-only in that mode because a single edit can't target
+   * all members.
+   */
+  aliasRecords?: readonly Entity[];
   criticalityLevel?: CriticalityLevelWithUnassigned | null;
   onCriticalitySave?: (value: CriticalityLevelWithUnassigned) => void;
 }
 
 export const EntitySummaryGrid = memo(
-  ({ entityRecord, criticalityLevel, onCriticalitySave }: EntitySummaryGridProps) => {
+  ({ entityRecord, aliasRecords, criticalityLevel, onCriticalitySave }: EntitySummaryGridProps) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     const entityId = entityRecord.entity?.id;
+    const isGroupView = isEntityGroupView(aliasRecords);
 
-    const watchlistIds = useMemo(() => {
-      const attrs = (entityRecord.entity as Record<string, unknown>)?.attributes as
-        | Record<string, unknown>
-        | undefined;
-      const watchlists = attrs?.watchlists;
-      return Array.isArray(watchlists) ? (watchlists as string[]) : [];
-    }, [entityRecord]);
+    const groupRecords = isGroupView ? [entityRecord, ...aliasRecords] : [entityRecord];
+    const dataSources = getUnionEntitySources(groupRecords);
+    const watchlistIds = getUnionWatchlistIds(groupRecords);
+    const displayedCriticality = isGroupView ? getMaxCriticality(groupRecords) : criticalityLevel;
+
+    const criticalitySaveHandler = isGroupView ? undefined : onCriticalitySave;
 
     return (
       <>
@@ -126,10 +140,7 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Data source' }
             )}
           >
-            <EntitySourceValue
-              values={toEntitySourceArray(entityRecord.entity?.source)}
-              textSize="xs"
-            />
+            <EntitySourceValue values={dataSources} textSize="xs" />
           </SummaryPanel>
           <SummaryPanel
             label={i18n.translate(
@@ -138,8 +149,8 @@ export const EntitySummaryGrid = memo(
             )}
           >
             <AssetCriticalityCell
-              criticalityLevel={criticalityLevel}
-              canEdit={!!onCriticalitySave}
+              criticalityLevel={displayedCriticality}
+              canEdit={!!criticalitySaveHandler}
               onOpenModal={() => setModalVisible(true)}
             />
           </SummaryPanel>
@@ -153,13 +164,13 @@ export const EntitySummaryGrid = memo(
           </SummaryPanel>
         </EuiFlexGrid>
         <EuiSpacer size="s" />
-        {modalVisible && onCriticalitySave && (
+        {modalVisible && criticalitySaveHandler && (
           <AssetCriticalityModal
             initialCriticalityLevel={
-              criticalityLevel === 'unassigned' ? undefined : criticalityLevel
+              displayedCriticality === 'unassigned' ? undefined : displayedCriticality
             }
             onSave={(value) => {
-              onCriticalitySave(value);
+              criticalitySaveHandler(value);
               setModalVisible(false);
             }}
             toggle={setModalVisible}
@@ -217,7 +228,12 @@ const AssetCriticalityCell = memo(
       </EuiFlexItem>
       {canEdit && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
+          <EuiIcon
+            type="chevronSingleDown"
+            size="s"
+            aria-hidden={true}
+            data-test-subj="asset-criticality-edit-chevron"
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

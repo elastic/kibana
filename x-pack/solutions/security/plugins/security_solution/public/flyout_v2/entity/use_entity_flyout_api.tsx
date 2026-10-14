@@ -58,8 +58,10 @@ import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 import {
   decodeFlyoutV2UrlParam,
   FLYOUT_DESCRIPTOR_KIND,
+  toEntityDescriptorMode,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
+import type { EntityViewMode } from '../../flyout/entity_details/shared/types';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -129,6 +131,11 @@ export interface OpenEntityDetailsParams extends WithTitle {
   scopeId: string;
   /** Optional context ID forwarded to cell-action filters inside the flyout. */
   contextID?: string;
+  /**
+   * Entity-store lookup mode for host/user/service: `resolved` also loads the entities that resolve
+   * to `entityId` (group view). Ignored for generic entities. Defaults to `single`.
+   */
+  mode?: EntityViewMode;
 }
 
 // Entity tool flyouts — each reuses the tool component's own props, plus an optional title.
@@ -262,6 +269,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         hostName: props.hostName,
         entityId: props.entityId,
         scopeId: props.scopeId,
+        mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -287,6 +295,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           hostName: props.hostName,
           entityId: props.entityId,
           scopeId: props.scopeId,
+          mode: toEntityDescriptorMode(props.mode),
         },
         'inherit'
       );
@@ -316,6 +325,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         userName: props.userName,
         entityId: props.entityId,
         scopeId: props.scopeId,
+        mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -341,6 +351,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           userName: props.userName,
           entityId: props.entityId,
           scopeId: props.scopeId,
+          mode: toEntityDescriptorMode(props.mode),
         },
         'inherit'
       );
@@ -370,6 +381,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         serviceName: props.serviceName,
         entityId: props.entityId,
         scopeId: props.scopeId,
+        mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -395,6 +407,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           serviceName: props.serviceName,
           entityId: props.entityId,
           scopeId: props.scopeId,
+          mode: toEntityDescriptorMode(props.mode),
         },
         'inherit'
       );
@@ -485,6 +498,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       contextID,
       title,
       origin,
+      mode,
     }: OpenEntityDetailsParams) => {
       let children: ReactNode;
       let descriptor: FlyoutDescriptor;
@@ -496,6 +510,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               entityId={entityId}
               scopeId={scopeId}
               contextID={contextID}
+              mode={mode}
             />
           );
           descriptor = {
@@ -503,6 +518,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
             hostName: entityName ?? '',
             entityId,
             scopeId,
+            mode: toEntityDescriptorMode(mode),
           };
           break;
         case 'user':
@@ -512,6 +528,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               entityId={entityId}
               scopeId={scopeId}
               contextID={contextID}
+              mode={mode}
             />
           );
           descriptor = {
@@ -519,6 +536,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
             userName: entityName ?? '',
             entityId,
             scopeId,
+            mode: toEntityDescriptorMode(mode),
           };
           break;
         case 'service':
@@ -528,6 +546,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               entityId={entityId}
               scopeId={scopeId}
               contextID={contextID}
+              mode={mode}
             />
           );
           descriptor = {
@@ -535,6 +554,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
             serviceName: entityName ?? '',
             entityId,
             scopeId,
+            mode: toEntityDescriptorMode(mode),
           };
           break;
         default:
@@ -578,6 +598,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       contextID,
       title,
       origin,
+      mode,
     }: OpenEntityDetailsParams) => {
       let children: ReactNode;
       let descriptor: FlyoutDescriptor;
@@ -589,6 +610,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               entityId={entityId}
               scopeId={scopeId}
               contextID={contextID}
+              mode={mode}
             />
           );
           descriptor = {
@@ -596,6 +618,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
             hostName: entityName ?? '',
             entityId,
             scopeId,
+            mode: toEntityDescriptorMode(mode),
           };
           break;
         case 'user':
@@ -605,6 +628,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               entityId={entityId}
               scopeId={scopeId}
               contextID={contextID}
+              mode={mode}
             />
           );
           descriptor = {
@@ -612,6 +636,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
             userName: entityName ?? '',
             entityId,
             scopeId,
+            mode: toEntityDescriptorMode(mode),
           };
           break;
         case 'service':
@@ -621,6 +646,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
               entityId={entityId}
               scopeId={scopeId}
               contextID={contextID}
+              mode={mode}
             />
           );
           descriptor = {
@@ -628,6 +654,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
             serviceName: entityName ?? '',
             entityId,
             scopeId,
+            mode: toEntityDescriptorMode(mode),
           };
           break;
         default:
