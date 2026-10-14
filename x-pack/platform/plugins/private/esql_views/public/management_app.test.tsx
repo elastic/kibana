@@ -514,7 +514,7 @@ describe('ManagementApp', () => {
 
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
-    fireEvent.click(screen.getByText('ES|QL Query Results'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(editorProps.mock.lastCall?.[0].errors).toEqual([previewError]);
     expect(screen.getByText(previewError.message)).toBeInTheDocument();
