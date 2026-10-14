@@ -13,6 +13,7 @@ import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agen
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
 import type { SubjectsClient } from './subjects/services/subjects_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
@@ -36,6 +37,11 @@ export interface AgenticInvestigationsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   /** Registers Impact workflow steps. */
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /**
+   * Reads the status of an investigation's workflow executions, which decides whether it is in
+   * progress. Without it no investigation is in progress.
+   */
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
