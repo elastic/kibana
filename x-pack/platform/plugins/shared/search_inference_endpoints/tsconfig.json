@@ -56,8 +56,7 @@
     "@kbn/es-errors",
     "@kbn/app-header",
     "@kbn/core-chrome-browser-context-mocks",
-    "@kbn/ui-callout",
-    "@kbn/config"
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

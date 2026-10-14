@@ -63,7 +63,6 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/ui-callout'
-  - '@kbn/config'
 tags:
   - plugin
   - prod
