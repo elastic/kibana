@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { BoostProfile, BoostProfileInput, BoostRule, BoostDataSource } from './types';
+import type {
+  BoostDataAge,
+  BoostDataSource,
+  BoostProfile,
+  BoostProfileInput,
+  BoostRule,
+} from './types';
 import { parseMaxAge, toMaxAgeHours } from './validation';
 import { resolveRule } from './resolution';
 
 // Placeholder model for the prototype. Real estimates will come from Elasticsearch, which knows the
 // resource curves and the project's data. These constants are illustrative, not pricing.
 
-/** Estimates are expressed per GB of data. */
-const ESTIMATE_DATA_GB = 1;
-// Data stream estimates spread that data evenly across this many days of age.
-const DATA_STREAM_AGE_DAYS = 30;
-const DATA_STREAM_GB_PER_DAY = ESTIMATE_DATA_GB / DATA_STREAM_AGE_DAYS;
-
+const BYTES_PER_GB = 1e9;
 // Boost 1 keeps data fully cached at twice its size (the design doc's 2.0 cache factor).
 const CACHE_FACTOR = 2;
 const CACHE_GB_PER_VCU = 8;
@@ -32,6 +33,22 @@ const PERIOD_CACHE_RATIOS = { recent: 1, standard: 0.5, background: 0.05 } as co
 /** A round, illustrative price for proofs of concept. It isn't Elastic pricing, which varies by region. */
 export const ILLUSTRATIVE_USD_PER_VCU_HOUR = 0.1;
 
+/** Search VCUs per hour, at rest (minimum boost) and at peak load (maximum boost). */
+export interface VcuRange {
+  atRest: number;
+  atPeak: number;
+}
+
+const NO_VCUS: VcuRange = { atRest: 0, atPeak: 0 };
+
+const addRanges = (a: VcuRange, b: VcuRange): VcuRange => ({
+  atRest: a.atRest + b.atRest,
+  atPeak: a.atPeak + b.atPeak,
+});
+
+const vcusForCachedData = (dataGb: number, cacheRatio: number, boost: number) =>
+  (dataGb * CACHE_FACTOR * cacheRatio * boost) / CACHE_GB_PER_VCU;
+
 export interface IndicesEstimateInput {
   minBoost: number;
   maxBoost: number;
@@ -40,88 +57,63 @@ export interface IndicesEstimateInput {
   pinned: boolean;
 }
 
-/** Search VCUs per hour, at rest (minimum boost) and at peak load (maximum boost). */
-export interface VcuRange {
-  atRest: number;
-  atPeak: number;
-}
-
-const VCUS_PER_BOOST = (ESTIMATE_DATA_GB * CACHE_FACTOR) / CACHE_GB_PER_VCU;
-
-export const estimateIndicesVcuRange = ({
-  minBoost,
-  maxBoost,
-  extraCopy,
-  prewarm,
-  pinned,
-}: IndicesEstimateInput): VcuRange => {
+/** Search VCUs for this much index data, which boost keeps fully cached. */
+export const estimateIndicesVcuRange = (
+  dataGb: number,
+  { minBoost, maxBoost, extraCopy, prewarm, pinned }: IndicesEstimateInput
+): VcuRange => {
   const copies = extraCopy ? EXTRA_COPY_MULTIPLIER : 1;
   const atRestMultiplier =
     (prewarm ? PREWARM_AT_REST_MULTIPLIER : 1) * (pinned ? PIN_AT_REST_MULTIPLIER : 1);
 
-  const atRest = VCUS_PER_BOOST * minBoost * copies * atRestMultiplier;
-  const atPeak = VCUS_PER_BOOST * maxBoost * copies;
+  const atRest = vcusForCachedData(dataGb, 1, minBoost) * copies * atRestMultiplier;
+  const atPeak = vcusForCachedData(dataGb, 1, maxBoost) * copies;
 
   return { atRest, atPeak: Math.max(atRest, atPeak) };
 };
 
-export interface BoostRangeInput {
-  minBoost: number;
-  maxBoost: number;
-}
+type DataStreamsProfile = Extract<BoostProfile | BoostProfileInput, { type: 'data_streams' }>;
 
-export interface DataStreamsEstimateInput {
-  recent: BoostRangeInput & { maxAgeDays: number };
-  standard: BoostRangeInput & { maxAgeDays: number };
-  background: BoostRangeInput;
-}
-
-const vcusForCachedData = (dataGb: number, cacheRatio: number, boost: number) =>
-  (dataGb * CACHE_FACTOR * cacheRatio * boost) / CACHE_GB_PER_VCU;
-
-/** Sums each period's estimate, splitting the data across the periods by age. */
-export const estimateDataStreamsVcuRange = ({
-  recent,
-  standard,
-  background,
-}: DataStreamsEstimateInput): VcuRange => {
-  const recentDays = Math.min(recent.maxAgeDays, DATA_STREAM_AGE_DAYS);
-  const standardDays = Math.max(
-    Math.min(standard.maxAgeDays, DATA_STREAM_AGE_DAYS) - recentDays,
-    0
-  );
-  const backgroundDays = DATA_STREAM_AGE_DAYS - recentDays - standardDays;
-
-  const periods = [
-    { days: recentDays, ratio: PERIOD_CACHE_RATIOS.recent, range: recent },
-    { days: standardDays, ratio: PERIOD_CACHE_RATIOS.standard, range: standard },
-    { days: backgroundDays, ratio: PERIOD_CACHE_RATIOS.background, range: background },
-  ];
-
-  return periods.reduce<VcuRange>(
-    (total, { days, ratio, range: { minBoost, maxBoost } }) => {
-      const dataGb = days * DATA_STREAM_GB_PER_DAY;
-      const atRest = vcusForCachedData(dataGb, ratio, minBoost);
-      return {
-        atRest: total.atRest + atRest,
-        atPeak: total.atPeak + Math.max(atRest, vcusForCachedData(dataGb, ratio, maxBoost)),
-      };
-    },
-    { atRest: 0, atPeak: 0 }
-  );
-};
-
-const BYTES_PER_GB = 1e9;
-
-const maxAgeDays = (maxAge: string | undefined): number => {
+const maxAgeHours = (maxAge: string | undefined): number => {
   const parsed = parseMaxAge(maxAge);
-  return parsed ? toMaxAgeHours(parsed) / 24 : 0;
+  return parsed ? toMaxAgeHours(parsed) : 0;
 };
 
-/** Estimates a saved profile's search VCUs per GB of the data it applies to. */
-export const estimateProfileVcuRange = (profile: BoostProfile | BoostProfileInput): VcuRange => {
+/**
+ * Search VCUs for a data stream's data, with each part in the period its age falls in: recent until
+ * the recent period's max age, standard until the standard period's, and background after that.
+ * Periods apply to whole backing indices, so a part moves on once its newest data is old enough.
+ */
+export const estimateDataStreamVcuRange = (
+  { recent, standard, background }: DataStreamsProfile,
+  dataAges: readonly BoostDataAge[]
+): VcuRange => {
+  const recentMaxHours = maxAgeHours(recent.max_age);
+  const standardMaxHours = maxAgeHours(standard.max_age);
+
+  return dataAges.reduce<VcuRange>((total, { age_hours: ageHours, size_in_bytes: bytes }) => {
+    const [period, ratio] =
+      ageHours < recentMaxHours
+        ? [recent, PERIOD_CACHE_RATIOS.recent]
+        : ageHours < standardMaxHours
+        ? [standard, PERIOD_CACHE_RATIOS.standard]
+        : [background, PERIOD_CACHE_RATIOS.background];
+    const dataGb = bytes / BYTES_PER_GB;
+    const atRest = vcusForCachedData(dataGb, ratio, period.min_boost);
+    return addRanges(total, {
+      atRest,
+      atPeak: Math.max(atRest, vcusForCachedData(dataGb, ratio, period.max_boost)),
+    });
+  }, NO_VCUS);
+};
+
+/** Search VCUs a profile would use for one index's or data stream's actual data. */
+export const estimateDataSourceVcuRange = (
+  { size_in_bytes: sizeInBytes, data_ages: dataAges }: BoostDataSource,
+  profile: BoostProfile | BoostProfileInput
+): VcuRange => {
   if (profile.type === 'indices') {
-    return estimateIndicesVcuRange({
+    return estimateIndicesVcuRange(sizeInBytes / BYTES_PER_GB, {
       minBoost: profile.min_boost,
       maxBoost: profile.max_boost,
       extraCopy: profile.high_availability === 'one_extra_copy',
@@ -129,20 +121,11 @@ export const estimateProfileVcuRange = (profile: BoostProfile | BoostProfileInpu
       pinned: profile.pinned,
     });
   }
-  const { recent, standard, background } = profile;
-  return estimateDataStreamsVcuRange({
-    recent: {
-      minBoost: recent.min_boost,
-      maxBoost: recent.max_boost,
-      maxAgeDays: maxAgeDays(recent.max_age),
-    },
-    standard: {
-      minBoost: standard.min_boost,
-      maxBoost: standard.max_boost,
-      maxAgeDays: maxAgeDays(standard.max_age),
-    },
-    background: { minBoost: background.min_boost, maxBoost: background.max_boost },
-  });
+  // Without a breakdown, all of the data counts as new, which overestimates rather than under.
+  return estimateDataStreamVcuRange(
+    profile,
+    dataAges ?? [{ age_hours: 0, size_in_bytes: sizeInBytes }]
+  );
 };
 
 /** The search cost of the data sources a change affects, before and after it. */
@@ -158,8 +141,8 @@ export interface CostImpact {
 const NO_IMPACT: CostImpact = {
   dataSourceCount: 0,
   sizeInBytes: 0,
-  current: { atRest: 0, atPeak: 0 },
-  next: { atRest: 0, atPeak: 0 },
+  current: NO_VCUS,
+  next: NO_VCUS,
 };
 
 interface RuleImpactInput {
@@ -171,11 +154,6 @@ interface RuleImpactInput {
   /** The rule as it's saved today, when editing. */
   currentRule?: BoostRule;
 }
-
-const addRange = (total: VcuRange, range: VcuRange, sizeGb: number): VcuRange => ({
-  atRest: total.atRest + range.atRest * sizeGb,
-  atPeak: total.atPeak + range.atPeak * sizeGb,
-});
 
 /**
  * Estimates what creating or editing a rule does to search VCUs: for every data source it gains or
@@ -191,11 +169,10 @@ export const estimateRuleImpact = ({
   const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
   // Matched by name, since callers may pass a copy of the saved rule.
   const nextRules = [...rules.filter(({ name }) => name !== currentRule?.name), nextRule];
-  const rangeFor = (rule: BoostRule | undefined): VcuRange | undefined => {
+  const rangeFor = (dataSource: BoostDataSource, rule: BoostRule | undefined): VcuRange => {
     const profile = rule && profilesByName.get(rule.boost_profile);
-    return profile && estimateProfileVcuRange(profile);
+    return profile ? estimateDataSourceVcuRange(dataSource, profile) : NO_VCUS;
   };
-  const zero: VcuRange = { atRest: 0, atPeak: 0 };
 
   return dataSources.reduce<CostImpact>((impact, dataSource) => {
     const appliedNow = resolveRule(dataSource, rules, profilesByName);
@@ -206,12 +183,11 @@ export const estimateRuleImpact = ({
     if (!isAffected) {
       return impact;
     }
-    const sizeGb = dataSource.size_in_bytes / BYTES_PER_GB;
     return {
       dataSourceCount: impact.dataSourceCount + 1,
       sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
-      current: addRange(impact.current, rangeFor(appliedNow) ?? zero, sizeGb),
-      next: addRange(impact.next, rangeFor(appliedNext) ?? zero, sizeGb),
+      current: addRanges(impact.current, rangeFor(dataSource, appliedNow)),
+      next: addRanges(impact.next, rangeFor(dataSource, appliedNext)),
     };
   }, NO_IMPACT);
 };
@@ -236,21 +212,18 @@ export const estimateProfileImpact = ({
   if (!currentProfile) {
     return NO_IMPACT;
   }
-  const currentRange = estimateProfileVcuRange(currentProfile);
-  const nextRange = estimateProfileVcuRange(nextProfile);
-
   return dataSources
     .filter(
       (dataSource) =>
         resolveRule(dataSource, rules, profilesByName)?.boost_profile === nextProfile.name
     )
-    .reduce<CostImpact>((impact, { size_in_bytes: sizeInBytes }) => {
-      const sizeGb = sizeInBytes / BYTES_PER_GB;
-      return {
+    .reduce<CostImpact>(
+      (impact, dataSource) => ({
         dataSourceCount: impact.dataSourceCount + 1,
-        sizeInBytes: impact.sizeInBytes + sizeInBytes,
-        current: addRange(impact.current, currentRange, sizeGb),
-        next: addRange(impact.next, nextRange, sizeGb),
-      };
-    }, NO_IMPACT);
+        sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
+        current: addRanges(impact.current, estimateDataSourceVcuRange(dataSource, currentProfile)),
+        next: addRanges(impact.next, estimateDataSourceVcuRange(dataSource, nextProfile)),
+      }),
+      NO_IMPACT
+    );
 };

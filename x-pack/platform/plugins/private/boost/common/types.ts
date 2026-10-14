@@ -99,12 +99,21 @@ export interface BoostSettings {
 
 export type DataSourceType = 'index' | 'data_stream';
 
+/** Part of a data stream's data, such as one backing index, by how old its newest data is. */
+export interface BoostDataAge {
+  /** Hours since the newest data in this part was written; 0 for the write index. */
+  age_hours: number;
+  size_in_bytes: number;
+}
+
 /** A regular index or data stream in the project that boost rules can apply to. */
 export interface BoostDataSource {
   name: string;
   type: DataSourceType;
-  /** Stored size, or 0 when Elasticsearch doesn't report one. */
+  /** Dataset size, or 0 when Elasticsearch doesn't report one. */
   size_in_bytes: number;
+  /** A data stream's data by age, which decides the boost period each part is in. */
+  data_ages?: BoostDataAge[];
 }
 
 export interface BoostState {

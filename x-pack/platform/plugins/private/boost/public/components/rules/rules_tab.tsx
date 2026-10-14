@@ -33,6 +33,7 @@ import type {
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteRule } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
+import { PROFILE_FILTER_FIELD, ProfileFilter } from './profile_filter';
 import { RuleTargets } from './rule_targets';
 import { RuleFlyout } from './rule_flyout';
 
@@ -75,7 +76,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   const [defaultQuery] = useState(() => {
     const profileName = new URLSearchParams(locationSearch).get(PROFILE_FILTER_PARAM);
     return profileName
-      ? Query.parse('').addOrFieldValue('boost_profile', profileName, true, 'eq')
+      ? Query.parse('').addOrFieldValue(PROFILE_FILTER_FIELD, profileName, true, 'eq')
       : undefined;
   });
 
@@ -199,10 +200,17 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     ...(canEdit ? [actionsColumn] : []),
   ];
 
-  // Only profiles that rules use, since the others would filter to an empty table.
-  const usedProfileNames = [...new Set(rules.map(({ boost_profile: name }) => name))].sort((a, b) =>
-    a.localeCompare(b)
-  );
+  // Only profiles that rules use, since the others would filter to an empty table. The filter
+  // component keeps its identity while the names don't change, so its popover stays open.
+  const usedProfileNamesKey = [...new Set(rules.map(({ boost_profile: name }) => name))]
+    .sort((a, b) => a.localeCompare(b))
+    .join('\n');
+  const RulesProfileFilter = useMemo(() => {
+    const profileNames = usedProfileNamesKey ? usedProfileNamesKey.split('\n') : [];
+    return (props: { query: Query; onChange?: (query: Query) => void }) => (
+      <ProfileFilter {...props} profileNames={profileNames} />
+    );
+  }, [usedProfileNamesKey]);
 
   const search: EuiSearchBarProps = {
     compressed: true,
@@ -214,6 +222,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       }),
     },
     filters: [
+      { type: 'custom_component', component: RulesProfileFilter },
       {
         type: 'field_value_toggle_group',
         field: 'profileType',
@@ -221,14 +230,6 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
           { value: 'indices', name: PROFILE_TYPE_LABELS.indices },
           { value: 'data_streams', name: PROFILE_TYPE_LABELS.data_streams },
         ],
-      },
-      {
-        type: 'field_value_selection',
-        field: 'boost_profile',
-        name: i18n.translate('xpack.boost.rulesTab.profileFilter', { defaultMessage: 'Profile' }),
-        multiSelect: 'or',
-        operator: 'eq',
-        options: usedProfileNames.map((name) => ({ value: name, name })),
       },
     ],
     toolsRight: canEdit ? (
