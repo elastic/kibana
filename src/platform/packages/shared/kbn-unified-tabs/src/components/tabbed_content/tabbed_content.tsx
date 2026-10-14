@@ -35,7 +35,7 @@ import type {
 } from '../../types';
 import { TabsEventName } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
-import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
+import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS, TABS_BAR_HEIGHT } from '../../constants';
 import { TabsEventDataKeys } from '../../event_data_keys';
 
 export interface TabbedContentProps
@@ -503,8 +503,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const tabsBarNode = hideTabsBar ? null : tabsBar;
   const renderedTabsBar = wrapTabsBar ? wrapTabsBar(tabsBarNode) : tabsBarNode;
 
-  // The separating line between tabs and content
   const tabsBarSeparatorCss = css`
+    box-sizing: border-box;
+    height: ${TABS_BAR_HEIGHT}px;
     border-bottom: ${euiTheme.border.thin};
   `;
 
