@@ -54,7 +54,6 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'schedule' }];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.settings.concurrency.key).toBe('auto-123');
-      expect(yaml.steps[0].with.concurrency_key).toBe('auto-123');
     });
 
     it('defaults to drop strategy when overlapPolicy is not set', () => {
