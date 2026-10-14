@@ -17,9 +17,9 @@ import {
  * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
  *
  * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
- * sources index. This fixed catalog contains Elastic Security Labs reporting
- * and CISA vulnerability and advisory data. Operators can only list and enable
- * / disable entries.
+ * sources index. This fixed catalog contains Elastic Security Labs reporting,
+ * CISA vulnerability and advisory data, and UK NCSC publications. Operators can
+ * only list and enable / disable entries.
  */
 interface DefaultSource {
   id: string;
@@ -53,6 +53,13 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     adapter_type: 'rss',
     name: 'CISA Alerts and Advisories',
     tags: ['government', 'advisories', 'vulnerability', 'government-policy'],
+    enabled: true,
+  },
+  {
+    id: 'rss:uk-ncsc',
+    adapter_type: 'rss',
+    name: 'UK National Cyber Security Centre',
+    tags: ['government', 'advisories', 'research', 'guidance'],
     enabled: true,
   },
 ];

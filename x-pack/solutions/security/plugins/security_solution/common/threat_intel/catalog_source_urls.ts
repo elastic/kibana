@@ -20,6 +20,7 @@ export const CATALOG_SOURCE_URLS = {
     'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
   'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
   'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
+  'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
 } as const satisfies Record<(typeof APPROVED_CATALOG_SOURCE_IDS)[number], string>;
 
 /** Returns the catalog fetch URL for a source id, if it is part of the approved set. */

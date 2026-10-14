@@ -81,6 +81,7 @@ export const APPROVED_CATALOG_SOURCE_IDS = [
   'kev:cisa-known-exploited-vulnerabilities',
   'vendor_api:elastic-security-labs',
   'rss:cisa-alerts',
+  'rss:uk-ncsc',
 ] as const;
 
 export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);
