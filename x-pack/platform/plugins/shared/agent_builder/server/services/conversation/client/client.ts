@@ -35,7 +35,6 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  EventActorType,
   isConversationAccessControlRole,
   isPublicConversation,
   normalizeConversationAccessControl,
@@ -55,6 +54,7 @@ import type {
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
+import type { ReportConversationFieldsChangedParams } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -112,11 +112,16 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
+import { currentUserActor } from './rounds_to_events';
+import type {
+  ConversationMetadataPatchedPayload,
+  ScopedConversationEventEmitter,
+} from '../../../workflows/triggers/conversation_event_bus';
 import {
   describeConversationWrite,
   diffMetadata,
 } from '../../../workflows/triggers/describe_conversation_write';
+import { describeConversationFieldsChanged } from '../../../telemetry/describe_conversation_fields_changed';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
@@ -226,6 +231,7 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'agent_id',
   'user_id',
   'user_name',
+  'user_type',
   'title',
   'created_at',
   'updated_at',
@@ -263,6 +269,8 @@ interface ConversationListEsResponse {
   };
 }
 
+export type OnConversationCreated = (params: { conversationId: string; agentId: string }) => void;
+
 export const createClient = ({
   space,
   logger,
@@ -271,6 +279,8 @@ export const createClient = ({
   agentRegistry,
   conversationEvents,
   eventEmitter,
+  onConversationCreated,
+  reportFieldsChange,
 }: {
   space: string;
   logger: Logger;
@@ -279,6 +289,8 @@ export const createClient = ({
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
+  onConversationCreated?: OnConversationCreated;
+  reportFieldsChange?: ConversationFieldsChangeReporter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -290,8 +302,15 @@ export const createClient = ({
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
+    reportFieldsChange,
   });
 };
+
+/** Receives the template fields, opted in with `report_changes`, that one write changed. */
+export type ConversationFieldsChangeReporter = (
+  params: ReportConversationFieldsChangedParams
+) => void;
 
 /**
  * Thrown from inside an OCC `fields` callback to turn the write into a no-op: the stored document
@@ -324,6 +343,8 @@ class ConversationClientImpl implements ConversationClient {
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
+  private readonly onConversationCreated?: OnConversationCreated;
+  private readonly reportFieldsChange?: ConversationFieldsChangeReporter;
 
   constructor({
     storage,
@@ -334,6 +355,8 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
+    reportFieldsChange,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -343,6 +366,8 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
+    onConversationCreated?: OnConversationCreated;
+    reportFieldsChange?: ConversationFieldsChangeReporter;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -352,6 +377,8 @@ class ConversationClientImpl implements ConversationClient {
     this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
+    this.onConversationCreated = onConversationCreated;
+    this.reportFieldsChange = reportFieldsChange;
   }
 
   /**
@@ -395,6 +422,48 @@ class ConversationClientImpl implements ConversationClient {
     } catch (error) {
       this.logger.warn(
         `Failed to notify conversation update for conversation "${conversationId}": ${error}`
+      );
+    }
+  }
+
+  /**
+   * Notifies the metadata-patched listener with the fields that were just persisted.
+   * Best-effort: listener failures are logged and never fail the write.
+   */
+  private notifyMetadataPatched(payload: ConversationMetadataPatchedPayload): void {
+    if (!this.eventEmitter || payload.changedFields.length === 0) {
+      return;
+    }
+    try {
+      this.eventEmitter.emitMetadataPatched(payload);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to notify metadata patched for conversation "${payload.conversationId}": ${error}`
+      );
+    }
+  }
+
+  /**
+   * Reports the `report_changes` template fields a successful write changed, as one event.
+   * Best-effort: the changes are described lazily inside the guard, so failures are logged and
+   * never fail the (already persisted) write.
+   */
+  private notifyFieldChanges(
+    conversationId: string,
+    describe: () => ReportConversationFieldsChangedParams | undefined
+  ): void {
+    const { reportFieldsChange } = this;
+    if (!reportFieldsChange) {
+      return;
+    }
+    try {
+      const params = describe();
+      if (params) {
+        reportFieldsChange(params);
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to report field changes for conversation "${conversationId}": ${error}`
       );
     }
   }
@@ -745,15 +814,26 @@ class ConversationClientImpl implements ConversationClient {
     this.notifyAttachmentEvents(id, conversation.events ?? []);
     const seqNo = indexed._seq_no;
     const primaryTerm = indexed._primary_term;
+    const readCreated = () =>
+      fromEs(
+        { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
+        this.getUser()
+      );
     this.notifyConversationUpdated(id, () =>
-      describeConversationWrite({
-        after: fromEs(
-          { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
-          this.getUser()
-        ),
+      describeConversationWrite({ after: readCreated(), source })
+    );
+    this.notifyFieldChanges(id, () =>
+      describeConversationFieldsChanged({
+        after: readCreated(),
+        resolveTemplate: getTemplate,
         source,
       })
     );
+    try {
+      this.onConversationCreated?.({ conversationId: id, agentId: conversation.agent_id });
+    } catch (error) {
+      this.logger.warn(`Failed to notify creation of conversation "${id}": ${error}`);
+    }
 
     return this.get(id);
   }
@@ -789,12 +869,7 @@ class ConversationClientImpl implements ConversationClient {
     },
     { source }: ConversationWriteOptions
   ): Promise<ConversationEvent[]> {
-    const { id: userId, username } = this.getUser();
-    const actor = {
-      type: EventActorType.user,
-      id: userId ?? username,
-      ...(username ? { username } : {}),
-    };
+    const actor = currentUserActor(this.getUser());
     const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
     const materialized = materializeConversationEvents({
       events: validatedEvents,
@@ -1268,14 +1343,12 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    if (changedFields.length > 0 && this.eventEmitter) {
-      this.eventEmitter.emitMetadataPatched({
-        conversationId: result.id,
-        templateId: result.template_id,
-        parentId: result.parent_conversation?.id,
-        changedFields,
-      });
-    }
+    this.notifyMetadataPatched({
+      conversationId: result.id,
+      templateId: result.template_id,
+      parentId: result.parent_conversation?.id,
+      changedFields,
+    });
 
     return { conversation: result, changedFields };
   }
@@ -1289,9 +1362,9 @@ class ConversationClientImpl implements ConversationClient {
       return originAuthor;
     }
 
-    const { id, username } = this.getUser();
+    const { id, username, type } = this.getUser();
 
-    return id === undefined ? undefined : { id, username };
+    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
@@ -1475,6 +1548,14 @@ class ConversationClientImpl implements ConversationClient {
         const { source } = emission;
         this.notifyConversationUpdated(conversationId, () =>
           describeConversationWrite({ before: previous, after: document, source })
+        );
+        this.notifyFieldChanges(conversationId, () =>
+          describeConversationFieldsChanged({
+            after: document,
+            before: previous,
+            resolveTemplate: getTemplate,
+            source,
+          })
         );
       }
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
