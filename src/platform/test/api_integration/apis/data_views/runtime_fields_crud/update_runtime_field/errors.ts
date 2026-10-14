@@ -14,6 +14,9 @@ import { configArray } from '../../constants';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/{index_patterns,data_views}/runtime_fields_update_*.spec.ts
   describe('errors', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {

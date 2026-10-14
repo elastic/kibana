@@ -15,7 +15,7 @@ import { createBulkEpisodeActionRouteForType } from './create_bulk_episode_actio
 export const BulkTagEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
   pathSuffix: '_bulk_tag',
-  summary: 'Bulk tag alert episodes',
+  summary: 'Bulk tag alerts',
   bodySchema: bulkTagEpisodeActionBodySchema,
   oasOperationObject: bulkTagEpisodeActionOasExamples,
   access: 'public' as const,
