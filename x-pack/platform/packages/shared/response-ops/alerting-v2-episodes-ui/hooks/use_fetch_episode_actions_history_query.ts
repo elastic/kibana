@@ -25,7 +25,11 @@ import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeActionsHistoryQueryOptions {
   episodeId: string | undefined;
-  groupHash: string | undefined;
+  /**
+   * Series of the episode. `undefined` while it is still being resolved (nothing is fetched yet),
+   * `null` when the episode has no series identity (only its own actions are fetched).
+   */
+  seriesId: string | null | undefined;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
   /** Page size for each keyset fetch. Defaults to {@link DEFAULT_ACTIONS_HISTORY_PAGE_SIZE}. */
   pageSize?: number;
@@ -38,7 +42,7 @@ export interface UseFetchEpisodeActionsHistoryQueryOptions {
  */
 export const useFetchEpisodeActionsHistoryQuery = ({
   episodeId,
-  groupHash,
+  seriesId,
   services,
   pageSize = DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
 }: UseFetchEpisodeActionsHistoryQueryOptions) => {
@@ -46,9 +50,9 @@ export const useFetchEpisodeActionsHistoryQuery = ({
   const spaceId = useSpaceId(services.spaces);
 
   const query = useInfiniteQuery({
-    queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', groupHash ?? ''), pageSize],
+    queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', seriesId ?? ''), pageSize],
     queryFn: async ({ signal, pageParam }: { signal?: AbortSignal; pageParam?: string }) => {
-      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
+      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, seriesId, {
         before: pageParam,
         limit: pageSize,
       });
@@ -64,7 +68,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
     },
     getNextPageParam: (lastPage) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
-    enabled: Boolean(episodeId) && Boolean(groupHash),
+    enabled: Boolean(episodeId) && seriesId !== undefined,
   });
 
   const entries = useMemo(() => {
@@ -88,7 +92,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
 
   return {
     entries,
-    // isLoading stays true forever for a disabled query in React Query v4 (e.g. no groupHash
+    // isLoading stays true forever for a disabled query in React Query v4 (e.g. no seriesId
     // yet); isInitialLoading is false in that case, only true while actually fetching.
     isLoading: query.isInitialLoading,
     isError: query.isError,

@@ -13,10 +13,18 @@ import {
   apiTest,
   buildAlertEvent,
   buildGroupHash,
+  buildSeriesId,
   getSnoozeSeriesActionUrl,
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
+
+const ANY_SERIES_ID = buildSeriesId(
+  buildAlertEvent({
+    rule: { id: 'any-rule', version: 1 },
+    group_hash: buildGroupHash('any-group'),
+  })
+);
 
 apiTest.describe('Create snooze series action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -43,14 +51,13 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
       const ruleId = 'snooze-happy-rule';
       const groupHash = buildGroupHash('snooze-happy-group');
       const snoozedUntil = '2099-01-01T00:00:00.000Z';
-      await apiServices.alertingV2.ruleEvents.seed([
-        buildAlertEvent({
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          alert: { id: 'snooze-happy-episode', status: 'active' },
-        }),
-      ]);
-      const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+      const event = buildAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        alert: { id: 'snooze-happy-episode', status: 'active' },
+      });
+      await apiServices.alertingV2.ruleEvents.seed([event]);
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(buildSeriesId(event)), {
         headers: writerHeaders,
         body: { snoozed_until: snoozedUntil },
       });
@@ -79,14 +86,13 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
     async ({ apiClient, apiServices }) => {
       const ruleId = 'snooze-no-expiry-rule';
       const groupHash = buildGroupHash('snooze-no-expiry-group');
-      await apiServices.alertingV2.ruleEvents.seed([
-        buildAlertEvent({
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          alert: { id: 'snooze-no-expiry-episode', status: 'active' },
-        }),
-      ]);
-      const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+      const event = buildAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        alert: { id: 'snooze-no-expiry-episode', status: 'active' },
+      });
+      await apiServices.alertingV2.ruleEvents.seed([event]);
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(buildSeriesId(event)), {
         headers: writerHeaders,
         body: {},
       });
@@ -107,7 +113,7 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
   );
 
   apiTest('schema: rejects snoozed_until that is not ISO 8601 with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getSnoozeSeriesActionUrl(buildGroupHash('any-group')), {
+    const response = await apiClient.post(getSnoozeSeriesActionUrl(ANY_SERIES_ID), {
       headers: writerHeaders,
       body: { snoozed_until: 'not-a-date' },
     });
@@ -120,7 +126,7 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
     async ({ apiClient }) => {
       // `z.iso.datetime()` requires a full ISO 8601 datetime; a date-only value
       // like `2099-01-01` should be rejected.
-      const response = await apiClient.post(getSnoozeSeriesActionUrl(buildGroupHash('any-group')), {
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(ANY_SERIES_ID), {
         headers: writerHeaders,
         body: { snoozed_until: '2099-01-01' },
       });
@@ -130,7 +136,7 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
   );
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getSnoozeSeriesActionUrl(buildGroupHash('any-group')), {
+    const response = await apiClient.post(getSnoozeSeriesActionUrl(ANY_SERIES_ID), {
       headers: writerHeaders,
       body: { extra: 'nope' },
     });
@@ -138,16 +144,16 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  const nonDigestGroupHashes = [
-    ['a plain label', 'not-a-digest'],
-    ['too few characters', 'a'.repeat(63)],
-    ['too many characters', 'a'.repeat(257)],
-    ['a non-hex character', `${'a'.repeat(63)}z`],
+  const invalidAlphabetSeriesIds = [
+    ['a space and punctuation', 'not base64url!'],
+    ['a dot', 'not.base64url'],
+    ['a padding character', 'bm90LWEtc2VyaWVz='],
+    ['more than 2048 characters', 'a'.repeat(2049)],
   ] as const;
 
-  for (const [label, groupHash] of nonDigestGroupHashes) {
-    apiTest(`schema: rejects a group_hash with ${label} with 400`, async ({ apiClient }) => {
-      const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+  for (const [label, seriesId] of invalidAlphabetSeriesIds) {
+    apiTest(`schema: rejects a series_id with ${label} with 400`, async ({ apiClient }) => {
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(seriesId), {
         headers: writerHeaders,
         body: {},
       });
@@ -156,16 +162,75 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
     });
   }
 
-  apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const groupHash = buildGroupHash('unknown-group');
-    const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+  const malformedSeriesIds = [
+    ['a legacy group hash', buildGroupHash('snooze-legacy-group')],
+    ['a base64url value that is not a series payload', 'bm90LWEtc2VyaWVz'],
+  ] as const;
+
+  for (const [label, seriesId] of malformedSeriesIds) {
+    apiTest(
+      `schema: rejects a series_id that is ${label} with INVALID_SERIES_ID`,
+      async ({ apiClient }) => {
+        const response = await apiClient.post(getSnoozeSeriesActionUrl(seriesId), {
+          headers: writerHeaders,
+          body: {},
+        });
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('INVALID_SERIES_ID');
+      }
+    );
+  }
+
+  apiTest('returns 404 when series_id matches no events', async ({ apiClient }) => {
+    const seriesId = buildSeriesId(
+      buildAlertEvent({
+        rule: { id: 'snooze-unknown-rule', version: 1 },
+        group_hash: buildGroupHash('unknown-group'),
+      })
+    );
+    const response = await apiClient.post(getSnoozeSeriesActionUrl(seriesId), {
       headers: writerHeaders,
       body: {},
     });
     expect(response).toHaveStatusCode(404);
     expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ group_hash: groupHash });
+    expect(response.body.details).toMatchObject({ series_id: seriesId });
   });
+
+  apiTest(
+    'returns 404 and writes nothing when series_id was minted for another space',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'snooze-other-space-rule';
+      const groupHash = buildGroupHash('snooze-other-space-group');
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: 'snooze-other-space-episode', status: 'active' },
+        }),
+      ]);
+      const otherSpaceSeriesId = buildSeriesId(
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          space_id: 'other-space',
+        })
+      );
+
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(otherSpaceSeriesId), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['snooze'],
+      });
+      expect(actions).toHaveLength(0);
+    }
+  );
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
@@ -173,13 +238,10 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_ALERTS_READ_ROLE
       );
-      const response = await apiClient.post(
-        getSnoozeSeriesActionUrl(buildGroupHash('snooze-authz-read-group')),
-        {
-          headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-          body: {},
-        }
-      );
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(ANY_SERIES_ID), {
+        headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
+        body: {},
+      });
       expect(response).toHaveStatusCode(403);
     }
   );
@@ -188,13 +250,10 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
     'authorization: returns 403 for a user without alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(
-        getSnoozeSeriesActionUrl(buildGroupHash('snooze-authz-none-group')),
-        {
-          headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-          body: {},
-        }
-      );
+      const response = await apiClient.post(getSnoozeSeriesActionUrl(ANY_SERIES_ID), {
+        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+        body: {},
+      });
       expect(response).toHaveStatusCode(403);
     }
   );

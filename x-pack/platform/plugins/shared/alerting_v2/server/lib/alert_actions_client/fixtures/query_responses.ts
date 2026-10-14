@@ -6,6 +6,7 @@
  */
 
 import type { EsqlQueryResponse, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import { encodeSeriesId } from '@kbn/alerting-v2-utils';
 import type { RawAlertEventRow } from '../types';
 
 /**
@@ -55,8 +56,7 @@ const toAlertEventRow = (record: Partial<RawAlertEventRow>): FieldValue[] => [
  * - Single-route paths (`loadLastSeriesAlertEventOrThrow`,
  *   `loadLastEpisodeAlertEventOrThrow`): pass one record (or omit the
  *   argument to accept defaults).
- * - Batched paths (`loadLatestAlertEventsByGroupHash`,
- *   `loadLatestAlertEventsByEpisodeId`): pass an array — one entry per
+ * - Batched paths (`loadLatestAlertEventsByEpisodeId`): pass an array — one entry per
  *   returned row.
  * - "No matches" case: pass an empty array.
  */
@@ -65,6 +65,34 @@ export const getAlertEventESQLResponse = (
 ): EsqlQueryResponse => ({
   columns: [...ALERT_EVENT_COLUMNS],
   values: records.map(toAlertEventRow),
+});
+
+/**
+ * Mocks an ES|QL response for the by-series projection
+ * (`loadLatestAlertEventsBySeries`): the alert-event columns plus the
+ * `series_id` each row was grouped under. Unless a record names one, it is
+ * derived from the record's own owner, space and hash, as the ES|QL
+ * expression does.
+ */
+export const getSeriesEventESQLResponse = (
+  records: ReadonlyArray<Partial<RawAlertEventRow> & { series_id?: string | null }> = [{}]
+): EsqlQueryResponse => ({
+  columns: [...ALERT_EVENT_COLUMNS, { name: 'series_id', type: 'keyword' }],
+  values: records.map((record) => {
+    const row = toAlertEventRow(record);
+    const [, groupHash, , , , ruleId, , spaceId, , source] = row;
+    return [
+      ...row,
+      record.series_id === undefined
+        ? encodeSeriesId({
+            space_id: String(spaceId),
+            group_hash: String(groupHash),
+            rule_id: ruleId == null ? null : String(ruleId),
+            source: source == null ? null : String(source),
+          })
+        : record.series_id,
+    ];
+  }),
 });
 
 export const getEmptyESQLResponse = (): EsqlQueryResponse => ({

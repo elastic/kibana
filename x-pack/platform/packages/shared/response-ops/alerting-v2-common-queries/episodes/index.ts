@@ -34,6 +34,8 @@ export type {
   EpisodesSortState,
 } from './episodes_query';
 
+export { SERIES_ID_EVAL, EVENTS_SERIES_ID_EVAL, ACTIONS_SERIES_ID_EVAL } from './series_id_eval';
+
 export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
 export type { EpisodeGroupHashEsqlRow } from './episode_query';
 

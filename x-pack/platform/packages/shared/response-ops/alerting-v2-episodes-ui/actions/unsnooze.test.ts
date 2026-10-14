@@ -16,6 +16,7 @@ const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   'episode.status': 'active' as any,
   'rule.id': 'r1',
   group_hash: 'g1',
+  series_id: 's1',
   first_timestamp: '2026-04-23T00:00:00Z',
   last_timestamp: '2026-04-23T00:00:00Z',
   duration: 0,
@@ -63,7 +64,15 @@ describe('createUnsnoozeAction', () => {
     expect(createUnsnoozeAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
-  it('execute: POSTs unique-by-group UNSNOOZE items, toasts, calls onSuccess', async () => {
+  it('not compatible when the episode has no series_id', () => {
+    expect(
+      createUnsnoozeAction(makeDeps()).isCompatible({
+        episodes: [makeEpisode({ series_id: null, last_snooze_action: 'snooze' })],
+      })
+    ).toBe(false);
+  });
+
+  it('execute: POSTs unique-by-series UNSNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest
       .spyOn(bulk, 'bulkUnsnoozeSeriesActions')
@@ -72,13 +81,14 @@ describe('createUnsnoozeAction', () => {
     await createUnsnoozeAction(deps).execute({
       episodes: [
         makeEpisode({ last_snooze_action: 'snooze' }),
-        makeEpisode({ 'episode.id': 'e2', group_hash: 'g2', last_snooze_action: 'snooze' }),
+        makeEpisode({ 'episode.id': 'e2', series_id: 's2', last_snooze_action: 'snooze' }),
+        makeEpisode({ 'episode.id': 'e3', last_snooze_action: 'snooze' }),
       ],
       onSuccess,
     });
     expect(bulk.bulkUnsnoozeSeriesActions).toHaveBeenCalledWith(deps.http, [
-      { group_hash: 'g1' },
-      { group_hash: 'g2' },
+      { series_id: 's1' },
+      { series_id: 's2' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();

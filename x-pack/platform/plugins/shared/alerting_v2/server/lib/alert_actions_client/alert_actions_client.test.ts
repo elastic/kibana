@@ -13,6 +13,7 @@ import type {
   BulkCreateSeriesAlertActionItemBody,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { encodeSeriesId } from '@kbn/alerting-v2-utils';
 import type { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import type { AlertActionsClient } from './alert_actions_client';
 import { createAlertActionsClient } from './alert_actions_client.mock';
@@ -20,9 +21,37 @@ import {
   getAlertActionStateESQLResponse,
   getAlertEventESQLResponse,
   getEmptyESQLResponse,
+  getSeriesEventESQLResponse,
 } from './fixtures/query_responses';
 import { ALERT_ACTIONS_RESOURCE_KEY } from '../../resources/datastreams/alert_actions';
 import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
+
+const GROUP_HASH = 'a'.repeat(64);
+const OTHER_GROUP_HASH = 'b'.repeat(64);
+
+/** Series id of the default fixture's rule (`test-rule-id`) in the `default` space. */
+const toSeriesId = ({
+  space_id: spaceId = 'default',
+  rule_id: ruleId = 'test-rule-id',
+  source,
+  group_hash: groupHash = GROUP_HASH,
+}: {
+  space_id?: string;
+  rule_id?: string;
+  source?: string;
+  group_hash?: string;
+} = {}): string => {
+  const seriesId = encodeSeriesId({
+    space_id: spaceId,
+    rule_id: ruleId,
+    source,
+    group_hash: groupHash,
+  });
+  if (seriesId === null) {
+    throw new Error('Expected a series id');
+  }
+  return seriesId;
+};
 
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
@@ -58,10 +87,12 @@ describe('AlertActionsClient', () => {
     };
 
     it('persists the audit doc with alert_id null and series anchors from the latest event', async () => {
-      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getSeriesEventESQLResponse([{ group_hash: GROUP_HASH }])
+      );
 
       await client.createSeriesAction({
-        groupHash: 'test-group-hash',
+        seriesId: toSeriesId(),
         action: {
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
           snoozed_until: '2026-08-12T00:00:00.000Z',
@@ -74,7 +105,7 @@ describe('AlertActionsClient', () => {
       expect(docs[0]).toMatchObject({
         action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         expiry: '2026-08-12T00:00:00.000Z',
-        group_hash: 'test-group-hash',
+        group_hash: GROUP_HASH,
         alert_id: null,
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
@@ -83,13 +114,45 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('emits the domain event with alert_id null, like the persisted doc', async () => {
+    it('looks the series up by its owner and hash, so another rule sharing the hash is not matched', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
-        getAlertEventESQLResponse([{ episode_id: 'episode-7' }])
+        getSeriesEventESQLResponse([{ group_hash: GROUP_HASH, rule_id: 'rule-a' }])
       );
 
       await client.createSeriesAction({
-        groupHash: 'test-group-hash',
+        seriesId: toSeriesId({ rule_id: 'rule-a' }),
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
+      });
+
+      const { query } = queryServiceEsClient.esql.query.mock.calls[0][0];
+      expect(query).toContain('space_id == "default"');
+      expect(query).toContain(`rule.id == "rule-a" AND group_hash == "${GROUP_HASH}"`);
+      expect(getDocs()[0]).toMatchObject({ rule_id: 'rule-a', group_hash: GROUP_HASH });
+    });
+
+    it('looks an external series up by its source', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getSeriesEventESQLResponse([{ group_hash: GROUP_HASH, rule_id: null, source: 'pagerduty' }])
+      );
+
+      await client.createSeriesAction({
+        seriesId: toSeriesId({ source: 'pagerduty' }),
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
+      });
+
+      const { query } = queryServiceEsClient.esql.query.mock.calls[0][0];
+      expect(query).toContain(`source == "pagerduty" AND group_hash == "${GROUP_HASH}"`);
+      expect(query).not.toContain('rule.id ==');
+      expect(getDocs()[0]).toMatchObject({ source: 'pagerduty', rule_id: null });
+    });
+
+    it('emits the domain event with alert_id null, like the persisted doc', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getSeriesEventESQLResponse([{ group_hash: GROUP_HASH, episode_id: 'episode-7' }])
+      );
+
+      await client.createSeriesAction({
+        seriesId: toSeriesId(),
         action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       });
 
@@ -102,29 +165,67 @@ describe('AlertActionsClient', () => {
       ]);
     });
 
-    it('throws ALERT_EVENT_NOT_FOUND with the group_hash detail when the series has no event', async () => {
+    it('throws ALERT_EVENT_NOT_FOUND with the series_id detail when the series has no event', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+      const seriesId = toSeriesId({ rule_id: 'unknown-rule' });
 
       await expect(
         client.createSeriesAction({
-          groupHash: 'unknown-group-hash',
+          seriesId,
           action: { action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
-        data: { code: 'ALERT_EVENT_NOT_FOUND', details: { group_hash: 'unknown-group-hash' } },
+        data: { code: 'ALERT_EVENT_NOT_FOUND', details: { series_id: seriesId } },
       });
 
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
+    it('throws ALERT_EVENT_NOT_FOUND without querying for a series id of another space', async () => {
+      const seriesId = toSeriesId({ space_id: 'other-space' });
+
+      await expect(
+        client.createSeriesAction({
+          seriesId,
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: 'ALERT_EVENT_NOT_FOUND', details: { series_id: seriesId } },
+      });
+
+      expect(queryServiceEsClient.esql.query).not.toHaveBeenCalled();
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a legacy group hash', GROUP_HASH],
+      ['text that is not a series payload', 'bm90LWEtc2VyaWVzLWlk'],
+    ])('rejects %s with INVALID_SERIES_ID before any I/O', async (_name, seriesId) => {
+      await expect(
+        client.createSeriesAction({
+          seriesId,
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'INVALID_SERIES_ID', details: { series_id: seriesId } },
+      });
+
+      expect(queryServiceEsClient.esql.query).not.toHaveBeenCalled();
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+
     it('records a user actor without profile_uid when security is not available', async () => {
-      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getSeriesEventESQLResponse([{ group_hash: GROUP_HASH }])
+      );
       userProfileService.getCurrentProfileId.mockResolvedValueOnce(null);
 
       await client.createSeriesAction({
-        groupHash: 'test-group-hash',
+        seriesId: toSeriesId(),
         action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       });
 
@@ -303,7 +404,7 @@ describe('AlertActionsClient', () => {
     });
 
     it('deactivates the latest episode of its series, writing the synthetic rule-event', async () => {
-      // By-episode lookup, then the latest-of-group guard lookup.
+      // By-episode lookup, then the latest-of-series guard lookup.
       queryServiceEsClient.esql.query
         .mockResolvedValueOnce(
           getAlertEventESQLResponse([
@@ -311,7 +412,7 @@ describe('AlertActionsClient', () => {
           ])
         )
         .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+          getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
         );
 
       await client.createEpisodeAction({
@@ -334,6 +435,58 @@ describe('AlertActionsClient', () => {
       });
     });
 
+    it('scopes the latest-episode guard to the alert own rule, so a later episode of another rule sharing the hash does not reject it', async () => {
+      queryServiceEsClient.esql.query
+        .mockResolvedValueOnce(
+          getAlertEventESQLResponse([
+            {
+              episode_id: 'episode-a',
+              group_hash: GROUP_HASH,
+              rule_id: 'rule-a',
+              episode_status: 'active',
+            },
+          ])
+        )
+        // The guard only sees rule A's series; rule B's newer episode is a different series.
+        .mockResolvedValueOnce(
+          getSeriesEventESQLResponse([
+            { episode_id: 'episode-a', group_hash: GROUP_HASH, rule_id: 'rule-a' },
+          ])
+        );
+
+      await client.createEpisodeAction({
+        episodeId: 'episode-a',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+      });
+
+      const { query } = queryServiceEsClient.esql.query.mock.calls[1][0];
+      expect(query).toContain(`rule.id == "rule-a" AND group_hash == "${GROUP_HASH}"`);
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects a lifecycle action on an alert without a series identity as not the latest', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse([
+          {
+            episode_id: 'episode-3',
+            group_hash: 'group-1',
+            rule_id: null,
+            episode_status: 'active',
+          },
+        ])
+      );
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'resolved' },
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 409 }, data: { code: 'ALERT_NOT_LATEST' } });
+
+      expect(queryServiceEsClient.esql.query).toHaveBeenCalledTimes(1);
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+
     it('rejects activate on a superseded episode with ALERT_NOT_LATEST', async () => {
       queryServiceEsClient.esql.query
         .mockResolvedValueOnce(
@@ -342,7 +495,7 @@ describe('AlertActionsClient', () => {
           ])
         )
         .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'new-episode', group_hash: 'group-1' }])
+          getSeriesEventESQLResponse([{ episode_id: 'new-episode', group_hash: 'group-1' }])
         );
 
       await expect(
@@ -370,7 +523,7 @@ describe('AlertActionsClient', () => {
           ])
         )
         .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
+          getSeriesEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
         );
 
       await client.createEpisodeAction({
@@ -459,17 +612,20 @@ describe('AlertActionsClient', () => {
     it('persists every action and emits every event with alert_id null', async () => {
       const items: BulkCreateSeriesAlertActionItemBody[] = [
         {
-          group_hash: 'group-1',
+          series_id: toSeriesId({ rule_id: 'rule-1' }),
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
           snoozed_until: '2026-08-12T00:00:00.000Z',
         },
-        { group_hash: 'group-2', action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
+        {
+          series_id: toSeriesId({ rule_id: 'rule-2', group_hash: OTHER_GROUP_HASH }),
+          action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        },
       ];
 
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
-        getAlertEventESQLResponse([
-          { group_hash: 'group-1', episode_id: 'episode-1' },
-          { group_hash: 'group-2', episode_id: 'episode-2' },
+        getSeriesEventESQLResponse([
+          { group_hash: GROUP_HASH, rule_id: 'rule-1', episode_id: 'episode-1' },
+          { group_hash: OTHER_GROUP_HASH, rule_id: 'rule-2', episode_id: 'episode-2' },
         ])
       );
 
@@ -480,25 +636,63 @@ describe('AlertActionsClient', () => {
       const docs = getDocs();
       expect(docs).toHaveLength(2);
       expect(docs[0]).toMatchObject({
-        group_hash: 'group-1',
+        group_hash: GROUP_HASH,
+        rule_id: 'rule-1',
         alert_id: null,
         expiry: '2026-08-12T00:00:00.000Z',
       });
-      expect(docs[1]).toMatchObject({ group_hash: 'group-2', alert_id: null });
+      expect(docs[1]).toMatchObject({
+        group_hash: OTHER_GROUP_HASH,
+        rule_id: 'rule-2',
+        alert_id: null,
+      });
+      expect(docs[0]).not.toHaveProperty('series_id');
       expect(emitEpisodeActionsSpy.mock.calls[0][1]).toEqual([
-        expect.objectContaining({ group_hash: 'group-1', alert_id: null }),
-        expect.objectContaining({ group_hash: 'group-2', alert_id: null }),
+        expect.objectContaining({ rule_id: 'rule-1', alert_id: null }),
+        expect.objectContaining({ rule_id: 'rule-2', alert_id: null }),
       ]);
     });
 
-    it('reports ALERT_GROUP_NOT_FOUND keyed by group_hash for missing series', async () => {
+    it('stamps each rule that shares a group hash with its own series', async () => {
       const items: BulkCreateSeriesAlertActionItemBody[] = [
-        { group_hash: 'group-1', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
-        { group_hash: 'unknown-group', action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+        {
+          series_id: toSeriesId({ rule_id: 'rule-a' }),
+          action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        },
+        {
+          series_id: toSeriesId({ rule_id: 'rule-b' }),
+          action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        },
       ];
 
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
-        getAlertEventESQLResponse([{ group_hash: 'group-1' }])
+        getSeriesEventESQLResponse([
+          { group_hash: GROUP_HASH, rule_id: 'rule-a', episode_id: 'episode-a' },
+          { group_hash: GROUP_HASH, rule_id: 'rule-b', episode_id: 'episode-b' },
+        ])
+      );
+
+      const result = await client.createBulkSeriesActions(items);
+
+      expect(result).toEqual({ affected_count: 2, errors: [] });
+      expect(getDocs().map((doc) => (doc as { rule_id: string }).rule_id)).toEqual([
+        'rule-a',
+        'rule-b',
+      ]);
+      const { query } = queryServiceEsClient.esql.query.mock.calls[0][0];
+      expect(query).toContain(`rule.id == "rule-a" AND group_hash == "${GROUP_HASH}"`);
+      expect(query).toContain(`rule.id == "rule-b" AND group_hash == "${GROUP_HASH}"`);
+    });
+
+    it('reports ALERT_GROUP_NOT_FOUND keyed by series_id for missing series', async () => {
+      const missingSeriesId = toSeriesId({ rule_id: 'unknown-rule' });
+      const items: BulkCreateSeriesAlertActionItemBody[] = [
+        { series_id: toSeriesId(), action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+        { series_id: missingSeriesId, action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+      ];
+
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getSeriesEventESQLResponse([{ group_hash: GROUP_HASH }])
       );
 
       const result = await client.createBulkSeriesActions(items);
@@ -506,10 +700,64 @@ describe('AlertActionsClient', () => {
       expect(result.affected_count).toBe(1);
       expect(result.errors).toEqual([
         {
-          id: 'unknown-group',
+          id: missingSeriesId,
           error: expect.objectContaining({ code: 'ALERT_GROUP_NOT_FOUND' }),
         },
       ]);
+    });
+
+    it('reports a series id of another space as not found without querying for it', async () => {
+      const otherSpaceSeriesId = toSeriesId({ space_id: 'other-space' });
+      const items: BulkCreateSeriesAlertActionItemBody[] = [
+        { series_id: toSeriesId(), action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+        { series_id: otherSpaceSeriesId, action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+      ];
+
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getSeriesEventESQLResponse([{ group_hash: GROUP_HASH }])
+      );
+
+      const result = await client.createBulkSeriesActions(items);
+
+      expect(result.affected_count).toBe(1);
+      expect(result.errors).toEqual([
+        {
+          id: otherSpaceSeriesId,
+          error: expect.objectContaining({ code: 'ALERT_GROUP_NOT_FOUND' }),
+        },
+      ]);
+      const { query } = queryServiceEsClient.esql.query.mock.calls[0][0];
+      expect(query).toContain('space_id == "default"');
+      expect(query).not.toContain('other-space');
+    });
+
+    it('does not query when every series id belongs to another space', async () => {
+      const result = await client.createBulkSeriesActions([
+        {
+          series_id: toSeriesId({ space_id: 'other-space' }),
+          action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+        },
+      ]);
+
+      expect(result.affected_count).toBe(0);
+      expect(result.errors).toHaveLength(1);
+      expect(queryServiceEsClient.esql.query).not.toHaveBeenCalled();
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('rejects the whole request with INVALID_SERIES_ID when an item id is malformed, before any I/O', async () => {
+      await expect(
+        client.createBulkSeriesActions([
+          { series_id: toSeriesId(), action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+          { series_id: GROUP_HASH, action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
+        ])
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'INVALID_SERIES_ID', details: { series_id: GROUP_HASH } },
+      });
+
+      expect(queryServiceEsClient.esql.query).not.toHaveBeenCalled();
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
   });
 
@@ -596,7 +844,7 @@ describe('AlertActionsClient', () => {
         )
         .mockResolvedValueOnce(getAlertActionStateESQLResponse())
         .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'new-episode', group_hash: 'group-1' }])
+          getSeriesEventESQLResponse([{ episode_id: 'new-episode', group_hash: 'group-1' }])
         );
 
       const result = await client.createBulkEpisodeActions(items);
@@ -635,7 +883,7 @@ describe('AlertActionsClient', () => {
           ])
         )
         .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+          getSeriesEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
         );
 
       const result = await client.createBulkEpisodeActions(items);
@@ -669,7 +917,7 @@ describe('AlertActionsClient', () => {
           ])
         )
         .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
+          getSeriesEventESQLResponse([{ episode_id: 'episode-1', group_hash: 'group-1' }])
         );
 
       const result = await client.createBulkEpisodeActions(items);
