@@ -1,0 +1,260 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import {
+  FP_TP_INFERENCE_FEATURE_ID,
+  INFERENCE_SETTINGS_API_VERSION,
+  INFERENCE_SETTINGS_ROUTE,
+  PUBLIC_API_VERSION,
+} from '../constants';
+import { mergeFeatureOverride, type InferenceFeatureSetting } from '../inference_override';
+import {
+  assertBulkOk,
+  createEntity,
+  deleteDocumentsById,
+  deleteEntitiesOnHosts,
+  deleteEntity,
+  ensureFpTpSeedPrerequisites,
+  kbnErrorMessage,
+  writeIdentityFields,
+  type FpTpLiveKbnRequest,
+} from '../world';
+import { ANONYMIZATION_FIELDS_FIND_ROUTE, anonymizationFieldsIndexForSpace } from './constants';
+import { workerModeCleanupTargets, type WorkerModeSeedPlan } from './plan';
+
+const PREVIOUS_SEED_PAGE_SIZE = 10_000;
+
+const readInferenceFeatures = async (
+  kbnRequest: FpTpLiveKbnRequest
+): Promise<InferenceFeatureSetting[]> => {
+  const response = await kbnRequest({
+    method: 'GET',
+    path: INFERENCE_SETTINGS_ROUTE,
+    version: INFERENCE_SETTINGS_API_VERSION,
+  });
+  if (response.statusCode >= 400) {
+    throw new Error(
+      `Failed to read inference settings (${response.statusCode}): ${kbnErrorMessage(
+        response.body
+      )}`
+    );
+  }
+  const features = (response.body as { data?: { features?: unknown } } | undefined)?.data?.features;
+  return Array.isArray(features) ? (features as InferenceFeatureSetting[]) : [];
+};
+
+/**
+ * Makes sure the space maps the `alertzero_reasoning` feature, which both generation and
+ * the FP/TP analysis resolve their connector from. With `connectorId` the mapping is set
+ * (other features are kept); without it an existing mapping is required. Returns the
+ * mapped connector id.
+ */
+export const ensureReasoningMapping = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  connectorId?: string
+): Promise<string> => {
+  const features = await readInferenceFeatures(kbnRequest);
+  const mapped = features.find(({ feature_id: id }) => id === FP_TP_INFERENCE_FEATURE_ID)
+    ?.endpoints?.[0]?.id;
+  if (connectorId === undefined || connectorId === mapped) {
+    if (mapped === undefined) {
+      throw new Error(
+        `The space maps no connector to ${FP_TP_INFERENCE_FEATURE_ID}. Pass ` +
+          '--reasoningConnectorId, or pick one in Stack Management → Feature Settings.'
+      );
+    }
+    return mapped;
+  }
+  const response = await kbnRequest({
+    method: 'PUT',
+    path: INFERENCE_SETTINGS_ROUTE,
+    version: INFERENCE_SETTINGS_API_VERSION,
+    body: {
+      features: mergeFeatureOverride(features, FP_TP_INFERENCE_FEATURE_ID, connectorId),
+    },
+  });
+  if (response.statusCode >= 400) {
+    throw new Error(
+      `Failed to map ${FP_TP_INFERENCE_FEATURE_ID} to ${connectorId} (${
+        response.statusCode
+      }): ${kbnErrorMessage(response.body)}`
+    );
+  }
+  return connectorId;
+};
+
+/**
+ * Generation reads the space's anonymization-fields index directly, and only an AI
+ * Assistant route creates it, so in a fresh space every Worker run fails
+ * (security-team#20129). Any request that builds the assistant data client installs it.
+ */
+export const ensureAnonymizationFields = async (
+  esClient: EsClient,
+  kbnRequest: FpTpLiveKbnRequest,
+  space: string
+): Promise<void> => {
+  const response = await kbnRequest({
+    method: 'GET',
+    path: `${ANONYMIZATION_FIELDS_FIND_ROUTE}?per_page=1`,
+    version: PUBLIC_API_VERSION,
+  });
+  if (response.statusCode >= 400) {
+    throw new Error(
+      `Failed to read anonymization fields (${response.statusCode}): ${kbnErrorMessage(
+        response.body
+      )}`
+    );
+  }
+  const index = anonymizationFieldsIndexForSpace(space);
+  if (!(await esClient.indices.exists({ index }))) {
+    throw new Error(
+      `${index} is still missing. Open Attack discovery once in space "${space}", then retry.`
+    );
+  }
+};
+
+/**
+ * One-time setup for a worker-mode seed: the detection alerts index, an installed Entity
+ * Store with extraction stopped (it would otherwise build entities from the seeded
+ * events), the reasoning mapping and the anonymization fields. Extraction stays stopped
+ * afterwards, because the Worker reads the entities long after seeding. Returns the
+ * reasoning connector id.
+ */
+export const ensureWorkerModePrerequisites = async ({
+  esClient,
+  kbnRequest,
+  space,
+  reasoningConnectorId,
+}: {
+  esClient: EsClient;
+  kbnRequest: FpTpLiveKbnRequest;
+  space: string;
+  reasoningConnectorId?: string;
+}): Promise<string> => {
+  await ensureFpTpSeedPrerequisites(kbnRequest);
+  const connectorId = await ensureReasoningMapping(kbnRequest, reasoningConnectorId);
+  await ensureAnonymizationFields(esClient, kbnRequest, space);
+  const { alertsIndex } = workerModeCleanupTargets(space);
+  if (!(await esClient.indices.exists({ index: alertsIndex }))) {
+    throw new Error(`Detection alerts index ${alertsIndex} does not exist after setup`);
+  }
+  return connectorId;
+};
+
+export interface WorkerModeCleanupSummary {
+  readonly alerts: number;
+  readonly hostIds: readonly string[];
+}
+
+/**
+ * Deletes what earlier worker-mode seeds left in `space`: their alerts (found by the
+ * seed label in `tags`), the raw events on those alerts' hosts in every namespace, and
+ * the entities on those hosts. Generation reads every open alert in the space, so a
+ * leftover alert would be folded into the next attack.
+ */
+export const cleanupWorkerModeSpace = async ({
+  esClient,
+  kbnRequest,
+  space,
+}: {
+  esClient: EsClient;
+  kbnRequest: FpTpLiveKbnRequest;
+  space: string;
+}): Promise<WorkerModeCleanupSummary> => {
+  const targets = workerModeCleanupTargets(space);
+  const previous = await esClient.search<{ host?: { id?: unknown } }>({
+    index: targets.alertsIndex,
+    ignore_unavailable: true,
+    size: PREVIOUS_SEED_PAGE_SIZE,
+    _source: ['host.id'],
+    query: targets.seededAlertsQuery,
+  });
+  const hostIds = [
+    ...new Set(
+      previous.hits.hits
+        .map(({ _source: source }) => source?.host?.id)
+        .filter((id): id is string => typeof id === 'string')
+    ),
+  ];
+
+  if (hostIds.length > 0) {
+    await esClient.deleteByQuery({
+      index: targets.eventsIndexPattern,
+      query: { terms: { 'host.id': hostIds } },
+      conflicts: 'proceed',
+      refresh: true,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    await deleteEntitiesOnHosts(esClient, kbnRequest, hostIds, targets.entityReadAlias);
+  }
+  if (previous.hits.hits.length > 0) {
+    await esClient.deleteByQuery({
+      index: targets.alertsIndex,
+      query: targets.seededAlertsQuery,
+      conflicts: 'proceed',
+      refresh: true,
+    });
+  }
+  return { alerts: previous.hits.hits.length, hostIds };
+};
+
+/** Deletes exactly what `plan` wrote. */
+export const cleanupWorkerModePlan = async ({
+  esClient,
+  kbnRequest,
+  plan,
+}: {
+  esClient: EsClient;
+  kbnRequest: FpTpLiveKbnRequest;
+  plan: WorkerModeSeedPlan;
+}): Promise<void> => {
+  await deleteDocumentsById(esClient, [
+    ...plan.alertIds.map((id) => ({ index: plan.alertsIndex, id })),
+    ...plan.events,
+  ]);
+  for (const entity of plan.entities) {
+    await deleteEntity(kbnRequest, entity.entityId);
+  }
+  await deleteEntitiesOnHosts(esClient, kbnRequest, plan.hostIds, plan.entityReadAlias);
+};
+
+/**
+ * Writes the plan's alerts, raw events and entities. Call `ensureWorkerModePrerequisites`
+ * and `cleanupWorkerModeSpace` first. A partial seed is removed before the error is
+ * rethrown.
+ */
+export const seedWorkerModePlan = async ({
+  esClient,
+  kbnRequest,
+  plan,
+}: {
+  esClient: EsClient;
+  kbnRequest: FpTpLiveKbnRequest;
+  plan: WorkerModeSeedPlan;
+}): Promise<void> => {
+  try {
+    assertBulkOk(
+      'alerts',
+      await esClient.bulk({ refresh: 'wait_for', operations: plan.alertOperations })
+    );
+    if (plan.eventOperations.length > 0) {
+      assertBulkOk(
+        'events',
+        await esClient.bulk({ refresh: 'wait_for', operations: plan.eventOperations })
+      );
+    }
+    for (const entity of plan.entities) {
+      await createEntity(kbnRequest, entity);
+      await writeIdentityFields(esClient, entity, plan.entityReadAlias);
+    }
+  } catch (error) {
+    await cleanupWorkerModePlan({ esClient, kbnRequest, plan }).catch(() => undefined);
+    throw error;
+  }
+};
