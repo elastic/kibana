@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { THREAT_REPORTS_INDEX as SHARED_THREAT_REPORTS_INDEX } from '@kbn/alertzero-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   httpServerMock,
 } from '@kbn/core/server/mocks';
-import { DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID } from '../../../common/threat_intel';
+import {
+  DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
+  THREAT_REPORTS_INDEX,
+} from '../../../common/threat_intel';
 import { getThreatIntelReadiness, type ReadinessDeps } from './readiness';
 
 const logger = loggingSystemMock.createLogger();
@@ -257,9 +261,19 @@ describe('getThreatIntelReadiness', () => {
 
     expect(result.reasonCodes).not.toContain('embedding_endpoint_unavailable');
     expect(deps.esClient.indices.getFieldMapping).not.toHaveBeenCalled();
+    expect(deps.esClient.indices.getMapping).toHaveBeenCalledTimes(1);
     expect(deps.esClient.indices.getMapping).toHaveBeenCalledWith({
       index: '.kibana-threat-reports',
+      expand_wildcards: ['open', 'hidden'],
     });
+  });
+
+  it('reads the reports mapping once per readiness evaluation', async () => {
+    const deps = buildDefaultDeps();
+
+    await getThreatIntelReadiness(deps);
+
+    expect(deps.esClient.indices.getMapping).toHaveBeenCalledTimes(1);
   });
 
   it('returns degraded with embedding_endpoint_unavailable when a semantic field has no inference_id', async () => {
@@ -375,5 +389,11 @@ describe('getThreatIntelReadiness', () => {
     const result = await getThreatIntelReadiness(deps);
 
     expect(result.reasonCodes).toEqual(['bootstrap_incomplete', 'reports_index_missing']);
+  });
+});
+
+describe('threat reports index constant', () => {
+  it('stays aligned with the copy shared through @kbn/alertzero-common', () => {
+    expect(SHARED_THREAT_REPORTS_INDEX).toBe(THREAT_REPORTS_INDEX);
   });
 });

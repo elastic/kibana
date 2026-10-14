@@ -128,6 +128,7 @@ describe('ThreatIntelSupplyService', () => {
     getWorkflowStatus.mockClear();
     ensureInstaller.mockClear();
     (esClient.inference.get as jest.Mock).mockClear();
+    (esClient.indices.getMapping as jest.Mock).mockClear();
     (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
     (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
       '.kibana-threat-reports': {
@@ -157,7 +158,16 @@ describe('ThreatIntelSupplyService', () => {
   it('does not call getFieldMapping (410 on serverless) when evaluating the hard-gate', async () => {
     expect((await createService().evaluateHardGate(request)).ok).toBe(true);
     expect(esClient.indices.getFieldMapping).not.toHaveBeenCalled();
-    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: '.kibana-threat-reports' });
+    expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({
+      index: '.kibana-threat-reports',
+      expand_wildcards: ['open', 'hidden'],
+    });
+  });
+
+  it('reads the reports mapping once per hard-gate evaluation', async () => {
+    await createService().evaluateHardGate(request);
+    expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
   });
 
   it('returns embedding_endpoint_unavailable when a semantic field has no inference_id', async () => {

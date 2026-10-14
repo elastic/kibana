@@ -241,3 +241,11 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
+export {
+  REQUIRED_REPORT_SEMANTIC_FIELDS,
+  THREAT_REPORTS_GET_MAPPING_PARAMS,
+  THREAT_REPORTS_INDEX,
+  getReportEmbeddingEndpointIds,
+  getSemanticTextInferenceId,
+  isReportsIndexManaged,
+} from './threat_intel_mapping';

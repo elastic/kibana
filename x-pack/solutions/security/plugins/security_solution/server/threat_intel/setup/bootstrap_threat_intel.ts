@@ -7,12 +7,12 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { REQUIRED_REPORT_SEMANTIC_FIELDS, getSemanticTextInferenceId } from '@kbn/alertzero-common';
 import {
   THREAT_REPORTS_INDEX,
   THREAT_INTEL_SOURCES_INDEX,
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
 } from '../../../common/threat_intel';
-import { getSemanticTextInferenceId } from '../lib/semantic_text_mapping';
 import { installIndexTemplates } from './index_templates';
 import { seedDefaultSources, type SeedDefaultSourcesResult } from './seed_default_sources';
 
@@ -57,8 +57,6 @@ const withElasticsearchRetry = async <T>(
 
   throw lastError ?? new Error(`${label} failed`);
 };
-
-const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
 
 /** Verifies the effective endpoints used by required report-content fields. */
 const checkReportSemanticTextEndpoints = async (
