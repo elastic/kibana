@@ -150,5 +150,15 @@ export const agentFormSchema = z.object({
     connector_ids: z.array(z.string()).optional(),
     ai_indices: z.array(z.string()).optional(),
     subagent_ids: z.array(z.string()).default([]),
+    approvals: z
+      .object({
+        auto_approved_apis: z
+          .object({
+            elasticsearch: z.array(z.string()).optional(),
+            kibana: z.array(z.string()).optional(),
+          })
+          .optional(),
+      })
+      .optional(),
   }),
 });
