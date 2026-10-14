@@ -24,7 +24,7 @@ import {
 } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
-import { EntityStoreAccessError, getEntityRecordsForMode } from '../utils/check_entity_exists';
+import { EntityStoreAccessError, getEntityRecords } from '../utils/check_entity_exists';
 import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
@@ -135,7 +135,7 @@ export const registerAnomalySummaryRoutes = ({
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
           // In `resolved` mode this is the whole resolution group, target first.
-          const entityRecords = await getEntityRecordsForMode({
+          const entityRecords = await getEntityRecords({
             crudClient: entityStoreCrudClient,
             esClient,
             entityId,
@@ -262,7 +262,7 @@ export const registerAnomalySummaryRoutes = ({
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
 
           // In `resolved` mode this is the whole resolution group, target first.
-          const entityRecords = await getEntityRecordsForMode({
+          const entityRecords = await getEntityRecords({
             crudClient: entityStoreCrudClient,
             esClient,
             entityId,

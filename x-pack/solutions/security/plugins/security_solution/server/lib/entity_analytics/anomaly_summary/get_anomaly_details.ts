@@ -59,10 +59,8 @@ const mapToAnomalySummaryEntry = (
 });
 
 interface GetEntityAnomaliesParams {
-  /** Entity ids covered by the request (target first, then any resolution-group aliases). */
   entityIds: string[];
   entityType: EntityType;
-  /** Entity-store records matching `entityIds`. */
   entityRecords: Entity[];
   esClient: ElasticsearchClient;
   fromMs?: number;

@@ -10,7 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetAnomalyOverview
       summary: Get anomaly overview for an entity
-      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
+      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
       parameters:
         - name: entity_type
           in: path
@@ -76,7 +76,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetAnomalySummary
       summary: Get anomaly summary for an entity
-      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group (the target plus the entities resolved to it) is combined as if it were one entity.
+      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
       parameters:
         - name: entity_type
           in: path
@@ -183,14 +183,14 @@ components:
     AnomalyEntityMode:
       type: string
       enum: [single, resolved]
-      default: single
-      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group), returning their anomalies together as if they were one entity.
+      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
 
     AnomalySummaryRequestBody:
       type: object
       properties:
         mode:
           $ref: '#/components/schemas/AnomalyEntityMode'
+          default: single
         page:
           type: integer
           minimum: 1
@@ -387,6 +387,7 @@ components:
       properties:
         mode:
           $ref: '#/components/schemas/AnomalyEntityMode'
+          default: single
         from:
           type: integer
           format: int64

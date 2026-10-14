@@ -38,14 +38,14 @@ export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
 /**
  * Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group), returning their anomalies together as if they were one entity.
  */
-export const AnomalyEntityMode = lazySchema(() => z.enum(['single', 'resolved']).default('single'));
+export const AnomalyEntityMode = lazySchema(() => z.enum(['single', 'resolved']));
 export type AnomalyEntityMode = z.infer<typeof AnomalyEntityMode>;
 export type AnomalyEntityModeEnum = typeof AnomalyEntityMode.enum;
 export const AnomalyEntityModeEnum = AnomalyEntityMode.enum;
 
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
-    mode: AnomalyEntityMode.optional(),
+    mode: AnomalyEntityMode.optional().default('single'),
     /**
      * Page number (1-indexed)
      */
@@ -227,7 +227,7 @@ export type AnomalySummaryResponse = z.infer<typeof AnomalySummaryResponse>;
 
 export const AnomalyOverviewRequestBody = lazySchema(() =>
   z.object({
-    mode: AnomalyEntityMode.optional(),
+    mode: AnomalyEntityMode.optional().default('single'),
     /**
      * Start time as epoch milliseconds; defaults to now-30d when omitted
      */

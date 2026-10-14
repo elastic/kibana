@@ -20,6 +20,15 @@ interface CheckEntityExistsParams {
   entityId: string;
   entityType: EntityType;
 }
+
+type ListEntityRecordsParams = Pick<CheckEntityExistsParams, 'crudClient' | 'esClient'> & {
+  filter: QueryDslQueryContainer[];
+  size: number;
+};
+
+interface GetEntityRecordsParams extends CheckEntityExistsParams {
+  mode?: EntityViewMode;
+}
 export class EntityStoreAccessError extends Error {
   constructor(message = 'Insufficient privileges to access feature') {
     super(message);
@@ -28,19 +37,18 @@ export class EntityStoreAccessError extends Error {
 }
 
 /**
- * Lists entity-store records matching `filter`, surfacing missing read access as
- * {@link EntityStoreAccessError}. For hidden indices, ES silently returns empty results when the
- * user lacks read access (rather than 403), so index privileges are checked explicitly first.
+ * Lists entity store records using the provided `filter` and `size`,
+ *
+ * For hidden indices, ES silently returns empty results when the user lacks
+ * read access (rather than 403), so we check index privileges explicitly
+ * before querying to ensure "no access" surfaces as EntityStoreAccessError.
  */
 const listEntityRecords = async ({
   crudClient,
   esClient,
   filter,
   size,
-}: Pick<CheckEntityExistsParams, 'crudClient' | 'esClient'> & {
-  filter: QueryDslQueryContainer[];
-  size: number;
-}): Promise<Entity[]> => {
+}: ListEntityRecordsParams): Promise<Entity[]> => {
   const latestIndex = await crudClient.latestIndexName();
   const { has_all_requested: hasRead } = await esClient.security.hasPrivileges({
     index: [{ names: [latestIndex], privileges: ['read'] }],
@@ -84,28 +92,28 @@ export const checkEntityExists = async ({
   return entities[0] ?? null;
 };
 
-interface GetEntityRecordsForModeParams extends CheckEntityExistsParams {
-  mode?: EntityViewMode;
-}
-
 /**
  * Entity records the given EUID covers in `mode`: the target record first, followed (in `resolved`
  * mode) by every record resolved to it, i.e. its resolution group. Empty when the target itself is
  * missing — aliases never stand in for the target.
  */
-export const getEntityRecordsForMode = async ({
+export const getEntityRecords = async ({
   crudClient,
   esClient,
   entityId,
   entityType,
   mode = 'single',
-}: GetEntityRecordsForModeParams): Promise<Entity[]> => {
+}: GetEntityRecordsParams): Promise<Entity[]> => {
+  const target = await checkEntityExists({ crudClient, esClient, entityId, entityType });
+  if (!target) {
+    return [];
+  }
   if (mode !== 'resolved') {
-    const entity = await checkEntityExists({ crudClient, esClient, entityId, entityType });
-    return entity ? [entity] : [];
+    return [target];
   }
 
-  const entities = await listEntityRecords({
+  // Get any entities that resolve to this entity
+  const resolvedEntities = await listEntityRecords({
     crudClient,
     esClient,
     filter: [
@@ -114,10 +122,5 @@ export const getEntityRecordsForMode = async ({
     ],
     size: RESOLVED_MODE_MAX_RECORDS,
   });
-
-  const target = entities.find((entity) => entity.entity?.id === entityId);
-  if (!target) {
-    return [];
-  }
-  return [target, ...entities.filter((entity) => entity !== target)];
+  return [target, ...resolvedEntities.filter((entity) => entity.entity?.id !== entityId)];
 };

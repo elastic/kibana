@@ -42,7 +42,7 @@ export const makeHit = (
     typical?: number[];
     sort?: unknown[];
     noSource?: boolean;
-    noEntityId?: boolean;
+    matchedQueries?: string[];
     detectorFunction?: string;
   } = {}
 ) => {
@@ -59,9 +59,10 @@ export const makeHit = (
     typical = [1],
     sort = [timestamp, jobId, detectorIndex],
     noSource = false,
-    noEntityId = false,
     detectorFunction = 'rare',
   } = overrides;
+  // Default to the hit's own entity id; pass `matchedQueries: undefined` to omit the field.
+  const matchedQueries = 'matchedQueries' in overrides ? overrides.matchedQueries : [entityId];
 
   return {
     _id: id ?? 'hit-1',
@@ -87,7 +88,7 @@ export const makeHit = (
           actual,
           typical,
         },
-    fields: noEntityId ? {} : { entity_id: [entityId] },
+    ...(matchedQueries ? { matched_queries: matchedQueries } : {}),
     sort,
   };
 };

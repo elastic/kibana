@@ -7,26 +7,58 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 /**
- * Identity filter matching source documents of any of the given entity-store records (e.g. a
- * resolution group). One record yields its EUID filter unchanged; several are OR-ed in a
- * `bool.should`. Records without enough identity fields are skipped; `undefined` when none qualify.
+ * Build a DSL filter matching documents of any of the given entity records, or `undefined` when
+ * none of the records carries the identity fields needed to build one.
+ *
+ * A single record's filter is returned as-is. When several records are OR'd together, each one is
+ * a named query (`_name` = `entity.id`) so Elasticsearch reports which record(s) a hit belongs to
+ * via `hit.matched_queries`; see {@link getMatchedEntityId}.
  */
 export const buildEntitiesFilter = (
   entityType: EntityType,
   entityRecords: Entity[]
 ): QueryDslQueryContainer | undefined => {
+  const definition = getBuiltInEntityDefinition(entityType);
   const filters = entityRecords.flatMap((record) => {
-    const filter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, record);
-    return filter ? [filter] : [];
+    const filter = euid.dsl.getEuidFilterBasedOnEntityRecord(definition, record);
+    return filter ? [{ filter, entityId: record.entity?.id }] : [];
   });
+
   if (filters.length === 0) {
     return undefined;
   }
+  // Single record, return its filter directly.
   if (filters.length === 1) {
-    return filters[0];
+    return filters[0].filter;
   }
-  return { bool: { should: filters, minimum_should_match: 1 } };
+
+  // Multiple records, return a named query so we can associate hits with the corresponding entity IDs.
+  return {
+    bool: {
+      should: filters.map(({ filter, entityId }) =>
+        entityId ? { bool: { filter: [filter], _name: entityId } } : filter
+      ),
+      minimum_should_match: 1,
+    },
+  };
+};
+
+/**
+ * Pick the entity a hit belongs to from its `matched_queries`, preferring the earliest of
+ * `entityIds` (the target entity comes first) when several records matched.
+ */
+export const getMatchedEntityId = (
+  matchedQueries: string[] | Record<string, number> | undefined,
+  entityIds: string[]
+): string | undefined => {
+  if (!matchedQueries) {
+    return undefined;
+  }
+  const matched = new Set(
+    Array.isArray(matchedQueries) ? matchedQueries : Object.keys(matchedQueries)
+  );
+  return entityIds.find((entityId) => matched.has(entityId));
 };

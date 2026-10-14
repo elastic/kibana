@@ -10,7 +10,7 @@ import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import {
   checkEntityExists,
   EntityStoreAccessError,
-  getEntityRecordsForMode,
+  getEntityRecords,
 } from './check_entity_exists';
 import {
   RESOLVED_MODE_MAX_RECORDS,
@@ -127,7 +127,7 @@ describe('checkEntityExists', () => {
   });
 });
 
-describe('getEntityRecordsForMode', () => {
+describe('getEntityRecords', () => {
   const listEntities = jest.fn();
   const latestIndexName = jest.fn();
   const hasPrivileges = jest.fn();
@@ -152,7 +152,7 @@ describe('getEntityRecordsForMode', () => {
     it('looks up the target record only and defaults to single mode', async () => {
       listEntities.mockResolvedValue({ entities: [target] });
 
-      const result = await getEntityRecordsForMode({
+      const result = await getEntityRecords({
         crudClient,
         esClient,
         entityId: 'host:target',
@@ -172,7 +172,7 @@ describe('getEntityRecordsForMode', () => {
     it('returns an empty list when the target is missing', async () => {
       listEntities.mockResolvedValue({ entities: [] });
 
-      const result = await getEntityRecordsForMode({
+      const result = await getEntityRecords({
         crudClient,
         esClient,
         entityId: 'host:missing',
@@ -185,10 +185,16 @@ describe('getEntityRecordsForMode', () => {
   });
 
   describe('resolved mode', () => {
-    it('queries the target and every record resolved to it in one request', async () => {
-      listEntities.mockResolvedValue({ entities: [target] });
+    const mockTargetAndGroup = (targetResult: unknown[], groupResult: unknown[]) => {
+      listEntities.mockImplementation(async ({ size }: { size: number }) => ({
+        entities: size === 1 ? targetResult : groupResult,
+      }));
+    };
 
-      await getEntityRecordsForMode({
+    it('runs a target lookup followed by a resolution group query', async () => {
+      mockTargetAndGroup([target], [target]);
+
+      await getEntityRecords({
         crudClient,
         esClient,
         entityId: 'host:target',
@@ -196,6 +202,14 @@ describe('getEntityRecordsForMode', () => {
         mode: 'resolved',
       });
 
+      expect(listEntities).toHaveBeenCalledTimes(2);
+      expect(listEntities).toHaveBeenCalledWith({
+        filter: [
+          { term: { 'entity.id': 'host:target' } },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
+        size: 1,
+      });
       expect(listEntities).toHaveBeenCalledWith({
         filter: [
           {
@@ -214,9 +228,9 @@ describe('getEntityRecordsForMode', () => {
     });
 
     it('returns the target first followed by its aliases', async () => {
-      listEntities.mockResolvedValue({ entities: [aliasA, target, aliasB] });
+      mockTargetAndGroup([target], [aliasA, target, aliasB]);
 
-      const result = await getEntityRecordsForMode({
+      const result = await getEntityRecords({
         crudClient,
         esClient,
         entityId: 'host:target',
@@ -227,10 +241,24 @@ describe('getEntityRecordsForMode', () => {
       expect(result).toEqual([target, aliasA, aliasB]);
     });
 
-    it('returns an empty list when only aliases match but the target is missing', async () => {
-      listEntities.mockResolvedValue({ entities: [aliasA, aliasB] });
+    it('returns the target even when the group query omits it', async () => {
+      mockTargetAndGroup([target], [aliasA]);
 
-      const result = await getEntityRecordsForMode({
+      const result = await getEntityRecords({
+        crudClient,
+        esClient,
+        entityId: 'host:target',
+        entityType: 'host',
+        mode: 'resolved',
+      });
+
+      expect(result).toEqual([target, aliasA]);
+    });
+
+    it('returns an empty list when only aliases match but the target is missing', async () => {
+      mockTargetAndGroup([], [aliasA, aliasB]);
+
+      const result = await getEntityRecords({
         crudClient,
         esClient,
         entityId: 'host:target',
@@ -239,13 +267,14 @@ describe('getEntityRecordsForMode', () => {
       });
 
       expect(result).toEqual([]);
+      expect(listEntities).toHaveBeenCalledTimes(1);
     });
 
     it('throws EntityStoreAccessError when user lacks read privilege on the index', async () => {
       hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
       await expect(
-        getEntityRecordsForMode({
+        getEntityRecords({
           crudClient,
           esClient,
           entityId: 'host:target',

@@ -9,7 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
 import { buildEntitiesFilter } from './build_entities_filter';
-import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyHit, EnrichedAnomalyHit } from './types';
 import type { JobConfig } from './get_job_config';
@@ -87,8 +86,7 @@ interface BaselineAggType {
 interface QuerySharedOpts {
   anomaly: AnomalyHit;
   detector: MlDetector;
-  /** Human-readable entity label for log messages. */
-  entityId: string;
+  entityIdLabel: string;
   entityType: EntityType;
   esClient: ElasticsearchClient;
   fromMs?: number;
@@ -101,7 +99,7 @@ interface QuerySharedOpts {
 
 const fetchRareBaselineForAnomaly = async ({
   anomaly,
-  entityId,
+  entityIdLabel,
   entityFilter,
   esClient,
   fromMs,
@@ -113,7 +111,7 @@ const fetchRareBaselineForAnomaly = async ({
   try {
     if (!anomaly.byFieldName) {
       logger.warn(
-        `Cannot fetch rare baseline for anomaly without by_field_name (job: ${jobId}, entity: ${entityId})`
+        `Cannot fetch rare baseline for anomaly without by_field_name (job: ${jobId}, entity: ${entityIdLabel})`
       );
       return { ...anomaly, anomalousValue: anomaly.byFieldValue };
     }
@@ -172,7 +170,7 @@ const fetchRareBaselineForAnomaly = async ({
       anomalousValueCount: aggs?.anomaly?.doc_count ?? 0,
     };
   } catch (err) {
-    logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityId}: ${err}`);
+    logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityIdLabel}: ${err}`);
     return { ...anomaly, anomalousValue: anomaly.byFieldValue };
   }
 };
@@ -186,7 +184,7 @@ const defaultBaselineForAnomaly = ({ anomaly }: QuerySharedOpts): EnrichedAnomal
 const fetchTimeBaselineForAnomaly = async ({
   anomaly,
   detector,
-  entityId,
+  entityIdLabel,
   entityType,
   entityFilter,
   esClient,
@@ -271,17 +269,15 @@ const fetchTimeBaselineForAnomaly = async ({
       anomalousValueCount: aggs?.time_bucket?.doc_count ?? 0,
     };
   } catch (err) {
-    logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityId}: ${err}`);
+    logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityIdLabel}: ${err}`);
     return { ...anomaly };
   }
 };
 
 interface FetchBaselineBehaviorOpts {
   anomaly: AnomalyHit;
-  /** Entity ids covered by the baseline (target first, then any resolution-group aliases). */
   entityIds: string[];
   entityType: EntityType;
-  /** Entity-store records matching `entityIds`; the baseline spans documents of any of them. */
   entityRecords: Entity[];
   esClient: ElasticsearchClient;
   fromMs?: number;
@@ -303,20 +299,16 @@ export const fetchBaselineBehavior = async ({
   jobId,
   logger,
 }: FetchBaselineBehaviorOpts): Promise<EnrichedAnomalyHit> => {
-  const entityId = entityIds.join(', ');
+  const entityIdLabel = entityIds.join(', ');
   try {
     if (!jobConfig || jobConfig.sourceIndex.length === 0 || jobConfig.detectors.length === 0) {
       return anomaly;
     }
 
-    // const entityFilter = buildEntitiesFilter(entityType, entityRecords);
-    const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
-      getBuiltInEntityDefinition(entityType),
-      entityRecord
-    );
+    const entityFilter = buildEntitiesFilter(entityType, entityRecords);
     if (!entityFilter) {
       logger.warn(
-        `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity records lack identity fields`
+        `Cannot build entity filter for "${entityIdLabel}" (type: ${entityType}): entity records lack identity fields`
       );
       return anomaly;
     }
@@ -325,7 +317,7 @@ export const fetchBaselineBehavior = async ({
     const opts = {
       anomaly,
       detector,
-      entityId,
+      entityIdLabel,
       entityType,
       esClient,
       fromMs,
@@ -344,7 +336,9 @@ export const fetchBaselineBehavior = async ({
       return defaultBaselineForAnomaly(opts);
     }
   } catch (err) {
-    logger.warn(`Failed to fetch baseline behavior for job ${jobId}, entity ${entityId}: ${err}`);
+    logger.warn(
+      `Failed to fetch baseline behavior for job ${jobId}, entity ${entityIdLabel}: ${err}`
+    );
     return anomaly;
   }
 };

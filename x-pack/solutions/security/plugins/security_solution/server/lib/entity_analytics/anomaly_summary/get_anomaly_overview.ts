@@ -8,7 +8,6 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
 import { buildEntitiesFilter } from '../ml_anomaly_detection/build_entities_filter';
@@ -43,10 +42,8 @@ interface OverviewAggs {
 }
 
 interface GetEntityAnomalyOverviewParams {
-  /** Entity ids covered by the overview (target first, then any resolution-group aliases). */
   entityIds: string[];
   entityType: EntityType;
-  /** Entity-store records matching `entityIds`; anomalies of any of them are aggregated. */
   entityRecords: Entity[];
   fromMs?: number;
   toMs?: number;
@@ -141,11 +138,7 @@ export const getEntityAnomalyOverview = async ({
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
-  // const entityFilter = buildEntitiesFilter(entityType, entityRecords);
-  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
-    getBuiltInEntityDefinition(entityType),
-    entityRecord
-  );
+  const entityFilter = buildEntitiesFilter(entityType, entityRecords);
   if (!entityFilter) {
     logger.warn(
       `Cannot build entity filter for "${entityIds.join(

@@ -27,6 +27,7 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
 }));
 
 const mockEntityFilter = { term: { 'user.name': 'alice' } };
+const namedEntityFilter = { bool: { filter: [mockEntityFilter], _name: 'user:alice' } };
 
 let mockMlAnomalySearch: jest.Mock;
 let mockMl: MlPluginSetup;
@@ -107,13 +108,24 @@ describe('searchEntityAnomalies', () => {
       }),
       []
     );
+    expect(mockMlAnomalySearch.mock.calls[0][0].query.bool.should).toBeUndefined();
     expect(mockMlAnomalySearch).not.toHaveBeenCalledWith(
       expect.objectContaining({ runtime_mappings: expect.anything() }),
       expect.anything()
     );
   });
 
-  it('ORs the identity filters of every entity record in a resolution group', async () => {
+  it('attributes hits to the single entity when the query is unnamed', async () => {
+    mockMlAnomalySearch.mockResolvedValueOnce(
+      makeResponse([makeHit({ id: 'hit-1', matchedQueries: undefined })])
+    );
+
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    expect(result.hits.map(({ entityId }) => entityId)).toEqual(['user:alice']);
+  });
+
+  it('ORs the named identity filters of every entity record in a resolution group', async () => {
     const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
     const aliasFilter = { term: { 'user.name': 'alice.alias' } };
     const aliasRecord = { entity: { id: 'user:alice-alias' }, user: { name: 'alice.alias' } };
@@ -135,15 +147,54 @@ describe('searchEntityAnomalies', () => {
         query: {
           bool: {
             filter: expect.arrayContaining([
-              { bool: { should: [mockEntityFilter, aliasFilter], minimum_should_match: 1 } },
+              {
+                bool: {
+                  should: [
+                    namedEntityFilter,
+                    { bool: { filter: [aliasFilter], _name: 'user:alice-alias' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             ]),
           },
         },
       }),
       []
     );
-    // hits are attributed to the primary (first) entity id
-    expect(result.hits.every((hit) => hit.entityId === 'user:alice')).toBe(true);
+    expect(result.hits).toEqual([]);
+  });
+
+  it('attributes each hit to the entity record whose named filter it matched', async () => {
+    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    const aliasRecord = { entity: { id: 'user:alice-alias' }, user: { name: 'alice.alias' } };
+    euid.dsl.getEuidFilterBasedOnEntityRecord
+      .mockReturnValueOnce(mockEntityFilter)
+      .mockReturnValueOnce({ term: { 'user.name': 'alice.alias' } });
+    mockMlAnomalySearch.mockResolvedValueOnce(
+      makeResponse([
+        makeHit({ id: 'target-hit', matchedQueries: ['user:alice'] }),
+        makeHit({ id: 'alias-hit', matchedQueries: ['user:alice-alias'] }),
+        makeHit({ id: 'both-hit', matchedQueries: ['user:alice-alias', 'user:alice'] }),
+        makeHit({ id: 'unmatched-hit', matchedQueries: [] }),
+      ])
+    );
+
+    const result = await searchEntityAnomalies({
+      ...defaultOpts,
+      entityIds: ['user:alice', 'user:alice-alias'],
+      entityRecords: [mockEntityRecord, aliasRecord],
+      logger,
+      ml: mockMl,
+      soClient,
+    });
+
+    expect(result.hits.map(({ _id: id, entityId }) => [id, entityId])).toEqual([
+      ['target-hit', 'user:alice'],
+      ['alias-hit', 'user:alice-alias'],
+      ['both-hit', 'user:alice'],
+      ['unmatched-hit', 'user:alice'],
+    ]);
   });
 
   it('uses now-DEFAULT_ML_AD_LOOKBACK as the timestamp lower bound when fromMs is not provided', async () => {

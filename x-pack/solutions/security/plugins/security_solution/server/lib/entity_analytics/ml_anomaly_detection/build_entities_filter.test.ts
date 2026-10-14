@@ -6,24 +6,29 @@
  */
 
 import type { Entity } from '@kbn/entity-store/common';
-import { buildEntitiesFilter } from './build_entities_filter';
+import { buildEntitiesFilter, getMatchedEntityId } from './build_entities_filter';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     dsl: {
       getEuidFilterBasedOnEntityRecord: jest.fn(
-        (_type: string, record: { user?: { name?: string } }) =>
+        (_definition: unknown, record: { user?: { name?: string } }) =>
           record.user?.name ? { term: { 'user.name': record.user.name } } : undefined
       ),
     },
   },
+  getBuiltInEntityDefinition: jest.fn((entityType: string) => ({ type: entityType })),
 }));
 
-const record = (name?: string): Entity =>
+const record = (name?: string, { withId = true }: { withId?: boolean } = {}): Entity =>
   ({
-    entity: { id: `user:${name ?? 'unknown'}` },
+    entity: withId ? { id: `user:${name ?? 'unknown'}` } : undefined,
     user: name ? { name } : {},
   } as unknown as Entity);
+
+const namedFilter = (name: string) => ({
+  bool: { filter: [{ term: { 'user.name': name } }], _name: `user:${name}` },
+});
 
 describe('buildEntitiesFilter', () => {
   it('returns undefined when there are no records', () => {
@@ -34,18 +39,55 @@ describe('buildEntitiesFilter', () => {
     expect(buildEntitiesFilter('user', [record()])).toBeUndefined();
   });
 
-  it('returns the single filter unchanged for one record', () => {
+  it('returns the single filter unchanged and unnamed for one record', () => {
     expect(buildEntitiesFilter('user', [record('alice')])).toEqual({
       term: { 'user.name': 'alice' },
     });
   });
 
-  it('ORs the filters of several records and skips records without identity', () => {
+  it('ORs the named filters of several records and skips records without identity', () => {
     expect(buildEntitiesFilter('user', [record('alice'), record(), record('bob')])).toEqual({
       bool: {
-        should: [{ term: { 'user.name': 'alice' } }, { term: { 'user.name': 'bob' } }],
+        should: [namedFilter('alice'), namedFilter('bob')],
         minimum_should_match: 1,
       },
     });
+  });
+
+  it('leaves a record without entity id unnamed inside the OR', () => {
+    expect(
+      buildEntitiesFilter('user', [record('alice'), record('bob', { withId: false })])
+    ).toEqual({
+      bool: {
+        should: [namedFilter('alice'), { term: { 'user.name': 'bob' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('getMatchedEntityId', () => {
+  const entityIds = ['user:target', 'user:alias-1', 'user:alias-2'];
+
+  it('returns undefined when the hit has no matched queries', () => {
+    expect(getMatchedEntityId(undefined, entityIds)).toBeUndefined();
+    expect(getMatchedEntityId([], entityIds)).toBeUndefined();
+  });
+
+  it('returns the matched entity id', () => {
+    expect(getMatchedEntityId(['user:alias-2'], entityIds)).toBe('user:alias-2');
+  });
+
+  it('prefers the earliest entity id when several records matched', () => {
+    expect(getMatchedEntityId(['user:alias-2', 'user:alias-1'], entityIds)).toBe('user:alias-1');
+    expect(getMatchedEntityId(['user:alias-1', 'user:target'], entityIds)).toBe('user:target');
+  });
+
+  it('ignores names that are not known entity ids', () => {
+    expect(getMatchedEntityId(['something-else'], entityIds)).toBeUndefined();
+  });
+
+  it('accepts the scored object form of matched_queries', () => {
+    expect(getMatchedEntityId({ 'user:alias-1': 1 }, entityIds)).toBe('user:alias-1');
   });
 });
