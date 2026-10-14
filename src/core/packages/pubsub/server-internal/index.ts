@@ -8,4 +8,4 @@
  */
 
 export { PubSubService } from './src/pubsub_service';
-export type { InternalPubSubSetup } from './src/internal_contracts';
+export type { InternalPubSubSetup, InternalPubSubStart } from './src/internal_contracts';

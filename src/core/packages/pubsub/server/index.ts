@@ -9,4 +9,11 @@
 
 export { defineTopic } from './src/topic';
 export type { Topic } from './src/topic';
-export type { PubSubSetup } from './src/contracts';
+export type {
+  PubSubEvent,
+  PubSubHandler,
+  PubSubHandlerContext,
+  PubSubSetup,
+  PubSubStart,
+  PublishInput,
+} from './src/contracts';

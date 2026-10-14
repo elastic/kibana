@@ -334,6 +334,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     pubsub: {
       registerTopic: (topic) => deps.pubsub.registerTopic(plugin.name, topic),
+      subscribe: (topic, consumer, handler) =>
+        deps.pubsub.subscribe(plugin.name, topic, consumer, handler),
     },
     userStorage: {
       register: deps.userStorage.register,
@@ -439,6 +441,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    pubsub: {
+      publish: (topic, input, context) => deps.pubsub.publish(plugin.name, topic, input, context),
     },
     userStorage: {
       asScoped: deps.userStorage.asScoped,

@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Topic } from '@kbn/core-pubsub-server';
+import type {
+  PubSubEvent,
+  PubSubHandler,
+  PubSubHandlerContext,
+  PublishInput,
+  Topic,
+} from '@kbn/core-pubsub-server';
 
 /**
  * Setup contract consumed by the plugin context, which adds the calling plugin id.
@@ -17,4 +23,25 @@ import type { Topic } from '@kbn/core-pubsub-server';
  */
 export interface InternalPubSubSetup {
   registerTopic<TData>(pluginId: string, topic: Topic<TData>): void;
+  /** `consumer` is plugin-local; the service stores it as `${pluginId}.${consumer}`. */
+  subscribe<TData>(
+    pluginId: string,
+    topic: Topic<TData>,
+    consumer: string,
+    handler: PubSubHandler<TData>
+  ): void;
+}
+
+/**
+ * Start contract consumed by the plugin context, which adds the calling plugin id.
+ *
+ * @internal
+ */
+export interface InternalPubSubStart {
+  publish<TData>(
+    pluginId: string,
+    topic: Topic<TData>,
+    input: PublishInput<TData>,
+    context?: PubSubHandlerContext
+  ): Promise<PubSubEvent<TData>>;
 }
