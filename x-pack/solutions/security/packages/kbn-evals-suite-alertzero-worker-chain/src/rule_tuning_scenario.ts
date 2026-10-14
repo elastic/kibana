@@ -7,6 +7,7 @@
 
 import {
   TerminalExecutionStatuses,
+  isExecuteAsyncStepType,
   type ChildWorkflowExecutionItem,
   type WorkflowExecutionDto,
 } from '@kbn/workflows';
@@ -19,6 +20,8 @@ import { assertReviewConnector, assertRuleTuningIdentity } from './rule_tuning_i
 import { resolveWorkerWorkflowId, spacePath, type KbnRequestContext } from './worker_settings';
 
 export const RULE_TUNING_REVIEW_ID = 'system-security-rule-tuning-review';
+/** The sweep step that dispatches one review per candidate rule (rule_tuning_worker.yaml). */
+const REVIEW_DISPATCH_STEP_ID = 'run_review';
 export const TUNING_EDIT_ACTION_ID = 'system-alertzero-action-edit-rule';
 
 /** True when the proposal is a suppressing action (edit or exception) naming the seeded rule. */
@@ -122,22 +125,48 @@ export const runRuleTuningScenario = async (
         }
       }
       if (sweepExecutionId && !workflowExecutionId) {
-        const children = await request<ChildWorkflowExecutionItem[]>(
+        const sweep = await readExecution(sweepExecutionId);
+        // `/children` lists only SYNC `workflow.execute` children, so it never
+        // lists the `workflow.executeAsync` reviews this sweep fans out. The
+        // dispatch-step outputs are the channel that carries their ids — the same
+        // walk chain_runner.ts does for the attack-discovery chain.
+        const dispatchedIds: string[] = [];
+        for (const step of sweep.stepExecutions ?? []) {
+          const dispatchedId = (step.output as { executionId?: unknown } | undefined)?.executionId;
+          const isDispatch =
+            step.stepId === REVIEW_DISPATCH_STEP_ID || isExecuteAsyncStepType(step.stepType);
+          if (
+            isDispatch &&
+            typeof dispatchedId === 'string' &&
+            !dispatchedIds.includes(dispatchedId)
+          ) {
+            dispatchedIds.push(dispatchedId);
+          }
+        }
+        const syncChildren = await request<ChildWorkflowExecutionItem[]>(
           `/api/workflows/executions/${sweepExecutionId}/children`,
           'GET'
-        );
-        for (const child of children.filter((c) => c.workflowId === RULE_TUNING_REVIEW_ID)) {
-          const review = await readExecution(child.executionId);
-          if (review.concurrencyGroupKey === `rule-tuning-review-${input.ruleId}`) {
-            workflowExecutionId = child.executionId;
+        )
+          .then((children) => (Array.isArray(children) ? children : []))
+          .catch((): ChildWorkflowExecutionItem[] => []);
+        const candidates = [
+          ...dispatchedIds,
+          ...syncChildren
+            .filter((child) => child.workflowId === RULE_TUNING_REVIEW_ID)
+            .map((child) => child.executionId),
+        ];
+        for (const candidate of candidates) {
+          const review = await readExecution(candidate).catch(() => undefined);
+          if (
+            review?.workflowId === RULE_TUNING_REVIEW_ID &&
+            review.concurrencyGroupKey === `rule-tuning-review-${input.ruleId}`
+          ) {
+            workflowExecutionId = candidate;
             break;
           }
         }
-        if (!workflowExecutionId) {
-          const sweep = await readExecution(sweepExecutionId);
-          if (TerminalExecutionStatuses.includes(sweep.status)) {
-            throw new Error('Rule Tuning sweep ended without reviewing the seeded rule');
-          }
+        if (!workflowExecutionId && TerminalExecutionStatuses.includes(sweep.status)) {
+          throw new Error('Rule Tuning sweep ended without reviewing the seeded rule');
         }
       }
       if (workflowExecutionId) {
