@@ -48,7 +48,7 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
       isYAxisTitleVisible: false,
     },
     legend: {
-      isVisible: config.legend?.show || true,
+      isVisible: config.legend?.show ?? true,
       position: config.legend?.position || 'left',
       type: 'heatmap_legend',
     },
