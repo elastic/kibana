@@ -12,11 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataSource } from '@kbn/data-source';
 import { getRecommendedQueriesTemplates, shouldBeQuotedSource } from '@kbn/esql-language';
-import {
-  getInitialESQLQuery,
-  getSourceCommandFromESQLQuery,
-  splitIndexPatternSources,
-} from '@kbn/esql-utils';
+import { getInitialESQLQuery, getSourceCommandFromESQLQuery } from '@kbn/esql-utils';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -35,7 +31,12 @@ const quoteSourceIfNeeded = (source: string) =>
   shouldBeQuotedSource(source.replace(/:/g, '')) ? `"${source}"` : source;
 
 const getSources = (indexPattern: string) =>
-  splitIndexPatternSources(indexPattern).map(quoteSourceIfNeeded).join(',');
+  indexPattern
+    .split(',')
+    .map((source) => source.trim())
+    .filter(Boolean)
+    .map(quoteSourceIfNeeded)
+    .join(',');
 
 const getSourceCommand = (dataSource: DataSource): string => {
   const query =
