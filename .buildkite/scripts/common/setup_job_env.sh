@@ -22,7 +22,10 @@ source .buildkite/scripts/common/util.sh
     kibana-console-definitions-sync | \
     kibana-es-ql-grammar-sync | \
     kibana-opentelemetry-semantic-conventions-sync | \
-    kibana-scout-update-metadata)
+    kibana-purge-cloud-deployments | \
+    kibana-renovate-helper | \
+    kibana-scout-update-metadata | \
+    kibana-serverless-release-readiness)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
       ;;
     *)
