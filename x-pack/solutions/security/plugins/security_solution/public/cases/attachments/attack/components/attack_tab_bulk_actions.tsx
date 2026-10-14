@@ -6,22 +6,19 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import numeral from '@elastic/numeral';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getAttackDiscoveryMarkdown, getOriginalAlertIds } from '@kbn/elastic-assistant-common';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import {
   ATTACK_TAB_BULK_ACTIONS_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID,
+  ATTACK_TAB_BULK_ACTIONS_SELECT_ALL_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useAttackAssigneesContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
@@ -39,16 +36,33 @@ import type { AttackToAttach } from '..';
 /** The telemetry source every bulk action taken from this bar is attributed to. */
 const TELEMETRY_SOURCE = 'case_attachment_table';
 
-const TAKE_ACTION = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.cases.tab.bulkTakeActionButtonLabel',
-  { defaultMessage: 'Take action' }
+const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.cases.tab.bulkActionsAriaLabel',
+  { defaultMessage: 'Bulk actions' }
 );
 
-const getSelectedLabel = (attackCount: number): string =>
+/** Mirrors the alerts table's toolbar, where the count is the button rather than a label beside it. */
+const getSelectedLabel = (attackCountFormatted: string, attackCount: number): string =>
   i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectedAttacksLabel', {
-    defaultMessage: '{attackCount, plural, one {# attack selected} other {# attacks selected}}',
-    values: { attackCount },
+    defaultMessage:
+      'Selected {attackCountFormatted} {attackCount, plural, one {attack} other {attacks}}',
+    values: { attackCountFormatted, attackCount },
   });
+
+const getSelectAllLabel = (attackCountFormatted: string, attackCount: number): string =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.selectAllAttacksLabel', {
+    defaultMessage:
+      'Select all {attackCountFormatted} {attackCount, plural, one {attack} other {attacks}}',
+    values: { attackCountFormatted, attackCount },
+  });
+
+const CLEAR_SELECTION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.cases.tab.clearSelectionLabel',
+  { defaultMessage: 'Clear selection' }
+);
+
+/** Matches the alerts table toolbar, which lays its two controls out inline. */
+const containerStyles = { display: 'inline-block', position: 'relative' } as const;
 
 /** Names the whole selection where a single row names its attack. */
 const getSelectionTitle = (attackCount: number): string =>
@@ -73,6 +87,12 @@ export interface SelectedAttack {
 export interface AttackTabBulkActionsProps {
   /** The selected rows. The bar renders nothing while this is empty. */
   selectedAttacks: readonly SelectedAttack[];
+  /** Every row the grid is currently showing, which is what "select all" selects. */
+  totalAttacks: number;
+  /** True once the selection covers every row, which turns the select-all control into a clear. */
+  areAllAttacksSelected: boolean;
+  /** Selects every row, or clears the selection when they are all selected already. */
+  onToggleSelectAll: () => void;
   /** Called once a bulk action lands, so the grid can drop a selection it has already acted on. */
   onActionSuccess: () => void;
 }
@@ -119,9 +139,13 @@ const getAttackToAttach = (
  */
 export const AttackTabBulkActions = ({
   selectedAttacks,
+  totalAttacks,
+  areAllAttacksSelected,
+  onToggleSelectAll,
   onActionSuccess,
 }: AttackTabBulkActionsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
@@ -277,6 +301,23 @@ export const AttackTabBulkActions = ({
     ]
   );
 
+  const selectedLabel = useMemo(
+    () =>
+      getSelectedLabel(
+        numeral(selectedAttacks.length).format(defaultNumberFormat),
+        selectedAttacks.length
+      ),
+    [defaultNumberFormat, selectedAttacks.length]
+  );
+
+  const selectAllLabel = useMemo(
+    () =>
+      areAllAttacksSelected
+        ? CLEAR_SELECTION
+        : getSelectAllLabel(numeral(totalAttacks).format(defaultNumberFormat), totalAttacks),
+    [areAllAttacksSelected, defaultNumberFormat, totalAttacks]
+  );
+
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [
       { id: 0, items: menuItems },
@@ -293,46 +334,43 @@ export const AttackTabBulkActions = ({
   }
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      data-test-subj={ATTACK_TAB_BULK_ACTIONS_TEST_ID}
-      gutterSize="s"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued" size="xs">
-          {getSelectedLabel(selectedAttacks.length)}
-        </EuiText>
-      </EuiFlexItem>
+    <div style={containerStyles} data-test-subj={ATTACK_TAB_BULK_ACTIONS_TEST_ID}>
       {/* A selection allowed to do nothing leaves nothing to open. */}
       {menuItems.length > 0 ? (
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            anchorPosition="downLeft"
-            aria-label={TAKE_ACTION}
-            button={
-              <EuiButtonEmpty
-                data-test-subj={ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID}
-                iconSide="right"
-                iconType="arrowDown"
-                onClick={togglePopover}
-                size="xs"
-              >
-                {TAKE_ACTION}
-              </EuiButtonEmpty>
-            }
-            closePopover={closePopover}
-            id="attackTabBulkActionsPopover"
-            isOpen={isPopoverOpen}
-            panelPaddingSize="none"
-            panelProps={{ 'data-test-subj': ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID }}
-            repositionOnScroll
-          >
-            <EuiContextMenu initialPanelId={0} panels={panels} />
-          </EuiPopover>
-        </EuiFlexItem>
+        <EuiPopover
+          anchorPosition="upLeft"
+          aria-label={BULK_ACTIONS_ARIA_LABEL}
+          button={
+            <EuiButtonEmpty
+              color="primary"
+              data-test-subj={ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID}
+              iconSide="right"
+              iconType="chevronSingleDown"
+              onClick={togglePopover}
+              size="xs"
+            >
+              {selectedLabel}
+            </EuiButtonEmpty>
+          }
+          closePopover={closePopover}
+          id="attackTabBulkActionsPopover"
+          isOpen={isPopoverOpen}
+          panelPaddingSize="none"
+          panelProps={{ 'data-test-subj': ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID }}
+          repositionOnScroll
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </EuiPopover>
       ) : null}
-    </EuiFlexGroup>
+      <EuiButtonEmpty
+        data-test-subj={ATTACK_TAB_BULK_ACTIONS_SELECT_ALL_TEST_ID}
+        iconType={areAllAttacksSelected ? 'cross' : 'pagesSelect'}
+        onClick={onToggleSelectAll}
+        size="xs"
+      >
+        {selectAllLabel}
+      </EuiButtonEmpty>
+    </div>
   );
 };
 
