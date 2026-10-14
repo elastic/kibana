@@ -146287,7 +146287,7 @@ components:
               type: number
             transactionName:
               description: Filter the rule to apply to a specific transaction name.
-              maxLength: 1024
+              maxLength: 10000
               type: string
             transactionType:
               description: Filter the rule to apply to a specific transaction type.
@@ -146454,7 +146454,7 @@ components:
             threshold:
               type: number
             transactionName:
-              maxLength: 1024
+              maxLength: 10000
               type: string
             transactionType:
               maxLength: 1024
