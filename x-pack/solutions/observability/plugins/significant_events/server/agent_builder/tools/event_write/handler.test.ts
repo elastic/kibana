@@ -959,7 +959,7 @@ describe('eventsWriteBulkHandler — how a version is written', () => {
 
     expect(result).toMatchObject({
       written: false,
-      reason: 'bulk_error',
+      reason: 'superseded',
       error: { type: 'superseded_write', reason: expect.stringContaining('Do not retry') },
     });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
