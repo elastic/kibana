@@ -188,12 +188,17 @@ describe('validatePackageUpload', () => {
       ).resolves.toBeUndefined();
     });
 
-    it('stays enforced when skipUploadPackageValidation is set', async () => {
+    // Registry packages such as ti_greynoise legitimately source `.alerts-security.alerts-*`,
+    // and their maintainers upload them from elastic-package stacks, which set this flag. The
+    // unconditional control is the caller-bound transform identity, not this check.
+    it('is skipped when skipUploadPackageValidation is set', async () => {
       mockedGetConfig.mockReturnValue({ internal: { skipUploadPackageValidation: true } });
 
-      await expectUploadRejected(
-        transformUpload('source:\n  index: [".fleet-policies"]\ndest:\n  index: "my_index"\n')
-      );
+      await expect(
+        validateUpload(
+          transformUpload('source:\n  index: [".fleet-policies"]\ndest:\n  index: "my_index"\n')
+        )
+      ).resolves.toBeUndefined();
     });
 
     // `isTransform` keys off the third path segment alone, so these paths are installed as
@@ -206,6 +211,33 @@ describe('validatePackageUpload', () => {
     ])('rejects a restricted index in a transform at %s', async (path) => {
       await expectUploadRejected(
         transformUpload('source:\n  index: [".fleet-policies"]\ndest:\n  index: "my_index"\n', path)
+      );
+    });
+
+    // The legacy install path parses with JSON.parse, which resolves a duplicate key to the
+    // last value, while the yaml parser rejects the document outright. Screening only the yaml
+    // result would skip this file and let the installer see `.fleet-policies`.
+    it('rejects a restricted index hidden behind a duplicate key in a JSON spec', async () => {
+      await expectUploadRejected(
+        transformUpload(
+          '{"source":{"index":["ok-index"]},"source":{"index":[".fleet-policies"]},"dest":{"index":"attacker"}}',
+          'my_integration-1.0.0/elasticsearch/transform/policies/default.json'
+        )
+      );
+    });
+
+    it('rejects a transform asset that neither parser accepts', async () => {
+      await expectUploadRejected(transformUpload('source:\n\tindex: ["my_index"]\n'));
+    });
+
+    it.each([
+      '- .fleet-policies',
+      '--.fleet-policies',
+      'my_index,.fleet-policies',
+      '- <.fleet-{now/d}>',
+    ])('rejects the restricted index expression %p', async (index) => {
+      await expectUploadRejected(
+        transformUpload(`source:\n  index: ["${index}"]\ndest:\n  index: "my_index"\n`)
       );
     });
   });

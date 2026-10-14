@@ -87,16 +87,21 @@ export async function validatePackageUpload({
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
 }): Promise<void> {
-  // Deliberately ahead of the escape hatch below: an uploaded transform that targets a
-  // restricted index is a privilege-escalation vector, not a packaging-convention issue, so
-  // it stays blocked even on stacks that opt out of upload validation.
-  await assertNoRestrictedTransformIndices(paths, archiveIterator);
-
   // Test/development escape hatch (e.g. elastic-package stacks, FTR suites): skip
   // every upload validation so uploads behave as if this validator did not exist.
   if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
     return;
   }
+
+  // Subject to the escape hatch above, like every other check here. Registry-authored packages
+  // legitimately source dot-prefixed indices — `ti_greynoise` and `ti_google_threat_intelligence`
+  // read `.alerts-security.alerts-*` — and their maintainers upload those archives from
+  // elastic-package stacks, which set this flag. Keeping the check unconditional would break
+  // that workflow with no override. The control this check backstops, binding transform identity
+  // to the installing user, has no escape hatch and holds on those stacks too; this is defense in
+  // depth against a Fleet admin later re-binding a deferred transform through the reauthorize
+  // flow, so a stack that has explicitly opted out of upload validation can opt out of it.
+  await assertNoRestrictedTransformIndices(paths, archiveIterator);
 
   assertValidUploadPackageName(packageInfo.name);
   assertNoForbiddenArchiveAssets(paths);
@@ -144,22 +149,58 @@ function assertNoForbiddenArchiveAssets(paths: string[]): void {
 }
 
 /**
- * Reduce an index expression to the bare index/alias pattern so a prefix check cannot be
- * evaded. `-` marks an exclusion, `<...>` wraps date math, and `<cluster>:<index>` targets a
- * remote cluster — each can still name a restricted index on this cluster.
+ * Reduce an index expression to the bare index/alias patterns so a prefix check cannot be
+ * evaded. One expression can carry several comma-separated patterns; `-` marks an exclusion,
+ * `<...>` wraps date math, and `<cluster>:<index>` targets a remote cluster — each can still
+ * name a restricted index on this cluster. Whitespace is stripped after every prefix because
+ * the prefix test only means something against a trimmed name.
  */
-function normalizeIndexExpression(expression: string): string {
-  let normalized = expression.trim();
-  if (normalized.startsWith('-')) {
-    normalized = normalized.slice(1);
+function normalizeIndexExpressions(expression: string): string[] {
+  return expression
+    .split(',')
+    .map((pattern) => {
+      let normalized = pattern.trim();
+      while (normalized.startsWith('-')) {
+        normalized = normalized.slice(1).trim();
+      }
+      if (isRemoteIndexExpression(normalized)) {
+        normalized = normalized.slice(normalized.indexOf(':') + 1).trim();
+      }
+      if (normalized.startsWith('<')) {
+        normalized = normalized.slice(1).trim();
+      }
+      return normalized;
+    })
+    .filter((pattern) => pattern.length > 0);
+}
+
+/**
+ * Parse a transform spec every way the installer might. The yml install path parses with the
+ * `yaml` package and the legacy path parses with `JSON.parse`, and the two disagree: `yaml`
+ * rejects a duplicate map key that `JSON.parse` silently resolves to the last value. Screening
+ * every result that parses means the validator can never see less than the installer will.
+ *
+ * Returns an empty array only when neither parser accepts the file, which the caller treats as
+ * a rejection rather than a skip — the installer parses these same files unconditionally and
+ * would throw on them anyway, and skipping is how a parser differential becomes a bypass.
+ */
+function parseTransformSpecs(buffer: Buffer): unknown[] {
+  const raw = buffer.toString('utf-8');
+  const parsed: unknown[] = [];
+
+  try {
+    parsed.push(parse(raw));
+  } catch {
+    // Not valid YAML; JSON.parse may still accept it.
   }
-  if (isRemoteIndexExpression(normalized)) {
-    normalized = normalized.slice(normalized.indexOf(':') + 1);
+
+  try {
+    parsed.push(JSON.parse(raw));
+  } catch {
+    // Not valid JSON; the YAML result above may still cover it.
   }
-  if (normalized.startsWith('<')) {
-    normalized = normalized.slice(1);
-  }
-  return normalized;
+
+  return parsed;
 }
 
 function collectTransformIndexExpressions(content: unknown): string[] {
@@ -233,24 +274,28 @@ async function assertNoRestrictedTransformIndices(
         return;
       }
 
-      let content: unknown;
-      try {
-        // `parse` from the yaml package reads JSON too, since JSON is a subset of YAML.
-        content = parse(buffer.toString('utf-8'));
-      } catch {
-        // Malformed spec; the install will fail later with a more specific parse error.
-        return;
+      const contents = parseTransformSpecs(buffer);
+      if (contents.length === 0) {
+        throw new PackageInvalidArchiveError(
+          i18n.translate('xpack.fleet.packageUpload.unparsableTransformSpec', {
+            defaultMessage:
+              'Uploaded package contains a transform asset in "{path}" that could not be parsed as YAML or JSON.',
+            values: { path },
+          })
+        );
       }
 
-      for (const expression of collectTransformIndexExpressions(content)) {
-        if (normalizeIndexExpression(expression).startsWith('.')) {
-          throw new PackageInvalidArchiveError(
-            i18n.translate('xpack.fleet.packageUpload.restrictedTransformIndex', {
-              defaultMessage:
-                'Uploaded package contains a transform in "{path}" that targets the restricted index "{index}". Transforms in uploaded packages cannot read from or write to system indices.',
-              values: { path, index: expression },
-            })
-          );
+      for (const content of contents) {
+        for (const expression of collectTransformIndexExpressions(content)) {
+          if (normalizeIndexExpressions(expression).some((p) => p.startsWith('.'))) {
+            throw new PackageInvalidArchiveError(
+              i18n.translate('xpack.fleet.packageUpload.restrictedTransformIndex', {
+                defaultMessage:
+                  'Uploaded package contains a transform in "{path}" that targets the restricted index "{index}". Transforms in uploaded packages cannot read from or write to system indices.',
+                values: { path, index: expression },
+              })
+            );
+          }
         }
       }
     },

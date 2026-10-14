@@ -88,7 +88,7 @@ interface TransformInstallation extends TransformModuleBase {
 }
 
 const untrustedTransformAuthErrorMessage = (installSource: InstallSource) =>
-  `Cannot install transforms from a ${installSource} package: transforms in caller-authored packages run with the installing user's Elasticsearch privileges, and a secondary authorization API key could not be created. This requires security to be enabled and the request to carry credentials Kibana can grant an API key from. A reinstall of an already-installed ${installSource} package hits this when it runs without a user request, such as from a background task — retry it from an authenticated request.`;
+  `Cannot install transforms from a ${installSource} package: they must run with the installing user's Elasticsearch privileges, but no secondary authorization API key could be granted for this request. Retry from an authenticated user request — a reinstall triggered by a background task has none.`;
 
 const installLegacyTransformsAssets = async (
   packageInstallContext: PackageInstallContext,
