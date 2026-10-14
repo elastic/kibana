@@ -97,6 +97,7 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
@@ -1147,6 +1148,37 @@ export class WorkflowsManagementApi {
       if (!(await access.checkAccess(workflow, 'read', options?.request))) return null;
     }
     return execution;
+  }
+
+  /**
+   * The status of each execution the caller can read, in one read. An id that is missing, in
+   * another space, or whose workflow the caller cannot read is left out of the result.
+   */
+  public async getWorkflowExecutionStatuses(
+    workflowExecutionIds: string[],
+    spaceId: string,
+    options: { request: KibanaRequest }
+  ): Promise<WorkflowExecutionStatusItem[]> {
+    const executions = await this.workflowsService.getWorkflowExecutionStatuses(
+      workflowExecutionIds,
+      spaceId
+    );
+    if (executions.length === 0) {
+      return [];
+    }
+    const workflows = await this.workflowsService.getWorkflowsByIds(
+      [...new Set(executions.map(({ workflowId }) => workflowId).filter(Boolean))],
+      spaceId,
+      { includeDeleted: true }
+    );
+    const access = await this.workflowsService.getAccessControl();
+    const permissions = await Promise.all(
+      workflows.map((workflow) => access.permissions(workflow, options.request))
+    );
+    const hiddenIds = new Set(
+      workflows.filter((_, index) => !permissions[index].read).map(({ id }) => id)
+    );
+    return executions.filter(({ workflowId }) => !hiddenIds.has(workflowId));
   }
 
   public async getChildWorkflowExecutions(

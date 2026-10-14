@@ -113,6 +113,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflows: jest.fn(),
       getWorkflowsSourceByIds: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
+      getWorkflowExecutionStatuses: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
@@ -544,6 +545,64 @@ describe('WorkflowsManagementApi', () => {
       steps: z.array(z.any()).optional(),
     });
   };
+
+  describe('getWorkflowExecutionStatuses', () => {
+    const status = (id: string, workflowId: string) => ({
+      id,
+      workflowId,
+      status: ExecutionStatus.CANCELLED,
+    });
+
+    it('should leave out the executions of workflows the caller cannot read, checked in one batch', async () => {
+      const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+      if (!workflow) throw new Error('Missing workflow fixture');
+      mockWorkflowsService.getWorkflowExecutionStatuses.mockResolvedValue([
+        status('run-1', 'workflow-123'),
+        status('run-2', 'private-hidden'),
+        status('run-3', 'workflow-123'),
+        status('run-4', 'hard-deleted'),
+      ]);
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        workflow,
+        {
+          ...workflow,
+          id: 'private-hidden',
+          access_control: { access_mode: 'private', entries: [] },
+        },
+      ]);
+      const access = await mockWorkflowsService.getAccessControl();
+      jest.mocked(access.permissions).mockImplementation(async ({ access_control }) => ({
+        read: access_control?.access_mode !== 'private',
+        execute: false,
+        edit: false,
+        manage: false,
+      }));
+
+      const result = await api.getWorkflowExecutionStatuses(
+        ['run-1', 'run-2', 'run-3', 'run-4'],
+        'default',
+        { request: mockRequest }
+      );
+
+      expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
+        ['workflow-123', 'private-hidden', 'hard-deleted'],
+        'default',
+        { includeDeleted: true }
+      );
+      // A hard-deleted workflow has no ACL left to deny, as in `getWorkflowExecution`.
+      expect(result.map(({ id }) => id)).toEqual(['run-1', 'run-3', 'run-4']);
+    });
+
+    it('should not look up workflows when no execution was found', async () => {
+      mockWorkflowsService.getWorkflowExecutionStatuses.mockResolvedValue([]);
+
+      await expect(
+        api.getWorkflowExecutionStatuses(['missing'], 'default', { request: mockRequest })
+      ).resolves.toEqual([]);
+      expect(mockWorkflowsService.getWorkflowsByIds).not.toHaveBeenCalled();
+    });
+  });
 
   it('returns remaining execution data when hard deletion removed the workflow ACL', async () => {
     const execution = await mockWorkflowsService.getWorkflowExecution('run-1', 'default');
