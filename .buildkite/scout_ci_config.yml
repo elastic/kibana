@@ -126,6 +126,7 @@ plugins:
 packages:
   enabled:
     - core
+    - dev
     - kbn-scout
     - kbn-security-hardening
     - kbn-streamlang-tests

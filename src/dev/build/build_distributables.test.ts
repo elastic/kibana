@@ -24,7 +24,6 @@ jest.mock('./lib/version_info', () => ({
 
 jest.mock('./tasks', () => {
   const actual = jest.requireActual('./tasks') as Record<string, unknown>;
-  const noopTaskRun = jest.fn().mockResolvedValue(undefined);
   const mockBundleTaskRun = jest.fn().mockResolvedValue(undefined);
 
   const result: Record<string, unknown> = {};
@@ -39,7 +38,7 @@ jest.mock('./tasks', () => {
     ) {
       result[key] = {
         ...(value as object),
-        run: key === 'BuildBundles' ? mockBundleTaskRun : noopTaskRun,
+        run: key === 'BuildBundles' ? mockBundleTaskRun : jest.fn().mockResolvedValue(undefined),
       };
     } else {
       result[key] = value;
@@ -82,6 +81,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
   versionQualifier: undefined,
   targetAllPlatforms: false,
   targetServerlessPlatforms: false,
+  skipFipsProvider: false,
   skipServerless: false,
   tarZstd: false,
   withExamplePlugins: false,
@@ -91,12 +91,39 @@ const minimalGenericFoldersOptions: BuildOptions = {
 
 describe('buildDistributables', () => {
   beforeEach(() => {
-    mockBundleTaskRun.mockClear();
+    jest.clearAllMocks();
   });
 
   it('runs BuildBundles once when creating generic folders', async () => {
     await buildDistributables(log, minimalGenericFoldersOptions);
 
     expect(mockBundleTaskRun).toHaveBeenCalledTimes(1);
+    expect(Tasks.BundleFipsProvider.run).not.toHaveBeenCalled();
+  });
+
+  it('bundles the provider when creating platform folders', async () => {
+    await buildDistributables(log, {
+      ...minimalGenericFoldersOptions,
+      createGenericFolders: false,
+      createPlatformFolders: true,
+      targetAllPlatforms: true,
+    });
+
+    expect(Tasks.BundleFipsProvider.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the FIPS provider while still preparing platforms and creating archives', async () => {
+    await buildDistributables(log, {
+      ...minimalGenericFoldersOptions,
+      createGenericFolders: false,
+      createPlatformFolders: true,
+      createArchives: true,
+      targetAllPlatforms: true,
+      skipFipsProvider: true,
+    });
+
+    expect(Tasks.BundleFipsProvider.run).not.toHaveBeenCalled();
+    expect(Tasks.CreateArchivesSources.run).toHaveBeenCalledTimes(1);
+    expect(Tasks.CreateArchives.run).toHaveBeenCalledTimes(1);
   });
 });
