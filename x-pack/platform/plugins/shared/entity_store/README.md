@@ -176,7 +176,7 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
 
 A definition is an identity core plus an optional `extraction` block:
 
-- Core: `type`, `name`, `managedBy` and `identityField`. This is all the id compiler reads, and a definition with only the core is valid.
+- Core: `type`, `name`, `managedBy` and `identityField`. This is sufficient for the id compiler, so a definition with only the core is valid; when `extraction` is present, document/search paths also replay its field evaluations, overrides and post-aggregation gate.
 - `extraction`: the config the store's extraction engine, templates and CRUD API read (`fields`, `fieldEvaluations`, `postAggFilter`, `whenConditionTrueSetFieldsPreAgg`, `whenConditionTrueSetFieldsAfterStats`, `entityTypeFallback`, `creatableFromSingleDocument`, `priorityExtractionGate`, `nonPrioritySampling`). Its presence does not make the store extract the type: the store only materialises its four built-ins.
 - There is no `indexPatterns` key. Source indices for extraction are API configuration (global state and per-engine overrides), not part of a definition.
 - Unknown keys are rejected, at the top level and inside `extraction`.
