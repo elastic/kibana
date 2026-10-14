@@ -144,6 +144,7 @@ describe('getScoutTargetDomain', () => {
       ],
       'security_ease',
     ],
+    [['--serverless=workplaceai'], 'workplaceai'],
     [['--serverless=vectordb'], 'vectordb'],
   ])('resolves %j to %s', (serverArgs, domain) => {
     expect(getScoutTargetDomain(createServerlessConfig(serverArgs))).toBe(domain);

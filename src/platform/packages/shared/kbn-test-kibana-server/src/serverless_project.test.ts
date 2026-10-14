@@ -24,7 +24,7 @@ describe('getServerlessProject', () => {
     }
   );
 
-  it.each([['es'], ['vectordb']])('reads the %s project without a tier', (projectType) => {
+  it.each([['es'], ['workplaceai'], ['vectordb']])('reads the %s project without a tier', (projectType) => {
     expect(
       getServerlessProject([`--serverless=${projectType}`, obltProducts('logs_essentials')])
     ).toEqual({
