@@ -121,6 +121,8 @@ export const useBulkAttackCaseItems = ({
           attachments: attackAttachments.attachments,
         });
         if (attackAttachments.truncated) {
+          // `onAddToCase` only opens the case selector, so nothing is attached yet and the user
+          // can still cancel. The message is worded prospectively for that reason.
           addWarning({
             title: ATTACK_ALERTS_TRUNCATED({
               alertCount: attackAttachments.alertCount,
