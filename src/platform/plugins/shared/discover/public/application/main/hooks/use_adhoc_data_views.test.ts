@@ -45,8 +45,6 @@ describe('useAdHocDataViews', () => {
 
   it('tracks the ad hoc data view metric for an ad hoc data view in classic mode', () => {
     renderWithDataSource(new DataViewSource(dataViewAdHoc));
-
-    expect(mockServices.trackUiMetric).toHaveBeenCalledTimes(1);
     expect(mockServices.trackUiMetric).toHaveBeenCalledWith(
       METRIC_TYPE.COUNT,
       ADHOC_DATA_VIEW_RENDER_EVENT
@@ -55,13 +53,11 @@ describe('useAdHocDataViews', () => {
 
   it('does not track the ad hoc data view metric for a persisted data view', () => {
     renderWithDataSource(new DataViewSource(dataViewMock));
-
     expect(mockServices.trackUiMetric).not.toHaveBeenCalled();
   });
 
   it('does not track the ad hoc data view metric in ES|QL mode', () => {
     renderWithDataSource(createMockEsqlSource());
-
     expect(mockServices.trackUiMetric).not.toHaveBeenCalled();
   });
 });

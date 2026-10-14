@@ -19,7 +19,7 @@ export const useAdHocDataViews = () => {
   const { filterManager, toastNotifications, trackUiMetric } = useDiscoverServices();
 
   useEffect(() => {
-    // ES|QL sources are never persisted, so only count ad hoc data views used in classic mode
+    // Only count ad hoc data views used in classic mode, since they are user-created
     if (dataSource.kind === 'index-pattern' && !dataSource.isPersisted()) {
       trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
