@@ -34,7 +34,7 @@ import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_
 import { MITRE_ATTACK_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 
 const isAttackRow = (threat: Threat): boolean =>
-  (threat.framework ?? MITRE_ATTACK_FRAMEWORK) === MITRE_ATTACK_FRAMEWORK;
+  !threat.framework || threat.framework === MITRE_ATTACK_FRAMEWORK;
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;

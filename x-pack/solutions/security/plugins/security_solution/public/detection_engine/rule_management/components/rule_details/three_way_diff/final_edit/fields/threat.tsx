@@ -25,8 +25,7 @@ export function threatSerializer(formData: FormData): {
   return {
     threat: filterEmptyThreats(formData.threat).map((singleThreat) => ({
       ...singleThreat,
-      // Rows added via the picker's "Add tactic" button carry no framework yet (undefined or empty string),
-      // so fall back to ATT&CK while preserving any framework already set (e.g. ATLAS).
+      // Fallback covers older saved form state and direct API values with no framework (undefined or empty string).
       framework: singleThreat.framework || MITRE_ATTACK_FRAMEWORK,
     })),
   };

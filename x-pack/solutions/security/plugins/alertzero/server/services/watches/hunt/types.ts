@@ -40,7 +40,8 @@ export interface HuntServices {
   /**
    * MITRE data client instance, for the Tier 2 technique catalog (pinned to ATT&CK Enterprise).
    * Undefined when the optional mitreAttack plugin is disabled or its managed source is off,
-   * in which case Tier 2 sees an empty catalog and drops every candidate technique.
+   * in which case Tier 2 sees an empty catalog, returns early before extraction, and reports a
+   * report-level `catalog_unavailable`.
    */
   mitreDataClient?: MitreAttackDataClient;
 }

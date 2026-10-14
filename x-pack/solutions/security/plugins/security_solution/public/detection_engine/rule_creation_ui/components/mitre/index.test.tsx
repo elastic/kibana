@@ -240,6 +240,7 @@ describe('AddMitreThreat', () => {
       it.each([
         ['an ATT&CK row', attackRow],
         ['a row with no framework', legacyRow],
+        ['a row with an empty framework', { ...attackRow, framework: '' }],
       ])('keeps technique fields enabled on %s', (_name, row) => {
         renderWithValue([row]);
 

@@ -125,7 +125,7 @@ export const getMitreCatalog = async ({
   } catch (error) {
     // A transient read failure must not fail the hunt, retry on the next call.
     logger?.warn(
-      `Failed to load the MITRE catalog; Technique validation is skipped for this run: ${
+      `Failed to load the MITRE catalog; the hunt run is skipped: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
