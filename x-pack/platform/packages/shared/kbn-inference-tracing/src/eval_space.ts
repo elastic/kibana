@@ -44,8 +44,9 @@ export const carryEvalSpaceId = (target: Context): Context =>
 
 /**
  * Sets `data_stream.namespace` on spans started in a context that has an eval space, so
- * the collector (and `_otlp`) writes them to `traces-<dataset>-<spaceId>`. A span that
- * already names a namespace, as Agent Builder's do, is left alone.
+ * the collector writes them to `traces-<dataset>-<spaceId>`. It overrides any namespace the
+ * span already has: processors that run earlier can derive one from inbound baggage, while
+ * the eval space only ever comes from server code.
  */
 export class EvalSpaceSpanProcessor implements tracing.SpanProcessor {
   onStart(span: tracing.Span, parentContext: Context): void {
@@ -54,7 +55,7 @@ export class EvalSpaceSpanProcessor implements tracing.SpanProcessor {
     }
 
     const spaceId = getEvalSpaceId(parentContext);
-    if (!spaceId || span.attributes[DATA_STREAM_NAMESPACE_ATTRIBUTE] !== undefined) {
+    if (!spaceId) {
       return;
     }
 

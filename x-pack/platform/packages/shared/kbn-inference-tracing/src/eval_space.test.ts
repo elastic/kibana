@@ -135,12 +135,22 @@ describe('eval space', () => {
       expect(setAttribute).not.toHaveBeenCalled();
     });
 
-    it('does not override a namespace the span already has, such as Agent Builder spans', () => {
+    it('overrides a namespace an earlier processor derived from inbound baggage', () => {
+      const { span, setAttribute } = createSpan({
+        attributes: { [DATA_STREAM_NAMESPACE_ATTRIBUTE]: 'other-space' },
+      });
+
+      processor.onStart(span, setEvalSpaceId(ROOT_CONTEXT, 'marketing'));
+
+      expect(setAttribute).toHaveBeenCalledWith(DATA_STREAM_NAMESPACE_ATTRIBUTE, 'marketing');
+    });
+
+    it('leaves a namespace alone outside any eval space', () => {
       const { span, setAttribute } = createSpan({
         attributes: { [DATA_STREAM_NAMESPACE_ATTRIBUTE]: 'sales' },
       });
 
-      processor.onStart(span, setEvalSpaceId(ROOT_CONTEXT, 'marketing'));
+      processor.onStart(span, ROOT_CONTEXT);
 
       expect(setAttribute).not.toHaveBeenCalled();
     });

@@ -99,7 +99,7 @@ const REMOTES_PATH = '/remotes' as const;
 const ONLINE_PATH = '/online' as const;
 
 // TODO: Show online evaluations tab when the feature is ready
-const SHOW_ONLINE_EVALS_TAB = true;
+const SHOW_ONLINE_EVALS_TAB = false;
 
 const experimentDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.experimentDetail', {
   defaultMessage: 'Experiment details',
