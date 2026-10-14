@@ -16,7 +16,8 @@ import type { InvestigationSubjectType, InvestigationTriggerType } from './workf
 export type { Severity } from '@kbn/significant-events-schema';
 
 export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
-export { parsePresetSchedule } from './automation_schedule';
+export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
+export type { PresetSchedule } from './automation_schedule';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,

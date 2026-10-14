@@ -13,19 +13,12 @@ import {
 import { MAX_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
   isSlackTrigger,
-  toEveryCron,
+  toPresetSchedule,
   type AutomationFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
 
 export const validationLabels = {
-  unsupportedSchedule: i18n.translate(
-    'xpack.nightshift.automations.flyout.unsupportedScheduleErrorMessage',
-    {
-      defaultMessage:
-        'This schedule is not supported. Replace it with an hourly, daily or weekly schedule.',
-    }
-  ),
   instructionsRequired: i18n.translate(
     'xpack.nightshift.automations.flyout.instructionsRequiredErrorMessage',
     {
@@ -60,25 +53,16 @@ export const isValidDailyLimit = (value: string): boolean => {
   return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= MAX_DAILY_LIMIT;
 };
 
-export const hasDailyLimit = (trigger?: TriggerFormValues): boolean =>
-  trigger !== undefined && trigger.kind !== 'cron';
-
 export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerFormValues => {
   if (!trigger) return false;
-  if (trigger.kind === 'cron') return false;
   if (trigger.kind === 'every') {
-    return parsePresetSchedule({
-      schedulePreset: { hour: 'hourly', day: 'daily', week: 'weekly' }[trigger.unit],
-      cronExpression: toEveryCron(trigger),
-      timezone: trigger.timezone,
-    }).success;
+    return parsePresetSchedule(toPresetSchedule(trigger)).success;
   }
   return true;
 };
 
 export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
   if (!values.trigger) return validationLabels.triggerRequired;
-  if (values.trigger.kind === 'cron') return validationLabels.unsupportedSchedule;
   if (values.trigger.kind === 'every') {
     if (!values.instructions.trim()) return validationLabels.instructionsRequired;
     if (values.instructions.trim().length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
@@ -102,5 +86,5 @@ export const getSaveBlocker = (values: AutomationFormValues): string | undefined
 
 export const canSaveAutomation = (values: AutomationFormValues): boolean =>
   isTriggerValid(values.trigger) &&
-  (!hasDailyLimit(values.trigger) || isValidDailyLimit(values.dailyDispatchLimit)) &&
+  isValidDailyLimit(values.dailyDispatchLimit) &&
   !getSaveBlocker(values);

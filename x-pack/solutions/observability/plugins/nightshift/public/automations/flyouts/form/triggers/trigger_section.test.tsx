@@ -10,7 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationTriggerSection } from './trigger_section';
 import type { TriggerFormValues } from '../automation_form_values';
-import { toEveryCron } from '../to_automation_request';
+import { toPresetSchedule } from '../automation_form_values';
 
 const defaultCatalog = {
   data: [
@@ -191,7 +191,7 @@ describe('AutomationTriggerSection', () => {
     expect(end).toHaveAttribute('step', '3600');
     expect(start).toHaveValue('09:00');
     expect(end).toHaveValue('17:00');
-    expect(toEveryCron(lastTrigger())).toBe('0 9-17 * * *');
+    expect(toPresetSchedule(lastTrigger())).toMatchObject({ hourWindow: { start: 9, end: 17 } });
   });
 
   it('configures a weekly schedule', async () => {
@@ -213,20 +213,6 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({ daysOfWeek: [2, 3, 4, 5, 0] });
   });
 
-  it('shows a saved custom schedule without editable cron controls', () => {
-    render(
-      <TriggerSection
-        initialTrigger={{ kind: 'cron', cronExpression: '*/15 * * * *', timezone: 'UTC' }}
-      />
-    );
-    expect(screen.getByTestId('automationCronExpression')).toHaveTextContent('*/15 * * * *');
-    expect(screen.getByTestId('automationUnsupportedSchedule')).toHaveTextContent(
-      'Replace it with an hourly, daily or weekly schedule.'
-    );
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('automationDailyLimit')).not.toBeInTheDocument();
-  });
-
   it('lists IANA timezones with their offset', async () => {
     render(<TriggerSection />);
     await selectTrigger('automationAddTrigger', 'Every…');
@@ -239,17 +225,6 @@ describe('AutomationTriggerSection', () => {
     expect(await screen.findByText('GMT+9')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Asia/Tokyo'));
     expect(lastTrigger()).toMatchObject({ kind: 'every', timezone: 'Asia/Tokyo' });
-  });
-
-  it('allows replacing a saved custom schedule with a supported preset', async () => {
-    render(
-      <TriggerSection
-        initialTrigger={{ kind: 'cron', cronExpression: '*/15 * * * *', timezone: 'UTC' }}
-      />
-    );
-    await selectTrigger('automationChangeTrigger', 'Every…');
-    expect(lastTrigger()).toMatchObject({ kind: 'every', unit: 'hour' });
-    expect(screen.queryByTestId('automationUnsupportedSchedule')).not.toBeInTheDocument();
   });
 
   it('flags an invalid daily limit', async () => {

@@ -97,15 +97,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     if (!completions.success) throw badRequest(completions.error.message);
     merged.completions = completions.data;
 
-    const disableOnly = body.isEnabled === false && Object.keys(body).length === 1;
-    if (!disableOnly) validateScheduledAutomation(merged);
+    validateScheduledAutomation(merged);
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
         await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
-          disableOnly ? { enabled: false } : { yaml: generateWorkflowYaml(params.path.id, merged) },
+          { yaml: generateWorkflowYaml(params.path.id, merged) },
           spaceId,
           request
         );

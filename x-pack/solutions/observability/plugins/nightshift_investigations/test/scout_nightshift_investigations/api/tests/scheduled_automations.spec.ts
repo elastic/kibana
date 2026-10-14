@@ -79,7 +79,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         kind: 'schedule',
         schedulePreset: 'daily',
         timezone: 'UTC',
-        cronExpression: `${due.getUTCMinutes()} ${due.getUTCHours()} * * *`,
+        time: due.toISOString().slice(11, 16),
         scopeQuery: 'service.name:checkout',
       };
       const body = {
@@ -102,9 +102,9 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
                     { kind: 'alert' },
                     {
                       ...schedule,
-                      cronExpression: `${due.getUTCMinutes()} ${
-                        (due.getUTCHours() + 1) % 24
-                      } * * *`,
+                      time: `${String((due.getUTCHours() + 1) % 24).padStart(2, '0')}:${String(
+                        due.getUTCMinutes()
+                      ).padStart(2, '0')}`,
                     },
                   ],
                 }
@@ -122,6 +122,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         responseType: 'json',
       });
       expect(updated).toHaveStatusCode(200);
+      expect(updated.body).toMatchObject({ trigger: body.trigger });
       const workflow = await kbnClient.request<{ valid: boolean }>({
         method: 'GET',
         path: `/api/workflows/workflow/${enabled.workflowId}`,
@@ -206,12 +207,12 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         { execution: {} },
         {
           trigger: {
-            rows: [{ kind: 'schedule', schedulePreset: 'custom', cronExpression: '*/15 * * * *' }],
+            rows: [{ kind: 'schedule', schedulePreset: 'custom' }],
           },
         },
         {
           trigger: {
-            rows: [{ kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 25 * * *' }],
+            rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '25:00' }],
           },
         },
       ]) {
@@ -221,7 +222,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
           body: {
             name: uniqueId('invalid-schedule'),
             trigger: {
-              rows: [{ kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' }],
+              rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
             },
             execution: { promptTemplate: 'Review health.' },
             completions: [],

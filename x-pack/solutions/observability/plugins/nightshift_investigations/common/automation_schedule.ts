@@ -6,82 +6,76 @@
  */
 
 import { ScheduledTriggerSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
-interface ScheduleRow {
-  schedulePreset?: string;
-  cronExpression?: string;
-  timezone?: string;
-}
+export const presetScheduleSchema = lazySchema(() => {
+  const timezone = z.string().max(100).optional();
+  const time = z
+    .string()
+    .max(5)
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/);
+  return z.discriminatedUnion('schedulePreset', [
+    z.object({
+      schedulePreset: z.literal('hourly'),
+      hourWindow: z
+        .object({
+          start: z.number().int().min(0).max(23),
+          end: z.number().int().min(0).max(23),
+        })
+        .refine(({ start, end }) => start < end, 'The hourly window must start before it ends.')
+        .optional(),
+      timezone,
+    }),
+    z.object({ schedulePreset: z.literal('daily'), time, timezone }),
+    z.object({
+      schedulePreset: z.literal('weekly'),
+      time,
+      daysOfWeek: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+      timezone,
+    }),
+  ]);
+});
+
+export type PresetSchedule = z.infer<typeof presetScheduleSchema>;
 
 export type PresetScheduleResult =
-  | { success: true; trigger: z.infer<typeof ScheduledTriggerSchema> }
+  | { success: true; schedule: PresetSchedule; trigger: z.infer<typeof ScheduledTriggerSchema> }
   | { success: false; error: string };
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'] as const;
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
-const invalidSchedule = (): PresetScheduleResult => ({
-  success: false,
-  error: 'Invalid hourly, daily or weekly schedule expression.',
-});
 
-/** Converts the preset expressions emitted by the automation form to calendar schedules. */
-export const parsePresetSchedule = (row: ScheduleRow): PresetScheduleResult => {
-  const { schedulePreset, cronExpression = '', timezone = 'UTC' } = row;
-  if (!['hourly', 'daily', 'weekly'].includes(schedulePreset ?? '')) {
-    return {
-      success: false,
-      error: 'Custom schedules are not supported. Select a schedule preset.',
-    };
-  }
-  if (cronExpression.length > 100) return invalidSchedule();
-  const fields = cronExpression.trim().split(/\s+/);
-  const [minute, hour, day, month, weekday] = fields;
-  if (fields.length !== 5 || day !== '*' || month !== '*') return invalidSchedule();
-  if (!/^\d{1,2}$/.test(minute) || Number(minute) > 59) return invalidSchedule();
-
-  let hours: number[];
-  if (schedulePreset === 'hourly') {
-    if (Number(minute) !== 0 || weekday !== '*') return invalidSchedule();
-    if (hour === '*') {
-      hours = HOURS;
-    } else {
-      if (!/^\d{1,2}-\d{1,2}$/.test(hour)) return invalidSchedule();
-      const [start, end] = hour.split('-').map(Number);
-      if (start >= end || end > 23) return invalidSchedule();
-      hours = HOURS.filter((value) => value >= start && value <= end);
-    }
-  } else {
-    if (!/^\d{1,2}$/.test(hour) || Number(hour) > 23) return invalidSchedule();
-    hours = [Number(hour)];
-  }
-
-  const weekdays: Array<(typeof WEEKDAYS)[number]> = [];
-  if (schedulePreset === 'weekly') {
-    if (!/^[0-6](?:-[0-6])?(?:,[0-6](?:-[0-6])?)*$/.test(weekday)) return invalidSchedule();
-    for (const part of weekday.split(',')) {
-      const [start, end = start] = part.split('-').map(Number);
-      if (start > end) return invalidSchedule();
-      weekdays.push(...WEEKDAYS.filter((_value, index) => index >= start && index <= end));
-    }
-  } else if (weekday !== '*') {
-    return invalidSchedule();
-  }
+/** Validates structured presets and converts them directly to calendar schedules. */
+export const parsePresetSchedule = (row: object): PresetScheduleResult => {
+  const parsed = presetScheduleSchema.safeParse(row);
+  if (!parsed.success) return { success: false, error: parsed.error.message };
+  const schedule = parsed.data;
+  const hours =
+    schedule.schedulePreset === 'hourly'
+      ? HOURS.filter(
+          (hour) =>
+            !schedule.hourWindow ||
+            (hour >= schedule.hourWindow.start && hour <= schedule.hourWindow.end)
+        )
+      : [Number(schedule.time.slice(0, 2))];
+  const minute = schedule.schedulePreset === 'hourly' ? 0 : Number(schedule.time.slice(3, 5));
 
   const result = ScheduledTriggerSchema.safeParse({
     type: 'scheduled',
     with: {
       rrule: {
-        freq: schedulePreset === 'weekly' ? 'WEEKLY' : 'DAILY',
+        freq: schedule.schedulePreset === 'weekly' ? 'WEEKLY' : 'DAILY',
         interval: 1,
-        tzid: timezone,
+        tzid: schedule.timezone ?? 'UTC',
         byhour: hours,
-        byminute: [Number(minute)],
-        ...(weekdays.length ? { byweekday: [...new Set(weekdays)] } : {}),
+        byminute: [minute],
+        ...(schedule.schedulePreset === 'weekly'
+          ? { byweekday: [...new Set(schedule.daysOfWeek)].map((day) => WEEKDAYS[day]) }
+          : {}),
       },
     },
   });
   return result.success
-    ? { success: true, trigger: result.data }
+    ? { success: true, schedule, trigger: result.data }
     : { success: false, error: 'Invalid schedule timezone.' };
 };

@@ -13,15 +13,12 @@ import type {
 } from '../../hooks/use_automations';
 import {
   SLACK_TRIGGER_EVENTS,
-  toEveryCron,
+  toPresetSchedule,
   toAutomationFormValues,
   isSlackTrigger,
   type AutomationFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
-import { hasDailyLimit } from './validation';
-
-export { toEveryCron } from './automation_form_values';
 
 const toTriggerRow = (
   trigger: TriggerFormValues
@@ -46,20 +43,9 @@ const toTriggerRow = (
       ...(messageFilter ? { messageFilter } : {}),
     };
   }
-  if (trigger.kind === 'cron') {
-    return {
-      kind: 'schedule',
-      schedulePreset: 'custom',
-      cronExpression: trigger.cronExpression.trim(),
-      timezone: trigger.timezone,
-    };
-  }
-  const presets = { hour: 'hourly', day: 'daily', week: 'weekly' } as const;
   return {
     kind: 'schedule',
-    schedulePreset: presets[trigger.unit],
-    cronExpression: toEveryCron(trigger),
-    timezone: trigger.timezone,
+    ...toPresetSchedule(trigger),
   };
 };
 
@@ -84,9 +70,7 @@ export const toAutomationRequestBody = (
       : values.slackAction.target === 'thread'
       ? [{ action: 'post_to_slack', targetMode: 'thread' }]
       : [{ action: 'post_to_slack', targetMode: values.slackAction.target, destination }],
-    runtime: hasDailyLimit(values.trigger)
-      ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
-      : {},
+    runtime: { dailyDispatchLimit: Number(values.dailyDispatchLimit) },
   };
 };
 
@@ -161,11 +145,7 @@ export const toAutomationUpdateBody = (
     completions: toUpdatedCompletions(values, automation),
     runtime: {
       ...automation.runtime,
-      ...(hasDailyLimit(values.trigger)
-        ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
-        : hasDailyLimit(originalValues.trigger)
-        ? { dailyDispatchLimit: null }
-        : {}),
+      dailyDispatchLimit: Number(values.dailyDispatchLimit),
     },
   };
 };

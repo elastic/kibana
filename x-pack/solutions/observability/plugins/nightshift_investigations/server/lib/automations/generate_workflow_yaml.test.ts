@@ -156,7 +156,7 @@ describe('generateWorkflowYaml', () => {
           {
             kind: 'schedule',
             schedulePreset: 'daily',
-            cronExpression: '0 9 * * *',
+            time: '09:00',
             timezone: 'Europe/Berlin',
             scopeQuery: 'service.name:checkout',
           },

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { PresetSchedule } from '../../../common/automation_schedule';
+
 export type AutomationType = 'custom' | 'managed';
 
 export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
 export type SlackTriggerEvent = 'message';
-export type SchedulePreset = 'hourly' | 'daily' | 'weekly' | 'custom';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';
 export type CompletionAction = 'create_investigation' | 'post_to_slack' | 'silent';
@@ -25,13 +26,7 @@ export type NightshiftTriggerRow =
       alertStatus?: AlertStatus;
       tags?: string[];
     }
-  | {
-      kind: 'schedule';
-      schedulePreset?: SchedulePreset;
-      cronExpression?: string;
-      timezone?: string;
-      scopeQuery?: string;
-    }
+  | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
   | {
       kind: 'slack';
       event: SlackTriggerEvent;

@@ -10,13 +10,7 @@ import {
   createTriggerFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
-import {
-  canSaveAutomation,
-  getSaveBlocker,
-  hasDailyLimit,
-  isTriggerValid,
-  isValidDailyLimit,
-} from './validation';
+import { canSaveAutomation, getSaveBlocker, isTriggerValid, isValidDailyLimit } from './validation';
 
 const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'every' }>> = {}) => ({
   ...(createTriggerFormValues('every') as Extract<TriggerFormValues, { kind: 'every' }>),
@@ -35,18 +29,10 @@ describe('automation validation', () => {
     expect(isValidDailyLimit(value)).toBe(expected);
   });
 
-  it('only applies a daily limit to event and interval triggers', () => {
-    expect(hasDailyLimit(undefined)).toBe(false);
-    expect(hasDailyLimit(createTriggerFormValues('alert'))).toBe(true);
-    expect(hasDailyLimit(createTriggerFormValues('every'))).toBe(true);
-    expect(hasDailyLimit(createTriggerFormValues('cron'))).toBe(false);
-  });
-
   it('validates triggers', () => {
     expect(isTriggerValid(undefined)).toBe(false);
     expect(isTriggerValid(createTriggerFormValues('alert'))).toBe(true);
     expect(isTriggerValid(everyTrigger({ unit: 'week', daysOfWeek: [] }))).toBe(false);
-    expect(isTriggerValid({ kind: 'cron', cronExpression: 'bad', timezone: 'UTC' })).toBe(false);
   });
 
   it('requires the hourly window to start before it ends', () => {
@@ -59,17 +45,6 @@ describe('automation validation', () => {
 
   describe('getSaveBlocker', () => {
     const values = createAutomationFormValues();
-
-    it('blocks a saved custom cron until it is replaced', () => {
-      expect(
-        getSaveBlocker({
-          ...values,
-          trigger: { kind: 'cron', cronExpression: 'bad', timezone: 'UTC' },
-        })
-      ).toBe(
-        'This schedule is not supported. Replace it with an hourly, daily or weekly schedule.'
-      );
-    });
 
     it('requires instructions for a scheduled assessment', () => {
       const scheduled = { ...values, trigger: createTriggerFormValues('every') };

@@ -6,8 +6,13 @@ This plugin provides the domain API for starting and reading investigations, ind
 
 Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and
 weekly times, and inclusive hourly windows, use the saved IANA timezone and follow daylight saving
-time. Custom cron execution is deferred; saved custom schedules remain visible but must be replaced
-before saving or enabling. They can still be disabled or deleted.
+time. Custom cron execution is deferred. Unsupported schedules are ignored when loading the form
+and rejected by the API.
+
+Schedule rows store structured presets and generate RRULE directly. Daily and weekly presets use
+`time` in `HH:mm` format; weekly presets also require `daysOfWeek` (0 for Sunday through 6 for
+Saturday). Hourly presets optionally use `hourWindow: { start, end }` with inclusive whole hours.
+All presets accept an IANA `timezone`, defaulting to UTC.
 
 Scheduled automations require nonempty instructions (at most 10,000 characters). Each tick starts a
 fresh investigation using a `manual` question subject with an `automatic` trigger type, so normal

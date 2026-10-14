@@ -188,7 +188,7 @@ describe('AutomationsPage', () => {
         id: 'report',
         name: 'Daily report',
         isEnabled: false,
-        trigger: { rows: [{ kind: 'schedule' }] },
+        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }] },
         runtime: { dailyDispatchLimit: 5 },
         author: 'Daniel Hughes',
       }),

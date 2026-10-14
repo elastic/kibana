@@ -8,15 +8,15 @@
 import { Frequency, RRule } from '@kbn/rrule';
 import { parsePresetSchedule } from './automation_schedule';
 
-const parse = (schedulePreset: string, cronExpression: string, timezone = 'UTC') => {
-  const result = parsePresetSchedule({ schedulePreset, cronExpression, timezone });
+const parse = (schedule: object) => {
+  const result = parsePresetSchedule(schedule);
   if (!result.success || !('rrule' in result.trigger.with)) throw new Error('Expected an RRULE');
   return result.trigger.with.rrule;
 };
 
 describe('preset schedules', () => {
   it('runs hourly on the hour rather than relative to the save time', () => {
-    expect(parse('hourly', '0 * * * *')).toEqual({
+    expect(parse({ schedulePreset: 'hourly' })).toEqual({
       freq: 'DAILY',
       interval: 1,
       tzid: 'UTC',
@@ -26,7 +26,13 @@ describe('preset schedules', () => {
   });
 
   it('preserves inclusive hourly windows and local timezones', () => {
-    expect(parse('hourly', '0 9-17 * * *', 'Asia/Kolkata')).toEqual({
+    expect(
+      parse({
+        schedulePreset: 'hourly',
+        hourWindow: { start: 9, end: 17 },
+        timezone: 'Asia/Kolkata',
+      })
+    ).toEqual({
       freq: 'DAILY',
       interval: 1,
       tzid: 'Asia/Kolkata',
@@ -35,8 +41,10 @@ describe('preset schedules', () => {
     });
   });
 
-  it('converts weekly lists and ranges, including Sunday', () => {
-    expect(parse('weekly', '30 9 * * 0,1-3,5')).toEqual({
+  it('converts selected weekdays, including Sunday, without duplicates', () => {
+    expect(
+      parse({ schedulePreset: 'weekly', time: '09:30', daysOfWeek: [0, 1, 2, 3, 5, 1] })
+    ).toEqual({
       freq: 'WEEKLY',
       interval: 1,
       tzid: 'UTC',
@@ -51,7 +59,7 @@ describe('preset schedules', () => {
     ['2026-10-24T00:00:00Z', '2026-10-24T07:30:00.000Z', '2026-10-25T08:30:00.000Z'],
   ])('keeps 09:30 Berlin local time across DST from %s', (start, first, second) => {
     const rule = new RRule({
-      ...parse('daily', '30 9 * * *', 'Europe/Berlin'),
+      ...parse({ schedulePreset: 'daily', time: '09:30', timezone: 'Europe/Berlin' }),
       freq: Frequency.DAILY,
       dtstart: new Date(start),
     });
@@ -60,32 +68,33 @@ describe('preset schedules', () => {
   });
 
   it.each([
-    ['custom', '0 9 * * *'],
-    ['daily', '60 9 * * *'],
-    ['daily', '0 24 * * *'],
-    ['daily', '0 9 1 * *'],
-    ['daily', '0 9 * 1 *'],
-    ['daily', '0 9 * * 1'],
-    ['hourly', '30 * * * *'],
-    ['hourly', '0 17-9 * * *'],
-    ['hourly', '0 9-9 * * *'],
-    ['hourly', '0 9-24 * * *'],
-    ['weekly', '0 9 * * *'],
-    ['weekly', '0 9 * * 7'],
-    ['weekly', '0 9 * * 5-1'],
-    ['weekly', '0 9 * *'],
-    ['weekly', '*/15 9 * * 1'],
-    ['daily', 'bad'],
-    ['', '0 9 * * *'],
-  ])('rejects unsupported or invalid %s expression %s', (schedulePreset, cronExpression) => {
-    expect(parsePresetSchedule({ schedulePreset, cronExpression }).success).toBe(false);
+    { schedulePreset: 'custom' },
+    { schedulePreset: 'daily' },
+    { schedulePreset: 'daily', time: '09:60' },
+    { schedulePreset: 'daily', time: '24:00' },
+    { schedulePreset: 'daily', time: '9:00' },
+    { schedulePreset: 'daily', time: 'bad' },
+    { schedulePreset: 'hourly', hourWindow: { start: 17, end: 9 } },
+    { schedulePreset: 'hourly', hourWindow: { start: 9, end: 9 } },
+    { schedulePreset: 'hourly', hourWindow: { start: 9, end: 24 } },
+    { schedulePreset: 'hourly', hourWindow: { start: -1, end: 17 } },
+    { schedulePreset: 'hourly', hourWindow: { start: 9.5, end: 17 } },
+    { schedulePreset: 'weekly', time: '09:00' },
+    { schedulePreset: 'weekly', time: '09:00', daysOfWeek: [] },
+    { schedulePreset: 'weekly', time: '09:00', daysOfWeek: [7] },
+    { schedulePreset: 'weekly', time: '09:00', daysOfWeek: [-1] },
+    { schedulePreset: 'weekly', time: '09:00', daysOfWeek: [1.5] },
+    { schedulePreset: 'weekly', time: '09:00', daysOfWeek: Array(8).fill(1) },
+    { schedulePreset: '' },
+  ])('rejects unsupported or invalid schedules: %j', (schedule) => {
+    expect(parsePresetSchedule(schedule).success).toBe(false);
   });
 
   it('rejects a timezone the scheduler does not accept', () => {
     expect(
       parsePresetSchedule({
         schedulePreset: 'daily',
-        cronExpression: '0 9 * * *',
+        time: '09:00',
         timezone: 'Not/AZone',
       }).success
     ).toBe(false);

@@ -9,14 +9,11 @@ import {
   createAutomationFormValues,
   toAutomationFormValues,
   createTriggerFormValues,
+  toPresetSchedule,
   type TriggerFormValues,
 } from './automation_form_values';
 import type { Automation } from '../../hooks/use_automations';
-import {
-  toAutomationRequestBody,
-  toAutomationUpdateBody,
-  toEveryCron,
-} from './to_automation_request';
+import { toAutomationRequestBody, toAutomationUpdateBody } from './to_automation_request';
 
 const buildAutomation = (overrides: Partial<Automation>): Automation => ({
   id: 'automation-1',
@@ -39,25 +36,37 @@ const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'eve
 });
 
 describe('automation request', () => {
-  describe('toEveryCron', () => {
-    it('runs every hour', () => {
-      expect(toEveryCron(everyTrigger())).toBe('0 * * * *');
+  describe('toPresetSchedule', () => {
+    it('stores an unrestricted hourly preset', () => {
+      expect(toPresetSchedule(everyTrigger())).toEqual({
+        schedulePreset: 'hourly',
+        timezone: 'UTC',
+      });
     });
 
-    it('limits hourly runs to a window', () => {
+    it('stores an inclusive hourly window', () => {
       expect(
-        toEveryCron(everyTrigger({ betweenHours: true, startTime: '09:00', endTime: '17:00' }))
-      ).toBe('0 9-17 * * *');
+        toPresetSchedule(everyTrigger({ betweenHours: true, startTime: '09:00', endTime: '17:00' }))
+      ).toEqual({ schedulePreset: 'hourly', hourWindow: { start: 9, end: 17 }, timezone: 'UTC' });
     });
 
-    it('runs every day at a time', () => {
-      expect(toEveryCron(everyTrigger({ unit: 'day', time: '07:30' }))).toBe('30 7 * * *');
+    it('stores a daily local time', () => {
+      expect(toPresetSchedule(everyTrigger({ unit: 'day', time: '07:30' }))).toEqual({
+        schedulePreset: 'daily',
+        time: '07:30',
+        timezone: 'UTC',
+      });
     });
 
-    it('runs on selected weekdays', () => {
-      expect(toEveryCron(everyTrigger({ unit: 'week', time: '09:00', daysOfWeek: [5, 1] }))).toBe(
-        '0 9 * * 1,5'
-      );
+    it('stores selected weekdays', () => {
+      expect(
+        toPresetSchedule(everyTrigger({ unit: 'week', time: '09:00', daysOfWeek: [5, 1] }))
+      ).toEqual({
+        schedulePreset: 'weekly',
+        time: '09:00',
+        daysOfWeek: [5, 1],
+        timezone: 'UTC',
+      });
     });
   });
 
@@ -102,7 +111,7 @@ describe('automation request', () => {
       });
     });
 
-    it('sends an interval schedule with its cron and preset', () => {
+    it('sends a weekly schedule with its time and weekdays', () => {
       expect(
         toAutomationRequestBody({
           ...values,
@@ -116,7 +125,8 @@ describe('automation request', () => {
             {
               kind: 'schedule',
               schedulePreset: 'weekly',
-              cronExpression: '0 8 * * 1',
+              time: '08:00',
+              daysOfWeek: [1],
               timezone: 'PST',
             },
           ],
@@ -125,12 +135,12 @@ describe('automation request', () => {
       });
     });
 
-    it('sends a custom cron without a daily limit and with a Slack action', () => {
+    it('sends a daily schedule with a daily limit and a Slack action', () => {
       expect(
         toAutomationRequestBody({
           ...values,
           name: 'Report',
-          trigger: { kind: 'cron', cronExpression: ' 0 9 * * * ', timezone: 'UTC' },
+          trigger: everyTrigger({ unit: 'day', time: '09:00', timezone: 'UTC' }),
           slackAction: { target: 'channel', destination: ' #oncall ' },
         })
       ).toMatchObject({
@@ -138,14 +148,14 @@ describe('automation request', () => {
           rows: [
             {
               kind: 'schedule',
-              schedulePreset: 'custom',
-              cronExpression: '0 9 * * *',
+              schedulePreset: 'daily',
+              time: '09:00',
               timezone: 'UTC',
             },
           ],
         },
         completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
-        runtime: {},
+        runtime: { dailyDispatchLimit: 20 },
       });
     });
 
@@ -187,7 +197,7 @@ describe('automation request', () => {
         trigger: {
           rows: [
             { kind: 'alert', ruleNamePattern: 'old', ruleNameMatchMode: 'regex' },
-            { kind: 'schedule', cronExpression: '0 9 * * *' },
+            { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
           ],
         },
       });
@@ -195,7 +205,7 @@ describe('automation request', () => {
       expect(toAutomationUpdateBody(alertValues, automation).trigger).toEqual({
         rows: [
           { kind: 'alert', ruleNamePattern: 'cpu', ruleNameMatchMode: 'regex' },
-          { kind: 'schedule', cronExpression: '0 9 * * *' },
+          { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
         ],
       });
     });
@@ -206,8 +216,8 @@ describe('automation request', () => {
           rows: [
             {
               kind: 'schedule',
-              schedulePreset: 'custom',
-              cronExpression: '0 9 * * *',
+              schedulePreset: 'daily',
+              time: '09:00',
               scopeQuery: 'host:a',
             },
           ],
@@ -215,14 +225,14 @@ describe('automation request', () => {
       });
       const values = {
         ...alertValues,
-        trigger: { kind: 'cron', cronExpression: '0 10 * * *', timezone: 'UTC' },
+        trigger: everyTrigger({ unit: 'day', time: '10:00', timezone: 'UTC' }),
       } as Parameters<typeof toAutomationUpdateBody>[0];
 
       expect(toAutomationUpdateBody(values, automation).trigger?.rows).toEqual([
         {
           kind: 'schedule',
-          schedulePreset: 'custom',
-          cronExpression: '0 10 * * *',
+          schedulePreset: 'daily',
+          time: '10:00',
           timezone: 'UTC',
           scopeQuery: 'host:a',
         },
@@ -232,7 +242,9 @@ describe('automation request', () => {
     it('replaces the rows when the trigger kind changes', () => {
       const automation = buildAutomation({
         trigger: {
-          rows: [{ kind: 'schedule', cronExpression: '0 9 * * *', scopeQuery: 'host:a' }],
+          rows: [
+            { kind: 'schedule', schedulePreset: 'daily', time: '09:00', scopeQuery: 'host:a' },
+          ],
         },
       });
 
@@ -289,7 +301,8 @@ describe('automation request', () => {
       const row = {
         kind: 'schedule' as const,
         schedulePreset: 'weekly' as const,
-        cronExpression: '30 9 * * 1-5',
+        time: '09:30',
+        daysOfWeek: [1, 2, 3, 4, 5],
         timezone: 'UTC',
       };
       const automation = buildAutomation({ trigger: { rows: [row] } });
@@ -302,15 +315,15 @@ describe('automation request', () => {
       expect(toAutomationUpdateBody(values, automation).trigger).toEqual({ rows: [row] });
     });
 
-    it('keeps the saved daily limit for a custom cron automation', () => {
+    it('keeps the saved daily limit for a scheduled automation', () => {
       const automation = buildAutomation({
         trigger: {
-          rows: [{ kind: 'schedule', schedulePreset: 'custom', cronExpression: '0 9 * * *' }],
+          rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
         },
         runtime: { dailyDispatchLimit: 15 },
       });
       const values = {
-        ...createAutomationFormValues(),
+        ...toAutomationFormValues(automation),
         name: 'Renamed',
         trigger: toAutomationFormValues(automation).trigger,
       } as Parameters<typeof toAutomationUpdateBody>[0];
