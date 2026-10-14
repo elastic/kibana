@@ -178,6 +178,16 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
               <EuiText size="s">{name}</EuiText>
             </EuiFlexItem>
             <DocumentationVersionBadge item={item} />
+            {item.updateAvailable && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color="success"
+                  data-test-subj={`documentation-update-available-${item.id}`}
+                >
+                  {i18n.UPDATE_AVAILABLE}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
             {item.isTechPreview && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge label={i18n.TECH_PREVIEW} size="s" alignment="middle" />
@@ -469,7 +479,7 @@ const InstallUpdateControl: React.FC<{
   const hasDate = Boolean(item.availableArtifactLastModified);
   const updateButton = (
     <EuiButton
-      color="primary"
+      color="success"
       fill
       size="s"
       iconType="download"
@@ -526,8 +536,7 @@ const InstallUpdateControl: React.FC<{
       ) : null}
       <EuiPopoverFooter paddingSize="s">
         <EuiButton
-          color="primary"
-          fill
+          color="success"
           fullWidth
           size="s"
           iconType="download"

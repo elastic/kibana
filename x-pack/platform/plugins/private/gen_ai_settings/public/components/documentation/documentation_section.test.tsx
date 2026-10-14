@@ -227,7 +227,10 @@ describe('DocumentationSection', () => {
         'documentation-version-badge-elastic_documents'
       );
       expect(elasticBadge).toHaveTextContent('9.2');
-      expect(elasticBadge.querySelector('[data-euiicon-type="iInCircle"]')).toBeInTheDocument();
+      expect(elasticBadge.querySelector('[data-euiicon-type="info"]')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('documentation-update-available-elastic_documents')
+      ).not.toBeInTheDocument();
       fireEvent.click(elasticBadge);
 
       const securityLabsBadge = screen.getByTestId('documentation-version-badge-security_labs');
@@ -739,6 +742,12 @@ describe('DocumentationSection', () => {
           'Install update'
         );
       });
+      expect(screen.getByTestId('documentation-update-available-security_labs')).toHaveTextContent(
+        'Update available'
+      );
+      expect(
+        screen.queryByTestId('documentation-update-available-elastic_documents')
+      ).not.toBeInTheDocument();
       openRowActions('security_labs');
       expect(screen.getByTestId('documentation-uninstall-security_labs')).toBeInTheDocument();
 
@@ -787,6 +796,12 @@ describe('DocumentationSection', () => {
           screen.getByTestId('documentation-install-update-elastic_documents')
         ).toHaveTextContent('Install update');
       });
+      const updateBadge = screen.getByTestId('documentation-update-available-elastic_documents');
+      expect(updateBadge).toHaveTextContent('Update available');
+      expect(updateBadge.className).toContain('success');
+      expect(
+        screen.queryByTestId('documentation-update-available-security_labs')
+      ).not.toBeInTheDocument();
 
       openInstallUpdate('elastic_documents');
       expect(screen.getByText('New version')).toBeInTheDocument();
@@ -935,6 +950,9 @@ describe('DocumentationSection', () => {
       expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
       expect(
         screen.queryByTestId('documentation-install-update-elastic_documents')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('documentation-update-available-elastic_documents')
       ).not.toBeInTheDocument();
     });
 

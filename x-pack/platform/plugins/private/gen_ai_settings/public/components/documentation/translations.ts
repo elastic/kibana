@@ -52,6 +52,10 @@ export const STATUS_INSTALLED = i18n.translate('genAiSettings.documentation.stat
   defaultMessage: 'Installed',
 });
 
+export const UPDATE_AVAILABLE = i18n.translate('genAiSettings.documentation.updateAvailable', {
+  defaultMessage: 'Update available',
+});
+
 export const STATUS_INSTALLING = i18n.translate('genAiSettings.documentation.status.installing', {
   defaultMessage: 'Installing...',
 });
