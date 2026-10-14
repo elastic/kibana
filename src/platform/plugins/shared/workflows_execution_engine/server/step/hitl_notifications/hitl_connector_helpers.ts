@@ -56,30 +56,6 @@ export function fitHitlTextPreservingSuffix(
   return `${prompt.slice(0, promptBudget)}\n\n${suffix}`;
 }
 
-/** Shortens text around `link` so the link itself is not cut. */
-export function fitHitlRenderedTextPreservingLink(
-  text: string,
-  link: string,
-  maxLength: number
-): string {
-  if (link.length > maxLength) {
-    throw new Error(
-      `HITL resume links are ${link.length} characters and exceed the ${maxLength} character connector limit`
-    );
-  }
-  if (text.length <= maxLength) {
-    return text;
-  }
-  const linkAt = text.indexOf(link);
-  if (linkAt === -1) {
-    return text.slice(0, maxLength);
-  }
-  const budget = maxLength - link.length;
-  const prefix = text.slice(0, linkAt).slice(0, budget);
-  const after = text.slice(linkAt + link.length).slice(0, Math.max(0, budget - prefix.length));
-  return `${prefix}${link}${after}`;
-}
-
 /** Stops ServiceNow from reading `[code]` in user text as journal HTML. */
 function breakServiceNowCodeTag(value: string): string {
   return value.replace(/\[(\/?code)\]/gi, '[\u200b$1]');

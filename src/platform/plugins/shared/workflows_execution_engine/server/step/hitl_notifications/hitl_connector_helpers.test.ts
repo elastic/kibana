@@ -10,7 +10,6 @@
 import {
   assertConnectorSucceeded,
   escapeServiceNowCommentText,
-  fitHitlRenderedTextPreservingLink,
   fitHitlTextPreservingSuffix,
   SERVICENOW_COMMENT_MAX_LENGTH,
   serviceNowCommentLink,
@@ -87,16 +86,5 @@ describe('fitHitlTextPreservingSuffix', () => {
     expect(() => fitHitlTextPreservingSuffix('prompt', 'x'.repeat(11), 10)).toThrow(
       'exceed the 10 character connector limit'
     );
-  });
-});
-
-describe('fitHitlRenderedTextPreservingLink', () => {
-  it('keeps the form link when the rendered message is too long', () => {
-    const link = 'https://kibana.example/form';
-    const text = `${'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH)}${link}${'b'.repeat(20)}`;
-    const fitted = fitHitlRenderedTextPreservingLink(text, link, SERVICENOW_COMMENT_MAX_LENGTH);
-
-    expect(fitted.length).toBe(SERVICENOW_COMMENT_MAX_LENGTH);
-    expect(fitted.includes(link)).toBe(true);
   });
 });

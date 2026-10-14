@@ -26,7 +26,6 @@ import {
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
   escapeServiceNowCommentText,
-  fitHitlRenderedTextPreservingLink,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -285,10 +284,12 @@ export async function sendWaitForInputNotifications({
             renderTemplate,
           })
         : undefined;
-    const comment =
-      renderedComment != null
-        ? fitHitlRenderedTextPreservingLink(renderedComment, formUrl, SERVICENOW_COMMENT_MAX_LENGTH)
-        : buildDefaultInputServiceNowComment({ stepMessage, formUrl });
+    if (renderedComment != null && renderedComment.length > SERVICENOW_COMMENT_MAX_LENGTH) {
+      throw new Error(
+        `HITL ServiceNow message is ${renderedComment.length} characters and exceeds the ${SERVICENOW_COMMENT_MAX_LENGTH} character connector limit`
+      );
+    }
+    const comment = renderedComment ?? buildDefaultInputServiceNowComment({ stepMessage, formUrl });
 
     const result = await connectorExecutor.execute({
       connectorType: 'servicenow_search',

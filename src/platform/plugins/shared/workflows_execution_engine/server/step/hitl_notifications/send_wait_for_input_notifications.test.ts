@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SERVICENOW_COMMENT_MAX_LENGTH } from './hitl_connector_helpers';
 import { sendWaitForInputNotifications } from './send_wait_for_input_notifications';
 
 describe('sendWaitForInputNotifications', () => {
@@ -281,6 +282,34 @@ describe('sendWaitForInputNotifications', () => {
     expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
       'Host <your_input>\n[code]<a href="https://kibana.example/form">Open the form</a>[/code]'
     );
+  });
+
+  it('throws when a custom ServiceNow message exceeds the connector limit', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await expect(
+      sendWaitForInputNotifications({
+        channels: {
+          servicenow: {
+            'connector-id': 'snow-1',
+            table: 'incident',
+            'sys-id': 'abc123',
+            message: 'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH + 1),
+          },
+        },
+        stepMessage: 'Please provide input',
+        formUrl: 'https://kibana.example/form',
+        kibanaUrl: 'https://kibana.example',
+        renderTemplate,
+        connectorExecutor: { execute } as never,
+        abortController: new AbortController(),
+      })
+    ).rejects.toThrow(
+      `HITL ServiceNow message is ${
+        SERVICENOW_COMMENT_MAX_LENGTH + 1
+      } characters and exceeds the ${SERVICENOW_COMMENT_MAX_LENGTH} character connector limit`
+    );
+    expect(execute).not.toHaveBeenCalled();
   });
 
   it('escapes ServiceNow step text outside the Open form anchor', async () => {
