@@ -25,7 +25,8 @@ export interface DashboardStructureGold {
   sections?: Array<{ titleIncludesAny: string[]; minPanels?: number }>;
   /**
    * Rows the prompt lays out, top to bottom: all panels of `kind` share one row
-   * directly below the previous one, spanning the 48 columns when `fullWidth`.
+   * (same top and height) directly below the previous one, spanning the 48
+   * columns when `fullWidth`.
    */
   rows?: Array<{ kind: string; fullWidth?: boolean }>;
 }

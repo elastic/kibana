@@ -56,8 +56,8 @@ describe('dashboard structure evaluator', () => {
     ];
     const asked = await evaluateStructure({ rows }, [
       metric('a', { x: 0, y: 0, w: 24, h: 5 }),
-      metric('b', { x: 24, y: 0, w: 24, h: 6 }),
-      xy('c', { x: 0, y: 6, w: 48, h: 10 }),
+      metric('b', { x: 24, y: 0, w: 24, h: 5 }),
+      xy('c', { x: 0, y: 5, w: 48, h: 10 }),
     ]);
     expect(asked.score).toBe(1);
 

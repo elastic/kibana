@@ -21,7 +21,10 @@ const describeRange = ({ min, max }: { min?: number; max?: number }): string =>
 
 type RowGold = NonNullable<DashboardStructureGold['rows']>[number];
 
-/** Checks each gold row against the panels of its kind and the row above it. */
+/**
+ * Checks each gold row against the panels of its kind and the row above it. A
+ * row shares its top and height, so it leaves no gap above the next row.
+ */
 const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData): Check[] => {
   const containers = getPanelContainers(dashboard);
   let previous: { panels: AttachmentPanel[]; container: number } | undefined;
@@ -36,7 +39,10 @@ const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData)
     const problems = [
       first === undefined ? `no ${kind} panel` : undefined,
       rowPanels.some(
-        (panel) => !containers[container]?.panels.includes(panel) || panel.grid.y !== first?.grid.y
+        (panel) =>
+          !containers[container]?.panels.includes(panel) ||
+          panel.grid.y !== first?.grid.y ||
+          panel.grid.h !== first?.grid.h
       )
         ? `${kind} panels are not in one row`
         : undefined,
@@ -50,7 +56,7 @@ const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData)
         ? `${kind} row is not directly below rows[${index - 1}]`
         : undefined,
     ].filter((problem): problem is string => problem !== undefined);
-    previous = { panels: rowPanels, container };
+    previous = first === undefined ? undefined : { panels: rowPanels, container };
 
     return {
       assertion: `rows[${index}]`,
