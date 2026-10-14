@@ -16,9 +16,8 @@ import {
   boundWorkflow,
   createBoundWorkflow,
   deleteBoundWorkflow,
-  HEADERS,
 } from '../fixtures/bound_workflows';
-import { createServiceAccountSuite } from '../fixtures/service_account_suite';
+import { commonHeaders, createServiceAccountSuite } from '../fixtures/service_account_suite';
 
 // Stateful only: these cases need a user that holds `manage_security` but is not a workflow access
 // control admin. Serverless custom roles cannot grant `manage_security`, and the built-in roles that
@@ -61,13 +60,13 @@ apiTest.describe(
       const password = randomUUID();
       await esClient.security.putUser({ username, password, roles: [username] });
       return {
-        ...HEADERS,
+        ...commonHeaders,
         Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
       };
     };
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient, kbnClient }) => {
-      await setup({ apiClient, samlAuth, config, esClient });
+    apiTest.beforeAll(async ({ apiClient, samlAuth, requestAuth, config, esClient, kbnClient }) => {
+      await setup({ apiClient, samlAuth, requestAuth, config, esClient });
       const { headers, accountId } = getContext();
       await createBoundWorkflow(apiClient, headers, {
         spaceId,

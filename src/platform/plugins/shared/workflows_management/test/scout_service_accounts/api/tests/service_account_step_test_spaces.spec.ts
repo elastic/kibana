@@ -53,7 +53,7 @@ apiTest.describe(
     };
 
     apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient, requestAuth }) => {
-      await setup({ apiClient, samlAuth, config, esClient });
+      await setup({ apiClient, samlAuth, requestAuth, config, esClient });
       const { headers, accountId, dataIndex } = getContext();
       for (const id of [sourceSpace, targetSpace]) {
         const response = await apiClient.post('api/spaces/space', {
