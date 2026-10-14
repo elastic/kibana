@@ -7,6 +7,7 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
+import { SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import {
   assertValidBulkWriteSize,
@@ -182,8 +183,13 @@ const decideStatuses = ({
     }
 
     const { latest, priorDocs, input } = candidate;
+    // A closed series is judged on what this write submits: only an incoming breach reopens it,
+    // never a stale confirmation from its closed episode.
+    const isLive =
+      latest !== undefined &&
+      SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === latest.status);
     const signals =
-      input.event_id === undefined
+      input.event_id === undefined || !isLive
         ? input.signals ?? []
         : mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
     const decision = decideLifecycle({

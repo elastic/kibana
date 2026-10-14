@@ -327,8 +327,10 @@ export function createEventsWriteTool({
 
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
-      **With event_id**: append a version to an existing event; a recovering event returns to
-      active. Signals and topology are merged with prior versions. \`severity\` is your verdict under
+      **With event_id**: append a version to an existing event. Its status follows the merged
+      members' verdicts: a breaching member returns a recovering event to active, while healthy or
+      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too.
+      Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and
       status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
