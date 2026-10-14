@@ -34,7 +34,7 @@ const schema: RootSchema<BrowserPageTranslatedEvent> = {
       description:
         'Which signal showed that a browser translator may be rewriting the page. ' +
         '`chrome_html_class`: `<html>` has the class `translated-ltr` or `translated-rtl`. ' +
-        '`html_lang_changed`: `<html lang>` changed after the page loaded. Kibana sets `lang` in the server render, so that initial value is not reported. A later change can be Firefox or another script. ' +
+        '`html_lang_changed`: `<html lang>` changed after the page loaded. Kibana sets `lang` in the server render, so that initial value is not reported, and writing the same value again does not count. A later change can be Firefox or another script. ' +
         '`font_signature`: a translator `<font>` wrapper was inserted (Edge or the Google Translate extension). ' +
         'Reported at most once per page load. Does not include the page URL or any translated text.',
     },
@@ -160,6 +160,10 @@ export function trackBrowserPageTranslation(
     });
   };
 
+  // Captured once. MutationObserver also records `html.lang = html.lang` and
+  // setAttribute of the current value, and comparing against this ignores those.
+  const initialLang = html.getAttribute('lang');
+
   const onRecords = (records: MutationRecord[]) => {
     if (stopped) {
       return;
@@ -169,8 +173,11 @@ export function trackBrowserPageTranslation(
       return;
     }
     // Kibana sets `<html lang>` in the server render, before this observer exists.
-    // Any change after load is reported, including Firefox and other scripts.
-    if (records.some((record) => record.attributeName === 'lang')) {
+    // A later change can be Firefox or another script. A no-op write is not one.
+    if (
+      records.some((record) => record.attributeName === 'lang') &&
+      html.getAttribute('lang') !== initialLang
+    ) {
       report('html_lang_changed');
     }
   };

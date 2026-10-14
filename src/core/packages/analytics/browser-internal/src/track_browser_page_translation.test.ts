@@ -233,6 +233,25 @@ describe('trackBrowserPageTranslation', () => {
     });
   });
 
+  test('does not report when the current locale is written again', async () => {
+    html.setAttribute('lang', 'en');
+    start();
+
+    html.setAttribute('lang', 'en');
+    html.lang = html.lang;
+    await flushMutations();
+
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+
+    html.setAttribute('lang', 'de');
+    await flushMutations();
+
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analytics.reportEvent).toHaveBeenCalledWith('browser_page_translated', {
+      detector: 'html_lang_changed',
+    });
+  });
+
   test('reports at most one event when translation keeps mutating the page', async () => {
     start();
 
