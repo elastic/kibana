@@ -105,6 +105,65 @@ describe('useChangeHistoryAutoSelection', () => {
     expect(setSelectedChangeId).toHaveBeenCalledWith('evt-2');
   });
 
+  it('preserves a locked selection across background refetches of the first page', () => {
+    const setSelectedChangeId = jest.fn();
+
+    const { result, rerender } = renderHook(
+      ({ items, isFetchingFirstPage }) =>
+        useChangeHistoryAutoSelection({
+          objectId: 'obj-1',
+          items,
+          isFetchingFirstPage,
+          setSelectedChangeId,
+        }),
+      {
+        initialProps: {
+          items: [createItem('evt-2'), createItem('evt-1')],
+          isFetchingFirstPage: false,
+        },
+      }
+    );
+
+    result.current.lockSelectionDecision();
+    setSelectedChangeId.mockClear();
+
+    rerender({ items: [createItem('evt-2'), createItem('evt-1')], isFetchingFirstPage: true });
+    rerender({
+      items: [createItem('evt-3'), createItem('evt-2'), createItem('evt-1')],
+      isFetchingFirstPage: false,
+    });
+
+    expect(setSelectedChangeId).not.toHaveBeenCalled();
+  });
+
+  it('re-selects the first item when the selected item leaves the list', () => {
+    const setSelectedChangeId = jest.fn();
+
+    const { result, rerender } = renderHook(
+      ({ items, selectedChangeId }) =>
+        useChangeHistoryAutoSelection({
+          objectId: 'obj-1',
+          items,
+          isFetchingFirstPage: false,
+          selectedChangeId,
+          setSelectedChangeId,
+        }),
+      {
+        initialProps: {
+          items: [createItem('pending'), createItem('evt-1')],
+          selectedChangeId: 'pending' as string | undefined,
+        },
+      }
+    );
+
+    result.current.lockSelectionDecision();
+    setSelectedChangeId.mockClear();
+
+    rerender({ items: [createItem('evt-1')], selectedChangeId: 'pending' });
+
+    expect(setSelectedChangeId).toHaveBeenCalledWith('evt-1');
+  });
+
   it('invokes onAutoSelect when auto-selecting the first item', async () => {
     const onAutoSelect = jest.fn();
     const firstItem = createItem('evt-1');

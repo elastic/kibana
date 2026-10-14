@@ -87,6 +87,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     items,
     isFetchingFirstPage,
     enabled: isOpen,
+    selectedChangeId,
     setSelectedChangeId,
     onAutoSelect: (item) => reportChangeSelected(item, 'auto_latest'),
   });

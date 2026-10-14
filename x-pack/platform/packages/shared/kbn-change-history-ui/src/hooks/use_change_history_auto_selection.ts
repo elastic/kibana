@@ -13,6 +13,7 @@ export interface UseChangeHistoryAutoSelectionArgs {
   items: ChangeHistoryListItem[];
   isFetchingFirstPage: boolean;
   enabled?: boolean;
+  selectedChangeId?: string;
   setSelectedChangeId: (changeId: string | undefined) => void;
   onAutoSelect?: (item: ChangeHistoryListItem) => void;
 }
@@ -27,6 +28,7 @@ export const useChangeHistoryAutoSelection = ({
   items,
   isFetchingFirstPage,
   enabled = true,
+  selectedChangeId,
   setSelectedChangeId,
   onAutoSelect,
 }: UseChangeHistoryAutoSelectionArgs): UseChangeHistoryAutoSelectionResult => {
@@ -41,17 +43,18 @@ export const useChangeHistoryAutoSelection = ({
   }, []);
 
   useEffect(() => {
-    /** Unlock selection when fetching first page */
-    if (isFetchingFirstPage) decidedRef.current = false;
-  }, [isFetchingFirstPage]);
-
-  useEffect(() => {
     setSelectedChangeId(undefined);
     decidedRef.current = false;
   }, [objectId, setSelectedChangeId]);
 
+  /** Selected item disappeared from the list (e.g. the pending change was saved or discarded) */
+  const isSelectionMissing =
+    selectedChangeId !== undefined &&
+    items.length > 0 &&
+    !items.some((item) => item.id === selectedChangeId);
+
   useEffect(() => {
-    if (!enabled || items.length === 0 || decidedRef.current) {
+    if (!enabled || items.length === 0 || (decidedRef.current && !isSelectionMissing)) {
       return;
     }
 
@@ -68,7 +71,7 @@ export const useChangeHistoryAutoSelection = ({
       /** Lock selection when fetching something other than the first page */
       decidedRef.current = true;
     }
-  }, [enabled, isFetchingFirstPage, items, onAutoSelect, setSelectedChangeId]);
+  }, [enabled, isFetchingFirstPage, isSelectionMissing, items, onAutoSelect, setSelectedChangeId]);
 
   return { lockSelectionDecision, unlockSelectionDecision };
 };
