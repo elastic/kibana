@@ -38,6 +38,7 @@ import {
   listResolutionRulesTool,
   setResolutionRulesTool,
 } from './entity_analytics';
+import { generateEntityAnalyticsBriefTool } from './entity_analytics/generate_brief_tool';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
@@ -118,6 +119,12 @@ export const registerTools = (
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
+  }
+
+  if (experimentalFeatures.entityAnalyticsAiBriefEnabled) {
+    agentBuilder.tools.register(
+      generateEntityAnalyticsBriefTool(core, logger, experimentalFeatures)
+    );
   }
 
   if (experimentalFeatures.leadGenerationEnabled) {

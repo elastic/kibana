@@ -143,6 +143,12 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: true,
 
   /**
+   * PoC: enables the Entity Analytics AI brief in Agent Builder (the scope attachment, the brief
+   * tool and the "Generate AI brief" button on the Entity Analytics page).
+   */
+  entityAnalyticsAiBriefEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
