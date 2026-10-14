@@ -141,7 +141,9 @@ export class PersonaMatrixChatClient {
           prompts: pending,
           _execution_mode: 'local',
         });
-        steps = [...steps, ...(continuation.steps ?? [])];
+        // The converse response is the folded round, so a continuation already carries every step
+        // of earlier executions; replace instead of appending or each round stacks a copy.
+        steps = continuation.steps ?? steps;
         lastResponse = continuation.response ?? lastResponse;
         conversationId = continuation.conversation_id ?? conversationId;
         rounds++;
