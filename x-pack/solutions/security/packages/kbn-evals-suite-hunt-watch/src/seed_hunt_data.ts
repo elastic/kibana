@@ -25,7 +25,7 @@ import {
   SPACE_COPY_SOURCES,
   THREAT_REPORTS_INDEX,
 } from './constants';
-import { apiVersion, httpStatus, isEsNotFound, sleep, spacePath } from './kibana_api';
+import { apiVersion, errorMessage, httpStatus, isEsNotFound, sleep, spacePath } from './kibana_api';
 
 const GENERATOR_CLI = Path.join(
   'x-pack',
@@ -40,6 +40,58 @@ const GENERATOR_CLI = Path.join(
 
 /** Pack the generator seeds. Telemetry lands in shared `logs-aws.*` streams. */
 const GENERATOR_PACK = 'aws-iam';
+
+/**
+ * Fleet's `AGENT_STATUS_CHANGE_DATA_STREAM_NAME` (`x-pack/platform/plugins/shared/fleet/common`).
+ * Not imported: the suite only needs the name, and the stream is covered by the stock `logs-*-*`
+ * template, so creating it needs nothing from Fleet.
+ */
+export const FLEET_AGENT_STATUS_CHANGE_STREAM = 'logs-elastic_agent.status_change-default';
+
+/**
+ * The one Security default pattern that resolves to indices on this stack (the generator pack,
+ * the endpoint fixtures, and Fleet's streams all land under it), so it is where a shard can still
+ * be initializing when the first hunt searches.
+ */
+const HUNT_SCOPE_PATTERN = 'logs-*';
+
+const isEsResourceAlreadyExists = (error: unknown): boolean =>
+  (error as { meta?: { statusCode?: number } })?.meta?.statusCode === 400 &&
+  /resource_already_exists_exception/.test(errorMessage(error));
+
+/**
+ * The generator enrolls a Fleet agent for the correlated host, and Fleet's status change task
+ * writes its first document for that agent a minute or so later, creating
+ * `logs-elastic_agent.status_change-default` on the fly. That stream sits under the Worker's
+ * `logs-*` scope, and a Tier 1 search that lands while its primary is still initializing comes
+ * back with one failed shard, which the coordinator records as `search_partial` and the run ends
+ * `partial` (seen live: the stream and the search shared the same second). Creating the stream
+ * before any hunt runs, then waiting for every scoped shard to start, takes that race out of the
+ * suite without hiding a real `partial` from the product.
+ */
+export const settleHuntScope = async ({
+  esClient,
+  log,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  try {
+    await esClient.indices.createDataStream({ name: FLEET_AGENT_STATUS_CHANGE_STREAM });
+    log.info(`Created ${FLEET_AGENT_STATUS_CHANGE_STREAM} ahead of Fleet's first status change`);
+  } catch (error) {
+    if (!isEsResourceAlreadyExists(error)) {
+      throw error;
+    }
+    log.info(`${FLEET_AGENT_STATUS_CHANGE_STREAM} already exists; waiting for its shards`);
+  }
+  await esClient.cluster.health({
+    index: HUNT_SCOPE_PATTERN,
+    wait_for_status: 'yellow',
+    wait_for_no_initializing_shards: true,
+    timeout: '60s',
+  });
+};
 
 /**
  * Mirrors `HUNT_INVESTIGATION_ID_NAMESPACE` and the frozen namespace uuid in the alertzero
@@ -251,6 +303,7 @@ export const seedHuntData = async ({
 }): Promise<() => Promise<void>> => {
   await assertThreatReportsIndexExists({ esClient });
   await runGenerator({ target, log });
+  await settleHuntScope({ esClient, log });
 
   for (const { spaceId, sourceReportId, copyReportId } of SPACE_COPY_SOURCES) {
     await copyReportToSpace({ esClient, sourceReportId, copyReportId, spaceId });

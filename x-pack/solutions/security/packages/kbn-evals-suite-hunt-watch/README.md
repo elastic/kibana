@@ -9,7 +9,10 @@ the Investigation conversation, its Proposals, and the report doc).
 
 All CODE evaluators are gates: 1 means the expectation was met. `score: null` is never a pass.
 `label: 'N/A'` means the check does not apply to the row; `label: 'MISSING'` means the
-artifact it needed was absent, which the golden gate treats as a failure.
+artifact it needed was absent. After each dataset's summary, `assertCodeScoresPass` throws if any
+CODE evaluator scored anything but 1 or N/A on any row, naming the evaluator and the row, so a
+pinned behavior that changes turns the Playwright test (and the CI step) red. LLM judges are
+never part of that gate.
 
 | Name | Kind | What it checks |
 |---|---|---|
@@ -89,6 +92,15 @@ verifies every bound id exists. Teardown deletes the seeded reports. The eval sp
 are created once and left in place: deleting and recreating them between runs races the
 per-space Worker install and its service-account binding on a long-lived stack.
 
+After the generator, `settleHuntScope` creates Fleet's `logs-elastic_agent.status_change-default`
+data stream if Fleet has not already, then waits for every `logs-*` shard to finish initializing.
+The generator enrolls a Fleet agent for the correlated host, and Fleet's first status change for
+it can land anywhere from one second to a minute later, creating that stream under the Worker's
+`logs-*` scope. A Tier 1 search that hits the new primary before it starts comes back with one
+failed shard, which the coordinator records as `search_partial` and the run ends `partial`; seen
+live, with the stream and the search in the same second. The gate would fail that row for a
+reason that has nothing to do with the Worker, so the suite removes the race up front.
+
 Before each row, `resetHuntReport` dismisses pending Proposals on the report's Investigation,
 waits for them to settle (dismiss only resumes the gate workflow; the status flips a few
 seconds later, and the Worker skips a report whose Investigation still has an open Proposal),
@@ -125,6 +137,29 @@ In CI the `Evals: Hunt Watch` step in `.buildkite/pipelines/evals/llm_evals.yml`
 over `weekly_eis_core_models` with `EVAL_SERVER_CONFIG_SET: 'evals_hunt_watch'`, and sets
 `FTR_EIS_CCM: '1'`, which does the same provisioning as `node scripts/eis`. The judge comes from
 the `models:judge:<id>` PR label, resolved by `normalizeEvaluationConnectorId`.
+
+## Reading a run against the baseline
+
+There are two kinds of numbers and they are compared differently.
+
+CODE evaluators are binary and gated. The baseline is "every applicable check is 1 on every
+row", and the suite enforces it: a 0 or MISSING fails the dataset's test with the evaluator and
+row named. A weekly run that goes red is a regression; there is nothing to compare by eye.
+
+LLM judges (Factuality, Relevance, Groundedness, Narrative Rubric) are continuous, run on two
+or three rows per cohort, and swing by about ±0.1 between runs. A single number from one run is
+not a baseline. Every run writes its per-row, per-evaluator scores to the evaluations Kibana
+tagged with suite, branch, model and experiment id, and the comparison is a paired test against
+the latest `main` run of the same suite and model:
+
+```bash
+# experiment ids are logged as "✅ Experiment <id> completed", one per dataset
+node scripts/evals compare <experiment-id> --baseline-branch main --suite hunt-watch
+```
+
+On a PR carrying the `evals:hunt-watch` label, CI runs this for you and posts the comparison as a
+PR comment (`.buildkite/scripts/steps/evals/post_eval_comment.sh`). Judge thresholds stay
+unratified in `CAPABILITY_PROFILE.md` until there is enough weekly history to set them.
 
 ## Lockdown scan
 
