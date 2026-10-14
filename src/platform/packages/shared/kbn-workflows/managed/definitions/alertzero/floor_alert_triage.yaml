@@ -85,9 +85,9 @@ consts:
 
 steps:
   # ---------------------------------------------------------------------------
-  # 1. Abort when Alert Analysis is off in this space. Turning the Worker on does not require
-  #    Alert Analysis (the Watch page only warns about it), so this is where it is enforced.
-  #    Fail-closed: a failed fetch after retries fails the sweep. The same read
+  # 1. Abort when Alert Analysis is off in this space. Enablement is checked at Worker turn-on;
+  #    this is the runtime complement for an operator who later turns analysis off and leaves the
+  #    Worker running. Fail-closed: a failed fetch after retries fails the sweep. The same read
   #    gives the tag prefix of Alert Analysis, so alerts it analysed on its own are left alone.
   # ---------------------------------------------------------------------------
   - name: fetch_analysis_runtime_config
