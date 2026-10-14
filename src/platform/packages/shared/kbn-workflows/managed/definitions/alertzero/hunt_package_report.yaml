@@ -150,6 +150,7 @@ steps:
         type: workflow.executeAsync
         with:
           workflow-id: system-security-hunt-proposal-gate
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ foreach.item.conversationId }}"
             title: "{{ foreach.item.title }}"
@@ -214,6 +215,8 @@ steps:
         run_incomplete
         {%- elsif variables.dismiss_close_failed == true -%}
         run_incomplete
+        {%- elsif steps.decide_and_package.output.dismissHold == 'check_failed' -%}
+        run_incomplete
         {%- elsif variables.dispatch_failed_count > 0 -%}
         run_incomplete
         {%- else -%}
@@ -226,6 +229,8 @@ steps:
         {{ steps.decide_and_package.output.reason }}
         {%- elsif steps.decide_and_package.output.mintSuppression == 'check_failed' -%}
         could not verify whether the Investigation already has a Proposal, so no Proposal was minted
+        {%- elsif steps.decide_and_package.output.dismissHold == 'check_failed' -%}
+        could not verify whether the Investigation has an open Proposal, so it was left open instead of being closed
         {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
         {{ steps.decide_and_package.error.message }}
         {%- elsif variables.dismiss_close_failed == true -%}
@@ -256,6 +261,10 @@ steps:
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
         {% elsif packaged.dismiss == true and variables.dismiss_close_failed == true -%}
         No confirmed hits, but packaging could not close this Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
+        {% elsif packaged.dismissHold == 'open_proposal' -%}
+        No confirmed hits this run, but the Investigation still has a Proposal from an earlier run that is pending or executing, so packaging left it open rather than closing it as benign. Decide the existing Proposal first{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        {% elsif packaged.dismissHold == 'check_failed' -%}
+        No confirmed hits this run, but packaging could not verify whether the Investigation has an open Proposal, so it left the Investigation open rather than risk closing it over one{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismiss == true -%}
         No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.mintSuppression == 'check_failed' -%}

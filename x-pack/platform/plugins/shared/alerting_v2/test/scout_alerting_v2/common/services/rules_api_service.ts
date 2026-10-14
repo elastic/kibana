@@ -23,6 +23,7 @@ import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
   RuleResponse,
+  UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import {
   COMMON_HEADERS,
@@ -44,6 +45,7 @@ export interface RuleApiSpaceOptions {
 export interface RulesApiService {
   create: (data: CreateRuleData, options?: RuleApiSpaceOptions) => Promise<RuleResponse>;
   upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
+  update: (id: string, data: UpdateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesRequest) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
@@ -129,6 +131,17 @@ export const getRulesApiService = ({
       measurePerformanceAsync(log, 'rules.upsert', async () => {
         const response = await kbnClient.request<RuleResponse>({
           method: 'PUT',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
+          headers: COMMON_HEADERS,
+          body: data,
+        });
+        return response.data;
+      }),
+
+    update: (id, data) =>
+      measurePerformanceAsync(log, 'rules.update', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'PATCH',
           path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,
           body: data,

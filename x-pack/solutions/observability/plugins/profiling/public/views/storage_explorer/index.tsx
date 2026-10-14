@@ -17,10 +17,12 @@ import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useState, useEffect } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { DataBreakdown } from './data_breakdown';
@@ -28,8 +30,39 @@ import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_val
 import { HostBreakdown } from './host_breakdown';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { Summary } from './summary';
+import {
+  getStorageExplorerAvailability,
+  StorageExplorerAvailability,
+} from '../../utils/get_storage_explorer_availability';
+import { AddDataTabs } from '../add_data_view/types';
 
 export function StorageExplorerView() {
+  const {
+    data: { universalProfiling },
+  } = useEnabledProfilingStatus();
+  const profilingRouter = useProfilingRouter();
+  const {
+    query: { rangeFrom, rangeTo, kuery },
+  } = useProfilingParams('/storage-explorer');
+
+  const availability = getStorageExplorerAvailability(universalProfiling);
+
+  // Direct links can still reach Storage explorer without Universal Profiling set up
+  useEffect(() => {
+    if (availability === StorageExplorerAvailability.NotSetUp) {
+      profilingRouter.replace('/add-data-instructions', {
+        path: {},
+        query: { selectedTab: AddDataTabs.Kubernetes },
+      });
+    } else if (availability === StorageExplorerAvailability.NotAvailable) {
+      profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });
+    }
+  }, [availability, profilingRouter, rangeFrom, rangeTo, kuery]);
+
+  return availability === StorageExplorerAvailability.Available ? <StorageExplorerContent /> : null;
+}
+
+function StorageExplorerContent() {
   const { query } = useProfilingParams('/storage-explorer');
   const { rangeFrom, rangeTo, indexLifecyclePhase } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });

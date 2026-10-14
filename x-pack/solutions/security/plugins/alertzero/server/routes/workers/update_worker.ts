@@ -14,15 +14,20 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   ALERTZERO_WORKER_URL_TEMPLATE,
+  SYSTEM_SECURITY_WORKER_CATALOG,
   UpdateWorkerRequestBody,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
+import { workerName } from '../../../common/worker_names';
 import type { RouteDependencies } from '../register_routes';
-import type { AlertTriageEnableBlockedReason } from '../../services/workers/workers_service';
+import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import { hasManageSecurity } from './has_manage_security';
 
-const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReason, () => string> = {
+const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
+  WorkerEnableBlockedReason,
+  (displayName: string) => string
+> = {
   alertAnalysisWorkflowDisabled: () =>
     i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
       defaultMessage:
@@ -38,7 +43,16 @@ const ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES: Record<AlertTriageEnableBlockedReaso
       defaultMessage:
         'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
     }),
+  noModel: (displayName) =>
+    i18n.translate('xpack.alertzero.workerEnableNoModelErrorMessage', {
+      defaultMessage:
+        '{workerName} cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
+      values: { workerName: displayName },
+    }),
 };
+
+const workerDisplayName = (workerId: string): string =>
+  workerName(workerId, SYSTEM_SECURITY_WORKER_CATALOG.find(({ id }) => id === workerId)?.name);
 
 const UpdateWorkerRequestParams = lazySchema(() =>
   z.object({
@@ -134,7 +148,11 @@ export const registerUpdateWorkerRoute = ({
               });
             case 'blocked':
               return response.badRequest({
-                body: { message: ALERT_TRIAGE_ENABLE_BLOCKED_MESSAGES[result.reason]() },
+                body: {
+                  message: WORKER_ENABLE_BLOCKED_MESSAGES[result.reason](
+                    workerDisplayName(workerId)
+                  ),
+                },
               });
             case 'invalid':
               return response.badRequest({

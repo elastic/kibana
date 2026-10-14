@@ -180,7 +180,7 @@ describe('SlackAppService', () => {
           {
             spaces: ['*'],
             feature: {
-              nightshift: ['read'],
+              nightshift: ['minimal_all'],
               streams: ['read'],
               agentBuilder: ['read'],
               actions: ['read'],

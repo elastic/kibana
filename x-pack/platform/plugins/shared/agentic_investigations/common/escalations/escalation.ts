@@ -152,3 +152,11 @@ export interface LinkedInvestigationSummary {
 export interface ListLinkedInvestigationsResponse {
   results: LinkedInvestigationSummary[];
 }
+
+/** Response of the `POST /{id}/_sync_attachments` endpoint. Both counts are 0 when nothing needed syncing. */
+export interface SyncEscalationResponse {
+  /** Attachments newly copied from linked investigations into the escalation. */
+  copied: number;
+  /** Attachments that needed copying but could not be written. */
+  failed: number;
+}

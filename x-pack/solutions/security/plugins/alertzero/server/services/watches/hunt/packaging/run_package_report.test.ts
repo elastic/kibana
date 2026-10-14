@@ -158,6 +158,7 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
   resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1' }),
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
+  hasOpenProposal: async () => false,
   ...overrides,
 });
 
@@ -399,6 +400,85 @@ describe('runPackageReport', () => {
       expect(proposal.actionInput?.parameters).toEqual({ entity_id: 'ent-abc' });
       expect(proposal.actionInput?.endpoint_ids).toEqual(['agent-1']);
     }
+  });
+
+  describe('open-Proposal dismiss guard', () => {
+    const cleanRun = (hasOpenProposal: RunPackageReportDeps['hasOpenProposal']) =>
+      runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: false,
+        attachments: [],
+        expectedSseCount: 0,
+        deps: deps({ hasOpenProposal }),
+      });
+
+    it('dismisses a clean run when no Proposal is open', async () => {
+      const result = await cleanRun(async () => false);
+      expect(result.status === 'packaged' && result.dismiss).toBe(true);
+      expect(result.status === 'packaged' && result.dismissHold).toBe('none');
+    });
+
+    it('holds a clean run open when a Proposal is still pending or executing', async () => {
+      const result = await cleanRun(async () => true);
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') {
+        return;
+      }
+      expect(result.dismiss).toBe(false);
+      expect(result.dismissHold).toBe('open_proposal');
+      // The step output must not claim a closure that did not happen.
+      expect(result.closureSummary).not.toContain('Closing');
+      expect(result.closureSummary).toContain('Leaving the Investigation open');
+      expect(result.proposals).toEqual([]);
+      expect(result.expectedProposalCount).toBe(0);
+      // Coverage is still recorded: the hunt did look.
+      expect(result.coverage.written.length).toBeGreaterThan(0);
+    });
+
+    it('fails closed when the open-Proposal lookup throws', async () => {
+      const result = await cleanRun(async () => {
+        throw new Error('boom');
+      });
+      expect(result.status === 'packaged' && result.dismiss).toBe(false);
+      expect(result.status === 'packaged' && result.dismissHold).toBe('check_failed');
+    });
+
+    it('holds the decided clean-with-SSE dismissal too', async () => {
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: false,
+        attachments: [sseAttachment({ hit: false })],
+        expectedSseCount: 1,
+        deps: deps({ hasOpenProposal: async () => true }),
+      });
+      expect(result.status === 'packaged' && result.dismiss).toBe(false);
+      expect(result.status === 'packaged' && result.dismissHold).toBe('open_proposal');
+    });
+
+    it('does not look up open Proposals for a run that is not a dismissal', async () => {
+      const hasOpenProposal = jest.fn().mockResolvedValue(true);
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
+        deps: deps({ hasOpenProposal }),
+      });
+      expect(hasOpenProposal).not.toHaveBeenCalled();
+      expect(result.status === 'packaged' && result.dismissHold).toBe('none');
+    });
   });
 
   // Phase 1 of the Proposals-side dedup Sergi/Astra raised: a rerun that lands back on an

@@ -8,10 +8,8 @@
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type { CaseCustomField, User } from '../../common/types/domain';
-import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
-  AttachmentRequest,
   BulkCreateAttachmentsRequestV2,
   CasePatchRequest,
   CasePostRequest,
@@ -49,13 +47,12 @@ import type {
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
-  getCaseCommentsUrl,
+  getCaseAttachmentDetailsUrl,
   getCasesDeleteFileAttachmentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseFindUserActionsUrl,
-  getCaseCommentDeleteUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
@@ -69,6 +66,7 @@ import {
   CASE_REPORTERS_URL,
   CASE_TAGS_URL,
   CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
@@ -453,19 +451,6 @@ export const replaceCustomField = async ({
   return convertToCamelCase<CaseCustomField, CaseUICustomField>(response);
 };
 
-export const postComment = async (
-  newComment: AttachmentRequest,
-  caseId: string,
-  signal: AbortSignal
-): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(`${CASES_URL}/${caseId}/comments`, {
-    method: 'POST',
-    body: JSON.stringify(newComment),
-    signal,
-  });
-  return convertCaseToCamelCase(decodeCaseResponse(response));
-};
-
 export const patchComment = async ({
   caseId,
   commentId,
@@ -480,19 +465,17 @@ export const patchComment = async ({
   version: string;
   owner: string;
   signal?: AbortSignal;
-}): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
-    method: 'PATCH',
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCaseAttachmentDetailsUrl(caseId, commentId), {
+    method: 'PUT',
     body: JSON.stringify({
-      comment: commentUpdate,
-      type: AttachmentType.user,
-      id: commentId,
-      version,
+      type: COMMENT_ATTACHMENT_TYPE,
+      data: { content: commentUpdate },
       owner,
+      version,
     }),
     signal,
   });
-  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const deleteComment = async ({
@@ -504,7 +487,7 @@ export const deleteComment = async ({
   commentId: string;
   signal?: AbortSignal;
 }): Promise<void> => {
-  await KibanaServices.get().http.fetch<Case>(getCaseCommentDeleteUrl(caseId, commentId), {
+  await KibanaServices.get().http.fetch(getCaseAttachmentDetailsUrl(caseId, commentId), {
     method: 'DELETE',
     signal,
   });

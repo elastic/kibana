@@ -148,7 +148,7 @@ apiTest.describe(
           expect(rule).toStrictEqual({ id: RULE_ID_KEPT, name: RULE_KEPT_NAME });
         }
         for (const rule of deletedRuleRefs) {
-          expect(rule).toStrictEqual({ id: RULE_ID_DELETED, name: null });
+          expect(rule).toStrictEqual({ id: RULE_ID_DELETED });
         }
       }
     );

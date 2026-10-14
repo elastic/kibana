@@ -51,9 +51,11 @@ const LOAD_ESQL_DOCS_SCRIPT = resolve(
   'x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js'
 );
 
-/** Connector used by load_esql_docs to enrich ES|QL docs (must exist in preconfigured connectors) */
-const ESQL_DOCS_CONNECTOR_ID =
-  process.env.ESQL_DOCS_CONNECTOR_ID || '.openai-gpt-4.1-chat_completion';
+/** Inference endpoint used by load_esql_docs to enrich ES|QL docs. */
+const ESQL_DOCS_INFERENCE_ID =
+  process.env.ESQL_DOCS_INFERENCE_ID ||
+  process.env.ESQL_DOCS_CONNECTOR_ID ||
+  '.openai-gpt-5.5-chat_completion';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -75,13 +77,13 @@ export default function ({ getService }: FtrProviderContext) {
       this.timeout(120 * 60 * 1000);
       const nodeBin = process.execPath;
 
-      it(`runs load_esql_docs with connectorId=${ESQL_DOCS_CONNECTOR_ID}`, async function () {
+      it(`runs load_esql_docs with inferenceId=${ESQL_DOCS_INFERENCE_ID}`, async function () {
         const kibanaUrl = formatUrl(config.get('servers.kibana'));
         const esUrl = formatUrl(config.get('servers.elasticsearch'));
 
         const loadEsqlDocsArgs = [
           LOAD_ESQL_DOCS_SCRIPT,
-          `--connectorId=${ESQL_DOCS_CONNECTOR_ID}`,
+          `--inferenceId=${ESQL_DOCS_INFERENCE_ID}`,
           `--kibana=${kibanaUrl}`,
           `--elasticsearch=${esUrl}`,
         ];

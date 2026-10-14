@@ -480,7 +480,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             isSortEnabled={isSortEnabled}
             sort={sort}
             rowHeightState={rowHeight}
-            isPlainRecord={isTextBasedQuery}
             rowsPerPageState={itemsPerPage}
             onUpdateRowsPerPage={onChangeItemsPerPage}
             onUpdateRowHeight={onUpdateRowHeight}

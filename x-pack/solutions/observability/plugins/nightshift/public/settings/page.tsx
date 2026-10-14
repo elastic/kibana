@@ -46,7 +46,7 @@ type SettingsPageHeaderProps = Pick<
   | 'onSandboxSecretsClick'
   | 'onCustomContextClick'
   | 'onAutomationsClick'
-  | 'investigationsHref'
+  | 'automationsHref'
 >;
 
 export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderProps }) {

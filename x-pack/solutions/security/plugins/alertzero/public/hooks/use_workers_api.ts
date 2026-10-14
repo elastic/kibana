@@ -59,7 +59,13 @@ export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void =
     return;
   }
   const cause = error instanceof Error ? error : new Error(String(error));
-  toasts.addError(cause, { title: WORKER_UPDATE_ERROR_TITLE });
+  const body = isHttpFetchError(error)
+    ? (error.body as { message?: unknown } | undefined)
+    : undefined;
+  toasts.addError(cause, {
+    title: WORKER_UPDATE_ERROR_TITLE,
+    ...(typeof body?.message === 'string' ? { toastMessage: body.message } : {}),
+  });
 };
 
 export const notifyWorkerRulesSkipped = (toasts: IToasts, skippedRuleCount: number): void => {

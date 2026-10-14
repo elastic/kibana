@@ -13,8 +13,8 @@ import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
-import { hasProfilingData } from '../utils/has_profiling_data';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
+import { hasUsableProfilingData } from '../utils/has_usable_profiling_data';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 import { ProfilingStatusErrorPrompt } from './profiling_status_error_prompt';
@@ -89,10 +89,7 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
     return children;
   }
 
-  if (
-    (hasProfilingData(data) && data.universalProfiling.hasSetup) ||
-    UTILITY_PATHNAMES.includes(pathname)
-  ) {
+  if (hasUsableProfilingData(data) || UTILITY_PATHNAMES.includes(pathname)) {
     return children;
   }
 

@@ -13,7 +13,12 @@ import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action'
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import { ConversationTitle } from './conversation_title';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
@@ -202,6 +207,7 @@ export interface RegisterEscalationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
   /** Escalation template id (typically `'escalation'`). Agent Builder throws on duplicate. */
   templateId: string;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /** Localized template display name. */
   name: string;
   icon?: IconType;
@@ -220,6 +226,11 @@ export interface RegisterEscalationTemplateUIOptions {
    * Supplied by the caller so the list can use Kibana HTTP hooks unavailable in this package.
    */
   renderLinkedInvestigations?: RenderLinkedInvestigations;
+  /**
+   * When provided, the header renders it beside the title, e.g. a spinner while the escalation's
+   * attachments sync. Supplied by the caller so it can use Kibana HTTP hooks and toasts.
+   */
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 /** Returns the tab ids registered by the escalation template. */
@@ -230,9 +241,9 @@ export const getEscalationTabIds = (templateId: string): readonly string[] => [
 /**
  * Registers the escalation conversation details flyout UI.
  *
- * The flyout shows a header (title, status, assignees) and — when `renderLinkedInvestigations`
- * is supplied — an overview tab listing the linked investigations. With a single tab Agent Builder
- * hides the tab bar, so the list reads as the flyout body.
+ * The flyout shows a header (title, status, assignees) and an overview tab with the summary, the
+ * grouped attachments and — when `renderLinkedInvestigations` is supplied — the linked
+ * investigations. With a single tab Agent Builder hides the tab bar, so it reads as the body.
  *
  * Call once from the plugin's `start`, **after** `registerAgenticInvestigationTemplateUI`.
  * Agent Builder throws if the template id is already registered.
@@ -240,11 +251,13 @@ export const getEscalationTabIds = (templateId: string): readonly string[] => [
 export const registerEscalationTemplateUI = ({
   conversationTemplates,
   templateId,
+  groupedAttachments,
   name,
   icon,
   renderAssignees,
   renderStatus,
   renderLinkedInvestigations,
+  renderSyncIndicator,
 }: RegisterEscalationTemplateUIOptions): void => {
   const [overviewTabId] = getEscalationTabIds(templateId);
 
@@ -255,6 +268,7 @@ export const registerEscalationTemplateUI = ({
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyEscalationOverviewSlot
             conversation={conversation}
+            groupedAttachments={groupedAttachments}
             renderLinkedInvestigations={renderLinkedInvestigations}
             onOpenInvestigation={({ conversationId, agentId }) =>
               openFullscreenConversation({ conversationId, agentId, openDetails: true })
@@ -277,6 +291,7 @@ export const registerEscalationTemplateUI = ({
               conversation={conversation}
               renderAssignees={renderAssignees}
               renderStatus={renderStatus}
+              renderSyncIndicator={renderSyncIndicator}
               refetchConversation={refetchConversation}
             />
           </Suspense>

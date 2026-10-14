@@ -17,6 +17,9 @@ import type { ServiceSettingsPersistedState } from '../service_settings_step/use
 import { buildInstanceStatuses, collectDeployResults, deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { toSOServiceVars } from './package_inputs';
+import { fetchAgentlessSecretRefs, withoutCoveredCredentials } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
+import type { ExistingSecretRefs } from './secret_refs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
 import {
   cleanupManagedIntegrationsPolicies,
@@ -28,6 +31,7 @@ import {
   buildEffectivePendingCleanup,
   buildCleanedLiveStale,
   buildRemainingPending,
+  pickSecretSourcePolicyId,
 } from './cleanup_reconciliation';
 
 export interface UseMiDeployParams {
@@ -45,6 +49,11 @@ export interface UseMiDeployParams {
   removeDeployInstances: (instanceIds: string[]) => void;
   getLatestFailedInstances: () => string[];
   persistPendingIacTemplate: () => Promise<void>;
+  /**
+   * Drops the typed keys from memory. After a successful deploy their secrets live in Fleet, and
+   * the next deploy reuses those instead of creating a duplicate secret from the typed value.
+   */
+  clearStagedStaticKeys: () => void;
   setIsDeploying: (deploying: boolean) => void;
   setFailedInstances: (instances: string[]) => void;
   createDeployment: UseOnboardingSOResult['createDeployment'];
@@ -227,6 +236,7 @@ export function useMiDeploy({
   removeDeployInstances,
   getLatestFailedInstances,
   persistPendingIacTemplate,
+  clearStagedStaticKeys,
   setIsDeploying,
   setFailedInstances,
   createDeployment,
@@ -244,6 +254,20 @@ export function useMiDeploy({
     async (instanceIds?: string[]) => {
       const isInitialDeploy = instanceIds === undefined;
 
+      // New policies reuse the credentials the user kept from an already deployed policy. Not
+      // needed when the credentials were typed in full or come from an identity.
+      const { connectorId: deployConnectorId, staticKeys: typedKeys } = authenticateAndDeployStep;
+      const needsKeptSecretRefs =
+        !deployConnectorId && !(typedKeys?.access_key_id && typedKeys?.secret_access_key);
+      // Read before cleanup, from a policy cleanup keeps: deleting the policy that holds a secret
+      // deletes the secret, so refs read from it would dangle. Only called once the run has
+      // marked itself as deploying, so the lookup cannot be raced by a second click.
+      const loadKeptSecretRefs = (effectivePendingCleanup: Record<string, string>) =>
+        fetchAgentlessSecretRefs(
+          pickSecretSourcePolicyId(policyIdsByInstance ?? {}, effectivePendingCleanup)
+        );
+      let keptSecretRefs: ExistingSecretRefs | undefined;
+
       let groupsToDeploy: DeployGroup[];
       let cleanupOps: PolicyCleanupOps = { toDelete: [], toUpdate: [] };
       // Instance IDs whose cleanup succeeded this run. Used to drop stale entries from the
@@ -253,6 +277,25 @@ export function useMiDeploy({
       // undefined when cleanup didn't run; retry path writes mid-flight, initial path in final update.
       let remainingPending: Record<string, string> | undefined;
       let dirtyUpdateApplied = false;
+
+      const hasTypedSecrets =
+        !deployConnectorId && Boolean(typedKeys?.access_key_id || typedKeys?.secret_access_key);
+      // The auth state a policy is built with: when its credentials come from a secret an earlier
+      // policy already stored, the typed values those refs cover are left out so Fleet does not store
+      // them again.
+      const withSharedRefs = (
+        sharedRefs: ExistingSecretRefs | undefined
+      ): AuthenticateAndDeployStepState =>
+        sharedRefs
+          ? {
+              ...authenticateAndDeployStep,
+              staticKeys:
+                authenticateAndDeployStep.staticKeys &&
+                withoutCoveredCredentials(authenticateAndDeployStep.staticKeys, sharedRefs),
+              existingSecretRefs: sharedRefs,
+            }
+          : authenticateAndDeployStep;
+      let dirtySharedRefs: ExistingSecretRefs | undefined;
 
       // Updates all already-deployed MI policies with the current session config.
       // Returns whether any policy update failed and the full set of IDs to mark failed.
@@ -282,14 +325,20 @@ export function useMiDeploy({
             ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
             : { hadFailures: false, allFailedIds: [] };
         }
-        const results = await Promise.allSettled(
-          [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
+        // Typed credentials become new Fleet secrets: store them once on the first policy and have
+        // the others use that secret, so a replacement never leaves one secret per policy.
+        const { results, sharedRefs: storedRefs } = await runWithSharedSecrets({
+          items: [...byPolicy.entries()],
+          hasTypedSecrets,
+          // An update can delete the secret it replaced: finish one before starting the next.
+          sequential: true,
+          run: ([policyId, instanceIdsForPolicy], sharedRefs) =>
             updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {
               instances: serviceSettings?.instances ?? [],
               storedServiceVars: serviceSettings?.serviceVars ?? {},
               globalRegion: serviceSettings?.globalRegion ?? '',
               namespace,
-              authenticateAndDeployStep,
+              authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
               // Override the connector when auth changed or when deploying with static keys.
               // Static keys never use a cloud connector; any connector attached externally after
@@ -300,9 +349,12 @@ export function useMiDeploy({
               ...(isAuthDirty || authenticateAndDeployStep.authMethod === 'static_keys'
                 ? { overrideCloudConnector: authenticateAndDeployStep.connectorId ?? null }
                 : {}),
-            })
-          )
-        );
+            }),
+          getPolicyId: ([policyId]) => policyId,
+          fetchRefs: fetchAgentlessSecretRefs,
+        });
+        // New policies of this run use the secret just created, not another one.
+        dirtySharedRefs = storedRefs;
         results.forEach((result) => {
           if (result.status === 'rejected') {
             // eslint-disable-next-line no-console
@@ -395,6 +447,7 @@ export function useMiDeploy({
             }
             setIsDeploying(false);
             updateDetectAndReviewStep({ isDeploying: false, isDirty: false, isAuthDirty: false });
+            clearStagedStaticKeys();
             await persistPendingIacTemplate();
             return { cleanupFailed: false };
           }
@@ -410,6 +463,10 @@ export function useMiDeploy({
         });
         onContinue();
 
+        if (needsKeptSecretRefs && groupsToDeploy.length > 0) {
+          keptSecretRefs = await loadKeptSecretRefs(plan.effectivePendingCleanup);
+        }
+
         let cleanupFailed = false;
         if (plan.hasPendingCleanup) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
@@ -419,7 +476,9 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
-            authenticateAndDeployStep,
+            // A dirty update may have just stored new keys for the policies this updates: keep
+            // them instead of storing the typed ones again, which would orphan the shared refs.
+            authenticateAndDeployStep: withSharedRefs(dirtySharedRefs),
             servicesMap: servicesMap ?? new Map(),
           });
           ({ cleanedInstanceIds, remainingPending, cleanupFailed } = reconcileMiCleanupOps(
@@ -495,6 +554,10 @@ export function useMiDeploy({
         setIsDeploying(true);
         updateDetectAndReviewStep({ isDeploying: true });
 
+        if (needsKeptSecretRefs && groupsToDeploy.length > 0) {
+          keptSecretRefs = await loadKeptSecretRefs(plan.retryPending);
+        }
+
         // Hoist cleanup result so it can be merged into a single updateDetectAndReviewStep call.
         // React may batch synchronous state updates, meaning two sequential calls in the same
         // tick both capture the same prev state — the second call would clobber the
@@ -508,7 +571,9 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
-            authenticateAndDeployStep,
+            // A dirty update may have just stored new keys for the policies this updates: keep
+            // them instead of storing the typed ones again, which would orphan the shared refs.
+            authenticateAndDeployStep: withSharedRefs(dirtySharedRefs),
             servicesMap: servicesMap ?? new Map(),
           });
           const retryReconciliation = reconcileMiCleanupOps(
@@ -595,17 +660,24 @@ export function useMiDeploy({
         }
       }
 
-      // Promise.allSettled preserves insertion order, so results[i] matches groupsToDeploy[i].
-      const results = await Promise.allSettled(
-        groupsToDeploy.map((group) =>
+      // Results are in groupsToDeploy order. Typed credentials are stored once (first policy) and
+      // shared by the other new policies, or by all of them when a dirty update just stored them.
+      const { results } = await runWithSharedSecrets({
+        items: groupsToDeploy,
+        hasTypedSecrets,
+        initialRefs: dirtySharedRefs,
+        run: (group, sharedRefs) =>
           deployGroup(group, {
             namespace,
             globalRegion,
             storedServiceVars,
-            authenticateAndDeployStep,
-          })
-        )
-      );
+            authenticateAndDeployStep: sharedRefs
+              ? withSharedRefs(sharedRefs)
+              : { ...authenticateAndDeployStep, existingSecretRefs: keptSecretRefs },
+          }),
+        getPolicyId: (_group, outcome) => outcome.policyId,
+        fetchRefs: fetchAgentlessSecretRefs,
+      });
 
       const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
       const {
@@ -658,6 +730,7 @@ export function useMiDeploy({
       }
 
       if (mergedFailed.length === 0) {
+        clearStagedStaticKeys();
         await persistPendingIacTemplate();
       }
 
@@ -698,6 +771,7 @@ export function useMiDeploy({
       removeDeployInstances,
       getLatestFailedInstances,
       persistPendingIacTemplate,
+      clearStagedStaticKeys,
       setIsDeploying,
       setFailedInstances,
       createDeployment,

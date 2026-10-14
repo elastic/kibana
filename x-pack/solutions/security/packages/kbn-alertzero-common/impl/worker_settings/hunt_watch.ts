@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  WATCH_AUTONOMY_LEVELS,
-} from '../../constants';
+import { CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS } from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
+import { SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID } from '../../constants';
 import type { WorkerSettingsDeclaration } from './types';
 
 /**
@@ -19,6 +17,6 @@ import type { WorkerSettingsDeclaration } from './types';
  */
 export const CONTINUOUS_THREAT_HUNT_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
-  scheduleInterval: { defaultValue: '4h' },
+  allowedAutonomyLevels: CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
+  scheduleInterval: CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
 };

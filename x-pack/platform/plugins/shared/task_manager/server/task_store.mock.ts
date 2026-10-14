@@ -31,6 +31,7 @@ export const taskStoreMock = {
       bulkPartialUpdate: jest.fn(),
       bulkRemove: jest.fn(),
       get: jest.fn(),
+      getCredential: jest.fn().mockResolvedValue(undefined),
       taskExists: jest.fn().mockResolvedValue(false),
       // Mirrors the real predicate for a security-enabled deployment; override to simulate
       // deployments where no keys are granted (e.g. security disabled).
