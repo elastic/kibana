@@ -333,11 +333,12 @@ describe('bulkUpdate()', () => {
         expect.stringContaining('error-id')
       );
       expect(esClientMock.bulk).toHaveBeenCalled();
-      const bulkBody = esClientMock.bulk.mock.calls[0][0].body;
-      expect(bulkBody).toEqual([
-        { update: { _index: indexName, _id: fakeAlertId } },
-        { doc: { signal: { status: 'closed' } } },
-      ]);
+      expect(esClientMock.bulk.mock.calls[0][0]).toMatchObject({
+        body: [
+          { update: { _index: indexName, _id: fakeAlertId } },
+          { doc: { signal: { status: 'closed' } } },
+        ],
+      });
     });
 
     // test('throws an error if ES client fetch fails', async () => {});

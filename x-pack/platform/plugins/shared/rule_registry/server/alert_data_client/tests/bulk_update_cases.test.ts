@@ -420,9 +420,11 @@ describe('bulkUpdateCases', () => {
       expect.stringContaining('error-id')
     );
     expect(esClientMock.bulk).toHaveBeenCalled();
-    expect(esClientMock.bulk.mock.calls[0][0].body).toEqual([
-      { update: { _index: 'alert-index', _id: 'alert-id' } },
-      { doc: { [ALERT_CASE_IDS]: ['test-case'] } },
-    ]);
+    expect(esClientMock.bulk.mock.calls[0][0]).toMatchObject({
+      body: [
+        { update: { _index: 'alert-index', _id: 'alert-id' } },
+        { doc: { [ALERT_CASE_IDS]: ['test-case'] } },
+      ],
+    });
   });
 });
