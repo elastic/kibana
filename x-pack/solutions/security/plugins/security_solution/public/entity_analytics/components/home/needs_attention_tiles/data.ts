@@ -25,6 +25,8 @@ export interface SignalCardData {
   noDataMessage?: string;
   description: string;
   delta?: number;
+  /** True while the delta query is in flight, to show a spinner in place of the badge number. */
+  isDeltaLoading?: boolean;
   filterLabel: string;
   trend?: number[];
 }
