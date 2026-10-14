@@ -80,6 +80,8 @@ export const SplitButtonWithNotification = ({
       color="text"
       size="s"
       isDisabled={isDisabled}
+      // Must be set here: EUI overrides `hasAriaDisabled` on each action with this value.
+      hasAriaDisabled={hasMainTooltip || Boolean(secondaryTooltipContent)}
       isLoading={isLoading}
       css={
         fullWidth &&
@@ -95,7 +97,6 @@ export const SplitButtonWithNotification = ({
         onClick={onClick as MouseEventHandler}
         isLoading={isMainButtonLoading}
         isDisabled={isMainButtonDisabled}
-        hasAriaDisabled={Boolean(isMainButtonDisabled && hasMainTooltip)}
         tooltipProps={
           hasMainTooltip ? { content: mainTooltipContent, title: mainTooltipTitle } : undefined
         }
@@ -146,7 +147,6 @@ export const SplitButtonWithNotification = ({
         aria-label={secondaryAriaLabel}
         onClick={onSecondaryButtonClick}
         isDisabled={isSecondaryButtonDisabled}
-        hasAriaDisabled={Boolean(isSecondaryButtonDisabled && secondaryTooltipContent)}
         tooltipProps={secondaryTooltipContent ? { content: secondaryTooltipContent } : undefined}
         isSelected={isSelected}
       />
