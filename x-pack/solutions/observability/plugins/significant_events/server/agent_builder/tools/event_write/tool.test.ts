@@ -650,6 +650,15 @@ describe('eventsWriteItemSchema', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
   });
 
+  it('accepts only the manual statuses, never the derived recovering', () => {
+    expect(eventsWriteItemSchema.safeParse({ ...validItem, status: 'inactive' }).success).toBe(
+      true
+    );
+    expect(eventsWriteItemSchema.safeParse({ ...validItem, status: 'recovering' }).success).toBe(
+      false
+    );
+  });
+
   it('requires the agent to propose a severity', () => {
     const { severity: _omitted, ...withoutSeverity } = validItem;
 

@@ -472,7 +472,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
+      alertsPage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/manage-detection-alerts`,
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
+      dashboardsPage: `${ELASTIC_DOCS}solutions/security/dashboards`,
+      detectionResponsePage: `${ELASTIC_DOCS}solutions/security/dashboards/detection-response-dashboard`,
+      notesPage: `${ELASTIC_DOCS}solutions/security/investigate/notes`,
+      timelinesPage: `${ELASTIC_DOCS}solutions/security/investigate/timeline`,
       runAttackDiscoveryInWorkflow: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-attack-discovery-in-a-workflow`,
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
       remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,

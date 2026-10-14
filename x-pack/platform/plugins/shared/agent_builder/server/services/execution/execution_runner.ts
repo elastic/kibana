@@ -261,9 +261,14 @@ const handleConversationExecution = async ({
       ? { ...telemetryMetadata, traceId: roundTraceId }
       : telemetryMetadata;
 
-    const { modelProvider, selectedConnectorId } = await resolveServices({
+    const {
+      modelProvider,
+      selectedConnectorId,
+      reasoningLevel: resolvedReasoningLevel,
+    } = await resolveServices({
       agentId,
       connectorId,
+      reasoningLevel,
       telemetryMetadata: roundTelemetryMetadata,
       request,
       ...deps,
@@ -284,7 +289,7 @@ const handleConversationExecution = async ({
       defaultConnectorId: selectedConnectorId,
       telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
-      reasoningLevel,
+      reasoningLevel: resolvedReasoningLevel,
       runAgent,
       browserApiTools,
       configurationOverrides,
@@ -649,9 +654,10 @@ const handleStandaloneExecution = async ({
     ? { ...telemetryMetadata, traceId: roundTraceId }
     : telemetryMetadata;
 
-  const { selectedConnectorId } = await resolveServices({
+  const { selectedConnectorId, reasoningLevel: resolvedReasoningLevel } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
+    reasoningLevel,
     telemetryMetadata: roundTelemetryMetadata,
     request,
     ...deps,
@@ -669,7 +675,7 @@ const handleStandaloneExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
-    reasoningLevel,
+    reasoningLevel: resolvedReasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,

@@ -7,12 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  SignificantEventManualStatus,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 
 interface UpdateSignificantEventArgs {
   eventId: string;
-  status: SignificantEventStatus;
+  /** A person sets active or inactive; recovering belongs to the status workflow. */
+  status: SignificantEventManualStatus;
   assessmentNote?: string;
 }
 
@@ -20,6 +24,7 @@ interface UpdateSignificantEventResult {
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
+  reason?: string;
 }
 
 const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
@@ -34,6 +39,14 @@ const UPDATE_NO_CHANGE_TOAST_TITLE = i18n.translate(
   {
     defaultMessage:
       'No change made: the significant event already has that status or no longer exists',
+  }
+);
+
+const UPDATE_SUPERSEDED_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.supersededToastTitle',
+  {
+    defaultMessage:
+      'The significant event changed while you were updating it. Review it and try again.',
   }
 );
 
@@ -74,7 +87,12 @@ export const useUpdateSignificantEvent = ({
           signal: null,
         }
       ),
-    onSuccess: ({ updated }) => {
+    onSuccess: ({ updated, reason }) => {
+      if (reason === 'superseded') {
+        // Keep the caller's UI (and any entered rationale) so the operator can retry.
+        toasts.addWarning({ title: UPDATE_SUPERSEDED_TOAST_TITLE });
+        return;
+      }
       if (updated === 0) {
         toasts.addInfo({ title: UPDATE_NO_CHANGE_TOAST_TITLE });
       } else {

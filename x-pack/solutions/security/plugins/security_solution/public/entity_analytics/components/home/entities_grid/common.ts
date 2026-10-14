@@ -9,13 +9,18 @@ import {
   getEuidNamespaceSourceFields,
   getEuidSourceFields,
 } from '@kbn/entity-store/common/domain/euid';
+import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/common';
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 // ── constants ────────────────────────────────────────────────────────────────
 
-export const ALLOWED_ENTITY_TYPES = ['user', 'host', 'service'] as const;
+export const ALLOWED_ENTITY_TYPES = [
+  'user',
+  'host',
+  'service',
+] as const satisfies readonly EntityStoreEntityType[];
 
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
@@ -34,6 +39,12 @@ export const SEVERITY_COUNT_FIELDS = {
 } as const;
 
 export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
+export const ROWS_MODES = ['resolved', 'individual'] as const;
+export const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
+/** Whether `value` is one of `options`, narrowing it to their union. */
+export const isOneOf = <T extends string>(options: readonly T[], value: unknown): value is T =>
+  options.some((option) => option === value);
 
 /**
  * Identity and namespace source fields from entity definitions. The alert enrich rebuilds
@@ -72,9 +83,9 @@ export const ENTITY_FIELDS = [
 // ── types ────────────────────────────────────────────────────────────────────
 
 export type TimeRange = (typeof TIME_RANGE_OPTIONS)[number];
-export type RowsMode = 'resolved' | 'individual';
+export type RowsMode = (typeof ROWS_MODES)[number];
 export type Row = Record<string, unknown>;
-export type SortDir = 'asc' | 'desc';
+export type SortDir = (typeof SORT_DIRECTIONS)[number];
 
 /** The filter dropdowns' selections. */
 export interface EntityFilters {

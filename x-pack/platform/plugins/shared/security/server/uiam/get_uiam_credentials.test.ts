@@ -8,10 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
-import {
-  assertUiamCredential,
-  getUiamCredentialsFromRequest,
-} from './get_uiam_credentials';
+import { assertUiamCredential, getUiamCredentialsFromRequest } from './get_uiam_credentials';
 
 describe('getUiamCredentialsFromRequest', () => {
   it.each([
