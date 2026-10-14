@@ -17,7 +17,7 @@ export type HuntRunOutcome = 'completed' | 'partial' | 'failed';
 
 export type HuntCohort = 'golden' | 'hard' | 'canary' | 'holdout';
 
-/** Expected structural result for one report in a run. Scored by the Phase 3 CODE evaluators. */
+/** Expected structural result for one report in a run. Scored by the CODE evaluators. */
 export interface HuntReportExpectation {
   reportId: string;
   hasConfirmedHit: boolean;

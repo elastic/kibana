@@ -178,8 +178,17 @@ const bridgeSubjectModel = async ({
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
-}): Promise<void> => {
+}): Promise<Map<string, string | null>> => {
+  const previous = new Map<string, string | null>();
   for (const spaceId of EVAL_SPACE_IDS) {
+    // Remembered so the cleanup can put the space back the way it was. The Worker stays enabled
+    // in every eval space between runs, and on a long-lived stack the default space is the
+    // developer's own: clearing the connector there would leave their Worker with no model.
+    previous.set(
+      spaceId,
+      (await getUiSetting<string>({ fetch, spaceId, key: GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR })) ??
+        null
+    );
     log.info(
       `[hunt-watch] setting genAiSettings:defaultAIConnector="${connectorId}" in space "${spaceId}"`
     );
@@ -209,11 +218,11 @@ const bridgeSubjectModel = async ({
           `${assignedTierFeatures.map((f) => f.feature_id).join(', ')}. Tier endpoints take ` +
           `precedence over "genAiSettings:defaultAIConnector" in scoped_model.ts, so the Worker ` +
           `would silently ignore the subject connector set above. Unassign the tier endpoint(s) ` +
-          `in this deployment before running this suite, or implement the per-tier bridge ` +
-          `tracked as follow-up kibana-58i.4.1.`
+          `in this deployment before running this suite. A per-tier bridge is a follow-up.`
       );
     }
   }
+  return previous;
 };
 
 interface ServiceAccountEntry {
@@ -437,7 +446,7 @@ export const runPreflight = async ({
     await ensureSpaceExists({ fetch, log, spaceId });
   }
   await configureIndexScope({ fetch, log });
-  await bridgeSubjectModel({ fetch, log, connectorId });
+  const previousConnectors = await bridgeSubjectModel({ fetch, log, connectorId });
   await enableWorkerInEvalSpaces({ fetch, log });
   await assertThreatIntelSupplyReady({ fetch, log });
   await ensureEntityStoreRunning({ fetch, log });
@@ -454,7 +463,9 @@ export const runPreflight = async ({
         await setUiSettings({
           fetch,
           spaceId,
-          changes: { [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: null },
+          changes: {
+            [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: previousConnectors.get(spaceId) ?? null,
+          },
         });
       } catch (err) {
         log.warning(

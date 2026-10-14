@@ -226,7 +226,7 @@ describe('dataset bindings', () => {
     }
   );
 
-  it('returns the exact golden rows from the plan', () => {
+  it('returns the three golden rows the README documents', () => {
     expect(goldenDataset.map((row) => row.id)).toEqual([
       'golden-hit-aws-iam-behavior-only',
       'golden-clean-aws-iam-clean',
@@ -234,7 +234,7 @@ describe('dataset bindings', () => {
     ]);
   });
 
-  it('returns the exact hard rows from the plan', () => {
+  it('returns the four hard rows the README documents', () => {
     expect(hardCases.map((row) => row.id)).toEqual([
       'hard-multi-candidate',
       'hard-clean-repeat',

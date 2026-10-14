@@ -320,10 +320,10 @@ export const resetHuntReport = async ({
 }) => {
   const conversationId = buildHuntInvestigationConversationId(reportId);
 
-  const open = await listOpenProposals({ fetch, spaceId, conversationId }).catch((error) => {
-    log.debug(`Could not list proposals for ${conversationId}: ${String(error)}`);
-    return [] as ProposalsListResponse['proposals'];
-  });
+  // An Investigation with no Proposals lists as empty, so a failure here is a real one. Swallowing
+  // it would skip the dismiss, and the Worker would then skip the report as `open_proposal` with
+  // nothing in the run log to say why.
+  const open = await listOpenProposals({ fetch, spaceId, conversationId });
 
   // Only a pending Proposal can be dismissed; an executing one settles on its own.
   for (const { id } of open.filter((p) => p.status === 'pending')) {

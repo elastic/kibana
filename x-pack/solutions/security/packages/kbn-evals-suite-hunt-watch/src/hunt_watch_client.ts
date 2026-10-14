@@ -111,7 +111,13 @@ export class HuntWatchClient {
       pollIntervalMs,
     });
 
-    if (!isTerminal(execution.status)) {
+    if (isTerminal(execution.status)) {
+      // Only in-flight runs are cancelled at teardown; a finished one has nothing to cancel.
+      const index = this.pendingExecutions.findIndex(
+        (pending) => pending.workflowExecutionId === workflowExecutionId
+      );
+      if (index !== -1) this.pendingExecutions.splice(index, 1);
+    } else {
       this.log.warning(
         `Worker execution ${workflowExecutionId} in space "${spaceId}" did not reach a terminal ` +
           `state within ${maxWaitMs}ms (last status: ${execution.status})`

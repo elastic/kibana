@@ -9,11 +9,14 @@ import type { HuntResult } from '@kbn/alertzero-common';
 import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
 import type { HuntExpected, HuntReportExpectation } from '../types';
 import {
+  scoreCandidateSelection,
   scoreCanaryTripped,
   scoreEvidenceHonesty,
+  scoreHitConsistency,
   scoreOutcome,
   scoreProposalPresence,
   scoreSseAttachment,
+  scoreStageProgression,
   scoreTier1Status,
 } from './code_scores';
 
@@ -186,6 +189,98 @@ describe('code scores', () => {
         buildArtifacts({
           conversation: { id: 'c' },
           sseEvents: [{ severity: 'low', hunt_result_error: 'tier1.status: invalid enum value' }],
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('scores hit consistency against the first SSE that carries a hunt_result', () => {
+    expect(
+      scoreHitConsistency(
+        buildExpected({ hasConfirmedHit: false, tier1Status: 'no_environment_hits' }),
+        buildArtifacts({
+          hunt: { hit: false },
+          sseEvents: [
+            { severity: 'low', hunt_result_error: 'rejected' },
+            { severity: 'high', hunt_result: { ...CLEAN_HUNT_RESULT, has_confirmed_hit: true } },
+          ],
+        })
+      ).score
+    ).toBe(0);
+  });
+});
+
+describe('scoreCandidateSelection', () => {
+  const missingId = 'r-missing';
+
+  it('scores 0 when an expected skip reason was not reported', () => {
+    expect(
+      scoreCandidateSelection(buildExpected({}, { skipped: ['not_found'] }), buildArtifacts()).score
+    ).toBe(0);
+  });
+
+  it('scores 1 for a row that names both a selected report and a skipped one', () => {
+    expect(
+      scoreCandidateSelection(buildExpected({}, { skipped: ['not_found'] }), {
+        ...buildArtifacts(),
+        skipped: [{ id: missingId, reason: 'not_found' }],
+      }).score
+    ).toBe(1);
+  });
+
+  it('scores 0 when a row expects no candidates but some were selected', () => {
+    expect(
+      scoreCandidateSelection(
+        { indexScopeBlocked: false, skipped: ['not_found'], reports: [] },
+        { ...buildArtifacts(), skipped: [{ id: missingId, reason: 'not_found' }] }
+      ).explanation
+    ).toMatch(/expected no candidates but selected/);
+  });
+
+  it('matches skip reasons exactly, not as substrings', () => {
+    expect(
+      scoreCandidateSelection(
+        { indexScopeBlocked: false, skipped: ['not_found'], reports: [] },
+        {
+          ...buildArtifacts(),
+          selectedIds: [],
+          skipped: [{ id: missingId, reason: 'not_found_x' }],
+        }
+      ).score
+    ).toBe(0);
+  });
+});
+
+describe('scoreStageProgression', () => {
+  const completed = (startedAt?: string) => ({ status: 'completed', startedAt });
+
+  it('returns MISSING rather than out-of-order when a stage has no startedAt', () => {
+    const result = scoreStageProgression(
+      buildExpected({ tier1Status: 'no_environment_hits' }),
+      buildArtifacts({
+        stages: {
+          find_or_create_investigation: completed('2026-01-01T00:00:00Z'),
+          hunt: completed(),
+          package_report: completed('2026-01-01T00:02:00Z'),
+          write_run_conclusion: completed('2026-01-01T00:03:00Z'),
+        },
+      })
+    );
+    expect(result.label).toBe('MISSING');
+    expect(result.explanation).toMatch(/hunt/);
+  });
+
+  it('scores 0 when the stages ran out of order', () => {
+    expect(
+      scoreStageProgression(
+        buildExpected({ tier1Status: 'no_environment_hits' }),
+        buildArtifacts({
+          stages: {
+            find_or_create_investigation: completed('2026-01-01T00:01:00Z'),
+            hunt: completed('2026-01-01T00:00:00Z'),
+            package_report: completed('2026-01-01T00:02:00Z'),
+            write_run_conclusion: completed('2026-01-01T00:03:00Z'),
+          },
         })
       ).score
     ).toBe(0);

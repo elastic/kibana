@@ -149,6 +149,13 @@ export const scoreIndexScope = (expected: HuntExpected, artifacts: HuntArtifacts
     : pass('scope blocked before any hunt or Investigation');
 };
 
+/** `reason` of every `select_candidate_reports` skip entry (`{ id, reason }`). */
+const skippedReasons = (skipped: unknown[]): string[] =>
+  skipped.flatMap((entry) => {
+    const reason = (entry as { reason?: unknown } | null)?.reason;
+    return typeof reason === 'string' ? [reason] : [];
+  });
+
 export const scoreCandidateSelection = (
   expected: HuntExpected,
   artifacts: HuntArtifacts
@@ -163,11 +170,13 @@ export const scoreCandidateSelection = (
       }
     }
   }
-  const skippedText = JSON.stringify(artifacts.skipped);
+  const reasons = skippedReasons(artifacts.skipped);
   for (const reason of skipped ?? []) {
-    if (!skippedText.includes(reason)) problems.push(`skipped reason "${reason}" not reported`);
+    if (!reasons.includes(reason)) problems.push(`skipped reason "${reason}" not reported`);
   }
-  if (indexScopeBlocked === false && skipped && artifacts.selectedIds.length > 0) {
+  // A row with no report expectations expects nothing to be selected. Keyed on `reports`, not on
+  // `skipped`, so a row can name both a selected report and a skipped one.
+  if (!indexScopeBlocked && reports.length === 0 && artifacts.selectedIds.length > 0) {
     problems.push(`expected no candidates but selected [${artifacts.selectedIds.join(', ')}]`);
   }
   return problems.length > 0
@@ -201,6 +210,10 @@ export const scoreStageProgression = (
             .join(', ')}`
         );
       }
+      const unstamped = STAGE_ORDER.filter((id) => !actual.stages[id].startedAt);
+      if (unstamped.length > 0) {
+        return missing(`stages without startedAt: ${unstamped.join(', ')}`);
+      }
       const starts = STAGE_ORDER.map((id) => Date.parse(actual.stages[id].startedAt ?? ''));
       const inOrder = starts.every((t, i) => i === 0 || t >= starts[i - 1]);
       return inOrder ? pass('all stages ran in order') : fail('stages ran out of order');
@@ -220,7 +233,7 @@ export const scoreHitConsistency = (expected: HuntExpected, artifacts: HuntArtif
           headline: actual.hunt.headline,
         });
       }
-      const sse = actual.sseEvents[0]?.hunt_result;
+      const sse = actual.sseEvents.find((e) => e.hunt_result)?.hunt_result;
       if (sse && sse.has_confirmed_hit !== report.hasConfirmedHit) {
         return fail(
           `SSE has_confirmed_hit=${sse.has_confirmed_hit}, report ${report.hasConfirmedHit}`

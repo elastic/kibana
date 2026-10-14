@@ -23,7 +23,9 @@ const listSourceFiles = (dir: string): string[] =>
   readdirSync(dir).flatMap((entry) => {
     const full = Path.join(dir, entry);
     if (statSync(full).isDirectory()) {
-      return entry === 'node_modules' || entry === 'test-results' ? [] : listSourceFiles(full);
+      return ['node_modules', 'test-results', 'target'].includes(entry)
+        ? []
+        : listSourceFiles(full);
     }
     return /\.tsx?$/.test(entry) && !entry.endsWith('.test.ts') ? [full] : [];
   });

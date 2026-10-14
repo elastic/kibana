@@ -109,9 +109,12 @@ node scripts/evals start --suite hunt-watch --profile local --skip-server --grep
   --judge eis-google-gemini-3-1-pro --model eis-google-gemini-3-1-pro
 ```
 
-A full run of all three cohorts takes about 18 minutes with `workers: 1`. The suite is pinned
-to one worker and `concurrency: 1` because the Worker's per-space
+A full run takes about 26 minutes with the judges on. The suite is pinned to one worker and
+`concurrency: 1` because the Worker's per-space
 `concurrency: { strategy: drop, max: 1 }` silently drops a trigger that races another sweep.
+The Worker also keeps its own 4h schedule in every eval space, and the suite cannot pause it,
+so on a long-lived stack a scheduled sweep can land during a run and drop that row's trigger.
+`HuntWatchClient.run` throws with the dropped-trigger message when that happens; rerun the row.
 
 The `local` profile's `evaluationsKbn.url` defaults to `localhost:5601/dev`. When the Scout
 stack is the only Kibana running, point it at `localhost:5620` in

@@ -8,12 +8,12 @@
 import { evaluate, tags } from '../src/evaluate';
 
 /**
- * Phase 1 install-assert shell. No dataset exists yet (seed/fixture binding is Phase 2,
- * blocked on elastic/kibana#291895), so this spec exists only to give the worker-scoped
- * `huntWatchPreflight` fixture (`auto: true`) a spec to attach to on a live Scout stack.
- * If the stack is missing a global child workflow, the per-space Worker is not installed
- * and enabled, the TI supply hard gate is failing, or the subject-model bridge is unsafe,
- * the fixture throws before this test body runs and names the failing gate.
+ * Install assert: a spec with no rows, so the worker-scoped `huntWatchPreflight` and
+ * `huntWatchSeed` fixtures (`auto: true`) run against a live Scout stack on their own. If the
+ * stack is missing a global child workflow, the per-space Worker is not installed and enabled,
+ * the TI supply hard gate is failing, the subject-model bridge is unsafe, or a seeded report id
+ * is absent, the fixture throws before this test body runs and names the failing gate. Useful
+ * with `--grep "install assert"` to check a stack without spending a Worker run.
  */
 evaluate.describe(
   'Hunt Watch Worker — install assert',

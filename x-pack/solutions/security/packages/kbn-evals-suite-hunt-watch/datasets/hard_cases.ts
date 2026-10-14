@@ -11,10 +11,10 @@ import type { HuntWatchExample } from '../src/types';
 /**
  * Hard cohort: structural evaluators gate per example; LLM rubric scores are reported only.
  *
- * aws-iam hits can resolve Tier 2 `incomplete_retryable` (smoke Finding 2), so hit rows accept
+ * aws-iam hits can resolve Tier 2 `incomplete_retryable` (seen in smoke runs), so hit rows accept
  * `completed` or `partial` and the evaluators check the outcome is consistent with evidence and
  * Proposal presence instead of pinning one label. There is no `failed` row: no deterministic
- * failure inducer exists on main (follow-up kibana-58i.3.1).
+ * failure inducer exists on main, so one needs fault injection first.
  */
 export const hardCases: HuntWatchExample[] = [
   {
@@ -65,7 +65,7 @@ export const hardCases: HuntWatchExample[] = [
   {
     // A second clean report on a different id: the no-hit path must be stable across reports,
     // not just on the golden one. Started life as a `partial` probe when the benign close failed
-    // on main; a deterministic `partial`/`failed` row now needs fault injection (kibana-58i.3.1).
+    // on main; a deterministic `partial`/`failed` row now needs fault injection.
     id: 'hard-clean-repeat',
     cohort: 'hard',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.cleanRepeat] },

@@ -172,7 +172,7 @@ export const SPACE_REPORT_IDS = {
 /** Threat intel index the seed writes into. Must already exist (Kibana creates it). */
 export const THREAT_REPORTS_INDEX = '.kibana-threat-reports';
 
-/** Holdout reports (`historic-03` of the other scenarios); scaffolded in Phase 6. */
+/** Holdout reports: the `historic-03` slot of scenarios the iteration cohorts never trigger. */
 export const HOLDOUT_REPORT_IDS = [
   buildHistoricReportId('aws-iam-assume-role', 3),
   buildHistoricReportId('aws-iam-ioc-only', 3),

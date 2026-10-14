@@ -37,6 +37,10 @@ interface MockOverrides {
   >;
   enableWorkerErrorSpaces?: string[];
   builtInRoleMissing?: boolean;
+  /** `genAiSettings:defaultAIConnector` user value already set in a space before the preflight. */
+  previousDefaultConnectorBySpace?: Record<string, string>;
+  /** Receives every `changes` body POSTed to a space's settings route, keyed by space id. */
+  settingsWrites?: Array<{ spaceId: string; changes: Record<string, unknown> }>;
 }
 
 const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
@@ -45,14 +49,19 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     threatIntelSupplyBySpace = {},
     enableWorkerErrorSpaces = [],
     builtInRoleMissing = false,
+    previousDefaultConnectorBySpace = {},
+    settingsWrites = [],
   } = overrides;
 
   return jest.fn(async (...args: unknown[]) => {
     const first = args[0];
-    const { path, method = 'GET' }: { path: string; method?: string } =
-      typeof first === 'string'
-        ? { path: first, ...(args[1] as { method?: string } | undefined) }
-        : (first as { path: string; method?: string });
+    const {
+      path,
+      method = 'GET',
+      body,
+    }: { path: string; method?: string; body?: string } = typeof first === 'string'
+      ? { path: first, ...(args[1] as { method?: string; body?: string } | undefined) }
+      : (first as { path: string; method?: string; body?: string });
 
     if (/^\/api\/spaces\/space\/[^/]+$/.test(path) && method === 'GET') {
       // Every eval space already exists — space-creation is not under test here.
@@ -72,8 +81,19 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     if (path === '/internal/security/service_account' && method === 'POST') {
       return { id: 'mock-service-account-id' };
     }
-    if (path === '/internal/kibana/settings' || /\/internal\/kibana\/settings$/.test(path)) {
-      if (method === 'GET') return { settings: {} };
+    const settingsMatch = /^(?:\/s\/([^/]+))?\/internal\/kibana\/settings$/.exec(path);
+    if (settingsMatch) {
+      const spaceId = settingsMatch[1] ? decodeURIComponent(settingsMatch[1]) : 'default';
+      if (method === 'GET') {
+        const previous = previousDefaultConnectorBySpace[spaceId];
+        return {
+          settings: previous ? { 'genAiSettings:defaultAIConnector': { userValue: previous } } : {},
+        };
+      }
+      settingsWrites.push({
+        spaceId,
+        changes: (JSON.parse(body ?? '{}') as { changes: Record<string, unknown> }).changes,
+      });
       return {};
     }
     if (/\/internal\/search_inference_endpoints\/settings$/.test(path)) {
@@ -141,6 +161,31 @@ describe('runPreflight', () => {
   it('resolves and returns a cleanup function on a healthy stack', async () => {
     const cleanup = await run(buildMockFetch());
     expect(typeof cleanup).toBe('function');
+  });
+
+  it('restores each space to the default connector it had before the bridge, not to null', async () => {
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    const cleanup = await run(
+      buildMockFetch({
+        previousDefaultConnectorBySpace: { default: 'developer-connector' },
+        settingsWrites,
+      })
+    );
+    settingsWrites.length = 0;
+    await cleanup();
+
+    const restored = Object.fromEntries(
+      settingsWrites.map(({ spaceId, changes }) => [
+        spaceId,
+        changes['genAiSettings:defaultAIConnector'],
+      ])
+    );
+    expect(restored).toEqual({
+      default: 'developer-connector',
+      'hunt-a': null,
+      'hunt-b': null,
+      'hunt-blocked': null,
+    });
   });
 
   it('throws naming the assigned tier feature when an alertzero_* tier endpoint is already assigned', async () => {

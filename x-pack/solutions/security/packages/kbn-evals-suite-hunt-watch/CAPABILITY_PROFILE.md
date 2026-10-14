@@ -73,7 +73,7 @@ results arrive. This profile takes the second path and records the numbers it wo
   these and the suite does not score them.
 - A chat skill or conversational surface for hunts.
 - A `failed` or `partial` outcome row. No seeded report reliably produces one on main without
-  fault injection (`kibana-58i.3.1`).
+  fault injection.
 - D1 and D2 authorization gates. The suite has no view of the orchestrator identity.
 - Modify, defer and expire decisions on Proposals; only approve and dismiss are exercised.
 - Coverage handoff to the Detection Watch.

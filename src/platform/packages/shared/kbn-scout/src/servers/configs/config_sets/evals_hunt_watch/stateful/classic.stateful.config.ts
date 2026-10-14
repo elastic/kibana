@@ -20,7 +20,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * `agenticInvestigations` and `proposals` are both **required** plugins of alertzero and both
  * default to `enabled: false`. Without either flag Kibana cascade-disables alertzero entirely, so
  * the managed hunt workflows are never installed. `inbox` is required for the HITL approval spec
- * (Phase 5) to respond to the proposal gate.
+ * to respond to the proposal gate.
  *
  * `serviceAccountsServerArgs` (`xpack.security.serviceAccounts.enabled=true`) is required because
  * every `/internal/alertzero/*` route (the Worker list/enable route this suite's preflight calls)
