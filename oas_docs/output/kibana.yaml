@@ -134005,6 +134005,16 @@ paths:
       summary: Trigger an on-demand test run for a monitor
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/synthetics/monitor/test/monitor-id" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            POST kbn://api/synthetics/monitor/test/monitor-id
       x-state: Generally available; added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -134278,6 +134288,15 @@ paths:
       summary: Search monitors
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/synthetics/monitors" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/synthetics/monitors
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -134445,6 +134464,19 @@ paths:
       summary: Create a monitor
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/synthetics/monitors" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}'
+        - lang: Console
+          source: |
+            POST kbn://api/synthetics/monitors
+            {"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -134548,6 +134580,19 @@ paths:
       summary: Bulk create monitors
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/synthetics/monitors/_bulk_create" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"monitors":[{"type":"http","name":"Storefront","url":"https://example.com","locations":["united_kingdom"]},{"type":"http","name":"Documentation","url":"https://docs.example.com","locations":["united_kingdom"]}]}'
+        - lang: Console
+          source: |
+            POST kbn://api/synthetics/monitors/_bulk_create
+            {"monitors":[{"type":"http","name":"Storefront","url":"https://example.com","locations":["united_kingdom"]},{"type":"http","name":"Documentation","url":"https://docs.example.com","locations":["united_kingdom"]}]}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -134623,6 +134668,19 @@ paths:
       summary: Delete monitors
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/synthetics/monitors/_bulk_delete" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"ids":["monitor1-id","monitor2-id"]}'
+        - lang: Console
+          source: |
+            POST kbn://api/synthetics/monitors/_bulk_delete
+            {"ids":["monitor1-id","monitor2-id"]}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -134751,6 +134809,19 @@ paths:
       summary: Bulk update monitors
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/synthetics/monitors/_bulk_update" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"updates":[{"id":"monitor1-id","attributes":{"enabled":false}},{"id":"monitor2-id","attributes":{"tags":["bulk-patched"]}},{"id":"monitor3-id","attributes":{"schedule":{"number":"15","unit":"m"}}}]}'
+        - lang: Console
+          source: |
+            PUT kbn://api/synthetics/monitors/_bulk_update
+            {"updates":[{"id":"monitor1-id","attributes":{"enabled":false}},{"id":"monitor2-id","attributes":{"tags":["bulk-patched"]}},{"id":"monitor3-id","attributes":{"schedule":{"number":"15","unit":"m"}}}]}
       x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -134811,6 +134882,16 @@ paths:
       summary: Delete a monitor
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/synthetics/monitors/monitor-id" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/synthetics/monitors/monitor-id
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -134895,6 +134976,15 @@ paths:
       summary: Get a monitor
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/synthetics/monitors/monitor-id" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/synthetics/monitors/monitor-id
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135034,6 +135124,19 @@ paths:
       summary: Update a monitor
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/synthetics/monitors/monitor-id" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}'
+        - lang: Console
+          source: |
+            PUT kbn://api/synthetics/monitors/monitor-id
+            {"type":"http","name":"Website Availability","url":"https://example.com","tags":["website","availability"],"locations":["united_kingdom"]}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135132,6 +135235,15 @@ paths:
       summary: Search parameters
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/synthetics/params" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/synthetics/params
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135271,6 +135383,19 @@ paths:
       summary: Add parameters
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/synthetics/params" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"key":"your-key-name","value":"your-parameter-value","description":"Param to use in browser monitor","tags":["authentication","security"],"share_across_spaces":true}'
+        - lang: Console
+          source: |
+            POST kbn://api/synthetics/params
+            {"key":"your-key-name","value":"your-parameter-value","description":"Param to use in browser monitor","tags":["authentication","security"],"share_across_spaces":true}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135344,6 +135469,19 @@ paths:
       summary: Delete parameters
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/synthetics/params/_bulk_delete" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"ids":["param1-id","param2-id"]}'
+        - lang: Console
+          source: |
+            POST kbn://api/synthetics/params/_bulk_delete
+            {"ids":["param1-id","param2-id"]}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135401,6 +135539,16 @@ paths:
       summary: Delete a parameter
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/synthetics/params/param-id" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/synthetics/params/param-id
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135493,6 +135641,15 @@ paths:
       summary: Get a parameter
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/synthetics/params/param-id" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/synthetics/params/param-id
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135616,6 +135773,19 @@ paths:
       summary: Update a parameter
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/synthetics/params/param-id" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"key":"updated_param_key","value":"updated-param-value","description":"Updated Param to be used in browser monitor","tags":["authentication","security","updated"]}'
+        - lang: Console
+          source: |
+            PUT kbn://api/synthetics/params/param-id
+            {"key":"updated_param_key","value":"updated-param-value","description":"Updated Param to be used in browser monitor","tags":["authentication","security","updated"]}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135706,6 +135876,15 @@ paths:
       summary: Get private locations
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/synthetics/private_locations" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/synthetics/private_locations
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135859,6 +136038,19 @@ paths:
       summary: Create a private location
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/synthetics/private_locations" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"label":"Private Location 1","agentPolicyId":"abcd1234","tags":["private","testing"],"geo":{"lat":40.7128,"lon":-74.006},"spaces":["default"]}'
+        - lang: Console
+          source: |
+            POST kbn://api/synthetics/private_locations
+            {"label":"Private Location 1","agentPolicyId":"abcd1234","tags":["private","testing"],"geo":{"lat":40.7128,"lon":-74.006},"spaces":["default"]}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135899,6 +136091,16 @@ paths:
       summary: Delete a private location
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/synthetics/private_locations/location-id" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/synthetics/private_locations/location-id
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -135987,6 +136189,15 @@ paths:
       summary: Get a private location
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/synthetics/private_locations/location-id" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/synthetics/private_locations/location-id
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -136129,6 +136340,19 @@ paths:
       summary: Update a private location
       tags:
         - synthetics
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/synthetics/private_locations/location-id" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{"label":"Updated Private Location Name"}'
+        - lang: Console
+          source: |
+            PUT kbn://api/synthetics/private_locations/location-id
+            {"label":"Updated Private Location Name"}
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -154479,6 +154703,7 @@ components:
           maxItems: 1000
           type: array
         maintenance_windows:
+          description: The IDs of the maintenance windows to apply to the monitor.
           items:
             maxLength: 1024
             type: string
@@ -154570,6 +154795,7 @@ components:
         source.project.content:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         spaces:
+          description: The IDs of additional spaces to make the monitor available in, besides the current space.
           items:
             maxLength: 1024
             type: string
@@ -155578,6 +155804,7 @@ components:
           maxItems: 1000
           type: array
         maintenance_windows:
+          description: The IDs of the maintenance windows to apply to the monitor.
           items:
             maxLength: 1024
             type: string
@@ -155672,6 +155899,7 @@ components:
         source.project.content:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         spaces:
+          description: The IDs of additional spaces to make the monitor available in, besides the current space.
           items:
             maxLength: 1024
             type: string
@@ -158991,6 +159219,7 @@ components:
           maxItems: 1000
           type: array
         maintenance_windows:
+          description: The IDs of the maintenance windows to apply to the monitor.
           items:
             maxLength: 1024
             type: string
@@ -159122,6 +159351,7 @@ components:
         source.project.content:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         spaces:
+          description: The IDs of additional spaces to make the monitor available in, besides the current space.
           items:
             maxLength: 1024
             type: string
@@ -161625,6 +161855,7 @@ components:
           maxItems: 1000
           type: array
         maintenance_windows:
+          description: The IDs of the maintenance windows to apply to the monitor.
           items:
             maxLength: 1024
             type: string
@@ -161737,6 +161968,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
         spaces:
+          description: The IDs of additional spaces to make the monitor available in, besides the current space.
           items:
             maxLength: 1024
             type: string
@@ -161871,6 +162103,7 @@ components:
           maxItems: 1000
           type: array
         maintenance_windows:
+          description: The IDs of the maintenance windows to apply to the monitor.
           items:
             maxLength: 1024
             type: string
@@ -161955,6 +162188,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
         spaces:
+          description: The IDs of additional spaces to make the monitor available in, besides the current space.
           items:
             maxLength: 1024
             type: string
@@ -178358,6 +178592,7 @@ components:
           maxItems: 1000
           type: array
         maintenance_windows:
+          description: The IDs of the maintenance windows to apply to the monitor.
           items:
             maxLength: 1024
             type: string
@@ -178448,6 +178683,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: The APM service name.
         spaces:
+          description: The IDs of additional spaces to make the monitor available in, besides the current space.
           items:
             maxLength: 1024
             type: string

@@ -219,6 +219,9 @@ To list available private locations, run the \`elastic-synthetics locations\` co
   [ConfigKey.SCHEDULE]:
     "The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.",
   [ConfigKey.APM_SERVICE_NAME]: 'The APM service name.',
+  [ConfigKey.KIBANA_SPACES]:
+    'The IDs of additional spaces to make the monitor available in, besides the current space.',
+  [ConfigKey.MAINTENANCE_WINDOWS]: 'The IDs of the maintenance windows to apply to the monitor.',
   [ConfigKey.TAGS]: 'An array of tags.',
   [ConfigKey.LABELS]:
     'Key-value pairs of labels to associate with the monitor. Labels can be used for filtering and grouping monitors.',
