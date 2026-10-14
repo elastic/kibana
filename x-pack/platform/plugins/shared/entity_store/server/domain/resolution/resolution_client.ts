@@ -88,6 +88,12 @@ export interface ResolutionWriteOptions {
    * bulk imports.
    */
   awaitVisibility?: boolean;
+
+  /**
+   * When false, the per-call link/unlink and resolution-error events are not emitted.
+   * Default: true.
+   */
+  reportTelemetry?: boolean;
 }
 
 interface FetchedEntities {
@@ -122,9 +128,10 @@ export class ResolutionClient {
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<LinkResult> {
+    const analytics = options.reportTelemetry === false ? undefined : this.analytics;
     try {
       const result = await this.performLink(targetId, rawEntityIds, options);
-      this.analytics?.reportEvent(ENTITY_STORE_RESOLUTION_LINK_EVENT, {
+      analytics?.reportEvent(ENTITY_STORE_RESOLUTION_LINK_EVENT, {
         entityType: result.entity_type,
         entitiesLinked: result.linked.length,
         entitiesSkipped: result.skipped.length,
@@ -132,8 +139,8 @@ export class ResolutionClient {
       });
       return result;
     } catch (error) {
-      if (this.analytics) {
-        reportResolutionError(this.analytics, 'link', this.namespace, error);
+      if (analytics) {
+        reportResolutionError(analytics, 'link', this.namespace, error);
       }
       throw error;
     }
@@ -302,9 +309,10 @@ export class ResolutionClient {
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<UnlinkResult> {
+    const analytics = options.reportTelemetry === false ? undefined : this.analytics;
     try {
       const result = await this.performUnlink(rawEntityIds, options);
-      this.analytics?.reportEvent(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
+      analytics?.reportEvent(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
         entityType: result.entity_type,
         entitiesUnlinked: result.unlinked.length,
         entitiesSkipped: result.skipped.length,
@@ -312,8 +320,8 @@ export class ResolutionClient {
       });
       return result;
     } catch (error) {
-      if (this.analytics) {
-        reportResolutionError(this.analytics, 'unlink', this.namespace, error);
+      if (analytics) {
+        reportResolutionError(analytics, 'unlink', this.namespace, error);
       }
       throw error;
     }

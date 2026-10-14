@@ -169,9 +169,9 @@ Entity references that don't resolve to a canonical id are excluded from the bat
             awaitVisibility: true,
           });
 
-          const skippedNonAliases = resolvedEntities.nonAliases.filter(({ euid }) =>
-            result.skipped.includes(euid)
-          );
+          const skippedNonAliases = resolvedEntities.nonAliases
+            .filter(({ euid }) => result.skipped.includes(euid))
+            .map((entity) => reconcileAfterUnlink(entity, result.unlinked));
 
           telemetryTracker.recordResultCount(result.unlinked.length);
           events.sendUiEvent(RESOLUTION_GROUP_UPDATED_TOOL_EVENT, {});
@@ -358,6 +358,25 @@ Entity references that don't resolve to a canonical id are excluded from the bat
       }
     },
   };
+};
+
+/**
+ * Re-states a non-alias entity against the aliases this call just removed. `nonAliases` is a
+ * snapshot taken before the confirmation prompt, so a group target whose aliases were in the
+ * same batch would otherwise still be reported as heading a group that no longer exists.
+ */
+const reconcileAfterUnlink = (
+  entity: NonAliasEntity,
+  unlinked: readonly string[]
+): NonAliasEntity => {
+  if (entity.kind !== 'group_target') {
+    return entity;
+  }
+
+  const remaining = entity.aliases.filter((alias) => !unlinked.includes(alias));
+  return remaining.length > 0
+    ? { euid: entity.euid, kind: 'group_target', aliases: remaining }
+    : { euid: entity.euid, kind: 'standalone' };
 };
 
 /**

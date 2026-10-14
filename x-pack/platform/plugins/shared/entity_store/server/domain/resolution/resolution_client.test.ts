@@ -939,5 +939,36 @@ describe('ResolutionClient', () => {
 
       expect(analytics.reportEvent).not.toHaveBeenCalled();
     });
+
+    it('does not report a link event when reportTelemetry is false', async () => {
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([createEntityDoc('target-1'), createEntityDoc('entity-1')]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1'], { reportTelemetry: false });
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not report a link error event when reportTelemetry is false', async () => {
+      await expect(
+        client.linkEntities('target-1', ['target-1'], { reportTelemetry: false })
+      ).rejects.toThrow(SelfLinkError);
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not report an unlink event when reportTelemetry is false', async () => {
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([createEntityDoc('alias-1', 'user', 'target-1')]) as never
+      );
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.unlinkEntities(['alias-1'], { reportTelemetry: false });
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
+    });
   });
 });

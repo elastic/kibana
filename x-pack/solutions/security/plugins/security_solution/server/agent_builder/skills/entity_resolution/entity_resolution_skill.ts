@@ -54,7 +54,7 @@ User: "These two are the same user, jsmith123 and jsmith.contractor — merge th
 
 1. If the user named the target (the account that should remain canonical), pass it as \`targetId\`. If they didn't, omit \`targetId\` and list every entity in \`entityIds\` — the tool proposes a target.
 2. Call \`security.link_entities\` with \`{ targetId: 'jsmith123', entityIds: ['jsmith.contractor'] }\`, or \`{ entityIds: ['jsmith123', 'jsmith.contractor'] }\` when no target was named.
-3. The tool handles user confirmation. On accept, report which entities were \`linked\` vs \`skipped\` (already linked); if the target was proposed (\`targetSelection: 'suggested'\`), say which one and why. On reject, state that no change was made.
+3. The tool handles user confirmation. On accept, report which entities were \`linked\` vs \`skipped\` (already linked); if the target was proposed (\`targetSelection: 'suggested'\`), say which one and the reason the tool reported in \`targetSelectionReason\`. On reject, state that no change was made.
 
 ### Unlink
 User: "Unlink jsmith.contractor from that group."

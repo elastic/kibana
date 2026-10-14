@@ -391,7 +391,72 @@ describe('unlinkEntitiesTool', () => {
 
           const other = result.results[0] as OtherResult;
           expect(other.data.skipped).toEqual(['user:head']);
-          expect(other.data.nonAliases).toEqual([groupTarget]);
+          // `user:alias.one` was just unlinked, so it is no longer one of the group's aliases
+          expect(other.data.nonAliases).toEqual([
+            { euid: 'user:head', kind: 'group_target', aliases: ['user:alias.two'] },
+          ]);
+        });
+
+        it('on accept: reports a group target as standalone once its last alias is unlinked', async () => {
+          mockUnlinkEntities.mockResolvedValueOnce({
+            entity_type: 'user',
+            unlinked: ['user:alias.one', 'user:alias.two'],
+            skipped: ['user:head'],
+          });
+          const ctx = seedApprovedUnlink(
+            buildHandlerContextWithPrompts(mocks, { checkStatus: ConfirmationStatus.accepted }),
+            {
+              resolved: [
+                { euid: 'user:alias.one', resolvedTo: 'user:head' },
+                { euid: 'user:alias.two', resolvedTo: 'user:head' },
+                { euid: 'user:head' },
+              ],
+              unresolved: [],
+              nonAliases: [
+                {
+                  euid: 'user:head',
+                  kind: 'group_target',
+                  aliases: ['user:alias.one', 'user:alias.two'],
+                },
+              ],
+            }
+          );
+
+          const result = (await tool.handler(
+            { entityIds: ['alias.one', 'alias.two', 'head'] },
+            ctx
+          )) as ToolHandlerStandardReturn;
+
+          const other = result.results[0] as OtherResult;
+          expect(other.data.nonAliases).toEqual([{ euid: 'user:head', kind: 'standalone' }]);
+        });
+
+        it('on accept: leaves a standalone skipped entity untouched', async () => {
+          mockUnlinkEntities.mockResolvedValueOnce({
+            entity_type: 'user',
+            unlinked: ['user:alias.one'],
+            skipped: ['user:loner'],
+          });
+          const ctx = seedApprovedUnlink(
+            buildHandlerContextWithPrompts(mocks, { checkStatus: ConfirmationStatus.accepted }),
+            {
+              resolved: [
+                { euid: 'user:alias.one', resolvedTo: 'user:head' },
+                { euid: 'user:loner' },
+              ],
+              unresolved: [],
+              nonAliases: [{ euid: 'user:loner', kind: 'standalone' }],
+            }
+          );
+
+          const result = (await tool.handler(
+            { entityIds: ['alias.one', 'loner'] },
+            ctx
+          )) as ToolHandlerStandardReturn;
+
+          expect((result.results[0] as OtherResult).data.nonAliases).toEqual([
+            { euid: 'user:loner', kind: 'standalone' },
+          ]);
         });
 
         it('with groupEntityId: reports a group target mismatch with its aliases', async () => {
