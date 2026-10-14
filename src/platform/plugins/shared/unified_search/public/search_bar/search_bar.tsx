@@ -86,6 +86,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * the `unifiedSearch.newDateRangePickerEnabled` feature flag is also enabled.
    */
   enableDateRangePicker?: boolean;
+  /**
+   * When false, hide the date picker's previous / next / zoom time-window buttons.
+   * Defaults to true.
+   */
+  showTimeWindowButtons?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
@@ -178,6 +183,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
+  visorInitialState?: QueryBarTopRowProps['visorInitialState'];
+  onVisorInitialStateChange?: QueryBarTopRowProps['onVisorInitialStateChange'];
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
@@ -858,11 +865,14 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
+          visorInitialState={this.props.visorInitialState}
+          onVisorInitialStateChange={this.props.onVisorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}
+          showTimeWindowButtons={this.props.showTimeWindowButtons}
           enableResourceBrowser={this.props.enableResourceBrowser}
           enableCreateView={this.props.enableCreateView}
         />
