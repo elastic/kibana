@@ -26,12 +26,10 @@ import {
 } from './constants';
 
 const SEARCHABLE_VISIBLE_IN: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
-// Alerts is the only entry listed in the classic hamburger, next to the Observability app links.
-const ALERTS_VISIBLE_IN: AppDeepLinkLocations[] = [...SEARCHABLE_VISIBLE_IN, 'classicSideNav'];
 
 /**
- * Same gate as the Observability classic nav (`updateGlobalNavigation`): users with only
- * Stack privileges can open the Alerts page but do not get a hamburger entry.
+ * Same gate as the Observability classic nav (`updateGlobalNavigation`), plus Alerting v2 alerts
+ * read. Alerts is the only entry listed in the classic hamburger.
  */
 const canListInClassicSideNav = (capabilities: Capabilities): boolean =>
   hasObservabilityAlertingCapabilities(capabilities, 'alerts').v2 ||
@@ -74,12 +72,12 @@ const getAccessibleVisibleIn = (
 
   if (
     link.id === OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID &&
-    !canListInClassicSideNav(capabilities)
+    canListInClassicSideNav(capabilities)
   ) {
-    return SEARCHABLE_VISIBLE_IN;
+    return [...SEARCHABLE_VISIBLE_IN, 'classicSideNav'];
   }
 
-  return link.visibleIn ?? [];
+  return SEARCHABLE_VISIBLE_IN;
 };
 
 /**
@@ -95,7 +93,7 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
       }),
       path: OBSERVABILITY_ALERTING_ALERTS_PATH,
       order: OBSERVABILITY_ALERTING_ALERTS_ORDER,
-      visibleIn: ALERTS_VISIBLE_IN,
+      visibleIn: SEARCHABLE_VISIBLE_IN,
       keywords: ['alerting', 'episodes', 'alerts', 'inbox'],
     },
     {

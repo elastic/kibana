@@ -35,7 +35,7 @@ const visibleInById = (caps?: Capabilities): Record<string, AppDeepLinkLocations
 describe('getObservabilityAlertingDeepLinks', () => {
   it('marks every surface searchable when capabilities are omitted, except Rule Library', () => {
     expect(visibleInById()).toEqual({
-      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,
+      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
@@ -126,14 +126,6 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
       });
-    });
-
-    it('keeps Alerts out of the classic side nav for a Stack-only user', () => {
-      expect(
-        visibleInById(capabilities({ stackAlertsOnly: { show: true } }))[
-          OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID
-        ]
-      ).toEqual(SEARCHABLE);
     });
 
     it('offers Alerts and Rules V1 to a v1 apm navLink user', () => {

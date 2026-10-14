@@ -120,7 +120,7 @@ describe('ObservabilityAlertingPlugin', () => {
           expect.objectContaining({
             id: OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
             path: OBSERVABILITY_ALERTING_ALERTS_PATH,
-            visibleIn: ['globalSearch', 'projectSideNav', 'classicSideNav'],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rules-v1',

@@ -26,7 +26,6 @@ import { canReadV1Alerts, getObservabilityAlertsLinkTitle } from './get_alerts_n
 // After the unlabeled top section (100) and Streams (101), before the Logs/Infra sections (200+).
 const ALERTING_SECTION_SORT_KEY = 102;
 
-// Rule Library has no entry: its deep link is hidden in every nav surface.
 const getAlertingEntries = (core: CoreStart): NavigationEntry[] => {
   const entries: NavigationEntry[] = [];
 
