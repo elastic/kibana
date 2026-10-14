@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags } from '@kbn/scout';
+import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
@@ -24,7 +24,10 @@ const NO_API_KEY_PRIVILEGES_ROLE = {
   elasticsearch: { cluster: [], indices: [] },
 };
 
-apiTest.describe('Vector DB onboarding API key API', { tag: [...tags.serverless.vectordb] }, () => {
+const LOCAL_ONLY_TAGS = getPlaywrightTagsFor('serverless', 'vectordb', 'local');
+
+// Suite fails on MKI: https://github.com/elastic/kibana/issues/296476
+apiTest.describe('Vector DB onboarding API key API', { tag: LOCAL_ONLY_TAGS }, () => {
   let testUsernames: string[];
 
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {

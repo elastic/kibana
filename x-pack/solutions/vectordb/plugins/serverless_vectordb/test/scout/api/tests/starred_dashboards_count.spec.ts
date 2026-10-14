@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags } from '@kbn/scout';
+import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, COMMON_HEADERS, STARRED_DASHBOARDS_COUNT_API_PATH } from '../fixtures';
 
@@ -22,9 +22,10 @@ const NO_DASHBOARDS_ROLE = {
   elasticsearch: { cluster: [], indices: [] },
 };
 
+// Suite fails on MKI: https://github.com/elastic/kibana/issues/296478
 apiTest.describe(
   'Vector DB starred dashboards count API',
-  { tag: [...tags.serverless.vectordb] },
+  { tag: getPlaywrightTagsFor('serverless', 'vectordb', 'local') },
   () => {
     apiTest.beforeAll(async ({ kbnClient }) => {
       await kbnClient.savedObjects.create({
