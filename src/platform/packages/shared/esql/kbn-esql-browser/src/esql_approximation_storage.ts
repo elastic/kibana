@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const STORAGE_KEY ='kibana.esql.fastMode';
+export const STORAGE_KEY = 'kibana.esql.fastMode';
 
 /**
  * Persists the user's Fast mode (ES|QL approximation) preference across browser sessions.
@@ -21,13 +21,22 @@ export const esqlApproximationStorage = {
    * Returns the stored Fast mode preference, or `undefined` if the user has never toggled it.
    */
   get(): boolean | undefined {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw !== null ? raw === 'true' : undefined;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw !== null ? raw === 'true' : undefined;
+    } catch {
+      // Web Storage may be unavailable (e.g. blocked by browser settings)
+      return undefined;
+    }
   },
   /**
    * Persists the Fast mode preference so it survives page reloads and new browser sessions.
    */
   set(value: boolean) {
-    localStorage.setItem(STORAGE_KEY, String(value));
+    try {
+      localStorage.setItem(STORAGE_KEY, String(value));
+    } catch {
+      // Ignore write failures (storage blocked or quota exceeded) so toggling still works
+    }
   },
 };
