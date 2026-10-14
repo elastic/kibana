@@ -88,7 +88,7 @@ export class ActionsAuthorization {
     const privilege = this.authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'get');
 
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { privileges } = await checkPrivileges.atSpaces(spaces, {
+    const { privileges, hasAllRequested } = await checkPrivileges.atSpaces(spaces, {
       kibana: [privilege],
     });
 
@@ -103,11 +103,13 @@ export class ActionsAuthorization {
     ];
 
     const unauthorizedSpaces = spaces.filter((spaceId) => !authorizedSpaces.includes(spaceId));
-    if (unauthorizedSpaces.length > 0) {
+    if (unauthorizedSpaces.length > 0 || !hasAllRequested) {
       throw Boom.forbidden(
-        `Unauthorized to get actions. Validate that you have permissions to access spaces: ${unauthorizedSpaces.join(
-          ', '
-        )}.`
+        `Unauthorized to get actions. Validate that you have permissions to access spaces: ${(unauthorizedSpaces.length >
+        0
+          ? unauthorizedSpaces
+          : spaces
+        ).join(', ')}.`
       );
     }
 
