@@ -21,7 +21,7 @@ interface GetDataSourceResponse {
 }
 
 const REGION = 'eu-central-1';
-const ENDPOINT = 'https://s3.example.com';
+const ENDPOINT = `https://s3.${REGION}.amazonaws.com`;
 
 apiTest.describe(
   'ES|QL Data Federation — data source update API',
