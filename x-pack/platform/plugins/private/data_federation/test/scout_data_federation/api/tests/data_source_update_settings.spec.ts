@@ -92,8 +92,8 @@ apiTest.describe(
         const { description, settings } = await getDataSource();
         expect(description).toBe('Updated description');
         expect(settings.auth).toBe('anonymous');
-        expect(settings).not.toHaveProperty('region');
-        expect(settings).not.toHaveProperty('endpoint');
+        expect(Object.keys(settings)).not.toContain('region');
+        expect(Object.keys(settings)).not.toContain('endpoint');
       });
     });
   }
