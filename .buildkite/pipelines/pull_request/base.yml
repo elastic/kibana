@@ -1,5 +1,13 @@
 env:
   KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+  # Declares that this commit has the Citadel proxy workarounds: FTR Chromium
+  # stays off the proxy (kbn-ftr-common-functional-ui-services/.../webdriver.ts)
+  # and the distribution download bypasses it (download_build_artifacts.sh).
+  # The Citadel rollout only lets a build use the proxy when its own pipeline
+  # definition declares at least the version the rollout stage requires, so a
+  # branch that predates the workarounds stays direct. Bump this together with
+  # the stage in elastic/vault-buildkite-plugin when a new workaround is needed.
+  CITADEL_WORKAROUNDS_VERSION: '1'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
