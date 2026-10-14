@@ -363,6 +363,17 @@ export class MapsPage {
   }
 
   /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
+  async setAbsoluteRange(from: string, to: string) {
+    await this.datePicker.setAbsoluteRange({ from, to });
+    await this.waitForLayersToLoad();
+  }
+
+  /** Re-submits the current query, which forces the map to refresh. */
+  async refreshQuery() {
+    await this.queryBar.submitQuery();
+    await this.waitForLayersToLoad();
+  }
+
   async setAndSubmitQuery(query: string) {
     await this.queryBar.setQuery(query);
     await this.queryBar.submitQuery();
@@ -420,7 +431,13 @@ export class MapsPage {
     await this.waitForLayersToLoad();
   }
 
-  /** Closes the currently open layer settings panel. */
+  /** Applies the edits made in the open layer settings panel and closes it. */
+  async keepLayerPanelChanges() {
+    await this.page.getByRole('button', { name: 'Keep changes' }).click();
+    await this.waitForLayersToLoad();
+  }
+
+  /** Closes the currently open layer settings panel. Discards any unsaved edits. */
   async closeLayerPanel() {
     await this.page.testSubj.click('layerPanelCancelButton');
     await this.waitForLayersToLoad();
