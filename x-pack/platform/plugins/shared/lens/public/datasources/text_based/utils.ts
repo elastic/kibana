@@ -104,62 +104,60 @@ export const reconcileQueryColumns = (
       (column) => preferredColumnIds.has(column.columnId) && predicate(column)
     ) ?? existingColumns.find(predicate);
 
-  return [
-    ...staticColumns,
-    ...columnsFromQuery.map((queryColumn, index) => {
-      const queryFieldName = queryColumn.variable ? `??${queryColumn.variable}` : queryColumn.id;
-      const exactMatch = findPreferredFirst(
-        (column) =>
-          !usedColumnIds.has(column.columnId) &&
-          (column.fieldName === queryFieldName ||
-            column.fieldName === queryColumn.id ||
-            column.fieldName === queryColumn.name)
-      );
-      const positionalMatch = existingColumns[index];
-      // A positional match must not shadow an unused dimension-bound column of the
-      // same type (e.g. on a duplicated layer, an orphan duplicate at the query
-      // column's index would otherwise win over the bound column and the bound
-      // dimension would be reported as missing).
-      const unusedPreferredTypeMatchExists = existingColumns.some(
-        (column) =>
-          preferredColumnIds.has(column.columnId) &&
-          !usedColumnIds.has(column.columnId) &&
-          column.meta?.type === queryColumn.meta?.type
-      );
-      const compatiblePositionalMatch =
-        positionalMatch &&
-        !usedColumnIds.has(positionalMatch.columnId) &&
-        positionalMatch.meta?.type === queryColumn.meta?.type &&
-        (preferredColumnIds.has(positionalMatch.columnId) || !unusedPreferredTypeMatchExists)
-          ? positionalMatch
-          : undefined;
-      const compatibleMatch = findPreferredFirst(
-        (column) =>
-          !usedColumnIds.has(column.columnId) && column.meta?.type === queryColumn.meta?.type
-      );
-      const existingColumn = exactMatch ?? compatiblePositionalMatch ?? compatibleMatch;
+  const queryColumns = columnsFromQuery.map((queryColumn, index) => {
+    const queryFieldName = queryColumn.variable ? `??${queryColumn.variable}` : queryColumn.id;
+    const exactMatch = findPreferredFirst(
+      (column) =>
+        !usedColumnIds.has(column.columnId) &&
+        (column.fieldName === queryFieldName ||
+          column.fieldName === queryColumn.id ||
+          column.fieldName === queryColumn.name)
+    );
+    const positionalMatch = existingColumns[index];
+    // A positional match must not shadow an unused dimension-bound column of the
+    // same type (e.g. on a duplicated layer, an orphan duplicate at the query
+    // column's index would otherwise win over the bound column and the bound
+    // dimension would be reported as missing).
+    const unusedPreferredTypeMatchExists = existingColumns.some(
+      (column) =>
+        preferredColumnIds.has(column.columnId) &&
+        !usedColumnIds.has(column.columnId) &&
+        column.meta?.type === queryColumn.meta?.type
+    );
+    const compatiblePositionalMatch =
+      positionalMatch &&
+      !usedColumnIds.has(positionalMatch.columnId) &&
+      positionalMatch.meta?.type === queryColumn.meta?.type &&
+      (preferredColumnIds.has(positionalMatch.columnId) || !unusedPreferredTypeMatchExists)
+        ? positionalMatch
+        : undefined;
+    const compatibleMatch = findPreferredFirst(
+      (column) =>
+        !usedColumnIds.has(column.columnId) && column.meta?.type === queryColumn.meta?.type
+    );
+    const existingColumn = exactMatch ?? compatiblePositionalMatch ?? compatibleMatch;
 
-      if (!existingColumn) {
-        return {
-          columnId: queryColumn.id,
-          fieldName: queryFieldName,
-          label: queryColumn.name,
-          meta: queryColumn.meta,
-          ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
-        };
-      }
-
-      usedColumnIds.add(existingColumn.columnId);
-      const { variable, ...restOfExistingColumn } = existingColumn;
+    if (!existingColumn) {
       return {
-        ...restOfExistingColumn,
+        columnId: queryColumn.id,
         fieldName: queryFieldName,
-        label: existingColumn.customLabel ? existingColumn.label : queryColumn.name,
+        label: queryColumn.name,
         meta: queryColumn.meta,
         ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
       };
-    }),
-  ];
+    }
+
+    usedColumnIds.add(existingColumn.columnId);
+    const { variable, ...restOfExistingColumn } = existingColumn;
+    return {
+      ...restOfExistingColumn,
+      fieldName: queryFieldName,
+      label: existingColumn.customLabel ? existingColumn.label : queryColumn.name,
+      meta: queryColumn.meta,
+      ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
+    };
+  });
+  return [...staticColumns, ...queryColumns];
 };
 
 export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
