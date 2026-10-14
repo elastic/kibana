@@ -27,19 +27,16 @@ import type { InvestigationSubjectType } from '../../../common/subjects/subject'
 import { getSubjectTitle } from '../../subjects/attachments/subject_title';
 import { getSubjectHref } from '../../subjects/attachments/subject_view';
 import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
+import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from '../attachments/translations';
 import type { HypothesisTreeNodeData, HypothesisTreeNodeKind } from './build_hypothesis_graph';
 import { HYPOTHESIS_TREE_NODE_WIDTH } from './layout_hypothesis_graph';
 import {
-  COLLAPSE_LABEL,
-  EXPAND_LABEL,
-  HYPOTHESIS_STATUS_LABELS,
   NODE_LABELS,
   OPEN_SLACK_THREAD_LABEL,
   PROPOSAL_CONFIDENCE_LABELS,
   VIEW_ALERT_LABEL,
   actionsCountLabel,
   hypothesesCountLabel,
-  hypothesisConfidenceLabel,
   hypothesisStatusCountLabel,
   moreSubjectsLabel,
 } from './translations';
@@ -55,13 +52,11 @@ export type HypothesisTreeFlowNode = Node<HypothesisTreeFlowNodeData, 'hypothesi
 
 interface HypothesisTreeActionsContextValue {
   onSelectAction: (index: number) => void;
-  onToggleActionsExpanded: () => void;
 }
 
-/** Lets the actions node's own controls reach the canvas without going through node data. */
+/** Lets the action cards reach the canvas without going through node data. */
 export const HypothesisTreeActionsContext = createContext<HypothesisTreeActionsContextValue>({
   onSelectAction: () => {},
-  onToggleActionsExpanded: () => {},
 });
 
 /** Height of the coloured band that carries a node's role label. */
@@ -151,7 +146,6 @@ const hiddenHandleCss = css`
 const NodeShell = ({
   kind,
   label,
-  trailing,
   isSelected,
   isDimmed,
   revealIndex,
@@ -160,7 +154,6 @@ const NodeShell = ({
 }: {
   kind: HypothesisTreeNodeKind;
   label: string;
-  trailing?: React.ReactNode;
   /** Rendered on the outer band below the header, for nodes without an inner card. */
   footer?: React.ReactNode;
   isSelected: boolean;
@@ -227,7 +220,6 @@ const NodeShell = ({
             {label}
           </EuiText>
         </EuiFlexItem>
-        {trailing && <EuiFlexItem grow={false}>{trailing}</EuiFlexItem>}
       </EuiFlexGroup>
       {footer && (
         <div
@@ -347,10 +339,6 @@ export const HypothesisStatusBadge = ({
   }
 };
 
-/** How many cards peek out behind the front of a collapsed stack. */
-const MAX_STACK_LAYERS = 2;
-const STACK_LAYER_OFFSET = 4;
-
 const ActionCard = ({
   proposal: { title, confidence },
   index,
@@ -405,76 +393,21 @@ const ActionCard = ({
   );
 };
 
-const ActionsStack = ({
+const ActionsList = ({
   proposals,
-  isExpanded,
   selectedIndex,
 }: {
   proposals: InvestigationProposalSummary[];
-  isExpanded: boolean;
   selectedIndex: number | null;
-}): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
-  const { onToggleActionsExpanded } = useContext(HypothesisTreeActionsContext);
-  const [recommended] = proposals;
-  const layerCount = Math.min(proposals.length - 1, MAX_STACK_LAYERS);
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-      {isExpanded ? (
-        proposals.map((proposal, index) => (
-          <EuiFlexItem key={proposal.id} grow={false}>
-            <ActionCard proposal={proposal} index={index} isSelected={selectedIndex === index} />
-          </EuiFlexItem>
-        ))
-      ) : (
-        <EuiFlexItem
-          grow={false}
-          data-test-subj="investigationHypothesisTreeActionsStack"
-          css={css`
-            position: relative;
-            padding: 0 ${layerCount * STACK_LAYER_OFFSET}px ${layerCount * STACK_LAYER_OFFSET}px 0;
-          `}
-        >
-          {Array.from({ length: layerCount }, (_, layer) => {
-            const offset = (layerCount - layer) * STACK_LAYER_OFFSET;
-            return (
-              <div
-                key={layer}
-                aria-hidden={true}
-                css={css`
-                  position: absolute;
-                  inset: ${offset}px 0 0 ${offset}px;
-                  background: ${euiTheme.colors.backgroundBasePlain};
-                  border: ${euiTheme.border.thin};
-                  border-color: ${euiTheme.colors.borderBaseSubdued};
-                  border-radius: ${euiTheme.border.radius.medium};
-                `}
-              />
-            );
-          })}
-          <ActionCard proposal={recommended} index={0} isSelected={selectedIndex === 0} />
-        </EuiFlexItem>
-      )}
-      {proposals.length > 1 && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <EuiLink
-              data-test-subj="investigationHypothesisTreeActionsToggle"
-              aria-expanded={isExpanded}
-              onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                onToggleActionsExpanded();
-              }}
-            >
-              {isExpanded ? COLLAPSE_LABEL : EXPAND_LABEL}
-            </EuiLink>
-          </EuiText>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-};
+}): React.ReactElement => (
+  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+    {proposals.map((proposal, index) => (
+      <EuiFlexItem key={proposal.id} grow={false}>
+        <ActionCard proposal={proposal} index={index} isSelected={selectedIndex === index} />
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+);
 
 const STATUS_COUNT_BADGES: ReadonlyArray<{
   status: HypothesisStatus;
@@ -489,7 +422,6 @@ const STATUS_COUNT_BADGES: ReadonlyArray<{
 const HypothesisTreeNodeComponent = ({
   data,
 }: NodeProps<HypothesisTreeFlowNode>): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
   const { isSelected, isDimmed } = data;
   const shellProps = { isSelected, isDimmed };
 
@@ -544,16 +476,6 @@ const HypothesisTreeNodeComponent = ({
           kind="hypotheses"
           label={hypothesesCountLabel(data.total)}
           {...shellProps}
-          trailing={
-            <EuiIcon
-              type={data.isExpanded ? 'minimize' : 'maximize'}
-              color="subdued"
-              aria-hidden={true}
-              css={css`
-                margin-right: ${euiTheme.size.xs};
-              `}
-            />
-          }
           footer={
             <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
               {STATUS_COUNT_BADGES.filter(({ status }) => data.counts[status] > 0).map(
@@ -590,7 +512,7 @@ const HypothesisTreeNodeComponent = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {hypothesisConfidenceLabel(data.hypothesis.confidence)}
+                  {confidenceLabel(data.hypothesis.confidence)}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -616,11 +538,7 @@ const HypothesisTreeNodeComponent = ({
           label={actionsCountLabel(data.proposals.length)}
           {...shellProps}
           footer={
-            <ActionsStack
-              proposals={data.proposals}
-              isExpanded={data.isExpanded}
-              selectedIndex={data.selectedActionIndex}
-            />
+            <ActionsList proposals={data.proposals} selectedIndex={data.selectedActionIndex} />
           }
         />
       );

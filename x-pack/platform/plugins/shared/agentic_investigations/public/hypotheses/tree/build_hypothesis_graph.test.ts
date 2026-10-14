@@ -59,8 +59,8 @@ const kinds = (graph: ReturnType<typeof buildHypothesisGraph>) =>
   graph.nodes.map(({ data }) => data.kind);
 
 describe('buildHypothesisGraph', () => {
-  it('builds the full tree for a completed run with the hypotheses expanded', () => {
-    const graph = buildHypothesisGraph({ input: completed, isHypothesesExpanded: true });
+  it('builds the full tree for a completed run', () => {
+    const graph = buildHypothesisGraph(completed);
 
     expect(kinds(graph)).toEqual([
       'trigger',
@@ -77,14 +77,11 @@ describe('buildHypothesisGraph', () => {
 
   it('leads only confirmed hypotheses to the conclusion', () => {
     const { edges } = buildHypothesisGraph({
-      input: {
-        ...completed,
-        hypotheses: [
-          ...completed.hypotheses,
-          { candidate: 'Bot traffic', confidence: 0.2, status: 'investigating' },
-        ],
-      },
-      isHypothesesExpanded: true,
+      ...completed,
+      hypotheses: [
+        ...completed.hypotheses,
+        { candidate: 'Bot traffic', confidence: 0.2, status: 'investigating' },
+      ],
     });
 
     expect(
@@ -96,14 +93,11 @@ describe('buildHypothesisGraph', () => {
 
   it('feeds the conclusion from the chip when no hypothesis is confirmed', () => {
     const { edges } = buildHypothesisGraph({
-      input: {
-        ...completed,
-        hypotheses: completed.hypotheses.map((hypothesis) => ({
-          ...hypothesis,
-          status: 'dismissed' as const,
-        })),
-      },
-      isHypothesesExpanded: true,
+      ...completed,
+      hypotheses: completed.hypotheses.map((hypothesis) => ({
+        ...hypothesis,
+        status: 'dismissed' as const,
+      })),
     });
 
     expect(
@@ -113,18 +107,8 @@ describe('buildHypothesisGraph', () => {
     ).toEqual([HYPOTHESIS_TREE_NODE_IDS.hypotheses]);
   });
 
-  it('expands the proposed actions by default', () => {
-    const actions = buildHypothesisGraph({
-      input: completed,
-      isHypothesesExpanded: true,
-    }).nodes.find(({ id }) => id === HYPOTHESIS_TREE_NODE_IDS.actions)?.data;
-
-    expect(actions).toMatchObject({ kind: 'actions', isExpanded: true });
-  });
-
   it('puts the subjects and the title on the trigger node', () => {
-    const trigger = buildHypothesisGraph({ input: completed, isHypothesesExpanded: true }).nodes[0]
-      .data;
+    const trigger = buildHypothesisGraph(completed).nodes[0].data;
 
     expect(trigger).toEqual({
       kind: 'trigger',
@@ -134,7 +118,7 @@ describe('buildHypothesisGraph', () => {
   });
 
   it('follows the highest-confidence confirmed hypothesis as the happy path', () => {
-    const graph = buildHypothesisGraph({ input: completed, isHypothesesExpanded: true });
+    const graph = buildHypothesisGraph(completed);
 
     expect(graph.edges.filter(({ isHappyPath }) => isHappyPath).map(({ id }) => id)).toEqual([
       `${HYPOTHESIS_TREE_NODE_IDS.trigger}->${HYPOTHESIS_TREE_NODE_IDS.hypotheses}`,
@@ -144,20 +128,8 @@ describe('buildHypothesisGraph', () => {
     ]);
   });
 
-  it('connects the chip straight to the conclusion when the hypotheses are collapsed', () => {
-    const graph = buildHypothesisGraph({ input: completed, isHypothesesExpanded: false });
-
-    expect(kinds(graph)).toEqual(['trigger', 'hypotheses', 'conclusion', 'actions']);
-    expect(graph.edges.map(({ id }) => id)).toContain(
-      `${HYPOTHESIS_TREE_NODE_IDS.hypotheses}->${HYPOTHESIS_TREE_NODE_IDS.conclusion}`
-    );
-  });
-
   it('holds back the conclusion and actions while an agent is still working on it', () => {
-    const graph = buildHypothesisGraph({
-      input: { ...completed, isRunning: true },
-      isHypothesesExpanded: true,
-    });
+    const graph = buildHypothesisGraph({ ...completed, isRunning: true });
 
     expect(kinds(graph)).not.toContain('conclusion');
     expect(kinds(graph)).not.toContain('actions');
@@ -165,10 +137,7 @@ describe('buildHypothesisGraph', () => {
   });
 
   it('feeds the actions from the hypotheses when there is no conclusion', () => {
-    const graph = buildHypothesisGraph({
-      input: { ...completed, conclusion: '   ' },
-      isHypothesesExpanded: true,
-    });
+    const graph = buildHypothesisGraph({ ...completed, conclusion: '   ' });
 
     expect(kinds(graph)).not.toContain('conclusion');
     expect(
@@ -178,24 +147,18 @@ describe('buildHypothesisGraph', () => {
 
   it('has no happy path when no hypothesis is confirmed', () => {
     const graph = buildHypothesisGraph({
-      input: {
-        ...completed,
-        hypotheses: completed.hypotheses.map((hypothesis) => ({
-          ...hypothesis,
-          status: 'dismissed' as const,
-        })),
-      },
-      isHypothesesExpanded: true,
+      ...completed,
+      hypotheses: completed.hypotheses.map((hypothesis) => ({
+        ...hypothesis,
+        status: 'dismissed' as const,
+      })),
     });
 
     expect(graph.edges.some(({ isHappyPath }) => isHappyPath)).toBe(false);
   });
 
   it('leaves the actions out without proposals', () => {
-    const graph = buildHypothesisGraph({
-      input: { ...completed, proposals: [] },
-      isHypothesesExpanded: true,
-    });
+    const graph = buildHypothesisGraph({ ...completed, proposals: [] });
 
     expect(kinds(graph)).not.toContain('actions');
   });
@@ -225,7 +188,7 @@ describe('getWinningHypothesisIndex', () => {
 
 describe('getPathToNode', () => {
   it('follows the happy path into the conclusion rather than every hypothesis', () => {
-    const { edges } = buildHypothesisGraph({ input: completed, isHypothesesExpanded: true });
+    const { edges } = buildHypothesisGraph(completed);
 
     const { nodeIds } = getPathToNode(edges, HYPOTHESIS_TREE_NODE_IDS.actions);
 
@@ -241,10 +204,7 @@ describe('getPathToNode', () => {
   });
 
   it('follows every route when none of them is the happy path', () => {
-    const { edges } = buildHypothesisGraph({
-      input: { ...completed, hypotheses: [completed.hypotheses[0]] },
-      isHypothesesExpanded: true,
-    });
+    const { edges } = buildHypothesisGraph({ ...completed, hypotheses: [completed.hypotheses[0]] });
 
     const { nodeIds } = getPathToNode(edges, getHypothesisNodeId(0));
 
@@ -260,7 +220,7 @@ describe('getPathToNode', () => {
 
 describe('layoutHypothesisGraph', () => {
   it('stacks the rows on one centred spine and packs the hypothesis row edge to edge', () => {
-    const graph = buildHypothesisGraph({ input: completed, isHypothesesExpanded: true });
+    const graph = buildHypothesisGraph(completed);
     const heights = {
       [HYPOTHESIS_TREE_NODE_IDS.trigger]: 100,
       [HYPOTHESIS_TREE_NODE_IDS.hypotheses]: 80,

@@ -62,7 +62,6 @@ const setup = ({ canDecide = true, isMissing = false } = {}) => {
           <ProposalDecision
             investigationId="conv-1"
             proposalId="p-1"
-            fallback={<div data-test-subj="fallback" />}
           />
         </QueryClientProvider>
       </I18nProvider>
@@ -102,9 +101,9 @@ describe('ProposalDecision', () => {
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toBeDisabled();
   });
 
-  it('shows the fallback when the proposal cannot be read', () => {
+  it('says so when the proposal cannot be read', () => {
     setup({ isMissing: true });
 
-    expect(screen.getByTestId('fallback')).toBeInTheDocument();
+    expect(screen.getByText(/Unable to load proposed actions/)).toBeInTheDocument();
   });
 });

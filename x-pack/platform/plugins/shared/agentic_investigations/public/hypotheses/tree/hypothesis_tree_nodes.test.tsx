@@ -21,7 +21,7 @@ const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
 
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
-  actions = { onSelectAction: jest.fn(), onToggleActionsExpanded: jest.fn() }
+  actions = { onSelectAction: jest.fn() }
 ) => {
   render(
     <EuiProvider>
@@ -149,7 +149,7 @@ describe('HypothesisTreeNode', () => {
 
     const node = screen.getByTestId('investigationHypothesisTreeNode-hypothesis');
     expect(node).toHaveTextContent('Confirmed');
-    expect(node).toHaveTextContent('Confidence 90%');
+    expect(node).toHaveTextContent('90% confidence');
     expect(node.querySelector('code')).toHaveTextContent('user_id');
   });
 
@@ -158,7 +158,6 @@ describe('HypothesisTreeNode', () => {
       kind: 'hypotheses',
       total: 3,
       counts: { confirmed: 1, dismissed: 2, investigating: 0 },
-      isExpanded: true,
       ...flags,
     });
 
@@ -169,34 +168,19 @@ describe('HypothesisTreeNode', () => {
     expect(node).not.toHaveTextContent('Investigating');
   });
 
-  it('collapses the proposed actions to the recommended one and selects it on click', () => {
+  it('lists every proposed action and selects one on click', () => {
     const actions = renderNode({
       kind: 'actions',
       proposals: [proposal('p-1', 'Roll back'), proposal('p-2', 'Scale up')],
-      isExpanded: false,
       ...flags,
     });
 
     expect(screen.getByTestId('investigationHypothesisTreeAction-0')).toHaveTextContent(
       'Roll back'
     );
-    expect(screen.queryByTestId('investigationHypothesisTreeAction-1')).toBeNull();
-
-    fireEvent.click(screen.getByTestId('investigationHypothesisTreeAction-0'));
-    expect(actions.onSelectAction).toHaveBeenCalledWith(0);
-
-    fireEvent.click(screen.getByTestId('investigationHypothesisTreeActionsToggle'));
-    expect(actions.onToggleActionsExpanded).toHaveBeenCalled();
-  });
-
-  it('lists every proposed action when expanded', () => {
-    renderNode({
-      kind: 'actions',
-      proposals: [proposal('p-1', 'Roll back'), proposal('p-2', 'Scale up')],
-      isExpanded: true,
-      ...flags,
-    });
-
     expect(screen.getByTestId('investigationHypothesisTreeAction-1')).toHaveTextContent('Scale up');
+
+    fireEvent.click(screen.getByTestId('investigationHypothesisTreeAction-1'));
+    expect(actions.onSelectAction).toHaveBeenCalledWith(1);
   });
 });

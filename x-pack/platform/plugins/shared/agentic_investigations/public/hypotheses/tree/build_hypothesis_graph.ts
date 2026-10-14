@@ -39,7 +39,6 @@ export type HypothesisTreeNodeData =
       kind: 'hypotheses';
       total: number;
       counts: HypothesisStatusCounts;
-      isExpanded: boolean;
     }
   | {
       kind: 'hypothesis';
@@ -50,9 +49,8 @@ export type HypothesisTreeNodeData =
   | { kind: 'conclusion'; conclusion: string }
   | {
       kind: 'actions';
-      /** Highest confidence first, so the front of the collapsed stack is the recommended one. */
+      /** Highest confidence first, so the recommended one is on top. */
       proposals: InvestigationProposalSummary[];
-      isExpanded: boolean;
     };
 
 export type HypothesisTreeNodeKind = HypothesisTreeNodeData['kind'];
@@ -133,18 +131,16 @@ const createEdge = (source: string, target: string, isHappyPath: boolean): Hypot
  * left out while it is still running.
  */
 export const buildHypothesisGraph = ({
-  input: { title, subjects, hypotheses, conclusion, proposals, isRunning },
-  isHypothesesExpanded,
-  isActionsExpanded = true,
-}: {
-  input: HypothesisTreeInput;
-  isHypothesesExpanded: boolean;
-  isActionsExpanded?: boolean;
-}): HypothesisGraph => {
+  title,
+  subjects,
+  hypotheses,
+  conclusion,
+  proposals,
+  isRunning,
+}: HypothesisTreeInput): HypothesisGraph => {
   const sortedProposals = sortProposals(proposals);
   const winnerIndex = getWinningHypothesisIndex(hypotheses);
   const hasWinner = !isRunning && winnerIndex !== -1;
-  const showHypothesisRow = isHypothesesExpanded && hypotheses.length > 0;
 
   const nodes: HypothesisGraphNode[] = [
     { id: HYPOTHESIS_TREE_NODE_IDS.trigger, data: { kind: 'trigger', subjects, title } },
@@ -154,7 +150,6 @@ export const buildHypothesisGraph = ({
         kind: 'hypotheses',
         total: hypotheses.length,
         counts: getHypothesisStatusCounts(hypotheses),
-        isExpanded: showHypothesisRow,
       },
     },
   ];
@@ -162,14 +157,12 @@ export const buildHypothesisGraph = ({
     createEdge(HYPOTHESIS_TREE_NODE_IDS.trigger, HYPOTHESIS_TREE_NODE_IDS.hypotheses, hasWinner),
   ];
 
-  if (showHypothesisRow) {
-    hypotheses.forEach((hypothesis, index) => {
-      const id = getHypothesisNodeId(index);
-      const isWinner = hasWinner && index === winnerIndex;
-      nodes.push({ id, data: { kind: 'hypothesis', hypothesis, index, isWinner } });
-      edges.push(createEdge(HYPOTHESIS_TREE_NODE_IDS.hypotheses, id, isWinner));
-    });
-  }
+  hypotheses.forEach((hypothesis, index) => {
+    const id = getHypothesisNodeId(index);
+    const isWinner = hasWinner && index === winnerIndex;
+    nodes.push({ id, data: { kind: 'hypothesis', hypothesis, index, isWinner } });
+    edges.push(createEdge(HYPOTHESIS_TREE_NODE_IDS.hypotheses, id, isWinner));
+  });
 
   if (isRunning) {
     return { nodes, edges };
@@ -180,8 +173,7 @@ export const buildHypothesisGraph = ({
   const leadingIds = hypotheses.flatMap(({ status }, index) =>
     status === 'confirmed' ? [getHypothesisNodeId(index)] : []
   );
-  const feedingIds =
-    showHypothesisRow && leadingIds.length > 0 ? leadingIds : [HYPOTHESIS_TREE_NODE_IDS.hypotheses];
+  const feedingIds = leadingIds.length > 0 ? leadingIds : [HYPOTHESIS_TREE_NODE_IDS.hypotheses];
   const happyFeedingId =
     feedingIds[0] === HYPOTHESIS_TREE_NODE_IDS.hypotheses
       ? HYPOTHESIS_TREE_NODE_IDS.hypotheses
@@ -202,7 +194,7 @@ export const buildHypothesisGraph = ({
   if (sortedProposals.length > 0) {
     nodes.push({
       id: HYPOTHESIS_TREE_NODE_IDS.actions,
-      data: { kind: 'actions', proposals: sortedProposals, isExpanded: isActionsExpanded },
+      data: { kind: 'actions', proposals: sortedProposals },
     });
     if (conclusionText) {
       edges.push(

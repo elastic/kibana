@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -47,8 +45,9 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
-import { EvidenceView } from '../../evidence/evidence_view';
 import { SubjectList } from '../../subjects/attachments/subject_view';
+import { HypothesisDetail } from '../attachments/hypotheses_view';
+import { confidenceLabel } from '../attachments/translations';
 import { ProposalDecision } from './proposal_decision';
 import {
   buildHypothesisGraph,
@@ -70,21 +69,11 @@ import {
 import { HypothesisTreeEdge, type HypothesisTreeFlowEdge } from './hypothesis_tree_edge';
 import {
   CLOSE_DETAILS_LABEL,
-  ENTER_FULL_SCREEN_LABEL,
-  EXIT_FULL_SCREEN_LABEL,
   FIT_VIEW_LABEL,
   HYPOTHESIS_TREE_TITLE,
   INVESTIGATING_LABEL,
-  NEXT_ACTION_LABEL,
   NODE_LABELS,
-  NO_COMMENT_LABEL,
-  NO_REASON_LABEL,
-  PREVIOUS_ACTION_LABEL,
-  PROPOSAL_CONFIDENCE_LABELS,
-  PROPOSAL_STATUS_LABELS,
-  actionPositionLabel,
   hypothesesAnalyzedLabel,
-  hypothesisConfidenceLabel,
 } from './translations';
 
 const nodeTypes: NodeTypes = { hypothesisTree: HypothesisTreeNode };
@@ -124,62 +113,14 @@ const getDetailTitle = (data: HypothesisTreeNodeData): string => {
   }
 };
 
-const ActionPager = ({
-  index,
-  total,
-  onChange,
-}: {
-  index: number;
-  total: number;
-  onChange: (index: number) => void;
-}): React.ReactElement => (
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="flexEnd"
-    gutterSize="xs"
-    responsive={false}
-    data-test-subj="investigationHypothesisTreeActionPager"
-  >
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={PREVIOUS_ACTION_LABEL} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="chevronSingleLeft"
-          color="text"
-          aria-label={PREVIOUS_ACTION_LABEL}
-          isDisabled={index === 0}
-          onClick={() => onChange(index - 1)}
-          data-test-subj="investigationHypothesisTreeActionPrevious"
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs">{actionPositionLabel(index + 1, total)}</EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={NEXT_ACTION_LABEL} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="chevronSingleRight"
-          color="text"
-          aria-label={NEXT_ACTION_LABEL}
-          isDisabled={index === total - 1}
-          onClick={() => onChange(index + 1)}
-          data-test-subj="investigationHypothesisTreeActionNext"
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
 const NodeDetail = ({
   investigationId,
   data,
   selectedActionIndex,
-  onChangeAction,
 }: {
   investigationId: string;
   data: HypothesisTreeNodeData;
   selectedActionIndex: number | null;
-  onChangeAction: (index: number) => void;
 }): React.ReactElement | null => {
   switch (data.kind) {
     case 'trigger':
@@ -191,7 +132,7 @@ const NodeDetail = ({
         </EuiText>
       );
     case 'hypothesis': {
-      const { status, confidence, reason, evidence = [] } = data.hypothesis;
+      const { status, confidence, reason, evidence } = data.hypothesis;
       return (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -200,67 +141,20 @@ const NodeDetail = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {hypothesisConfidenceLabel(confidence)}
+                {confidenceLabel(confidence)}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiMarkdownFormat textSize="s">
-            {reason?.trim() ? reason : NO_REASON_LABEL}
-          </EuiMarkdownFormat>
-          {evidence.map((item, index) => (
-            <React.Fragment key={index}>
-              <EuiSpacer size="m" />
-              <EvidenceView evidence={item} />
-            </React.Fragment>
-          ))}
+          <HypothesisDetail reason={reason} evidence={evidence} />
         </>
       );
     }
     case 'conclusion':
       return <EuiMarkdownFormat textSize="s">{data.conclusion}</EuiMarkdownFormat>;
     case 'actions': {
-      const total = data.proposals.length;
-      const index = Math.min(selectedActionIndex ?? 0, total - 1);
-      const { id, title, confidence, status, comment } = data.proposals[index];
-      const summary = (
-        <>
-          <EuiText size="s">
-            <strong>{title}</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{PROPOSAL_STATUS_LABELS[status]}</EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {PROPOSAL_CONFIDENCE_LABELS[confidence]}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiMarkdownFormat textSize="s">
-            {comment.trim() ? comment : NO_COMMENT_LABEL}
-          </EuiMarkdownFormat>
-        </>
-      );
-      return (
-        <>
-          {total > 1 && (
-            <>
-              <ActionPager index={index} total={total} onChange={onChangeAction} />
-              <EuiSpacer size="s" />
-            </>
-          )}
-          <ProposalDecision
-            key={id}
-            investigationId={investigationId}
-            proposalId={id}
-            fallback={summary}
-          />
-        </>
-      );
+      const { id } = data.proposals[Math.min(selectedActionIndex ?? 0, data.proposals.length - 1)];
+      return <ProposalDecision key={id} investigationId={investigationId} proposalId={id} />;
     }
     case 'hypotheses':
       return null;
@@ -271,32 +165,18 @@ const NodeDetail = ({
   }
 };
 
-const HypothesisTreeCanvas = ({
-  input,
-  isFullScreen,
-  onToggleFullScreen,
-}: {
-  input: HypothesisTreeInput;
-  isFullScreen: boolean;
-  onToggleFullScreen: () => void;
-}): React.ReactElement => {
+const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.ReactElement => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { fitView, getZoom, setCenter } = useReactFlow();
   const canvasWidth = useStore(selectCanvasWidth);
   const canvasHeight = useStore(selectCanvasHeight);
-  const [isHypothesesExpanded, setIsHypothesesExpanded] = useState(true);
-  // Expanded by default; collapsing leaves a stack fronted by the highest-confidence action.
-  const [isActionsExpanded, setIsActionsExpanded] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedActionIndex, setSelectedActionIndex] = useState<number | null>(null);
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
   const [nodes, setNodes, onNodesChange] = useNodesState<HypothesisTreeFlowNode>([]);
   const { isRunning } = input;
 
-  const graph = useMemo(
-    () => buildHypothesisGraph({ input, isHypothesesExpanded, isActionsExpanded }),
-    [input, isHypothesesExpanded, isActionsExpanded]
-  );
+  const graph = useMemo(() => buildHypothesisGraph(input), [input]);
   const positioned = useMemo(
     () => layoutHypothesisGraph(graph, measuredHeights),
     [graph, measuredHeights]
@@ -385,7 +265,7 @@ const HypothesisTreeCanvas = ({
   )}`;
   useEffect(() => {
     // Waits for React Flow to measure the new nodes before fitting them. Also refits when the
-    // canvas resizes (full screen, flyout resize) so no node is left out of view.
+    // flyout is resized, so no node is left out of view.
     void fitView(FIT_VIEW_OPTIONS);
   }, [layoutKey, canvasWidth, canvasHeight, fitView]);
 
@@ -426,8 +306,8 @@ const HypothesisTreeCanvas = ({
 
   const handleNodeClick: NodeMouseHandler<HypothesisTreeFlowNode> = useCallback(
     (_, { id, data }) => {
+      // The hypotheses chip only summarizes the row below it.
       if (data.kind === 'hypotheses') {
-        setIsHypothesesExpanded((expanded) => !expanded);
         return;
       }
       if (selectedNodeId === id) {
@@ -441,14 +321,6 @@ const HypothesisTreeCanvas = ({
     [centreOnNode, clearSelection, selectedNodeId]
   );
 
-  const changeAction = useCallback((index: number) => {
-    setSelectedActionIndex(index);
-    // A collapsed stack only shows the first action, so reveal the one being viewed.
-    if (index > 0) {
-      setIsActionsExpanded(true);
-    }
-  }, []);
-
   const actionsContext = useMemo(
     () => ({
       onSelectAction: (index: number) => {
@@ -460,11 +332,10 @@ const HypothesisTreeCanvas = ({
           centreOnNode(HYPOTHESIS_TREE_NODE_IDS.actions);
         }
         setSelectedNodeId(HYPOTHESIS_TREE_NODE_IDS.actions);
-        changeAction(index);
+        setSelectedActionIndex(index);
       },
-      onToggleActionsExpanded: () => setIsActionsExpanded((expanded) => !expanded),
     }),
-    [centreOnNode, changeAction, clearSelection, selectedActionIndex, selectedNodeId]
+    [centreOnNode, clearSelection, selectedActionIndex, selectedNodeId]
   );
 
   return (
@@ -501,19 +372,6 @@ const HypothesisTreeCanvas = ({
             data-test-subj="investigationHypothesisTreeFitView"
           >
             <EuiIcon type="bullseye" size="s" aria-hidden={true} />
-          </ControlButton>
-          <ControlButton
-            onClick={onToggleFullScreen}
-            title={isFullScreen ? EXIT_FULL_SCREEN_LABEL : ENTER_FULL_SCREEN_LABEL}
-            aria-label={isFullScreen ? EXIT_FULL_SCREEN_LABEL : ENTER_FULL_SCREEN_LABEL}
-            aria-pressed={isFullScreen}
-            data-test-subj="investigationHypothesisTreeFullScreen"
-          >
-            <EuiIcon
-              type={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
-              size="s"
-              aria-hidden={true}
-            />
           </ControlButton>
         </Controls>
         {isRunning && (
@@ -565,7 +423,6 @@ const HypothesisTreeCanvas = ({
                 investigationId={input.id}
                 data={selectedNode.data}
                 selectedActionIndex={selectedActionIndex}
-                onChangeAction={changeAction}
               />
             </EuiPanel>
           </Panel>
@@ -586,160 +443,46 @@ export const HypothesisTreeFlyout = ({
 }: HypothesisTreeFlyoutProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'investigationHypothesisTreeTitle' });
-  const fullScreenTitleId = useGeneratedHtmlId({
-    prefix: 'investigationHypothesisTreeFullScreenTitle',
-  });
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const toggleFullScreen = useCallback(() => setIsFullScreen((fullScreen) => !fullScreen), []);
-  const exitFullScreen = useCallback(() => setIsFullScreen(false), []);
-
-  // EUI caps managed flyouts at 90% width and their `perspective` traps fixed-position children,
-  // so full screen moves the canvas into a body-level layer. Rendering it through a portal into a
-  // host element that is re-parented keeps the React tree, and so the canvas state, intact.
-  const [canvasHost] = useState(() => {
-    const host = document.createElement('div');
-    host.style.width = '100%';
-    host.style.height = '100%';
-    return host;
-  });
-  const [flyoutSlot, setFlyoutSlot] = useState<HTMLDivElement | null>(null);
-  const [fullScreenSlot, setFullScreenSlot] = useState<HTMLDivElement | null>(null);
-  // EuiPortal mounts its children after this component's effects, so focus once the button exists.
-  const focusOnMount = useCallback((button: HTMLButtonElement | null) => button?.focus(), []);
-
-  useLayoutEffect(() => {
-    const slot = isFullScreen ? fullScreenSlot : flyoutSlot;
-    if (slot && canvasHost.parentElement !== slot) {
-      slot.appendChild(canvasHost);
-    }
-  }, [canvasHost, flyoutSlot, fullScreenSlot, isFullScreen]);
-
-  useEffect(() => {
-    if (!isFullScreen) {
-      return;
-    }
-    // Captured on window so Escape leaves full screen instead of reaching the flyout and closing it.
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-      setIsFullScreen(false);
-    };
-    window.addEventListener('keydown', handleKeyDown, true);
-    return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isFullScreen]);
-
-  const description = hypothesesAnalyzedLabel(input.hypotheses.length);
 
   return (
-    <>
-      {/* Rendered from inside the conversation details flyout, whose transformed body would
-          otherwise contain this fixed-position flyout. */}
-      <EuiPortal>
-        <EuiFlyout
-          onClose={onClose}
-          aria-labelledby={titleId}
-          data-test-subj="investigationHypothesisTreeFlyout"
-          session="start"
-          historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
-          flyoutMenuProps={{ title: HYPOTHESIS_TREE_TITLE, hideTitle: true }}
-          type="push"
-          size="m"
-          resizable
+    // Rendered from inside the conversation details flyout, whose transformed body would otherwise
+    // contain this fixed-position flyout.
+    <EuiPortal>
+      <EuiFlyout
+        onClose={onClose}
+        aria-labelledby={titleId}
+        data-test-subj="investigationHypothesisTreeFlyout"
+        session="start"
+        historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
+        flyoutMenuProps={{ title: HYPOTHESIS_TREE_TITLE, hideTitle: true }}
+        type="push"
+        size="m"
+        resizable
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle size="s">
+            <h2 id={titleId}>{HYPOTHESIS_TREE_TITLE}</h2>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            {hypothesesAnalyzedLabel(input.hypotheses.length)}
+          </EuiText>
+        </EuiFlyoutHeader>
+        <div
+          css={css`
+            flex: 1 1 auto;
+            min-block-size: 0;
+            position: relative;
+            margin: ${euiTheme.size.base};
+            border: ${euiTheme.border.thin};
+            border-radius: ${euiTheme.border.radius.medium};
+            overflow: hidden;
+          `}
         >
-          <EuiFlyoutHeader>
-            <EuiTitle size="s">
-              <h2 id={titleId}>{HYPOTHESIS_TREE_TITLE}</h2>
-            </EuiTitle>
-            <EuiText size="xs" color="subdued">
-              {description}
-            </EuiText>
-          </EuiFlyoutHeader>
-          <div
-            ref={setFlyoutSlot}
-            css={css`
-              flex: 1 1 auto;
-              min-block-size: 0;
-              position: relative;
-              margin: ${euiTheme.size.base};
-              border: ${euiTheme.border.thin};
-              border-radius: ${euiTheme.border.radius.medium};
-              overflow: hidden;
-            `}
-          />
-        </EuiFlyout>
-      </EuiPortal>
-      {isFullScreen && (
-        <EuiPortal>
-          <div
-            role="dialog"
-            aria-modal={true}
-            aria-labelledby={fullScreenTitleId}
-            data-test-subj="investigationHypothesisTreeFullScreenLayer"
-            css={css`
-              position: fixed;
-              inset: 0;
-              z-index: ${euiTheme.levels.modal};
-              display: flex;
-              flex-direction: column;
-              background: ${euiTheme.colors.backgroundBasePlain};
-            `}
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="m"
-              responsive={false}
-              css={css`
-                flex: 0 0 auto;
-                padding: ${euiTheme.size.m} ${euiTheme.size.l};
-                border-bottom: ${euiTheme.border.thin};
-              `}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2 id={fullScreenTitleId}>{HYPOTHESIS_TREE_TITLE}</h2>
-                </EuiTitle>
-                <EuiText size="xs" color="subdued">
-                  {description}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={EXIT_FULL_SCREEN_LABEL} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    buttonRef={focusOnMount}
-                    iconType="fullScreenExit"
-                    color="text"
-                    aria-label={EXIT_FULL_SCREEN_LABEL}
-                    onClick={exitFullScreen}
-                    data-test-subj="investigationHypothesisTreeExitFullScreen"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <div
-              ref={setFullScreenSlot}
-              css={css`
-                flex: 1 1 auto;
-                min-block-size: 0;
-                position: relative;
-              `}
-            />
-          </div>
-        </EuiPortal>
-      )}
-      {createPortal(
-        <ReactFlowProvider>
-          <HypothesisTreeCanvas
-            input={input}
-            isFullScreen={isFullScreen}
-            onToggleFullScreen={toggleFullScreen}
-          />
-        </ReactFlowProvider>,
-        canvasHost
-      )}
-    </>
+          <ReactFlowProvider>
+            <HypothesisTreeCanvas input={input} />
+          </ReactFlowProvider>
+        </div>
+      </EuiFlyout>
+    </EuiPortal>
   );
 };

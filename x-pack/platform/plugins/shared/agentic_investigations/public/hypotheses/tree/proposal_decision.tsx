@@ -7,29 +7,19 @@
 
 import React, { useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQueryClient } from '@kbn/react-query';
-import { PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
 import { ApprovalContent, type DeclineParams } from '@kbn/proposals-ui';
-import {
-  useApproveProposal,
-  useDismissProposal,
-  useIsApprovingProposal,
-  useIsDecliningProposal,
-  useProposal,
-} from '@kbn/proposals-plugin/public';
-import { getUserDisplayName } from '@kbn/user-profile-components';
+import { useProposal } from '@kbn/proposals-plugin/public';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { decisionErrorMessage } from '../../conversation_templates/shared/proposed_actions/decision_errors';
+import { PROPOSED_ACTIONS_LOAD_ERROR_LABEL } from '../../conversation_templates/shared/proposed_actions/translations';
+import { useProposalDecision } from '../../conversation_templates/shared/proposed_actions/use_proposal_decision';
 import { investigationQueryKeys } from '../../investigations/query_keys';
-import { useCurrentUserProfile } from '../../user_profiles';
 
 export interface ProposalDecisionProps {
   /** The investigation (conversation) the proposal belongs to, read again after a decision. */
   investigationId: string;
   proposalId: string;
-  /** Shown while the full proposal loads, or when it cannot be read. */
-  fallback: React.ReactNode;
 }
 
 /**
@@ -40,19 +30,11 @@ export interface ProposalDecisionProps {
 export const ProposalDecision = ({
   investigationId,
   proposalId,
-  fallback,
 }: ProposalDecisionProps): React.ReactElement => {
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
   const { data: proposal, isLoading } = useProposal(proposalId);
-  const approve = useApproveProposal();
-  const dismiss = useDismissProposal();
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
-  const { data: currentUserProfile } = useCurrentUserProfile();
-  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
+  const { readOnly, isSubmitting, currentActorName, approve, dismiss } =
+    useProposalDecision(proposalId);
 
   const refreshInvestigation = useCallback(
     () =>
@@ -63,37 +45,38 @@ export const ProposalDecision = ({
   // `ApprovalContent` shows a thrown error's message in the card, so failures are rethrown readable.
   const handleApprove = useCallback(async () => {
     try {
-      await approve.mutateAsync({ id: proposalId, body: { actionInput: proposal?.actionInput } });
+      await approve(proposal?.actionInput);
     } catch (err) {
       throw new Error(decisionErrorMessage(err));
     }
     await refreshInvestigation();
-  }, [approve, proposal?.actionInput, proposalId, refreshInvestigation]);
+  }, [approve, proposal?.actionInput, refreshInvestigation]);
 
   const handleDismiss = useCallback(
-    async ({ dismissReason, rationale }: DeclineParams) => {
+    async (params: DeclineParams) => {
       try {
-        await dismiss.mutateAsync({ id: proposalId, body: { dismissReason, rationale } });
+        await dismiss(params);
       } catch (err) {
         throw new Error(decisionErrorMessage(err));
       }
       await refreshInvestigation();
     },
-    [dismiss, proposalId, refreshInvestigation]
+    [dismiss, refreshInvestigation]
   );
 
+  if (isLoading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
   if (!proposal) {
-    return isLoading ? <EuiLoadingSpinner size="m" /> : <>{fallback}</>;
+    return <KbnDangerCallout size="s" title={PROPOSED_ACTIONS_LOAD_ERROR_LABEL} />;
   }
 
   return (
     <ApprovalContent
       proposal={proposal}
-      readOnly={!canDecide}
-      isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
-      currentActorName={
-        currentUserProfile ? getUserDisplayName(currentUserProfile.user) : undefined
-      }
+      readOnly={readOnly}
+      isSubmitting={isSubmitting}
+      currentActorName={currentActorName}
       onApprove={handleApprove}
       onDismiss={handleDismiss}
       data-test-subj={`investigationHypothesisTreeProposal-${proposalId}`}

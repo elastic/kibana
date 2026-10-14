@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ProposalConfidence, ProposalStatus } from '@kbn/proposals-common';
+import type { ProposalConfidence } from '@kbn/proposals-common';
 import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
+import { HYPOTHESIS_STATUS_LABELS } from '../attachments/translations';
 
 export const HYPOTHESIS_TREE_TITLE = i18n.translate(
   'xpack.agenticInvestigations.hypothesisTree.title',
@@ -68,24 +69,6 @@ export const moreSubjectsLabel = (count: number): string =>
     values: { count },
   });
 
-export const hypothesisConfidenceLabel = (confidence: number): string =>
-  i18n.translate('xpack.agenticInvestigations.hypothesisTree.hypothesisConfidence', {
-    defaultMessage: 'Confidence {confidence, number, percent}',
-    values: { confidence },
-  });
-
-export const HYPOTHESIS_STATUS_LABELS: Record<HypothesisStatus, string> = {
-  confirmed: i18n.translate('xpack.agenticInvestigations.hypothesisTree.status.confirmed', {
-    defaultMessage: 'Confirmed',
-  }),
-  dismissed: i18n.translate('xpack.agenticInvestigations.hypothesisTree.status.dismissed', {
-    defaultMessage: 'Dismissed',
-  }),
-  investigating: i18n.translate('xpack.agenticInvestigations.hypothesisTree.status.investigating', {
-    defaultMessage: 'Investigating',
-  }),
-};
-
 export const hypothesisStatusCountLabel = (status: HypothesisStatus, count: number): string =>
   i18n.translate('xpack.agenticInvestigations.hypothesisTree.statusCount', {
     defaultMessage: '{count} {status}',
@@ -104,72 +87,6 @@ export const PROPOSAL_CONFIDENCE_LABELS: Record<ProposalConfidence, string> = {
   }),
 };
 
-export const PROPOSAL_STATUS_LABELS: Record<ProposalStatus, string> = {
-  pending: i18n.translate('xpack.agenticInvestigations.hypothesisTree.proposalStatus.pending', {
-    defaultMessage: 'Awaiting decision',
-  }),
-  executing: i18n.translate('xpack.agenticInvestigations.hypothesisTree.proposalStatus.executing', {
-    defaultMessage: 'Running',
-  }),
-  succeeded: i18n.translate('xpack.agenticInvestigations.hypothesisTree.proposalStatus.succeeded', {
-    defaultMessage: 'Applied',
-  }),
-  failed: i18n.translate('xpack.agenticInvestigations.hypothesisTree.proposalStatus.failed', {
-    defaultMessage: 'Failed',
-  }),
-  expired: i18n.translate('xpack.agenticInvestigations.hypothesisTree.proposalStatus.expired', {
-    defaultMessage: 'Expired',
-  }),
-  no_action: i18n.translate('xpack.agenticInvestigations.hypothesisTree.proposalStatus.noAction', {
-    defaultMessage: 'Dismissed',
-  }),
-  superseded: i18n.translate(
-    'xpack.agenticInvestigations.hypothesisTree.proposalStatus.superseded',
-    {
-      defaultMessage: 'Superseded',
-    }
-  ),
-};
-
-export const EXPAND_LABEL = i18n.translate('xpack.agenticInvestigations.hypothesisTree.expand', {
-  defaultMessage: 'Expand',
-});
-export const COLLAPSE_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.collapse',
-  {
-    defaultMessage: 'Collapse',
-  }
-);
-
-export const NO_REASON_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.detail.noReason',
-  {
-    defaultMessage: 'No reasoning recorded yet.',
-  }
-);
-export const NO_COMMENT_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.detail.noComment',
-  {
-    defaultMessage: 'No rationale recorded.',
-  }
-);
-export const PREVIOUS_ACTION_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.detail.previousAction',
-  {
-    defaultMessage: 'Previous action',
-  }
-);
-export const NEXT_ACTION_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.detail.nextAction',
-  {
-    defaultMessage: 'Next action',
-  }
-);
-export const actionPositionLabel = (current: number, total: number): string =>
-  i18n.translate('xpack.agenticInvestigations.hypothesisTree.detail.actionPosition', {
-    defaultMessage: '{current} of {total}',
-    values: { current, total },
-  });
 export const CLOSE_DETAILS_LABEL = i18n.translate(
   'xpack.agenticInvestigations.hypothesisTree.detail.close',
   {
@@ -180,18 +97,6 @@ export const CLOSE_DETAILS_LABEL = i18n.translate(
 export const FIT_VIEW_LABEL = i18n.translate('xpack.agenticInvestigations.hypothesisTree.fitView', {
   defaultMessage: 'Fit to view',
 });
-export const ENTER_FULL_SCREEN_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.enterFullScreen',
-  {
-    defaultMessage: 'Full screen',
-  }
-);
-export const EXIT_FULL_SCREEN_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.exitFullScreen',
-  {
-    defaultMessage: 'Exit full screen',
-  }
-);
 export const INVESTIGATING_LABEL = i18n.translate(
   'xpack.agenticInvestigations.hypothesisTree.investigating',
   {
