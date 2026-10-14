@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import type { InvestigationRunStatus } from '@kbn/significant-events-schema';
 
+// Investigations have no failed state any more; a run status recorded as failed reads as
+// unavailable.
 const RUN_STATUS_TO_INVESTIGATION_STATUS: Record<InvestigationRunStatus, InvestigationStatus> = {
   pending: 'running',
   complete: 'complete',
-  failed: 'failed',
+  failed: 'unavailable',
   unavailable: 'unavailable',
 };
 
@@ -33,7 +35,7 @@ export const isInvestigationInvestigated = (status: InvestigationStatus): status
 
 export const isInvestigationTerminalFailure = (
   status: InvestigationStatus
-): status is 'failed' | 'unavailable' => status === 'failed' || status === 'unavailable';
+): status is 'unavailable' => status === 'unavailable';
 
 export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus): string => {
   if (isInvestigationInvestigated(status)) {
@@ -41,10 +43,6 @@ export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus)
   }
 
   switch (status) {
-    case 'failed':
-      return i18n.translate('xpack.nightshift.investigation.statusFailed', {
-        defaultMessage: 'Investigation failed',
-      });
     case 'unavailable':
       return i18n.translate('xpack.nightshift.investigation.statusUnavailable', {
         defaultMessage: 'Investigation unavailable',

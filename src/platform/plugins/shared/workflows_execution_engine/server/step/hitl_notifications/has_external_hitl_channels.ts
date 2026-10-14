@@ -12,6 +12,8 @@ export interface ExternalHitlChannels {
   slack_api?: { 'connector-id'?: string; channels?: string[] };
   email?: { 'connector-id'?: string; to?: string[] };
   slack2?: { 'connector-id'?: string; channels?: string[] };
+  servicenow?: { 'connector-id'?: string; table?: string; 'sys-id'?: string };
+  http?: { 'connector-id'?: string; url?: string };
 }
 
 export function hasExternalHitlChannels(
@@ -27,6 +29,11 @@ export function hasExternalHitlChannels(
   const hasEmail = Boolean(channels.email?.['connector-id']) && Boolean(channels.email?.to?.length);
   const hasSlack2 =
     Boolean(channels.slack2?.['connector-id']) && Boolean(channels.slack2?.channels?.length);
+  const hasServiceNow =
+    Boolean(channels.servicenow?.['connector-id']) &&
+    Boolean(channels.servicenow?.table) &&
+    Boolean(channels.servicenow?.['sys-id']);
+  const hasHttp = Boolean(channels.http?.['connector-id'] || channels.http?.url);
 
-  return hasSlack || hasSlackApi || hasEmail || hasSlack2;
+  return hasSlack || hasSlackApi || hasEmail || hasSlack2 || hasServiceNow || hasHttp;
 }

@@ -8,7 +8,8 @@
 import { css } from '@emotion/react';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NO_INVESTIGATIONS_FOUND_MESSAGE } from '../common/messages';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import {
@@ -25,7 +26,7 @@ export interface InvestigationListHandle {
 export interface InvestigationListProps {
   sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
-  onInvestigationClick?: (investigation: ListInvestigationItem) => void;
+  onInvestigationClick?: (investigation: InvestigationSummary) => void;
 }
 
 export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
