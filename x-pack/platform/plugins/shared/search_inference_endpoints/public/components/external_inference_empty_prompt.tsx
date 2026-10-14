@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
@@ -50,7 +50,13 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
         <EuiFlexGroup justifyContent="center" direction="column" alignItems="center">
           {canManage && (
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton" iconType="plusCircle" iconSide="left">
+              <EuiButton
+                fill
+                onClick={onFlyoutOpen}
+                data-test-subj="addEndpointButton"
+                iconType="plusCircle"
+                iconSide="left"
+              >
                 {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
                   defaultMessage: 'Add endpoint',
                 })}
