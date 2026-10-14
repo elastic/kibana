@@ -20,6 +20,7 @@ import {
 
 import type { SimilarCaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from '../all_cases/types';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { ColumnsPopover } from '../all_cases/components/columns_popover';
 import { SidebarToggleButton } from '../case_view/components/sidebar/sidebar_toggle_button';
@@ -79,9 +80,16 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
     [nameColumn, onSelectedColumnsChange]
   );
 
+  const assigneeUids = useMemo(
+    () => Array.from(new Set(cases.flatMap(({ assignees }) => assignees.map(({ uid }) => uid)))),
+    [cases]
+  );
+  const { data: userProfiles } = useBulkGetUserProfiles({ uids: assigneeUids });
+
   const { columns } = useSimilarCasesColumns({
     selectedColumns: tableColumnsSelection,
     customFields,
+    userProfiles,
   });
 
   const tableRowProps = useCallback(
