@@ -324,6 +324,60 @@ describe('tab_state actions', () => {
     });
   });
 
+  describe('setDocViewerShareableState', () => {
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+
+    const setDataViewQuery = (
+      internalState: Awaited<ReturnType<typeof setup>>['internalState'],
+      tabId: string
+    ) => {
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { query: '', language: 'kuery' } },
+        })
+      );
+    };
+
+    it('writes the shareable state and replaces URL history while a document is expanded', async () => {
+      const { internalState, services, stateStorageContainer, tabId } = await setup();
+
+      setDataViewQuery(internalState, tabId);
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      stateStorageContainer.kbnUrlControls.flush();
+
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const historyLength = services.history.length;
+
+      await internalState.dispatch(
+        internalStateActions.setDocViewerShareableState({ tabId, docViewerState })
+      );
+
+      const currentTab = selectTab(internalState.getState(), tabId);
+      const persistedAppState = stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY);
+
+      expect(currentTab.appState.docViewerState).toEqual(docViewerState);
+      expect(persistedAppState).toEqual(currentTab.appState);
+      expect(setUrlStateSpy).toHaveBeenCalledWith(APP_STATE_URL_KEY, currentTab.appState, {
+        replace: true,
+      });
+      expect(services.history.length).toBe(historyLength);
+      expect(services.history.action).toBe('REPLACE');
+    });
+
+    it('does not write shareable state when no document reference is expanded', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(
+        internalStateActions.setDocViewerShareableState({ tabId, docViewerState })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState.docViewerState).toBeUndefined();
+      expect(setUrlStateSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('updateAppState', () => {
     it('should drop the shareable doc viewer state when the expanded doc reference is removed', async () => {
       const { internalState, tabId } = await setup();

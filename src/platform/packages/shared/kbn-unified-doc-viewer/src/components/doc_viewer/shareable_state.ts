@@ -62,10 +62,14 @@ export const capShareableState = (state: DocViewerShareableState): DocViewerShar
   return rest;
 };
 
+const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
  * Seeds the restorable state with the per-tab slices restored from a shared link, so a tab reopens
  * with its nested state. Restored slices are validated against each tab's `shareableStateSchema`
- * (invalid ones are dropped) and take precedence over any local slice for the same tab.
+ * (invalid ones are dropped). Restored fields are merged into each tab's local slice and take
+ * precedence, so the tab's other local values stay in place.
  */
 export const mergeShareableStateIntoRestorable = (
   docViews: DocView[],
@@ -78,11 +82,19 @@ export const mergeShareableStateIntoRestorable = (
     return initialState;
   }
 
+  const docViewerTabsState = { ...initialState?.docViewerTabsState };
+
+  for (const [tabId, restoredSlice] of Object.entries(restoredTabsState)) {
+    const localSlice = docViewerTabsState[tabId];
+
+    docViewerTabsState[tabId] =
+      isPlainRecord(localSlice) && isPlainRecord(restoredSlice)
+        ? { ...localSlice, ...restoredSlice }
+        : restoredSlice;
+  }
+
   return {
     ...initialState,
-    docViewerTabsState: {
-      ...initialState?.docViewerTabsState,
-      ...restoredTabsState,
-    },
+    docViewerTabsState,
   };
 };

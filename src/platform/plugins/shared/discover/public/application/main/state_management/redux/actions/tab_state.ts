@@ -189,9 +189,10 @@ type DocViewerShareableStatePayload = TabActionPayload<{
  * do not flood the browser back stack.
  */
 export const setDocViewerShareableState: InternalStateThunkActionCreator<
-  [DocViewerShareableStatePayload]
+  [DocViewerShareableStatePayload],
+  Promise<void>
 > = (payload) =>
-  function setDocViewerShareableStateThunkFn(dispatch, getState) {
+  async function setDocViewerShareableStateThunkFn(dispatch, getState) {
     const { tabId, docViewerState } = payload;
     const { appState } = selectTab(getState(), tabId);
 
@@ -202,7 +203,7 @@ export const setDocViewerShareableState: InternalStateThunkActionCreator<
       return;
     }
 
-    dispatch(
+    await dispatch(
       updateAppStateAndReplaceUrl({ tabId, appState: { docViewerState: nextDocViewerState } })
     );
   };

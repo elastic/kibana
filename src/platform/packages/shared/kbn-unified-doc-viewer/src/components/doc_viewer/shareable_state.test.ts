@@ -91,15 +91,17 @@ describe('mergeShareableStateIntoRestorable', () => {
     expect(mergeShareableStateIntoRestorable(docViews, initialState, undefined)).toBe(initialState);
   });
 
-  it('lets restored slices take precedence over local ones per tab', () => {
+  it('merges restored fields into the local tab slice and lets them take precedence', () => {
     const result = mergeShareableStateIntoRestorable(
       docViews,
-      { docViewerTabsState: { a: { from: 'local' }, b: { local: true } } },
+      {
+        docViewerTabsState: { a: { from: 'local', scrollPosition: 10 }, b: { local: true } },
+      },
       { tabsState: { a: { from: 'url' } } }
     );
 
     expect(result).toEqual({
-      docViewerTabsState: { a: { from: 'url' }, b: { local: true } },
+      docViewerTabsState: { a: { from: 'url', scrollPosition: 10 }, b: { local: true } },
     });
   });
 
