@@ -24,6 +24,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/has_user_index_pattern.spec.ts
   describe('has user index pattern API', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {
