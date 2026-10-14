@@ -15,7 +15,9 @@ import type {
 } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { EVENT_CREATED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 
@@ -63,16 +65,27 @@ type SearchClientMethods =
 
 /** Typed `.rule-events` read client mock; override individual methods by passing a partial mock. */
 const makeEventSearchClient = (
-  overrides: Partial<jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>>> = {}
-): jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>> & RuleEventsClient =>
-  ({
-    findLatestPaginated: jest.fn(),
-    findLatestByCurrentStatePaginated: jest.fn(),
-    findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-    findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-    findLatestByEventId: jest.fn(),
-    ...overrides,
-  } as never);
+  overrides: Partial<jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>>> = {},
+  emitTrigger?: TriggerEmitter
+): jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>> & RuleEventsClient => {
+  const findByEventId = overrides.findByEventId ?? jest.fn().mockResolvedValue({ hits: [] });
+  return asRuleEventsClient(
+    {
+      findLatestPaginated: jest.fn(),
+      findLatestByCurrentStatePaginated: jest.fn(),
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId,
+      findLatestByEventId: jest
+        .fn()
+        .mockImplementation(async (eventId: string) => (await findByEventId(eventId)).hits.at(-1)),
+      ...overrides,
+    },
+    {
+      getAlertEventsClient: async () => alertEventsClient,
+      emitTrigger,
+    }
+  ) as never;
+};
 
 const makeAlertEventsClient = (
   overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
@@ -115,7 +128,6 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
@@ -136,7 +148,6 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       input: { ...baseInput },
     });
     expect(findByEventId).not.toHaveBeenCalled();
@@ -153,7 +164,6 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       input: { ...baseInput, event_id: '' },
     });
     if (result.written) {
@@ -171,7 +181,6 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345', status: 'active' },
     });
 
@@ -201,7 +210,6 @@ describe('eventsWriteHandler', () => {
 
     await eventsWriteHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       input: { ...baseInput, event_id: 'checkout__latency-abc12345' },
     });
 
@@ -219,7 +227,6 @@ describe('eventsWriteHandler', () => {
 
       const result = await eventsWriteHandler({
         eventSearchClient: eventClient,
-        alertEventsClient,
         input: { ...baseInput, event_id: 'checkout-stable', status: 'active', severity: 'high' },
       });
 
@@ -267,7 +274,6 @@ describe('eventsWriteHandler', () => {
 
       const result = await eventsWriteHandler({
         eventSearchClient: eventClient,
-        alertEventsClient,
         input: {
           ...baseInput,
           event_id: 'checkout-stable',
@@ -309,7 +315,6 @@ describe('eventsWriteHandler', () => {
 
       const result = await eventsWriteHandler({
         eventSearchClient: eventClient,
-        alertEventsClient,
         input: {
           ...baseInput,
           event_id: 'checkout-stable',
@@ -334,7 +339,6 @@ describe('eventsWriteHandler', () => {
       await expect(
         eventsWriteHandler({
           eventSearchClient: eventClient,
-          alertEventsClient,
           input: { ...baseInput },
         })
       ).rejects.toMatchObject({ code: 'outcome_unknown' });
@@ -348,7 +352,6 @@ describe('eventsWriteBulkHandler', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       inputs: [
         { ...baseInput, event_id: 'event-1' },
         { ...baseInput, event_id: 'event-2', status: 'inactive' },
@@ -371,7 +374,6 @@ describe('eventsWriteBulkHandler', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       inputs: [
         { ...baseInput, event_id: 'duplicate' },
         { ...baseInput, event_id: 'duplicate' },
@@ -391,7 +393,6 @@ describe('eventsWriteBulkHandler', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       inputs: [{ ...baseInput }],
     });
 
@@ -431,7 +432,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       inputs: [dedupInput],
     });
 
@@ -448,7 +448,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   it('writes the first of two in-batch duplicates and flags the second', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
-      alertEventsClient,
       inputs: [dedupInput, { ...dedupInput }],
     });
 
@@ -462,7 +461,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient,
-      alertEventsClient,
       rejectUnknownEventIds: true,
       inputs: [{ ...baseInput, event_id: 'unknown-event-id' }, dedupInput],
     });
@@ -501,7 +499,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
     const [result] = await eventsWriteBulkHandler({
       eventSearchClient,
-      alertEventsClient,
       rejectUnknownEventIds: true,
       inputs: [{ ...baseInput, event_id: eventId }],
     });
@@ -525,7 +522,6 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       inputs: [{ ...baseInput, event_id: eventId, status }],
     });
 
@@ -550,7 +546,6 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
       const results = await eventsWriteBulkHandler({
         eventSearchClient: eventClient,
-        alertEventsClient,
         inputs: [{ ...baseInput, event_id: 'checkout-changing', ...inputOverrides }],
       });
 
@@ -579,7 +574,6 @@ describe('eventsWriteBulkHandler — agent-proposed severity', () => {
       eventSearchClient: makeEventSearchClient({
         findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
       }),
-      alertEventsClient,
       inputs: [{ ...baseInput, ...input }],
     });
 
@@ -648,7 +642,6 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
 
     const [result] = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       source: 'discovery',
       inputs: [
         {
@@ -672,7 +665,6 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       source: 'discovery',
       inputs: [
         {
@@ -697,7 +689,6 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       source: 'discovery',
       inputs: [
         {
@@ -719,7 +710,6 @@ describe('eventsWriteBulkHandler — signal-less chat create', () => {
 
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       inputs: [
         { ...baseInput, severity: 'critical', signals: [], causal_features: [], blast_radius: [] },
       ],
@@ -799,7 +789,6 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
 
     const [result] = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
-      alertEventsClient,
       inputs: [
         makeSnapshotInput(eventId, {
           signals: [makeDetectionSignal('rule-eis-auth')], // same rule — no new rules
@@ -824,7 +813,6 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
   it('calls createAlertEvent once per written document', async () => {
     await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
-      alertEventsClient,
       inputs: [
         { ...baseInput, event_id: 'event-a' },
         { ...baseInput, event_id: 'event-b' },
@@ -837,7 +825,6 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
   it('writes the toRuleEvent output of the in-memory document', async () => {
     await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
-      alertEventsClient,
       inputs: [{ ...baseInput, event_id: 'checkout__latency-abc12345' }],
     });
 
@@ -861,9 +848,7 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
     });
 
     const results = await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient(),
-      alertEventsClient,
-      emitTrigger,
+      eventSearchClient: makeEventSearchClient({}, emitTrigger),
       logger,
       inputs: [
         { ...baseInput, event_id: 'event-a' },
@@ -888,9 +873,7 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
     const emitTrigger = jest.fn();
 
     await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient(),
-      alertEventsClient,
-      emitTrigger,
+      eventSearchClient: makeEventSearchClient({}, emitTrigger),
       inputs: [{ ...baseInput, event_id: 'event-a' }],
     });
 
@@ -906,9 +889,80 @@ describe('eventsWriteBulkHandler — .rule-events writes', () => {
     await expect(
       eventsWriteHandler({
         eventSearchClient: makeEventSearchClient(),
-        alertEventsClient,
         input: { ...baseInput, event_id: 'event-1' },
       })
     ).rejects.toThrow('rule_events_write_error: bad');
+  });
+});
+
+describe('eventsWriteBulkHandler — how a version is written', () => {
+  const eventId = 'checkout-existing';
+  const stored = () => makeStoredEvent(eventId, { status: 'active', severity: 'high' });
+  const clientWith = ({
+    head,
+    hits,
+    emitTrigger,
+  }: {
+    head?: SignificantEvent;
+    hits: SignificantEvent[];
+    emitTrigger?: TriggerEmitter;
+  }) =>
+    makeEventSearchClient(
+      {
+        findByEventId: jest.fn().mockResolvedValue({ hits }),
+        findLatestByEventId: jest.fn().mockResolvedValue(head),
+      },
+      emitTrigger
+    );
+
+  it('creates an event with no prior version through createEvent', async () => {
+    const eventSearchClient = clientWith({ hits: [] });
+    const createEvent = jest.spyOn(eventSearchClient, 'createEvent');
+    const updateEvent = jest.spyOn(eventSearchClient, 'updateEvent');
+
+    await eventsWriteBulkHandler({
+      eventSearchClient,
+      inputs: [{ ...baseInput, event_id: 'event-a' }],
+    });
+
+    expect(createEvent).toHaveBeenCalledTimes(1);
+    expect(updateEvent).not.toHaveBeenCalled();
+  });
+
+  it('continues an existing event through updateEvent with the version it read', async () => {
+    const prior = stored();
+    const eventSearchClient = clientWith({ head: prior, hits: [prior] });
+    const createEvent = jest.spyOn(eventSearchClient, 'createEvent');
+    const updateEvent = jest.spyOn(eventSearchClient, 'updateEvent');
+
+    await eventsWriteBulkHandler({
+      eventSearchClient,
+      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
+    });
+
+    expect(updateEvent).toHaveBeenCalledWith(expect.objectContaining({ prior }));
+    expect(createEvent).not.toHaveBeenCalled();
+  });
+
+  it('reports superseded_write, writing and notifying nothing, when another writer got there first', async () => {
+    const emitTrigger = jest.fn();
+    const eventSearchClient = clientWith({
+      head: { ...stored(), '@timestamp': '2099-01-01T00:00:00.000Z' },
+      hits: [stored()],
+      emitTrigger,
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient,
+      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
+    });
+
+    expect(result).toMatchObject({
+      written: false,
+      reason: 'superseded',
+      error: { type: 'superseded_write', reason: expect.stringContaining('Do not retry') },
+    });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    expect(emitTrigger).not.toHaveBeenCalled();
   });
 });
