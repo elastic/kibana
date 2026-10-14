@@ -22,7 +22,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
@@ -36,6 +36,7 @@ import type { PaginatedResponse } from '../../../lib/significant_events/query_ut
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { MAX_SOURCE_IDS_PER_REQUEST, sourceIdsQuerySchema } from '../../utils/resolve_source_ids';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -59,22 +60,15 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
     for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') continue;
       const { detection_id, rule_name, change_point_type } = signal.metadata;
-      const streamName = signal.stream_name;
       const parsedChangePointType = parseChangePointType(change_point_type);
-      if (
-        !detection_id ||
-        !rule_name ||
-        !streamName ||
-        !parsedChangePointType ||
-        seen.has(detection_id)
-      ) {
+      if (!detection_id || !rule_name || !parsedChangePointType || seen.has(detection_id)) {
         continue;
       }
       seen.add(detection_id);
       result.push({
         detection_id,
         rule_name,
-        stream_name: streamName,
+        source_id: signal.source_id,
         change_point_type: parsedChangePointType,
       });
     }
@@ -97,8 +91,8 @@ const eventsSearchRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
+      from: isoDateTime().optional(),
+      to: isoDateTime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       status: z
@@ -107,7 +101,9 @@ const eventsSearchRoute = createServerRoute({
           z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
         ])
         .optional(),
-      stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
+      source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+        'Source ids to filter events by. One id or a repeated list.'
+      ),
       search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
@@ -129,7 +125,7 @@ const eventsSearchRoute = createServerRoute({
 
     const {
       status,
-      stream,
+      source_id: sourceIdFilter,
       search,
       severity,
       from,
@@ -145,7 +141,7 @@ const eventsSearchRoute = createServerRoute({
       from,
       to,
       status: toArray(status),
-      stream: toArray(stream),
+      sourceIds: toArray(sourceIdFilter),
       severity: toArray(severity),
       topologyFeatureIds: toArray(topologyFeatureId),
       search: search || undefined,
@@ -200,7 +196,7 @@ const eventsLifecycleRoute = createServerRoute({
     );
 
     const detections: LifecycleDetection[] = embedded.flatMap(
-      ({ detection_id, rule_name, stream_name, change_point_type }) => {
+      ({ detection_id, rule_name, source_id, change_point_type }) => {
         const hit = hitsByDetectionId.get(detection_id);
         if (!hit) {
           return [];
@@ -216,7 +212,7 @@ const eventsLifecycleRoute = createServerRoute({
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
             rule_uuid: hit.rule_uuid,
-            stream_name: hit.stream_name ?? stream_name,
+            source_id: hit.source_id ?? source_id,
             change_point_type: hitChangePointType,
             '@timestamp': hit['@timestamp'],
           },
@@ -445,7 +441,7 @@ const investigationStatusesRoute = createServerRoute({
     access: 'internal',
     summary: 'Resolve the outcome of investigation runs',
     description:
-      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
+      'Reports whether each investigation is pending (an agent works on it) or complete, from the shared investigations API. The ids are the investigation ids a significant event records in `workflow_execution_id`. Investigations that do not exist or cannot be read are omitted.',
   },
   security: {
     authz: {
@@ -463,7 +459,6 @@ const investigationStatusesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-    getSpaceId,
   }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
     const { licensing } = await getScopedClients({ request });
 
@@ -471,9 +466,8 @@ const investigationStatusesRoute = createServerRoute({
 
     const statuses = await resolveInvestigationStatuses({
       request,
-      workflowsManagement: server.workflowsManagement,
-      spaceId: await getSpaceId(request),
-      workflowExecutionIds: params.body.workflow_execution_ids,
+      agenticInvestigations: server.agenticInvestigations,
+      investigationIds: params.body.workflow_execution_ids,
       logger,
     });
 

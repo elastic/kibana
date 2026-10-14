@@ -26,7 +26,6 @@ import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
-import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import {
@@ -384,14 +383,8 @@ export const WatchDetailPage: React.FC = () => {
           </EuiFlexItem>
         ) : null}
 
-        <EuiFlexItem grow={false}>
-          <SettingsSection
-            title={settingsI18n.WORKERS_SECTION_TITLE}
-            subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
-            data-test-subj="alertZeroWatchWorkersSection"
-          >
-            {renderWorkers()}
-          </SettingsSection>
+        <EuiFlexItem grow={false} data-test-subj="alertZeroWatchWorkersSection">
+          {renderWorkers()}
         </EuiFlexItem>
       </EuiFlexGroup>
       {pendingDisable ? (

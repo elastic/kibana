@@ -27,6 +27,7 @@ export interface ColorRangesProps {
   paletteConfiguration: CustomPaletteParams | undefined;
   showExtraActions: boolean;
   dispatch: Dispatch<PaletteConfigurationActions>;
+  maxSteps?: number;
 }
 
 export function ColorRanges({
@@ -34,6 +35,7 @@ export function ColorRanges({
   paletteConfiguration,
   showExtraActions,
   dispatch,
+  maxSteps,
 }: ColorRangesProps) {
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
@@ -95,9 +97,7 @@ export function ColorRanges({
           <ColorRangesExtraActions
             dispatch={dispatch}
             shouldDisableAdd={Boolean(
-              (paletteConfiguration?.maxSteps &&
-                colorRanges.length >= paletteConfiguration?.maxSteps) ||
-                errors.length
+              (maxSteps && colorRanges.length >= maxSteps) || errors.length
             )}
             shouldDisableDistribute={Boolean(colorRanges.length === 1)}
             shouldDisableReverse={Boolean(colorRanges.length === 1)}
