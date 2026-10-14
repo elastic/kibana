@@ -280,8 +280,11 @@ describe('AgentClient', () => {
       getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
     };
 
-    const buildClient = (isAdmin: boolean): Promise<AgentClient> => {
-      getUserFromRequestMock.mockResolvedValue({ ...mockUser, isAdmin });
+    const buildClient = (
+      isAdmin: boolean,
+      user: { id?: string; username: string } = mockUser
+    ): Promise<AgentClient> => {
+      getUserFromRequestMock.mockResolvedValue({ ...user, isAdmin });
       return createClient({
         space: testSpace,
         logger,
@@ -334,6 +337,15 @@ describe('AgentClient', () => {
     });
 
     describe('create', () => {
+      it('rejects a caller without a profile uid', async () => {
+        const profilelessClient = await buildClient(false, { ...mockUser, id: undefined });
+
+        await expect(profilelessClient.create(buildCreateProfile() as never)).rejects.toThrow(
+          'A Kibana user profile is required to create an agent.'
+        );
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
       it('rejects a non-admin attaching post_execution_workflow_ids', async () => {
         const nonAdminClient = await buildClient(false);
         mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });

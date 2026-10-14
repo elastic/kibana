@@ -1186,6 +1186,25 @@ describe('ConversationClient', () => {
       mockGetReturnsIndexedDocument();
     });
 
+    it('rejects a caller without a profile uid', async () => {
+      const profilelessClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { username: 'test-user', isAdmin: false },
+      });
+
+      await expect(
+        profilelessClient.create(
+          { id: 'conversation-1', title: 'Conversation 1', agent_id: 'agent-1', rounds: [] },
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow('A Kibana user profile is required to create a conversation.');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
       const result = await client.create(
         {

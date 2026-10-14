@@ -40,6 +40,7 @@ import {
   isPublicConversation,
   normalizeConversationAccessControl,
   createBadRequestError,
+  createForbiddenError,
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
@@ -654,6 +655,13 @@ class ConversationClientImpl implements ConversationClient {
     conversation: ConversationCreateRequest,
     { source }: ConversationWriteOptions
   ): Promise<ConversationWithPermissions> {
+    // Without a profile uid the conversation would be owned by username, which is not unique across realms.
+    if (!(conversation.user ?? this.user).id) {
+      throw createForbiddenError(
+        'A Kibana user profile is required to create a conversation. Log in to Kibana at least once.'
+      );
+    }
+
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
