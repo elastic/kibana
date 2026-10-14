@@ -114,14 +114,14 @@ export const getColorConfigPromptContent = (
             stepsCount === 1 ? '' : 's'
           } for a new color config, or the existing step count when editing one`;
     lines.push(
-      `- For explicit \`steps\`, pick exactly ONE palette from the previews below: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude. Use ${bandCount}, with every \`steps[*].color\` hex copied from that palette's preview line for that count.`,
-      "- Step thresholds are data values in the metric column's unit and scale, not display labels. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values. Keep palette order. To reverse it, reverse the `steps` colors yourself, since there is no `reverse` field."
+      `- For explicit \`steps\`, pick exactly ONE palette from the previews below: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude. Use ${bandCount}, with every \`steps[*].color\` hex copied from that palette's preview line for that count. When the user names specific colors, use those colors instead, keeping the step count and thresholds.`,
+      "- Each step is `{ gte, lt, color }`, and the last step uses `lte` instead of `lt`. Step thresholds are data values in the metric column's unit and scale, not display labels. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values. Keep palette order. To reverse it, reverse the `steps` colors yourself, since there is no `reverse` field."
     );
   }
 
   if (supportsCategorical) {
     lines.push(
-      '- Categorical `palette` MUST be one of the ids below verbatim (e.g. `"default"`, `"severity"`). Leave `mapping: []` unless the user names specific values to color. In that case use `color: { type: "color_code", value: "#hex" }` per entry, with the hex drawn from one of the palettes below.'
+      '- Categorical `palette` MUST be one of the ids below verbatim (e.g. `"default"`, `"severity"`). Leave `mapping: []` unless the user names specific values to color. In that case add one `{ values: ["<value>"], color: { type: "color_code", value: "#hex" } }` entry per value, with the hex drawn from one of the palettes below unless the user names specific colors.'
     );
   }
 

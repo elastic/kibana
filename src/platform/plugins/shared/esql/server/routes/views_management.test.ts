@@ -256,9 +256,16 @@ describe('ES|QL views routes', () => {
       });
     });
 
-    it('preserves Elasticsearch errors with their status', async () => {
+    it('preserves Elasticsearch errors with their status and structured type', async () => {
       const mocks = createMocks();
-      const error = Object.assign(new Error('Conflict'), { statusCode: 409 });
+      const error = Object.assign(new Error('Conflict with an existing index'), {
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'resource_already_exists_exception',
+          },
+        },
+      });
       mocks.esql.putView.mockRejectedValue(error);
       registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
 
@@ -272,8 +279,13 @@ describe('ES|QL views routes', () => {
           mocks.response
         )
       ).resolves.toEqual({
-        status: 409,
-        body: { message: 'Conflict' },
+        status: 400,
+        body: {
+          message: 'Conflict with an existing index',
+          attributes: {
+            errorType: 'resource_already_exists_exception',
+          },
+        },
       });
       expect(mocks.logger.error).toHaveBeenCalled();
     });

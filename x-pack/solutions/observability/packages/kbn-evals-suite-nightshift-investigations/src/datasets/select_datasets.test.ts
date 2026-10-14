@@ -46,14 +46,17 @@ describe('selectDatasets', () => {
     expect(selectedIds('orcabench,synthetic-smoke')).toEqual(['synthetic-smoke', 'orcabench']);
   });
 
-  it('reads NIGHTSHIFT_DATASETS when no selection is passed', () => {
+  it('ignores NIGHTSHIFT_DATASETS and treats an undefined request as every dataset', () => {
+    // resolveEvalSelection passes `undefined` for "all smoke datasets" when the variable holds a
+    // non-smoke id such as trace-only; re-reading it here would throw "Unknown dataset(s)".
     const previous = process.env.NIGHTSHIFT_DATASETS;
-    process.env.NIGHTSHIFT_DATASETS = 'customer-zero';
+    process.env.NIGHTSHIFT_DATASETS = 'trace-only';
 
     try {
-      expect(selectDatasets(REGISTRY).map((dataset) => dataset.id)).toEqual(['customer-zero']);
+      expect(selectedIds(undefined)).toEqual(['synthetic-smoke', 'customer-zero', 'orcabench']);
     } finally {
-      process.env.NIGHTSHIFT_DATASETS = previous;
+      if (previous === undefined) delete process.env.NIGHTSHIFT_DATASETS;
+      else process.env.NIGHTSHIFT_DATASETS = previous;
     }
   });
 

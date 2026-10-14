@@ -19,11 +19,12 @@ import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../components/spark_plot';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { DurabilityBadge } from '../durability_badge/durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
@@ -44,6 +45,28 @@ const capitalizeStyle = css`
   text-transform: capitalize;
 `;
 
+const TITLE_COLUMN_WIDTH = '240px';
+
+const titleCellStyles = css`
+  width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+`;
+
+const titleTextStyles = css`
+  min-width: 0;
+  overflow: hidden;
+`;
+
+const titleLinkStyles = css`
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 interface UseKnowledgeIndicatorsColumnsParams {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   selectedKnowledgeIndicatorId: string | undefined;
@@ -59,16 +82,24 @@ export const useKnowledgeIndicatorsColumns = ({
   setKnowledgeIndicatorsToDelete,
   canManage,
 }: UseKnowledgeIndicatorsColumnsParams) => {
+  const { getSourceTitle } = useSourcesById();
+
   return useMemo(() => {
     const columns: Array<EuiBasicTableColumn<KnowledgeIndicator>> = [
       {
         name: TITLE_COLUMN_LABEL,
+        width: TITLE_COLUMN_WIDTH,
         render: (ki: KnowledgeIndicator) => {
           const title = getKnowledgeIndicatorTitle(ki);
           const isExpanded = selectedKnowledgeIndicatorId === getKnowledgeIndicatorItemId(ki);
 
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              css={titleCellStyles}
+            >
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
@@ -82,13 +113,16 @@ export const useKnowledgeIndicatorsColumns = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLink
-                  data-test-subj="significantEventsAppColumnsLink"
-                  onClick={() => toggleSelectedKnowledgeIndicator(ki)}
-                >
-                  {title}
-                </EuiLink>
+              <EuiFlexItem css={titleTextStyles}>
+                <EuiToolTip content={title} display="block" disableScreenReaderOutput>
+                  <EuiLink
+                    data-test-subj="significantEventsAppColumnsLink"
+                    css={titleLinkStyles}
+                    onClick={() => toggleSelectedKnowledgeIndicator(ki)}
+                  >
+                    {title}
+                  </EuiLink>
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -144,7 +178,8 @@ export const useKnowledgeIndicatorsColumns = ({
         name: STREAM_COLUMN_LABEL,
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
-          return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
+          const sourceId = getKnowledgeIndicatorSourceId(ki);
+          return <EuiBadge color="hollow">{getSourceTitle(sourceId)}</EuiBadge>;
         },
       },
       {
@@ -160,7 +195,7 @@ export const useKnowledgeIndicatorsColumns = ({
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
-            streamName={getKnowledgeIndicatorStreamName(ki)}
+            sourceId={getKnowledgeIndicatorSourceId(ki)}
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
           />
@@ -175,6 +210,7 @@ export const useKnowledgeIndicatorsColumns = ({
     return columns;
   }, [
     canManage,
+    getSourceTitle,
     occurrencesByQueryId,
     selectedKnowledgeIndicatorId,
     toggleSelectedKnowledgeIndicator,

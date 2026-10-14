@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Severity } from '../../common';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import { buildInvestigationFilter } from './build_investigation_filter';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
+import { fromStoredSeverity, toStoredSeverity, type StoredSeverity } from './severity';
 import type {
   FindInvestigationsQuery,
   FindInvestigationsResult,
@@ -19,15 +21,29 @@ import type {
   InvestigationRepository,
 } from './types';
 
-const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
-  id,
-  version,
-  attributes,
-}: SavedObject<Attributes>): Attributes & Pick<InvestigationRecord, 'id' | 'version'> => ({
-  id,
-  version,
-  ...attributes,
-});
+/** Stored severity carries a sortable numeric prefix; callers only ever see the canonical value. */
+const toRecord = <Attributes extends Partial<InvestigationAttributes>>(
+  { id, version, attributes }: SavedObject<Attributes>,
+  logger?: Logger
+): Attributes & Pick<InvestigationRecord, 'id' | 'version'> => {
+  const severity = fromStoredSeverity(attributes.severity);
+  if (attributes.severity !== undefined && severity === undefined) {
+    logger?.warn(`Investigation ${id} has an unrecognized stored severity: ${attributes.severity}`);
+  }
+  return {
+    id,
+    version,
+    ...attributes,
+    ...(attributes.severity === undefined ? {} : { severity }),
+  };
+};
+
+const withStoredSeverity = <T extends { severity?: Severity }>(
+  payload: T
+): Omit<T, 'severity'> & { severity?: StoredSeverity } => {
+  const { severity, ...rest } = payload;
+  return severity === undefined ? rest : { ...rest, severity: toStoredSeverity(severity) };
+};
 
 /** Text-mapped attributes the free-text `query` searches across. */
 const buildSearchFields = (query: FindInvestigationsQuery): string[] | undefined =>
@@ -40,13 +56,17 @@ export type InvestigationSavedObjectsClient = Pick<
 
 export interface SavedObjectInvestigationRepositoryDeps {
   savedObjectsClient: InvestigationSavedObjectsClient;
+  logger?: Logger;
 }
 
 export class SavedObjectInvestigationRepository implements InvestigationRepository {
   private readonly savedObjectsClient: InvestigationSavedObjectsClient;
 
-  constructor({ savedObjectsClient }: SavedObjectInvestigationRepositoryDeps) {
+  private readonly logger?: Logger;
+
+  constructor({ savedObjectsClient, logger }: SavedObjectInvestigationRepositoryDeps) {
     this.savedObjectsClient = savedObjectsClient;
+    this.logger = logger;
   }
 
   async create({
@@ -57,9 +77,9 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     attributes: InvestigationAttributes;
   }): Promise<void> {
     try {
-      await this.savedObjectsClient.create<InvestigationAttributes>(
+      await this.savedObjectsClient.create(
         NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-        attributes,
+        withStoredSeverity(attributes),
         { id }
       );
     } catch (error) {
@@ -76,7 +96,7 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
         NIGHTSHIFT_INVESTIGATION_SO_TYPE,
         id
       );
-      return toRecord(savedObject);
+      return toRecord(savedObject, this.logger);
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return undefined;
@@ -95,10 +115,10 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     version?: string;
   }): Promise<void> {
     try {
-      await this.savedObjectsClient.update<InvestigationAttributes>(
+      await this.savedObjectsClient.update(
         NIGHTSHIFT_INVESTIGATION_SO_TYPE,
         id,
-        patch,
+        withStoredSeverity(patch),
         { version }
       );
     } catch (error) {
@@ -125,7 +145,7 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     });
 
     return {
-      results: result.saved_objects.map(toRecord),
+      results: result.saved_objects.map((savedObject) => toRecord(savedObject, this.logger)),
       total: result.total,
       page: result.page,
       size: result.per_page,

@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
 import { createFeatureSimilaritySearchTool } from './feature_similarity_search/tool';
@@ -39,7 +39,7 @@ export function registerAgentBuilderTools({
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): void {

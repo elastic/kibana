@@ -27,20 +27,24 @@ export interface Investigation {
   createdAt: string;
   /** ISO 8601 timestamp */
   updatedAt: string;
-  watch_id: string;
-  watch_execution_id: string;
+  worker_execution_ids: string[];
   watch_tier?: string;
   severity?: string;
   assignee?: string | null;
+  /** Full list of assignee user-profile uids. Used by the interactive assignee picker in the flyout. */
+  assignees: string[];
   status?: string;
   pendingProposalCount: number;
   recommendedAction?: RecommendedAction;
-  /** Primary asset or surface impacted */
+  /**
+   * @deprecated Read `entityIds`. Still populated so sample data and the flyout
+   * Overview row that only know a single surface keep working.
+   */
   affectedSurface?: string;
   /**
    * Opaque entity ids this investigation is about. The landing-page pills and
-   * their filter read this list; `affectedSurface` remains the single-value
-   * fallback used by sample data and the flyout Overview row.
+   * their filter read this list. `affectedSurface` is the deprecated single-value
+   * fallback for sample data that has not been hydrated.
    */
   entityIds?: string[];
   summary?: string;

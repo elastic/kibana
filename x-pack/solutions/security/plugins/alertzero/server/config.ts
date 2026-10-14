@@ -9,6 +9,12 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
+  /**
+   * Deployment-level kill switch for AlertZero's startup side effects: managed-workflow ownership,
+   * the global managed workflows, inference features, the default-space agent, and the Kibana
+   * feature privileges. Turning it off and restarting is what triggers orphan cleanup. The
+   * user-facing per-space gate is the `securitySolution:enableAlertZero` advanced setting.
+   */
   enabled: schema.boolean({ defaultValue: false }),
 });
 

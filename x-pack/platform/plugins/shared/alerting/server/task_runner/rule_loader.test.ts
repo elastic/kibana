@@ -12,6 +12,7 @@ import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 import {
   getDecryptedRule,
@@ -20,7 +21,7 @@ import {
 } from './rule_loader';
 import { ApiKeyType, type TaskRunnerContext } from './types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import type { Rule } from '../types';
+import type { RawRule, Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
 import { mockedRawRuleSO, mockedRule } from './fixtures';
@@ -28,10 +29,16 @@ import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { alertingUiamTelemetry } from '../otel/uiam_telemetry';
+import { LEGACY_MISSING_UIAM_API_KEY_TAG } from '../application/rule/constants';
 
 // create mocks
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
+const savedObjects = savedObjectsServiceMock.createStartContract();
+const unsafeSavedObjectsClient = savedObjectsServiceMock
+  .createStartContract()
+  .getUnsafeInternalClient();
+const mockUnsafeSavedObjectsClientUpdate = jest.mocked(unsafeSavedObjectsClient.update);
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('../rules_client/lib/get_alert_from_raw');
@@ -89,6 +96,14 @@ describe('rule_loader', () => {
       },
     } as Rule);
     contextMock = getTaskRunnerContext();
+    savedObjects.getUnsafeInternalClient.mockReturnValue(unsafeSavedObjectsClient);
+    mockUnsafeSavedObjectsClientUpdate.mockResolvedValue({
+      id: ruleId,
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {},
+      references: [],
+      version: '2',
+    });
     context = contextMock as unknown as TaskRunnerContext;
   });
 
@@ -208,6 +223,32 @@ describe('rule_loader', () => {
   });
 
   describe('getDecryptedAttributes()', () => {
+    test('loads the decrypted rule without updating missing UIAM API key tags', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
+        mockGetDecrypted({
+          ...mockedRawRuleSO.attributes,
+          enabled,
+          consumer,
+          uiamApiKey: null,
+          tags: ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG],
+        })
+      );
+
+      const result = await getDecryptedRule(
+        {
+          ...context,
+          isServerless: true,
+          shouldGrantUiam: true,
+          apiKeyType: ApiKeyType.UIAM,
+        },
+        ruleId,
+        spaceId
+      );
+
+      expect(result.rawRule.tags).toEqual(['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG]);
+      expect(mockUnsafeSavedObjectsClientUpdate).not.toHaveBeenCalled();
+    });
+
     test('succeeds with default space', async () => {
       contextMock.spaceIdToNamespace.mockReturnValue(undefined);
       const result = await getDecryptedRule(context, ruleId, 'default');
@@ -554,7 +595,7 @@ describe('rule_loader', () => {
 });
 
 // returns a version of encryptedSavedObjects.getDecryptedAsInternalUser() with provided params
-function mockGetDecrypted(attributes: { apiKey?: string; enabled: boolean; consumer: string }) {
+function mockGetDecrypted(attributes: Pick<RawRule, 'enabled' | 'consumer'> & Partial<RawRule>) {
   return async (type: string, id: string, opts_: unknown) => {
     return { id, type, references: [], version: '1', attributes };
   };
@@ -565,5 +606,6 @@ function getTaskRunnerContext() {
   return {
     spaceIdToNamespace: jest.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
+    savedObjects,
   };
 }

@@ -17,9 +17,9 @@ const investigation: Investigation = {
   title: 'Compromised API key — billing-svc',
   createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
   updatedAt: new Date().toISOString(),
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
+  assignees: [],
   recommendedAction: 'closed',
   primaryActionLabel: 'Rotate the Stripe key',
   summary: 'A summary the compact row deliberately leaves out.',
@@ -31,10 +31,10 @@ const renderRow = (props: Partial<React.ComponentProps<typeof ConversationCardCo
   renderWithKibanaRenderContext(
     <ConversationCardCompact
       investigation={investigation}
-      hasBorder={false}
       outcome="Approved by Maya Chen"
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       {...props}
@@ -63,9 +63,11 @@ describe('ConversationCardCompact', () => {
   it('offers no decision, since the row is already decided', () => {
     renderRow();
 
-    // A decided row with no escalation capability has no available actions — the trigger
-    // must not render at all rather than opening an empty popover.
-    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+
+    // Only the read-only Copy link remains.
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
   });
 
   it('still opens the flyout on click', () => {

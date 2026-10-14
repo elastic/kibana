@@ -66,6 +66,15 @@ describe('AuthorHeader', () => {
     expect(screen.getByText('via Slack')).toBeInTheDocument();
   });
 
+  it('renders the label between the name and the time', () => {
+    const { container } = render(
+      <AuthorHeader startedAt={startedAt} name="Jane Doe" label="Text Note" />
+    );
+
+    expect(screen.getByText('Text Note')).toBeInTheDocument();
+    expect(container.textContent).toMatch(/^Jane Doe·Text Note·/);
+  });
+
   it('does not render the agent badge for user authors', () => {
     render(<AuthorHeader startedAt={startedAt} name="Jane Doe" />);
 

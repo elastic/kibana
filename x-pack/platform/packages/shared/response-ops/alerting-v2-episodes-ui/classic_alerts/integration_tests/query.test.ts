@@ -10,6 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { createTestEsCluster, type EsTestCluster } from '@kbn/test';
 import { ALERT_SEVERITY, ALERT_STATUS, ALERT_RULE_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 import { buildClassicAlertsQuery, buildClassicAlertsSort } from '../utils/query';
+import { CLASSIC_SEVERITY_EXTENSIONS } from '../create_classic_episode_source';
 
 const TEST_INDEX = 'test-classic-alerts';
 
@@ -111,7 +112,10 @@ describe('classic alerts query builders', () => {
         index: TEST_INDEX,
         size: 20,
         query: { match_all: {} },
-        sort: buildClassicAlertsSort({ sortField: 'severity', sortDirection: 'desc' }),
+        sort: buildClassicAlertsSort(
+          { sortField: 'severity', sortDirection: 'desc' },
+          CLASSIC_SEVERITY_EXTENSIONS
+        ),
         _source: [ALERT_SEVERITY],
       });
 
@@ -120,12 +124,12 @@ describe('classic alerts query builders', () => {
       );
       expect(severities).toEqual([
         'critical',
-        'high',
         'major',
+        'high',
+        'minor',
         'medium',
         'warning',
         'low',
-        'minor',
         'info',
         null,
       ]);
@@ -136,7 +140,10 @@ describe('classic alerts query builders', () => {
         index: TEST_INDEX,
         size: 20,
         query: { match_all: {} },
-        sort: buildClassicAlertsSort({ sortField: 'severity', sortDirection: 'asc' }),
+        sort: buildClassicAlertsSort(
+          { sortField: 'severity', sortDirection: 'asc' },
+          CLASSIC_SEVERITY_EXTENSIONS
+        ),
         _source: [ALERT_SEVERITY],
       });
 
@@ -147,9 +154,9 @@ describe('classic alerts query builders', () => {
         null,
         'info',
         'low',
-        'minor',
-        'medium',
         'warning',
+        'medium',
+        'minor',
         'high',
         'major',
         'critical',
@@ -190,6 +197,22 @@ describe('classic alerts query builders', () => {
 
       expect(hits).toHaveLength(1);
       expect(hits[0][ALERT_SEVERITY]).toBe('critical');
+    });
+
+    it('filters warning without including medium documents', async () => {
+      const query = buildClassicAlertsQuery({ severity: ['warning'] });
+      const hits = await search(query);
+
+      expect(hits).toHaveLength(1);
+      expect(hits[0][ALERT_SEVERITY]).toBe('warning');
+    });
+
+    it('filters medium without including warning documents', async () => {
+      const query = buildClassicAlertsQuery({ severity: ['medium'] });
+      const hits = await search(query);
+
+      expect(hits).toHaveLength(1);
+      expect(hits[0][ALERT_SEVERITY]).toBe('medium');
     });
 
     it('filters by search text', async () => {

@@ -69,7 +69,12 @@ export const parseIndicatorList = (
       currentBlock.reference = url;
     } else if (line && !line.startsWith('#')) {
       const { iocs } = extractIocs({ text: line, defang: false });
-      for (const ioc of iocs) {
+      // `context` is prompt-only, for semantic adjudication of article reports
+      // (see adjudicate_iocs.ts). This parser never adjudicates — Maltrail
+      // entries promote directly — and `extracted.iocs` is dynamic: strict, so
+      // a per-line "context window" would fail every report write once a
+      // url/domain value picked one up.
+      for (const { context, ...ioc } of iocs) {
         // Appearing in a curated trail file is a strong signal, so an uncertain or
         // contextual value is elevated. It is not strong enough to override a
         // verdict the extractor already reached: `reference` covers private and

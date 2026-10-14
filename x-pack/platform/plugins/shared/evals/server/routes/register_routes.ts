@@ -15,6 +15,8 @@ import type { EvaluatorRegistry } from '../evaluators/types';
 import type { TaskProviderRegistry } from '../task_providers/types';
 import { registerGetExperimentsRoute } from './experiments/get_experiments';
 import { registerGetExperimentRoute } from './experiments/get_experiment';
+import { registerGetExperimentRunsRoute } from './experiments/get_experiment_runs';
+import { registerGetExperimentTracesRoute } from './experiments/get_experiment_traces';
 import { registerGetExperimentScoresRoute } from './experiments/get_experiment_scores';
 import { registerGetExperimentDatasetExamplesRoute } from './experiments/get_experiment_dataset_examples';
 import { registerGetExperimentExampleDetailsRoute } from './experiments/get_experiment_example_details';
@@ -47,6 +49,7 @@ import { registerDeleteEvaluatorRoute } from './evaluators/delete_evaluator';
 import { registerEvaluateRoute } from './evaluators/evaluate';
 import { registerResolveInstrumentationRoute } from './evaluators/resolve_instrumentation';
 import { registerValidateRoute } from './evaluators/validate';
+import { registerTestEvaluatorRoute } from './evaluators/test_evaluator';
 import { registerRunExperimentRoute } from './experiments/run_experiment';
 import { registerSaveExperimentWorkflowRoute } from './experiments/save_experiment_workflow';
 import { registerPreviewExperimentRoute } from './experiments/preview_experiment';
@@ -72,6 +75,8 @@ export interface RouteDependencies extends SpaceDependencies {
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetExperimentsRoute(dependencies);
   registerGetExperimentRoute(dependencies);
+  registerGetExperimentRunsRoute(dependencies);
+  registerGetExperimentTracesRoute(dependencies);
   registerGetExperimentScoresRoute(dependencies);
   registerGetExperimentDatasetExamplesRoute(dependencies);
   registerGetExperimentExampleDetailsRoute(dependencies);
@@ -102,6 +107,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerEvaluateRoute(dependencies);
   registerResolveInstrumentationRoute(dependencies);
   registerValidateRoute(dependencies);
+  registerTestEvaluatorRoute(dependencies);
   registerGetEvaluatorRoute(dependencies);
   registerUpdateEvaluatorRoute(dependencies);
   registerDeleteEvaluatorRoute(dependencies);

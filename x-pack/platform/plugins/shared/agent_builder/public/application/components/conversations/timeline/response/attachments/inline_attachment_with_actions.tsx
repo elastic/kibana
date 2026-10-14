@@ -19,7 +19,7 @@ import { useConversationContext } from '../../../../../context/conversation/conv
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
-import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
+import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
@@ -189,9 +189,15 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
             > .euiPanel {
               border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
             }
+
+            /* No header rendered (no action buttons): the content is the top of the card too. */
+            &:first-child,
+            &:first-child > .euiPanel {
+              border-radius: ${AB_PANEL_RADIUS}px;
+            }
           `}
         >
-          <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
+          <TimelineRenderErrorBoundary key={attachmentPreviewKey}>
             {() =>
               uiDefinition.renderInlineContent?.(
                 {
@@ -205,7 +211,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
                 }
               )
             }
-          </AttachmentRenderErrorBoundary>
+          </TimelineRenderErrorBoundary>
         </EuiSplitPanel.Inner>
       )}
     </EuiSplitPanel.Outer>

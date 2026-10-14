@@ -6,10 +6,14 @@
  */
 
 import { EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { ItemRow } from './item_row';
+import type { SourceType } from './source_picker/types';
+import { useSourceRowMountAnimation } from './source_row.styles';
 
 interface SourceRowProps {
   label: string;
@@ -17,6 +21,8 @@ interface SourceRowProps {
   icon: ReactNode;
   children?: ReactNode;
   onRemove?: () => void;
+  sourceType?: SourceType;
+  animateOnMount?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -26,8 +32,13 @@ export const SourceRow = ({
   icon,
   children,
   onRemove,
+  sourceType,
+  animateOnMount = false,
   'data-test-subj': dataTestSubj,
 }: SourceRowProps) => {
+  const mountAnimation = useSourceRowMountAnimation();
+  const [enterStyles] = useState(() => (animateOnMount ? mountAnimation : undefined));
+
   const removeLabel = i18n.translate('xpack.contextEngine.sourceRow.removeAriaLabel', {
     defaultMessage: 'Remove {label}',
     values: { label },
@@ -35,6 +46,7 @@ export const SourceRow = ({
 
   return (
     <ItemRow
+      css={enterStyles}
       label={label}
       icon={icon}
       badge={
@@ -51,6 +63,11 @@ export const SourceRow = ({
               onClick={onRemove}
               aria-label={removeLabel}
               data-test-subj="contextRemoveSourceButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
+                action: CONTEXT_ENGINE_UI_EBT.action.sources.REMOVE_SOURCE,
+                ...(sourceType !== undefined && { detail: sourceType }),
+              })}
             />
           </EuiToolTip>
         ) : undefined

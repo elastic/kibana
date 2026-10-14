@@ -30,23 +30,26 @@ export const EXECUTION_LOOKUP_BATCH_SIZE = 100;
  */
 export const MAX_CANDIDATES = 1_000;
 
+/**
+ * How long an investigation may stay running when its latest run's execution cannot be found, for
+ * example because the execution document was deleted. The investigation workflow times out after
+ * 60 minutes; the margin covers the reconciliation interval.
+ */
+export const UNTRACKED_RUN_TIMEOUT_MS = 70 * 60 * 1000;
+
+export const UNTRACKED_RUN_TIMEOUT_ERROR =
+  'Investigation did not finish within the workflow timeout';
+
 /** Used when the execution recorded no error of its own. */
 export const FALLBACK_ERRORS: Partial<Record<ExecutionStatus, string>> = {
   [ExecutionStatus.FAILED]: 'Workflow execution failed',
   [ExecutionStatus.TIMED_OUT]: 'Workflow execution timed out',
 };
 
-export const MISSING_EXECUTION_ERROR = 'Workflow execution no longer exists';
-
-/**
- * How long an investigation whose execution cannot be found is left alone. An execution document is
- * always written before its investigation record (see `investigations_client.start()`), so a
- * missing one is either not yet visible to search or gone for good; waiting distinguishes the two.
- */
-export const MISSING_EXECUTION_GRACE_PERIOD_MS = 60 * 60 * 1000;
-
 export interface ExecutionSummary {
   status: ExecutionStatus;
+  workflowId?: string | null;
+  originManagedWorkflowId?: string | null;
   error?: { message: string } | null;
   finishedAt?: string;
 }
@@ -66,8 +69,9 @@ export interface ReconciliationResult {
   reconciled: number;
 }
 
-export type ReconciliationCandidate =
-  FindInvestigationsAcrossSpacesResult<'created_at'>['results'][number];
+export type ReconciliationCandidate = FindInvestigationsAcrossSpacesResult<
+  'created_at' | 'status' | 'started_at' | 'execution_id'
+>['results'][number];
 
 export interface ReconciliationOutcome {
   reconciledStatus: InvestigationStatus;

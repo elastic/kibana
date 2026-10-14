@@ -12,13 +12,15 @@ import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { getTextInputHardMaxLength } from '../utils/validate_text_input';
 
 const descriptionHelpText = i18n.translate('xpack.contextEngine.aiIndexDescription.helpText', {
-  defaultMessage: 'Optional — describe what this AI index is for.',
+  defaultMessage:
+    'Important: This description shapes generated automation workflows and helps agents decide when the index is relevant.',
 });
 
 const descriptionPlaceholder = i18n.translate(
   'xpack.contextEngine.aiIndexDescription.placeholder',
   {
-    defaultMessage: 'Describe what this AI index is for.',
+    defaultMessage:
+      'Describe what this AI index is for and the information its Knowledge Indicators contain. Include example questions they should help answer and any known gaps in that information.',
   }
 );
 
@@ -49,6 +51,7 @@ export const AiIndexDescriptionField = ({
   >
     <EuiTextArea
       fullWidth
+      rows={3}
       value={value}
       onChange={(event) => onChange(event.target.value)}
       maxLength={getTextInputHardMaxLength(MAX_AI_INDEX_DESCRIPTION_LENGTH)}

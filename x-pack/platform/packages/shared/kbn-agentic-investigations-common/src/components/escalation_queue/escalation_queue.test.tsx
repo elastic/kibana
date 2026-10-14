@@ -13,6 +13,7 @@ import { EscalationQueue } from './escalation_queue';
 
 const openItem: EscalationQueueItem = {
   id: 'esc-1',
+  agentId: 'agent-1',
   title: 'Unusual admin activity',
   status: 'open',
   createdAt: '2024-01-01T00:00:00Z',
@@ -61,6 +62,21 @@ describe('EscalationQueue', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
+  it('counts the matching rows in the badge while filtered, with "+" when more can load', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        loadedCount={3}
+        totalItemCount={5}
+        isFiltered
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.getByText('1+')).toBeInTheDocument();
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
+  });
+
   it('renders a card for each escalation', () => {
     renderQueue('open', [openItem, { ...openItem, id: 'esc-3', title: 'Second escalation' }]);
     expect(screen.getByTestId('escalationCard-esc-1')).toBeInTheDocument();
@@ -92,6 +108,25 @@ describe('EscalationQueue', () => {
     expect(screen.getByText('Show more (50)')).toBeInTheDocument();
   });
 
+  it('renders "Show more" as the sibling after the last card, so the card keeps its divider', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        totalItemCount={51}
+        onLoadMore={jest.fn()}
+        renderAssignees={() => <span />}
+      />
+    );
+
+    let footer: HTMLElement = screen.getByTestId('escalationQueueLoadMore-open');
+    while (footer.parentElement && !footer.previousElementSibling) {
+      footer = footer.parentElement;
+    }
+
+    expect(footer.previousElementSibling).toHaveTextContent(openItem.title);
+  });
+
   it('calls onLoadMore when the "Show more" button is clicked', () => {
     const onLoadMore = jest.fn();
     renderWithKibanaRenderContext(
@@ -118,5 +153,62 @@ describe('EscalationQueue', () => {
       />
     );
     expect(screen.queryByTestId('escalationQueueLoadMore-open')).not.toBeInTheDocument();
+  });
+
+  it('passes the href from getHref to each card', () => {
+    const getHref = jest.fn((e: EscalationQueueItem) => `/chat/${e.id}`);
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        onClickCard={jest.fn()}
+        getHref={getHref}
+        renderAssignees={() => <span />}
+      />
+    );
+
+    expect(getHref).toHaveBeenCalledWith(openItem);
+    const link = screen.getByTestId(`escalationCardLink-${openItem.id}`);
+    expect(link).toHaveAttribute('href', `/chat/${openItem.id}`);
+  });
+
+  it('shows the filtered empty-state copy when an Impact filter hides every row', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue status="open" escalations={[]} isFiltered renderAssignees={() => <span />} />
+    );
+    expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
+  });
+
+  it('computes "Show more" from the unfiltered loaded count', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        loadedCount={3}
+        totalItemCount={5}
+        isFiltered
+        onLoadMore={jest.fn()}
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.getByTestId('escalationQueueLoadMore-open')).toHaveTextContent('2');
+  });
+
+  it('keeps "Show more" available when the filter hides every loaded row', () => {
+    const onLoadMore = jest.fn();
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="closed"
+        escalations={[]}
+        loadedCount={10}
+        totalItemCount={15}
+        isFiltered
+        onLoadMore={onLoadMore}
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('escalationQueueLoadMore-closed'));
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 });

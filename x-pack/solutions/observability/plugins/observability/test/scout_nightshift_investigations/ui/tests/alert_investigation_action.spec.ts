@@ -114,6 +114,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
       await pageObjects.alertsTablePage.gotoWithAppState({
         kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
         rangeFrom: 'now-1h',
@@ -126,25 +127,30 @@ test.describe(
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickViewInvestigation();
 
+      // The Nightshift app opens the investigation's Agent Builder conversation details flyout for
+      // this link (covered by its unit tests); the serverless config set has no agentic
+      // investigations, which that flyout needs.
       await expect
         .poll(() => page.url())
         .toContain(`/app/nightshift?investigationId=investigation-1`);
-      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
 
     test('views a completed investigation from the alert detail action menu', async ({
       page,
       pageObjects,
     }) => {
+      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
       await pageObjects.alertPage.goto(alertId);
       await pageObjects.alertPage.openActionsMenu();
 
       await pageObjects.alertPage.clickViewInvestigation();
 
+      // The Nightshift app opens the investigation's Agent Builder conversation details flyout for
+      // this link (covered by its unit tests); the serverless config set has no agentic
+      // investigations, which that flyout needs.
       await expect
         .poll(() => page.url())
         .toContain(`/app/nightshift?investigationId=investigation-1`);
-      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
   }
 );

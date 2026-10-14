@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import { isTimelineEvent } from '@kbn/agent-builder-common';
 import { buildItems } from '../components/conversations/timeline/to_timeline_items';
 import { useConversation } from './use_conversation';
 
@@ -21,7 +20,7 @@ export const useStepsFromSavedTurns = (): ConversationRoundStep[] => {
 
   return useMemo(
     () =>
-      buildItems((savedEvents ?? []).filter(isTimelineEvent)).flatMap((item) =>
+      buildItems(savedEvents ?? []).flatMap((item) =>
         item.kind === 'agentTurn' ? item.steps : []
       ),
     [savedEvents]

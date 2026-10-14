@@ -9,6 +9,8 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
+import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { spaceTest, tags } from '../fixtures';
 
 spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnostic }, () => {
@@ -157,11 +159,11 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
   );
 
   spaceTest(
-    'saving preserves the data view ID but saving as copy generates a new data view ID',
-    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
+    'saving and reloading preserve the stored data view ID but saving as copy generates a new ID',
+    async ({ apiServices, discoverScoutSpace, kbnClient, page, pageObjects }) => {
       const { discover } = pageObjects;
 
-      await apiServices.discover.create(
+      const sessionId = await apiServices.discover.create(
         {
           title: 'logstash-adhoc-save',
           tabs: [
@@ -185,12 +187,38 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
         } satisfies DiscoverSessionApiDataInput,
         discoverScoutSpace.id
       );
+      const readStoredDataView = async () => {
+        const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+          type: 'search',
+          id: sessionId,
+          space: discoverScoutSpace.id,
+        });
+        return parseSearchSourceJSON(
+          storedSession.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+        ).index;
+      };
+      // Read the stored ID before opening Discover, so reconciliation cannot hide a missing ID.
+      const storedDataView = await readStoredDataView();
       await discover.loadSavedSearch('logstash-adhoc-save');
 
       const idBeforeSave = await discover.getCurrentDataViewId();
+      expect(storedDataView).toMatchObject({ id: idBeforeSave });
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(idBeforeSave);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
+
       await discover.saveSearch('logstash*-ss');
       await discover.waitUntilTabIsLoaded();
       expect(await discover.getCurrentDataViewId()).toBe(idBeforeSave);
+      expect(await readStoredDataView()).toMatchObject({ id: idBeforeSave });
+
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+      await expect.poll(() => discover.getCurrentDataViewId()).toBe(idBeforeSave);
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
       const idBeforeCopy = await discover.getCurrentDataViewId();
       await discover.saveSearchAsNew('logstash*-ss-new');

@@ -32,9 +32,11 @@ For alert-action events, the end-to-end flow is:
 
 For rule-lifecycle events (create, update, delete, enable, disable):
 
-1. `RuleEventPublisher` publishes a `rule.*` domain event together with `{ request }`.
+1. `RuleEventPublisher` publishes a `rule.*` domain event together with `{ request, origin }`.
 2. `RuleWorkflowSubscriber` receives the event, selects the matching trigger binding, and maps the payload.
 3. `WorkflowService.emitEvent(request, triggerId, payload)` emits the workflow trigger.
+
+`origin` is `user` for changes made with a caller's credentials and `internal` for changes the internal Kibana user makes through `InternalRulesClient`. `RuleWorkflowSubscriber` skips `internal` events with a debug log: their request carries no credentials, so workflows cannot schedule the triggered workflow.
 
 Trigger registration is handled separately during setup by [`register_trigger_definitions.ts`](../../workflow_extensions/register_trigger_definitions.ts), using the same trigger catalog the subscriber uses at runtime.
 
@@ -64,7 +66,7 @@ class SomeSubscriber {
 `emitEvent()` takes:
 
 - `request`: the auth and space context to run under
-- `triggerId`: the workflows trigger id, for example `alertingV2.episodeAssigned`
+- `triggerId`: the workflows trigger id, for example `alerting.actions.alertAssigned`
 - `payload`: a plain object that must conform to the trigger's registered Zod schema
 
 If workflows is unavailable for that request, the service logs a debug message and drops the emit.
@@ -81,7 +83,7 @@ The request is required because the workflows execution path derives critical me
 Because of that, the choice of auth identity must stay explicit at the call site.
 
 - If the caller is handling a real user request, pass that user's `KibanaRequest`.
-- If the caller is a singleton background task or other non-HTTP flow, synthesise a system request at the call site and pass that.
+- If the caller is a singleton background task or other non-HTTP flow, synthesise a system request at the call site and pass that. A credential-less request is not enough: that is why `RuleWorkflowSubscriber` skips `internal` rule events instead of emitting them.
 
 Do **not** hide a default system-user fallback inside `WorkflowService`. If the service silently chose the system identity when a real user identity was available, it would make audit and privilege behaviour harder to reason about.
 

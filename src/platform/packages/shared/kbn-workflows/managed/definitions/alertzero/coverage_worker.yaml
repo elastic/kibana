@@ -1,10 +1,10 @@
 version: "1"
 name: Detection Coverage Worker
 description: >
-  Finds knowledge indicators that report a detection gap, are still pending, and were
-  created inside the lookback window. Starts one Detection Coverage Review for each, up
-  to a limit of active reviews per space. Skips indicators that already have an active
-  review. Does not write to indicators. One run is one sweep.
+  Finds knowledge indicators in this space that report a detection gap, are still
+  pending, and were created inside the lookback window. Starts one Detection Coverage
+  Review for each, up to a limit of active reviews per space. Skips indicators that
+  already have an active review. Does not write to indicators. One run is one sweep.
 enabled: true
 tags:
   - security
@@ -40,7 +40,12 @@ triggers:
           type: integer
           minimum: 1
           maximum: 90
-          description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 30. A manual run can raise or lower it."
+          description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 14. A manual run can raise or lower it."
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          maxLength: 16
+          description: "Detection Watch autonomy level of the dispatching worker, forwarded to every review it starts. Default: manual."
       additionalProperties: false
 outputs:
   - name: pending
@@ -64,8 +69,11 @@ consts:
   # Task Manager tasks. The ES search size below must be at least this value.
   batch_size: 5
   # How many days back the sweep looks. An indicator older than this is never reviewed,
-  # so the sweep reads the oldest indicators in the window first.
-  lookback_days: 7
+  # so the sweep reads the oldest indicators in the window first. Must stay above the
+  # review's `176h` timeout: a review can park that long on its proposal, and an
+  # expired proposal is only retried while its indicator is still inside the window.
+  # A test pins the relationship.
+  lookback_days: 14
   # The template language has no empty-list literal. `| default: []` returns nothing.
   # This constant is the empty-list fallback.
   no_rows: []
@@ -132,6 +140,9 @@ steps:
   # indicator is created, so the range is a creation-time window and marking an indicator
   # processed does not move it.
   #
+  # All spaces share one indicator index, so the query also matches the space. The
+  # producer writes it in `attributes.space_id`. An indicator without it is not reviewed.
+  #
   # The query excludes indicators with an active review. An excluded indicator does not
   # use a place in the result. If step 1 failed or the parse was unsound, the list is
   # empty, and an empty list excludes nothing.
@@ -163,6 +174,8 @@ steps:
                 type: security.coverage
             - term:
                 attributes.status: pending
+            - term:
+                attributes.space_id: "{{ workflow.spaceId }}"
             - range:
                 "@timestamp":
                   gte: "now-{{ inputs.lookback_days | default: consts.lookback_days }}d"
@@ -179,8 +192,8 @@ steps:
       indicators: "${{ steps.search_pending_indicators.output.hits.hits | default: consts.no_rows | slice: 0, steps.resolve_free_slots.output.free | slice: 0, steps.resolve_batch_size.output.size }}"
 
   # Step 8 of 8: start one review per indicator. The sweep does not wait for the review.
-  # A review can wait up to 72 hours for a human. The sweep passes the indicator id and
-  # the index name. The review reads the indicator.
+  # A review can park for up to a week while its proposal gate waits for a human. The
+  # sweep passes the indicator id and the index name. The review reads the indicator.
   - name: start_reviews
     type: foreach
     foreach: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows }}"
@@ -191,9 +204,11 @@ steps:
           continue: true
         with:
           workflow-id: system-security-coverage-review
+          run-as-mode: inherit
           inputs:
             ki_id: "{{ foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+            autonomy_level: "{{ inputs.autonomy_level | default: 'manual' }}"
 
   - name: emit_result
     type: workflow.output

@@ -51,7 +51,7 @@ import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
-  isComingFromContainerView,
+  isSaveAndReturn,
   isLegacyEditorEmbeddable,
   setBreadcrumbsTitle,
   useNavigateBackToApp,
@@ -355,7 +355,7 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp: isComingFromContainerView(incomingState)
+            originatingApp: isSaveAndReturn(incomingState)
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
@@ -522,7 +522,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isComingFromContainerView(incomingState) || legacyEditorAppName
+            isSaveAndReturn(incomingState) || legacyEditorAppName
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

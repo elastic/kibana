@@ -18,6 +18,15 @@ describe('validateVariablePath', () => {
     expect(validateVariablePath('1foo')).toBe(false);
   });
 
+  it('should validate a numeric index accessed with dot', () => {
+    expect(validateVariablePath('foreach.item.2')).toBe(true);
+    expect(validateVariablePath('steps.search.output.hits.0._source')).toBe(true);
+  });
+
+  it('should fail if a non-numeric segment after a dot starts with a number', () => {
+    expect(validateVariablePath('foo.1bar')).toBe(false);
+  });
+
   it('should fail if any segment contains a space', () => {
     expect(validateVariablePath('foo bar')).toBe(false);
   });
@@ -79,6 +88,14 @@ describe('parseVariablePath', () => {
     const result = parseVariablePath('steps.data["key"][0]');
     expect(result).toEqual({
       propertyPath: 'steps.data["key"][0]',
+      filters: [],
+    });
+  });
+
+  it('should parse a Liquid dynamic map key', () => {
+    const result = parseVariablePath('inputs.payload.rules[ep.rule_id].name');
+    expect(result).toEqual({
+      propertyPath: 'inputs.payload.rules[ep.rule_id].name',
       filters: [],
     });
   });

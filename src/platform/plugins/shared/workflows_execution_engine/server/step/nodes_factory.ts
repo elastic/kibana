@@ -50,7 +50,12 @@ import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
-import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
+import {
+  EnterForeachIterationNodeImpl,
+  EnterForeachNodeImpl,
+  ExitForeachIterationNodeImpl,
+  ExitForeachNodeImpl,
+} from './foreach_step';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
@@ -127,7 +132,7 @@ export class NodesFactory {
         node as ElasticsearchGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -140,7 +145,7 @@ export class NodesFactory {
         node as KibanaGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -154,7 +159,7 @@ export class NodesFactory {
         node,
         stepExecutionRuntime,
         this.workflowRuntime,
-        this.workflowLogger
+        stepExecutionRuntime.stepLogger
       );
     }
 
@@ -173,7 +178,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.connectorExecutor,
           this.workflowRuntime,
-          this.workflowLogger
+          stepExecutionRuntime.stepLogger
         );
       }
     }
@@ -194,6 +199,15 @@ export class NodesFactory {
           stepLogger,
           this.stepIoService
         );
+      case 'enter-foreach-iteration':
+        return new EnterForeachIterationNodeImpl(
+          node,
+          this.workflowRuntime,
+          stepExecutionRuntime,
+          this.stepExecutionRuntimeFactory
+        );
+      case 'exit-foreach-iteration':
+        return new ExitForeachIterationNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'exit-foreach':
         return new ExitForeachNodeImpl(
           node as ExitForeachNode,
@@ -420,7 +434,7 @@ export class NodesFactory {
           workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
           workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
-          workflowLogger: this.workflowLogger,
+          workflowLogger: stepExecutionRuntime.stepLogger,
           config: this.dependencies.config,
         });
       case 'workflow.output':

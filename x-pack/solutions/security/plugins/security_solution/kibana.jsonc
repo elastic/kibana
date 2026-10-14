@@ -89,7 +89,9 @@
       "mitreAttack",
       "cps",
       "searchInferenceEndpoints",
-      "esql"
+      "esql",
+      "alertzero",
+      "agenticInvestigations"
     ],
     "requiredBundles": [
       "esUiShared",

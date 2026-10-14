@@ -15,7 +15,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentLoadingSkeleton } from './attachment_loading_skeleton';
-import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
+import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 
 interface ShellArgs {
   icon?: string;
@@ -67,7 +67,7 @@ const Shell: React.FC<ShellArgs> = ({
         }
       `}
     >
-      <AttachmentRenderErrorBoundary>{() => body}</AttachmentRenderErrorBoundary>
+      <TimelineRenderErrorBoundary>{() => body}</TimelineRenderErrorBoundary>
     </EuiSplitPanel.Inner>
   </EuiSplitPanel.Outer>
 );
@@ -118,7 +118,7 @@ const defaultActions = [
 ];
 
 const meta: Meta<typeof Shell> = {
-  title: 'Agent Builder Attachment Cards/Card Shell',
+  title: 'Conversations/Timeline/Attachments/Card Shell',
   component: Shell,
 };
 export default meta;

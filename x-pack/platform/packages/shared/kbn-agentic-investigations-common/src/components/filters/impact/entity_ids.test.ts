@@ -14,9 +14,9 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
   title: 'Case',
   createdAt: '2026-09-01T00:00:00.000Z',
   updatedAt: '2026-09-01T00:00:00.000Z',
-  watch_id: '',
-  watch_execution_id: '',
+  worker_execution_ids: [],
   pendingProposalCount: 1,
+  assignees: [],
   events: [],
   ...overrides,
 });

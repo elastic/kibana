@@ -42,9 +42,10 @@ export interface UnitValidationResult {
  */
 export interface UnitConfigHooks {
   /**
-   * Semantic / graph validation via config-distributor `POST /v1/validate`.
-   * Called after structural checks and before the configuration saved object
-   * is written. Throw to reject the PUT. Credentials are not required.
+   * Unit validation via config-distributor `POST /v1/validate`. This is the
+   * only unit-document check on the write path. Called before the
+   * configuration saved object is written. Throw to reject the PUT.
+   * Credentials are not required.
    */
   validate?: (unit: StreamsUnit.Configuration) => Promise<UnitValidationResult>;
   /**

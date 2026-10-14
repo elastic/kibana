@@ -38,7 +38,14 @@ export {
 export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
 
 // re-exported test framework from @kbn/scout
-export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
+export {
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  globalTeardownHook,
+  getPlaywrightTagsFor,
+  tags,
+} from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {

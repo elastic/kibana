@@ -10,6 +10,7 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { CoreStart } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -17,6 +18,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -61,19 +63,22 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 });
 
 /**
- * Registers the baseline attachment UI definitions that do not require Security Solution runtime
- * context:
- *   - `security.alert` — label + icon only (no rich renderer yet).
+ * Registers the baseline attachment UI definitions:
+ *   - `security.alert` — label and icon.
+ *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
  * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
  */
-export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
-  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
-    ALERT_ATTACHMENT_CONFIG.type,
-    createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
-  );
+export const registerAttachmentUiDefinitions = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}) => {
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
+    ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
+  });
 
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
     SecurityAgentBuilderAttachments.alerts,
@@ -154,6 +159,8 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext,
   searchSession,
   uiSettings,
+  rendering,
+  registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -163,7 +170,18 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
+  rendering: CoreStart['rendering'];
+  registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
+  registerImpactEntityOpener?.((entity) => {
+    void import(
+      /* webpackChunkName: "security_impact_entity_flyout" */
+      './open_impact_entity_flyout'
+    ).then(({ openImpactEntityFlyout }) =>
+      openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+    );
+  });
+
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
     './entity_attachment'
@@ -378,6 +396,26 @@ export const registerEntityRiskScoreHistoryAttachment = ({
 };
 
 /**
+ * Registers the `security.siem_migration.rule_migration_items` attachment renderer (chip label only).
+ * No rich renderer needed — the attachment label is pre-built by the client.
+ */
+export const registerSiemMigrationRuleItemsAttachment = (
+  attachments: AttachmentServiceStartContract
+): void => {
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    SecurityAgentBuilderAttachments.ruleMigrationItems,
+    {
+      getLabel: (attachment) =>
+        attachment?.data?.attachmentLabel ??
+        i18n.translate('xpack.securitySolution.agentBuilder.ruleMigrationItemsAttachment.label', {
+          defaultMessage: 'Migration Rules',
+        }),
+      getIcon: () => 'productAgent',
+    }
+  );
+};
+
+/**
  * Registers the `security.exception` attachment renderer (read-only card showing
  * a proposed rule exception's description and conditions).
  */
@@ -423,25 +461,28 @@ export const registerRulePreviewAttachment = ({
 
 /**
  * Registers the `security.attack_discovery` attachment renderer (inline summary
- * and details via `AttackDiscoveryMarkdownFormatter`).
+ * and details via `AttackDiscoveryMarkdownFormatter`, and an "Open in Attacks" link
+ * built with `getUrlForApp`).
  *
  * Dynamically imports
  * [./attack_discovery](./attack_discovery) so the markdown field-plugin stack stays
  * off the main `securitySolution` page-load bundle.
  *
  * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
- * resolves, `security.attack_discovery` attachments are header-only.
+ * resolves, `security.attack_discovery` attachments are not rendered.
  */
 export const registerAttackDiscoveryAttachment = ({
   attachments,
+  getUrlForApp,
 }: {
   attachments: AttachmentServiceStartContract;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }): void => {
   void import(
     /* webpackChunkName: "security_attack_discovery_attachment" */
     './attack_discovery'
   ).then(({ registerAttackDiscoveryAttachment: register }) => {
-    register({ attachments });
+    register({ attachments, getUrlForApp });
   });
 };
 
@@ -455,7 +496,7 @@ export const registerAttackDiscoveryAttachment = ({
  * stack stays off the main `securitySolution` page-load bundle.
  *
  * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
- * resolves, `security.attack_discovery.verdict` attachments are header-only.
+ * resolves, `security.attack_discovery.verdict` attachments are not rendered.
  */
 export const registerAttackDiscoveryVerdictAttachment = ({
   attachments,

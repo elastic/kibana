@@ -63,7 +63,7 @@ export const AlertEpisodeOverviewList = ({
   const { euiTheme } = useEuiTheme();
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
-  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
   const tags = groupAction?.tags ?? [];
   // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
   // http(s) before putting into href — blocks javascript:/data: stored XSS.
@@ -201,8 +201,8 @@ export const AlertEpisodeOverviewList = ({
               },
               {
                 title: i18n.ACTIONS_OVERVIEW_SNOOZED_UNTIL,
-                description: groupAction?.snoozeExpiry
-                  ? formatDateTime(groupAction.snoozeExpiry, dateFormat)
+                description: groupAction?.snoozedUntil
+                  ? formatDateTime(groupAction.snoozedUntil, dateFormat)
                   : EMPTY_VALUE,
               },
             ]

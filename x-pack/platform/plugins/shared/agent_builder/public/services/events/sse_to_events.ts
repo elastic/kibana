@@ -33,16 +33,19 @@ import {
   isMessageCompleteEvent,
   isPromptRequestEvent,
   isReasoningEvent,
+  isSubstitutionAppliedEvent,
   isThinkingCompleteEvent,
   isTodosUpdatedEvent,
   isToolCallEvent,
   isToolCallStep,
   isToolProgressEvent,
   isToolResultEvent,
+  isTimelineEvent,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
+  createSubstitutionStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 
@@ -71,6 +74,10 @@ export type TimelineDisplayEvent = TimelineEvent | ExecutionStreamingEvent;
 export const isExecutionStreamingEvent = (event: {
   type: string;
 }): event is ExecutionStreamingEvent => event.type === EXECUTION_STREAMING_EVENT_TYPE;
+
+/** Narrows any stored or live event to one the built-in timeline knows how to group. */
+export const isTimelineDisplayEvent = (event: ConversationEvent): event is TimelineDisplayEvent =>
+  isTimelineEvent(event) || isExecutionStreamingEvent(event);
 
 /** Identity of the execution currently streaming, learnt from its `execution_started` event. */
 interface ExecutionCursor {
@@ -334,7 +341,7 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   if (isCompactionStartedEvent(event)) {
     const step: CompactionStep = {
       type: ConversationRoundStepType.compaction,
-      summarized_round_count: 0,
+      summarized_cycle_count: 0,
       token_count_before: event.data.token_count_before,
       token_count_after: 0,
     };
@@ -342,20 +349,28 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isCompactionCompletedEvent(event)) {
-    const { token_count_after: tokenCountAfter, summarized_round_count: summarizedRoundCount } =
-      event.data;
+    const {
+      token_count_before: tokenCountBefore,
+      token_count_after: tokenCountAfter,
+      summarized_cycle_count: summarizedCycleCount,
+    } = event.data;
     // Patch the most recent compaction step - the one the matching `compaction_started` just added.
     for (let sequence = state.steps.length - 1; sequence >= 0; sequence--) {
       const step = state.steps[sequence];
       if (isCompactionStep(step)) {
         return withStepAt(state, sequence, {
           ...step,
+          token_count_before: tokenCountBefore,
           token_count_after: tokenCountAfter,
-          summarized_round_count: summarizedRoundCount,
+          summarized_cycle_count: summarizedCycleCount,
         });
       }
     }
     return state;
+  }
+
+  if (isSubstitutionAppliedEvent(event)) {
+    return withAppendedStep(state, createSubstitutionStep(event.data));
   }
 
   if (isBackgroundAgentCompleteEvent(event)) {

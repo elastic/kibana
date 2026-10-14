@@ -12,6 +12,8 @@ import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
+  isSelectedActionEnabled,
+  type SelectedActions,
 } from '@kbn/connector-specs';
 import { clientTypes as defaultClientTypes } from '@kbn/connector-specs/server';
 import type {
@@ -94,8 +96,10 @@ export const generateExecutorFunction = ({
   networkSettings,
   platform,
   clientTypes = defaultClientTypes,
+  getJwtSigner,
 }: {
   actions: ConnectorSpec['actions'];
+  getJwtSigner?: (connectorId: string) => ActionContext['signJwt'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
@@ -143,7 +147,36 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
+    const selectedActions = config.selectedActions as SelectedActions;
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
     const pool = getClientLeasePool();
+    const acquiredClients: Array<{
+      clientType: ClientTypeSpec<unknown>;
+      key: string;
+      promise: Promise<unknown>;
+      release: () => void;
+    }> = [];
+
+    // Release before invalidating: termination waits for every active use, including ours.
+    const releaseAcquiredClients = (): void => {
+      acquiredClients.forEach(({ release }) => release());
+    };
+
+    const invalidateAcquiredClientsForError = async (error: unknown): Promise<void> => {
+      await Promise.all(
+        acquiredClients.map(async ({ clientType, key, promise }) => {
+          if (clientType.shouldInvalidateOnError?.(error)) {
+            await pool.invalidate(key, promise);
+          }
+        })
+      );
+    };
+
     // Shared by getClient (authMode) and the Relay gate. Specs that route through the Relay
     // (isRelayAuth) read this same secrets.authType, so the two cannot disagree: the discriminated
     // union makes authType mandatory on saved connectors and buildConnector sets it on the
@@ -183,14 +216,15 @@ export const generateExecutorFunction = ({
         if (!connectorVersion) {
           throw new Error(`Missing saved-object version for persisted connector "${connectorId}".`);
         }
-        return await pool.lease(
-          buildClientLeaseKey({
-            connectorId,
-            clientTypeId: id,
-            authMode: derivedAuthMode,
-            profileUid,
-            connectorVersion,
-          }),
+        const key = buildClientLeaseKey({
+          connectorId,
+          clientTypeId: id,
+          authMode: derivedAuthMode,
+          profileUid,
+          connectorVersion,
+        });
+        const { promise, release } = pool.acquire(
+          key,
           () =>
             clientType.build({
               logger,
@@ -207,6 +241,8 @@ export const generateExecutorFunction = ({
             }),
           (client) => clientType.terminate(client)
         );
+        acquiredClients.push({ clientType, key, promise, release });
+        return await promise;
       } catch (err) {
         const isUser = isClientUserError(err, clientType);
         const error = err instanceof Error ? err : new Error(String(err));
@@ -221,6 +257,7 @@ export const generateExecutorFunction = ({
       config,
       getClient: getClient as ActionContext['getClient'],
       relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
+      signJwt: getJwtSigner?.(connectorId),
     };
 
     try {
@@ -233,6 +270,8 @@ export const generateExecutorFunction = ({
 
       return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
+      releaseAcquiredClients();
+      await invalidateAcquiredClientsForError(error);
       const errorSource = error instanceof Error ? getErrorSource(error) : undefined;
       if (errorSource === TaskErrorSource.FRAMEWORK) throw error;
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -251,5 +290,7 @@ export const generateExecutorFunction = ({
           ? { retry: false, errorSource: TaskErrorSource.USER }
           : {}),
       };
+    } finally {
+      releaseAcquiredClients();
     }
   };

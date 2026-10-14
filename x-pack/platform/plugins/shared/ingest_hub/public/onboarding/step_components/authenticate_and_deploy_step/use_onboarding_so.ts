@@ -27,11 +27,11 @@ export interface UseOnboardingSOResult {
   createDeployment: (
     params: CreateCloudOnboardingDeploymentRequest['body']
   ) => Promise<string | null>;
-  /** Updates the SO (best-effort). Shows a toast on failure. */
+  /** Updates the SO. Shows a toast on failure. Returns true on success, false on failure. */
   updateDeployment: (
     id: string,
     update: UpdateCloudOnboardingDeploymentRequest['body']
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   /**
    * After a successful create, wires the deployment id into session storage, context, and URL.
    * Must be called before onContinue so the edit-mode guard fires before the next render.
@@ -62,15 +62,22 @@ export function useOnboardingSO(): UseOnboardingSOResult {
   );
 
   const updateDeployment = useCallback(
-    async (id: string, update: UpdateCloudOnboardingDeploymentRequest['body']): Promise<void> => {
-      await sendUpdateCloudOnboardingDeployment(id, update).catch(() => {
+    async (
+      id: string,
+      update: UpdateCloudOnboardingDeploymentRequest['body']
+    ): Promise<boolean> => {
+      try {
+        await sendUpdateCloudOnboardingDeployment(id, update);
+        return true;
+      } catch {
         services.notifications.toasts.addDanger(
           i18n.translate('xpack.ingestHub.authenticateAndDeployStep.soUpdateError', {
             defaultMessage:
               'Could not update deployment record. Deploy outcome may not be reflected on resume.',
           })
         );
-      });
+        return false;
+      }
     },
     [services]
   );

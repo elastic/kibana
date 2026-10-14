@@ -311,7 +311,7 @@ beforeEach(() => {
 });
 
 describe('Action Executor', () => {
-  test('passes saved-object version only to spec connector executors', async () => {
+  test('passes saved-object version to connector executors', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...connectorSavedObject,
       version: 'WzEsMV0=',
@@ -354,7 +354,7 @@ describe('Action Executor', () => {
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
   });
 
-  test('does not pass connectorVersion to non-spec connector executors', async () => {
+  test('passes saved-object version to non-spec connector executors', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...connectorSavedObject,
       version: 'WzEsMV0=',
@@ -363,8 +363,8 @@ describe('Action Executor', () => {
 
     await actionExecutor.execute(executeParams);
 
-    expect(connectorType.executor).not.toHaveBeenCalledWith(
-      expect.objectContaining({ connectorVersion: expect.anything() })
+    expect(connectorType.executor).toHaveBeenCalledWith(
+      expect.objectContaining({ connectorVersion: 'WzEsMV0=' })
     );
   });
 
@@ -673,6 +673,7 @@ describe('Action Executor', () => {
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
       });
 
       expect(loggerMock.debug).toHaveBeenCalledWith(
@@ -769,6 +770,7 @@ describe('Action Executor', () => {
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
           profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
           ...(executeUnsecure ? {} : { source: SOURCE }),
+          connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
         });
       }
 
@@ -1350,6 +1352,7 @@ describe('Action Executor', () => {
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
       });
 
       expect(loggerMock.debug).toHaveBeenCalledWith(
@@ -1458,6 +1461,7 @@ describe('Action Executor', () => {
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         source: SOURCE,
         profileUid: mockUser?.profile_uid,
+        connectorVersion: IN_MEMORY_CONNECTOR_REVISION,
       });
 
       expect(loggerMock.debug).toHaveBeenCalledWith(

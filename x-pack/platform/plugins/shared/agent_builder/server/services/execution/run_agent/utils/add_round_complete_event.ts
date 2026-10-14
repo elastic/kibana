@@ -198,6 +198,7 @@ export const addRoundCompleteEvent = ({
               mainConnectorId,
               attachmentRefs,
               configurationOverrides,
+              lastCallInputTokens: finalGraphState.lastCallUsage?.inputTokens,
             });
           }
 
@@ -313,6 +314,7 @@ const resumeRound = ({
     mainConnectorId,
     attachmentRefs,
     configurationOverrides,
+    lastCallInputTokens: finalGraphState.lastCallUsage?.inputTokens,
   });
 
   // Input / attachment / usage / timing / trace / overrides merge semantics come from the legacy
@@ -338,6 +340,7 @@ const createRound = ({
   mainConnectorId,
   attachmentRefs,
   configurationOverrides,
+  lastCallInputTokens,
 }: {
   roundId?: string;
   steps: ConversationRoundStep[];
@@ -351,6 +354,7 @@ const createRound = ({
   mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  lastCallInputTokens?: number;
 }): ConversationRound => {
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
@@ -388,7 +392,7 @@ const createRound = ({
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
-    model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
+    model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId, lastCallInputTokens),
     response: lastMessage
       ? {
           message: lastMessage.message_content,

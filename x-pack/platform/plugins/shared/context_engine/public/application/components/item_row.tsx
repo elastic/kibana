@@ -15,6 +15,8 @@ interface ItemRowProps {
   badge?: ReactNode;
   children?: ReactNode;
   actions?: ReactNode;
+
+  className?: string;
   'data-test-subj'?: string;
 }
 
@@ -24,9 +26,10 @@ export const ItemRow = ({
   badge,
   children,
   actions,
+  className,
   'data-test-subj': dataTestSubj,
 }: ItemRowProps) => (
-  <EuiPanel hasBorder paddingSize="m" data-test-subj={dataTestSubj}>
+  <EuiPanel hasBorder paddingSize="m" className={className} data-test-subj={dataTestSubj}>
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
       <EuiFlexItem css={{ minWidth: 0 }}>

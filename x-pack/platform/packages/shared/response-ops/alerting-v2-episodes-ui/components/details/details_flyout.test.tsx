@@ -361,11 +361,28 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
-    expect(screen.getByText('Source')).toBeInTheDocument();
+    expect(screen.getByText('Alert URL')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeFlyoutAlertUrl')).toHaveAttribute(
       'href',
       'https://monitoring.example/alerts/1'
     );
+  });
+
+  it('shows the alerting system as the Source for native Universal alerts', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutSourceBadge')).toHaveTextContent('Universal');
+  });
+
+  it('shows the connector as the Source for alerts ingested from an external system', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episode: { ...mockEpisode, source: 'zabbix' } as AlertEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutSourceBadge')).toHaveTextContent('zabbix');
   });
 
   it.each([
@@ -427,7 +444,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
         lastDeactivateActor: null,
         lastSnoozeAction: null,
-        snoozeExpiry: null,
+        snoozedUntil: null,
         tags: [],
         lastSnoozeActor: null,
       },
@@ -473,7 +490,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         lastDeactivateActor: null,
         lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         lastSnoozeActor: 'user-snoozer',
-        snoozeExpiry: '2030-01-01T00:00:00.000Z',
+        snoozedUntil: '2030-01-01T00:00:00.000Z',
         tags: [],
       },
     });
@@ -586,7 +603,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         ruleId: 'rule-1',
         lastDeactivateAction: null,
         lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snoozeExpiry: '2035-06-15T14:30:00.000Z',
+        snoozedUntil: '2035-06-15T14:30:00.000Z',
         tags: [],
         lastSnoozeActor: null,
         lastDeactivateActor: null,

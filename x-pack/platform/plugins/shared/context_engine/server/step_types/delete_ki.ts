@@ -35,7 +35,7 @@ export const getDeleteKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, refresh = false } = context.input;
       return withKiWriteTelemetry({
         action: 'delete',
         aiIndexId,
@@ -78,6 +78,7 @@ export const getDeleteKiStepDefinition = ({
                   lifecycle: { status: 'deleted' },
                 },
               },
+              refresh,
               abortSignal: context.abortSignal,
             });
             return { output: { id: kiId } };
@@ -88,7 +89,7 @@ export const getDeleteKiStepDefinition = ({
               {
                 index: revision.index,
                 id: revision.documentId,
-                refresh: 'wait_for',
+                ...(refresh && { refresh: 'wait_for' as const }),
               },
               { signal: context.abortSignal }
             )

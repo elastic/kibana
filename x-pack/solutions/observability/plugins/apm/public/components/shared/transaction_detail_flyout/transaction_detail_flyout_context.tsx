@@ -46,6 +46,11 @@ export interface TransactionDetailFlyoutContextValue {
   schema?: ServiceSchemaType;
   /** APM index patterns for ES|QL charts — undefined loading, null failed. */
   indices?: APMIndices | null;
+  /**
+   * Active alerts for this transaction from the parent (e.g. transactions table).
+   * Synced by the host on open and when the list refreshes.
+   */
+  alertsCount?: number;
   openFullTraceFlyout: (state: FullTraceFlyoutState) => void;
 }
 

@@ -16,3 +16,6 @@ export const ALERTZERO_PAGE_PADDING_TOP = 12;
 
 /** Watches section secondary nav width (Throughline panel feel). */
 export const ALERTZERO_WATCHES_SUBNAV_WIDTH = 272;
+
+/** Watch settings content column. */
+export const ALERTZERO_WATCH_SETTINGS_WIDTH = 1000;

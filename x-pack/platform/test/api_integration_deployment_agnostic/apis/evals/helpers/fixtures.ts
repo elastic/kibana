@@ -30,6 +30,7 @@ export interface BuildScoreOptions {
   label?: string;
   repetitionIndex?: number;
   traceId?: string;
+  evaluatorTraceId?: string;
   evaluatorModel?: SeededScore['evaluator']['model'];
   evaluatorKind?: SeededScore['evaluator']['kind'];
 }
@@ -54,6 +55,7 @@ export const buildScore = (options: BuildScoreOptions): SeededScore => ({
     explanation: 'seeded by FTR',
     ...(options.evaluatorModel ? { model: options.evaluatorModel } : {}),
     ...(options.evaluatorKind ? { kind: options.evaluatorKind } : {}),
+    ...(options.evaluatorTraceId ? { trace_id: options.evaluatorTraceId } : {}),
   },
 });
 

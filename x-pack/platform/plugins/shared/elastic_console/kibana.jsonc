@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/elastic-console-plugin",
-  "owner": "@elastic/obs-elastic-brain-team",
+  "owner": "@elastic/nightshift-context-and-research-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {

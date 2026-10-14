@@ -102,7 +102,7 @@ const buildMetadataItems = (rule: RuleResponse, dateFormat: string): DetailItem[
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.createdBy', {
         defaultMessage: 'Created by',
       }),
-      description: rule.created_by || EMPTY_VALUE,
+      description: rule.created_by?.profile_uid || EMPTY_VALUE,
     },
     {
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.createdDate', {
@@ -120,7 +120,7 @@ const buildMetadataItems = (rule: RuleResponse, dateFormat: string): DetailItem[
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.updatedBy', {
         defaultMessage: 'Updated by',
       }),
-      description: rule.updated_by || EMPTY_VALUE,
+      description: rule.updated_by?.profile_uid || EMPTY_VALUE,
     },
   ];
 };
