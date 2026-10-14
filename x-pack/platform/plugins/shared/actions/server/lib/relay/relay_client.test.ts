@@ -409,7 +409,7 @@ describe('RelayClient', () => {
         message: 'hello',
       });
 
-      expect(response.conversationKey).toBe(expected);
+      expect(response.externalConversationId).toBe(expected);
     });
 
     it('includes thread_ts only when replying in a thread', async () => {

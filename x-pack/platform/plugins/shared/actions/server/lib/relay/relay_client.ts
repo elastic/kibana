@@ -207,12 +207,12 @@ export class RelayClient implements RelayClientContract {
         'Relay invalid response format missing expected `ref`'
       );
     }
-    const conversationKey = body.origin?.external_conversation_id;
+    const externalConversationId = body.origin?.external_conversation_id;
     return {
       ref: body.ref,
       channel: typeof body.channel === 'string' && body.channel.length > 0 ? body.channel : channel,
-      ...(typeof conversationKey === 'string' && conversationKey.length > 0
-        ? { conversationKey }
+      ...(typeof externalConversationId === 'string' && externalConversationId.length > 0
+        ? { externalConversationId }
         : {}),
     };
   }

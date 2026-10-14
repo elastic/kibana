@@ -91,7 +91,7 @@ export async function relaySendMessage(
   connection: SlackRelayConnection,
   ctx: ActionContext,
   input: SlackSendMessageInput
-): Promise<{ ok: true; channel: string; ts: string; conversationKey?: string }> {
+): Promise<{ ok: true; channel: string; ts: string; externalConversationId?: string }> {
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
     ctx.log.debug(
       'Slack sendMessage: unfurl options are not supported through the Elastic Slack app and were ignored'
@@ -109,7 +109,7 @@ export async function relaySendMessage(
     const {
       ref,
       channel: resolvedChannel,
-      conversationKey,
+      externalConversationId,
     } = await connection.client.trigger({
       tenantKey: connection.tenantKey,
       channel,
@@ -121,7 +121,7 @@ export async function relaySendMessage(
       ok: true,
       channel: resolvedChannel,
       ts: ref,
-      ...(conversationKey ? { conversationKey } : {}),
+      ...(externalConversationId ? { externalConversationId } : {}),
     };
   } catch (error) {
     ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);

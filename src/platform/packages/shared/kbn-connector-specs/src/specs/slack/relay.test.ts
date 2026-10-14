@@ -130,14 +130,14 @@ describe('relaySendMessage', () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0001',
       channel: CHANNEL_ID,
-      conversationKey: `slack:team-A:${CHANNEL_ID}:1700.0001`,
+      externalConversationId: `slack:team-A:${CHANNEL_ID}:1700.0001`,
     });
 
     await expect(send({ channel: CHANNEL_ID, text: 'hello' }, { trigger })).resolves.toEqual({
       ok: true,
       channel: CHANNEL_ID,
       ts: '1700.0001',
-      conversationKey: `slack:team-A:${CHANNEL_ID}:1700.0001`,
+      externalConversationId: `slack:team-A:${CHANNEL_ID}:1700.0001`,
     });
   });
 
