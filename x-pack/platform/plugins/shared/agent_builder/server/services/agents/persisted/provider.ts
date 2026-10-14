@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import {
@@ -27,7 +26,6 @@ import { getDefaultAgentCreateRequest } from '../default_agent_definition';
 
 export const createPersistedProviderFn = (opts: {
   security: SecurityServiceStart;
-  userProfile: UserProfileServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
@@ -54,7 +52,6 @@ const createPersistedProvider = async ({
   space,
   request,
   security,
-  userProfile,
   elasticsearch,
   toolsService,
   logger,
@@ -64,7 +61,6 @@ const createPersistedProvider = async ({
   space: string;
   request: KibanaRequest;
   security: SecurityServiceStart;
-  userProfile: UserProfileServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
@@ -76,7 +72,6 @@ const createPersistedProvider = async ({
     logger,
     request,
     security,
-    userProfile,
     toolsService,
     space,
   });

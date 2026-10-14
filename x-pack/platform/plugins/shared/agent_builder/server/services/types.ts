@@ -11,7 +11,6 @@ import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -109,7 +108,6 @@ export interface ServicesStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   http: HttpServiceStart;
   security: SecurityServiceStart;
-  userProfile: UserProfileServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   featureFlags: FeatureFlagsStart;

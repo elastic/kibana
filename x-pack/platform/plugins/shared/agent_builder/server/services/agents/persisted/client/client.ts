@@ -11,7 +11,6 @@ import type {
   KibanaRequest,
   Logger,
   SecurityServiceStart,
-  UserProfileServiceStart,
 } from '@kbn/core/server';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
@@ -273,7 +272,6 @@ export const createClient = async ({
   security,
   toolsService,
   logger,
-  userProfile,
 }: {
   space: string;
   request: KibanaRequest;
@@ -281,13 +279,11 @@ export const createClient = async ({
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
-  userProfile?: UserProfileServiceStart;
 }): Promise<AgentClient> => {
   const scopedClient = elasticsearch.client.asScoped(request);
   const user = await getUserFromRequest({
     request,
     security,
-    userProfile,
     esClient: scopedClient.asCurrentUser,
   });
   const esClient = scopedClient.asInternalUser;

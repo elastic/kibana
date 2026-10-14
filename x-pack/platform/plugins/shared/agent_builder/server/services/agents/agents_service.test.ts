@@ -11,7 +11,6 @@ import {
   savedObjectsServiceMock,
   securityServiceMock,
   uiSettingsServiceMock,
-  userProfileServiceMock,
 } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -43,7 +42,6 @@ const runSkillRefCleanupMock = runSkillRefCleanup as jest.MockedFunction<typeof 
 
 const createStartDeps = (): AgentsServiceStartDeps => ({
   security: securityServiceMock.createStart(),
-  userProfile: userProfileServiceMock.createStart(),
   elasticsearch: elasticsearchServiceMock.createStart(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   savedObjects: savedObjectsServiceMock.createStartContract(),
