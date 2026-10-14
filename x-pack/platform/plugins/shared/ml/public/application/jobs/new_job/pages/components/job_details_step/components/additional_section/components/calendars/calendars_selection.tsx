@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import {
@@ -46,9 +46,10 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const [selectedCalendars, setSelectedCalendars] = useState<MlCalendar[]>(
     filterCalendarsForDst(jobCreator.calendars, isDst)
   );
-  const [selectedOptions, setSelectedOptions] = useState<
-    Array<EuiComboBoxOptionOption<MlCalendar>>
-  >([]);
+  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<MlCalendar>>>(
+    () => selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })),
+    [selectedCalendars]
+  );
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<MlCalendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const titleId = useGeneratedHtmlId({ prefix: 'calendarsSelection' });
@@ -60,7 +61,6 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
       (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
     setOptions(filteredCalendars.map((c) => ({ label: c.calendar_id, value: c })));
-    setSelectedOptions(selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setIsLoading(false);
   }
 
@@ -83,7 +83,6 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
     selectedOptions,
     isLoading,
     onChange: (optionsIn) => {
-      setSelectedOptions(optionsIn);
       setSelectedCalendars(optionsIn.map((o) => o.value!));
     },
   };

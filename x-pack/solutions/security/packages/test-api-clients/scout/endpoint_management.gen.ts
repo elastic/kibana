@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type {
   CancelActionRequestBodyInput,
@@ -297,7 +297,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint/action`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, EndpointGetActionsListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -345,7 +345,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint/action_status`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, EndpointGetActionsStatusResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -579,7 +579,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint/metadata`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetEndpointMetadataListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -625,7 +625,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/internal/api/endpoint/workflow_insights/pending`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetPendingWorkflowInsightsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -647,7 +647,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/api/endpoint/policy_response`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetPolicyResponseResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -693,7 +693,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     const path = `${basePath}/internal/api/endpoint/workflow_insights`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetWorkflowInsightsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',

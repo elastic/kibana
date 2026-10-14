@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { BASE_BUCKET_DAILY } from './bucket_config';
+import { BASE_BUCKET_DAILY } from './bucket_config.ts';
 
 interface ManifestEntry {
   filename?: string;
@@ -24,7 +24,7 @@ interface ManifestEntry {
 (async () => {
   console.log('--- Create ES Snapshot Manifest');
 
-  const destination = process.argv[2] || __dirname + '/test';
+  const destination = process.argv[2] || `${import.meta.dirname}/test`;
 
   const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
   const ES_CLOUD_IMAGE = process.env.ELASTICSEARCH_CLOUD_IMAGE;
@@ -104,7 +104,8 @@ interface ManifestEntry {
       set -euo pipefail
 
       echo '--- Upload files to GCS'
-      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
+      # Archive upload can outlive the 60-minute shared token; impersonation refreshes it.
+      .buildkite/scripts/common/activate_service_account.sh --auto-refresh ${BASE_BUCKET_DAILY}
       cd "${destination}"
       gcloud storage cp --recursive *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json

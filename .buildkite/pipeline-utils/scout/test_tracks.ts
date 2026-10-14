@@ -9,7 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { SCOUT_TEST_TRACKS_ROOT } from './paths';
+import { SCOUT_TEST_TRACKS_ROOT } from './paths.ts';
 
 export interface ScoutTestLane {
   number: number;

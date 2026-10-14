@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   CheckPrivilegesPayload,
@@ -13,18 +13,20 @@ import type {
 } from '@kbn/security-plugin/server';
 
 export type Privileges = z.infer<typeof Privileges>;
-export const Privileges = z.object({
-  has_all_required: z.boolean(),
-  has_read_permissions: z.boolean().optional(),
-  has_write_permissions: z.boolean().optional(),
-  privileges: z.object({
-    elasticsearch: z.object({
-      cluster: z.object({}).catchall(z.boolean()).optional(),
-      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+export const Privileges = lazySchema(() =>
+  z.object({
+    has_all_required: z.boolean(),
+    has_read_permissions: z.boolean().optional(),
+    has_write_permissions: z.boolean().optional(),
+    privileges: z.object({
+      elasticsearch: z.object({
+        cluster: z.object({}).catchall(z.boolean()).optional(),
+        index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+      }),
+      kibana: z.object({}).catchall(z.boolean()).optional(),
     }),
-    kibana: z.object({}).catchall(z.boolean()).optional(),
-  }),
-});
+  })
+);
 
 const groupPrivilegesByName = <PrivilegeName extends string>(
   privileges: Array<{

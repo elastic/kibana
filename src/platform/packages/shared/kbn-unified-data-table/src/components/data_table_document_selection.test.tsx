@@ -12,6 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import type { DataTableCompareToolbarBtn } from './data_table_document_selection';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   DataTableDocumentToolbarBtn,
   SelectButton,
@@ -411,7 +412,9 @@ describe('document selection', () => {
         getButton: async () => {
           const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
           await userEvent.click(menuButton);
-          return screen.queryByRole('button', { name: /Compare/ });
+          await waitForEuiPopoverOpen();
+
+          return screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
         },
       };
     };

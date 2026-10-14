@@ -155,7 +155,7 @@ export const getListHandler: FleetRequestHandler<
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
-      appContextService.getInternalUserSOClientForSpaceId(fleetContext.spaceId)
+      appContextService.getInternalUserSOClientWithoutSpaceExtension()
     );
     for (const item of flattenedRes) {
       item.packagePoliciesInfo = {
