@@ -7,11 +7,11 @@
 
 import { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { toReadableAttackIndexPattern } from '@kbn/elastic-assistant-common';
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
-import { toReadableAttackIndexPattern } from '../utils';
 
 export interface UseOpenAttackFlyoutParams {
   /** The attack document `_id`, saved as the attachment id. */
