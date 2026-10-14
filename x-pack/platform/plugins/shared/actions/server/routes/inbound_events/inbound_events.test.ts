@@ -185,6 +185,31 @@ describe('inboundEventsRoute', () => {
     expect(res.forbidden).toHaveBeenCalledWith({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
   });
 
+  it('maps a connector HTTP ack onto the status schema for that response', async () => {
+    const body = { ok: true };
+    const ingest = jest.fn().mockResolvedValue({
+      status: 'spoke_http',
+      statusCode: 202,
+      body,
+    });
+    const { addVersionMock } = registerRoute({ ingest });
+    const [options, handler] = addVersionMock.mock.calls[0];
+    const bodySchema = options.validate.response[202].body();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: 'webhook', connector_id: 'c1' },
+      query: {},
+      body: { hello: 'world' },
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['custom']);
+
+    await handler({}, request, res);
+
+    expect(res.custom).toHaveBeenCalledWith({ statusCode: 202, body });
+    expect(bodySchema.validate(res.custom.mock.calls[0][0].body)).toEqual(body);
+    expect(() => bodySchema.validate(undefined)).toThrow();
+  });
+
   it('maps not_found ingest results to 404', async () => {
     const ingest = jest.fn().mockResolvedValue({ status: 'not_found' });
     const { addVersionMock } = registerRoute({ ingest });

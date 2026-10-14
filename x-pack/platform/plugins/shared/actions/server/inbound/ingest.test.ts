@@ -868,6 +868,24 @@ describe('ingestInboundEvent', () => {
     expectOutcome('info', 'http_ack');
   });
 
+  it('forwards a body on a connector HTTP 202 ack', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'http',
+          httpResponse: { status: 202, body: { ok: true } },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.custom).toHaveBeenCalledWith({
+      statusCode: 202,
+      body: { ok: true },
+    });
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('info', 'http_ack');
+  });
+
   it('returns 500 when handleEvents http includes Location', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(

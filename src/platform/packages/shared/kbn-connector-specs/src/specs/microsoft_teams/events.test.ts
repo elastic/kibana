@@ -137,7 +137,7 @@ describe('Microsoft Teams inbound events', () => {
         ],
       })
     );
-    expect(result).toEqual({ type: 'http', httpResponse: { status: 202 } });
+    expect(result).toEqual({ type: 'emit', events: [] });
   });
 
   it('emits a channel message from the plaintext resource path', async () => {
@@ -295,6 +295,37 @@ describe('Microsoft Teams inbound events', () => {
     ]);
   });
 
+  it('reads the user id from a 0##tenant##user membership id', async () => {
+    const tenantId = '3e36bde8-1b72-47ae-b410-adcd6c4be670';
+    const userId = '73761f06-2ac9-469c-9f10-279a8cc267f9';
+    const membershipId = btoa(`0##${tenantId}##${userId}`);
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          notification({
+            tenantId,
+            resource: `teams('ee0f5ae2-8bc6-4ae5-8466-7daeebbfa062')/members('${membershipId}')`,
+            resourceData: {
+              '@odata.type': '#Microsoft.Graph.aadUserConversationMember',
+              id: membershipId,
+            },
+          })
+        )
+      )
+    );
+    expect(result.events).toEqual([
+      {
+        eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
+        correlationKey: 'notification-1',
+        payload: {
+          team_id: 'ee0f5ae2-8bc6-4ae5-8466-7daeebbfa062',
+          user_id: userId,
+          tenant_id: tenantId,
+        },
+      },
+    ]);
+  });
+
   it('emits nothing for updates, unknown types, and paths without the required ids', async () => {
     const result = expectEmit(
       await events.handleEvents(
@@ -325,6 +356,30 @@ describe('Microsoft Teams inbound events', () => {
               resourceData: {
                 '@odata.type': '#microsoft.graph.aadUserConversationMember',
                 id: 'membership-1',
+              },
+            },
+            {
+              id: 'member-other-tenant',
+              changeType: 'created',
+              tenantId: '10eda0c8-cb50-4390-8751-488c29218b02',
+              resource: `teams('team-1')/members('${btoa(
+                '0##3e36bde8-1b72-47ae-b410-adcd6c4be670##73761f06-2ac9-469c-9f10-279a8cc267f9'
+              )}')`,
+              resourceData: {
+                '@odata.type': '#microsoft.graph.aadUserConversationMember',
+                id: 'membership-other-tenant',
+              },
+            },
+            {
+              id: 'chat-member',
+              changeType: 'created',
+              tenantId: '2432b57b-0abd-43db-aa7b-16eadd115d34',
+              resource: `teams('team-1')/members('${btoa(
+                '0##2432b57b-0abd-43db-aa7b-16eadd115d34##19:chat@thread.v2##2fc60663-19a2-4aa4-852c-f7ba4e90ada2'
+              )}')`,
+              resourceData: {
+                '@odata.type': '#microsoft.graph.aadUserConversationMember',
+                id: 'chat-membership',
               },
             },
             {

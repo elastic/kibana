@@ -108,30 +108,51 @@ const readBoundedString = (value: unknown, maxLength: number): string | undefine
 
 const readId = (value: unknown): string | undefined => readBoundedString(value, TEAMS_ID_MAX);
 
-/**
- * A basic member notification has no userId. Graph's membership id is base64 of `{team-id}##{user-id}`.
- */
-const userIdFromMembershipId = (membershipId: string, teamId: string): string | undefined => {
+const decodeMembershipId = (membershipId: string): string | undefined => {
   const remainder = membershipId.length % 4;
   const padded =
     remainder === 0
       ? membershipId
       : membershipId.padEnd(membershipId.length + (4 - remainder), '=');
-  let decoded: string;
   try {
-    decoded = atob(padded);
+    return atob(padded);
   } catch {
     return undefined;
   }
+};
+
+/**
+ * A basic member notification has no userId. The membership id is base64 of
+ * `{team-id}##{user-id}` or `0##{tenant-id}##{user-id}`.
+ */
+const userIdFromMembershipId = (
+  membershipId: string,
+  teamId: string,
+  tenantId: string | undefined
+): string | undefined => {
+  const decoded = decodeMembershipId(membershipId);
+  if (decoded === undefined) {
+    return undefined;
+  }
   const parts = decoded.split('##');
-  if (parts.length !== 2) {
-    return undefined;
+  if (parts.length === 2) {
+    const [encodedTeamId, userId] = parts;
+    if (encodedTeamId.toLowerCase() !== teamId.toLowerCase() || !ENTRA_GUID.test(userId)) {
+      return undefined;
+    }
+    return userId;
   }
-  const [encodedTeamId, userId] = parts;
-  if (encodedTeamId.toLowerCase() !== teamId.toLowerCase() || !ENTRA_GUID.test(userId)) {
-    return undefined;
+  if (parts.length === 3) {
+    const [prefix, encodedTenantId, userId] = parts;
+    if (prefix !== '0' || !ENTRA_GUID.test(encodedTenantId) || !ENTRA_GUID.test(userId)) {
+      return undefined;
+    }
+    if (tenantId !== undefined && encodedTenantId.toLowerCase() !== tenantId.toLowerCase()) {
+      return undefined;
+    }
+    return userId;
   }
-  return userId;
+  return undefined;
 };
 
 const omitUndefined = (fields: Record<string, string | undefined>): Record<string, string> =>
@@ -263,7 +284,8 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
     ids.members !== undefined
   ) {
     const userId =
-      readId(item.resourceData.userId) ?? userIdFromMembershipId(ids.members, ids.teams);
+      readId(item.resourceData.userId) ??
+      userIdFromMembershipId(ids.members, ids.teams, readId(item.tenantId));
     if (userId === undefined) {
       return undefined;
     }
@@ -323,7 +345,7 @@ const handleMicrosoftTeamsEvents = async (
   }
   const changeItems = items.filter((item) => !isLifecycleItem(item));
   if (changeItems.length === 0) {
-    return { type: 'http', httpResponse: { status: 202 } };
+    return { type: 'emit', events: [] };
   }
 
   const events: EventPayload[] = [];
