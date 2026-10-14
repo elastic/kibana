@@ -456,9 +456,9 @@ describe('ManagementApp', () => {
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
 
-    expect(screen.getByText('ES|QL Query Results')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL query results')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('ES|QL Query Results'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(await screen.findByTestId('mockEsqlDataGrid')).toHaveTextContent('2 preview rows');
     expect(mockEsqlDataGrid).toHaveBeenCalledWith(
@@ -486,7 +486,7 @@ describe('ManagementApp', () => {
 
     await screen.findByText('No ES|QL views found');
     fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
-    fireEvent.click(screen.getByText('ES|QL Query Results'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(screen.getByText('No results yet')).toBeInTheDocument();
     expect(
@@ -517,8 +517,8 @@ describe('ManagementApp', () => {
         'Changes affect every dashboard, alert, and other saved object that uses this view.'
       )
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'ES|QL view details' })).toBeInTheDocument();
-    expect(screen.getByText('Name and describe the view.')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'ES|QL view details' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Name and describe the view.')).not.toBeInTheDocument();
     expect(screen.getByPlaceholderText('e.g. my-view')).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -591,6 +591,11 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
 
     expect(await screen.findByTestId('esqlViewNameInput')).toHaveAttribute('readonly');
+    expect(
+      screen.queryByText(
+        'Must not match an existing index, data stream, alias, external dataset, or view.'
+      )
+    ).not.toBeInTheDocument();
     fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
       target: { value: 'Production logs' },
     });
@@ -1030,7 +1035,7 @@ describe('ManagementApp', () => {
       });
     });
 
-    it('disables the action when the user cannot access Discover', async () => {
+    it('hides the action when the user cannot access Discover', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
       const discoverLocator = createDiscoverLocator();
@@ -1038,22 +1043,17 @@ describe('ManagementApp', () => {
       renderApp(client, { discoverLocator, isDiscoverAvailable: false });
       await screen.findByText('logs-view');
 
-      const action = within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction');
-      expect(action).toHaveAttribute('aria-disabled', 'true');
-      fireEvent.click(action);
-      expect(discoverLocator.navigateSync).not.toHaveBeenCalled();
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
 
-    it('disables the action when the Discover locator is unavailable', async () => {
+    it('hides the action when the Discover locator is unavailable', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
 
       renderApp(client);
       await screen.findByText('logs-view');
 
-      expect(
-        within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction')
-      ).toHaveAttribute('aria-disabled', 'true');
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
   });
 

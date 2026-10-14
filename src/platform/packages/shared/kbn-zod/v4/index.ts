@@ -36,3 +36,5 @@ export type {
   ZodStringHelper,
   UnboundedStringOptions,
 } from './string_helpers';
+export { normalizeJsonSchemaTypeArrays, inlineRootJsonSchemaRef } from './json_schema_utils';
+export { isoDateTime } from './iso_datetime';

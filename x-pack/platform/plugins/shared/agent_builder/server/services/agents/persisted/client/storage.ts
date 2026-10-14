@@ -11,6 +11,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentAccessControl,
   AgentAccessControlMode,
+  AgentApprovals,
   ToolSelection,
 } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -102,6 +103,7 @@ export interface AgentConfigurationProperties {
   connector_ids?: string[];
   ai_indices?: string[];
   subagent_ids?: string[];
+  approvals?: AgentApprovals;
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;

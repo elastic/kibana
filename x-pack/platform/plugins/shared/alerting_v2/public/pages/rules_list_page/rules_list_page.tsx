@@ -30,6 +30,7 @@ import { useAlertingLocators } from '../../application/locator_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
+import { UniversalAlertingIntroBanner } from './universal_alerting_intro_banner';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -155,6 +156,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={navigateToAgentBuilder}
           onBuildSequence={navigateToSequenceBuilder}
         />
+        <UniversalAlertingIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>
