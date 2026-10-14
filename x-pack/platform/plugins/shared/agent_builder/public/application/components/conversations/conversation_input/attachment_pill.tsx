@@ -29,9 +29,12 @@ const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.remove
   defaultMessage: 'Remove attachment',
 });
 
-const readingPdfLabel = i18n.translate('xpack.agentBuilder.attachmentPill.readingPdfLabel', {
-  defaultMessage: 'Reading PDF...',
-});
+const readingDocumentLabel = i18n.translate(
+  'xpack.agentBuilder.attachmentPill.readingDocumentLabel',
+  {
+    defaultMessage: 'Reading file...',
+  }
+);
 
 export interface AttachmentPillProps {
   attachment: Attachment;
@@ -106,18 +109,18 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       data-test-subj={
         isLoading
-          ? `agentBuilderLoadingPdfPill-${attachment.id}`
+          ? `agentBuilderLoadingDocumentPill-${attachment.id}`
           : `agentBuilderAttachmentPill-${attachment.id}`
       }
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           {isLoading ? (
-            <EuiToolTip content={readingPdfLabel} disableScreenReaderOutput>
+            <EuiToolTip content={readingDocumentLabel} disableScreenReaderOutput>
               <div
                 css={iconContainerStyles}
                 role="status"
-                aria-label={readingPdfLabel}
+                aria-label={readingDocumentLabel}
                 tabIndex={0}
               >
                 <EuiLoadingSpinner size="m" />

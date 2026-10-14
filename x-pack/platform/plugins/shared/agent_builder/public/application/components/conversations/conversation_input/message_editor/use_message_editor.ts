@@ -210,8 +210,8 @@ const useMessageEditorController = ({
             ref.current.appendChild(createCommandBadgeElement(segment.data));
           } else if (segment.type === 'image') {
             ref.current.appendChild(createAttachmentPlaceholderElement(segment.name));
-          } else if (segment.type === 'pdf') {
-            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'pdf'));
+          } else if (segment.type === 'document') {
+            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'document'));
           }
         }
 

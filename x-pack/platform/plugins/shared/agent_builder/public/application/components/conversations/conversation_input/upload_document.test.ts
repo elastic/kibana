@@ -5,78 +5,105 @@
  * 2.0.
  */
 
-import { MAX_PDF_BYTES } from '@kbn/agent-builder-common/attachments';
+import { MAX_DOCUMENT_BYTES } from '@kbn/agent-builder-common/attachments';
 import {
-  MAX_PDFS_PER_MESSAGE,
-  rejectIfTooManyPdfs,
-  rejectInvalidPdf,
-  uploadPdf,
+  MAX_DOCUMENTS_PER_MESSAGE,
+  rejectIfTooManyDocuments,
+  rejectInvalidDocument,
+  uploadDocument,
 } from './upload_document';
 
 jest.mock('@kbn/agent-builder-browser', () => ({
   formatAgentBuilderErrorMessage: (error: Error) => error.message,
 }));
 
-const createPdf = ({ type = 'application/pdf', size = 4 } = {}) =>
-  new File([new Uint8Array(size)], 'invoice.pdf', { type });
+const MB = 1024 * 1024;
 
-describe('rejectInvalidPdf', () => {
+const createDocument = ({ name = 'invoice.pdf', type = 'application/pdf', size = 4 } = {}) =>
+  new File([new Uint8Array(size)], name, { type });
+
+describe('rejectInvalidDocument', () => {
   it('accepts a small PDF', () => {
     const addErrorToast = jest.fn();
 
-    expect(rejectInvalidPdf({ file: createPdf(), addErrorToast })).toBe(false);
+    expect(rejectInvalidDocument({ file: createDocument(), addErrorToast })).toBe(false);
+    expect(addErrorToast).not.toHaveBeenCalled();
+  });
+
+  it('accepts a Markdown file with an empty type', () => {
+    const addErrorToast = jest.fn();
+    const file = createDocument({ name: 'notes.md', type: '' });
+
+    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(false);
     expect(addErrorToast).not.toHaveBeenCalled();
   });
 
   it('accepts a PDF of exactly the maximum size', () => {
     const addErrorToast = jest.fn();
+    const file = createDocument({ size: MAX_DOCUMENT_BYTES['application/pdf'] });
 
-    expect(rejectInvalidPdf({ file: createPdf({ size: MAX_PDF_BYTES }), addErrorToast })).toBe(
+    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(false);
+  });
+
+  it('rejects a file type that is not supported', () => {
+    const addErrorToast = jest.fn();
+    const file = createDocument({ name: 'data.csv', type: 'text/plain' });
+
+    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(true);
+    expect(addErrorToast).toHaveBeenCalledWith({ title: 'This file type is not supported.' });
+  });
+
+  it.each([
+    ['a PDF', 'invoice.pdf', 'application/pdf', 10],
+    ['a Markdown file', 'notes.md', 'text/markdown', 2],
+    ['a text file', 'notes.txt', 'text/plain', 2],
+  ])('rejects %s that is over its own limit', (_label, name, type, limitInMb) => {
+    const addErrorToast = jest.fn();
+    const file = createDocument({ name, type, size: limitInMb * MB + 1 });
+
+    expect(rejectInvalidDocument({ file, addErrorToast })).toBe(true);
+    expect(addErrorToast).toHaveBeenCalledWith({
+      title: `The file is too large. The maximum size is ${limitInMb} MB.`,
+    });
+  });
+
+  it('uses the limit of the file type, not one limit for all', () => {
+    const addErrorToast = jest.fn();
+
+    expect(
+      rejectInvalidDocument({
+        file: createDocument({ name: 'notes.txt', type: 'text/plain', size: 3 * MB }),
+        addErrorToast,
+      })
+    ).toBe(true);
+    expect(rejectInvalidDocument({ file: createDocument({ size: 3 * MB }), addErrorToast })).toBe(
       false
     );
   });
-
-  it('rejects a file that is not a PDF', () => {
-    const addErrorToast = jest.fn();
-
-    expect(rejectInvalidPdf({ file: createPdf({ type: 'text/plain' }), addErrorToast })).toBe(true);
-    expect(addErrorToast).toHaveBeenCalledWith({ title: 'Only PDF files are supported.' });
-  });
-
-  it('rejects a PDF that is too large', () => {
-    const addErrorToast = jest.fn();
-
-    expect(rejectInvalidPdf({ file: createPdf({ size: MAX_PDF_BYTES + 1 }), addErrorToast })).toBe(
-      true
-    );
-    expect(addErrorToast).toHaveBeenCalledWith({
-      title: 'PDF is too large. Maximum size is 10 MB.',
-    });
-  });
 });
 
-describe('rejectIfTooManyPdfs', () => {
-  it('allows the first PDF', () => {
+describe('rejectIfTooManyDocuments', () => {
+  it('allows the first document', () => {
     const addErrorToast = jest.fn();
 
-    expect(rejectIfTooManyPdfs({ currentPdfCount: 0, addErrorToast })).toBe(false);
+    expect(rejectIfTooManyDocuments({ currentDocumentCount: 0, addErrorToast })).toBe(false);
     expect(addErrorToast).not.toHaveBeenCalled();
   });
 
-  it('blocks a second PDF with a toast', () => {
+  it('blocks a second document with a toast', () => {
     const addErrorToast = jest.fn();
 
-    expect(rejectIfTooManyPdfs({ currentPdfCount: MAX_PDFS_PER_MESSAGE, addErrorToast })).toBe(
-      true
-    );
-    expect(addErrorToast).toHaveBeenCalledWith({ title: 'You can attach 1 PDF per message.' });
+    expect(
+      rejectIfTooManyDocuments({ currentDocumentCount: MAX_DOCUMENTS_PER_MESSAGE, addErrorToast })
+    ).toBe(true);
+    expect(addErrorToast).toHaveBeenCalledWith({ title: 'You can attach 1 document per message.' });
   });
 });
 
-describe('uploadPdf', () => {
-  const attachment = { id: 'att-1', type: 'pdf' };
+describe('uploadDocument', () => {
+  const attachment = { id: 'att-1', type: 'document' };
   const setup = () => {
-    const pdfFilesClient = {
+    const documentFilesClient = {
       create: jest.fn().mockResolvedValue({ file: { id: 'file-1' } }),
       upload: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
@@ -84,27 +111,28 @@ describe('uploadPdf', () => {
     const attachmentsService = { create: jest.fn().mockResolvedValue(attachment) };
     const controller = new AbortController();
     const run = () =>
-      uploadPdf({
-        file: createPdf(),
+      uploadDocument({
+        file: createDocument(),
         name: 'invoice.pdf',
+        mimeType: 'application/pdf',
         conversationId: 'conv-1',
-        pdfFilesClient: pdfFilesClient as never,
+        documentFilesClient: documentFilesClient as never,
         attachmentsService: attachmentsService as never,
         signal: controller.signal,
       });
-    return { pdfFilesClient, attachmentsService, controller, run };
+    return { documentFilesClient, attachmentsService, controller, run };
   };
 
-  it('uploads the file, then creates the pdf attachment from its id', async () => {
-    const { pdfFilesClient, attachmentsService, controller, run } = setup();
+  it('uploads the file, then creates the document attachment from its id', async () => {
+    const { documentFilesClient, attachmentsService, controller, run } = setup();
 
     await expect(run()).resolves.toEqual({ status: 'done', attachment, fileId: 'file-1' });
 
-    expect(pdfFilesClient.create).toHaveBeenCalledWith({
+    expect(documentFilesClient.create).toHaveBeenCalledWith({
       name: 'invoice.pdf',
       mimeType: 'application/pdf',
     });
-    expect(pdfFilesClient.upload).toHaveBeenCalledWith(
+    expect(documentFilesClient.upload).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'file-1',
         contentType: 'application/pdf',
@@ -114,24 +142,46 @@ describe('uploadPdf', () => {
     );
     expect(attachmentsService.create).toHaveBeenCalledWith({
       conversationId: 'conv-1',
-      type: 'pdf',
+      type: 'document',
       origin: 'file-1',
       signal: controller.signal,
     });
   });
 
+  it('uses the resolved MIME type, not the type of the file', async () => {
+    const { documentFilesClient, attachmentsService, controller } = setup();
+
+    await uploadDocument({
+      file: createDocument({ name: 'notes.md', type: '' }),
+      name: 'notes.md',
+      mimeType: 'text/markdown',
+      conversationId: 'conv-1',
+      documentFilesClient: documentFilesClient as never,
+      attachmentsService: attachmentsService as never,
+      signal: controller.signal,
+    });
+
+    expect(documentFilesClient.create).toHaveBeenCalledWith({
+      name: 'notes.md',
+      mimeType: 'text/markdown',
+    });
+    expect(documentFilesClient.upload).toHaveBeenCalledWith(
+      expect.objectContaining({ contentType: 'text/markdown' })
+    );
+  });
+
   it('fails with a plain message when the upload fails, and does not create the attachment', async () => {
-    const { pdfFilesClient, attachmentsService, run } = setup();
-    pdfFilesClient.upload.mockRejectedValue(new Error('network'));
+    const { documentFilesClient, attachmentsService, run } = setup();
+    documentFilesClient.upload.mockRejectedValue(new Error('network'));
 
     await expect(run()).resolves.toEqual({
       status: 'failed',
-      message: 'Could not upload the PDF.',
+      message: 'Could not upload the file.',
     });
     expect(attachmentsService.create).not.toHaveBeenCalled();
   });
 
-  it('shows the server message when reading the PDF fails', async () => {
+  it('shows the server message when reading the document fails', async () => {
     const { attachmentsService, run } = setup();
     attachmentsService.create.mockRejectedValue(new Error('The file is not a valid PDF.'));
 
@@ -142,25 +192,25 @@ describe('uploadPdf', () => {
   });
 
   it('reports an abort during the upload as aborted, not failed', async () => {
-    const { pdfFilesClient, attachmentsService, controller, run } = setup();
-    pdfFilesClient.upload.mockImplementation(async () => {
+    const { documentFilesClient, attachmentsService, controller, run } = setup();
+    documentFilesClient.upload.mockImplementation(async () => {
       controller.abort();
       throw new Error('aborted');
     });
 
     await expect(run()).resolves.toEqual({ status: 'aborted' });
     expect(attachmentsService.create).not.toHaveBeenCalled();
-    expect(pdfFilesClient.delete).not.toHaveBeenCalled();
+    expect(documentFilesClient.delete).not.toHaveBeenCalled();
   });
 
   it('deletes the file itself when aborted between the upload and the read', async () => {
-    const { pdfFilesClient, attachmentsService, controller, run } = setup();
-    pdfFilesClient.upload.mockImplementation(async () => {
+    const { documentFilesClient, attachmentsService, controller, run } = setup();
+    documentFilesClient.upload.mockImplementation(async () => {
       controller.abort();
     });
 
     await expect(run()).resolves.toEqual({ status: 'aborted' });
-    expect(pdfFilesClient.delete).toHaveBeenCalledWith({ id: 'file-1' });
+    expect(documentFilesClient.delete).toHaveBeenCalledWith({ id: 'file-1' });
     expect(attachmentsService.create).not.toHaveBeenCalled();
   });
 

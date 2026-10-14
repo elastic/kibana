@@ -12,98 +12,103 @@ import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
-  MAX_PDF_BYTES,
-  SUPPORTED_PDF_MIME_TYPE,
+  MAX_DOCUMENT_BYTES,
+  type SupportedDocumentMimeType,
 } from '@kbn/agent-builder-common/attachments';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { AttachmentsService } from '../../../../services/attachments';
+import { getDocumentMimeType } from './document_mime_type';
 
-export const MAX_PDFS_PER_MESSAGE = 1;
-
-const FORMATTED_MAX_SIZE = numeral(MAX_PDF_BYTES).format('0.[0] b');
+export const MAX_DOCUMENTS_PER_MESSAGE = 1;
 
 const labels = {
-  invalidType: i18n.translate('xpack.agentBuilder.uploadPdf.invalidType', {
-    defaultMessage: 'Only PDF files are supported.',
+  invalidType: i18n.translate('xpack.agentBuilder.uploadDocument.invalidType', {
+    defaultMessage: 'This file type is not supported.',
   }),
-  tooLarge: i18n.translate('xpack.agentBuilder.uploadPdf.tooLarge', {
-    defaultMessage: 'PDF is too large. Maximum size is {maxSize}.',
-    values: { maxSize: FORMATTED_MAX_SIZE },
+  uploadError: i18n.translate('xpack.agentBuilder.uploadDocument.uploadError', {
+    defaultMessage: 'Could not upload the file.',
   }),
-  uploadError: i18n.translate('xpack.agentBuilder.uploadPdf.uploadError', {
-    defaultMessage: 'Could not upload the PDF.',
-  }),
-  tooMany: i18n.translate('xpack.agentBuilder.uploadPdf.tooMany', {
-    defaultMessage: 'You can attach {max, plural, one {# PDF} other {# PDFs}} per message.',
-    values: { max: MAX_PDFS_PER_MESSAGE },
+  tooMany: i18n.translate('xpack.agentBuilder.uploadDocument.tooMany', {
+    defaultMessage:
+      'You can attach {max, plural, one {# document} other {# documents}} per message.',
+    values: { max: MAX_DOCUMENTS_PER_MESSAGE },
   }),
 };
 
-/** Shows a toast and returns true when the file is not a PDF or is too large. */
-export const rejectInvalidPdf = ({
+/** Shows a toast and returns true when the file type is not supported or the file is too large. */
+export const rejectInvalidDocument = ({
   file,
   addErrorToast,
 }: {
   file: File;
   addErrorToast: (input: ToastInput) => void;
 }): boolean => {
-  if (file.type !== SUPPORTED_PDF_MIME_TYPE) {
+  const mimeType = getDocumentMimeType(file);
+  if (!mimeType) {
     addErrorToast({ title: labels.invalidType });
     return true;
   }
-  if (file.size > MAX_PDF_BYTES) {
-    addErrorToast({ title: labels.tooLarge });
+  const maxBytes = MAX_DOCUMENT_BYTES[mimeType];
+  if (file.size > maxBytes) {
+    addErrorToast({
+      title: i18n.translate('xpack.agentBuilder.uploadDocument.tooLarge', {
+        defaultMessage: 'The file is too large. The maximum size is {maxSize}.',
+        values: { maxSize: numeral(maxBytes).format('0.[0] b') },
+      }),
+    });
     return true;
   }
   return false;
 };
 
-/** Blocks adding another PDF once `currentPdfCount` has reached the per-message limit. */
-export const rejectIfTooManyPdfs = ({
-  currentPdfCount,
+/** Blocks adding another document once `currentDocumentCount` has reached the per-message limit. */
+export const rejectIfTooManyDocuments = ({
+  currentDocumentCount,
   addErrorToast,
 }: {
-  currentPdfCount: number;
+  currentDocumentCount: number;
   addErrorToast: (input: ToastInput) => void;
 }): boolean => {
-  if (currentPdfCount < MAX_PDFS_PER_MESSAGE) return false;
+  if (currentDocumentCount < MAX_DOCUMENTS_PER_MESSAGE) return false;
   addErrorToast({ title: labels.tooMany });
   return true;
 };
 
-export type UploadPdfResult =
+export type UploadDocumentResult =
   | { status: 'done'; attachment: VersionedAttachment; fileId: string }
   | { status: 'aborted' }
   | { status: 'failed'; message: string };
 
 /**
- * Uploads the PDF to the Files service, then asks the server to read it into a pdf attachment.
- * Aborting stops either step: Files deletes a half-uploaded file, and the server stops reading
- * and deletes the file. Never throws.
+ * Uploads the file to the Files service, then asks the server to read it into a document
+ * attachment. Aborting stops either step: Files deletes a half-uploaded file, and the server
+ * stops reading. The file stays in Files after a stopped read. Never throws.
  */
-export const uploadPdf = async ({
+export const uploadDocument = async ({
   file,
   name,
+  mimeType,
   conversationId,
-  pdfFilesClient,
+  documentFilesClient,
   attachmentsService,
   signal,
 }: {
   file: File;
   name: string;
+  mimeType: SupportedDocumentMimeType;
   conversationId: string;
-  pdfFilesClient: ScopedFilesClient;
+  documentFilesClient: ScopedFilesClient;
   attachmentsService: AttachmentsService;
   signal: AbortSignal;
-}): Promise<UploadPdfResult> => {
+}): Promise<UploadDocumentResult> => {
   let fileId: string;
   try {
-    const { file: fileEntry } = await pdfFilesClient.create({ name, mimeType: file.type });
+    const { file: fileEntry } = await documentFilesClient.create({ name, mimeType });
     fileId = fileEntry.id;
-    await pdfFilesClient.upload({
+    await documentFilesClient.upload({
       id: fileId,
       body: file,
-      contentType: file.type,
+      contentType: mimeType,
       abortSignal: signal,
       selfDestructOnAbort: true,
     });
@@ -115,14 +120,14 @@ export const uploadPdf = async ({
 
   if (signal.aborted) {
     // Aborted between the two steps: nothing else owns this file yet.
-    await pdfFilesClient.delete({ id: fileId }).catch(() => {});
+    await documentFilesClient.delete({ id: fileId }).catch(() => {});
     return { status: 'aborted' };
   }
 
   try {
     const attachment = await attachmentsService.create({
       conversationId,
-      type: AttachmentType.pdf,
+      type: AttachmentType.document,
       origin: fileId,
       signal,
     });

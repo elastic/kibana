@@ -67,7 +67,7 @@ export const useConversationStream = () => {
         throw new Error('agentId is required to send a message');
       }
       onSubmit?.();
-      // A conversation made before Send (a new chat with a PDF) is not the current one yet.
+      // A conversation made before Send (a new chat with a document) is not the current one yet.
       const conversationAttachments =
         targetConversationId === conversationId
           ? conversation?.attachments

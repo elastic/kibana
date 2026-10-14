@@ -29,7 +29,7 @@ interface SubmitMessageOptions {
  * user is moved to it, by URL in the routed app or by state in the embeddable.
  * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
  * A new conversation that already exists (made earlier by `createConversation`, for example when
- * a PDF was pasted) is passed as `conversationId`, so it is reused instead of created again.
+ * a document was pasted) is passed as `conversationId`, so it is reused instead of created again.
  */
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();

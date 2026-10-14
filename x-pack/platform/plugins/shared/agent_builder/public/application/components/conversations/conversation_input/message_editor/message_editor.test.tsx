@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
 import { MessageEditor } from './message_editor';
 import { createTextFragment, NON_BREAKING_SPACE } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
@@ -501,13 +502,17 @@ describe('MessageEditor', () => {
     expect(editor.querySelector('[data-attachment-placeholder]')).not.toBeNull();
   });
 
-  describe('pasting a PDF', () => {
-    const pastePdf = ({
-      acceptPdf,
+  describe('pasting a document', () => {
+    const PDF_FILE = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
+
+    const pasteDocument = ({
+      acceptedDocumentMimeTypes,
       onPasteFile,
+      file = PDF_FILE,
     }: {
-      acceptPdf?: boolean;
+      acceptedDocumentMimeTypes?: SupportedDocumentMimeType[];
       onPasteFile: jest.Mock;
+      file?: File;
     }) => {
       const { messageEditor } = createMockMessageEditor();
       render(
@@ -515,7 +520,7 @@ describe('MessageEditor', () => {
           messageEditor={messageEditor}
           onSubmit={mockOnSubmit}
           onPasteFile={onPasteFile}
-          acceptPdf={acceptPdf}
+          acceptedDocumentMimeTypes={acceptedDocumentMimeTypes}
           data-test-subj="messageEditor"
         />
       );
@@ -528,46 +533,107 @@ describe('MessageEditor', () => {
       sel.removeAllRanges();
       sel.addRange(range);
 
-      const pdfFile = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
       fireEvent.paste(editor, {
         clipboardData: {
           getData: jest.fn().mockReturnValue(''),
-          items: [{ kind: 'file', type: 'application/pdf', getAsFile: () => pdfFile }],
+          items: [{ kind: 'file', type: file.type, getAsFile: () => file }],
         },
       });
-      return { editor, pdfFile };
+      return { editor, documentFile: file };
     };
 
-    it('calls onPasteFile and inserts a pdf chip when acceptPdf is on', () => {
+    it('calls onPasteFile and inserts a document chip when the type is accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
 
-      const { editor, pdfFile } = pastePdf({ acceptPdf: true, onPasteFile });
+      const { editor, documentFile } = pasteDocument({
+        acceptedDocumentMimeTypes: ['application/pdf'],
+        onPasteFile,
+      });
 
-      expect(onPasteFile).toHaveBeenCalledWith(pdfFile);
+      expect(onPasteFile).toHaveBeenCalledWith(documentFile);
       const chip = editor.querySelector('[data-attachment-placeholder]');
       expect(chip).not.toBeNull();
-      expect(chip?.getAttribute('data-placeholder-kind')).toBe('pdf');
+      expect(chip?.getAttribute('data-placeholder-kind')).toBe('document');
+    });
+
+    it('inserts a document chip for a Markdown file with an empty type', () => {
+      const onPasteFile = jest.fn().mockReturnValue('notes.md');
+      const file = new File(['# Notes'], 'notes.md', { type: '' });
+
+      const { editor } = pasteDocument({
+        acceptedDocumentMimeTypes: ['text/markdown'],
+        onPasteFile,
+        file,
+      });
+
+      expect(onPasteFile).toHaveBeenCalledWith(file);
+      expect(
+        editor.querySelector('[data-attachment-placeholder]')?.getAttribute('data-placeholder-kind')
+      ).toBe('document');
     });
 
     it('inserts no chip when onPasteFile refuses the file', () => {
       const onPasteFile = jest.fn().mockReturnValue(undefined);
 
-      const { editor } = pastePdf({ acceptPdf: true, onPasteFile });
+      const { editor } = pasteDocument({
+        acceptedDocumentMimeTypes: ['application/pdf'],
+        onPasteFile,
+      });
 
       expect(onPasteFile).toHaveBeenCalled();
       expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
     });
 
-    it('ignores the pdf when acceptPdf is off', () => {
+    it('ignores the file when no document type is accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
 
-      const { editor } = pastePdf({ onPasteFile });
+      const { editor } = pasteDocument({ onPasteFile });
 
       expect(onPasteFile).not.toHaveBeenCalled();
       expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
     });
 
-    it('marks a pdf chip as uploading from uploadingNames', () => {
+    it('ignores a PDF when only Markdown and text are accepted', () => {
+      const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
+
+      const { editor } = pasteDocument({
+        acceptedDocumentMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+      });
+
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('still accepts a Markdown file when only Markdown and text are accepted', () => {
+      const onPasteFile = jest.fn().mockReturnValue('notes.md');
+
+      pasteDocument({
+        acceptedDocumentMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+        file: new File(['# Notes'], 'notes.md', { type: 'text/markdown' }),
+      });
+
+      expect(onPasteFile).toHaveBeenCalled();
+    });
+
+    it('ignores a file type that is not supported', () => {
+      const onPasteFile = jest.fn().mockReturnValue('report.docx');
+      const file = new File([new Uint8Array(4)], 'report.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
+
+      const { editor } = pasteDocument({
+        acceptedDocumentMimeTypes: ['application/pdf', 'text/markdown', 'text/plain'],
+        onPasteFile,
+        file,
+      });
+
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('marks a document chip as uploading from uploadingNames', () => {
       const { messageEditor } = createMockMessageEditor();
       const { rerender } = render(
         <MessageEditor
@@ -577,7 +643,7 @@ describe('MessageEditor', () => {
         />
       );
       const editor = screen.getByTestId('messageEditor');
-      editor.appendChild(createAttachmentPlaceholderElement('invoice.pdf', 'pdf'));
+      editor.appendChild(createAttachmentPlaceholderElement('invoice.pdf', 'document'));
 
       rerender(
         <MessageEditor

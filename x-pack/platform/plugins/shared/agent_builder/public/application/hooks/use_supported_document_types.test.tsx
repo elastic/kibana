@@ -9,12 +9,14 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useIsPdfUploadAvailable } from './use_supported_document_types';
+import { useSupportedDocumentTypes } from './use_supported_document_types';
 
-const mockIsPdfAvailable = jest.fn();
+const mockGetSupportedDocumentMimeTypes = jest.fn();
 
 jest.mock('./use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({ attachmentsService: { isPdfAvailable: mockIsPdfAvailable } }),
+  useAgentBuilderServices: () => ({
+    attachmentsService: { getSupportedDocumentMimeTypes: mockGetSupportedDocumentMimeTypes },
+  }),
 }));
 
 const createWrapper = () => {
@@ -25,52 +27,65 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-describe('useIsPdfUploadAvailable', () => {
+describe('useSupportedDocumentTypes', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('is false until the server answers', () => {
-    mockIsPdfAvailable.mockReturnValue(new Promise(() => {}));
+  it('is empty until the server answers', () => {
+    mockGetSupportedDocumentMimeTypes.mockReturnValue(new Promise(() => {}));
 
-    const { result } = renderHook(() => useIsPdfUploadAvailable(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
 
-    expect(result.current).toBe(false);
+    expect(result.current).toEqual([]);
   });
 
-  it('is true when the server says PDFs are available', async () => {
-    mockIsPdfAvailable.mockResolvedValue(true);
+  it('returns the types the server says work', async () => {
+    mockGetSupportedDocumentMimeTypes.mockResolvedValue(['text/markdown', 'text/plain']);
 
-    const { result } = renderHook(() => useIsPdfUploadAvailable(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current).toBe(true));
+    await waitFor(() => expect(result.current).toEqual(['text/markdown', 'text/plain']));
   });
 
-  it('is false when the server says PDFs are not available', async () => {
-    mockIsPdfAvailable.mockResolvedValue(false);
+  it('is empty when the server says no type works', async () => {
+    mockGetSupportedDocumentMimeTypes.mockResolvedValue([]);
 
-    const { result } = renderHook(() => useIsPdfUploadAvailable(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(mockIsPdfAvailable).toHaveBeenCalled());
-    expect(result.current).toBe(false);
+    await waitFor(() => expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalled());
+    expect(result.current).toEqual([]);
   });
 
-  it('is false when the check fails', async () => {
-    mockIsPdfAvailable.mockRejectedValue(new Error('boom'));
+  it('is empty when the check fails', async () => {
+    mockGetSupportedDocumentMimeTypes.mockRejectedValue(new Error('boom'));
 
-    const { result } = renderHook(() => useIsPdfUploadAvailable(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useSupportedDocumentTypes(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(mockIsPdfAvailable).toHaveBeenCalled());
-    expect(result.current).toBe(false);
+    await waitFor(() => expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalled());
+    expect(result.current).toEqual([]);
+  });
+
+  it('keeps the same empty list between renders', async () => {
+    mockGetSupportedDocumentMimeTypes.mockRejectedValue(new Error('boom'));
+
+    const { result, rerender } = renderHook(() => useSupportedDocumentTypes(), {
+      wrapper: createWrapper(),
+    });
+    const before = result.current;
+    await waitFor(() => expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalled());
+    rerender();
+
+    expect(result.current).toBe(before);
   });
 
   it('asks the server once for many hook users', async () => {
-    mockIsPdfAvailable.mockResolvedValue(true);
+    mockGetSupportedDocumentMimeTypes.mockResolvedValue(['application/pdf']);
     const wrapper = createWrapper();
 
-    const first = renderHook(() => useIsPdfUploadAvailable(), { wrapper });
-    await waitFor(() => expect(first.result.current).toBe(true));
-    const second = renderHook(() => useIsPdfUploadAvailable(), { wrapper });
+    const first = renderHook(() => useSupportedDocumentTypes(), { wrapper });
+    await waitFor(() => expect(first.result.current).toEqual(['application/pdf']));
+    const second = renderHook(() => useSupportedDocumentTypes(), { wrapper });
 
-    expect(second.result.current).toBe(true);
-    expect(mockIsPdfAvailable).toHaveBeenCalledTimes(1);
+    expect(second.result.current).toEqual(['application/pdf']);
+    expect(mockGetSupportedDocumentMimeTypes).toHaveBeenCalledTimes(1);
   });
 });

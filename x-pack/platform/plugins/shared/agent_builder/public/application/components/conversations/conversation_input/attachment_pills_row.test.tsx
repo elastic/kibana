@@ -114,16 +114,18 @@ describe('AttachmentPillsRow', () => {
     expect(onRemove).toBeUndefined();
   });
 
-  describe('loading PDFs', () => {
-    it('renders nothing for an empty list with no loading PDFs', () => {
+  describe('loading documents', () => {
+    it('renders nothing for an empty list with no loading documents', () => {
       const { container } = render(
-        <AttachmentPillsRow attachments={[]} loadingPdfNames={new Set()} />
+        <AttachmentPillsRow attachments={[]} loadingDocumentNames={new Set()} />
       );
       expect(container.firstChild).toBeNull();
     });
 
-    it('renders a named loading pill for each loading PDF, even with no attachments', () => {
-      render(<AttachmentPillsRow attachments={[]} loadingPdfNames={new Set(['invoice.pdf'])} />);
+    it('renders a named loading pill for each loading document, even with no attachments', () => {
+      render(
+        <AttachmentPillsRow attachments={[]} loadingDocumentNames={new Set(['invoice.pdf'])} />
+      );
 
       const pill = screen.getByTestId('mock-attachment-pill-invoice.pdf');
       expect(pill).toHaveAttribute('data-loading', 'true');
@@ -134,7 +136,7 @@ describe('AttachmentPillsRow', () => {
       render(
         <AttachmentPillsRow
           attachments={[makeInput('a1')]}
-          loadingPdfNames={new Set(['invoice.pdf'])}
+          loadingDocumentNames={new Set(['invoice.pdf'])}
         />
       );
 
@@ -145,41 +147,43 @@ describe('AttachmentPillsRow', () => {
       ]);
     });
 
-    it('cancels a loading PDF by its name when removable', () => {
-      const onRemoveLoadingPdf = jest.fn();
+    it('cancels a loading document by its name when removable', () => {
+      const onRemoveLoadingDocument = jest.fn();
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingPdfNames={new Set(['invoice.pdf'])}
-          onRemoveLoadingPdf={onRemoveLoadingPdf}
+          loadingDocumentNames={new Set(['invoice.pdf'])}
+          onRemoveLoadingDocument={onRemoveLoadingDocument}
           removable
         />
       );
 
       screen.getByTestId('mock-attachment-pill-invoice.pdf').click();
 
-      expect(onRemoveLoadingPdf).toHaveBeenCalledWith('invoice.pdf');
+      expect(onRemoveLoadingDocument).toHaveBeenCalledWith('invoice.pdf');
     });
 
     it('offers no cancel when not removable', () => {
-      const onRemoveLoadingPdf = jest.fn();
+      const onRemoveLoadingDocument = jest.fn();
       render(
         <AttachmentPillsRow
           attachments={[]}
-          loadingPdfNames={new Set(['invoice.pdf'])}
-          onRemoveLoadingPdf={onRemoveLoadingPdf}
+          loadingDocumentNames={new Set(['invoice.pdf'])}
+          onRemoveLoadingDocument={onRemoveLoadingDocument}
         />
       );
 
       screen.getByTestId('mock-attachment-pill-invoice.pdf').click();
 
-      expect(onRemoveLoadingPdf).not.toHaveBeenCalled();
+      expect(onRemoveLoadingDocument).not.toHaveBeenCalled();
     });
 
-    it('passes the description of an added PDF to its pill, so the label is its name', () => {
+    it('passes the description of an added document to its pill, so the label is its name', () => {
       render(
         <AttachmentPillsRow
-          attachments={[{ id: 'pdf-1', type: 'pdf', origin: 'file-1', description: 'invoice.pdf' }]}
+          attachments={[
+            { id: 'pdf-1', type: 'document', origin: 'file-1', description: 'invoice.pdf' },
+          ]}
         />
       );
 

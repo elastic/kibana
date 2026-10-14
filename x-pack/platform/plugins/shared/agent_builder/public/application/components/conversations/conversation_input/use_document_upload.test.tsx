@@ -11,12 +11,12 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { queryKeys } from '../../../query_keys';
-import { uploadPdf, type UploadPdfResult } from './upload_document';
-import { usePdfUpload } from './use_document_upload';
+import { uploadDocument, type UploadDocumentResult } from './upload_document';
+import { useDocumentUpload } from './use_document_upload';
 
 jest.mock('../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
-    pdfFilesClient: { name: 'pdfFilesClient' },
+    documentFilesClient: { name: 'documentFilesClient' },
     attachmentsService: { delete: mockDeleteAttachment },
   }),
 }));
@@ -26,21 +26,21 @@ jest.mock('../../../context/conversation/conversation_context', () => ({
 }));
 jest.mock('./upload_document', () => ({
   ...jest.requireActual('./upload_document'),
-  uploadPdf: jest.fn(),
+  uploadDocument: jest.fn(),
 }));
 
 const mockDeleteAttachment = jest.fn();
-const mockUploadPdf = jest.mocked(uploadPdf);
+const mockUploadDocument = jest.mocked(uploadDocument);
 
-const createdAttachment = { id: 'att-1', type: 'pdf', current_version: 1, versions: [] };
-const doneResult: UploadPdfResult = {
+const createdAttachment = { id: 'att-1', type: 'document', current_version: 1, versions: [] };
+const doneResult: UploadDocumentResult = {
   status: 'done',
   attachment: createdAttachment as never,
   fileId: 'file-1',
 };
-const pdfAttachmentInput = {
+const documentAttachmentInput = {
   id: 'att-1',
-  type: 'pdf',
+  type: 'document',
   origin: 'file-1',
   description: 'invoice.pdf',
 };
@@ -68,35 +68,38 @@ const setContext = ({
     removeAttachment,
   } as never);
 
-const createPdf = (name = 'invoice.pdf') =>
+const createDocument = (name = 'invoice.pdf') =>
   new File([new Uint8Array(4)], name, { type: 'application/pdf' });
 
 /** A read the test finishes by hand, so it can check the state in between. */
 const deferUpload = () => {
-  let resolve: (result: UploadPdfResult) => void = () => {};
-  mockUploadPdf.mockReturnValueOnce(new Promise((res) => (resolve = res)));
-  return { resolve: (result: UploadPdfResult) => act(async () => resolve(result)) };
+  let resolve: (result: UploadDocumentResult) => void = () => {};
+  mockUploadDocument.mockReturnValueOnce(new Promise((res) => (resolve = res)));
+  return { resolve: (result: UploadDocumentResult) => act(async () => resolve(result)) };
 };
 
-describe('usePdfUpload', () => {
+describe('useDocumentUpload', () => {
   let queryClient: QueryClient;
   const wrapper = ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  const renderPdfUpload = () =>
+  const renderDocumentUpload = () =>
     renderHook(
       () =>
-        usePdfUpload({
+        useDocumentUpload({
           addErrorToast,
           messageEditorController: messageEditorController as never,
           createConversation,
         }),
       { wrapper }
     );
-  const paste = (result: { current: ReturnType<typeof usePdfUpload> }, file = createPdf()) => {
+  const paste = (
+    result: { current: ReturnType<typeof useDocumentUpload> },
+    file = createDocument()
+  ) => {
     let name: string | undefined;
     act(() => {
-      name = result.current.handlePastePdf?.(file);
+      name = result.current.handlePasteDocument?.(file);
     });
     return name;
   };
@@ -105,7 +108,7 @@ describe('usePdfUpload', () => {
     jest.clearAllMocks();
     queryClient = new QueryClient();
     setContext({ conversationId: 'conv-1' });
-    mockUploadPdf.mockResolvedValue(doneResult);
+    mockUploadDocument.mockResolvedValue(doneResult);
     mockDeleteAttachment.mockResolvedValue(undefined);
     createConversation.mockResolvedValue({ id: 'new-conv' });
     messageEditorController.getPlaceholderNames.mockReturnValue([]);
@@ -114,26 +117,30 @@ describe('usePdfUpload', () => {
   describe('paste in an existing conversation', () => {
     it('returns the name, shows it as loading, then adds the attachment without data', async () => {
       const upload = deferUpload();
-      const { result } = renderPdfUpload();
+      const { result } = renderDocumentUpload();
 
       expect(paste(result)).toBe('invoice.pdf');
-      expect(result.current.loadingPdfNames).toEqual(new Set(['invoice.pdf']));
+      expect(result.current.loadingDocumentNames).toEqual(new Set(['invoice.pdf']));
       expect(upsertAttachments).not.toHaveBeenCalled();
 
       await upload.resolve(doneResult);
 
-      expect(mockUploadPdf).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'invoice.pdf', conversationId: 'conv-1' })
+      expect(mockUploadDocument).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'invoice.pdf',
+          mimeType: 'application/pdf',
+          conversationId: 'conv-1',
+        })
       );
-      expect(upsertAttachments).toHaveBeenCalledWith([pdfAttachmentInput]);
-      expect(result.current.loadingPdfNames.size).toBe(0);
+      expect(upsertAttachments).toHaveBeenCalledWith([documentAttachmentInput]);
+      expect(result.current.loadingDocumentNames.size).toBe(0);
       expect(createConversation).not.toHaveBeenCalled();
     });
 
     it('puts the attachment into the conversation cache, for Send', async () => {
       const conversation = { id: 'conv-1', attachments: [{ id: 'other' }] };
       queryClient.setQueryData(queryKeys.conversations.byId('conv-1'), conversation);
-      const { result } = renderPdfUpload();
+      const { result } = renderDocumentUpload();
 
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
@@ -145,30 +152,53 @@ describe('usePdfUpload', () => {
     });
   });
 
+  describe('paste of a Markdown file', () => {
+    it('reads a Markdown file with an empty type and adds a document attachment', async () => {
+      const { result } = renderDocumentUpload();
+
+      expect(paste(result, new File(['# Hi'], 'notes.md', { type: '' }))).toBe('notes.md');
+      await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
+
+      expect(mockUploadDocument).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'notes.md', mimeType: 'text/markdown' })
+      );
+      expect(upsertAttachments).toHaveBeenCalledWith([
+        { id: 'att-1', type: 'document', origin: 'file-1', description: 'notes.md' },
+      ]);
+    });
+
+    it('names a file without a name by its type', () => {
+      deferUpload();
+      const { result } = renderDocumentUpload();
+
+      expect(paste(result, new File(['# Hi'], '', { type: 'text/markdown' }))).toBe('document.md');
+    });
+  });
+
   describe('paste in a new chat', () => {
     beforeEach(() => setContext({ conversationId: undefined }));
 
-    it('creates the conversation once and reads the PDF into it', async () => {
-      const { result } = renderPdfUpload();
+    it('creates the conversation once and reads the document into it', async () => {
+      const { result } = renderDocumentUpload();
 
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
 
       expect(createConversation).toHaveBeenCalledTimes(1);
       expect(createConversation).toHaveBeenCalledWith('agent-1');
-      expect(mockUploadPdf).toHaveBeenCalledWith(
+      expect(mockUploadDocument).toHaveBeenCalledWith(
         expect.objectContaining({ conversationId: 'new-conv' })
       );
       expect(result.current.pendingConversationId).toBe('new-conv');
     });
 
-    it('reuses the conversation for the next PDF', async () => {
-      const { result } = renderPdfUpload();
+    it('reuses the conversation for the next document', async () => {
+      const { result } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalledTimes(1));
-      act(() => result.current.handleRemovePdf('invoice.pdf'));
+      act(() => result.current.handleRemoveDocument('invoice.pdf'));
 
-      paste(result, createPdf('second.pdf'));
+      paste(result, createDocument('second.pdf'));
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalledTimes(2));
 
       expect(createConversation).toHaveBeenCalledTimes(1);
@@ -176,57 +206,64 @@ describe('usePdfUpload', () => {
 
     it('removes the chip and reads nothing when the conversation cannot be created', async () => {
       createConversation.mockRejectedValue(new Error('boom'));
-      const { result } = renderPdfUpload();
+      const { result } = renderDocumentUpload();
 
       paste(result);
 
       await waitFor(() =>
         expect(messageEditorController.removePlaceholderByName).toHaveBeenCalledWith(
           'invoice.pdf',
-          'pdf'
+          'document'
         )
       );
-      expect(mockUploadPdf).not.toHaveBeenCalled();
-      expect(result.current.loadingPdfNames.size).toBe(0);
+      expect(mockUploadDocument).not.toHaveBeenCalled();
+      expect(result.current.loadingDocumentNames.size).toBe(0);
       expect(result.current.pendingConversationId).toBeUndefined();
     });
   });
 
   describe('checks before the upload', () => {
-    it('refuses a file that is not a PDF with a toast', () => {
-      const { result } = renderPdfUpload();
+    it('refuses a file that is not a document with a toast', () => {
+      const { result } = renderDocumentUpload();
 
-      expect(paste(result, new File(['x'], 'a.txt', { type: 'text/plain' }))).toBeUndefined();
+      expect(paste(result, new File(['x'], 'a.csv', { type: 'text/plain' }))).toBeUndefined();
 
-      expect(addErrorToast).toHaveBeenCalledWith({ title: 'Only PDF files are supported.' });
-      expect(mockUploadPdf).not.toHaveBeenCalled();
+      expect(addErrorToast).toHaveBeenCalledWith({ title: 'This file type is not supported.' });
+      expect(mockUploadDocument).not.toHaveBeenCalled();
     });
 
-    it('refuses a second PDF while the first one is loading', () => {
+    it('refuses a second document while the first one is loading', () => {
       deferUpload();
-      const { result } = renderPdfUpload();
+      const { result } = renderDocumentUpload();
       paste(result);
 
-      expect(paste(result, createPdf('second.pdf'))).toBeUndefined();
+      expect(paste(result, createDocument('second.pdf'))).toBeUndefined();
 
-      expect(addErrorToast).toHaveBeenCalledWith({ title: 'You can attach 1 PDF per message.' });
-      expect(result.current.loadingPdfNames).toEqual(new Set(['invoice.pdf']));
+      expect(addErrorToast).toHaveBeenCalledWith({
+        title: 'You can attach 1 document per message.',
+      });
+      expect(result.current.loadingDocumentNames).toEqual(new Set(['invoice.pdf']));
     });
 
-    it('refuses a second PDF after the first one is added', async () => {
-      const { result } = renderPdfUpload();
+    it('refuses a second document after the first one is added', async () => {
+      const { result } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
 
-      expect(paste(result, createPdf('second.pdf'))).toBeUndefined();
+      expect(paste(result, createDocument('second.pdf'))).toBeUndefined();
 
-      expect(addErrorToast).toHaveBeenCalledWith({ title: 'You can attach 1 PDF per message.' });
+      expect(addErrorToast).toHaveBeenCalledWith({
+        title: 'You can attach 1 document per message.',
+      });
     });
   });
 
   it('shows the error and removes the chip when the read fails', async () => {
-    mockUploadPdf.mockResolvedValue({ status: 'failed', message: 'The file is not a valid PDF.' });
-    const { result } = renderPdfUpload();
+    mockUploadDocument.mockResolvedValue({
+      status: 'failed',
+      message: 'The file is not a valid PDF.',
+    });
+    const { result } = renderDocumentUpload();
 
     paste(result);
 
@@ -235,27 +272,27 @@ describe('usePdfUpload', () => {
     );
     expect(messageEditorController.removePlaceholderByName).toHaveBeenCalledWith(
       'invoice.pdf',
-      'pdf'
+      'document'
     );
     expect(upsertAttachments).not.toHaveBeenCalled();
-    expect(result.current.loadingPdfNames.size).toBe(0);
+    expect(result.current.loadingDocumentNames.size).toBe(0);
   });
 
-  describe('removing a PDF', () => {
+  describe('removing a document', () => {
     it('while loading aborts the work, removes the chip and ignores the late result', async () => {
       const upload = deferUpload();
-      const { result } = renderPdfUpload();
+      const { result } = renderDocumentUpload();
       paste(result);
-      const { signal } = mockUploadPdf.mock.calls[0][0];
+      const { signal } = mockUploadDocument.mock.calls[0][0];
 
-      act(() => result.current.handleRemovePdf('invoice.pdf'));
+      act(() => result.current.handleRemoveDocument('invoice.pdf'));
 
       expect(signal.aborted).toBe(true);
       expect(messageEditorController.removePlaceholderByName).toHaveBeenCalledWith(
         'invoice.pdf',
-        'pdf'
+        'document'
       );
-      expect(result.current.loadingPdfNames.size).toBe(0);
+      expect(result.current.loadingDocumentNames.size).toBe(0);
 
       await upload.resolve(doneResult);
 
@@ -265,13 +302,13 @@ describe('usePdfUpload', () => {
 
     it('after it was added permanently deletes the attachment and clears every trace', async () => {
       queryClient.setQueryData(queryKeys.conversations.byId('conv-1'), { id: 'conv-1' });
-      const { result, rerender } = renderPdfUpload();
+      const { result, rerender } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
-      setContext({ conversationId: 'conv-1', attachments: [pdfAttachmentInput] });
+      setContext({ conversationId: 'conv-1', attachments: [documentAttachmentInput] });
       rerender();
 
-      act(() => result.current.handleRemovePdf('invoice.pdf'));
+      act(() => result.current.handleRemoveDocument('invoice.pdf'));
 
       expect(mockDeleteAttachment).toHaveBeenCalledWith({
         conversationId: 'conv-1',
@@ -288,29 +325,29 @@ describe('usePdfUpload', () => {
 
     it('does not fail when the delete request fails', async () => {
       mockDeleteAttachment.mockRejectedValue(new Error('boom'));
-      const { result } = renderPdfUpload();
+      const { result } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
 
-      expect(() => act(() => result.current.handleRemovePdf('invoice.pdf'))).not.toThrow();
+      expect(() => act(() => result.current.handleRemoveDocument('invoice.pdf'))).not.toThrow();
     });
   });
 
   describe('handleAfterInput', () => {
-    it('removes a PDF whose chip was deleted from the text', async () => {
-      const { result } = renderPdfUpload();
+    it('removes a document whose chip was deleted from the text', async () => {
+      const { result } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
       messageEditorController.getPlaceholderNames.mockReturnValue([]);
 
       act(() => result.current.handleAfterInput());
 
-      expect(messageEditorController.getPlaceholderNames).toHaveBeenCalledWith('pdf');
+      expect(messageEditorController.getPlaceholderNames).toHaveBeenCalledWith('document');
       expect(mockDeleteAttachment).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps a PDF whose chip is still in the text', async () => {
-      const { result } = renderPdfUpload();
+    it('keeps a document whose chip is still in the text', async () => {
+      const { result } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
       messageEditorController.getPlaceholderNames.mockReturnValue(['invoice.pdf']);
@@ -320,35 +357,35 @@ describe('usePdfUpload', () => {
       expect(mockDeleteAttachment).not.toHaveBeenCalled();
     });
 
-    it('cancels a PDF that is loading when its chip was deleted', () => {
+    it('cancels a document that is loading when its chip was deleted', () => {
       deferUpload();
-      const { result } = renderPdfUpload();
+      const { result } = renderDocumentUpload();
       paste(result);
-      const { signal } = mockUploadPdf.mock.calls[0][0];
+      const { signal } = mockUploadDocument.mock.calls[0][0];
 
       act(() => result.current.handleAfterInput());
 
       expect(signal.aborted).toBe(true);
-      expect(result.current.loadingPdfNames.size).toBe(0);
+      expect(result.current.loadingDocumentNames.size).toBe(0);
     });
   });
 
   describe('leaving', () => {
     it('aborts the work in flight when the conversation changes', () => {
       deferUpload();
-      const { result, rerender } = renderPdfUpload();
+      const { result, rerender } = renderDocumentUpload();
       paste(result);
-      const { signal } = mockUploadPdf.mock.calls[0][0];
+      const { signal } = mockUploadDocument.mock.calls[0][0];
 
       setContext({ conversationId: 'conv-2' });
       rerender();
 
       expect(signal.aborted).toBe(true);
-      expect(result.current.loadingPdfNames.size).toBe(0);
+      expect(result.current.loadingDocumentNames.size).toBe(0);
     });
 
-    it('deletes the PDFs that were not sent when the conversation changes', async () => {
-      const { result, rerender } = renderPdfUpload();
+    it('deletes the documents that were not sent when the conversation changes', async () => {
+      const { result, rerender } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
 
@@ -364,7 +401,7 @@ describe('usePdfUpload', () => {
 
     it('forgets the pending conversation when the conversation changes', async () => {
       setContext({ conversationId: undefined });
-      const { result, rerender } = renderPdfUpload();
+      const { result, rerender } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(result.current.pendingConversationId).toBe('new-conv'));
 
@@ -374,9 +411,9 @@ describe('usePdfUpload', () => {
       expect(result.current.pendingConversationId).toBeUndefined();
     });
 
-    it('keeps the PDFs that were sent, even when the screen changes right after', async () => {
+    it('keeps the documents that were sent, even when the screen changes right after', async () => {
       setContext({ conversationId: undefined });
-      const { result, rerender } = renderPdfUpload();
+      const { result, rerender } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
 
@@ -388,8 +425,8 @@ describe('usePdfUpload', () => {
       expect(result.current.pendingConversationId).toBeUndefined();
     });
 
-    it('deletes the PDFs that were not sent when the input unmounts', async () => {
-      const { result, unmount } = renderPdfUpload();
+    it('deletes the documents that were not sent when the input unmounts', async () => {
+      const { result, unmount } = renderDocumentUpload();
       paste(result);
       await waitFor(() => expect(upsertAttachments).toHaveBeenCalled());
 

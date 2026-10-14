@@ -6,10 +6,12 @@
  */
 
 import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
-import type {
-  UnknownAttachment,
-  UpdateOriginResponse,
-  VersionedAttachment,
+import {
+  isSupportedDocumentMimeType,
+  type SupportedDocumentMimeType,
+  type UnknownAttachment,
+  type UpdateOriginResponse,
+  type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentUIDefinition,
@@ -20,7 +22,7 @@ import type {
   ListAttachmentsResult,
   UpdateAttachmentArgs,
 } from '@kbn/agent-builder-browser';
-import { pdfAvailabilityPath, publicApiPath } from '../../../common/constants';
+import { documentSupportedTypesPath, publicApiPath } from '../../../common/constants';
 import type {
   CheckStaleAttachmentsResponse,
   CreateAttachmentResponse,
@@ -151,9 +153,11 @@ export class AttachmentsService {
     return attachment;
   }
 
-  async isPdfAvailable(): Promise<boolean> {
-    const { available } = await this.http.get<{ available: boolean }>(pdfAvailabilityPath);
-    return available === true;
+  async getSupportedDocumentMimeTypes(): Promise<SupportedDocumentMimeType[]> {
+    const { mime_types: mimeTypes } = await this.http.get<{ mime_types: string[] }>(
+      documentSupportedTypesPath
+    );
+    return mimeTypes.filter(isSupportedDocumentMimeType);
   }
 
   async update({

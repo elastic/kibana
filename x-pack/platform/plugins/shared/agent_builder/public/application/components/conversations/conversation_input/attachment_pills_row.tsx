@@ -27,8 +27,8 @@ export interface AttachmentPillsRowProps {
   justifyContent?: EuiFlexGroupProps['justifyContent'];
   onRemoveAttachment?: (attachment: ConversationAttachment) => void;
   uploadingNames?: Set<string>;
-  loadingPdfNames?: Set<string>;
-  onRemoveLoadingPdf?: (name: string) => void;
+  loadingDocumentNames?: Set<string>;
+  onRemoveLoadingDocument?: (name: string) => void;
   hoveredImageName?: string | null;
 }
 
@@ -81,15 +81,19 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   justifyContent = 'flexStart',
   onRemoveAttachment,
   uploadingNames,
-  loadingPdfNames,
-  onRemoveLoadingPdf,
+  loadingDocumentNames,
+  onRemoveLoadingDocument,
   hoveredImageName,
 }) => {
   const { removeAttachment } = useConversationContext();
   const uploadingEntries = uploadingNames ? [...uploadingNames] : [];
-  const loadingPdfEntries = loadingPdfNames ? [...loadingPdfNames] : [];
+  const loadingDocumentEntries = loadingDocumentNames ? [...loadingDocumentNames] : [];
 
-  if (attachments.length === 0 && uploadingEntries.length === 0 && loadingPdfEntries.length === 0) {
+  if (
+    attachments.length === 0 &&
+    uploadingEntries.length === 0 &&
+    loadingDocumentEntries.length === 0
+  ) {
     return null;
   }
 
@@ -151,17 +155,17 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
           </EuiFlexItem>
         );
       })}
-      {loadingPdfEntries.map((name) => (
-        <EuiFlexItem key={`loading-pdf-${name}`} grow={false} role="listitem">
+      {loadingDocumentEntries.map((name) => (
+        <EuiFlexItem key={`loading-document-${name}`} grow={false} role="listitem">
           <AttachmentPill
             attachment={{
               id: name,
-              type: AttachmentType.pdf,
+              type: AttachmentType.document,
               data: {},
               description: name,
             }}
             isLoading
-            onRemoveAttachment={removable ? () => onRemoveLoadingPdf?.(name) : undefined}
+            onRemoveAttachment={removable ? () => onRemoveLoadingDocument?.(name) : undefined}
           />
         </EuiFlexItem>
       ))}

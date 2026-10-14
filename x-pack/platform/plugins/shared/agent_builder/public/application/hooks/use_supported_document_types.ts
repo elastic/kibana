@@ -6,24 +6,27 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
-/** Whether PDFs can be pasted. Asked once per page load; `false` when the check fails. */
-export const useIsPdfUploadAvailable = (): boolean => {
+const NO_DOCUMENT_TYPES: readonly SupportedDocumentMimeType[] = [];
+
+/** The document types that can be pasted. Asked once per page load; empty when the check fails. */
+export const useSupportedDocumentTypes = (): readonly SupportedDocumentMimeType[] => {
   const { attachmentsService } = useAgentBuilderServices();
 
   const { data } = useQuery({
-    queryKey: queryKeys.attachments.pdfAvailable,
+    queryKey: queryKeys.attachments.supportedDocumentTypes,
     queryFn: async () => {
       try {
-        return await attachmentsService.isPdfAvailable();
+        return await attachmentsService.getSupportedDocumentMimeTypes();
       } catch {
-        return false;
+        return NO_DOCUMENT_TYPES;
       }
     },
     staleTime: Infinity,
   });
 
-  return data ?? false;
+  return data ?? NO_DOCUMENT_TYPES;
 };

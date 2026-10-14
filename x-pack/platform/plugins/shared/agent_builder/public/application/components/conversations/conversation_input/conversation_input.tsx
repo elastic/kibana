@@ -329,15 +329,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const {
     uploadingNames,
-    loadingPdfNames,
+    loadingDocumentNames,
     uploadingChipNames,
     isUploading,
-    isPdfUploadAvailable,
+    acceptedDocumentMimeTypes,
     pendingConversationId,
     handlePasteFile,
     handleAfterInput,
     handleRemoveAttachment,
-    handleRemoveLoadingPdf,
+    handleRemoveLoadingDocument,
     handleSubmitted: handleUploadsSubmitted,
   } = useAttachmentUploads({ addErrorToast, messageEditorController, createConversation });
 
@@ -518,8 +518,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           <AttachmentPillsRow
             attachments={visibleAttachments}
             uploadingNames={uploadingNames}
-            loadingPdfNames={loadingPdfNames}
-            onRemoveLoadingPdf={handleRemoveLoadingPdf}
+            loadingDocumentNames={loadingDocumentNames}
+            onRemoveLoadingDocument={handleRemoveLoadingDocument}
             removable
             onRemoveAttachment={handleRemoveAttachment}
             hoveredImageName={hoveredImageName}
@@ -535,7 +535,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
           onPasteFile={upsertAttachments ? handlePasteFile : undefined}
-          acceptPdf={isPdfUploadAvailable}
+          acceptedDocumentMimeTypes={acceptedDocumentMimeTypes}
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}
           uploadingNames={uploadingChipNames}

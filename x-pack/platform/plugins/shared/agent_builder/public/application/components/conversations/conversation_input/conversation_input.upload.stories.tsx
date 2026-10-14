@@ -12,8 +12,14 @@ import type { EuiGlobalToastListToast } from '@elastic/eui';
 import { QueryClient } from '@kbn/react-query';
 import { fn, userEvent, within } from '@storybook/test';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
-import { MAX_PDF_BYTES } from '@kbn/agent-builder-common/attachments';
+import type {
+  ConversationAttachment,
+  SupportedDocumentMimeType,
+} from '@kbn/agent-builder-common/attachments';
+import {
+  MAX_DOCUMENT_BYTES,
+  SUPPORTED_DOCUMENT_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
 import { createStorybookAgentBuilderServices } from '../../../__storybook__/agent_builder_services';
 import { createStorybookKibanaServices } from '../../../__storybook__/kibana_services';
@@ -76,15 +82,17 @@ trailer << /Root 1 0 R >>
 %%EOF
 `;
 
-const createPdfFile = (name: string, sizeBytes?: number): File => {
+const MINIMAL_MARKDOWN = '# Notes\n\n- First point\n- Second point\n';
+
+const createDocumentFile = (name: string, sizeBytes?: number): File => {
+  const isPdf = name.endsWith('.pdf');
+  const content = isPdf ? MINIMAL_PDF : MINIMAL_MARKDOWN;
   const padding =
-    sizeBytes && sizeBytes > MINIMAL_PDF.length
-      ? [new Uint8Array(sizeBytes - MINIMAL_PDF.length)]
-      : [];
-  return new File([MINIMAL_PDF, ...padding], name, { type: 'application/pdf' });
+    sizeBytes && sizeBytes > content.length ? [new Uint8Array(sizeBytes - content.length)] : [];
+  return new File([content, ...padding], name, { type: isPdf ? 'application/pdf' : '' });
 };
 
-const pastePdf = async (
+const pasteDocument = async (
   canvasElement: HTMLElement,
   { name, typeText, sizeBytes }: { name: string; typeText?: string; sizeBytes?: number }
 ): Promise<HTMLElement> => {
@@ -95,11 +103,11 @@ const pastePdf = async (
     await userEvent.type(editor, typeText);
   }
 
-  // The availability check answers right after mount; give it a moment before the paste.
+  // The supported types check answers right after mount; give it a moment before the paste.
   await new Promise((resolve) => setTimeout(resolve, 100));
 
   const dt = new DataTransfer();
-  dt.items.add(createPdfFile(name, sizeBytes));
+  dt.items.add(createDocumentFile(name, sizeBytes));
   await userEvent.paste(dt);
 
   return editor;
@@ -229,19 +237,25 @@ export const ImageMultipleWithTrickyFilenames: Story = {
   },
 };
 
-const STORY_PDF_ATTACHMENT: VersionedAttachment = {
-  id: 'story-pdf-attachment',
-  type: 'pdf',
+const createStoryDocumentAttachment = (
+  name: string,
+  mimeType: SupportedDocumentMimeType
+): VersionedAttachment => ({
+  id: 'story-document-attachment',
+  type: 'document',
   current_version: 1,
   versions: [
     {
       version: 1,
-      data: { file_id: 'story-pdf-file', name: 'invoice.pdf', text: 'Hello' },
+      data: { file_id: 'story-document-file', name, mime_type: mimeType, text: 'Hello' },
       created_at: '2026-10-09T10:00:00.000Z',
-      content_hash: 'story-pdf-hash',
+      content_hash: 'story-document-hash',
     },
   ],
-};
+});
+
+const STORY_PDF_ATTACHMENT = createStoryDocumentAttachment('invoice.pdf', 'application/pdf');
+const STORY_MARKDOWN_ATTACHMENT = createStoryDocumentAttachment('notes.md', 'text/markdown');
 
 const STORY_CONVERSATION = {
   id: 'story-conversation',
@@ -255,38 +269,40 @@ const STORY_CONVERSATION = {
 };
 
 const READING_TIME_MS = 800;
-const readsPdf = () =>
+const readsDocument = () =>
   new Promise<VersionedAttachment>((resolve) =>
     setTimeout(() => resolve(STORY_PDF_ATTACHMENT), READING_TIME_MS)
   );
-const neverReadsPdf = () => new Promise<VersionedAttachment>(() => {});
+const readsMarkdownFast = () => Promise.resolve(STORY_MARKDOWN_ATTACHMENT);
+const neverReadsDocument = () => new Promise<VersionedAttachment>(() => {});
 
-const createPdfStoryServices = ({
-  create = readsPdf,
-  isAvailable = true,
+const createDocumentStoryServices = ({
+  create = readsDocument,
+  supportedMimeTypes = [...SUPPORTED_DOCUMENT_MIME_TYPES],
   filesClient,
 }: {
   create?: () => Promise<VersionedAttachment>;
-  isAvailable?: boolean;
+  supportedMimeTypes?: SupportedDocumentMimeType[];
   filesClient?: unknown;
 }) => {
   const defaults = createStorybookAgentBuilderServices();
   // Keeps the real attachment types of the storybook service and replaces only the calls.
-  const pdfAttachmentsService = Object.assign(Object.create(defaults.attachmentsService), {
+  const documentAttachmentsService = Object.assign(Object.create(defaults.attachmentsService), {
     create,
     delete: () => Promise.resolve(),
-    isPdfAvailable: () => Promise.resolve(isAvailable),
+    getSupportedDocumentMimeTypes: () => Promise.resolve(supportedMimeTypes),
   });
   return {
-    pdfFilesClient: (filesClient ?? defaults.filesClient) as typeof defaults.pdfFilesClient,
-    attachmentsService: pdfAttachmentsService,
+    documentFilesClient: (filesClient ??
+      defaults.filesClient) as typeof defaults.documentFilesClient,
+    attachmentsService: documentAttachmentsService,
     conversationsService: { create: () => Promise.resolve(STORY_CONVERSATION) } as never,
   };
 };
 
-/** Gives a PDF story its own query cache, so the availability answer does not carry over, and shows toasts. */
-const PdfStoryProvider: React.FC<{
-  services: ReturnType<typeof createPdfStoryServices>;
+/** Gives a document story its own query cache, so the supported types answer does not carry over, and shows toasts. */
+const DocumentStoryProvider: React.FC<{
+  services: ReturnType<typeof createDocumentStoryServices>;
   children: React.ReactNode;
 }> = ({ services, children }) => {
   const [toasts, setToasts] = useState<EuiGlobalToastListToast[]>([]);
@@ -325,70 +341,84 @@ const PdfStoryProvider: React.FC<{
   );
 };
 
-const withPdfServices = (options: Parameters<typeof createPdfStoryServices>[0] = {}) => [
+const withDocumentServices = (options: Parameters<typeof createDocumentStoryServices>[0] = {}) => [
   (Story: React.ComponentType) => (
-    <PdfStoryProvider services={createPdfStoryServices(options)}>
+    <DocumentStoryProvider services={createDocumentStoryServices(options)}>
       <Story />
-    </PdfStoryProvider>
+    </DocumentStoryProvider>
   ),
 ];
 
-export const PdfLoading: Story = {
+export const DocumentLoading: Story = {
   name: 'PDF - Loading',
-  decorators: withPdfServices({ create: neverReadsPdf, filesClient: neverResolvingFilesClient }),
+  decorators: withDocumentServices({
+    create: neverReadsDocument,
+    filesClient: neverResolvingFilesClient,
+  }),
   play: async ({ canvasElement }) => {
-    await pastePdf(canvasElement, { name: 'invoice.pdf' });
+    await pasteDocument(canvasElement, { name: 'invoice.pdf' });
   },
 };
 
-export const PdfOne: Story = {
+export const DocumentOne: Story = {
   name: 'PDF - 1 PDF',
-  decorators: withPdfServices(),
+  decorators: withDocumentServices(),
   play: async ({ canvasElement }) => {
-    await pastePdf(canvasElement, { name: 'invoice.pdf', typeText: 'Summarize this: ' });
+    await pasteDocument(canvasElement, { name: 'invoice.pdf', typeText: 'Summarize this: ' });
   },
 };
 
-export const PdfWithImage: Story = {
+export const DocumentMarkdown: Story = {
+  name: 'Document - Markdown',
+  decorators: withDocumentServices({ create: readsMarkdownFast }),
+  play: async ({ canvasElement }) => {
+    await pasteDocument(canvasElement, { name: 'notes.md', typeText: 'Summarize this: ' });
+  },
+};
+
+export const DocumentWithImage: Story = {
   name: 'PDF - Image + PDF',
-  decorators: withPdfServices(),
+  decorators: withDocumentServices(),
   play: async ({ canvasElement }) => {
     await pasteImage(canvasElement, { name: 'chart.png' });
-    await pastePdf(canvasElement, { name: 'invoice.pdf' });
+    await pasteDocument(canvasElement, { name: 'invoice.pdf' });
   },
 };
 
-export const PdfSecondRefused: Story = {
+export const DocumentSecondRefused: Story = {
   name: 'PDF - Second PDF refused',
-  decorators: withPdfServices(),
+  decorators: withDocumentServices(),
   play: async ({ canvasElement }) => {
-    await pastePdf(canvasElement, { name: 'invoice.pdf' });
-    await pastePdf(canvasElement, { name: 'contract.pdf' });
+    await pasteDocument(canvasElement, { name: 'invoice.pdf' });
+    await pasteDocument(canvasElement, { name: 'contract.pdf' });
   },
 };
 
-export const PdfTooLarge: Story = {
+export const DocumentTooLarge: Story = {
   name: 'PDF - Too large',
-  decorators: withPdfServices(),
+  decorators: withDocumentServices(),
   play: async ({ canvasElement }) => {
-    await pastePdf(canvasElement, { name: 'huge.pdf', sizeBytes: MAX_PDF_BYTES + 1 });
+    await pasteDocument(canvasElement, {
+      name: 'huge.pdf',
+      sizeBytes: MAX_DOCUMENT_BYTES['application/pdf'] + 1,
+    });
   },
 };
 
-export const PdfServerError: Story = {
+export const DocumentServerError: Story = {
   name: 'PDF - Server error',
-  decorators: withPdfServices({
+  decorators: withDocumentServices({
     create: () => Promise.reject(new Error('Could not read the PDF. Try again later.')),
   }),
   play: async ({ canvasElement }) => {
-    await pastePdf(canvasElement, { name: 'invoice.pdf' });
+    await pasteDocument(canvasElement, { name: 'invoice.pdf' });
   },
 };
 
-export const PdfNotAvailable: Story = {
-  name: 'PDF - Not available',
-  decorators: withPdfServices({ isAvailable: false }),
+export const DocumentNotAvailable: Story = {
+  name: 'PDF - Not supported',
+  decorators: withDocumentServices({ supportedMimeTypes: [] }),
   play: async ({ canvasElement }) => {
-    await pastePdf(canvasElement, { name: 'invoice.pdf' });
+    await pasteDocument(canvasElement, { name: 'invoice.pdf' });
   },
 };

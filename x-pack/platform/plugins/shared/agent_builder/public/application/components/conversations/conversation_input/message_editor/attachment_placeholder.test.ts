@@ -120,18 +120,22 @@ describe('removePlaceholderByName', () => {
   });
 });
 
-describe('pdf placeholders', () => {
+describe('document placeholders', () => {
   it('marks the chip with its kind and defaults to image', () => {
     expect(
       createAttachmentPlaceholderElement('a.png').getAttribute(PLACEHOLDER_KIND_ATTRIBUTE)
     ).toBe('image');
     expect(
-      createAttachmentPlaceholderElement('a.pdf', 'pdf').getAttribute(PLACEHOLDER_KIND_ATTRIBUTE)
-    ).toBe('pdf');
+      createAttachmentPlaceholderElement('a.pdf', 'document').getAttribute(
+        PLACEHOLDER_KIND_ATTRIBUTE
+      )
+    ).toBe('document');
   });
 
   it('reads the kind back, treating a chip without the attribute as an image', () => {
-    expect(getPlaceholderKind(createAttachmentPlaceholderElement('a.pdf', 'pdf'))).toBe('pdf');
+    expect(getPlaceholderKind(createAttachmentPlaceholderElement('a.pdf', 'document'))).toBe(
+      'document'
+    );
     const legacy = createAttachmentPlaceholderElement('a.png');
     legacy.removeAttribute(PLACEHOLDER_KIND_ATTRIBUTE);
     expect(getPlaceholderKind(legacy)).toBe('image');
@@ -139,10 +143,10 @@ describe('pdf placeholders', () => {
 
   it('draws the document icon instead of the image icon', () => {
     const image = createAttachmentPlaceholderElement('a.png');
-    const pdf = createAttachmentPlaceholderElement('a.pdf', 'pdf');
+    const pdf = createAttachmentPlaceholderElement('a.pdf', 'document');
     const imagePath = image.querySelector(`[${ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE}] path`);
-    const pdfPath = pdf.querySelector(`[${ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE}] path`);
-    expect(pdfPath?.getAttribute('d')).not.toBe(imagePath?.getAttribute('d'));
+    const documentPath = pdf.querySelector(`[${ATTACHMENT_PLACEHOLDER_ICON_ATTRIBUTE}] path`);
+    expect(documentPath?.getAttribute('d')).not.toBe(imagePath?.getAttribute('d'));
     expect(pdf.querySelectorAll('svg')).toHaveLength(2);
   });
 
@@ -150,31 +154,34 @@ describe('pdf placeholders', () => {
     const setup = () => {
       const container = document.createElement('div');
       container.appendChild(createAttachmentPlaceholderElement('same.name'));
-      container.appendChild(createAttachmentPlaceholderElement('same.name', 'pdf'));
-      container.appendChild(createAttachmentPlaceholderElement('only.pdf', 'pdf'));
+      container.appendChild(createAttachmentPlaceholderElement('same.name', 'document'));
+      container.appendChild(createAttachmentPlaceholderElement('only.pdf', 'document'));
       return container;
     };
 
     it('lists the names of one kind', () => {
       const container = setup();
       expect(getPlaceholderNamesFromElement(container)).toEqual(['same.name']);
-      expect(getPlaceholderNamesFromElement(container, 'pdf')).toEqual(['same.name', 'only.pdf']);
+      expect(getPlaceholderNamesFromElement(container, 'document')).toEqual([
+        'same.name',
+        'only.pdf',
+      ]);
     });
 
     it('removes a chip of one kind only', () => {
       const container = setup();
-      removePlaceholderByName(container, 'same.name', 'pdf');
+      removePlaceholderByName(container, 'same.name', 'document');
       expect(getPlaceholderNamesFromElement(container)).toEqual(['same.name']);
-      expect(getPlaceholderNamesFromElement(container, 'pdf')).toEqual(['only.pdf']);
+      expect(getPlaceholderNamesFromElement(container, 'document')).toEqual(['only.pdf']);
     });
 
     it('syncs the uploading state of chips of every kind by name', () => {
       const container = setup();
       syncChipsUploadingState(container, new Set(['only.pdf']));
-      const [image, pdf, otherPdf] = Array.from(container.children);
+      const [image, pdf, otherDocument] = Array.from(container.children);
       expect(image.hasAttribute('data-uploading')).toBe(false);
       expect(pdf.hasAttribute('data-uploading')).toBe(false);
-      expect(otherPdf.getAttribute('data-uploading')).toBe('true');
+      expect(otherDocument.getAttribute('data-uploading')).toBe('true');
     });
   });
 });

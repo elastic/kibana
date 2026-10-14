@@ -10,64 +10,66 @@ import { useQueryClient } from '@kbn/react-query';
 import type { ToastInput } from '@kbn/core/public';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  ConversationAttachment,
+  SupportedDocumentMimeType,
+} from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
-import { rejectIfTooManyPdfs, rejectInvalidPdf, uploadPdf } from './upload_document';
+import { getDocumentMimeType, getDocumentName } from './document_mime_type';
+import { rejectIfTooManyDocuments, rejectInvalidDocument, uploadDocument } from './upload_document';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { queryKeys } from '../../../query_keys';
 
-const DEFAULT_PDF_NAME = 'document.pdf';
-
-export interface UsePdfUploadParams {
+export interface UseDocumentUploadParams {
   addErrorToast: (input: ToastInput) => void;
   messageEditorController: MessageEditorController;
   createConversation: (agentId: string) => Promise<{ id: string }>;
 }
 
-export interface UsePdfUploadResult {
-  loadingPdfNames: Set<string>;
+export interface UseDocumentUploadResult {
+  loadingDocumentNames: Set<string>;
   pendingConversationId: string | undefined;
-  handlePastePdf?: (file: File) => string | undefined;
+  handlePasteDocument?: (file: File) => string | undefined;
   handleAfterInput: () => void;
-  handleRemovePdf: (name: string) => void;
-  /** Tells the hook the PDFs went out with a message, so leaving the screen does not delete them. */
+  handleRemoveDocument: (name: string) => void;
+  /** Tells the hook the documents went out with a message, so leaving the screen does not delete them. */
   handleSubmitted: () => void;
 }
 
-interface UnsentPdf {
+interface UnsentDocument {
   attachmentId: string;
   conversationId: string;
 }
 
-const isPdfInput = (attachment: ConversationAttachment): boolean =>
-  !('items' in attachment) && attachment.type === AttachmentType.pdf;
+const isDocumentInput = (attachment: ConversationAttachment): boolean =>
+  !('items' in attachment) && attachment.type === AttachmentType.document;
 
-export const usePdfUpload = ({
+export const useDocumentUpload = ({
   addErrorToast,
   messageEditorController,
   createConversation,
-}: UsePdfUploadParams): UsePdfUploadResult => {
-  const { pdfFilesClient, attachmentsService } = useAgentBuilderServices();
+}: UseDocumentUploadParams): UseDocumentUploadResult => {
+  const { documentFilesClient, attachmentsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const agentId = useAgentId();
   const { attachments, conversationId, upsertAttachments, removeAttachment } =
     useConversationContext();
-  const [loadingPdfNames, setLoadingPdfNames] = useState<Set<string>>(new Set());
+  const [loadingDocumentNames, setLoadingDocumentNames] = useState<Set<string>>(new Set());
   const [pendingConversationId, setPendingConversationId] = useState<string | undefined>();
 
-  // Uploads and reads that are in flight, by PDF name.
+  // Uploads and reads that are in flight, by document name.
   const controllers = useRef<Map<string, AbortController>>(new Map());
-  // PDFs that are read and sit in the input attachments, but are not sent yet.
-  const unsentPdfs = useRef<Map<string, UnsentPdf>>(new Map());
+  // Documents that are read and sit in the input attachments, but are not sent yet.
+  const unsentDocuments = useRef<Map<string, UnsentDocument>>(new Map());
   const pendingConversation = useRef<Promise<string> | undefined>();
 
   const attachmentsRef = useRef(attachments);
   attachmentsRef.current = attachments;
 
   const setLoading = useCallback((name: string, isLoading: boolean) => {
-    setLoadingPdfNames((prev) => {
+    setLoadingDocumentNames((prev) => {
       if (prev.has(name) === isLoading) return prev;
       const next = new Set(prev);
       if (isLoading) {
@@ -97,7 +99,7 @@ export const usePdfUpload = ({
   }, [agentId, createConversation]);
 
   const removeFromConversationCache = useCallback(
-    ({ conversationId: cachedConversationId, attachmentId }: UnsentPdf) => {
+    ({ conversationId: cachedConversationId, attachmentId }: UnsentDocument) => {
       queryClient.setQueryData<Conversation | undefined>(
         queryKeys.conversations.byId(cachedConversationId),
         (old) =>
@@ -108,14 +110,14 @@ export const usePdfUpload = ({
   );
 
   // Removes the pill and best-effort deletes the attachment. The file stays in Files (orphan).
-  const deleteUnsentPdf = useCallback(
+  const deleteUnsentDocument = useCallback(
     (name: string) => {
-      const unsent = unsentPdfs.current.get(name);
+      const unsent = unsentDocuments.current.get(name);
       if (!unsent) return;
-      unsentPdfs.current.delete(name);
+      unsentDocuments.current.delete(name);
 
       const current = attachmentsRef.current ?? [];
-      const index = current.findIndex((a) => isPdfInput(a) && a.id === unsent.attachmentId);
+      const index = current.findIndex((a) => isDocumentInput(a) && a.id === unsent.attachmentId);
       if (index !== -1) removeAttachment?.(index);
 
       removeFromConversationCache(unsent);
@@ -124,26 +126,28 @@ export const usePdfUpload = ({
     [attachmentsService, removeAttachment, removeFromConversationCache]
   );
 
-  // Stops the work and removes everything the PDF left in the editor and the input attachments.
-  const removePdf = useCallback(
+  // Stops the work and removes everything the document left in the editor and the input attachments.
+  const removeDocument = useCallback(
     (name: string) => {
-      messageEditorController.removePlaceholderByName(name, 'pdf');
+      messageEditorController.removePlaceholderByName(name, 'document');
       controllers.current.get(name)?.abort();
       controllers.current.delete(name);
       setLoading(name, false);
-      deleteUnsentPdf(name);
+      deleteUnsentDocument(name);
     },
-    [messageEditorController, setLoading, deleteUnsentPdf]
+    [messageEditorController, setLoading, deleteUnsentDocument]
   );
 
-  const readPdf = useCallback(
+  const readDocument = useCallback(
     async ({
       file,
       name,
+      mimeType,
       controller,
     }: {
       file: File;
       name: string;
+      mimeType: SupportedDocumentMimeType;
       controller: AbortController;
     }) => {
       if (!upsertAttachments) return;
@@ -154,22 +158,23 @@ export const usePdfUpload = ({
           targetConversationId = await ensurePendingConversation();
         } catch {
           // The create mutation shows its own error toast.
-          removePdf(name);
+          removeDocument(name);
           return;
         }
       }
       if (controller.signal.aborted) return;
 
-      const result = await uploadPdf({
+      const result = await uploadDocument({
         file,
         name,
+        mimeType,
         conversationId: targetConversationId,
-        pdfFilesClient,
+        documentFilesClient,
         attachmentsService,
         signal: controller.signal,
       });
 
-      // The PDF was removed meanwhile, and its name may belong to a new upload by now.
+      // The document was removed meanwhile, and its name may belong to a new upload by now.
       if (controllers.current.get(name) !== controller) return;
       if (result.status === 'aborted') return;
 
@@ -178,12 +183,12 @@ export const usePdfUpload = ({
 
       if (result.status === 'failed') {
         addErrorToast({ title: result.message });
-        messageEditorController.removePlaceholderByName(name, 'pdf');
+        messageEditorController.removePlaceholderByName(name, 'document');
         return;
       }
 
       const { attachment, fileId } = result;
-      unsentPdfs.current.set(name, {
+      unsentDocuments.current.set(name, {
         attachmentId: attachment.id,
         conversationId: targetConversationId,
       });
@@ -200,15 +205,15 @@ export const usePdfUpload = ({
           }
       );
       upsertAttachments([
-        { id: attachment.id, type: AttachmentType.pdf, origin: fileId, description: name },
+        { id: attachment.id, type: AttachmentType.document, origin: fileId, description: name },
       ]);
     },
     [
       upsertAttachments,
       conversationId,
       ensurePendingConversation,
-      removePdf,
-      pdfFilesClient,
+      removeDocument,
+      documentFilesClient,
       attachmentsService,
       setLoading,
       addErrorToast,
@@ -217,56 +222,58 @@ export const usePdfUpload = ({
     ]
   );
 
-  const handlePastePdf = useCallback(
+  const handlePasteDocument = useCallback(
     (file: File): string | undefined => {
       if (!upsertAttachments) return undefined;
-      if (rejectInvalidPdf({ file, addErrorToast })) return undefined;
+      if (rejectInvalidDocument({ file, addErrorToast })) return undefined;
+      const mimeType = getDocumentMimeType(file);
+      if (!mimeType) return undefined;
       if (
-        rejectIfTooManyPdfs({
-          currentPdfCount: controllers.current.size + unsentPdfs.current.size,
+        rejectIfTooManyDocuments({
+          currentDocumentCount: controllers.current.size + unsentDocuments.current.size,
           addErrorToast,
         })
       ) {
         return undefined;
       }
 
-      const name = file.name || DEFAULT_PDF_NAME;
+      const name = getDocumentName(file, mimeType);
       const controller = new AbortController();
       controllers.current.set(name, controller);
       setLoading(name, true);
-      readPdf({ file, name, controller });
+      readDocument({ file, name, mimeType, controller });
       return name;
     },
-    [upsertAttachments, addErrorToast, setLoading, readPdf]
+    [upsertAttachments, addErrorToast, setLoading, readDocument]
   );
 
-  // Keeps the work in step with the chips: a chip the user deleted cancels or deletes its PDF.
+  // Keeps the work in step with the chips: a chip the user deleted cancels or deletes its document.
   const handleAfterInput = useCallback(() => {
-    const chipNames = new Set(messageEditorController.getPlaceholderNames('pdf'));
-    for (const name of [...controllers.current.keys(), ...unsentPdfs.current.keys()]) {
-      if (!chipNames.has(name)) removePdf(name);
+    const chipNames = new Set(messageEditorController.getPlaceholderNames('document'));
+    for (const name of [...controllers.current.keys(), ...unsentDocuments.current.keys()]) {
+      if (!chipNames.has(name)) removeDocument(name);
     }
-  }, [messageEditorController, removePdf]);
+  }, [messageEditorController, removeDocument]);
 
   const handleSubmitted = useCallback(() => {
-    unsentPdfs.current.clear();
+    unsentDocuments.current.clear();
     pendingConversation.current = undefined;
     setPendingConversationId(undefined);
   }, []);
 
-  // Leaving the conversation or the agent drops the PDFs that were not sent.
+  // Leaving the conversation or the agent drops the documents that were not sent.
   const leaveRef = useRef<() => void>(() => {});
   leaveRef.current = () => {
     for (const controller of controllers.current.values()) {
       controller.abort();
     }
     controllers.current.clear();
-    for (const name of [...unsentPdfs.current.keys()]) {
-      deleteUnsentPdf(name);
+    for (const name of [...unsentDocuments.current.keys()]) {
+      deleteUnsentDocument(name);
     }
     pendingConversation.current = undefined;
     setPendingConversationId(undefined);
-    setLoadingPdfNames(new Set());
+    setLoadingDocumentNames(new Set());
   };
   useEffect(() => {
     const leave = leaveRef;
@@ -274,11 +281,11 @@ export const usePdfUpload = ({
   }, [conversationId, agentId]);
 
   return {
-    loadingPdfNames,
+    loadingDocumentNames,
     pendingConversationId,
-    handlePastePdf: upsertAttachments ? handlePastePdf : undefined,
+    handlePasteDocument: upsertAttachments ? handlePasteDocument : undefined,
     handleAfterInput,
-    handleRemovePdf: removePdf,
+    handleRemoveDocument: removeDocument,
     handleSubmitted,
   };
 };

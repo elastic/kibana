@@ -6,18 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PdfAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  DocumentAttachmentData,
+  UnknownAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 
 // Pending input attachments carry no data, only the origin and a description (the file name).
-type PdfAttachment = UnknownAttachment & { data?: Partial<PdfAttachmentData> };
+type DocumentAttachment = UnknownAttachment & { data?: Partial<DocumentAttachmentData> };
 
-export const pdfAttachmentDefinition: AttachmentUIDefinition<PdfAttachment> = {
+export const documentAttachmentDefinition: AttachmentUIDefinition<DocumentAttachment> = {
   getLabel: ({ data, description }) =>
     data?.name ??
     description ??
-    i18n.translate('xpack.agentBuilderPlatform.attachments.pdf.label', {
-      defaultMessage: 'PDF',
+    i18n.translate('xpack.agentBuilderPlatform.attachments.document.label', {
+      defaultMessage: 'Document',
     }),
   getIcon: () => 'document',
 };

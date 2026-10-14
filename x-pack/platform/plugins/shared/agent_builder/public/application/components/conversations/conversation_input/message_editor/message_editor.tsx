@@ -15,6 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorInstance } from './use_message_editor';
 import { CommandMenuContainer } from './command_menu';
 import type { CommandMenuHandle } from './command_menu';
@@ -84,7 +85,7 @@ interface MessageEditorProps {
   ariaLabel?: string;
   'data-test-subj'?: string;
   onPasteFile?: (file: File) => string | undefined;
-  acceptPdf?: boolean;
+  acceptedDocumentMimeTypes?: readonly SupportedDocumentMimeType[];
   onAfterInput?: () => void;
   onHoveredPlaceholderChange?: (name: string | null) => void;
   uploadingNames?: ReadonlySet<string>;
@@ -98,7 +99,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   ariaLabel,
   'data-test-subj': dataTestSubj,
   onPasteFile,
-  acceptPdf,
+  acceptedDocumentMimeTypes,
   onAfterInput,
   onHoveredPlaceholderChange,
   uploadingNames,
@@ -203,7 +204,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onPaste={(event) =>
           handleEditorPaste(event.nativeEvent, {
             onPasteFile,
-            acceptPdf,
+            acceptedDocumentMimeTypes,
             editorRef: ref,
             onChange,
             onAfterInput,

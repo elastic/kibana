@@ -7,15 +7,12 @@
 
 import { useCallback, useMemo } from 'react';
 import type { ToastInput } from '@kbn/core/public';
-import {
-  AttachmentType,
-  SUPPORTED_PDF_MIME_TYPE,
-  type ConversationAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, type ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
+import { getDocumentMimeType } from './document_mime_type';
 import { useImageUpload } from './use_image_upload';
-import { usePdfUpload } from './use_document_upload';
-import { useIsPdfUploadAvailable } from '../../../hooks/use_supported_document_types';
+import { useDocumentUpload } from './use_document_upload';
+import { useSupportedDocumentTypes } from '../../../hooks/use_supported_document_types';
 
 export interface UseAttachmentUploadsParams {
   addErrorToast: (input: ToastInput) => void;
@@ -23,7 +20,7 @@ export interface UseAttachmentUploadsParams {
   createConversation: (agentId: string) => Promise<{ id: string }>;
 }
 
-/** Puts the image and PDF uploads behind one set of handlers for the message editor and the pills. */
+/** Puts the image and document uploads behind one set of handlers for the message editor and the pills. */
 export const useAttachmentUploads = ({
   addErrorToast,
   messageEditorController,
@@ -39,58 +36,58 @@ export const useAttachmentUploads = ({
     messageEditorController,
   });
 
-  const isPdfUploadAvailable = useIsPdfUploadAvailable();
+  const acceptedDocumentMimeTypes = useSupportedDocumentTypes();
   const {
-    loadingPdfNames,
+    loadingDocumentNames,
     pendingConversationId,
-    handlePastePdf,
-    handleAfterInput: handleAfterPdfInput,
-    handleRemovePdf,
-    handleSubmitted: handlePdfSubmitted,
-  } = usePdfUpload({
+    handlePasteDocument,
+    handleAfterInput: handleAfterDocumentInput,
+    handleRemoveDocument,
+    handleSubmitted: handleDocumentSubmitted,
+  } = useDocumentUpload({
     addErrorToast,
     messageEditorController,
     createConversation,
   });
 
   const uploadingChipNames = useMemo(
-    () => new Set([...uploadingNames, ...loadingPdfNames]),
-    [uploadingNames, loadingPdfNames]
+    () => new Set([...uploadingNames, ...loadingDocumentNames]),
+    [uploadingNames, loadingDocumentNames]
   );
 
   const handlePasteFile = useCallback(
     (file: File): string | undefined =>
-      file.type === SUPPORTED_PDF_MIME_TYPE ? handlePastePdf?.(file) : handlePasteImage?.(file),
-    [handlePastePdf, handlePasteImage]
+      getDocumentMimeType(file) ? handlePasteDocument?.(file) : handlePasteImage?.(file),
+    [handlePasteDocument, handlePasteImage]
   );
 
   const handleAfterInput = useCallback(() => {
     handleAfterImageInput();
-    handleAfterPdfInput();
-  }, [handleAfterImageInput, handleAfterPdfInput]);
+    handleAfterDocumentInput();
+  }, [handleAfterImageInput, handleAfterDocumentInput]);
 
   const handleRemoveAttachment = useCallback(
     (attachment: ConversationAttachment) => {
-      if (!('items' in attachment) && attachment.type === AttachmentType.pdf) {
-        if (attachment.description) handleRemovePdf(attachment.description);
+      if (!('items' in attachment) && attachment.type === AttachmentType.document) {
+        if (attachment.description) handleRemoveDocument(attachment.description);
         return;
       }
       handleRemoveImageAttachment?.(attachment);
     },
-    [handleRemovePdf, handleRemoveImageAttachment]
+    [handleRemoveDocument, handleRemoveImageAttachment]
   );
 
   return {
     uploadingNames,
-    loadingPdfNames,
+    loadingDocumentNames,
     uploadingChipNames,
-    isUploading: uploadingNames.size > 0 || loadingPdfNames.size > 0,
-    isPdfUploadAvailable,
+    isUploading: uploadingNames.size > 0 || loadingDocumentNames.size > 0,
+    acceptedDocumentMimeTypes,
     pendingConversationId,
     handlePasteFile,
     handleAfterInput,
     handleRemoveAttachment,
-    handleRemoveLoadingPdf: handleRemovePdf,
-    handleSubmitted: handlePdfSubmitted,
+    handleRemoveLoadingDocument: handleRemoveDocument,
+    handleSubmitted: handleDocumentSubmitted,
   };
 };

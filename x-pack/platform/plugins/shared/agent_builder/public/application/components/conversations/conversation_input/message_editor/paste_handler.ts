@@ -7,7 +7,7 @@
 
 import type { RefObject } from 'react';
 import DOMPurify from 'dompurify';
-import { SUPPORTED_PDF_MIME_TYPE } from '@kbn/agent-builder-common/attachments';
+import type { SupportedDocumentMimeType } from '@kbn/agent-builder-common/attachments';
 import {
   COMMAND_BADGE_ATTRIBUTE,
   COMMAND_BADGE_LABEL_ATTRIBUTE,
@@ -16,7 +16,10 @@ import {
 } from './command_badge';
 import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
 import { insertAttachmentPlaceholderChip, type PlaceholderKind } from './attachment_placeholder';
+import { getDocumentMimeType } from '../document_mime_type';
 import { createTextFragment, ensureCaretTargetBeforeFirstBadge, insertNodeAtCursor } from './utils';
+
+const NO_DOCUMENT_TYPES: readonly SupportedDocumentMimeType[] = [];
 
 const stringContainsBadge = (html: string): boolean => html.includes(COMMAND_BADGE_ATTRIBUTE);
 
@@ -65,37 +68,39 @@ const createTextAndBadgeFragment = (sanitizedHtml: DocumentFragment): DocumentFr
 
 export interface HandleEditorPasteOpts {
   onPasteFile?: (file: File) => string | undefined;
-  acceptPdf?: boolean;
+  acceptedDocumentMimeTypes?: readonly SupportedDocumentMimeType[];
   editorRef: RefObject<HTMLDivElement>;
   onChange: () => void;
   onAfterInput?: () => void;
 }
 
-const getPastedFileKind = (type: string, acceptPdf: boolean): PlaceholderKind | undefined => {
-  if (type.startsWith('image/')) return 'image';
-  if (acceptPdf && type === SUPPORTED_PDF_MIME_TYPE) return 'pdf';
+const getPastedFileKind = (
+  file: File,
+  acceptedDocumentMimeTypes: readonly SupportedDocumentMimeType[]
+): PlaceholderKind | undefined => {
+  if (file.type.startsWith('image/')) return 'image';
+  const mimeType = getDocumentMimeType(file);
+  if (mimeType && acceptedDocumentMimeTypes.includes(mimeType)) return 'document';
   return undefined;
 };
 
-/** Handles the image and pdf file branch of a paste event. Returns true if consumed. */
+/** Handles the image and document file branch of a paste event. Returns true if consumed. */
 const handleFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): boolean => {
-  const { onPasteFile, acceptPdf = false, onChange } = opts;
+  const { onPasteFile, acceptedDocumentMimeTypes = NO_DOCUMENT_TYPES, onChange } = opts;
   if (!onPasteFile || !event.clipboardData) return false;
 
-  const fileItem = Array.from(event.clipboardData.items).find(
-    (item) => item.kind === 'file' && getPastedFileKind(item.type, acceptPdf)
-  );
-  if (!fileItem) return false;
+  const fileItem = Array.from(event.clipboardData.items).find((item) => item.kind === 'file');
+  const file = fileItem?.getAsFile();
+  if (!file) return false;
+
+  const kind = getPastedFileKind(file, acceptedDocumentMimeTypes);
+  if (!kind) return false;
 
   event.preventDefault();
-  const file = fileItem.getAsFile();
-  const kind = getPastedFileKind(fileItem.type, acceptPdf);
-  if (file && kind) {
-    const label = onPasteFile(file);
-    if (label) {
-      insertAttachmentPlaceholderChip(label, kind);
-      onChange();
-    }
+  const label = onPasteFile(file);
+  if (label) {
+    insertAttachmentPlaceholderChip(label, kind);
+    onChange();
   }
   return true;
 };
@@ -125,7 +130,7 @@ const handleTextOrBadgePaste = (event: ClipboardEvent, opts: HandleEditorPasteOp
 
 /**
  * Full paste handler for the message editor contentEditable.
- * Dispatches to image/pdf-file paste or text/badge paste based on clipboard content.
+ * Dispatches to image/document-file paste or text/badge paste based on clipboard content.
  */
 export const handleEditorPaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): void => {
   const handledAsFile = handleFilePaste(event, opts);

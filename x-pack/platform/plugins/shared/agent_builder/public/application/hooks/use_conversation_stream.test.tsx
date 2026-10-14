@@ -39,7 +39,12 @@ jest.mock('../context/streaming/streaming_context', () => ({
 const mutateSendMessage = jest.fn();
 let mockConversation: { attachments?: unknown[] } | undefined;
 
-const pdfInput = { id: 'pdf-1', type: 'pdf', origin: 'file-1', description: 'invoice.pdf' };
+const documentInput = {
+  id: 'pdf-1',
+  type: 'document',
+  origin: 'file-1',
+  description: 'invoice.pdf',
+};
 
 describe('useConversationStream sendMessage', () => {
   let queryClient: QueryClient;
@@ -52,7 +57,7 @@ describe('useConversationStream sendMessage', () => {
     queryClient = new QueryClient();
     mockConversation = undefined;
     jest.mocked(useConversationContext).mockReturnValue({
-      attachments: [pdfInput],
+      attachments: [documentInput],
       resetAttachments: jest.fn(),
     } as never);
   });
@@ -67,7 +72,7 @@ describe('useConversationStream sendMessage', () => {
     expect(mutateSendMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         conversationId: 'conv-1',
-        attachments: [pdfInput],
+        attachments: [documentInput],
         conversationAttachments: [{ id: 'pdf-1' }],
       })
     );
