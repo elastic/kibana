@@ -319,9 +319,6 @@ dependsOn:
   - '@kbn/core-user-profile-server-mocks'
   - '@kbn/core-user-profile-server'
   - '@kbn/core-security-server'
-  - '@kbn/data-views-types'
-  - '@kbn/response-ops-alerts-apis'
-  - '@kbn/maintenance-windows-plugin'
 tags:
   - plugin
   - prod
