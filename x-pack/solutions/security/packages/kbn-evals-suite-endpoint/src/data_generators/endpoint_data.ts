@@ -157,7 +157,7 @@ interface ExtraDocument {
   document: Record<string, unknown>;
 }
 
-interface EndpointScenario {
+export interface EndpointScenario {
   agentId: string;
   hostName: string;
   os: {

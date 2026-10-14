@@ -61,6 +61,32 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(process.indexOf('0.')).toBeLessThan(process.indexOf('1.'));
     });
 
+    it('does not claim to be read-only and documents the shipped write-tool contract', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      const reference =
+        skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
+
+      for (const text of [skill.description, skill.content, reference]) {
+        expect(text).not.toMatch(/read-only/i);
+        expect(text).not.toMatch(/only reads state/i);
+        expect(text).not.toMatch(/cannot isolate, release, scan/i);
+      }
+      expect(skill.description).toMatch(/isolate or release/);
+      expect(skill.description).toMatch(/malware scan/);
+      expect(skill.description.length).toBeLessThanOrEqual(1024);
+
+      // the unshipped actions stay refused
+      expect(skill.content).toMatch(/execute, kill-process.*not available/s);
+      expect(skill.content).toContain('Response Actions UI');
+
+      // one contract: write tools are called directly, ambiguity handled by the tool
+      expect(skill.content).toContain('call directly');
+      expect(skill.content).toContain('ambiguous_hostname');
+      expect(skill.content).toMatch(/no\s+\\?`?get_endpoint_status\\?`? pre-check/);
+      expect(reference).not.toMatch(/Before isolate or release, call/);
+      expect(reference).toMatch(/isolate_host.*directly/);
+    });
+
     it('includes system instructions in content', () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
 

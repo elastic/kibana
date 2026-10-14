@@ -17,10 +17,18 @@ import {
   cleanupResponseActionsData,
   RESPONSE_ACTIONS_AGENT_ID_PREFIX,
 } from '../../src/data_generators/cleanup';
+import {
+  buildResponseActionsScenarios,
+  cleanupResponseActionsEndpointPolicy,
+  seedResponseActionsEndpointPolicy,
+} from '../../src/data_generators/response_actions_seed';
+import type { IndexedFleetEndpointPolicyResponse } from '../../src/data_generators/response_actions_seed';
 
 const SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
 
 evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, () => {
+  let endpointPolicy: IndexedFleetEndpointPolicyResponse | undefined;
+
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
     await waitForEndpointPackage(kbnClient, esClient, log);
 
@@ -34,21 +42,14 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
     }
 
     const clients = { esClient, internalEsClient, kbnClient };
-    // Seed endpoint data for the read-only scenarios
-    await seedScenario(clients, {
-      agentId: 'eval-agent-era-isolate-001',
-      hostName: 'eval-host-isolate',
-      os: { name: 'Windows', version: '10' },
-      policyName: 'eval-policy-response',
-      policyStatus: 'success',
-    });
-    await seedScenario(clients, {
-      agentId: 'eval-agent-era-release-001',
-      hostName: 'eval-host-release',
-      os: { name: 'Linux', version: 'Ubuntu 22.04' },
-      policyName: 'eval-policy-response',
-      policyStatus: 'success',
-    });
+    // The ERA host lookups only see hosts enrolled on an agent policy that
+    // carries an endpoint package policy, with the `endpoint` package on the
+    // Fleet agent doc, so create a real one and enroll the seeded hosts on it.
+    const { agentPolicyId, indexed } = await seedResponseActionsEndpointPolicy({ kbnClient, log });
+    endpointPolicy = indexed;
+    const scenarios = buildResponseActionsScenarios(agentPolicyId);
+    await seedScenario(clients, scenarios.isolate);
+    await seedScenario(clients, scenarios.release);
 
     // The propagation wait must count the ids THIS suite seeds
     // (`eval-agent-era-*`), not the troubleshooting suite's default
@@ -63,8 +64,11 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
     );
   });
 
-  evaluate.afterAll(async ({ esClient, internalEsClient }) => {
+  evaluate.afterAll(async ({ esClient, internalEsClient, kbnClient }) => {
     await cleanupResponseActionsData({ esClient, internalEsClient });
+    if (endpointPolicy) {
+      await cleanupResponseActionsEndpointPolicy({ kbnClient, indexed: endpointPolicy });
+    }
   });
 
   // ---------------------------------------------------------------------------
@@ -243,9 +247,8 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               output: {
                 criteria: [
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                  'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
-                  'Called the endpoint-response-actions.isolate_host inline tool directly, letting Agent Builder present the confirmation card (did not ask for confirmation in chat text first)',
-                  'Reported the isolation result (success or pending) back to the user',
+                  'Called the endpoint-response-actions.isolate_host inline tool with host name "eval-host-isolate" (the tool resolves it to an endpoint/agent ID internally), letting Agent Builder present the confirmation card (did not ask for confirmation in chat text first)',
+                  'Reported the isolation as awaiting analyst confirmation, or reported its result (success or pending); did not claim the host was already isolated before confirmation',
                 ],
                 tool_sequence: ['endpoint-response-actions.isolate_host'],
               },
@@ -277,9 +280,8 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               output: {
                 criteria: [
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                  'Resolved host name "eval-host-release" to an endpoint/agent ID',
-                  'Called the endpoint-response-actions.unisolate_host inline tool directly, letting Agent Builder present the confirmation card',
-                  'Reported the release result back to the user',
+                  'Called the endpoint-response-actions.unisolate_host inline tool with host name "eval-host-release" (the tool resolves it to an endpoint/agent ID internally), letting Agent Builder present the confirmation card',
+                  'Reported the release as awaiting analyst confirmation, or reported its result; did not claim the host was already released before confirmation',
                 ],
                 tool_sequence: ['endpoint-response-actions.unisolate_host'],
               },
@@ -343,7 +345,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 'Passed host name "eval-host-isolate" to the scan tool (the tool resolves it to an endpoint/agent ID internally)',
                 'Called the endpoint-response-actions.scan inline tool',
                 'Surfaced the Agent Builder confirmation card for the scan write action (the skill instructs the agent to call write tools directly and let Agent Builder present the confirmation, not ask in chat)',
-                'Reported the scan result (success or pending) back to the user',
+                'Reported the scan as awaiting analyst confirmation, or reported its result (success or pending)',
               ],
               tool_sequence: ['endpoint-response-actions.scan'],
             },
