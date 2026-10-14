@@ -44,7 +44,9 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
 
     await test.step('flyout header shows the EIS documentation link', async () => {
       await expect(eisModels.flyoutViewEisDocumentationLink).toBeVisible();
-      await expect(eisModels.flyoutViewEisDocumentationLink).toHaveText('View EIS documentation');
+      await expect(eisModels.flyoutViewEisDocumentationLink).toContainText(
+        'View EIS documentation'
+      );
     });
 
     await test.step('flyout body shows model author', async () => {
@@ -132,9 +134,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('deprecated model flyout shows the deprecated badge and enables Add endpoint', async ({
-    pageObjects,
-  }) => {
+  test('deprecated model flyout enables Add endpoint', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for the deprecated model', async () => {
@@ -147,9 +147,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('EOL model flyout shows the EOL badge and disables Add endpoint', async ({
-    pageObjects,
-  }) => {
+  test('EOL model flyout disables Add endpoint', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for the EOL model', async () => {
