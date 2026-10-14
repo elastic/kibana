@@ -209,7 +209,7 @@ Both streams use data stream lifecycle (DSL), not ILM. Rollover follows the Elas
 | `xpack.alerting_v2.retention.ruleEvents.enabled` | `false` | `config/serverless.oblt.yml` turns it on for Observability Serverless. |
 | `xpack.alerting_v2.retention.ruleEvents.dataRetention` | `90d` | Units `d`, `h`, `m`, `s` or `ms` (no `w`). Minimum `30d`. |
 
-`DatastreamInitializer` applies each stream's lifecycle with `PUT _data_stream/<name>/_lifecycle` on every startup, because `@kbn/data-streams` only updates it on a template version bump. Changes take effect on restart, disabling retention removes `data_retention`, and any retention set by hand on either stream is overwritten.
+`DatastreamInitializer` applies each stream's lifecycle with `PUT _data_stream/<name>/_lifecycle` on every startup, because `@kbn/data-streams` only updates it on a template version bump. Changes take effect on restart, disabling retention removes `data_retention`, and any retention set by hand on either stream is overwritten. A failed update fails the stream's initialization, so a previous, retention is never silently kept.
 
 Caveats:
 

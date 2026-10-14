@@ -73,6 +73,7 @@ export class DatastreamInitializer implements IResourceInitializer {
     try {
       await this.initializeDataStream(dataStreamDefinition);
       await this.updateExistingIndicesFinalPipeline();
+      await this.updateDataStreamLifecycle();
     } catch (error) {
       // Another node that read the data stream before we recreated it may still delete it for
       // its own reset. Retrying re-runs initialization against the data stream it recreates.
@@ -86,7 +87,6 @@ export class DatastreamInitializer implements IResourceInitializer {
     }
 
     await this.updateExistingIndicesReplicaSettings();
-    await this.updateDataStreamLifecycle();
   }
 
   private async initializeDataStream(
@@ -303,21 +303,18 @@ export class DatastreamInitializer implements IResourceInitializer {
   }
 
   /**
-   * Applies the definition's lifecycle to the existing data stream.
-   * The PUT replaces the whole lifecycle, so a lifecycle
-   * without `data_retention` removes a previously applied retention.
-   * `enabled` is explicit because Elasticsearch rejects an empty body.
+   * Replaces the data stream's lifecycle, so omitting `data_retention` removes it. Failures block
+   * initialization so a previous, retention is not kept. `enabled` avoids an empty body.
    */
   private async updateDataStreamLifecycle(): Promise<void> {
     const { dataStreamName, lifecycle } = this.resourceDefinition;
-    try {
-      await this.esClient.indices.putDataLifecycle({
-        name: dataStreamName,
-        enabled: true,
-        ...lifecycle,
-      });
-    } catch (error) {
-      this.logger.warn(`Failed to update the lifecycle of ${dataStreamName}: ${error.message}`);
+    const { acknowledged } = await this.esClient.indices.putDataLifecycle({
+      name: dataStreamName,
+      enabled: true,
+      ...lifecycle,
+    });
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(`apply lifecycle to ${dataStreamName}`);
     }
   }
 }

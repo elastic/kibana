@@ -103,19 +103,32 @@ describe('DatastreamInitializer', () => {
       });
     });
 
-    it('does not fail initialization when applying the lifecycle fails', async () => {
+    it('fails initialization when applying the lifecycle fails, so a previous retention is not kept', async () => {
       esClient.indices.putDataLifecycle.mockRejectedValue(
         new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
       );
 
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
 
-      await expect(initializer.initialize()).resolves.toBeUndefined();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `Failed to update the lifecycle of ${resourceDefinition.dataStreamName}`
-        )
+      await expect(initializer.initialize()).rejects.toMatchObject({ statusCode: 500 });
+    });
+
+    it('fails initialization with a retryable error when applying the lifecycle is not acknowledged', async () => {
+      esClient.indices.putDataLifecycle.mockResolvedValue({ acknowledged: false });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+      await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
+    });
+
+    it('fails with a retryable error when another node deletes the data stream before the lifecycle is applied', async () => {
+      esClient.indices.putDataLifecycle.mockRejectedValue(
+        new errors.ResponseError({ statusCode: 404, body: {} } as DiagnosticResult)
       );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+      await expect(initializer.initialize()).rejects.toBeInstanceOf(EsConcurrentModificationError);
     });
   });
 
