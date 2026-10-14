@@ -6526,9 +6526,6 @@ importers:
       recast:
         specifier: 0.24.0
         version: 0.24.0
-      regenerate:
-        specifier: 1.4.2
-        version: 1.4.2
       resolve:
         specifier: 1.22.8
         version: 1.22.8
