@@ -124,7 +124,8 @@ export const buildEuidCspPreviewOptions = (
     const { dsl } = euidApi.euid;
     const euidEntityFilter = combineEntityGroupFilters(
       getEntityGroupRecords(identityDocument, aliasRecords),
-      (document) => dsl.getEuidFilterBasedOnDocument(euidApi.getBuiltInEntityDefinition(entityType), document)
+      (document) =>
+        dsl.getEuidFilterBasedOnDocument(euidApi.getBuiltInEntityDefinition(entityType), document)
     );
     if (euidEntityFilter != null) {
       return {

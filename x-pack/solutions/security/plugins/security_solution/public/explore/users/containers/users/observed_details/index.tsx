@@ -111,7 +111,11 @@ export const useObservedUserDetails = ({
     // resolution-group view the target's and aliases' filters are OR-ed together.
     const recordFilter = combineEntityGroupFilters(
       getEntityGroupRecords(entityRecord, aliasRecords),
-      (record) => euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(euidApi.getBuiltInEntityDefinition('user'), record)
+      (record) =>
+        euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
+          euidApi.getBuiltInEntityDefinition('user'),
+          record
+        )
     );
     if (recordFilter) {
       return recordFilter;

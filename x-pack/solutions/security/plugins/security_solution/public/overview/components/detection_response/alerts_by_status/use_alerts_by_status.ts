@@ -207,7 +207,11 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       const { dsl } = euidApi.euid;
       const filter = combineEntityGroupFilters(
         getEntityGroupRecords(entityRecord ?? entityRecordInput, aliasRecords),
-        (record) => dsl.getEuidFilterBasedOnDocument(euidApi.getBuiltInEntityDefinition(storeEntityType ?? 'generic'), record)
+        (record) =>
+          dsl.getEuidFilterBasedOnDocument(
+            euidApi.getBuiltInEntityDefinition(storeEntityType ?? 'generic'),
+            record
+          )
       );
       return filter != null ? [filter] : [];
     }
