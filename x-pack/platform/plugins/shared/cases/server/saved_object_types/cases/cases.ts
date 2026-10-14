@@ -210,7 +210,7 @@ export const createCaseSavedObjectType = (
           },
         },
       },
-      extractObservablesSource: {
+      extract_observables_source: {
         type: 'keyword',
         ignore_above: 1024,
       },

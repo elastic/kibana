@@ -9,5 +9,5 @@ import { schema } from '@kbn/config-schema';
 import { casesSchema as casesSchemaV10 } from './v10';
 
 export const casesSchema = casesSchemaV10.extends({
-  extractObservablesSource: schema.maybe(schema.string()),
+  extract_observables_source: schema.maybe(schema.string()),
 });

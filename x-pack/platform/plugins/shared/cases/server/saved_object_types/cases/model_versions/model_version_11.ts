@@ -9,12 +9,15 @@ import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { casesSchemaV11 } from '../schemas';
 import { createSchemaOverrides } from './create_schema_overrides';
 
+/**
+ * Adds the server-owned `extract_observables_source` keyword mapping
+ */
 export const modelVersion11: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
-        extractObservablesSource: {
+        extract_observables_source: {
           type: 'keyword',
           ignore_above: 1024,
         },
