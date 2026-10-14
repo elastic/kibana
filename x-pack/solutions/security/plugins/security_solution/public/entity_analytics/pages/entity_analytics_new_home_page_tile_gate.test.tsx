@@ -23,10 +23,9 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useNewEntitySeries: jest.fn(),
   useNewlyHighCriticalCount: jest.fn(),
   useNewlyHighCriticalDelta: jest.fn(),
-  useNewlyHighCriticalSeries: jest.fn(),
   useRiskMoversCount: jest.fn(),
   useRiskMoversDelta: jest.fn(),
-  useRiskMoversSeries: jest.fn(),
+  useRiskTilesSeries: jest.fn(),
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -100,8 +99,9 @@ const SERIES_HOOKS: Record<Tile, string> = {
   alerts: 'useAlertBasedTilesSeries',
   anomalies: 'useEntitiesWithAnomaliesSeries',
   newEntity: 'useNewEntitySeries',
-  riskMovers: 'useRiskMoversSeries',
-  newlyHighCritical: 'useNewlyHighCriticalSeries',
+  // The two risk tiles share one series hook.
+  riskMovers: 'useRiskTilesSeries',
+  newlyHighCritical: 'useRiskTilesSeries',
 };
 
 interface TileState {
@@ -156,9 +156,14 @@ const mockTiles = (state: Partial<Record<Tile, Partial<TileState>>> = {}) => {
     watchlistedTrend: undefined,
     isTrendLoading: false,
   });
-  (['anomalies', 'newEntity', 'riskMovers', 'newlyHighCritical'] as const).forEach((tile) =>
+  (['anomalies', 'newEntity'] as const).forEach((tile) =>
     hooks[SERIES_HOOKS[tile]].mockReturnValue({ trend: undefined, isTrendLoading: false })
   );
+  hooks.useRiskTilesSeries.mockReturnValue({
+    riskMoversTrend: undefined,
+    newlyHighCriticalTrend: undefined,
+    isTrendLoading: false,
+  });
 };
 
 const lastOptions = (hook: string) => {
@@ -168,6 +173,13 @@ const lastOptions = (hook: string) => {
 
 const deltaIsReady = (tile: Tile): boolean => lastOptions(DELTA_HOOKS[tile]).isReady;
 const seriesIsReady = (tile: Tile): boolean => lastOptions(SERIES_HOOKS[tile]).isReady;
+/** What the sparkline of a tile was told about its history: the risk tiles take one each. */
+const seriesReachesBack = (tile: Tile): boolean | undefined => {
+  const options = lastOptions(SERIES_HOOKS[tile]);
+  if (tile === 'riskMovers') return options.riskMoversReachesBack;
+  if (tile === 'newlyHighCritical') return options.newlyHighCriticalReachesBack;
+  return options.reachesBack;
+};
 
 describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
   beforeEach(() => {
@@ -239,24 +251,38 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
 
   describe('the sparklines follow the deltas', () => {
     it('hold a sparkline back until its own delta has loaded, and release the others', () => {
-      mockTiles({ riskMovers: { isDeltaLoading: true } });
+      mockTiles({ anomalies: { isDeltaLoading: true } });
       render(<EntityAnalyticsNewHomePage />);
 
-      expect(seriesIsReady('riskMovers')).toBe(false);
-      TILES.filter((tile) => tile !== 'riskMovers').forEach((tile) =>
+      expect(seriesIsReady('anomalies')).toBe(false);
+      TILES.filter((tile) => tile !== 'anomalies').forEach((tile) =>
         expect(seriesIsReady(tile)).toBe(true)
       );
     });
 
+    it.each(['riskMovers', 'newlyHighCritical'] as const)(
+      'hold the one risk sparkline query back while the %s delta is loading',
+      (loading) => {
+        mockTiles({ [loading]: { isDeltaLoading: true } });
+        render(<EntityAnalyticsNewHomePage />);
+
+        expect(seriesIsReady('riskMovers')).toBe(false);
+        expect(seriesIsReady('newlyHighCritical')).toBe(false);
+        (['alerts', 'anomalies', 'newEntity'] as const).forEach((tile) =>
+          expect(seriesIsReady(tile)).toBe(true)
+        );
+      }
+    );
+
     it.each(TILES)('pass the history result of the %s delta on to its sparkline', (tile) => {
       mockTiles({ [tile]: { reachesBack: false } });
       render(<EntityAnalyticsNewHomePage />);
-      expect(lastOptions(SERIES_HOOKS[tile]).reachesBack).toBe(false);
+      expect(seriesReachesBack(tile)).toBe(false);
 
       jest.clearAllMocks();
       mockTiles({ [tile]: { reachesBack: undefined } });
       render(<EntityAnalyticsNewHomePage />);
-      expect(lastOptions(SERIES_HOOKS[tile]).reachesBack).toBeUndefined();
+      expect(seriesReachesBack(tile)).toBeUndefined();
     });
   });
 });

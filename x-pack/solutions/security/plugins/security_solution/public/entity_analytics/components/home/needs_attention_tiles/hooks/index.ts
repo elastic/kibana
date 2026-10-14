@@ -10,7 +10,7 @@ export { useAlertBasedTilesDelta } from './use_alert_based_tiles_delta';
 export { useAlertBasedTilesSeries } from './use_alert_based_tiles_series';
 export { useEntitiesWithAnomaliesSeries } from './use_entities_with_anomalies_series';
 export { useNewEntitySeries } from './use_new_entity_series';
-export { useNewlyHighCriticalSeries, useRiskMoversSeries } from './use_risk_tile_series';
+export { useRiskTilesSeries } from './use_risk_tiles_series';
 export { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_count';
 export { useEntitiesWithAnomaliesDelta } from './use_entities_with_anomalies_delta';
 export { useNewEntityCount } from './use_new_entity_count';

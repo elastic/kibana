@@ -15,8 +15,7 @@ import { getRiskScoreIndex } from '../../../entities_grid/queries/esql';
 import { buildRiskLevelHistoryBranch, buildRiskScoreHistoryBranch } from '../risk_history';
 import { buildJoinTail } from '../risk_previous_period';
 import {
-  buildNewlyHighCriticalSeriesQuery,
-  buildRiskMoversSeriesQuery,
+  buildRiskTilesSeriesQuery,
   newlyHighCriticalSeriesColumn,
   riskMoversSeriesColumn,
 } from '../risk_series_query';
@@ -254,7 +253,6 @@ describe('risk tile series on Elasticsearch', () => {
   const tiles = [
     {
       name: 'Risk movers',
-      series: (range: TimeRange) => buildRiskMoversSeriesQuery(NAMESPACE, ENTITY_INDEX, range),
       column: riskMoversSeriesColumn,
       oracle: oracleMovers,
       count: (range: TimeRange) => buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, range),
@@ -262,8 +260,6 @@ describe('risk tile series on Elasticsearch', () => {
     },
     {
       name: 'Newly high/critical',
-      series: (range: TimeRange) =>
-        buildNewlyHighCriticalSeriesQuery(NAMESPACE, ENTITY_INDEX, range),
       column: newlyHighCriticalSeriesColumn,
       oracle: oracleNewlyHighCritical,
       count: (range: TimeRange) => buildNewlyHighCriticalCountQuery(NAMESPACE, ENTITY_INDEX, range),
@@ -271,7 +267,24 @@ describe('risk tile series on Elasticsearch', () => {
     },
   ];
 
-  describe.each(tiles)('$name', ({ series, column, oracle, count, byHand }) => {
+  /** The one query for both tiles: each test reads its own tile's columns from the same result. */
+  const series = (range: TimeRange) => buildRiskTilesSeriesQuery(NAMESPACE, ENTITY_INDEX, range);
+
+  it.each(RANGES)('one %s query returns the dots of both tiles', async (range) => {
+    const result = await query(series(range));
+    const { dots } = getSeriesWindow(range);
+    const names = result.columns.map((c) => c.name);
+    for (let k = 0; k < dots; k++) {
+      expect(names).toContain(riskMoversSeriesColumn(k));
+      expect(names).toContain(newlyHighCriticalSeriesColumn(k));
+    }
+    // The tiles differ in this fixture, so one is not a copy of the other.
+    expect(readSeriesDots(result, range, riskMoversSeriesColumn)).not.toEqual(
+      readSeriesDots(result, range, newlyHighCriticalSeriesColumn)
+    );
+  });
+
+  describe.each(tiles)('$name', ({ column, oracle, count, byHand }) => {
     const dotsOf = async (range: TimeRange) =>
       readSeriesDots(await query(series(range)), range, column);
 

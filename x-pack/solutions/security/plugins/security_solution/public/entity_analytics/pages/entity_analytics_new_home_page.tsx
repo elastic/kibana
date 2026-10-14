@@ -42,10 +42,9 @@ import {
   useNewEntitySeries,
   useNewlyHighCriticalCount,
   useNewlyHighCriticalDelta,
-  useNewlyHighCriticalSeries,
   useRiskMoversCount,
   useRiskMoversDelta,
-  useRiskMoversSeries,
+  useRiskTilesSeries,
 } from '../components/home/needs_attention_tiles/hooks';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
@@ -271,17 +270,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     reachesBack: newEntityReachesBack,
     count: newEntityCount,
   });
-  const { trend: riskMoversTrend } = useRiskMoversSeries({
+  // The two risk tiles read the same risk score history, so one query serves both sparklines.
+  const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
     ...deltaOptions,
-    isReady: areCountsLoaded && !riskMoversDeltaLoading,
-    reachesBack: riskMoversReachesBack,
-    count: riskMoversCount,
-  });
-  const { trend: newlyHCTrend } = useNewlyHighCriticalSeries({
-    ...deltaOptions,
-    isReady: areCountsLoaded && !newlyHCDeltaLoading,
-    reachesBack: newlyHCReachesBack,
-    count: newlyHCCount,
+    isReady: areCountsLoaded && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
+    riskMoversReachesBack,
+    newlyHighCriticalReachesBack: newlyHCReachesBack,
+    riskMoversCount,
+    newlyHighCriticalCount: newlyHCCount,
   });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
