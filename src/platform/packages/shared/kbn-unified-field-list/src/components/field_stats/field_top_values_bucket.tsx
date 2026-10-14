@@ -46,6 +46,10 @@ export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
   /**
+   * Optional callback to filter for/out the "Other" bucket
+   */
+  onAddOtherFilter?: (options: { negate: boolean }) => void;
+  /**
    * Optional callback to allow overriding props on bucket level
    */
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
@@ -54,6 +58,7 @@ export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
 const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   'data-test-subj': dataTestSubject,
   onAddFilter,
+  onAddOtherFilter,
   overrideFieldTopValueBar,
   ...fieldTopValuesBucketOverridableProps
 }) => {
@@ -74,18 +79,28 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     textProps = {},
   } = { ...fieldTopValuesBucketOverridableProps, ...overrides };
   const fieldLabel = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
+  const isOtherBucket = type === 'other';
+  const otherLabel = i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
+    defaultMessage: 'Other',
+  });
+  const filterValueLabel = isOtherBucket ? otherLabel : formattedFieldValue;
 
   const filterForLabel = i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
     defaultMessage: 'Filter for {field}: "{value}"',
-    values: { value: formattedFieldValue, field: fieldLabel },
+    values: { value: filterValueLabel, field: fieldLabel },
   });
   const filterOutLabel = i18n.translate(
     'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
     {
       defaultMessage: 'Filter out {field}: "{value}"',
-      values: { value: formattedFieldValue, field: fieldLabel },
+      values: { value: filterValueLabel, field: fieldLabel },
     }
   );
+
+  const addFilter: ((options: { negate: boolean }) => void) | undefined = isOtherBucket
+    ? onAddOtherFilter
+    : onAddFilter && (({ negate }) => onAddFilter(field, fieldValue, negate ? '-' : '+'));
+  const filterValueTestSubj = isOtherBucket ? '__other__' : fieldValue;
 
   return (
     <EuiFlexGroup
@@ -145,13 +160,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 </EuiToolTip>
               ) : (
                 <EuiText size="xs">
-                  {type === 'other'
-                    ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                        defaultMessage: 'Other',
-                      })
-                    : formattedFieldValue === ''
-                    ? EMPTY_LABEL
-                    : '-'}
+                  {isOtherBucket ? otherLabel : formattedFieldValue === '' ? EMPTY_LABEL : '-'}
                 </EuiText>
               )}
             </div>
@@ -166,22 +175,15 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
         <EuiFlexItem grow={false}>
-          {type === 'other' ? (
-            <div
-              data-test-subj={`${dataTestSubject}-filterActions-placeholder`}
-              css={css`
-                width: 48px;
-              `}
-            />
-          ) : (
+          {addFilter ? (
             <div>
               <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="plusCircle"
-                  onClick={() => onAddFilter(field, fieldValue, '+')}
+                  onClick={() => addFilter({ negate: false })}
                   aria-label={filterForLabel}
-                  data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
+                  data-test-subj={`plus-${fieldLabel}-${filterValueTestSubj}`}
                   style={{
                     minHeight: 'auto',
                     minWidth: 'auto',
@@ -196,9 +198,9 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="minusCircle"
-                  onClick={() => onAddFilter(field, fieldValue, '-')}
+                  onClick={() => addFilter({ negate: true })}
                   aria-label={filterOutLabel}
-                  data-test-subj={`minus-${fieldLabel}-${fieldValue}`}
+                  data-test-subj={`minus-${fieldLabel}-${filterValueTestSubj}`}
                   style={{
                     minHeight: 'auto',
                     minWidth: 'auto',
@@ -210,6 +212,13 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 />
               </EuiToolTip>
             </div>
+          ) : (
+            <div
+              data-test-subj={`${dataTestSubject}-filterActions-placeholder`}
+              css={css`
+                width: 48px;
+              `}
+            />
           )}
         </EuiFlexItem>
       )}

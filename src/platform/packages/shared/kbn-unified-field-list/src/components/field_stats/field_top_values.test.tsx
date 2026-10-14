@@ -75,6 +75,28 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
     expect(mockAddFilter).toHaveBeenCalledWith(defaultProps.field, 'sourceA', '+');
   });
 
+  it('should filter on Other with the displayed top values when onAddOtherFilter is provided', async () => {
+    const mockAddFilter = jest.fn();
+    const mockAddOtherFilter = jest.fn();
+
+    renderWithI18n(
+      <FieldTopValues
+        {...defaultProps}
+        onAddFilter={mockAddFilter}
+        onAddOtherFilter={mockAddOtherFilter}
+      />
+    );
+
+    expect(screen.getAllByRole('button')).toHaveLength(6);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Filter out extension: "Other"' }));
+
+    expect(mockAddOtherFilter).toHaveBeenCalledWith(defaultProps.field, ['sourceA', 'sourceB'], {
+      negate: true,
+    });
+    expect(mockAddFilter).not.toHaveBeenCalled();
+  });
+
   it('should render correctly without Other section', () => {
     renderWithI18n(
       <FieldTopValues
