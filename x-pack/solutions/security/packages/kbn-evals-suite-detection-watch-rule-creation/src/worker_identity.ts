@@ -8,10 +8,11 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
-  WORKER_ROLE_DEFINITIONS,
-  buildSecurityRoleUrl,
   SECURITY_ROLE_API_VERSION,
-} from '@kbn/alertzero-plugin/common/worker_roles';
+  WORKER_SERVICE_ACCOUNT_NAMES,
+  buildSecurityRoleUrl,
+  getWorkerRoleName,
+} from '@kbn/alertzero-common';
 import { WORKFLOWS_API_VERSION } from './constants';
 
 export const COVERAGE_WORKER_ID = 'system-security-detection-rule-coverage';
@@ -42,8 +43,41 @@ const statusOf = (error: unknown): number | undefined => {
   return status ?? response?.status;
 };
 
+const isServerlessDeployment = async (fetch: HttpHandler): Promise<boolean> => {
+  const status = await fetch<{ version?: { build_flavor?: string } }>('/api/status', {
+    method: 'GET',
+  });
+  return status.version?.build_flavor === 'serverless';
+};
+
+/**
+ * The coverage worker's role is built in (an ES reserved role on stateful, a predefined role on
+ * Serverless), so the eval only looks it up. It never creates or changes a role.
+ */
+const findBuiltInRole = async (fetch: HttpHandler, accountName: string): Promise<string> => {
+  const isServerless = await isServerlessDeployment(fetch);
+  const roleName = getWorkerRoleName(accountName, { isServerless });
+  const missing = () =>
+    new Error(
+      `Built-in ${isServerless ? 'predefined' : 'reserved'} role ${roleName} is missing on this ` +
+        'stack; AlertZero evals do not create worker roles'
+    );
+  let role: { metadata?: { _reserved?: unknown } };
+  try {
+    role = await fetch(buildSecurityRoleUrl(roleName), {
+      method: 'GET',
+      version: SECURITY_ROLE_API_VERSION,
+      headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION },
+    });
+  } catch (error) {
+    throw statusOf(error) === 404 ? missing() : error;
+  }
+  if (role.metadata?._reserved !== true) throw missing();
+  return roleName;
+};
+
 const ensureAccount = async (fetch: HttpHandler): Promise<string> => {
-  const definition = WORKER_ROLE_DEFINITIONS[COVERAGE_WORKER_ID];
+  const accountName = WORKER_SERVICE_ACCOUNT_NAMES[COVERAGE_WORKER_ID];
   const accounts: Account[] = [];
   let after: string | undefined;
   do {
@@ -55,32 +89,22 @@ const ensureAccount = async (fetch: HttpHandler): Promise<string> => {
     after = page.nextPage;
   } while (after);
   const existing = accounts.find(
-    (account) => account.name === definition.name && account.enabled && account.assumable
+    (account) => account.name === accountName && account.enabled && account.assumable
   );
   if (existing) return existing.id;
-  if (accounts.some((account) => account.name === definition.name)) {
-    throw new Error(`Service account ${definition.name} is disabled or not assumable`);
+  if (accounts.some((account) => account.name === accountName)) {
+    throw new Error(`Service account ${accountName} is disabled or not assumable`);
   }
-  try {
-    await fetch(buildSecurityRoleUrl(definition.name), {
-      method: 'PUT',
-      version: SECURITY_ROLE_API_VERSION,
-      headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION },
-      query: { createOnly: true },
-      body: JSON.stringify(definition.role),
-    });
-  } catch (error) {
-    if (statusOf(error) !== 409) throw error;
-  }
+  const roleName = await findBuiltInRole(fetch, accountName);
   const created = await fetch<Account>(ACCOUNTS_URL, {
     method: 'POST',
     body: JSON.stringify({
-      name: definition.name,
-      roles: [definition.name],
+      name: accountName,
+      roles: [roleName],
       description: 'Rule-coverage eval worker',
     }),
   });
-  if (!created.id) throw new Error(`Service account ${definition.name} was created without an id`);
+  if (!created.id) throw new Error(`Service account ${accountName} was created without an id`);
   return created.id;
 };
 

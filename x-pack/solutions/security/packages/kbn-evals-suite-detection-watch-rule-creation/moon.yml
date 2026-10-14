@@ -28,7 +28,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
   - '@kbn/proposals-common'
-  - '@kbn/alertzero-plugin'
+  - '@kbn/alertzero-common'
 tags:
   - functional-tests
   - package
