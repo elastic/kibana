@@ -203,7 +203,12 @@ export const batchVerdictCoverage: Evaluator = {
  * check while describing another alert (a same-length hex swap does this). Decided from content:
  * a verdict mismatches when its rationale/factors name another batch alert's unique marker (host,
  * binary, scanned file) and none of its own. Verdicts whose text names no marker are UNDETERMINED
- * and reported as such, never counted as matches: the denominator is shown beside the score.
+ * and never counted as matches: when no verdict at all is determinable the score is N/A (null), not
+ * 1, and the determinable/undetermined counts are shown beside every score. Models often paraphrase
+ * ("unsigned process from AppData") without naming a host or binary, so this evaluator is expected to
+ * be undetermined for them. A single id corrupted onto a sibling id is caught by BatchVerdictIntegrity
+ * (the sibling id is then repeated and the original is missing); this check covers the permutation
+ * case, where two verdicts trade ids and the ids stay unique.
  * Verdict ORDER versus the order alerts were given is recorded as `orderMismatchCount` but is not
  * scored, because the run route does not promise to present the alerts in the order of `alertIds`.
  */
@@ -214,6 +219,18 @@ export const batchVerdictCorrespondence: Evaluator = {
   evaluate: async ({ output }) => {
     const d = diagnose(output);
     const mismatches = d.contentMismatches.length;
+    if (mismatches === 0 && d.determinableVerdicts === 0) {
+      // Nothing to compare: no verdict named any alert's unique evidence. Scoring this 1 would
+      // report "consistent" for a check that decided nothing, so it is N/A and the counts are kept.
+      return {
+        score: null,
+        label: 'undetermined',
+        explanation:
+          `no verdict named a batch alert's unique evidence (${d.undeterminedVerdicts} undetermined, ` +
+          `orderMismatches=${d.orderMismatchCount})`,
+        metadata: diagnosticsMetadata(d, output),
+      };
+    }
     return {
       score: mismatches === 0 ? 1 : 0,
       label: mismatches === 0 ? 'consistent' : 'mismatched',

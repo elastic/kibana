@@ -187,6 +187,18 @@ describe('batch evaluators', () => {
     expect(result.metadata).toMatchObject({ contentMismatchCount: 1 });
   });
 
+  it('correspondence is N/A, not 1, when no verdict names any alert evidence', async () => {
+    const paraphrased = [
+      verdict('a-1', 'true_positive', 'Unsigned process with an inject flag.'),
+      verdict('a-2', 'false_positive', 'Signed vendor scan.'),
+      verdict('a-3', 'true_positive', 'Unsigned process with an inject flag.'),
+    ];
+    const result = await score(batchVerdictCorrespondence, paraphrased);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('undetermined');
+    expect(result.metadata).toMatchObject({ determinableVerdicts: 0, undeterminedVerdicts: 3 });
+  });
+
   it('accuracy is the fraction of alerts carrying the golden label', async () => {
     const wrong = [verdict('a-1', 'false_positive', 'badbin1.exe'), CLEAN[1], CLEAN[2]];
     expect((await score(batchClassificationAccuracy, wrong)).score).toBeCloseTo(2 / 3);
