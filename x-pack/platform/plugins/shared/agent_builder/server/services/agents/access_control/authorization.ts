@@ -173,6 +173,21 @@ export const canChangeAgentAccessControl = (
 };
 
 /**
+ * Checks whether the caller can change the agent's auto-approved APIs.
+ *
+ * This requires admin, owner, or Manager access. Only admins can change them on the default agent.
+ */
+export const canConfigureAgentApprovals = (
+  args: AgentAuthzArgs & { agentId?: string }
+): boolean => {
+  const role = getEffectiveAgentRole(args);
+  if (args.agentId === agentBuilderDefaultAgentId) {
+    return role === 'admin';
+  }
+  return role === 'admin' || role === 'owner' || role === AgentAccessControlRole.Manager;
+};
+
+/**
  * Checks whether the caller can read and list the agent.
  */
 export const hasAgentReadAccess = (args: AgentAuthzArgs): boolean =>

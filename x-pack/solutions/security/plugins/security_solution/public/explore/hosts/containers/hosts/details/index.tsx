@@ -100,7 +100,10 @@ export const useHostDetails = ({
     // For entity store v2, resolve the entity via an indexed-field identity filter built from the
     // entity-store record. This replaces the previous `entity_id` runtime field, which forced
     // Elasticsearch to run the EUID Painless script on every document in the time range.
-    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord('host', entityRecord);
+    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
+      euidApi.getBuiltInEntityDefinition('host'),
+      entityRecord
+    );
     if (recordFilter) {
       return recordFilter;
     }
@@ -108,7 +111,7 @@ export const useHostDetails = ({
     if (hostName) {
       return { term: { 'host.name': hostName } };
     }
-  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, euidApi?.euid]);
+  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, euidApi]);
 
   const {
     loading,
