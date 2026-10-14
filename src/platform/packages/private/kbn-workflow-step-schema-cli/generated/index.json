@@ -4,7 +4,6 @@
     ".abuseipdb",
     ".alienvault-otx",
     ".amazon_s3",
-    ".ansible_controller",
     ".aws_lambda",
     ".azure-blob",
     ".bedrock",
@@ -122,20 +121,6 @@
     "amazon_s3.downloadFile",
     "amazon_s3.listBucketObjects",
     "amazon_s3.listBuckets",
-    "ansible_controller.cancelJob",
-    "ansible_controller.getJob",
-    "ansible_controller.getJobStdout",
-    "ansible_controller.getJobTemplate",
-    "ansible_controller.getJobTemplateLaunchOptions",
-    "ansible_controller.getMe",
-    "ansible_controller.launchJobTemplate",
-    "ansible_controller.listHosts",
-    "ansible_controller.listInventories",
-    "ansible_controller.listJobEvents",
-    "ansible_controller.listJobTemplates",
-    "ansible_controller.listJobs",
-    "ansible_controller.listProjects",
-    "ansible_controller.request",
     "aws_lambda.getFunction",
     "aws_lambda.invoke",
     "aws_lambda.listFunctions",
@@ -201,6 +186,7 @@
     "cases.addObservables",
     "cases.addTags",
     "cases.assignCase",
+    "cases.bulkDeleteObservables",
     "cases.closeCase",
     "cases.createCase",
     "cases.createCaseFromTemplate",
@@ -1028,11 +1014,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "03fc6d0ac5cc08851aa0b74259309f4ea3652d15fa94ad409badf1ad5a9504e1"
+      "sha256": "5c264e4a08b45a9c131334f2b26dec748ba4485377c663ce936f31ec2f6dddf1"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "53e5ce23370f056fd4252d78314cbf31ede45b6a31a4ec705189e0480bb5cb64"
+      "sha256": "946f95dbb589c3588c3a53aeab6238bdb4a2d722f75b9fe8c9ee311d7bb22990"
     }
   }
 }

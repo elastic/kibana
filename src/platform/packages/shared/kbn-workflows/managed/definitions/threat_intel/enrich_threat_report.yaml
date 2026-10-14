@@ -101,8 +101,8 @@ steps:
               values:
                 - "{{ foreach.item._id }}"
 
-      # Cheap hard gate: a negative Fast-tier verdict stops this report before
-      # deterministic extraction, Reasoning-tier core extraction, or Diamond.
+      # Cheap hard gate: a negative Efficient-tier verdict stops this report before
+      # deterministic extraction, Frontier-tier core extraction, or Diamond.
       - name: assess_relevance
         type: kibana.request
         with:
