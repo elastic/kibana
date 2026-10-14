@@ -22,6 +22,7 @@ const createDelegate = (): jest.Mocked<ServiceAccountsServiceContract> => ({
   bindWorkload: jest.fn(),
   unbindWorkload: jest.fn(),
   getWorkloadBinding: jest.fn(),
+  getServiceAccountSummary: jest.fn(),
   withScopedRequestForWorkload: jest.fn(),
 });
 
@@ -38,12 +39,13 @@ describe('createPluginScopedServiceAccounts', () => {
   const scopedTo = (pluginId: string) =>
     createPluginScopedServiceAccounts({ pluginId, delegate, workloadTypes });
 
-  it('passes `isEnabled`, `create`, and `delete` straight through', () => {
+  it('passes `isEnabled`, `create`, `delete`, and `getServiceAccountSummary` straight through', () => {
     const scoped = scopedTo('alerting');
 
     expect(scoped.isEnabled).toBe(delegate.isEnabled);
     expect(scoped.create).toBe(delegate.create);
     expect(scoped.delete).toBe(delegate.delete);
+    expect(scoped.getServiceAccountSummary).toBe(delegate.getServiceAccountSummary);
   });
 
   it('exposes exactly the public service accounts contract', () => {
@@ -51,6 +53,7 @@ describe('createPluginScopedServiceAccounts', () => {
       'bindWorkload',
       'create',
       'delete',
+      'getServiceAccountSummary',
       'getWorkloadBinding',
       'isEnabled',
       'unbindWorkload',

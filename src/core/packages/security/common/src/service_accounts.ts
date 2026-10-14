@@ -157,3 +157,25 @@ export interface ServiceAccount {
   /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
   roles: string[];
 }
+
+/**
+ * The parts of a service account that name it, for showing which account a workload runs as to
+ * users who may see the workload but not manage service accounts. Deliberately smaller than
+ * {@link ServiceAccount}: roles and description stay with the users who manage accounts.
+ *
+ * @public
+ */
+export interface ServiceAccountSummary {
+  /** See {@link ServiceAccount.id}. */
+  id: string;
+  /** See {@link ServiceAccount.name}. */
+  name: string;
+  /** Whether the account can authenticate. */
+  enabled: boolean;
+  /**
+   * Whether this Kibana holds a credential for the account. It is not confirmed against the
+   * account's identity provider, so it can be stale for an account that was deleted and recreated
+   * outside Kibana.
+   */
+  assumable: boolean;
+}
