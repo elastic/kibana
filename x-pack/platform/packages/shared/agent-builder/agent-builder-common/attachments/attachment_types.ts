@@ -182,7 +182,7 @@ export const MAX_DOCUMENT_BYTES: Readonly<Record<SupportedDocumentMimeType, numb
 
 export const MAX_DOCUMENT_FILE_KIND_BYTES = Math.max(...Object.values(MAX_DOCUMENT_BYTES));
 
-export const MAX_DOCUMENT_TEXT_LENGTH = 500_000;
+export const MAX_DOCUMENT_TEXT_LENGTH = 60_000;
 
 export const documentAttachmentDataSchema = z.object({
   file_id: z.string().max(1024),
