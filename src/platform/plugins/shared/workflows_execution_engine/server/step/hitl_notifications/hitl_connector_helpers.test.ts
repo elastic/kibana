@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
+import {
+  assertConnectorSucceeded,
+  escapeServiceNowCommentText,
+  fitHitlTextPreservingSuffix,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
+  slackApiChannelTarget,
+} from './hitl_connector_helpers';
 
 describe('assertConnectorSucceeded', () => {
   it('does not throw when status is ok', () => {
@@ -42,5 +49,42 @@ describe('slackApiChannelTarget', () => {
 
   it('routes other values to channelIds', () => {
     expect(slackApiChannelTarget('C0123456789')).toEqual({ channelIds: ['C0123456789'] });
+  });
+});
+
+describe('escapeServiceNowCommentText', () => {
+  it('escapes HTML and journal code tags in comment text', () => {
+    expect(escapeServiceNowCommentText('Host <your_input> [code]x[/code] & "q"')).toBe(
+      'Host \uFF1Cyour_input\uFF1E [\u200bcode]x[\u200b/code] & "q"'
+    );
+  });
+});
+
+describe('serviceNowCommentLink', () => {
+  it('keeps the journal anchor and escapes the label', () => {
+    expect(serviceNowCommentLink('Approve[/code]', 'https://example.com?a=1&b=2')).toBe(
+      '[code]<a href="https://example.com?a=1&amp;b=2">Approve[\u200b/code]</a>[/code]'
+    );
+  });
+});
+
+describe('fitHitlTextPreservingSuffix', () => {
+  const suffix = 'Approve: https://kibana.example/approve\nDecline: https://kibana.example/reject';
+
+  it('shortens the prompt so the links still fit the ServiceNow comment limit', () => {
+    const comment = fitHitlTextPreservingSuffix(
+      'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH),
+      suffix,
+      SERVICENOW_COMMENT_MAX_LENGTH
+    );
+
+    expect(comment.length).toBe(SERVICENOW_COMMENT_MAX_LENGTH);
+    expect(comment.endsWith(suffix)).toBe(true);
+  });
+
+  it('throws when the links alone exceed the limit', () => {
+    expect(() => fitHitlTextPreservingSuffix('prompt', 'x'.repeat(11), 10)).toThrow(
+      'exceed the 10 character connector limit'
+    );
   });
 });
