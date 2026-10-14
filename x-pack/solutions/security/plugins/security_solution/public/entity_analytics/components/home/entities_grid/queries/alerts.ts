@@ -6,6 +6,7 @@
  */
 
 import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   buildIdentityPrefilter,
   getAlertsIndex,
@@ -20,6 +21,7 @@ import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
   SEVERITY_COUNT_FIELDS,
+  isOneOf,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
@@ -61,7 +63,7 @@ const buildAlertAggregations = (rowCondition?: string): string[] =>
   });
 
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
-  typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
+  isOneOf(ALLOWED_ENTITY_TYPES, type);
 
 // ── unstamped alert filters ───────────────────────────────────────────────────
 
@@ -83,7 +85,7 @@ const buildUnstampedIdentityFilters = (
   for (const row of pageRows) {
     const entityType = row[ENTITY_TYPE_FIELD];
     if (isAllowedEntityType(entityType)) {
-      const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
+      const clause = getEuidEsqlFilterBasedOnDocument(getBuiltInEntityDefinition(entityType), row);
       if (clause) {
         clauses.add(clause);
         matchedRows.push(row);

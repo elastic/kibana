@@ -116,6 +116,10 @@ export {
   type SubstitutionStepData,
   createSubstitutionStep,
   isSubstitutionStep,
+  type InjectedContextStep,
+  type InjectedContextStepData,
+  createInjectedContextStep,
+  isInjectedContextStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -198,6 +202,9 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isApiStateChangedEvent,
+  API_STATE_CHANGED_UI_EVENT,
+  type ApiStateChangedEventData,
   type UserQuestionAskedEvent,
   type UserQuestionAskedEventData,
   type UserQuestionAnsweredEvent,

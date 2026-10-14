@@ -228,7 +228,7 @@ export const buildPendingWrite = ({
   };
 };
 
-/** Writes `error ? bulk_error : written` into `results` for each pending write, by index. */
+/** Writes `error ? bulk_error (or superseded) : written` into `results` for each pending write, by index. */
 export const applyWriteOutcomes = ({
   pendingWrites,
   errors,
@@ -246,7 +246,7 @@ export const applyWriteOutcomes = ({
         event_id: candidate.eventId,
         status,
         written: false,
-        reason: 'bulk_error',
+        reason: error.type === 'superseded_write' ? 'superseded' : 'bulk_error',
         error,
       };
       return;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
@@ -392,14 +391,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             onSwitchChange={alertingV2.onToggle}
             switchDataTestSubj="alertingV2ScopedQuerySwitch"
             expandedSubtitle={i18n.FILTER_ALERTING_V2_SUBTITLE}
-            titleBadge={
-              <EuiBetaBadge
-                label={i18n.TECHNICAL_PREVIEW_LABEL}
-                iconType="flask"
-                tooltipContent={i18n.CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP}
-                size="s"
-              />
-            }
           >
             <EuiFormRow
               fullWidth
