@@ -302,7 +302,12 @@ describe('Perform bulk action route', () => {
         .mockRejectedValueOnce(new Error('Internal error'));
 
       const response = await server.inject(
-        getBulkDeleteByIdsRequest([mockRule.id, 'rule-not-found-on-delete', mockRule.id, missingId]),
+        getBulkDeleteByIdsRequest([
+          mockRule.id,
+          'rule-not-found-on-delete',
+          mockRule.id,
+          missingId,
+        ]),
         requestContextMock.convertContext(context)
       );
 
@@ -316,7 +321,11 @@ describe('Perform bulk action route', () => {
       expect(response.body.attributes.results.deleted).toHaveLength(1);
       expect(response.body.attributes.results.skipped).toHaveLength(2);
       expect(response.body.attributes.errors).toEqual([
-        { message: 'Internal error', status_code: 500, rules: [{ id: mockRule.id, name: mockRule.name }] },
+        {
+          message: 'Internal error',
+          status_code: 500,
+          rules: [{ id: mockRule.id, name: mockRule.name }],
+        },
       ]);
     });
 
