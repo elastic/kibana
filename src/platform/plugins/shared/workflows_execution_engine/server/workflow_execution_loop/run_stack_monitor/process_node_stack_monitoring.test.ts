@@ -49,13 +49,14 @@ describe('processNodeStackMonitoring', () => {
           .mockReturnValueOnce(nodeWithoutMonitor),
       },
       workflowExecutionRepository: {},
-      workflowExecutionState: {},
+      workflowExecutionState: { refreshCancelState: jest.fn() },
       workflowLogger: {},
     };
 
     await processNodeStackMonitoring(params as any, monitoredRuntime as any);
 
     expect(monitorFn).toHaveBeenCalledWith(monitoredRuntime);
+    expect(params.workflowExecutionState.refreshCancelState).not.toHaveBeenCalled();
     expect(cancelWorkflowIfRequested).toHaveBeenCalled();
   });
 
@@ -75,12 +76,13 @@ describe('processNodeStackMonitoring', () => {
         create: jest.fn(),
       },
       workflowExecutionRepository: {},
-      workflowExecutionState: {},
+      workflowExecutionState: { refreshCancelState: jest.fn() },
       workflowLogger: {},
     };
 
     await processNodeStackMonitoring(params as any, monitoredRuntime as any);
 
+    expect(params.workflowExecutionState.refreshCancelState).not.toHaveBeenCalled();
     expect(params.nodesFactory.create).not.toHaveBeenCalled();
     expect(cancelWorkflowIfRequested).toHaveBeenCalled();
   });

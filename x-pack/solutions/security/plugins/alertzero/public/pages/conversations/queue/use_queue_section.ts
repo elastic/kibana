@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
@@ -104,11 +104,20 @@ const needsCountRequest = (
 const useSection = (
   id: RecommendedAction,
   firstPageSize: number,
-  { isOpen, onToggle, retry }: ReturnType<typeof useSectionState>,
+  { isOpen, onToggle: setIsOpen, retry }: ReturnType<typeof useSectionState>,
   countQuery: UseQueryResult<ProposalsPageResponse>,
   pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>
 ): QueueSection => {
   const pages = pagesQuery.data?.pages;
+  const hasSettledDefault = useRef(false);
+
+  const onToggle = useCallback(
+    (nextIsOpen: boolean) => {
+      hasSettledDefault.current = true;
+      setIsOpen(nextIsOpen);
+    },
+    [setIsOpen]
+  );
 
   // Deduplicated because the pages are offset windows over a list that moves: a row
   // decided between two fetches shifts everything after it up, and an optimistic drop
@@ -123,6 +132,14 @@ const useSection = (
 
   const total = totalFromPages(pagesQuery) ?? countQuery.data?.total;
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = pagesQuery;
+
+  useEffect(() => {
+    if (hasSettledDefault.current || total === undefined) return;
+    hasSettledDefault.current = true;
+    if (total === 0) {
+      setIsOpen(false);
+    }
+  }, [total, setIsOpen]);
 
   // Tracked from the click rather than read off `pagesQuery.error`, which a failed
   // poll sets just the same — and a poll the analyst did not ask for must not

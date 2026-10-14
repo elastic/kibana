@@ -1,5 +1,5 @@
 {
-  "sha1": "c0ac16c7304e5b44d581c895a3774ca946453655",
+  "sha1": "e9b0f5cce1421faa365c4c5347a609b8cef5dadf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -375,7 +375,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/recently_closed_tabs.spec.ts",
-        "line": 51,
+        "line": 49,
         "column": 25
       }
     },
@@ -388,7 +388,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/recently_closed_tabs.spec.ts",
-        "line": 78,
+        "line": 76,
         "column": 22
       }
     },
@@ -401,7 +401,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/recently_closed_tabs.spec.ts",
-        "line": 108,
+        "line": 106,
         "column": 9
       }
     },
@@ -557,7 +557,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 35,
+        "line": 41,
         "column": 59
       }
     },
@@ -570,7 +570,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 69,
+        "line": 75,
         "column": 24
       }
     },
@@ -583,7 +583,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 114,
+        "line": 120,
         "column": 25
       }
     },
@@ -596,7 +596,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 144,
+        "line": 150,
         "column": 22
       }
     },
@@ -674,7 +674,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 46,
+        "line": 45,
         "column": 50
       }
     },
@@ -687,7 +687,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 109,
+        "line": 108,
         "column": 20
       }
     },
@@ -700,7 +700,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 186,
+        "line": 185,
         "column": 54
       }
     },
