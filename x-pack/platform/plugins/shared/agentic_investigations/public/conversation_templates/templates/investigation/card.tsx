@@ -16,12 +16,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { SEVERITY_COLORS, SEVERITY_LABELS } from '@kbn/agentic-investigations-common';
 import type { InvestigationSummary } from '../../../../common';
 import { getInvestigationDisplayTitle } from './to_view_model';
 import {
   CLOSED_LABEL,
-  INVESTIGATION_SEVERITY_COLORS,
-  INVESTIGATION_SEVERITY_LABELS,
   NO_SEVERITY_LABEL,
   RUNNING_LABEL,
   moreEntitiesLabel,
@@ -113,9 +112,9 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 type="dot"
-                color={severity ? INVESTIGATION_SEVERITY_COLORS[severity] : 'subdued'}
-                content={severity ? INVESTIGATION_SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
-                aria-label={severity ? INVESTIGATION_SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
+                color={severity ? SEVERITY_COLORS[severity] : 'subdued'}
+                content={severity ? SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
+                aria-label={severity ? SEVERITY_LABELS[severity] : NO_SEVERITY_LABEL}
                 iconProps={{ 'data-test-subj': 'investigationCardSeverity' }}
               />
             </EuiFlexItem>

@@ -8,12 +8,13 @@
  */
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getAppIdFromFilePath } from '../helpers/get_app_id_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
+import { getJsxStringValue } from '../helpers/get_jsx_string_value';
 import { getStringValue, isTruthy } from '../helpers/utils';
 
 export const RULE_WARNING_MESSAGE =
@@ -22,16 +23,14 @@ export const RULE_WARNING_MESSAGE =
 export const NO_IDENTIFIER_MESSAGE =
   'APP_ID does not have an i18n identifier added to i18nrc.json yet. Translations for this plugin or package will not work until one is added.';
 
-export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
+export const FormattedMessageShouldStartWithTheRightId: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
   },
-  create(context) {
-    const { cwd, filename, sourceCode, report } = context;
-
+  createOnce(context) {
     return {
-      JSXElement(node: Rule.Node) {
+      JSXElement(node) {
         const jsxNode = node as unknown as TSESTree.JSXElement;
         const { openingElement } = jsxNode;
 
@@ -42,6 +41,8 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
         ) {
           return;
         }
+
+        const { cwd, filename, sourceCode } = context;
 
         // Find the id attribute
         const idAttribute = openingElement.attributes.find(
@@ -58,7 +59,7 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
           // Find the package/plugin ID from kibana.jsonc to show in the error message
           const appId = getAppIdFromFilePath(filename, cwd);
 
-          report({
+          context.report({
             node,
             message: NO_IDENTIFIER_MESSAGE.replace('APP_ID', appId),
           });
@@ -90,11 +91,10 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
         const identifier =
           idAttribute?.value?.type === AST_NODE_TYPES.Literal &&
           typeof idAttribute.value.value === 'string'
-            ? idAttribute.value.value
+            ? getJsxStringValue(idAttribute.value)
             : false;
 
-        const functionDeclaration = sourceCode.getScope(node).block as TSESTree.FunctionDeclaration;
-        const functionName = getFunctionName(functionDeclaration);
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
 
         // Check if i18n has already been imported into the file
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
@@ -105,7 +105,7 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
 
         // If no identifier is found, report an error
         if (!identifier) {
-          report({
+          context.report({
             node,
             message: RULE_WARNING_MESSAGE,
             fix(fixer) {
@@ -140,7 +140,7 @@ export const FormattedMessageShouldStartWithTheRightId: Rule.RuleModule = {
                 ''
               ) || 'defaultMessage=""';
 
-          report({
+          context.report({
             node,
             message: RULE_WARNING_MESSAGE,
             fix(fixer) {

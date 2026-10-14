@@ -7,17 +7,13 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
-import {
-  apiTest,
-  INVESTIGATIONS_READ_ROLE,
-  INVESTIGATIONS_WRITE_ROLE,
-  ensureInvestigation,
-  uniqueId,
-} from '../fixtures';
+import { apiTest, INVESTIGATIONS_WRITE_ROLE, ensureInvestigation, uniqueId } from '../fixtures';
 
+// Ensuring an investigation needs the agentic investigations plugin, which is not enabled on
+// serverless yet, so only the authorization check runs there.
 apiTest.describe(
   'POST /internal/nightshift/investigations/{id}/_ensure',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: tags.stateful.classic },
   () => {
     let cookieHeader: Record<string, string>;
 
@@ -34,15 +30,6 @@ apiTest.describe(
           uniqueId('missing-ensure-investigation')
         );
         expect(response).toHaveStatusCode(404);
-      }
-    );
-
-    apiTest(
-      'returns 403 for a user without agentBuilder:write',
-      async ({ apiClient, samlAuth }) => {
-        const unauthorized = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
-        const response = await ensureInvestigation(apiClient, unauthorized.cookieHeader, 'any-id');
-        expect(response).toHaveStatusCode(403);
       }
     );
   }

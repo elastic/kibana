@@ -28,8 +28,8 @@ import type {
   AgenticInvestigationsPluginStart,
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
-import type { DeleteAllInvestigationsResult } from './lib/delete_all_investigations';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
@@ -45,14 +45,10 @@ export interface NightshiftInvestigationsServerSetup {
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
-  /**
-   * Deletes the shared investigation data of investigations in every space (not the Agent Builder
-   * conversations); callers must authorize this destructive operation.
-   */
-  deleteAllInvestigations: () => Promise<DeleteAllInvestigationsResult>;
 }
 
 export interface NightshiftInvestigationsSetupDeps {
+  share: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   /**
    * Stores investigations as conversations. Without it investigations are unavailable.

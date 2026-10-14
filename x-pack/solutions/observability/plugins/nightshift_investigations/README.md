@@ -64,24 +64,48 @@ The `title` of the start route, the `nightshift.triggerInvestigation` step, and 
 
 The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, so runs of one investigation never overlap. The investigation reads as in progress while its agent runs.
 
-### Reading and deleting investigations
+### Reading investigations
 
 Readers use the shared query API: the Nightshift landing page (list, severity counts, cards from `agenticInvestigations.InvestigationCard`, Agent Builder's conversation details flyout for one investigation), the significant-event flyout (`@kbn/investigation-output`), the alert "Investigate" action (list by `subject_id=<alert id>`), and significant events' investigation status route.
 
-`deleteAllInvestigations()` on the start contract deletes, through `agenticInvestigations.deleteSubjectInvestigationDataAcrossSpaces()`, the subjects, claims, impact, and hypotheses of every investigation with subjects in every space. The Agent Builder conversations stay; Agent Builder has no cross-space delete.
+Nightshift does not delete investigations. The Significant Events reset leaves the investigation conversations and their shared data (subjects, claims, impact, hypotheses) alone: Agent Builder has no cross-space delete, and the shared data has no owner that would limit a sweep to Nightshift's investigations.
 
-### One identity per investigation
+### Continuing an investigation
 
-Agent Builder lets only the conversation owner write subjects, metadata, and attachments. So one identity must create and continue an investigation. Use a service account for the investigation workflow, its automations, and the Slack thread workflow.
-
-A start will not continue an investigation it does not own. It opens a new one instead and logs a warning.
-
-The start judges ownership by Agent Builder's owner check. (Agent Builder resolves the user profile id of an API key's creator for fake requests too, so a workflow step and the HTTP calls it makes count as the same owner.) If a run reaches an investigation it does not own anyway, the agent still works in the conversation, but subjects and the reopen are skipped. Cross-identity follow-ups need converse-access writes in Agent Builder.
+Investigations are public conversations, and Agent Builder lets anyone who can converse in one write its subjects, metadata, and attachments. So any identity that can read an open investigation continues it: a workflow step, its automations, the Slack thread workflow, and a user over HTTP all add to the same investigation.
 
 ### Slack threads
 
-`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by the conversation origin `team:<T>/channel:<C>/thread:<ts>`, which is the key Agent Builder uses for Slack. If that origin belongs to another conversation, it falls back to the thread's `slack_thread` subject.
+`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed `team:<T>/channel:<C>/thread:<ts>`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
 
-With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation gets that origin and has the thread as its subject. The thread's status message is recorded on that subject as `slack.status_message_ts`.
+With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
+
+## Notifications
+
+Investigation starts can include up to 5 `notificationDestinations`. Each uses the generic envelope `{ type, connector_id, params }`, with optional `automation_id` and `automation_name` provenance. `params` is a JSON object limited to 4096 serialized characters, three container levels including the root, and 20 entries per object or array; keys are limited to 128 characters. Workflow YAML validates the envelope; notification handlers validate connector-specific params before execution starts, when recovering workflow inputs, and when preparing delivery. Unsupported types are rejected at runtime. Delivery fields are server-owned and rejected in destination input.
+
+Slack is the currently supported notification type. It accepts `params: { channel, thread_ts? }`: `channel` must contain 1–500 characters and `thread_ts` at most 100. `thread_ts` is the parent message ID used for thread replies. Channel-mode Slack automations require a destination.
+
+The automation UI's Channel action uses the Elastic Slack app by default. A saved connector can be supplied through `completion.connectorId`; editing or cloning the automation preserves that selection. Removing the Slack action clears its action and destination and removes notification destinations from the regenerated workflow. Direct-message actions and Slack-source thread actions remain separate follow-up work.
+
+```json
+{
+  "notificationDestinations": [
+    {
+      "type": "slack",
+      "connector_id": "my-slack-connector",
+      "params": { "channel": "#alerts", "thread_ts": "1759190400.000100" }
+    }
+  ]
+}
+```
+
+Destinations and delivery history live in a hidden, readonly `nightshift.notification_routing` attachment backed by its own index. Endpoints are deduplicated by type, connector ID, and canonical parameters while retaining automation attribution. The 5-association limit applies to retained endpoints and automation identities, not execution or attempt history. The started phase adds destinations and freezes each execution's participants; explicit follow-up executions notify all retained destinations.
+
+The investigation workflow sends a started message, stores its confirmed Slack thread reference, and replies with completion or failure. Later executions reuse that thread. An explicitly supplied parent timestamp is also supported. Terminal delivery requires an initialized execution and persists one terminal phase, preventing contradictory completion and failure messages.
+
+Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses produce `failed`; exceptions, cancellation after claiming, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
+
+The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. Outbound thread references do not register incoming Slack-thread continuation.

@@ -8,7 +8,7 @@
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
-import { freeFormContextSchema } from '../../common';
+import { freeFormContextSchema, investigationNotificationDestinationsSchema } from '../../common';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
 import { fetchAlertSnapshot } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -47,6 +47,7 @@ const startInvestigationBodySchema = z.union([
     title: titleSchema.optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
+    notificationDestinations: investigationNotificationDestinationsSchema.optional(),
   }),
   // A manual investigation is defined by its question, so `message` is required and the
   // subject id is optional: there is no entity to point at, only the prompt.
@@ -64,6 +65,7 @@ const startInvestigationBodySchema = z.union([
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
     ...startInvestigationModel,
+    notificationDestinations: investigationNotificationDestinationsSchema.optional(),
   }),
 ]);
 
@@ -115,6 +117,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           trigger_type: 'manual',
           message: body.message,
           ...(body.connector_id ? { connector_id: body.connector_id } : {}),
+          ...(body.notificationDestinations
+            ? { notificationDestinations: body.notificationDestinations }
+            : {}),
         });
       }
       return await client.start({ ...body, trigger_type: 'manual' });

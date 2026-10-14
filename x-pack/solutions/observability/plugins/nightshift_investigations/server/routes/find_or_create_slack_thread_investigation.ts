@@ -28,10 +28,10 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
     access: 'internal',
     summary: "Find or create a Slack thread's investigation",
     description:
-      'Returns the investigation and status message for a Slack thread, found by the ' +
-      "thread's Agent Builder conversation origin (`team:<T>/channel:<C>/thread:<ts>`) or its " +
-      '`slack_thread` subject. With `create`, a thread without one gets a new investigation ' +
-      'conversation with that origin and the thread as its subject; otherwise the response is ' +
+      'Returns the investigation and status message for a Slack thread, found by its ' +
+      '`slack_thread` subject (`team:<T>/channel:<C>/thread:<ts>`). With `create`, a thread ' +
+      'without one gets a new investigation conversation with the thread as its subject; ' +
+      'otherwise the response is ' +
       'empty. With `status_message_ts`, records that message as the thread status message on the ' +
       "thread's subject. With `event_id` and `execution_id`, records the delivered event for that " +
       "execution on the thread's subject and marks the response `duplicate` when another " +

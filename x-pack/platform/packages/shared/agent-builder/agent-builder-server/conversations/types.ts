@@ -17,7 +17,6 @@ import type {
   ConversationListResult,
   MetadataFieldValue,
   ConversationAddEventInput,
-  ConversationOrigin,
 } from '@kbn/agent-builder-common';
 
 /** Request for adding events to a conversation. */
@@ -46,11 +45,6 @@ export interface ConversationCreatePublicRequest {
    * Initial metadata values. Requires `templateId`.
    */
   metadata?: Record<string, MetadataFieldValue>;
-  /**
-   * Stable external conversation key, for example a Slack team/channel/thread identifier.
-   * Lets a caller find the conversation again with `getByOrigin`.
-   */
-  origin?: ConversationOrigin;
 }
 
 /**
@@ -64,7 +58,7 @@ export interface ConversationUpdatePublicRequest {
 }
 
 /**
- * A conversation client exposing get, bulk get, get by origin, list, search, create, patchMetadata, and update operations
+ * A conversation client exposing get, bulk get, list, search, create, patchMetadata, and update operations
  */
 export interface ConversationPublicClient {
   /**
@@ -75,11 +69,6 @@ export interface ConversationPublicClient {
    * Retrieve several conversations by ID in one request, without their rounds.
    */
   bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>>;
-  /**
-   * Find the conversation created with this origin in the current space, or undefined when there
-   * is none or the current user cannot converse in it.
-   */
-  getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   /**
    * List conversations for the current user, optionally filtered by agent ID.
    */
@@ -117,8 +106,8 @@ export interface ConversationPublicClient {
   ): Promise<Conversation>;
   /**
    * Validate updates against the conversation's template and merge them into its metadata.
-   * Defaults to owner-only access. Pass `{ access: 'converse' }` to allow collaborators or
-   * any authenticated user (for public conversations) to write metadata.
+   * Defaults to `converse` access, so members and anyone who can converse in a public conversation
+   * can write metadata. Pass `{ access: 'owner' }` to restrict the write to the owner.
    * The conversation must have a template applied.
    */
   patchMetadata(

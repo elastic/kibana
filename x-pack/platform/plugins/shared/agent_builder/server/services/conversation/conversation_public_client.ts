@@ -40,12 +40,11 @@ export const createConversationPublicClient = ({
   return {
     get: client.get.bind(client),
     bulkGet: client.bulkGet.bind(client),
-    getByOrigin: client.getByOrigin.bind(client),
     list: client.list.bind(client),
     search: client.search.bind(client),
     addEvents: ({ conversationId, events }) =>
       client.addCustomEvents({ id: conversationId, events }, { source }),
-    create: async ({ agentId, id, title, accessControl, templateId, metadata, origin }) => {
+    create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {
       const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
 
       await agentRegistry.get(effectiveAgentId, { access: 'use' });
@@ -71,7 +70,6 @@ export const createConversationPublicClient = ({
             : undefined,
           template_id: templateId,
           metadata,
-          ...(origin ? { origin } : {}),
           rounds: [],
         },
         { source }
@@ -89,7 +87,7 @@ export const createConversationPublicClient = ({
       }),
     patchMetadata: async (conversationId, updates, options) => {
       const { conversation, changedFields } = await client.patchMetadata(conversationId, updates, {
-        access: options?.access ?? 'owner',
+        access: options?.access ?? 'converse',
         source,
       });
       return { conversation, changedFields };

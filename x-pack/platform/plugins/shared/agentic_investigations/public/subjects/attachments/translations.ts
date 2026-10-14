@@ -51,13 +51,6 @@ export const subjectTriggerLabel = (type: InvestigationSubjectType): string =>
     values: { type: SUBJECT_TYPE_LABELS[type] },
   });
 
-/** The line under an alert listed under an "N alerts" row: when that alert started. */
-export const nestedAlertTriggerLabel = (start: string): string =>
-  i18n.translate('xpack.agenticInvestigations.subjects.nestedAlertTriggerLabel', {
-    defaultMessage: 'Trigger · Alert · {start}',
-    values: { start },
-  });
-
 export const OPENS_IN_NEW_TAB = i18n.translate(
   'xpack.agenticInvestigations.subjects.opensInNewTab',
   { defaultMessage: 'Opens in a new tab' }

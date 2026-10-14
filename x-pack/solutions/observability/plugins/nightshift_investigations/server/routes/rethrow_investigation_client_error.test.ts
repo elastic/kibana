@@ -11,6 +11,7 @@ import {
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
 import {
+  InvalidNotificationDestinationError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvestigationUnavailableError,
@@ -30,6 +31,7 @@ const mapStatusCode = (error: Error): number => {
 
 describe('rethrowInvestigationClientError', () => {
   it.each([
+    [new InvalidNotificationDestinationError('Unsupported notification type'), 400],
     [new InvestigationNotFoundError('investigation-1'), 404],
     [new InvestigationUnavailableError('Unavailable'), 503],
     [new InvestigationQuotaDeniedError(), 429],

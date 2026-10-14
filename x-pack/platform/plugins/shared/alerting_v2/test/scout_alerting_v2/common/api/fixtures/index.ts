@@ -104,3 +104,4 @@ export {
   RULE_TEMPLATE_TAGS_MAX_COUNT,
 } from '../../constants';
 export * as testData from '../../constants';
+export { findNullPaths } from '../../saved_object_assertions';

@@ -47,8 +47,8 @@ export const DEFAULT_INVESTIGATIONS_PAGE_SIZE = 20;
 
 /**
  * Ceiling on investigations a list or count considers. Filters that Agent Builder cannot apply
- * (in progress, subject, entity, free text on summary and verdict, severity sort) run in memory
- * over at most this many candidates, so pages beyond it are not reachable.
+ * (subject, entity, free text on summary and verdict, severity sort) run in memory over at most
+ * this many candidates, so pages beyond it are not reachable.
  */
 export const MAX_INVESTIGATION_CANDIDATES = 1000;
 

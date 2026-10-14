@@ -17,11 +17,7 @@ import {
   type EntityType,
   type GatedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import type { EntityDefinitionOptions } from '../../../common/domain/definitions/registry';
-import {
-  getEuidEsqlEvaluation,
-  getFieldEvaluationsEsqlFromDefinition,
-} from '../../../common/domain/euid/esql';
+import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
@@ -65,7 +61,6 @@ interface LogsExtractionQueryParams {
   indexPatterns: string[];
   latestIndex: string;
   entityDefinition: GatedEntityDefinition;
-  entityDefinitionOptions?: EntityDefinitionOptions;
   docsLimit: number;
   fromDateISO: string;
   toDateISO: string;
@@ -78,7 +73,6 @@ interface LogsExtractionQueryParams {
 export function buildLogsExtractionEsqlQuery({
   indexPatterns,
   entityDefinition,
-  entityDefinitionOptions,
   fromDateISO,
   toDateISO,
   docsLimit,
@@ -121,11 +115,12 @@ export function buildLogsExtractionEsqlQuery({
 
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
-    const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
-    const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
-      withTypeId: false,
-      options: entityDefinitionOptions,
-    });
+    const fieldEvalsEsql = getFieldEvaluationsEsql(entityDefinition);
+    const euidEsql = getEuidEsqlEvaluation(
+      entityDefinition,
+      recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+      { withTypeId: false }
+    );
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 

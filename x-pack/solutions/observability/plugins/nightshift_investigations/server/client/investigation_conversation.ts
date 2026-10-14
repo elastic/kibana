@@ -9,11 +9,7 @@ import {
   ConversationAccessControlMode,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
-import type {
-  Conversation,
-  ConversationOrigin,
-  ConversationPermissions,
-} from '@kbn/agent-builder-common';
+import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
@@ -27,18 +23,19 @@ export interface InvestigationConversation {
   title: string;
   /** `metadata.status`; a missing status reads as open. */
   status: 'open' | 'closed';
-  /**
-   * Whether the caller owns the conversation. Subject attachments and metadata writes are
-   * owner-only in Agent Builder, so a caller that does not own an investigation cannot follow up
-   * on it.
-   */
-  isOwner: boolean;
+  /** `metadata.workflow_execution_ids`: the workflow runs that worked on the investigation. */
+  workflowExecutionIds: string[];
   /** This call created the conversation. */
   created: boolean;
 }
 
 type ConversationWithAccess = Pick<Conversation, 'id' | 'title' | 'metadata' | 'template_id'> & {
   permissions: ConversationPermissions;
+};
+
+const toWorkflowExecutionIds = (metadata: ConversationWithAccess['metadata']): string[] => {
+  const ids = metadata?.workflow_execution_ids;
+  return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
 };
 
 const toInvestigationConversation = (
@@ -53,7 +50,7 @@ const toInvestigationConversation = (
     id: conversation.id,
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
-    isOwner: conversation.permissions.update_access_control === true,
+    workflowExecutionIds: toWorkflowExecutionIds(conversation.metadata),
     created,
   };
 };
@@ -102,12 +99,9 @@ export const findInvestigationConversation = async (
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
-  origin,
 }: {
   conversations: ConversationPublicClient;
   id: string;
-  /** External key the conversation can later be found by, such as a Slack thread. */
-  origin?: ConversationOrigin;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
@@ -120,7 +114,6 @@ export const getOrCreateInvestigationConversation = async ({
       agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
       templateId: INVESTIGATION_TEMPLATE_ID,
       accessControl: { access_mode: ConversationAccessControlMode.Public },
-      ...(origin ? { origin } : {}),
     });
     return toInvestigationConversation(created, true);
   } catch (error) {

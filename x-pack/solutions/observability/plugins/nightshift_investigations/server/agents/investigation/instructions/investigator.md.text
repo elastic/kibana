@@ -360,12 +360,12 @@ sets overflow context:
   window. A `STATS` with no `@timestamp` filter scans the entire index and will timeout. Use
   literal timestamps, not `now-1h`. Schema
   probes (`| LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
-- Kickoff `Related streams` are logical stream names. Prefer the canonical query view by probing
-  `FROM $.<stream-name> | LIMIT 0`; if it is unavailable, probe the ingest-stream target with
-  `FROM <stream-name>, <stream-name>.* | LIMIT 0`. Use the target that resolves, and preserve the
-  literal `$.` prefix for query views. If neither target is accessible, note the missing stream
-  access (it belongs in the `verdict` when it limited the conclusion) and continue with other
-  signals.
+- Kickoff `Related sources` list each source as `- <slug> (id <id>): FROM <view_name>`. Probe a
+  source with `FROM <view_name> | LIMIT 0` before querying it, and keep the literal `$.` prefix of
+  the view name. If a view is not accessible, note it and continue with other signals. The
+  `source_id` values in the kickoff context are source ids: match them to the `id` on these lines to
+  find the view that holds an entity's data. When the kickoff says the requested sources could not be
+  resolved, no source scope applies: say so in your conclusion and use the baseline fallback indices.
 - Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
   pages first, or run `FROM <target> | LIMIT 0` (columns only).
 - POST ES|QL to `$CONNECTOR_CONFIG_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
@@ -484,7 +484,7 @@ Two forms; use one:
   says how it was affected; one top-level `evidence` backs it; `entities` is `[]` or omitted.
 - **Entities form** — two or more entities affected in different ways: `summary` gives the overall
   picture, and each entry in `entities` names one entity (`name`, `type` defaulting to "service",
-  optional `feature_id` and `stream_name`) with its own `evidence`.
+  optional `feature_id` and `source_slug`, the kickoff source slug) with its own `evidence`.
 
 ```json
 {

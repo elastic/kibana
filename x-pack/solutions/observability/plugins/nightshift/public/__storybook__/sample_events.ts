@@ -20,7 +20,7 @@ export const checkoutEvent: SignificantEventResponse = {
   created_at: '2026-07-24T09:42:00.000Z',
   event_id: 'checkout-latency',
   status: 'active',
-  stream_names: ['logs.checkout-api'],
+  source_ids: ['logs.checkout-api'],
   title: 'Checkout latency increased after deployment',
   summary:
     'Checkout requests are taking longer than expected. The `checkout-api` P95 latency rose from 420 ms to 2.8 s shortly after version `2026.07.24-1` was deployed. Error rates and payment retries increased during the same interval.',
@@ -32,7 +32,7 @@ export const checkoutEvent: SignificantEventResponse = {
       type: 'entity',
       subtype: 'service',
       name: 'checkout-api',
-      stream_name: 'logs.checkout-api',
+      source_id: 'logs.checkout-api',
     },
   ],
   blast_radius: [
@@ -41,15 +41,15 @@ export const checkoutEvent: SignificantEventResponse = {
       subtype: 'service',
       feature_id: 'checkout-api',
       name: 'checkout-api',
-      stream_name: 'logs.checkout-api',
+      source_id: 'logs.checkout-api',
     },
-    // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
+    // Spans a second source so one event alone can show a partial knowledge-indicator failure.
     {
       type: 'entity',
       subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
-      stream_name: 'logs.inventory-service',
+      source_id: 'logs.inventory-service',
     },
   ],
 };
@@ -58,7 +58,7 @@ export const inventoryEvent: SignificantEvent = {
   '@timestamp': '2026-07-24T08:16:00.000Z',
   event_id: 'inventory-errors',
   status: 'active',
-  stream_names: ['logs.inventory-service'],
+  source_ids: ['logs.inventory-service'],
   title: 'Inventory service error rate is elevated',
   summary:
     'The inventory service is returning more `503` responses while refreshing product availability.',
@@ -70,7 +70,7 @@ export const inventoryEvent: SignificantEvent = {
       type: 'entity',
       subtype: 'service',
       name: 'inventory-service',
-      stream_name: 'logs.inventory-service',
+      source_id: 'logs.inventory-service',
     },
   ],
   blast_radius: [
@@ -79,7 +79,7 @@ export const inventoryEvent: SignificantEvent = {
       subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
-      stream_name: 'logs.inventory-service',
+      source_id: 'logs.inventory-service',
     },
   ],
 };
@@ -88,7 +88,7 @@ export const resolvedPaymentEvent: SignificantEvent = {
   '@timestamp': '2026-07-23T22:05:00.000Z',
   event_id: 'payment-timeouts',
   status: 'inactive',
-  stream_names: ['logs.payment-gateway'],
+  source_ids: ['logs.payment-gateway'],
   title: 'Payment gateway timeouts',
   summary: 'Payment gateway timeout rates returned to their expected baseline.',
   severity: 'medium',
@@ -106,7 +106,7 @@ export const inactiveShippingEvent: SignificantEvent = {
   '@timestamp': '2026-07-23T19:20:00.000Z',
   event_id: 'shipping-queue-depth',
   status: 'inactive',
-  stream_names: ['logs.shipping-service'],
+  source_ids: ['logs.shipping-service'],
   title: 'Shipping queue depth briefly increased',
   summary: 'The queue increase was caused by a planned batch import and requires no action.',
   severity: 'low',
@@ -121,7 +121,7 @@ export const nightshiftEvents: SignificantEvent[] = [
 
 export const checkoutDetectionSignal: SignalEntry = {
   type: 'detection',
-  stream_name: 'logs.checkout-api',
+  source_id: 'logs.checkout-api',
   description:
     'P95 latency for `checkout-api` rose from 420 ms to 2.8 s immediately after the latest deployment.',
   verdict: 'confirms',
@@ -144,11 +144,13 @@ export const checkoutEventWithSignals: SignificantEventResponse = {
   signals: [checkoutDetectionSignal],
 };
 
+const CHECKOUT_SOURCE_ID = 'logs.checkout-api';
+
 export const checkoutDetection: LifecycleDetection = {
   detection_id: 'checkout-latency-detection',
   rule_name: 'checkout-api-p95-latency',
   rule_uuid: 'checkout-latency-rule',
-  stream_name: 'logs.checkout-api',
+  source_id: CHECKOUT_SOURCE_ID,
   change_point_type: 'spike',
   '@timestamp': '2026-07-24T09:42:00.000Z',
 };
@@ -170,7 +172,7 @@ export const checkoutOccurrences: QueryOccurrencesResponse = {
       },
       severity_score: 80,
       rule_uuid: checkoutDetection.rule_uuid ?? 'checkout-latency-rule',
-      stream_name: checkoutDetection.stream_name,
+      source_id: CHECKOUT_SOURCE_ID,
       occurrences: [
         { date: '2026-07-24T09:20:00.000Z', count: 2 },
         { date: '2026-07-24T09:25:00.000Z', count: 3 },
@@ -196,7 +198,7 @@ export const checkoutOccurrences: QueryOccurrencesResponse = {
 export const checkoutFeature: Feature = {
   uuid: 'checkout-api',
   id: 'checkout-api-service',
-  stream_name: 'logs.checkout-api',
+  source_id: 'logs.checkout-api',
   type: 'entity',
   subtype: 'service',
   title: 'checkout-api',
@@ -240,7 +242,7 @@ export const streamOnlyEntity: Feature = {
   id: 'logs.checkout-api',
   subtype: 'stream',
   title: 'logs.checkout-api',
-  description: 'The source stream associated with the checkout latency detection.',
+  description: 'The source associated with the checkout latency detection.',
   confidence: 0,
   evidence: [],
 };

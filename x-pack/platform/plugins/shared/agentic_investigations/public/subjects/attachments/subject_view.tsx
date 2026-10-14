@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import moment from 'moment';
+import React, { useMemo, useState } from 'react';
+import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
@@ -20,7 +20,6 @@ import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
   alertsCountLabel,
-  nestedAlertTriggerLabel,
   subjectTriggerLabel,
 } from './translations';
 
@@ -106,7 +105,7 @@ interface CompactRowProps {
   iconType: IconType;
   tone: SubjectIconTone;
   title: string;
-  description: string;
+  description: React.ReactNode;
   /** Makes the row a link; Slack threads open in a new tab. */
   href?: string;
   isExternal?: boolean;
@@ -247,18 +246,38 @@ const CompactRow = ({
   );
 };
 
-const NESTED_ALERT_START_FORMAT = 'MMM D, HH:mm:ss';
-
 /**
  * The subdued line under a row's title. Alerts listed under an "N alerts" row usually share the
  * rule name, so they also show when each alert started.
  */
-const getSubjectDescription = ({ type, snapshot }: SubjectRowData, isNested: boolean): string => {
+const getSubjectDescription = (
+  { type, snapshot }: SubjectRowData,
+  isNested: boolean
+): React.ReactNode => {
   const start =
-    type === 'alert' && isNested && snapshot?.start ? moment(snapshot.start) : undefined;
-  return start?.isValid()
-    ? nestedAlertTriggerLabel(start.format(NESTED_ALERT_START_FORMAT))
-    : subjectTriggerLabel(type);
+    type === 'alert' && isNested && snapshot?.start ? new Date(snapshot.start) : undefined;
+  if (start === undefined || Number.isNaN(start.getTime())) {
+    return subjectTriggerLabel(type);
+  }
+  return (
+    <FormattedMessage
+      id="xpack.agenticInvestigations.subjects.nestedAlertTriggerLabel"
+      defaultMessage="Trigger · Alert · {start}"
+      values={{
+        start: (
+          <FormattedTime
+            value={start}
+            month="short"
+            day="numeric"
+            hour="2-digit"
+            minute="2-digit"
+            second="2-digit"
+            hourCycle="h23"
+          />
+        ),
+      }}
+    />
+  );
 };
 
 /**
@@ -293,32 +312,34 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({ subjects }) => {
   const { euiTheme } = useEuiTheme();
   const [isAlertsExpanded, setIsAlertsExpanded] = useState(false);
-  const alerts = subjects.filter(({ type }) => type === 'alert');
-  const firstAlert = alerts.length > 1 ? alerts[0] : undefined;
+  const alerts = useMemo(() => subjects.filter(({ type }) => type === 'alert'), [subjects]);
 
-  const rows = subjects.flatMap((subject) => {
-    if (firstAlert === undefined || subject.type !== 'alert') {
-      return [<SubjectRow key={subjectKey(subject)} subject={subject} />];
-    }
-    if (subject !== firstAlert) {
-      return [];
-    }
-    return [
-      <CompactRow
-        key="alerts"
-        iconType={SUBJECT_ICONS.alert}
-        tone={SUBJECT_ICON_TONES.alert}
-        title={alertsCountLabel(alerts.length)}
-        description={TRIGGER_LABEL}
-        onToggle={() => setIsAlertsExpanded((expanded) => !expanded)}
-        isExpanded={isAlertsExpanded}
-        data-test-subj="investigationSubject-alerts"
-      />,
-      ...(isAlertsExpanded
-        ? alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)
-        : []),
-    ];
-  });
+  const rows = useMemo(() => {
+    const firstAlert = alerts.length > 1 ? alerts[0] : undefined;
+    return subjects.flatMap((subject) => {
+      if (firstAlert === undefined || subject.type !== 'alert') {
+        return [<SubjectRow key={subjectKey(subject)} subject={subject} />];
+      }
+      if (subject !== firstAlert) {
+        return [];
+      }
+      return [
+        <CompactRow
+          key="alerts"
+          iconType={SUBJECT_ICONS.alert}
+          tone={SUBJECT_ICON_TONES.alert}
+          title={alertsCountLabel(alerts.length)}
+          description={TRIGGER_LABEL}
+          onToggle={() => setIsAlertsExpanded((expanded) => !expanded)}
+          isExpanded={isAlertsExpanded}
+          data-test-subj="investigationSubject-alerts"
+        />,
+        ...(isAlertsExpanded
+          ? alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)
+          : []),
+      ];
+    });
+  }, [subjects, alerts, isAlertsExpanded]);
 
   return (
     <EuiPanel

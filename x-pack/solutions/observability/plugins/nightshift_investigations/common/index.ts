@@ -10,6 +10,8 @@ import type { InvestigationTriggerType } from './workflows/triggers';
 
 export type { Severity } from '@kbn/significant-events-schema';
 
+export { MAX_RULE_NAMES } from './automation_limits';
+
 export {
   INVESTIGATION_SUBJECT_TYPES,
   type InvestigationSubjectType,
@@ -24,6 +26,7 @@ export type {
   AlertSnapshotEvaluation,
   AlertSnapshotGroup,
   InvestigationContext,
+  InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
 
@@ -31,13 +34,17 @@ export {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   freeFormContextSchema,
+  investigationNotificationDestinationSchema,
+  investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
+  MAX_INVESTIGATION_NOTIFICATIONS,
 } from './schemas';
 
 import type {
   AlertInvestigationContext,
   InvestigationContext,
+  InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
 
@@ -53,9 +60,16 @@ export interface StartInvestigationRequest {
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
-  stream_names?: string[];
+  /**
+   * Nightshift source ids the investigation should scope its queries to. The
+   * investigation workflow resolves them to slug and ES|QL view.
+   */
+  source_ids?: string[];
+  /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
   context?: InvestigationContext | AlertInvestigationContext;
+  /** Destinations receiving investigation lifecycle messages. */
+  notificationDestinations?: InvestigationNotificationDestination[];
 }
 
 export interface StartInvestigationResponse {
