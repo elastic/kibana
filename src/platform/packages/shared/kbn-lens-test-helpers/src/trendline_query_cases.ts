@@ -155,6 +155,27 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedMetricFields: ['avg_bytes'],
     },
     {
+      description: 'FROM query with renamed source time field before STATS',
+      sourceQuery: `FROM ${index} | RENAME @timestamp AS event_time | STATS avg_bytes = AVG(bytes)`,
+      expectedQuery: `FROM ${index} | RENAME @timestamp AS event_time | STATS avg_bytes = AVG(bytes) BY BUCKET(event_time, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(event_time, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['avg_bytes'],
+    },
+    {
+      description: 'TS query with renamed TBUCKET column and KEEP',
+      sourceQuery: `TS ${index} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY bucket = TBUCKET(100) | RENAME bucket AS time | KEEP avg_bytes`,
+      expectedQuery: `TS ${index} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY bucket = TBUCKET(100) | RENAME bucket AS time | KEEP avg_bytes, time`,
+      expectedTimeField: 'time',
+      expectedMetricFields: ['avg_bytes'],
+    },
+    {
+      description: 'FROM query with aliased TBUCKET and KEEP after STATS',
+      sourceQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY time_bucket = TBUCKET(100) | KEEP avg_bytes`,
+      expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY time_bucket = TBUCKET(100) | KEEP avg_bytes, time_bucket`,
+      expectedTimeField: 'time_bucket',
+      expectedMetricFields: ['avg_bytes'],
+    },
+    {
       description: 'FROM query with KEEP after STATS',
       sourceQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) | KEEP avg_bytes`,
       expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend) | KEEP avg_bytes, \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\``,
