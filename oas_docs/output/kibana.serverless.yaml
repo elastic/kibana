@@ -950,7 +950,14 @@ paths:
 
         List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-agents
-      parameters: []
+      parameters:
+        - description: When true, hidden agents (such as built-in system agents) are included in the response.
+          in: query
+          name: include_hidden
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -974,6 +981,7 @@ paths:
                         permissions:
                           update_access_control: false
                           update_agent: false
+                          update_approvals: false
                         type: chat
                       - access_control:
                           access_mode: private
@@ -1000,6 +1008,7 @@ paths:
                         permissions:
                           update_access_control: true
                           update_agent: true
+                          update_approvals: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -1096,6 +1105,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1528,6 +1562,7 @@ paths:
                     permissions:
                       update_access_control: true
                       update_agent: true
+                      update_approvals: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1631,6 +1666,31 @@ paths:
                         type: string
                       maxItems: 100
                       type: array
+                    approvals:
+                      additionalProperties: false
+                      description: Auto-approval defaults applied to every run of this agent.
+                      type: object
+                      properties:
+                        auto_approved_apis:
+                          additionalProperties: false
+                          description: Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.
+                          type: object
+                          properties:
+                            elasticsearch:
+                              description: Elasticsearch APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                            kibana:
+                              description: Kibana APIs pre-approved for every run of this agent. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API. Entries are not checked against the known APIs, and one that matches no API has no effect.
+                              items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
+                      x-state: Generally available
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -20693,7 +20753,9 @@ paths:
                         - full_name
                         - username
                     customFields:
-                      description: Custom fields configuration details.
+                      deprecated: true
+                      description: |
+                        Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                       items:
                         type: object
                         properties:
@@ -20902,7 +20964,9 @@ paths:
                       - full_name
                       - username
                   customFields:
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -21112,7 +21176,9 @@ paths:
                       - full_name
                       - username
                   customFields:
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
                     items:
                       type: object
                       properties:
@@ -46518,6 +46584,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -46852,6 +46931,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -47079,6 +47171,19 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      serviceIds:
+                        description: Service IDs active when the stack was last launched or updated.
+                        items:
+                          maxLength: 128
+                          minLength: 1
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      stackArn:
+                        description: CloudFormation stack ARN pasted by the user post-launch.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
                       stackName:
                         description: CloudFormation stack name (128-char AWS limit).
                         maxLength: 128
@@ -47232,6 +47337,19 @@ paths:
                                 - unified
                                 - otel
                                 - crowdstrike
+                              type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
                               type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
@@ -47493,6 +47611,19 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              serviceIds:
+                                description: Service IDs active when the stack was last launched or updated.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 1000
+                                type: array
+                              stackArn:
+                                description: CloudFormation stack ARN pasted by the user post-launch.
+                                maxLength: 2048
+                                minLength: 1
                                 type: string
                               stackName:
                                 description: CloudFormation stack name (128-char AWS limit).
@@ -140617,11 +140748,23 @@ components:
         maxLength: 30000
         type: string
       description: |
-        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+        Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.
+      example:
+        escalated_as_boolean: 'true'
+        priority_as_keyword: high
+        ticket_number_as_integer: '4287'
       maxProperties: 500
       title: Case extended fields
       type: object
       x-state: Technical preview; added in 9.5.0
+    Cases_case_extended_fields_labels:
+      additionalProperties:
+        type: string
+      description: |
+        A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.
+      example:
+        priority_as_keyword: Priority
+      type: object
     Cases_case_observable:
       description: A single observable attached to a case.
       properties:
@@ -140752,7 +140895,8 @@ components:
         created_by:
           $ref: '#/components/schemas/Cases_case_response_created_by_properties'
         customFields:
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -140786,6 +140930,15 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
+        extended_fields_labels:
+          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -140928,7 +141081,8 @@ components:
         created_by:
           $ref: '#/components/schemas/Cases_case_response_created_by_properties'
         customFields:
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -140969,6 +141123,8 @@ components:
             The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
           type: object
           x-state: Technical preview; added in 9.5.0
+        extended_fields_labels:
+          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -141442,8 +141598,9 @@ components:
             - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
             - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
         customFields:
+          deprecated: true
           description: |
-            Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+            Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
           items:
             type: object
             properties:
@@ -142294,7 +142451,9 @@ components:
             - name
             - type
         customFields:
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -142541,6 +142700,9 @@ components:
       title: Template write request
       type: object
     Cases_templates:
+      deprecated: true
+      description: |
+        Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
       items:
         type: object
         properties:
@@ -142692,7 +142854,9 @@ components:
             - name
             - type
         customFields:
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
           items:
             type: object
             properties:
@@ -142777,8 +142941,9 @@ components:
                   - $ref: '#/components/schemas/Cases_connector_properties_servicenow_sir'
                   - $ref: '#/components/schemas/Cases_connector_properties_swimlane'
               customFields:
+                deprecated: true
                 description: |
-                  Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+                  Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
                 items:
                   type: object
                   properties:
@@ -142825,6 +142990,24 @@ components:
                 $ref: '#/components/schemas/Cases_case_status'
               tags:
                 $ref: '#/components/schemas/Cases_case_tags'
+              template:
+                description: |
+                  The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.
+                nullable: true
+                type: object
+                properties:
+                  id:
+                    description: The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+                    type: string
+                  version:
+                    description: |
+                      The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.
+                    minimum: 1
+                    type: integer
+                required:
+                  - id
+                  - version
+                x-state: Technical preview
               title:
                 $ref: '#/components/schemas/Cases_case_title'
               version:
@@ -154213,6 +154396,18 @@ components:
                               - sum
                               - min
                               - max
+                            type: string
+                          grid_sort_direction:
+                            description: Direction of the metrics grid order. If omitted, defaults to ascending.
+                            enum:
+                              - asc
+                              - desc
+                            type: string
+                          grid_sort_field:
+                            description: Criterion used to order metrics in the metrics grid. `recency` orders by the metrics the viewing user explored most recently in their own browser. If omitted, metrics are ordered alphabetically.
+                            enum:
+                              - alphabetically
+                              - recency
                             type: string
                           header_row_height:
                             anyOf:
@@ -177292,7 +177487,7 @@ components:
       properties:
         fill:
           default: solid
-          description: 'Area fill type: solid or gradient. Defaults to solid.'
+          description: 'Area fill type: solid or gradient.'
           enum:
             - solid
             - gradient
