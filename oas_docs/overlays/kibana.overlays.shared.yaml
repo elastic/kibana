@@ -226,6 +226,19 @@ actions:
                   $ref: '../examples/get_spaces_response1.yaml'
                 getSpacesResponseExample2:
                   $ref: '../examples/get_spaces_response2.yaml'
+# Hide query parameters that are only used internally by the Synthetics app
+  - target: "$.paths['/api/synthetics/monitors']['get'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
+  - target: "$.paths['/api/synthetics/monitors']['post'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
+  - target: "$.paths['/api/synthetics/monitors/{id}']['get'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
+  - target: "$.paths['/api/synthetics/monitors/{id}']['put'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
 # Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces

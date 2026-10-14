@@ -134213,18 +134213,6 @@ paths:
               type: string
             maxItems: 50
             type: array
-        - description: For internal use only.
-          in: query
-          name: internal
-          required: false
-          schema:
-            anyOf:
-              - enum:
-                  - 'true'
-                  - 'false'
-                type: string
-              - type: boolean
-            default: false
       responses:
         '200':
           content:
@@ -134333,39 +134321,6 @@ paths:
                   - 'false'
                 type: string
               - type: boolean
-        - description: For internal use only.
-          in: query
-          name: gettingStarted
-          required: false
-          schema:
-            anyOf:
-              - enum:
-                  - 'true'
-                  - 'false'
-                type: string
-              - type: boolean
-        - description: For internal use only.
-          in: query
-          name: internal
-          required: false
-          schema:
-            anyOf:
-              - enum:
-                  - 'true'
-                  - 'false'
-                type: string
-              - type: boolean
-            default: false
-        - description: For internal use only.
-          in: query
-          name: savedObjectType
-          required: false
-          schema:
-            default: synthetics-monitor-multi-space
-            enum:
-              - synthetics-monitor-multi-space
-              - synthetics-monitor
-            type: string
       requestBody:
         content:
           application/json:
@@ -134880,18 +134835,6 @@ paths:
             maxLength: 1024
             minLength: 1
             type: string
-        - description: For internal use only.
-          in: query
-          name: internal
-          required: false
-          schema:
-            anyOf:
-              - enum:
-                  - 'true'
-                  - 'false'
-                type: string
-              - type: boolean
-            default: false
       responses:
         '200':
           content:
@@ -134990,18 +134933,6 @@ paths:
             maxLength: 1024
             minLength: 1
             type: string
-        - description: For internal use only.
-          in: query
-          name: internal
-          required: false
-          schema:
-            anyOf:
-              - enum:
-                  - 'true'
-                  - 'false'
-                type: string
-              - type: boolean
-            default: false
       requestBody:
         content:
           application/json:
