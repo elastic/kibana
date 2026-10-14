@@ -235,7 +235,7 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow">
                   {i18n.translate('xpack.aiAnonymizationSettings.patternTester.valuesMasked', {
-                    defaultMessage: '{count} values masked',
+                    defaultMessage: '{count, plural, one {# value} other {# values}} masked',
                     values: { count: result.stats.valuesMasked },
                   })}
                 </EuiBadge>
@@ -243,7 +243,7 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow">
                   {i18n.translate('xpack.aiAnonymizationSettings.patternTester.uniqueValues', {
-                    defaultMessage: '{count} unique values',
+                    defaultMessage: '{count, plural, one {# unique value} other {# unique values}}',
                     values: { count: result.stats.uniqueValues },
                   })}
                 </EuiBadge>
