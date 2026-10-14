@@ -175,13 +175,17 @@ const createPersistentHarness = () => {
     updateWorkflow,
     createService: (
       agentBuilder?: AgentBuilderPluginStart,
-      getBlockingReasons: GetWorkerBlockingReasons = async () => []
+      getBlockingReasons: GetWorkerBlockingReasons = async () => [],
+      agentFns: {
+        ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+        requireAgentForSpace?: (spaceId: string) => Promise<void>;
+      } = {}
     ) => {
       return new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
-        { agentBuilder },
+        { agentBuilder, ...agentFns },
         {},
         async (_request, registration, options) => {
           await install(registration.id, options);
@@ -224,6 +228,78 @@ describe('WorkersService', () => {
       what: 'a worker that is enabled without a service account',
     });
     expect(harness.install).not.toHaveBeenCalled();
+  });
+
+  describe('ensuring the shared agent', () => {
+    it('requires it in the space before enabling a worker', async () => {
+      const harness = createPersistentHarness();
+      const ensureAgentForSpace = jest.fn(async () => undefined);
+      const requireAgentForSpace = jest.fn(async (_spaceId: string) => {
+        // The worker must not be able to run before the agent exists.
+        expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      });
+
+      const result = await harness
+        .createService(undefined, undefined, { ensureAgentForSpace, requireAgentForSpace })
+        .update(
+          RULE_TUNING,
+          { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          'space-a',
+          request
+        );
+
+      expect(result.outcome).toBe('updated');
+      expect(requireAgentForSpace).toHaveBeenCalledWith('space-a');
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        reportedWorkflowId(RULE_TUNING, 'space-a'),
+        { enabled: true },
+        'space-a',
+        request
+      );
+    });
+
+    it('does not enable the worker when the agent cannot be stored', async () => {
+      const harness = createPersistentHarness();
+      const requireAgentForSpace = jest.fn(async () => {
+        throw new Error('agent store unavailable');
+      });
+
+      await expect(
+        harness
+          .createService(undefined, undefined, { requireAgentForSpace })
+          .update(
+            RULE_TUNING,
+            { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+            'space-a',
+            request
+          )
+      ).rejects.toThrow('agent store unavailable');
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('uses the best-effort ensure, not the required one, when listing workers', async () => {
+      const harness = createPersistentHarness();
+      const ensureAgentForSpace = jest.fn(async () => undefined);
+      const requireAgentForSpace = jest.fn(async () => undefined);
+
+      await harness
+        .createService(undefined, undefined, { ensureAgentForSpace, requireAgentForSpace })
+        .list(request, 'space-a');
+
+      expect(ensureAgentForSpace).toHaveBeenCalledWith('space-a');
+      expect(requireAgentForSpace).not.toHaveBeenCalled();
+    });
+
+    it('does not require it when turning a worker off', async () => {
+      const harness = createPersistentHarness();
+      const requireAgentForSpace = jest.fn(async () => undefined);
+
+      await harness
+        .createService(undefined, undefined, { requireAgentForSpace })
+        .update(RULE_TUNING, { enabled: false }, 'space-a', request);
+
+      expect(requireAgentForSpace).not.toHaveBeenCalled();
+    });
   });
 
   describe('an already-enabled worker with no stored account', () => {
