@@ -206,7 +206,7 @@ describe('inboundEventsRoute', () => {
     await handler({}, request, res);
 
     expect(res.custom).toHaveBeenCalledWith({ statusCode: 202, body });
-    expect(bodySchema.validate(res.custom.mock.calls[0][0].body)).toEqual(body);
+    expect(bodySchema.validate(jest.mocked(res.custom).mock.calls[0][0].body)).toEqual(body);
     expect(() => bodySchema.validate(undefined)).toThrow();
   });
 
