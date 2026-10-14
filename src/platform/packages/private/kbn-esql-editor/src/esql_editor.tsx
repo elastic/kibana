@@ -400,7 +400,8 @@ const ESQLEditorInternal = function ESQLEditor({
         return;
       }
 
-      if (!editorRef.current) {
+      // Focus may have moved on since (e.g. to the visor input); triggerSuggest would steal it back
+      if (!editorRef.current?.hasTextFocus()) {
         return;
       }
 

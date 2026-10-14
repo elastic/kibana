@@ -12,8 +12,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { ContinuousOnboardingSection } from './components/continuous_onboarding_section';
 import { CostEstimate } from './components/cost_estimate';
-import { DetectionPausedCallout } from './components/detection_paused_callout';
-import { DeveloperModeBadge } from './components/developer_mode_badge';
+import { DeveloperModeBadge } from '../components/ui/developer_mode_badge';
 import { MaintenanceSection } from './components/maintenance_section';
 import { RunLimitsSection } from './components/run_limits_section';
 import { ScheduledDiscoverySection } from './components/scheduled_discovery_section';
@@ -92,7 +91,6 @@ export const DetectionsSettingsTab = () => {
 
   return (
     <>
-      <DetectionPausedCallout />
       {!form.canEditSettings && <SettingsNoPermissionCallout />}
       <SettingsSection
         title={i18n.translate('xpack.nightshift.settings.detectionProcessTitle', {
