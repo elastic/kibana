@@ -2612,6 +2612,41 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       expect(promptStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
     });
 
+    describe('token usage attribution', () => {
+      const promptStep = findStepByName(workflow.steps, PROMPT_STEP) as Record<string, string>;
+      const init = findStepByName(workflow.steps, 'set_workflow_variables') as {
+        with: Record<string, unknown>;
+      };
+      const callerOverrides = findStepByName(workflow.steps, 'set_caller_overrides') as {
+        with: Record<string, unknown>;
+      };
+      const attributionFor = (variables: Record<string, unknown>) => ({
+        pluginId: engine.parseAndRenderSync(promptStep['plugin-id'], { variables }),
+        aggregateBy: engine.parseAndRenderSync(promptStep['aggregate-by'], { variables }),
+      });
+
+      it('attributes standalone prompt calls to Alert Analysis, with no parent', () => {
+        expect(attributionFor(init.with)).toEqual({
+          pluginId: 'security_alert_analysis',
+          aggregateBy: '',
+        });
+      });
+
+      it('attributes Worker prompt calls to the Alert Triage Worker under the Alertzero parent', () => {
+        expect(attributionFor({ ...init.with, ...callerOverrides.with })).toEqual({
+          pluginId: 'alertzero_alert_triage',
+          aggregateBy: 'alertzero_parent',
+        });
+      });
+
+      it("leaves the agent's attribution alone, so ai.agent calls keep counting as Agent Builder", () => {
+        const agentStep = findStepByName(workflow.steps, AGENT_STEP) as Record<string, unknown>;
+
+        expect(agentStep).not.toHaveProperty('plugin-id');
+        expect(agentStep).not.toHaveProperty('aggregate-by');
+      });
+    });
+
     it('accepts the same large reply as the agent', () => {
       const agentStep = findStepByName(workflow.steps, 'runAgent_step') as Record<string, unknown>;
       const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as Record<

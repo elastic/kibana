@@ -358,6 +358,11 @@ steps:
       # Sibling of connector_id; apply_caller_input_overrides sets the feature id when the
       # Worker supplies connectorIdByFeature. analysis_enabled and the batch steps check either.
       connector_id_by_feature: ""
+      # Feature ids runPrompt_step attributes its LLM calls to (token usage feature_id /
+      # parent_feature_id, EIS use-case header). apply_caller_input_overrides swaps in the Worker's
+      # ids. runAgent_step does not use them, so it keeps Agent Builder's own attribution.
+      prompt_plugin_id: security_alert_analysis
+      prompt_aggregate_by: ""
       # True when each batch is classified with ai.prompt instead of ai.agent. The space's
       # "use a prompt" setting sets it; the Worker path always sets it.
       use_prompt: false
@@ -445,6 +450,10 @@ steps:
           # The Worker always classifies with ai.prompt, whatever the space's setting says: no
           # agent or conversation is involved, so the space's agent is not used on this path.
           use_prompt: true
+          # Attribute the Worker's prompt calls to the Alert Triage Worker, rolled up under
+          # Alertzero like the other Workers.
+          prompt_plugin_id: alertzero_alert_triage
+          prompt_aggregate_by: alertzero_parent
           # When the Worker passes investigationConversationId, store it for progress
           # comment steps guarded by calledByWorker.
           investigation_conversation_id: "{{ inputs.investigationConversationId }}"
@@ -1611,6 +1620,10 @@ steps:
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch (see
             # runAgent_step).
             max-step-size: '10mb'
+            # Without these the call is logged with no feature id and EIS sees the generic
+            # "inference" use case. aggregate-by is blank (unset) on the standalone path.
+            plugin-id: "{{ variables.prompt_plugin_id }}"
+            aggregate-by: "{{ variables.prompt_aggregate_by }}"
             on-failure:
               retry:
                 max-attempts: 3
