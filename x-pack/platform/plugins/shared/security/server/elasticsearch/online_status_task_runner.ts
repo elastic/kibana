@@ -41,7 +41,8 @@ export const createOnlineStatusTaskRunner = (
       });
 
       previousRun = run;
-      run.then(() => subscriber.complete());
+      // `run` never rejects, since the task's errors are caught above.
+      void run.then(() => subscriber.complete());
 
       return () => abortController.abort();
     });
