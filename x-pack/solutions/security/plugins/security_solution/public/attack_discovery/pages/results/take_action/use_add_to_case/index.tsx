@@ -10,6 +10,7 @@ import type {
   CaseAttachmentWithoutOwner,
   CaseAttachmentsWithoutOwner,
 } from '@kbn/cases-plugin/public/types';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
@@ -28,8 +29,14 @@ export interface AddToCaseParams {
   alertIds: string[];
   markdownComments: string[];
   replacements?: Replacements;
-  /** When non-empty, posted verbatim instead of the payload built from `alertIds` / `markdownComments`. */
-  attachments?: CaseAttachmentsWithoutOwner;
+  /**
+   * When provided, posted verbatim instead of the payload built from `alertIds` /
+   * `markdownComments`. Resolved once the user has picked (or created) a case, so callers whose
+   * payload depends on the target case — its owner, or how many alerts it already holds — can
+   * build it against the real thing. `theCase` is undefined only before the create-case flyout
+   * has a case to hand back.
+   */
+  getAttachments?: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
 }
 
 export const useAddToCase = ({
@@ -64,9 +71,9 @@ export const useAddToCase = ({
   });
 
   const onAddToCase = useCallback(
-    ({ alertIds, attachments, markdownComments, replacements }: AddToCaseParams) => {
-      if (attachments != null && attachments.length > 0) {
-        openSelectCaseModal({ getAttachments: () => attachments });
+    ({ alertIds, getAttachments, markdownComments, replacements }: AddToCaseParams) => {
+      if (getAttachments != null) {
+        openSelectCaseModal({ getAttachments: ({ theCase }) => getAttachments(theCase) });
         return;
       }
 

@@ -9,6 +9,8 @@ import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import type { CaseUI } from '@kbn/cases-plugin/common';
+import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 
 import { useAddToCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
 import { APP_ID } from '../../../../../../common';
@@ -86,16 +88,24 @@ export const useBulkAttackCaseItems = ({
     title,
   });
 
-  const attackAttachments = useMemo(() => {
-    if (!canAttachAttack || attackToAttach == null) {
-      return undefined;
-    }
+  const buildAttachmentsForCase = useCallback(
+    (theCase?: CaseUI) => {
+      if (!canAttachAttack || attackToAttach == null) {
+        return undefined;
+      }
 
-    return buildAttackAttachments({
-      ...attackToAttach,
-      alertsIndex: alertsIndexPattern ?? '',
-    });
-  }, [alertsIndexPattern, attackToAttach, canAttachAttack]);
+      return buildAttackAttachments(
+        {
+          ...attackToAttach,
+          alertsIndex: alertsIndexPattern ?? '',
+        },
+        // A case holds at most MAX_ALERTS_PER_CASE alerts in total, so the attack's alerts have to
+        // fit in whatever the chosen case has left. A case created from the flyout has none yet.
+        { maxAlerts: MAX_ALERTS_PER_CASE - (theCase?.totalAlerts ?? 0) }
+      );
+    },
+    [alertsIndexPattern, attackToAttach, canAttachAttack]
+  );
 
   const onAddToCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
     async (alertItems) => {
@@ -112,29 +122,41 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
-      if (attackAttachments == null) {
+      if (!canAttachAttack) {
         onAddToCase({ alertIds, markdownComments });
       } else {
         onAddToCase({
           alertIds: [],
           markdownComments: [],
-          attachments: attackAttachments.attachments,
+          // Built per case rather than up front: how many of the attack's alerts fit depends on
+          // how many the chosen case already holds, which isn't known until the user picks one.
+          getAttachments: (theCase) => {
+            const attackAttachments = buildAttachmentsForCase(theCase);
+
+            if (attackAttachments == null) {
+              return [];
+            }
+
+            if (attackAttachments.truncated) {
+              // Raised as the attachments are posted, so it describes an attach that is actually
+              // happening — but the request may still fail, hence the prospective wording.
+              addWarning({
+                title: ATTACK_ALERTS_TRUNCATED({
+                  alertCount: attackAttachments.alertCount,
+                  attachedAlertCount: attackAttachments.attachedAlertCount,
+                  maxAlertsPerCase: MAX_ALERTS_PER_CASE,
+                }),
+              });
+            }
+
+            return attackAttachments.attachments;
+          },
         });
-        if (attackAttachments.truncated) {
-          // `onAddToCase` only opens the case selector, so nothing is attached yet and the user
-          // can still cancel. The message is worded prospectively for that reason.
-          addWarning({
-            title: ATTACK_ALERTS_TRUNCATED({
-              alertCount: attackAttachments.alertCount,
-              attachedAlertCount: attackAttachments.attachedAlertCount,
-            }),
-          });
-        }
       }
 
       closePopover?.();
     },
-    [addWarning, attackAttachments, closePopover, onAddToCase]
+    [addWarning, buildAttachmentsForCase, canAttachAttack, closePopover, onAddToCase]
   );
 
   const items = useMemo<BulkActionsConfig[]>(

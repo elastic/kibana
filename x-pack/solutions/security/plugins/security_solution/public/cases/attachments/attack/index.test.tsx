@@ -447,6 +447,54 @@ describe('buildAttackAttachments', () => {
     expect(truncated).toBe(false);
   });
 
+  it('caps the batched alert ids at the room the target case has left', () => {
+    const alertIds = Array.from({ length: 10 }, (_, i) => `alert-${i}`);
+
+    const { attachments, alertCount, attachedAlertCount, truncated } = buildAttackAttachments(
+      attackToAttach({ alertIds }),
+      { maxAlerts: 4 }
+    );
+
+    expect(attachments[1].attachmentId).toEqual(['alert-0', 'alert-1', 'alert-2', 'alert-3']);
+    expect(attachedAlertCount).toBe(4);
+    expect(alertCount).toBe(10);
+    expect(truncated).toBe(true);
+  });
+
+  it('drops the alert attachment when the target case has no room left', () => {
+    const { attachments, attachedAlertCount, truncated } = buildAttackAttachments(
+      attackToAttach({ alertIds: ['alert-1', 'alert-2'] }),
+      { maxAlerts: 0 }
+    );
+
+    expect(attachments).toHaveLength(1);
+    expect(attachedAlertCount).toBe(0);
+    expect(truncated).toBe(true);
+  });
+
+  it.each([-5, MAX_ALERTS_PER_CASE + 50])(
+    'clamps an out-of-range room of %s into the allowed range',
+    (maxAlerts) => {
+      const alertIds = Array.from({ length: MAX_ALERTS_PER_CASE + 5 }, (_, i) => `alert-${i}`);
+
+      const { attachedAlertCount } = buildAttackAttachments(attackToAttach({ alertIds }), {
+        maxAlerts,
+      });
+
+      expect(attachedAlertCount).toBe(maxAlerts < 0 ? 0 : MAX_ALERTS_PER_CASE);
+    }
+  );
+
+  it('does not report truncation when every alert fits in the room left', () => {
+    const { attachedAlertCount, truncated } = buildAttackAttachments(
+      attackToAttach({ alertIds: ['alert-1', 'alert-2'] }),
+      { maxAlerts: 2 }
+    );
+
+    expect(attachedAlertCount).toBe(2);
+    expect(truncated).toBe(false);
+  });
+
   it('omits the optional metadata fields the caller did not supply', () => {
     const { attachments } = buildAttackAttachments({
       id: 'attack-id-1',

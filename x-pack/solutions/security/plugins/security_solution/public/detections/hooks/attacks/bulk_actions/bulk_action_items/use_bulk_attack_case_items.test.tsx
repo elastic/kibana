@@ -12,6 +12,7 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 import { useBulkAttackCaseItems } from './use_bulk_attack_case_items';
 import {
@@ -229,6 +230,15 @@ describe('useBulkAttackCaseItems', () => {
       },
     ];
 
+    /**
+     * Resolves the attachments the hook builds for a case, the way the case selector does once
+     * the user has picked one. `theCase` is undefined on the create-a-new-case path.
+     */
+    const resolveAttachments = (theCase?: Partial<CaseUI>) => {
+      const { getAttachments } = onAddToCase.mock.calls[0][0];
+      return getAttachments(theCase as CaseUI);
+    };
+
     it('posts the attack attachment payload when the flag is on', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
@@ -237,8 +247,17 @@ describe('useBulkAttackCaseItems', () => {
       expect(onAddToCase).toHaveBeenCalledWith({
         alertIds: [],
         markdownComments: [],
-        attachments: expectedAttachments,
+        getAttachments: expect.any(Function),
       });
+      expect(resolveAttachments({ totalAlerts: 0 })).toEqual(expectedAttachments);
+    });
+
+    it('builds the payload for a case created from the flyout, which holds no alerts yet', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      await clickAddToCase();
+
+      expect(resolveAttachments()).toEqual(expectedAttachments);
     });
 
     it('does not create a markdown user comment when the flag is on', async () => {
@@ -246,8 +265,7 @@ describe('useBulkAttackCaseItems', () => {
 
       await clickAddToCase();
 
-      const { attachments } = onAddToCase.mock.calls[0][0];
-      expect(attachments).not.toEqual(
+      expect(resolveAttachments({ totalAlerts: 0 })).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ type: COMMENT_ATTACHMENT_TYPE })])
       );
     });
@@ -273,7 +291,7 @@ describe('useBulkAttackCaseItems', () => {
       });
     });
 
-    it('warns when the attack carries more alerts than a case accepts in one request', async () => {
+    it('warns when the attack carries more alerts than a case holds', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
       const tooManyAlertIds = Array.from(
         { length: MAX_ALERTS_PER_CASE + 5 },
@@ -282,16 +300,66 @@ describe('useBulkAttackCaseItems', () => {
 
       await clickAddToCase({ attackToAttach: { ...attackToAttach, alertIds: tooManyAlertIds } });
 
-      const { attachments } = onAddToCase.mock.calls[0][0];
+      const attachments = resolveAttachments({ totalAlerts: 0 });
       expect(attachments).toHaveLength(2);
       expect(attachments[1].attachmentId).toHaveLength(MAX_ALERTS_PER_CASE);
       expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
     });
 
-    it('does not warn when every constituent alert fits in one request', async () => {
+    it('leaves room for the alerts the chosen case already holds', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+      const tooManyAlertIds = Array.from(
+        { length: MAX_ALERTS_PER_CASE + 5 },
+        (_, i) => `alert-${i}`
+      );
+
+      await clickAddToCase({ attackToAttach: { ...attackToAttach, alertIds: tooManyAlertIds } });
+
+      const attachments = resolveAttachments({ totalAlerts: 10 });
+      // Otherwise the case would end up over the limit and the server would reject the attach.
+      expect(attachments[1].attachmentId).toHaveLength(MAX_ALERTS_PER_CASE - 10);
+      expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops the alert attachment entirely when the chosen case is already full', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
       await clickAddToCase();
+
+      const attachments = resolveAttachments({ totalAlerts: MAX_ALERTS_PER_CASE });
+      expect(attachments).toEqual([expectedAttachments[0]]);
+      expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('truncates against the chosen case, so a case with room takes every alert', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      await clickAddToCase();
+
+      expect(resolveAttachments({ totalAlerts: MAX_ALERTS_PER_CASE - 2 })).toEqual(
+        expectedAttachments
+      );
+      expect(appToastsMock.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('does not warn before the user has picked a case', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+      const tooManyAlertIds = Array.from(
+        { length: MAX_ALERTS_PER_CASE + 5 },
+        (_, i) => `alert-${i}`
+      );
+
+      await clickAddToCase({ attackToAttach: { ...attackToAttach, alertIds: tooManyAlertIds } });
+
+      // The selector is only open at this point; nothing is attached and the user can still cancel.
+      expect(appToastsMock.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('does not warn when every constituent alert fits', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      await clickAddToCase();
+      resolveAttachments({ totalAlerts: 0 });
 
       expect(appToastsMock.addWarning).not.toHaveBeenCalled();
     });
