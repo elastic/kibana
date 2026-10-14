@@ -289,14 +289,6 @@ describe('getThreatIntelReadiness', () => {
     expect(result.reasonCodes).toEqual(['bootstrap_incomplete', 'reports_index_missing']);
   });
 
-  it('returns huntUsableReportCount equal to usableReportCount', async () => {
-    const deps = buildDefaultDeps();
-
-    const result = await getThreatIntelReadiness(deps);
-
-    expect(result.huntUsableReportCount).toBe(result.usableReportCount);
-  });
-
   it('returns indicatorEligibleReportCount from the filter aggregation', async () => {
     const deps = buildDefaultDeps();
     deps.esClient.search.mockResolvedValue(
@@ -330,18 +322,14 @@ describe('getThreatIntelReadiness', () => {
     });
   });
 
-  it('returns all three counts as 0 on a blocked response', async () => {
+  it('returns both counts as 0 on a blocked response', async () => {
     const deps = buildDefaultDeps({
       getBootstrapReady: jest.fn().mockRejectedValue(new Error('still starting')),
     });
 
     const result = await getThreatIntelReadiness(deps);
 
-    expect([
-      result.usableReportCount,
-      result.huntUsableReportCount,
-      result.indicatorEligibleReportCount,
-    ]).toEqual([0, 0, 0]);
+    expect([result.usableReportCount, result.indicatorEligibleReportCount]).toEqual([0, 0]);
   });
 
   it('sends the hunt-usable filter in the query and the indicator-eligible filter in the aggregation', async () => {
