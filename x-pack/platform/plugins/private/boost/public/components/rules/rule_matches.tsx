@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiTextColor,
   useEuiOverflowScroll,
   useEuiTheme,
 } from '@elastic/eui';
@@ -36,9 +37,11 @@ interface RuleMatchesProps {
  * project, so they say so rather than count it.
  */
 export const RuleMatches = ({ patterns, type, isDefaultRule, coverage }: RuleMatchesProps) => {
+  const { euiTheme } = useEuiTheme();
+
   if (isDefaultRule) {
     return (
-      <>
+      <EuiTextColor color={euiTheme.colors.textDisabled} data-test-subj="boostRuleUnmatched">
         {type === 'data_streams'
           ? i18n.translate('xpack.boost.ruleMatches.allUnmatchedDataStreams', {
               defaultMessage: 'All unmatched data streams',
@@ -46,7 +49,7 @@ export const RuleMatches = ({ patterns, type, isDefaultRule, coverage }: RuleMat
           : i18n.translate('xpack.boost.ruleMatches.allUnmatchedIndices', {
               defaultMessage: 'All unmatched indices',
             })}
-      </>
+      </EuiTextColor>
     );
   }
   if (coverage.matches === 0) {

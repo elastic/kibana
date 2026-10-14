@@ -178,7 +178,8 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       name: i18n.translate('xpack.boost.rulesTab.priorityColumn', {
         defaultMessage: 'Priority',
       }),
-      width: '12%',
+      // Fits the header and its sort arrow, which are wider than typical priorities.
+      width: '7em',
       sortable: true,
       dataType: 'number',
     },
@@ -189,7 +190,8 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       name: i18n.translate('xpack.boost.rulesTab.matchesColumn', {
         defaultMessage: 'Matches',
       }),
-      width: '16%',
+      // Fits "All unmatched data streams" on one line.
+      width: '17em',
       sortable: true,
       render: (
         matches: number,

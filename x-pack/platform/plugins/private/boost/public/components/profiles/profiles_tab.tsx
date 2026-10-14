@@ -174,7 +174,9 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
     {
       field: 'type',
       name: i18n.translate('xpack.boost.profilesTab.typeColumn', { defaultMessage: 'Type' }),
-      width: '12%',
+      // Widths in em, relative to the table's 12px base, fit each column's widest content: "Data
+      // streams" here, and the headers with their sort arrows in the number columns.
+      width: '9em',
       sortable: true,
       render: (type: BoostProfile['type']) => PROFILE_TYPE_LABELS[type],
     },
@@ -183,7 +185,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       name: i18n.translate('xpack.boost.profilesTab.minBoostColumn', {
         defaultMessage: 'Min boost',
       }),
-      width: '12%',
+      width: '9em',
       sortable: true,
       dataType: 'number',
       render: formatBoost,
@@ -193,7 +195,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       name: i18n.translate('xpack.boost.profilesTab.maxBoostColumn', {
         defaultMessage: 'Max boost',
       }),
-      width: '12%',
+      width: '9em',
       sortable: true,
       dataType: 'number',
       render: formatBoost,
@@ -203,7 +205,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       name: i18n.translate('xpack.boost.profilesTab.rulesUsingColumn', {
         defaultMessage: 'Rules using',
       }),
-      width: '12%',
+      width: '9.5em',
       sortable: true,
       dataType: 'number',
       // Opens the rules tab filtered to the rules that use this profile.
