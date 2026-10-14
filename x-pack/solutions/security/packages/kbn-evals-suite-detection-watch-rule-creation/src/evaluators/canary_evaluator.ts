@@ -32,10 +32,16 @@ export const createCanaryEvaluator = (evaluators: DefaultEvaluators): RuleEvalua
         metadata: { trippedBy: 'quality gate (explicit skip)', reason: args.output.skipReason },
       };
     }
-    if (!args.output?.rule) {
-      // No rule AND no refusal is a broken run, not a working gate. Scoring 1 here
-      // would let a crashed draft masquerade as a passing canary — the exact
-      // false-positive that made this evaluator read 1 while everything was broken.
+    const rule = args.output?.rule;
+    const emptyRule =
+      rule != null &&
+      (rule.name ?? '').trim().length === 0 &&
+      (rule.query ?? '').trim().length === 0;
+    if (!rule || emptyRule) {
+      // No rule (or an empty `{}` draft) without a refusal is a broken run, not
+      // a working gate. Scoring 1 here would let a crashed draft masquerade as
+      // a passing canary — the exact false-positive that made this evaluator
+      // read 1 while everything was broken.
       return {
         score: null,
         label: 'N/A',

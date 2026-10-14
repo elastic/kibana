@@ -28,7 +28,20 @@ export const classificationAccuracy: Evaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const predicted = asVerdict(output).classification;
+    const verdict = asVerdict(output);
+    // Defensive only: runAlertAnalysisWorkflow always returns a verdict object
+    // (executionId/executionStatus) or throws, so this branch is not reachable
+    // via the spec. Kept so a future refactor of the workflow task cannot
+    // reintroduce quality zeros for empty artifacts.
+    if (verdict == null || typeof verdict !== 'object' || Object.keys(verdict).length === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'Empty verdict artifact — workflow produced no output to score.',
+        metadata: { predicted: null, expected: asExpected(expected)?.classification ?? null },
+      };
+    }
+    const predicted = verdict.classification;
     const goldenLabel = asExpected(expected)?.classification;
     const correct = predicted != null && predicted === goldenLabel;
 
@@ -57,6 +70,17 @@ export const validVerdict: Evaluator = {
   direction: 'maximize',
   evaluate: async ({ output }) => {
     const verdict = asVerdict(output);
+    // Defensive only: see ClassificationAccuracy — the workflow always returns
+    // a verdict object or throws, so this branch is unreachable via the spec.
+    // score_stats already excludes null scores.
+    if (verdict == null || typeof verdict !== 'object' || Object.keys(verdict).length === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'Empty verdict artifact — workflow produced no output to score.',
+        metadata: { classificationValid: false, confidenceValid: false },
+      };
+    }
     const classificationValid =
       verdict.classification != null &&
       (CLASSIFICATIONS as readonly string[]).includes(verdict.classification);
@@ -64,7 +88,8 @@ export const validVerdict: Evaluator = {
       typeof verdict.confidenceScore === 'number' &&
       verdict.confidenceScore >= 0 &&
       verdict.confidenceScore <= 1;
-    const valid = classificationValid && confidenceValid;
+    const rationaleValid = verdict.rationale != null && verdict.rationale.trim().length > 0;
+    const valid = classificationValid && confidenceValid && rationaleValid;
 
     return {
       score: valid ? 1 : 0,
@@ -72,6 +97,7 @@ export const validVerdict: Evaluator = {
       metadata: {
         classificationValid,
         confidenceValid,
+        rationaleValid,
         executionStatus: verdict.executionStatus,
       },
     };

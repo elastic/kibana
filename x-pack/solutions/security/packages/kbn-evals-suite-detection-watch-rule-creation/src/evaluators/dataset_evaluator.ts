@@ -270,6 +270,16 @@ export const createGapAddressedEvaluator = (
   evaluate: async ({ output, input, expected }) => {
     if (!output?.rule) return NO_RULE_NA;
     const { name = '', query = '' } = output.rule;
+    // An empty draft (no name and no query) is a missing artifact, not an
+    // off-target one — feeding `{}` to the judge lets it score "absence" as a
+    // quality zero. Score N/A so the mean reflects only real drafts.
+    if (name.trim().length === 0 && query.trim().length === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'Empty rule artifact — draft has neither a name nor a query to judge.',
+      };
+    }
     const criteriaEval = evaluators.criteria(
       GAP_ADDRESSED_CRITERIA(input.technique, input.gap_description, name, query)
     );
