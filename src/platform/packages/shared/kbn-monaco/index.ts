@@ -14,13 +14,11 @@ export {
   jsonDefaults,
   isCancellationError,
   CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
   initializeRegisteredLanguagesTheme,
-  defaultThemesResolvers,
 } from './src/monaco_imports';
 export type {
-  KbnMonacoThemeColorsOverride,
   KbnMonacoLanguageThemeResolver,
+  KbnCodeEditorThemeColorId,
 } from './src/languages/theming';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */

@@ -14,7 +14,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { monaco } from '../../monaco_imports';
 import {
   CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
   defaultThemesResolvers,
   initializeRegisteredLanguagesTheme,
 } from '.';
@@ -160,41 +159,32 @@ describe('language scoped editor themes', () => {
       defineTheme.mockRestore();
     });
 
-    it('gives every registered theme the same rule set, so only colors differ', () => {
+    it('registers exactly one theme: chrome is per instance, never another theme', () => {
       const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
 
       initializeRegisteredLanguagesTheme(createMockEuiTheme());
 
-      const ruleSets = defineTheme.mock.calls.map(([, themeData]) =>
-        themeData.rules.map(({ token }) => token).join()
-      );
-
-      expect(new Set(ruleSets).size).toBe(1);
+      expect(defineTheme).toHaveBeenCalledTimes(1);
+      expect(defineTheme).toHaveBeenCalledWith(CODE_EDITOR_DEFAULT_THEME_ID, expect.any(Object));
 
       defineTheme.mockRestore();
     });
   });
 
   describe('rendered colors', () => {
-    // Only Kibana's two themes exist; language-named ids are no longer registered, and Monaco
-    // silently falls back to `vs` for an unknown id, so asserting against one would be meaningless.
-    const REGISTERED_THEMES = [CODE_EDITOR_DEFAULT_THEME_ID, CODE_EDITOR_TRANSPARENT_THEME_ID];
-
+    // Only Kibana's theme exists; language-named ids are no longer registered, and Monaco silently
+    // falls back to `vs` for an unknown id, so asserting against one would be meaningless.
     it.each([
       ['JSON', JSON_DOCUMENT, XJsonLang.ID],
       ['ES|QL', ESQL_QUERY, ESQL_LANG_ID],
       ['Console', CONSOLE_REQUEST, CONSOLE_LANG_ID],
-    ])('renders %s identically under every registered theme', async (_name, text, languageId) => {
-      const renderedPerTheme = [];
+    ])('colors %s under the Kibana theme', async (_name, text, languageId) => {
+      monaco.editor.setTheme(CODE_EDITOR_DEFAULT_THEME_ID);
 
-      for (const activeTheme of REGISTERED_THEMES) {
-        monaco.editor.setTheme(activeTheme);
-        renderedPerTheme.push(await colorizedClassesOf(text, languageId));
-      }
+      const rendered = await colorizedClassesOf(text, languageId);
 
-      expect(new Set(renderedPerTheme).size).toBe(1);
-      // Guards against the matrix passing because every token collapsed to one default colour.
-      expect(new Set(renderedPerTheme[0].split(' | ')).size).toBeGreaterThan(3);
+      // Guards against a scoped language collapsing to one default colour.
+      expect(new Set(rendered.split(' | ')).size).toBeGreaterThan(3);
     });
 
     it('keeps the ES|QL palette off JSON object keys while both share one theme (#258514)', async () => {
@@ -359,7 +349,7 @@ describe('language scoped editor themes', () => {
     });
 
     // The one way a transitional render can still register is when the key changed for another
-    // reason — a language or variant registered since the last registration. Even then nothing
+    // reason — a language registered since the last registration. Even then nothing
     // mismatched is built: the builders are memoised by palette, so the previous palette's theme
     // is a cache hit with its original `base`, and resolvers only read colours. This is why no
     // palette-derived colour mode is needed.
@@ -396,79 +386,6 @@ describe('language scoped editor themes', () => {
       );
 
       defineTheme.mockRestore();
-    });
-  });
-
-  describe('theme variants', () => {
-    const registered = (themeId: string) =>
-      [...defineThemeCalls()].reverse().find(([id]) => id === themeId)?.[1];
-    let defineTheme: jest.SpyInstance;
-    const defineThemeCalls = () =>
-      defineTheme.mock.calls as Array<[string, monaco.editor.IStandaloneThemeData]>;
-
-    beforeEach(() => {
-      initializeRegisteredLanguagesTheme.reset();
-      defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
-    });
-
-    afterEach(() => {
-      defineTheme.mockRestore();
-    });
-
-    it('the transparent theme is a variant: the default theme with a transparent background', () => {
-      initializeRegisteredLanguagesTheme(createMockEuiTheme());
-
-      const base = registered(CODE_EDITOR_DEFAULT_THEME_ID)!;
-      const transparent = registered(CODE_EDITOR_TRANSPARENT_THEME_ID)!;
-
-      expect(transparent.rules).toEqual(base.rules);
-      expect(transparent.colors).toEqual({ ...base.colors, 'editor.background': '#00000000' });
-    });
-
-    it("layers a variant's colours over the Kibana theme and keeps every language namespace", () => {
-      monaco.editor.registerKbnCodeEditorThemeVariant(
-        'custom-variant',
-        ({ euiTheme }) => ({
-          'editor.background': '#00000000',
-          'editorSuggestWidget.background': euiTheme.colors.backgroundBasePlain,
-        }),
-        true
-      );
-      initializeRegisteredLanguagesTheme(createMockEuiTheme());
-
-      const base = registered(CODE_EDITOR_DEFAULT_THEME_ID)!;
-      const variant = registered('custom-variant')!;
-
-      expect(variant.base).toBe(base.base);
-      expect(variant.rules).toEqual(base.rules);
-      expect(variant.rules.some(({ token }) => token.startsWith(`${ESQL_LANG_ID}.`))).toBe(true);
-      expect(variant.colors['editor.background']).toBe('#00000000');
-      expect(variant.colors['editorSuggestWidget.background']).toBe(
-        createMockEuiTheme().euiTheme.colors.backgroundBasePlain
-      );
-      expect(variant.colors['editor.foreground']).toBe(base.colors['editor.foreground']);
-    });
-
-    it('re-registers when a variant is registered after the first initialisation', () => {
-      initializeRegisteredLanguagesTheme(createMockEuiTheme());
-      const perRegistration = defineThemeCalls().length;
-
-      monaco.editor.registerKbnCodeEditorThemeVariant('late-variant', () => ({}), true);
-      initializeRegisteredLanguagesTheme(createMockEuiTheme());
-
-      expect(registered('late-variant')).toBeDefined();
-      // One more theme than before is registered this time round.
-      expect(defineThemeCalls().length).toBe(perRegistration * 2 + 1);
-    });
-
-    it('rejects a duplicate variant id unless overriding is explicit', () => {
-      monaco.editor.registerKbnCodeEditorThemeVariant('dup-variant', () => ({}), true);
-      expect(() =>
-        monaco.editor.registerKbnCodeEditorThemeVariant('dup-variant', () => ({}))
-      ).toThrow(/already registered/);
-      expect(() =>
-        monaco.editor.registerKbnCodeEditorThemeVariant('dup-variant', () => ({}), true)
-      ).not.toThrow();
     });
   });
 

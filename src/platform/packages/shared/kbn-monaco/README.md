@@ -35,7 +35,7 @@ Editor backgrounds and widget colours still follow the global theme.
 | `src/monaco_imports.ts` | Curated editor contributions and shared Monaco imports. |
 | `src/languages/definitions/index.ts` | Language exports and `initializeSupportedLanguages` registry. |
 | `src/languages/helpers.ts` | Language registration and cancellation helper. |
-| `src/languages/theming/` | Theme API, token scoping, and EUI palette. |
+| `src/languages/theming/` | Theme API, token scoping, EUI palette, and per-editor chrome overrides. |
 | `src/languages/worker_factory.ts`, `webpack.config.js` | Worker routing and bundle entries. |
 | `server.ts` | Worker bundle directory for the server to serve. |
 
@@ -60,40 +60,20 @@ Use `handleInterruptibleMonacoOperation` for cancellable provider work. It rejec
 
 ## Theming
 
-`src/languages/theming/index.ts` patches `TokenTheme.prototype.match` to prefix tokens with the
-language id for languages with a registered resolver. For example, `variable` becomes
-`esql.variable` at lookup. Token colours are associated with models, which can be shared by editors,
-so this isolates syntax colours by language rather than by editor.
+Monaco has one active theme per page, so Kibana defines exactly one (`codeEditorDefaultTheme`) and
+scopes within it on two axes:
 
-- Set `languageThemeResolver` on the language definition to opt into scoping. Author rules using
-  the tokenizer's original token names; the package adds the namespace.
-- `initializeRegisteredLanguagesTheme(euiTheme)` seeds each namespace with the shared EUI palette,
-  then applies the language's overrides, and registers the result into both Kibana themes
-  (`codeEditorDefaultTheme`, `codeEditorTransparentTheme`). No language-named theme ids are
-  registered; use this initializer instead of defining themes directly.
-- Theme `rules` are scoped; `colors` (backgrounds, widgets, etc.) remain global.
-  `@kbn/code-editor` reruns the initializer when the EUI theme changes.
-- The `defaultThemesResolvers` builders are memoised per palette, so a light → dark → light
-  round-trip never recomputes a theme. The initializer is a no-op while Monaco already holds themes
-  for the current palette — every mount after the first — which avoids Monaco's theme refresh
-  (stylesheet regeneration and re-tokenising every model) per mount. A mode switch does
-  re-register, necessarily: Monaco keeps one theme per id.
-- The palette is identified by three computed colours (`backgroundBasePlain`, `textParagraph`,
-  `borderBasePlain` — the last because high-contrast mode only overrides borders), never by object
-  identity or by `colorMode`: EUI's provider updates `colorMode` and the computed theme in separate
-  commits, so on a live switch `useEuiTheme()` has one render where the flag has flipped but the
-  colours haven't. That render's colours are, by definition, the palette registered on the previous
-  consistent render, so it is a no-op and a switch registers exactly once — the builders are never
-  even called for it. Builders return a shared object: spread it before changing anything.
-- Two orthogonal extension points. A language's `languageThemeResolver` contributes **rules**
-  (token colours, scoped to that language); `monaco.editor.registerKbnCodeEditorThemeVariant(id, colors)`
-  contributes **colors** (editor chrome) under a new theme id, inheriting the shared rules and every
-  language namespace. `codeEditorTransparentTheme` is the built-in variant. A consumer that wants
-  its own chrome registers a variant and passes the id as `CodeEditor`'s `themeOverride`; a theme
-  defined by hand with `monaco.editor.defineTheme` replaces all of that and, while active, leaves
-  scoped languages anywhere on the page without syntax colours.
-- Language ids matching `/\b(comment|string|regex|regexp)\b/` are rejected for scoping because
-  Monaco derives token types from these words in the token string.
+- **Syntax, per language.** A language's `languageThemeResolver` contributes token `rules`; the
+  module namespaces them (`variable` → `esql.variable`) by patching `TokenTheme.prototype.match`,
+  so no language's rules can colour another language's tokens.
+- **Chrome, per editor instance.** Backgrounds, gutter, selection and widgets are the Kibana default
+  everywhere; an editor that needs its own passes `chromeOverrides` to `CodeEditor`, applied as
+  inline `--vscode-*` custom properties on that editor's nodes alone. That layer lives in
+  `@kbn/code-editor`; this package only supplies the default chrome and its colour-id type.
+
+Nothing else calls `defineTheme` or `setTheme`. The reasoning, the Monaco internals it rests on,
+the rejected alternatives and the upgrade checklist are in
+[`src/languages/theming/README.md`](src/languages/theming/README.md).
 
 The theming module imports Monaco directly to avoid a cycle with `monaco_imports.ts`, which
 re-exports its API. Prefer the centralized imports for browser contributions; workers and isolated
