@@ -9,7 +9,11 @@ import type { OverallLatencyDistributionResponse } from '@kbn/apm-types';
 import { latencyDistributionChartTypeSchema, environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
-import { MAX_ARRAY_ITEMS, MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+} from '../../constants';
 
 export type LatencyOverallTransactionDistributionResponse = OverallLatencyDistributionResponse;
 
@@ -21,7 +25,7 @@ export const latencyOverallTransactionDistributionRoute =
         body: z
           .object({
             serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
-            transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+            transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
             transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
             termFilters: z
               .array(

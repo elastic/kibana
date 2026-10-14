@@ -8,7 +8,11 @@ import { z } from '@kbn/zod/v4';
 import { AggregationType, type Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { rangeSchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH, MAX_KUERY_LENGTH } from '../../constants';
+import {
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_KUERY_LENGTH,
+} from '../../constants';
 
 const MAX_GROUP_BY_FIELDS = 10; // same as the APM rule params
 const MAX_QUERY_LANGUAGE_LENGTH = 64;
@@ -51,7 +55,7 @@ export const alertParamsSchema = z
     serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
     errorGroupingKey: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
     transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
-    transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
     interval: z.string().max(MAX_FIELD_VALUE_LENGTH),
     groupBy: z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_GROUP_BY_FIELDS).optional(),
     searchConfiguration: searchConfigurationJsonSchema.optional(),

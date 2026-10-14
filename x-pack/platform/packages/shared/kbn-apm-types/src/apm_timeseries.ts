@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { LatencyAggregationType } from './latency_aggregation_types';
-import { MAX_ARRAY_ITEMS, MAX_FIELD_VALUE_LENGTH, MAX_KUERY_LENGTH } from './request_limits';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_KUERY_LENGTH,
+} from './request_limits';
 
 export enum ApmTimeseriesType {
   transactionThroughput = 'transaction_throughput',
@@ -27,7 +32,7 @@ const timeseriesSchema = z.union([
       z.literal(ApmTimeseriesType.transactionFailureRate),
     ]),
     'transaction.type': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
-    'transaction.name': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    'transaction.name': z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
   }),
   z.object({
     name: z.union([
@@ -35,7 +40,7 @@ const timeseriesSchema = z.union([
       z.literal(ApmTimeseriesType.exitSpanFailureRate),
       z.literal(ApmTimeseriesType.exitSpanLatency),
     ]),
-    'span.destination.service.resource': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    'span.destination.service.resource': z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
   }),
   z.object({
     name: z.literal(ApmTimeseriesType.transactionLatency),
@@ -45,7 +50,7 @@ const timeseriesSchema = z.union([
       z.literal(LatencyAggregationType.p99),
     ]),
     'transaction.type': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
-    'transaction.name': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+    'transaction.name': z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
   }),
   z.object({
     name: z.literal(ApmTimeseriesType.errorEventRate),
@@ -59,7 +64,7 @@ export const getApmTimeseriesRt = z.object({
         'service.name': z.string().max(MAX_FIELD_VALUE_LENGTH),
         title: z.string().max(MAX_FIELD_VALUE_LENGTH),
         timeseries: timeseriesSchema,
-        filter: z.string().max(MAX_FIELD_VALUE_LENGTH).max(MAX_KUERY_LENGTH).optional(),
+        filter: z.string().max(MAX_KUERY_LENGTH).optional(),
         offset: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         'service.environment': z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
       })

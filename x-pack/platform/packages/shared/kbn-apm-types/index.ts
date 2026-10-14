@@ -39,6 +39,7 @@ export type * from './src/latency_distribution';
 export * from './src/latency_distribution_chart_types';
 export * from './src/mobile_types';
 export * from './src/processor_event';
+export * from './src/request_limits';
 export * from './src/rollup';
 export * from './src/serverless';
 export type * from './src/service_anomalies';

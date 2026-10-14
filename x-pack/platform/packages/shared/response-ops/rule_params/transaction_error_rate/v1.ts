@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  MAX_APM_DOCUMENT_VALUE_LENGTH,
   MAX_APM_FIELD_VALUE_LENGTH,
   MAX_APM_GROUP_BY_FIELDS,
   MAX_TIME_WINDOW_UNIT_LENGTH,
@@ -20,7 +21,7 @@ export const transactionErrorRateParamsSchema = schema.object(
     windowUnit: schema.string({ maxLength: MAX_TIME_WINDOW_UNIT_LENGTH }),
     threshold: schema.number(),
     transactionType: schema.maybe(schema.string({ maxLength: MAX_APM_FIELD_VALUE_LENGTH })),
-    transactionName: schema.maybe(schema.string({ maxLength: MAX_APM_FIELD_VALUE_LENGTH })),
+    transactionName: schema.maybe(schema.string({ maxLength: MAX_APM_DOCUMENT_VALUE_LENGTH })),
     serviceName: schema.maybe(schema.string({ maxLength: MAX_APM_FIELD_VALUE_LENGTH })),
     environment: schema.string({ maxLength: MAX_APM_FIELD_VALUE_LENGTH }),
     groupBy: schema.maybe(

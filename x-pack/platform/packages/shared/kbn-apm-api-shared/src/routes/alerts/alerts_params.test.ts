@@ -72,7 +72,7 @@ describe('alertParamsSchema', () => {
   });
 
   describe('input limits', () => {
-    it.each(['serviceName', 'errorGroupingKey', 'transactionType', 'transactionName', 'interval'])(
+    it.each(['serviceName', 'errorGroupingKey', 'transactionType', 'interval'])(
       'rejects an over-long %s',
       (field) => {
         expectParseSuccess(
@@ -81,6 +81,15 @@ describe('alertParamsSchema', () => {
         expectParseError(alertParamsSchema.safeParse({ ...baseParams, [field]: 'a'.repeat(1025) }));
       }
     );
+
+    it('accepts a transactionName up to 10,000 characters, as the UI reads it from _source', () => {
+      expectParseSuccess(
+        alertParamsSchema.safeParse({ ...baseParams, transactionName: 'a'.repeat(10_000) })
+      );
+      expectParseError(
+        alertParamsSchema.safeParse({ ...baseParams, transactionName: 'a'.repeat(10_001) })
+      );
+    });
 
     it('accepts ten groupBy fields and rejects eleven', () => {
       expectParseSuccess(

@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  MAX_APM_DOCUMENT_VALUE_LENGTH,
   MAX_APM_FIELD_VALUE_LENGTH,
   MAX_APM_GROUP_BY_FIELDS,
   MAX_TIME_WINDOW_UNIT_LENGTH,
@@ -36,7 +37,7 @@ export const transactionDurationParamsSchema = schema.object(
     ),
     transactionName: schema.maybe(
       schema.string({
-        maxLength: MAX_APM_FIELD_VALUE_LENGTH,
+        maxLength: MAX_APM_DOCUMENT_VALUE_LENGTH,
         meta: { description: 'Filter the rule to apply to a specific transaction name.' },
       })
     ),

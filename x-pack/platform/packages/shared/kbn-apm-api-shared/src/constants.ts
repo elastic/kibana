@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-// Bounds the serviceName path param to satisfy the CodeQL "unbounded string in
-// route validation" rule; 1024 matches the ES keyword default `ignore_above`.
-export const MAX_SERVICE_NAME_LENGTH = 1_024;
+import { MAX_FIELD_VALUE_LENGTH } from '@kbn/apm-types';
 
-// Upper bounds for request inputs, to keep unbounded user input out of route validation (DoS
-// hardening). Names, types, IDs and environments are ECS keyword fields indexed with
-// `ignore_above: 1024`, so longer values can never match a document.
-export const MAX_FIELD_VALUE_LENGTH = 1_024;
-export const MAX_KUERY_LENGTH = 10_000; // KQL expressions can be long
-export const MAX_DESCRIPTION_LENGTH = 10_000;
-export const MAX_FILTERS_LENGTH = 100_000; // serialized ES bool query (JSON string)
-export const MAX_QUERY_PARAM_LENGTH = 1_024; // short params: ISO/datemath dates, offsets
-// JSON-serialized arrays sent as one string (e.g. `groupIds`, `serviceNames`)
-export const MAX_JSON_ARRAY_PARAM_LENGTH = 1_000_000;
-export const MAX_ARRAY_ITEMS = 1_000;
-export const MAX_NUM_BUCKETS = 1_000; // the UI requests 8, 20 or 100
-export const MAX_PAGE_SIZE = 1_000;
-export const MAX_PROFILING_INDEX = 1_000; // the UI requests 0..10
+export {
+  MAX_ARRAY_ITEMS,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_FILTERS_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+  MAX_KUERY_LENGTH,
+  MAX_NUM_BUCKETS,
+  MAX_PAGE,
+  MAX_PAGE_SIZE,
+  MAX_PROFILING_INDEX,
+  MAX_QUERY_PARAM_LENGTH,
+  MAX_SERVICE_MAP_SERVICES,
+} from '@kbn/apm-types';
+
+// Bounds the serviceName path param; matches the `ignore_above` of the `service.name` keyword field.
+export const MAX_SERVICE_NAME_LENGTH = MAX_FIELD_VALUE_LENGTH;

@@ -8,7 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface TransactionTraceSamplesResponse {
   traceSamples: Array<{
@@ -27,7 +27,7 @@ export const transactionTraceSamplesRoute = defineRoute<TransactionTraceSamplesR
       query: z
         .object({
           transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
-          transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+          transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
         })
         .merge(
           z

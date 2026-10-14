@@ -9,7 +9,11 @@ import type { TopNFunctions } from '@kbn/profiling-utils';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH, MAX_PROFILING_INDEX } from '../../constants';
+import {
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_PROFILING_INDEX,
+} from '../../constants';
 
 export type ServicesFunctionsResponse = TopNFunctions;
 
@@ -20,7 +24,7 @@ export const servicesFunctionsRoute = defineRoute<ServicesFunctionsResponse>()({
       path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: environmentSchema
         .merge(rangeSchema)
-        .merge(z.object({ transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional() }))
+        .merge(z.object({ transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional() }))
         .merge(
           z.object({
             startIndex: z.coerce.number().int().min(0).max(MAX_PROFILING_INDEX),

@@ -29,7 +29,7 @@ export const mobileTermsByFieldRoute = defineRoute<MobileTermsByFieldRouteRespon
       query: z
         .object({
           size: z.coerce.number().int().min(1).max(1000),
-          fieldName: z.string().max(1024),
+          fieldName: z.string().max(MAX_FIELD_VALUE_LENGTH),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)

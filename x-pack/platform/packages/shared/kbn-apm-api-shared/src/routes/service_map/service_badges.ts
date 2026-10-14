@@ -11,10 +11,10 @@ import type { ServiceAlertsResponse } from '../services/service_alerts_count';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
 import {
-  MAX_ARRAY_ITEMS,
   MAX_FIELD_VALUE_LENGTH,
   MAX_JSON_ARRAY_PARAM_LENGTH,
   MAX_KUERY_LENGTH,
+  MAX_SERVICE_MAP_SERVICES,
 } from '../../constants';
 
 export type ServiceSloStatsResponse = Array<{
@@ -47,7 +47,7 @@ export const serviceMapServiceBadgesRoute = defineRoute<ServiceMapServiceBadgesR
               return z.NEVER;
             }
           })
-          .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS)),
+          .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_SERVICE_MAP_SERVICES)),
       }),
     })
   ),

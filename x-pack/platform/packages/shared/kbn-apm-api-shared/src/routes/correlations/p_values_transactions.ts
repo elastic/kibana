@@ -9,7 +9,11 @@ import type { FailedTransactionsCorrelation } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
-import { MAX_ARRAY_ITEMS, MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+} from '../../constants';
 
 export interface PValuesResponse {
   failedTransactionsCorrelations: FailedTransactionsCorrelation[];
@@ -24,7 +28,7 @@ export const pValuesTransactionsRoute = defineRoute<PValuesResponse>()({
       body: z
         .object({
           serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
-          transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
           transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
           durationMin: z.coerce.number().optional(),
           durationMax: z.coerce.number().optional(),

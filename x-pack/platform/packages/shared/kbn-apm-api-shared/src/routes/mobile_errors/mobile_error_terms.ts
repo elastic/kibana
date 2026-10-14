@@ -32,7 +32,7 @@ export const mobileErrorTermsRoute = defineRoute<MobileErrorTermsRouteResponse>(
         .merge(
           z.object({
             size: z.coerce.number().int().min(1).max(1000),
-            fieldName: z.string().max(1024),
+            fieldName: z.string().max(MAX_FIELD_VALUE_LENGTH),
           })
         ),
     })

@@ -10,7 +10,7 @@ import { environmentSchema } from '@kbn/apm-types';
 
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface SessionsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: number | null | undefined };
@@ -27,7 +27,7 @@ export const mobileSessionsRoute = defineRoute<SessionsTimeseries>()({
       query: z
         .object({
           transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
-          transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)

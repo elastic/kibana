@@ -10,7 +10,12 @@ import { environmentSchema, type CorrelationsResponse } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
 import { entityTypeSchema, metricSchema } from './types';
-import { MAX_ARRAY_ITEMS, MAX_FIELD_VALUE_LENGTH, MAX_KUERY_LENGTH } from '../../constants';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_DOCUMENT_VALUE_LENGTH,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_KUERY_LENGTH,
+} from '../../constants';
 
 export type UnifiedCorrelationsRouteResponse = CorrelationsResponse;
 
@@ -25,7 +30,7 @@ export const unifiedCorrelationsRoute = defineRoute<UnifiedCorrelationsRouteResp
         })
         .extend({
           serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
-          transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional(),
           transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
           fieldCandidates: z
             .array(z.string().max(MAX_FIELD_VALUE_LENGTH))

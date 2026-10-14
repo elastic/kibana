@@ -100,6 +100,48 @@ describe('getApmTimeseriesRt', () => {
     expectParseSuccess(result);
   });
 
+  it('accepts a KQL filter up to 10,000 characters and rejects a longer one', () => {
+    const withFilter = (filter: string) => ({
+      stats: [
+        {
+          'service.name': 'opbeans-java',
+          title: 'Latency',
+          filter,
+          timeseries: { name: ApmTimeseriesType.errorEventRate },
+        },
+      ],
+      start: 'now-15m',
+      end: 'now',
+    });
+
+    expectParseSuccess(getApmTimeseriesRt.safeParse(withFilter('a'.repeat(10_000))));
+    expectParseError(getApmTimeseriesRt.safeParse(withFilter('a'.repeat(10_001))));
+  });
+
+  it('accepts a transaction name up to 10,000 characters, as the UI reads it from _source', () => {
+    const result = getApmTimeseriesRt.safeParse(
+      baseStat({
+        name: ApmTimeseriesType.transactionThroughput,
+        'transaction.name': 'a'.repeat(10_000),
+      })
+    );
+
+    expectParseSuccess(result);
+  });
+
+  it('accepts up to 1,000 stats and rejects more', () => {
+    const stats = (n: number) => ({
+      ...baseStat({ name: ApmTimeseriesType.errorEventRate }),
+      stats: Array.from(
+        { length: n },
+        () => baseStat({ name: ApmTimeseriesType.errorEventRate }).stats[0]
+      ),
+    });
+
+    expectParseSuccess(getApmTimeseriesRt.safeParse(stats(1_000)));
+    expectParseError(getApmTimeseriesRt.safeParse(stats(1_001)));
+  });
+
   it('rejects an unknown timeseries name', () => {
     const result = getApmTimeseriesRt.safeParse(baseStat({ name: 'not_a_real_type' }));
 

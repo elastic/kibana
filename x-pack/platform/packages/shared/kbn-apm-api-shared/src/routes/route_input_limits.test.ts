@@ -87,7 +87,7 @@ describe('shared APM route params', () => {
 
 describe('numeric and JSON-array route params', () => {
   const range = { start: '2023-01-01T00:00:00.000Z', end: '2023-01-02T00:00:00.000Z' };
-  const { errors, services, profiling } = routeDefinitions;
+  const { errors, services, profiling, serviceMap, sourceMaps } = routeDefinitions;
 
   describe('numBuckets', () => {
     const params = (numBuckets: number, groupIds: string = '["a"]') => ({
@@ -125,10 +125,40 @@ describe('numeric and JSON-array route params', () => {
     it('accepts the UI paging values and rejects out of range ones', () => {
       const route = services.slos;
       expectParseSuccess(route.params!.safeParse(params({ page: 0, perPage: 1 })));
-      expectParseSuccess(route.params!.safeParse(params({ page: 0, perPage: 1000 })));
-      expectParseError(route.params!.safeParse(params({ page: 0, perPage: 1001 })));
+      expectParseSuccess(route.params!.safeParse(params({ page: 0, perPage: 10_000 })));
+      expectParseError(route.params!.safeParse(params({ page: 0, perPage: 10_001 })));
       expectParseError(route.params!.safeParse(params({ page: 0, perPage: 0 })));
       expectParseError(route.params!.safeParse(params({ page: -1, perPage: 10 })));
+    });
+  });
+
+  describe('source maps paging', () => {
+    const route = sourceMaps.list;
+
+    it('keeps accepting values that were valid before the limits were added', () => {
+      expectParseSuccess(route.params!.safeParse({ query: { page: 1, perPage: 10 } }));
+      expectParseSuccess(route.params!.safeParse({ query: { page: 0, perPage: 0 } }));
+      expectParseSuccess(route.params!.safeParse({ query: { page: 1.5, perPage: 2.5 } }));
+    });
+
+    it('rejects values above the upper bounds', () => {
+      expectParseSuccess(route.params!.safeParse({ query: { page: 100_000, perPage: 10_000 } }));
+      expectParseError(route.params!.safeParse({ query: { page: 100_001 } }));
+      expectParseError(route.params!.safeParse({ query: { perPage: 10_001 } }));
+    });
+  });
+
+  describe('service map badges', () => {
+    const route = serviceMap.serviceBadges;
+    const params = (serviceNames: string[]) => ({
+      query: { ...range, environment: 'ENVIRONMENT_ALL' },
+      body: { serviceNames: JSON.stringify(serviceNames) },
+    });
+    const names = (n: number) => Array.from({ length: n }, (_, i) => `s${i}`);
+
+    it('accepts every service of a large map and rejects more than 10,000', () => {
+      expectParseSuccess(route.params!.safeParse(params(names(10_000))));
+      expectParseError(route.params!.safeParse(params(names(10_001))));
     });
   });
 

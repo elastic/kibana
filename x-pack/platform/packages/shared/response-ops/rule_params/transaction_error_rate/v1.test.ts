@@ -30,14 +30,20 @@ describe('transactionErrorRateParamsSchema', () => {
     ).not.toThrow();
   });
 
-  it.each(['serviceName', 'transactionType', 'transactionName', 'environment'])(
-    'rejects an over-long %s',
-    (field) => {
-      expect(() =>
-        transactionErrorRateParamsSchema.validate({ ...base, [field]: 'a'.repeat(1025) })
-      ).toThrow(/maximum length/);
-    }
-  );
+  it.each(['serviceName', 'transactionType', 'environment'])('rejects an over-long %s', (field) => {
+    expect(() =>
+      transactionErrorRateParamsSchema.validate({ ...base, [field]: 'a'.repeat(1025) })
+    ).toThrow(/maximum length/);
+  });
+
+  it('accepts a transactionName up to 10,000 characters and rejects a longer one', () => {
+    expect(() =>
+      transactionErrorRateParamsSchema.validate({ ...base, transactionName: 'a'.repeat(10_000) })
+    ).not.toThrow();
+    expect(() =>
+      transactionErrorRateParamsSchema.validate({ ...base, transactionName: 'a'.repeat(10_001) })
+    ).toThrow(/maximum length/);
+  });
 
   it('rejects an over-long windowUnit', () => {
     expect(() =>

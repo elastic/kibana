@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_FIELD_VALUE_LENGTH } from '@kbn/apm-types';
 import { settingDefinitions } from '../setting_definitions';
 import type { SettingValidation } from '../setting_definitions/types';
 
@@ -20,12 +21,11 @@ const knownSettings = settingDefinitions.reduce<Record<string, SettingValidation
 
 // Upper bounds for the request body (DoS hardening). Names and environments are ECS keyword fields
 // (`ignore_above: 1024`); setting values can be long lists (e.g. ignored URLs).
-const MAX_NAME_LENGTH = 1_024;
-const MAX_SETTING_VALUE_LENGTH = 10_000;
+const MAX_SETTING_VALUE_LENGTH = 100_000;
 
 export const serviceSchema = z.object({
-  name: z.string().max(MAX_NAME_LENGTH).optional(),
-  environment: z.string().max(MAX_NAME_LENGTH).optional(),
+  name: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+  environment: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
 });
 
 /**
@@ -33,7 +33,7 @@ export const serviceSchema = z.object({
  * per-setting validation.
  */
 export const settingsSchema = z
-  .record(z.string().max(MAX_NAME_LENGTH), z.string().max(MAX_SETTING_VALUE_LENGTH))
+  .record(z.string().max(MAX_FIELD_VALUE_LENGTH), z.string().max(MAX_SETTING_VALUE_LENGTH))
   .superRefine((settings, ctx) => {
     for (const [key, validator] of Object.entries(knownSettings)) {
       const value = settings[key];
@@ -49,7 +49,7 @@ export const settingsSchema = z
   });
 
 export const agentConfigurationIntakeSchema = z.object({
-  agent_name: z.string().max(MAX_NAME_LENGTH).optional(),
+  agent_name: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
   service: serviceSchema,
   settings: settingsSchema,
 });

@@ -7,7 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import { MAX_DOCUMENT_VALUE_LENGTH } from '../../constants';
 
 export interface MetadataForDependencyResponse {
   spanType: string | undefined;
@@ -23,7 +23,7 @@ export const dependencyMetadataRoute = defineRoute<DependencyMetadataRouteRespon
   params: lazySchema(() =>
     z.object({
       query: z
-        .object({ dependencyName: z.string().max(MAX_FIELD_VALUE_LENGTH) })
+        .object({ dependencyName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH) })
         .merge(rangeSchema),
     })
   ),

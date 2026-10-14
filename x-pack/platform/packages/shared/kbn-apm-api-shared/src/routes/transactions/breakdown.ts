@@ -8,7 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface TransactionBreakdownResponse {
   timeseries: Array<{
@@ -27,7 +27,7 @@ export const transactionChartsBreakdownRoute = defineRoute<TransactionBreakdownR
       path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: z
         .object({ transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH) })
-        .merge(z.object({ transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH) }).partial())
+        .merge(z.object({ transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH) }).partial())
         .merge(environmentSchema)
         .merge(kuerySchema)
         .merge(rangeSchema),

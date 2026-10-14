@@ -9,7 +9,7 @@ import type { AgentName, EventOutcome } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, kuerySchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import { MAX_DOCUMENT_VALUE_LENGTH } from '../../constants';
 
 export interface DependencySpan {
   '@timestamp': number;
@@ -38,8 +38,8 @@ export const topDependencySpansRoute = defineRoute<TopDependencySpansResponse>()
         .merge(kuerySchema)
         .merge(
           z.object({
-            dependencyName: z.string().max(MAX_FIELD_VALUE_LENGTH),
-            spanName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+            dependencyName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
+            spanName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
           })
         )
         .merge(

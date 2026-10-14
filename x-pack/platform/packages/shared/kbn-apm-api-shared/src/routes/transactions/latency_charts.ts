@@ -16,7 +16,7 @@ import {
   filtersSchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface TransactionLatencyResponse {
   currentPeriod: {
@@ -44,7 +44,7 @@ export const transactionLatencyChartsRoute = defineRoute<TransactionLatencyRespo
           z
             .object({
               transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
-              transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+              transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH),
               filters: filtersSchema,
             })
             .partial()

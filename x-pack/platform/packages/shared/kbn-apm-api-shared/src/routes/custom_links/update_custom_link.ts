@@ -6,6 +6,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 import { payloadSchema } from './custom_link_types';
 
 export const updateCustomLinkRoute = defineRoute<void>()({
@@ -13,7 +14,7 @@ export const updateCustomLinkRoute = defineRoute<void>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        id: z.string().max(1024),
+        id: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       body: payloadSchema,
     })

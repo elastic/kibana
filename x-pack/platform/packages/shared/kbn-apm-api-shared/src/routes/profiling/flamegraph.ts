@@ -9,7 +9,7 @@ import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
-import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
+import { MAX_DOCUMENT_VALUE_LENGTH, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type ServicesFlamegraphResponse = BaseFlameGraph;
 
@@ -21,7 +21,7 @@ export const servicesFlamegraphRoute = defineRoute<ServicesFlamegraphResponse>()
       query: kuerySchema
         .merge(environmentSchema)
         .merge(rangeSchema)
-        .merge(z.object({ transactionName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional() }))
+        .merge(z.object({ transactionName: z.string().max(MAX_DOCUMENT_VALUE_LENGTH).optional() }))
         .merge(z.object({ transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH) })),
     })
   ),
