@@ -83,6 +83,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
   - '@kbn/task-manager-plugin'
+  - '@kbn/workflows-execution-engine'
 tags:
   - plugin
   - prod
@@ -92,6 +93,7 @@ tags:
 fileGroups:
   src:
     - common/**/*
+    - integration_tests/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
