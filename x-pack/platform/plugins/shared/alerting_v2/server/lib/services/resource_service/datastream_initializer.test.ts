@@ -55,6 +55,68 @@ describe('DatastreamInitializer', () => {
     esClient.indices.putSettings.mockResolvedValue({ acknowledged: true });
     esClient.ingest.getPipeline.mockRejectedValue(pipelineNotFound());
     esClient.ingest.putPipeline.mockResolvedValue({ acknowledged: true });
+    esClient.indices.putDataLifecycle.mockResolvedValue({ acknowledged: true });
+  });
+
+  describe('data stream lifecycle', () => {
+    it('applies the retention to the data stream', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, {
+        ...resourceDefinition,
+        lifecycle: { data_retention: '90d' },
+      });
+
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+        name: resourceDefinition.dataStreamName,
+        enabled: true,
+        data_retention: '90d',
+      });
+    });
+
+    it('applies a lifecycle without retention, removing a previously applied one', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+        name: resourceDefinition.dataStreamName,
+        enabled: true,
+      });
+    });
+
+    it('applies the lifecycle when the data stream already exists', async () => {
+      esClient.indices.createDataStream.mockRejectedValueOnce(
+        new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, {
+        ...resourceDefinition,
+        lifecycle: { data_retention: '30d' },
+      });
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+        name: resourceDefinition.dataStreamName,
+        enabled: true,
+        data_retention: '30d',
+      });
+    });
+
+    it('does not fail initialization when applying the lifecycle fails', async () => {
+      esClient.indices.putDataLifecycle.mockRejectedValue(
+        new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+      await expect(initializer.initialize()).resolves.toBeUndefined();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Failed to update the lifecycle of ${resourceDefinition.dataStreamName}`
+        )
+      );
+    });
   });
 
   describe('ingest pipeline', () => {

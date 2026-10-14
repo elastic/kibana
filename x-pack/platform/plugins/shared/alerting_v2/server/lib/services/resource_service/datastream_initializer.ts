@@ -86,6 +86,7 @@ export class DatastreamInitializer implements IResourceInitializer {
     }
 
     await this.updateExistingIndicesReplicaSettings();
+    await this.updateDataStreamLifecycle();
   }
 
   private async initializeDataStream(
@@ -298,6 +299,25 @@ export class DatastreamInitializer implements IResourceInitializer {
       this.logger.warn(
         `Failed to update auto_expand_replicas for ${this.resourceDefinition.dataStreamName}: ${error.message}`
       );
+    }
+  }
+
+  /**
+   * Applies the definition's lifecycle to the existing data stream.
+   * The PUT replaces the whole lifecycle, so a lifecycle
+   * without `data_retention` removes a previously applied retention.
+   * `enabled` is explicit because Elasticsearch rejects an empty body.
+   */
+  private async updateDataStreamLifecycle(): Promise<void> {
+    const { dataStreamName, lifecycle } = this.resourceDefinition;
+    try {
+      await this.esClient.indices.putDataLifecycle({
+        name: dataStreamName,
+        enabled: true,
+        ...lifecycle,
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to update the lifecycle of ${dataStreamName}: ${error.message}`);
     }
   }
 }
