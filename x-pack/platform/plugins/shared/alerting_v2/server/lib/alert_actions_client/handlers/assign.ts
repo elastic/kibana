@@ -28,7 +28,8 @@ export const assignHandler: ActionHandler<AssignAlertActionBody> = {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
         message: getAssigneeUnchangedMessage(alertEvent.episode_id, action.assignee_uid),
-        alertEvent,
+        groupHash: alertEvent.group_hash,
+        alertId: alertEvent.episode_id,
         actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
       });
     }

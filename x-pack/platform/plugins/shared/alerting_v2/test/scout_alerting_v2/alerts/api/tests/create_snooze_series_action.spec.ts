@@ -14,6 +14,7 @@ import {
   buildAlertEvent,
   buildGroupHash,
   getSnoozeSeriesActionUrl,
+  getUnsnoozeSeriesActionUrl,
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
@@ -167,6 +168,55 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
       });
       expect(response).toHaveStatusCode(409);
       expect(response.body.code).toBe('ALERT_ACTION_NO_OP');
+    }
+  );
+
+  apiTest(
+    'precondition: an indefinite snooze after a timed one is judged on its own, not the earlier expiry',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'snooze-timed-then-indefinite-rule';
+      const groupHash = buildGroupHash('snooze-timed-then-indefinite-group');
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: 'snooze-timed-then-indefinite-episode', status: 'active' },
+        }),
+      ]);
+
+      const timedResponse = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: { snoozed_until: '2099-01-01T00:00:00.000Z' },
+      });
+      expect(timedResponse).toHaveStatusCode(204);
+
+      // Going from a timed to an indefinite snooze changes the series.
+      const indefiniteResponse = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(indefiniteResponse).toHaveStatusCode(204);
+
+      // The indefinite snooze is now in effect, so repeating it changes nothing.
+      const repeatResponse = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(repeatResponse).toHaveStatusCode(409);
+      expect(repeatResponse.body.code).toBe('ALERT_ACTION_NO_OP');
+
+      // And the series can still be unsnoozed.
+      const unsnoozeResponse = await apiClient.post(getUnsnoozeSeriesActionUrl(groupHash), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(unsnoozeResponse).toHaveStatusCode(204);
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['snooze', 'unsnooze'],
+      });
+      expect(actions).toHaveLength(3);
     }
   );
 

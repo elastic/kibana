@@ -36,7 +36,8 @@ export const ackHandler: ActionHandler<AckAlertActionBody> = {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
         message: getAlertAlreadyAcknowledgedMessage(alertEvent.episode_id),
-        alertEvent,
+        groupHash: alertEvent.group_hash,
+        alertId: alertEvent.episode_id,
         actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
       });
     }
@@ -53,7 +54,8 @@ export const unackHandler: ActionHandler<UnackAlertActionBody> = {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
         message: getAlertNotAcknowledgedMessage(alertEvent.episode_id),
-        alertEvent,
+        groupHash: alertEvent.group_hash,
+        alertId: alertEvent.episode_id,
         actionType: ALERT_EPISODE_ACTION_TYPE.UNACK,
       });
     }

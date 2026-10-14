@@ -43,7 +43,7 @@ export const snoozeHandler: ActionHandler<SnoozeAlertActionBody> = {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
         message: getSeriesAlreadySnoozedMessage(alertEvent.group_hash, requestedUntil),
-        alertEvent,
+        groupHash: alertEvent.group_hash,
         actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
       });
     }

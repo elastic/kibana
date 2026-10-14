@@ -28,7 +28,7 @@ export const unsnoozeHandler: ActionHandler<UnsnoozeAlertActionBody> = {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
         message: getSeriesNotSnoozedMessage(alertEvent.group_hash),
-        alertEvent,
+        groupHash: alertEvent.group_hash,
         actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
       });
     }

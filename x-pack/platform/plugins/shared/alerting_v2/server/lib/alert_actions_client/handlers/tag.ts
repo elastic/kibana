@@ -41,7 +41,8 @@ export const tagHandler: ActionHandler<TagAlertActionBody> = {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
         message: getTagsUnchangedMessage(alertEvent.episode_id),
-        alertEvent,
+        groupHash: alertEvent.group_hash,
+        alertId: alertEvent.episode_id,
         actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       });
     }
