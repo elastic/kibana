@@ -82,6 +82,12 @@ export {
   buildInboundEventsUrl,
   INBOUND_EVENTS_TOKEN_MAX_LENGTH,
 } from './inbound_events';
+export {
+  buildConnectorPublicKeyUrls,
+  CONNECTOR_PUBLIC_KEYS_API_PATH,
+  SSF_DISCOVERY_PATH_PREFIX,
+} from './connector_public_keys';
+export type { ConnectorPublicKeyUrls } from './connector_public_keys';
 export const ACTIONS_FEATURE_ID = 'actions';
 
 export const DEFAULT_MICROSOFT_EXCHANGE_URL = 'https://login.microsoftonline.com';

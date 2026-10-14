@@ -19,7 +19,7 @@ const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): Sign
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'agent-event-1',
   status: 'active',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: 'medium',
