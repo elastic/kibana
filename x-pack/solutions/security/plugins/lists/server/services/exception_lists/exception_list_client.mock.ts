@@ -14,6 +14,7 @@ import {
   EXCEPTION_LIST_NAMESPACE_AWARE,
 } from '@kbn/securitysolution-list-constants';
 import type {
+  SavedObjectsBulkDeleteObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
@@ -48,6 +49,12 @@ export class ExceptionListClientMock extends ExceptionListClient {
   public createExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
   public updateExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
   public deleteExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
+  public bulkDeleteExceptionList = jest.fn().mockResolvedValue({
+    errors: [],
+    results: [getExceptionListSchemaMock()],
+    success: true,
+    summary: { failed: 0, skipped: 0, succeeded: 1, total: 1 },
+  });
   public createExceptionListItem = jest.fn().mockResolvedValue(getExceptionListItemSchemaMock());
   public updateExceptionListItem = jest.fn().mockResolvedValue(getExceptionListItemSchemaMock());
   public deleteExceptionListItem = jest.fn().mockResolvedValue(getExceptionListItemSchemaMock());
@@ -312,6 +319,15 @@ export const getExceptionListSavedObjectClientMock = (
       saved_objects: importObjects.map((item) => {
         return getExceptionListItemSavedObject(item.attributes);
       }),
+    };
+  });
+
+  // Mock `.bulkDelete()` (used in bulk delete item cascades)
+  soClient.bulkDelete.mockImplementation(async (...args) => {
+    const [objects] = args as [SavedObjectsBulkDeleteObject[]];
+
+    return {
+      statuses: objects.map(({ id, type }) => ({ id, success: true, type })),
     };
   });
 
