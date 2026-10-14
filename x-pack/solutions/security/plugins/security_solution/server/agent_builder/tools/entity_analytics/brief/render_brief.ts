@@ -12,6 +12,7 @@ import type {
   EntityAnalyticsScopeTile,
 } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { BRIEF_TILE_IDS } from '../../../../../common/entity_analytics/ai_brief/scope';
+import type { RiskChangeEntity } from './brief_types';
 import { MAX_CHANGE_ROWS } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
@@ -30,6 +31,9 @@ import type { CandidateEntities } from './fetch_candidate_entities';
 import type { VerifiedBrief } from './verify_brief';
 import { MENTION_PATTERN } from './verify_brief';
 
+const ENTITY_TABLE_INTRO =
+  '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';
+
 export const QUIET_LINE =
   'Nothing in this view is flagged by the needs-attention tiles. That does not mean the environment is safe.';
 export const UNAVAILABLE_TILES_LINE =
@@ -42,6 +46,14 @@ export const NO_PRIORITIES_LINE =
 /** Real comparisons rank by change relative to the previous value, floored at this many entities. */
 const MIN_CHANGE_BASE = 5;
 
+/** A risk-history chart for a priority's risk change: its render tag and whose score it shows. */
+export interface RiskChart {
+  tag: string;
+  /** The priority's entity. */
+  entityId: string;
+  riskChangeEntity: RiskChangeEntity;
+}
+
 export interface RenderBriefParams {
   scope: EntityAnalyticsScope;
   spaceId: string;
@@ -50,8 +62,8 @@ export interface RenderBriefParams {
   verified?: VerifiedBrief;
   /** The render tag of the priorities' entity table. */
   entityTableTag?: string;
-  /** Risk-history chart render tags, by the entity id of the priority they go under. */
-  riskChartTags?: Map<string, string>;
+  /** A risk-history chart, shown after the entity table. */
+  riskChart?: RiskChart;
   /** True when the risk at the start of the period couldn't be read. */
   riskChangeFailed?: boolean;
 }
@@ -63,7 +75,7 @@ export const renderBrief = ({
   entities,
   verified,
   entityTableTag,
-  riskChartTags = new Map(),
+  riskChart,
   riskChangeFailed = false,
 }: RenderBriefParams): string => {
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
@@ -80,10 +92,11 @@ export const renderBrief = ({
       renderScope(scope, spaceId, entities.dataTimestamp),
       ...renderDisclosures(scope, entities, riskChangeFailed),
     ],
-    renderAttention(scope, entities, verified, withNames),
+    renderAttention(scope, entities, verified, boldName, withNames),
     renderChanges(scope),
-    renderPriorities(verified, riskChartTags, boldName, withNames),
-    entityTableTag ? [entityTableTag] : [],
+    renderPriorities(verified, boldName, withNames),
+    entityTableTag ? [ENTITY_TABLE_INTRO, '', entityTableTag] : [],
+    renderRiskChart(riskChart, boldName),
     [`_Checked: ${describeCoverage(scope, entities.candidates.length, entities.capturedCount)}._`],
   ];
   return sections
@@ -172,16 +185,41 @@ const describeNoMatch = (count: number): string =>
     ? "The tile entity doesn't match the search query."
     : `None of the ${formatCount(count)} tile entities match the search query.`;
 
+/** The model's attention text, then the first priority's next step, which readers may not reach. */
 const renderAttention = (
   scope: EntityAnalyticsScope,
   entities: CandidateEntities,
   verified: VerifiedBrief | undefined,
+  boldName: (entityId: string) => string,
   withNames: (text: string) => string
 ): string[] => {
-  if (verified) {
-    return verified.attention ? ['**What needs attention**', withNames(verified.attention)] : [];
+  if (!verified) {
+    return ['**What needs attention**', getNoBriefLine(scope, entities)];
   }
-  return ['**What needs attention**', getNoBriefLine(scope, entities)];
+  const [first] = verified.priorities;
+  const lines = compact([
+    verified.attention && withNames(verified.attention),
+    first && `_Start with_ ${boldName(first.entityId)}: ${asSentence(withNames(first.nextStep))}`,
+  ]);
+  return lines.length > 0 ? ['**What needs attention**', lines.join('\n\n')] : [];
+};
+
+/** The chart with a caption naming its priority, and the group member when the chart is the member's. */
+const renderRiskChart = (
+  riskChart: RiskChart | undefined,
+  boldName: (entityId: string) => string
+): string[] => {
+  if (!riskChart) {
+    return [];
+  }
+  const { tag, entityId, riskChangeEntity } = riskChart;
+  const member =
+    riskChangeEntity.id === entityId
+      ? ''
+      : ` (${riskChangeEntity.type} ${escapeMarkdown(
+          riskChangeEntity.name
+        )}, in its resolution group)`;
+  return [`_Risk history over the period for_ ${boldName(entityId)}${member}`, '', tag];
 };
 
 /** Why there was nothing to brief on. Only a view whose tiles were all read can be called quiet. */
@@ -253,7 +291,6 @@ const asSentence = (text: string): string => (/[.!?…]$/.test(text) ? text : `$
 
 const renderPriorities = (
   verified: VerifiedBrief | undefined,
-  riskChartTags: Map<string, string>,
   boldName: (entityId: string) => string,
   withNames: (text: string) => string
 ): string[] => {
@@ -263,15 +300,11 @@ const renderPriorities = (
   if (verified.priorities.length === 0) {
     return ['**Priorities**', NO_PRIORITIES_LINE];
   }
-  // A chart goes on its own line, between blank lines, directly under its priority.
-  const lines = verified.priorities.flatMap(
-    ({ entityId, observed, whyItMatters, nextStep }, index) => {
-      const line = `${index + 1}. ${boldName(entityId)}: ${asSentence(
-        withNames(observed)
-      )} ${asSentence(withNames(whyItMatters))} _Next:_ ${asSentence(withNames(nextStep))}`;
-      const chartTag = riskChartTags.get(entityId);
-      return chartTag ? [line, '', chartTag, ''] : [line];
-    }
+  const lines = verified.priorities.map(
+    ({ entityId, observed, whyItMatters, nextStep }, index) =>
+      `${index + 1}. ${boldName(entityId)}: ${asSentence(withNames(observed))} ${asSentence(
+        withNames(whyItMatters)
+      )} _Next:_ ${asSentence(withNames(nextStep))}`
   );
   return ['**Priorities**', ...lines];
 };

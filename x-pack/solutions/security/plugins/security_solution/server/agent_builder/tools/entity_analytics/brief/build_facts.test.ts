@@ -8,7 +8,7 @@
 import type { Entity } from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefCandidate, BriefPriority } from './brief_types';
-import { buildFacts, getCitedRiskChanges } from './build_facts';
+import { buildFacts, getFirstCitedRiskChange } from './build_facts';
 
 const scope: EntityAnalyticsScope = {
   period: '7d',
@@ -83,7 +83,7 @@ describe('buildFacts risk change', () => {
       { 'user:jdoe': 28, 'user:jdoe-laptop': 20 },
       [record('user:jdoe-laptop', 80, 'user:jdoe'), record('user:jdoe-mail', 90, 'user:jdoe')],
       [
-        'Resolution group member "jdoe-laptop": risk score 20 at the start of the last 7 days (7 October), 80 now, up 60 points',
+        'User "jdoe-laptop" in the same resolution group: risk score 20 at the start of the last 7 days (7 October), 80 now, up 60 points',
       ],
     ],
     ['nothing without a score now', record('user:jdoe'), { 'user:jdoe': 40 }, [], []],
@@ -134,8 +134,8 @@ describe('buildFacts first seen', () => {
   });
 });
 
-describe('getCitedRiskChanges', () => {
-  it('returns a chart entity only for priorities citing their risk change fact', () => {
+describe('getFirstCitedRiskChange', () => {
+  it('returns the risk change fact of the first priority citing one', () => {
     const facts = buildFacts(
       [
         candidate(record('user:jdoe', 71)),
@@ -163,13 +163,14 @@ describe('getCitedRiskChanges', () => {
       nextStep: '',
       factIds,
     });
-    const priorities = [
-      priority('user:jdoe', [factId('user:jdoe', true)]),
-      priority('host:web', [factId('host:web', false)]),
-    ];
+    const notCiting = priority('host:web', [factId('host:web', false)]);
+    const citing = priority('user:jdoe', [factId('user:jdoe', true)]);
 
-    expect([...getCitedRiskChanges(priorities, facts)]).toEqual([
-      ['user:jdoe', { id: 'user:jdoe', name: 'jdoe', type: 'user' }],
-    ]);
+    expect(getFirstCitedRiskChange([notCiting, citing], facts)?.riskChangeEntity).toEqual({
+      id: 'user:jdoe',
+      name: 'jdoe',
+      type: 'user',
+    });
+    expect(getFirstCitedRiskChange([notCiting], facts)).toBeUndefined();
   });
 });

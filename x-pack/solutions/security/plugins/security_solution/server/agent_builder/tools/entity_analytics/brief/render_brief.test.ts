@@ -213,12 +213,22 @@ describe('renderBrief', () => {
         droppedPriorityCount: 0,
       },
       entityTableTag: '<render_attachment id="x" version="1" />',
+      riskChart: {
+        tag: '<render_attachment id="y" version="1" />',
+        entityId: 'host:a',
+        riskChangeEntity: { id: 'host:a-alias', name: 'web_01_alias', type: 'host' },
+      },
     });
-    expect(brief).toContain('**What needs attention**\n**web\\_01** rose sharply');
+    expect(brief).toContain(
+      '**What needs attention**\n**web\\_01** rose sharply\n\n_Start with_ **web\\_01**: Review its alerts.'
+    );
     expect(brief).toContain(
       '1. **web\\_01**: Risk rose. High impact asset. _Next:_ Review its alerts.'
     );
-    expect(brief).toContain('<render_attachment id="x" version="1" />');
+    // The table, then the chart, each under a sentence saying what it is.
+    expect(brief).toMatch(
+      /_The priority entities at a glance[^\n]*_\n\n<render_attachment id="x" version="1" \/>\n\n_Risk history over the period for_ \*\*web\\_01\*\* \(host web\\_01\\_alias, in its resolution group\)\n\n<render_attachment id="y" version="1" \/>/
+    );
   });
 
   it('escapes link, image and tag syntax and breaks autolinks in model text', () => {

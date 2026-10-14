@@ -35,6 +35,7 @@ import {
 
 const PRIORITY_LINE = `1. **${SEEDED_USER.name}**`;
 const RISK_CHART_ID = 'security.riskscorehistory:user:';
+const ENTITY_TABLE_ID = 'security.entity:list:';
 
 apiTest.describe(
   'Entity Analytics AI brief - security.generate_entity_analytics_brief',
@@ -125,7 +126,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'states the risk change and charts it under the priority citing it',
+      'states the risk change and charts it after the entity table',
       async ({ apiClient }) => {
         // Facts 1 to 3: Risk movers membership, current risk, risk change.
         mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id, [3]));
@@ -141,8 +142,7 @@ apiTest.describe(
           `3. Risk score ${SEEDED_USER_START_SCORE} at the start of the last 7 days`
         );
         expect(submitRequests[0]).toContain('82 now, up 44 points');
-        const priority = brief.split('\n').findIndex((line) => line.startsWith(PRIORITY_LINE));
-        expect(brief.split('\n')[priority + 2]).toContain(RISK_CHART_ID);
+        expect(brief.indexOf(RISK_CHART_ID)).toBeGreaterThan(brief.indexOf(ENTITY_TABLE_ID));
       }
     );
 

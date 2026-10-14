@@ -16,13 +16,7 @@ import {
   getEntityLifecycle,
   matchesPrivilegedWatchlist,
 } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
-import type {
-  BriefCandidate,
-  BriefFact,
-  BriefPriority,
-  RiskAtStart,
-  RiskChangeEntity,
-} from './brief_types';
+import type { BriefCandidate, BriefFact, BriefPriority, RiskAtStart } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_DEFINITIONS,
@@ -108,7 +102,11 @@ const describeRiskChange = (
     return undefined;
   }
   const { id, name, now, start } = moved;
-  const subject = id === candidate.id ? '' : `Resolution group member ${JSON.stringify(name)}: `;
+  // The member's type is stated, or the model guesses it from the name (a user `jdoe@LAPTOP` read as a host).
+  const subject =
+    id === candidate.id
+      ? ''
+      : `${candidate.type} ${JSON.stringify(name)} in the same resolution group: `;
   return {
     text: upperFirst(`${subject}${describeScoreChange(start, now.score, period, periodStart)}`),
     riskChangeEntity: { id, name, type: candidate.type },
@@ -196,16 +194,13 @@ export const buildFacts = (
   return facts;
 };
 
-/** The risk change fact each priority cites, by the priority's entity id. Only these get a risk-history chart. */
-export const getCitedRiskChanges = (
+/** The risk change fact cited by the first priority that cites one. Only it gets a risk-history chart. */
+export const getFirstCitedRiskChange = (
   priorities: BriefPriority[],
   facts: BriefFact[]
-): Map<string, RiskChangeEntity> =>
-  new Map(
-    priorities.flatMap(({ entityId, factIds }) => {
-      const fact = facts.find(
-        ({ id, riskChangeEntity }) => riskChangeEntity && factIds.includes(id)
-      );
-      return fact?.riskChangeEntity ? [[entityId, fact.riskChangeEntity] as const] : [];
-    })
-  );
+): BriefFact | undefined =>
+  priorities
+    .flatMap(({ factIds }) =>
+      facts.filter(({ id, riskChangeEntity }) => riskChangeEntity && factIds.includes(id))
+    )
+    .at(0);
