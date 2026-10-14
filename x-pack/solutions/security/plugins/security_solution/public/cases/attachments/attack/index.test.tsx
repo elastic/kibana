@@ -94,6 +94,8 @@ describe('Attack attachment', () => {
       getCreationActivity: expect.any(Function),
       getRemovalActivity: expect.any(Function),
       getAttachmentList: expect.any(Function),
+      workflow: { getActivityLabel: expect.any(Function) },
+      getDocumentAction: expect.any(Function),
     });
   });
 
@@ -184,6 +186,68 @@ describe('Attack attachment', () => {
         origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
       })
     );
+  });
+  it('labels a single-attack workflow run', () => {
+    const attackType = getAttackAttachment();
+
+    render(
+      <TestProviders>
+        {attackType.workflow?.getActivityLabel({ workflowName: 'Enrich' })}
+      </TestProviders>
+    );
+
+    expect(screen.getByText(/ran Enrich on an attack/)).toBeInTheDocument();
+  });
+
+  it('labels a multi-attack workflow run with the count', () => {
+    const attackType = getAttackAttachment();
+
+    render(
+      <TestProviders>
+        {attackType.workflow?.getActivityLabel({ workflowName: 'Enrich', count: 3 })}
+      </TestProviders>
+    );
+
+    expect(screen.getByText(/ran Enrich on 3 attacks/)).toBeInTheDocument();
+  });
+
+  it('exposes a document action that opens the attack flyout from a workflow activity row', async () => {
+    const attackType = getAttackAttachment();
+    const action = attackType.getDocumentAction?.({
+      id: 'user-action-1',
+      documentId: 'attack-id-1',
+      index: ATTACK_INDEX,
+    });
+
+    expect(action).toEqual(
+      expect.objectContaining({ type: AttachmentActionType.CUSTOM, isPrimary: true })
+    );
+
+    render(
+      <TestProviders>
+        {action?.type === AttachmentActionType.CUSTOM && action.render()}
+      </TestProviders>
+    );
+
+    fireEvent.click(await screen.findByTestId('comment-action-show-attack-user-action-1'));
+
+    await waitFor(() =>
+      expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith({
+        attackId: 'attack-id-1',
+        indexName: '.alerts-security.attack.discovery.alerts-*',
+        // The workflow origin carries no title, so the flyout history entry falls back.
+        attackTitle: undefined,
+        origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+      })
+    );
+  });
+
+  it('returns no document action when the origin was never enriched with an index', () => {
+    const attackType = getAttackAttachment();
+
+    expect(
+      attackType.getDocumentAction?.({ id: 'user-action-1', documentId: 'attack-id-1' })
+    ).toBeNull();
   });
 });
 
