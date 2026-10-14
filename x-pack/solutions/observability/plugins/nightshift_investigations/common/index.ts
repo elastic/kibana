@@ -320,4 +320,8 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
-export type { InvestigatorServiceAccountStatus } from './service_account';
+export type {
+  InvestigatorServiceAccountStatus,
+  NightshiftBoundWorkflowStatus,
+  NightshiftServiceAccountInfo,
+} from './service_account';

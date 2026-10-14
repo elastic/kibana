@@ -195,7 +195,13 @@ const BOUND_WORKFLOW_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE
 /** How an investigation run started through a space's entry point executes. */
 const INVESTIGATOR_IDENTITY = {
   type: 'service_account' as const,
-  id: 'kibana/nightshift_investigator',
+  id: `kibana/nightshift-agent-${SPACE_ID}`,
+};
+
+/** The space's entry point, bound to its agent account. */
+const BOUND_DEFINITION = {
+  steps: [],
+  settings: { run_as: INVESTIGATOR_IDENTITY.id },
 };
 
 const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): InvestigationAttributes => ({
@@ -502,7 +508,12 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
 describe('NightshiftInvestigationsClient.start()', () => {
   const WORKFLOW_ID = BOUND_WORKFLOW_ID;
-  const mockWorkflow = { id: WORKFLOW_ID, enabled: true, valid: true, definition: { steps: [] } };
+  const mockWorkflow = {
+    id: WORKFLOW_ID,
+    enabled: true,
+    valid: true,
+    definition: BOUND_DEFINITION,
+  };
 
   const alertContext = {
     alerts: [
@@ -619,7 +630,19 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it.each([
     ['not set up', null],
-    ['disabled', { id: BOUND_WORKFLOW_ID, enabled: false, valid: true, definition: { steps: [] } }],
+    [
+      'disabled',
+      { id: BOUND_WORKFLOW_ID, enabled: false, valid: true, definition: BOUND_DEFINITION },
+    ],
+    [
+      'bound to another account',
+      {
+        id: BOUND_WORKFLOW_ID,
+        enabled: true,
+        valid: true,
+        definition: { steps: [], settings: { run_as: 'kibana/nightshift_investigator' } },
+      },
+    ],
   ])('refuses to start while the space is %s', async (_, boundWorkflow) => {
     mockManagement.getWorkflow.mockResolvedValue(boundWorkflow);
 
@@ -638,7 +661,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: BOUND_DEFINITION,
     };
     mockManagement.getWorkflow.mockResolvedValue(investigationWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
@@ -678,7 +701,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: BOUND_DEFINITION,
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
@@ -715,7 +738,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: BOUND_DEFINITION,
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
@@ -738,7 +761,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: BOUND_DEFINITION,
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
@@ -1370,7 +1393,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     id: BOUND_WORKFLOW_ID,
     enabled: true,
     valid: true,
-    definition: { steps: [] },
+    definition: BOUND_DEFINITION,
   };
   const makeAlert = (id: string) => ({
     id,
@@ -2237,7 +2260,7 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
       id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: BOUND_DEFINITION,
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });

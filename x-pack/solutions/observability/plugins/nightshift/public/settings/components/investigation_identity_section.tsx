@@ -54,11 +54,31 @@ export const InvestigationIdentitySection = () => {
               defaultMessage="Account: {account} · Role: {role}"
               values={{
                 account: <EuiCode>{status.data.serviceAccountId}</EuiCode>,
-                role: <EuiCode>nightshift_investigator</EuiCode>,
+                role: <EuiCode>{status.data.role}</EuiCode>,
               }}
             />
           </EuiText>
         </EuiFlexItem>
+        {isSetUp && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="nightshiftServiceAccountOthers">
+              <FormattedMessage
+                id="xpack.nightshift.settings.serviceAccount.otherAccounts"
+                defaultMessage="Other accounts of this space: {accounts}"
+                values={{
+                  accounts: status.data.serviceAccounts
+                    .filter(({ kind }) => kind !== 'agent')
+                    .map(({ id, role }, index) => (
+                      <React.Fragment key={id}>
+                        {index > 0 && ', '}
+                        <EuiCode>{id}</EuiCode> ({role})
+                      </React.Fragment>
+                    )),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
         {isSetUp && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued" data-test-subj="nightshiftServiceAccountSlack">

@@ -9,7 +9,18 @@ import { isNightshiftSetUp } from './use_investigator_service_account';
 
 const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
-  serviceAccountId: 'kibana/nightshift_investigator',
+  serviceAccountId: 'kibana/nightshift-agent-default',
+  role: 'nightshift_agent_default',
+  bound: true,
+  serviceAccounts: [
+    {
+      kind: 'agent' as const,
+      id: 'kibana/nightshift-agent-default',
+      role: 'nightshift_agent_default',
+    },
+    { kind: 'relay' as const, id: 'kibana/relay-default', role: 'nightshift_agent_default' },
+  ],
+  boundWorkflows: [],
   workflowId: 'system-nightshift-investigation-bound-default',
   installed: true,
   enabled: true,
@@ -26,6 +37,7 @@ describe('isNightshiftSetUp', () => {
     ['service accounts are turned off', { serviceAccountsEnabled: false }],
     ['the bound investigation is missing', { installed: false, enabled: null }],
     ['the bound investigation is disabled', { enabled: false }],
+    ['the entry point is bound to another account', { bound: false }],
   ])('is not set up when %s', (_, overrides) => {
     expect(isNightshiftSetUp(status(overrides))).toBe(false);
   });

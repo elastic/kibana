@@ -7,123 +7,182 @@
 
 import Boom from '@hapi/boom';
 import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { InvestigatorServiceAccountStatus } from '../../../common';
+import type {
+  InvestigatorServiceAccountStatus,
+  NightshiftBoundWorkflowStatus,
+  NightshiftServiceAccountInfo,
+} from '../../../common';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
+import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import {
   getBoundInvestigationWorkflowId,
-  NIGHTSHIFT_INVESTIGATOR_NAME,
-  NIGHTSHIFT_INVESTIGATOR_SERVICE_ACCOUNT_ID,
+  getInvestigatorServiceAccountId,
+  getNightshiftRoleName,
+  getNightshiftRoleOfAccount,
+  getNightshiftServiceAccountId,
+  getNightshiftServiceAccountName,
+  NIGHTSHIFT_ROLE_KINDS,
+  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
+  type NightshiftServiceAccountKind,
 } from './constants';
-
-/** Kibana's application name in Elasticsearch application privileges (default `.kibana` index). */
-const KIBANA_APPLICATION = 'kibana-.kibana';
-
-/**
- * The investigator role. POC scope: `all` on every space (bindings are per space, so the account
- * only acts where an admin set it up) and read on observability data. Narrowing it to the feature
- * privileges the investigation actually uses is follow-up work.
- */
-export const NIGHTSHIFT_INVESTIGATOR_ROLE = {
-  description: 'Privileges for Nightshift investigations. Created by Nightshift.',
-  cluster: ['monitor', 'monitor_inference'],
-  indices: [
-    {
-      names: ['logs-*', 'logs', 'logs.*', 'metrics-*', 'traces-*', '.alerts-*', '.kibana_streams*'],
-      privileges: ['read', 'view_index_metadata'],
-      allow_restricted_indices: false,
-    },
-  ],
-  applications: [{ application: KIBANA_APPLICATION, privileges: ['all'], resources: ['*'] }],
-  metadata: { managed_by: 'nightshift' },
-};
+import { buildNightshiftRole, NIGHTSHIFT_ROLE_METADATA } from './roles';
 
 interface Deps {
   core: CoreStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
   logger: Logger;
 }
 
-const isStatus = (error: unknown, status: number): boolean =>
-  Boom.isBoom(error)
-    ? error.output.statusCode === status
-    : (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode === status ||
-      (error as { meta?: { statusCode?: number } })?.meta?.statusCode === status;
+const ACCOUNT_DESCRIPTION: Record<NightshiftServiceAccountKind, string> = {
+  agent: 'Runs Nightshift investigations, their sandbox tools and learning hooks.',
+  relay: 'The Relay Slack bot: calls Agent Builder and workflows for Slack conversations.',
+  automations: 'Matches Nightshift automation triggers and starts investigations.',
+  detection: 'Runs Nightshift detections, KI discovery and onboarding.',
+};
 
-/** Creates the role when missing. An existing role is reused unchanged, never overwritten. */
-const ensureRole = async (esClient: ElasticsearchClient): Promise<void> => {
-  try {
-    const existing = await esClient.security.getRole({ name: NIGHTSHIFT_INVESTIGATOR_NAME });
-    if (existing[NIGHTSHIFT_INVESTIGATOR_NAME]) return;
-  } catch (error) {
-    if (!isStatus(error, 404)) throw error;
+const getStatusCode = (error: unknown): number | undefined => {
+  if (Boom.isBoom(error)) return error.output.statusCode;
+  const { statusCode, meta } = (error ?? {}) as {
+    statusCode?: number;
+    meta?: { statusCode?: number };
+  };
+  return statusCode ?? meta?.statusCode;
+};
+
+const getServiceAccounts = (spaceId: string): NightshiftServiceAccountInfo[] =>
+  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS.map((kind) => ({
+    kind,
+    id: getNightshiftServiceAccountId(kind, spaceId),
+    role: getNightshiftRoleOfAccount(kind, spaceId),
+  }));
+
+/**
+ * Creates or updates the space's roles. Roles Nightshift created are brought to the current
+ * definition on every run, so a privilege change ships with the code. A role of the same name that
+ * Nightshift did not create is never overwritten.
+ */
+const syncRoles = async (esClient: ElasticsearchClient, spaceId: string): Promise<void> => {
+  for (const kind of NIGHTSHIFT_ROLE_KINDS) {
+    const name = getNightshiftRoleName(kind, spaceId);
+    let existing: { metadata?: Record<string, unknown> } | undefined;
+    try {
+      existing = (await esClient.security.getRole({ name }))[name];
+    } catch (error) {
+      if (getStatusCode(error) !== 404) throw error;
+    }
+    if (existing && existing.metadata?.managed_by !== NIGHTSHIFT_ROLE_METADATA.managed_by) {
+      throw Boom.conflict(
+        `Role [${name}] exists but was not created by Nightshift. Delete or rename it, then retry.`
+      );
+    }
+    await esClient.security.putRole({ name, ...buildNightshiftRole(kind, spaceId) });
   }
-  await esClient.security.putRole({
-    name: NIGHTSHIFT_INVESTIGATOR_NAME,
-    ...NIGHTSHIFT_INVESTIGATOR_ROLE,
-  });
 };
 
 /** Creates the account when missing. A name conflict means it already exists, and is reused. */
-const ensureServiceAccount = async (core: CoreStart, request: KibanaRequest): Promise<string> => {
+const ensureServiceAccount = async (
+  core: CoreStart,
+  request: KibanaRequest,
+  kind: NightshiftServiceAccountKind,
+  spaceId: string
+): Promise<void> => {
   try {
-    const created = await core.security.serviceAccounts.create(request, {
-      name: NIGHTSHIFT_INVESTIGATOR_NAME,
-      description: 'Runs Nightshift investigations. Created by Nightshift.',
-      roles: [NIGHTSHIFT_INVESTIGATOR_NAME],
+    await core.security.serviceAccounts.create(request, {
+      name: getNightshiftServiceAccountName(kind, spaceId),
+      description: `${ACCOUNT_DESCRIPTION[kind]} Space [${spaceId}]. Created by Nightshift.`,
+      roles: [getNightshiftRoleOfAccount(kind, spaceId)],
     });
-    return created.id;
   } catch (error) {
-    if (isStatus(error, 409)) return NIGHTSHIFT_INVESTIGATOR_SERVICE_ACCOUNT_ID;
-    throw error;
+    if (getStatusCode(error) !== 409) throw error;
   }
 };
 
 export const createInvestigatorServiceAccountService = ({
   core,
   workflowsExtensions,
+  workflowsManagement,
+  spaces,
   logger,
 }: Deps) => {
+  // Setups of one space run one after another, so two clicks cannot interleave their installs.
+  const queues = new Map<string, Promise<unknown>>();
+
+  const getBoundWorkflowStatus = async (
+    request: KibanaRequest,
+    spaceId: string,
+    id: BoundWorkflowId
+  ): Promise<NightshiftBoundWorkflowStatus> => {
+    const client = await workflowsExtensions.getClient(request);
+    const status = await client.managedWorkflows.getWorkflowStatus(
+      NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
+      id,
+      { spaceId, workflowIdSuffix: spaceId }
+    );
+    const workflowId = `${id}-${spaceId}`;
+    const workflow =
+      status.installed && workflowsManagement
+        ? await workflowsManagement.management
+            .getWorkflow(workflowId, spaceId, request)
+            .catch((error: unknown) => {
+              logger.debug(`Could not read [${workflowId}] in space [${spaceId}]: ${error}`);
+              return null;
+            })
+        : null;
+    const runAs = workflow?.definition?.settings?.run_as ?? null;
+    return {
+      workflowId,
+      installed: status.installed,
+      enabled: status.enabled,
+      runAs,
+      bound: runAs === getInvestigatorServiceAccountId(spaceId),
+    };
+  };
+
   const getStatus = async (
     request: KibanaRequest,
     spaceId: string
   ): Promise<InvestigatorServiceAccountStatus> => {
-    const client = await workflowsExtensions.getClient(request);
-    const [investigation, slackThread] = await Promise.all(
-      (
-        [
-          NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
-          NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
-        ] as const
-      ).map((id) =>
-        client.managedWorkflows.getWorkflowStatus(
-          NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
-          id,
-          { spaceId, workflowIdSuffix: spaceId }
-        )
-      )
+    const boundWorkflows = await Promise.all(
+      BOUND_WORKFLOW_IDS.map((id) => getBoundWorkflowStatus(request, spaceId, id))
     );
+    const byId = (id: BoundWorkflowId) => boundWorkflows[BOUND_WORKFLOW_IDS.indexOf(id)];
+    const entryPoint = byId(NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID);
     return {
       serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
-      serviceAccountId: NIGHTSHIFT_INVESTIGATOR_SERVICE_ACCOUNT_ID,
+      serviceAccountId: getInvestigatorServiceAccountId(spaceId),
+      role: getNightshiftRoleOfAccount('agent', spaceId),
       workflowId: getBoundInvestigationWorkflowId(spaceId),
-      installed: investigation.installed,
-      enabled: investigation.enabled,
-      slackThreadInstalled: slackThread.installed,
+      installed: entryPoint.installed,
+      enabled: entryPoint.enabled,
+      bound: entryPoint.bound,
+      slackThreadInstalled: byId(NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID).installed,
+      serviceAccounts: getServiceAccounts(spaceId),
+      boundWorkflows,
     };
   };
 
-  /**
-   * Ensures the investigator role and service account with the caller's privileges, then installs
-   * the bound investigation and Slack thread workflows in the caller's space. Binding a workflow
-   * to the account requires the caller to hold `manage_security`; the workflows plugin enforces
-   * that too. Re-running it repairs a space whose workflows were removed.
-   */
-  const enable = async (
+  const assertSpaceExists = async (request: KibanaRequest, spaceId: string): Promise<void> => {
+    if (!spaces) return;
+    try {
+      await spaces.spacesService.createSpacesClient(request).get(spaceId);
+    } catch (error) {
+      if (getStatusCode(error) === 404) {
+        throw Boom.notFound(`Space [${spaceId}] does not exist.`);
+      }
+      throw error;
+    }
+  };
+
+  const runEnable = async (
     request: KibanaRequest,
     spaceId: string
   ): Promise<InvestigatorServiceAccountStatus> => {
@@ -138,40 +197,88 @@ export const createInvestigatorServiceAccountService = ({
     });
     if (!canManageSecurity) {
       throw Boom.forbidden(
-        'Setting up the Nightshift service account requires the manage_security cluster privilege.'
+        'Setting up the Nightshift service accounts requires the manage_security cluster privilege.'
       );
     }
-    await ensureRole(esClient);
-    const serviceAccountId = await ensureServiceAccount(core, request);
+    await assertSpaceExists(request, spaceId);
 
+    await syncRoles(esClient, spaceId);
+    for (const kind of NIGHTSHIFT_SERVICE_ACCOUNT_KINDS) {
+      await ensureServiceAccount(core, request, kind, spaceId);
+    }
+
+    // Every bound workflow runs as the agent account. Installing again with a different account
+    // (an earlier setup's) rebinds it.
+    const serviceAccountId = getInvestigatorServiceAccountId(spaceId);
     const client = await workflowsExtensions.getClient(request);
-    // Both call the global investigation workflow, which runs as the account they are bound to.
-    for (const id of [
-      NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
-      NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
-    ] as const) {
-      await client.managedWorkflows.install(NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER, id, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-        values: { serviceAccountId },
-      });
+    for (const id of BOUND_WORKFLOW_IDS) {
+      try {
+        await client.managedWorkflows.install(
+          NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
+          id,
+          {
+            spaceId,
+            workflowIdSuffix: spaceId,
+            values: { serviceAccountId },
+          }
+        );
+      } catch (error) {
+        logger.error(`Nightshift setup in space [${spaceId}] failed to install [${id}]: ${error}`);
+        throw Boom.boomify(error instanceof Error ? error : new Error(String(error)), {
+          statusCode: getStatusCode(error) ?? 500,
+          message: `Installing workflow [${id}] failed`,
+        });
+      }
+    }
+
+    const status = await getStatus(request, spaceId);
+    const unbound = status.boundWorkflows.filter(({ installed, bound }) => !installed || !bound);
+    if (unbound.length > 0) {
+      throw Boom.internal(
+        `Nightshift setup in space [${spaceId}] did not bind ${unbound
+          .map(({ workflowId, runAs }) => `[${workflowId}] (runs as ${runAs ?? 'the caller'})`)
+          .join(', ')} to [${serviceAccountId}]`
+      );
     }
     logger.info(
       `Nightshift in space [${spaceId}] now runs as service account [${serviceAccountId}]`
     );
-    return getStatus(request, spaceId);
+    return status;
   };
 
-  /** Uninstalls the bound workflows; the space can no longer run investigations. */
+  /**
+   * Sets up a space with the caller's privileges: creates or updates its roles, creates its
+   * service accounts if missing, and installs every bound workflow with `settings.run_as` set to
+   * the agent account. Binding a workflow requires the caller to hold `manage_security`; the
+   * workflows plugin enforces that too. Idempotent: running it again repairs a space whose
+   * workflows were removed or bound to another account, and brings the roles up to date.
+   */
+  const enable = (
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<InvestigatorServiceAccountStatus> => {
+    const previous = queues.get(spaceId) ?? Promise.resolve();
+    const run = previous.catch(() => undefined).then(() => runEnable(request, spaceId));
+    queues.set(spaceId, run);
+    run
+      .catch(() => undefined)
+      .finally(() => {
+        if (queues.get(spaceId) === run) queues.delete(spaceId);
+      });
+    return run;
+  };
+
+  /**
+   * Uninstalls the bound workflows; the space can no longer run investigations. Accounts and roles
+   * are kept, so `_enable` restores the space with the same identities.
+   */
   const disable = async (
     request: KibanaRequest,
     spaceId: string
   ): Promise<InvestigatorServiceAccountStatus> => {
     const client = await workflowsExtensions.getClient(request);
-    for (const id of [
-      NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
-      NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
-    ] as const) {
+    // The entry point goes first, so the space stops reading as set up before anything else goes.
+    for (const id of [...BOUND_WORKFLOW_IDS].reverse()) {
       await client.managedWorkflows.uninstall(
         NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
         id,

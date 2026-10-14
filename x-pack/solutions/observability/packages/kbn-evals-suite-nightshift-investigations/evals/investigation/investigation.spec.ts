@@ -55,6 +55,25 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
           5 * 60_000
       );
+      // Investigations only run as the space's Nightshift service account, so the space has to be
+      // set up first. The eval user holds manage_security; setup is idempotent.
+      await expect
+        .poll(
+          async () =>
+            fetch<{ installed: boolean; bound: boolean }>(
+              '/internal/nightshift/investigations/service_account/_enable',
+              { method: 'POST' }
+            ).then(
+              ({ installed, bound }) => installed && bound,
+              (error: unknown) => {
+                log.warning(`Nightshift setup failed, retrying: ${String(error)}`);
+                return false;
+              }
+            ),
+          // Setup needs the managed workflows plugin to be ready after a cold start.
+          { timeout: 120_000, intervals: [5_000] }
+        )
+        .toBe(true);
       await expect
         .poll(
           async () =>

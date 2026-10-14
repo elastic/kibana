@@ -18,6 +18,11 @@ const request = {} as KibanaRequest;
 const warn = jest.fn();
 const logger = { warn } as never;
 const workflow = { enabled: true, valid: true, definition: {} };
+/** The space's entry point, bound to the space's agent account. */
+const boundWorkflow = (_id: string, spaceId: string) => ({
+  ...workflow,
+  definition: { settings: { run_as: `kibana/nightshift-agent-${spaceId}` } },
+});
 const agentBuilder = {} as never;
 const agenticInvestigations = {} as never;
 const proposals = {} as never;
@@ -54,7 +59,7 @@ const createDependencies = (featureFlags = createFeatureFlagsMock(true)) => ({
 beforeEach(() => {
   jest.clearAllMocks();
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
-  getWorkflow.mockResolvedValue(workflow);
+  getWorkflow.mockImplementation(async (id: string, spaceId: string) => boundWorkflow(id, spaceId));
 });
 
 it('checks the bound investigation workflow of the space', async () => {
@@ -72,6 +77,15 @@ it('returns false while service accounts are turned off', async () => {
     })
   ).resolves.toBe(false);
   expect(getWorkflow).not.toHaveBeenCalled();
+});
+
+it('returns false while the entry point is bound to another account', async () => {
+  getWorkflow.mockResolvedValue({
+    ...workflow,
+    definition: { settings: { run_as: 'kibana/nightshift_investigator' } },
+  });
+
+  await expect(isInvestigationInfrastructureAvailable(createDependencies())).resolves.toBe(false);
 });
 
 it('returns false while the bound workflow is disabled', async () => {

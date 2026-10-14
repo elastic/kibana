@@ -60,6 +60,8 @@ const createInvestigationConfig = (
         // Allow sixteen investigation workflows plus five background tasks.
         '--xpack.task_manager.capacity=21',
         '--xpack.nightshift_investigations.enabled=true',
+        // Investigations only run as the space's Nightshift service account.
+        '--xpack.security.serviceAccounts.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxKibanaConfig}`,

@@ -21,7 +21,14 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   isLoading: false,
   data: {
     serviceAccountsEnabled: true,
-    serviceAccountId: 'kibana/nightshift_investigator',
+    serviceAccountId: 'kibana/nightshift-agent-default',
+    role: 'nightshift_agent_default',
+    bound: true,
+    serviceAccounts: [
+      { kind: 'agent', id: 'kibana/nightshift-agent-default', role: 'nightshift_agent_default' },
+      { kind: 'relay', id: 'kibana/relay-default', role: 'nightshift_agent_default' },
+    ],
+    boundWorkflows: [],
     workflowId: 'system-nightshift-investigation-bound-default',
     installed: true,
     enabled: true,
@@ -43,7 +50,9 @@ describe('InvestigationIdentitySection', () => {
     renderSection();
 
     expect(screen.getByTestId('nightshiftServiceAccountOn')).toBeInTheDocument();
-    expect(screen.getByText('kibana/nightshift_investigator')).toBeInTheDocument();
+    expect(screen.getByText('kibana/nightshift-agent-default')).toBeInTheDocument();
+    expect(screen.getByText('nightshift_agent_default')).toBeInTheDocument();
+    expect(screen.getByText('kibana/relay-default')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 

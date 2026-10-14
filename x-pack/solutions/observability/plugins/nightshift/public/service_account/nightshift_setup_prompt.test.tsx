@@ -18,7 +18,11 @@ jest.mock('./use_investigator_service_account', () => ({
 
 const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
-  serviceAccountId: 'kibana/nightshift_investigator',
+  serviceAccountId: 'kibana/nightshift-agent-default',
+  role: 'nightshift_agent_default',
+  bound: false,
+  serviceAccounts: [],
+  boundWorkflows: [],
   workflowId: 'system-nightshift-investigation-bound-default',
   installed: false,
   enabled: null,

@@ -123,7 +123,7 @@ describe('NightshiftPage', () => {
     mockServiceAccount = {
       isLoading: false,
       isSuccess: true,
-      data: { installed: true, enabled: true, serviceAccountsEnabled: true },
+      data: { installed: true, enabled: true, bound: true, serviceAccountsEnabled: true },
     };
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseOnboardingVisibility.mockReturnValue({

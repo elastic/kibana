@@ -42,7 +42,8 @@ import type { InvestigationNotificationDestination } from '../../common/schemas'
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import {
   getBoundInvestigationWorkflowId,
-  NIGHTSHIFT_INVESTIGATOR_SERVICE_ACCOUNT_ID,
+  getInvestigatorServiceAccountId,
+  isEntryPointReady,
 } from '../lib/service_account/constants';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
@@ -389,13 +390,12 @@ const SERVICE_ACCOUNT_REQUIRED_MESSAGE =
  * installed globally, so anyone allowed to run workflows can start it directly, as themselves;
  * such a run must not act on an investigation.
  */
-const runsAsInvestigator = ({
-  effectiveIdentity,
-}: {
-  effectiveIdentity?: { type: string; id?: string };
-}): boolean =>
+const runsAsInvestigator = (
+  { effectiveIdentity }: { effectiveIdentity?: { type: string; id?: string } },
+  spaceId: string
+): boolean =>
   effectiveIdentity?.type === 'service_account' &&
-  effectiveIdentity.id === NIGHTSHIFT_INVESTIGATOR_SERVICE_ACCOUNT_ID;
+  effectiveIdentity.id === getInvestigatorServiceAccountId(spaceId);
 
 const NOT_RUN_AS_INVESTIGATOR_MESSAGE =
   'Investigations only run as the Nightshift service account, through the entry point of the space.';
@@ -561,7 +561,7 @@ export class NightshiftInvestigationsClient {
       this.request
     );
 
-    if (!workflow?.definition || !workflow.enabled) {
+    if (!workflow?.definition || !isEntryPointReady(workflow, spaceId)) {
       this.logger.warn(
         `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
       );
@@ -863,7 +863,7 @@ export class NightshiftInvestigationsClient {
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
-    if (!runsAsInvestigator(execution)) {
+    if (!runsAsInvestigator(execution, this.getSpaceId())) {
       throw new InvestigationUnavailableError(NOT_RUN_AS_INVESTIGATOR_MESSAGE);
     }
     return { execution, inputs };

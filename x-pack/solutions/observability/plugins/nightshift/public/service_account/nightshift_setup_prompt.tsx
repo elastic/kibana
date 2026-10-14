@@ -13,7 +13,7 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
 import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
 
-const DEFAULT_ACCOUNT = 'kibana/nightshift_investigator';
+const DEFAULT_ACCOUNT = 'kibana/nightshift-agent-<space>';
 
 /**
  * First-run step shown instead of Nightshift until the space is set up. Nightshift only works as
@@ -100,7 +100,7 @@ export const NightshiftSetupPrompt = ({
           <p>
             <FormattedMessage
               id="xpack.nightshift.setup.body"
-              defaultMessage="Nightshift runs its investigations as its own service account, {account}, not as the people who use it. Its access is set by the account's role, and its work can be traced to it. An administrator sets it up once per space, which creates the account and its role if they do not exist yet."
+              defaultMessage="Nightshift runs its investigations as its own service account, {account}, not as the people who use it. Its access is set by the account's role, which only applies to this space, and its work can be traced to it. An administrator sets it up once per space, which creates the space's Nightshift service accounts and roles if they do not exist yet."
               values={{ account: <EuiCode>{account}</EuiCode> }}
             />
           </p>

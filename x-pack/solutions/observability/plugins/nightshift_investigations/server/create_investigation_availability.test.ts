@@ -26,7 +26,10 @@ it('keeps the agent available when infrastructure exists without probing a model
       workflowsManagement: {
         management: {
           getClient: () => ({
-            getWorkflow: jest.fn().mockResolvedValue({ definition: {}, enabled: true }),
+            getWorkflow: jest.fn().mockResolvedValue({
+              definition: { settings: { run_as: 'kibana/nightshift-agent-default' } },
+              enabled: true,
+            }),
           }),
         },
       } as never,

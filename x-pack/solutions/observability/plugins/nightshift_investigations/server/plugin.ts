@@ -22,9 +22,13 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundHookWorkflowId,
+  NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
+import { getBoundHookIdFor } from './lib/service_account/bound_workflows';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
@@ -259,10 +263,13 @@ export class NightshiftInvestigationsPlugin
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
+        resolveHookWorkflowId: this.resolveHookWorkflowId,
         logger: this.logger.get('custom_context'),
       });
       if (this.decisionTreesEnabled) {
-        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
+        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder, {
+          resolveHookWorkflowId: this.resolveHookWorkflowId,
+        });
       }
 
       if (plugins.sandbox?.isAvailable) {
@@ -686,6 +693,17 @@ export class NightshiftInvestigationsPlugin
   private isServiceAccountExecutionEnabled = (): boolean =>
     this.security?.serviceAccounts.isEnabled() ?? false;
 
+  /**
+   * Investigations run as the space's service account, and so must the Agent Builder hooks of
+   * their agents: the space's bound entry point for a hook runs it as that account.
+   */
+  private resolveHookWorkflowId = (hookWorkflowId: string, spaceId: string): string => {
+    const boundHookId = getBoundHookIdFor(hookWorkflowId);
+    return boundHookId && this.isServiceAccountExecutionEnabled()
+      ? getNightshiftBoundHookWorkflowId(boundHookId, spaceId)
+      : hookWorkflowId;
+  };
+
   private getInvestigatorServiceAccountService = (): InvestigatorServiceAccountService => {
     if (!this.coreStart || !this.workflowsExtensionsStart) {
       throw new Error('workflowsExtensions is not available — plugin start() has not been called');
@@ -693,6 +711,8 @@ export class NightshiftInvestigationsPlugin
     return createInvestigatorServiceAccountService({
       core: this.coreStart,
       workflowsExtensions: this.workflowsExtensionsStart,
+      workflowsManagement: this.workflowsManagement,
+      spaces: this.spaces,
       logger: this.logger.get('service_account'),
     });
   };

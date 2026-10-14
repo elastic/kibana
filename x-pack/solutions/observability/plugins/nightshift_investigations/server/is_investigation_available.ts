@@ -18,6 +18,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { getNightshiftBoundInvestigationWorkflowId } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { isEntryPointReady } from './lib/service_account/constants';
 
 export interface InvestigationInfrastructureAvailabilityDependencies {
   request: KibanaRequest;
@@ -82,7 +83,7 @@ export const isInvestigationInfrastructureAvailable = async ({
       .getClient(request)
       .getWorkflow(getNightshiftBoundInvestigationWorkflowId(resolvedSpaceId), resolvedSpaceId);
 
-    return Boolean(workflow?.definition && workflow.enabled);
+    return isEntryPointReady(workflow, resolvedSpaceId);
   } catch (error) {
     logger.warn(`Failed to check investigation infrastructure availability: ${String(error)}`);
     return false;

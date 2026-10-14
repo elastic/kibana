@@ -68,6 +68,8 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
       queryClient.setQueryData(QUERY_KEY, status);
     },
     onError: (error) => {
+      // A failed setup may have done part of its work; read the status again.
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       notifications.toasts.addError(toError(error), {
         title: i18n.translate('xpack.nightshift.serviceAccount.setupErrorToastTitle', {
           defaultMessage: 'Failed to set up the Nightshift service account',
@@ -78,8 +80,11 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
 };
 
 /**
- * Nightshift is usable in a space once service accounts are on and its bound investigation
- * workflow is installed and enabled.
+ * Nightshift is usable in a space once service accounts are on and its investigation entry point
+ * is installed, enabled, and bound to the space's agent account.
  */
 export const isNightshiftSetUp = (status: InvestigatorServiceAccountStatus | undefined): boolean =>
-  status?.serviceAccountsEnabled === true && status.installed === true && status.enabled === true;
+  status?.serviceAccountsEnabled === true &&
+  status.installed === true &&
+  status.enabled === true &&
+  status.bound === true;
