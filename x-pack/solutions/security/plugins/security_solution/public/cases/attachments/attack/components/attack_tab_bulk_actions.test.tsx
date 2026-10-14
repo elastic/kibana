@@ -15,6 +15,15 @@ import {
   ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_SELECT_ALL_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
+import {
+  ATTACK_ADD_TO_CASE_ACTION_ID,
+  ATTACK_ASSIGNEE_ACTION_IDS,
+  ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
+  ATTACK_STATUS_ACTION_IDS,
+  ATTACK_TAG_ACTION_ID,
+  RUN_ATTACK_WORKFLOW_ACTION_ID,
+} from '../../../../common/constants/action_ids';
+import { ACTION_MENU_GROUP_SEPARATOR_TEST_ID } from '../../../../common/utils/action_menu_items';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAttackAssigneesContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
@@ -70,8 +79,27 @@ const ITEM_NAMES = {
   workflowStatus: 'Mark as acknowledged',
 } as const;
 
+/**
+ * The stable action id each item is keyed on, which is what the icon map is looked up by — so the
+ * mocks have to carry the real ones for the decoration to be exercised at all.
+ */
+const ITEM_KEYS: Readonly<Record<string, string>> = {
+  [ITEM_NAMES.addToExistingCase]: ATTACK_ADD_TO_CASE_ACTION_ID,
+  [ITEM_NAMES.addToNewCase]: ATTACK_ADD_TO_CASE_ACTION_ID,
+  [ITEM_NAMES.assignees]: ATTACK_ASSIGNEE_ACTION_IDS.assign,
+  [ITEM_NAMES.investigateInTimeline]: ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
+  [ITEM_NAMES.runWorkflow]: RUN_ATTACK_WORKFLOW_ACTION_ID,
+  [ITEM_NAMES.tags]: ATTACK_TAG_ACTION_ID,
+  [ITEM_NAMES.workflowStatus]: ATTACK_STATUS_ACTION_IDS.markAsAcknowledged,
+};
+
 const menuItems = (...names: string[]) => ({
-  items: names.map((name) => ({ name, key: name, onClick: jest.fn() })),
+  items: names.map((name) => ({
+    name,
+    key: ITEM_KEYS[name] ?? name,
+    'data-test-subj': ITEM_KEYS[name] ?? name,
+    onClick: jest.fn(),
+  })),
   panels: [],
 });
 
@@ -213,6 +241,99 @@ describe('AttackTabBulkActions', () => {
     Object.values(ITEM_NAMES).forEach((name) => {
       expect(within(menu).getByText(name)).toBeInTheDocument();
     });
+  });
+
+  it('orders the verbs into the groups the alerts table uses, separated', async () => {
+    renderBar(resolvedSelection);
+
+    const menu = await openMenu();
+
+    // Status, then the attack-management verbs, then workflows, then navigation — the order the
+    // alerts table's bulk menu and the attacks page's take-action menu both use.
+    expect(
+      within(menu)
+        .getAllByRole('menuitem')
+        .map(({ textContent }) => textContent)
+    ).toEqual([
+      ITEM_NAMES.workflowStatus,
+      ITEM_NAMES.assignees,
+      ITEM_NAMES.addToExistingCase,
+      ITEM_NAMES.addToNewCase,
+      ITEM_NAMES.tags,
+      ITEM_NAMES.runWorkflow,
+      ITEM_NAMES.investigateInTimeline,
+    ]);
+    expect(within(menu).getAllByTestId(ACTION_MENU_GROUP_SEPARATOR_TEST_ID)).toHaveLength(3);
+  });
+
+  it('gives every verb the icon it carries elsewhere', async () => {
+    renderBar(resolvedSelection);
+
+    const menu = await openMenu();
+
+    expect(
+      within(menu)
+        .getAllByTestId(ATTACK_ADD_TO_CASE_ACTION_ID)[0]
+        .querySelector('[data-euiicon-type="briefcase"]')
+    ).toBeInTheDocument();
+    expect(
+      within(menu)
+        .getByTestId(ATTACK_ASSIGNEE_ACTION_IDS.assign)
+        .querySelector('[data-euiicon-type="users"]')
+    ).toBeInTheDocument();
+    expect(
+      within(menu).getByTestId(ATTACK_TAG_ACTION_ID).querySelector('[data-euiicon-type="tag"]')
+    ).toBeInTheDocument();
+    expect(
+      within(menu)
+        .getByTestId(RUN_ATTACK_WORKFLOW_ACTION_ID)
+        .querySelector('[data-euiicon-type="workflow"]')
+    ).toBeInTheDocument();
+    expect(
+      within(menu)
+        .getByTestId(ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID)
+        .querySelector('[data-euiicon-type="timeline"]')
+    ).toBeInTheDocument();
+  });
+
+  it('marks the workflow status verbs with their status dot', async () => {
+    renderBar(resolvedSelection);
+
+    const menu = await openMenu();
+
+    expect(
+      within(menu)
+        .getByTestId(ATTACK_STATUS_ACTION_IDS.markAsAcknowledged)
+        .querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
+  });
+
+  it('leaves no orphan separator behind a group the selection may not use', async () => {
+    useAttackRunWorkflowContextMenuItemsMock.mockReturnValue(menuItems());
+    useAttackInvestigateInTimelineContextMenuItemsMock.mockReturnValue(menuItems());
+
+    renderBar(resolvedSelection);
+
+    const menu = await openMenu();
+
+    expect(within(menu).getAllByTestId(ACTION_MENU_GROUP_SEPARATOR_TEST_ID)).toHaveLength(1);
+  });
+
+  it('draws no separator at all when only one group survives', async () => {
+    [
+      useAttackCaseContextMenuItemsMock,
+      useAttackTagsContextMenuItemsMock,
+      useAttackAssigneesContextMenuItemsMock,
+      useAttackRunWorkflowContextMenuItemsMock,
+      useAttackInvestigateInTimelineContextMenuItemsMock,
+    ].forEach((hook) => hook.mockReturnValue(menuItems()));
+
+    renderBar(resolvedSelection);
+
+    const menu = await openMenu();
+
+    expect(within(menu).queryByTestId(ACTION_MENU_GROUP_SEPARATOR_TEST_ID)).not.toBeInTheDocument();
+    expect(within(menu).getByText(ITEM_NAMES.workflowStatus)).toBeInTheDocument();
   });
 
   it('opens by keyboard', async () => {
