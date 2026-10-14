@@ -49,10 +49,11 @@ Follow these steps rigorously:
           * `ACCURATE`: All claims are `FULLY_SUPPORTED` or `PARTIALLY_SUPPORTED`.
           * `MINOR_INACCURACIES`: Contains `CONTRADICTED` or `NOT_IN_GROUND_TRUTH` claims that are `peripheral`.
           * `MAJOR_INACCURACIES`: Contains `CONTRADICTED` or `NOT_IN_GROUND_TRUTH` claims that are `central` to the user's query.
-      * `relevance_summary`:
-          * `RELEVANT`: The response contains only `central` claims.
-          * `PARTIALLY_RELEVANT`: The response answers the core query but also contains one or more `peripheral` claims.
-          * `IRRELEVANT`: The response is primarily composed of `peripheral` claims or fails to address the `central` parts of the query.
+      * `relevance_summary` (derive it from the `centrality` tags you assigned above; the rules are mutually exclusive, so apply them in this order):
+          * `RELEVANT`: There is at least one claim and every claim is `central`.
+          * `IRRELEVANT`: Fewer than half of the claims are `central`, OR no claim addresses the user's core request.
+          * `PARTIALLY_RELEVANT`: Anything else (at least half of the claims are `central`, but at least one claim is `peripheral`).
+          * An empty or non-answer response yields zero claims and is `IRRELEVANT`. Never emit claims about the response itself (for example "the agent response is empty"); only extract claims the response actually makes.
       * `sequence_accuracy_summary`:
           * `MATCH`: All central claims have a sequence_match of MATCH.
           * `MISMATCH`: One or more central claims has a sequence_match of MISMATCH.
