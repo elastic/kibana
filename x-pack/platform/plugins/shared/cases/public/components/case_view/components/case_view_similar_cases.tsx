@@ -70,13 +70,21 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
         ({ field, isChecked }) => field === sortField && !isChecked
       );
 
-      if (isSortedColumnHidden) {
-        setSortField(DEFAULT_SORT_FIELD);
-        setSortOrder(DEFAULT_SORT_ORDER);
-        setPageIndex(0);
+      if (!isSortedColumnHidden) {
+        return;
       }
+
+      const isDefaultSort = sortField === DEFAULT_SORT_FIELD && sortOrder === DEFAULT_SORT_ORDER;
+
+      if (isDefaultSort) {
+        return;
+      }
+
+      setSortField(DEFAULT_SORT_FIELD);
+      setSortOrder(DEFAULT_SORT_ORDER);
+      setPageIndex(0);
     },
-    [setPickerColumns, sortField]
+    [setPickerColumns, sortField, sortOrder]
   );
 
   const pagination = useMemo(
