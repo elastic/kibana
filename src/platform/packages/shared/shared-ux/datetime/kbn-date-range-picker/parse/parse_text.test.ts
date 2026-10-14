@@ -767,6 +767,18 @@ describe('"now" anchoring', () => {
     expect(range.endDate?.toISOString()).toBe('2025-07-15T11:30:00.456Z');
   });
 
+  it('ends rounded-up relative bounds on the last whole second', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('yesterday');
+
+    expect(range.endDate?.getMilliseconds()).toBe(0);
+    expect(range.endDate?.getHours()).toBe(23);
+    expect(range.endDate?.getMinutes()).toBe(59);
+    expect(range.endDate?.getSeconds()).toBe(59);
+  });
+
   it('keeps milliseconds in "now" when a bound uses the ms unit', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
