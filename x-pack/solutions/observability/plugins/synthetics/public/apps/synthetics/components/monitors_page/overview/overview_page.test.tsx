@@ -123,6 +123,10 @@ jest.mock('../common/no_monitors_found', () => ({
   NoMonitorsFound: () => null,
 }));
 
+jest.mock('../../common/components/browser_complete_agent_overview_callout', () => ({
+  BrowserCompleteAgentOverviewCallout: () => null,
+}));
+
 import { OverviewPage } from './overview_page';
 import { setOverviewPageStateAction } from '../../../state';
 import type { MonitorOverviewPageState } from '../../../state';

@@ -59,6 +59,10 @@ export class ScriptedFieldForm {
     await this.codeEditor.setCodeEditorValue(script);
   }
 
+  async selectFormat(format: string): Promise<void> {
+    await this.page.testSubj.locator('editorSelectedFormatId').selectOption(format);
+  }
+
   async save(): Promise<void> {
     await this.page.testSubj.click('fieldSaveButton');
   }

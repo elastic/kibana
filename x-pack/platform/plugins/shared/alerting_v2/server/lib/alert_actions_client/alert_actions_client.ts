@@ -51,9 +51,24 @@ import {
   loadLatestAlertEventsByEpisodeId,
   loadLatestAlertEventsByGroupHash,
 } from './context_loaders/load_latest_alert_events';
+import {
+  EMPTY_ALERT_ACTION_STATE,
+  loadAlertActionStatesByEpisodeId,
+  type AlertActionState,
+} from './context_loaders/load_alert_action_states';
+import {
+  EMPTY_SERIES_ACTION_STATE,
+  loadSeriesActionStatesByGroupHash,
+  type SeriesActionState,
+} from './context_loaders/load_series_action_states';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
-import { ACTION_HANDLERS, prepareWithHandler } from './handlers';
+import {
+  ACTION_HANDLERS,
+  prepareWithHandler,
+  requiresActionState,
+  requiresSeriesActionState,
+} from './handlers';
 
 /** A single per-item error in a bulk create alert actions response. */
 type BulkAlertActionError = BulkResponse['errors'][number];
@@ -102,19 +117,19 @@ const boomToBulkActionError = (id: string, error: Boom.Boom): BulkAlertActionErr
 };
 
 /**
- * Lifecycle actions (`activate` / `deactivate`) write a synthetic
- * `.rule-events` doc with `@timestamp set at ingest time; applied to a superseded episode
- * that doc would make the old episode the group's latest and hijack the
- * director's group-level state machine, so they are guarded to the latest
- * episode of the series. The other episode actions are pure audit records
- * and may target any existing episode.
- */
-/**
  * Per-item rejections a bulk request absorbs into `errors[]`. Anything else
  * thrown while preparing an item is a real failure and aborts the batch.
  */
 const EXPECTED_BULK_ITEM_STATUS_CODES = new Set([400, 404, 409]);
 
+/**
+ * Lifecycle actions (`activate` / `deactivate`) write a synthetic
+ * `.rule-events` doc with `@timestamp` set at ingest time; applied to a superseded episode
+ * that doc would make the old episode the group's latest and hijack the
+ * director's group-level state machine, so they are guarded to the latest
+ * episode of the series. The other episode actions are pure audit records
+ * and may target any existing episode.
+ */
 const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
   actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
   actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
@@ -133,7 +148,7 @@ export class AlertActionsClient {
   ) {}
 
   /**
-   * Creates a series-level action (`tag` / `snooze` / `unsnooze`) for the
+   * Creates a series-level action (`snooze` / `unsnooze`) for the
    * series identified by `groupHash`. The series' latest event is still
    * resolved — it fills `rule_id`, `source` and `last_series_event_timestamp`
    * on the audit doc — but the persisted `.alert-actions` document carries
@@ -146,16 +161,23 @@ export class AlertActionsClient {
   }): Promise<void> {
     const { groupHash, action } = params;
 
-    const [userProfileUid, alertEvent] = await Promise.all([
+    const [userProfileUid, alertEvent, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLastSeriesAlertEventOrThrow({
         queryService: this.queryService,
         spaceId: this.spaceId,
         groupHash,
       }),
+      this.loadSeriesActionStates(requiresSeriesActionState(action.action_type) ? [groupHash] : []),
     ]);
 
-    const prepared = this.prepareAction({ action, alertEvent, userProfileUid, docAlertId: null });
+    const prepared = this.prepareAction({
+      action,
+      alertEvent,
+      userProfileUid,
+      docAlertId: null,
+      seriesActionState: seriesActionStates.get(groupHash) ?? EMPTY_SERIES_ACTION_STATE,
+    });
 
     await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
@@ -177,13 +199,14 @@ export class AlertActionsClient {
   }): Promise<void> {
     const { episodeId, action } = params;
 
-    const [userProfileUid, alertEvent] = await Promise.all([
+    const [userProfileUid, alertEvent, actionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLastEpisodeAlertEventOrThrow({
         queryService: this.queryService,
         spaceId: this.spaceId,
         episodeId,
       }),
+      this.loadActionStates(requiresActionState(action.action_type) ? [episodeId] : []),
     ]);
 
     if (isLifecycleActionType(action.action_type)) {
@@ -206,10 +229,35 @@ export class AlertActionsClient {
       alertEvent,
       userProfileUid,
       docAlertId: alertEvent.episode_id,
+      alertActionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
     });
 
     await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
+  }
+
+  /**
+   * Resolves the ack / assignee / tags of the alerts whose actions are
+   * preconditioned. Issued alongside the alert-event lookups rather than
+   * after them: both only need the ids the caller already supplied.
+   */
+  private loadActionStates(episodeIds: readonly string[]): Promise<Map<string, AlertActionState>> {
+    return loadAlertActionStatesByEpisodeId({
+      queryService: this.queryService,
+      spaceId: this.spaceId,
+      episodeIds,
+    });
+  }
+
+  /** Resolves the snooze of the series whose actions are preconditioned. */
+  private loadSeriesActionStates(
+    groupHashes: readonly string[]
+  ): Promise<Map<string, SeriesActionState>> {
+    return loadSeriesActionStatesByGroupHash({
+      queryService: this.queryService,
+      spaceId: this.spaceId,
+      groupHashes,
+    });
   }
 
   /**
@@ -235,8 +283,19 @@ export class AlertActionsClient {
      * id for episode-scoped actions, `null` for series-scoped actions.
      */
     docAlertId: string | null;
+    /** Current state of the targeted alert, for the preconditioned episode actions. */
+    alertActionState?: AlertActionState;
+    /** Current snooze of the targeted series, for the preconditioned series actions. */
+    seriesActionState?: SeriesActionState;
   }): PreparedAction {
-    const { action, alertEvent, userProfileUid, docAlertId } = params;
+    const {
+      action,
+      alertEvent,
+      userProfileUid,
+      docAlertId,
+      alertActionState = EMPTY_ALERT_ACTION_STATE,
+      seriesActionState = EMPTY_SERIES_ACTION_STATE,
+    } = params;
     const alertActionDoc = this.buildAlertActionDocument({
       action,
       alertEvent,
@@ -244,7 +303,10 @@ export class AlertActionsClient {
       docAlertId,
     });
 
-    return prepareWithHandler({ action, alertEvent, alertActionDoc }, ACTION_HANDLERS);
+    return prepareWithHandler(
+      { action, alertEvent, alertActionDoc, alertActionState, seriesActionState },
+      ACTION_HANDLERS
+    );
   }
 
   /**
@@ -281,20 +343,26 @@ export class AlertActionsClient {
 
   /**
    * Bulk equivalent of {@link AlertActionsClient.createSeriesAction}: one
-   * latest-event query for every series referenced in the batch, per-item
-   * `errors[]` for missing series, `alert_id: null` on every persisted audit
-   * doc and `episodeId: null` on every emitted domain event.
+   * latest-event query for every series referenced in the batch, one
+   * snooze-state query for the preconditioned items, per-item `errors[]` for
+   * missing series and failed preconditions, `alert_id: null` on every
+   * persisted audit doc and `episodeId: null` on every emitted domain event.
    */
   public async createBulkSeriesActions(
     items: BulkCreateSeriesAlertActionItemBody[]
   ): Promise<BulkResponse> {
-    const [userProfileUid, latestEvents] = await Promise.all([
+    const [userProfileUid, latestEvents, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLatestAlertEventsByGroupHash({
         queryService: this.queryService,
         spaceId: this.spaceId,
         groupHashes: items.map((item) => item.group_hash),
       }),
+      this.loadSeriesActionStates(
+        items
+          .filter((item) => requiresSeriesActionState(item.action_type))
+          .map((item) => item.group_hash)
+      ),
     ]);
 
     const latestEventByGroupHash = new Map(latestEvents.map((event) => [event.group_hash, event]));
@@ -322,6 +390,7 @@ export class AlertActionsClient {
             alertEvent,
             userProfileUid,
             docAlertId: null,
+            seriesActionState: seriesActionStates.get(item.group_hash) ?? EMPTY_SERIES_ACTION_STATE,
           })
         );
       } catch (error) {
@@ -346,21 +415,25 @@ export class AlertActionsClient {
 
   /**
    * Bulk equivalent of {@link AlertActionsClient.createEpisodeAction}: one
-   * latest-event query for every episode referenced in the batch, plus — for
-   * lifecycle items only — one latest-event query over their series to
-   * enforce the latest-episode guard. Missing or superseded episodes are
-   * reported per item; the rest of the batch still runs.
+   * latest-event query for every episode referenced in the batch, one
+   * action-state query for the preconditioned items, plus — for lifecycle
+   * items only — one latest-event query over their series to enforce the
+   * latest-episode guard. Missing or superseded episodes and failed
+   * preconditions are reported per item; the rest of the batch still runs.
    */
   public async createBulkEpisodeActions(
     items: BulkCreateEpisodeAlertActionItemBody[]
   ): Promise<BulkResponse> {
-    const [userProfileUid, episodeEvents] = await Promise.all([
+    const [userProfileUid, episodeEvents, actionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLatestAlertEventsByEpisodeId({
         queryService: this.queryService,
         spaceId: this.spaceId,
         episodeIds: items.map((item) => item.alert_id),
       }),
+      this.loadActionStates(
+        items.filter((item) => requiresActionState(item.action_type)).map((item) => item.alert_id)
+      ),
     ]);
 
     const eventByEpisodeId = new Map(episodeEvents.map((event) => [event.episode_id, event]));
@@ -404,7 +477,7 @@ export class AlertActionsClient {
           toBulkActionError(item.alert_id, {
             code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
             message: getEpisodeNotLatestMessage(item.alert_id, alertEvent.group_hash),
-            details: { group_hash: alertEvent.group_hash },
+            details: { alert_id: item.alert_id, group_hash: alertEvent.group_hash },
           })
         );
         continue;
@@ -417,6 +490,7 @@ export class AlertActionsClient {
             alertEvent,
             userProfileUid,
             docAlertId: alertEvent.episode_id,
+            alertActionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
           })
         );
       } catch (error) {

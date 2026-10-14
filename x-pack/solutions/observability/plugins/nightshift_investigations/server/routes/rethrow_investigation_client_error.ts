@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { badRequest, conflict, notFound, serverUnavailable, tooManyRequests } from '@hapi/boom';
+import {
+  badRequest,
+  conflict,
+  forbidden,
+  notFound,
+  serverUnavailable,
+  tooManyRequests,
+} from '@hapi/boom';
 import {
   NightshiftModelBlockedError,
   NightshiftModelNotFoundError,
@@ -17,7 +24,24 @@ import {
   InvestigationQuotaDeniedError,
   InvestigationUnavailableError,
   InvalidInvestigationContextError,
+  InvalidNotificationDestinationError,
 } from '../client/errors';
+
+/**
+ * Errors agentic investigations throws in-process: a caller without the investigations
+ * privileges, an input it rejects, and a write that lost a concurrent update. Only their types are
+ * part of that plugin's contract, so they are recognised by name.
+ */
+const AGENTIC_INVESTIGATIONS_ERRORS = {
+  InvestigationsForbiddenError: forbidden,
+  InvestigationAttachmentInvalidRequestError: badRequest,
+  InvestigationAttachmentConflictError: conflict,
+} as const;
+
+const isAgenticInvestigationsError = (
+  error: unknown
+): error is Error & { name: keyof typeof AGENTIC_INVESTIGATIONS_ERRORS } =>
+  error instanceof Error && Object.hasOwn(AGENTIC_INVESTIGATIONS_ERRORS, error.name);
 
 export function rethrowInvestigationClientError(error: unknown): never {
   if (
@@ -25,6 +49,9 @@ export function rethrowInvestigationClientError(error: unknown): never {
     error instanceof NightshiftModelBlockedError
   ) {
     throw badRequest(error.message);
+  }
+  if (isAgenticInvestigationsError(error)) {
+    throw AGENTIC_INVESTIGATIONS_ERRORS[error.name](error.message);
   }
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);
@@ -38,7 +65,10 @@ export function rethrowInvestigationClientError(error: unknown): never {
   if (error instanceof InvestigationQuotaDeniedError) {
     throw tooManyRequests(error.message);
   }
-  if (error instanceof InvalidInvestigationContextError) {
+  if (
+    error instanceof InvalidInvestigationContextError ||
+    error instanceof InvalidNotificationDestinationError
+  ) {
     throw badRequest(error.message);
   }
   if (error instanceof InvestigationUnavailableError) {

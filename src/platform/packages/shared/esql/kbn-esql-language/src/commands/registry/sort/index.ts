@@ -22,6 +22,7 @@ export const sortCommand = {
   name: Commands.SORT,
   methods: sortCommandMethods,
   metadata: {
+    docPreserving: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.sortDoc', {
       defaultMessage:
         'Sorts all results by the specified fields. By default, null values are treated as being larger than any other value. With an ascending sort order, null values are sorted last, and with a descending sort order, null values are sorted first. You can change that by providing NULLS FIRST or NULLS LAST',

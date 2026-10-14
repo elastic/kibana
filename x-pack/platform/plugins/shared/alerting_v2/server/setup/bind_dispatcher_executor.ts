@@ -10,10 +10,10 @@ import { DispatcherPipeline } from '../lib/dispatcher/execution_pipeline';
 import { DispatcherExecutionStepsToken } from '../lib/dispatcher/steps/tokens';
 import {
   WaitForResourcesStep,
-  FetchEpisodesStep,
+  FetchAlertsStep,
   FetchSuppressionsStep,
   ApplySuppressionStep,
-  HydrateEpisodeDataStep,
+  HydrateAlertDataStep,
   FetchRulesStep,
   ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
@@ -31,10 +31,10 @@ export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOpt
    * Binding order defines execution order.
    */
   bind(DispatcherExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
-  bind(DispatcherExecutionStepsToken).to(FetchEpisodesStep).inSingletonScope();
+  bind(DispatcherExecutionStepsToken).to(FetchAlertsStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(FetchSuppressionsStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(ApplySuppressionStep).inSingletonScope();
-  bind(DispatcherExecutionStepsToken).to(HydrateEpisodeDataStep).inSingletonScope();
+  bind(DispatcherExecutionStepsToken).to(HydrateAlertDataStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(FetchRulesStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(ApplyMaintenanceWindowStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(FetchPoliciesStep).inSingletonScope();

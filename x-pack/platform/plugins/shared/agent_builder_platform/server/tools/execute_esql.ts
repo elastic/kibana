@@ -84,6 +84,7 @@ You **must** get the query from one of two sources before calling this tool:
 
 Under no circumstances should you invent, guess, or modify a query yourself for this tool.
 If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+Adapting an earlier query to a new question, such as another metric or field, counts as writing it yourself: call \`${platformCoreTools.generateEsql}\` again for each new question.
 
 ### Using a limit
 

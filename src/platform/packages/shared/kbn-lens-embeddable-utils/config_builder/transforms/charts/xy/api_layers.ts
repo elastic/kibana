@@ -9,7 +9,6 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
-import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 import type {
   FormBasedLayer,
   SeriesType,
@@ -22,7 +21,6 @@ import type {
   YConfig,
 } from '@kbn/lens-common';
 import {
-  AvailableReferenceLineIcons,
   isPersistedByReferenceAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
   isRuntimeByReferenceAnnotationsLayer,
@@ -47,7 +45,7 @@ import {
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
 } from '../../coloring';
-import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from './defaults';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING, DEFAULT_REFERENCE_LINE_AXIS } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
@@ -68,7 +66,7 @@ import {
 } from '../../utils';
 import { stripUndefined } from '../utils';
 import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
-import { xyIconCompat } from './helpers';
+import { getAnnotationIconAPIName } from './helpers';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
@@ -132,7 +130,7 @@ function convertDataLayerToAPI(
             ...(breakdown_by
               ? {}
               : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
-            ...(onAxis !== 'y' ? { axis: onAxis } : {}),
+            axis: onAxis,
           };
         })
         .filter(nonNullable) ?? [];
@@ -175,7 +173,7 @@ function convertDataLayerToAPI(
     return {
       ...getValueApiColumn(accessor, layer),
       ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
-      ...(axis !== 'y' ? { axis } : {}),
+      axis,
     };
   });
 
@@ -266,12 +264,6 @@ export function buildAPIDataLayer(
 
 type ReferenceLineDef = ReferenceLineLayerType['thresholds'][number];
 
-const referenceLinesAvailableIconsSet = new Set(Object.values(AvailableReferenceLineIcons));
-
-function isReferenceLineValidIcon(icon: string | undefined): icon is AvailableReferenceLineIcon {
-  return Boolean(icon && referenceLinesAvailableIconsSet.has(icon as AvailableReferenceLineIcon));
-}
-
 function convertReferenceLinesDecorationsToAPIFormat(
   yConfig: Omit<YConfig, 'forAccessor'>,
   resolveAxisId: ResolveAxisId
@@ -279,20 +271,16 @@ function convertReferenceLinesDecorationsToAPIFormat(
   ReferenceLineDef,
   'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
 > {
-  const resolvedOnAxis = (): ReferenceLineDef['axis'] | undefined => {
-    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
+  const resolvedOnAxis = (): ReferenceLineDef['axis'] => {
+    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return DEFAULT_REFERENCE_LINE_AXIS;
     if (yConfig.axisMode === 'bottom') return 'x';
-    const axisId = resolveAxisId(yConfig.axisMode);
-    return axisId !== 'y' ? axisId : undefined;
+    return resolveAxisId(yConfig.axisMode);
   };
   return stripUndefined({
     color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
-    icon:
-      isReferenceLineValidIcon(yConfig.icon) && yConfig.icon !== 'empty'
-        ? xyIconCompat.toAPI(yConfig.icon)
-        : undefined,
+    icon: getAnnotationIconAPIName(yConfig.icon),
     position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: resolvedOnAxis(),
@@ -512,7 +500,7 @@ export function buildAPIAnnotationsLayer(
           color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
-          ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
+          ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
           // lineWidth isn't allowed to be zero, so the truthy check is valid here
           ...(annotation.lineWidth || annotation.lineStyle
             ? {
@@ -549,7 +537,7 @@ export function buildAPIAnnotationsLayer(
             }
           : {}),
         ...(annotation.label ? { label: annotation.label } : {}),
-        ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
+        ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
         ...(annotation.lineWidth || annotation.lineStyle
           ? {
               line: {

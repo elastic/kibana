@@ -17,8 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Minimum confidence score (0–1) for the Alert Triage Worker to auto-close an alert
- * as a false positive. Alerts below this threshold require human review.
+ * Minimum confidence score (0–1) for the Alert Triage Worker to auto-close an alert as a false positive. Alerts below this threshold require human review.
  */
 export const AutoCloseConfidenceScoreMinThreshold = lazySchema(() => z.number().min(0).max(1));
 export type AutoCloseConfidenceScoreMinThreshold = z.infer<
@@ -26,13 +25,26 @@ export type AutoCloseConfidenceScoreMinThreshold = z.infer<
 >;
 
 /**
- * Complete Worker-specific settings for the Alert Triage Worker, owned by Floor Watch.
- * Sent whole on write; a replacement missing a field is rejected.
+ * Triage work the sweep may plan per hour, in cost units (a batch costs a fixed overhead plus a cost per alert). Scaled to the sweep interval, so changing the interval does not change the hourly total.
+ */
+export const BudgetPerHour = lazySchema(() => z.number().int().min(10).max(5000));
+export type BudgetPerHour = z.infer<typeof BudgetPerHour>;
+
+/**
+ * How many hours back the sweep looks for alerts to triage. Older pending alerts are tagged stale instead of analysed.
+ */
+export const LookbackHours = lazySchema(() => z.number().int().min(1).max(168));
+export type LookbackHours = z.infer<typeof LookbackHours>;
+
+/**
+ * Complete Worker-specific settings for the Alert Triage Worker, owned by Floor Watch. Sent whole on write; a replacement missing a field is rejected.
  */
 export const AlertTriageWorkerExtras = lazySchema(() =>
   z
     .object({
       autoCloseConfidenceScoreMinThreshold: AutoCloseConfidenceScoreMinThreshold,
+      budgetPerHour: BudgetPerHour,
+      lookbackHours: LookbackHours,
     })
     .strict()
 );

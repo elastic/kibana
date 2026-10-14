@@ -58,6 +58,10 @@ spaceTest.describe('Graph - datasource switching', { tag: testData.GRAPH_UI_TAGS
       await graph.changeIndexPatternByName(secondDataViewName);
       await expect(graph.datasourceButton).toContainText(secondDataViewName);
       await expect.poll(() => graph.nodeCount()).toBe(0);
+
+      await graph.addFields(['url']);
+      await graph.runQuery('admin');
+      await expect.poll(() => graph.nodeCount()).toBeGreaterThan(0);
     }
   );
 });

@@ -113,7 +113,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'reports identical config for every engine when nothing is overridden',
+      'reports identical non-cadence config for every engine, and the built-in cadence per type, when nothing is overridden',
       async ({ apiClient }) => {
         expect((await installAllEntityTypes(apiClient, defaultHeaders)).statusCode).toBe(201);
 
@@ -122,14 +122,7 @@ apiTest.describe(
         expect(status.body.engines).toHaveLength(4);
 
         const [first, ...rest] = status.body.engines.map(
-          ({
-            frequency,
-            delay,
-            lookbackPeriod,
-            maxLogsPerWindow,
-            maxLogsPerWindowCapBehavior,
-          }) => ({
-            frequency,
+          ({ delay, lookbackPeriod, maxLogsPerWindow, maxLogsPerWindowCapBehavior }) => ({
             delay,
             lookbackPeriod,
             maxLogsPerWindow,
@@ -137,6 +130,16 @@ apiTest.describe(
           })
         );
         rest.forEach((engine) => expect(engine).toStrictEqual(first));
+
+        const frequencyByType = Object.fromEntries(
+          status.body.engines.map(({ type, frequency }) => [type, frequency])
+        );
+        expect(frequencyByType).toStrictEqual({
+          user: '1m',
+          host: '1m',
+          service: '10m',
+          generic: '30m',
+        });
       }
     );
 
@@ -163,11 +166,11 @@ apiTest.describe(
       const response = await apiClient.put(ENTITY_STORE_ROUTES.internal.ENGINE_CONFIG('service'), {
         headers: internalHeaders,
         responseType: 'json',
-        body: { logExtraction: { frequency: '10m' } },
+        body: { logExtraction: { frequency: '7m' } },
       });
       expect(response.statusCode).toBe(200);
 
-      expect((await engineConfig(apiClient, 'service')).frequency).toBe('10m');
+      expect((await engineConfig(apiClient, 'service')).frequency).toBe('7m');
       expect((await engineConfig(apiClient, 'user')).frequency).toBe('1m');
     });
 
