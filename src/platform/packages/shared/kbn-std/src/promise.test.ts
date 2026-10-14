@@ -50,7 +50,10 @@ describe('withTimeout', () => {
 
   it('drops the event-loop ref only when unref is true, and still reports the timeout', async () => {
     const timers: NodeJS.Timeout[] = [];
-    const spy = jest.spyOn(global, 'setTimeout').mockImplementation(((handler: () => void, timeout?: number) => {
+    const spy = jest.spyOn(global, 'setTimeout').mockImplementation(((
+      handler: () => void,
+      timeout?: number
+    ) => {
       // Call the Node timer directly. Spreading unknown extra args makes this resolve
       // to the DOM setTimeout overload, which is typed as returning a number.
       const timer = nodeSetTimeout(handler, timeout);
