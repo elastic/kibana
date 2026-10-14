@@ -156,9 +156,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     return applications;
   }, [application.capabilities]);
 
-  // File upload and sample data have no Kibana privilege of their own, so ingest entry points
-  // follow integrations access, matching the home page "Add data" section.
-  const canAccessIntegrations = application.capabilities.navLinks.integrations === true;
+  // `fileUpload.show` is resolved from the user's privileges to create data views, which file upload
+  // and sample data both need.
+  const canIngestData =
+    application.capabilities.navLinks.integrations === true ||
+    application.capabilities.fileUpload?.show === true;
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
@@ -359,7 +361,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                     : {}),
                 })}
               >
-                {canAccessIntegrations ? (
+                {canIngestData ? (
                   <EuiFlexItem>
                     <AddData addBasePath={addBasePath} features={addDataFeatures} />
                   </EuiFlexItem>

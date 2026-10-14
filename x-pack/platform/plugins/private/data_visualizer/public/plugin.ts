@@ -45,6 +45,7 @@ export class DataVisualizerPlugin
       enabled: true,
     },
   };
+  private canUploadFile = false;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const resultsLinks = initializerContext.config.get().resultLinks;
@@ -60,7 +61,7 @@ export class DataVisualizerPlugin
 
     if (plugins.home) {
       registerHomeAddData(core.getStartServices, plugins.home, this.resultsLinks);
-      registerHomeFeatureCatalogue(plugins.home);
+      registerHomeFeatureCatalogue(plugins.home, () => this.canUploadFile);
     }
 
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
@@ -68,6 +69,7 @@ export class DataVisualizerPlugin
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
+    this.canUploadFile = core.application.capabilities.fileUpload?.show === true;
 
     if (plugins.uiActions) {
       registerUiActions(core, plugins);
