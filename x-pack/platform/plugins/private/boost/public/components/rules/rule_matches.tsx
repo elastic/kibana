@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCode,
-  EuiIconTip,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -18,97 +17,63 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
-import { SUPERSEDING_ICON, SupersedingRule, TargetName } from './target_name';
+import { SupersedingRule, TargetName } from './target_name';
 
-interface AppliesToProps {
+interface RuleMatchesProps {
   patterns: readonly string[];
   type?: BoostProfileType;
   isDefaultRule: boolean;
   coverage: RuleCoverage;
 }
 
-const getSupersededDescription = (type: BoostProfileType | undefined, count: number) =>
-  type === 'data_streams'
-    ? i18n.translate('xpack.boost.appliesTo.supersededDataStreams', {
-        defaultMessage:
-          '{count, plural, one {# data stream this rule matches uses} other {# data streams this rule matches use}} a higher-ranked rule instead.',
-        values: { count },
-      })
-    : i18n.translate('xpack.boost.appliesTo.supersededIndices', {
-        defaultMessage:
-          '{count, plural, one {# index this rule matches uses} other {# indices this rule matches use}} a higher-ranked rule instead.',
-        values: { count },
-      });
-
-const getMatchesTitle = (type: BoostProfileType | undefined, appliesTo: number, matches: number) =>
-  type === 'data_streams'
-    ? i18n.translate('xpack.boost.appliesTo.dataStreamsTitle', {
-        defaultMessage:
-          'Applies to {appliesTo} of {matches, plural, one {# matching data stream} other {# matching data streams}}',
-        values: { appliesTo, matches },
-      })
-    : i18n.translate('xpack.boost.appliesTo.indicesTitle', {
-        defaultMessage:
-          'Applies to {appliesTo} of {matches, plural, one {# matching index} other {# matching indices}}',
-        values: { appliesTo, matches },
-      });
-
 /**
- * What a rule applies to, as a link to everything it matches, noting any that a higher-ranked rule
- * takes. Default rules apply to whatever no other rule matches, which can be most of a project, so
- * they say so rather than count it.
+ * How many data sources a rule matches, as a link to the list, which shows any that a higher-ranked
+ * rule applies to instead. Default rules match whatever no other rule does, which can be most of a
+ * project, so they say so rather than count it.
  */
-export const AppliesTo = ({ patterns, type, isDefaultRule, coverage }: AppliesToProps) => {
-  const { euiTheme } = useEuiTheme();
-  const { matches, supersededBy } = coverage;
-
+export const RuleMatches = ({ patterns, type, isDefaultRule, coverage }: RuleMatchesProps) => {
   if (isDefaultRule) {
     return (
       <>
         {type === 'data_streams'
-          ? i18n.translate('xpack.boost.appliesTo.allUnmatchedDataStreams', {
+          ? i18n.translate('xpack.boost.ruleMatches.allUnmatchedDataStreams', {
               defaultMessage: 'All unmatched data streams',
             })
-          : i18n.translate('xpack.boost.appliesTo.allUnmatchedIndices', {
+          : i18n.translate('xpack.boost.ruleMatches.allUnmatchedIndices', {
               defaultMessage: 'All unmatched indices',
             })}
       </>
     );
   }
-  if (matches === 0) {
+  if (coverage.matches === 0) {
     return <>{formatDataSourceCount(type, 0)}</>;
   }
-
-  const description = getSupersededDescription(type, supersededBy.size);
-  return (
-    <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-      <MatchesPopover patterns={patterns} type={type} coverage={coverage} />
-      {supersededBy.size > 0 && (
-        <EuiIconTip
-          type={SUPERSEDING_ICON}
-          color="subdued"
-          display="flex"
-          content={description}
-          aria-label={description}
-          iconProps={{ 'data-test-subj': 'boostRuleSuperseded' }}
-        />
-      )}
-    </span>
-  );
+  return <MatchesPopover patterns={patterns} type={type} coverage={coverage} />;
 };
 
-type MatchesPopoverProps = Omit<AppliesToProps, 'isDefaultRule'>;
+type MatchesPopoverProps = Omit<RuleMatchesProps, 'isDefaultRule'>;
 
 const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const [isOpen, setIsOpen] = useState(false);
-  const { appliesTo, matches, matchedNames, supersededBy } = coverage;
+  const { matches, matchedNames, supersededBy } = coverage;
 
-  const title = getMatchesTitle(type, appliesTo, matches);
+  const title =
+    type === 'data_streams'
+      ? i18n.translate('xpack.boost.ruleMatches.dataStreamsTitle', {
+          defaultMessage:
+            '{matches, plural, one {# matching data stream} other {# matching data streams}}',
+          values: { matches },
+        })
+      : i18n.translate('xpack.boost.ruleMatches.indicesTitle', {
+          defaultMessage: '{matches, plural, one {# matching index} other {# matching indices}}',
+          values: { matches },
+        });
   // A rule with a pattern shows it, since the list is what the pattern matches today.
   const [pattern] = patterns;
   const hasPattern = patterns.length === 1 && pattern.includes('*');
@@ -125,9 +90,9 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
         <EuiLink
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
-          data-test-subj="boostRuleAppliesTo"
+          data-test-subj="boostRuleMatches"
         >
-          {formatDataSourceCount(type, appliesTo)}
+          {formatDataSourceCount(type, matches)}
         </EuiLink>
       }
     >
@@ -135,10 +100,11 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
         {title}
         {hasPattern && (
           <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.boost.appliesTo.patternLabel', {
-              defaultMessage: 'Pattern',
-            })}{' '}
-            <EuiCode>{pattern}</EuiCode>
+            <FormattedMessage
+              id="xpack.boost.ruleMatches.patternSubtitle"
+              defaultMessage="Using index pattern {pattern}"
+              values={{ pattern: <EuiCode>{pattern}</EuiCode> }}
+            />
           </EuiText>
         )}
       </EuiPopoverTitle>

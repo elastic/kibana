@@ -10,7 +10,7 @@ import { EuiCode, EuiIcon, EuiIconTip, EuiScreenReaderOnly, useEuiTheme } from '
 import { i18n } from '@kbn/i18n';
 
 /** Marks a rule that ranks higher than another, so it applies instead. */
-export const SUPERSEDING_ICON = 'sortAscending';
+const SUPERSEDING_ICON = 'sortAscending';
 
 const SUPERSEDING_LABEL = i18n.translate('xpack.boost.targetName.supersedingLabel', {
   defaultMessage: 'Higher-ranked rule',

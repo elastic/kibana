@@ -36,7 +36,7 @@ import { formatDataSourceCount } from '../format';
 import { TypeFilter, matchesTypeFilter } from '../type_filter';
 import type { ProfileSelections } from './profile_filter';
 import { ProfileFilter, matchesProfileFilter } from './profile_filter';
-import { AppliesTo } from './applies_to';
+import { RuleMatches } from './rule_matches';
 import { RuleFlyout } from './rule_flyout';
 
 interface RulesTabProps {
@@ -183,30 +183,30 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       dataType: 'number',
     },
     {
-      // Spelled out ("3 indices") and left-aligned; it still sorts numerically. Wide enough for the
-      // count and its icon, now that it also stands in for the rule's targets.
-      field: 'appliesTo',
-      name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
-        defaultMessage: 'Applies to',
+      // Spelled out ("3 indices") and left-aligned; it still sorts numerically. It counts
+      // everything the rule matches; the list shows any that a higher-ranked rule takes.
+      field: 'matches',
+      name: i18n.translate('xpack.boost.rulesTab.matchesColumn', {
+        defaultMessage: 'Matches',
       }),
       width: '16%',
       sortable: true,
       render: (
-        appliesTo: number,
+        matches: number,
         {
           index_patterns: patterns,
           profileType,
           is_builtin: isBuiltin,
-          matches,
           matchedNames,
+          appliesTo,
           supersededBy,
         }: RuleRow
       ) => (
-        <AppliesTo
+        <RuleMatches
           patterns={patterns}
           type={profileType}
           isDefaultRule={isBuiltin}
-          coverage={{ appliesTo, matches, matchedNames, supersededBy }}
+          coverage={{ matches, matchedNames, appliesTo, supersededBy }}
         />
       ),
     },
