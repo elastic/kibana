@@ -17,7 +17,7 @@ import type {
 
 import { getChangeHistoryClient } from './change_history_service';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { spacesService } from '../kibana_services';
+import { securityService, spacesService } from '../kibana_services';
 
 export const CHANGE_HISTORY_ROUTE_SECURITY = {
   authz: {
@@ -38,17 +38,21 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
 ) => {
   const core = await ctx.core;
   const spaceId = spacesService?.getSpaceId(req) ?? 'default';
-  const { has_all_requested: hasAllPrivileges } =
-    await core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-      application: [
-        {
-          application: 'kibana-.kibana',
-          resources: [`space:${spaceId}`],
-          privileges: ['feature_dashboard_v2.all'],
-        },
-      ],
-    });
-  if (!hasAllPrivileges) return { error: res.forbidden() };
+  // the privileges API is unavailable when Elasticsearch security is disabled; in that case, requests are not subject to RBAC
+  const isRbacEnabled = securityService?.authz.mode.useRbacForRequest(req) ?? false;
+  if (isRbacEnabled) {
+    const { has_all_requested: hasAllPrivileges } =
+      await core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        application: [
+          {
+            application: 'kibana-.kibana',
+            resources: [`space:${spaceId}`],
+            privileges: ['feature_dashboard_v2.all'],
+          },
+        ],
+      });
+    if (!hasAllPrivileges) return { error: res.forbidden() };
+  }
 
   // history is read with an internally privileged client, so access to the dashboard must be verified
   try {

@@ -15,7 +15,11 @@ import { getChangeHistoryClient } from './change_history_service';
 import { getChangeHistoryContext } from './route_utils';
 
 jest.mock('./change_history_service');
+const mockUseRbacForRequest = jest.fn();
 jest.mock('../kibana_services', () => ({
+  securityService: {
+    authz: { mode: { useRbacForRequest: (...args: unknown[]) => mockUseRbacForRequest(...args) } },
+  },
   spacesService: { getSpaceId: (req: { id: string }) => `space-for-${req.id}` },
 }));
 
@@ -45,7 +49,21 @@ const getContext = (hasAllRequested: boolean) => {
 describe('getChangeHistoryContext', () => {
   const req = { id: 'req-1' } as unknown as KibanaRequest<unknown, unknown, unknown, 'get'>;
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockUseRbacForRequest.mockReturnValue(true);
+  });
+
+  it('skips the privileges check when security is disabled', async () => {
+    mockUseRbacForRequest.mockReturnValue(false);
+    getSavedObject.mockResolvedValue({});
+    mockedGetClient.mockReturnValue({} as never);
+    const res = httpServerMock.createResponseFactory();
+    const result = await getChangeHistoryContext(getContext(false), req, res, 'dash-1');
+
+    expect(hasPrivileges).not.toHaveBeenCalled();
+    expect(result).toEqual({ client: {}, spaceId: 'space-for-req-1' });
+  });
 
   it('returns a forbidden response without dashboard edit privileges', async () => {
     const res = httpServerMock.createResponseFactory();
