@@ -26,7 +26,7 @@ describe('Profiling locators', () => {
       );
     });
 
-    it('lets the Profiling app pick the schema when none is given', async () => {
+    it('omits schema when none is given', async () => {
       const { path } = await locator.getLocation(params);
 
       expect(path).toBe(`${pathname}?kuery=host.name%3A%22host-1%22&rangeFrom=now-15m&rangeTo=now`);
