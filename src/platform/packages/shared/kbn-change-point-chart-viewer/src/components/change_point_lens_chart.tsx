@@ -9,11 +9,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type {
-  LensAnnotationLayer,
-  LensSeriesLayer,
-  LensXYConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/data-plugin/common';
@@ -33,6 +28,7 @@ import { useChangePointLensProps } from '../hooks/use_change_point_lens_props';
 import { ChangePointBadge } from './change_point_badge';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
 import type { UnifiedChangePointGridProps } from '../types';
+import { getChangePointLensConfig } from '../utils/get_change_point_lens_config';
 
 const CHART_HEIGHT_PX = 230;
 
@@ -102,38 +98,16 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
-  const chartLayers = useMemo((): LensXYConfig['layers'] => {
-    const seriesLayer: LensSeriesLayer = {
-      type: 'series',
-      seriesType: 'area',
-      // String xAxis omits `meta.type: date`, so Lens treats X as ordinal — not a time chart and
-      // event annotations do not render. Date histogram maps the ES|QL time column as interval/date.
-      xAxis: { type: 'dateHistogram', field: timeColumn, minimumInterval: 'auto' },
-      yAxis: [
-        {
-          value: valueColumn,
-          label: valueColumn,
-        },
-      ],
-    };
-
-    if (!card.annotationEvents.length) {
-      return [seriesLayer];
-    }
-
-    const annotationLayer: LensAnnotationLayer = {
-      type: 'annotation',
-      yAxis: [],
-      events: card.annotationEvents.map((e) => ({
-        name: e.name,
-        datetime: e.datetime,
-        icon: 'triangle',
-        color: euiTheme.colors.danger,
-      })),
-    };
-
-    return [seriesLayer, annotationLayer];
-  }, [card.annotationEvents, euiTheme.colors.danger, timeColumn, valueColumn]);
+  const lensConfig = useMemo(
+    () =>
+      getChangePointLensConfig({
+        card,
+        timeColumn,
+        valueColumn,
+        annotationColor: euiTheme.colors.danger,
+      }),
+    [card, timeColumn, valueColumn, euiTheme.colors.danger]
+  );
 
   // If any annotation falls before the Discover time range, extend `from` so Lens doesn't clip it.
   // fetchParams.timeRange is always resolved to absolute ISO by processFetchParams, so the
@@ -155,15 +129,13 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
 
   const { lensProps, buildError } = useChangePointLensProps({
     lensInstanceId: `changePointMiniLens-${card.id}`,
-    title: card.title,
+    lensConfig,
     // Stored on attributes for case-attachment metadata.
     description: card.entityDescription,
-    query: card.lineEsql,
     services,
     fetchParams,
     discoverFetch$,
     chartRef,
-    chartLayers,
     timeRange: chartTimeRange,
   });
 
