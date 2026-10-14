@@ -27,7 +27,11 @@ import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
-import { getAiIndexDetailPath, getAiIndexKnowledgeIndicatorsPath } from '../paths';
+import {
+  decodeRouteParam,
+  getAiIndexDetailPath,
+  getAiIndexKnowledgeIndicatorsPath,
+} from '../paths';
 
 type ViewKiTabId = 'details' | 'document';
 
@@ -47,8 +51,8 @@ export const ViewKiPage = () => {
     id: string;
     kiId: string;
   }>();
-  const aiIndexId = useMemo(() => decodeURIComponent(aiIndexIdParam), [aiIndexIdParam]);
-  const kiId = useMemo(() => decodeURIComponent(kiIdParam), [kiIdParam]);
+  const aiIndexId = aiIndexIdParam;
+  const kiId = decodeRouteParam(kiIdParam);
   const location = useLocation();
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const index = searchParams.get('index') ?? '';

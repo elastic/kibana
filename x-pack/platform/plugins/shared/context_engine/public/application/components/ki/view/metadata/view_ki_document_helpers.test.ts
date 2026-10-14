@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
 import {
   documentAttributesToRows,
   formatKiJsonValueAsString,
@@ -68,6 +69,10 @@ describe('documentAttributesToRows', () => {
 
   it('returns an empty array when attributes are missing or not an object', () => {
     expect(documentAttributesToRows({})).toEqual([]);
-    expect(documentAttributesToRows({ attributes: [] })).toEqual([]);
+    expect(
+      documentAttributesToRows({
+        attributes: [] as unknown as KiDocument['attributes'],
+      })
+    ).toEqual([]);
   });
 });
