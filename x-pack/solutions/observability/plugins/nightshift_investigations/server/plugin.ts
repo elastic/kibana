@@ -22,6 +22,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
@@ -86,6 +88,7 @@ import {
   nightshiftAutomationSavedObjectType,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
+import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
@@ -197,6 +200,15 @@ export class NightshiftInvestigationsPlugin
       }),
       canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
       logger: this.logger.get('sandbox_secrets'),
+    });
+
+    const onboardingClient = createOnboardingClient({
+      getDeps: () => ({
+        workflowsManagement: this.workflowsManagement,
+        spaces: this.spaces,
+      }),
+      listSandboxSecretKeys: (request) => sandboxSecretsClient.listKeysForSandbox(request),
+      logger: this.logger.get('onboarding'),
     });
 
     registerInvestigationReconciliationTask({
@@ -446,6 +458,7 @@ export class NightshiftInvestigationsPlugin
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
           customContextClient,
+          onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -728,6 +741,9 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
+    await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
     if (this.cortexEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });

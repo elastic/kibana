@@ -49978,7 +49978,6 @@
     "xpack.sharedComponents.trialUsageBadge.daysUsed": "{used} / {total} dias",
     "xpack.sharedComponents.trialUsageBadge.manageSubscription": "Gerenciar assinatura",
     "xpack.sharedComponents.trialUsageBadge.popoverAriaLabel": "Detalhes de uso da avaliação",
-    "xpack.sharedComponents.trialUsageBadge.serverlessTitle": "Elastic Cloud Serverless",
     "xpack.sharedComponents.trialUsageBadge.toggleAriaLabel": "Alternar detalhes de uso da avaliação",
     "xpack.sharedComponents.trialUsageBadge.trialLabel": "AVALIAÇÃO",
     "xpack.sharedComponents.trialUsageBadge.trialPeriodLabel": "Período de avaliação",
