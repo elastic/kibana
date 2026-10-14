@@ -130697,6 +130697,7 @@ paths:
                 - items:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_parameterRequest'
                   maxItems: 10000
+                  title: Multiple parameters
                   type: array
               description: The request body can contain either a single parameter object or an array of parameter objects.
       responses:
@@ -130752,6 +130753,7 @@ paths:
                           type: string
                       title: Post parameter response
                       type: object
+                    title: Multiple parameters
                     type: array
                   - properties:
                       description:
@@ -168733,7 +168735,6 @@ components:
       type: object
     Kibana_HTTP_APIs_parameterRequest:
       additionalProperties: false
-      type: object
       properties:
         description:
           description: A description of the parameter.
@@ -168762,6 +168763,8 @@ components:
       required:
         - key
         - value
+      title: Single parameter
+      type: object
     Kibana_HTTP_APIs_pieLibItemNoESQL:
       additionalProperties: false
       properties:

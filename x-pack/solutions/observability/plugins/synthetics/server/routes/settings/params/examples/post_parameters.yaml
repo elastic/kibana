@@ -27,6 +27,7 @@ responses:
         schema:
           oneOf:
             - type: array
+              title: Multiple parameters
               items:
                 $ref: '../../../oas_schemas.yaml#/postParameterResponse'
             - $ref: '../../../oas_schemas.yaml#/postParameterResponse'
