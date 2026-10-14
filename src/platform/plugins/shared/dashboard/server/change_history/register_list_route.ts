@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
@@ -41,7 +40,7 @@ export const registerHistoryListRoute = (
         request: {
           params: z
             .object({
-              id: asCodeIdSchema,
+              id: z.string(),
             })
             .strict(),
           query: z

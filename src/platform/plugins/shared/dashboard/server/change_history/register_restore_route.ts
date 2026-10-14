@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -26,7 +25,9 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
         request: {
           params: z
             .object({
-              id: asCodeIdSchema,
+              // can not validate id at route level
+              // existing dashboards may have invalid "as code" ids
+              id: z.string(),
               changeId: z.string(),
             })
             .strict(),

@@ -96,7 +96,7 @@ describe('getChangeHistoryContext', () => {
         {
           application: 'kibana-.kibana',
           resources: ['space:space-for-req-1'],
-          privileges: ['feature_dashboard_v2.edit'],
+          privileges: ['feature_dashboard_v2.all'],
         },
       ],
     });

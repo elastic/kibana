@@ -27,7 +27,7 @@ export const CHANGE_HISTORY_ROUTE_SECURITY = {
 } as const;
 
 /**
- * Checks dashboard edit privileges and access to the target dashboard saved object, then resolves the change history client and space for a
+ * Checks the dashboard "all" privilege and access to the target dashboard saved object, then resolves the change history client and space for a
  * request. Returns the error response to send when the request cannot be served.
  */
 export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
@@ -44,7 +44,7 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
         {
           application: 'kibana-.kibana',
           resources: [`space:${spaceId}`],
-          privileges: ['feature_dashboard_v2.edit'],
+          privileges: ['feature_dashboard_v2.all'],
         },
       ],
     });

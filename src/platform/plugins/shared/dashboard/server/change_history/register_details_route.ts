@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
@@ -35,7 +34,7 @@ export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext
         request: {
           params: z
             .object({
-              id: asCodeIdSchema,
+              id: z.string(),
               changeId: z.string(),
             })
             .strict(),
