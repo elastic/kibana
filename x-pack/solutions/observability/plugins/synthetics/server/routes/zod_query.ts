@@ -31,7 +31,7 @@ const blankQueryNumberToNaN = (value: unknown) =>
  * Safe-range check written as a refinement so the OpenAPI spec doesn't list
  * `-9007199254740991`/`9007199254740991` as min/max on every number.
  */
-export const safeNumber = <T extends z.ZodNumber>(schema: T) =>
+export const safeNumber = <T extends z.ZodType<number>>(schema: T) =>
   schema.refine((value) => value >= Number.MIN_SAFE_INTEGER && value <= Number.MAX_SAFE_INTEGER, {
     error: 'Value is outside the safe number range.',
   });
