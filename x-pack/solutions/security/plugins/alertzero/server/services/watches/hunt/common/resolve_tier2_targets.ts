@@ -24,6 +24,13 @@ export interface Tier2Targets {
   /** The signals that contributed, in a fixed order. Empty when `tier2_targets` is empty. */
   tier2_target_sources: Tier2TargetSource[];
   /**
+   * What the report itself points at: the `report_match` and `model` datasets, without the
+   * indices Tier 1 happened to hit or the process-bearing streams added for response actions.
+   * Bounded and universe-checked like `tier2_targets`. A coverage KI names these as the data a
+   * detection would query; empty when neither signal matched or the list did not fit.
+   */
+  report_intent_targets: string[];
+  /**
    * True when a model match joined the targets, a bound had to collapse or drop the
    * list, or a derived pattern reached outside the universe and had to be narrowed
    * or dropped.
@@ -209,16 +216,40 @@ export const resolveTier2Targets = async ({
   // dataset with no sibling. `tier1_hits` and `actionable` are already collapsed from
   // concrete indices Tier 1 or `classifyActionableIndices` actually saw inside the
   // universe — stream-level by construction, nothing left to narrow.
+  const constrainedReportMatches = constrainToUniverse(reportMatches);
+  const constrainedModelMatches = constrainToUniverse(modelMatches);
   const bySource: Array<[Tier2TargetSource, string[]]> = [
-    ['report_match', constrainToUniverse(reportMatches)],
+    ['report_match', constrainedReportMatches],
     ['tier1_hits', tier1Hits],
-    ['model', constrainToUniverse(modelMatches)],
+    ['model', constrainedModelMatches],
     ['actionable', scope.actionable_indices],
   ];
+
+  const intent = uniq([...constrainedReportMatches, ...constrainedModelMatches]);
+  const boundedIntent = boundTargetPatterns(intent);
+  const intentExpanded = !boundedIntent.fits
+    ? []
+    : boundedIntent.collapsed
+    ? constrainToUniverse(boundedIntent.patterns)
+    : boundedIntent.patterns;
+  // Universe narrowing can trade a collapsed dataset pattern back for its streams, so the bound
+  // is checked again, as it is for `tier2_targets`. The route and the packaging step both cap
+  // this list, so one that no longer fits would make the whole coordinator result invalid.
+  const reportIntentTargets = fitsRequestPath(intentExpanded) ? intentExpanded : [];
+  if (intentExpanded.length > 0 && reportIntentTargets.length === 0) {
+    logger?.warn(
+      `Hunt report-intent targets grew to ${intentExpanded.length} stream pattern(s) after the universe check, more than a request may carry; none are reported this run`
+    );
+  }
   const contributing = bySource.filter(([, patterns]) => patterns.length > 0);
   const union = uniq(contributing.flatMap(([, patterns]) => patterns));
   if (union.length === 0) {
-    return { tier2_targets: [], tier2_target_sources: [], degraded: universeNarrowed };
+    return {
+      tier2_targets: [],
+      tier2_target_sources: [],
+      report_intent_targets: reportIntentTargets,
+      degraded: universeNarrowed,
+    };
   }
 
   const bounded = boundTargetPatterns(union);
@@ -226,7 +257,12 @@ export const resolveTier2Targets = async ({
     logger?.warn(
       `Hunt Tier 2 targets named ${union.length} index pattern(s), more than a request may carry even as vendor wildcards; Tier 2 gets no targets this run`
     );
-    return { tier2_targets: [], tier2_target_sources: [], degraded: true };
+    return {
+      tier2_targets: [],
+      tier2_target_sources: [],
+      report_intent_targets: reportIntentTargets,
+      degraded: true,
+    };
   }
   if (bounded.collapsed) {
     logger?.warn(
@@ -253,12 +289,18 @@ export const resolveTier2Targets = async ({
     logger?.warn(
       `Hunt Tier 2 targets narrowed back to ${finalTargets.length} backing stream pattern(s) after the universe check, more than a request may carry; Tier 2 gets no targets this run`
     );
-    return { tier2_targets: [], tier2_target_sources: [], degraded: true };
+    return {
+      tier2_targets: [],
+      tier2_target_sources: [],
+      report_intent_targets: reportIntentTargets,
+      degraded: true,
+    };
   }
 
   return {
     tier2_targets: finalTargets,
     tier2_target_sources: contributing.map(([source]) => source),
+    report_intent_targets: reportIntentTargets,
     degraded: modelMatches.length > 0 || bounded.collapsed || universeNarrowed,
   };
 };

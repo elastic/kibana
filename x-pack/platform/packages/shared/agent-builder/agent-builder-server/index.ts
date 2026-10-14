@@ -11,6 +11,11 @@ export type {
   ProcessedRoundInput,
 } from './processed_input';
 export type {
+  ProcessedCustomEvent,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './processed_timeline';
+export type {
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
@@ -77,6 +82,7 @@ export {
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
+  ExecutionConversationAccess,
   AgentHandlerReturn,
   AgentHandlerFn,
   RunAgentFn,
@@ -110,6 +116,17 @@ export type {
   AfterExecutionHookContext,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
+export type {
+  CycleContext,
+  CycleHandler,
+  CycleHookApi,
+  CycleHookDefinition,
+  CycleHookExecutionContext,
+  CycleTrigger,
+  ExecutionSummary,
+  InjectedContextInput,
+} from './hooks/cycle';
+export { DEFAULT_CYCLE_HOOK_TIMEOUT_MS, MAX_CYCLE_HOOK_TIMEOUT_MS } from './hooks/cycle';
 export {
   applyHookResultByLifecycle,
   applyBeforeAgentResult,
@@ -118,7 +135,12 @@ export {
   applyAfterExecutionResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
-export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
+export type {
+  AgentBuilderAnalytics,
+  AgentBuilderTracking,
+  CompactionTriggeredEvent,
+  SkillInvokedEvent,
+} from './telemetry';
 export { toHashedId } from './telemetry';
 export type {
   BuiltInPluginDefinition,
@@ -172,6 +194,8 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
+  ConversationsSetup,
+  ConversationUpdatedOptIn,
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,

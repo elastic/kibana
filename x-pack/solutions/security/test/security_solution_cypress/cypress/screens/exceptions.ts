@@ -9,6 +9,8 @@ export const CLOSE_ALERTS_CHECKBOX = '[data-test-subj="bulkCloseAlertOnAddExcept
 
 export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExceptionCheckbox"]';
 
+export const CLOSE_ALERTS_REASON_SELECT = '[data-test-subj="exceptionFlyoutCloseReasonSelect"]';
+
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN =

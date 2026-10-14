@@ -185,7 +185,7 @@ Use operations[] to:
                 name: updatedData.name,
                 destinations: updatedData.destinations,
                 matcher: updatedData.matcher,
-                groupingMode: updatedData.grouping_mode,
+                grouping: updatedData.grouping,
                 throttle: updatedData.throttle,
               },
               ...(workflowDiagnostics.length > 0 ? { workflowDiagnostics } : {}),

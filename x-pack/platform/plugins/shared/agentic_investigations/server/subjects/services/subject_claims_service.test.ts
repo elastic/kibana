@@ -275,4 +275,23 @@ describe('SubjectClaimsService', () => {
     await expect(service.deleteAllInSpace(SPACE_ID)).resolves.toBe(2);
     expect(storage.entries.size).toBe(1);
   });
+
+  it('deletes every claim in every space for maintenance', async () => {
+    const { service, storage } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+    await service.claim({
+      spaceId: 'other',
+      conversationId: 'conv-2',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await expect(service.deleteAllAcrossSpaces()).resolves.toBe(2);
+    expect(storage.entries.size).toBe(0);
+  });
 });

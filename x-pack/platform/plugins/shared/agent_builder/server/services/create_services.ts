@@ -39,6 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -208,6 +209,11 @@ export class ServiceManager {
       trackingService,
     });
 
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
     const conversations = new ConversationServiceImpl({
       logger: logger.get('conversations'),
       security,
@@ -216,6 +222,7 @@ export class ServiceManager {
       agents,
       eventBus: conversationEventBus,
       conversationEvents,
+      auditLogService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -255,14 +262,15 @@ export class ServiceManager {
       conversations,
     });
 
-    const auditLogService = new AuditLogService({
-      security,
-      logger: logger.get('audit'),
+    const surfaces = new SurfacesServiceImpl({
+      attachmentsService: attachments,
+      logger: logger.get('surfaces'),
     });
 
     const taskHandler = createTaskHandler({
       logger: logger.get('task-handler'),
       elasticsearch,
+      security,
       inference,
       conversationService: conversations,
       agentService: agents,
@@ -275,11 +283,13 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      surfacesService: surfaces,
     });
 
     executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
+      security,
       taskManager,
       spaces,
       inference,

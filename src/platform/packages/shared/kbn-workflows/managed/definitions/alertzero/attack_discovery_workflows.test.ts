@@ -143,12 +143,11 @@ const asWith = (step: YamlStep | undefined): Record<string, string> =>
 // Every reference to the Investigation resolves through the derived id rather than
 // through the create's output: on a re-review the create 409s and emits nothing.
 const derivedInvestigationId = '{{ steps.resolve_investigation_id.output.investigation_id }}';
-const journalWorkflowIdTemplate = '{{ consts.journal_note }}';
+const journalWorkflowId = ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID;
 
 const journalExecutes = (steps: YamlStep[]) =>
   steps.filter(
-    (step) =>
-      step.type === 'workflow.execute' && step.with?.['workflow-id'] === journalWorkflowIdTemplate
+    (step) => step.type === 'workflow.execute' && step.with?.['workflow-id'] === journalWorkflowId
   );
 
 // Two persisted Attack Discovery ids. `kibana.alert.uuid` is the SHA-256 hex the
@@ -733,13 +732,9 @@ describe('Attack Discovery worker chain', () => {
       const analysisInputs = asInputs(runAnalysis);
 
       it('calls the analysis workflow', () => {
-        expect(review.consts?.fp_tp_analysis).toBe(
+        expect(runAnalysis?.with?.['workflow-id']).toBe(
           ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
         );
-      });
-
-      it('resolves the workflow id from that const', () => {
-        expect(runAnalysis?.with?.['workflow-id']).toBe('{{ consts.fp_tp_analysis }}');
       });
 
       // Synchronous: the review needs the verdict inline, and every write the
@@ -1751,7 +1746,7 @@ describe('Attack Discovery worker chain', () => {
       it.each(closes)("journals to the Investigation from %s's fallback", (name) => {
         expect(
           (fallbackOf(name)[0]?.with as { 'workflow-id'?: string } | undefined)?.['workflow-id']
-        ).toBe('{{ consts.journal_note }}');
+        ).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
       });
     });
 
@@ -2201,7 +2196,12 @@ describe('Attack Discovery worker chain', () => {
     const isFailureNote = (name: string) => LIFECYCLE_FAILURE_NOTES.includes(name);
 
     it('points journal executes at the helper id', () => {
-      expect(review.consts?.journal_note).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID);
+      expect(reviewJournal.length).toBeGreaterThan(0);
+      expect(
+        reviewJournal.every(
+          (step) => step.with?.['workflow-id'] === ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID
+        )
+      ).toBe(true);
     });
 
     it('calls the journal helper at each agreed inflection', () => {

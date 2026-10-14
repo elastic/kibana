@@ -6,24 +6,34 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { ImpactPrivilegesChecker } from './check_impact_privileges';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 import { MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
-import { ImpactForbiddenError } from './errors';
 import { createImpactClient } from './impact_client';
 import type { ImpactService } from './impact_service';
 
 const request = httpServerMock.createKibanaRequest();
 
+/** A `bulkGet` that returns the ids in `readable`, or every requested id when omitted. */
+const bulkGetReturning = (readable?: string[]) =>
+  jest.fn(async (ids: string[]) => {
+    const visible = readable ? ids.filter((id) => readable.includes(id)) : ids;
+    return new Map(visible.map((id) => [id, { id }]));
+  });
+
 const createClient = ({
   listByConversationIds = jest.fn().mockResolvedValue([]),
   assertCanRead = jest.fn().mockResolvedValue(undefined),
   getSpaceId = jest.fn().mockReturnValue('space-from-request'),
+  bulkGet = bulkGetReturning(),
 }: {
   listByConversationIds?: jest.Mock;
   assertCanRead?: jest.Mock;
   getSpaceId?: jest.Mock;
+  bulkGet?: jest.Mock;
 } = {}) => {
-  const privileges: ImpactPrivilegesChecker = {
+  const privileges: InvestigationsPrivilegesChecker = {
     assertCanRead,
     assertCanManage: jest.fn(),
   };
@@ -31,9 +41,10 @@ const createClient = ({
     getImpactService: () => ({ listByConversationIds } as unknown as ImpactService),
     getSpaceId,
     privileges,
+    getConversationClient: async () => ({ bulkGet } as unknown as ConversationPublicClient),
   })(request);
 
-  return { client, listByConversationIds, assertCanRead, getSpaceId };
+  return { client, listByConversationIds, assertCanRead, getSpaceId, bulkGet };
 };
 
 describe('createImpactClient', () => {
@@ -47,12 +58,32 @@ describe('createImpactClient', () => {
     expect(listByConversationIds).toHaveBeenCalledWith(['c1', 'c2'], 'space-from-request');
   });
 
-  it('should refuse before searching when the principal cannot manage investigations', async () => {
-    const { client, listByConversationIds, getSpaceId } = createClient({
-      assertCanRead: jest.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
+  it('should only read impact of conversations the caller can read', async () => {
+    const { client, listByConversationIds, bulkGet } = createClient({
+      bulkGet: bulkGetReturning(['c2']),
     });
 
-    await expect(client.listByConversationIds(['c1'])).rejects.toBeInstanceOf(ImpactForbiddenError);
+    await client.listByConversationIds(['c1', 'c2', 'c2']);
+
+    expect(bulkGet).toHaveBeenCalledWith(['c1', 'c2']);
+    expect(listByConversationIds).toHaveBeenCalledWith(['c2'], 'space-from-request');
+  });
+
+  it('should not read the impact index when the caller can read none of the conversations', async () => {
+    const { client, listByConversationIds } = createClient({ bulkGet: bulkGetReturning([]) });
+
+    expect(await client.listByConversationIds(['private-1'])).toEqual([]);
+    expect(listByConversationIds).not.toHaveBeenCalled();
+  });
+
+  it('should refuse before searching when the principal cannot manage investigations', async () => {
+    const { client, listByConversationIds, getSpaceId } = createClient({
+      assertCanRead: jest.fn().mockRejectedValue(new InvestigationsForbiddenError('nope')),
+    });
+
+    await expect(client.listByConversationIds(['c1'])).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
     expect(listByConversationIds).not.toHaveBeenCalled();
     expect(getSpaceId).not.toHaveBeenCalled();
   });
@@ -61,6 +92,18 @@ describe('createImpactClient', () => {
     const impact = (conversationId: string, ...ids: string[]) => ({
       conversationId,
       entities: ids.map((id) => ({ id })),
+    });
+
+    it('should leave out conversations the caller cannot read', async () => {
+      const { client, listByConversationIds } = createClient({
+        listByConversationIds: jest.fn().mockResolvedValue([impact('c1', 'host-1')]),
+        bulkGet: bulkGetReturning(['c1']),
+      });
+
+      const result = await client.getEntityIdsByConversationId(['c1', 'someone-elses-private']);
+
+      expect(listByConversationIds).toHaveBeenCalledWith(['c1'], 'space-from-request');
+      expect(result).toEqual(new Map([['c1', ['host-1']]]));
     });
 
     it('should map each conversation to its entity ids and omit conversations without impact', async () => {
@@ -103,11 +146,11 @@ describe('createImpactClient', () => {
 
     it('should refuse when the principal cannot manage investigations', async () => {
       const { client } = createClient({
-        assertCanRead: jest.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
+        assertCanRead: jest.fn().mockRejectedValue(new InvestigationsForbiddenError('nope')),
       });
 
       await expect(client.getEntityIdsByConversationId(['c1'])).rejects.toBeInstanceOf(
-        ImpactForbiddenError
+        InvestigationsForbiddenError
       );
     });
   });

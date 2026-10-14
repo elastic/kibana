@@ -325,7 +325,12 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
+    readonly alertsPage: string;
     readonly attacksPage: string;
+    readonly dashboardsPage: string;
+    readonly detectionResponsePage: string;
+    readonly notesPage: string;
+    readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
@@ -497,6 +502,7 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    compareAlertingSystems: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -608,6 +614,7 @@ export interface DocLinks {
     secureLogstash: string;
     agentPolicy: string;
     agentlessIntegrations: string;
+    cloudConnectorDeployment: string;
     api: string;
     managedOtlp: string;
     uninstallAgent: string;
@@ -768,6 +775,7 @@ export interface DocLinks {
     readonly datasets: string;
     readonly datasetSettings: string;
     readonly authentication: string;
+    readonly grantReadAccess: string;
     readonly staticCredentials: string;
     readonly federatedIdentity: string;
     readonly querying: string;

@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
@@ -13,7 +14,6 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { alertingV2ExperimentalAvailability } from './alerting_v2_experimental_availability';
 import {
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
@@ -27,7 +27,11 @@ import {
   generateMultiRuleActionPolicyDoc,
 } from './schema_to_skill_docs';
 
-export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDeps) =>
+type ActionPolicyManagementSkillDeps = ManageActionPolicyToolDeps & {
+  availability: AvailabilityConfig;
+};
+
+export const createActionPolicyManagementSkill = (deps: ActionPolicyManagementSkillDeps) =>
   defineSkillType({
     id: ACTION_POLICY_MANAGEMENT_SKILL_ID,
     name: ACTION_POLICY_MANAGEMENT_SKILL_ID,
@@ -36,7 +40,7 @@ export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDe
       'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
-    availability: alertingV2ExperimentalAvailability,
+    availability: deps.availability,
     referencedContent: [
       {
         name: 'action-policy-matchers',

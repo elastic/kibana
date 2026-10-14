@@ -134,7 +134,6 @@ consts:
   # the Investigation without taking any lifecycle action.
   failed_verdict: failed
   default_autonomy: manual
-  fp_tp_analysis: system-security-attack-discovery-fp-tp-analysis
   # Mirrors ALERTS_BATCH_MAX_SIZE in security_solution's common/constants, which is
   # what the `security.alerts` attachment schema caps `alertIds` at. Duplicated
   # rather than imported because this is YAML; if that constant moves, the
@@ -145,12 +144,10 @@ consts:
   # existing Context-Engine-as-IPC producers hardcode this same string; it is a
   # convention rather than a shared constant.
   forensics_ai_index_id: security-investigations
-  # Always-on Investigation journal. converse `trigger_mode: never` persists a
-  # user_message without running the agent (elastic/kibana#290223).
-  #
-  # The journal steps themselves ride with whichever slice owns the step they sit
-  # next to, so the verdict-switch and gate notes land in #19214.
-  journal_note: system-alertzero-journal-note
+  # Child workflow ids (journal note, FP/TP analysis, proposal) are literals at each
+  # call site, not consts: `run-as-mode: inherit` runs the child as this review's
+  # service account, and the engine only allows that for a literal `workflow-id`.
+
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback, which is
   # what keeps `| size` from erroring when `alert_ids` is omitted.
@@ -294,7 +291,8 @@ steps:
   - name: journal_review_started
     type: workflow.execute
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
@@ -391,7 +389,8 @@ steps:
   - name: journal_evidence_attached
     type: workflow.execute
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
@@ -449,7 +448,8 @@ steps:
   - name: journal_impact_recorded
     type: workflow.execute
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
@@ -476,7 +476,8 @@ steps:
   - name: journal_analysis_started
     type: workflow.execute
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: Starting FP/TP analysis.
@@ -505,7 +506,8 @@ steps:
   - name: run_fp_tp_analysis
     type: workflow.execute
     with:
-      workflow-id: "{{ consts.fp_tp_analysis }}"
+      workflow-id: system-security-attack-discovery-fp-tp-analysis
+      run-as-mode: inherit
       inputs:
         attack_discovery_id: "{{ inputs.attack_discovery_id }}"
         investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
@@ -611,7 +613,8 @@ steps:
   - name: journal_analysis_finished
     type: workflow.execute
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
@@ -691,7 +694,8 @@ steps:
                 - name: journal_attack_status_false_positive_failed
                   type: workflow.execute
                   with:
-                    workflow-id: "{{ consts.journal_note }}"
+                    workflow-id: system-alertzero-journal-note
+                    run-as-mode: inherit
                     inputs:
                       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                       message: >-
@@ -711,7 +715,8 @@ steps:
           - name: journal_fp_closed
             type: workflow.execute
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: >-
@@ -723,7 +728,8 @@ steps:
           - name: journal_attack_status_false_positive
             type: workflow.execute
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: "Attack status written: closed (false_positive)."
@@ -780,7 +786,8 @@ steps:
           - name: journal_analysis_failed
             type: workflow.execute
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: >-
@@ -860,6 +867,7 @@ steps:
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
     with:
       workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         # The attack's own name, which `resolve_escalation` already heads the
@@ -916,7 +924,8 @@ steps:
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: |-
@@ -994,7 +1003,8 @@ steps:
         - name: journal_attack_status_declined_failed
           type: workflow.execute
           with:
-            workflow-id: "{{ consts.journal_note }}"
+            workflow-id: system-alertzero-journal-note
+            run-as-mode: inherit
             inputs:
               conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
               message: >-
@@ -1014,7 +1024,8 @@ steps:
     type: workflow.execute
     if: "${{ steps.record_decision.output.declined == true }}"
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: "Attack status written: closed."

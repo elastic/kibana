@@ -25,6 +25,7 @@ import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-com
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
+  EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
   InputSchema,
   runAgentStepCommonDefinition,
 } from '../../common/step_types/run_agent_step';
@@ -828,6 +829,112 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(execution.executeAgent).not.toHaveBeenCalled();
       expect(res.error?.message).toBe(
         'Feature "knowledge_base_embeddings" is not a chat completion feature (task type "text_embedding"). connector-id-by-feature requires a feature with task type "chat_completion".'
+      );
+    });
+  });
+
+  describe('ephemeral', () => {
+    const roundOnly = () =>
+      of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'summary' } } },
+      });
+
+    it('loads the conversation without storing anything and omits conversation_id', async () => {
+      const execution = createExecutionMock(roundOnly());
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: { message: 'Summarize', conversation_id: 'c-1' },
+          config: { ephemeral: true },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            conversationId: 'c-1',
+            storeConversation: false,
+            autoCreateConversationWithId: undefined,
+          }),
+        })
+      );
+      expect(res.error).toBeUndefined();
+      expect(res.output?.message).toBe('summary');
+      expect(res.output?.conversation_id).toBeUndefined();
+    });
+
+    it('runs a one-shot when no conversation_id is given', async () => {
+      const execution = createExecutionMock(roundOnly());
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({ input: { message: 'Hello' }, config: { ephemeral: true } })
+      );
+
+      expect(execution.executeAgent.mock.calls[0][0].params.storeConversation).toBe(false);
+      expect(res.output?.conversation_id).toBeUndefined();
+    });
+
+    it('still stores a conversation_id run when ephemeral is false', async () => {
+      const execution = createExecutionMock(
+        of(
+          { type: ChatEventType.conversationUpdated, data: { conversation_id: 'c-1', title: 't' } },
+          {
+            type: ChatEventType.roundComplete,
+            data: { round: { id: 'r-1', response: { message: 'ok' } } },
+          }
+        )
+      );
+      const step = getRunAgentStepDefinition({ internalStart: { execution } } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: { message: 'Hi', conversation_id: 'c-1' },
+          config: { ephemeral: false },
+        })
+      );
+
+      expect(execution.executeAgent.mock.calls[0][0].params.storeConversation).toBe(true);
+      expect(res.output?.conversation_id).toBe('c-1');
+    });
+
+    it('ConfigSchema rejects ephemeral combined with create-conversation', () => {
+      const parsed = ConfigSchema.safeParse({ 'create-conversation': true, ephemeral: true });
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues[0].message).toBe(EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE);
+        expect(parsed.error.issues[0].path).toEqual(['ephemeral']);
+      }
+    });
+
+    it('does not call executeAgent when ephemeral is combined with create-conversation at runtime', async () => {
+      const execution = createExecutionMock(of());
+      const serviceManager = { internalStart: { execution } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'create-conversation': true, ephemeral: true },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE);
+    });
+
+    it('ConfigSchema accepts ephemeral alone and with public-conversation', () => {
+      expect(ConfigSchema.safeParse({ ephemeral: true }).success).toBe(true);
+      expect(ConfigSchema.safeParse({ ephemeral: true, 'public-conversation': true }).success).toBe(
+        true
+      );
+    });
+
+    it('declares the key in the attached config schema', () => {
+      expect(runAgentStepCommonDefinition.configSchema?.shape).toEqual(
+        expect.objectContaining({ ephemeral: expect.anything() })
       );
     });
   });

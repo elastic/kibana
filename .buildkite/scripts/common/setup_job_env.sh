@@ -16,6 +16,8 @@ source .buildkite/scripts/common/util.sh
   export BUILDKITE_TOKEN
 
   case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-deploy-cloud-from-pr | \
+    kibana-deploy-project-from-pr | \
     kibana-chromium-linux-build | \
     kibana-console-definitions-sync | \
     kibana-es-ql-grammar-sync | \
@@ -143,7 +145,7 @@ EOF
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
     echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
-    KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
+    KBN_EVALS_CONFIG_JSON="$(retry 5 5 vault kv get -field=config kv/ci-shared/kbn-evals/golden | base64 -d)"
     # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
     #don't fetch the validator; eval steps run on a full checkout.
     kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
@@ -248,11 +250,11 @@ EOF
   fi
 }
 
-# Inject moon remote-cache credentials on CI
-if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
-  MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
-  export MOON_REMOTE_CACHE_TOKEN
-fi
+# Moon remote cache is disabled (see .moon/workspace.yml)
+# if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
+#   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
+#   export MOON_REMOTE_CACHE_TOKEN
+# fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

@@ -170,13 +170,13 @@ const recommendation = (
 const entity = (
   name: string,
   type: string,
-  streamName: string,
+  sourceSlug: string,
   featureId?: string,
   entityEvidence?: InvestigationEvidence
 ): ImpactEntity => ({
   name,
   type,
-  stream_name: streamName,
+  source_slug: sourceSlug,
   ...(featureId && { feature_id: featureId }),
   ...(entityEvidence && { evidence: entityEvidence }),
 });
@@ -682,7 +682,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         entity(
           'web-frontend',
           'service',
-          'logs.web-frontend',
+          'web-frontend-logs',
           'web-frontend',
           evidence(
             'Shoppers get a payment error on the last step; their carts are kept, so most retry.',
@@ -704,7 +704,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         entity(
           'payment-service',
           'service',
-          'logs.payment-service',
+          'payment-service-logs',
           'payment-service',
           evidence(
             'Payment calls from checkout fail while each pod restarts:\n\n| Restart | Failed calls | Duration |\n| --- | --- | --- |\n| 1 | 212 | 9 min |\n| 2 | 198 | 11 min |\n| 3 | 205 | 10 min |'

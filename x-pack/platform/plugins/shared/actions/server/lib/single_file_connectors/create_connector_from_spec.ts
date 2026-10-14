@@ -72,6 +72,7 @@ export const createConnectorTypeFromSpec = (
     throw new Error('No actions or events defined');
   }
 
+  const { signingKey } = spec;
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
   const schemaForConfig = spec.schema;
@@ -85,6 +86,12 @@ export const createConnectorTypeFromSpec = (
         getRelayClient: actions.getRelayClient,
         networkSettings,
         platform,
+        ...(signingKey
+          ? {
+              getJwtSigner: (connectorId: string) =>
+                actions.getConnectorJwtSigner(connectorId, signingKey),
+            }
+          : {}),
       })
     : undefined;
 

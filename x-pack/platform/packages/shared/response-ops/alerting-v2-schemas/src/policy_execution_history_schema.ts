@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
@@ -72,14 +72,12 @@ export const listPolicyExecutionHistoryRequestSchema = z
     per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .describe(`Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}.`),
-    from: z.iso
-      .datetime()
+    from: isoDateTime()
       .optional()
       .describe(
         'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.'
       ),
-    to: z.iso
-      .datetime()
+    to: isoDateTime()
       .optional()
       .describe('Inclusive ISO datetime upper bound on the event timestamp.'),
     alert_ids: idFilterArraySchema
@@ -114,7 +112,10 @@ export type ListPolicyExecutionHistoryRequest = z.infer<
 
 export const namedRefSchema = z.object({
   id: z.string(),
-  name: z.string().nullable().optional(),
+  name: z
+    .string()
+    .optional()
+    .describe('Omitted when the referenced resource could not be resolved.'),
 });
 
 // Defensive upper bounds to keep response payloads sane.
@@ -130,7 +131,7 @@ const alertRefSchema = z.object({ id: z.string() });
 
 export const policyExecutionHistoryItemSchema = z
   .object({
-    dispatched_at: z.iso.datetime(),
+    dispatched_at: isoDateTime(),
     policy: namedRefSchema,
     outcome: policyExecutionOutcomeSchema,
     alert_count: z.number(),
@@ -157,9 +158,10 @@ export const policyExecutionHistoryItemSchema = z
     error: z
       .object({
         message: z.string(),
-        stack_trace: z.string().nullable(),
+        stack_trace: z.string().optional().describe('Omitted when the source recorded no trace.'),
       })
-      .nullable(),
+      .optional()
+      .describe('Failure details. Omitted when the dispatch did not fail.'),
   })
   .meta({ id: 'alerting_policy_execution_history_item' });
 
@@ -185,9 +187,9 @@ export const listPolicyExecutionHistoryResponseSchema = z
       .nonnegative()
       .describe(`The number of action policy events matching the query. ${ESTIMATED_COUNT_NOTE}`),
     search_matches: searchMatchCountsSchema
-      .nullable()
+      .optional()
       .describe(
-        'Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
+        'Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
       ),
   })
   .meta({ id: 'alerting_policy_execution_history_response' });

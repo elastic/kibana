@@ -22,7 +22,7 @@ import {
 import type { ExperimentalFeatures } from '../../../../../common';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { requireResolvedEntity } from '../entity_resolution';
-import { resolveEntityIdsForResolution } from './resolve_entity_ids';
+import { resolveEntityIds } from '../shared/resolve_entity_ids';
 import { getResolutionToolAvailability } from './resolution_availability';
 import { linkEntitiesTool, SECURITY_LINK_ENTITIES_TOOL_ID } from './link_entities_tool';
 
@@ -30,8 +30,8 @@ jest.mock('../entity_resolution', () => ({
   requireResolvedEntity: jest.fn(),
 }));
 
-jest.mock('./resolve_entity_ids', () => ({
-  resolveEntityIdsForResolution: jest.fn(),
+jest.mock('../shared/resolve_entity_ids', () => ({
+  resolveEntityIds: jest.fn(),
 }));
 
 jest.mock('./resolution_availability', () => ({
@@ -39,7 +39,7 @@ jest.mock('./resolution_availability', () => ({
 }));
 
 const mockRequireResolvedEntity = requireResolvedEntity as jest.Mock;
-const mockResolveEntityIdsForResolution = resolveEntityIdsForResolution as jest.Mock;
+const mockResolveEntityIds = resolveEntityIds as jest.Mock;
 const mockGetResolutionToolAvailability = getResolutionToolAvailability as jest.Mock;
 
 const mockExperimentalFeatures = {
@@ -113,7 +113,7 @@ describe('linkEntitiesTool', () => {
       ok: true,
       identity: { identifierType: 'host', identifier: 'server1', entityStoreId: 'host:server1' },
     });
-    mockResolveEntityIdsForResolution.mockResolvedValue({
+    mockResolveEntityIds.mockResolvedValue({
       resolved: [{ euid: 'host:server2' }],
       unresolved: [],
     });
@@ -212,7 +212,7 @@ describe('linkEntitiesTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(mockRequireResolvedEntity).not.toHaveBeenCalled();
-        expect(mockResolveEntityIdsForResolution).not.toHaveBeenCalled();
+        expect(mockResolveEntityIds).not.toHaveBeenCalled();
         expect(mockLinkEntities).toHaveBeenCalledWith('host:server1', ['host:server2'], {
           awaitVisibility: true,
         });
@@ -262,7 +262,7 @@ describe('linkEntitiesTool', () => {
       });
 
       it('when nothing resolves: returns an error with unresolved references, without prompting or calling the client', async () => {
-        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+        mockResolveEntityIds.mockResolvedValueOnce({
           resolved: [],
           unresolved: [{ entityId: 'ghost-entity', status: 'not_found' }],
         });
@@ -285,7 +285,7 @@ describe('linkEntitiesTool', () => {
       });
 
       it('when a reference is ambiguous: returns the candidates without prompting or linking', async () => {
-        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+        mockResolveEntityIds.mockResolvedValueOnce({
           resolved: [],
           unresolved: [
             {

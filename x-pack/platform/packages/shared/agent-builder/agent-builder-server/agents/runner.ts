@@ -15,7 +15,7 @@ import type {
   AgentExecutionMode,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
-import type { AgentParams, AgentResponse } from './provider';
+import type { AgentParams, AgentResponse, ExecutionConversationAccess } from './provider';
 
 export interface RunAgentReturn {
   /** return from the agent */
@@ -38,6 +38,11 @@ export interface RunAgentParams {
    * The id of the parent execution that spawned this one, when applicable.
    */
   parentExecutionId?: string;
+  /**
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}. Defaults to
+   * `readWrite`.
+   */
+  conversationAccess?: ExecutionConversationAccess;
   /**
    * ID of the agent to call.
    */

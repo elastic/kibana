@@ -8,7 +8,7 @@
  */
 
 import { decodeLegacyParams } from './legacy_decoder';
-import type { SortDirectionsByField } from './url_codec';
+import type { SortDirectionsByField } from '../sorting';
 
 describe('legacy_decoder', () => {
   const bothDirections = new Set<'asc' | 'desc'>(['asc', 'desc']);

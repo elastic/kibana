@@ -245,7 +245,7 @@ ${noteBlock}### What to do
 
 1. **Fix the breaking change** if it was unintentional.
 2. **If intentional**:
-   - add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
+   - add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` value from the table above, plus \`source\` when the table shows one, to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
    - ${releaseNote.labelStep}.
    - ${releaseNote.textStep}.
 
@@ -289,23 +289,29 @@ const isImpactReport = (report: unknown): report is ImpactReport =>
 
 // The same change appearing in both the stack and serverless specs collapses to
 // one row, keyed by endpoint + change identity.
-const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] =>
+export const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] =>
   Array.from(
     new Map(
       entries.map((e) => [
-        `${e.path}::${e.method ?? ''}::${e.oasdiffId ?? ''}::${e.source ?? ''}`,
+        `${e.path}::${e.method ?? ''}::${e.oasdiffId ?? ''}::${e.source ?? ''}::${e.reason}`,
         e,
       ])
     ).values()
   );
 
-async function main() {
-  const reportPaths = process.argv.slice(2);
-
+/**
+ * Reads the impact reports. `complete` is true only when every report exists and
+ * parses: a missing report means that check was skipped or crashed.
+ */
+export const readImpactReports = (
+  reportPaths: readonly string[]
+): { entries: ImpactEntry[]; complete: boolean } => {
   const entries: ImpactEntry[] = [];
+  let complete = reportPaths.length > 0;
 
   for (const reportPath of reportPaths) {
     if (!existsSync(reportPath)) {
+      complete = false;
       continue;
     }
     let report: unknown;
@@ -313,17 +319,39 @@ async function main() {
       report = JSON.parse(readFileSync(reportPath, 'utf-8'));
     } catch {
       console.error(`Failed to parse report at ${reportPath}, skipping`);
+      complete = false;
       continue;
     }
     if (isImpactReport(report)) {
       entries.push(...report.entries);
     } else {
       console.error(`Report at ${reportPath} has no recognized shape, skipping`);
+      complete = false;
     }
   }
 
+  return { entries, complete };
+};
+
+export const RESOLVED_COMMENT_BODY = `## API Contract Breaking Changes
+
+The latest run found nothing to report in the public OpenAPI surface, so the earlier results on this PR no longer apply.`;
+
+export const notifyApiContractOwners = async (reportPaths: readonly string[]): Promise<void> => {
+  const { entries, complete } = readImpactReports(reportPaths);
+
   if (entries.length === 0) {
-    console.log('No breaking changes to report');
+    if (!complete) {
+      console.log('No breaking changes to report');
+      return;
+    }
+    console.log('No breaking changes found, updating an earlier comment if there is one...');
+    await upsertComment({
+      commentBody: RESOLVED_COMMENT_BODY,
+      commentContext: COMMENT_CONTEXT,
+      clearPrevious: false,
+      createIfMissing: false,
+    });
     return;
   }
 
@@ -336,10 +364,10 @@ async function main() {
   });
 
   console.log('PR comment posted successfully');
-}
+};
 
 if (basename(process.argv[1] ?? '') === 'notify_api_contract_owners.ts') {
-  main().catch((error) => {
+  notifyApiContractOwners(process.argv.slice(2)).catch((error) => {
     console.error('Failed to post API contract notification:', error);
     process.exit(1);
   });
