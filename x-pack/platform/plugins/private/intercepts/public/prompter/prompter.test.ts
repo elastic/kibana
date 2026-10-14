@@ -65,6 +65,7 @@ describe('ProductInterceptPrompter', () => {
           analytics,
           targetDomElement: document.createElement('div'),
           userAllowsFeedback,
+          isChromeVisible$: Rx.of(true),
         })
       ).toEqual({
         registerIntercept: expect.any(Function),
@@ -139,6 +140,7 @@ describe('ProductInterceptPrompter', () => {
           analytics,
           targetDomElement: document.createElement('div'),
           userAllowsFeedback,
+          isChromeVisible$: Rx.of(true),
         }));
       });
 
@@ -170,6 +172,7 @@ describe('ProductInterceptPrompter', () => {
           analytics,
           targetDomElement: document.createElement('div'),
           userAllowsFeedback: false,
+          isChromeVisible$: Rx.of(true),
         }));
 
         const intercept$ = registerIntercept({
@@ -331,6 +334,63 @@ describe('ProductInterceptPrompter', () => {
 
         await waitFor(() => {
           expect(mockQueueInterceptFn).toHaveBeenCalled();
+        });
+
+        subscription.unsubscribe();
+      });
+
+      it('defers the intercept while chrome is hidden and shows it once chrome is visible', async () => {
+        const isChromeVisible$ = new Rx.BehaviorSubject(false);
+
+        ({ registerIntercept } = prompter.start({
+          http,
+          rendering,
+          analytics,
+          targetDomElement: document.createElement('div'),
+          userAllowsFeedback,
+          isChromeVisible$,
+        }));
+
+        const triggerInfo: TriggerInfo = {
+          registeredAt: new Date(
+            'Fri Nov 28 2025 15:01:07 GMT+0100 (Central European Standard Time)'
+          ).toISOString(),
+          triggerIntervalInMs: 30000, // 30 seconds
+          recurrent: true,
+        };
+
+        const { runs: triggerRuns } = prompter.calculateTimeTillTrigger(
+          triggerInfo.registeredAt,
+          triggerInfo.triggerIntervalInMs
+        );
+
+        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        mockGetUserTriggerData$.mockReturnValue(Rx.of({ lastInteractedInterceptId: triggerRuns }));
+
+        // the timer has elapsed beyond the trigger interval, so the intercept is due
+        localStorageGetItemSpy.mockReturnValue(
+          JSON.stringify({
+            [intercept.id]: {
+              timerStart: new Date(jest.now() - triggerInfo.triggerIntervalInMs - 1).toISOString(),
+            },
+          })
+        );
+
+        const subscription = registerIntercept({
+          id: intercept.id,
+          config: () => Promise.resolve(intercept),
+        }).subscribe();
+
+        await jest.runOnlyPendingTimersAsync();
+
+        expect(mockQueueInterceptFn).not.toHaveBeenCalled();
+
+        isChromeVisible$.next(true);
+
+        await waitFor(() => {
+          expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+            expect.objectContaining({ id: intercept.id })
+          );
         });
 
         subscription.unsubscribe();
