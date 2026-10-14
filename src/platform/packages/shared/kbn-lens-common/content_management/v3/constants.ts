@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
-const preset = require('cssnano-preset-default');
-
-module.exports = {
-  plugins: [
-    autoprefixer(),
-    cssnano({
-      preset: preset({ discardComments: false }),
-    }),
-  ],
-};
+/**
+ * Lens CM Item Version `v3`
+ */
+export const LENS_ITEM_VERSION_V3 = 3 as const;
+export type LENS_ITEM_VERSION_V3 = typeof LENS_ITEM_VERSION_V3;

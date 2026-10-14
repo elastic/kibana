@@ -154,7 +154,7 @@ describe('getAxiosInstance', () => {
     });
     const credential = getCredential({
       connectorId: '1',
-      secrets: { authType: 'oauth_authorization_code' },
+      secrets: { authType: 'oauth_password' },
     });
 
     await expect(credential.getAuthHeaders()).rejects.toBeInstanceOf(UnsupportedAuthProducerError);

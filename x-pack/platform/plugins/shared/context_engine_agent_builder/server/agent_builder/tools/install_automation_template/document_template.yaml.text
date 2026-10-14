@@ -8,7 +8,7 @@ version: "1"
 #   1. Set every value in `consts`. `corpus_filter` is the agreed bound on what gets indicated —
 #      it is a whole ES|QL line, so it can carry several conditions, and setting it to an empty
 #      string takes the whole index.
-#   2. Add any further fields the summary should draw on to the `KEEP` in `discover_documents`,
+#   2. Add any further fields the summary should draw on to the `KEEP` in `fetch_documents`,
 #      remembering that `KEEP` fixes the column order the `foreach` reads by position.
 #   3. Tell the prompt what these documents are. "Product manual" and "incident record" produce
 #      different summaries from the same text, and the model cannot tell which it is holding.
@@ -70,8 +70,7 @@ steps:
       path: /{{ consts.source_index }}/_mapping
 
   # Sorted by _id so a pilot's documents are the first of the full run's, and the full run
-  # replaces the pilot's KIs instead of adding to them. Sorted and limited before the body is
-  # read, so only the kept documents' bodies are loaded.
+  # replaces the pilot's KIs.
   - name: discover_documents
     type: elasticsearch.esql.query
     with:
@@ -80,8 +79,7 @@ steps:
         {{ consts.corpus_filter }}
         | SORT _id ASC
         | LIMIT {{ inputs.pilot_size | default: consts.max_documents | at_most: consts.max_documents }}
-        | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
-        | KEEP _id, `{{ consts.title_field }}`, body
+        | KEEP _id
 
   # Documents are chunked into batches of at most 100 before entering `parallel`: the engine
   # throws above that fan-out limit. Each batch runs concurrently; batches run sequentially.
@@ -91,19 +89,30 @@ steps:
     iteration-on-failure:
       continue: true
     steps:
+      # Bodies are fetched per batch so step outputs stay bounded as `max_documents` grows.
+      - name: fetch_documents
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM {{ consts.source_index }} METADATA _id
+            {{ consts.corpus_filter }}
+            | WHERE _id IN ({% for row in foreach.item %}"{{ row[0] | replace: '\\', '\\\\' | replace: '"', '\\"' | replace: '\n', '\\n' | replace: '\r', '\\r' }}"{% unless forloop.last %}, {% endunless %}{% endfor %})
+            | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
+            | KEEP _id, `{{ consts.title_field }}`, body
+
       # Summarising a document costs a model call, and no document's summary depends on another's,
       # so five run at a time rather than the batch running end to end.
       - name: loop_documents
         type: parallel
-        foreach: "{{ foreach.item | json }}"
+        foreach: "{{ steps.fetch_documents.output.values | json }}"
         concurrency: 5
         # One document that fails to summarise should not cost the rest of the batch: `settled`
         # runs every branch to a terminal state, where the default `fail-fast` stops scheduling
         # on the first failure.
         mode: settled
         steps:
-          # Column order comes from the `KEEP` above: _id, title, body. Changing that list moves
-          # these indices.
+          # Column order comes from the `KEEP` in `fetch_documents`: _id, title, body. Changing that
+          # list moves these indices.
           - name: document_context
             type: data.set
             with:
