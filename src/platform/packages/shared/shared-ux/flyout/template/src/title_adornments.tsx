@@ -11,17 +11,11 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import type { EuiIconProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 /** Test subject shared by both title icon forms, so collapsed and expanded headers locate alike. */
 export const TITLE_ICON_TEST_SUBJ = 'flyoutHeaderTitleIcon';
 
 export const TITLE_LOADING_TEST_SUBJ = 'flyoutHeaderTitleLoading';
-
-const TITLE_LOADING_ARIA_LABEL = i18n.translate(
-  'sharedUXPackages.flyoutTemplate.header.titleLoadingAriaLabel',
-  { defaultMessage: 'Loading' }
-);
 
 /** Renders an optional title icon or accessible tooltip anchor. */
 export const renderTitleIcon = (
@@ -40,13 +34,7 @@ export const renderTitleIcon = (
 
 /** Renders the title loading spinner when `isLoading` is set. */
 export const renderTitleLoading = (isLoading: boolean): ReactNode =>
-  isLoading ? (
-    <EuiLoadingSpinner
-      size="m"
-      aria-label={TITLE_LOADING_ARIA_LABEL}
-      data-test-subj={TITLE_LOADING_TEST_SUBJ}
-    />
-  ) : null;
+  isLoading ? <EuiLoadingSpinner size="m" data-test-subj={TITLE_LOADING_TEST_SUBJ} /> : null;
 
 /** Renders a title node with an optional trailing icon and loading spinner. */
 export const renderTitleWithAdornments = (
