@@ -1,7 +1,8 @@
 # Gate-correctness checklist for the Hunt Watch Worker (NotDaybreak families A/B/C/D).
 # Every gate is either tested, with the suite assertion named as evidence, or n/a with the reason.
 # A gate regression is binary and blocking; output-quality scores cannot average it away.
-# Validate with the `evaluation.gate-checklist` action, mode `validate`, suite_dir this package.
+# Validate with the `evaluation.gate-checklist` action, mode `validate`, against a temp dir holding
+# a copy named `gate-checklist.yaml` (the validator hardcodes that name; Kibana requires snake_case).
 worker_name: Hunt Watch Worker
 capabilities:
   - hitl-resumed-writes

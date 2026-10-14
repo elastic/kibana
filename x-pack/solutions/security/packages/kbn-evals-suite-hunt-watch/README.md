@@ -133,10 +133,16 @@ lives in `LOCKDOWN_SCAN_PATHS` in `src/lockdown.ts`.
 
 ## Gate checklist
 
-`gate-checklist.yaml` records, for every NotDaybreak gate family, whether this suite tests the gate
-(with the evaluator or spec as evidence) or why it does not apply. The file is validated with the
-`evaluation.gate-checklist` action in `validate` mode against this package directory; D8 is
-required `tested` because the Worker declares `hitl-resumed-writes`.
+`gate_checklist.yaml` records, for every NotDaybreak gate family, whether this suite tests the gate
+(with the evaluator or spec as evidence) or why it does not apply. D8 is required `tested` because
+the Worker declares `hitl-resumed-writes`. The validator (`evaluation.gate-checklist` in `validate`
+mode) only reads a file named `gate-checklist.yaml`, which Kibana's file casing check rejects, so
+validate a copy:
+
+```bash
+d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
+# then: evaluation.gate-checklist { mode: "validate", suite_dir: "$d" }
+```
 
 <!-- gate-checklist:begin -->
 | Gate | Status | Evidence / reason (short) |
