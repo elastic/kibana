@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import type { NightshiftSourcesPublicPluginStart } from '@kbn/nightshift-sources-plugin/public';
@@ -33,6 +34,8 @@ export interface NightshiftStartDependencies {
   significantEvents: SignificantEventsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Investigation cards and the shared investigations API. */
+  agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
   nightshiftSources?: NightshiftSourcesPublicPluginStart;
   serverless?: ServerlessPluginStart;
