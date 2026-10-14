@@ -7,7 +7,7 @@
 
 import type * as http from 'http';
 import type { RenderIacTemplateResponse } from '@kbn/fleet-plugin/common/types/rest_spec/iac_provisioner';
-import { createServer } from '@mswjs/http-middleware';
+import { createServer } from '@msw/serve';
 import { http as mswHttp, HttpResponse } from 'msw';
 
 export const IAC_PROVISIONER_MOCK_PORT = 8090;
