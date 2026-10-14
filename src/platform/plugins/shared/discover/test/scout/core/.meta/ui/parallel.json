@@ -1,5 +1,5 @@
 {
-  "sha1": "802654afbce6290cd000224f6170eb36dc35483c",
+  "sha1": "7cf562b8516e6d0187a904a0e6707f2017f28708",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -509,8 +509,7 @@
       "title": "Discover app - errors should render invalid scripted field error",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/error_handling.spec.ts",
@@ -1210,6 +1209,58 @@
       }
     },
     {
+      "id": "95fb6f1ca7693bd-410e96cc9eb8bac",
+      "title": "Using scripted fields in Discover numeric field: value, sort, filter and Lens hand-off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 137,
+        "column": 22
+      }
+    },
+    {
+      "id": "95fb6f1ca7693bd-bb52826822140e7",
+      "title": "Using scripted fields in Discover string field: value, sort and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 174,
+        "column": 29
+      }
+    },
+    {
+      "id": "95fb6f1ca7693bd-32c2689be36a794",
+      "title": "Using scripted fields in Discover boolean field: value and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 203,
+        "column": 22
+      }
+    },
+    {
+      "id": "95fb6f1ca7693bd-44e69b77e0921c5",
+      "title": "Using scripted fields in Discover date field: formatted value and filter from a cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 230,
+        "column": 5
+      }
+    },
+    {
       "id": "1fdc29104a88cee-486ca7221335a36",
       "title": "Discover app - search source alert data view should not overwrite current data view with alert data view when starting or saving a Discover session",
       "expectedStatus": "passed",
@@ -1225,8 +1276,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 62,
+        "column": 15
       }
     },
     {
@@ -1245,7 +1296,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
-        "line": 77,
+        "line": 81,
         "column": 26
       }
     },
@@ -1265,8 +1316,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
-        "line": 158,
-        "column": 27
+        "line": 162,
+        "column": 36
       }
     },
     {
@@ -1285,7 +1336,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
-        "line": 203,
+        "line": 208,
         "column": 56
       }
     },
@@ -1318,8 +1369,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
-        "line": 47,
-        "column": 56
+        "line": 50,
+        "column": 73
       }
     },
     {
@@ -1338,7 +1389,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
-        "line": 79,
+        "line": 83,
         "column": 24
       }
     },
@@ -1358,8 +1409,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
-        "line": 117,
-        "column": 88
+        "line": 122,
+        "column": 26
       }
     },
     {

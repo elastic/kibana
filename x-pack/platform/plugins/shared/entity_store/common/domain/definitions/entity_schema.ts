@@ -17,6 +17,25 @@ export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 /** Registry type name. Wider than the closed `EntityType`, which only covers the built-ins. */
 export type EntityDefinitionType = string;
 
+/**
+ * Registry type names: lowercase alphanumeric segments separated by `.`, `_` or `-`, starting with
+ * a letter. Separators cannot lead, trail or repeat. Examples: `host`, `k8s.pod`, `aws_s3-bucket`.
+ * Length is capped separately by `ENTITY_DEFINITION_TYPE_MAX_LENGTH`.
+ */
+export const ENTITY_DEFINITION_TYPE_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
+export const ENTITY_DEFINITION_TYPE_MAX_LENGTH = 64;
+
+/** Returns why `type` is not a valid entity definition type name, or `undefined` when it is valid. */
+export const validateEntityDefinitionType = (type: string): string | undefined => {
+  if (type.length > ENTITY_DEFINITION_TYPE_MAX_LENGTH) {
+    return `type name exceeds the maximum length of ${ENTITY_DEFINITION_TYPE_MAX_LENGTH}`;
+  }
+  if (!ENTITY_DEFINITION_TYPE_PATTERN.test(type)) {
+    return `type name does not match pattern ${ENTITY_DEFINITION_TYPE_PATTERN}`;
+  }
+  return undefined;
+};
+
 /** Which extraction process a task is running as. */
 export type ExtractionMode = z.infer<typeof ExtractionMode>;
 export const ExtractionMode = lazySchema(() => z.enum(['single', 'priority', 'nonPriority']));
@@ -273,6 +292,15 @@ export type SingleFieldIdentity = z.infer<typeof singleFieldIdentitySchema>;
 export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-time identity (full or singleField)
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
+/**
+ * A definition whose type name is not restricted to the built-in `EntityType` values. The id
+ * compiler emits `type` verbatim as the `<type>:` id prefix inside ES|QL and Painless string
+ * literals, so it must match the registry's type-name pattern (lowercase alphanumerics with `.`,
+ * `_` or `-` separators). Definitions read from the registry always do.
+ */
+export type EntityDefinitionOfAnyType = Omit<EntityDefinitionWithoutId, 'type'> & {
+  type: EntityDefinitionType;
+};
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
 
 /**
