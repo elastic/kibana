@@ -8,12 +8,13 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { z } from '@kbn/zod';
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
+import { writeErrorHandler } from '@kbn/as-code-utils';
+import { createOnRequestValidationError } from './on_request_validation_error';
 import { getRouteConfig } from './get_route_config';
 import { discoverSessionApiResponseSchema } from './schema';
 import { upsertDiscoverSession } from './session_upsert';
@@ -44,6 +45,7 @@ export const registerUpsertRoute = (
             (await import('./oas_examples')).upsertDiscoverSessionOASOperationObject,
         },
         validate: {
+          onRequestValidationError: createOnRequestValidationError(logger),
           request: {
             params: z
               .object({
