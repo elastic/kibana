@@ -50,6 +50,7 @@ import {
   isConversationNotFoundError,
   isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
+import type { MetadataFieldChange, MetadataPatchContext } from '@kbn/agent-builder-server';
 import type {
   ConversationSearchOptions,
   SerializedMetadataValue,
@@ -206,7 +207,10 @@ export interface ConversationClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: ConversationWriteOptions & { access?: ConversationAccess }
+    options: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      context?: MetadataPatchContext;
+    }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
   getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
@@ -1226,9 +1230,14 @@ class ConversationClientImpl implements ConversationClient {
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    { access = 'owner', source }: ConversationWriteOptions & { access?: ConversationAccess }
+    {
+      access = 'owner',
+      source,
+      context,
+    }: ConversationWriteOptions & { access?: ConversationAccess; context?: MetadataPatchContext }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
+    let changes: Record<string, MetadataFieldChange> = {};
 
     const result = await this.writeConversation({
       conversationId,
@@ -1263,6 +1272,12 @@ class ConversationClientImpl implements ConversationClient {
         // Track which fields actually changed to suppress no-op trigger events.
         const metadata = { ...storedMetadata, ...serialized };
         changedFields = diffMetadata(storedMetadata, metadata);
+        changes = Object.fromEntries(
+          changedFields.map((field) => [
+            field,
+            { from: storedMetadata[field], to: metadata[field] },
+          ])
+        );
 
         return { metadata };
       },
@@ -1274,6 +1289,9 @@ class ConversationClientImpl implements ConversationClient {
         templateId: result.template_id,
         parentId: result.parent_conversation?.id,
         changedFields,
+        changes,
+        source,
+        ...(context ? { context } : {}),
       });
     }
 

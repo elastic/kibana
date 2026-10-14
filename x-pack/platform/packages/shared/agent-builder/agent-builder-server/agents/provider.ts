@@ -26,6 +26,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { MetadataPatchContext } from '../conversations';
 import type {
   ModelProvider,
   ScopedRunner,
@@ -63,7 +64,7 @@ export interface ConversationClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: { source: ConversationWriteSource }
+    options: { source: ConversationWriteSource; context?: MetadataPatchContext }
   ): Promise<{ changedFields: string[] }>;
 }
 

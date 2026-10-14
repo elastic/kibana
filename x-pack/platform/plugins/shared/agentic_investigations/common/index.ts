@@ -199,6 +199,13 @@ export {
   assigneesChangedEventSchema,
 } from './assignments/conversation_events';
 export type { AssigneesChangedEventData } from './assignments/conversation_events';
+export {
+  STATUS_CHANGED_EVENT_TYPE,
+  statusChangedEventSchema,
+} from './investigations/conversation_events';
+export type { StatusChangedEventData } from './investigations/conversation_events';
+export { eventViaSchema } from './conversation_events/via';
+export type { EventVia } from './conversation_events/via';
 
 export type {
   CreateEscalationRequest,

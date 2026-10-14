@@ -6,17 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ConversationMetadataPatchedEvent } from '@kbn/agent-builder-server';
 import type {
   AttachmentTimelineEvent,
   ConversationUpdatedTriggerEvent,
 } from '@kbn/agent-builder-common';
 
-export interface ConversationMetadataPatchedPayload {
-  conversationId: string;
-  templateId?: string;
-  parentId?: string;
-  changedFields: string[];
-}
+export type ConversationMetadataPatchedPayload = ConversationMetadataPatchedEvent;
 
 export interface ConversationAttachmentEventsPayload {
   conversationId: string;

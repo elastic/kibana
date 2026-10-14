@@ -250,6 +250,24 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     return { service, releaseGate, get, patchMetadata: client.patchMetadata };
   };
 
+  it('passes the automation context to patchMetadata', async () => {
+    const { service, patchMetadata } = makeDismissService({ releaseGateSideEffect: 'success' });
+    const context = { type: 'agent' as const, agent_id: 'agent-1' };
+
+    await service.setStatus(
+      request,
+      'conv-1',
+      { status: 'closed', dismiss_reason: 'no_reason' },
+      context
+    );
+
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { status: 'closed' },
+      { access: 'converse', context }
+    );
+  });
+
   it('skips a proposal that was already decided (conflict, re-read shows decided)', async () => {
     const conflictErr = Object.assign(new Error('already decided'), {
       name: 'ProposalConflictError',

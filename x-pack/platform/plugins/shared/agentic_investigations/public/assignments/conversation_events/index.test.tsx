@@ -57,4 +57,19 @@ describe('assignees changed event UI definition', () => {
       'Unassigned u3'
     );
   });
+
+  it('names the workflow behind a change made by automation', async () => {
+    renderEvent(
+      {
+        added: ['u1'],
+        removed: [],
+        via: { type: 'workflow', workflow_id: 'wf-1', workflow_name: 'Triage', execution_id: 'e1' },
+      },
+      [{ uid: 'u1', user: { username: 'jdoe' } }]
+    );
+
+    expect(await screen.findByTestId('conversationEventVia')).toHaveTextContent(
+      'via workflow Triage'
+    );
+  });
 });

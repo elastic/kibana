@@ -20,6 +20,7 @@ import {
   ASSIGNEES_CHANGED_EVENT_TYPE,
   type AssigneesChangedEventData,
 } from '../../../common/assignments/conversation_events';
+import { EventVia } from '../../conversation_events/event_via';
 import { useUserProfiles } from '../../user_profiles';
 
 /** Renders the names of the given uids, falling back to the uid for a profile that can't be resolved. */
@@ -32,7 +33,7 @@ const renderUsers = (uids: string[], names: Map<string, string>) =>
   ));
 
 export const AssigneesChangedEvent = memo(
-  ({ data: { added, removed } }: { data: AssigneesChangedEventData }) => {
+  ({ data: { added, removed, via } }: { data: AssigneesChangedEventData }) => {
     const { data: profiles, isLoading } = useUserProfiles({ uids: added.concat(removed) });
 
     const names = new Map<string, string>();
@@ -41,36 +42,39 @@ export const AssigneesChangedEvent = memo(
     }
 
     return (
-      <EuiText size="s" color="primary" data-test-subj="assigneesChangedEvent">
-        {isLoading ? (
-          <EuiSkeletonText lines={1} size="s" />
-        ) : (
-          <EuiFlexGroup alignItems="center" direction="row">
-            {added.length > 0 && (
-              <EuiFlexItem data-test-subj="assigneesChangedEventAdded" grow={false}>
-                <div>
-                  <FormattedMessage
-                    id="xpack.agenticInvestigations.assignments.events.added"
-                    defaultMessage="Assigned {users}"
-                    values={{ users: renderUsers(added, names) }}
-                  />
-                </div>
-              </EuiFlexItem>
-            )}
-            {removed.length > 0 && (
-              <EuiFlexItem data-test-subj="assigneesChangedEventRemoved">
-                <div>
-                  <FormattedMessage
-                    id="xpack.agenticInvestigations.assignments.events.removed"
-                    defaultMessage="Unassigned {users}"
-                    values={{ users: renderUsers(removed, names) }}
-                  />
-                </div>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
-      </EuiText>
+      <>
+        <EuiText size="s" color="primary" data-test-subj="assigneesChangedEvent">
+          {isLoading ? (
+            <EuiSkeletonText lines={1} size="s" />
+          ) : (
+            <EuiFlexGroup alignItems="center" direction="row">
+              {added.length > 0 && (
+                <EuiFlexItem data-test-subj="assigneesChangedEventAdded" grow={false}>
+                  <div>
+                    <FormattedMessage
+                      id="xpack.agenticInvestigations.assignments.events.added"
+                      defaultMessage="Assigned {users}"
+                      values={{ users: renderUsers(added, names) }}
+                    />
+                  </div>
+                </EuiFlexItem>
+              )}
+              {removed.length > 0 && (
+                <EuiFlexItem data-test-subj="assigneesChangedEventRemoved">
+                  <div>
+                    <FormattedMessage
+                      id="xpack.agenticInvestigations.assignments.events.removed"
+                      defaultMessage="Unassigned {users}"
+                      values={{ users: renderUsers(removed, names) }}
+                    />
+                  </div>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          )}
+        </EuiText>
+        <EventVia via={via} />
+      </>
     );
   }
 );

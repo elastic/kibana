@@ -62,6 +62,7 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
     conversationEvents: { register: jest.fn() },
+    conversations: { onMetadataPatched: jest.fn() },
     tools: { register: jest.fn() },
   };
 
@@ -258,18 +259,19 @@ describe('AgenticInvestigationsPlugin', () => {
         agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
       ).toEqual([
         'assignees_changed',
+        'status_changed',
         'escalation_created_from_investigation',
         'escalation_investigation_linked',
         'escalation_attachments_synced',
       ]);
     });
 
-    it('registers only the assignee timeline event type when escalations are disabled', () => {
+    it('registers only the assignee and status timeline event types when escalations are disabled', () => {
       const { agentBuilder } = setupPlugin({ escalationsEnabled: false });
 
       expect(
         agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
-      ).toEqual(['assignees_changed']);
+      ).toEqual(['assignees_changed', 'status_changed']);
     });
 
     it('registers the HTTP routes for every entity', () => {

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { ConversationPublicClient, MetadataPatchContext } from '@kbn/agent-builder-server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { DismissReason } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
@@ -212,7 +212,9 @@ export class InvestigationStatusService {
   async setStatus(
     request: KibanaRequest,
     conversationId: string,
-    body: SetInvestigationStatusRequest
+    body: SetInvestigationStatusRequest,
+    /** The workflow or agent run making the change, shown on the timeline event. */
+    context?: MetadataPatchContext
   ): Promise<SetInvestigationStatusResponse> {
     const client = await this.getConversationClient(request);
     const conversation = await client.get(conversationId);
@@ -305,7 +307,7 @@ export class InvestigationStatusService {
     const { conversation: updated } = await client.patchMetadata(
       conversationId,
       { status: body.status },
-      { access: 'converse' }
+      { access: 'converse', ...(context ? { context } : {}) }
     );
 
     return {

@@ -31,6 +31,10 @@ export const createStepHandlerContext = ({
     config,
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'workflow-1', name: 'Test workflow' },
+        execution: { id: 'execution-1' },
+      }),
     },
     logger: {
       debug: jest.fn(),

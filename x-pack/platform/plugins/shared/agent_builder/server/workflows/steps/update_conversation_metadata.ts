@@ -33,10 +33,19 @@ export const updateConversationMetadataStepDefinition = ({
           source: 'workflow',
         });
         const input = context.input as UpdateConversationMetadataStepInput;
+        const { workflow, execution } = context.contextManager.getContext();
 
         const { conversation, changedFields } = await publicClient.patchMetadata(
           input.conversation_id,
-          input.updates
+          input.updates,
+          {
+            context: {
+              type: 'workflow',
+              workflow_id: workflow.id,
+              workflow_name: workflow.name,
+              execution_id: execution.id,
+            },
+          }
         );
 
         return {

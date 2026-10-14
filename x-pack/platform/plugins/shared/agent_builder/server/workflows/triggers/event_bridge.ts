@@ -59,9 +59,17 @@ export function registerConversationWorkflowEventBridge(
     }
   };
 
-  conversationEventBus.onMetadataPatched((request, payload) => {
-    void forward(ConversationMetadataUpdatedTriggerId, payload, request);
-  });
+  conversationEventBus.onMetadataPatched(
+    (request, { conversationId, templateId, parentId, changedFields }) => {
+      // The trigger payload stays as workflows know it: the before/after values and the write
+      // context are only for in-process listeners.
+      void forward(
+        ConversationMetadataUpdatedTriggerId,
+        { conversationId, templateId, parentId, changedFields },
+        request
+      );
+    }
+  );
 
   conversationEventBus.onAttachmentEvents((request, { conversationId, events }) => {
     void forwardBatch(

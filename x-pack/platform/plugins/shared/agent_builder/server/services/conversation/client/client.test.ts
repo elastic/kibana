@@ -2433,7 +2433,44 @@ describe('ConversationClient', () => {
           templateId: template.id,
           parentId: undefined,
           changedFields: ['severity'],
+          changes: { severity: { from: undefined, to: 'high' } },
+          source: 'http_api',
         });
+      });
+
+      it('emits the serialized before/after values and the automation context', async () => {
+        const eventEmitter = buildEventEmitter();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          eventEmitter,
+        });
+
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: template.id,
+            metadata: { severity: 'low' },
+          })
+        );
+
+        const context = { type: 'agent' as const, agent_id: 'agent-1', execution_id: 'exec-1' };
+        await clientWithCb.patchMetadata(
+          'conversation-1',
+          { severity: 'high' },
+          { source: 'execution', context }
+        );
+
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledWith(
+          expect.objectContaining({
+            changes: { severity: { from: 'low', to: 'high' } },
+            source: 'execution',
+            context,
+          })
+        );
       });
 
       it('includes parentId when the conversation has a parent_conversation', async () => {
