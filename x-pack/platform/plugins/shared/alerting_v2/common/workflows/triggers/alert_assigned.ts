@@ -20,7 +20,7 @@ export const alertAssignedPayloadSchema = lazySchema(() =>
       .max(256)
       .describe(
         i18n.translate('xpack.alertingVTwo.triggers.alertAssigned.schema.assigneeUid', {
-          defaultMessage: 'User-profile uid of the new assignee.',
+          defaultMessage: 'User-profile UID of the new assignee.',
         })
       ),
   })
