@@ -12,9 +12,9 @@ export const TITLE_COLUMN = i18n.translate('xpack.significantEventsApp.queriesTa
 });
 
 export const STREAM_COLUMN = i18n.translate(
-  'xpack.significantEventsApp.queriesTable.streamColumn',
+  'xpack.significantEventsApp.sources.queriesTable.sourceColumn',
   {
-    defaultMessage: 'Stream',
+    defaultMessage: 'Source',
   }
 );
 

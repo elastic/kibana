@@ -83,7 +83,7 @@ An episode is the lifecycle container for an alert series. Episodes exist only f
 
 - A single series can have many episodes over time.
 - A single episode covers one breach-to-recovery lifecycle.
-- The director assigns `episode.id`, `episode.status`, and `episode.status_count`.
+- The director assigns `alert.id`, `alert.status`, and `alert.status_count`.
 
 Episode statuses are:
 

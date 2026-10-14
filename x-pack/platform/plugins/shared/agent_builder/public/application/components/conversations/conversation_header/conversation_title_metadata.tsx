@@ -21,7 +21,12 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate } from '@kbn/i18n-react';
-import { AGENT_BUILDER_UI_EBT, isPublicConversation } from '@kbn/agent-builder-common';
+import {
+  AGENT_BUILDER_UI_EBT,
+  isPrivatelySharedConversation,
+  isPublicConversation,
+} from '@kbn/agent-builder-common';
+import type { ConversationAccessControl } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversation, useConversationPermissions } from '../../../hooks/use_conversation';
 import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
@@ -64,9 +69,20 @@ const labels = {
   private: i18n.translate('xpack.agentBuilder.conversationTitleMetadata.private', {
     defaultMessage: 'Private',
   }),
+  restricted: i18n.translate('xpack.agentBuilder.conversationTitleMetadata.restricted', {
+    defaultMessage: 'Restricted',
+  }),
   defaultChatType: i18n.translate('xpack.agentBuilder.conversationTitleMetadata.defaultChatType', {
     defaultMessage: 'Default',
   }),
+};
+
+const getVisibilityLabel = (accessControl: ConversationAccessControl | undefined): string => {
+  if (isPublicConversation(accessControl)) {
+    return labels.public;
+  }
+
+  return isPrivatelySharedConversation(accessControl) ? labels.restricted : labels.private;
 };
 
 interface InfoRowProps {
@@ -127,9 +143,7 @@ export const ConversationTitleMetadata = ({ ariaLabelledBy }: ConversationTitleM
   const templateDisplay = useConversationTemplateDisplay();
   const templateName = templateDisplay?.name;
   const templateIcon = templateDisplay?.icon;
-  const visibilityLabel = isPublicConversation(conversation?.access_control)
-    ? labels.public
-    : labels.private;
+  const visibilityLabel = getVisibilityLabel(conversation?.access_control);
 
   const titleButtonStyles = css`
     max-width: 100%;

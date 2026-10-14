@@ -31,7 +31,7 @@ Props description:
 | **controlColumnIds** | (optional)string[] | List of used control columns (available: 'openDetails', 'select'). |
 | **rowHeightState** | (optional)number | Row height from state. |
 | **onUpdateRowHeight** | (optional)(rowHeight: number) => void; | Update row height state. |
-| **isPlainRecord** | (optional)boolean | Is text base lang mode enabled. |
+| **dataSource** | (optional)DataSource | Data source of the rows. An ES\|QL source enables ES\|QL mode; column types come from it. |
 | **rowsPerPageState** | (optional)number | Current state value for rowsPerPage. |
 | **onUpdateRowsPerPage** | (optional)(rowsPerPage: number) => void; | Update rows per page state. |
 | **onFieldEdited** | (optional)() => void; | Callback to execute on edit runtime field. |
@@ -101,7 +101,7 @@ Usage example:
       onUpdateRowHeight={(rowHeight: number) => {
         // Do the state update with the new setting of the row height
       }}
-      isPlainRecord={isTextBasedQuery}
+      dataSource={dataSource}
       rowsPerPageState={50}
       onUpdateRowsPerPage={(rowHeight: number) => {
         // Do the state update with the new number of the rows per page

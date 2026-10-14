@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -15,6 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mainTranslations } from './main_i18n';
 import { Main } from './main';
 import type { DataSetWithName, DataSource } from '../common';
+import { docLinksMock } from './doc_links_mock';
 
 jest.mock('./datasets_tab_content', () => ({
   DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
@@ -51,26 +52,11 @@ const createServicesMock = ({
     get: jest.fn().mockResolvedValue(dataSets),
   },
   toasts: createToastsMock(),
-  docLinks: {
-    links: {
-      dataFederation: {
-        overview: '',
-        quickstart: '',
-        dataSources: '',
-        datasets: '',
-        datasetSettings: '',
-        authentication: '',
-        staticCredentials: '',
-        federatedIdentity: '',
-        querying: '',
-        security: '',
-      },
-    },
-  },
+  docLinks: docLinksMock,
 });
 
 describe('Main', () => {
-  it('defaults to the data sources tab when both lists are empty', async () => {
+  it('stays on the datasets tab when both lists are empty', async () => {
     const services = createServicesMock({ dataSources: [], dataSets: [] });
 
     const { getByRole, getByTestId, queryByTestId } = render(
@@ -85,15 +71,19 @@ describe('Main', () => {
       </EuiProvider>
     );
 
-    // Starts on the sets tab, but should switch to sources once both requests complete.
-    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
-    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(services.dataSourcesClient.get).toHaveBeenCalled();
+    expect(services.datasetsClient.get).toHaveBeenCalled();
 
-    await waitFor(() => {
-      expect(getByTestId('dataSourcesTabContent')).toBeInTheDocument();
+    await act(async () => {
+      await Promise.all([
+        services.dataSourcesClient.get.mock.results[0].value,
+        services.datasetsClient.get.mock.results[0].value,
+      ]);
     });
 
-    expect(getByRole('tab', { name: mainTranslations.tabs.sources })).toHaveAttribute(
+    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(getByRole('tab', { name: mainTranslations.tabs.sets })).toHaveAttribute(
       'aria-selected',
       'true'
     );

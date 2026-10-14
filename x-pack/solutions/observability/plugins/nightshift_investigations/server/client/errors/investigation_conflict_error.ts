@@ -24,4 +24,10 @@ export class InvestigationConflictError extends Error {
       `Investigation "${investigationId}" was modified concurrently; retry the update`
     );
   }
+
+  static runInProgress(investigationId: string): InvestigationConflictError {
+    return new InvestigationConflictError(
+      `Investigation "${investigationId}" is being run by another execution; retry once it settles`
+    );
+  }
 }

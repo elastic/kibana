@@ -37,7 +37,7 @@ const groupHashSchema = z
 
 /** Semantics every client-addressable id carries; append to its `.describe()`. */
 const ENTITY_ID_NOTE =
-  'Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alert episodes recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.';
+  'Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.';
 
 const durationSchema = z
   .string()

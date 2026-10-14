@@ -56,7 +56,7 @@ export const AlertEpisodeTimelineSection = ({
       ...new Set(
         actionEntries.flatMap((e) => {
           const uids: string[] = [];
-          if (e.actor) uids.push(e.actor);
+          if (e.actor.profile_uid) uids.push(e.actor.profile_uid);
           if (e.assignee_uid) uids.push(e.assignee_uid);
           return uids;
         })
