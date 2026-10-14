@@ -170,7 +170,7 @@ Elapsed time for a `timeframe` is measured against the timestamp the phase was e
 
 Elapsed time therefore accumulates across evaluations, so an `and`-combined `timeframe` resolves once cumulative elapsed time exceeds it regardless of how the rule's schedule interval compares to the timeframe (a 5m timeframe on a 1m schedule resolves after ~5 evaluations). This holds for any count.
 
-> **Note:** the derivation reads the phase-entry event back from the `.rule-events` data stream, so a `timeframe` longer than the stream's retention could lose its entry event and restart the clock. Phase durations are expected to be well within retention.
+> **Note:** the derivation reads the phase-entry event back from the `.rule-events` data stream, so the entry event can be missing when a `timeframe` outlives the stream's retention, or when `state_transition` is configured while an episode is already mid-phase. In that case `last_episode_phase_started_at` is `null` and elapsed time falls back to `last_episode_timestamp` (the previous evaluation), so the phase keeps advancing instead of stalling at 0 until the signal flaps. Phase durations are expected to be well within retention, where the exact phase-entry timestamp is used.
 
 ## When to add a new strategy
 

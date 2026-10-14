@@ -713,4 +713,63 @@ describe('CountTimeframeStrategy', () => {
       ).toBe(6);
     });
   });
+
+  describe('mid-phase episode with no derivable phase-entry timestamp', () => {
+    it('falls back to last_episode_timestamp to resolve a pending episode', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          stateTransition: { pending: { count: 0, timeframe: '30s', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.pending,
+            eventStatus: alertEventStatus.breached,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.active);
+    });
+
+    it('falls back to last_episode_timestamp to resolve a recovering episode', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.recovered,
+          stateTransition: { recovering: { count: 0, timeframe: '30s', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.recovering,
+            eventStatus: alertEventStatus.recovered,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.inactive);
+    });
+
+    it('holds the phase when the fallback elapsed is still below the timeframe', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.pending,
+            eventStatus: alertEventStatus.breached,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.pending);
+    });
+  });
 });

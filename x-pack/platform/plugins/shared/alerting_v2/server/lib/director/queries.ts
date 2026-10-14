@@ -43,9 +43,11 @@ export interface LatestAlertEventState {
    * (not persisted) as the latest `status_count == 1` event: `status_count`
    * resets to 1 on every phase entry and increments while the phase is held, so
    * the most recent `status_count == 1` event marks the start of the current run.
-   * `null` when the episode has never been in a counted phase. Lets a `timeframe`
-   * threshold accumulate elapsed time against phase entry rather than the
-   * previous evaluation.
+   * `null` when the episode has never been in a counted phase, or when the entry
+   * event is no longer derivable (aged out of retention, or `state_transition`
+   * configured mid-episode); the strategy then falls back to
+   * `last_episode_timestamp`. Lets a `timeframe` threshold accumulate elapsed time
+   * against phase entry rather than the previous evaluation.
    */
   last_episode_phase_started_at: string | null;
   last_lifecycle_action_type: LastLifecycleActionType;

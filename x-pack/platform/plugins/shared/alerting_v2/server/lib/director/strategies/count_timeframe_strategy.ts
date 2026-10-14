@@ -142,7 +142,8 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     const stateTransition = rule.state_transition;
     const currentEpisodeStatus = previousEpisode?.last_episode_status;
     const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
-    const phaseStartedAt = previousEpisode?.last_episode_phase_started_at;
+    const phaseStartedAt =
+      previousEpisode?.last_episode_phase_started_at ?? previousEpisode?.last_episode_timestamp;
     const elapsedMs = this.getElapsedMs(evaluatedAt, phaseStartedAt);
 
     // Delegate to the inherited basic state machine to get the "natural" next state.
