@@ -350,6 +350,10 @@ Scout supports two distinct types of tests: UI and API, each with their own dire
 
 It also reports exported class names that appear in more than one Scout module (the FTR duplication pattern), and compares every custom server config set against the default: sets with identical or subset differences could be merged, and sets whose only differences are runtime updatable settings (`feature_flags.overrides`, or keys a plugin declares in `dynamicConfig`) could use `apiServices.core.settings()` instead of booting their own servers. `--format text` prints only the findings with the reason for each, in a form that reads well in Slack. The default JSON is for tooling.
 
+A shared page object the owners reviewed and want to keep in `@kbn/scout` goes in `REVIEWED_PAGE_OBJECTS` in `src/cli/audit.ts` with the reason, and the census leaves it out. The duplicate class name check reports a name only when the classes also share most of their member names, a name collision between unrelated page objects is not a copy.
+
+A config set that must stay separate on purpose (for example its tests change the license or need a clean cluster) goes in `MUST_STAY_SEPARATE` in `src/cli/audit_config_sets.ts` with the reason. The audit skips it, so it is not suggested for merging again. The audit also ignores config sets that CI does not run (every test config of the set is in `excluded_configs` of `.buildkite/scout_ci_config.yml`, or the set has no test config), since they cost no lane.
+
 Run it by hand when you add, move, or remove a page object or a config set. A scheduled Buildkite pipeline (`kibana / scout / quality-audit`) also runs it on the 1st and 15th of each month and posts a summary to `#kibana-scout-stats`, with the full report in the build annotation. Read the output against the placement policy above. The command reports facts only, it does not decide.
 
 The audit is a set of small functions in `src/cli/audit.ts` and `src/cli/audit_config_sets.ts` so the same facts can feed a scheduled run and the `scout-best-practices-reviewer` skill on every PR. To add a check, add a function that returns facts, include it in the report, and give it a section in `formatAuditReportForSlack`.
@@ -532,7 +536,7 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 
 `cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them; errors are reported in a single message with the file path and `'<field>'` paths. Use the examples above as the source of truth for required fields. A few rules worth calling out:
 
-- `projectType` (serverless only) must be one of `es | oblt | security | workplaceai`.
+- `projectType` (serverless only) must be one of `es | oblt | security | vectordb`.
 - Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 - `license` is optional and defaults to `"trial"`.
 - You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
@@ -604,8 +608,7 @@ Enable it via the `http2` server config set; tests don't need any changes.
 
 ```bash
 node scripts/scout start-server --arch stateful --domain classic --serverConfigSet http2
-node scripts/scout run-tests --arch stateful --domain classic --serverConfigSet http2 \
-  --config <plugin-path>/test/scout/ui/playwright.config.ts
+node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts --project local
 ```
 
 Supported `--arch`/`--domain` combinations are the ones defined under `src/servers/configs/config_sets/http2/`.

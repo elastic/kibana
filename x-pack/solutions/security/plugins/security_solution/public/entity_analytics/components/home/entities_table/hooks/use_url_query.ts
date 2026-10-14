@@ -7,7 +7,7 @@
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { encode } from '@kbn/rison';
 import { encodeQuery } from '@kbn/cloud-security-posture';
 import {
@@ -86,7 +86,7 @@ export const useUrlQuery = <T extends Record<string, unknown>>(getDefaultQuery: 
       // feedback loop with `useSyncGlobalQueryString`, which would re-push the
       // dropped params on every URL change.
       const currentSearch = window.location.search;
-      const parsed = parse(currentSearch, { sort: false });
+      const parsed = queryString.parse(currentSearch, { sort: false });
 
       const cspqRison = safeRisonEncode(queryParams);
       if (cspqRison) {

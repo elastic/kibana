@@ -12,7 +12,10 @@ import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
+import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import type { VisorNlResultHandler } from '../types';
 import { useReplaceReview } from './use_replace_review';
+import type { ReviewState } from './use_replace_review';
 import { getVisorNlInsertPlan } from './visor_nl_insert';
 
 interface UseVisorNlToEsqlParams {
@@ -20,6 +23,7 @@ interface UseVisorNlToEsqlParams {
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   onSubmit: (query: string) => void;
   onAfterInsert?: () => void;
+  telemetryService?: ESQLEditorTelemetryService;
 }
 
 export const useVisorNlToEsql = ({
@@ -27,11 +31,36 @@ export const useVisorNlToEsql = ({
   editorModel,
   onSubmit,
   onAfterInsert,
+  telemetryService,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
+  const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
+  const isSupersedingRef = useRef(false);
 
-  const onAfterAccept = useCallback(() => onSubmit(generatedContentRef.current), [onSubmit]);
+  const onAfterAccept = useCallback(
+    ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
+      telemetryService?.trackVisorNlReviewed({
+        action: AiReviewAction.ACCEPT,
+        linesChanged: generatedLineEnd - generatedLineStart + 1,
+      });
+      onSubmit(generatedContentRef.current);
+      reviewRef.current?.onAccept();
+    },
+    [onSubmit, telemetryService]
+  );
+
+  const onAfterReject = useCallback(
+    ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
+      if (isSupersedingRef.current) return;
+      telemetryService?.trackVisorNlReviewed({
+        action: AiReviewAction.REJECT,
+        linesChanged: generatedLineEnd - generatedLineStart + 1,
+      });
+      reviewRef.current?.onReject?.();
+    },
+    [telemetryService]
+  );
 
   const acceptAction = useMemo(
     () => ({
@@ -62,19 +91,23 @@ export const useVisorNlToEsql = ({
     rejectAction,
     editSourceId: 'nl-to-esql-visor',
     onAfterAccept,
+    onAfterReject,
   });
 
-  const showVisorReview = useCallback(
-    (generatedContent: string) => {
+  const showVisorReview = useCallback<VisorNlResultHandler>(
+    (generatedContent, review) => {
       const editor = editorRef.current;
       const model = editorModel.current;
       if (!editor || !model) return;
 
       // Revert any outstanding review so the next plan is against the original query,
       // not leftover generated lines from the previous result.
+      isSupersedingRef.current = true;
       reject();
+      isSupersedingRef.current = false;
 
       generatedContentRef.current = generatedContent;
+      reviewRef.current = review;
 
       const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
       if (!plan) return;

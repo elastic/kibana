@@ -6,7 +6,8 @@
  */
 
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
-import type { EntityDefinitionWithoutId } from './entity_schema';
+import type { EntityDefinitionManagedBy, EntityDefinitionWithoutId } from './entity_schema';
+import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
   getCommonFieldDescriptions,
@@ -16,8 +17,11 @@ import {
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
-export const hostEntityDefinition: EntityDefinitionWithoutId = {
+export const hostEntityDefinition: EntityDefinitionWithoutId & {
+  managedBy: EntityDefinitionManagedBy;
+} = {
   type: 'host',
+  managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'host' Entity Store Definition`,
   identityField: {
     euidRanking: {

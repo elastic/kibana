@@ -29,4 +29,6 @@ export interface EscalationQueueItem {
   linkedInvestigationCount: number;
   /** User profile uids from `metadata.assignees`. */
   assigneeUids: readonly string[];
+  /** Entity ids from the Impact of the linked investigations; feeds the Impact pills. */
+  entityIds?: string[];
 }

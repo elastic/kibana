@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/kql'
+  - '@kbn/chart-icons'
 tags:
   - plugin
   - prod

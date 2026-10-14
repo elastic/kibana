@@ -165,6 +165,16 @@ export const useReplaceReview = ({
         true
       );
 
+      const activeElement = document.activeElement;
+      const focusLeftEditor =
+        activeElement !== null &&
+        activeElement !== document.body &&
+        !editor.getDomNode()?.contains(activeElement);
+      if (!focusLeftEditor) {
+        editor.revealLineInCenter(state.generatedLineEnd);
+        widgetRef.current.focus();
+      }
+
       actionDisposablesRef.current = [
         editor.addAction({
           id: rejectAction.id,

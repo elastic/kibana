@@ -12,7 +12,7 @@ import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 7;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 8;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_RESOURCE_KEY = `data_stream:${ALERT_EVENTS_DATA_STREAM}`;
 
@@ -34,12 +34,23 @@ const mappings: MappingsDefinition = {
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
-    episode: {
+    // Renamed from `episode` in v8. New documents are written with `alert.*`.
+    // The `episode.*` aliases allow existing ES|QL queries to keep using the old names
+    // during the transition; they resolve to `alert.*` at query time.
+    alert: {
       type: 'object',
       properties: {
         id: { type: 'keyword' },
         status: { type: 'keyword' }, // inactive | pending | active | recovering
         status_count: { type: 'long' }, // only set for pending and recovering
+      },
+    },
+    episode: {
+      type: 'object',
+      properties: {
+        id: { type: 'alias', path: 'alert.id' },
+        status: { type: 'alias', path: 'alert.status' },
+        status_count: { type: 'alias', path: 'alert.status_count' },
       },
     },
     space_id: { type: 'keyword' },
@@ -65,7 +76,8 @@ export const alertEventSchema = z.object({
   status: alertEventStatusSchema,
   source: z.string(),
   type: alertEventTypeSchema,
-  episode: z
+  // Matches the `alert` mapping field (renamed from `episode` in v8).
+  alert: z
     .object({
       id: z.string(),
       status: alertEpisodeStatusSchema,
@@ -87,7 +99,7 @@ export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
 export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 
 export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDocument => {
-  const { scheduled_timestamp, episode, severity, ...required } = params;
+  const { scheduled_timestamp, alert, severity, ...required } = params;
 
   const doc: AlertEventDocument = { ...required };
 
@@ -95,11 +107,11 @@ export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDo
     doc.scheduled_timestamp = scheduled_timestamp;
   }
 
-  if (episode !== undefined) {
-    doc.episode = {
-      id: episode.id,
-      status: episode.status,
-      ...(episode.status_count != null ? { status_count: episode.status_count } : {}),
+  if (alert !== undefined) {
+    doc.alert = {
+      id: alert.id,
+      status: alert.status,
+      ...(alert.status_count != null ? { status_count: alert.status_count } : {}),
     };
   }
 
@@ -117,4 +129,7 @@ export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   mappings,
   lifecycle: {},
   finalPipeline: getIngestTimestampPipeline(ALERT_EVENTS_DATA_STREAM),
+  // Data streams created from v7 or below map `episode.*` as concrete fields, which cannot be
+  // turned into aliases in place. Keep this at 7 when bumping the version.
+  forceReset: { version: 7 },
 });

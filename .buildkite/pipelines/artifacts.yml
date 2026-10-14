@@ -64,7 +64,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 130
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -78,7 +77,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 130
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -92,7 +90,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 130
     timeout_in_minutes: 30
     retry:
       automatic:

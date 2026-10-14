@@ -24,6 +24,10 @@ export default function ({ getService }) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Function-level assertions already in Jest: data_views/server/fetcher/lib/errors.test.ts. Delete
+  // with serverless copy. The Jest test builds the ES errors by hand instead of getting them from a
+  // real ES (`get_es_errors.ts`); that loss is accepted since it already mirrors the live payload shape.
   describe('index_patterns/* error handler', () => {
     let indexNotFoundError;
     let docNotFoundError;

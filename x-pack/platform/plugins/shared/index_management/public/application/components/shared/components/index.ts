@@ -11,3 +11,5 @@ export type { CommonWizardSteps } from './wizard_steps';
 export { StepAliasesContainer, StepMappingsContainer, StepSettingsContainer } from './wizard_steps';
 
 export { TemplateContentIndicator } from './template_content_indicator';
+
+export { LookupLifecycleWarningCallout } from './lookup_lifecycle_warning_callout';

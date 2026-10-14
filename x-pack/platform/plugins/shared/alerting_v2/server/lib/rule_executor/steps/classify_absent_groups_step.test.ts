@@ -44,7 +44,6 @@ const hashFor = (host: string): string =>
   buildGroupHash({
     rowDoc: { 'host.name': host },
     groupKeyFields: ['host.name'],
-    fallbackSeed: 'x',
   });
 
 describe('ClassifyAbsentGroupsStep', () => {

@@ -18,8 +18,8 @@ const makeEntry = (
   _id: 'action-1',
   '@timestamp': '2026-07-02T10:00:00.000Z',
   action_type: 'ack',
-  actor: 'user-1',
-  episode_id: 'episode-1',
+  actor: { type: 'user', profile_uid: 'user-1' },
+  alert_id: 'episode-1',
   group_hash: 'group-1',
   tags: [],
   assignee_uid: null,
@@ -50,11 +50,11 @@ describe('AlertEpisodeTimelineActionEvent', () => {
   });
 
   it.each([
-    ['ack', 'acknowledged the episode'],
-    ['unack', 'unacknowledged the episode'],
-    ['unsnooze', 'unsnoozed the episode'],
-    ['deactivate', 'resolved the episode'],
-    ['activate', 'reopened the episode'],
+    ['ack', 'acknowledged the alert'],
+    ['unack', 'unacknowledged the alert'],
+    ['unsnooze', 'unsnoozed the alert'],
+    ['deactivate', 'resolved the alert'],
+    ['activate', 'reopened the alert'],
   ])('renders a complete sentence for the %s action', (actionType, sentence) => {
     renderEvent(makeEntry({ action_type: actionType }));
 
@@ -117,7 +117,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
   it('renders the snoozed-indefinitely sentence when snoozing without an expiry', () => {
     renderEvent(makeEntry({ action_type: 'snooze', expiry: null }));
 
-    expect(screen.getByText('snoozed the episode indefinitely')).toBeInTheDocument();
+    expect(screen.getByText('snoozed the alert indefinitely')).toBeInTheDocument();
   });
 
   it('renders the snooze duration and expiry when snoozing with an expiry', () => {
@@ -129,7 +129,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
       })
     );
 
-    expect(screen.getByText(/^snoozed the episode for 2 hours, until /)).toBeInTheDocument();
+    expect(screen.getByText(/^snoozed the alert for 2 hours, until /)).toBeInTheDocument();
   });
 
   it('omits the duration when the snooze expiry is not in the future', () => {
@@ -141,13 +141,13 @@ describe('AlertEpisodeTimelineActionEvent', () => {
       })
     );
 
-    expect(screen.getByText(/^snoozed the episode until /)).toBeInTheDocument();
+    expect(screen.getByText(/^snoozed the alert until /)).toBeInTheDocument();
   });
 
   it('renders the reason as a suffix separated from the sentence', () => {
     renderEvent(makeEntry({ action_type: 'deactivate', reason: 'Handled by on-call' }));
 
-    expect(screen.getByText('resolved the episode')).toBeInTheDocument();
+    expect(screen.getByText('resolved the alert')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2TimelineActionReason')).toHaveTextContent(
       '· Handled by on-call'
     );

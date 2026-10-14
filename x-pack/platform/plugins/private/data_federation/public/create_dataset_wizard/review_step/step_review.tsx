@@ -33,6 +33,7 @@ import { buildDatasetPayload } from '../build_dataset_payload';
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+import { fieldTypeSelectStrings } from '../mapping_step/mapping_editor/field_type_select_i18n';
 import { getSettingsReviewItems, type ReviewItem } from './review_settings_items';
 
 const displayValue = (value: string) => value.trim() || createDatasetWizardStrings.notSet;
@@ -47,31 +48,48 @@ const originBadge = (origin: ReviewItem['origin']) => {
   return null;
 };
 
-const ReviewColumn = ({ title, items }: { title: string; items: ReviewItem[] }) => (
+const ReviewColumn = ({
+  title,
+  items,
+  emptyMessage,
+}: {
+  title: string;
+  items: ReviewItem[];
+  emptyMessage?: string;
+}) => (
   <EuiFlexItem>
     <EuiTitle size="xs">
       <h3>{title}</h3>
     </EuiTitle>
     <EuiSpacer size="m" />
-    <EuiDescriptionList textStyle="reverse" compressed>
-      {items.map(({ key, label, value, origin }) => (
-        <React.Fragment key={key}>
-          <EuiDescriptionListTitle>{label}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription data-test-subj={`createDatasetWizardReview-${key}`}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>{value}</EuiFlexItem>
-              {origin ? <EuiFlexItem grow={false}>{originBadge(origin)}</EuiFlexItem> : null}
-            </EuiFlexGroup>
-          </EuiDescriptionListDescription>
-        </React.Fragment>
-      ))}
-    </EuiDescriptionList>
+    {items.length === 0 && emptyMessage ? (
+      <EuiText size="s" color="subdued" data-test-subj="createDatasetWizardReviewEmptyColumn">
+        {emptyMessage}
+      </EuiText>
+    ) : (
+      <EuiDescriptionList textStyle="reverse" compressed>
+        {items.map(({ key, label, value, origin }) => (
+          <React.Fragment key={key}>
+            <EuiDescriptionListTitle>{label}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj={`createDatasetWizardReview-${key}`}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false} css={{ whiteSpace: 'pre-wrap' }}>
+                  {value}
+                </EuiFlexItem>
+                {origin ? <EuiFlexItem grow={false}>{originBadge(origin)}</EuiFlexItem> : null}
+              </EuiFlexGroup>
+            </EuiDescriptionListDescription>
+          </React.Fragment>
+        ))}
+      </EuiDescriptionList>
+    )}
   </EuiFlexItem>
 );
 
 const getDatasetReviewItems = (
   dataset: DataSetWithName,
-  dataSources: DataSource[]
+  dataSources: DataSource[],
+  datasetSettingsItems: ReviewItem[]
 ): ReviewItem[] => {
   const dataSourceType = dataSources.find(({ name }) => name === dataset.data_source)?.type;
 
@@ -105,6 +123,7 @@ const getDatasetReviewItems = (
       label: createDatasetWizardStrings.resourceLabel,
       value: displayValue(dataset.resource),
     },
+    ...datasetSettingsItems,
   ];
 };
 
@@ -113,7 +132,7 @@ const getTimestampReviewItems = (timestamp: DatasetMappingProperty | undefined):
     return [
       {
         key: 'timestamp_mapping',
-        label: createDatasetWizardStrings.timestampMappingLabel,
+        label: createDatasetWizardStrings.timeseriesDataLabel,
         value: createDatasetWizardStrings.offLabel,
         origin: 'custom',
       },
@@ -123,7 +142,7 @@ const getTimestampReviewItems = (timestamp: DatasetMappingProperty | undefined):
   return [
     {
       key: 'timestamp_mapping',
-      label: createDatasetWizardStrings.timestampMappingLabel,
+      label: createDatasetWizardStrings.timeseriesDataLabel,
       value: createDatasetWizardStrings.onLabel,
       origin: 'default',
     },
@@ -132,6 +151,15 @@ const getTimestampReviewItems = (timestamp: DatasetMappingProperty | undefined):
       label: createDatasetWizardStrings.timestampFieldLabel,
       value: timestamp.path ?? TIMESTAMP_LOGICAL_FIELD_NAME,
       ...(timestamp.path ? { origin: 'custom' as const } : {}),
+    },
+    {
+      key: 'timestamp_type',
+      label: createDatasetWizardStrings.timestampTypeLabel,
+      value:
+        timestamp.type === 'date_nanos'
+          ? fieldTypeSelectStrings.dateNanosOption
+          : fieldTypeSelectStrings.dateOption,
+      origin: timestamp.type === 'date_nanos' ? 'custom' : 'default',
     },
     ...(timestamp.format
       ? [
@@ -146,32 +174,34 @@ const getTimestampReviewItems = (timestamp: DatasetMappingProperty | undefined):
   ];
 };
 
-const getMappingReviewItems = (mappings: DatasetMappings | undefined): ReviewItem[] => {
-  const isDynamic = mappings?.dynamic !== 'false';
+/** Lists the mapping in step order; only its preselected options are marked as defaults. */
+const getMappingReviewItems = (
+  mappings: DatasetMappings | undefined,
+  mappingSettingsItems: ReviewItem[]
+): ReviewItem[] => {
+  const isSchemaInferred = mappings?.dynamic !== 'false';
 
   return [
+    ...getTimestampReviewItems(mappings?.properties[TIMESTAMP_LOGICAL_FIELD_NAME]),
     {
       key: 'schema_mapping_mode',
       label: createDatasetWizardStrings.schemaMappingModeLabel,
-      value: mappings
-        ? createDatasetWizardStrings.schemaMappingModeDeclared
-        : createDatasetWizardStrings.schemaMappingModeInferred,
-      origin: mappings ? 'custom' : 'default',
+      value: isSchemaInferred
+        ? createDatasetWizardStrings.inferSchemaLabel
+        : createDatasetWizardStrings.defineSchemaLabel,
+      origin: isSchemaInferred ? 'default' : 'custom',
     },
-    {
-      key: 'dynamic_fields',
-      label: createDatasetWizardStrings.dynamicFieldsLabel,
-      value: isDynamic ? createDatasetWizardStrings.onLabel : createDatasetWizardStrings.offLabel,
-      origin: isDynamic ? 'default' : 'custom',
-    },
+    ...mappingSettingsItems,
     ...(mappings
       ? [
           {
             key: 'mapped_fields',
             label: createDatasetWizardStrings.mappedFieldsLabel,
-            value: String(Object.keys(mappings.properties).length),
+            value: createDatasetWizardStrings.mappedFieldsCount(
+              Object.keys(mappings.properties).length
+            ),
+            origin: 'custom' as const,
           },
-          ...getTimestampReviewItems(mappings.properties[TIMESTAMP_LOGICAL_FIELD_NAME]),
         ]
       : []),
   ];
@@ -183,21 +213,24 @@ export function StepReview({ dataSources }: { dataSources: DataSource[] }) {
   const { method, path, body } = buildDatasetRequest(payload);
   const request = `${method} ${path}\n${JSON.stringify(body, null, 2)}`;
 
+  const settingsItems = getSettingsReviewItems(payload.settings);
+
   const summaryTab = (
     <>
       <EuiSpacer size="l" />
       <EuiFlexGroup data-test-subj="createDatasetWizardReviewSummaryTab">
         <ReviewColumn
           title={createDatasetWizardStrings.datasetStepLabel}
-          items={getDatasetReviewItems(payload, dataSources)}
+          items={getDatasetReviewItems(payload, dataSources, settingsItems.dataset)}
         />
         <ReviewColumn
           title={createDatasetWizardStrings.additionalStepLabel}
-          items={getSettingsReviewItems(payload.settings)}
+          items={settingsItems.additional}
+          emptyMessage={createDatasetWizardStrings.reviewNoAdditionalSettings}
         />
         <ReviewColumn
           title={createDatasetWizardStrings.mappingStepLabel}
-          items={getMappingReviewItems(payload.mappings)}
+          items={getMappingReviewItems(payload.mappings, settingsItems.mapping)}
         />
       </EuiFlexGroup>
     </>

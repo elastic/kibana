@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { License } from '@kbn/license-api-guard-plugin/server';
 
 import { registerDeleteDataSet } from './data_sets/delete_dataset';
 import { registerCreateDataset } from './data_sets/create_dataset';
@@ -17,13 +18,17 @@ import { registerGetAllDataSources } from './data_sources/get_all_data_sources';
 import { registerCreateDataSource } from './data_sources/create_data_source';
 import type { DataFederationConfigType } from '../config';
 
-export function registerDataSetsRoutes(router: IRouter, config: DataFederationConfigType): void {
-  registerGetAllDataSources(router);
-  registerGetDataSourceRoute(router);
-  registerCreateDataSource(router, config);
-  registerDeleteDataSource(router);
-  registerGetAllDatasets(router);
-  registerGetDataset(router);
-  registerCreateDataset(router);
-  registerDeleteDataSet(router);
+export function registerDataSetsRoutes(
+  router: IRouter,
+  license: License,
+  config: DataFederationConfigType
+): void {
+  registerGetAllDataSources(router, license);
+  registerGetDataSourceRoute(router, license);
+  registerCreateDataSource(router, license, config);
+  registerDeleteDataSource(router, license);
+  registerGetAllDatasets(router, license);
+  registerGetDataset(router, license);
+  registerCreateDataset(router, license);
+  registerDeleteDataSet(router, license);
 }

@@ -24,6 +24,26 @@ describe('buildEpisodeActionsHistoryQuery', () => {
     expect(queryString).not.toContain('@timestamp <=');
   });
 
+  it('matches the episode actions on alert_id and the series actions on a null alert_id', () => {
+    const queryString = buildEpisodeActionsHistoryQuery('default', 'ep-1', 'hash-1', {
+      limit: 25,
+    }).print('basic');
+    expect(queryString).toContain('alert_id == "ep-1"');
+    expect(queryString).toContain('group_hash == "hash-1"');
+    expect(queryString).toContain('alert_id IS NULL');
+    expect(queryString).toMatch(/KEEP .*\balert_id\b/);
+    expect(queryString).not.toContain('episode_id');
+  });
+
+  it('projects the actor leaf fields instead of the actor object', () => {
+    const queryString = buildEpisodeActionsHistoryQuery('default', 'ep-1', 'hash-1', {
+      limit: 25,
+    }).print('basic');
+    expect(queryString).toContain('`actor.type`');
+    expect(queryString).toContain('`actor.profile_uid`');
+    expect(queryString).not.toMatch(/[^.]actor,/);
+  });
+
   it('uses a different space id when provided', () => {
     const queryString = buildEpisodeActionsHistoryQuery('my-space', 'ep-1', 'hash-1', {
       limit: 25,

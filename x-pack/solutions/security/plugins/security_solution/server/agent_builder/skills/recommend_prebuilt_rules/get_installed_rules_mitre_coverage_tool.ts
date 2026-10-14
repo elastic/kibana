@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -18,7 +18,7 @@ import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_co
 export const GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID =
   'security.get_installed_rules_mitre_coverage';
 
-export const getInstalledRulesMitreCoverageSchema = z.object({}).strict();
+export const getInstalledRulesMitreCoverageSchema = lazySchema(() => z.object({}).strict());
 
 const MAX_INSTALLED_RULES = 10000;
 

@@ -17,6 +17,7 @@ import type {
 import {
   ConversationRoundStepType,
   ToolResultType,
+  createInjectedContextStep,
   createPreExecutionWorkflowStep,
   createSubstitutionStep,
 } from '@kbn/agent-builder-common';
@@ -300,5 +301,33 @@ describe('renderUnit', () => {
     expect(rendered[2]).toContain('SECOND_INPUT');
     expect(rendered[2]).toContain('SECOND_ANSWER');
     expect(rendered[3]).toContain('RAW_x1');
+  });
+});
+
+describe('renderVisibleContext injected context', () => {
+  const render = (steps: ConversationRoundStep[], cursor?: CompactionCursor) =>
+    renderVisibleContext(
+      {
+        conversation: conversation(twoRoundTimeline()),
+        run: run(steps, { cursor, renderState: renderStateOf(['x1', 'x2']) }),
+        phase: 'research',
+      },
+      deps()
+    );
+
+  it('renders a note in its cycle, and drops it once a summary covers that cycle', async () => {
+    const steps = [
+      createInjectedContextStep({ hook_id: 'h', text: 'HOOK_NOTE' }),
+      call('x1'),
+      call('x2'),
+    ];
+
+    const uncovered = text(await render(steps));
+    expect(uncovered.split('HOOK_NOTE')).toHaveLength(2);
+    expect(uncovered.indexOf('HOOK_NOTE')).toBeGreaterThan(uncovered.indexOf('NEXT_INPUT'));
+    expect(uncovered.indexOf('HOOK_NOTE')).toBeLessThan(uncovered.indexOf('RAW_x1'));
+
+    const covered = text(await render(steps, { round_id: 'current', tool_call_id: 'x1' }));
+    expect(covered.split('HOOK_NOTE')).toHaveLength(1);
   });
 });

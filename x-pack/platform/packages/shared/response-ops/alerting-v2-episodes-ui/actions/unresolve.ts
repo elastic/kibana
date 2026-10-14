@@ -36,7 +36,7 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
       .filter(episodeSupportsActions)
       .filter((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE);
     const items: BulkActivateEpisodeActionItem[] = actionable.map((ep) => ({
-      episode_id: ep['episode.id'],
+      alert_id: ep['episode.id'],
       reason: i18n.RESOLVE_ACTION_REASON,
     }));
     if (!items.length) return;

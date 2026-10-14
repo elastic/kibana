@@ -106,24 +106,34 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     const step = findStepByName(workflow.steps, 'persist_extractions') as {
       if?: string;
       with?: {
-        doc?: {
-          extracted?: {
-            iocs?: string;
-            ioc_set_hash?: string;
-            core?: { adjudication?: { deferred_unreviewed?: string } };
+        path?: string;
+        body?: {
+          doc?: {
+            extracted?: {
+              iocs?: string;
+              ioc_set_hash?: string;
+              core?: { adjudication?: { deferred_unreviewed?: string } };
+            };
           };
         };
       };
     };
 
     expect(step.if).toContain('steps.enrich_report_core.error == null');
-    expect(step.with?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
-    expect(step.with?.doc?.extracted).not.toHaveProperty('anchor_iocs');
+    // Internal route, not a direct elasticsearch step: `.kibana-threat-reports` is
+    // plugin-owned and hidden, so a plain `elasticsearch.update` here would run as
+    // whichever identity enabled the workflow and 403 for every non-superuser.
+    // Space-prefixed with the report's own `space_id` so the route can reject a cross-space id.
+    expect(step.with?.path).toBe(
+      "/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields"
+    );
+    expect(step.with?.body?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
+    expect(step.with?.body?.doc?.extracted).not.toHaveProperty('anchor_iocs');
     // Correlation hash stays on extract_iocs so boost:5 matches pre-adjudication docs.
-    expect(step.with?.doc?.extracted?.ioc_set_hash).toContain(
+    expect(step.with?.body?.doc?.extracted?.ioc_set_hash).toContain(
       'steps.extract_iocs.output.ioc_set_hash'
     );
-    expect(step.with?.doc?.extracted?.core?.adjudication?.deferred_unreviewed).toContain(
+    expect(step.with?.body?.doc?.extracted?.core?.adjudication?.deferred_unreviewed).toContain(
       'steps.enrich_report_core.output.adjudication.deferred_unreviewed'
     );
   });
@@ -209,10 +219,45 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   // former `routeSpaceId: "default"` variable did, without needing the variable.
   it('calls the enrich routes with no space prefix, resolving to the default space', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('routeSpaceId');
-    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toMatch(/path:\s*"\/s\//);
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
       'path: "/internal/threat_intel/assess_relevance"'
     );
+  });
+
+  /**
+   * The writes are the exception to the rule above, and the exception is load-bearing:
+   * `persist_report_fields` writes as the internal user and uses the request's space to reject an id
+   * from another space, so addressing the report through its own `space_id` is what makes that check
+   * pass for this workflow and fail for a hand-crafted call. Unprefixing these would break
+   * enrichment for every report outside the default space.
+   */
+  it("addresses each persist write through the report's own space", () => {
+    const spacePrefixedPersist =
+      "path: \"/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields\"";
+    const occurrences =
+      THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml.split(spacePrefixedPersist).length - 1;
+    expect(occurrences).toBe(4);
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toMatch(
+      /path:\s*"\/internal\/threat_intel\/persist_report_fields"/
+    );
+  });
+
+  // A global report has no addressable space of its own, so it is written through `default`; the
+  // route accepts the global sentinel from any space. Without the fallbacks an unstamped or global
+  // report would produce `/s//...` or `/s/*/...` and the write would silently fail under
+  // `on-failure: continue`.
+  it('routes global and unstamped reports through the default space', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
+      "space_id | default: 'default' | replace: '*', 'default'"
+    );
+  });
+
+  // The write path reads `_source.space_id`, so the driver has to fetch it.
+  it('fetches space_id on the driver query so the persist steps can address the report', () => {
+    const load = findStepByName(workflow.steps, 'load_pending_reports') as {
+      with?: { _source?: string[] };
+    };
+    expect(load.with?._source).toContain('space_id');
   });
 
   it('sends the stored article URL to assess_relevance', () => {

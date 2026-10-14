@@ -7,7 +7,7 @@
 
 import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
 import {
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntBehaviorRequestBody,
   INTERNAL_API_ACCESS,
@@ -16,6 +16,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
@@ -62,7 +63,7 @@ export const registerHuntBehaviorRoute = ({
           const modelOutcome = await resolveScopedModel({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
-            featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+            featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,
@@ -85,11 +86,20 @@ export const registerHuntBehaviorRoute = ({
 
           const { text, report_id, llm_confidence_threshold, iocs, article_context } = request.body;
           const esClient = core.elasticsearch.client.asCurrentUser;
+          // What the generated query may read: the same default data view Tier 1 searches.
+          const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const body: HuntBehaviorResponse = await huntBehavior(
             modelOutcome.model,
             logger,
-            { text, report_id, llm_confidence_threshold, iocs, article_context },
+            {
+              text,
+              report_id,
+              llm_confidence_threshold,
+              iocs,
+              article_context,
+              allowed_indices: indexPatterns,
+            },
             esClient
           );
 

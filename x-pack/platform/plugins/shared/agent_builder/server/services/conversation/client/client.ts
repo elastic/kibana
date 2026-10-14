@@ -10,6 +10,7 @@ import type {
   GetResponse,
   SortResults,
   QueryDslQueryContainer,
+  Refresh,
 } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -17,6 +18,8 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ConversationRoundFeedback,
+  ConversationUpdatedTriggerEvent,
+  ConversationWriteSource,
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
@@ -25,14 +28,15 @@ import {
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAccessControlEntryInput,
   type ConversationAddEventInput,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  EventActorType,
   isConversationAccessControlRole,
+  isPublicConversation,
   normalizeConversationAccessControl,
   createBadRequestError,
   createConversationAlreadyExistsError,
@@ -50,6 +54,7 @@ import type {
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
+import type { ReportConversationFieldsChangedParams } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -72,6 +77,7 @@ import type {
   ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
+  ConversationWriteOptions,
   NormalizedConversation,
   ReplaceRoundEventsRequest,
   ConversationListResult,
@@ -106,44 +112,57 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import type { ScopedConversationEventEmitter } from '../../../workflows/triggers/conversation_event_bus';
+import { currentUserActor } from './rounds_to_events';
+import type {
+  ConversationMetadataPatchedPayload,
+  ScopedConversationEventEmitter,
+} from '../../../workflows/triggers/conversation_event_bus';
+import {
+  describeConversationWrite,
+  diffMetadata,
+} from '../../../workflows/triggers/describe_conversation_write';
+import { describeConversationFieldsChanged } from '../../../telemetry/describe_conversation_fields_changed';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import {
   materializeConversationEvents,
   validateConversationEvents,
 } from '../../conversation_events';
 
-// Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
-// This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
-function computeChangedFields(
-  updates: Record<string, SerializedMetadataValue>,
-  stored: Record<string, SerializedMetadataValue>
-): string[] {
-  return Object.keys(updates).filter(
-    (k) => JSON.stringify(stored[k]) !== JSON.stringify(updates[k])
-  );
-}
+/**
+ * Whether a write is reported to `ai.conversation.updated`. `source` is required unless the
+ * write explicitly opts out with `emit: false`.
+ */
+type ConversationWriteEmission =
+  | { source: ConversationWriteSource; emit?: true }
+  | { emit: false; source?: never };
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
-  create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions>;
+  create(
+    conversation: ConversationCreateRequest,
+    options: ConversationWriteOptions
+  ): Promise<ConversationWithPermissions>;
   update(
     conversation: ConversationUpdateRequest,
-    options?: { access: ConversationAccess; retryOnConflict?: boolean }
+    options: ConversationWriteOptions & { access?: ConversationAccess; retryOnConflict?: boolean }
   ): Promise<Conversation>;
   appendEvents(
     request: AppendEventsRequest,
-    options?: { access: ConversationAccess }
+    options: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      /** Defaults to `wait_for`, so list searches made after the write see it. */
+      refresh?: Refresh;
+    }
   ): Promise<Conversation>;
-  addCustomEvents(request: {
-    id: string;
-    events: ConversationAddEventInput[];
-  }): Promise<ConversationEvent[]>;
+  addCustomEvents(
+    request: { id: string; events: ConversationAddEventInput[] },
+    options: ConversationWriteOptions
+  ): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
-    options?: { access: ConversationAccess }
+    options: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
   setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
@@ -158,13 +177,41 @@ export interface ConversationClient {
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
-    update: UpdateConversationAccessControlRequestBody
+    update: UpdateConversationAccessControlRequestBody,
+    options: ConversationWriteOptions
   ): Promise<ConversationAccessControl>;
-  applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
+  /**
+   * Adds entries to a private conversation's ACL without removing existing entries or
+   * changing the access mode. A no-op for public conversations. Existing entries are left
+   * unchanged — even when the requested role differs; role changes go through
+   * `updateAccessControl` (owner-only). Safe to call with `access: 'converse'` so
+   * collaborators can add new members when assigning.
+   */
+  addAccessControlEntries(
+    conversationId: string,
+    entries: ConversationAccessControlEntryInput[],
+    options: ConversationWriteOptions & { access?: ConversationAccess }
+  ): Promise<Conversation>;
+  /**
+   * Removes principals from a private conversation's ACL. A no-op for public conversations,
+   * or when none of the requested principals are present. Never changes the access mode or
+   * removes the owner. Safe to call with `access: 'converse'` so assignees can revoke their
+   * own (or others') access when un-assigning.
+   */
+  removeAccessControlEntries(
+    conversationId: string,
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
+    options: ConversationWriteOptions & { access?: ConversationAccess }
+  ): Promise<Conversation>;
+  applyTemplate(
+    conversationId: string,
+    templateId: string,
+    options: ConversationWriteOptions
+  ): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options?: { access: ConversationAccess }
+    options: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
   getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
@@ -184,6 +231,7 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'agent_id',
   'user_id',
   'user_name',
+  'user_type',
   'title',
   'created_at',
   'updated_at',
@@ -221,6 +269,8 @@ interface ConversationListEsResponse {
   };
 }
 
+export type OnConversationCreated = (params: { conversationId: string; agentId: string }) => void;
+
 export const createClient = ({
   space,
   logger,
@@ -229,6 +279,8 @@ export const createClient = ({
   agentRegistry,
   conversationEvents,
   eventEmitter,
+  onConversationCreated,
+  reportFieldsChange,
 }: {
   space: string;
   logger: Logger;
@@ -237,6 +289,8 @@ export const createClient = ({
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
+  onConversationCreated?: OnConversationCreated;
+  reportFieldsChange?: ConversationFieldsChangeReporter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -248,8 +302,15 @@ export const createClient = ({
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
+    reportFieldsChange,
   });
 };
+
+/** Receives the template fields, opted in with `report_changes`, that one write changed. */
+export type ConversationFieldsChangeReporter = (
+  params: ReportConversationFieldsChangedParams
+) => void;
 
 /**
  * Thrown from inside an OCC `fields` callback to turn the write into a no-op: the stored document
@@ -282,6 +343,8 @@ class ConversationClientImpl implements ConversationClient {
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly eventEmitter?: ScopedConversationEventEmitter;
+  private readonly onConversationCreated?: OnConversationCreated;
+  private readonly reportFieldsChange?: ConversationFieldsChangeReporter;
 
   constructor({
     storage,
@@ -292,6 +355,8 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents,
     logger,
     eventEmitter,
+    onConversationCreated,
+    reportFieldsChange,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
@@ -301,6 +366,8 @@ class ConversationClientImpl implements ConversationClient {
     conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     eventEmitter?: ScopedConversationEventEmitter;
+    onConversationCreated?: OnConversationCreated;
+    reportFieldsChange?: ConversationFieldsChangeReporter;
   }) {
     this.storage = storage;
     this.esClient = esClient;
@@ -310,6 +377,8 @@ class ConversationClientImpl implements ConversationClient {
     this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.eventEmitter = eventEmitter;
+    this.onConversationCreated = onConversationCreated;
+    this.reportFieldsChange = reportFieldsChange;
   }
 
   /**
@@ -329,6 +398,72 @@ class ConversationClientImpl implements ConversationClient {
     } catch (error) {
       this.logger.warn(
         `Failed to notify attachment events for conversation "${conversationId}": ${error}`
+      );
+    }
+  }
+
+  /**
+   * Notifies the conversation-updated listener with the description of a successful write.
+   * Best-effort: the event is built lazily inside the guard, so failures to describe the write
+   * or to emit the event are logged and never fail the (already persisted) write.
+   */
+  private notifyConversationUpdated(
+    conversationId: string,
+    describe: () => ConversationUpdatedTriggerEvent | undefined
+  ): void {
+    if (!this.eventEmitter) {
+      return;
+    }
+    try {
+      const event = describe();
+      if (event) {
+        this.eventEmitter.emitConversationUpdated(event);
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to notify conversation update for conversation "${conversationId}": ${error}`
+      );
+    }
+  }
+
+  /**
+   * Notifies the metadata-patched listener with the fields that were just persisted.
+   * Best-effort: listener failures are logged and never fail the write.
+   */
+  private notifyMetadataPatched(payload: ConversationMetadataPatchedPayload): void {
+    if (!this.eventEmitter || payload.changedFields.length === 0) {
+      return;
+    }
+    try {
+      this.eventEmitter.emitMetadataPatched(payload);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to notify metadata patched for conversation "${payload.conversationId}": ${error}`
+      );
+    }
+  }
+
+  /**
+   * Reports the `report_changes` template fields a successful write changed, as one event.
+   * Best-effort: the changes are described lazily inside the guard, so failures are logged and
+   * never fail the (already persisted) write.
+   */
+  private notifyFieldChanges(
+    conversationId: string,
+    describe: () => ReportConversationFieldsChangedParams | undefined
+  ): void {
+    const { reportFieldsChange } = this;
+    if (!reportFieldsChange) {
+      return;
+    }
+    try {
+      const params = describe();
+      if (params) {
+        reportFieldsChange(params);
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to report field changes for conversation "${conversationId}": ${error}`
       );
     }
   }
@@ -584,7 +719,10 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  async create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions> {
+  async create(
+    conversation: ConversationCreateRequest,
+    { source }: ConversationWriteOptions
+  ): Promise<ConversationWithPermissions> {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
@@ -674,20 +812,46 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     this.notifyAttachmentEvents(id, conversation.events ?? []);
+    const seqNo = indexed._seq_no;
+    const primaryTerm = indexed._primary_term;
+    const readCreated = () =>
+      fromEs(
+        { _id: id, _source: attributes, _seq_no: seqNo, _primary_term: primaryTerm },
+        this.getUser()
+      );
+    this.notifyConversationUpdated(id, () =>
+      describeConversationWrite({ after: readCreated(), source })
+    );
+    this.notifyFieldChanges(id, () =>
+      describeConversationFieldsChanged({
+        after: readCreated(),
+        resolveTemplate: getTemplate,
+        source,
+      })
+    );
+    try {
+      this.onConversationCreated?.({ conversationId: id, agentId: conversation.agent_id });
+    } catch (error) {
+      this.logger.warn(`Failed to notify creation of conversation "${id}": ${error}`);
+    }
 
     return this.get(id);
   }
 
   async update(
     conversationUpdate: ConversationUpdateRequest,
-    options: { access: ConversationAccess; retryOnConflict?: boolean } = { access: 'owner' }
+    {
+      access = 'owner',
+      retryOnConflict = false,
+      source,
+    }: ConversationWriteOptions & { access?: ConversationAccess; retryOnConflict?: boolean }
   ): Promise<Conversation> {
     const { id: conversationId, ...fields } = conversationUpdate;
-    const { access, retryOnConflict = false } = options;
 
     const result = await this.writeConversation({
       conversationId,
       access,
+      source,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
       fields: () => withBoundedTitle(fields),
     });
@@ -695,33 +859,35 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
-  async addCustomEvents({
-    id,
-    events: inputs,
-  }: {
-    id: string;
-    events: ConversationAddEventInput[];
-  }): Promise<ConversationEvent[]> {
-    const { id: userId, username } = this.getUser();
-    const actor = {
-      type: EventActorType.user,
-      id: userId ?? username,
-      ...(username ? { username } : {}),
-    };
+  async addCustomEvents(
+    {
+      id,
+      events: inputs,
+    }: {
+      id: string;
+      events: ConversationAddEventInput[];
+    },
+    { source }: ConversationWriteOptions
+  ): Promise<ConversationEvent[]> {
+    const actor = currentUserActor(this.getUser());
     const validatedEvents = validateConversationEvents(inputs, this.conversationEvents);
     const materialized = materializeConversationEvents({
       events: validatedEvents,
       actor,
       now: new Date(),
     });
-    await this.appendEvents({ id, events: materialized });
+    await this.appendEvents({ id, events: materialized }, { source });
     return materialized;
   }
 
   /** Appends timeline events onto a conversation.*/
   async appendEvents(
     request: AppendEventsRequest,
-    options: { access: ConversationAccess } = { access: 'converse' }
+    {
+      access = 'converse',
+      source,
+      refresh,
+    }: ConversationWriteOptions & { access?: ConversationAccess; refresh?: Refresh }
   ): Promise<Conversation> {
     const {
       id: conversationId,
@@ -733,7 +899,6 @@ class ConversationClientImpl implements ConversationClient {
       workspaceId,
       skipIfTerminalExistsFor,
     } = request;
-    const { access } = options;
 
     // `fields` may run more than once on OCC retry; the last run is the one that was written.
     let writtenEvents: ConversationEvent[] = [];
@@ -741,6 +906,8 @@ class ConversationClientImpl implements ConversationClient {
     const result = await this.writeConversation({
       conversationId,
       access,
+      source,
+      refresh,
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -779,7 +946,7 @@ class ConversationClientImpl implements ConversationClient {
 
   async replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
-    options: { access: ConversationAccess } = { access: 'converse' }
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<Conversation> {
     const {
       id: conversationId,
@@ -792,7 +959,6 @@ class ConversationClientImpl implements ConversationClient {
       workspaceId,
       skipIfTerminalExistsFor,
     } = request;
-    const { access } = options;
     const roundPrefix = `${roundId}::`;
 
     let writtenEvents: ConversationEvent[] = [];
@@ -800,6 +966,7 @@ class ConversationClientImpl implements ConversationClient {
     const result = await this.writeConversation({
       conversationId,
       access,
+      source,
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -851,6 +1018,8 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
+      // Per-user state only: never reported to `ai.conversation.updated`.
+      emit: false,
       fields: (current) =>
         updateReadBy({
           userId: this.getUser().id,
@@ -865,6 +1034,8 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
+      // Per-user state only: never reported to `ai.conversation.updated`.
+      emit: false,
       fields: (current) =>
         updatePinnedBy({
           userId: this.getUser().id,
@@ -883,6 +1054,8 @@ class ConversationClientImpl implements ConversationClient {
     await this.writeConversation({
       conversationId,
       access: 'owner',
+      // Per-user state only: never reported to `ai.conversation.updated`.
+      emit: false,
       fields: (current) => {
         const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
 
@@ -959,11 +1132,13 @@ class ConversationClientImpl implements ConversationClient {
 
   async updateAccessControl(
     conversationId: string,
-    update: UpdateConversationAccessControlRequestBody
+    update: UpdateConversationAccessControlRequestBody,
+    { source }: ConversationWriteOptions
   ): Promise<ConversationAccessControl> {
     const conversation = await this.writeConversation({
       conversationId,
       access: 'updateAccessControl',
+      source,
       fields: (current) => ({
         access_control: this.buildAccessControlUpdate({ current, update }),
       }),
@@ -972,7 +1147,116 @@ class ConversationClientImpl implements ConversationClient {
     return normalizeConversationAccessControl(conversation.access_control);
   }
 
-  async applyTemplate(conversationId: string, templateId: string): Promise<Conversation> {
+  async addAccessControlEntries(
+    conversationId: string,
+    entries: ConversationAccessControlEntryInput[],
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
+  ): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access,
+      source,
+      fields: (current) => {
+        // Public conversations use access_mode filtering; ACL entries are not valid on them.
+        if (isPublicConversation(current.access_control)) {
+          throw skipWrite(current);
+        }
+
+        const normalized = normalizeConversationAccessControl(current.access_control);
+        // Key format matches validateAccessControlEntries: `${type}:${id}`.
+        const existingKeys = new Set([
+          ...normalized.entries.map((e) => `${e.type}:${e.id}`),
+          // The owner is never stored as an entry; treat them as implicitly present.
+          `user:${current.user.id}`,
+        ]);
+
+        // Dedupe the request by key and drop entries that are already present.
+        const seenKeys = new Set<string>();
+        const newEntries = entries.filter((e) => {
+          const key = `${e.type}:${e.id}`;
+          if (existingKeys.has(key) || seenKeys.has(key)) return false;
+          seenKeys.add(key);
+          return true;
+        });
+
+        // If every requested principal is already a member (or the owner), skip the write.
+        if (newEntries.length === 0) {
+          throw skipWrite(current);
+        }
+
+        const addedAtById = new Map(
+          normalized.entries.map((entry) => [`${entry.type}:${entry.id}`, entry.added_at])
+        );
+
+        const allEntries = [...normalized.entries, ...newEntries];
+
+        const validatedEntries = validateAccessControlEntries({
+          entries: allEntries,
+          ownerId: current.user.id,
+          addedAtById,
+        });
+
+        return {
+          access_control: {
+            access_mode: normalized.access_mode,
+            entries: validatedEntries,
+          },
+        };
+      },
+    });
+  }
+
+  async removeAccessControlEntries(
+    conversationId: string,
+    principals: Array<Pick<ConversationAccessControlEntryInput, 'type' | 'id'>>,
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
+  ): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access,
+      source,
+      fields: (current) => {
+        // Public conversations use access_mode filtering; ACL entries are not relevant.
+        if (isPublicConversation(current.access_control)) {
+          throw skipWrite(current);
+        }
+
+        const normalized = normalizeConversationAccessControl(current.access_control);
+        const toRemove = new Set(principals.map((p) => `${p.type}:${p.id}`));
+        const hasAny = normalized.entries.some((e) => toRemove.has(`${e.type}:${e.id}`));
+
+        // If none of the requested principals are present as members, skip the write.
+        if (!hasAny) {
+          throw skipWrite(current);
+        }
+
+        const remaining = normalized.entries.filter((e) => !toRemove.has(`${e.type}:${e.id}`));
+
+        const addedAtById = new Map(
+          normalized.entries.map((entry) => [`${entry.type}:${entry.id}`, entry.added_at])
+        );
+
+        const validatedEntries = validateAccessControlEntries({
+          entries: remaining,
+          ownerId: current.user.id,
+          addedAtById,
+        });
+
+        return {
+          access_control: {
+            access_mode: normalized.access_mode,
+            entries: validatedEntries,
+          },
+        };
+      },
+    });
+  }
+
+  async applyTemplate(
+    conversationId: string,
+    templateId: string,
+    { source }: ConversationWriteOptions
+  ): Promise<Conversation> {
     const template = getTemplate(templateId);
     if (!template) {
       throw createBadRequestError(`Template not found: ${templateId}`);
@@ -985,6 +1269,7 @@ class ConversationClientImpl implements ConversationClient {
     const result = await this.writeConversation({
       conversationId,
       access: 'owner',
+      source,
       fields: (current) => {
         // Reject switching to a different template — one template per conversation.
         // Re-applying the same template is the explicit version-migration action.
@@ -1016,13 +1301,14 @@ class ConversationClientImpl implements ConversationClient {
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    { access = 'owner' }: { access?: ConversationAccess } = {}
+    { access = 'converse', source }: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
 
     const result = await this.writeConversation({
       conversationId,
       access,
+      source,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
@@ -1050,20 +1336,19 @@ class ConversationClientImpl implements ConversationClient {
         const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
-        changedFields = computeChangedFields(serialized, storedMetadata);
+        const metadata = { ...storedMetadata, ...serialized };
+        changedFields = diffMetadata(storedMetadata, metadata);
 
-        return { metadata: { ...storedMetadata, ...serialized } };
+        return { metadata };
       },
     });
 
-    if (changedFields.length > 0 && this.eventEmitter) {
-      this.eventEmitter.emitMetadataPatched({
-        conversationId: result.id,
-        templateId: result.template_id,
-        parentId: result.parent_conversation?.id,
-        changedFields,
-      });
-    }
+    this.notifyMetadataPatched({
+      conversationId: result.id,
+      templateId: result.template_id,
+      parentId: result.parent_conversation?.id,
+      changedFields,
+    });
 
     return { conversation: result, changedFields };
   }
@@ -1077,9 +1362,9 @@ class ConversationClientImpl implements ConversationClient {
       return originAuthor;
     }
 
-    const { id, username } = this.getUser();
+    const { id, username, type } = this.getUser();
 
-    return id === undefined ? undefined : { id, username };
+    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
@@ -1230,26 +1515,49 @@ class ConversationClientImpl implements ConversationClient {
     access,
     fields,
     maxRetries = 5,
+    refresh,
+    ...emission
   }: {
     conversationId: string;
     access: ConversationAccess;
     fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
-  }): Promise<Conversation> {
-    const writer = this.createWriter({ access, maxRetries });
+    refresh?: Refresh;
+  } & ConversationWriteEmission): Promise<Conversation> {
+    const writer = this.createWriter({ access, maxRetries, refresh });
+    // `mutate` may run more than once on OCC retry; the last run is the one that was written.
+    // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
+    let before = undefined as NormalizedConversation | undefined;
 
     try {
       const { document } = await writer.readModifyWrite({
         id: conversationId,
-        mutate: (current) =>
-          updateConversation({
+        mutate: (current) => {
+          before = current;
+          return updateConversation({
             conversation: current,
             update: { id: conversationId, ...fields(current) },
             updateDate: new Date(),
             space: this.space,
-          }),
+          });
+        },
       });
 
+      if (emission.emit !== false && before) {
+        const previous = before;
+        const { source } = emission;
+        this.notifyConversationUpdated(conversationId, () =>
+          describeConversationWrite({ before: previous, after: document, source })
+        );
+        this.notifyFieldChanges(conversationId, () =>
+          describeConversationFieldsChanged({
+            after: document,
+            before: previous,
+            resolveTemplate: getTemplate,
+            source,
+          })
+        );
+      }
       return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
     } catch (error) {
       if (isWriteSkipped(error)) {
@@ -1274,9 +1582,11 @@ class ConversationClientImpl implements ConversationClient {
   private createWriter({
     access,
     maxRetries,
+    refresh,
   }: {
     access: ConversationAccess;
     maxRetries: number;
+    refresh?: Refresh;
   }): OccWriter<NormalizedConversation> {
     return new OccWriter<NormalizedConversation>({
       get: async (id) => {
@@ -1295,6 +1605,7 @@ class ConversationClientImpl implements ConversationClient {
           ...(ifSeqNo != null && ifPrimaryTerm != null
             ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
             : {}),
+          ...(refresh !== undefined ? { refresh } : {}),
         });
 
         return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };

@@ -18,8 +18,7 @@ const investigation: Investigation = {
   title: 'Impossible travel',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   recordId: 'CASE-2047',
   assignee: 'ava',
   pendingProposalCount: 0,
@@ -92,5 +91,37 @@ describe('ConversationDetailsFlyoutFooter', () => {
     expect(
       screen.queryByRole('button', { name: openEscalationButtonName })
     ).not.toBeInTheDocument();
+  });
+
+  it('lets wrapEscalationButton hide the escalation button', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onOpenEscalation={jest.fn(() => null)}
+        wrapEscalationButton={() => null}
+      />
+    );
+
+    expect(
+      screen.queryByRole('button', { name: openEscalationButtonName })
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the escalation button through wrapEscalationButton', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onOpenEscalation={jest.fn(() => null)}
+        wrapEscalationButton={(button) => <div data-test-subj="escalationButtonGate">{button}</div>}
+      />
+    );
+
+    expect(screen.getByTestId('escalationButtonGate')).toContainElement(
+      screen.getByRole('button', { name: openEscalationButtonName })
+    );
   });
 });
