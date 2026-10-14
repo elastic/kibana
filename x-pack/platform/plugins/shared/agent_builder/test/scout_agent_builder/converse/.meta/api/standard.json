@@ -1,5 +1,5 @@
 {
-  "sha1": "3d1a6f3bcaf6049106b017b54df66121a98efaf7",
+  "sha1": "e266c12645b65b595fab1124bad0126fed7fad78",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -354,6 +354,38 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
         "line": 273,
         "column": 7
+      }
+    },
+    {
+      "id": "9220e328dff6e91-b94fd512ffd866c",
+      "title": "Agent Builder — execute_api state change events a successful create call sends one api_state_changed event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_api_state_changes_api.spec.ts",
+        "line": 124,
+        "column": 19
+      }
+    },
+    {
+      "id": "9220e328dff6e91-2267afb1048b4ce",
+      "title": "Agent Builder — execute_api state change events a successful read-only call sends no api_state_changed event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_api_state_changes_api.spec.ts",
+        "line": 149,
+        "column": 17
       }
     },
     {

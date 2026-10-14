@@ -26,6 +26,13 @@ export const predefinedRoleMissing = (roleName: string) =>
     values: { roleName },
   });
 
+export const reservedRoleMissing = (roleName: string) =>
+  i18n.translate('xpack.alertzero.serviceAccounts.reservedRoleMissing', {
+    defaultMessage:
+      'Elasticsearch has no built-in "{roleName}" role for this worker. Upgrade Elasticsearch to the same version as Kibana, then try again.',
+    values: { roleName },
+  });
+
 export const NO_PREBUILT_ROLE = i18n.translate('xpack.alertzero.serviceAccounts.noPrebuiltRole', {
   defaultMessage: 'AlertZero has no prebuilt role for this worker.',
 });

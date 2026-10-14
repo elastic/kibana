@@ -58,6 +58,38 @@
       }
     },
     {
+      "id": "f4580a1ee3ff8d8-87907c20fb755f5",
+      "title": "EQL rule editing with non-blocking query validation errors saves the rule after confirming the warning when the data source does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/eql_rule_edit_non_blocking_errors.spec.ts",
+        "line": 43,
+        "column": 25
+      }
+    },
+    {
+      "id": "f4580a1ee3ff8d8-6bcf831f66ebd49",
+      "title": "EQL rule editing with non-blocking query validation errors saves the rule after confirming the warning when a queried field does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/eql_rule_edit_non_blocking_errors.spec.ts",
+        "line": 58,
+        "column": 25
+      }
+    },
+    {
       "id": "176ca0ecf589cb0-c6a4e67e2d9dda8",
       "title": "Rule creation MITRE picker — managed MITRE source loads tactics from the managed MITRE API and persists a tactic/technique/subtechnique selection after rule save",
       "expectedStatus": "passed",

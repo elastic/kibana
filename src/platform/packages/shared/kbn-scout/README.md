@@ -608,8 +608,7 @@ Enable it via the `http2` server config set; tests don't need any changes.
 
 ```bash
 node scripts/scout start-server --arch stateful --domain classic --serverConfigSet http2
-node scripts/scout run-tests --arch stateful --domain classic --serverConfigSet http2 \
-  --config <plugin-path>/test/scout/ui/playwright.config.ts
+node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts --project local
 ```
 
 Supported `--arch`/`--domain` combinations are the ones defined under `src/servers/configs/config_sets/http2/`.
