@@ -56,10 +56,22 @@ export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;
 /** Workflow context path: `context.hitl.externalQueryLink`. */
 export const HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY = 'externalQueryLink' as const;
 
+/** Workflow context path: `context.hitl.externalApproveLink`. */
+export const HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY = 'externalApproveLink' as const;
+
+/** Workflow context path: `context.hitl.externalRejectLink`. */
+export const HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY = 'externalRejectLink' as const;
+
 export const DEFAULT_HITL_INPUT_OPEN_FORM_LABEL = 'Open form' as const;
 
 export const DEFAULT_HITL_INPUT_CHANNEL_MESSAGE =
   'Respond here: {{context.hitl.externalFormLink}}' as const;
+
+export const MAX_HITL_EMAIL_RECIPIENTS = 100 as const;
+
+export const MAX_HITL_EMAIL_ADDRESS_LENGTH = 512 as const;
+
+export const MAX_HITL_EMAIL_SUBJECT_LENGTH = 998 as const;
 
 /**
  * YAML schema description for `with.channels` on HITL wait steps with scope boundary definition.
@@ -84,7 +96,9 @@ export const isHitlWaitStepType = (stepType: string | undefined): stepType is Hi
 export const HITL_CHANNEL_CONNECTOR_TYPES = {
   slack: 'slack',
   slack_api: 'slack_api',
+  email: 'email',
   slack2: 'slack2.sendMessage',
+  http: 'http',
 } as const satisfies Record<string, string>;
 
 export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;

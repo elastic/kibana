@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import {
-  getIndexForESQLQuery,
-  getESQLAdHocDataview,
-  getInitialESQLQuery,
-  getESQLQueryColumns,
-} from '@kbn/esql-utils';
+import { getIndexForESQLQuery, getInitialESQLQuery, getESQLQueryColumns } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { LensSerializedState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { createEsqlAdHocDataView } from '../data_views_service/create_esql_ad_hoc_data_view';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
 
@@ -65,11 +61,11 @@ async function buildMainESQLAttributes({
   const indexName = await getIndexForESQLQuery({ http: coreStart.http });
   const initialQuery = indexName ? `FROM ${indexName}` : FALLBACK_ESQL_QUERY;
 
-  const dataView = await getESQLAdHocDataview({
-    dataViewsService: dataViews,
+  const dataView = await createEsqlAdHocDataView({
+    dataViews,
     query: initialQuery,
     http: indexName ? coreStart.http : undefined,
-    options: indexName ? undefined : { allowNoIndex: true },
+    allowNoIndex: !indexName,
   });
 
   const esqlQuery = indexName ? getInitialESQLQuery(dataView) : FALLBACK_ESQL_QUERY;
@@ -85,10 +81,10 @@ async function buildESQLAttributes(
   esqlQuery: string,
   { dataViews, data, visualizationMap, datasourceMap }: ESQLStartServices
 ): Promise<LensSerializedState['attributes'] | undefined> {
-  const dataView = await getESQLAdHocDataview({
-    dataViewsService: dataViews,
+  const dataView = await createEsqlAdHocDataView({
+    dataViews,
     query: esqlQuery,
-    options: { allowNoIndex: true },
+    allowNoIndex: true,
   });
 
   return buildESQLAttributesFromDataView(esqlQuery, dataView, {
