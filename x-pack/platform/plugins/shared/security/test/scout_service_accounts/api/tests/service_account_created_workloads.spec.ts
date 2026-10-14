@@ -231,9 +231,19 @@ apiTest.describe(
         taskIds.push(id);
         expect(apiKeyId).toBeDefined();
 
-        const { api_keys: apiKeys } = await esClient.security.getApiKey({ id: apiKeyId });
-        expect(apiKeys).toHaveLength(1);
-        expect(apiKeys[0]).toMatchObject({ username: accountId, realm: '_service_account' });
+        // Task Manager grants the key without waiting for an index refresh, so a lookup by id can
+        // miss (404) for up to a refresh interval.
+        await expect
+          .poll(async () => {
+            const { api_keys: apiKeys } = await esClient.security.getApiKey(
+              { id: apiKeyId },
+              { ignore: [404] }
+            );
+            return apiKeys;
+          })
+          .toStrictEqual([
+            expect.objectContaining({ username: accountId, realm: '_service_account' }),
+          ]);
       }
     );
 
