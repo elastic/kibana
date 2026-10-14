@@ -135,7 +135,7 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]:
 export const MATCHES_OPERATOR_LABEL = i18n.translate(
   'xpack.securitySolution.blocklist.operator.matches',
   {
-    defaultMessage: 'Match',
+    defaultMessage: 'Matches',
   }
 );
 
