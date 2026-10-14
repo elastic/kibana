@@ -40,9 +40,20 @@ export function getDisplayedColumns(
   return stateColumns &&
     stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)
-    !(stateColumns.length === 1 && stateColumns[0] === dataView.timeFieldName)
+    !(stateColumns.length === 1 && isPrependedTimeFieldColumn(stateColumns[0], dataView))
     ? stateColumns
     : SOURCE_ONLY;
+}
+
+/**
+ * The configured time field column is prepended to the grid only when it matches one of the data view fields,
+ * otherwise it's a regular column which can be removed like any other column
+ */
+function isPrependedTimeFieldColumn(column: string, dataView: DataView) {
+  return (
+    column === dataView.timeFieldName &&
+    (!dataView.fields || Boolean(dataView.getFieldByName(column)))
+  );
 }
 
 export function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
