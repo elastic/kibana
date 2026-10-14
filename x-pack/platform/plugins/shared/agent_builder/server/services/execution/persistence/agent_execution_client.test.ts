@@ -59,6 +59,21 @@ describe('AgentExecutionClient', () => {
       expect(execution.owner).toEqual(owner);
     });
 
+    it('stores a service account owner with its principal type', async () => {
+      const owner = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+
+      const execution = await client.create({ ...createParams, owner });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ owner }) })
+      );
+      expect(execution.owner).toEqual(owner);
+    });
+
     it('omits the owner when the caller has none', async () => {
       const execution = await client.create(createParams);
 

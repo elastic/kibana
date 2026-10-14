@@ -98,6 +98,10 @@ describe('lockSeverityForCompletedInvestigation', () => {
     expect(lock({ proposedStatus: 'inactive' })).toBe('high');
   });
 
+  it('accepts the computed severity when a recovering event returns to active', () => {
+    expect(lock({ latestEvent: makeEvent({ status: 'recovering' }) })).toBe('high');
+  });
+
   it('accepts the computed severity when reactivating an inactive event', () => {
     expect(lock({ latestEvent: makeEvent({ status: 'inactive' }) })).toBe('high');
   });

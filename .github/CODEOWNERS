@@ -1568,6 +1568,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 
 # Data Discovery
 /src/platform/packages/shared/kbn-scout/src/playwright/ui_components/esql_editor @elastic/kibana-discover @elastic/appex-qa
+/src/platform/packages/shared/kbn-scout/src/playwright/page_objects/discover @elastic/kibana-discover @elastic/appex-qa
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-discover
@@ -1818,6 +1819,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/test/scout/api @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rule_details_page.ts @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rules_page.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations @elastic/nightshift
 
 # Observability AI Assistant
 /x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
