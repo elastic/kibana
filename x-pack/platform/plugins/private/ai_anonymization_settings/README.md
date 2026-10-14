@@ -36,6 +36,8 @@ this page.
 - **The pattern tester needs the `manage_advanced_settings` privilege** and runs on its own small
   worker pool with a short timeout, separate from the pool serving AI requests. It can be turned off
   with `xpack.aiAnonymizationSettings.patternTester.enabled: false` (default `true`), in which case
-  the endpoint refuses requests. A host plugin can also switch it off through the plugin's setup
-  contract (`configurePatternTester({ enabled: false })`); the inference plugin does this when its
-  anonymization workers are disabled. A host can only restrict the tester, never re-enable it.
+  the endpoint refuses requests and the management page hides the Pattern tester tab and the
+  flyout's test button. A host plugin can also switch it off through the plugin's setup contract
+  (`configurePatternTester({ enabled: false })`), but nothing calls it yet, and the page cannot see
+  that switch, so it still shows the tester and the endpoint refuses requests. A host can only
+  restrict the tester, never re-enable it.
