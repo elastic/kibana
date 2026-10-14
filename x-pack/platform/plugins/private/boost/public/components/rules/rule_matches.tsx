@@ -53,7 +53,11 @@ export const RuleMatches = ({ patterns, type, isDefaultRule, coverage }: RuleMat
     );
   }
   if (coverage.matches === 0) {
-    return <>{formatDataSourceCount(type, 0)}</>;
+    return (
+      <EuiTextColor color={euiTheme.colors.textDisabled} data-test-subj="boostRuleNoMatches">
+        {formatDataSourceCount(type, 0)}
+      </EuiTextColor>
+    );
   }
   return <MatchesPopover patterns={patterns} type={type} coverage={coverage} />;
 };
@@ -128,8 +132,7 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
           {matchedNames.map((name) => {
             const supersedingRule = supersededBy.get(name);
             return (
-              // A flex row, so each name's padded background takes up space in the list instead of
-              // overlapping the next one, with any higher-ranked rule on the right.
+              // A row with any higher-ranked rule on the right.
               <li
                 key={name}
                 css={{

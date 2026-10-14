@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiIcon, EuiIconTip, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiIconTip, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 /** Marks a rule that ranks higher than another, so it applies instead. */
@@ -27,13 +27,12 @@ interface TargetNameProps {
  * targets it but doesn't apply.
  */
 export const TargetName = ({ name, supersededBy }: TargetNameProps) => (
-  // Names wrap between each other, not at their hyphens.
-  <EuiCode
-    css={{ whiteSpace: 'nowrap', textDecoration: supersededBy ? 'line-through' : undefined }}
+  <span
+    css={{ textDecoration: supersededBy ? 'line-through' : undefined }}
     data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
   >
     {name}
-  </EuiCode>
+  </span>
 );
 
 interface SupersedingRuleProps {
