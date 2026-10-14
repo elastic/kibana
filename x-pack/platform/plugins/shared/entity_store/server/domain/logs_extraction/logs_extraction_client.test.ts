@@ -2899,25 +2899,13 @@ describe('LogsExtractionClient sampling wiring', () => {
     });
   });
 
-  it('a raised effective cap does not suppress sampling - the trigger stays pinned to the default', async () => {
+  it('a raised effective cap gives more headroom before sampling engages', async () => {
     const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
       nonPriorityLogExtractionConfig: { maxLogsPerWindow: 500_000 },
     });
-    mockHighVolumeSequence(); // 50K raw fits the raised cap, but projects to 150K, above the 100K default
-
-    const result = await client.extractLogs('user');
-
-    expect(result.success).toBe(true);
-    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
-  });
-
-  it('a lowered effective cap below the default does not trigger sampling - the cap just fires', async () => {
-    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
-      nonPriorityLogExtractionConfig: { maxLogsPerWindow: 20_000 },
-    });
-    // 3000 sampled (< the realistic 5000 ceiling) → last page, so no extrapolation: projected
-    // volume is just the raw 30K itself - under the 100K default trigger but over the 20K cap
-    mockVolumeSequence(3000, '2025-01-15T11:53:00.000Z');
+    // 50K raw projects to 150K for the window - above the old 100K default, but well under the
+    // raised 500K trigger, so this no longer samples.
+    mockHighVolumeSequence();
 
     const result = await client.extractLogs('user');
 
@@ -2925,7 +2913,24 @@ describe('LogsExtractionClient sampling wiring', () => {
     for (const query of extractionQueries()) {
       expect(query).not.toContain('SAMPLE');
     }
-    expect(result.success && result.logsCapApplied).toBe(true);
+  });
+
+  it('a lowered effective cap engages sampling earlier than the default would', async () => {
+    const { client } = createSamplingContext(EXTRACTION_MODE.nonPriority, {
+      nonPriorityLogExtractionConfig: { maxLogsPerWindow: 20_000 },
+    });
+    // 3000 sampled (< the realistic 5000 ceiling) → last page, so no extrapolation: projected
+    // volume is just the raw 30K itself - under the old 100K default trigger, but over the
+    // lowered 20K one, so this now samples (rate = 20K / 30K ≈ 0.667). Same rule as "the budget
+    // counts processed volume" below: sampling shrinks the effective ingested volume enough that
+    // the hard cap never fires - graceful degradation instead of a hard drop.
+    mockVolumeSequence(3000, '2025-01-15T11:53:00.000Z');
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
+    expect(result.success && result.logsCapApplied).toBe(false);
   });
 
   it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {

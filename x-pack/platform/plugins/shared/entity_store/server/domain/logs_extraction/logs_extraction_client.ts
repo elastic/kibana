@@ -904,6 +904,7 @@ export class LogsExtractionClient {
                 sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
                 sliceEndISO: logsPageCursorEnd.timestampCursor,
                 windowEndISO,
+                maxLogsPerWindow,
               },
               samplingRateOverride
             );

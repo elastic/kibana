@@ -518,5 +518,43 @@ apiTest.describe.skip(
         await uninstall(apiClient, esClient);
       }
     );
+
+    // No `samplingRate` override here - the dynamic trigger alone must engage, confirming it
+    // tracks the configured `maxLogsPerWindow` rather than a hardcoded default.
+    apiTest(
+      'flag on: a lowered maxLogsPerWindow engages sampling dynamically, without an override',
+      async ({ apiClient, apiServices, esClient }) => {
+        await setDualProcess(apiServices, true);
+        await install(apiClient, true);
+
+        expect(
+          (await setUserConfig(apiClient, { nonPriorityOverride: { maxLogsPerWindow: 400 } }))
+            .statusCode
+        ).toBe(200);
+        expect((await userEngine(apiClient)).nonPriority?.samplingRate).toBeNull();
+
+        await extract(apiClient, 'user', 'priority', SAMPLING_WINDOW);
+        await extract(apiClient, 'user', 'nonPriority', SAMPLING_WINDOW);
+
+        // Priority never samples, regardless of the non-priority cap.
+        expect(await countByIdPrefix(esClient, 'user:dp-sample-okta-')).toBe(SAMPLING_ASSET_USERS);
+
+        // A 400 cap over ~1000 projected logs should sample about 40% (~400 users). SAMPLE is
+        // random, so exact counts vary - but far outside this range means sampling either didn't
+        // engage at all (~1000, rate stuck at 1) or dropped to the 0.1 floor (~100) instead of
+        // tracking the 400 cap.
+        const sampled = await countByIdPrefix(esClient, 'user:dp-sample-local-');
+        expect(sampled).toBeGreaterThanOrEqual(150);
+        expect(sampled).toBeLessThanOrEqual(650);
+        expect(sampled).toBeLessThan(SAMPLING_LOCAL_USERS);
+
+        expect(
+          (await setUserConfig(apiClient, { nonPriorityOverride: { maxLogsPerWindow: null } }))
+            .statusCode
+        ).toBe(200);
+
+        await uninstall(apiClient, esClient);
+      }
+    );
   }
 );
