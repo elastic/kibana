@@ -161,10 +161,10 @@ async function buildChunk(options: BuildChunkOptions): Promise<void> {
 
   if (options.entry) {
     await esbuild({ ...shared, entryPoints: [options.entry] });
-    // esbuild ends the entry with `module.exports = require_plugin()`. That
-    // replaces the object Node already gave to any on-disk file that required
-    // this module while the bundle was still evaluating, so those files keep
-    // an empty exports object. Copy onto the original object instead.
+    // A cycle makes esbuild evaluate the entry into its own exports object and
+    // assign `module.exports` only after that call returns. An on-disk file
+    // required in the middle still holds Node's empty object. Point the wrapper
+    // at Node's module before the call so those writes are visible immediately.
     publishEntryExports(options.outfile);
     return;
   }
@@ -180,44 +180,66 @@ async function buildChunk(options: BuildChunkOptions): Promise<void> {
   });
 }
 
+// esbuild 0.28 wraps a cyclic entry in this helper and fills a fresh `{ exports }`
+// until the trailing `module.exports = require_plugin()` call.
+const ESBUILD_COMMONJS_HELPER =
+  'var __commonJS = (cb, mod) => function __require() {\n' +
+  '  try {\n' +
+  '    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;\n' +
+  '  } catch (e) {\n' +
+  '    throw mod = 0, e;\n' +
+  '  }\n' +
+  '};';
+
+const ESBUILD_COMMONJS_HELPER_WITH_EXISTING_MODULE =
+  'var __commonJS = (cb, mod) => function __require(existing) {\n' +
+  '  try {\n' +
+  '    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = existing || { exports: {} }).exports, mod), mod.exports;\n' +
+  '  } catch (e) {\n' +
+  '    throw mod = 0, e;\n' +
+  '  }\n' +
+  '};';
+
 function publishEntryExports(outfile: string): void {
   const source = Fs.readFileSync(outfile, 'utf8');
-  // A cycle makes esbuild wrap the entry and assign `module.exports` at the
-  // end. Without a cycle the entry writes onto Node's `exports` directly.
+  // Without a cycle the entry writes onto Node's `exports` directly.
   const match = source.match(/module\.exports = (require_[A-Za-z0-9_$]+)\(\);\s*$/);
   if (!match || match.index === undefined || !match[1]) {
     return;
   }
 
+  if (!source.includes(ESBUILD_COMMONJS_HELPER)) {
+    throw new Error(
+      `Failed to bundle server plugin at ${outfile}: esbuild's cyclic entry wrapper did not match the expected helper`
+    );
+  }
+
   const requireEntry = match[1];
-  const assignment = [
-    `var __kbnBundleExports = ${requireEntry}();`,
-    'if (__kbnBundleExports !== null && typeof __kbnBundleExports === "object") {',
-    '  var __kbnBundleKeys = Reflect.ownKeys(__kbnBundleExports);',
-    '  for (var __kbnBundleIndex = 0; __kbnBundleIndex < __kbnBundleKeys.length; __kbnBundleIndex++) {',
-    '    var __kbnBundleKey = __kbnBundleKeys[__kbnBundleIndex];',
-    '    var __kbnBundleDescriptor = Object.getOwnPropertyDescriptor(__kbnBundleExports, __kbnBundleKey);',
-    '    if (__kbnBundleDescriptor) {',
-    '      Object.defineProperty(module.exports, __kbnBundleKey, __kbnBundleDescriptor);',
-    '    }',
-    '  }',
-    '} else {',
-    '  module.exports = __kbnBundleExports;',
-    '}',
-    '',
-  ].join('\n');
-  Fs.writeFileSync(outfile, source.slice(0, match.index) + assignment);
+  const rewritten =
+    source
+      .slice(0, match.index)
+      .replace(ESBUILD_COMMONJS_HELPER, ESBUILD_COMMONJS_HELPER_WITH_EXISTING_MODULE) +
+    `module.exports = ${requireEntry}(module);\n`;
+  Fs.writeFileSync(outfile, rewritten);
 }
 
 function virtualChunkEntry(modules: readonly string[], serverDir: string): string {
-  const lines = ['"use strict";', 'module.exports = {'];
-  for (const file of modules) {
-    const key = relativeKey(serverDir, file);
-    const specifier = relativeSpecifier(serverDir, file);
-    lines.push(`  ${JSON.stringify(key)}: require(${JSON.stringify(specifier)}),`);
-  }
-  lines.push('};', '');
-  return lines.join('\n');
+  // Getters evaluate one module on first access. An object of eager requires
+  // would run every sibling when any one of them is loaded.
+  const loaded = 'var __kbnChunkLoaded = Object.create(null);';
+  const getters = modules.map((file) => {
+    const key = JSON.stringify(relativeKey(serverDir, file));
+    const specifier = JSON.stringify(relativeSpecifier(serverDir, file));
+    return [
+      `  get ${key}() {`,
+      `    if (!Object.prototype.hasOwnProperty.call(__kbnChunkLoaded, ${key})) {`,
+      `      __kbnChunkLoaded[${key}] = require(${specifier});`,
+      '    }',
+      `    return __kbnChunkLoaded[${key}];`,
+      '  }',
+    ].join('\n');
+  });
+  return `"use strict";\n${loaded}\nmodule.exports = {\n${getters.join(',\n')}\n};\n`;
 }
 
 function pluginServerBundlePlugin(options: BuildChunkOptions): Plugin {
@@ -231,6 +253,14 @@ function pluginServerBundlePlugin(options: BuildChunkOptions): Plugin {
         }
         if (!args.path.startsWith('.')) {
           return { path: args.path, external: true };
+        }
+
+        // require.resolve() needs a path on disk. Inlining the target leaves
+        // the relative call resolving against server/ and throws MODULE_NOT_FOUND.
+        if (args.kind === 'require-resolve') {
+          const resolvedForDisk = resolveExisting(args.resolveDir, args.path);
+          const expected = resolvedForDisk ?? Path.resolve(args.resolveDir, args.path);
+          return { path: relativeSpecifier(serverDir, expected), external: true };
         }
 
         const resolved = resolveExisting(args.resolveDir, args.path);

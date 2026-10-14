@@ -313,6 +313,7 @@ describe('bundlePluginServer', () => {
       Path.join(server, 'plugin.js'),
       [
         '"use strict";',
+        'exports.ready = function ready() { return "ready"; };',
         'const inner = require("./lib/inner");',
         'const logger = require("./lib/logger");',
         'Object.defineProperty(exports, "EVENT_LOG_ACTIONS", {',
@@ -344,6 +345,7 @@ describe('bundlePluginServer', () => {
       [
         '"use strict";',
         'const plugin = require("../plugin");',
+        'exports.seenDuringLoad = plugin.ready();',
         'exports.readActions = () => plugin.EVENT_LOG_ACTIONS;',
         '',
       ].join('\n')
@@ -354,10 +356,12 @@ describe('bundlePluginServer', () => {
     const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
     expect(bundle).toContain('inner-marker');
     expect(bundle).toContain('require("./lib/logger.js")');
-    expect(bundle).toContain('__kbnBundleExports');
-    expect(bundle).not.toMatch(/module\.exports = require_[A-Za-z0-9_$]+\(\);\s*$/);
+    expect(bundle).toContain('existing || { exports: {} }');
+    expect(bundle).toMatch(/module\.exports = require_[A-Za-z0-9_$]+\(module\);\s*$/);
 
     const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(loaded.ready()).toBe('ready');
+    expect(requireFromTest(Path.join(lib, 'logger.js')).seenDuringLoad).toBe('ready');
     expect(loaded.EVENT_LOG_ACTIONS).toEqual({ execute: 'execute' });
     expect(loaded.inner.marker).toBe('inner-marker');
     expect(loaded.inner.actions()).toEqual({ execute: 'execute' });
@@ -426,8 +430,11 @@ describe('bundlePluginServer', () => {
       Path.join(lib, 'a.js'),
       [
         '"use strict";',
+        'const order = (globalThis.__kbnBundleOrder = globalThis.__kbnBundleOrder || []);',
+        'order.push("a-start");',
         'exports.marker = "a-marker";',
         'exports.shared = require("./shared");',
+        'order.push("a-end");',
         'exports.dir = __dirname;',
         `exports.pad = "${pad}";`,
         '',
@@ -437,6 +444,8 @@ describe('bundlePluginServer', () => {
       Path.join(lib, 'b.js'),
       [
         '"use strict";',
+        'const order = (globalThis.__kbnBundleOrder = globalThis.__kbnBundleOrder || []);',
+        'order.push("b");',
         'exports.marker = "b-marker";',
         'exports.shared = require("./shared");',
         'exports.dir = __dirname;',
@@ -446,7 +455,13 @@ describe('bundlePluginServer', () => {
     );
     Fs.writeFileSync(
       Path.join(lib, 'shared.js'),
-      '"use strict";\nexports.state = { marker: "shared-marker" };\n'
+      [
+        '"use strict";',
+        'const order = (globalThis.__kbnBundleOrder = globalThis.__kbnBundleOrder || []);',
+        'order.push("shared");',
+        'exports.state = { marker: "shared-marker" };',
+        '',
+      ].join('\n')
     );
 
     await bundlePluginServer(root);
@@ -467,7 +482,11 @@ describe('bundlePluginServer', () => {
     expect(Fs.readFileSync(Path.join(lib, 'a.js'), 'utf8')).toContain('a-marker');
 
     delete process.env.KBN_BUNDLE_AGAIN;
+    const order: string[] = [];
+    (globalThis as { __kbnBundleOrder?: string[] }).__kbnBundleOrder = order;
     const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(order).toEqual(['a-start', 'shared', 'a-end', 'b']);
+    delete (globalThis as { __kbnBundleOrder?: string[] }).__kbnBundleOrder;
     expect(loaded.a.marker).toBe('a-marker');
     expect(loaded.b.marker).toBe('b-marker');
     expect(loaded.a.shared.state).toBe(loaded.shared.state);
@@ -488,6 +507,7 @@ describe('bundlePluginServer', () => {
     expect(Fs.realpathSync(movedLoaded.a.dir)).toBe(Fs.realpathSync(movedLib));
     expect(Fs.realpathSync(movedLoaded.b.dir)).toBe(Fs.realpathSync(movedLib));
     expect(movedLoaded.a.shared.state).toBe(movedLoaded.b.shared.state);
+    delete (globalThis as { __kbnBundleOrder?: string[] }).__kbnBundleOrder;
   });
 
   it('keeps a require cycle together when it exceeds the chunk budget', async () => {
@@ -586,6 +606,34 @@ describe('bundlePluginServer', () => {
     const onDisk = requireFromTest(Path.join(ownerServer, 'token.js'));
     expect(loaded.inner.marker).toBe('inner-marker');
     expect(loaded.token.state).toBe(onDisk.state);
+  });
+
+  it('resolves require.resolve against the real file when that file is also inlined', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    const lib = Path.join(server, 'lib');
+    Fs.mkdirSync(lib, { recursive: true });
+    const worker = Path.join(lib, 'worker.js');
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      '"use strict";\nexports.runner = require("./lib/runner");\n'
+    );
+    Fs.writeFileSync(
+      Path.join(lib, 'runner.js'),
+      [
+        '"use strict";',
+        'exports.path = require.resolve("./worker.js");',
+        'exports.worker = require("./worker");',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(worker, '"use strict";\nexports.marker = "worker-marker";\n');
+
+    await bundlePluginServer(root);
+
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(Fs.realpathSync(loaded.runner.path)).toBe(Fs.realpathSync(worker));
+    expect(loaded.runner.worker.marker).toBe('worker-marker');
   });
 
   it('keeps browser-evaluated functions free of the esbuild __name helper', async () => {
