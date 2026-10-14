@@ -2102,7 +2102,6 @@ export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
 
 export const AlertResponseProperties = lazySchema(() =>
   z.object({
-    attached_at: z.string().datetime().optional(),
     /**
      * The alert identifier.
      */
