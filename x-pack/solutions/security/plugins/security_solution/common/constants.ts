@@ -274,6 +274,10 @@ export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
 export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
   'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
 
+/** This Kibana Advanced Setting allows users to apply exceptions on the fields that an ES|QL rule query computes */
+export const ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING =
+  'securitySolution:enableEsqlRuleComputedFieldExceptions' as const;
+
 /** This hidden Kibana Advanced Setting stores gap reason types to exclude from gap monitoring and auto-fill */
 export const EXCLUDED_GAP_REASONS_KEY = 'securitySolution:excludedGapReasons' as const;
 
