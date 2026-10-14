@@ -12,7 +12,10 @@ import {
   isInboundOnlyConnectorSpec,
   resolveActionScope,
 } from '@kbn/connector-specs';
-import type { ConnectorSpecActionSummary, ConnectorSpecSummary } from '../../../common/connector_spec';
+import type {
+  ConnectorSpecActionSummary,
+  ConnectorSpecSummary,
+} from '../../../common/connector_spec';
 import type { RegisteredSpec } from './get_registered_spec';
 
 export const getAuthTypeIds = (spec: ConnectorSpec): string[] => {

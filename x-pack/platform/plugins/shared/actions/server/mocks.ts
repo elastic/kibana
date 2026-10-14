@@ -23,6 +23,7 @@ import { actionsAuthorizationMock } from './authorization/actions_authorization.
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { actionsConfigMock } from './actions_config.mock';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
+import { specsClientMock } from './specs_client/specs_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
 export type { ActionsClientMock };
@@ -60,6 +61,8 @@ const createStartMock = () => {
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getActionsClientWithRequestInSpace: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
+    getSpecsClientWithRequest: jest.fn().mockReturnValue(specsClientMock.create()),
+    getUnsecuredSpecsClient: jest.fn().mockReturnValue(specsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),
