@@ -28,6 +28,9 @@ import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_upd
  */
 const UPDATE_RETRY_ON_CONFLICT = 3;
 
+const isCreateConflict = (error: { type?: string } | undefined): boolean =>
+  error?.type === 'version_conflict_engine_exception';
+
 export class WorkflowExecutionRepository {
   constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
@@ -146,12 +149,57 @@ export class WorkflowExecutionRepository {
     // For a single-document create, any error must propagate so callers don't
     // silently proceed after a failed write (e.g. version conflict on duplicate ID).
     const itemError = response.items[0]?.error;
-    if (itemError) {
-      throw new Error(
-        `Failed to create workflow execution ${workflowExecution.id}: ${
-          itemError.reason ?? JSON.stringify(itemError)
-        }`
-      );
+    if (!itemError) {
+      return;
+    }
+    if (isCreateConflict(itemError)) {
+      const persistedIds = await this.getAlreadyPersistedIds([workflowExecution]);
+      if (persistedIds.has(workflowExecution.id)) {
+        await this.refreshAfterRecoveredCreate(options.refresh);
+        return;
+      }
+    }
+    throw new Error(
+      `Failed to create workflow execution ${workflowExecution.id}: ${
+        itemError.reason ?? JSON.stringify(itemError)
+      }`
+    );
+  }
+
+  /**
+   * A transient error (e.g. a client timeout) can hide a create that Elasticsearch already
+   * persisted, so the retried `create` fails with a version conflict. Execution IDs are freshly
+   * generated UUIDs, so a stored document with the same ID, space and workflow is that earlier
+   * attempt of the same create.
+   */
+  private async getAlreadyPersistedIds(
+    executions: Array<Partial<EsWorkflowExecution>>
+  ): Promise<Set<string>> {
+    const ids = executions.flatMap(({ id }) => (id ? [id] : []));
+    const { items } = await this.workflowExecutionsDataClient.getByIds(ids, {
+      sourceIncludes: ['spaceId', 'workflowId'],
+    });
+    const storedById = new Map(items.map(({ document }) => [document.id, document]));
+    return new Set(
+      executions.flatMap(({ id, spaceId, workflowId }) => {
+        const stored = id ? storedById.get(id) : undefined;
+        return stored && stored.spaceId === spaceId && stored.workflowId === workflowId
+          ? [stored.id]
+          : [];
+      })
+    );
+  }
+
+  /**
+   * A conflicted create item made no write in this request, so the request's `refresh` option
+   * does not cover the document persisted by the earlier attempt; refresh explicitly when the
+   * caller asked for it.
+   */
+  private async refreshAfterRecoveredCreate(
+    refresh: boolean | 'wait_for' | undefined
+  ): Promise<void> {
+    if (refresh === true || refresh === 'wait_for') {
+      await this.workflowExecutionsDataClient.refresh();
     }
   }
 
@@ -197,9 +245,18 @@ export class WorkflowExecutionRepository {
       refresh: options.refresh,
     });
 
+    const conflicting = executions.filter((_, idx) =>
+      isCreateConflict(bulkResponse.items[idx]?.error)
+    );
+    const persistedIds =
+      conflicting.length > 0 ? await this.getAlreadyPersistedIds(conflicting) : new Set<string>();
+    if (persistedIds.size > 0) {
+      await this.refreshAfterRecoveredCreate(options.refresh);
+    }
+
     return bulkResponse.items.map((item, idx: number) => {
       const id = executions[idx].id as string;
-      if (item.error) {
+      if (item.error && !persistedIds.has(id)) {
         return { id, error: item.error.reason ?? JSON.stringify(item.error) };
       }
       return { id };

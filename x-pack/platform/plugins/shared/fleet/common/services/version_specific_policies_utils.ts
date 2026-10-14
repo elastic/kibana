@@ -7,28 +7,73 @@
 
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
+import { AGENT_POLICY_SENTINEL_VERSION, AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
 
 const DEFAULT_POLICY_ID_FIELD = 'policy_id';
 
-export function hasVersionSuffix(policyId: string): boolean {
-  if (!policyId) {
-    return false;
+// Agent version part of a suffix, e.g. `9.2` in 'policy123#9.2'.
+const AGENT_VERSION_PATTERN = '[0-9]+\\.[0-9]+';
+
+// 'policy123#9.2' or the sentinel 'policy123#sentinel'
+const VERSION_SUFFIX_REGEX = new RegExp(
+  `${AGENT_POLICY_VERSION_SEPARATOR}(${AGENT_VERSION_PATTERN}|${AGENT_POLICY_SENTINEL_VERSION})$`
+);
+
+/**
+ * Elasticsearch `regexp` query value matching the policy ids with an agent version suffix e.g.
+ * 'policy123#9.2', but not the sentinel or ids that only contain a '#'. Keep in sync with
+ * {@link classifyPolicyId}. `#` is a reserved character in Lucene regexps, so it is escaped.
+ */
+export const AGENT_VERSION_SUFFIX_ES_REGEXP = `.*\\${AGENT_POLICY_VERSION_SEPARATOR}${AGENT_VERSION_PATTERN}`;
+
+export type ClassifiedPolicyId =
+  | { kind: 'base'; baseId: string; version: null }
+  | { kind: 'sentinel'; baseId: string; version: string }
+  | { kind: 'agentVersion'; baseId: string; version: string };
+
+/**
+ * Single source of truth for the kind of a policy id, so callers switch on `kind` instead of
+ * comparing suffixes themselves:
+ * - `base`: no version suffix, e.g. 'policy123' (or 'policy#123', a '#' that is not a suffix)
+ * - `sentinel`: 'policy123#sentinel', the non-version-specific copy of a policy
+ * - `agentVersion`: 'policy123#9.2', a policy variant for agents of that version
+ */
+export function classifyPolicyId(policyId: string): ClassifiedPolicyId {
+  const match = policyId ? VERSION_SUFFIX_REGEX.exec(policyId) : null;
+  if (!match) {
+    return { kind: 'base', baseId: policyId, version: null };
   }
-  // policy ends with version suffix e.g. 'policy123#9.2'
-  return Boolean(policyId.match(/#\d+\.\d+$/));
+  const version = match[1];
+  return {
+    kind: version === AGENT_POLICY_SENTINEL_VERSION ? 'sentinel' : 'agentVersion',
+    baseId: policyId.slice(0, match.index),
+    version,
+  };
+}
+
+export function hasVersionSuffix(policyId: string): boolean {
+  return classifyPolicyId(policyId).kind !== 'base';
+}
+
+/** Whether the policy id ends with the sentinel suffix, e.g. 'policy123#sentinel'. */
+export function hasSentinelVersionSuffix(policyId: string): boolean {
+  return classifyPolicyId(policyId).kind === 'sentinel';
+}
+
+/** Whether the policy id ends with an agent version suffix e.g. 'policy123#9.2', not the sentinel. */
+export function hasAgentVersionSuffix(policyId: string): boolean {
+  return classifyPolicyId(policyId).kind === 'agentVersion';
+}
+
+export function getSentinelVersionPolicyId(baseId: string): string {
+  return `${baseId}${AGENT_POLICY_VERSION_SEPARATOR}${AGENT_POLICY_SENTINEL_VERSION}`;
 }
 
 export function splitVersionSuffixFromPolicyId(policyId: string): {
   baseId: string;
   version: string | null;
 } {
-  if (!hasVersionSuffix(policyId)) {
-    return { baseId: policyId, version: null };
-  }
-  const separatorIndex = policyId.lastIndexOf(AGENT_POLICY_VERSION_SEPARATOR);
-  const baseId = policyId.slice(0, separatorIndex);
-  const version = policyId.slice(separatorIndex + 1);
+  const { baseId, version } = classifyPolicyId(policyId);
   return { baseId, version };
 }
 
@@ -45,6 +90,21 @@ export function buildVersionVariantsKueryFragment(
   fieldName: string = DEFAULT_POLICY_ID_FIELD
 ): string {
   return `${fieldName}:${escapeKuery(baseId)}${AGENT_POLICY_VERSION_SEPARATOR}*`;
+}
+
+/**
+ * KQL fragment matching only the agent version variants of a base policy id
+ * (e.g. `policy_id:my-policy#* and not policy_id:"my-policy#sentinel"`) — NOT the base id itself
+ * and NOT the sentinel. Wrapped in parentheses so it can be combined with other conditions.
+ */
+export function buildAgentVersionVariantsKueryFragment(
+  baseId: string,
+  fieldName: string = DEFAULT_POLICY_ID_FIELD
+): string {
+  return `(${buildVersionVariantsKueryFragment(
+    baseId,
+    fieldName
+  )} and not ${fieldName}:"${escapeQuotes(getSentinelVersionPolicyId(baseId))}")`;
 }
 
 /**
@@ -94,6 +154,22 @@ export function buildVersionVariantsEsFilter(
   fieldName: string = DEFAULT_POLICY_ID_FIELD
 ) {
   return { prefix: { [fieldName]: `${baseId}${AGENT_POLICY_VERSION_SEPARATOR}` } };
+}
+
+/**
+ * ES query DSL filter matching only the agent version variants of a base policy id — NOT the base
+ * id itself and NOT the sentinel.
+ */
+export function buildAgentVersionVariantsEsFilter(
+  baseId: string,
+  fieldName: string = DEFAULT_POLICY_ID_FIELD
+) {
+  return {
+    bool: {
+      filter: [buildVersionVariantsEsFilter(baseId, fieldName)],
+      must_not: [{ term: { [fieldName]: getSentinelVersionPolicyId(baseId) } }],
+    },
+  };
 }
 
 /**

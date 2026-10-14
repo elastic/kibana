@@ -38,7 +38,6 @@ export const evaluateCondition = async ({
   executionTimestamp,
   logger,
   schema,
-  isPodSchemaSelectorEnabled,
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
@@ -51,7 +50,6 @@ export const evaluateCondition = async ({
   executionTimestamp: Date;
   logger: Logger;
   schema?: DataSchemaFormat;
-  isPodSchemaSelectorEnabled: boolean;
 }): Promise<Record<string, ConditionResult>> => {
   const { metric, customMetric } = condition;
 
@@ -88,7 +86,6 @@ export const evaluateCondition = async ({
     filterQuery,
     customMetric,
     schema,
-    isPodSchemaSelectorEnabled,
   });
 
   const result = mapValues(currentValues, (value) => {

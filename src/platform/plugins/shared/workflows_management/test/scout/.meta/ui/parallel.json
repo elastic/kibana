@@ -1,5 +1,5 @@
 {
-  "sha1": "f4039b2ec4809c6d5c5300e719e030b484ea408e",
+  "sha1": "981c4266c35f1c2f568d2776fa8f94c77849cf4f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -455,66 +455,6 @@
       }
     },
     {
-      "id": "84b864bf30250b9-1e36b15992c9e68",
-      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 114,
-        "column": 58
-      }
-    },
-    {
-      "id": "84b864bf30250b9-bb6c00e207d6b96",
-      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 315,
-        "column": 20
-      }
-    },
-    {
-      "id": "84b864bf30250b9-b92795356361dc9",
-      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 114,
-        "column": 58
-      }
-    },
-    {
-      "id": "84b864bf30250b9-c189381fa89f5ce",
-      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 315,
-        "column": 20
-      }
-    },
-    {
       "id": "bd47170adc03761-1eaf3f4c5859ccb",
       "title": "Sanity tests for workflows Create, save, run and view a dummy workflow",
       "expectedStatus": "passed",
@@ -715,7 +655,7 @@
     {
       "id": "751ff7b8b9bd440-063497b8c9edff4",
       "title": "Workflow execution - Alert triggers should trigger workflow from alert",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -726,14 +666,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 158,
+        "line": 157,
         "column": 18
       }
     },
     {
       "id": "751ff7b8b9bd440-c4010c12909cde8",
       "title": "Workflow execution - Alert triggers should not trigger a disabled workflow when alert fires",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -744,28 +684,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 282,
+        "line": 281,
         "column": 31
       }
     },
     {
       "id": "9e4dfe2f4767d9b-fc39598781b03ea",
       "title": "Workflow execution - Cancellation should cancel a single running execution from the execution details panel",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
-        "line": 24,
+        "line": 23,
         "column": 56
       }
     },
     {
       "id": "9e4dfe2f4767d9b-54e0484e76de34d",
       "title": "Workflow execution - Cancellation should cancel all active executions from the execution list via Cancel all active",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -773,7 +713,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
         "line": 32,
-        "column": 26
+        "column": 23
       }
     },
     {

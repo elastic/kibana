@@ -323,7 +323,6 @@ describe('bulkDeleteQueriesRoute', () => {
   it('triggers stale event cleanup only for deleted backing rules', async () => {
     const eventClient = {};
     const rulesClient = {};
-    const alertEventsClient = {};
     const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
@@ -343,7 +342,6 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventSearchClient: () => eventClient,
-        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
@@ -363,14 +361,12 @@ describe('bulkDeleteQueriesRoute', () => {
       eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
-      alertEventsClient,
     });
   });
 
   it('excludes backing rules from streams whose deletion failed', async () => {
     const eventClient = {};
     const rulesClient = {};
-    const alertEventsClient = {};
     const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest
       .fn()
@@ -393,7 +389,6 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventSearchClient: () => eventClient,
-        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
@@ -412,7 +407,6 @@ describe('bulkDeleteQueriesRoute', () => {
       eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
-      alertEventsClient,
     });
   });
 });

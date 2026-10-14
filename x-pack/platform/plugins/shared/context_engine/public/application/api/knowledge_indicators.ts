@@ -12,6 +12,7 @@ import {
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_LIST_PATH,
 } from '../../../common/constants';
+import type { KiLifecycleStatus } from '../../../common/step_types/ki';
 import type { GetKiResponse, ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 
 interface ListKisArgs {
@@ -38,15 +39,19 @@ interface GetKiArgs {
   aiIndexId: string;
   kiId: string;
   index: string;
+  lifecycleStatus?: KiLifecycleStatus[];
   signal?: AbortSignal;
 }
 
 export const getKi = (
   http: HttpStart,
-  { aiIndexId, kiId, index, signal }: GetKiArgs
+  { aiIndexId, kiId, index, lifecycleStatus, signal }: GetKiArgs
 ): Promise<GetKiResponse> =>
   http.get<GetKiResponse>(buildPath(AI_INDEX_KI_BY_ID_PATH, { aiIndexId, kiId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
-    query: { index },
+    query: {
+      index,
+      ...(lifecycleStatus !== undefined ? { lifecycle_status: lifecycleStatus } : {}),
+    },
     ...(signal ? { signal } : {}),
   });
