@@ -8,10 +8,15 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
+import {
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
@@ -19,63 +24,115 @@ import type { KnowledgeIndicatorType } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
 import { createSignificantEventsMaintenanceService } from './maintenance_service';
+import { requestForSpace } from './feature_settings';
+import {
+  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
+  SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+} from './saved_object';
 
-export const REQUEST = { headers: {} } as KibanaRequest;
+export const REQUEST = { headers: {}, spaceId: asSpaceId('default') } as KibanaRequest;
+/** A request made in another space, with the caller's credentials. */
+export const requestInSpace = (spaceId: string): KibanaRequest =>
+  requestForSpace(REQUEST, brandSpaceId(spaceId));
 // The credential-less request system sweeps build for themselves.
 export const SYSTEM_REQUEST = expect.objectContaining({
   isFakeRequest: true,
   auth: { isAuthenticated: false },
 });
 
-// A minimal, stateful saved-objects client: `get` throws NotFound until `create`
-// stores the doc, then returns it with a version that every write bumps. `create`
-// without overwrite and `update` with a stale version throw a conflict, like ES.
+/** The per-space continuous onboarding document of a space. */
+export const continuousDocumentId = (spaceId: string): string =>
+  `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
+
+/** The per-space cleanup document of a space: scheduled, and not backed by a Settings toggle. */
+export const cleanupDocumentId = (spaceId: string): string =>
+  `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+
+/** The space a saved-objects call was scoped to; it travels as `this` (see `mock.contexts`). */
+interface SoCallContext {
+  spaceId: string;
+}
+
+// A minimal, stateful saved-objects client of a space-isolated type: every space has its own
+// document under the same id. `get` throws NotFound until `create` stores the doc, then returns
+// it with a version that every write bumps. `create` without overwrite and `update` with a stale
+// version throw a conflict, like ES.
+//
+// The calls are recorded on shared mocks, in the shape the real client takes, so a test sees
+// every write in order whichever space made it. `forSpace` is what `asScopedToNamespace` hands
+// out; `readDocument` reaches a space's stored document directly.
 export function makeSoClient() {
   const store = new Map<string, { attributes: Record<string, unknown>; version?: string }>();
-  const key = (type: string, id: string) => `${type}:${id}`;
+  const key = (spaceId: string, type: string, id: string) => `${spaceId}:${type}:${id}`;
   let nextVersion = 1;
-  const put = (type: string, id: string, attributes: Record<string, unknown>) =>
-    store.set(key(type, id), { attributes, version: String(nextVersion++) });
-  return {
-    get: jest.fn(async (type: string, id: string) => {
-      const stored = store.get(key(type, id));
-      if (!stored) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      }
-      return { id, type, references: [], ...stored };
-    }),
-    create: jest.fn(
-      async (
-        type: string,
-        attributes: Record<string, unknown>,
-        options: { id: string; overwrite?: boolean }
-      ) => {
-        if (options.overwrite === false && store.has(key(type, options.id))) {
-          throw SavedObjectsErrorHelpers.createConflictError(type, options.id);
-        }
-        put(type, options.id, attributes);
-        return { id: options.id, type, references: [], attributes };
-      }
-    ),
-    update: jest.fn(
-      async (
-        type: string,
-        id: string,
-        attributes: Record<string, unknown>,
-        options?: { version?: string }
-      ) => {
-        const stored = store.get(key(type, id));
-        if (!stored) {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        if (options?.version !== undefined && options.version !== stored.version) {
-          throw SavedObjectsErrorHelpers.createConflictError(type, id);
-        }
-        put(type, id, { ...stored.attributes, ...attributes });
-        return { id, type, references: [], attributes };
-      }
-    ),
+  const put = (spaceId: string, type: string, id: string, attributes: Record<string, unknown>) =>
+    store.set(key(spaceId, type, id), { attributes, version: String(nextVersion++) });
+
+  const get = jest.fn(async function (this: SoCallContext, type: string, id: string) {
+    const stored = store.get(key(this.spaceId, type, id));
+    if (!stored) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    return { id, type, references: [], ...stored };
+  });
+  const create = jest.fn(async function (
+    this: SoCallContext,
+    type: string,
+    attributes: Record<string, unknown>,
+    options: { id: string; overwrite?: boolean }
+  ) {
+    if (options.overwrite === false && store.has(key(this.spaceId, type, options.id))) {
+      throw SavedObjectsErrorHelpers.createConflictError(type, options.id);
+    }
+    put(this.spaceId, type, options.id, attributes);
+    return { id: options.id, type, references: [], attributes };
+  });
+  const update = jest.fn(async function (
+    this: SoCallContext,
+    type: string,
+    id: string,
+    attributes: Record<string, unknown>,
+    options?: { version?: string }
+  ) {
+    const stored = store.get(key(this.spaceId, type, id));
+    if (!stored) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    if (options?.version !== undefined && options.version !== stored.version) {
+      throw SavedObjectsErrorHelpers.createConflictError(type, id);
+    }
+    put(this.spaceId, type, id, { ...stored.attributes, ...attributes });
+    return { id, type, references: [], attributes };
+  });
+  const remove = jest.fn(async function (this: SoCallContext, type: string, id: string) {
+    if (!store.delete(key(this.spaceId, type, id))) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    return {};
+  });
+
+  const forSpace = (spaceId: string) => {
+    const context: SoCallContext = { spaceId };
+    return {
+      spaceId,
+      get: (...args: Parameters<typeof get>) => get.call(context, ...args),
+      create: (...args: Parameters<typeof create>) => create.call(context, ...args),
+      update: (...args: Parameters<typeof update>) => update.call(context, ...args),
+      delete: (...args: Parameters<typeof remove>) => remove.call(context, ...args),
+    };
   };
+
+  /** The stored maintenance document of a space, if any. */
+  const readDocument = (spaceId: string) =>
+    store.get(
+      key(
+        spaceId,
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
+      )
+    )?.attributes;
+
+  return { get, create, update, delete: remove, forSpace, readDocument };
 }
 
 // Stateful workflows management mock: tracks each workflow's `enabled` flag so a
@@ -86,17 +143,27 @@ export function makeManagementApi(options?: {
   failEnableFor?: string | { id?: string };
   /** Workflow ids for which cancelAllActiveWorkflowExecutions should throw. */
   failCancelAllFor?: string;
+  /**
+   * Document ids that are not installed. Per-space continuous onboarding documents
+   * only exist while the feature is on in their space.
+   */
+  missingWorkflows?: string[];
 }) {
   const enabled = new Map<string, boolean>();
   const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
   const failEnableId = (): string | undefined =>
     typeof options?.failEnableFor === 'object' ? options.failEnableFor.id : options?.failEnableFor;
+  const missing = new Set(options?.missingWorkflows ?? []);
 
-  const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
-    id,
-    enabled: enabled.get(stateKey(id, spaceId)) ?? true,
-    definition: { id },
-  }));
+  const getWorkflow = jest.fn(async (id: string, spaceId: string) =>
+    missing.has(id)
+      ? null
+      : {
+          id,
+          enabled: enabled.get(stateKey(id, spaceId)) ?? true,
+          definition: { id },
+        }
+  );
 
   const updateWorkflow = jest.fn(
     async (id: string, patch: { enabled?: boolean }, spaceId: string) => {
@@ -167,7 +234,7 @@ export function makeV2RulesClient(options?: {
 
 export function makeUiSettingsClient(
   initial: Record<string, boolean | number | string> = {},
-  options?: { failSetFor?: string }
+  options?: { failSetFor?: string[] }
 ) {
   const store = new Map<string, boolean | number | string>(Object.entries(initial));
   return {
@@ -175,7 +242,7 @@ export function makeUiSettingsClient(
       store.has(key) ? (store.get(key) as T) : defaultValue
     ),
     set: jest.fn(async (key: string, value: boolean | number | string) => {
-      if (options?.failSetFor === key) {
+      if (options?.failSetFor?.includes(key)) {
         throw new Error(`set failed for ${key}`);
       }
       store.set(key, value);
@@ -188,25 +255,29 @@ export function makeUiSettingsClient(
 export function makeService(params?: {
   management?: ReturnType<typeof makeManagementApi>['api'];
   ruleBackedRuleIds?: string[];
+  /** Rule ids whose owning source is disabled in the catalog; the others belong to an enabled one. */
+  disabledSourceRuleIds?: string[];
   v2RulesClient?: ReturnType<typeof makeV2RulesClient> | null;
   spacesGetAllThrows?: boolean;
   /** Space ids returned by SpacesClient.getAll (default: default only). */
   spaceIds?: string[];
   /** Space ids the internal client finds (default: same as `spaceIds`). */
   internalSpaceIds?: string[];
-  /** Global continuous-onboarding toggle before pause (default: off). */
+  /** Per-space continuous-onboarding toggle before pause, in every space (default: off). */
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
   scheduledDiscoveryEnabled?: boolean;
+  /** Spaces where the caller lacks the Nightshift manage and configure privileges (default: none). */
+  unauthorizedSpaceIds?: string[];
   /** Make the continuous-onboarding uiSettings `set` throw. */
   failContinuousSet?: boolean;
   /** Make the scheduled-discovery uiSettings `set` throw. */
   failScheduledSet?: boolean;
   indicatorStreams?: string[];
   ownedRuleStreams?: string[];
-  queryLinksByStream?: Record<string, Array<{ rule_backed: boolean; rule_id?: string }>>;
+  queryLinksBySource?: Record<string, Array<{ rule_backed: boolean; rule_id?: string }>>;
   knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
-  ownedRuleIdsByStream?: Record<string, string[]>;
+  ownedRuleIdsBySource?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
   /** `null` models the investigations plugin being unavailable. */
   investigations?: {
@@ -219,10 +290,21 @@ export function makeService(params?: {
   const v2RulesClient =
     params?.v2RulesClient === null ? undefined : params?.v2RulesClient ?? makeV2RulesClient();
   const getRuleBackedQueryLinks = jest.fn(async () =>
-    (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
+    (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({
+      rule_id,
+      source_id: params?.disabledSourceRuleIds?.includes(rule_id)
+        ? 'disabled-source'
+        : 'enabled-source',
+    }))
   );
+  const sourcesClient = {
+    list: jest.fn(async ({ enabled }: { enabled?: boolean }) => {
+      const sources = enabled === false ? [{ id: 'disabled-source' }] : [{ id: 'enabled-source' }];
+      return { sources, total: sources.length };
+    }),
+  };
   const internalRuleBackedRules = {
-    listRuleIds: jest.fn(async () => params?.ruleBackedRuleIds ?? []),
+    listRuleIds: jest.fn(async (_spaceId: string) => params?.ruleBackedRuleIds ?? []),
     bulkDisableRules: jest.fn(async ({ ids }: { ids: string[] }) => {
       if (ids.length > MAX_BULK_ITEMS) {
         throw new Error(
@@ -232,18 +314,18 @@ export function makeService(params?: {
       return { affected_count: ids.length, errors: [] };
     }),
   };
-  const getStreamNamesWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
-  const findStreamNamesWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
-  const getStreamToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
+  const getSourceIdsWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
+  const findSourceIdsWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
+  const getSourceToQueryLinksMap = jest.fn(async (sourceIds: string[]) =>
     Object.fromEntries(
-      streamNames.map((streamName) => [streamName, params?.queryLinksByStream?.[streamName] ?? []])
+      sourceIds.map((sourceId) => [sourceId, params?.queryLinksBySource?.[sourceId] ?? []])
     )
   );
   const countKnowledgeIndicators = jest.fn(
     async (type: KnowledgeIndicatorType) => params?.knowledgeIndicatorCounts?.[type] ?? 0
   );
   const findOwnedRuleIds = jest.fn(
-    async (streamName: string) => params?.ownedRuleIdsByStream?.[streamName] ?? []
+    async (sourceId: string) => params?.ownedRuleIdsBySource?.[sourceId] ?? []
   );
 
   const streamDocuments = new Map<string, number>(
@@ -290,24 +372,21 @@ export function makeService(params?: {
       : params?.investigations ?? { deleted: 0, failures: [] };
   const deleteAllInvestigations = investigations ? jest.fn(async () => investigations) : undefined;
 
-  const globalUiSettingsClient = makeUiSettingsClient(
-    {
-      [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]:
-        params?.continuousOnboardingEnabled ?? false,
-    },
-    params?.failContinuousSet
-      ? { failSetFor: OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED }
-      : undefined
-  );
-  const spaceUiSettingsClient = makeUiSettingsClient(
-    {
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
-        params?.scheduledDiscoveryEnabled ?? false,
-    },
-    params?.failScheduledSet
-      ? { failSetFor: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED }
-      : undefined
-  );
+  const initialSettings = {
+    [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]:
+      params?.continuousOnboardingEnabled ?? false,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
+      params?.scheduledDiscoveryEnabled ?? false,
+  };
+  const userFailSetFor = [
+    ...(params?.failContinuousSet ? [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED] : []),
+    ...(params?.failScheduledSet
+      ? [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]
+      : []),
+  ];
+  const spaceUiSettingsClient = makeUiSettingsClient(initialSettings, {
+    failSetFor: userFailSetFor,
+  });
 
   // One space per page, so a sweep that stops after the first page misses `space-a`.
   const spacesRepository = {
@@ -328,23 +407,36 @@ export function makeService(params?: {
     if (existing) {
       return existing;
     }
-    const client = makeUiSettingsClient({
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
-        params?.scheduledDiscoveryEnabled ?? false,
+    // System sweeps run reset and reassert, which only write the continuous toggle here.
+    const client = makeUiSettingsClient(initialSettings, {
+      failSetFor: params?.failContinuousSet
+        ? [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]
+        : [],
     });
     internalSpaceUiSettingsClients.set(spaceId, client);
     return client;
   };
-  const internalClient = { asScopedToNamespace: jest.fn((spaceId: string) => ({ spaceId })) };
+  // The internal client rebinds to a space: the maintenance document of each space comes from
+  // its own scoped client, and the uiSettings client reads the space off the same object.
+  const internalClient = {
+    asScopedToNamespace: jest.fn((spaceId: string) => soClient.forSpace(spaceId)),
+  };
 
   const savedObjects = {
-    createInternalRepository: jest.fn((types: string[]) =>
-      types.includes('space') ? spacesRepository : soClient
-    ),
+    // Only the spaces finder goes through a repository. The maintenance document is a
+    // space-isolated type, so an unscoped read of it would silently mean the default space.
+    createInternalRepository: jest.fn((types: string[]) => {
+      if (!types.includes('space')) {
+        throw new Error(`Unexpected internal repository for ${types.join(', ')}`);
+      }
+      return spacesRepository;
+    }),
     getScopedClient: jest.fn(),
     getUnsafeInternalClient: jest.fn(() => internalClient),
   };
 
+  // No `globalAsScopedToClient`: continuous onboarding is a space setting, so a
+  // leftover global read or write fails the test.
   const server = {
     core: {
       savedObjects,
@@ -359,7 +451,23 @@ export function makeService(params?: {
         asScopedToClient: jest.fn((client?: { spaceId?: string }) =>
           client?.spaceId ? getInternalSpaceUiSettingsClient(client.spaceId) : spaceUiSettingsClient
         ),
-        globalAsScopedToClient: jest.fn(() => globalUiSettingsClient),
+      },
+    },
+    security: {
+      authz: {
+        mode: { useRbacForRequest: jest.fn(() => true) },
+        actions: { api: { get: jest.fn((privilege: string) => `api:${privilege}`) } },
+        checkPrivilegesWithRequest: jest.fn(() => ({
+          atSpaces: jest.fn(async (spaceIds: string[]) => ({
+            privileges: {
+              kibana: spaceIds.map((spaceId) => ({
+                resource: spaceId,
+                privilege: 'api:manage_nightshift',
+                authorized: !(params?.unauthorizedSpaceIds ?? []).includes(spaceId),
+              })),
+            },
+          })),
+        })),
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
@@ -378,18 +486,18 @@ export function makeService(params?: {
     },
   } as unknown as SignificantEventsServer;
 
-  const getScopedClients = jest.fn(async () => ({
+  const getScopedClients = jest.fn(async (_params: { request: KibanaRequest }) => ({
     getKnowledgeIndicatorClient: async () => ({
       getRuleBackedQueryLinks,
-      getStreamNamesWithKnowledgeIndicators,
-      findStreamNamesWithOwnedRules,
+      getSourceIdsWithKnowledgeIndicators,
+      findSourceIdsWithOwnedRules,
       countKnowledgeIndicators,
-      getStreamToQueryLinksMap,
+      getSourceToQueryLinksMap,
       findOwnedRuleIds,
     }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
-    globalUiSettingsClient,
     uiSettingsClient: spaceUiSettingsClient,
+    sourcesClient,
   }));
 
   const service = createSignificantEventsMaintenanceService({
@@ -403,14 +511,15 @@ export function makeService(params?: {
     service,
     soClient,
     savedObjects,
+    internalClient,
     getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,
     internalRuleBackedRules,
-    getStreamNamesWithKnowledgeIndicators,
-    findStreamNamesWithOwnedRules,
+    getSourceIdsWithKnowledgeIndicators,
+    findSourceIdsWithOwnedRules,
     countKnowledgeIndicators,
-    getStreamToQueryLinksMap,
+    getSourceToQueryLinksMap,
     findOwnedRuleIds,
     initializeClient,
     internalEsClient,
@@ -418,7 +527,6 @@ export function makeService(params?: {
     esClient,
     asScoped,
     deleteAllInvestigations,
-    globalUiSettingsClient,
     spaceUiSettingsClient,
     getInternalSpaceUiSettingsClient,
   };
