@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags } from '@kbn/scout';
+import { tags, type ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import { AgentAccessControlMode, type Conversation } from '@kbn/agent-builder-common';
@@ -14,7 +14,10 @@ import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
-import { setupAgentDirectAnswer } from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
+import {
+  setupAgentCallToolThenAnswer,
+  setupAgentDirectAnswer,
+} from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
 import {
   apiTest,
   API_AGENT_BUILDER,
@@ -110,7 +113,7 @@ apiTest.describe(
       });
     });
 
-    apiTest('the owner of a private agent can run it on Task Manager', async ({ apiClient }) => {
+    const loginAndCreateApiKey = async (apiClient: ApiClientFixture) => {
       const loginResponse = await apiClient.post('/internal/security/login', {
         headers: COMMON_HEADERS,
         body: {
@@ -143,6 +146,12 @@ apiTest.describe(
         Authorization: `ApiKey ${encoded}`,
         'elastic-api-version': ELASTIC_API_VERSION,
       };
+
+      return { sessionHeaders, apiKeyHeaders };
+    };
+
+    apiTest('the owner of a private agent can run it on Task Manager', async ({ apiClient }) => {
+      const { sessionHeaders, apiKeyHeaders } = await loginAndCreateApiKey(apiClient);
 
       const createAgentResponse = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
         headers: sessionHeaders,
@@ -204,5 +213,50 @@ apiTest.describe(
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
     });
+
+    apiTest(
+      'the agent can write metadata to its owner private conversation on Task Manager',
+      async ({ apiClient }) => {
+        const { sessionHeaders, apiKeyHeaders } = await loginAndCreateApiKey(apiClient);
+
+        const createResponse = await apiClient.post(`${API_AGENT_BUILDER}/conversations`, {
+          headers: sessionHeaders,
+          body: { template_id: 'investigation' },
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+
+        const { id: conversationId } = createResponse.body as { id: string };
+
+        setupAgentCallToolThenAnswer({
+          proxy: llmProxy,
+          toolName: 'set_conversation_metadata',
+          toolArg: { metadata: { severity: 'high' } },
+          response: 'Severity set',
+        });
+
+        const converseResponse = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
+          headers: apiKeyHeaders,
+          body: {
+            conversation_id: conversationId,
+            input: 'Set the severity to high',
+            connector_id: connectorId,
+            _execution_mode: 'task_manager',
+          },
+          responseType: 'json',
+        });
+        expect(converseResponse).toHaveStatusCode(200);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        const conversationResponse = await apiClient.get(
+          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
+          { headers: sessionHeaders, responseType: 'json' }
+        );
+        expect(conversationResponse).toHaveStatusCode(200);
+        expect((conversationResponse.body as Conversation).metadata).toMatchObject({
+          severity: 'high',
+        });
+      }
+    );
   }
 );
