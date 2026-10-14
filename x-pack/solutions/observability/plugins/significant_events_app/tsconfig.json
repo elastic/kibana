@@ -44,7 +44,6 @@
     "@kbn/spaces-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/streamlang",
-    "@kbn/nightshift-ai",
     "@kbn/streams-schema",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",

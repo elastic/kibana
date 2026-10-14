@@ -12,16 +12,27 @@ import { i18n } from '@kbn/i18n';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
 import { NightshiftAppHeader, type NightshiftAppHeaderProps } from '../app/app_header';
 import { useKibana } from '../hooks/use_kibana';
-import { CortexTab } from './cortex/tab';
-import { DecisionTreesTab } from './decision_trees/tab';
 import { useKnowledgeTabsAvailability } from './hooks/use_knowledge_tabs_availability';
 import {
   getVisibleKnowledgeTabs,
-  isAnyKnowledgeTabLoading,
+  getDefaultKnowledgeTab,
   isKnowledgeTabId,
   KNOWLEDGE_TAB_LABELS,
 } from './knowledge_tabs';
-import { MemoryTab } from './memory/tab';
+const KnowledgeIndicatorsTab = React.lazy(() =>
+  import('./knowledge_indicators/tab').then((module) => ({
+    default: module.KnowledgeIndicatorsTab,
+  }))
+);
+const CortexTab = React.lazy(() =>
+  import('./cortex/tab').then((module) => ({ default: module.CortexTab }))
+);
+const MemoryTab = React.lazy(() =>
+  import('./memory/tab').then((module) => ({ default: module.MemoryTab }))
+);
+const DecisionTreesTab = React.lazy(() =>
+  import('./decision_trees/tab').then((module) => ({ default: module.DecisionTreesTab }))
+);
 
 const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNightshiftLabel', {
   defaultMessage: 'Nightshift',
@@ -62,12 +73,12 @@ export function KnowledgePage({
     tab !== undefined && isKnowledgeTabId(tab) && availability[tab].isEnabled;
 
   if (!isVisibleRequestedTab) {
-    if (isAnyKnowledgeTabLoading(availability)) {
+    const defaultTab = getDefaultKnowledgeTab(availability);
+    if (defaultTab === 'loading') {
       return <KnowledgePageLoading />;
     }
 
-    const [firstVisibleTab] = getVisibleKnowledgeTabs(availability);
-    return <Redirect to={firstVisibleTab ? `/knowledge/${firstVisibleTab}` : '/'} />;
+    return <Redirect to={defaultTab ? `/knowledge/${defaultTab}` : '/'} />;
   }
 
   const visibleTabs = getVisibleKnowledgeTabs(availability);
@@ -95,9 +106,12 @@ export function KnowledgePage({
         tabs={tabs}
       />
       <EuiPageTemplate.Section component="div" restrictWidth={false}>
-        {tab === 'cortex' && <CortexTab />}
-        {tab === 'memory' && <MemoryTab />}
-        {tab === 'decision_trees' && <DecisionTreesTab />}
+        <React.Suspense fallback={<KnowledgePageLoading />}>
+          {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTab />}
+          {tab === 'cortex' && <CortexTab />}
+          {tab === 'memory' && <MemoryTab />}
+          {tab === 'decision_trees' && <DecisionTreesTab />}
+        </React.Suspense>
       </EuiPageTemplate.Section>
     </>
   );

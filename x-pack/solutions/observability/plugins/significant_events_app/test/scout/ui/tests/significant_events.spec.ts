@@ -74,7 +74,7 @@ test.describe(
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
 
-      for (const label of ['Sources', 'Knowledge Indicators', 'Rules', 'Significant events']) {
+      for (const label of ['Sources', 'Rules', 'Significant events']) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
       await expect(tabBar.getByRole('tab', { name: 'Detections' })).toHaveCount(0);

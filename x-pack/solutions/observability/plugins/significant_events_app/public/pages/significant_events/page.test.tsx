@@ -101,7 +101,6 @@ jest.mock('../../components/redirect_to', () => ({
   ),
 }));
 jest.mock('./components/knowledge_indicators_table', () => ({
-  KnowledgeIndicatorsTable: () => null,
   KiGenerationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('./components/queries_table/queries_table', () => ({
