@@ -74,7 +74,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.aiAnonymizationSettings.settingsTab.maskingHelpText"
-          defaultMessage="Applies to every AI feature that uses the inference plugin's chatComplete API."
+          defaultMessage="Applies to AI features in this space."
         />
       </EuiText>
 
