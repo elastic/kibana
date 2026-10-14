@@ -43,8 +43,11 @@ stays trustworthy.
 
 The numbers above come from the baseline run on main of 2026-10-14 (golden 1.000 / 0.921 / 0.917 and
 hard 1.000 / 0.959 / 0.952 for Groundedness / Factuality / Relevance). They are a starting point
-for review, not a promise. The playbook allows unratified thresholds for the MVP slice but requires
-sign-off before any Pilot claim.
+for review, not a promise: a golden rerun the same day scored Relevance 0.800, so with two or
+three judged rows per cohort a single run moves by about ±0.1. Code scores are gated in the suite
+(any 0 or MISSING fails the cohort); judge scores are compared against the rolling `main` history
+with `node scripts/evals compare` rather than against these fixed numbers. The playbook allows
+unratified thresholds for the MVP slice but requires sign-off before any Pilot claim.
 
 ## Threshold tradeoffs
 

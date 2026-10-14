@@ -25,7 +25,12 @@ import {
   runJudgeAnalyses,
   type JudgeProvenance,
 } from './judge_analysis';
-import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
+import {
+  assertCodeScoresPass,
+  createRunCollector,
+  logRunSummary,
+  withScoreCollection,
+} from './run_summary';
 
 export type HuntEvaluator = Evaluator<HuntWatchExample, HuntArtifacts>;
 
@@ -122,7 +127,7 @@ export const createEvaluateDataset =
       ...createJudgeEvaluators(judge),
     ];
     const judged = evaluatorOverrides === undefined;
-    const sink: ScoreSink = new Map();
+    const collector = createRunCollector();
     log.info(`Running Hunt Watch evaluation: "${dataset.name}" (${dataset.examples.length} rows)`);
 
     await executorClient.runExperiment(
@@ -149,8 +154,9 @@ export const createEvaluateDataset =
           return { ...artifacts, ...analyses };
         },
       },
-      withScoreCollection(all, sink, log)
+      withScoreCollection(all, collector, log)
     );
 
-    logRunSummary({ sink, datasetName: dataset.name, log });
+    logRunSummary({ sink: collector.scores, datasetName: dataset.name, log });
+    assertCodeScoresPass(dataset.name, collector.codeFailures);
   };
