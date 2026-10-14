@@ -79,9 +79,11 @@ export const BuiltInPatternsTable: React.FC<BuiltInPatternsTableProps> = ({
       ])
     );
     // Force-enable for the preview so a disabled built-in still shows an example output.
+    // Silent: the example column degrades to a dash if the tester is disabled.
     test(
       sampleInput,
-      patterns.map((pattern) => ({ ...pattern, enabled: true }))
+      patterns.map((pattern) => ({ ...pattern, enabled: true })),
+      { silent: true }
     );
     // Only recompute when the set of built-in patterns itself changes, not on every enable toggle.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -11,9 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { BuiltInPatternsTable } from './built_in_patterns_table';
 
+const mockTest = jest.fn();
+
 jest.mock('../hooks/use_pattern_tester', () => ({
   usePatternTester: () => ({
-    test: jest.fn(),
+    test: mockTest,
     result: {
       maskedInput: { 'builtin-long': 'HOST_NAME_c149b11fb2b78fc39be80c6f5612b8a6219a4d75' },
     },
@@ -43,6 +45,16 @@ const renderTable = () =>
   );
 
 describe('BuiltInPatternsTable', () => {
+  beforeEach(() => {
+    mockTest.mockClear();
+  });
+
+  it('requests the example outputs silently so a disabled tester does not toast on every visit', () => {
+    renderTable();
+
+    expect(mockTest).toHaveBeenCalledWith(expect.anything(), expect.anything(), { silent: true });
+  });
+
   it('shows each built-in rule’s regex in a Pattern column', () => {
     renderTable();
 

@@ -41,7 +41,11 @@ export function usePatternTester() {
   const [error, setError] = useState<string | undefined>();
 
   const test = useCallback(
-    async (input: unknown, rules: RegexAnonymizationRule[]) => {
+    async (
+      input: unknown,
+      rules: RegexAnonymizationRule[],
+      { silent = false }: { silent?: boolean } = {}
+    ) => {
       setIsLoading(true);
       setError(undefined);
       try {
@@ -55,7 +59,9 @@ export function usePatternTester() {
         const bodyMessage = (e as { body?: { message?: string } })?.body?.message;
         const message = bodyMessage ?? (e instanceof Error ? e.message : String(e));
         setError(message);
-        notifications.toasts.addDanger({ title: message });
+        if (!silent) {
+          notifications.toasts.addDanger({ title: message });
+        }
         return undefined;
       } finally {
         setIsLoading(false);
