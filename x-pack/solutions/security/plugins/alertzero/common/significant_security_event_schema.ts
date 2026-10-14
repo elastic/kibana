@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 // The canonical reason list, reused rather than re-declared: a reason this schema does not
 // accept is an attachment `ai.attachment.add` rejects for telling the truth.
 import { HuntIncompleteReason } from '@kbn/alertzero-common';
@@ -50,7 +50,7 @@ export const huntIocSchema = lazySchema(() =>
  * Every timestamp is an ISO 8601 instant. `.datetime()` alone leaves the string unbounded,
  * and these arrive through attachment input, so cap them before the format check runs.
  */
-const isoDatetimeSchema = lazySchema(() => z.string().max(64).datetime());
+const isoDatetimeSchema = lazySchema(() => isoDateTime().max(64));
 
 const alertRefSchema = lazySchema(() =>
   z.object({

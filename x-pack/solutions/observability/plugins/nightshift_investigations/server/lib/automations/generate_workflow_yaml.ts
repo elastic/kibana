@@ -74,7 +74,6 @@ export function generateWorkflowYaml(
           title: isAlertTrigger ? '{{ trigger.rule.name }}' : automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
-          concurrency_key: automationId,
           ...(automation.execution.promptTemplate
             ? { message: automation.execution.promptTemplate }
             : {}),
@@ -98,23 +97,24 @@ function buildNotificationDestinations(
   automationId: string,
   automation: NightshiftAutomationAttributes
 ): InvestigationNotificationDestination[] | undefined {
-  const { completion } = automation;
-  if (
-    completion.action !== 'post_to_slack' ||
-    completion.targetMode !== 'channel' ||
-    !completion.destination
-  ) {
-    return undefined;
-  }
-  return [
-    {
+  const destinations: InvestigationNotificationDestination[] = [];
+  for (const completion of automation.completions) {
+    if (
+      completion.action !== 'post_to_slack' ||
+      completion.targetMode !== 'channel' ||
+      !completion.destination
+    ) {
+      continue;
+    }
+    destinations.push({
       type: 'slack',
       connector_id: completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID,
       params: { channel: completion.destination },
       automation_id: automationId,
       automation_name: automation.name,
-    },
-  ];
+    });
+  }
+  return destinations.length > 0 ? destinations : undefined;
 }
 
 function buildTriggers(
@@ -157,9 +157,12 @@ function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>
     // regex mode: KQL does not natively support regex — filter applied at investigation time.
   }
 
-  if (row.tags && row.tags.length > 0) {
-    const tagParts = row.tags.map((t) => `rule.tags: "${escapeKql(t)}"`);
-    parts.push(tagParts.length === 1 ? tagParts[0] : `(${tagParts.join(' OR ')})`);
+  const ruleMatchers = [
+    ...(row.ruleNames ?? []).map((name) => `rule.name: "${escapeKql(name)}"`),
+    ...(row.tags ?? []).map((tag) => `rule.tags: "${escapeKql(tag)}"`),
+  ];
+  if (ruleMatchers.length > 0) {
+    parts.push(ruleMatchers.length === 1 ? ruleMatchers[0] : `(${ruleMatchers.join(' OR ')})`);
   }
 
   return parts.join(' AND ');

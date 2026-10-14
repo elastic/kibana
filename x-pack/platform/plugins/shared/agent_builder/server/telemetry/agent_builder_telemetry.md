@@ -250,6 +250,7 @@ execution. For per-execution figures, and for pauses that were never resumed, se
 | `tool_calls` | integer | yes | Total number of tool-call steps in this round. |
 | `tool_call_errors` | integer | yes | Number of tool calls where all results were errors. |
 | `tools_invoked` | keyword[] | yes | Normalized tool IDs invoked (may contain duplicates for per-tool counts). |
+| `workflow_execution_id` | keyword | no | The workflow execution whose `ai.agent` step started the round. See [Round attribution](#round-attribution). |
 
 ### `agent_builder_execution_complete`
 
@@ -309,6 +310,7 @@ Fired when a round fails with an unrecoverable error.
 | `model_provider` | keyword | no | LLM provider identifier. |
 | `error_type` | keyword | yes | Sanitized/normalized error type or code. |
 | `error_message` | keyword | yes | Error message (truncated to 500 chars). |
+| `workflow_execution_id` | keyword | no | The workflow execution whose `ai.agent` step started the round. See [Round attribution](#round-attribution). |
 
 ### `agent_builder_tool_call_success`
 
@@ -356,6 +358,40 @@ only value.
 started from the Agent Builder UI or a direct call to the converse API carry no `origin`, and
 neither do rounds and tool calls from sub-agent runs, since a sub-agent opens its own execution
 without inheriting the parent's origin.
+
+### Round attribution
+
+`agent_builder_round_complete` and `agent_builder_round_error` carry an optional
+`workflow_execution_id`: for a round started by a workflow `ai.agent` step, the ID of that workflow
+execution, the same engine-generated ID the workflows engine reports as `workflowExecutionId`. It
+joins a round to the workflow run that started it, so a run's agent work (LLM calls, model, tool
+calls, round errors) can be counted per run; the engine already reports the run's token totals.
+
+- The `ai.agent` step passes it as the `workflowExecutionId` execution parameter for every round,
+  whether or not it sets `plugin-id`. No route accepts it.
+- A persistent sub-agent that such a round creates, or sends a message to, inherits it, so its
+  rounds join to the same run. Standalone sub-agent runs inherit it too, but report no round
+  events.
+- Rounds from the Agent Builder UI and the converse and chat APIs carry none.
+
+`agent_builder_execution_complete` and tool-call events don't carry it.
+
+The same id is the one source of the workflow run for EIS too: every LLM call of such an execution
+sends it to EIS as the `interactionId` connector telemetry field (the
+`X-Elastic-Inference-Interaction-Id` header), so EIS usage joins to the same run. Only the main
+agent's loop sends it, the same calls that carry the trace, user and space ids: the sub-agents it
+spawns (persistent or standalone) don't. An `interactionId` the caller set itself is kept. Only EIS
+inference endpoints get this header; other connectors receive only `pluginId` and `aggregateBy`.
+
+What it doesn't attribute:
+
+- The id is the workflow execution whose step ran the agent, not the root of a chain of workflows;
+  join through the engine's run events to reach the root.
+- Standalone sub-agent runs report no round events, so their work isn't counted per run.
+- Sub-agents' EIS calls carry no `interactionId`, so EIS usage grouped by run counts only the
+  main agent's calls.
+- A run that fails while it is being set up (for example, its connector can't be resolved) reports
+  no `agent_builder_round_error`, with or without the id.
 
 ### Skill CRUD events
 

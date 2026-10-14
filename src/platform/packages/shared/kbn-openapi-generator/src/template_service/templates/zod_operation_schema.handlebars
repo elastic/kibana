@@ -7,7 +7,7 @@
 
  {{> disclaimer}}
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 {{#if useZodHelpers}}
 import { isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 {{/if}}

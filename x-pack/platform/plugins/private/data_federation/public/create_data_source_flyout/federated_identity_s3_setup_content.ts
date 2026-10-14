@@ -60,7 +60,7 @@ POLICY_ARN=$(aws iam create-policy \\
     },
     {
       "Effect": "Allow",
-      "Action": [ "s3:ListBucket", "s3:GetBucketLocation" ],
+      "Action": [ "s3:ListBucket" ],
       "Resource": [ "arn:aws:s3:::\${BUCKET_NAME}" ]
     }
   ]
@@ -137,7 +137,7 @@ export const getS3FederatedIdentityManualSteps = ({
       'xpack.dataFederation.createFlyout.s3.federated.manual.step2.description',
       {
         defaultMessage:
-          'ListBucket and GetBucketLocation are needed so prefix and glob queries resolve, not just object reads. The policy covers the whole bucket, so narrow the object resource to a prefix for a tighter scope.',
+          'ListBucket is needed so prefix and glob queries resolve, not just object reads. The policy covers the whole bucket, so narrow the object resource to a prefix for a tighter scope.',
       }
     ),
     command: CREATE_READ_POLICY_COMMAND,

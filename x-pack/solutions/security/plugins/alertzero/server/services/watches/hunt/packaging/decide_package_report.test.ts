@@ -603,7 +603,7 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].actionInput?.parameters).toEqual({ entity_id: 'ent-1' });
   });
 
-  it('mints byte-identical host and process subject keys (frozen: a change renames every existing proposal)', () => {
+  it('mints pinned host and process subject keys (frozen: a change renames every live proposal)', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
@@ -620,28 +620,65 @@ describe('decidePackageReport', () => {
       catalog: { ok: true, actions: [isolateHost, killProcess] },
     });
     const byWorkflow = new Map(result.proposals.map((p) => [p.actionWorkflowId, p.subjectKey]));
-    // uuidv5(`conv-1|agent-a|system-security-action-isolate-host`) under the fixed namespace.
-    expect(byWorkflow.get(isolateHost.workflowId)).toBe('a1ec6d8b-714e-50a2-8715-d6b9cc4402a1');
-    // uuidv5(`conv-1|agent-a|system-security-action-kill-process|entity:ent-4242`).
-    expect(byWorkflow.get(killProcess.workflowId)).toBe('2ece4e12-63c6-5d82-8129-d056e8e7aa8f');
+    // uuidv5(`agent-a|system-security-action-isolate-host`) under the fixed namespace. No
+    // Investigation in the material: that is what lets two of them share a Proposal.
+    expect(byWorkflow.get(isolateHost.workflowId)).toBe('6f30494e-d19c-51d9-94b3-da6a6e4a17fd');
+    // uuidv5(`agent-a|system-security-action-kill-process|entity:ent-4242`).
+    expect(byWorkflow.get(killProcess.workflowId)).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
   });
 
   it('builds stable subject keys for the same host × action × process', () => {
-    expect(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        subjectId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
-    ).toBe(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        subjectId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
-    );
+    const key = {
+      subjectId: 'e',
+      actionWorkflowId: 'a',
+      processKey: 'p',
+    };
+
+    expect(buildProposalSubjectKey(key)).toBe(buildProposalSubjectKey({ ...key }));
+  });
+
+  it('builds different subject keys for a different host, action or process', () => {
+    const key = { subjectId: 'e', actionWorkflowId: 'a', processKey: 'p' };
+    const keys = [
+      buildProposalSubjectKey(key),
+      buildProposalSubjectKey({ ...key, subjectId: 'e2' }),
+      buildProposalSubjectKey({ ...key, actionWorkflowId: 'a2' }),
+      buildProposalSubjectKey({ ...key, processKey: 'p2' }),
+      buildProposalSubjectKey({ subjectId: 'e', actionWorkflowId: 'a' }),
+    ];
+
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  describe('which Investigation raised a proposal', () => {
+    const decideIn = (
+      investigationId: string,
+      catalog: Parameters<typeof decidePackageReport>[0]['catalog']
+    ) =>
+      decidePackageReport({
+        conversationId: investigationId,
+        state: baseHitState(),
+        catalog,
+      });
+
+    it('does not change the subject key of a host action: two Investigations on one host share it, so their proposals converge', () => {
+      const catalog = { ok: true as const, actions: [isolateHost] };
+
+      const first = decideIn('conv-1', catalog).proposals.map((p) => p.subjectKey);
+      const second = decideIn('conv-2', catalog).proposals.map((p) => p.subjectKey);
+
+      expect(first.length).toBeGreaterThan(0);
+      expect(second).toEqual(first);
+    });
+
+    it('does change the key of the analyst recommendation, which has no host or action to share', () => {
+      const catalog = { ok: false as const, reason: 'catalog_error' as const };
+
+      const keyIn = (id: string) => decideIn(id, catalog).proposals.map((p) => p.subjectKey);
+
+      expect(keyIn('conv-1')).toEqual(keyIn('conv-1'));
+      expect(keyIn('conv-1')).not.toEqual(keyIn('conv-2'));
+    });
   });
 
   it('carries subject and hostName on host and process mints', () => {
@@ -1189,31 +1226,28 @@ describe('decidePackageReport', () => {
       ).toEqual({ endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } });
     });
 
-    it('keeps the kill/suspend/isolate subject keys byte-identical to the pre-table material', () => {
+    it('pins the kill/suspend/isolate subject keys (frozen: a change renames every live proposal)', () => {
       const processKey = 'pid:4212';
       expect(
         buildProposalSubjectKey({
-          conversationId,
           subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
           processKey,
         })
-      ).toBe('f13e9429-d7c7-56a4-b6d7-220ca3f59315');
+      ).toBe('4571fe1a-2cf5-5403-9068-fbd7fe17ac0e');
       expect(
         buildProposalSubjectKey({
-          conversationId,
           subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
           processKey,
         })
-      ).toBe('75bb185c-5273-55cb-bcb3-5ebb05673d05');
+      ).toBe('290fbfde-55da-5eca-8081-7418fa50a1f0');
       expect(
         buildProposalSubjectKey({
-          conversationId,
           subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
         })
-      ).toBe('9336b59d-3846-5306-9cb9-1b588da3694b');
+      ).toBe('206b47f2-780e-5992-9935-6fadb64483fd');
     });
 
     it('mints the same subject keys regardless of catalog order', () => {
