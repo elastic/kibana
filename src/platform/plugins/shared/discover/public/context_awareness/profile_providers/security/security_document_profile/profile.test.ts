@@ -141,10 +141,23 @@ describe('createSecurityDocumentProfileProvider — resolve', () => {
     ).toEqual({ isMatch: true, context: { type: DocumentType.Default } });
   });
 
-  it('does not match without Security data source context', () => {
+  it('matches in Security navigation when another data source profile won', () => {
     expect(
       provider.resolve({
         rootContext: { profileId: 'security-root-profile', solutionType: SolutionType.Security },
+        dataSourceContext: {
+          profileId: 'sparkline-data-source-profile',
+          category: DataSourceCategory.Default,
+        },
+        record,
+      })
+    ).toEqual({ isMatch: true, context: { type: DocumentType.Default } });
+  });
+
+  it('does not match outside Security navigation without a Security data source', () => {
+    expect(
+      provider.resolve({
+        rootContext,
         dataSourceContext: {
           profileId: 'default-data-source-profile',
           category: DataSourceCategory.Default,
