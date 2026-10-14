@@ -56,28 +56,18 @@ export function fitHitlTextPreservingSuffix(
   return `${prompt.slice(0, promptBudget)}\n\n${suffix}`;
 }
 
-/** Shortens text around `link` so the link itself is not cut. */
-export function fitHitlRenderedTextPreservingLink(
-  text: string,
-  link: string,
-  maxLength: number
-): string {
-  if (link.length > maxLength) {
-    throw new Error(
-      `HITL resume links are ${link.length} characters and exceed the ${maxLength} character connector limit`
-    );
-  }
-  if (text.length <= maxLength) {
-    return text;
-  }
-  const linkAt = text.indexOf(link);
-  if (linkAt === -1) {
-    return text.slice(0, maxLength);
-  }
-  const budget = maxLength - link.length;
-  const prefix = text.slice(0, linkAt).slice(0, budget);
-  const after = text.slice(linkAt + link.length).slice(0, Math.max(0, budget - prefix.length));
-  return `${prefix}${link}${after}`;
+/** Makes step text safe to place next to an HTML anchor. Teams renders the body as HTML. */
+export function escapeTeamsHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** Teams message HTML. The channel renders this as an anchor. */
+export function teamsHtmlLink(label: string, url: string): string {
+  return `<a href="${escapeTeamsHtml(url)}">${escapeTeamsHtml(label)}</a>`;
 }
 
 /** Builds Actions params for a Microsoft Teams `sendChannelMessage` call. */
@@ -92,7 +82,7 @@ export function buildTeamsSendChannelMessageInput(
       teamId,
       channelId,
       content,
-      contentType: 'text' as const,
+      contentType: 'html' as const,
     },
   };
 }

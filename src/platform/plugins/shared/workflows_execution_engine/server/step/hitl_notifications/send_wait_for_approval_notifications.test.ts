@@ -311,6 +311,11 @@ describe('send_wait_for_approval_notifications', () => {
 
       await sendWaitForApprovalNotifications({
         ...baseNotifyArgs,
+        message: 'Isolate host <MAMBA.HOST>?',
+        resumeLinks: {
+          approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+          rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
+        },
         channels: {
           teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
         },
@@ -325,9 +330,9 @@ describe('send_wait_for_approval_notifications', () => {
           subActionParams: {
             teamId: 'team-1',
             channelId: 'channel-1',
-            contentType: 'text',
+            contentType: 'html',
             content:
-              'Approve change?\n\nApprove: https://kibana.example/approve\nDecline: https://kibana.example/reject',
+              'Isolate host &lt;MAMBA.HOST&gt;?\n\n<br><a href="https://kibana.example/approve?token=abc&amp;approved=true">Approve</a> <a href="https://kibana.example/reject?token=abc&amp;approved=false">Decline</a>',
           },
         },
         abortController: expect.any(AbortController),

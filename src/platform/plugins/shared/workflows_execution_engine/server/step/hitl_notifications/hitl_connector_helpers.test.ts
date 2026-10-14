@@ -9,10 +9,11 @@
 
 import {
   assertConnectorSucceeded,
-  fitHitlRenderedTextPreservingLink,
+  escapeTeamsHtml,
   fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
   TEAMS_CONTENT_MAX_LENGTH,
+  teamsHtmlLink,
 } from './hitl_connector_helpers';
 
 describe('assertConnectorSucceeded', () => {
@@ -72,13 +73,11 @@ describe('fitHitlTextPreservingSuffix', () => {
   });
 });
 
-describe('fitHitlRenderedTextPreservingLink', () => {
-  it('keeps the form link when the rendered message is too long', () => {
-    const link = 'https://kibana.example/form';
-    const text = `${'a'.repeat(TEAMS_CONTENT_MAX_LENGTH)}${link}${'b'.repeat(20)}`;
-    const fitted = fitHitlRenderedTextPreservingLink(text, link, TEAMS_CONTENT_MAX_LENGTH);
-
-    expect(fitted.length).toBe(TEAMS_CONTENT_MAX_LENGTH);
-    expect(fitted.includes(link)).toBe(true);
+describe('teamsHtmlLink', () => {
+  it('escapes the step text and keeps the href intact', () => {
+    expect(escapeTeamsHtml('Host <web-01> & "q"')).toBe('Host &lt;web-01&gt; &amp; &quot;q&quot;');
+    expect(teamsHtmlLink('Approve', 'https://kibana.example/resume?token=abc&approved=true')).toBe(
+      '<a href="https://kibana.example/resume?token=abc&amp;approved=true">Approve</a>'
+    );
   });
 });

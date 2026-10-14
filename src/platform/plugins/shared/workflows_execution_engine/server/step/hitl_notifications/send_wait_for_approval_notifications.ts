@@ -21,10 +21,12 @@ import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
   buildTeamsSendChannelMessageInput,
+  escapeTeamsHtml,
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
   TEAMS_CONTENT_MAX_LENGTH,
+  teamsHtmlLink,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -74,8 +76,8 @@ function buildTeamsApprovalMessage({
   rejectUrl: string;
 }): string {
   return fitHitlTextPreservingSuffix(
-    message,
-    `${approveLabel}: ${approveUrl}\n${rejectLabel}: ${rejectUrl}`,
+    escapeTeamsHtml(message),
+    `<br>${teamsHtmlLink(approveLabel, approveUrl)} ${teamsHtmlLink(rejectLabel, rejectUrl)}`,
     TEAMS_CONTENT_MAX_LENGTH
   );
 }

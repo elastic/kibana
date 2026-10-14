@@ -25,11 +25,12 @@ import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
   buildTeamsSendChannelMessageInput,
+  escapeTeamsHtml,
   executeHitlHttpChannel,
-  fitHitlRenderedTextPreservingLink,
   fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
   TEAMS_CONTENT_MAX_LENGTH,
+  teamsHtmlLink,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -47,8 +48,8 @@ function buildDefaultInputTeamsMessage({
   formUrl: string;
 }): string {
   return fitHitlTextPreservingSuffix(
-    stepMessage,
-    `Open form: ${formUrl}`,
+    escapeTeamsHtml(stepMessage),
+    `<br>${teamsHtmlLink(DEFAULT_HITL_INPUT_OPEN_FORM_LABEL, formUrl)}`,
     TEAMS_CONTENT_MAX_LENGTH
   );
 }
@@ -272,19 +273,21 @@ export async function sendWaitForInputNotifications({
   const teamId = teamsConfig?.['team-id'];
   const channelId = teamsConfig?.['channel-id'];
   if (teamsConnectorId && teamId && channelId) {
-    const content =
+    const renderedComment =
       teamsConfig.message != null
-        ? fitHitlRenderedTextPreservingLink(
-            resolveWaitForInputChannelMessage({
-              channelMessageTemplate: teamsConfig.message,
-              stepMessage,
-              formUrl,
-              renderTemplate,
-            }),
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: teamsConfig.message,
+            stepMessage,
             formUrl,
-            TEAMS_CONTENT_MAX_LENGTH
-          )
-        : buildDefaultInputTeamsMessage({ stepMessage, formUrl });
+            renderTemplate,
+          })
+        : undefined;
+    if (renderedComment != null && renderedComment.length > TEAMS_CONTENT_MAX_LENGTH) {
+      throw new Error(
+        `HITL Teams message is ${renderedComment.length} characters and exceeds the ${TEAMS_CONTENT_MAX_LENGTH} character connector limit`
+      );
+    }
+    const content = renderedComment ?? buildDefaultInputTeamsMessage({ stepMessage, formUrl });
 
     const result = await connectorExecutor.execute({
       connectorType: 'microsoft-teams',

@@ -225,8 +225,9 @@ describe('sendWaitForInputNotifications', () => {
         subActionParams: {
           teamId: 'team-1',
           channelId: 'channel-1',
-          contentType: 'text',
-          content: 'Please provide input\n\nOpen form: https://kibana.example/form',
+          contentType: 'html',
+          content:
+            'Please provide input\n\n<br><a href="https://kibana.example/form">Open form</a>',
         },
       },
       abortController: expect.any(AbortController),
