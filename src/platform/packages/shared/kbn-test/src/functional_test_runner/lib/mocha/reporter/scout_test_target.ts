@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import getopts from 'getopts';
+import type { ServerlessProductTier, ServerlessProjectType } from '@kbn/es';
 import type { ScoutTargetDomain } from '@kbn/scout-info';
 import { ScoutTestTarget } from '@kbn/scout-info';
+import type { ServerlessProject } from '@kbn/test-kibana-server';
+import { getServerlessProject } from '@kbn/test-kibana-server';
 import type { Config as FTRConfig } from '../../config';
 
-export const SERVERLESS_DOMAINS: Readonly<Record<string, ScoutTargetDomain>> = {
+type ServerlessProjectKey =
+  | ServerlessProjectType
+  | `${ServerlessProjectType}:${ServerlessProductTier}`;
+
+export const SERVERLESS_DOMAINS: Readonly<
+  Partial<Record<ServerlessProjectKey, ScoutTargetDomain>>
+> = {
   es: 'search',
   'oblt:complete': 'observability_complete',
   'oblt:logs_essentials': 'observability_logs_essentials',
@@ -20,45 +28,6 @@ export const SERVERLESS_DOMAINS: Readonly<Record<string, ScoutTargetDomain>> = {
   'security:essentials': 'security_essentials',
   'security:search_ai_lake': 'security_ease',
   vectordb: 'vectordb',
-};
-
-// Kibana keeps the last value when a setting is passed more than once
-const getStringOption = (options: getopts.ParsedOptions, name: string): string | undefined => {
-  const value: unknown = [options[name]].flat().at(-1);
-  return typeof value === 'string' && value.length > 0 ? value : undefined;
-};
-
-const parseJsonArray = <T>(value: string | undefined): T[] => {
-  try {
-    const parsed: unknown = JSON.parse(value ?? '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-const getProductTier = (
-  options: getopts.ParsedOptions,
-  projectType: string
-): string | undefined => {
-  if (projectType === 'security') {
-    const productTypes = parseJsonArray<{ product_line?: string; product_tier?: string }>(
-      getStringOption(options, 'xpack.securitySolutionServerless.productTypes')
-    );
-    const entry =
-      productTypes.find(({ product_line: productLine }) => productLine === 'security') ??
-      productTypes[0];
-    return entry?.product_tier ?? 'complete';
-  }
-
-  if (projectType === 'oblt') {
-    const products = parseJsonArray<{ name?: string; tier?: string }>(
-      getStringOption(options, 'pricing.tiers.products')
-    );
-    return products.find(({ name }) => name === 'observability')?.tier ?? 'complete';
-  }
-
-  return undefined;
 };
 
 /**
@@ -70,14 +39,21 @@ export const getScoutTargetDomain = (config: FTRConfig): ScoutTargetDomain | und
     return 'classic';
   }
 
-  const options = getopts(config.get('kbnTestServer.serverArgs', []));
-  const projectType = getStringOption(options, 'serverless');
-  if (projectType === undefined) {
+  let serverlessProject: ServerlessProject | undefined;
+  try {
+    serverlessProject = getServerlessProject(config.get('kbnTestServer.serverArgs', []));
+  } catch {
+    // Runs against existing deployments don't start Kibana, so its arguments may never have been validated
+    return undefined;
+  }
+  if (serverlessProject === undefined) {
     return undefined;
   }
 
-  const tier = getProductTier(options, projectType);
-  return SERVERLESS_DOMAINS[tier === undefined ? projectType : `${projectType}:${tier}`];
+  const { projectType, productTier } = serverlessProject;
+  const key: ServerlessProjectKey =
+    productTier === undefined ? projectType : `${projectType}:${productTier}`;
+  return SERVERLESS_DOMAINS[key];
 };
 
 /**

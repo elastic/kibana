@@ -149,18 +149,6 @@ describe('getScoutTargetDomain', () => {
     expect(getScoutTargetDomain(createServerlessConfig(serverArgs))).toBe(domain);
   });
 
-  it('uses the last value when an argument is repeated', () => {
-    const serverArgs = [
-      '--serverless=es',
-      '--serverless=oblt',
-      obltProducts('complete'),
-      obltProducts('logs_essentials'),
-    ];
-    expect(getScoutTargetDomain(createServerlessConfig(serverArgs))).toBe(
-      'observability_logs_essentials'
-    );
-  });
-
   it.each([
     [[]],
     [['--serverless']],
@@ -176,9 +164,8 @@ describe('getScoutTargetDomain', () => {
     expect(getScoutTargetDomain(createServerlessConfig(serverArgs))).toBeUndefined();
   });
 
-  it('defaults to the complete tier for unparsable tiers', () => {
-    const config = createServerlessConfig(['--serverless=oblt', '--pricing.tiers.products=nope']);
-    expect(getScoutTargetDomain(config)).toBe('observability_complete');
+  it('returns undefined for invalid Kibana CLI arguments', () => {
+    expect(getScoutTargetDomain(createServerlessConfig(['serverless=oblt']))).toBeUndefined();
   });
 
   it('maps every serverless Scout test target domain', () => {
