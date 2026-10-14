@@ -183,18 +183,23 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
       calculateRelevanceScore,
       'relevance_summary',
       ({ output, correctnessAnalysis, score, label }) => {
+        // The label of record is derived in code from the claim tags the judge emitted, not from
+        // the judge's own `relevance_summary`, which collapses to one label on some judges.
         // An empty response has nothing to be relevant about. The judge tends to emit a single
         // central meta-claim about the emptiness, which would otherwise score 1.0.
         const responseIsEmpty = isAgentResponseEmpty(output);
-        const expectedLabel = responseIsEmpty
+        const derivedLabel = responseIsEmpty
           ? 'IRRELEVANT'
           : deriveRelevanceLabel(correctnessAnalysis.analysis ?? []);
 
         return {
           score: responseIsEmpty ? 0 : score,
-          label: responseIsEmpty ? 'IRRELEVANT' : label,
-          // The judge's label is kept as emitted; this flag only makes drift from the rubric measurable.
-          extraMetadata: { relevanceLabelConsistent: label === expectedLabel },
+          label: derivedLabel,
+          // The judge's label is kept so drift from the code-derived label stays measurable.
+          extraMetadata: {
+            judgeRelevanceLabel: label,
+            relevanceLabelConsistent: label === derivedLabel,
+          },
         };
       }
     ),
