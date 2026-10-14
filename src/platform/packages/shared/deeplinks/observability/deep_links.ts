@@ -108,9 +108,9 @@ export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
 
-export type SignificantEventsLinkId = 'sources' | 'events' | 'rules';
+export type SignificantEventsLinkId = 'events' | 'rules';
 
-export type NightshiftLinkId = 'knowledge_indicators';
+export type NightshiftLinkId = 'knowledge_indicators' | 'sources';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'
