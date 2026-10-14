@@ -24,7 +24,13 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, buildCreateRuleData, buildWorkflowYaml } from '../fixtures';
+import {
+  apiTest,
+  buildCreateActionPolicyData,
+  buildCreateRuleData,
+  buildWorkflowYaml,
+  testData,
+} from '../fixtures';
 
 const SOURCE_INDEX = 'test-alerting-v2-dispatch-workflow-source';
 const ACTION_POLICY_ID = 'dispatch-workflow-policy';
@@ -36,7 +42,7 @@ apiTest.describe(
   () => {
     let workflowId: string;
 
-    apiTest.beforeAll(async ({ apiServices, log }) => {
+    apiTest.beforeAll(async ({ apiClient, apiServices, log, samlAuth }) => {
       log.info('Cleaning up alert events, rule events, rules and action policies');
       await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
@@ -58,11 +64,22 @@ apiTest.describe(
       workflowId = workflow.id;
       log.info(`Created workflow [${workflowId}]`);
 
-      await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_ID, {
-        name: 'Dispatch workflow policy',
-        description: 'Catch-all policy whose destination is a real workflow',
-        destinations: [{ type: 'workflow', id: workflowId }],
-      });
+      // The policy stores an API key minted from the request credential. With UIAM (serverless)
+      // that must be a UIAM credential, which basic auth used by `apiServices` is not, so the
+      // policy is created with an interactive user session, like the UI does.
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const createPolicyResponse = await apiClient.put(
+        `${testData.ACTION_POLICY_API_PATH}/${ACTION_POLICY_ID}`,
+        {
+          headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+          body: buildCreateActionPolicyData({
+            name: 'Dispatch workflow policy',
+            description: 'Catch-all policy whose destination is a real workflow',
+            destinations: [{ type: 'workflow', id: workflowId }],
+          }),
+        }
+      );
+      expect(createPolicyResponse).toHaveStatusCode(201);
       log.info(
         `Created action policy [${ACTION_POLICY_ID}] with destination workflow [${workflowId}]`
       );

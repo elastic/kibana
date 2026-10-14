@@ -46,6 +46,17 @@ export interface WorkflowsApiService {
   waitForFinishedExecution: (workflowId: string) => Promise<WorkflowExecutionSummary>;
 }
 
+const describeExecutions = (executions: WorkflowExecutionSummary[]): string =>
+  executions.length === 0
+    ? 'none'
+    : executions
+        .map(
+          ({ id, status, triggeredBy, executedBy, error }) =>
+            `${id}(status=${status}, triggeredBy=${triggeredBy}, executedBy=${executedBy}, ` +
+            `error=${JSON.stringify(error)})`
+        )
+        .join('; ');
+
 export const getWorkflowsApiService = ({
   log,
   kbnClient,
@@ -80,6 +91,9 @@ export const getWorkflowsApiService = ({
 
   waitForFinishedExecution: (workflowId) =>
     measurePerformanceAsync(log, 'workflows.waitForFinishedExecution', async () => {
+      let seen: WorkflowExecutionSummary[] = [];
+      let lastLogged = '';
+
       const findFinished = async (): Promise<WorkflowExecutionSummary | undefined> => {
         const response = await kbnClient.request<WorkflowExecutionListResponse>({
           method: 'GET',
@@ -87,17 +101,31 @@ export const getWorkflowsApiService = ({
           headers: COMMON_HEADERS,
           retries: 0,
         });
-        return response.data.results.find(({ status }) =>
-          TERMINAL_EXECUTION_STATUSES.includes(status)
-        );
+        seen = response.data.results;
+
+        const summary = describeExecutions(seen);
+        if (summary !== lastLogged) {
+          lastLogged = summary;
+          log.info(`Executions of workflow [${workflowId}]: ${summary}`);
+        }
+
+        return seen.find(({ status }) => TERMINAL_EXECUTION_STATUSES.includes(status));
       };
 
-      await expect
-        .poll(async () => (await findFinished())?.id, {
-          timeout: POLL_TIMEOUT_MS,
-          intervals: [POLL_INTERVAL_MS],
-        })
-        .toBeDefined();
+      try {
+        await expect
+          .poll(async () => (await findFinished())?.id, {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          })
+          .toBeDefined();
+      } catch (error) {
+        throw new Error(
+          `Workflow [${workflowId}] has no finished execution after ${POLL_TIMEOUT_MS}ms. ` +
+            `Executions seen: ${describeExecutions(seen)}`,
+          { cause: error }
+        );
+      }
 
       const execution = await findFinished();
       if (!execution) {
