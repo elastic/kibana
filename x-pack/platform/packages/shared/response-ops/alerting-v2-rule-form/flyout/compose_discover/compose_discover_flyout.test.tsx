@@ -34,6 +34,7 @@ type CapturedFlyoutOnClose = EuiFlyoutProps['onClose'];
 let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
 let latestFlyoutKey: number | undefined;
 let latestFlyoutSession: EuiFlyoutProps['session'];
+let latestFlyoutMenuTitle: string | undefined;
 
 jest.mock('@elastic/eui', () => {
   const ReactActual = jest.requireActual('react') as typeof import('react');
@@ -48,6 +49,7 @@ jest.mock('@elastic/eui', () => {
           latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
           latestFlyoutKey = (props as { 'data-flyout-key'?: number })['data-flyout-key'];
           latestFlyoutSession = props.session;
+          latestFlyoutMenuTitle = props.flyoutMenuProps?.title;
         }
         return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
       }
@@ -415,6 +417,7 @@ describe('ComposeDiscoverFlyout', () => {
     latestFlyoutOnClose = undefined;
     latestFlyoutKey = undefined;
     latestFlyoutSession = undefined;
+    latestFlyoutMenuTitle = undefined;
     sandboxFlyoutProps = undefined;
     yamlRuleFormProps = undefined;
     readCommittedQuery = undefined;
@@ -561,7 +564,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByText('Edit rule')).toBeInTheDocument();
     });
 
-    it('keeps edit and clone off the managed session so the title can follow the rule name', () => {
+    it('keeps the managed session title stable when the rule name changes', () => {
       renderFlyout({
         mode: 'edit',
         ruleId: 'rule-1',
@@ -581,12 +584,14 @@ describe('ComposeDiscoverFlyout', () => {
         },
       });
 
-      expect(latestFlyoutSession).toBe('never');
+      expect(latestFlyoutSession).toBe('start');
+      expect(latestFlyoutMenuTitle).toBe('Edit CPU high');
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
 
       expect(screen.getByText('Edit changed')).toBeInTheDocument();
-      expect(latestFlyoutSession).toBe('never');
+      expect(latestFlyoutSession).toBe('start');
+      expect(latestFlyoutMenuTitle).toBe('Edit CPU high');
       expect(latestFlyoutKey).toBe(0);
     });
 
@@ -1044,7 +1049,9 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
-      expect(latestFlyoutKey).toBe(keyAfterEdit);
+      // EUI unregisters the session before onClose. Re-registering keeps the
+      // panel up, and the query sandbox stays a child of that session.
+      expect(latestFlyoutKey).toBe((keyAfterEdit ?? 0) + 1);
       expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
     });
 

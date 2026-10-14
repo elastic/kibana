@@ -458,14 +458,12 @@ export function ComposeDiscoverFlyout({
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
   /*
-   * Create joins an EUI session so it can stack on the option picker. That
-   * session calls closeAllFlyouts() before onClose, so the flyout has to
+   * Every mode joins an EUI session. Create stacks on the option picker.
+   * Edit and clone need the same session so the query sandbox inherits it:
+   * an unmanaged sandbox is a second overlay and covers the YAML editor.
+   * The session calls closeAllFlyouts() before onClose, so the flyout has to
    * remount to stay up while the unsaved-changes modal is open.
-   * Edit and clone stay unmanaged. A managed session re-registers whenever
-   * flyoutMenuProps.title changes, which tears the session down on every
-   * rule-name keystroke, and the remount drops in-progress fields.
    */
-  const isManagedFlyoutSession = mode === 'create';
   const { flyoutKey, reregister } = useEuiFlyoutReregister();
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
@@ -542,13 +540,10 @@ export function ComposeDiscoverFlyout({
   const suspendingCloseRef = useRef(false);
 
   const restoreFlyoutAfterEuiClose = useCallback(() => {
-    if (!isManagedFlyoutSession) {
-      return;
-    }
     suspendingCloseRef.current = true;
     reopenChildRef.current = yamlModeRef.current || childOpenRef.current;
     reregister();
-  }, [isManagedFlyoutSession, reregister]);
+  }, [reregister]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -973,6 +968,12 @@ export function ComposeDiscoverFlyout({
   /** Create, edit, and clone share the unified ↔ split-tab sandbox toggle. */
   const supportsUnifiedEditorToggle = isCreate || isEditing;
   const title = getFlyoutTitle({ mode, builderType, ruleName: watchedRuleName });
+  /*
+   * EUI re-registers the session whenever flyoutMenuProps.title changes, which
+   * closes this flyout and the query sandbox. The heading follows the rule
+   * name; the title EUI registered at open stays put.
+   */
+  const sessionTitleRef = useRef(title);
 
   const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
@@ -1420,9 +1421,9 @@ export function ComposeDiscoverFlyout({
           <EuiFlyout
             key={flyoutKey}
             type="overlay"
-            session={isManagedFlyoutSession ? 'start' : 'never'}
-            historyKey={isManagedFlyoutSession ? historyKey : undefined}
-            flyoutMenuProps={isManagedFlyoutSession ? { title } : undefined}
+            session="start"
+            historyKey={historyKey}
+            flyoutMenuProps={{ title: sessionTitleRef.current }}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
             size={STACKED_FLYOUT_SIZE}
