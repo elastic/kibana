@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/i18n'
   - '@kbn/es-query'
+  - '@kbn/flyout-template'
   - '@kbn/ui-callout'
   - '@kbn/ui-theme'
   - '@kbn/synthtrace-client'
@@ -181,6 +182,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/lens-common'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/genai-common'
 tags:
   - plugin
   - prod

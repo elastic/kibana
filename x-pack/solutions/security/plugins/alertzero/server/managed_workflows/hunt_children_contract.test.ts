@@ -6,6 +6,13 @@
  */
 
 import { parse } from 'yaml';
+import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
+import { PROPOSAL_BY_ID_URL } from '@kbn/proposals-common';
+import {
+  ASSET_CRITICALITY_LEVELS,
+  CONFIRMED_FINDING_CRITICALITY,
+  CRITICAL_FINDING_CRITICALITY,
+} from '../../common/proposals/asset_criticality';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
@@ -22,6 +29,7 @@ import {
   HUNT_INDEX_SCOPE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
+  WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
 
 interface NestedStep {
@@ -33,10 +41,21 @@ interface NestedStep {
   'on-failure'?: { continue?: boolean; fallback?: NestedStep[] };
 }
 
+const outputNames = (workflow: { outputs?: ParsedWorkflow['outputs'] }): string[] => {
+  const { outputs } = workflow;
+  if (!outputs) return [];
+  return Array.isArray(outputs)
+    ? outputs.map(({ name }) => name)
+    : Object.keys(outputs.properties ?? {});
+};
+
 interface ParsedWorkflow {
   tags?: string[];
   settings?: { timeout?: string };
-  outputs?: Array<{ name: string; type: string }>;
+  /** Legacy list form, or the JSON-schema form `hunt.yaml` uses to declare array outputs. */
+  outputs?:
+    | Array<{ name: string; type: string }>
+    | { properties?: Record<string, { type?: string }> };
   steps: NestedStep[];
 }
 
@@ -127,37 +146,14 @@ describe('system-security-hunt-execute', () => {
     expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
   });
 
-  // The sole consumer of this field, `HUNT_STATUS_LABELS` in the threat attachment, is keyed on
-  // these three literals, and it was previously keyed on raw Tier 1 statuses this step never
-  // emits -- so every value production wrote rendered as an unlabelled string. Nothing
-  // type-checks a Liquid template against a React constant, so pin the producer's vocabulary
-  // here and let the attachment's own test cover the labels.
-  it('collapses the hunt outcome to exactly the three statuses the UI labels', () => {
-    const collapse = stepNamed(workflow, 'resolve_evidence_values').with
-      ?.last_hunt_status as string;
-
-    const emitted = collapse
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0 && !line.startsWith('{%'));
-
-    expect(emitted).toEqual(['hit', 'clean', 'incomplete']);
-  });
-
-  it('writes the evidence fields the candidate selection gate filters on', () => {
-    const script = stepNamed(workflow, 'set_evidence_script').with?.evidence_script as string;
-    expect(script).toEqual(expect.stringContaining('last_hunted_at'));
-  });
-
-  it('keys the evidence element by space, matching the gate', () => {
-    const script = stepNamed(workflow, 'set_evidence_script').with?.evidence_script as string;
-    expect(script).toEqual(expect.stringContaining('space_id'));
-  });
-
-  it('writes evidence only when the coordinator reports a completed run', () => {
-    expect(stepNamed(workflow, 'write_evidence').if).toEqual(
-      expect.stringContaining('completed_successfully == true')
-    );
+  // The hunt-once evidence write (last_hunted_at, last_hunt_status and siblings) is a dedicated
+  // step calling its own route -- see write_hunt_evidence.test.ts for the `deriveLastHuntStatus` /
+  // script-shape coverage this test used to provide at the YAML level when it was still an
+  // `elasticsearch.update` step.
+  it('only stamps the hunt-once gate once the coordinator confirms success', () => {
+    const step = stepNamed(workflow, 'write_evidence');
+    expect(step.if).toBe('${{ steps.run_hunt_coordinator.output.completed_successfully == true }}');
+    expect(step.with?.path).toBe(`/s/{{ workflow.spaceId }}${WRITE_HUNT_EVIDENCE_URL}`);
   });
 
   it('writes the coordinator narrative as the hunt results message', () => {
@@ -171,9 +167,7 @@ describe('system-security-hunt-execute', () => {
   it('exposes the headline, hit, and sse_count the Worker conclusion quotes', () => {
     const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
     expect(Object.keys(emitted)).toEqual(expect.arrayContaining(['headline', 'hit', 'sse_count']));
-    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
-      expect.arrayContaining(['headline', 'hit', 'sse_count'])
-    );
+    expect(outputNames(workflow)).toEqual(expect.arrayContaining(['headline', 'hit', 'sse_count']));
   });
 });
 
@@ -195,9 +189,7 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
     const workflow = parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID);
     const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
     expect(emitted.summary).toEqual(expect.stringContaining('package_summary'));
-    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
-      expect.arrayContaining(['summary'])
-    );
+    expect(outputNames(workflow)).toEqual(expect.arrayContaining(['summary']));
   });
 });
 
@@ -214,22 +206,59 @@ describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
     expect(workflow.settings?.timeout).toBe('176h');
   });
 
-  // Both requeries swallow their own failure, so every settlement count has to fall
-  // back to the earlier read. Reading the retry alone means a transient failure on
-  // the second call discards a first call that succeeded, collapses created_count to
-  // 0, and leaves the Investigation open forever with every Proposal already decided.
-  it('falls back to the first requery for every settlement count', () => {
+  // Each count is read from its own status-scoped pair (elastic/security-team#19773: a
+  // single unfiltered page undercounted past 100 Proposals on an Investigation, since
+  // `total` -- not the returned array -- is the accurate count at any volume, and getting
+  // it per status needs a per-status query). Every pair still swallows its own failure, so
+  // every count has to fall back to its own earlier read -- reading the retry alone means a
+  // transient failure on the second call discards a first call that succeeded.
+  it('falls back to its own first requery for every settlement count', () => {
     const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
     const counts = stepNamed(workflow, 'resolve_settlement_counts').with as Record<string, string>;
 
-    for (const count of ['created_count', 'pending_count', 'executing_count']) {
+    const countToRequeryPrefix: Record<string, string> = {
+      created_count: 'created',
+      pending_count: 'pending',
+      executing_count: 'executing',
+    };
+
+    for (const [count, prefix] of Object.entries(countToRequeryPrefix)) {
       expect(counts[count]).toEqual(
-        expect.stringContaining('steps.requery_proposals_retry.output')
+        expect.stringContaining(`steps.requery_${prefix}_retry.output`)
       );
       expect(counts[count]).toEqual(
-        expect.stringContaining('default: steps.requery_proposals.output')
+        expect.stringContaining(`default: steps.requery_${prefix}.output`)
       );
     }
+  });
+
+  // pending_count/executing_count gate on being *zero*, so a failed pair must never
+  // collapse to literal `0` (indistinguishable from "nothing outstanding") -- `1` is the
+  // fail-closed sentinel instead. created_count's own `default: 0` is left alone: a 0
+  // created count essentially never clears `>= expectedProposalCount`, so it is already
+  // fail-safe on its own.
+  it('fails closed on pending/executing, not just created, when both reads for a status fail', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+    const counts = stepNamed(workflow, 'resolve_settlement_counts').with as Record<string, string>;
+
+    expect(counts.created_count).toEqual(expect.stringContaining('default: 0'));
+    expect(counts.pending_count).toEqual(expect.stringContaining('default: 1'));
+    expect(counts.executing_count).toEqual(expect.stringContaining('default: 1'));
+  });
+
+  // The requery for pending/executing has to actually filter by status server-side --
+  // otherwise it is just the unfiltered requery again under a different name, and the
+  // fix above doesn't scope anything.
+  it.each([
+    ['requery_pending', 'pending'],
+    ['requery_pending_retry', 'pending'],
+    ['requery_executing', 'executing'],
+    ['requery_executing_retry', 'executing'],
+  ])('%s filters the requery by status: %s', (stepName, status) => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+    const query = stepNamed(workflow, stepName).with?.query as Record<string, unknown>;
+
+    expect(query.status).toBe(status);
   });
 });
 
@@ -293,9 +322,16 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       CANDIDATES_URL,
       HUNT_COORDINATOR_URL,
       FIND_OR_CREATE_INVESTIGATION_URL,
+      WRITE_HUNT_EVIDENCE_URL,
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',
+      // The gate reads the Proposal under its id to tell a lost race from any other failed create.
+      // Imported rather than typed, with the route's own `{id}` swapped for the gate's template,
+      // so a moved route fails here instead of 404ing on the first lost race.
+      PROPOSAL_BY_ID_URL.replace('{id}', '{{ inputs.proposalId }}'),
+      // Owned by agentic investigations; imported rather than typed so a moved route fails here.
+      IMPACT_INTERNAL_URL,
     ]);
     const SPACE_PREFIX = '/s/{{ workflow.spaceId }}';
     const stripSpacePrefix = (path: string): string | undefined =>
@@ -341,6 +377,61 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       const strippedPaths = rawPaths.map(stripSpacePrefix).filter((path): path is string => !!path);
 
       expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
+    });
+  });
+
+  // Packaging ranks the asset criticality levels when it resolves a slot, and the proposal gate
+  // ranks them again in Liquid when it says whether a race winner covers a finding. Both read
+  // the same list, and the action only accepts what its own definition declares, so a level added
+  // in one place and not the others would start being proposed while reading as unknown, or be
+  // proposed and then refused. This keeps the three together.
+  describe('asset criticality levels', () => {
+    const definitionYaml = (id: string): string => {
+      const definition = getManagedWorkflowDefinition(id);
+      if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
+        throw new Error(`Managed definition ${id} has no yaml`);
+      }
+      return definition.yaml;
+    };
+
+    /** Finds an `enum` declared under a property of this name, wherever the schema nests it. */
+    const enumOf = (node: unknown, property: string): unknown[] | undefined => {
+      if (!node || typeof node !== 'object') {
+        return undefined;
+      }
+      const record = node as Record<string, unknown>;
+      const declared = record[property] as { enum?: unknown[] } | undefined;
+      if (declared?.enum) {
+        return declared.enum;
+      }
+      for (const value of Object.values(record)) {
+        const found = enumOf(value, property);
+        if (found) {
+          return found;
+        }
+      }
+      return undefined;
+    };
+
+    it('are the ones the Set asset criticality action accepts, in the order the resolver ranks them', () => {
+      const action = parse(definitionYaml('system-alertzero-action-set-asset-criticality'));
+
+      // The action's enum is the source; the order is the shared list's, weakest first.
+      expect(enumOf(action, 'criticality_level')).toEqual([...ASSET_CRITICALITY_LEVELS]);
+    });
+
+    it('include both levels packaging proposes, the critical one ranked above the confirmed one', () => {
+      expect(ASSET_CRITICALITY_LEVELS).toContain(CONFIRMED_FINDING_CRITICALITY);
+      expect(ASSET_CRITICALITY_LEVELS).toContain(CRITICAL_FINDING_CRITICALITY);
+      expect(ASSET_CRITICALITY_LEVELS.indexOf(CRITICAL_FINDING_CRITICALITY)).toBeGreaterThan(
+        ASSET_CRITICALITY_LEVELS.indexOf(CONFIRMED_FINDING_CRITICALITY)
+      );
+    });
+
+    it('are the list the proposal gate ranks in its lost-race note', () => {
+      const gate = definitionYaml(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+
+      expect(gate).toContain(`'${ASSET_CRITICALITY_LEVELS.join(',')}' | split: ','`);
     });
   });
 });

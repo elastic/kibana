@@ -35,6 +35,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           apiPrivileges.readAgentBuilder,
           apiPrivileges.writeAgentBuilder,
           ApiPrivileges.manage('llm_product_doc'),
+          'bulkGetUserProfiles',
         ],
         catalogue: [AGENTBUILDER_FEATURE_ID],
         // Read the space-settings singleton for UI resolution of default Agent
@@ -46,7 +47,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
       },
       read: {
         app: ['kibana', AGENTBUILDER_APP_ID],
-        api: [apiPrivileges.readAgentBuilder],
+        api: [apiPrivileges.readAgentBuilder, 'bulkGetUserProfiles'],
         catalogue: [AGENTBUILDER_FEATURE_ID],
         savedObject: {
           all: [],

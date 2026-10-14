@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { relative } from 'path';
+import { readFile } from 'fs/promises';
+import { relative, resolve } from 'path';
 
 import execa from 'execa';
 
@@ -15,7 +16,12 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { File } from '../file';
-import { LINT_LOG_PREFIX, OXLINT_CONFIG_PATH, oxlintBinPath } from './constants';
+import {
+  LINT_LOG_PREFIX,
+  OXLINT_CONFIG_PATH,
+  OXLINT_FIX_CONFIG_PATH,
+  oxlintBinPath,
+} from './constants';
 
 export interface LintFilesOptions {
   fix?: boolean;
@@ -53,10 +59,16 @@ const hasFilename = (d: OxlintDiagnostic): d is FileDiagnostic => Boolean(d.file
 // ARG_MAX on macOS is 1MB; explicit path lists are batched to stay well under it.
 const MAX_PATHS_PER_RUN = 4000;
 
-async function runOxlint(args: string[]): Promise<OxlintJsonReport<FileDiagnostic>> {
+// Matches ESLint's fix-pass limit.
+const MAX_FIX_PASSES = 10;
+
+async function runOxlint(
+  configPath: string,
+  args: string[]
+): Promise<OxlintJsonReport<FileDiagnostic>> {
   const { stdout, stderr, exitCode } = await execa(
     process.execPath,
-    [oxlintBinPath, '--config', OXLINT_CONFIG_PATH, '--format', 'json', ...args],
+    [oxlintBinPath, '--config', configPath, '--format', 'json', ...args],
     { cwd: REPO_ROOT, reject: false, maxBuffer: 256 * 1024 * 1024 }
   );
 
@@ -92,6 +104,37 @@ async function runOxlint(args: string[]): Promise<OxlintJsonReport<FileDiagnosti
   return { ...report, diagnostics: report.diagnostics.filter(hasFilename) };
 }
 
+async function runOxlintOnPaths(
+  configPath: string,
+  args: string[],
+  paths: string[]
+): Promise<Array<OxlintJsonReport<FileDiagnostic>>> {
+  const reports: Array<OxlintJsonReport<FileDiagnostic>> = [];
+  for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
+    reports.push(await runOxlint(configPath, [...args, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
+  }
+  return reports;
+}
+
+const readContents = (paths: string[]): Promise<string[]> =>
+  Promise.all(paths.map((path) => readFile(resolve(REPO_ROOT, path), 'utf8')));
+
+/**
+ * Oxlint applies a single fix pass, so fixes that overlap within a file (e.g. inserting the
+ * required license header and removing a disallowed one) only partially apply. Like ESLint,
+ * re-run fixes on each file until its contents stop changing.
+ */
+async function fixUntilStable(paths: string[]): Promise<void> {
+  let candidates = paths;
+
+  for (let pass = 0; pass < MAX_FIX_PASSES && candidates.length > 0; pass++) {
+    const before = await readContents(candidates);
+    await runOxlintOnPaths(OXLINT_FIX_CONFIG_PATH, ['--fix'], candidates);
+    const after = await readContents(candidates);
+    candidates = candidates.filter((_, i) => before[i] !== after[i]);
+  }
+}
+
 /**
  * Lints files with oxlint. Reports are written to the log.
  * Returns a result with `failedFiles` populated when errors are found.
@@ -101,19 +144,22 @@ export async function lintFiles(
   files: File[],
   { fix, fullRepo }: LintFilesOptions = {}
 ): Promise<LintFilesResult> {
-  const fixArgs = fix ? ['--fix'] : [];
-  const reports: Array<OxlintJsonReport<FileDiagnostic>> = [];
-  if (fullRepo) {
-    reports.push(await runOxlint(fixArgs));
-  } else {
-    const paths = files.map((file) => relative(REPO_ROOT, file.getAbsolutePath()));
-    for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
-      reports.push(await runOxlint([...fixArgs, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
-    }
-  }
+  const paths = files.map((file) => relative(REPO_ROOT, file.getAbsolutePath()));
+  const lint = async (configPath: string, args: string[]) =>
+    fullRepo ? [await runOxlint(configPath, args)] : runOxlintOnPaths(configPath, args, paths);
 
-  const diagnostics = reports.flatMap((report) => report.diagnostics);
+  if (fix) {
+    // Oxlint's `--fix` also fixes warnings, so only files with errors are fixed, against the
+    // errors-only config, as ESLint's `--quiet --fix` did. The run below then reports everything.
+    const errorReports = await lint(OXLINT_FIX_CONFIG_PATH, []);
+    await fixUntilStable([
+      ...new Set(errorReports.flatMap((report) => report.diagnostics.map((d) => d.filename))),
+    ]);
+  }
+  const reports = await lint(OXLINT_CONFIG_PATH, []);
+
   const lintedFileCount = reports.reduce((sum, report) => sum + report.number_of_files, 0);
+  const diagnostics = reports.flatMap((report) => report.diagnostics);
   const failedFiles = [
     ...new Set(diagnostics.filter((d) => d.severity === 'error').map((d) => d.filename)),
   ].sort((left, right) => left.localeCompare(right));

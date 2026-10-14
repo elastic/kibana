@@ -13,7 +13,7 @@ import type { Command } from '@kbn/dev-cli-runner';
 import { findPackageForPath } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import ts from 'typescript';
-import { auditConfigSets, KEEP_SEPARATE, type ConfigSetsReport } from './audit_config_sets';
+import { auditConfigSets, MUST_STAY_SEPARATE, type ConfigSetsReport } from './audit_config_sets';
 
 /**
  * Extracts the `PageObjects` fixture keys straight from `createCorePageObjects`'s
@@ -178,6 +178,21 @@ export function findAllScoutFiles(rootDir: string): string[] {
   return [...core, ...findScoutTestFiles(rootDir)];
 }
 
+/**
+ * Shared page objects the audit flagged and the owners reviewed, with the reason they stay in
+ * `@kbn/scout`. The census leaves them out so the report does not repeat a settled question.
+ */
+export const REVIEWED_PAGE_OBJECTS: Readonly<Record<string, string>> = {
+  listingTable: 'wraps the shared listing table used by Dashboards, Visualize and other apps',
+  unifiedTabs: 'wraps the shared @kbn/unified-tabs component, Discover is only its first consumer',
+};
+
+/** Drops the reviewed keys from a census. */
+export const withoutReviewedPageObjects = (
+  census: PageObjectConsumerCensus[],
+  reviewed: Readonly<Record<string, string>> = REVIEWED_PAGE_OBJECTS
+): PageObjectConsumerCensus[] => census.filter(({ key }) => !(key in reviewed));
+
 export interface PageObjectConsumerCensus {
   key: string;
   fileCount: number;
@@ -223,9 +238,23 @@ export interface DuplicateClassName {
   modules: string[];
 }
 
-/** Exported class names declared in two or more modules across the given Scout files. */
+/** Share of the smaller member set that both classes have. Same name alone is not a copy. */
+const MEMBER_OVERLAP_THRESHOLD = 0.8;
+
+export const memberOverlap = (a: Set<string>, b: Set<string>): number => {
+  const smaller = Math.min(a.size, b.size);
+  if (smaller === 0) return a.size === b.size ? 1 : 0;
+  let shared = 0;
+  for (const name of a) if (b.has(name)) shared += 1;
+  return shared / smaller;
+};
+
+/**
+ * Exported class names declared in two or more modules whose classes also share most of their
+ * member names. Two unrelated page objects that happen to be called `OverviewTab` are not a copy.
+ */
 export function findDuplicateClassNames(repoRoot: string, files: string[]): DuplicateClassName[] {
-  const modulesByClass = new Map<string, Set<string>>();
+  const membersByClass = new Map<string, Map<string, Set<string>>>();
 
   for (const file of files) {
     const pkg = findPackageForPath(repoRoot, file);
@@ -241,18 +270,37 @@ export function findDuplicateClassNames(repoRoot: string, files: string[]): Dupl
       const isExported = ts
         .getModifiers(statement as ts.HasModifiers)
         ?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
-      if (ts.isClassDeclaration(statement) && statement.name && isExported) {
-        const name = statement.name.text;
-        if (!modulesByClass.has(name)) modulesByClass.set(name, new Set());
-        modulesByClass.get(name)?.add(pkg.id);
+      if (!ts.isClassDeclaration(statement) || !statement.name || !isExported) continue;
+
+      const members = new Set<string>();
+      for (const member of statement.members) {
+        if (member.name && ts.isIdentifier(member.name)) members.add(member.name.text);
       }
+      const name = statement.name.text;
+      if (!membersByClass.has(name)) membersByClass.set(name, new Map());
+      const byModule = membersByClass.get(name) as Map<string, Set<string>>;
+      // A class declared twice in one module keeps the union of its members.
+      byModule.set(pkg.id, new Set([...(byModule.get(pkg.id) ?? []), ...members]));
     }
   }
 
-  return [...modulesByClass.entries()]
-    .filter(([, modules]) => modules.size > 1)
-    .map(([className, modules]) => ({ className, modules: [...modules].sort() }))
-    .sort((a, b) => a.className.localeCompare(b.className));
+  const duplicates: DuplicateClassName[] = [];
+  for (const [className, byModule] of membersByClass) {
+    const modules = [...byModule.keys()];
+    const copies = new Set<string>();
+    for (let i = 0; i < modules.length; i++) {
+      for (let j = i + 1; j < modules.length; j++) {
+        const a = byModule.get(modules[i]) as Set<string>;
+        const b = byModule.get(modules[j]) as Set<string>;
+        if (memberOverlap(a, b) >= MEMBER_OVERLAP_THRESHOLD) {
+          copies.add(modules[i]);
+          copies.add(modules[j]);
+        }
+      }
+    }
+    if (copies.size > 1) duplicates.push({ className, modules: [...copies].sort() });
+  }
+  return duplicates.sort((a, b) => a.className.localeCompare(b.className));
 }
 
 export interface AuditReport {
@@ -269,7 +317,9 @@ export async function runAudit(
   const pageObjectKeys = extractPageObjectKeysOrThrow(indexSource, pageObjectsIndexPath);
   const scoutTestFiles = findScoutTestFiles(repoRoot);
   return {
-    census: censusPageObjectConsumers(repoRoot, scoutTestFiles, pageObjectKeys),
+    census: withoutReviewedPageObjects(
+      censusPageObjectConsumers(repoRoot, scoutTestFiles, pageObjectKeys)
+    ),
     duplicateClassNames: findDuplicateClassNames(repoRoot, findAllScoutFiles(repoRoot)),
     configSets: await auditConfigSets(repoRoot),
   };
@@ -341,7 +391,7 @@ export function formatAuditReportForSlack(report: AuditReport): string {
     `Checked ${census.length} core page objects and ${
       configSets.sets.length
     } config files, skipped ${
-      Object.keys(KEEP_SEPARATE).length
+      Object.keys(MUST_STAY_SEPARATE).length
     } sets kept separate on purpose. Placement rules: https://www.elastic.co/docs/extend/kibana/testing/page-objects#scout-page-objects-placement`
   );
   return lines.join('\n');

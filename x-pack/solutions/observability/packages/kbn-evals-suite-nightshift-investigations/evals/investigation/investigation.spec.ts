@@ -24,7 +24,9 @@ import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
-evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
+const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+
+evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, () => {
   evaluate(
     'grades investigations with the RCA judges and persists complete agent traces',
     async ({
@@ -117,7 +119,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           // These execution-acceptance checks alone establish that the run itself succeeded,
           // independently of the quality scores the judges assign.
           expect(output.execution_error).toBeUndefined();
-          expect(output.workflow_status).toBe('completed');
+          expect(output.workflow_status).toBe('complete');
           expect(output.investigation_id).toEqual(expect.any(String));
           expect(output.conversation_id).toEqual(expect.any(String));
           expect(

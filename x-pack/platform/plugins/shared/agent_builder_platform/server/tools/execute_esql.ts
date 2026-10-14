@@ -8,7 +8,7 @@
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { hasStartEndParams } from '@kbn/esql-utils';
+import { getAnySourceCommandFromESQLQuery, hasStartEndParams } from '@kbn/esql-utils';
 import {
   executeEsql,
   buildTimeRangeParams,
@@ -18,6 +18,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 /**
  * Elasticsearch caps a request body at 100MB; this is a courtesy bound well under it. It has to be
@@ -25,6 +26,14 @@ import { resolveTimeRange } from './screen_context_utils';
  * leaves the value side unbounded.
  */
 const MAX_FILTER_LENGTH = 100_000;
+
+const getTimeRangeNotAppliedWarning = (query: string): string => {
+  const example =
+    getAnySourceCommandFromESQLQuery(query) === 'PROMQL'
+      ? 'PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>). Do not add a WHERE clause on @timestamp after PROMQL: its output has no @timestamp column.'
+      : 'WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.';
+  return `The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. ${example}`;
+};
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
@@ -41,7 +50,7 @@ const executeEsqlToolSchema = z.object({
     })
     .optional()
     .describe(
-      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend; otherwise the query runs without it and a warning is returned.'
+      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend, e.g. `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`, or `PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>)`; otherwise the query runs without it and a warning is returned.'
     ),
   limit: z
     .number()
@@ -57,6 +66,7 @@ const executeEsqlToolSchema = z.object({
     .describe(
       '(Optional) An Elasticsearch Query DSL object combined with the query using AND, e.g. {"term": {"status": "open"}}. It can only narrow the results, never widen them. This is not a WHERE clause: it is pushed down to the data source, so it removes documents before any ES|QL command sees them, and it is parsed separately from the query text, so it cannot reference ?named parameters.'
     ),
+  include_frozen: includeFrozenSchema,
 });
 
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
@@ -76,6 +86,7 @@ You **must** get the query from one of two sources before calling this tool:
 
 Under no circumstances should you invent, guess, or modify a query yourself for this tool.
 If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+Adapting an earlier query to a new question, such as another metric or field, counts as writing it yourself: call \`${platformCoreTools.generateEsql}\` again for each new question.
 
 ### Using a limit
 
@@ -92,8 +103,9 @@ Prefer a filter that every targeted index can match: against a wildcard pattern 
 
 ### Data tiers
 
-Indices on the frozen tier are always excluded, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
-If results look incomplete for a time range that reaches far into the past, tell the user that frozen tier data was not searched.
+Indices on the frozen tier are excluded by default, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
+Set \`include_frozen\` to true only when the user or your instructions explicitly ask for frozen tier data, and expect the query to be slow or to time out.
+If results look incomplete for a time range that reaches far into the past and \`include_frozen\` was not set, tell the user that frozen tier data was not searched.
 
 ## API documentation
 - ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
@@ -113,6 +125,7 @@ If results look incomplete for a time range that reaches far into the past, tell
         time_range: explicitTimeRange,
         limit = 100,
         filter: esqlFilter,
+        include_frozen: includeFrozen = false,
       },
       { esClient, attachments }
     ) => {
@@ -133,6 +146,7 @@ If results look incomplete for a time range that reaches far into the past, tell
         esClient: esClient.asCurrentUser,
         limit,
         filter: esqlFilter as QueryDslQueryContainer | undefined,
+        includeFrozen,
       });
 
       // need the interpolated query to return in the results / to display in the UI
@@ -168,8 +182,7 @@ If results look incomplete for a time range that reaches far into the past, tell
                 {
                   type: ToolResultType.other as const,
                   data: {
-                    warning:
-                      'The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.',
+                    warning: getTimeRangeNotAppliedWarning(esqlQuery),
                   },
                 },
               ]

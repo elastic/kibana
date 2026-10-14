@@ -40,6 +40,11 @@ export const storyAgent: AgentDefinition = {
 
 let fileIdCounter = 0;
 const storybookFileBlobUrls = new Map<string, string>();
+
+/** Makes an image attachment with this `file_id` show `url` as its thumbnail. */
+export const registerStorybookImage = (fileId: string, url: string): void => {
+  storybookFileBlobUrls.set(fileId, url);
+};
 const storybookFilesClient = {
   create: () => Promise.resolve({ file: { id: `storybook-file-${++fileIdCounter}` } }),
   upload: ({ id, body }: { id: string; body: Blob }) =>

@@ -76,5 +76,10 @@ export * from './eui_components';
 export * from './ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
-export { AppMenu, ContentListWrapper, InspectorPage, ListingTable } from './page_objects';
-export type { InspectorView } from './page_objects/inspector';
+export {
+  AppMenu,
+  ContentListWrapper,
+  EmbeddableAlertsTablePage,
+  InspectorPage,
+  ListingTable,
+} from './page_objects';

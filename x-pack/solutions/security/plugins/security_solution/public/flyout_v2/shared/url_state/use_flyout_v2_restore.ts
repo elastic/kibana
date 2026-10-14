@@ -181,12 +181,20 @@ export const openDescriptorAsStart = (
     // --- Document main flyouts ---
     case 'document': {
       const { documentId, indexName } = descriptor as DocumentDescriptor;
-      api.openDocumentFlyoutFromIndex({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromIndex({
+        documentId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
     case 'documentFromPattern': {
       const { documentId, indexName } = descriptor as DocumentFromPatternDescriptor;
-      api.openDocumentFlyoutFromPattern({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromPattern({
+        documentId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
 
@@ -342,7 +350,11 @@ export const openDescriptorAsStart = (
     // --- Attack main flyout + tools ---
     case 'attack': {
       const { attackId, indexName } = descriptor as AttackDescriptor;
-      api.openAttackFlyout({ attackId, indexName, ...originParams });
+      api.openAttackFlyout({
+        attackId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
     case 'attackCorrelations': {
@@ -554,7 +566,10 @@ export const openDescriptorAsStart = (
     }
     case 'rule': {
       const { ruleId } = descriptor as RuleDescriptor;
-      api.openRuleFlyout({ ruleId, ...originParams });
+      api.openRuleFlyout({
+        ruleId,
+        ...originParams,
+      });
       break;
     }
 

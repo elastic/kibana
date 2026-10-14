@@ -9,6 +9,7 @@ import { startInvestigationRoute } from './start_investigation';
 import { getInvestigationRoute } from './get_investigation';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
+import { findOrCreateSlackThreadInvestigationRoute } from './find_or_create_slack_thread_investigation';
 import { listInvestigationsRoute } from './list_investigations';
 import { updateInvestigationRoute } from './update_investigation';
 import { followInvestigationRoute } from './follow_investigation';
@@ -19,6 +20,8 @@ import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_pag
 import { archiveCortexPageRoute } from './archive_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
 import { sandboxSecretsRoutes } from './sandbox_secrets';
+import { customContextRoutes } from './custom_context';
+import { onboardingRoutes } from './onboarding';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
 import { getDecisionTreeRoute } from './get_decision_tree';
@@ -32,12 +35,19 @@ import {
   deleteAutomationRoute,
   listAutomationRunsRoute,
 } from './automations';
+import { getMemoryAvailabilityRoute } from './get_memory_availability';
+import { listMemoryPagesRoute } from './list_memory_pages';
+import { getMemoryPageRoute } from './get_memory_page';
+import { archiveMemoryPageRoute } from './archive_memory_page';
+import { deleteMemoryPageRoute } from './delete_memory_page';
+import { getMemoryLineageRoute } from './get_memory_lineage';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
   ...getInvestigationRoute,
   ...emitLifecycleEventRoute,
   ...ensureInvestigationRoute,
+  ...findOrCreateSlackThreadInvestigationRoute,
   ...listInvestigationsRoute,
   ...updateInvestigationRoute,
   ...followInvestigationRoute,
@@ -49,6 +59,8 @@ export const nightshiftInvestigationsRouteRepository = {
   ...archiveCortexPageRoute,
   ...getCortexAvailabilityRoute,
   ...sandboxSecretsRoutes,
+  ...customContextRoutes,
+  ...onboardingRoutes,
   ...getDecisionTreesAvailabilityRoute,
   ...listDecisionTreesRoute,
   ...getDecisionTreeRoute,
@@ -60,6 +72,12 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateAutomationRoute,
   ...deleteAutomationRoute,
   ...listAutomationRunsRoute,
+  ...getMemoryAvailabilityRoute,
+  ...listMemoryPagesRoute,
+  ...getMemoryPageRoute,
+  ...archiveMemoryPageRoute,
+  ...deleteMemoryPageRoute,
+  ...getMemoryLineageRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

@@ -72,6 +72,24 @@ describe('executeEsqlTool', () => {
     });
   });
 
+  it('suggests the PROMQL start and end options when a PROMQL query does not apply the time_range', async () => {
+    const tool = executeEsqlTool();
+    const result = (await tool.handler(
+      {
+        query: 'PROMQL index=metrics step=1m load=(avg by (instance) (node_load1))',
+        time_range: { from: 'now-24h', to: 'now' },
+        limit: 100,
+      },
+      createHandlerContext() as any
+    )) as ToolHandlerStandardReturn;
+
+    const { warning } = result.results.find((r) => r.type === ToolResultType.other)?.data as {
+      warning: string;
+    };
+    expect(warning).toContain('start=?_tstart end=?_tend');
+    expect(warning).not.toContain('WHERE @timestamp >= ?_tstart');
+  });
+
   it('omits time_range from results when query has no placeholders and no explicit time_range', async () => {
     const tool = executeEsqlTool();
     const result = (await tool.handler(
@@ -125,6 +143,30 @@ describe('executeEsqlTool', () => {
     expect(executeEsqlMock).toHaveBeenCalledTimes(1);
     const esqlResults = result.results.find((r) => r.type === ToolResultType.esqlResults);
     expect(esqlResults?.data).not.toHaveProperty('time_range');
+  });
+
+  describe('include_frozen', () => {
+    it('excludes frozen tier indices by default', async () => {
+      await executeEsqlTool().handler(
+        { query: 'FROM logs', limit: 100 },
+        createHandlerContext() as any
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
+    });
+
+    it('includes frozen tier indices when opted in', async () => {
+      await executeEsqlTool().handler(
+        { query: 'FROM logs', limit: 100, include_frozen: true },
+        createHandlerContext() as any
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: true });
+    });
+
+    it('describes how to opt in to the frozen tier', () => {
+      expect(executeEsqlTool().description).toContain('include_frozen');
+    });
   });
 
   describe('filter', () => {

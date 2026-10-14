@@ -18,7 +18,7 @@ const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useD
 const feature: Feature = {
   id: 'feature-id',
   uuid: 'feature-uuid',
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   type: 'dependency',
   description: 'A service dependency',
   properties: { source: 'service-a', target: 'service-b' },
