@@ -1,0 +1,56 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createMemoryRequest:
+          value:
+            type: memory.session_fact
+            title: Cast duration fields before comparison
+            description: duration_ms is mapped as a keyword.
+            content: Use TO_DOUBLE(duration_ms) before numeric comparisons.
+            tags: [observability, esql]
+responses:
+  201:
+    content:
+      application/json:
+        examples:
+          created:
+            value:
+              id: 98c33351-2504-49da-a390-89e59b30b27e
+              session_id: 73008bd7-f4e1-4052-a42c-e29483d06f47
+  400:
+    content:
+      application/json:
+        examples:
+          disabled:
+            value: { statusCode: 400, error: Bad Request, message: Context Engine memory is not enabled. }
+  403:
+    content:
+      application/json:
+        examples:
+          forbidden:
+            value: { statusCode: 403, error: Forbidden, message: Elasticsearch denied the write. }
+  404:
+    content:
+      application/json:
+        examples:
+          missing:
+            value: { statusCode: 404, error: Not Found, message: "AI index 'support' not found" }
+  409:
+    content:
+      application/json:
+        examples:
+          conflict:
+            value: { statusCode: 409, error: Conflict, message: The memory write conflicted. }
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories" \
+        -H "Authorization: ApiKey ${API_KEY}" -H "kbn-xsrf: true" -H "Content-Type: application/json" \
+        -d '{
+          "type": "memory.session_fact",
+          "title": "Cast duration fields before comparison",
+          "description": "duration_ms is mapped as a keyword.",
+          "content": "Use TO_DOUBLE(duration_ms) before numeric comparisons.",
+          "tags": ["observability", "esql"]
+        }'

@@ -64,16 +64,24 @@ export const registerAgentBuilderTools = ({
   agentBuilder.tools.register(createListAiIndicesTool(aiIndexToolDeps));
   agentBuilder.tools.register(createDescribeAiIndexTool(aiIndexToolDeps));
   agentBuilder.tools.register(createQueryAiIndicesTool(aiIndexToolDeps));
+  const getMemoryWriteService = async ({
+    esClient,
+    request,
+  }: Parameters<ContextEnginePluginStart['getAiIndexMemoryWriteService']>[0]) =>
+    (await getContextEngineStart()).getAiIndexMemoryWriteService({
+      esClient,
+      request,
+    });
   agentBuilder.tools.register(
     createRememberTool({
-      getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
+      getMemoryWriteService,
       getCoreStart,
       getSecurityStart,
     })
   );
   agentBuilder.tools.register(
     createForgetTool({
-      getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
+      getMemoryWriteService,
       getCoreStart,
       getSecurityStart,
     })

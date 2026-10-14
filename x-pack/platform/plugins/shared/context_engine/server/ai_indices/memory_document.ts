@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-interface MemoryReference {
+export interface MemoryReference {
   uri: string;
   relation?: string;
   description?: string;
 }
 
-interface MemoryWriter {
+export interface MemoryWriter {
   uri: string;
   metadata: Record<string, string | number>;
 }
 
-type MemoryLifecycleStatus = 'active' | 'deleted';
+export type MemoryLifecycleStatus = 'active' | 'deleted';
 
-interface MemoryGovernance {
+export interface MemoryGovernance {
   provenance?: {
     created_by?: MemoryWriter;
     updated_by?: MemoryWriter;
@@ -44,15 +44,15 @@ export interface StoredMemoryDocument {
 }
 
 export const createMemoryWriter = ({
-  toolId,
+  source,
   runId,
   agentId,
 }: {
-  toolId: string;
+  source: string;
   runId: string;
   agentId?: string;
 }): MemoryWriter => ({
-  uri: `tool://${toolId}`,
+  uri: source,
   metadata: {
     run_id: runId,
     ...(agentId !== undefined && { agent_id: agentId }),

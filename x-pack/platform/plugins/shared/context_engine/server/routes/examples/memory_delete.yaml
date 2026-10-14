@@ -1,0 +1,37 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          deleted:
+            value:
+              id: 98c33351-2504-49da-a390-89e59b30b27e
+  400:
+    content:
+      application/json:
+        examples:
+          invalid:
+            value: { statusCode: 400, error: Bad Request, message: The memory cannot be deleted. }
+  403:
+    content:
+      application/json:
+        examples:
+          forbidden:
+            value: { statusCode: 403, error: Forbidden, message: Elasticsearch denied the write. }
+  404:
+    content:
+      application/json:
+        examples:
+          missing:
+            value: { statusCode: 404, error: Not Found, message: The memory was not found. }
+  409:
+    content:
+      application/json:
+        examples:
+          conflict:
+            value: { statusCode: 409, error: Conflict, message: The memory write conflicted. }
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X DELETE "https://${KIBANA_URL}/api/context_engine/ai_index/support/memories/98c33351-2504-49da-a390-89e59b30b27e" \
+        -H "Authorization: ApiKey ${API_KEY}" -H "kbn-xsrf: true"

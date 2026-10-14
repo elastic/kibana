@@ -57,6 +57,60 @@ export interface AiIndexAuditEventParams {
   error?: Error;
 }
 
+export enum MemoryAuditAction {
+  CREATE = 'context_engine_memory_create',
+  REVISE = 'context_engine_memory_revise',
+  DELETE = 'context_engine_memory_delete',
+}
+
+export interface MemoryAuditEventParams {
+  action: MemoryAuditAction;
+  aiIndexId: string;
+  memoryId?: string;
+  error?: Error;
+}
+
+const memoryActionVerbs: Record<MemoryAuditAction, [string, string]> = {
+  context_engine_memory_create: ['create', 'created'],
+  context_engine_memory_revise: ['revise', 'revised'],
+  context_engine_memory_delete: ['delete', 'deleted'],
+};
+
+const memoryEventTypes: Record<MemoryAuditAction, string> = {
+  context_engine_memory_create: 'creation',
+  context_engine_memory_revise: 'change',
+  context_engine_memory_delete: 'deletion',
+};
+
+/** Audits a caller-scoped memory mutation. */
+export const memoryAuditEvent = ({
+  action,
+  aiIndexId,
+  memoryId,
+  error,
+}: MemoryAuditEventParams): AuditEvent => {
+  const [present, past] = memoryActionVerbs[action];
+  const memory = memoryId ? `memory [id=${memoryId}]` : 'a memory';
+  return {
+    message: error
+      ? `Failed attempt to ${present} ${memory} in AI index [id=${aiIndexId}]`
+      : `User has ${past} ${memory} in AI index [id=${aiIndexId}]`,
+    event: {
+      action,
+      category: ['database'],
+      type: [memoryEventTypes[action]],
+      outcome: error ? 'failure' : 'success',
+    },
+    kibana: {
+      saved_object: { type: 'ai_index', id: aiIndexId },
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
+
 export enum ImprovementAuditAction {
   RECORD = 'context_engine_improvement_record',
 }
