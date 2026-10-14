@@ -75,6 +75,7 @@ export const calculateResolutionEntityScores = async function* ({
     // Per page: fetch groups, score them, then apply merged group modifiers.
     const pageResult = await fetchNextResolutionPage({
       esClient,
+      entityType,
       lookupIndex,
       pageSize,
       afterKey,
@@ -145,12 +146,14 @@ export const calculateResolutionEntityScores = async function* ({
 
 const fetchNextResolutionPage = async ({
   esClient,
+  entityType,
   lookupIndex,
   pageSize,
   afterKey,
   targetEntityIds,
 }: {
   esClient: ElasticsearchClient;
+  entityType: EntityType;
   lookupIndex: string;
   pageSize: number;
   afterKey: Record<string, string> | undefined;
@@ -163,6 +166,7 @@ const fetchNextResolutionPage = async ({
 
   const compositeResponse = await esClient.search(
     getResolutionCompositeQuery(
+      entityType,
       lookupIndex,
       Math.min(pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE),
       afterKey,

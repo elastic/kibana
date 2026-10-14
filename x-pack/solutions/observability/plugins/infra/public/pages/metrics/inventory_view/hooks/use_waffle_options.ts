@@ -32,7 +32,6 @@ import type {
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
 import { preferredSchemaForInventoryView } from '../../../../../common/inventory/preferred_schema_for_inventory_view';
-import { useIsPodSchemaSelectorEnabled } from '../../../../hooks/use_is_pod_schema_selector_enabled';
 import { useInventoryViewsContext } from './use_inventory_views';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
@@ -61,10 +60,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   preferredSchema: null,
 };
 
-function mapInventoryViewToState(
-  savedView: InventoryView,
-  isPodSchemaSelectorEnabled: boolean
-): WaffleOptionsState {
+function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
   const {
     metric,
     groupBy,
@@ -85,8 +81,7 @@ function mapInventoryViewToState(
   const preferredSchemaValue = preferredSchemaForInventoryView(
     nodeType,
     savedView.id,
-    preferredSchema,
-    isPodSchemaSelectorEnabled
+    preferredSchema
   );
 
   return {
@@ -108,7 +103,6 @@ function mapInventoryViewToState(
 }
 
 export const useWaffleOptions = () => {
-  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
   const { currentView } = useInventoryViewsContext();
   const {
     inventoryPrefill: { setPrefillState },
@@ -116,9 +110,7 @@ export const useWaffleOptions = () => {
 
   const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
-    defaultState: currentView
-      ? mapInventoryViewToState(currentView, isPodSchemaSelectorEnabled)
-      : DEFAULT_WAFFLE_OPTIONS_STATE,
+    defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
@@ -140,14 +132,14 @@ export const useWaffleOptions = () => {
   const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      const state = mapInventoryViewToState(currentView, isPodSchemaSelectorEnabled);
+      const state = mapInventoryViewToState(currentView);
       setUrlState(state);
       previousViewId.current = currentView.id;
 
       // Same mapping as URL state — do not seed from the raw saved-object field.
       setPreferredSchema(state.preferredSchema ?? null);
     }
-  }, [currentView, isPodSchemaSelectorEnabled, setUrlState]);
+  }, [currentView, setUrlState]);
 
   // there is a lot going on with the url state management on this hook
   // when the state resets, many things need to be synchronized

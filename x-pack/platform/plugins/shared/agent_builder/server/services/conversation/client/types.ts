@@ -12,6 +12,7 @@ import type {
   ReasoningStep,
   CompactionStep,
   SubstitutionStep,
+  InjectedContextStep,
   BackgroundAgentCompleteStep,
   TodosStep,
   AskUserQuestionStep,
@@ -173,7 +174,8 @@ export type PersistentConversationRoundStep =
   | RelevantSkillsStep
   | PreExecutionWorkflowStep
   | SubagentRosterUpdatedStep
-  | SubstitutionStep;
+  | SubstitutionStep
+  | InjectedContextStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.

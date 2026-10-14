@@ -9,6 +9,7 @@
       "platform/packages/shared/ml/aiops_log_rate_analysis",
       "platform/plugins/shared/aiops"
     ],
+    "xpack.aiAnonymization": "platform/packages/shared/ai-infra/ai-anonymization-server",
     "xpack.aiAssistant": "platform/packages/shared/kbn-ai-assistant",
     "xpack.alerting": "platform/plugins/shared/alerting",
     "xpack.alertingV2": "platform/packages/shared/response-ops/alerting-v2-utils",
@@ -51,6 +52,7 @@
     "xpack.elasticAssistant": "platform/packages/shared/kbn-elastic-assistant",
     "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
     "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
+    "xpack.elasticsearchHome": "platform/plugins/shared/elasticsearch_home",
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
@@ -77,6 +79,7 @@
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inferenceWorkflows": "platform/plugins/shared/inference_workflows",
     "xpack.investigationOutput": "solutions/observability/packages/kbn-investigation-output",
+    "xpack.isomer": "platform/packages/shared/isomer",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": [
@@ -165,6 +168,7 @@
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "platform/plugins/shared/spaces",
+    "xpack.subscriptionStatus": "platform/plugins/private/subscription_status",
     "xpack.savedObjectsTagging": ["platform/plugins/shared/saved_objects_tagging"],
     "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",

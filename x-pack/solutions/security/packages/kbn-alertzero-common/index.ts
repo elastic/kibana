@@ -20,12 +20,12 @@ export {
   ALERTZERO_APP_PATH,
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_FEATURE_ID,
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_INTERNAL_URL,
   ALERTZERO_PLUGIN_NAME,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_INVESTIGATIONS_COUNT_URL,
   ALERTZERO_SCAN_FAILURES_URL,
@@ -43,6 +43,8 @@ export {
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
   WRITE_HUNT_EVIDENCE_URL,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
+  HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   SECURITY_SERVICE_ACCOUNT_URL,
@@ -78,13 +80,29 @@ export {
   buildWorkerUrl,
 } from './constants';
 
-export type { ScanFailureWorker, ScanFailuresResponse } from './constants';
+export {
+  SECURITY_ROLE_API_VERSION,
+  WORKER_SERVICE_ACCOUNT_NAMES,
+  buildSecurityRoleUrl,
+  getWorkerRoleName,
+} from './worker_roles';
+
+export type {
+  ScanFailureWorker,
+  ScanFailuresResponse,
+  HuntThreatIntelSupplyScope,
+  HuntThreatIntelSupplyWorkflowKey,
+  HuntThreatIntelSupplyWorkflowStatus,
+  HuntThreatIntelSupplyHardGate,
+  HuntThreatIntelSupplyStatus,
+} from './constants';
 
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  ActionSubjectKind,
   JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';
@@ -120,6 +138,7 @@ export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -159,6 +178,8 @@ export {
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
 
+export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
+
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,
@@ -174,6 +195,15 @@ export type {
 
 export {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
+  BUDGET_PER_HOUR_DEFAULT,
+  BUDGET_PER_HOUR_MAX,
+  BUDGET_PER_HOUR_MIN,
+  TRIAGE_ALERT_COST,
+  TRIAGE_BATCH_OVERHEAD_COST,
+  getMinBudgetPerHour,
+  LOOKBACK_HOURS_DEFAULT,
+  LOOKBACK_HOURS_MAX,
+  LOOKBACK_HOURS_MIN,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
@@ -192,16 +222,18 @@ export {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
-  applyMissingWorkerSettingDefaults,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   diffWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
   getAllowedAutonomyLevels,
+  isWorkerScheduleIntervalReadOnly,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
-  projectStoredAutonomyLevel,
+  nearestLowerAutonomyLevel,
   touchesWorkerSettings,
+  upgradeStoredWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {

@@ -69,7 +69,7 @@ export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from '
 export {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
-  MAX_SLACK_SEEN_EVENT_IDS,
+  MAX_SLACK_SEEN_EVENTS,
   MAX_SUBJECT_ID_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
   MAX_SUBJECTS_PER_REQUEST,
@@ -85,6 +85,7 @@ export type {
   InvestigationSubjectKey,
   InvestigationSubjectTriggerType,
   InvestigationSubjectType,
+  SlackSeenEvent,
   SlackThreadSubject,
 } from './subjects/subject';
 
@@ -113,6 +114,7 @@ export {
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
   ESCALATION_STATUS_URL,
+  ESCALATION_SYNC_URL,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
@@ -147,6 +149,7 @@ export type {
   ReadManagePrivileges,
 } from './investigations/privileges';
 
+export { isInvestigationSeverity } from './investigations/severity';
 export { isInvestigationTitlePending } from './investigations/title';
 
 // Query API shapes. Types only, like subjects and hypotheses: the schemas stay in the entity
@@ -204,6 +207,7 @@ export type {
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
+  SyncEscalationResponse,
 } from './escalations';
 
 export {
