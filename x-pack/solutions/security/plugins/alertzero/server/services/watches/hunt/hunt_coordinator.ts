@@ -21,7 +21,7 @@ import {
   huntCompletenessOf,
 } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
-import { resolveTier2Targets } from './common/resolve_tier2_targets';
+import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
@@ -846,7 +846,23 @@ const huntCoordinatorCore = async (
   // Nothing to point Tier 2 at is not a failure to run it: every signal came up empty,
   // and a later run over the same data finds the same. `always` does not override it,
   // because a query with no allowed index could only be refused at the source gate.
+  //
+  // That only holds when every signal was consulted. Choosing a dataset by model is the last
+  // one, and without a model for the Efficient tier it never ran, so "no targets" says nothing
+  // about this report and a run with the model restored may find some. That is a Tier 2 that
+  // was requested but could not run, which stays retryable, and not a report to retire.
   if (targets.tier2_targets.length === 0) {
+    if (
+      !models.efficient &&
+      needsModelDatasetMatch({ scope, tier1: tier1Raw, report: scopeReport })
+    ) {
+      const missingTier = describeModelTiers(['efficient']);
+      return tier1Only({
+        reason: 'no_inference',
+        message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no model available for the ${missingTier} to choose where to hunt).`,
+        nextStep: `Tier 2 could not choose where to hunt because the ${missingTier} has no model. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
+      });
+    }
     return tier1Only({
       reason: 'no_tier2_targets',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no_tier2_targets).`,

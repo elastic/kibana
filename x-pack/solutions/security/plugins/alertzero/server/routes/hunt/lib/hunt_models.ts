@@ -21,6 +21,22 @@ export interface HuntModelFailure {
   message: string;
 }
 
+const FAILURE_SEVERITY: Record<HuntModelFailure['reason'], number> = {
+  no_inference_plugin: 0,
+  resolution_error: 1,
+  no_connector: 2,
+};
+
+/**
+ * The failure that should decide a response when several tiers failed: a missing inference plugin
+ * outranks a resolution that threw, which outranks a missing connector, so a server-side fault is
+ * never hidden behind a client-fixable one. The first of equals wins. `failures` must not be empty.
+ */
+export const mostSevereFailure = (failures: HuntModelFailure[]): HuntModelFailure =>
+  failures.reduce((worst, failure) =>
+    FAILURE_SEVERITY[failure.reason] < FAILURE_SEVERITY[worst.reason] ? failure : worst
+  );
+
 export interface ResolveHuntModelsOutcome {
   /** Only the tiers that resolved are set; a missing tier degrades only its own consumers. */
   models: HuntModels;

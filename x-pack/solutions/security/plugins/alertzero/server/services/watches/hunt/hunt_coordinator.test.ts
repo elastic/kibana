@@ -319,6 +319,98 @@ describe('huntCoordinator', () => {
       expect(recommendationsInvoke).toHaveBeenCalled();
     });
 
+    describe('when the efficient tier is missing and Tier 2 is otherwise reachable', () => {
+      const withoutEfficient: HuntModels = { balanced, frontier };
+      const runWithoutEfficient = (runId: string) =>
+        huntCoordinator({ esClient, reportsEsClient: esClient }, withoutEfficient, logger, {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: runId,
+          tier2_when: 'always',
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          text: 'report text',
+        });
+      const nothingElsePointsAnywhere = () => {
+        mockScope.mockResolvedValueOnce({
+          ...okScope,
+          report_matches: [],
+          actionable_indices: [],
+          discovered: [oktaDataset],
+        });
+        mockT1.mockResolvedValueOnce(tier1(false));
+      };
+
+      it('stays retryable as no_inference, naming the Efficient tier, instead of retiring the report', async () => {
+        nothingElsePointsAnywhere();
+
+        const result = await runWithoutEfficient('run-no-efficient-no-targets');
+
+        // Choosing a dataset by model is the last signal, and it never ran, so "no targets" says
+        // nothing about this report. It must not read as the deterministic no_tier2_targets.
+        expect(mockModelMatch).not.toHaveBeenCalled();
+        expect(mockT2).not.toHaveBeenCalled();
+        expect(result.tier2_skipped_reason).toBe('no_inference');
+        expect(result.unavailable_model_tiers).toEqual(['efficient']);
+        expect(result.message).toContain('Efficient tier');
+        expect(result.next_step).toContain('Efficient tier');
+        expect(result.next_step).not.toContain('matched no dataset');
+        expect(result.narrative).toContain('Efficient tier had no model to choose where to hunt');
+        expect(result.completeness).toBe('incomplete_retryable');
+        expect(result.completed_successfully).toBe(false);
+      });
+
+      it('still skips as no_tier2_targets, and completes, when the efficient model ran and found nothing', async () => {
+        nothingElsePointsAnywhere();
+
+        const result = await run('run-efficient-found-nothing');
+
+        expect(mockModelMatch).toHaveBeenCalledTimes(1);
+        expect(result.tier2_skipped_reason).toBe('no_tier2_targets');
+        expect(result.completeness).toBe('complete');
+        expect(result.completed_successfully).toBe(true);
+      });
+
+      it.each([
+        [
+          'the report matched a dataset',
+          () => {
+            mockT1.mockResolvedValueOnce(tier1(false));
+          },
+        ],
+        [
+          'Tier 1 hit an index',
+          () => {
+            mockScope.mockResolvedValueOnce({ ...okScope, report_matches: [] });
+            mockT1.mockResolvedValueOnce(tier1(true));
+          },
+        ],
+        [
+          'the universe carries process telemetry',
+          () => {
+            mockScope.mockResolvedValueOnce({
+              ...okScope,
+              report_matches: [],
+              actionable_indices: ['logs-endpoint.events.process-default*'],
+            });
+            mockT1.mockResolvedValueOnce(tier1(false));
+          },
+        ],
+      ])(
+        'does not block Tier 2 when %s, since the model was not needed',
+        async (_label, arrange) => {
+          arrange();
+
+          const result = await runWithoutEfficient('run-no-efficient-has-targets');
+
+          expect(mockT2).toHaveBeenCalledTimes(1);
+          expect(result.tier2_skipped_reason).not.toBe('no_inference');
+          // The run is narrower than it could be, and says so.
+          expect(result.unavailable_model_tiers).toEqual(['efficient']);
+        }
+      );
+    });
+
     it('still writes recommendations from the template when only the efficient tier is missing', async () => {
       mockT1.mockResolvedValueOnce(tier1(true));
 

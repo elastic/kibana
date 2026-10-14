@@ -34,4 +34,8 @@ describe('describeModelTiers', () => {
   ] as const)('describes %j as "%s"', (tiers, expected) => {
     expect(describeModelTiers(tiers)).toBe(expected);
   });
+
+  it('is empty for no tiers, never the string "undefined tier"', () => {
+    expect(describeModelTiers([])).toBe('');
+  });
 });

@@ -13,7 +13,7 @@ import {
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
-import { resolveHuntModels } from './hunt_models';
+import { mostSevereFailure, resolveHuntModels } from './hunt_models';
 import { resolveScopedModel } from './scoped_model';
 
 jest.mock('./scoped_model', () => ({ resolveScopedModel: jest.fn() }));
@@ -113,5 +113,38 @@ describe('resolveHuntModels', () => {
     const { failures } = await resolve(['balanced', 'frontier']);
 
     expect(failures.map(({ tier }) => tier)).toEqual(['balanced', 'frontier']);
+  });
+});
+
+describe('mostSevereFailure', () => {
+  const failure = (
+    tier: 'efficient' | 'balanced' | 'frontier',
+    reason: 'no_inference_plugin' | 'no_connector' | 'resolution_error'
+  ) => ({ tier, reason, message: `${tier} ${reason}` });
+
+  it('puts a missing inference plugin ahead of a thrown resolution, and that ahead of a missing connector', () => {
+    expect(
+      mostSevereFailure([
+        failure('balanced', 'no_connector'),
+        failure('frontier', 'resolution_error'),
+      ]).reason
+    ).toBe('resolution_error');
+    expect(
+      mostSevereFailure([
+        failure('balanced', 'resolution_error'),
+        failure('frontier', 'no_inference_plugin'),
+      ]).reason
+    ).toBe('no_inference_plugin');
+  });
+
+  it('keeps the first of equally severe failures', () => {
+    expect(
+      mostSevereFailure([failure('balanced', 'no_connector'), failure('frontier', 'no_connector')])
+        .tier
+    ).toBe('balanced');
+  });
+
+  it('returns the only failure', () => {
+    expect(mostSevereFailure([failure('frontier', 'no_connector')]).tier).toBe('frontier');
   });
 });

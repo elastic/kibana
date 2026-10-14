@@ -105,7 +105,13 @@ export const registerHuntCoordinatorRoute = ({
             logger,
           });
           for (const failure of failures) {
-            logger.debug(
+            // A missing connector is the ordinary outcome, but a resolution that threw is a
+            // fault, and at debug it would be invisible in production.
+            const log =
+              failure.reason === 'resolution_error'
+                ? logger.warn.bind(logger)
+                : logger.debug.bind(logger);
+            log(
               `hunt_coordinator: ${failure.tier} model unavailable, its consumers will degrade — ${failure.message}`
             );
           }

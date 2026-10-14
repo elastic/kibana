@@ -11,7 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
-import { resolveHuntModels } from './lib/hunt_models';
+import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
@@ -68,7 +68,7 @@ export const registerHuntBehaviorRoute = ({
           });
 
           if (!models.frontier || !models.balanced) {
-            const [failure] = failures;
+            const failure = mostSevereFailure(failures);
             return response.customError({
               // A resolution that threw is ours to fix, not a missing connector the caller can add.
               statusCode:

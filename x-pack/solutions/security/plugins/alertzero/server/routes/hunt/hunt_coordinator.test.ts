@@ -199,6 +199,8 @@ describe('registerHuntCoordinatorRoute', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('efficient model unavailable')
     );
+    // An ordinary missing connector stays at debug.
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalled();
   });
 
@@ -221,7 +223,7 @@ describe('registerHuntCoordinatorRoute', () => {
     expect(response.ok).toHaveBeenCalled();
   });
 
-  it('passes no model when resolution throws, logging at debug rather than failing the request', async () => {
+  it('passes no model when resolution throws, logging a warning rather than failing the request', async () => {
     resolveScopedModelMock.mockRejectedValue(new Error('connector store unavailable'));
     const { handler, context, logger } = makeDeps();
     const response = httpServerMock.createResponseFactory();
@@ -233,7 +235,8 @@ describe('registerHuntCoordinatorRoute', () => {
       balanced: undefined,
       frontier: undefined,
     });
-    expect(logger.debug).toHaveBeenCalledWith(
+    // A resolution that threw is a fault, so it must be visible in production.
+    expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('connector store unavailable')
     );
     expect(logger.error).not.toHaveBeenCalled();

@@ -240,6 +240,49 @@ describe('registerHuntBehaviorRoute', () => {
     });
   });
 
+  it('answers with the most severe failure across the tiers, so a thrown resolution is not hidden behind a missing connector', async () => {
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) => {
+      if (featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID) {
+        throw new Error('connector store unavailable');
+      }
+      return { ok: false, reason: 'no_connector', message: 'no balanced connector' };
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: 'connector store unavailable',
+        attributes: {
+          tier2_skipped_reason: 'resolution_error',
+          unavailable_model_tiers: ['balanced', 'frontier'],
+        },
+      },
+    });
+  });
+
+  it('answers 503 when the inference plugin is missing for any tier, whatever else failed', async () => {
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
+      featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
+        ? { ok: false, reason: 'no_inference_plugin', message: 'inference is not installed' }
+        : { ok: false, reason: 'no_connector', message: 'no balanced connector' }
+    );
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 503,
+        body: expect.objectContaining({ message: 'inference is not installed' }),
+      })
+    );
+  });
+
   it('forwards the extraction threshold and report context to the service', async () => {
     const { handler, context } = makeDeps();
 

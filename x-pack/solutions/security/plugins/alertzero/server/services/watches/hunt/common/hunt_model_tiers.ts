@@ -36,9 +36,13 @@ export const unavailableModelTiers = (
   tiers: readonly HuntModelTier[] = HUNT_MODEL_TIERS
 ): HuntModelTier[] => tiers.filter((tier) => !models[tier]);
 
-/** `Balanced`, `Balanced and Frontier`, or `Efficient, Balanced and Frontier`, plus the noun. */
+/**
+ * `Balanced tier`, `Balanced and Frontier tiers`, or `Efficient, Balanced and Frontier tiers`.
+ * Empty for no tiers, so a caller cannot ship the string "undefined tier".
+ */
 export const describeModelTiers = (tiers: readonly HuntModelTier[]): string => {
   const labels = tiers.map((tier) => HUNT_MODEL_TIER_LABELS[tier]);
+  if (labels.length === 0) return '';
   const list =
     labels.length > 1
       ? `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`

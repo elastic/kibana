@@ -80,10 +80,15 @@ const describeTier2Skip = (
     case 'no_environment_hits':
       return 'Tier 2 behavior hunting was skipped because Tier 1 found no environment hits and this run only escalates to Tier 2 on a hit.';
     case 'no_inference':
-      return missingTier2Tiers.length > 0
-        ? `Tier 2 behavior hunting was skipped because no model was available for the ${describeModelTiers(
-            missingTier2Tiers
-          )}.`
+      if (missingTier2Tiers.length > 0) {
+        return `Tier 2 behavior hunting was skipped because no model was available for the ${describeModelTiers(
+          missingTier2Tiers
+        )}.`;
+      }
+      // Both Tier 2 tiers resolved, so the Efficient tier is what was missing: it chooses the
+      // dataset to hunt when nothing else points at one.
+      return unavailableTiers.includes('efficient')
+        ? 'Tier 2 behavior hunting was skipped because the Efficient tier had no model to choose where to hunt.'
         : 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
     case 'no_tier2_targets':
       return 'Tier 2 behavior hunting was skipped because no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry.';
