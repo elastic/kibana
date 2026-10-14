@@ -77,6 +77,11 @@ export interface AlertAnalysisVerdict {
   toolCallIds?: string[];
   /** True when trace ES was unreachable or the workflow trace id was invalid. */
   toolCallsUnavailable?: boolean;
+  /**
+   * The alert document the workflow analysed, attached by the eval task. The rationale judge
+   * receives it as `input.alertData` so the grounding criterion has the evidence it refers to.
+   */
+  alertData?: Record<string, unknown>;
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
