@@ -83,6 +83,8 @@ it('executes the manual investigation and reads what it recorded from the shared
         ],
       } as Partial<Investigation>)
     )
+    // With a pending proposal, the round being stored is what says the agent is done.
+    .mockResolvedValueOnce(conversation)
     .mockResolvedValueOnce(conversation);
 
   const result = await runInvestigation(fetch, example, connector);
@@ -117,6 +119,46 @@ it('executes the manual investigation and reads what it recorded from the shared
     conversation_round_count: 1,
   });
   expect(result.execution_error).toBeUndefined();
+});
+
+it("treats the eval fetch's 404 as an investigation that does not exist yet", async () => {
+  // The KbnClient-backed `fetch` exposes the HTTP status as `status`.
+  const kbnClientNotFound = Object.assign(new Error('404 Not Found'), { status: 404 });
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockRejectedValueOnce(kbnClientNotFound)
+    .mockResolvedValueOnce(investigation())
+    .mockResolvedValueOnce({ rounds: [] });
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output.execution_error).toBeUndefined();
+  expect(output.workflow_status).toBe('complete');
+});
+
+it('keeps polling while a pending proposal hides a round that has not ended yet', async () => {
+  const pendingProposal = {
+    id: 'p-1',
+    title: 'Pause the load test',
+    status: 'pending',
+  } as Investigation['proposals'][number];
+  const withProposal = investigation({ proposals: [pendingProposal] });
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    // `in_progress` is false once a proposal is pending, but the round is not stored yet.
+    .mockResolvedValueOnce(withProposal)
+    .mockResolvedValueOnce({ rounds: [] })
+    .mockResolvedValueOnce(withProposal)
+    .mockResolvedValueOnce({ rounds: [{ steps: [], trace_id: 'trace' }] })
+    .mockResolvedValueOnce({ rounds: [{ steps: [], trace_id: 'trace' }] });
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output.execution_error).toBeUndefined();
+  expect(output.conversation_round_count).toBe(1);
+  expect(fetch).toHaveBeenCalledTimes(6);
 });
 
 it('keeps multi-megabyte conversation evidence out of the persisted score output', async () => {

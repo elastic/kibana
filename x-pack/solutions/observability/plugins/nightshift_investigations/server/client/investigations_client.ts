@@ -801,6 +801,7 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
+      workflowExecutionId: executionId,
     });
 
     const subjects = recoverSubjectsFromInputs(inputs, investigationId);

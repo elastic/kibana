@@ -254,8 +254,21 @@ beforeEach(() => {
   repository = createMockRepository();
   withConversations();
   // Like Agent Builder, a conversation created without a title carries the placeholder.
-  conversations.create.mockImplementation(async ({ id, title }: { id: string; title?: string }) =>
-    makeConversation({ id, title: title ?? DEFAULT_CONVERSATION_TITLE })
+  conversations.create.mockImplementation(
+    async ({
+      id,
+      title,
+      metadata,
+    }: {
+      id: string;
+      title?: string;
+      metadata?: { workflow_execution_ids?: string[] };
+    }) =>
+      makeConversation({
+        id,
+        title: title ?? DEFAULT_CONVERSATION_TITLE,
+        workflowExecutionIds: metadata?.workflow_execution_ids,
+      })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
   subjectsClient.upsertSubjects.mockResolvedValue([]);
@@ -1713,19 +1726,19 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
     // Without a title, so Agent Builder generates one on the run's first round; the run's
     // `title` input is not stored.
+    // The run is recorded in the creating write, so the investigation reads as in progress from
+    // the moment it exists.
     expect(conversations.create).toHaveBeenCalledWith({
       id: 'inv-1',
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
       accessControl: { access_mode: 'public' },
+      metadata: { workflow_execution_ids: ['exec-1'] },
     });
     // A conversation this call created holds no subjects yet.
     expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    // The run is recorded, so the investigation reads as in progress while it runs.
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
-      workflow_execution_ids: ['exec-1'],
-    });
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
   it('appends the run to the runs an investigation already records, once', async () => {

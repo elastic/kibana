@@ -62,6 +62,10 @@ const createInvestigationConfig = (
         '--xpack.nightshift_investigations.enabled=true',
         // Investigations only run as the space's Nightshift service account.
         '--xpack.security.serviceAccounts.enabled=true',
+        // Investigations are stored as agentic investigations, and the agent proposes actions with
+        // the proposals plugin. Both are off by default and Nightshift is unavailable without them.
+        '--xpack.agenticInvestigations.enabled=true',
+        '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxKibanaConfig}`,

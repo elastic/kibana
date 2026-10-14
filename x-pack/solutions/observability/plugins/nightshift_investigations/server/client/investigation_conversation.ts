@@ -99,9 +99,15 @@ export const findInvestigationConversation = async (
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
+  workflowExecutionId,
 }: {
   conversations: ConversationPublicClient;
   id: string;
+  /**
+   * The run creating it. Recorded in the same write, so the investigation never reads as not in
+   * progress between its creation and the run being recorded on it.
+   */
+  workflowExecutionId?: string;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
@@ -114,6 +120,9 @@ export const getOrCreateInvestigationConversation = async ({
       agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
       templateId: INVESTIGATION_TEMPLATE_ID,
       accessControl: { access_mode: ConversationAccessControlMode.Public },
+      ...(workflowExecutionId
+        ? { metadata: { workflow_execution_ids: [workflowExecutionId] } }
+        : {}),
     });
     return toInvestigationConversation(created, true);
   } catch (error) {
