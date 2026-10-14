@@ -197,7 +197,7 @@ describe('Significant Events run quota workflow contracts', () => {
         type: 'workflow.output',
         status: 'cancelled',
         with: {
-          streamName: '${{ inputs.streamName }}',
+          sourceId: '${{ inputs.sourceId }}',
           featuresSkipped: true,
           featuresConnectorUsed: '',
           discoveredFeatures: [],

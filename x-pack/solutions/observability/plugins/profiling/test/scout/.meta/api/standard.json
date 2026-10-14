@@ -1,5 +1,5 @@
 {
-  "sha1": "3bddd46553715591d96a39664ac13f285beea559",
+  "sha1": "2347c4d8576786f5e6faaafaebb21b0033921d81",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -170,8 +170,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 85,
-        "column": 40
+        "line": 89,
+        "column": 7
       }
     },
     {
@@ -184,8 +184,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 105,
-        "column": 11
+        "line": 107,
+        "column": 45
       }
     },
     {
@@ -214,6 +214,160 @@
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/07_status.spec.ts",
         "line": 93,
         "column": 28
+      }
+    },
+    {
+      "id": "bb30001f65463ba-7f1659b4f206b31",
+      "title": "Profiling schemas API reports the schemas with data in the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/08_schemas.spec.ts",
+        "line": 54,
+        "column": 13
+      }
+    },
+    {
+      "id": "bb30001f65463ba-8dbd0936c0a809a",
+      "title": "Profiling schemas API only reports the schemas with data matching the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/08_schemas.spec.ts",
+        "line": 87,
+        "column": 5
+      }
+    },
+    {
+      "id": "c5002c92d885184-ea049cd8d3fad06",
+      "title": "Profiling data APIs by schema queries the flamegraph of the requested schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 117,
+        "column": 45
+      }
+    },
+    {
+      "id": "c5002c92d885184-5f462034de2cae1",
+      "title": "Profiling data APIs by schema queries the functions of the requested schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 132,
+        "column": 96
+      }
+    },
+    {
+      "id": "c5002c92d885184-1b251b05f5941cb",
+      "title": "Profiling data APIs by schema queries the stacktraces of the requested schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 150,
+        "column": 95
+      }
+    },
+    {
+      "id": "c5002c92d885184-9976c8937ba61a6",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by containers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-f114daf717144be",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by deployments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-c2267562153849d",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by executables",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-70b95cd850b0719",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by hosts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-2c473f131f286ce",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by threads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-e9bb220a08ff9a8",
+      "title": "Profiling data APIs by schema looks up the frames of the OTel stacktraces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 170,
+        "column": 10
       }
     },
     {
