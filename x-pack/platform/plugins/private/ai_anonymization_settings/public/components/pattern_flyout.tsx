@@ -243,7 +243,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
             >
               <FormattedMessage
                 id="xpack.aiAnonymizationSettings.patternFlyout.testButton"
-                defaultMessage="Pattern tester"
+                defaultMessage="Test pattern"
               />
             </EuiButton>
           </EuiFormRow>
