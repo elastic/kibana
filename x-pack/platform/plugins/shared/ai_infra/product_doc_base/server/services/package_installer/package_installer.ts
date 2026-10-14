@@ -204,12 +204,16 @@ export class PackageInstaller {
   /**
    * Whether any installed product docs are behind the repository: either the installable
    * version differs, or GCS LastModified is newer than the stored artifactLastModified.
+   * When `includeAvailableArtifacts` is set, also returns the installable artifact and its
+   * last-modified date for products that are not installed.
    * Returns undefined when the repository listing cannot be read (best-effort for status UX).
    */
   async isProductDocUpdateAvailable({
     inferenceId,
+    includeAvailableArtifacts = false,
   }: {
     inferenceId: string;
+    includeAvailableArtifacts?: boolean;
   }): Promise<ProductDocUpdateAvailability | undefined> {
     try {
       const [{ versions, lastModifiedByProductVersion }, installStatuses] = await Promise.all([
@@ -219,11 +223,12 @@ export class PackageInstaller {
 
       let isUpdateAvailable = false;
       let availableArtifact: AvailableArtifact | undefined;
+      let listedArtifact: AvailableArtifact | undefined;
       const installedArtifactLastModifiedByProduct: Partial<Record<ProductName, string>> = {};
 
       for (const [name, productState] of Object.entries(installStatuses)) {
         const productName = name as ProductName;
-        if (productState.status !== 'installed') {
+        if (!includeAvailableArtifacts && productState.status !== 'installed') {
           continue;
         }
         const availableVersions = versions[productName];
@@ -246,6 +251,15 @@ export class PackageInstaller {
         }
 
         const gcsLastModified = lastModifiedByProductVersion[productName]?.[installableVersion];
+        if (includeAvailableArtifacts) {
+          listedArtifact = preferAvailableArtifact(listedArtifact, {
+            version: installableVersion,
+            lastModified: gcsLastModified,
+          });
+        }
+        if (productState.status !== 'installed') {
+          continue;
+        }
         const installedVersionLastModified = productState.version
           ? lastModifiedByProductVersion[productName]?.[productState.version]
           : undefined;
@@ -311,13 +325,14 @@ export class PackageInstaller {
         );
       }
 
+      const reportedArtifact = isUpdateAvailable ? availableArtifact : listedArtifact;
       return {
         isUpdateAvailable,
-        ...(availableArtifact?.lastModified
-          ? { availableArtifactLastModified: availableArtifact.lastModified }
+        ...(reportedArtifact?.lastModified
+          ? { availableArtifactLastModified: reportedArtifact.lastModified }
           : {}),
-        ...(availableArtifact?.stackVersion
-          ? { availableStackVersion: availableArtifact.stackVersion }
+        ...(reportedArtifact?.stackVersion
+          ? { availableStackVersion: reportedArtifact.stackVersion }
           : {}),
         ...(Object.keys(installedArtifactLastModifiedByProduct).length
           ? { installedArtifactLastModifiedByProduct }
@@ -961,8 +976,10 @@ export class PackageInstaller {
    */
   async getSecurityLabsStatus({
     inferenceId,
+    includeAvailableArtifacts = false,
   }: {
     inferenceId?: string;
+    includeAvailableArtifacts?: boolean;
   }): Promise<SecurityLabsStatusResponse> {
     try {
       const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
@@ -994,6 +1011,12 @@ export class PackageInstaller {
         Boolean(installedVersion) &&
         Boolean(repoLatestVersion) &&
         installedVersion !== repoLatestVersion;
+      const availableArtifactFields =
+        (includeAvailableArtifacts || isUpdateAvailable) && repoLatestLastModified
+          ? { availableArtifactLastModified: repoLatestLastModified }
+          : {};
+      const listedVersionFields =
+        includeAvailableArtifacts && repoLatestVersion ? { latestVersion: repoLatestVersion } : {};
 
       // If we have a saved-object based status, return it (augmented with update info).
       // (Backwards compatibility: if not found, fall back to index existence checks below.)
@@ -1002,21 +1025,26 @@ export class PackageInstaller {
           ...status,
           latestVersion: repoLatestVersion,
           isUpdateAvailable,
-          ...(isUpdateAvailable && repoLatestLastModified
-            ? { availableArtifactLastModified: repoLatestLastModified }
-            : {}),
+          ...availableArtifactFields,
         };
       }
 
       const indexName = getSecurityLabsIndexName(effectiveInferenceId);
       const exists = await this.esClient.indices.exists({ index: indexName });
-      if (!exists) return { status: 'uninstalled' };
+      if (!exists)
+        return { status: 'uninstalled', ...availableArtifactFields, ...listedVersionFields };
 
       const countResponse = await this.esClient.count({ index: indexName });
-      if (countResponse.count === 0) return { status: 'uninstalled' };
+      if (countResponse.count === 0) {
+        return { status: 'uninstalled', ...availableArtifactFields, ...listedVersionFields };
+      }
 
       // Unknown version (legacy install), but installed.
-      return { status: 'installed', latestVersion: repoLatestVersion };
+      return {
+        status: 'installed',
+        latestVersion: repoLatestVersion,
+        ...availableArtifactFields,
+      };
     } catch (error) {
       this.log.error(`Error checking Security Labs status: ${error.message}`);
       return {

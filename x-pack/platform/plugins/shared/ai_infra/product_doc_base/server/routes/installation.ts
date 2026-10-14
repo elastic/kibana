@@ -102,6 +102,7 @@ export const registerInstallationRoutes = ({
         query: schema.object({
           inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
           resourceType: resourceTypeSchema,
+          includeAvailableArtifacts: schema.boolean({ defaultValue: false }),
         }),
       },
       options: {
@@ -117,11 +118,13 @@ export const registerInstallationRoutes = ({
       const { installClient, documentationManager } = getServices();
       const inferenceId = req.query?.inferenceId;
       const resourceType = req.query?.resourceType as ResourceType;
+      const includeAvailableArtifacts = req.query?.includeAvailableArtifacts === true;
 
       // Handle Security Labs status separately
       if (resourceType === ResourceTypes.securityLabs) {
         const securityLabsStatus = await documentationManager.getSecurityLabsStatus({
           inferenceId,
+          includeAvailableArtifacts,
         });
         return res.ok<SecurityLabsInstallStatusResponse>({
           body: {
@@ -175,9 +178,12 @@ export const registerInstallationRoutes = ({
       let isUpdateAvailable: boolean | undefined;
       let availableArtifactLastModified: string | undefined;
       let availableStackVersion: string | undefined;
-      if (overallStatus === 'installed') {
+      // Installed docs always check for a newer zip. GenAI Settings also asks on mount when
+      // nothing is installed, so the page can show the repository artifact and its date.
+      if (includeAvailableArtifacts || overallStatus === 'installed') {
         const updateAvailability = await packageInstaller.isProductDocUpdateAvailable({
           inferenceId,
+          includeAvailableArtifacts,
         });
         isUpdateAvailable = updateAvailability?.isUpdateAvailable;
         availableArtifactLastModified = updateAvailability?.availableArtifactLastModified;

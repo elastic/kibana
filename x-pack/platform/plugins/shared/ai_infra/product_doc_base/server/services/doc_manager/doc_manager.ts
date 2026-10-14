@@ -506,15 +506,20 @@ export class DocumentationManager implements DocumentationManagerAPI {
 
   async getSecurityLabsStatus({
     inferenceId,
+    includeAvailableArtifacts,
   }: {
     inferenceId: string;
+    includeAvailableArtifacts?: boolean;
   }): Promise<SecurityLabsStatusResponse> {
     if (!this.packageInstaller) {
       return { status: 'uninstalled' };
     }
 
     try {
-      return await this.packageInstaller.getSecurityLabsStatus({ inferenceId });
+      return await this.packageInstaller.getSecurityLabsStatus({
+        inferenceId,
+        includeAvailableArtifacts,
+      });
     } catch (error) {
       this.logger.error(`Failed to get Security Labs status: ${error.message}`);
       return {

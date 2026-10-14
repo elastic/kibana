@@ -36,11 +36,16 @@ export class InstallationService {
   ): Promise<InstallationStatusResponse | SecurityLabsInstallStatusResponse> {
     const inferenceId = params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
     const resourceType = params?.resourceType;
+    const includeAvailableArtifacts = params?.includeAvailableArtifacts;
 
     const response = await this.http.get<
       InstallationStatusResponse | SecurityLabsInstallStatusResponse
     >(INSTALLATION_STATUS_API_PATH, {
-      query: { inferenceId, ...(resourceType ? { resourceType } : {}) },
+      query: {
+        inferenceId,
+        ...(resourceType ? { resourceType } : {}),
+        ...(includeAvailableArtifacts ? { includeAvailableArtifacts: true } : {}),
+      },
     });
 
     return response;

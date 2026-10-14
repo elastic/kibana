@@ -547,8 +547,18 @@ describe('DocumentationSection', () => {
       });
       openRowActions('elastic_documents');
       openRowActions('security_labs');
-      expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
-      expect(screen.getByTestId('documentation-uninstall-security_labs')).toBeInTheDocument();
+      const elasticDocumentsUninstall = screen.getByTestId(
+        'documentation-uninstall-elastic_documents'
+      );
+      const securityLabsUninstall = screen.getByTestId('documentation-uninstall-security_labs');
+      expect(elasticDocumentsUninstall).toBeInTheDocument();
+      expect(
+        elasticDocumentsUninstall.querySelector('[data-euiicon-type="trash"]')
+      ).toBeInTheDocument();
+      expect(securityLabsUninstall).toBeInTheDocument();
+      expect(
+        securityLabsUninstall.querySelector('[data-euiicon-type="trash"]')
+      ).toBeInTheDocument();
     });
 
     it('should call install when install action is clicked', async () => {

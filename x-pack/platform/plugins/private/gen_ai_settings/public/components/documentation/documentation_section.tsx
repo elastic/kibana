@@ -440,6 +440,7 @@ const DocumentationActionsMenu: React.FC<{
           <EuiContextMenuItem
             key="uninstall"
             icon="trash"
+            color="danger"
             disabled={isDisabled}
             data-test-subj={`documentation-uninstall-${itemId}`}
             onClick={() => {
@@ -468,9 +469,10 @@ const InstallUpdateControl: React.FC<{
   const hasDate = Boolean(item.availableArtifactLastModified);
   const updateButton = (
     <EuiButton
-      color="accent"
+      color="primary"
       fill
       size="s"
+      iconType="download"
       isDisabled={isDisabled}
       isLoading={isLoading}
       onClick={() => setIsOpen((open) => !open)}
@@ -523,24 +525,22 @@ const InstallUpdateControl: React.FC<{
         </EuiDescriptionList>
       ) : null}
       <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="accent"
-              fill
-              size="s"
-              isDisabled={isDisabled}
-              isLoading={isLoading}
-              data-test-subj={`documentation-update-${item.id}`}
-              onClick={() => {
-                closePopover();
-                onInstallUpdate();
-              }}
-            >
-              {i18n.ACTION_INSTALL_UPDATE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButton
+          color="primary"
+          fill
+          fullWidth
+          size="s"
+          iconType="download"
+          isDisabled={isDisabled}
+          isLoading={isLoading}
+          data-test-subj={`documentation-update-${item.id}`}
+          onClick={() => {
+            closePopover();
+            onInstallUpdate();
+          }}
+        >
+          {i18n.ACTION_INSTALL_UPDATE}
+        </EuiButton>
       </EuiPopoverFooter>
     </EuiPopover>
   );

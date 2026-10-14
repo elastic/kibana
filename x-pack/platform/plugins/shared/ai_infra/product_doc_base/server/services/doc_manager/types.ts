@@ -65,8 +65,11 @@ export interface DocumentationManagerAPI {
    */
   getSecurityLabsStatus({
     inferenceId,
+    includeAvailableArtifacts,
   }: {
     inferenceId: string;
+    /** Include the repository artifact and its last-modified date even when nothing is installed. */
+    includeAvailableArtifacts?: boolean;
   }): Promise<SecurityLabsStatusResponse>;
 
   /**

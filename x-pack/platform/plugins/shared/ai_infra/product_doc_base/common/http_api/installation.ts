@@ -58,6 +58,11 @@ export interface ProductDocInstallParams {
    * - 'security_labs': Elastic Security Labs content
    */
   resourceType?: ResourceType;
+  /**
+   * When true, the status response includes repository artifacts and their last-modified
+   * dates even when nothing is installed. GenAI Settings sets this whenever the page mounts.
+   */
+  includeAvailableArtifacts?: boolean;
 }
 export interface BaseInstallStatusResponse<T extends ResourceType> {
   inferenceId: string;
