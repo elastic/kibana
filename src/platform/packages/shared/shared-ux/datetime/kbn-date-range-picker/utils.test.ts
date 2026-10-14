@@ -26,6 +26,7 @@ import {
   msToSeconds,
   getStartDate,
   getEndDate,
+  formatInputDateRange,
 } from './utils';
 
 describe('toLocalPreciseString', () => {
@@ -350,13 +351,13 @@ describe('getStartDate', () => {
 });
 
 describe('getEndDate', () => {
-  it('sets time to 23:59:59.999', () => {
+  it('sets time to the last whole second, 23:59:59.000', () => {
     const d = new Date(2026, 2, 15, 8, 0, 0, 0);
     const result = getEndDate(d);
     expect(result.getHours()).toBe(23);
     expect(result.getMinutes()).toBe(59);
     expect(result.getSeconds()).toBe(59);
-    expect(result.getMilliseconds()).toBe(999);
+    expect(result.getMilliseconds()).toBe(0);
   });
 
   it('preserves the year, month, and day', () => {
@@ -372,6 +373,26 @@ describe('getEndDate', () => {
     const result = getEndDate(d);
     expect(result).not.toBe(d);
     expect(d.getHours()).toBe(8);
+  });
+});
+
+describe('formatInputDateRange', () => {
+  it('omits milliseconds when both dates are on whole seconds', () => {
+    const text = formatInputDateRange(
+      new Date(2026, 1, 10, 0, 0, 0, 0),
+      new Date(2026, 1, 10, 23, 59, 59, 0)
+    );
+
+    expect(text).not.toMatch(/\.\d{3}/);
+  });
+
+  it('includes milliseconds on both bounds when either has them', () => {
+    const text = formatInputDateRange(
+      new Date(2026, 1, 10, 0, 0, 0, 0),
+      new Date(2026, 1, 10, 23, 59, 59, 500)
+    );
+
+    expect(text).toMatch(/00:00:00\.000.*23:59:59\.500/);
   });
 });
 

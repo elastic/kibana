@@ -353,9 +353,9 @@ export function getStartDate(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 }
 
-/** Returns a new Date set to the end of the given day (23:59:59.999). */
+/** Returns a new Date set to the last whole second of the given day (23:59:59.000). */
 export function getEndDate(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 0);
 }
 
 /**
@@ -372,14 +372,16 @@ export function formatDateRange(start: Date, end: Date, precision: TimePrecision
 }
 
 /**
- * Formats a date range as re-parseable input text at full millisecond precision.
+ * Formats a date range as re-parseable input text, never truncating below what the
+ * dates carry.
  *
- * Input text is the source of truth for the applied range, so it must never be
- * truncated to the display `timePrecision`: e.g. a calendar day selection must
- * round-trip as `23:59:59.999`, not `23:59:59` or `23:59`.
+ * Input text is the source of truth for the applied range, so it must not be
+ * truncated to the display `timePrecision`. Milliseconds are included only when
+ * either date is not on a whole second, so whole-second ranges stay free of `.000`.
  */
 export function formatInputDateRange(start: Date, end: Date): string {
-  return formatDateRange(start, end, 'ms');
+  const hasSubSecondBound = start.getMilliseconds() !== 0 || end.getMilliseconds() !== 0;
+  return formatDateRange(start, end, hasSubSecondBound ? 'ms' : 's');
 }
 
 /**

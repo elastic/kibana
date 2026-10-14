@@ -134,7 +134,7 @@ describe('TimeWindowButtons', () => {
   });
 
   describe('time shift', () => {
-    it('steps forward to the adjacent window, starting 1ms after the current end', async () => {
+    it('steps forward by a whole second when both bounds are whole seconds', async () => {
       const { onChange } = renderPicker({
         defaultValue: '2025-01-01T00:00:00.000Z to 2025-01-02T00:00:00.000Z',
       });
@@ -145,11 +145,11 @@ describe('TimeWindowButtons', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       const call = onChange.mock.calls[0][0];
-      expect(call.start).toBe('2025-01-02T00:00:00.001Z');
-      expect(call.end).toBe('2025-01-03T00:00:00.001Z');
+      expect(call.start).toBe('2025-01-02T00:00:01.000Z');
+      expect(call.end).toBe('2025-01-03T00:00:01.000Z');
     });
 
-    it('steps backward to the adjacent window, ending 1ms before the current start', async () => {
+    it('steps backward by a whole second when both bounds are whole seconds', async () => {
       const { onChange } = renderPicker({
         defaultValue: '2025-01-02T00:00:00.000Z to 2025-01-03T00:00:00.000Z',
       });
@@ -160,8 +160,36 @@ describe('TimeWindowButtons', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       const call = onChange.mock.calls[0][0];
-      expect(call.start).toBe('2024-12-31T23:59:59.999Z');
-      expect(call.end).toBe('2025-01-01T23:59:59.999Z');
+      expect(call.start).toBe('2024-12-31T23:59:59.000Z');
+      expect(call.end).toBe('2025-01-01T23:59:59.000Z');
+    });
+
+    it('steps by 1ms when a bound has milliseconds', async () => {
+      const { onChange } = renderPicker({
+        defaultValue: '2025-01-01T00:00:00.000Z to 2025-01-02T00:00:00.500Z',
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dateRangePickerNextButton'));
+      });
+
+      const call = onChange.mock.calls[0][0];
+      expect(call.start).toBe('2025-01-02T00:00:00.501Z');
+      expect(call.end).toBe('2025-01-03T00:00:01.001Z');
+    });
+
+    it('steps a whole-second calendar day to the next full calendar day', async () => {
+      const { onChange } = renderPicker({
+        defaultValue: '2025-01-01T00:00:00.000Z to 2025-01-01T23:59:59.000Z',
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dateRangePickerNextButton'));
+      });
+
+      const call = onChange.mock.calls[0][0];
+      expect(call.start).toBe('2025-01-02T00:00:00.000Z');
+      expect(call.end).toBe('2025-01-02T23:59:59.000Z');
     });
 
     it('steps a full calendar day to the next full calendar day', async () => {
@@ -237,8 +265,8 @@ describe('TimeWindowButtons', () => {
       expect(call.end).toBe(expectedEnd);
     });
 
-    it('expands by ZOOM_DELTA_FALLBACK_MS when time window is 0', async () => {
-      const sameTime = '2025-01-01T12:00:00.000Z';
+    it('expands by ZOOM_DELTA_FALLBACK_MS when a zero-width window has milliseconds', async () => {
+      const sameTime = '2025-01-01T12:00:00.250Z';
       const { onChange } = renderPicker({ defaultValue: `${sameTime} to ${sameTime}` });
 
       await act(async () => {
@@ -252,6 +280,39 @@ describe('TimeWindowButtons', () => {
       const call = onChange.mock.calls[0][0];
       expect(call.start).toBe(expectedStart);
       expect(call.end).toBe(expectedEnd);
+    });
+  });
+
+  describe('zoom out on whole-second windows', () => {
+    it('lands on whole seconds when the zoom delta is not a whole second', async () => {
+      const { onChange } = renderPicker({
+        defaultValue: '2025-01-01T00:00:00.000Z to 2025-01-01T00:00:07.000Z',
+        showTimeWindowButtons: { zoomFactor: 0.5 },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dateRangePickerZoomOutButton'));
+      });
+
+      // 7s * 0.25 = 1.75s, rounded to 2s
+      const call = onChange.mock.calls[0][0];
+      expect(call.start).toBe('2024-12-31T23:59:58.000Z');
+      expect(call.end).toBe('2025-01-01T00:00:09.000Z');
+    });
+
+    it('expands by a whole second when the window is zero-width', async () => {
+      const sameTime = '2025-01-01T12:00:00.000Z';
+      const { onChange } = renderPicker({ defaultValue: `${sameTime} to ${sameTime}` });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dateRangePickerZoomOutButton'));
+      });
+
+      const call = onChange.mock.calls[0][0];
+      expect(call.start).toBe(
+        moment(sameTime).subtract(ZOOM_DELTA_FALLBACK_MS, 'ms').toISOString()
+      );
+      expect(call.end).toBe(moment(sameTime).add(ZOOM_DELTA_FALLBACK_MS, 'ms').toISOString());
     });
   });
 
