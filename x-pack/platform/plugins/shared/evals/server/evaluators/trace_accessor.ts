@@ -93,7 +93,9 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
     const { spaceIds } = traceAccessor;
     const buildSpaceIndex =
       source === 'traces' ? buildSpaceTracesIndexPattern : buildSpaceLogsIndexPattern;
-    const index = spaceIds ? spaceIds.map(buildSpaceIndex) : sourceIndex;
+    // An empty index list would search every index. With no spaces the namespace filter
+    // below has no terms, so the read matches nothing.
+    const index = spaceIds?.length ? spaceIds.map(buildSpaceIndex) : sourceIndex;
 
     const filterClauses: QueryDslQueryContainer[] = [
       { term: { [field]: traceAccessor.traceId } },

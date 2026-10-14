@@ -87,6 +87,27 @@ describe('createTraceAccessor', () => {
       );
     });
 
+    it('matches nothing, instead of searching every index, when given no spaces', async () => {
+      const { esClient, searchMock } = createEsClient();
+      const accessor = createTraceAccessor({ traceId: validTraceId, esClient, spaceIds: [] });
+
+      await accessor.runSearch('traces', { size: 1 });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'traces-*',
+          query: {
+            bool: {
+              filter: [
+                { term: { 'trace.id': validTraceId } },
+                { terms: { 'data_stream.namespace': [] } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
     it('limits the logs source to the same spaces, so log evidence follows the trace rules', async () => {
       const { esClient, searchMock } = createEsClient();
       const accessor = createTraceAccessor({
