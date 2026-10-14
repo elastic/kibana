@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core-http-browser';
 import { isInternalURL } from '@kbn/std';
 import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { CUSTOM_CONTENT_ALLOWED_LINK_APPS } from './constants';
@@ -13,6 +14,11 @@ export interface LinkBasePath {
   requestBasePath: string;
   serverBasePath: string;
 }
+
+export const getLinkBasePath = ({ basePath }: Pick<HttpStart, 'basePath'>): LinkBasePath => ({
+  requestBasePath: basePath.get(),
+  serverBasePath: basePath.serverBasePath,
+});
 
 export const isKibanaFramed = (): boolean => window.top !== window.self;
 
