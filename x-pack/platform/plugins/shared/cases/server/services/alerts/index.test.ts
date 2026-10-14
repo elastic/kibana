@@ -937,6 +937,29 @@ describe('updateAlertsStatus', () => {
       });
     });
 
+    it('runs alerting RBAC on a scheduled attack requested by alias rather than backing index', async () => {
+      // `metadata.index` is caller-controlled, and alert index privileges are granted on the
+      // alias, so the requested name routinely differs from the concrete backing index
+      // Elasticsearch resolves and returns. Pairing the response to the request by index name
+      // would match nothing here and skip alerting RBAC altogether.
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000001',
+            _id: 'attack-1',
+            found: true,
+            _source: validAttackSource,
+          },
+        ],
+      } as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts: attacks });
+    });
+
     it('throws when an ad-hoc attack belongs to another space', async () => {
       esClient.mget.mockResolvedValueOnce(
         adHocAttackDoc({
