@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { borealisLight } from './src/borealis_tokens.generated';
+export { borealisDark, borealisLight } from './src/borealis_tokens.generated';
 export {
   CARD_FALLBACK_NODE_HEIGHT,
   cardContentWidth,
