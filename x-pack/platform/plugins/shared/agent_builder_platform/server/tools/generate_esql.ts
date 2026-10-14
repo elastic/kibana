@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
@@ -54,6 +55,7 @@ const nlToEsqlToolSchema = z.object({
     .describe(
       '(optional) Time range to use for named parameters ?_tstart and ?_tend when validating the generated query. If not provided, falls back to the time range from the screen context.'
     ),
+  include_frozen: includeFrozenSchema,
 });
 
 export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
@@ -70,6 +72,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         execute_query: executeQuery = true,
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
+        include_frozen: includeFrozen = false,
       },
       { esClient, experimentalFeatures, modelProvider, logger, events, attachments }
     ) => {
@@ -83,6 +86,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         disableNamedParams,
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
+        includeFrozen,
         modelProvider,
         esClient: esClient.asCurrentUser,
         internalEsClient: esClient.asInternalUser,
