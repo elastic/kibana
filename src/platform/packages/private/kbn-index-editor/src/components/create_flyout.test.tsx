@@ -115,4 +115,26 @@ describe('createFlyout', () => {
       fieldCount: 0,
     });
   });
+
+  it('should prefill lookup- as the index name when creating a new lookup index', () => {
+    createFlyout(deps, {
+      doesIndexExist: false,
+      canEditIndex: true,
+      triggerSource: 'test-source',
+    });
+
+    expect(indexUpdateService.setIndexName).toHaveBeenCalledWith('lookup-');
+  });
+
+  it('should not override the index name when editing an existing lookup index', () => {
+    createFlyout(deps, {
+      doesIndexExist: true,
+      indexName: 'lookup-test-index',
+      canEditIndex: true,
+      triggerSource: 'test-source',
+    });
+
+    expect(indexUpdateService.setIndexName).toHaveBeenCalledWith('lookup-test-index');
+    expect(indexUpdateService.setIndexName).not.toHaveBeenCalledWith('lookup-');
+  });
 });
