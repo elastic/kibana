@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -18,6 +19,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
+import {
+  ALERTZERO_ENABLED_SETTING_ID,
+  TEMPLATE_ID_ESCALATION,
+  TEMPLATE_ID_INVESTIGATION,
+} from '@kbn/alertzero-common';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -36,11 +42,11 @@ const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
 const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
 import type {
   AlertZeroRequestHandlerContext,
-  AlertTriageAttachmentServiceProvider,
   AlertZeroPluginSetup,
   AlertZeroPluginStart,
   AlertZeroSetupDependencies,
   AlertZeroStartDependencies,
+  ThreatIntelSupplyWorkflowInstaller,
 } from './types';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
@@ -50,6 +56,7 @@ import { initializeManagedWorkflows } from './managed_workflows/initialize_manag
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
+import { createGetWorkerBlockingReasons } from './services/workers/worker_blocking_reasons';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
@@ -63,6 +70,8 @@ import { registerAttachments } from './agent_builder/attachments/register_attach
 import { registerStepDefinitions } from './step_types';
 import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
+import { enumerateSpaceIds } from './lib/enumerate_space_ids';
+import { ThreatIntelSupplyService } from './services/threat_intel_supply';
 
 export class AlertZeroPlugin
   implements
@@ -82,6 +91,7 @@ export class AlertZeroPlugin
     this.serverlessTierAvailable = available;
   };
   private spaces?: AlertZeroStartDependencies['spaces'];
+  private taskManager?: AlertZeroStartDependencies['taskManager'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
@@ -93,17 +103,21 @@ export class AlertZeroPlugin
   private agentBuilderConversations?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
+  private agentBuilderExecution?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['execution'];
+  private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
   private scanFailuresService?: ScanFailuresService;
+  private threatIntelSupplyService?: ThreatIntelSupplyService;
 
   /**
-   * Set by whichever optional consumer's `start()` calls `registerAlertTriageAttachmentServiceProvider`
-   * (see `AlertZeroPluginStart`). May still be unset when `WorkersService` is constructed below,
-   * since that consumer starts after this plugin; `WorkersService` reads it lazily per call.
+   * Set by security_solution's `start()` via `registerThreatIntelSupplyWorkflowInstaller`.
+   * May be unset when `ThreatIntelSupplyService` is constructed; that service reads it lazily.
    */
-  private alertTriageAttachmentServiceProvider?: AlertTriageAttachmentServiceProvider;
+  private threatIntelSupplyWorkflowInstaller?: ThreatIntelSupplyWorkflowInstaller;
 
   /** Set in start from `xpack.security.serviceAccounts.enabled`. False until then. */
   private serviceAccountsEnabled = false;
@@ -114,11 +128,15 @@ export class AlertZeroPlugin
     this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  private readonly registerAlertTriageAttachmentServiceProvider = (
-    provider: AlertTriageAttachmentServiceProvider
+  private readonly registerThreatIntelSupplyWorkflowInstaller = (
+    installer: ThreatIntelSupplyWorkflowInstaller
   ): void => {
-    this.alertTriageAttachmentServiceProvider = provider;
+    this.threatIntelSupplyWorkflowInstaller = installer;
   };
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
+    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+  });
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -160,6 +178,17 @@ export class AlertZeroPlugin
         ...listActionsTool(() => this.requireActionsService(), assertAlertZeroAccess),
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
+      // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero stay quiet.
+      agentBuilder.conversations.enableUpdatedTrigger({
+        templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
+        isEnabled: async (request) => {
+          const [{ savedObjects, uiSettings }] = await coreSetup.getStartServices();
+          return uiSettings
+            .asScopedToClient(savedObjects.getScopedClient(request))
+            .get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
+        },
+      });
     }
 
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
@@ -169,12 +198,16 @@ export class AlertZeroPlugin
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
+      getExecution: (params) => this.requireAgentBuilderExecution().executeAgent(params),
+      resolveConnectorId: (request) => this.resolveSummaryConnectorId(request),
       getHuntServices: () => this.requireHuntServices(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(
         () => this.fleetAgentService,
         stepsLogger
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
+      getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
       logger: stepsLogger,
     });
 
@@ -239,6 +272,7 @@ export class AlertZeroPlugin
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
+      getThreatIntelSupplyService: () => this.threatIntelSupplyService,
     });
 
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
@@ -246,16 +280,16 @@ export class AlertZeroPlugin
 
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.taskManager = plugins.taskManager;
     this.coreStart = core;
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
+    this.agentBuilderExecution = plugins.agentBuilder?.execution;
+    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
     if (!this.config.enabled) {
-      return {
-        registerAlertTriageAttachmentServiceProvider:
-          this.registerAlertTriageAttachmentServiceProvider,
-      };
+      return this.alertZeroStartContract();
     }
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
@@ -265,10 +299,7 @@ export class AlertZeroPlugin
     // Service accounts are required the same way: with the flag off the plugin stays mounted
     // for the unavailable screen and does not install or schedule workers.
     if (!agentBuilder || !proposals || !agenticInvestigations || !this.serviceAccountsEnabled) {
-      return {
-        registerAlertTriageAttachmentServiceProvider:
-          this.registerAlertTriageAttachmentServiceProvider,
-      };
+      return this.alertZeroStartContract();
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
@@ -303,6 +334,22 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
+    this.threatIntelSupplyService =
+      management != null
+        ? new ThreatIntelSupplyService({
+            management,
+            managedWorkflows,
+            logger: this.logger,
+            // Internal user: TI reports index is plugin-owned / hidden; route authz
+            // already gates who can enable Hunt.
+            getEsClient: async () => core.elasticsearch.client.asInternalUser,
+            enumerateSpaceIds: () =>
+              enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
+            // security_solution registers after this plugin starts; read lazily.
+            getWorkflowInstaller: () => this.threatIntelSupplyWorkflowInstaller,
+          })
+        : undefined;
+
     this.workersService = new WorkersService(
       management,
       managedWorkflows,
@@ -314,13 +361,6 @@ export class AlertZeroPlugin
         agentTypes: [agentType],
       },
       {
-        // Reads whatever was registered via `registerAlertTriageAttachmentServiceProvider` at
-        // call time, not at construction time — a consumer may register after this plugin has
-        // started, since this plugin's optional consumers necessarily start after it does.
-        getAttachmentService: (request, workflowId) =>
-          this.alertTriageAttachmentServiceProvider
-            ? this.alertTriageAttachmentServiceProvider(request, workflowId)
-            : Promise.resolve(undefined),
         // Read per request: the setting is space-scoped, so a Worker enabled in one space
         // says nothing about another. Resolved here rather than in WorkersService because
         // the setting belongs to security_solution.
@@ -332,21 +372,21 @@ export class AlertZeroPlugin
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
-      }
+      },
+      createGetWorkerBlockingReasons(plugins.searchInferenceEndpoints, this.logger.get('workers')),
+      this.threatIntelSupplyService
     );
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
 
     this.huntServices = {
       getProposalsService: () => this.requireProposals().getProposalsService(),
+      getProposalPrivileges: () => this.requireProposals().getProposalPrivileges(),
       getInference: () => plugins.inference,
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };
 
-    return {
-      registerAlertTriageAttachmentServiceProvider:
-        this.registerAlertTriageAttachmentServiceProvider,
-    };
+    return this.alertZeroStartContract();
   }
 
   private requireStarted<T>(value: T | undefined, name: string): T {
@@ -380,6 +420,33 @@ export class AlertZeroPlugin
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'] {
     return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
+  }
+
+  private requireAgentBuilderExecution(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['execution'] {
+    return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
+  }
+
+  private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {
+    const searchInferenceEndpoints = this.searchInferenceEndpoints;
+    if (!searchInferenceEndpoints) {
+      return undefined;
+    }
+    try {
+      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+        ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+        request
+      );
+      return endpoints[0]?.connectorId;
+    } catch (error) {
+      this.logger.warn(
+        `AlertZero investigation summary connector could not be resolved. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
   }
 
   private requireHuntServices(): HuntServices {

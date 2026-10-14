@@ -686,12 +686,13 @@ export function ComposeDiscoverFlyout({
         );
         setSandboxRecovery({ strategy: recoveryStrategy.no_breach });
       } else {
-        // Signal rules carry no breach split and no lifecycle config.
+        // Signal rules carry no breach split, no lifecycle config and no routing tags.
         const signalQuery: RuleQuery = { base: assembled, breach: { segment: '' } };
         setSandboxQuery(signalQuery);
         methods.setValue('query', signalQuery, { shouldDirty: true });
         methods.setValue('noData', undefined, { shouldDirty: true });
         methods.setValue('recovery', undefined, { shouldDirty: true });
+        methods.setValue('metadata.routingTags', undefined, { shouldDirty: true });
         setSandboxRecovery(undefined);
       }
       methods.setValue('kind', kind, { shouldDirty: true });

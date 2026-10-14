@@ -385,6 +385,12 @@ export interface DocLinks {
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly api: string;
+      readonly explore: {
+        readonly landing: string;
+        readonly hostsPage: string;
+        readonly networkPage: string;
+        readonly usersPage: string;
+      };
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
@@ -491,6 +497,7 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    compareAlertingSystems: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -602,6 +609,7 @@ export interface DocLinks {
     secureLogstash: string;
     agentPolicy: string;
     agentlessIntegrations: string;
+    cloudConnectorDeployment: string;
     api: string;
     managedOtlp: string;
     uninstallAgent: string;
@@ -762,6 +770,7 @@ export interface DocLinks {
     readonly datasets: string;
     readonly datasetSettings: string;
     readonly authentication: string;
+    readonly grantReadAccess: string;
     readonly staticCredentials: string;
     readonly federatedIdentity: string;
     readonly querying: string;

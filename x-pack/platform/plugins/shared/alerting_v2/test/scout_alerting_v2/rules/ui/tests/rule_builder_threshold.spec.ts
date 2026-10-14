@@ -132,9 +132,9 @@ test.describe(
           .toBeGreaterThanOrEqual(1);
       });
 
-      await test.step('the persisted rule has builder_type metadata', async () => {
+      await test.step('the persisted rule has builder metadata', async () => {
         const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
-        expect(items[0]?.metadata?.builder_type).toBe('threshold');
+        expect(items[0]?.metadata?.builder).toStrictEqual({ type: 'threshold' });
       });
     });
 
@@ -147,7 +147,7 @@ test.describe(
       await test.step('seed a builder rule via API', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            metadata: { name: EDIT_RULE_NAME, builder_type: 'threshold' },
+            metadata: { name: EDIT_RULE_NAME, builder: { type: 'threshold' } },
             query: {
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },
@@ -216,17 +216,17 @@ test.describe(
       });
     });
 
-    test('builder-to-esql: rule without builder_type opens in ES|QL mode', async ({
+    test('builder-to-esql: rule without builder metadata opens in ES|QL mode', async ({
       page,
       apiServices,
       pageObjects,
     }) => {
       let ruleId: string | undefined;
 
-      await test.step('create a builder rule then clear builder_type via upsert', async () => {
+      await test.step('create a builder rule then clear builder metadata via upsert', async () => {
         const created = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            metadata: { name: 'was-builder-rule', builder_type: 'threshold' },
+            metadata: { name: 'was-builder-rule', builder: { type: 'threshold' } },
             query: {
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },
@@ -271,7 +271,7 @@ test.describe(
       await test.step('create builder rule with unparseable query', async () => {
         const created = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            metadata: { name: 'unparseable-builder-rule', builder_type: 'threshold' },
+            metadata: { name: 'unparseable-builder-rule', builder: { type: 'threshold' } },
             query: {
               base: `FROM ${TEST_INDEX} | STATS COUNT(*) BY host.name`,
               breach: { segment: '| WHERE `COUNT(*)` > 3.0' },
@@ -312,7 +312,7 @@ test.describe(
       await test.step('create a valid builder rule', async () => {
         const created = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            metadata: { name: 'switch-modal-rule', builder_type: 'threshold' },
+            metadata: { name: 'switch-modal-rule', builder: { type: 'threshold' } },
             query: {
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },

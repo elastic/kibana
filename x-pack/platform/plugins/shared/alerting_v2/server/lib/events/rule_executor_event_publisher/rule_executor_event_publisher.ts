@@ -13,6 +13,7 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
+import { EventOriginToken, type EventOrigin } from '../../event_origin/token';
 import type { EventBus } from '../event_bus';
 import {
   RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
@@ -49,7 +50,8 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
-    @inject(Request) private readonly request: KibanaRequest
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(EventOriginToken) private readonly origin: EventOrigin
   ) {}
 
   public publishExecutionSucceeded(payload: RuleExecutionSucceededPayload): void {
@@ -58,7 +60,7 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
       payload,
     };
 
-    this.eventBus.publish(event, { request: this.request });
+    this.eventBus.publish(event, { request: this.request, origin: this.origin });
   }
 
   public publishExecutionFailed(payload: RuleExecutionFailedPayload): void {
@@ -67,6 +69,6 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
       payload,
     };
 
-    this.eventBus.publish(event, { request: this.request });
+    this.eventBus.publish(event, { request: this.request, origin: this.origin });
   }
 }

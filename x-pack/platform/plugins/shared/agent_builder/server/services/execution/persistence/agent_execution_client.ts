@@ -183,10 +183,12 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       metadata: metadata ?? {},
     };
 
+    // Reads by id are real-time GETs, and searches already tolerate the lag on status updates.
     await this.storage.getClient().index({
       id: executionId,
       document,
       op_type: 'create',
+      refresh: false,
     });
 
     return fromEs(document);

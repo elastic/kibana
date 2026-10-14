@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import {
+  DEFAULT_MAX_ERROR_RATIO,
   validateMaxErrorRatio,
   type CreateDatasetFormValues,
 } from '../../../create_dataset_form_state';
@@ -52,7 +53,7 @@ export function MaxErrorRatioField({ control }: { control: Control<CreateDataset
         <FormattedMessage
           id="xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioHelpText"
           defaultMessage="{defaultValue} by default"
-          values={{ defaultValue: <EuiCode>0.0</EuiCode> }}
+          values={{ defaultValue: <EuiCode>{DEFAULT_MAX_ERROR_RATIO}</EuiCode> }}
         />
       }
       fullWidth
