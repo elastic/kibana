@@ -289,6 +289,11 @@ test.describe(
       await expect(page.getByTestId('streamsCanvasEdgeMenu')).toBeVisible();
       await expect(page.getByText('Add processing')).toBeVisible();
       await expect(page.getByText('Add routing')).toBeVisible();
+
+      await page.getByText('Add processing').click();
+      await expect(
+        page.getByTestId('streamsProcessingFlyout').getByText('Add Processing')
+      ).toBeVisible();
     });
   }
 );

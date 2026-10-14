@@ -31,7 +31,7 @@ export function ProcessingFlyout({ edge }: { edge: string }) {
       maxWidth={1600}
       aria-labelledby={headerId}
       onClose={closeRoutingFlyout}
-      data-test-subj="streamsRoutingFlyout"
+      data-test-subj="streamsProcessingFlyout"
       paddingSize="none"
     >
       <EuiFlyoutHeader hasBorder>
