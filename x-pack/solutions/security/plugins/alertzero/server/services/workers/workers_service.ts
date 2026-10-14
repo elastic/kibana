@@ -14,7 +14,6 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   touchesWorkerSettings,
-  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type UpdateWorkerRequestBody,
   type Worker,
   type WorkerBlockingReason,
@@ -22,8 +21,6 @@ import {
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowSchema } from '@kbn/workflows';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
@@ -42,17 +39,6 @@ import {
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
-
-interface AlertTriageOpts {
-  /**
-   * Whether the Alert Analysis workflow will actually analyse anything in the caller's space.
-   * Distinct from its `enabled` flag: the workflow installs enabled, but its own guard also
-   * requires a per-space uiSetting that now defaults to off, and with that off it completes
-   * having classified nothing instead of failing. Injected rather than read here because the
-   * setting belongs to security_solution.
-   */
-  isAlertAnalysisRuntimeEnabled?: (request: KibanaRequest) => Promise<boolean>;
-}
 
 /**
  * Workers hidden until the named skill is registered. These skills may be
@@ -86,11 +72,6 @@ const templateValuesEqual = (
 /** Why enabling any Worker in the space was refused before anything was written. */
 export type SpaceEnableBlockedReason = 'noModel';
 
-/** Why an Alert Triage Worker enable was refused before anything was written. */
-export type AlertTriageEnableBlockedReason =
-  | 'alertAnalysisWorkflowDisabled'
-  | 'alertAnalysisRuntimeDisabled';
-
 /** Why Continuous Threat Hunt enable was refused before anything was written. */
 export type HuntSupplyEnableBlockedReason =
   | 'huntSupplyPrerequisitesUnmet'
@@ -98,10 +79,7 @@ export type HuntSupplyEnableBlockedReason =
   | 'huntSupplyNotInstalled';
 
 /** Why a Worker enable was refused before anything was written. */
-export type WorkerEnableBlockedReason =
-  | SpaceEnableBlockedReason
-  | AlertTriageEnableBlockedReason
-  | HuntSupplyEnableBlockedReason;
+export type WorkerEnableBlockedReason = SpaceEnableBlockedReason | HuntSupplyEnableBlockedReason;
 
 const readServiceAccountId = (
   values: Record<string, unknown> | null | undefined
@@ -147,7 +125,6 @@ export class WorkersService {
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
-    private readonly alertTriageOpts: AlertTriageOpts = {},
     private readonly installWorkerForRequest: InstallWorkerForRequest,
     private readonly getBlockingReasons: GetWorkerBlockingReasons,
     private readonly threatIntelSupply?: ThreatIntelSupplyService
@@ -289,19 +266,7 @@ export class WorkersService {
       workflowIdSuffix: spaceId,
     });
 
-    const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
     const isHuntWorker = workerId === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
-
-    // Validate the enable half before writing anything: a combined settings-and-enable PATCH
-    // must not persist new settings (below) when the enable half is refused, or the operator
-    // is left with a bumped revision and no way back to a consistent "not yet enabled" state.
-    // `status.workflowId` is deterministic regardless of install state, so this can run first.
-    if (isAlertTriageWorker && patch.enabled) {
-      const blockedReason = await this.checkAlertAnalysisPreflight(request);
-      if (blockedReason) {
-        return { outcome: 'blocked', reason: blockedReason };
-      }
-    }
 
     const currentState = status.installed
       ? await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId)
@@ -488,73 +453,6 @@ export class WorkersService {
       agentLookup
     );
     return { outcome: 'updated', response: { worker } };
-  }
-
-  /**
-   * Returns why the Alert Analysis workflow cannot do the Worker's work, or null if the enable
-   * may proceed. The Worker wraps that workflow, so enabling it against an unusable one
-   * produces a Worker that triages nothing.
-   *
-   * Two independent things have to hold, and they fail differently:
-   *
-   * - the workflow must be `enabled`, or `workflow.execute` throws and every rule trigger
-   *   surfaces a failed execution
-   * - its per-space runtime config must have analysis switched on. This is the quieter of the
-   *   two and the reason the check cannot stop at the `enabled` flag: the workflow installs
-   *   enabled, but `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and
-   *   with it off the workflow's own guard short-circuits and it returns an empty verdict set.
-   *   The Worker then completes successfully having classified, tagged and closed nothing.
-   *
-   * Refusing rather than switching it on is deliberate: that setting is `readonly` and owned
-   * by security_solution, so it is not ours to flip.
-   */
-  private async checkAlertAnalysisPreflight(
-    request: KibanaRequest
-  ): Promise<AlertTriageEnableBlockedReason | null> {
-    const management = this.management;
-    if (!management) return null;
-    try {
-      const workflow = await management.getWorkflow(
-        SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-        GLOBAL_WORKFLOW_SPACE_ID,
-        request
-      );
-      // `getWorkflow` returns null for an absent workflow, not just a present-but-disabled one.
-      // `workflow.execute` against a nonexistent workflow fails the same way as against a
-      // disabled one, so both must block the enable the same way.
-      if (!workflow || !workflow.enabled) {
-        return 'alertAnalysisWorkflowDisabled';
-      }
-    } catch (err) {
-      // Degrades to the runtime-config check below and, ultimately, to the YAML-level
-      // `require_analysis_enabled` guard at execution time: refusing on a transient read
-      // failure here would make the Worker un-enableable whenever `getWorkflow` errors for an
-      // unrelated reason, and a disabled workflow still fails closed at run time regardless.
-      this.logger.warn(
-        `Alert Triage Worker: could not verify Alert Analysis workflow state: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-
-    const { isAlertAnalysisRuntimeEnabled } = this.alertTriageOpts;
-    if (isAlertAnalysisRuntimeEnabled) {
-      try {
-        if (!(await isAlertAnalysisRuntimeEnabled(request))) {
-          return 'alertAnalysisRuntimeDisabled';
-        }
-      } catch (err) {
-        // Refusing on an unreadable setting would make the Worker un-enableable whenever the
-        // read fails for an unrelated reason, so this degrades to the checks above.
-        this.logger.warn(
-          `Alert Triage Worker: could not verify alert analysis runtime config: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-      }
-    }
-
-    return null;
   }
 
   private async projectWorker(
