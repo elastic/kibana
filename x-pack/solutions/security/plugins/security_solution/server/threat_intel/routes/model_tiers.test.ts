@@ -28,11 +28,11 @@ import { resolveScopedModel } from './lib/scoped_model';
 jest.mock('./lib/scoped_model');
 
 const routes = [
-  [registerAssessRelevanceRoute, ASSESS_RELEVANCE_API_PATH, 'alertzero_fast'],
-  [registerClassifySeverityRoute, CLASSIFY_SEVERITY_API_PATH, 'alertzero_fast'],
-  [registerEnrichTaxonomyRoute, ENRICH_TAXONOMY_API_PATH, 'alertzero_fast'],
-  [registerEnrichReportCoreRoute, ENRICH_REPORT_CORE_API_PATH, 'alertzero_reasoning'],
-  [registerExtractDiamondRoute, EXTRACT_DIAMOND_API_PATH, 'alertzero_reasoning'],
+  [registerAssessRelevanceRoute, ASSESS_RELEVANCE_API_PATH, 'alertzero_efficient'],
+  [registerClassifySeverityRoute, CLASSIFY_SEVERITY_API_PATH, 'alertzero_efficient'],
+  [registerEnrichTaxonomyRoute, ENRICH_TAXONOMY_API_PATH, 'alertzero_efficient'],
+  [registerEnrichReportCoreRoute, ENRICH_REPORT_CORE_API_PATH, 'alertzero_frontier'],
+  [registerExtractDiamondRoute, EXTRACT_DIAMOND_API_PATH, 'alertzero_frontier'],
 ] as const;
 
 describe('threat intel model tiers', () => {
