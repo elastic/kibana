@@ -51,7 +51,15 @@ const readModel = (property: MappingProperty | undefined): SearchEmbeddingModel 
   }
 };
 
-/** Reads the `search_embedding` model from the backing-index mappings of the data stream. */
+const sameModel = (a: SearchEmbeddingModel, b: SearchEmbeddingModel): boolean =>
+  a.kind === b.kind &&
+  (a.kind !== 'dense' || b.kind !== 'dense' || a.inferenceId === b.inferenceId);
+
+/**
+ * Reads the `search_embedding` model from the data stream's backing indices; `unknown` when they
+ * disagree, since `KNN(TEXT_EMBEDDING(...))` embeds the query with one endpoint while `MATCH`
+ * resolves inference per index.
+ */
 export const readSearchEmbeddingModel = async (
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -59,12 +67,26 @@ export const readSearchEmbeddingModel = async (
 ): Promise<SearchEmbeddingModel> => {
   try {
     const mappings = await esClient.indices.getMapping({ index: dataStream });
-    for (const { mappings: indexMappings } of Object.values(mappings ?? {})) {
+    let resolved: SearchEmbeddingModel = { kind: 'unknown' };
+    for (const [index, { mappings: indexMappings }] of Object.entries(mappings ?? {})) {
       const model = readModel(indexMappings?.properties?.[SEARCH_EMBEDDING]);
-      if (model.kind !== 'unknown') {
-        return model;
+      if (model.kind === 'unknown') {
+        continue;
+      }
+      if (resolved.kind === 'unknown') {
+        resolved = model;
+        continue;
+      }
+      if (!sameModel(resolved, model)) {
+        logger.warn(
+          `Backing indices of [${dataStream}] disagree on the search_embedding model (${JSON.stringify(
+            resolved
+          )} vs ${JSON.stringify(model)} in [${index}]), ranking with MATCH`
+        );
+        return { kind: 'unknown' };
       }
     }
+    return resolved;
   } catch (error) {
     logger.warn(
       `Could not read the search_embedding mapping of [${dataStream}], ranking with MATCH: ${

@@ -9,8 +9,15 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { readSearchEmbeddingModel } from './search_embedding_model';
 
-const mappingWith = (searchEmbedding: Record<string, unknown> | undefined) => ({
-  '.ds-ki-000001': { mappings: { properties: { search_embedding: searchEmbedding } } },
+const indexWith = (searchEmbedding: Record<string, unknown>) => ({
+  mappings: { properties: { search_embedding: searchEmbedding } },
+});
+
+const dense = (inferenceId: string, extra: Record<string, unknown> = {}) => ({
+  type: 'semantic_text',
+  inference_id: inferenceId,
+  model_settings: { task_type: 'text_embedding', dimensions: 1024 },
+  ...extra,
 });
 
 describe('readSearchEmbeddingModel', () => {
@@ -21,14 +28,11 @@ describe('readSearchEmbeddingModel', () => {
     jest.clearAllMocks();
   });
 
-  it('reads a dense model with its inference endpoint', async () => {
-    esClient.indices.getMapping.mockResolvedValue(
-      mappingWith({
-        type: 'semantic_text',
-        inference_id: '.jina-v5',
-        model_settings: { task_type: 'text_embedding', dimensions: 1024 },
-      })
-    );
+  it('reads a dense model shared by every backing index', async () => {
+    esClient.indices.getMapping.mockResolvedValue({
+      '.ds-ki-000001': indexWith(dense('.jina-v5')),
+      '.ds-ki-000002': indexWith(dense('.jina-v5')),
+    });
 
     await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
       kind: 'dense',
@@ -36,15 +40,10 @@ describe('readSearchEmbeddingModel', () => {
     });
   });
 
-  it('embeds the query with search_inference_id when one is set', async () => {
-    esClient.indices.getMapping.mockResolvedValue(
-      mappingWith({
-        type: 'semantic_text',
-        inference_id: '.jina-v5',
-        search_inference_id: 'jina-v5-query',
-        model_settings: { task_type: 'text_embedding', dimensions: 1024 },
-      })
-    );
+  it('prefers search_inference_id', async () => {
+    esClient.indices.getMapping.mockResolvedValue({
+      '.ds-ki-000001': indexWith(dense('.jina-v5', { search_inference_id: 'jina-v5-query' })),
+    });
 
     await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
       kind: 'dense',
@@ -53,28 +52,45 @@ describe('readSearchEmbeddingModel', () => {
   });
 
   it('reads a sparse model', async () => {
-    esClient.indices.getMapping.mockResolvedValue(
-      mappingWith({
+    esClient.indices.getMapping.mockResolvedValue({
+      '.ds-ki-000001': indexWith({
         type: 'semantic_text',
         inference_id: '.elser-2-elastic',
         model_settings: { task_type: 'sparse_embedding' },
-      })
-    );
+      }),
+    });
 
     await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
       kind: 'sparse',
     });
   });
 
-  it('is unknown before the first embedded document sets the model', async () => {
-    esClient.indices.getMapping.mockResolvedValue(mappingWith({ type: 'semantic_text' }));
+  it('skips backing indices without model_settings', async () => {
+    esClient.indices.getMapping.mockResolvedValue({
+      '.ds-ki-000001': indexWith({ type: 'semantic_text' }),
+      '.ds-ki-000002': indexWith(dense('.jina-v5')),
+    });
+
+    await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
+      kind: 'dense',
+      inferenceId: '.jina-v5',
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('is unknown when backing indices disagree', async () => {
+    esClient.indices.getMapping.mockResolvedValue({
+      '.ds-ki-000001': indexWith(dense('.jina-v4')),
+      '.ds-ki-000002': indexWith(dense('.jina-v5')),
+    });
 
     await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
       kind: 'unknown',
     });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('.ds-ki-000002'));
   });
 
-  it('warns and is unknown when the mapping cannot be read', async () => {
+  it('is unknown when the mapping cannot be read', async () => {
     esClient.indices.getMapping.mockRejectedValue(new Error('index_not_found_exception'));
 
     await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({

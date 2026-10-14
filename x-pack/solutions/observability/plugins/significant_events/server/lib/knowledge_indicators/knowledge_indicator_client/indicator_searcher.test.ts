@@ -64,7 +64,7 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
   const run = (searchMode: 'semantic' | 'keyword' | 'hybrid' = 'semantic') =>
     searcher.findFeatures('src-a', 'redis cache', { searchMode, limit: 50 });
 
-  it('ranks a dense model with KNN(TEXT_EMBEDDING) taking k from LIMIT and binds the params', async () => {
+  it('ranks a dense model with KNN(TEXT_EMBEDDING) and binds the params', async () => {
     resolveEmbeddingModel.mockResolvedValue({ kind: 'dense', inferenceId: '.jina-v5' });
 
     await run();
@@ -86,7 +86,7 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
     expect(printed).not.toContain('KNN(');
   });
 
-  it('binds the semantic params in hybrid mode too', async () => {
+  it('binds the semantic params in hybrid mode', async () => {
     resolveEmbeddingModel.mockResolvedValue({ kind: 'dense', inferenceId: '.jina-v5' });
 
     await run('hybrid');
