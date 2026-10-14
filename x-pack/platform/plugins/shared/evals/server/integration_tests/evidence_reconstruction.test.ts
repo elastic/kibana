@@ -41,9 +41,9 @@ import { registerValidateRoute } from '../routes/evaluators/validate';
 import { registerGetTraceEvidenceRoute } from '../routes/traces/get_trace_evidence';
 
 const logger = loggingSystemMock.createLogger();
-const LOGS_INDEX = 'logs-evals-evidence-reconstruction-it';
+// Routes read `traces-*-{space}` and `logs-*-{space}`, so both carry the default space's namespace.
+const LOGS_INDEX = 'logs-evals-evidence-reconstruction-it-default';
 const LOGS_BACKING_INDEX = 'evals-logs-evidence-reconstruction-it';
-// Routes read `traces-*-{space}`, so the index carries the default space's namespace.
 const TRACES_INDEX = 'traces-evals-evidence-reconstruction-it-default';
 
 const ELASTIC_CONVENTION_TRACE_ID = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
@@ -335,7 +335,7 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
       esClient.index({
         index: LOGS_BACKING_INDEX,
         id: `log-${index}`,
-        document,
+        document: { ...document, 'data_stream.namespace': 'default' },
       })
     )
   );

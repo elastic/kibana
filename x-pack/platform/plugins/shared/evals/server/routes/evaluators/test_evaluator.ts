@@ -22,7 +22,7 @@ import {
   validateJudgeConfig,
 } from '../../evaluators/user_defined/validate_config';
 import type { RouteDependencies } from '../register_routes';
-import { resolveTraceReadSpace } from '../traces/resolve_trace_read_space';
+import { resolveTraceReadSpaces } from '../traces/resolve_trace_read_spaces';
 import { builtInEvaluatorConflict } from './shared/handle_evaluator_error';
 import { EvaluationExecutionError, executeEvaluators } from './shared/execute_evaluators';
 
@@ -98,8 +98,8 @@ export const registerTestEvaluatorRoute = ({
                 // Elasticsearch privileges for.
                 traceReader: coreContext.elasticsearch.client.asCurrentUser,
                 spaceId,
-                resolveTraceReadSpace: (traceId) =>
-                  resolveTraceReadSpace({ evalsContext, spaceId, traceId }),
+                resolveTraceReadSpaces: (traceId) =>
+                  resolveTraceReadSpaces({ evalsContext, spaceId, traceId }),
               })
           );
           const testResult: TestEvaluatorResponse['result'] = {

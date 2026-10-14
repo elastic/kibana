@@ -52,11 +52,11 @@ interface ExecuteEvaluatorsOptions {
   /** The space the evaluation runs in. Judge spans are written to its traces. */
   spaceId?: string;
   /**
-   * Limits where the trace is read from, by returning the space to read it in. Leave unset
+   * Limits where the trace is read from, by returning the spaces to read it in. Leave unset
    * to find the trace by id wherever it was written: experiment runs and the CLI reach
    * here with traces written in a space the request may not name.
    */
-  resolveTraceReadSpace?: (traceId: string) => Promise<string | undefined>;
+  resolveTraceReadSpaces?: (traceId: string) => Promise<string[]>;
 }
 
 export const executeEvaluators = async ({
@@ -68,7 +68,7 @@ export const executeEvaluators = async ({
   getInferenceStart,
   traceReader,
   spaceId,
-  resolveTraceReadSpace,
+  resolveTraceReadSpaces,
 }: ExecuteEvaluatorsOptions): Promise<EvaluateResponse['results']> => {
   if (subject.mode === 'multi-turn') {
     throw new EvaluationExecutionError('multi-turn evaluation is not yet supported', 'badRequest');
@@ -110,11 +110,11 @@ export const executeEvaluators = async ({
     parsedReferenceData.set(definition, parsed.data as Record<string, unknown>);
   }
 
-  const traceReadSpaceId = await resolveTraceReadSpace?.(traceId);
+  const traceReadSpaceIds = await resolveTraceReadSpaces?.(traceId);
   const traceAccessor = createTraceAccessor({
     traceId,
     esClient: traceReader,
-    ...(traceReadSpaceId !== undefined ? { spaceId: traceReadSpaceId } : {}),
+    ...(traceReadSpaceIds !== undefined ? { spaceIds: traceReadSpaceIds } : {}),
   });
   const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
 

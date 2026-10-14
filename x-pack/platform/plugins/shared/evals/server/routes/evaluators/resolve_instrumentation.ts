@@ -23,7 +23,7 @@ import {
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_errors';
 import type { RouteDependencies } from '../register_routes';
-import { resolveTraceReadSpace } from '../traces/resolve_trace_read_space';
+import { resolveTraceReadSpaces } from '../traces/resolve_trace_read_spaces';
 
 export const registerResolveInstrumentationRoute = ({ router, getSpaceId }: RouteDependencies) => {
   router.versioned
@@ -54,7 +54,7 @@ export const registerResolveInstrumentationRoute = ({ router, getSpaceId }: Rout
         }
 
         const coreContext = await context.core;
-        const readSpaceId = await resolveTraceReadSpace({
+        const readSpaceIds = await resolveTraceReadSpaces({
           evalsContext: await context.evals,
           spaceId: getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID,
           traceId,
@@ -65,7 +65,7 @@ export const registerResolveInstrumentationRoute = ({ router, getSpaceId }: Rout
           // reading as the internal user would hand trace content to a caller who holds
           // `manage_evals` but no Elasticsearch access to the trace.
           esClient: coreContext.elasticsearch.client.asCurrentUser,
-          spaceId: readSpaceId,
+          spaceIds: readSpaceIds,
         });
 
         if (!(await hasTraceDocuments(traceAccessor))) {

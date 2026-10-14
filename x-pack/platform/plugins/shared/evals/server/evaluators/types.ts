@@ -16,10 +16,10 @@ export interface TraceAccessor {
   traceId: string;
   esClient: ElasticsearchClient;
   /**
-   * Limits trace reads to the traces written in this space. Leave it unset for reads that
-   * must find a trace by id wherever it was written, such as evaluator runs.
+   * Limits span and log reads to the documents written in these spaces. Leave it unset for
+   * reads that must find a trace by id wherever it was written, such as evaluator runs.
    */
-  spaceId?: string;
+  spaceIds?: readonly string[];
 }
 
 export interface EvaluatorContext<ReferenceData = Record<string, unknown>> {

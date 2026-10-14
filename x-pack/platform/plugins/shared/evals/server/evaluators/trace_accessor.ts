@@ -15,8 +15,9 @@ import { isValidTraceId } from '@opentelemetry/api';
 import {
   LOGS_INDEX_PATTERN,
   TRACES_INDEX_PATTERN,
+  buildSpaceLogsIndexPattern,
   buildSpaceTracesIndexPattern,
-  buildTracesNamespaceFilter,
+  buildTracesNamespacesFilter,
 } from '@kbn/evals-common';
 import type { TraceAccessor } from './types';
 
@@ -89,14 +90,14 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
     const { filter = [], fields, sort, size, trackTotalHits, aggs } = params;
     const sortFields = sort ? (Array.isArray(sort) ? sort : [sort]) : undefined;
 
-    // Only traces are routed per space; logs stay on one pattern.
-    const { spaceId } = traceAccessor;
-    const scopeToSpace = source === 'traces' && spaceId !== undefined;
-    const index = scopeToSpace ? buildSpaceTracesIndexPattern(spaceId) : sourceIndex;
+    const { spaceIds } = traceAccessor;
+    const buildSpaceIndex =
+      source === 'traces' ? buildSpaceTracesIndexPattern : buildSpaceLogsIndexPattern;
+    const index = spaceIds ? spaceIds.map(buildSpaceIndex) : sourceIndex;
 
     const filterClauses: QueryDslQueryContainer[] = [
       { term: { [field]: traceAccessor.traceId } },
-      ...(scopeToSpace ? [buildTracesNamespaceFilter(spaceId)] : []),
+      ...(spaceIds ? [buildTracesNamespacesFilter(spaceIds)] : []),
     ];
     const mustNotClauses: QueryDslQueryContainer[] = [];
     for (const clause of filter) {

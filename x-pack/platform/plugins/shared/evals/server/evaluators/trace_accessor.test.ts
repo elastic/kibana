@@ -58,12 +58,12 @@ describe('createTraceAccessor', () => {
       });
     });
 
-    it('limits the traces source to one space when a space id is given', async () => {
+    it('limits the traces source to the given spaces', async () => {
       const { esClient, searchMock } = createEsClient();
       const accessor = createTraceAccessor({
         traceId: validTraceId,
         esClient,
-        spaceId: 'marketing',
+        spaceIds: ['marketing', 'default'],
       });
 
       await accessor.runSearch('traces', {
@@ -73,12 +73,12 @@ describe('createTraceAccessor', () => {
 
       expect(searchMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: 'traces-*-marketing',
+          index: ['traces-*-marketing', 'traces-*-default'],
           query: {
             bool: {
               filter: [
                 { term: { 'trace.id': validTraceId } },
-                { term: { 'data_stream.namespace': 'marketing' } },
+                { terms: { 'data_stream.namespace': ['marketing', 'default'] } },
                 { term: { 'attributes.elastic.inference.span.kind': 'TOOL' } },
               ],
             },
@@ -87,20 +87,27 @@ describe('createTraceAccessor', () => {
       );
     });
 
-    it('does not limit the logs source to a space', async () => {
+    it('limits the logs source to the same spaces, so log evidence follows the trace rules', async () => {
       const { esClient, searchMock } = createEsClient();
       const accessor = createTraceAccessor({
         traceId: validTraceId,
         esClient,
-        spaceId: 'marketing',
+        spaceIds: ['marketing'],
       });
 
       await accessor.runSearch('logs', { filter: [], size: 1 });
 
       expect(searchMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: 'logs-*',
-          query: { bool: { filter: [{ term: { trace_id: validTraceId } }] } },
+          index: ['logs-*-marketing'],
+          query: {
+            bool: {
+              filter: [
+                { term: { trace_id: validTraceId } },
+                { terms: { 'data_stream.namespace': ['marketing'] } },
+              ],
+            },
+          },
         })
       );
     });

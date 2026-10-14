@@ -37,7 +37,7 @@ import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_errors';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
-import { resolveTraceReadSpace } from './resolve_trace_read_space';
+import { resolveTraceReadSpaces } from './resolve_trace_read_spaces';
 
 const toResolvedResponse = ({
   traceId,
@@ -115,7 +115,7 @@ export const registerGetTraceEvidenceRoute = ({
 
         try {
           const coreContext = await context.core;
-          const readSpaceId = await resolveTraceReadSpace({
+          const readSpaceIds = await resolveTraceReadSpaces({
             evalsContext: await context.evals,
             spaceId: getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID,
             traceId,
@@ -123,7 +123,7 @@ export const registerGetTraceEvidenceRoute = ({
           const traceAccessor = createTraceAccessor({
             traceId,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
-            spaceId: readSpaceId,
+            spaceIds: readSpaceIds,
           });
 
           if (wait !== 'none') {
