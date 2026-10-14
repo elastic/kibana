@@ -16,10 +16,7 @@ import type {
   EventPayload,
   HandleEventsResult,
 } from '../../connector_spec_events';
-import {
-  MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH,
-  MAX_HANDLE_EVENTS_EVENTS,
-} from '../../handle_events_result';
+import { MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH } from '../../handle_events_result';
 import {
   MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
   MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY,
@@ -34,6 +31,7 @@ import {
 } from './constants';
 
 const TEAMS_ID_MAX = 1024;
+const ENTRA_GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const GRAPH_RESOURCE_PREFIX = /^https:\/\/graph\.microsoft\.com\/v1\.0\//i;
 const ODATA_SEGMENT = /^([A-Za-z]+)[(](?:'([^']*)'|"([^"]*)")[)]$/;
 const COLLECTION_NAMES = new Set(['teams', 'channels', 'messages', 'chats', 'members', 'users']);
@@ -101,6 +99,32 @@ const readBoundedString = (value: unknown, maxLength: number): string | undefine
 };
 
 const readId = (value: unknown): string | undefined => readBoundedString(value, TEAMS_ID_MAX);
+
+/**
+ * A basic member notification has no userId. Graph's membership id is base64 of `{team-id}##{user-id}`.
+ */
+const userIdFromMembershipId = (membershipId: string, teamId: string): string | undefined => {
+  const remainder = membershipId.length % 4;
+  const padded =
+    remainder === 0
+      ? membershipId
+      : membershipId.padEnd(membershipId.length + (4 - remainder), '=');
+  let decoded: string;
+  try {
+    decoded = atob(padded);
+  } catch {
+    return undefined;
+  }
+  const parts = decoded.split('##');
+  if (parts.length !== 2) {
+    return undefined;
+  }
+  const [encodedTeamId, userId] = parts;
+  if (encodedTeamId.toLowerCase() !== teamId.toLowerCase() || !ENTRA_GUID.test(userId)) {
+    return undefined;
+  }
+  return userId;
+};
 
 const omitUndefined = (fields: Record<string, string | undefined>): Record<string, string> =>
   Object.fromEntries(
@@ -217,9 +241,11 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
   if (
     typeName.endsWith('conversationmember') &&
     ids.teams !== undefined &&
+    ids.channels === undefined &&
     ids.members !== undefined
   ) {
-    const userId = readId(item.resourceData.userId);
+    const userId =
+      readId(item.resourceData.userId) ?? userIdFromMembershipId(ids.members, ids.teams);
     if (userId === undefined) {
       return undefined;
     }
@@ -247,13 +273,8 @@ const notificationItems = (rawBody: unknown): unknown[] | undefined => {
   return rawBody.value;
 };
 
-const hasLifecycleEvent = (items: unknown[]): boolean =>
-  items.some(
-    (item) =>
-      isPlainObject(item) &&
-      typeof item.lifecycleEvent === 'string' &&
-      item.lifecycleEvent.length > 0
-  );
+const isLifecycleItem = (item: unknown): boolean =>
+  isPlainObject(item) && typeof item.lifecycleEvent === 'string' && item.lifecycleEvent.length > 0;
 
 const correlationKeyFor = (item: Record<string, unknown>): string =>
   readBoundedString(item.id, MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH) ?? uuidv4();
@@ -277,12 +298,13 @@ const handleMicrosoftTeamsEvents = async (
   if (items === undefined) {
     return { type: 'emit', events: [] };
   }
-  if (hasLifecycleEvent(items)) {
+  const changeItems = items.filter((item) => !isLifecycleItem(item));
+  if (changeItems.length === 0) {
     return { type: 'http', httpResponse: { status: 202 } };
   }
 
   const events: EventPayload[] = [];
-  for (const item of items) {
+  for (const item of changeItems) {
     if (!isPlainObject(item)) {
       continue;
     }
@@ -295,12 +317,6 @@ const handleMicrosoftTeamsEvents = async (
       correlationKey: correlationKeyFor(item),
       payload: named.payload,
     });
-  }
-
-  if (events.length > MAX_HANDLE_EVENTS_EVENTS) {
-    const dropped = events.length - MAX_HANDLE_EVENTS_EVENTS;
-    ctx.log.warn(`inbound_events_dropped count=${dropped}`);
-    events.length = MAX_HANDLE_EVENTS_EVENTS;
   }
 
   return { type: 'emit', events };

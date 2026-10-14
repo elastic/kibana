@@ -252,7 +252,7 @@ The connector supports five events. A workflow subscribes to an event by using i
 | `microsoft-teams.chat_created` | A chat is created | `chat_id`, optional `tenant_id` |
 | `microsoft-teams.team_member_added` | A user is added to a team | `team_id`, `user_id`, optional `tenant_id` |
 
-`tenant_id` is present when Graph sends `tenantId`. On a team member event, `user_id` is `resourceData.userId`. The member id in the resource path is the membership id. A reply in a channel uses `microsoft-teams.channel_message`. `message_id` is the reply id, from the `replies` segment of the resource path.
+`tenant_id` is present when Graph sends `tenantId`. On a team member event, `user_id` is `resourceData.userId` when Graph sends it. A basic notification omits that field. The membership id is base64 of `{team-id}##{user-id}`, and {{kib}} reads the user id from that value. Adding a member to a channel does not start this event. A reply in a channel uses `microsoft-teams.channel_message`. `message_id` is the reply id, from the `replies` segment of the resource path.
 
 Only `created` starts one of these workflows. Edits, deletes, chat members, and channel members do not. A notification that matches none of these events does not start a workflow. {{kib}} reads the ids from the resource path and `resourceData`. `encryptedContent`, when Graph includes it, is ignored. The event does not include the message body, content type, or sender.
 

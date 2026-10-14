@@ -10,7 +10,6 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import { buildEventId } from '../../event_type_id';
-import { MAX_HANDLE_EVENTS_EVENTS } from '../../handle_events_result';
 import { validateEmittedEvents } from '../../validate_emitted_events';
 import {
   MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
@@ -90,6 +89,40 @@ describe('Microsoft Teams inbound events', () => {
         body: 'graph-token',
       },
     });
+  });
+
+  it('emits a created notification that shares a batch with a lifecycle notification', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext({
+          value: [
+            {
+              lifecycleEvent: 'reauthorizationRequired',
+              subscriptionId: 'sub-1',
+            },
+            {
+              id: 'n-message',
+              changeType: 'created',
+              tenantId: 'tenant-1',
+              resource: "teams('team-1')/channels('channel-1')/messages('message-1')",
+              resourceData: { '@odata.type': '#microsoft.graph.chatMessage', id: 'message-1' },
+            },
+          ],
+        })
+      )
+    );
+    expect(result.events).toEqual([
+      {
+        eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
+        correlationKey: 'n-message',
+        payload: {
+          team_id: 'team-1',
+          channel_id: 'channel-1',
+          message_id: 'message-1',
+          tenant_id: 'tenant-1',
+        },
+      },
+    ]);
   });
 
   it('acks a lifecycle notification without emitting', async () => {
@@ -234,6 +267,34 @@ describe('Microsoft Teams inbound events', () => {
     expect(result.events[2].payload.user_id).not.toBe('membership-1');
   });
 
+  it('reads the user id from a basic team member notification', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          notification({
+            resource:
+              "teams('ee0f5ae2-8bc6-4ae5-8466-7daeebbfa062')/members('ZWUwZjVhZTItOGJjNi00YWU1LTg0NjYtN2RhZWViYmZhMDYyIyM3Mzc2MWYwNi0yYWM5LTQ2OWMtOWYxMC0yNzlhOGNjMjY3Zjk=')",
+            resourceData: {
+              '@odata.type': '#Microsoft.Graph.aadUserConversationMember',
+              id: 'ZWUwZjVhZTItOGJjNi00YWU1LTg0NjYtN2RhZWViYmZhMDYyIyM3Mzc2MWYwNi0yYWM5LTQ2OWMtOWYxMC0yNzlhOGNjMjY3Zjk=',
+            },
+          })
+        )
+      )
+    );
+    expect(result.events).toEqual([
+      {
+        eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
+        correlationKey: 'notification-1',
+        payload: {
+          team_id: 'ee0f5ae2-8bc6-4ae5-8466-7daeebbfa062',
+          user_id: '73761f06-2ac9-469c-9f10-279a8cc267f9',
+          tenant_id: 'tenant-1',
+        },
+      },
+    ]);
+  });
+
   it('emits nothing for updates, unknown types, and paths without the required ids', async () => {
     const result = expectEmit(
       await events.handleEvents(
@@ -266,6 +327,16 @@ describe('Microsoft Teams inbound events', () => {
                 id: 'membership-1',
               },
             },
+            {
+              id: 'channel-member',
+              changeType: 'created',
+              resource: "teams('team-1')/channels('channel-1')/members('membership-1')",
+              resourceData: {
+                '@odata.type': '#microsoft.graph.aadUserConversationMember',
+                id: 'membership-1',
+                userId: 'user-1',
+              },
+            },
           ],
         })
       )
@@ -273,22 +344,15 @@ describe('Microsoft Teams inbound events', () => {
     expect(result.events).toEqual([]);
   });
 
-  it('drops notifications past the emit cap', async () => {
-    const log = loggerMock.create();
-    const value = Array.from({ length: MAX_HANDLE_EVENTS_EVENTS + 2 }, (_, index) => ({
+  it('returns every created notification so the ingest limit can accept or reject the batch', async () => {
+    const value = Array.from({ length: 27 }, (_, index) => ({
       id: `notification-${index}`,
       changeType: 'created',
       resource: `chats/chat-${index}`,
       resourceData: { '@odata.type': '#microsoft.graph.chat', id: `chat-${index}` },
     }));
-    const result = expectEmit(
-      await events.handleEvents({
-        ...createContext({ value }),
-        log,
-      })
-    );
-    expect(result.events).toHaveLength(MAX_HANDLE_EVENTS_EVENTS);
-    expect(log.warn).toHaveBeenCalledWith('inbound_events_dropped count=2');
+    const result = expectEmit(await events.handleEvents(createContext({ value })));
+    expect(result.events).toHaveLength(27);
   });
 
   it('uses a generated correlation key when the notification id is too long', async () => {
