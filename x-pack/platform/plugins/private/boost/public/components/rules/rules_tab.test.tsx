@@ -72,6 +72,7 @@ const renderTab = (path: string) =>
           dataSources={[
             { name: 'products', type: 'index', size_in_bytes: 0 },
             { name: 'users', type: 'index', size_in_bytes: 0 },
+            { name: 'archives-2024', type: 'index', size_in_bytes: 0 },
           ]}
           canEdit
         />
@@ -169,7 +170,7 @@ describe('RulesTab filters', () => {
   });
 });
 
-describe('RulesTab superseded targets', () => {
+describe('RulesTab applies to', () => {
   const getRow = (name: string) => {
     const row = screen.getByText(name).closest('tr');
     if (!row) {
@@ -178,24 +179,59 @@ describe('RulesTab superseded targets', () => {
     return within(row);
   };
 
-  it('notes and strikes through targets a higher-ranked rule applies to', () => {
+  it('lists what a rule matches, striking through what a higher-ranked rule applies to', async () => {
     renderTab('/rules');
 
     const picked = getRow('picked');
     expect(picked.getByTestId('boostRuleSuperseded')).toBeInTheDocument();
-    expect(picked.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
-    expect(picked.getByText('(Higher-ranked rule: products-first)')).toBeInTheDocument();
+    await userEvent.click(picked.getByTestId('boostRuleAppliesTo'));
 
-    const productsFirst = getRow('products-first');
-    expect(productsFirst.queryByTestId('boostRuleSuperseded')).not.toBeInTheDocument();
-    expect(productsFirst.queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
+    const popover = within(screen.getByRole('dialog'));
+    expect(popover.getByText('Applies to 1 of 2 matching indices')).toBeInTheDocument();
+    expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
+    expect(popover.getByTestId('boostSupersedingRule')).toHaveTextContent('products-first');
   });
 
-  it("doesn't note the targets default rules leave to other rules", () => {
+  it("shows a pattern rule's pattern above what it matches", async () => {
     renderTab('/rules');
 
-    expect(
-      getRow('elastic-default-indices').queryByTestId('boostRuleSuperseded')
-    ).not.toBeInTheDocument();
+    await userEvent.click(getRow('archives').getByTestId('boostRuleAppliesTo'));
+
+    const popover = screen.getByRole('dialog');
+    expect(popover).toHaveTextContent('Pattern archives-*');
+    expect(popover).toHaveTextContent('archives-2024');
+  });
+
+  it("doesn't show a pattern for a rule that names its targets", async () => {
+    renderTab('/rules');
+
+    await userEvent.click(getRow('products-first').getByTestId('boostRuleAppliesTo'));
+
+    expect(screen.getByRole('dialog')).not.toHaveTextContent('Pattern');
+  });
+
+  it('describes default rules without counting or listing what they apply to', () => {
+    renderTab('/rules');
+
+    const defaults = getRow('elastic-default-indices');
+    expect(defaults.getByText('All unmatched indices')).toBeInTheDocument();
+    expect(defaults.queryByTestId('boostRuleAppliesTo')).not.toBeInTheDocument();
+    expect(defaults.queryByTestId('boostRuleSuperseded')).not.toBeInTheDocument();
+  });
+
+  it("doesn't link a count for a rule that matches nothing", () => {
+    renderTab('/rules');
+
+    expect(getRow('catalogs').queryByTestId('boostRuleAppliesTo')).not.toBeInTheDocument();
+  });
+});
+
+describe('RulesTab search', () => {
+  it('searches rule names and profiles, but not patterns', async () => {
+    renderTab('/rules');
+
+    await userEvent.type(screen.getByRole('searchbox'), 'users');
+
+    expect(screen.queryByText('picked')).not.toBeInTheDocument();
   });
 });

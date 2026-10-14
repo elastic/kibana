@@ -127,12 +127,19 @@ describe('getRuleCoverage', () => {
     );
     expect(coverage.get('wildcard')).toEqual({
       matches: 2,
+      matchedNames: ['products', 'products-2'],
       appliesTo: 1,
       supersededBy: new Map([['products', 'exact']]),
     });
-    expect(coverage.get('exact')).toEqual({ matches: 1, appliesTo: 1, supersededBy: new Map() });
+    expect(coverage.get('exact')).toEqual({
+      matches: 1,
+      matchedNames: ['products'],
+      appliesTo: 1,
+      supersededBy: new Map(),
+    });
     expect(coverage.get('elastic-default-indices')).toEqual({
       matches: 3,
+      matchedNames: ['products', 'products-2', 'users'],
       appliesTo: 1,
       supersededBy: new Map([
         ['products', 'exact'],

@@ -54,7 +54,7 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
-import { TargetName, getHigherRankedRuleLabel } from './target_name';
+import { SupersedingRule, TargetName } from './target_name';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import {
@@ -417,9 +417,10 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         label: dataSource.name,
         checked: draft.picked.includes(dataSource.name) ? 'on' : undefined,
         supersededBy,
+        // A list option can't hold a focusable tooltip, so the rule is described as text.
         append: supersededBy && (
           <EuiText size="xs" color="subdued">
-            {getHigherRankedRuleLabel(supersededBy)}
+            <SupersedingRule rule={supersededBy} hasTooltip={false} />
           </EuiText>
         ),
       };
@@ -751,7 +752,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                               {overriddenBy && (
                                 <EuiFlexItem grow={false}>
                                   <EuiText size="xs" color="subdued">
-                                    {getHigherRankedRuleLabel(overriddenBy)}
+                                    <SupersedingRule rule={overriddenBy} />
                                   </EuiText>
                                 </EuiFlexItem>
                               )}

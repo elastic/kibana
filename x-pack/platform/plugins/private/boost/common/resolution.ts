@@ -81,6 +81,8 @@ export const resolveRule = (
 export interface RuleCoverage {
   /** Data sources of the rule's type that its patterns match. */
   matches: number;
+  /** Their names, in the order of the data sources. */
+  matchedNames: string[];
   /** Matching data sources the rule actually applies to, after higher-ranked rules. */
   appliesTo: number;
   /** Matching data sources that a higher-ranked rule applies to instead, with that rule's name. */
@@ -100,7 +102,7 @@ export const getRuleCoverage = (
   const coverage = new Map(
     rules.map(({ name }): [string, RuleCoverage] => [
       name,
-      { matches: 0, appliesTo: 0, supersededBy: new Map() },
+      { matches: 0, matchedNames: [], appliesTo: 0, supersededBy: new Map() },
     ])
   );
 
@@ -112,6 +114,7 @@ export const getRuleCoverage = (
         return;
       }
       ruleCoverage.matches++;
+      ruleCoverage.matchedNames.push(dataSource.name);
       if (appliedRule?.name === rule.name) {
         ruleCoverage.appliesTo++;
       } else if (appliedRule) {

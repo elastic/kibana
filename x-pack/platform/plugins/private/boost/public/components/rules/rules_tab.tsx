@@ -17,10 +17,8 @@ import {
   EuiButton,
   EuiConfirmModal,
   EuiFilterGroup,
-  EuiIconTip,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +36,7 @@ import { formatDataSourceCount } from '../format';
 import { TypeFilter, matchesTypeFilter } from '../type_filter';
 import type { ProfileSelections } from './profile_filter';
 import { ProfileFilter, matchesProfileFilter } from './profile_filter';
-import { RuleTargets } from './rule_targets';
+import { AppliesTo } from './applies_to';
 import { RuleFlyout } from './rule_flyout';
 
 interface RulesTabProps {
@@ -57,53 +55,6 @@ const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', 
 });
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
-
-const getSupersededDescription = (type: BoostProfileType | undefined, count: number) =>
-  type === 'data_streams'
-    ? i18n.translate('xpack.boost.rulesTab.supersededDataStreams', {
-        defaultMessage:
-          '{count, plural, one {# data stream this rule matches uses} other {# data streams this rule matches use}} a higher-ranked rule instead.',
-        values: { count },
-      })
-    : i18n.translate('xpack.boost.rulesTab.supersededIndices', {
-        defaultMessage:
-          '{count, plural, one {# index this rule matches uses} other {# indices this rule matches use}} a higher-ranked rule instead.',
-        values: { count },
-      });
-
-/**
- * How many data sources a rule applies to, noting any it matches that a higher-ranked rule takes.
- * Default rules match everything by design, so they don't note the rest.
- */
-const AppliesTo = ({ row, appliesTo }: { row: RuleRow; appliesTo: number }) => {
-  const { euiTheme } = useEuiTheme();
-  const { profileType, supersededBy, is_builtin: isBuiltin } = row;
-  const count = formatDataSourceCount(profileType, appliesTo);
-  if (isBuiltin || supersededBy.size === 0) {
-    return <>{count}</>;
-  }
-  const description = getSupersededDescription(profileType, supersededBy.size);
-  // The count can wrap in a narrow column, but its last word and the icon stay together, so the
-  // icon never sits on a line of its own, centered on that line.
-  const lastSpace = count.lastIndexOf(' ');
-  return (
-    <span>
-      {count.slice(0, lastSpace + 1)}
-      <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-        {count.slice(lastSpace + 1)}
-        {/* A stack: another rule sits on top of this one for these. */}
-        <EuiIconTip
-          type="layers"
-          color="subdued"
-          display="flex"
-          content={description}
-          aria-label={description}
-          iconProps={{ 'data-test-subj': 'boostRuleSuperseded' }}
-        />
-      </span>
-    </span>
-  );
-};
 
 // The search parameter that opens this tab filtered by one profile.
 const PROFILE_FILTER_PARAM = 'profile';
@@ -135,7 +86,12 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     return rules.map((rule) => ({
       ...rule,
       profileType: profileTypes.get(rule.boost_profile),
-      ...(coverage.get(rule.name) ?? { matches: 0, appliesTo: 0, supersededBy: new Map() }),
+      ...(coverage.get(rule.name) ?? {
+        matches: 0,
+        matchedNames: [],
+        appliesTo: 0,
+        supersededBy: new Map(),
+      }),
     }));
   }, [rules, profiles, dataSources]);
 
@@ -218,15 +174,6 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       sortable: true,
     },
     {
-      field: 'index_patterns',
-      name: i18n.translate('xpack.boost.rulesTab.targetsColumn', {
-        defaultMessage: 'Targets',
-      }),
-      render: (patterns: string[], { profileType, supersededBy }: RuleRow) => (
-        <RuleTargets patterns={patterns} type={profileType} supersededBy={supersededBy} />
-      ),
-    },
-    {
       field: 'priority',
       name: i18n.translate('xpack.boost.rulesTab.priorityColumn', {
         defaultMessage: 'Priority',
@@ -236,14 +183,32 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       dataType: 'number',
     },
     {
-      // Spelled out ("3 indices") and left-aligned; it still sorts numerically.
+      // Spelled out ("3 indices") and left-aligned; it still sorts numerically. Wide enough for the
+      // count and its icon, now that it also stands in for the rule's targets.
       field: 'appliesTo',
       name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
         defaultMessage: 'Applies to',
       }),
-      width: '12%',
+      width: '16%',
       sortable: true,
-      render: (appliesTo: number, row: RuleRow) => <AppliesTo row={row} appliesTo={appliesTo} />,
+      render: (
+        appliesTo: number,
+        {
+          index_patterns: patterns,
+          profileType,
+          is_builtin: isBuiltin,
+          matches,
+          matchedNames,
+          supersededBy,
+        }: RuleRow
+      ) => (
+        <AppliesTo
+          patterns={patterns}
+          type={profileType}
+          isDefaultRule={isBuiltin}
+          coverage={{ appliesTo, matches, matchedNames, supersededBy }}
+        />
+      ),
     },
     ...(canEdit ? [actionsColumn] : []),
   ];
@@ -302,6 +267,9 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
           defaultMessage: 'Boost rules',
         })}
         items={filteredRows}
+        // Text searches names and profiles; patterns aren't shown in the table, so they aren't
+        // searched either.
+        executeQueryOptions={{ defaultFields: ['name', 'boost_profile'] }}
         itemId="name"
         columns={columns}
         search={search}

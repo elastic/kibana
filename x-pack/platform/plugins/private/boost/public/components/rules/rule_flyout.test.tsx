@@ -397,7 +397,7 @@ describe('RuleFlyout superseded targets', () => {
 
     const matches = within(screen.getByTestId('boostRulePatternMatches'));
     expect(matches.getByTestId('boostSupersededTarget')).toHaveTextContent('catalog-fall');
-    expect(matches.getByText('Higher-ranked rule: catalogs')).toBeInTheDocument();
+    expect(matches.getByTestId('boostSupersedingRule')).toHaveTextContent('catalogs');
   });
 
   it('only notes the data sources in the list that a higher-ranked rule keeps', async () => {
