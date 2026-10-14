@@ -23,12 +23,16 @@ export const BRIEF_TILE_TITLES: Record<BriefTileId, string> = {
   newEntity: 'New entity',
 };
 
-/** What membership of each tile means for an entity, following the tile descriptions on the page. */
+/** What membership of each tile means for an entity, following the tile queries on the page. */
 export const BRIEF_TILE_DEFINITIONS: Record<BriefTileId, (period: string) => string> = {
-  entitiesWithAlerts: (period) => `had at least one alert in the last ${period}`,
+  // The tile counts only High and Critical alerts, of any status, whatever the page's description says.
+  entitiesWithAlerts: (period) =>
+    `had at least one High or Critical alert, open or closed, in the last ${period}`,
   entitiesWithAnomalies: (period) => `had at least one ML anomaly in the last ${period}`,
-  riskMovers: (period) => `risk score rose by 10 or more points against the previous ${period}`,
-  newlyHighCritical: (period) => `crossed into High or Critical risk in the last ${period}`,
+  riskMovers: (period) =>
+    `risk score is at least 10 points higher than at the start of the last ${period}`,
+  newlyHighCritical: (period) =>
+    `is High or Critical now, and was lower or not yet scored at the start of the last ${period}`,
   watchlisted: (period) => `is on a watchlist and had at least one alert in the last ${period}`,
   newEntity: (period) => `was first seen in the last ${period} with a risk score above zero`,
 };
@@ -79,16 +83,48 @@ const filterValue = (params: unknown, value: unknown): string | undefined => {
   return value === undefined ? undefined : String(value);
 };
 
+/** A count as the page shows it, with thousands separators. */
+export const formatCount = (count: number): string => count.toLocaleString('en-US');
+
+/** True when the tile compares against a previous value of 0, which may be missing history. */
+export const hasNoPreviousValue = ({ value, delta }: EntityAnalyticsScopeTile): boolean =>
+  value > 0 && delta === value;
+
 /** A tile's change against the previous period, in words. */
-export const describeTileChange = (tile: EntityAnalyticsScopeTile, period: string): string => {
-  if (tile.unavailable) {
+export const describeTileChange = (tile: EntityAnalyticsScopeTile, period: BriefPeriod): string => {
+  const { delta, unavailable } = tile;
+  const previous = `previous ${BRIEF_PERIOD_LABELS[period]}`;
+  if (unavailable) {
     return 'unavailable';
   }
-  if (tile.delta === undefined) {
+  if (delta === undefined) {
     return 'no comparison';
   }
-  if (tile.delta === 0) {
-    return `no change vs previous ${period}`;
+  if (hasNoPreviousValue(tile)) {
+    return `none in the ${previous}`;
   }
-  return `${tile.delta > 0 ? '+' : ''}${tile.delta} vs previous ${period}`;
+  if (delta === 0) {
+    return `no change vs ${previous}`;
+  }
+  return `${delta > 0 ? '+' : ''}${formatCount(delta)} vs ${previous}`;
+};
+
+/**
+ * How many tile entities the facts cover. The total is the largest tile or the distinct captured
+ * ids, whichever is larger, and a lower bound when a tile sent fewer ids than its value. Never a sum.
+ */
+export const describeCoverage = (
+  { tiles }: EntityAnalyticsScope,
+  checkedCount: number,
+  capturedCount: number
+): string => {
+  const available = Object.values(tiles).filter(({ unavailable }) => !unavailable);
+  const isSampled = available.some(({ value, entityIds }) => entityIds.length < value);
+  const total = Math.max(capturedCount, ...available.map(({ value }) => value));
+  if (!isSampled && checkedCount >= total) {
+    return `${formatCount(checkedCount)} entities in the page's tiles`;
+  }
+  return `${formatCount(checkedCount)} of ${isSampled ? 'at least ' : ''}${formatCount(
+    total
+  )} entities in the page's tiles, chosen by selected tile, tile count, then risk`;
 };

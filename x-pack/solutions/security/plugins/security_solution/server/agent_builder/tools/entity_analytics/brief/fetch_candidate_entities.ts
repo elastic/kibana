@@ -10,6 +10,7 @@ import type {
   SearchTotalHits,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import { truncate } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
@@ -21,32 +22,46 @@ import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_genera
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
 import type { BriefCandidate, BriefEntityType } from './brief_types';
 import { getScopeFilters } from './describe_scope';
-import { rankCandidates, selectCandidateTiles } from './select_candidates';
+import {
+  foldAliases,
+  getRankWeight,
+  rankCandidates,
+  selectCandidateTiles,
+} from './select_candidates';
 
-/** Records read for ranking. Tiles can hold hundreds of entities, so the riskiest are read first. */
+/** Records read for ranking. Tiles can hold hundreds of entities, so the first by rank are read. */
 const MAX_RANKED_RECORDS = 100;
+/** Display names come from source logs, so an attacker can choose them. */
+const MAX_NAME_LENGTH = 80;
 
-/** The resolution group's risk when scored, otherwise the entity's own, as `getEntityRisk` reads it. */
-const RISK_SORT: SortCombinations = {
+/**
+ * The `rankCandidates` order in one sort value: the entity's `getRankWeight`, then risk. Risk is the
+ * resolution group's when scored, otherwise the entity's own (`getRankRisk`), so a group ranks by its
+ * combined risk; the facts still state each entity's own risk, as the tiles test it.
+ */
+const buildRankSort = (weights: Record<string, number>): SortCombinations => ({
   _script: {
     type: 'number',
     order: 'desc',
     script: {
       lang: 'painless',
       source: `
-        for (String field : params.fields) {
-          if (doc.containsKey(field) && doc[field].size() > 0) { return doc[field].value; }
+        double risk = -1;
+        for (String field : params.riskFields) {
+          if (doc.containsKey(field) && doc[field].size() > 0) { risk = doc[field].value; break; }
         }
-        return -1;`,
+        def weight = params.weights.get(doc['entity.id'].value);
+        return (weight == null ? 0 : weight) * 1000 + risk;`,
       params: {
-        fields: [
+        weights,
+        riskFields: [
           'entity.relationships.resolution.risk.calculated_score_norm',
           'entity.risk.calculated_score_norm',
         ],
       },
     },
   },
-};
+});
 
 export interface CandidateEntities {
   /** Ranked and capped, narrowed by the page's query when it applied. */
@@ -55,7 +70,7 @@ export interface CandidateEntities {
   capturedCount: number;
   /** Captured ids with no Entity Store record. */
   notFoundCount: number;
-  /** Captured ids with a record that the page's query, when applied, kept. */
+  /** Captured ids with a record that the page's query, when applied, kept. An alias and its golden entity count twice. */
   matchedCount: number;
   /** True when the page had a search query or filter pills. */
   hasPageQuery: boolean;
@@ -70,7 +85,7 @@ interface CandidateAggregations {
   all_entities: { latest: { value_as_string?: string } };
 }
 
-/** Reads the riskiest Entity Store records of the scope's tile entities in one search, as the requesting user. */
+/** Reads the Entity Store records of the scope's tile entities, first by rank, in one search as the requesting user. */
 export const fetchCandidateEntities = async ({
   scope,
   spaceId,
@@ -82,8 +97,15 @@ export const fetchCandidateEntities = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<CandidateEntities> => {
+  const { focusTileId } = scope;
   const tileIdsByEntityId = selectCandidateTiles(scope);
   const entityIds = [...tileIdsByEntityId.keys()];
+  const weights = Object.fromEntries(
+    [...tileIdsByEntityId].map(([entityId, tileIds]) => [
+      entityId,
+      getRankWeight(tileIds, focusTileId),
+    ])
+  );
   const hasPageQuery = Boolean(scope.query?.query) || (scope.filters ?? []).length > 0;
 
   // The page query is a post filter: it narrows the ranked hits, while `found` still counts every
@@ -95,7 +117,7 @@ export const fetchCandidateEntities = async ({
       ignore_unavailable: true,
       query: { bool: { filter: [{ terms: { 'entity.id': entityIds } }] } },
       post_filter: pageQuery,
-      sort: [RISK_SORT, { 'entity.id': 'asc' }],
+      sort: [buildRankSort(weights), { 'entity.id': 'asc' }],
       aggs: {
         found: { value_count: { field: 'entity.id' } },
         // `global` ignores the query, so this is the freshness of the whole entities index.
@@ -121,11 +143,12 @@ export const fetchCandidateEntities = async ({
       return [];
     }
     const type = getBriefEntityType(record, id);
-    return [{ id, name: resolveDisplayName(record, type, id), type, tileIds, record }];
+    const name = truncate(resolveDisplayName(record, type, id), { length: MAX_NAME_LENGTH });
+    return [{ id, name, type, tileIds, record }];
   });
 
   return {
-    candidates: rankCandidates(candidates, scope.focusTileId),
+    candidates: rankCandidates(foldAliases(candidates, focusTileId), focusTileId),
     capturedCount: entityIds.length,
     notFoundCount: entityIds.length - (response.aggregations?.found.value ?? 0),
     matchedCount: getTotal(response.hits.total),

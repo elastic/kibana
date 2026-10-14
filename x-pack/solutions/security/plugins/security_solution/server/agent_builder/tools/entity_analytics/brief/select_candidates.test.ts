@@ -10,7 +10,7 @@ import type {
   EntityAnalyticsScope,
 } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefCandidate } from './brief_types';
-import { rankCandidates, selectCandidateTiles } from './select_candidates';
+import { foldAliases, rankCandidates, selectCandidateTiles } from './select_candidates';
 
 const scopeWith = (
   tiles: EntityAnalyticsScope['tiles'],
@@ -22,12 +22,19 @@ const scopeWith = (
   focusTileId,
 });
 
-const candidate = (id: string, tileIds: BriefTileId[], score?: number): BriefCandidate => ({
+const candidate = (
+  id: string,
+  tileIds: BriefTileId[],
+  score?: number,
+  resolution?: { resolved_to?: string; risk?: { calculated_score_norm: number } }
+): BriefCandidate => ({
   id,
   name: id,
   type: 'host',
   tileIds,
-  record: { entity: { id, risk: { calculated_score_norm: score } } },
+  record: {
+    entity: { id, risk: { calculated_score_norm: score }, relationships: { resolution } },
+  },
 });
 
 describe('selectCandidateTiles', () => {
@@ -91,6 +98,15 @@ describe('rankCandidates', () => {
       undefined,
       ['high', 'low', 'none'],
     ],
+    [
+      'ranks on resolution group risk when scored',
+      [
+        candidate('own', ['riskMovers'], 80),
+        candidate('group', ['riskMovers'], 20, { risk: { calculated_score_norm: 90 } }),
+      ],
+      undefined,
+      ['group', 'own'],
+    ],
   ])('%s', (_name, candidates, focusTileId, expected) => {
     expect(rankCandidates(candidates, focusTileId).map(({ id }) => id)).toEqual(expected);
   });
@@ -98,5 +114,50 @@ describe('rankCandidates', () => {
   it('caps the candidates', () => {
     const many = Array.from({ length: 30 }, (_, index) => candidate(`e${index}`, ['newEntity']));
     expect(rankCandidates(many, undefined)).toHaveLength(25);
+  });
+});
+
+describe('foldAliases', () => {
+  const alias = (id: string, tileIds: BriefTileId[], goldenId: string) =>
+    candidate(id, tileIds, 10, { resolved_to: goldenId });
+
+  it.each<
+    [string, BriefCandidate[], Array<[id: string, recordId: string, tileIds: BriefTileId[]]>]
+  >([
+    [
+      'merges an alias into its golden entity and keeps the golden record',
+      [alias('user:alias', ['newEntity'], 'user:gold'), candidate('user:gold', ['riskMovers'])],
+      [['user:gold', 'user:gold', ['riskMovers', 'newEntity']]],
+    ],
+    [
+      'stands an alias in for a golden entity that was not read',
+      [
+        alias('user:a1', ['newEntity'], 'user:gold'),
+        alias('user:a2', ['entitiesWithAlerts'], 'user:gold'),
+      ],
+      [['user:gold', 'user:a1', ['entitiesWithAlerts', 'newEntity']]],
+    ],
+    [
+      'puts the selected tile first in merged tiles',
+      [candidate('user:gold', ['entitiesWithAlerts']), alias('user:a', ['newEntity'], 'user:gold')],
+      [['user:gold', 'user:gold', ['newEntity', 'entitiesWithAlerts']]],
+    ],
+    [
+      'leaves unrelated entities alone',
+      [candidate('host:x', ['riskMovers']), candidate('host:y', ['riskMovers'])],
+      [
+        ['host:x', 'host:x', ['riskMovers']],
+        ['host:y', 'host:y', ['riskMovers']],
+      ],
+    ],
+  ])('%s', (name, candidates, expected) => {
+    const focusTileId = name.includes('selected') ? 'newEntity' : undefined;
+    expect(
+      foldAliases(candidates, focusTileId).map(({ id, record, tileIds }) => [
+        id,
+        record.entity?.id,
+        tileIds,
+      ])
+    ).toEqual(expected);
   });
 });

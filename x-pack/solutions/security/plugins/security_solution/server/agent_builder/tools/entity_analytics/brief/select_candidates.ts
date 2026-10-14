@@ -13,14 +13,16 @@ import type {
 import { BRIEF_TILE_IDS } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefCandidate } from './brief_types';
 import { MAX_BRIEF_CANDIDATES } from './brief_types';
-import { getEntityRisk } from './build_facts';
+import { getRankRisk } from './build_facts';
+
+const getTileOrder = (focusTileId: BriefTileId | undefined): BriefTileId[] =>
+  orderBy(BRIEF_TILE_IDS, (tileId) => tileId === focusTileId, 'desc');
 
 /** Maps each entity id in the scope's available tiles to its tile ids, the selected tile first. */
 export const selectCandidateTiles = (scope: EntityAnalyticsScope): Map<string, BriefTileId[]> => {
   const { focusTileId, tiles } = scope;
-  const tileOrder = orderBy(BRIEF_TILE_IDS, (tileId) => tileId === focusTileId, 'desc');
   const tileIdsByEntityId = new Map<string, BriefTileId[]>();
-  for (const tileId of tileOrder) {
+  for (const tileId of getTileOrder(focusTileId)) {
     const tile = tiles[tileId];
     const entityIds = tile && !tile.unavailable ? tile.entityIds : [];
     for (const entityId of entityIds) {
@@ -30,7 +32,37 @@ export const selectCandidateTiles = (scope: EntityAnalyticsScope): Map<string, B
   return tileIdsByEntityId;
 };
 
-/** Orders candidates by selected tile membership, then tile count, then risk, and keeps the first `MAX_BRIEF_CANDIDATES`. */
+/** The ranking key before risk: selected tile membership, then tile count. Elasticsearch sorts on it too. */
+export const getRankWeight = (
+  tileIds: readonly BriefTileId[],
+  focusTileId: BriefTileId | undefined
+): number => (focusTileId !== undefined && tileIds.includes(focusTileId) ? 10 : 0) + tileIds.length;
+
+/**
+ * Folds alias records into their golden entity, so one identity is one candidate. The golden entity's
+ * own record is used when it was read, otherwise the first alias record stands in under the golden id.
+ */
+export const foldAliases = (
+  candidates: BriefCandidate[],
+  focusTileId: BriefTileId | undefined
+): BriefCandidate[] => {
+  const byIdentityId = new Map<string, BriefCandidate>();
+  for (const candidate of candidates) {
+    const identityId =
+      candidate.record.entity?.relationships?.resolution?.resolved_to ?? candidate.id;
+    const folded = byIdentityId.get(identityId);
+    const tileIds = [...(folded?.tileIds ?? []), ...candidate.tileIds];
+    const kept = candidate.id === identityId || !folded ? candidate : folded;
+    byIdentityId.set(identityId, {
+      ...kept,
+      id: identityId,
+      tileIds: getTileOrder(focusTileId).filter((tileId) => tileIds.includes(tileId)),
+    });
+  }
+  return [...byIdentityId.values()];
+};
+
+/** Orders candidates by `getRankWeight`, then risk, and keeps the first `MAX_BRIEF_CANDIDATES`. */
 export const rankCandidates = (
   candidates: BriefCandidate[],
   focusTileId: BriefTileId | undefined
@@ -38,9 +70,8 @@ export const rankCandidates = (
   orderBy(
     candidates,
     [
-      ({ tileIds }) => focusTileId !== undefined && tileIds.includes(focusTileId),
-      ({ tileIds }) => tileIds.length,
-      ({ record }) => getEntityRisk(record)?.score ?? -1,
+      ({ tileIds }) => getRankWeight(tileIds, focusTileId),
+      ({ record }) => getRankRisk(record)?.score ?? -1,
     ],
-    ['desc', 'desc', 'desc']
+    ['desc', 'desc']
   ).slice(0, MAX_BRIEF_CANDIDATES);

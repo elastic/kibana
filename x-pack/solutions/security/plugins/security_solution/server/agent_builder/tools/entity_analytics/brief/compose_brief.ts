@@ -53,6 +53,7 @@ export const composeBrief = async ({
   scope,
   candidates,
   facts,
+  coverage,
   abortSignal,
   logger,
 }: {
@@ -60,11 +61,12 @@ export const composeBrief = async ({
   scope: EntityAnalyticsScope;
   candidates: BriefCandidate[];
   facts: BriefFact[];
+  coverage: string;
   abortSignal?: AbortSignal;
   logger: Logger;
 }): Promise<{ draft: BriefDraft; repaired: boolean }> => {
   const messages: Message[] = [
-    { role: MessageRole.User, content: buildUserMessage({ scope, candidates, facts }) },
+    { role: MessageRole.User, content: buildUserMessage({ scope, candidates, facts, coverage }) },
   ];
 
   const callModel = async (conversation: Message[]): Promise<Attempt> => {
@@ -74,6 +76,8 @@ export const composeBrief = async ({
         messages: conversation,
         tools: { [SUBMIT_BRIEF_TOOL_NAME]: getSubmitBriefTool() },
         toolChoice: { function: SUBMIT_BRIEF_TOOL_NAME },
+        // The same view should give the same brief. Models without temperature support drop it.
+        temperature: 0,
         abortSignal,
         retryConfiguration: { retryOn: shouldRetry },
       });

@@ -7,7 +7,13 @@
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { CandidateEntities } from './fetch_candidate_entities';
-import { NO_PRIORITIES_LINE, QUIET_LINE, renderBrief } from './render_brief';
+import {
+  NO_MATCH_LINE,
+  NO_PRIORITIES_LINE,
+  QUIET_LINE,
+  UNAVAILABLE_TILES_LINE,
+  renderBrief,
+} from './render_brief';
 
 const scopeWith = (overrides: Partial<EntityAnalyticsScope>): EntityAnalyticsScope => ({
   period: '7d',
@@ -43,64 +49,133 @@ describe('renderBrief', () => {
     expect(brief).toContain(QUIET_LINE);
     expect(brief).not.toContain('**Priorities**');
     expect(brief).toContain(
-      '**Scope:** last 7 days (2026-10-07 12:00 UTC to 2026-10-14 12:00 UTC) · space default · captured 2026-10-14 12:00 UTC · entity data as of 2026-10-14 11:55 UTC'
+      '**Scope:** last 7 days (2026-10-07 12:00 UTC to 2026-10-14 12:00 UTC) · space default · captured 2026-10-14 12:00 UTC · Entity Store last updated 2026-10-14 11:55 UTC'
     );
-    expect(brief).toContain("_Checked: 0 entities from the page's tiles._");
+    expect(brief).toContain("_Checked: 0 entities in the page's tiles._");
   });
 
-  it('does not call a view quiet when tiles flagged entities that were not checked', () => {
+  it.each<[string, EntityAnalyticsScope['tiles'], Partial<CandidateEntities>, string]>([
+    [
+      'calls a fully read view with nothing flagged quiet',
+      { riskMovers: { value: 0, entityIds: [] }, newEntity: { value: 0, entityIds: [] } },
+      {},
+      QUIET_LINE,
+    ],
+    [
+      'never calls a view quiet when a tile could not be read',
+      { riskMovers: { value: 0, unavailable: true, entityIds: [] } },
+      {},
+      UNAVAILABLE_TILES_LINE,
+    ],
+    [
+      'does not call a view quiet when tiles flagged entities that were not checked',
+      { riskMovers: { value: 2, entityIds: ['host:x'] } },
+      { capturedCount: 1, notFoundCount: 1 },
+      NO_PRIORITIES_LINE,
+    ],
+    [
+      'blames the search when it matches no tile entity',
+      { riskMovers: { value: 3, entityIds: ['host:x', 'host:y', 'host:z'] } },
+      { capturedCount: 3, hasPageQuery: true },
+      NO_MATCH_LINE,
+    ],
+  ])('%s', (_name, tiles, entities, line) => {
     const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: { value: 2, entityIds: ['host:x'] } } }),
+      scope: scopeWith({ tiles }),
       spaceId: 'default',
-      entities: { ...noEntities, capturedCount: 1, notFoundCount: 1 },
+      entities: { ...noEntities, ...entities },
     });
-    expect(brief).toContain(NO_PRIORITIES_LINE);
-    expect(brief).toContain('_1 tile entities were not found in the Entity Store._');
-    expect(brief).toContain("_Checked: 0 of 1 entities from the page's tiles._");
+    expect(brief).toContain(`**What needs attention**\n${line}`);
   });
 
-  it('says the riskiest were checked first only when the cap cut matched entities', () => {
+  it.each<[string, EntityAnalyticsScope['tiles'], Partial<CandidateEntities>, string]>([
+    [
+      'all tile entities',
+      { riskMovers: { value: 1, entityIds: ['host:a'] } },
+      hostA,
+      "_Checked: 1 entities in the page's tiles._",
+    ],
+    [
+      'a ranked cut of the tile entities',
+      { riskMovers: { value: 30, entityIds: Array.from({ length: 30 }, (_, i) => `host:${i}`) } },
+      { ...hostA, capturedCount: 30, matchedCount: 30 },
+      "_Checked: 1 of 30 entities in the page's tiles, chosen by selected tile, tile count, then risk._",
+    ],
+    [
+      'a sample of a large tile, never summing tiles',
+      {
+        entitiesWithAlerts: { value: 48213, entityIds: ['host:a', 'host:b'] },
+        riskMovers: { value: 20, entityIds: ['host:a'] },
+      },
+      { ...hostA, capturedCount: 2, matchedCount: 2 },
+      "_Checked: 1 of at least 48,213 entities in the page's tiles, chosen by selected tile, tile count, then risk._",
+    ],
+  ])('states the coverage of %s', (_name, tiles, entities, coverage) => {
     const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: { value: 640, entityIds: ['host:a'] } } }),
+      scope: scopeWith({ tiles }),
       spaceId: 'default',
-      entities: { ...hostA, capturedCount: 640, matchedCount: 600 },
+      entities: { ...noEntities, ...entities },
     });
-    expect(brief).toContain(
-      "_Checked: 1 of 640 entities from the page's tiles, highest risk first._"
-    );
+    expect(brief).toContain(coverage);
   });
 
-  it('picks the selected tile, then the largest movement, and never sums', () => {
+  it.each<[string, EntityAnalyticsScope['focusTileId'], EntityAnalyticsScope['tiles'], string[]]>([
+    [
+      'ranks by relative change, then rises from zero, and never sums',
+      undefined,
+      {
+        entitiesWithAlerts: { value: 48213, delta: 4800, entityIds: [] },
+        newlyHighCritical: { value: 3, delta: 3, entityIds: [] },
+        riskMovers: { value: 6, delta: -2, entityIds: [] },
+      },
+      [
+        '| Risk movers | 6 | -2 vs previous 7 days |',
+        '| Entities with alerts | 48,213 | +4,800 vs previous 7 days |',
+        '| Newly high/critical | 3 | none in the previous 7 days |',
+      ],
+    ],
+    [
+      'puts the selected tile first and floors small bases',
+      'newEntity',
+      {
+        entitiesWithAlerts: { value: 130, delta: 30, entityIds: [] },
+        riskMovers: { value: 0, unavailable: true, entityIds: [] },
+        watchlisted: { value: 3, delta: 1, entityIds: [] },
+        newEntity: { value: 7, entityIds: [] },
+      },
+      [
+        '| New entity | 7 | no comparison |',
+        '| Entities with alerts | 130 | +30 vs previous 7 days |',
+        '| Watchlisted | 3 | +1 vs previous 7 days |',
+      ],
+    ],
+    [
+      'hides the section when no tile has a comparison',
+      undefined,
+      {
+        entitiesWithAlerts: { value: 10, entityIds: [] },
+        riskMovers: { value: 0, unavailable: true, delta: 4, entityIds: [] },
+      },
+      [],
+    ],
+  ])('what changed %s', (_name, focusTileId, tiles, rows) => {
     const brief = renderBrief({
-      scope: scopeWith({
-        focusTileId: 'newEntity',
-        tiles: {
-          entitiesWithAlerts: { value: 10, delta: 2, entityIds: [] },
-          entitiesWithAnomalies: { value: 4, entityIds: [] },
-          riskMovers: { value: 0, unavailable: true, entityIds: [] },
-          newlyHighCritical: { value: 3, delta: -5, entityIds: [] },
-          watchlisted: { value: 1, delta: 0, entityIds: [] },
-          newEntity: { value: 7, entityIds: [] },
-        },
-      }),
+      scope: scopeWith({ focusTileId, tiles }),
       spaceId: 'default',
       entities: noEntities,
     });
-    expect(brief).toContain(
-      [
-        '| New entity | 7 | no comparison |',
-        '| Newly high/critical | 3 | -5 vs previous 7d |',
-        '| Entities with alerts | 10 | +2 vs previous 7d |',
-      ].join('\n')
-    );
-    expect(brief).toContain('_Unavailable tiles: Risk movers._');
+    if (rows.length === 0) {
+      expect(brief).not.toContain('**What changed**');
+      return;
+    }
+    expect(brief).toContain(`| --- | --- | --- |\n${rows.join('\n')}\n\n`);
   });
 
   it.each([
     [
       'no change',
       { value: 1, delta: 0, entityIds: [] },
-      '| Risk movers | 1 | no change vs previous 7d |',
+      '| Risk movers | 1 | no change vs previous 7 days |',
     ],
     ['no comparison', { value: 1, entityIds: [] }, '| Risk movers | 1 | no comparison |'],
     [
@@ -110,7 +185,9 @@ describe('renderBrief', () => {
     ],
   ])('renders %s', (_name, tile, row) => {
     const brief = renderBrief({
-      scope: scopeWith({ tiles: { riskMovers: tile } }),
+      scope: scopeWith({
+        tiles: { riskMovers: tile, entitiesWithAlerts: { value: 4, delta: 1, entityIds: [] } },
+      }),
       spaceId: 'default',
       entities: noEntities,
     });
@@ -144,6 +221,22 @@ describe('renderBrief', () => {
     expect(brief).toContain('<render_attachment id="x" version="1" />');
   });
 
+  it('escapes link, image and tag syntax in model text', () => {
+    const brief = renderBrief({
+      scope: scopeWith({ tiles: { riskMovers: { value: 1, entityIds: ['host:a'] } } }),
+      spaceId: 'default',
+      entities: hostA,
+      verified: {
+        attention: '{{ entity.id host:a }} see [runbook](https://x.test) ![i](https://y.test) <b>',
+        priorities: [],
+        droppedPriorityCount: 0,
+      },
+    });
+    expect(brief).toContain(
+      '**web\\_01** see \\[runbook\\](https://x.test) \\!\\[i\\](https://y.test) \\<b\\>'
+    );
+  });
+
   it('renders the no-priorities line after a model call', () => {
     const brief = renderBrief({
       scope: scopeWith({ tiles: { riskMovers: { value: 1, entityIds: ['host:a'] } } }),
@@ -165,6 +258,11 @@ describe('renderBrief', () => {
       'a query that could not be applied',
       { hasPageQuery: true, pageQueryFailed: true },
       "_The search query or filters couldn't be applied, so they don't narrow the priorities._",
+    ],
+    [
+      'a query that matches no tile entity',
+      { hasPageQuery: true, capturedCount: 1200, notFoundCount: 2 },
+      '_None of the 1,198 tile entities match the search query._',
     ],
   ])('discloses %s', (_name, entities, disclosure) => {
     const brief = renderBrief({

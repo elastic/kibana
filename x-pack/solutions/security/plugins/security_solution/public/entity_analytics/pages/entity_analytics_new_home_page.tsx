@@ -49,6 +49,7 @@ import {
   EMPTY_ENTITY_IDS,
   type ActiveFilter,
   type SignalCardData,
+  type SignalCardId,
 } from '../components/home/needs_attention_tiles/data';
 import {
   DataViewContext,
@@ -143,6 +144,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedCount,
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
+    error: alertBasedError,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -153,6 +155,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
+    hasNoJobs: hasNoAnomalyJobs,
+    error: anomaliesError,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -163,6 +167,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
+    error: newEntityError,
   } = useNewEntityCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -174,6 +179,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
+    error: riskMoversError,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -185,6 +191,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
+    error: newlyHCError,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -480,6 +487,26 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ]
   );
 
+  // A failed tile, or anomalies without ML jobs, shows 0 on the page; the AI brief must not read it as 0.
+  const unavailableTiles = useMemo(
+    (): Record<SignalCardId, boolean> => ({
+      entitiesWithAlerts: Boolean(alertBasedError),
+      entitiesWithAnomalies: Boolean(anomaliesError) || hasNoAnomalyJobs,
+      riskMovers: Boolean(riskMoversError),
+      newlyHighCritical: Boolean(newlyHCError),
+      watchlisted: Boolean(alertBasedError),
+      newEntity: Boolean(newEntityError),
+    }),
+    [
+      alertBasedError,
+      anomaliesError,
+      hasNoAnomalyJobs,
+      riskMoversError,
+      newlyHCError,
+      newEntityError,
+    ]
+  );
+
   const dataViewContextValue = useMemo(
     () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
     [dataView, isDataViewLoading]
@@ -529,6 +556,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
               <GenerateAiBriefButton
                 cards={signalCards}
                 entityIdsByTile={entityIdsByTile}
+                unavailableTiles={unavailableTiles}
                 timeRange={timeRange}
                 entityFilters={entityFilters}
                 focusTileId={activeFilter?.cardId}

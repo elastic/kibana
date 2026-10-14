@@ -100,7 +100,7 @@ apiTest.describe(
       );
 
       expect(brief).toContain(PRIORITY_LINE);
-      expect(brief).toContain('| Entities with alerts | 14 | +3 vs previous 7d |');
+      expect(brief).toContain('| Entities with alerts | 14 | +3 vs previous 7 days |');
       expect(brief).toContain('no comparison');
       expect(brief).toContain('Unavailable tiles: Entities with anomalies');
       expect(brief).not.toContain('| Entities with anomalies | 0 |');
@@ -109,6 +109,9 @@ apiTest.describe(
       const submitRequests = getSubmitBriefRequests(llmProxy);
       expect(submitRequests).toHaveLength(1);
       expect(submitRequests[0]).toContain(SEEDED_USER.id);
+      expect(submitRequests[0]).toContain(
+        'Entities with alerts (selected): 14 (+3 vs previous 7 days)'
+      );
       expect(submitRequests[0]).not.toContain(SEEDED_HOST.id);
     });
 

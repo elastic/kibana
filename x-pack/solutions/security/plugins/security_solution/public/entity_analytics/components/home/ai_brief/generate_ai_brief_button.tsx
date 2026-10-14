@@ -23,6 +23,8 @@ import type { TimeRange } from '../use_time_range_param';
 interface GenerateAiBriefButtonProps {
   cards: SignalCardData[];
   entityIdsByTile: Record<SignalCardId, readonly string[]>;
+  /** Tiles whose value is not real: the query failed or has no data source. */
+  unavailableTiles: Record<SignalCardId, boolean>;
   timeRange: TimeRange;
   entityFilters: EntityFilters;
   focusTileId?: SignalCardId;
@@ -32,6 +34,7 @@ interface GenerateAiBriefButtonProps {
 export const GenerateAiBriefButton: React.FC<GenerateAiBriefButtonProps> = ({
   cards,
   entityIdsByTile,
+  unavailableTiles,
   timeRange,
   entityFilters,
   focusTileId,
@@ -65,13 +68,22 @@ export const GenerateAiBriefButton: React.FC<GenerateAiBriefButtonProps> = ({
           {
             value,
             delta,
-            unavailable: noDataMessage ? true : undefined,
+            unavailable: noDataMessage || unavailableTiles[id] ? true : undefined,
             entityIds: entityIdsByTile[id].slice(0, MAX_ENTITY_IDS_PER_TILE),
           },
         ])
       ),
     };
-  }, [cards, entityFilters, entityIdsByTile, focusTileId, globalFilters, query, timeRange]);
+  }, [
+    cards,
+    entityFilters,
+    entityIdsByTile,
+    focusTileId,
+    globalFilters,
+    query,
+    timeRange,
+    unavailableTiles,
+  ]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
     attachmentType: ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE,

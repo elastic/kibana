@@ -23,36 +23,35 @@ import {
   getPeriodStart,
 } from './describe_scope';
 
-export interface EntityRisk {
+interface EntityRisk {
   /** Normalised score, 0 to 100. */
   score: number;
   level: EntityRiskLevels;
-  fromResolutionGroup: boolean;
 }
 
-/** The entity's risk: its resolution group's when scored, otherwise its own. */
-export const getEntityRisk = ({ entity }: Entity): EntityRisk | undefined => {
-  const groupRisk = entity?.relationships?.resolution?.risk;
-  const fromResolutionGroup = groupRisk?.calculated_score_norm !== undefined;
-  const risk = fromResolutionGroup ? groupRisk : entity?.risk;
+const readRisk = (
+  risk: { calculated_score_norm?: number; calculated_level?: EntityRiskLevels } | undefined
+): EntityRisk | undefined => {
   const score = risk?.calculated_score_norm;
   if (score === undefined || !Number.isFinite(score)) {
     return undefined;
   }
-  return { score, level: risk?.calculated_level ?? getRiskLevel(score), fromResolutionGroup };
+  return { score, level: risk?.calculated_level ?? getRiskLevel(score) };
 };
 
-const describeRisk = ({ score, level, fromResolutionGroup }: EntityRisk): string =>
-  `Current ${fromResolutionGroup ? 'resolution group ' : ''}risk: ${level} (score ${Math.round(
-    score
-  )})`;
+/** The risk candidates are ranked on: the resolution group's when scored, otherwise the entity's own. */
+export const getRankRisk = ({ entity }: Entity): EntityRisk | undefined =>
+  readRisk(entity?.relationships?.resolution?.risk) ?? readRisk(entity?.risk);
+
+const describeRisk = (label: string, { score, level }: EntityRisk): string =>
+  `${label}: ${level} (score ${Math.round(score)})`;
 
 const describeFirstSeen = (firstSeen: string, periodStart: Date, period: string): string => {
   const date = firstSeen.slice(0, 10);
   if (new Date(firstSeen) < periodStart) {
-    return `First seen ${date}`;
+    return `First seen by the Entity Store ${date}`;
   }
-  return `First seen ${date}, inside the last ${period}`;
+  return `First seen by the Entity Store ${date}, inside the last ${period}`;
 };
 
 /** Facts about each candidate from its tile membership and Entity Store record, numbered from 1. */
@@ -69,9 +68,14 @@ export const buildFacts = (
     for (const tileId of candidate.tileIds) {
       add(`In the "${BRIEF_TILE_TITLES[tileId]}" tile: ${BRIEF_TILE_DEFINITIONS[tileId](period)}`);
     }
-    const risk = getEntityRisk(candidate.record);
-    if (risk) {
-      add(describeRisk(risk));
+    // The tiles test the entity's own risk; the group's is a separate fact when it differs.
+    const ownRisk = readRisk(candidate.record.entity?.risk);
+    const groupRisk = readRisk(candidate.record.entity?.relationships?.resolution?.risk);
+    if (ownRisk) {
+      add(describeRisk('Current risk', ownRisk));
+    }
+    if (groupRisk && Math.round(groupRisk.score) !== Math.round(ownRisk?.score ?? -1)) {
+      add(describeRisk('Resolution group risk', groupRisk));
     }
     const criticality = getAssetCriticality(candidate);
     if (criticality) {
@@ -83,8 +87,9 @@ export const buildFacts = (
     const otherWatchlists = (getEntityAttributes(candidate)?.watchlists ?? []).filter(
       (watchlist) => !matchesPrivilegedWatchlist([watchlist])
     );
+    // Watchlist ids are not names, so only the count is stated.
     if (otherWatchlists.length > 0) {
-      add(`On watchlists: ${otherWatchlists.join(', ')}`);
+      add(`On ${otherWatchlists.length} other watchlist${otherWatchlists.length === 1 ? '' : 's'}`);
     }
     const firstSeen = getEntityLifecycle(candidate)?.first_seen;
     if (firstSeen) {

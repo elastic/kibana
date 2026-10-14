@@ -5,17 +5,33 @@
  * 2.0.
  */
 
+import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefDraft, BriefFact, BriefPriority } from './brief_types';
 import type { VerifiedBrief } from './verify_brief';
 import { verifyBrief } from './verify_brief';
 
 const facts: BriefFact[] = [
   { id: 1, entityId: 'host:a', text: 'In the "Risk movers" tile' },
-  { id: 2, entityId: 'host:a', text: 'Asset criticality: high_impact' },
+  { id: 2, entityId: 'host:a', text: 'Current risk: High (score 74)' },
   { id: 3, entityId: 'user:b', text: 'In the "Watchlisted" tile' },
   { id: 4, entityId: 'user:c', text: 'In the "New entity" tile' },
   { id: 5, entityId: 'user:d', text: 'In the "New entity" tile' },
 ];
+
+const scope: EntityAnalyticsScope = {
+  period: '7d',
+  capturedAt: '2026-10-14T12:00:00.000Z',
+  tiles: { entitiesWithAlerts: { value: 48213, delta: -120, entityIds: [] } },
+};
+
+const candidates = [
+  { id: 'host:a', name: 'web-01' },
+  { id: 'user:b', name: 'b' },
+  { id: 'user:c', name: 'c' },
+  { id: 'user:d', name: 'd' },
+];
+
+const verify = (input: BriefDraft) => verifyBrief(input, facts, scope, candidates);
 
 const priority = (entityId: string, factIds: number[]): BriefPriority => ({
   entityId,
@@ -93,6 +109,36 @@ describe('verifyBrief', () => {
       { attention: 'Both {{ entity.id host:a }}, and others, rose.' },
     ],
     [
+      'keeps numbers from the facts, tile values and changes, with separators',
+      draft('{{ entity.id host:a }} scores 74; 48,213 entities alert, 120 fewer.', [
+        priority('host:a', [1]),
+      ]),
+      { attention: '{{ entity.id host:a }} scores 74; 48,213 entities alert, 120 fewer.' },
+    ],
+    [
+      'drops a sentence with a number in neither the facts nor the tiles',
+      draft('{{ entity.id host:a }} scores 74. Over 300 hosts are affected.', [
+        priority('host:a', [1]),
+      ]),
+      { attention: '{{ entity.id host:a }} scores 74.' },
+    ],
+    [
+      'ignores digits in mentions, names and EUIDs',
+      draft('{{ entity.id host:a }} (web-01, host:a) rose.', [priority('host:a', [1])]),
+      { attention: '{{ entity.id host:a }} (web-01, host:a) rose.' },
+    ],
+    [
+      'drops a priority with an unsupported number in any field',
+      draft('Look.', [
+        { ...priority('host:a', [1]), nextStep: 'Review its 12 alerts.' },
+        { ...priority('user:b', [3]), whyItMatters: 'Score 74, as on web-01.' },
+      ]),
+      {
+        priorities: [{ ...priority('user:b', [3]), whyItMatters: 'Score 74, as on web-01.' }],
+        droppedPriorityCount: 1,
+      },
+    ],
+    [
       'cuts tool-call markup leaked at the end of attention',
       draft('{{ entity.id host:a }} rose.</parameter>\n<parameter name="x">[]', [
         priority('host:a', [1]),
@@ -100,13 +146,12 @@ describe('verifyBrief', () => {
       { attention: '{{ entity.id host:a }} rose.' },
     ],
   ])('%s', (_name, input, expected) => {
-    expect(verifyBrief(input, facts)).toMatchObject(expected);
+    expect(verify(input)).toMatchObject(expected);
   });
 
   it('caps priority text at 20 words', () => {
-    const [verified] = verifyBrief(
-      draft('Look.', [{ ...priority('host:a', [1]), observed: `${words(25)}.` }]),
-      facts
+    const [verified] = verify(
+      draft('Look.', [{ ...priority('host:a', [1]), observed: `${words(25)}.` }])
     ).priorities;
     expect(verified.observed).toBe(`${words(20)}…`);
   });

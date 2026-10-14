@@ -16,20 +16,30 @@ import { MAX_CHANGE_ROWS } from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_TITLES,
+  describeCoverage,
   describeTileChange,
   filterLabel,
   formatBriefTime,
+  formatCount,
   getPeriodStart,
   getScopeFilters,
+  hasNoPreviousValue,
 } from './describe_scope';
 import type { CandidateEntities } from './fetch_candidate_entities';
 import type { VerifiedBrief } from './verify_brief';
-import { replaceMentions } from './verify_brief';
+import { MENTION_PATTERN } from './verify_brief';
 
 export const QUIET_LINE =
   'Nothing in this view is flagged by the needs-attention tiles. That does not mean the environment is safe.';
+export const UNAVAILABLE_TILES_LINE =
+  'Nothing is flagged by the tiles that could be read, and the unavailable tiles were not checked. That does not mean the environment is safe.';
+export const NO_MATCH_LINE =
+  'The search query excludes every tile entity, so there is nothing to prioritise. Clear or change the search to brief on the tiles.';
 export const NO_PRIORITIES_LINE =
   'No entity in this view has enough evidence to prioritise. That does not mean the environment is safe.';
+
+/** Real comparisons rank by change relative to the previous value, floored at this many entities. */
+const MIN_CHANGE_BASE = 5;
 
 export interface RenderBriefParams {
   scope: EntityAnalyticsScope;
@@ -52,15 +62,19 @@ export const renderBrief = ({
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
   const boldName = (entityId: string) =>
     `**${escapeMarkdown(namesById.get(entityId) ?? entityId)}**`;
-  // Model text is plain prose: only tags are neutralised, so it can't inject a render tag.
-  const withNames = (text: string) => replaceMentions(text.replace(/[<>]/g, '\\$&'), boldName);
+  // Model text is plain prose: link, image and tag syntax is escaped, and mentions become bold names.
+  const withNames = (text: string) =>
+    text
+      .split(MENTION_PATTERN)
+      .map((part, index) => (index % 2 === 1 ? boldName(part) : escapeProse(part)))
+      .join('');
   const sections = [
     [renderScope(scope, spaceId, entities.dataTimestamp), ...renderDisclosures(scope, entities)],
-    renderAttention(scope, verified, withNames),
+    renderAttention(scope, entities, verified, withNames),
     renderChanges(scope),
     renderPriorities(verified, boldName, withNames),
     entityTableTag ? [entityTableTag] : [],
-    [renderCoverage(entities)],
+    [`_Checked: ${describeCoverage(scope, entities.candidates.length, entities.capturedCount)}._`],
   ];
   return sections
     .filter((lines) => lines.length > 0)
@@ -69,6 +83,7 @@ export const renderBrief = ({
 };
 
 const escapeMarkdown = (text: string): string => text.replace(/[\\`*_[\]<>|#]/g, '\\$&');
+const escapeProse = (text: string): string => text.replace(/[\\[\]!<>]/g, '\\$&');
 
 const renderScope = (
   scope: EntityAnalyticsScope,
@@ -86,23 +101,39 @@ const renderScope = (
     `space ${spaceId}`,
     `captured ${formatBriefTime(capturedAt)}`,
     dataTimestamp
-      ? `entity data as of ${formatBriefTime(dataTimestamp)}`
-      : 'entity data freshness unknown',
+      ? `Entity Store last updated ${formatBriefTime(dataTimestamp)}`
+      : 'Entity Store update time unknown',
   ];
   return `**Scope:** ${escapeMarkdown(compact(parts).join(' · '))}`;
 };
 
+/** Tile entities have records, but the page's search query kept none of them. */
+const matchesNoTileEntity = ({
+  hasPageQuery,
+  pageQueryFailed,
+  matchedCount,
+  capturedCount,
+  notFoundCount,
+}: CandidateEntities): boolean =>
+  hasPageQuery && !pageQueryFailed && matchedCount === 0 && capturedCount > notFoundCount;
+
 const renderDisclosures = (scope: EntityAnalyticsScope, entities: CandidateEntities): string[] => {
+  const { hasPageQuery, pageQueryFailed, capturedCount, notFoundCount } = entities;
   const unavailable = BRIEF_TILE_IDS.filter((tileId) => scope.tiles[tileId]?.unavailable);
   const disclosures = [
-    entities.hasPageQuery && !entities.pageQueryFailed
+    hasPageQuery && !pageQueryFailed
       ? 'Headline counts follow the period and entity filters, as on the page. The search query narrows the priorities.'
       : undefined,
-    entities.pageQueryFailed
+    matchesNoTileEntity(entities)
+      ? `None of the ${formatCount(
+          capturedCount - notFoundCount
+        )} tile entities match the search query.`
+      : undefined,
+    pageQueryFailed
       ? "The search query or filters couldn't be applied, so they don't narrow the priorities."
       : undefined,
-    entities.notFoundCount > 0
-      ? `${entities.notFoundCount} tile entities were not found in the Entity Store.`
+    notFoundCount > 0
+      ? `${formatCount(notFoundCount)} tile entities were not found in the Entity Store.`
       : undefined,
     unavailable.length > 0
       ? `Unavailable tiles: ${unavailable.map((tileId) => BRIEF_TILE_TITLES[tileId]).join(', ')}.`
@@ -112,33 +143,63 @@ const renderDisclosures = (scope: EntityAnalyticsScope, entities: CandidateEntit
 };
 
 const renderAttention = (
-  { tiles }: EntityAnalyticsScope,
+  scope: EntityAnalyticsScope,
+  entities: CandidateEntities,
   verified: VerifiedBrief | undefined,
   withNames: (text: string) => string
 ): string[] => {
   if (verified) {
     return verified.attention ? ['**What needs attention**', withNames(verified.attention)] : [];
   }
-  const flagged = Object.values(tiles).some(
-    (tile) => !tile.unavailable && (tile.value > 0 || tile.entityIds.length > 0)
-  );
-  return ['**What needs attention**', flagged ? NO_PRIORITIES_LINE : QUIET_LINE];
+  return ['**What needs attention**', getNoBriefLine(scope, entities)];
 };
 
-/** The selected tile, then the tiles that moved most. Tiles are never summed. */
-const pickChangeRows = ({ tiles, focusTileId }: EntityAnalyticsScope): BriefTileId[] =>
-  orderBy(
+/** Why there was nothing to brief on. Only a view whose tiles were all read can be called quiet. */
+const getNoBriefLine = ({ tiles }: EntityAnalyticsScope, entities: CandidateEntities): string => {
+  const scopeTiles = Object.values(tiles);
+  const flagged = scopeTiles.some(
+    ({ unavailable, value, entityIds }) => !unavailable && (value > 0 || entityIds.length > 0)
+  );
+  if (matchesNoTileEntity(entities)) {
+    return NO_MATCH_LINE;
+  }
+  if (flagged) {
+    return NO_PRIORITIES_LINE;
+  }
+  return scopeTiles.some(({ unavailable }) => unavailable) ? UNAVAILABLE_TILES_LINE : QUIET_LINE;
+};
+
+/** The selected tile, then the tiles that moved most. Hidden when no tile has a comparison. Never summed. */
+const pickChangeRows = ({ tiles, focusTileId }: EntityAnalyticsScope): BriefTileId[] => {
+  const hasComparison = Object.values(tiles).some(
+    ({ unavailable, delta }) => !unavailable && delta !== undefined
+  );
+  if (!hasComparison) {
+    return [];
+  }
+  return orderBy(
     BRIEF_TILE_IDS.filter((tileId) => tiles[tileId]),
     [(tileId) => tileId === focusTileId, (tileId) => movement(tiles[tileId])],
     ['desc', 'desc']
   ).slice(0, MAX_CHANGE_ROWS);
+};
 
-/** Larger for more movement; no comparison ranks below no change, and unavailable last. */
+/**
+ * Change relative to the previous value, floored at `MIN_CHANGE_BASE`. A rise from 0 may be missing
+ * history, so it ranks below real comparisons, then no comparison, then unavailable.
+ */
 const movement = (tile: EntityAnalyticsScopeTile | undefined): number => {
   if (!tile || tile.unavailable) {
+    return -3;
+  }
+  const { value, delta } = tile;
+  if (delta === undefined) {
     return -2;
   }
-  return tile.delta === undefined ? -1 : Math.abs(tile.delta);
+  if (hasNoPreviousValue(tile)) {
+    return -1;
+  }
+  return Math.abs(delta) / Math.max(value - delta, MIN_CHANGE_BASE);
 };
 
 const renderChanges = (scope: EntityAnalyticsScope): string[] => {
@@ -147,7 +208,7 @@ const renderChanges = (scope: EntityAnalyticsScope): string[] => {
     if (!tile) {
       return [];
     }
-    const now = tile.unavailable ? 'unavailable' : String(tile.value);
+    const now = tile.unavailable ? 'unavailable' : formatCount(tile.value);
     return [
       `| ${BRIEF_TILE_TITLES[tileId]} | ${now} | ${describeTileChange(tile, scope.period)} |`,
     ];
@@ -178,11 +239,4 @@ const renderPriorities = (
       )} _Next:_ ${asSentence(withNames(nextStep))}`
   );
   return ['**Priorities**', ...lines];
-};
-
-const renderCoverage = ({ candidates, capturedCount, matchedCount }: CandidateEntities): string => {
-  const checked = candidates.length;
-  const ofCaptured = checked < capturedCount ? ` of ${capturedCount}` : '';
-  const order = checked < matchedCount ? ', highest risk first' : '';
-  return `_Checked: ${checked}${ofCaptured} entities from the page's tiles${order}._`;
 };

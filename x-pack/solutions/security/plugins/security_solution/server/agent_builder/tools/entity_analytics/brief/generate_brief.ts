@@ -12,6 +12,7 @@ import { buildListEntityAttachmentId, ensureEntityAttachment } from '../entity_a
 import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './brief_types';
 import { buildFacts } from './build_facts';
 import { composeBrief } from './compose_brief';
+import { describeCoverage } from './describe_scope';
 import { fetchCandidateEntities } from './fetch_candidate_entities';
 import { renderBrief } from './render_brief';
 import { verifyBrief } from './verify_brief';
@@ -54,11 +55,12 @@ export const generateBrief = async ({
     scope,
     candidates,
     facts,
+    coverage: describeCoverage(scope, candidates.length, entities.capturedCount),
     abortSignal,
     logger,
   });
   const composed = Date.now();
-  const verified = verifyBrief(draft, facts);
+  const verified = verifyBrief(draft, facts, scope, candidates);
   const priorityCandidates = verified.priorities.flatMap(
     ({ entityId }) => candidates.find(({ id }) => id === entityId) ?? []
   );
