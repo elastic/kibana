@@ -642,6 +642,19 @@ describe('ConversationInput', () => {
       expect(handleDocumentSubmitted).toHaveBeenCalledTimes(1);
     });
 
+    it('tells the document upload it was sent before the submit moves to the new conversation', () => {
+      mockedUseDocumentUpload.mockReturnValue(
+        documentUploadState({ pendingConversationId: 'pending-conv' })
+      );
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(handleDocumentSubmitted.mock.invocationCallOrder[0]).toBeLessThan(
+        submitMessage.mock.invocationCallOrder[0]
+      );
+    });
+
     it('gives the document upload the create conversation call of the submit hook', () => {
       renderInput(<ConversationInput />);
 

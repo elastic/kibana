@@ -492,12 +492,12 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       return;
     }
     lastEditorContentRef.current = '';
+    handleUploadsSubmitted();
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
       submitMessage(content, { conversationId: pendingConversationId });
     }
-    handleUploadsSubmitted();
     clearDraft();
     messageEditorController.clear();
     onSubmit?.();
