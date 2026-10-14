@@ -106,19 +106,30 @@ describe('RuleFlyout profile picker', () => {
     ]);
   });
 
-  it("only lists profiles of an edited rule's type", async () => {
+  it("shows the selected profile's type in the field", () => {
+    renderFlyout();
+
+    expect(
+      within(screen.getByTestId('boostRuleProfile')).getByTestId('boostRuleProfileType')
+    ).toHaveTextContent('Indices');
+  });
+
+  it('lists profiles of both types when editing a custom rule', async () => {
     const { getInput } = renderFlyout();
 
     await userEvent.click(getInput());
 
-    expect(screen.getAllByRole('option').map(({ textContent }) => textContent)).toEqual([
-      'alpha-search',
-      'elastic-high-availabilityManaged',
-      'elastic-on-demandManaged',
-      'elastic-performantManaged',
-      'zeta-search',
-    ]);
-    expect(screen.queryByText('Data streams')).not.toBeInTheDocument();
+    expect(screen.getByText('Data streams')).toBeInTheDocument();
+  });
+
+  it("only lists profiles of a default rule's type", async () => {
+    const { getInput } = renderFlyout(
+      state.rules.find(({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME)
+    );
+
+    await userEvent.click(getInput());
+
+    expect(screen.queryByText('Indices')).not.toBeInTheDocument();
   });
 
   it('can be emptied with select-all and Delete, and restores the last profile on blur', async () => {
@@ -184,7 +195,7 @@ describe('RuleFlyout profile creation', () => {
     expect(screen.queryByTestId('boostRuleProfile')).not.toBeInTheDocument();
     expect(screen.getByTestId('boostProfileName')).toHaveFocus();
     expect(getTypeRadio('indices')).toBeChecked();
-    expect(getTypeRadio('data_streams')).toBeDisabled();
+    expect(getTypeRadio('data_streams')).toBeEnabled();
   });
 
   it('creates the profile and selects it in the rule', async () => {
@@ -263,6 +274,8 @@ describe('RuleFlyout estimate', () => {
     await userEvent.type(getPattern(), 'catalog-*');
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
+    // A new rule has nothing of its own to compare with, so there's no change to show.
+    expect(screen.queryByText(/^(Up|Down) /)).not.toBeInTheDocument();
 
     await userEvent.clear(getPattern());
     await userEvent.type(getPattern(), 'nothing-*');
@@ -280,6 +293,8 @@ describe('RuleFlyout estimate', () => {
     await blur();
 
     expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+    // EUI's test build renders an icon's label as its text.
+    expect(screen.getAllByText(/^(Up|Down) /).length).toBeGreaterThan(0);
   });
 
   it("estimates the rule's targets with a profile being created for it", async () => {
@@ -292,7 +307,7 @@ describe('RuleFlyout estimate', () => {
 });
 
 describe('RuleFlyout duplicate', () => {
-  it('copies a rule under a new name, keeping its type', async () => {
+  it('copies a rule under a new name', async () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout duplicateOf={rule} onClose={jest.fn()} />
@@ -305,11 +320,6 @@ describe('RuleFlyout duplicate', () => {
     expect(screen.getByTestId('boostRuleName')).toHaveValue('catalogs-copy');
     expect(screen.getByTestId('boostRulePattern')).toHaveValue('catalog-*');
 
-    await userEvent.click(
-      within(screen.getByTestId('boostRuleProfile')).getByTestId('comboBoxSearchInput')
-    );
-    expect(screen.queryByText('Data streams')).not.toBeInTheDocument();
-
     await userEvent.click(screen.getByTestId('boostRuleSave'));
     expect(mutation.mutate).toHaveBeenCalledWith(
       {
@@ -319,6 +329,49 @@ describe('RuleFlyout duplicate', () => {
         priority: 1,
       },
       expect.anything()
+    );
+  });
+});
+
+describe('RuleFlyout pattern matches', () => {
+  const renderNewRule = () =>
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+  it('counts and lists what the pattern matches', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('Matches 1 index');
+    expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
+  });
+
+  it('says when nothing matches, in the same panel', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
+
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('Matches 0 indices');
+    expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('Nothing matches yet.');
+  });
+
+  it('explains why the pattern is disabled before a profile is selected', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('boostRulePattern')).toBeDisabled();
+    // EUI turns off pointer events on disabled inputs, so hovers land on the row the tooltip wraps.
+    await userEvent.hover(screen.getByText('Index pattern', { selector: 'label' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Select a boost profile to choose targets.'
     );
   });
 });

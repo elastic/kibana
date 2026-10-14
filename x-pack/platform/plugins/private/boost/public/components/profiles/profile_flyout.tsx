@@ -59,7 +59,7 @@ export interface ProfileForRule {
   ruleName?: string;
   /** The rule's current type, which the new profile starts with. */
   type?: BoostProfileType;
-  /** A saved rule's type can't change, so its new profile's can't either. */
+  /** Default rules can't change type, so their new profile can't either. */
   isTypeLocked: boolean;
   /** Estimates the rule's targets with the new profile, once the rule has some. */
   estimate: (profile: BoostProfileInput) => CostImpact | undefined;
@@ -318,7 +318,7 @@ export const ProfileFlyoutContent = ({
               description={
                 forRule?.isTypeLocked
                   ? i18n.translate('xpack.boost.profileForm.lockedTypeDescription', {
-                      defaultMessage: "Matches the rule's type, which can't change.",
+                      defaultMessage: "Matches the default rule's type, which can't change.",
                     })
                   : i18n.translate('xpack.boost.profileForm.typeDescription', {
                       defaultMessage: "The type can't be changed after the profile is created.",
@@ -462,7 +462,12 @@ export const ProfileFlyoutContent = ({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <CostEstimate impact={getImpact()} type={draft.type} isEditing={isBoostFocused} />
+        <CostEstimate
+          impact={getImpact()}
+          type={draft.type}
+          isEditing={isBoostFocused}
+          showChange={isEditing || duplicateOf !== undefined}
+        />
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

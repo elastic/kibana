@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import type {
   EuiBasicTableColumn,
   EuiSearchBarProps,
@@ -17,6 +18,7 @@ import {
   EuiConfirmModal,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
+  Query,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -51,6 +53,15 @@ const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', 
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
 
+// The search parameter that opens this tab filtered by one profile.
+const PROFILE_FILTER_PARAM = 'profile';
+
+/** Where the rules tab shows only the rules that use a profile. */
+export const getProfileRulesLocation = (profileName: string) => ({
+  pathname: '/rules',
+  search: `?${new URLSearchParams({ [PROFILE_FILTER_PARAM]: profileName })}`,
+});
+
 export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProps) => {
   const { notifications } = useBoostServices();
   const deleteModalTitleId = useGeneratedHtmlId();
@@ -58,6 +69,15 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   // Undefined while closed; an empty object creates a rule, and `rule` edits one.
   const [flyout, setFlyout] = useState<{ rule?: BoostRule; duplicateOf?: BoostRule }>();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
+  const { search: locationSearch } = useLocation();
+  // Read once, so the filter is the user's to change afterwards. The profile filter matches values
+  // in its "or" form, so the query is built that way.
+  const [defaultQuery] = useState(() => {
+    const profileName = new URLSearchParams(locationSearch).get(PROFILE_FILTER_PARAM);
+    return profileName
+      ? Query.parse('').addOrFieldValue('boost_profile', profileName, true, 'eq')
+      : undefined;
+  });
 
   const rows = useMemo<RuleRow[]>(() => {
     const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
@@ -179,8 +199,14 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     ...(canEdit ? [actionsColumn] : []),
   ];
 
+  // Only profiles that rules use, since the others would filter to an empty table.
+  const usedProfileNames = [...new Set(rules.map(({ boost_profile: name }) => name))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+
   const search: EuiSearchBarProps = {
     compressed: true,
+    defaultQuery,
     box: {
       incremental: true,
       placeholder: i18n.translate('xpack.boost.rulesTab.searchPlaceholder', {
@@ -195,6 +221,14 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
           { value: 'indices', name: PROFILE_TYPE_LABELS.indices },
           { value: 'data_streams', name: PROFILE_TYPE_LABELS.data_streams },
         ],
+      },
+      {
+        type: 'field_value_selection',
+        field: 'boost_profile',
+        name: i18n.translate('xpack.boost.rulesTab.profileFilter', { defaultMessage: 'Profile' }),
+        multiSelect: 'or',
+        operator: 'eq',
+        options: usedProfileNames.map((name) => ({ value: name, name })),
       },
     ],
     toolsRight: canEdit ? (

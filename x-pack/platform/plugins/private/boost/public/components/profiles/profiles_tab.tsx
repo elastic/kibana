@@ -6,13 +6,15 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import type {
   EuiBasicTableColumn,
   EuiSearchBarProps,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { EuiBadge, EuiButton, EuiInMemoryTable, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiInMemoryTable, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { countRulesByProfile } from '../../../common/resolution';
 import type {
   BoostDataSource,
@@ -23,6 +25,7 @@ import type {
 import { PROFILE_TYPE_LABELS, formatBoost } from '../format';
 import { DeleteProfileModal } from './delete_profile_modal';
 import { RuleFlyout } from '../rules/rule_flyout';
+import { getProfileRulesLocation } from '../rules/rules_tab';
 import { ProfileFlyout } from './profile_flyout';
 
 interface ProfilesTabProps {
@@ -64,6 +67,7 @@ const USED_BY_DEFAULT_RULE_DESCRIPTIONS: Record<BoostProfileType, string> = {
 };
 
 export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesTabProps) => {
+  const history = useHistory();
   const [flyout, setFlyout] = useState<FlyoutState>();
   const [profileToDelete, setProfileToDelete] = useState<BoostProfile>();
   // A profile just created with "Save and create rule", which the rule flyout starts with.
@@ -193,6 +197,23 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       width: '12%',
       sortable: true,
       dataType: 'number',
+      // Opens the rules tab filtered to the rules that use this profile.
+      render: (ruleCount: number, { name }: ProfileRow) =>
+        ruleCount > 0 ? (
+          <EuiLink
+            {...reactRouterNavigate(history, getProfileRulesLocation(name))}
+            aria-label={i18n.translate('xpack.boost.profilesTab.rulesUsingLinkLabel', {
+              defaultMessage:
+                'View {count, plural, one {# rule} other {# rules}} using boost profile "{name}"',
+              values: { count: ruleCount, name },
+            })}
+            data-test-subj="boostProfileRulesLink"
+          >
+            {ruleCount}
+          </EuiLink>
+        ) : (
+          ruleCount
+        ),
     },
     ...(canEdit ? [actionsColumn] : []),
   ];

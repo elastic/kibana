@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { render, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import {
+  BUILTIN_PROFILES,
+  DEFAULT_SIMPLE_MODE_DEFAULTS,
+  createDefaultRules,
+  translateSimpleDefaults,
+} from '../../../common/presets';
+import type { BoostProfile } from '../../../common/types';
+import { ProfilesTab } from './profiles_tab';
+
+const customProfile = (name: string): BoostProfile => ({
+  name,
+  type: 'indices',
+  is_builtin: false,
+  min_boost: 1,
+  max_boost: 4,
+  high_availability: 'none',
+  prewarm: false,
+  pinned: false,
+});
+
+describe('ProfilesTab', () => {
+  it("links a profile's rule count to the rules that use it", () => {
+    render(
+      <MemoryRouter initialEntries={['/profiles']}>
+        <IntlProvider locale="en">
+          <ProfilesTab
+            profiles={[...BUILTIN_PROFILES, customProfile('catalog-search')]}
+            rules={[
+              ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+              {
+                name: 'catalogs',
+                index_patterns: ['catalog-*'],
+                boost_profile: 'catalog-search',
+                priority: 1,
+                is_builtin: false,
+              },
+            ]}
+            dataSources={[]}
+            canEdit
+          />
+        </IntlProvider>
+      </MemoryRouter>
+    );
+
+    expect(
+      screen.getByRole('link', { name: 'View 1 rule using boost profile "catalog-search"' })
+    ).toHaveAttribute('href', '/rules?profile=catalog-search');
+    // Unused profiles have nothing to link to.
+    expect(
+      screen.queryByRole('link', { name: /using boost profile "elastic-on-demand"/ })
+    ).not.toBeInTheDocument();
+  });
+});

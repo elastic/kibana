@@ -32,6 +32,11 @@ interface CostEstimateProps {
    * finish, the last estimate stays, faded; after that, it's hidden.
    */
   isEditing: boolean;
+  /**
+   * Whether to show how the estimate changes from today, which only means something when editing or
+   * copying a saved rule or profile.
+   */
+  showChange: boolean;
 }
 
 interface ShownEstimate {
@@ -174,12 +179,18 @@ const EstimateValue = ({ end, estimate, comparison }: EstimateValueProps) => {
 interface EstimateContentProps {
   estimate: ShownEstimate;
   isStale: boolean;
+  showChange: boolean;
 }
 
 /** The estimate's title, what it covers, and its values. */
-const EstimateContent = ({ estimate: { impact, type }, isStale }: EstimateContentProps) => {
+const EstimateContent = ({
+  estimate: { impact, type },
+  isStale,
+  showChange,
+}: EstimateContentProps) => {
   const { euiTheme } = useEuiTheme();
-  const { next: estimate, current: comparison, dataSourceCount, sizeInBytes } = impact;
+  const { next: estimate, dataSourceCount, sizeInBytes } = impact;
+  const comparison = showChange ? impact.current : undefined;
 
   return (
     <EuiFlexGroup
@@ -279,7 +290,7 @@ const EstimateContent = ({ estimate: { impact, type }, isStale }: EstimateConten
  * The illustrative hourly search cost of the data a change affects, compared with today, above a
  * footer's buttons. It's only shown for real data, so it's hidden until there's some to estimate.
  */
-export const CostEstimate = ({ impact, type, isEditing }: CostEstimateProps) => {
+export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstimateProps) => {
   const { euiTheme } = useEuiTheme();
   const lastShownRef = useRef<ShownEstimate>();
   // The last estimate rendered, which stays while it animates out.
@@ -345,7 +356,9 @@ export const CostEstimate = ({ impact, type, isEditing }: CostEstimateProps) => 
             padding-block-end: calc(${dividerGap} * 2 + ${euiTheme.border.width.thin});
           `}
         >
-          {rendered && <EstimateContent estimate={rendered} isStale={isStale} />}
+          {rendered && (
+            <EstimateContent estimate={rendered} isStale={isStale} showChange={showChange} />
+          )}
         </div>
       </div>
       {/* The divider stays put above the buttons, edge to edge through the footer's 16px padding,
