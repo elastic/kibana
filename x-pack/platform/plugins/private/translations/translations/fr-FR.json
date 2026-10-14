@@ -49611,7 +49611,6 @@
     "xpack.sharedComponents.trialUsageBadge.daysUsed": "{used}/{total} jours",
     "xpack.sharedComponents.trialUsageBadge.manageSubscription": "Gérer l'abonnement",
     "xpack.sharedComponents.trialUsageBadge.popoverAriaLabel": "Détails de l'utilisation de l'essai",
-    "xpack.sharedComponents.trialUsageBadge.serverlessTitle": "Elastic Cloud Serverless",
     "xpack.sharedComponents.trialUsageBadge.toggleAriaLabel": "Afficher/masquer les détails de l'utilisation à l'essai",
     "xpack.sharedComponents.trialUsageBadge.trialLabel": "ESSAI",
     "xpack.sharedComponents.trialUsageBadge.trialPeriodLabel": "Période d'essai",

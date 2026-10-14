@@ -50004,7 +50004,6 @@
     "xpack.sharedComponents.trialUsageBadge.daysUsed": "{used}/{total}日",
     "xpack.sharedComponents.trialUsageBadge.manageSubscription": "サブスクリプションを管理",
     "xpack.sharedComponents.trialUsageBadge.popoverAriaLabel": "トライアル使用状況の詳細",
-    "xpack.sharedComponents.trialUsageBadge.serverlessTitle": "Elastic Cloud Serverless",
     "xpack.sharedComponents.trialUsageBadge.toggleAriaLabel": "トライアル利用の詳細を切り替え",
     "xpack.sharedComponents.trialUsageBadge.trialLabel": "トライアル",
     "xpack.sharedComponents.trialUsageBadge.trialPeriodLabel": "トライアルの期間",
