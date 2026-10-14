@@ -51,6 +51,40 @@ const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
   },
 ];
 
+/**
+ * Scopes the filter dropdown options to the documents the current screen actually lists, so
+ * they can't offer values that match nothing. Detail routes win over the tab id: they are
+ * nested under errors-and-crashes, so that route matches on them too.
+ */
+export function getMobileFiltersErrorType({
+  isCrashDetail,
+  isErrorDetail,
+  isErrorsAndCrashes,
+  mobileErrorTabId,
+}: {
+  isCrashDetail: boolean;
+  isErrorDetail: boolean;
+  isErrorsAndCrashes: boolean;
+  mobileErrorTabId?: string;
+}): MobileErrorType | undefined {
+  if (isCrashDetail) {
+    return MobileErrorType.Crash;
+  }
+
+  if (isErrorDetail) {
+    return MobileErrorType.Error;
+  }
+
+  // Overview and transactions, where transaction and span documents are the right source.
+  if (!isErrorsAndCrashes) {
+    return undefined;
+  }
+
+  // The errors tab is the default and is rendered before `mobileErrorTabId` reaches the
+  // URL, so anything that isn't `crashes` is the errors tab.
+  return mobileErrorTabId === 'crashes' ? MobileErrorType.Crash : MobileErrorType.Error;
+}
+
 export function MobileFilters() {
   const history = useHistory();
   const { serviceName } = useApmServiceContext();
@@ -82,18 +116,25 @@ export function MobileFilters() {
     '/mobile-services/{serviceName}/errors-and-crashes'
   );
 
+  // The detail routes are nested under errors-and-crashes, so the params above match there
+  // too. Match them explicitly: their scope comes from the route, not from a query param
+  // that a deep link or bookmark may not carry.
+  const isCrashDetail = !!useMaybeApmParams(
+    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
+  );
+  const isErrorDetail = !!useMaybeApmParams(
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
+  );
+
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  // Scope the dropdown options to the documents the active tab actually lists, so they
-  // can't offer values that match nothing. Undefined on overview/transactions, where
-  // transaction and span documents are the right source. The errors tab is the default,
-  // so on this route anything that isn't `crashes` is the errors tab.
-  const errorType = errorsAndCrashesParams
-    ? errorsAndCrashesParams.query.mobileErrorTabId === 'crashes'
-      ? MobileErrorType.Crash
-      : MobileErrorType.Error
-    : undefined;
+  const errorType = getMobileFiltersErrorType({
+    isCrashDetail,
+    isErrorDetail,
+    isErrorsAndCrashes: !!errorsAndCrashesParams,
+    mobileErrorTabId: errorsAndCrashesParams?.query.mobileErrorTabId,
+  });
 
   const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {
