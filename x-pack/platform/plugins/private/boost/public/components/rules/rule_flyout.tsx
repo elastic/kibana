@@ -49,7 +49,7 @@ import type {
   BoostState,
 } from '../../../common/types';
 import { BOOST_DOCS_URL } from '../../doc_links';
-import { estimateRuleImpact } from '../../../common/vcu_estimate';
+import { estimateRuleCost } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
@@ -374,29 +374,31 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
           })
       : [];
 
-  // The cost change across everything this rule gains or gives up.
+  // The rule's own cost: what it applies to after higher-ranked rules, compared with the saved rule
+  // when editing, or the original when duplicating.
   const hasValidTargets =
     isDefaultRule || (draft.mode === 'pattern' ? !errors.pattern : draft.picked.length > 0);
   const impact =
     draft.profileName && type && hasValidTargets
-      ? estimateRuleImpact({
+      ? estimateRuleCost({
           dataSources,
           rules,
           profiles,
           nextRule: draftRule,
-          currentRule: rule,
+          replacedRuleName: rule?.name,
+          comparedRule: rule ?? duplicateOf,
         })
       : undefined;
 
   // The same, with a profile being created for this rule in the profile form.
   const estimateWithNewProfile = (profile: BoostProfileInput) =>
     hasValidTargets && profile.type === type
-      ? estimateRuleImpact({
+      ? estimateRuleCost({
           dataSources,
           rules,
           profiles: [...profiles, { ...profile, name: NEW_PROFILE_NAME, is_builtin: false }],
           nextRule: { ...draftRule, boost_profile: NEW_PROFILE_NAME },
-          currentRule: rule,
+          replacedRuleName: rule?.name,
         })
       : undefined;
 

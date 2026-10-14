@@ -128,14 +128,16 @@ export const estimateDataSourceVcuRange = (
   );
 };
 
-/** The search cost of the data sources a change affects, before and after it. */
+/** The search cost an estimate covers, today and with a change. */
 export interface CostImpact {
-  /** The data sources the change affects, and their total size. */
+  /** The data sources the estimate covers with the change, and their total size. */
   dataSourceCount: number;
   sizeInBytes: number;
-  /** Total search VCUs for those data sources today, and with the change. */
+  /** Total search VCUs today, and with the change. */
   current: VcuRange;
   next: VcuRange;
+  /** Whether today's cost covers any data, so a change that leaves none still compares with it. */
+  hasCurrentData: boolean;
 }
 
 const NO_IMPACT: CostImpact = {
@@ -143,51 +145,57 @@ const NO_IMPACT: CostImpact = {
   sizeInBytes: 0,
   current: NO_VCUS,
   next: NO_VCUS,
+  hasCurrentData: false,
 };
 
-interface RuleImpactInput {
+interface RuleCostInput {
   dataSources: readonly BoostDataSource[];
   rules: readonly BoostRule[];
   profiles: readonly BoostProfile[];
   /** The rule as it would be saved. */
   nextRule: BoostRule;
-  /** The rule as it's saved today, when editing. */
-  currentRule?: BoostRule;
+  /** The saved rule that the next rule replaces, when editing. */
+  replacedRuleName?: string;
+  /** The saved rule to compare with: the one being edited, or the one being copied. */
+  comparedRule?: BoostRule;
 }
 
 /**
- * Estimates what creating or editing a rule does to search VCUs: for every data source it gains or
- * loses, the total under today's rules and under the changed rules.
+ * Estimates a rule's own search cost: the data sources it would apply to, after higher-ranked rules,
+ * with its profile, compared with what a saved rule costs today.
  */
-export const estimateRuleImpact = ({
+export const estimateRuleCost = ({
   dataSources,
   rules,
   profiles,
   nextRule,
-  currentRule,
-}: RuleImpactInput): CostImpact => {
+  replacedRuleName,
+  comparedRule,
+}: RuleCostInput): CostImpact => {
   const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
-  // Matched by name, since callers may pass a copy of the saved rule.
-  const nextRules = [...rules.filter(({ name }) => name !== currentRule?.name), nextRule];
-  const rangeFor = (dataSource: BoostDataSource, rule: BoostRule | undefined): VcuRange => {
-    const profile = rule && profilesByName.get(rule.boost_profile);
-    return profile ? estimateDataSourceVcuRange(dataSource, profile) : NO_VCUS;
-  };
+  const nextRules = [...rules.filter(({ name }) => name !== replacedRuleName), nextRule];
+  const nextProfile = profilesByName.get(nextRule.boost_profile);
+  const comparedProfile = comparedRule && profilesByName.get(comparedRule.boost_profile);
 
-  return dataSources.reduce<CostImpact>((impact, dataSource) => {
-    const appliedNow = resolveRule(dataSource, rules, profilesByName);
-    const appliedNext = resolveRule(dataSource, nextRules, profilesByName);
-    const isAffected =
-      (currentRule !== undefined && appliedNow?.name === currentRule.name) ||
-      appliedNext === nextRule;
-    if (!isAffected) {
-      return impact;
-    }
+  return dataSources.reduce<CostImpact>((cost, dataSource) => {
+    const appliesNext =
+      nextProfile !== undefined && resolveRule(dataSource, nextRules, profilesByName) === nextRule;
+    // Matched by name, since callers may pass a copy of the saved rule.
+    const appliesNow =
+      comparedProfile !== undefined &&
+      resolveRule(dataSource, rules, profilesByName)?.name === comparedRule?.name;
     return {
-      dataSourceCount: impact.dataSourceCount + 1,
-      sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
-      current: addRanges(impact.current, rangeFor(dataSource, appliedNow)),
-      next: addRanges(impact.next, rangeFor(dataSource, appliedNext)),
+      dataSourceCount: cost.dataSourceCount + (appliesNext ? 1 : 0),
+      sizeInBytes: cost.sizeInBytes + (appliesNext ? dataSource.size_in_bytes : 0),
+      next:
+        appliesNext && nextProfile
+          ? addRanges(cost.next, estimateDataSourceVcuRange(dataSource, nextProfile))
+          : cost.next,
+      current:
+        appliesNow && comparedProfile
+          ? addRanges(cost.current, estimateDataSourceVcuRange(dataSource, comparedProfile))
+          : cost.current,
+      hasCurrentData: cost.hasCurrentData || appliesNow,
     };
   }, NO_IMPACT);
 };
@@ -223,6 +231,7 @@ export const estimateProfileImpact = ({
         sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
         current: addRanges(impact.current, estimateDataSourceVcuRange(dataSource, currentProfile)),
         next: addRanges(impact.next, estimateDataSourceVcuRange(dataSource, nextProfile)),
+        hasCurrentData: true,
       }),
       NO_IMPACT
     );

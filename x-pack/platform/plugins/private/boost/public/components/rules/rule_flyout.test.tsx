@@ -288,16 +288,18 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 
-  it('still estimates an edited rule that matches nothing, for the data it gives up', async () => {
+  it('shows an edited rule that matches nothing costing nothing, down from today', async () => {
     const { blur } = renderFlyout();
 
     await userEvent.clear(getPattern());
     await userEvent.type(getPattern(), 'nothing-*');
     await blur();
 
-    expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+    expect(getEstimate()).toHaveAttribute('data-shown', 'true');
+    expect(getEstimate()).toHaveTextContent('0 indices · 0 GB');
+    expect(getEstimate()).toHaveTextContent('$0.00 at rest');
     // EUI's test build renders an icon's label as its text.
-    expect(screen.getAllByText(/^(Up|Down) /).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^Down /).length).toBeGreaterThan(0);
   });
 
   it("estimates the rule's targets with a profile being created for it", async () => {

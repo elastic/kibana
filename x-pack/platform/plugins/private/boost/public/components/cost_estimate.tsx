@@ -23,7 +23,10 @@ import { ILLUSTRATIVE_USD_PER_VCU_HOUR } from '../../common/vcu_estimate';
 import { formatDataSourceCount } from './format';
 
 interface CostEstimateProps {
-  /** The cost of the data a change affects, before and after; omitted while it can't be estimated. */
+  /**
+   * The cost of what a rule or profile applies to, today and with the change; omitted while it
+   * can't be estimated.
+   */
   impact?: CostImpact;
   /** The type of the data the change affects. */
   type?: BoostProfileType;
@@ -287,8 +290,8 @@ const EstimateContent = ({
 };
 
 /**
- * The illustrative hourly search cost of the data a change affects, compared with today, above a
- * footer's buttons. It's only shown for real data, so it's hidden until there's some to estimate.
+ * The illustrative hourly search cost of what a rule or profile applies to, compared with today, above
+ * a footer's buttons. It's only shown for real data, so it's hidden until there's some to estimate.
  */
 export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstimateProps) => {
   const { euiTheme } = useEuiTheme();
@@ -296,7 +299,11 @@ export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstima
   // The last estimate rendered, which stays while it animates out.
   const lastRenderedRef = useRef<ShownEstimate>();
 
-  const current = impact && impact.dataSourceCount > 0 && type ? { impact, type } : undefined;
+  // Shown for real data: what the change covers, or, when there's a change to show, what it covered
+  // before, such as a rule edited to match nothing.
+  const hasData =
+    impact !== undefined && (impact.dataSourceCount > 0 || (showChange && impact.hasCurrentData));
+  const current = impact && hasData && type ? { impact, type } : undefined;
   const shown = current ?? (isEditing ? lastShownRef.current : undefined);
   useEffect(() => {
     lastShownRef.current = shown;

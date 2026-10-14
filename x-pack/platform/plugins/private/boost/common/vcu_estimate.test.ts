@@ -23,7 +23,7 @@ import {
   estimateDataStreamVcuRange,
   estimateIndicesVcuRange,
   estimateProfileImpact,
-  estimateRuleImpact,
+  estimateRuleCost,
 } from './vcu_estimate';
 
 const GB = 1e9;
@@ -161,11 +161,10 @@ describe('cost impacts', () => {
   };
   const profiles = [...BUILTIN_PROFILES, fast];
   const defaultRules = createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS));
-  const performant = BUILTIN_PROFILES.find(({ name }) => name === 'elastic-performant') ?? fast;
   const products = index('products', 10);
   const users = index('users', 2);
   const dataSources = [products, users, index('archive', 50)];
-  const cost = (dataSource: BoostDataSource, profile: BoostProfile | BoostProfileInput) =>
+  const atRest = (dataSource: BoostDataSource, profile: BoostProfile | BoostProfileInput) =>
     estimateDataSourceVcuRange(dataSource, profile).atRest;
   const rule = (patterns: string[]): BoostRule => ({
     name: 'fast-rule',
@@ -175,33 +174,81 @@ describe('cost impacts', () => {
     is_builtin: false,
   });
 
-  it('compares the cost of the data a new rule takes over', () => {
-    const impact = estimateRuleImpact({
+  it("estimates a new rule's own cost, with nothing to compare", () => {
+    const cost = estimateRuleCost({
       dataSources,
       rules: defaultRules,
       profiles,
       nextRule: rule(['products']),
     });
 
-    expect(impact.dataSourceCount).toBe(1);
-    expect(impact.sizeInBytes).toBe(10e9);
-    expect(impact.current.atRest).toBeCloseTo(cost(products, performant));
-    expect(impact.next.atRest).toBeCloseTo(cost(products, fast));
+    expect(cost.dataSourceCount).toBe(1);
+    expect(cost.sizeInBytes).toBe(10e9);
+    expect(cost.next.atRest).toBeCloseTo(atRest(products, fast));
+    expect(cost.current).toEqual({ atRest: 0, atPeak: 0 });
+    expect(cost.hasCurrentData).toBe(false);
   });
 
-  it('counts data an edited rule gives up, which falls back to another rule', () => {
-    const currentRule = rule(['products', 'users']);
-    const impact = estimateRuleImpact({
+  it('compares an edited rule with what it costs today', () => {
+    const savedRule = rule(['products', 'users']);
+    const cost = estimateRuleCost({
       dataSources,
-      rules: [...defaultRules, currentRule],
+      rules: [...defaultRules, savedRule],
       profiles,
       nextRule: rule(['products']),
+      replacedRuleName: savedRule.name,
       // A copy, as the rules table passes it.
-      currentRule: { ...currentRule },
+      comparedRule: { ...savedRule },
     });
 
-    expect(impact.dataSourceCount).toBe(2);
-    expect(impact.next.atRest).toBeCloseTo(cost(products, fast) + cost(users, performant));
+    expect(cost.dataSourceCount).toBe(1);
+    expect(cost.next.atRest).toBeCloseTo(atRest(products, fast));
+    expect(cost.current.atRest).toBeCloseTo(atRest(products, fast) + atRest(users, fast));
+    expect(cost.hasCurrentData).toBe(true);
+  });
+
+  it('costs nothing for an edited rule that no longer applies to anything', () => {
+    const savedRule = rule(['products']);
+    const cost = estimateRuleCost({
+      dataSources,
+      rules: [...defaultRules, savedRule],
+      profiles,
+      nextRule: rule(['nothing-*']),
+      replacedRuleName: savedRule.name,
+      comparedRule: savedRule,
+    });
+
+    expect(cost.dataSourceCount).toBe(0);
+    expect(cost.next).toEqual({ atRest: 0, atPeak: 0 });
+    expect(cost.current.atRest).toBeCloseTo(atRest(products, fast));
+    expect(cost.hasCurrentData).toBe(true);
+  });
+
+  it('only counts what a rule applies to after higher-ranked rules', () => {
+    const higher = { ...rule(['products']), name: 'higher', priority: 5 };
+    const cost = estimateRuleCost({
+      dataSources,
+      rules: [...defaultRules, higher],
+      profiles,
+      nextRule: rule(['products', 'users']),
+    });
+
+    expect(cost.dataSourceCount).toBe(1);
+    expect(cost.next.atRest).toBeCloseTo(atRest(users, fast));
+  });
+
+  it("compares a copy with the original's cost, keeping the original", () => {
+    const original = rule(['products']);
+    const cost = estimateRuleCost({
+      dataSources,
+      rules: [...defaultRules, original],
+      profiles,
+      nextRule: { ...rule(['users']), name: 'fast-rule-copy' },
+      comparedRule: original,
+    });
+
+    expect(cost.next.atRest).toBeCloseTo(atRest(users, fast));
+    expect(cost.current.atRest).toBeCloseTo(atRest(products, fast));
   });
 
   it('compares an edited profile across the data its rules apply to', () => {
@@ -214,8 +261,8 @@ describe('cost impacts', () => {
     });
 
     expect(impact.dataSourceCount).toBe(1);
-    expect(impact.current.atRest).toBeCloseTo(cost(products, fast));
-    expect(impact.next.atRest).toBeCloseTo(cost(products, faster));
+    expect(impact.current.atRest).toBeCloseTo(atRest(products, fast));
+    expect(impact.next.atRest).toBeCloseTo(atRest(products, faster));
   });
 
   it('has no impact for a profile that no rule applies', () => {
