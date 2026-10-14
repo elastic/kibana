@@ -565,7 +565,7 @@ export class UiamService implements UiamServicePublic {
     const clientAuthentication = isExternalApiKey ? null : getUiamClientAuthentication(request);
     return {
       ...this.#getClientAuthenticationHeaders(clientAuthentication),
-      Authorization: `${scheme} ${getUiamCredentialsFromRequest(request)}`,
+      Authorization: authorization.toString(),
     };
   }
 
