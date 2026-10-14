@@ -7,14 +7,12 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
+import { documentSupportedTypesPath } from '@kbn/agent-builder-plugin/common/constants';
 import type {
   DocumentConverter,
   DocumentConverters,
 } from '../attachment_types/document/converters';
-import {
-  documentSupportedTypesPath,
-  registerDocumentSupportedTypesRoute,
-} from './document_supported_types';
+import { registerDocumentSupportedTypesRoute } from './document_supported_types';
 
 describe('registerDocumentSupportedTypesRoute', () => {
   const createConverter = (available: boolean): DocumentConverter => ({

@@ -7,6 +7,7 @@
 
 export const publicApiPath = `/api/agent_builder`;
 export const internalApiPath = `/internal/agent_builder`;
+export const documentSupportedTypesPath = `${internalApiPath}/attachments/document/_supported_types`;
 
 export const chatApiPath = `/api/chat`;
 

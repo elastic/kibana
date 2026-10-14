@@ -7,11 +7,9 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
-import { internalApiPath } from '@kbn/agent-builder-plugin/common/constants';
+import { documentSupportedTypesPath } from '@kbn/agent-builder-plugin/common/constants';
 import type { DocumentConverters } from '../attachment_types/document/converters';
 import { getAvailableDocumentMimeTypes } from '../attachment_types/document/converters';
-
-export const documentSupportedTypesPath = `${internalApiPath}/attachments/document/_supported_types`;
 
 export const registerDocumentSupportedTypesRoute = ({
   router,
