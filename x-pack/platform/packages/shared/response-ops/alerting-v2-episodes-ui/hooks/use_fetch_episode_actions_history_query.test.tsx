@@ -23,7 +23,7 @@ const ACTIONS_COLUMNS = [
   { name: 'action_type', type: 'keyword' },
   { name: 'actor.type', type: 'keyword' },
   { name: 'actor.profile_uid', type: 'keyword' },
-  { name: 'episode_id', type: 'keyword' },
+  { name: 'alert_id', type: 'keyword' },
   { name: 'group_hash', type: 'keyword' },
   { name: 'tags', type: 'keyword' },
   { name: 'assignee_uid', type: 'keyword' },

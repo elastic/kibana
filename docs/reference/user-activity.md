@@ -104,6 +104,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | --- | --- |
 | `@timestamp` | The timestamp of the event. |
 | `message` | Human readable description of the action performed. |
+| `log.type` | Set to `user_activity`. Only present when events are shipped through an `otel` appender. |
 
 ### Event fields
 
@@ -188,7 +189,24 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 | **Field**            | **Description**                                |
 |----------------------|------------------------------------------------|
 | `service.id`         | The cluster ID.                                |
+| `service.name`       | Identifies the deployment type: `serverless-kibana` on {{serverless-full}}, `hosted-kibana` on {{ech}}, and `self-managed-kibana` for self-managed deployments. Only present in the OpenTelemetry output. |
 | `service.node.roles` | Roles of Kibana: `["ui", "background_tasks"]`. |
 | `service.state`      | The status of Kibana.                          |
 | `service.type`       | `kibana`.                                      |
 | `service.version`    | Version of Kibana that emitted the event.      |
+
+When events are shipped through an `otel` appender, only `service.name` and `service.type` are emitted, and they are carried on the OTel resource rather than on each record. To override the detected `service.name`, use the appender `attributes` setting, values set there take precedence:
+
+```yaml
+user_activity:
+  appenders:
+    otlp:
+      type: otel
+      url: https://collector:4318/v1/logs
+      attributes:
+        '[service.name]': hosted-kibana
+```
+
+:::::{note}
+When user activity events are indexed into {{es}} through an OpenTelemetry ingest pipeline, per-record fields are stored under `attributes.*` (for example, `attributes.event.action`). Elastic's OpenTelemetry mappings are pass-through, so the fields remain queryable by the names documented on this page. On {{serverless-full}}, each record also carries a `project.id` attribute identifying the project that emitted it.
+:::::

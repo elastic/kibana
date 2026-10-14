@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-const candidateBehaviorSchema = z.object({
-  technique_id: z
-    .string()
-    .describe(
-      'Canonical ATT&CK ID (e.g. "T1566.001", "T1059.003"). Use sub-technique IDs ' +
-        'when the text describes a specific variant.'
-    ),
-  evidence_quote: z
-    .string()
-    .describe('Verbatim 1-3 sentence quote from the text that justifies the mapping.'),
-  llm_confidence: z.number().min(0).max(1).describe('0.0-1.0 confidence in this mapping.'),
-});
+const candidateBehaviorSchema = lazySchema(() =>
+  z.object({
+    technique_id: z
+      .string()
+      .describe(
+        'Canonical ATT&CK ID (e.g. "T1566.001", "T1059.003"). Use sub-technique IDs ' +
+          'when the text describes a specific variant.'
+      ),
+    evidence_quote: z
+      .string()
+      .describe('Verbatim 1-3 sentence quote from the text that justifies the mapping.'),
+    llm_confidence: z.number().min(0).max(1).describe('0.0-1.0 confidence in this mapping.'),
+  })
+);
 
-export const huntBehaviorLlmExtractionSchema = z.object({
-  candidates: z.array(candidateBehaviorSchema).default([]),
-});
+export const huntBehaviorLlmExtractionSchema = lazySchema(() =>
+  z.object({
+    candidates: z.array(candidateBehaviorSchema).default([]),
+  })
+);
 
 export const EXTRACTION_PROMPT = `You are a threat intelligence analyst. Extract MITRE ATT&CK technique
 IDs that are *actively described* in the provided report text. Do NOT include techniques merely

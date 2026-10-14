@@ -7,15 +7,13 @@
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  AlertEpisode,
-  EpisodeSuppressionRow,
+  Alert,
+  AlertSuppressionRow,
   LastNotifiedRecord,
   SeriesSuppressionRow,
 } from '../types';
 
-export const createDispatchableAlertEventsResponse = (
-  alertEpisodes: AlertEpisode[]
-): EsqlQueryResponse => {
+export const createDispatchableAlertEventsResponse = (alerts: Alert[]): EsqlQueryResponse => {
   return {
     columns: [
       { name: 'last_event_timestamp', type: 'date' },
@@ -23,31 +21,31 @@ export const createDispatchableAlertEventsResponse = (
       { name: 'source', type: 'keyword' },
       { name: 'space_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
-      { name: 'episode_id', type: 'keyword' },
-      { name: 'episode_status', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
+      { name: 'alert_status', type: 'keyword' },
       { name: 'severity', type: 'keyword' },
     ],
-    values: alertEpisodes.map((alertEpisode) => [
-      alertEpisode.last_event_timestamp,
-      alertEpisode.rule_id,
-      alertEpisode.source,
-      alertEpisode.space_id,
-      alertEpisode.group_hash,
-      alertEpisode.episode_id,
-      alertEpisode.episode_status,
-      alertEpisode.severity ?? null,
+    values: alerts.map((alert) => [
+      alert.last_event_timestamp,
+      alert.rule_id,
+      alert.source,
+      alert.space_id,
+      alert.group_hash,
+      alert.alert_id,
+      alert.alert_status,
+      alert.severity ?? null,
     ]),
   };
 };
 
-export const createEpisodeSuppressionsResponse = (
-  suppressions: EpisodeSuppressionRow[] = []
+export const createAlertSuppressionsResponse = (
+  suppressions: AlertSuppressionRow[] = []
 ): EsqlQueryResponse => {
   return {
     columns: [
       { name: 'rule_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
-      { name: 'episode_id', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
       { name: 'should_suppress', type: 'boolean' },
       { name: 'last_ack_action', type: 'keyword' },
       { name: 'last_deactivate_action', type: 'keyword' },
@@ -57,7 +55,7 @@ export const createEpisodeSuppressionsResponse = (
     values: suppressions.map((suppression) => [
       suppression.rule_id,
       suppression.group_hash,
-      suppression.episode_id,
+      suppression.alert_id,
       suppression.should_suppress,
       suppression.last_ack_action ?? null,
       suppression.last_deactivate_action ?? null,
@@ -90,18 +88,18 @@ export const createSeriesSuppressionsResponse = (
   };
 };
 
-export interface EpisodeDataRow {
-  episode_id: string;
+export interface AlertDataRow {
+  alert_id: string;
   data_json: string | null;
 }
 
-export const createEpisodeDataResponse = (rows: EpisodeDataRow[]): EsqlQueryResponse => {
+export const createAlertDataResponse = (rows: AlertDataRow[]): EsqlQueryResponse => {
   return {
     columns: [
-      { name: 'episode_id', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
       { name: 'data_json', type: 'keyword' },
     ],
-    values: rows.map((row) => [row.episode_id, row.data_json]),
+    values: rows.map((row) => [row.alert_id, row.data_json]),
   };
 };
 
@@ -112,7 +110,8 @@ export const createLastNotifiedTimestampsResponse = (
     columns: [
       { name: 'action_group_id', type: 'keyword' },
       { name: 'last_notified', type: 'date' },
+      { name: 'alert_status', type: 'keyword' },
     ],
-    values: records.map((r) => [r.action_group_id, r.last_notified]),
+    values: records.map((r) => [r.action_group_id, r.last_notified, r.alert_status ?? null]),
   };
 };

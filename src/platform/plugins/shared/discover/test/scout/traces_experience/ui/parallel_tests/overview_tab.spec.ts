@@ -9,7 +9,6 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { PageObjects } from '@kbn/scout';
 import {
   spaceTest,
   TRACES,
@@ -18,8 +17,9 @@ import {
   setupTracesExperience,
   teardownTracesExperience,
 } from '../fixtures';
+import type { DiscoverPageObjects } from '../fixtures';
 
-type DiscoverPage = PageObjects['discover'];
+type DiscoverPage = DiscoverPageObjects['discover'];
 
 const queryModes = [
   {

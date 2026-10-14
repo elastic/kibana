@@ -143,7 +143,12 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-123', username: 'testuser', isAdmin: false });
+    expect(result).toEqual({
+      id: 'profile-123',
+      username: 'testuser',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
@@ -163,6 +168,7 @@ describe('getUserFromRequest', () => {
       id: 'realm:["file","file1","shareduser"]',
       username: 'shareduser',
       isAdmin: false,
+      type: 'user',
     });
   });
 
@@ -189,6 +195,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-from-api-key',
       username: 'shareduser',
       isAdmin: false,
+      type: 'user',
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
       with_profile_uid: true,
@@ -220,6 +227,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'shareduser',
       isAdmin: false,
+      type: 'user',
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
       with_profile_uid: true,
@@ -256,6 +264,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'shareduser',
       isAdmin: false,
+      type: 'user',
     });
   });
 
@@ -290,6 +299,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'shareduser',
       isAdmin: false,
+      type: 'user',
     });
   });
 
@@ -335,6 +345,7 @@ describe('getUserFromRequest', () => {
       id: 'profile-123',
       username: 'shareduser',
       isAdmin: false,
+      type: 'user',
     });
     expect(esClient.security.getApiKey).not.toHaveBeenCalled();
   });
@@ -357,6 +368,7 @@ describe('getUserFromRequest', () => {
       id: undefined,
       username: 'api-key-user',
       isAdmin: false,
+      type: 'user',
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
@@ -372,7 +384,12 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-123', username: 'originating-user', isAdmin: false });
+    expect(result).toEqual({
+      id: 'profile-123',
+      username: 'originating-user',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
@@ -387,9 +404,92 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ username: 'task-manager-user', isAdmin: false });
+    expect(result).toEqual({
+      id: undefined,
+      username: 'task-manager-user',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
+  });
+
+  it('types an inbound Elasticsearch service account token as a service account', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({ username: 'kibana/automation' } as any);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'kibana/automation',
+      variant: 'stack',
+    });
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'service_account:kibana/automation',
+      username: 'kibana/automation',
+      isAdmin: false,
+      type: 'service_account',
+    });
+    expect(esClient.security.authenticate).not.toHaveBeenCalled();
+  });
+
+  it('types a UIAM service account the same way', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({ username: 'sa-7f3c' } as any);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'sa-7f3c',
+      variant: 'uiam',
+    });
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toMatchObject({ id: 'service_account:sa-7f3c', type: 'service_account' });
+  });
+
+  it('identifies a fake request Kibana minted for a service account', async () => {
+    const request = httpServerMock.createFakeKibanaRequest({});
+
+    security.authc.getCurrentUser.mockReturnValue(null);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'kibana/automation',
+      variant: 'stack',
+    });
+    esClient.security.authenticate.mockResolvedValue({ username: 'kibana/automation' } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result).toEqual({
+      id: 'service_account:kibana/automation',
+      username: 'kibana/automation',
+      isAdmin: false,
+      type: 'service_account',
+    });
+  });
+
+  it('does not treat an API key as a service account', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'kibana/automation',
+      authentication_type: 'api_key',
+      authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+    } as any);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'api_key',
+      apiKeyId: 'k1',
+      variant: 'stack',
+    });
+    esClient.security.getApiKey.mockResolvedValue({ api_keys: [{}] } as any);
+
+    const result = await getUserFromRequest({ request, security, esClient });
+
+    expect(result.type).toBe('user');
+    expect(result.id).toBeUndefined();
   });
 
   it('includes the id from getCurrentUser when falling back to ES authenticate for the username', async () => {
@@ -403,7 +503,12 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-456', username: 'some-user', isAdmin: false });
+    expect(result).toEqual({
+      id: 'profile-456',
+      username: 'some-user',
+      isAdmin: false,
+      type: 'user',
+    });
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 });

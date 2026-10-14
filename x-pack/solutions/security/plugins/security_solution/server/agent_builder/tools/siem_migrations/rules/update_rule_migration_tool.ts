@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -21,14 +21,16 @@ import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
-  migration_id: MigrationId,
-  name: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe('The new name for the rule migration. 1–256 characters.'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    migration_id: MigrationId,
+    name: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('The new name for the rule migration. 1–256 characters.'),
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_PATH.replace('{migration_id}', encodeURIComponent(migrationId));

@@ -17,6 +17,7 @@ import {
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
+import { autoApprovedApisSchema } from './approvals_schema';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
@@ -107,6 +108,25 @@ const SUBAGENT_IDS_SCHEMA = schema.arrayOf(
       availability: { stability: 'stable', since: '9.6.0' },
       description:
         "Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+    },
+  }
+);
+
+const APPROVALS_SCHEMA = schema.object(
+  {
+    auto_approved_apis: schema.maybe(
+      autoApprovedApisSchema({
+        scope: 'every run of this agent',
+        description:
+          'Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.',
+        knownApisOnly: false,
+      })
+    ),
+  },
+  {
+    meta: {
+      availability: { stability: 'stable', since: '9.6.0' },
+      description: 'Auto-approval defaults applied to every run of this agent.',
     },
   }
 );
@@ -418,6 +438,7 @@ export function registerAgentRoutes({
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                   subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
+                  approvals: schema.maybe(APPROVALS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -569,6 +590,7 @@ export function registerAgentRoutes({
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                     ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                     subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
+                    approvals: schema.maybe(APPROVALS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
