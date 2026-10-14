@@ -27,7 +27,6 @@ export interface SignificantEventsMaintenanceDeletedCounts {
   knowledgeIndicators: number;
   storedQueries: number;
   rules: number;
-  investigations: number;
   dataStreams: number;
 }
 
