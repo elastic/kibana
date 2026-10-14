@@ -542,7 +542,7 @@ export class AttackCasesPage {
     await this.attackGridMoreActionsPopover.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 
-  /** Opens the bulk action bar's "Take action" popover, for the whole selection. */
+  /** Opens the bulk action bar's selection popover, for the whole selection. */
   async openBulkTakeActionMenu() {
     await this.attackGridBulkTakeActionButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.attackGridBulkTakeActionButton.click();
