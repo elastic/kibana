@@ -12,6 +12,7 @@ import type { OpenContentEditorParams } from '@kbn/content-management-content-ed
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { useContentEditorOpen } from './use_content_editor_open';
 import type { ContentEditorConfig } from './types';
+import { MANAGED_READONLY_REASON } from './use_content_editor_open';
 
 const mockOpenContentEditor = jest.fn((_params: OpenContentEditorParams): (() => void) =>
   jest.fn()
@@ -198,5 +199,73 @@ describe('useContentEditorOpen', () => {
     const callArgs = mockOpenContentEditor.mock.calls[0][0];
     expect(callArgs.isReadonly).toBe(true);
     expect(callArgs.onSave).toBeUndefined();
+  });
+
+  it('uses the edit restriction reason for a restricted item', () => {
+    const restrictionReason = 'You cannot edit this dashboard.';
+    const editRestriction = jest.fn(() => restrictionReason);
+    const { result } = renderHook(() =>
+      useContentEditorOpen({
+        ...defaultOptions,
+        contentEditor: defaultConfig,
+        editRestriction,
+      })
+    );
+
+    act(() => {
+      result.current!(testItem);
+    });
+
+    expect(editRestriction).toHaveBeenCalledWith(testItem);
+    const callArgs = mockOpenContentEditor.mock.calls[0][0];
+    expect(callArgs.isReadonly).toBe(true);
+    expect(callArgs.readonlyReason).toBe(restrictionReason);
+    expect(callArgs.onSave).toBeUndefined();
+  });
+
+  it('prefers the list-wide reason when the whole list is read-only', () => {
+    const listReadonlyReason = 'You do not have permission to edit dashboards.';
+    const editRestriction = jest.fn(() => 'You cannot edit this dashboard.');
+    const { result } = renderHook(() =>
+      useContentEditorOpen({
+        ...defaultOptions,
+        contentEditor: {
+          ...defaultConfig,
+          isReadonly: true,
+          readonlyReason: listReadonlyReason,
+        },
+        editRestriction,
+      })
+    );
+
+    act(() => {
+      result.current!({ ...testItem, managed: true });
+    });
+
+    const callArgs = mockOpenContentEditor.mock.calls[0][0];
+    expect(callArgs.isReadonly).toBe(true);
+    expect(callArgs.readonlyReason).toBe(listReadonlyReason);
+    expect(callArgs.onSave).toBeUndefined();
+  });
+
+  it('falls back to the managed item reason when the list is read-only without a list-wide reason', () => {
+    const { result } = renderHook(() =>
+      useContentEditorOpen({
+        ...defaultOptions,
+        contentEditor: {
+          ...defaultConfig,
+          isReadonly: true,
+          // readonlyReason intentionally omitted — the managed reason must survive.
+        },
+      })
+    );
+
+    act(() => {
+      result.current!({ ...testItem, managed: true });
+    });
+
+    const callArgs = mockOpenContentEditor.mock.calls[0][0];
+    expect(callArgs.isReadonly).toBe(true);
+    expect(callArgs.readonlyReason).toBe(MANAGED_READONLY_REASON);
   });
 });
