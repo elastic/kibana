@@ -89,6 +89,19 @@ describe('toStableUserId', () => {
     expect(resolveApiKeyProfileUid).toHaveBeenCalledTimes(1);
   });
 
+  it('treats a fake request as API key auth even when its identity hides the type', async () => {
+    const resolveApiKeyProfileUid = jest.fn().mockResolvedValue('profile-from-api-key');
+
+    await expect(
+      toStableUserId({
+        authUser: { username: 'scheduling-user' },
+        request: httpServerMock.createFakeKibanaRequest({}),
+        resolveApiKeyProfileUid,
+      })
+    ).resolves.toBe('profile-from-api-key');
+    expect(resolveApiKeyProfileUid).toHaveBeenCalledTimes(1);
+  });
+
   it('does not use the _es_api_key realm when no profile uid is available', async () => {
     const resolveApiKeyProfileUid = jest.fn().mockResolvedValue(undefined);
 
@@ -390,6 +403,48 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({ username: 'task-manager-user', isAdmin: false });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
+  });
+
+  describe('fake requests enriched with a username but no profile uid', () => {
+    const apiKeyId = 'task-api-key-id';
+
+    const createTaskRequest = () =>
+      httpServerMock.createFakeKibanaRequest({
+        headers: {
+          authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+        },
+      });
+
+    beforeEach(() => {
+      security.authc.getCurrentUser.mockReturnValue({ username: 'scheduling-user' } as any);
+    });
+
+    it('resolves the API key owner profile uid', async () => {
+      esClient.security.getApiKey.mockResolvedValue({
+        api_keys: [{ id: apiKeyId, profile_uid: 'key-owner-profile' }],
+      } as any);
+
+      const result = await getUserFromRequest({ request: createTaskRequest(), security, esClient });
+
+      expect(result).toEqual({
+        id: 'key-owner-profile',
+        username: 'scheduling-user',
+        isAdmin: false,
+      });
+      expect(esClient.security.getApiKey).toHaveBeenCalledWith({
+        with_profile_uid: true,
+        id: apiKeyId,
+      });
+      expect(esClient.security.authenticate).not.toHaveBeenCalled();
+    });
+
+    it('leaves the id undefined when the API key owner has no profile', async () => {
+      esClient.security.getApiKey.mockResolvedValue({ api_keys: [{ id: apiKeyId }] } as any);
+
+      const result = await getUserFromRequest({ request: createTaskRequest(), security, esClient });
+
+      expect(result).toEqual({ id: undefined, username: 'scheduling-user', isAdmin: false });
+    });
   });
 
   describe('un-enriched fake requests authenticated with an API key', () => {

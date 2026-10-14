@@ -37,22 +37,27 @@ interface StableUserIdAuthUser {
  */
 export const toStableUserId = async ({
   authUser,
+  request,
   resolveApiKeyProfileUid,
 }: {
   authUser: StableUserIdAuthUser;
+  request?: KibanaRequest;
   resolveApiKeyProfileUid?: () => Promise<string | undefined>;
 }): Promise<string | undefined> => {
-  const isApiKey = authUser.authentication_type === 'api_key';
+  const isApiKey = request?.isFakeRequest || authUser.authentication_type === 'api_key';
   let profileUid = authUser.profile_uid;
 
+  // API key auth, including fake requests whose identity hides it: use the key owner's profile uid.
   if (isApiKey && profileUid === undefined && resolveApiKeyProfileUid) {
     profileUid = await resolveApiKeyProfileUid();
   }
 
+  // A profile uid is always the preferred identity.
   if (profileUid) {
     return profileUid;
   }
 
+  // An API key whose owner has no profile has no stable identity: fail closed.
   if (isApiKey) {
     return undefined;
   }
@@ -60,6 +65,8 @@ export const toStableUserId = async ({
   const realmType = authUser.authentication_realm?.type;
   const realmName = authUser.authentication_realm?.name;
   const { username } = authUser;
+
+  // Without a full realm identity there is nothing stable to build an id from.
   if (!realmType || !realmName || !username) {
     return undefined;
   }
@@ -114,7 +121,9 @@ const resolveApiKeyOwnerProfileUid = async ({
  * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns the
  * originating user's identity when the request was enriched at schedule time (profile_uid and
  * username persisted on the task's userScope). This is required for Cross-Project Search, where
- * the API key owner's username does not match the originating user.
+ * the API key owner's username does not match the originating user. A fake request authenticates
+ * with an API key, so when no profile_uid was attached the id is the key owner's profile uid: the
+ * identity Elasticsearch authorizes the run as.
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
  * back to the ES `_security/_authenticate` API for the username. When it authenticated an API key,
@@ -131,13 +140,12 @@ export const getUserFromRequest = async ({
 }): Promise<CurrentUser> => {
   const authUser = security.authc.getCurrentUser(request);
   const isAdmin = await isAdminFromRequest({ esClient });
+  const resolveApiKeyProfileUid = () => resolveApiKeyOwnerProfileUid({ request, esClient });
 
+  // Real requests, and fake requests enriched with the scheduling user's identity.
   if (authUser?.username) {
     return {
-      id: await toStableUserId({
-        authUser,
-        resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
-      }),
+      id: await toStableUserId({ authUser, request, resolveApiKeyProfileUid }),
       username: authUser.username,
       isAdmin,
     };
@@ -146,12 +154,17 @@ export const getUserFromRequest = async ({
   const { username, authentication_type: authenticationType } =
     await esClient.security.authenticate();
 
-  if (authUser?.profile_uid || authenticationType !== 'api_key') {
-    return { id: authUser?.profile_uid, username, isAdmin };
-  }
-
+  // Un-enriched fake requests: Elasticsearch reports who the request authenticated as.
   return {
-    id: await resolveApiKeyOwnerProfileUid({ request, esClient }),
+    id: await toStableUserId({
+      authUser: {
+        username,
+        profile_uid: authUser?.profile_uid,
+        authentication_type: authenticationType,
+      },
+      request,
+      resolveApiKeyProfileUid,
+    }),
     username,
     isAdmin,
   };
