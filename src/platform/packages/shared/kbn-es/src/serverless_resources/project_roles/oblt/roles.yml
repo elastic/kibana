@@ -125,7 +125,7 @@ admin:
       privileges: ['*']
       resources: ['*']
 
-# Predefined role for the Nightshift agent's service account (elasticsearch-controller#2143)
+# Predefined role for the Nightshift agent's service account, defined in elasticsearch-controller
 _nightshift_agent:
   description: 'Privileges for the service account of the Nightshift agent. Assigned by Kibana; do not assign to users.'
   metadata:
