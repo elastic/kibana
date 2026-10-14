@@ -48,6 +48,7 @@ import { appContextService } from '../app_context';
 import { checkOtlpOutputAllowed } from '../outputs/helpers';
 import { checkKafkaAuthMethodAllowed } from '../outputs/kafka_auth_gate';
 import { KAFKA_AUTH_METHODS, usesKafkaAuth } from '../outputs/kafka_auth';
+import type { KafkaAuthMethod } from '../outputs/kafka_auth';
 import { getKafkaSecretLeaves } from '../secrets/outputs';
 import {
   isAgentlessEnabled,
@@ -232,15 +233,21 @@ export async function createOrUpdatePreconfiguredOutputs(
     ? await checkOtlpOutputAllowed(esClient, soClient)
     : { result: true as const };
 
-  // Same for the Kafka outputs using an authentication method that has to be allowed.
-  const kafkaAuthMethodChecks = await Promise.all(
-    KAFKA_AUTH_METHODS.map(async (method) => ({
-      method,
-      check: outputs.some((output) => usesKafkaAuth(method, output))
-        ? await checkKafkaAuthMethodAllowed(method, esClient, soClient)
-        : { result: true as const, error: undefined },
-    }))
-  );
+  // Same for the Kafka outputs using an authentication method that has to be allowed. The result
+  // can depend on the output (e.g. a Kerberos password needs the secrets storage), so each distinct
+  // check is made once, when the first output needs it.
+  const kafkaAuthChecks = new Map<string, ReturnType<typeof checkKafkaAuthMethodAllowed>>();
+  const checkKafkaAuthMethod = (method: KafkaAuthMethod, output: PreconfiguredOutput) => {
+    const key =
+      method === 'kerberos' ? `${method}:${(output as KafkaOutput).kerberos?.auth_type}` : method;
+    if (!kafkaAuthChecks.has(key)) {
+      kafkaAuthChecks.set(
+        key,
+        checkKafkaAuthMethodAllowed(method, esClient, soClient, output as KafkaOutput)
+      );
+    }
+    return kafkaAuthChecks.get(key)!;
+  };
 
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
     if (isOtlpOutput(output) && !otlpCheck.result) {
@@ -248,12 +255,13 @@ export async function createOrUpdatePreconfiguredOutputs(
       return;
     }
 
-    const notAllowed = kafkaAuthMethodChecks.find(
-      ({ method, check }) => !check.result && usesKafkaAuth(method, output)
-    );
-    if (notAllowed) {
-      logger.warn(`Skipping preconfigured Kafka output ${output.id}: ${notAllowed.check.error}`);
-      return;
+    for (const method of KAFKA_AUTH_METHODS) {
+      if (!usesKafkaAuth(method, output)) continue;
+      const { result, error } = await checkKafkaAuthMethod(method, output);
+      if (!result) {
+        logger.warn(`Skipping preconfigured Kafka output ${output.id}: ${error}`);
+        return;
+      }
     }
 
     const existingOutput = existingOutputs.find((o) => o.id === output.id);

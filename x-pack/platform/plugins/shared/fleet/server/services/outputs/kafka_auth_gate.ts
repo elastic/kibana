@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { checkKafkaKerberosAllowed, checkKafkaOAuth2Allowed } from './helpers';
-import type { KafkaAuthMethod } from './kafka_auth';
+import type { KafkaAuthMethod, KafkaAuthOutput } from './kafka_auth';
 
 /**
  * Checks whether an authentication method of the Kafka output is permitted in this deployment.
@@ -17,8 +17,13 @@ import type { KafkaAuthMethod } from './kafka_auth';
 export const checkKafkaAuthMethodAllowed = (
   method: KafkaAuthMethod,
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  output: KafkaAuthOutput
 ): Promise<{ result: boolean; error?: string }> =>
   method === 'kerberos'
-    ? checkKafkaKerberosAllowed(esClient, soClient)
+    ? checkKafkaKerberosAllowed(
+        esClient,
+        soClient,
+        output as { kerberos?: { auth_type?: string } | null }
+      )
     : checkKafkaOAuth2Allowed(esClient, soClient);

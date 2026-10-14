@@ -196,7 +196,7 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
         input={inputs.kafkaKerberosServiceNameInput}
         testSubj="kafkaKerberosServiceNameInput"
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiSwitch
         compressed
         label={i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaKerberosFastLabel', {

@@ -1593,7 +1593,11 @@ describe('Outputs preconfiguration', () => {
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         await createOrUpdatePreconfiguredOutputs(soClient, esClient, [kerberosOutput()]);
 
-        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(esClient, soClient);
+        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(
+          esClient,
+          soClient,
+          expect.objectContaining({ kerberos: expect.any(Object) })
+        );
         expect(mockedOutputService.create).toHaveBeenCalledWith(
           soClient,
           esClient,

@@ -541,7 +541,12 @@ class OutputService {
       ) {
         continue;
       }
-      const { result, error } = await checkKafkaAuthMethodAllowed(method, esClient, soClient);
+      const { result, error } = await checkKafkaAuthMethodAllowed(
+        method,
+        esClient,
+        soClient,
+        output
+      );
       if (!result) {
         throw new OutputInvalidError(error!);
       }

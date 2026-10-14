@@ -24,17 +24,19 @@ describe('checkKafkaAuthMethodAllowed', () => {
   });
 
   it('checks OAuth2 with the OAuth2 requirements', async () => {
-    expect(await checkKafkaAuthMethodAllowed('oauth2', esClientMock, soClientMock)).toEqual({
+    expect(await checkKafkaAuthMethodAllowed('oauth2', esClientMock, soClientMock, {})).toEqual({
       result: true,
     });
     expect(checkKafkaOAuth2Allowed).toHaveBeenCalledWith(esClientMock, soClientMock);
   });
 
   it('checks Kerberos with the Kerberos requirements', async () => {
-    expect(await checkKafkaAuthMethodAllowed('kerberos', esClientMock, soClientMock)).toEqual({
-      result: false,
-      error: 'Kerberos is not allowed',
-    });
-    expect(checkKafkaKerberosAllowed).toHaveBeenCalledWith(esClientMock, soClientMock);
+    const output = { kerberos: { auth_type: 'password' } };
+
+    expect(
+      await checkKafkaAuthMethodAllowed('kerberos', esClientMock, soClientMock, output)
+    ).toEqual({ result: false, error: 'Kerberos is not allowed' });
+    // the result can depend on the output, e.g. on the authentication of Kerberos
+    expect(checkKafkaKerberosAllowed).toHaveBeenCalledWith(esClientMock, soClientMock, output);
   });
 });

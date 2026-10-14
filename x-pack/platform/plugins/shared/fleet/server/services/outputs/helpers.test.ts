@@ -134,16 +134,49 @@ describe('checkKafkaKerberosAllowed', () => {
     expect(mockedIsOutputSecretStorageEnabled).not.toHaveBeenCalled();
   });
 
-  it('returns { result: false, error } when the output secrets storage is not available', async () => {
-    mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+  describe('password authentication', () => {
+    const output = { kerberos: { auth_type: 'password' } };
 
-    const result = await checkKafkaKerberosAllowed(esClientMock, soClientMock);
+    it('returns { result: false, error } when the output secrets storage is not available', async () => {
+      mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
 
-    expect(result.result).toBe(false);
-    expect(result.error).toContain('requires output secrets storage');
+      const result = await checkKafkaKerberosAllowed(esClientMock, soClientMock, output);
+
+      expect(result.result).toBe(false);
+      expect(result.error).toContain('requires output secrets storage');
+    });
+
+    it('returns { result: true } when the secrets storage is available', async () => {
+      expect(await checkKafkaKerberosAllowed(esClientMock, soClientMock, output)).toEqual({
+        result: true,
+      });
+    });
   });
 
-  it('returns { result: true } when the flag is on and the secrets storage is available', async () => {
+  describe('keytab authentication', () => {
+    const output = { kerberos: { auth_type: 'keytab' } };
+
+    it('does not need the output secrets storage, as it has no secret', async () => {
+      mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+      expect(await checkKafkaKerberosAllowed(esClientMock, soClientMock, output)).toEqual({
+        result: true,
+      });
+      expect(mockedIsOutputSecretStorageEnabled).not.toHaveBeenCalled();
+    });
+
+    it('is not allowed when the feature flag is off', async () => {
+      mockedIsKafkaKerberosAuthEnabled.mockResolvedValue(false);
+
+      expect((await checkKafkaKerberosAllowed(esClientMock, soClientMock, output)).result).toBe(
+        false
+      );
+    });
+  });
+
+  it('only checks the feature flag when there are no settings to look at', async () => {
+    mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
     expect(await checkKafkaKerberosAllowed(esClientMock, soClientMock)).toEqual({ result: true });
   });
 });

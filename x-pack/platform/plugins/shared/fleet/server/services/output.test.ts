@@ -1539,7 +1539,11 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
 
-        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(esClientMock, soClient);
+        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(
+          esClientMock,
+          soClient,
+          expect.objectContaining({ kerberos: expect.any(Object) })
+        );
         expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
         const saved = soClient.create.mock.calls[0][1] as Record<string, unknown>;
         expect(saved.auth_type).toEqual('kerberos');
@@ -3151,7 +3155,11 @@ describe('Output Service', () => {
           kerberosUpdate()
         );
 
-        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(esClientMock, soClient);
+        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(
+          esClientMock,
+          soClient,
+          expect.objectContaining({ kerberos: expect.any(Object) })
+        );
         expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
