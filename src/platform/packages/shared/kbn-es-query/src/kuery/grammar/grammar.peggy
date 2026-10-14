@@ -230,8 +230,9 @@ QuotedCharacter
   / '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
+// A value can't start with the NOT operator, so a dangling "not" stays a syntax error.
 UnquotedLiteral
-  = &{ return parseCursor; } prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+  = &{ return parseCursor; } !Not prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -242,13 +243,17 @@ UnquotedLiteral
       text: text().replace(cursor, '')
     };
   }
-  // A value can't start with the NOT operator, so a dangling "not" stays a syntax error.
   / !Not chars:UnquotedCharacter+ {
     const sequence = chars.join('').trim();
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
     if (sequence === 'false') return buildLiteralNode(false);
     if (chars.includes(KQL_WILDCARD_SYMBOL)) return buildWildcardNode(sequence);
+    // A standalone "not" in a plain value is most likely a misplaced NOT operator. Reading it as
+    // text would silently match the opposite of what was intended, so it stays a syntax error.
+    if (/\snot\s/i.test(text())) {
+      error('NOT is only supported at the start of a clause. To search for "not" as text, use quotes or a wildcard value.');
+    }
     return buildLiteralNode(sequence);
   }
 

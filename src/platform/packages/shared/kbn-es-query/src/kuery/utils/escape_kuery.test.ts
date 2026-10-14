@@ -77,9 +77,13 @@ describe('escapeKuery', () => {
     expect(escapeKuery(value)).toBe(expected);
   });
 
-  test('should escape "not" as a unicode sequence so it is not read as a newline escape', () => {
-    expect(escapeKuery('cannot connect')).toBe('can\\u006eot connect');
-    expect(escapeKuery('Not found')).toBe('\\u004eot found');
+  test('should escape a lowercase "not" as a unicode sequence so it is not read as a newline escape', () => {
+    expect(escapeKuery('do not touch')).toBe('do \\u006eot touch');
+    expect(escapeKuery('Not found')).toBe('\\Not found');
+  });
+
+  test('should not escape "not" inside a word', () => {
+    expect(escapeKuery('cannot connect')).toBe('cannot connect');
   });
 
   test.each([
@@ -90,6 +94,7 @@ describe('escapeKuery', () => {
     'NOT ME',
     'knot\ttie',
     'a and not b',
+    'not not b',
     'line\nother',
     'nothing to see',
     '(special) *chars* and not <more>',
