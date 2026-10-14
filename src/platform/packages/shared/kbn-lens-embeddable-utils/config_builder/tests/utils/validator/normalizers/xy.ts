@@ -231,7 +231,9 @@ function alignEsqlAnnotationCompanionDataView(attributes: XYAttributes) {
     index,
     timeFieldName: parseTimeFieldFromESQLQuery(esqlQuery) || LENS_DEFAULT_TIME_FIELD,
   };
-  const annotationDataViewId = `${generateAdHocDataViewId(regularDataView)}${LENS_ESQL_ANNOTATION_DATA_VIEW_ID_SUFFIX}`;
+  const annotationDataViewId = `${generateAdHocDataViewId(
+    regularDataView
+  )}${LENS_ESQL_ANNOTATION_DATA_VIEW_ID_SUFFIX}`;
   attributes.state.adHocDataViews = {
     ...adHocDataViews,
     [annotationDataViewId]: {

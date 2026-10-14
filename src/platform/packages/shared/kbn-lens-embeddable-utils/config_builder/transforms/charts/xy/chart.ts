@@ -14,12 +14,7 @@ import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../s
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import {
-  getIdForLayer,
-  isAPIDataLayer,
-  isAPIesqlXYLayer,
-  isLensStateDataLayer,
-} from './helpers';
+import { getIdForLayer, isAPIDataLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
