@@ -31,6 +31,12 @@ export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LAT
 export const getAlertsIndex = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
 export const getRiskScoreIndex = (namespace: string) => getRiskScoreTimeSeriesIndex(namespace);
 
+/**
+ * Alert and anomaly indices don't map every EUID source field (for example `user.entity.id`);
+ * with this setting an unmapped field reads as null instead of failing the query.
+ */
+export const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
+
 // ── ML anomalies ─────────────────────────────────────────────────────────────
 // One definition of an entity anomaly, shared by the anomalies tile and column.
 
