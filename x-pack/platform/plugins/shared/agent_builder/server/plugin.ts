@@ -347,8 +347,16 @@ export class AgentBuilderPlugin
       licensing,
       security: securityPlugin,
     } = startDeps;
-    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
-      coreStart;
+    const {
+      elasticsearch,
+      http,
+      security,
+      userProfile,
+      uiSettings,
+      savedObjects,
+      dataStreams,
+      featureFlags,
+    } = coreStart;
 
     this.cleanupLegacySmlTasks(taskManager).catch((error) => {
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
@@ -361,6 +369,7 @@ export class AgentBuilderPlugin
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      userProfile,
       securityPlugin,
       elasticsearch,
       http,

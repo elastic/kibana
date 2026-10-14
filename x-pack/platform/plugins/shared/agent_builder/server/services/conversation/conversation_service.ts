@@ -10,6 +10,7 @@ import type {
   Logger,
   SecurityServiceStart,
   ElasticsearchServiceStart,
+  UserProfileServiceStart,
 } from '@kbn/core/server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -33,6 +34,7 @@ export interface ConversationService {
 interface ConversationServiceDeps {
   logger: Logger;
   security: SecurityServiceStart;
+  userProfile: UserProfileServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   agents: AgentsServiceStart;
@@ -43,6 +45,7 @@ interface ConversationServiceDeps {
 export class ConversationServiceImpl implements ConversationService {
   private readonly logger: Logger;
   private readonly security: SecurityServiceStart;
+  private readonly userProfile: UserProfileServiceStart;
   private readonly elasticsearch: ElasticsearchServiceStart;
   private readonly spaces?: SpacesPluginStart;
   private readonly agents: AgentsServiceStart;
@@ -52,6 +55,7 @@ export class ConversationServiceImpl implements ConversationService {
   constructor({
     logger,
     security,
+    userProfile,
     elasticsearch,
     spaces,
     agents,
@@ -60,6 +64,7 @@ export class ConversationServiceImpl implements ConversationService {
   }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
+    this.userProfile = userProfile;
     this.elasticsearch = elasticsearch;
     this.spaces = spaces;
     this.agents = agents;
@@ -71,6 +76,7 @@ export class ConversationServiceImpl implements ConversationService {
     const user = await getUserFromRequest({
       request,
       security: this.security,
+      userProfile: this.userProfile,
       esClient: this.getScopedEsClient(request).asCurrentUser,
     });
 

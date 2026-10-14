@@ -118,6 +118,7 @@ export class ServiceManager {
   startServices({
     logger,
     security,
+    userProfile,
     spaces,
     elasticsearch,
     http,
@@ -191,6 +192,7 @@ export class ServiceManager {
     const agents = this.services.agents.start({
       spaces,
       security,
+      userProfile,
       elasticsearch,
       uiSettings,
       savedObjects,
@@ -212,6 +214,7 @@ export class ServiceManager {
     const conversations = new ConversationServiceImpl({
       logger: logger.get('conversations'),
       security,
+      userProfile,
       elasticsearch,
       spaces,
       agents,

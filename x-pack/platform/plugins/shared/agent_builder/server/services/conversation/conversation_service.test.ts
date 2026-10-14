@@ -31,6 +31,7 @@ const createService = ({
   return new ConversationServiceImpl({
     logger: loggingSystemMock.createLogger(),
     security: {} as never,
+    userProfile: {} as never,
     elasticsearch: {
       client: {
         asScoped: jest.fn().mockReturnValue({ asCurrentUser, asInternalUser }),

@@ -9,15 +9,11 @@ import {
   httpServerMock,
   securityServiceMock,
   elasticsearchServiceMock,
+  userProfileServiceMock,
 } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
-import {
-  isAdminFromRequest,
-  getAgentApiAccessFromRequest,
-  getUserFromRequest,
-  toStableUserId,
-} from './utils';
+import { isAdminFromRequest, getAgentApiAccessFromRequest, getUserFromRequest } from './utils';
 import { apiPrivileges } from '../../common/features';
 
 const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
@@ -29,76 +25,6 @@ const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
     },
   ],
 };
-
-describe('toStableUserId', () => {
-  it('prefers the profile uid attached to the request', async () => {
-    await expect(
-      toStableUserId({
-        authUser: {
-          username: 'shareduser',
-          profile_uid: 'profile-123',
-          authentication_type: 'realm',
-        },
-      })
-    ).resolves.toBe('profile-123');
-  });
-
-  it('returns undefined instead of a username or realm id for non API key auth without a profile', async () => {
-    await expect(
-      toStableUserId({ authUser: { username: 'shareduser', authentication_type: 'realm' } })
-    ).resolves.toBeUndefined();
-  });
-
-  it('resolves API key creator profile uid via the injected callback', async () => {
-    const resolveApiKeyProfileUid = jest.fn().mockResolvedValue('profile-from-api-key');
-
-    await expect(
-      toStableUserId({
-        authUser: { username: 'shareduser', authentication_type: 'api_key' },
-        resolveApiKeyProfileUid,
-      })
-    ).resolves.toBe('profile-from-api-key');
-    expect(resolveApiKeyProfileUid).toHaveBeenCalledTimes(1);
-  });
-
-  it('treats a fake request as API key auth even when its identity hides the type', async () => {
-    const resolveApiKeyProfileUid = jest.fn().mockResolvedValue('profile-from-api-key');
-
-    await expect(
-      toStableUserId({
-        authUser: { username: 'scheduling-user' },
-        request: httpServerMock.createFakeKibanaRequest({}),
-        resolveApiKeyProfileUid,
-      })
-    ).resolves.toBe('profile-from-api-key');
-    expect(resolveApiKeyProfileUid).toHaveBeenCalledTimes(1);
-  });
-
-  it('returns undefined for API key auth when the key owner has no profile', async () => {
-    await expect(
-      toStableUserId({
-        authUser: { username: 'shareduser', authentication_type: 'api_key' },
-        resolveApiKeyProfileUid: jest.fn().mockResolvedValue(undefined),
-      })
-    ).resolves.toBeUndefined();
-  });
-
-  it('does not call resolveApiKeyProfileUid when profile uid is already present', async () => {
-    const resolveApiKeyProfileUid = jest.fn();
-
-    await expect(
-      toStableUserId({
-        authUser: {
-          username: 'shareduser',
-          profile_uid: 'profile-123',
-          authentication_type: 'api_key',
-        },
-        resolveApiKeyProfileUid,
-      })
-    ).resolves.toBe('profile-123');
-    expect(resolveApiKeyProfileUid).not.toHaveBeenCalled();
-  });
-});
 
 describe('getUserFromRequest', () => {
   let security: ReturnType<typeof securityServiceMock.createStart>;
@@ -123,6 +49,26 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({ id: 'profile-123', username: 'testuser', isAdmin: false });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
+  });
+
+  it('resolves the profile uid through the user profile service for realm auth', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const userProfile = userProfileServiceMock.createStart();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'shareduser',
+      authentication_type: 'realm',
+    } as any);
+    userProfile.getCurrentProfileId.mockResolvedValue('profile-from-basic-auth');
+
+    const result = await getUserFromRequest({ request, security, userProfile, esClient });
+
+    expect(result).toEqual({
+      id: 'profile-from-basic-auth',
+      username: 'shareduser',
+      isAdmin: false,
+    });
+    expect(userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
   });
 
   it('leaves the id undefined when profile uid is missing for realm auth', async () => {

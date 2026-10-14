@@ -11,6 +11,7 @@ import {
   extractApiKeyIdFromAuthzHeader,
   type SecurityServiceStart,
 } from '@kbn/core-security-server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
 import { errors } from '@elastic/elasticsearch';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
@@ -18,46 +19,13 @@ import { apiPrivileges } from '../../common/features';
 
 const KIBANA_APPLICATION = `${APPLICATION_PREFIX}.kibana`;
 
-interface StableUserIdAuthUser {
-  username?: string;
-  profile_uid?: string;
-  authentication_type?: string;
-}
-
-/**
- * Resolves the Kibana user profile uid Agent Builder identifies the caller by. There is no
- * fallback to usernames or synthetic ids: a caller without a profile has no id.
- */
-export const toStableUserId = async ({
-  authUser,
-  request,
-  resolveApiKeyProfileUid,
-}: {
-  authUser: StableUserIdAuthUser;
-  request?: KibanaRequest;
-  resolveApiKeyProfileUid?: () => Promise<string | undefined>;
-}): Promise<string | undefined> => {
-  // A profile uid attached to the request is always the preferred identity.
-  if (authUser.profile_uid) {
-    return authUser.profile_uid;
-  }
-
-  // API key auth, including fake requests whose identity hides it: use the key owner's profile uid.
-  if (request?.isFakeRequest || authUser.authentication_type === 'api_key') {
-    return resolveApiKeyProfileUid?.();
-  }
-
-  // Other auth without a profile, e.g. basic credentials: no id rather than a username or realm id.
-  return undefined;
-};
-
 /**
  * Resolves the API key creator's profile uid via Elasticsearch, when available.
  *
  * `getCurrentUser` for API-key auth often omits `profile_uid`. Looking up the key with
  * `with_profile_uid` recovers the creator's profile so ownership can match interactive
  * sessions for the same user. Older keys or creators without an activated profile return
- * undefined and callers fall back to username matching.
+ * undefined, and the caller has no id.
  */
 const resolveApiKeyOwnerProfileUid = async ({
   request,
@@ -92,8 +60,9 @@ const resolveApiKeyOwnerProfileUid = async ({
 /**
  * Resolves the current user from a request.
  *
- * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user. API key
- * requests without a profile_uid resolve the key owner's; other callers without one have no id.
+ * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user. Requests
+ * without a profile_uid resolve it: API keys from the key owner, other credentials (e.g. basic auth)
+ * through the user profile service, which activates the profile when needed.
  *
  * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns the
  * originating user's identity when the request was enriched at schedule time (profile_uid and
@@ -109,42 +78,38 @@ const resolveApiKeyOwnerProfileUid = async ({
 export const getUserFromRequest = async ({
   request,
   security,
+  userProfile,
   esClient,
 }: {
   request: KibanaRequest;
   security: SecurityServiceStart;
+  userProfile?: UserProfileServiceStart;
   esClient: ElasticsearchClient;
 }): Promise<CurrentUser> => {
   const authUser = security.authc.getCurrentUser(request);
   const isAdmin = await isAdminFromRequest({ esClient });
-  const resolveApiKeyProfileUid = () => resolveApiKeyOwnerProfileUid({ request, esClient });
 
-  // Real requests, and fake requests enriched with the scheduling user's identity.
-  if (authUser?.username) {
-    return {
-      id: await toStableUserId({ authUser, request, resolveApiKeyProfileUid }),
-      username: authUser.username,
-      isAdmin,
-    };
+  // Un-enriched fake requests carry no user: Elasticsearch reports who the request authenticated as.
+  const { username, authentication_type: authenticationType } = authUser?.username
+    ? authUser
+    : await esClient.security.authenticate();
+
+  // A profile uid attached to the request is always the preferred identity.
+  if (authUser?.profile_uid) {
+    return { id: authUser.profile_uid, username, isAdmin };
   }
 
-  const { username, authentication_type: authenticationType } =
-    await esClient.security.authenticate();
+  // API key auth, including fake requests whose identity hides it: use the key owner's profile uid.
+  if (request.isFakeRequest || authenticationType === 'api_key') {
+    const id = await resolveApiKeyOwnerProfileUid({ request, esClient });
 
-  // Un-enriched fake requests: Elasticsearch reports who the request authenticated as.
-  return {
-    id: await toStableUserId({
-      authUser: {
-        username,
-        profile_uid: authUser?.profile_uid,
-        authentication_type: authenticationType,
-      },
-      request,
-      resolveApiKeyProfileUid,
-    }),
-    username,
-    isAdmin,
-  };
+    return { id, username, isAdmin };
+  }
+
+  // Other auth, e.g. basic credentials: resolve the caller's profile, activating it if needed.
+  const id = (await userProfile?.getCurrentProfileId({ request })) ?? undefined;
+
+  return { id, username, isAdmin };
 };
 
 const ADMIN_PRIVILEGE = 'agent_builder:admin'; // intentionally unregistered privilege

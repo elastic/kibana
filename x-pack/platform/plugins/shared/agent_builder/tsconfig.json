@@ -34,6 +34,7 @@
     "@kbn/ebt-click",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-server",
+    "@kbn/core-user-profile-server",
     "@kbn/logging-mocks",
     "@kbn/zod",
     "@kbn/inference-langchain",

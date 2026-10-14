@@ -48,6 +48,7 @@ describe('persisted agent provider', () => {
 
     const providerFactory = createPersistedProviderFn({
       security: {} as never,
+      userProfile: {} as never,
       elasticsearch: {} as never,
       toolsService: {} as never,
       logger: {} as never,
@@ -70,6 +71,7 @@ describe('persisted agent provider', () => {
 
       const provider = await createPersistedProviderFn({
         security: {} as never,
+        userProfile: {} as never,
         elasticsearch: {} as never,
         toolsService: {} as never,
         logger: {} as never,
@@ -99,6 +101,7 @@ describe('persisted agent provider', () => {
 
       const provider = await createPersistedProviderFn({
         security: {} as never,
+        userProfile: {} as never,
         elasticsearch: {} as never,
         toolsService: {} as never,
         logger: {} as never,
@@ -129,6 +132,7 @@ describe('persisted agent provider', () => {
 
       const provider = await createPersistedProviderFn({
         security: {} as never,
+        userProfile: {} as never,
         elasticsearch: {} as never,
         toolsService: {} as never,
         logger: {} as never,

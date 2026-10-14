@@ -12,6 +12,7 @@ import type {
   KibanaRequest,
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
+  UserProfileServiceStart,
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type {
@@ -49,6 +50,7 @@ export interface AgentsServiceSetupDeps {
 
 export interface AgentsServiceStartDeps {
   security: SecurityServiceStart;
+  userProfile: UserProfileServiceStart;
   spaces?: SpacesPluginStart;
   elasticsearch: ElasticsearchServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -114,7 +116,8 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
+    const { security, userProfile, elasticsearch, spaces, toolsService, uiSettings, savedObjects } =
+      startDeps;
 
     this.validateAgentTypes();
 
@@ -127,6 +130,7 @@ export class AgentsService {
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
       security,
+      userProfile,
       toolsService,
       logger,
       availabilityByAgentId: this.availabilityByAgentId,
@@ -139,6 +143,7 @@ export class AgentsService {
         logger,
         request,
         security,
+        userProfile,
         space,
         toolsService,
       });
