@@ -34,7 +34,7 @@ describe('getPlaywrightTagsFor', () => {
   });
 
   it('returns empty array for domain/arch combo with no targets', () => {
-    const result = getPlaywrightTagsFor('stateful', 'workplaceai', 'all');
+    const result = getPlaywrightTagsFor('stateful', 'vectordb', 'all');
     expect(result).toEqual([]);
   });
 });
@@ -84,14 +84,13 @@ describe('tags', () => {
       );
     });
 
-    it('all includes search, observability, security, workplaceai, and vectordb', () => {
+    it('all includes search, observability, security, and vectordb', () => {
       expect(tags.serverless.all.length).toBeGreaterThan(0);
       expect(tags.serverless.all).toEqual(
         expect.arrayContaining([
           ...tags.serverless.search,
           ...tags.serverless.observability.all,
           ...tags.serverless.security.all,
-          ...tags.serverless.workplaceai,
           ...tags.serverless.vectordb,
         ])
       );

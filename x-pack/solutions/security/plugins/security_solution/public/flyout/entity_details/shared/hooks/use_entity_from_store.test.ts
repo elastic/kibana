@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useEntityFromStore } from './use_entity_from_store';
 import {
@@ -22,6 +23,8 @@ jest.mock('@kbn/entity-store/public', () => ({
         getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
       },
     },
+    getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+      .getBuiltInEntityDefinition,
   }),
 }));
 
@@ -70,7 +73,7 @@ describe('useEntityFromStore', () => {
 
       // Partition semantics must be disabled for the lookup (wiring check, #278276).
       expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith(
-        'host',
+        getBuiltInEntityDefinition('host'),
         { 'host.name': 'web01' },
         { excludeHigherRankedFields: false }
       );
