@@ -60,7 +60,7 @@ describe('updateConversationMetadataStepDefinition', () => {
       'conv-1',
       { status: 'resolved', severity: 'low' },
       {
-        access: 'owner',
+        access: 'converse',
         source: 'workflow',
         context: {
           type: 'workflow',

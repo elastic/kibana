@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
@@ -52,11 +52,6 @@ const multiValued = <TItem extends z.ZodType>(
     .transform((value): Array<z.output<TItem>> => (Array.isArray(value) ? value : [value]))
     .optional();
 
-/** `true`/`false` from a query string, or a boolean from an in-process caller. */
-const booleanParam = z
-  .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
-  .optional();
-
 export const investigationIdSchema = z.string().min(1).max(MAX_ID_LENGTH);
 
 export const investigationIdParamsSchema = z.object({ id: investigationIdSchema });
@@ -68,16 +63,14 @@ export const investigationFiltersSchema = z.object({
   status: multiValued(z.enum(INVESTIGATION_METADATA_STATUSES)),
   /** `none` matches investigations whose severity has not been set. */
   severity: multiValued(z.enum([...INVESTIGATION_SEVERITIES, INVESTIGATION_SEVERITY_NONE])),
-  /** True: only investigations an Agent Builder execution is running for now. False: the rest. */
-  in_progress: booleanParam,
   subject_type: multiValued(z.enum(INVESTIGATION_SUBJECT_TYPES)),
   subject_id: multiValued(z.string().min(1).max(MAX_SUBJECT_ID_LENGTH)),
   /** Impacted entity id or name, matched exactly. */
   entity: z.string().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
   /** Case-insensitive text matched against the title, summary, and verdict. */
   query: z.string().trim().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
-  created_after: z.iso.datetime({ offset: true }).optional(),
-  created_before: z.iso.datetime({ offset: true }).optional(),
+  created_after: isoDateTime({ offset: true }).optional(),
+  created_before: isoDateTime({ offset: true }).optional(),
 });
 export type InvestigationFiltersInput = z.input<typeof investigationFiltersSchema>;
 export type InvestigationFilters = z.output<typeof investigationFiltersSchema>;
@@ -173,7 +166,10 @@ export interface InvestigationSummary {
   updated_at: string;
   agent_id: string;
   metadata: InvestigationMetadata;
-  /** An Agent Builder execution is scheduled or running for its conversation. */
+  /**
+   * A worker is still running for it: it is open, no proposal awaits a decision, and one of its
+   * `workflow_execution_ids` is not in a terminal status.
+   */
   in_progress: boolean;
   subjects: InvestigationSubjectResponse[];
   impact?: InvestigationImpactResponse;

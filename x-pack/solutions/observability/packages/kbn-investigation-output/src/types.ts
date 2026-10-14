@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 
 /**
- * Where an investigation is in its lifecycle, from the point of view of a consumer rendering it:
- * - `running` — the investigation is still in progress (live progress may be streaming in).
- * - `loading` — the investigation is over; its persisted result is being fetched.
- * - `complete` — the investigation finished and its final state is available.
- * - `failed` — the investigation itself failed (the workflow or its investigate step errored).
- * - `unavailable` — the investigation may have succeeded, but its result couldn't be
- *   loaded or parsed (e.g. missing privileges, or an incompatible result format).
+ * Where an investigation is, from the point of view of a consumer rendering it:
+ * - `loading` — the first read has not returned yet.
+ * - `running` — its agent is running; findings appear as they are recorded.
+ * - `complete` — nothing is working on it; what it recorded is final until a follow-up.
+ * - `unavailable` — it could not be read (for example missing privileges, or it does not exist).
  */
-export type InvestigationStatus = 'running' | 'loading' | 'complete' | 'failed' | 'unavailable';
+export type InvestigationStatus = 'loading' | 'running' | 'complete' | 'unavailable';
 
 export interface InvestigationOutputProps {
   status: InvestigationStatus;
-  /** Current (while running) or final (once complete) investigation state. */
-  state?: InvestigationState;
-  /** Detail message for the `failed` and `unavailable` statuses. */
+  /** The investigation from the shared investigations API, once read. */
+  investigation?: Investigation;
+  /** Detail message for the `unavailable` status. */
   error?: string;
 }

@@ -35,7 +35,9 @@ export const useEnableWorkers = (
   onSavingChange?: (saving: boolean) => void
 ) => {
   const queryClient = useQueryClient();
-  const { services } = useKibana<CoreStart & { serviceAccounts?: CoreServiceAccounts }>();
+  const { services } = useKibana<
+    CoreStart & { serviceAccounts?: CoreServiceAccounts; isServerless?: boolean }
+  >();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleEnableAndContinue = async () => {
@@ -61,7 +63,8 @@ export const useEnableWorkers = (
     const accounts = await ensureWorkerServiceAccounts(
       services.http!,
       services.serviceAccounts,
-      needsAccount
+      needsAccount,
+      { isServerless: services.isServerless ?? false }
     );
     const accountFailures = needsAccount.flatMap((id) => {
       const account = accounts.get(id);

@@ -40,6 +40,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     },
     hooks: {
       register: jest.fn(),
+      registerCycleHook: jest.fn(),
     },
     plugins: {
       register: jest.fn(),

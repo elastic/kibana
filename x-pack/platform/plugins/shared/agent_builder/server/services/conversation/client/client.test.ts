@@ -2272,6 +2272,64 @@ describe('ConversationClient', () => {
       });
     });
 
+    describe('access', () => {
+      const otherUserDocument = (accessMode: ConversationAccessControlMode): Document => {
+        const document = createConversationDocumentWithTemplate({ templateId: 'tmpl-a' });
+
+        return {
+          ...document,
+          _source: {
+            ...document._source,
+            user_id: 'other-user-id',
+            user_name: 'other-user',
+            access_control: { access_mode: accessMode },
+          },
+        } as Document;
+      };
+
+      beforeEach(() => {
+        getTemplateMock.mockReturnValue(
+          makeTemplate('tmpl-a', {
+            severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+          })
+        );
+      });
+
+      it('lets a non-owner patch metadata on a public conversation by default', async () => {
+        mockGetDocumentResponse(otherUserDocument(ConversationAccessControlMode.Public));
+
+        await client.patchMetadata('conversation-1', { severity: 'high' }, { source: 'workflow' });
+
+        expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+          severity: 'high',
+        });
+      });
+
+      it('rejects a non-owner on a private conversation', async () => {
+        mockGetDocumentResponse(otherUserDocument(ConversationAccessControlMode.Private));
+
+        await expect(
+          client.patchMetadata('conversation-1', { severity: 'high' }, { source: 'workflow' })
+        ).rejects.toThrow('Conversation conversation-1 not found');
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('stays owner-only when owner access is requested', async () => {
+        mockGetDocumentResponse(otherUserDocument(ConversationAccessControlMode.Public));
+
+        await expect(
+          client.patchMetadata(
+            'conversation-1',
+            { severity: 'high' },
+            { access: 'owner', source: 'workflow' }
+          )
+        ).rejects.toThrow('Conversation conversation-1 not found');
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+    });
+
     it('performs the merge inside the OCC closure so concurrent writes are not lost', async () => {
       // Simulate: at OCC read time the doc has an extra key `status` written concurrently.
       const template = makeTemplate('tmpl-a', {

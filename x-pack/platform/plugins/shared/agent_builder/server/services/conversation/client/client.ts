@@ -1231,7 +1231,7 @@ class ConversationClientImpl implements ConversationClient {
     conversationId: string,
     updates: Record<string, unknown>,
     {
-      access = 'owner',
+      access = 'converse',
       source,
       context,
     }: ConversationWriteOptions & { access?: ConversationAccess; context?: MetadataPatchContext }

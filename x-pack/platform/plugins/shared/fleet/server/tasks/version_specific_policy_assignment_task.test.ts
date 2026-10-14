@@ -27,6 +27,7 @@ import {
   getAgentVersionsForVersionSpecificPolicies,
   hasAgentVersionConditionInInputTemplate,
 } from '../services/utils/version_specific_policies';
+import { isSentinelPolicyVersionEnabled } from '../services/utils/sentinel_policy_version';
 import type { Agent, AgentPolicy, PackagePolicy } from '../types';
 
 import { AGENT_POLICY_INDEX } from '../../common/constants';
@@ -43,6 +44,7 @@ jest.mock('../services/agents/reassign');
 jest.mock('../services/epm/packages');
 jest.mock('../services/epm/packages/get');
 jest.mock('../services/utils/version_specific_policies');
+jest.mock('../services/utils/sentinel_policy_version');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -91,6 +93,9 @@ const mockedGetVariantPolicyIdsFromAgentsWithoutBaseId =
   >;
 const mockedGetVariantAgentsKuery = getVariantAgentsKuery as jest.MockedFunction<
   typeof getVariantAgentsKuery
+>;
+const mockedIsSentinelPolicyVersionEnabled = isSentinelPolicyVersionEnabled as jest.MockedFunction<
+  typeof isSentinelPolicyVersionEnabled
 >;
 const mockedGetAgentVersionsForVersionSpecificPolicies =
   getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
@@ -720,7 +725,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
       expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
         expect.anything(),
-        'policy-1'
+        'policy-1',
+        { keepPolicyIds: [] }
       );
     });
 
@@ -889,7 +895,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockedReassignAgents).not.toHaveBeenCalled();
       expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
         expect.anything(),
-        'policy-1'
+        'policy-1',
+        { keepPolicyIds: [] }
       );
     });
 
@@ -983,6 +990,479 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         undefined,
         expect.objectContaining({ agentVersions: ['9.2'], spaceId: '*' })
       );
+    });
+  });
+  describe('Sentinel policy version', () => {
+    const getPolicyPages = (...pages: AgentPolicy[][]) => {
+      const fetch = jest.fn();
+      for (const page of pages) {
+        fetch.mockResolvedValueOnce(
+          (async function* () {
+            yield page;
+          })()
+        );
+      }
+      return fetch;
+    };
+
+    // `.fleet-policies` terms aggregation read to check which `#sentinel` documents are up to date
+    const mockSentinelPoliciesInIndex = async (
+      revisionsBySentinelPolicyId: Record<string, number>
+    ) => {
+      const [coreStart] = await mockCore.getStartServices();
+      const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          policies: {
+            buckets: Object.entries(revisionsBySentinelPolicyId).map(([key, revision]) => ({
+              key,
+              max_revision: { value: revision },
+            })),
+          },
+        },
+      });
+      return esClient;
+    };
+
+    beforeEach(() => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
+      jest
+        .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+        .mockReturnValue({} as any);
+      mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+      mockedGetVariantPolicyIdsFromAgentsWithoutBaseId.mockResolvedValue(new Map());
+      mockedGetAgentCountsForVariantPolicyIds.mockResolvedValue(new Map());
+      mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    describe('assigning agents', () => {
+      const policy = { id: 'policy-1', revision: 2 } as AgentPolicy;
+
+      beforeEach(() => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages([], [policy]);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedFetchAllAgentsByKuery.mockResolvedValue(
+          getMockFetchAllAgentsByKuery(generateAgents(2, 'policy-1'))
+        );
+      });
+
+      it('reassigns agents on the plain policy id to the #sentinel policy', async () => {
+        await mockSentinelPoliciesInIndex({ 'policy-1#sentinel': 2 });
+
+        await runTask();
+
+        expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ kuery: 'policy_id:("policy-1")' })
+        );
+        expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          {
+            agentIds: ['agent-0', 'agent-1'],
+            showInactive: false,
+            spaceId: '*',
+            _internalCrossSpace: true,
+          },
+          'policy-1#sentinel'
+        );
+      });
+
+      it('only selects policies without version conditions, managed or agentless', async () => {
+        await mockSentinelPoliciesInIndex({ 'policy-1#sentinel': 2 });
+
+        await runTask();
+
+        expect(mockAgentPolicyService.fetchAllAgentPolicies).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            kuery: expect.stringMatching(
+              /not .*has_agent_version_conditions:true and not .*is_managed:true and not .*supports_agentless:true/
+            ),
+          })
+        );
+      });
+
+      it('deploys the #sentinel policy first when it is missing', async () => {
+        const esClient = await mockSentinelPoliciesInIndex({});
+        esClient.search
+          .mockResolvedValueOnce({ aggregations: { policies: { buckets: [] } } })
+          .mockResolvedValueOnce({
+            aggregations: {
+              policies: { buckets: [{ key: 'policy-1#sentinel', max_revision: { value: 2 } }] },
+            },
+          });
+
+        await runTask();
+
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+          expect.anything(),
+          ['policy-1'],
+          undefined,
+          { spaceId: '*' }
+        );
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-0', 'agent-1'] }),
+          'policy-1#sentinel'
+        );
+      });
+
+      it('deploys the #sentinel policy first when it is behind the policy revision', async () => {
+        const esClient = await mockSentinelPoliciesInIndex({ 'policy-1#sentinel': 1 });
+        esClient.search
+          .mockResolvedValueOnce({
+            aggregations: {
+              policies: { buckets: [{ key: 'policy-1#sentinel', max_revision: { value: 1 } }] },
+            },
+          })
+          .mockResolvedValueOnce({
+            aggregations: {
+              policies: { buckets: [{ key: 'policy-1#sentinel', max_revision: { value: 2 } }] },
+            },
+          });
+
+        await runTask();
+
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledTimes(1);
+        expect(mockedReassignAgents).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not reassign agents when the #sentinel policy could not be deployed', async () => {
+        await mockSentinelPoliciesInIndex({});
+
+        await runTask();
+
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalled();
+        expect(mockedReassignAgents).not.toHaveBeenCalled();
+      });
+
+      it('does nothing when the feature flag is disabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
+        await mockSentinelPoliciesInIndex({ 'policy-1#sentinel': 2 });
+
+        await runTask();
+
+        expect(mockedReassignAgents).not.toHaveBeenCalled();
+        expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('policies with version conditions', () => {
+      it('looks for agents on the #sentinel policy too', async () => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages(
+          [{ id: 'policy-1' } as AgentPolicy],
+          []
+        );
+        mockedGetAgentsByKuery.mockResolvedValue({ total: 0, agents: [], page: 1, perPage: 0 });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            kuery: expect.stringContaining('policy_id:("policy-1" or "policy-1#sentinel")'),
+          })
+        );
+      });
+
+      it('moves agents from #sentinel to the version specific policy', async () => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages(
+          [{ id: 'policy-1' } as AgentPolicy],
+          []
+        );
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        const agents = generateAgents(1, 'policy-1#sentinel', '9.4.1');
+        mockedGetAgentsByKuery.mockResolvedValue({ total: 1, agents, page: 1, perPage: 1 });
+        mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+        await runTask();
+
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-0'] }),
+          'policy-1#9.4'
+        );
+      });
+    });
+
+    describe('policies with version conditions, inactive agents on #sentinel', () => {
+      const inactiveAgents = generateAgents(1, 'policy-1#sentinel', '9.4.1');
+
+      beforeEach(() => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages(
+          [{ id: 'policy-1' } as AgentPolicy],
+          []
+        );
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedGetAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          options.kuery.includes('status:inactive')
+            ? { total: 1, agents: inactiveAgents, page: 1, perPage: 0 }
+            : { total: 0, agents: [], page: 1, perPage: 0 }
+        );
+        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
+          getMockFetchAllAgentsByKuery(
+            options.kuery.includes('status:inactive') ? inactiveAgents : []
+          )
+        );
+      });
+
+      it('moves them to the version specific policy when the sentinel version is disabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
+
+        await runTask();
+
+        expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            kuery: 'policy_id:"policy-1#sentinel" AND active:true AND status:inactive',
+            showInactive: true,
+          })
+        );
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-0'], showInactive: true }),
+          'policy-1#9.4'
+        );
+      });
+
+      it('leaves them alone while the sentinel version is enabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            kuery: expect.stringContaining('status:inactive'),
+          })
+        );
+        expect(mockedReassignAgents).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('orphaned version-specific policy sweep', () => {
+      beforeEach(() => {
+        mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages([], []);
+        mockAgentPolicyService.getByIds = jest
+          .fn()
+          .mockResolvedValue([
+            { id: 'policy-1', revision: 2, has_agent_version_conditions: false },
+          ]);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      });
+
+      // The sweep reads a `variant_policies` aggregation, and the sentinel documents are checked
+      // with a `policies` aggregation, both on `.fleet-policies`.
+      const mockSweepAndSentinelDocs = async (
+        policyIds: string[],
+        sentinelRevisionsAfterDeploy: Array<Record<string, number>>
+      ) => {
+        await mockVariantPoliciesInIndex(policyIds);
+        const [coreStart] = await mockCore.getStartServices();
+        const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+        const sweepResponse = await esClient.search();
+        const sentinelResponses = [...sentinelRevisionsAfterDeploy];
+        esClient.search.mockImplementation(async (request: any) => {
+          if (!request.aggs?.policies) {
+            return sweepResponse;
+          }
+          const revisions =
+            sentinelResponses.length > 1 ? sentinelResponses.shift()! : sentinelResponses[0];
+          return {
+            aggregations: {
+              policies: {
+                buckets: Object.entries(revisions).map(([key, revision]) => ({
+                  key,
+                  max_revision: { value: revision },
+                })),
+              },
+            },
+          };
+        });
+      };
+
+      it('keeps the #sentinel policy of a parent without version conditions', async () => {
+        await mockVariantPoliciesInIndex(['policy-1', 'policy-1#sentinel']);
+
+        await runTask();
+
+        expect(mockedReassignAgents).not.toHaveBeenCalled();
+        expect(mockedDeleteVersionSpecificFleetServerPolicies).not.toHaveBeenCalled();
+      });
+
+      it('moves agents of the other variants to #sentinel and keeps the #sentinel policy', async () => {
+        await mockSweepAndSentinelDocs(
+          ['policy-1', 'policy-1#sentinel', 'policy-1#9.4'],
+          [{ 'policy-1#sentinel': 2 }]
+        );
+        mockedGetVariantAgentsKuery.mockResolvedValue('policy_base_id:"policy-1"');
+        mockedFetchAllAgentsByKuery.mockResolvedValue(
+          getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+        );
+        mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
+
+        await runTask();
+
+        expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            kuery: '(policy_base_id:"policy-1") and not policy_id:"policy-1#sentinel"',
+          })
+        );
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-1'] }),
+          'policy-1#sentinel'
+        );
+        expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          { keepPolicyIds: ['policy-1#sentinel'] }
+        );
+        expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+      });
+
+      it('deploys the missing #sentinel policy before moving the agents of the other variants to it', async () => {
+        await mockSweepAndSentinelDocs(
+          ['policy-1', 'policy-1#9.4'],
+          [{}, { 'policy-1#sentinel': 2 }]
+        );
+        mockedGetVariantAgentsKuery.mockResolvedValue('policy_base_id:"policy-1"');
+        mockedFetchAllAgentsByKuery.mockResolvedValue(
+          getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+        );
+        mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
+
+        await runTask();
+
+        expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+          expect.anything(),
+          ['policy-1'],
+          undefined,
+          { spaceId: '*' }
+        );
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-1'] }),
+          'policy-1#sentinel'
+        );
+      });
+
+      it.each([
+        ['managed', { is_managed: true }],
+        ['agentless', { supports_agentless: true }],
+      ])(
+        'moves the agents of the other variants of a %s policy to the base policy, keeping the #sentinel policy',
+        async (_name, attributes) => {
+          mockAgentPolicyService.getByIds = jest
+            .fn()
+            .mockResolvedValue([
+              { id: 'policy-1', revision: 2, has_agent_version_conditions: false, ...attributes },
+            ]);
+          await mockSweepAndSentinelDocs(
+            ['policy-1', 'policy-1#sentinel', 'policy-1#9.4'],
+            [{ 'policy-1#sentinel': 2 }]
+          );
+          mockedGetVariantAgentsKuery.mockResolvedValue('policy_base_id:"policy-1"');
+          mockedFetchAllAgentsByKuery.mockResolvedValue(
+            getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+          );
+          mockedGetAgentsByKuery.mockResolvedValueOnce({
+            total: 0,
+            agents: [],
+            page: 1,
+            perPage: 0,
+          });
+
+          await runTask();
+
+          expect(mockedReassignAgents).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({ agentIds: ['agent-1'] }),
+            'policy-1'
+          );
+          expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+          expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
+            expect.anything(),
+            'policy-1',
+            { keepPolicyIds: ['policy-1#sentinel'] }
+          );
+        }
+      );
+
+      it('moves the agents of the other variants to the base policy when the #sentinel policy cannot be deployed', async () => {
+        await mockSweepAndSentinelDocs(['policy-1', 'policy-1#9.4'], [{}]);
+        mockedGetVariantAgentsKuery.mockResolvedValue('policy_base_id:"policy-1"');
+        mockedFetchAllAgentsByKuery.mockResolvedValue(
+          getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+        );
+        mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
+
+        await runTask();
+
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-1'] }),
+          'policy-1'
+        );
+      });
+
+      it('does not delete the #sentinel policy as a stale variant of a parent with version conditions', async () => {
+        mockAgentPolicyService.getByIds = jest
+          .fn()
+          .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
+        await mockVariantPoliciesInIndex(['policy-1', 'policy-1#sentinel']);
+
+        await runTask();
+
+        expect(mockedDeleteVersionSpecificFleetServerPoliciesForVersions).not.toHaveBeenCalled();
+      });
+
+      it('cleans up the #sentinel policy when the feature flag is disabled', async () => {
+        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
+        await mockVariantPoliciesInIndex(['policy-1', 'policy-1#sentinel']);
+        mockedGetVariantAgentsKuery.mockResolvedValue('policy_base_id:"policy-1"');
+        mockedFetchAllAgentsByKuery.mockResolvedValue(
+          getMockFetchAllAgentsByKuery([
+            { id: 'agent-1', policy_id: 'policy-1#sentinel' },
+          ] as Agent[])
+        );
+        mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
+
+        await runTask();
+
+        expect(mockedReassignAgents).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ agentIds: ['agent-1'] }),
+          'policy-1'
+        );
+        expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
+          expect.anything(),
+          'policy-1',
+          { keepPolicyIds: [] }
+        );
+      });
     });
   });
 });

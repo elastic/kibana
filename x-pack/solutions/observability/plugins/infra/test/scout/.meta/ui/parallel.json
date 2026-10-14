@@ -1,5 +1,5 @@
 {
-  "sha1": "5859da0700ea75022fb98587f976e492ce859d1c",
+  "sha1": "240eaab3eabb902011fdef26b9ae358bdc4f0db3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -704,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
-        "line": 39,
-        "column": 37
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -800,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 106,
-        "column": 25
+        "line": 111,
+        "column": 13
       }
     },
     {
@@ -816,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 133,
-        "column": 10
+        "line": 139,
+        "column": 22
       }
     },
     {
@@ -832,7 +832,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 197,
+        "line": 204,
         "column": 19
       }
     },
@@ -848,7 +848,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 200,
+        "line": 207,
         "column": 19
       }
     },
@@ -864,7 +864,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 222,
+        "line": 229,
         "column": 13
       }
     },
@@ -880,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 257,
+        "line": 264,
         "column": 20
       }
     },

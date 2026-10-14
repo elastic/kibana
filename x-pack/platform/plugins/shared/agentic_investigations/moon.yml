@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
+  - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
