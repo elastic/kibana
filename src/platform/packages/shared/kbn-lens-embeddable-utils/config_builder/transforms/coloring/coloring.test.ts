@@ -192,6 +192,18 @@ describe('Color util transforms', () => {
         expect(result?.params?.steps).toBe(3);
       });
 
+      it('should prefer the steps carried by the config over the chart default band count', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'distributed_palette',
+          palette: 'status',
+          steps: 5,
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue, 3);
+
+        expect(result?.params?.steps).toBe(5);
+      });
+
       it('should use numeric range type when useNumericRange is true', () => {
         const colorByValue: ColorByValueType = {
           type: 'distributed_palette',
@@ -599,6 +611,46 @@ describe('Color util transforms', () => {
         expect(result).toEqual({
           type: 'distributed_palette',
           palette: 'status',
+        } satisfies ColorByValueType);
+      });
+
+      it('should keep the band count when it differs from the chart default', () => {
+        const palette: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'status',
+          params: { name: 'status', rangeType: 'percent', steps: 5 },
+        };
+
+        expect(fromColorByValueLensStateToAPI(palette, 3)).toEqual({
+          type: 'distributed_palette',
+          palette: 'status',
+          steps: 5,
+        } satisfies ColorByValueType);
+      });
+
+      it('should omit the band count when it equals the chart default', () => {
+        const palette: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'status',
+          params: { name: 'status', rangeType: 'percent', steps: 3 },
+        };
+
+        expect(fromColorByValueLensStateToAPI(palette, 3)).toEqual({
+          type: 'distributed_palette',
+          palette: 'status',
+        } satisfies ColorByValueType);
+      });
+
+      it('should round-trip a non-default band count', () => {
+        const palette = fromColorByValueAPIToLensState(
+          { type: 'distributed_palette', palette: 'status', steps: 5 },
+          3
+        );
+
+        expect(fromColorByValueLensStateToAPI(palette, 3)).toEqual({
+          type: 'distributed_palette',
+          palette: 'status',
+          steps: 5,
         } satisfies ColorByValueType);
       });
 

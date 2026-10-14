@@ -220,7 +220,9 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.colorMode === 'palette') {
-      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+      props.metric.color =
+        fromColorByValueLensStateToAPI(visualization.palette, LENS_GAUGE_DEFAULT_COLOR_STEPS) ??
+        AUTO_COLOR;
     } else {
       props.metric.color = NO_COLOR;
     }

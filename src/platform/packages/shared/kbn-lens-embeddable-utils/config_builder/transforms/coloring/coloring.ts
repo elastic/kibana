@@ -140,7 +140,8 @@ function buildNamedPaletteLensState({
  * API -> Lens state for a `distributed_palette` or the deprecated `legacy_dynamic`.
  * - `continuity` is always `all`; opening both bounds keeps values outside the effective range
  *   (e.g. above a metric's user-defined max) colored with the nearest band.
- * - `numberOfBands` is the per-chart default band count used to split the domain.
+ * - `numberOfBands` is the per-chart default band count used to split the domain, unless the
+ *   config carries its own `steps`.
  * - `useNumericRange` defaults to `false` (`percent`). Single-value charts (metric without
  *   a max or breakdown, and legacy metric) pass `true` (`number`) instead, since they color a
  *   single value across an absolute range where percentages are meaningless.
@@ -153,7 +154,8 @@ function fromColorByValuePaletteAPIToLensState(
   const { palette } = config;
   return buildNamedPaletteLensState({
     palette,
-    numberOfBands,
+    numberOfBands:
+      (config.type === 'distributed_palette' ? config.steps : undefined) ?? numberOfBands,
     useNumericRange,
   });
 }
@@ -228,13 +230,15 @@ export function getRangeValue(value?: number | null): number | null {
 /**
  * Lens state -> API for color by value; inverse of {@link fromColorByValueAPIToLensState}.
  * - A named (non-custom) palette becomes a `distributed_palette`: per-band stops are dropped
- *   since the palette service owns the band distribution.
+ *   since the palette service owns the band distribution. Its band count (`steps`) is kept
+ *   unless it equals `defaultBandCount`, the chart's default that API -> state applies.
  * - A custom palette becomes a `dynamic` config, rematerializing each stop as a
  *   `{ gte, lt | lte, color }` step. The stored stops already own the color order, so the
  *   historical `reverse` flag is ignored.
  */
 export function fromColorByValueLensStateToAPI(
-  config: PaletteOutput<CustomPaletteParams> | undefined
+  config: PaletteOutput<CustomPaletteParams> | undefined,
+  defaultBandCount?: number
 ): ColorByValueType | undefined {
   const colorParams = config?.params;
 
@@ -245,7 +249,8 @@ export function fromColorByValueLensStateToAPI(
   const rangeMax = getRangeValue(colorParams.rangeMax);
 
   // A named (non-custom) palette maps to a `distributed_palette`, where the palette
-  // service owns the individual bands, so the per-band stops are dropped.
+  // service owns the individual bands, so the per-band stops are dropped. Only the band
+  // count (`steps`) is kept.
   if (palette !== CUSTOM_PALETTE) {
     // `complimentary` is the legacy misspelling of `complementary`
     // (https://github.com/elastic/kibana/issues/161194). Runtime canonicalizes it before rendering,
@@ -258,6 +263,9 @@ export function fromColorByValueLensStateToAPI(
     return {
       type: 'distributed_palette',
       palette: canonicalPalette,
+      // `steps` is only written when it differs from the chart default, which API -> SO restores
+      ...(colorParams.steps != null &&
+        colorParams.steps !== defaultBandCount && { steps: colorParams.steps }),
     };
   }
 

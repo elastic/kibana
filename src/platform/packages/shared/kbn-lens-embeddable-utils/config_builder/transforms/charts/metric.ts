@@ -525,7 +525,10 @@ function enrichConfigurationWithVisualizationProperties(
     // The color/palette is derived from its own state presence, mirroring rendering: a color/palette
     // set without `apply_color_to` still paints the background.
     if (visualization.palette) {
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      const colorByValue = fromColorByValueLensStateToAPI(
+        visualization.palette,
+        LENS_METRIC_DEFAULT_COLOR_STEPS
+      );
       // A percentage-ranged palette (custom or named) only makes sense when there is a data range
       // to color against: a breakdown or a max (bar background). On a single value with neither,
       // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable; otherwise the
