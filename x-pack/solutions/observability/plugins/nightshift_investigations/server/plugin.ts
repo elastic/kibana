@@ -713,6 +713,10 @@ export class NightshiftInvestigationsPlugin
       workflowsExtensions: this.workflowsExtensionsStart,
       workflowsManagement: this.workflowsManagement,
       spaces: this.spaces,
+      reinforcementAgent:
+        this.decisionTreesEnabled && this.agentBuilder
+          ? { agentBuilder: this.agentBuilder, availability: this.getInvestigationAvailability() }
+          : undefined,
       logger: this.logger.get('service_account'),
     });
   };

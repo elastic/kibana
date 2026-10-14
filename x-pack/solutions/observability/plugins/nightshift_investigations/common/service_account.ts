@@ -22,6 +22,11 @@ export interface NightshiftBoundWorkflowStatus {
   runAs: string | null;
   /** Whether `runAs` is the space's agent account. */
   bound: boolean;
+  /**
+   * False when the workflow failed validation, for example the Slack thread workflow on a
+   * deployment without the Slack trigger. Such a workflow cannot run until it validates.
+   */
+  valid: boolean | null;
 }
 
 /**

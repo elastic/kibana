@@ -6,8 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+import { parse as parseYaml } from 'yaml';
 import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { AgentAccessControlRole } from '@kbn/agent-builder-common';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
@@ -33,12 +37,19 @@ import {
   type NightshiftServiceAccountKind,
 } from './constants';
 import { buildNightshiftRole, NIGHTSHIFT_ROLE_METADATA } from './roles';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../../agents/decision_tree_reinforcement';
+import { installDecisionTreeReinforcementAgent } from '../install_decision_tree_reinforcement_agent';
 
 interface Deps {
   core: CoreStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;
+  /** Set when decision trees are on, so the reinforcement agent exists and must admit the agent. */
+  reinforcementAgent?: {
+    agentBuilder: AgentBuilderPluginStart;
+    availability: AgentAvailabilityConfig;
+  };
   logger: Logger;
 }
 
@@ -56,6 +67,17 @@ const getStatusCode = (error: unknown): number | undefined => {
     meta?: { statusCode?: number };
   };
   return statusCode ?? meta?.statusCode;
+};
+
+/** `settings.run_as` of a workflow's YAML, for a workflow whose definition failed validation. */
+const readRunAs = (yaml: string | undefined): string | undefined => {
+  if (!yaml) return undefined;
+  try {
+    const runAs = parseYaml(yaml)?.settings?.run_as;
+    return typeof runAs === 'string' ? runAs : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
 const getServiceAccounts = (spaceId: string): NightshiftServiceAccountInfo[] =>
@@ -111,8 +133,35 @@ export const createInvestigatorServiceAccountService = ({
   workflowsExtensions,
   workflowsManagement,
   spaces,
+  reinforcementAgent,
   logger,
 }: Deps) => {
+  /**
+   * The decision-tree reinforcement agent is private and system-owned, so only admins can see or
+   * run it. Agent optimize runs it as the agent account, so the account gets the `user` role on it.
+   * Granted here, by the admin setting the space up, rather than by making the agent shared.
+   */
+  const admitAgentToReinforcementAgent = async (
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<void> => {
+    if (!reinforcementAgent) return;
+    const { agentBuilder, availability } = reinforcementAgent;
+    await installDecisionTreeReinforcementAgent({ agentBuilder, spaceId, availability });
+    const registry = await agentBuilder.agents.getRegistry({ request });
+    const agent = await registry.get(NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID);
+    const accountId = getInvestigatorServiceAccountId(spaceId);
+    const principalId = `service_account:${accountId}`;
+    const entries = agent.access_control?.entries ?? [];
+    if (entries.some(({ id }) => id === principalId)) return;
+    await registry.updateAccessControl(NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID, {
+      entries: [
+        ...entries,
+        { type: 'user', id: principalId, name: accountId, role: AgentAccessControlRole.User },
+      ],
+    });
+  };
+
   // Setups of one space run one after another, so two clicks cannot interleave their installs.
   const queues = new Map<string, Promise<unknown>>();
 
@@ -137,13 +186,14 @@ export const createInvestigatorServiceAccountService = ({
               return null;
             })
         : null;
-    const runAs = workflow?.definition?.settings?.run_as ?? null;
+    const runAs = workflow?.definition?.settings?.run_as ?? readRunAs(workflow?.yaml) ?? null;
     return {
       workflowId,
       installed: status.installed,
       enabled: status.enabled,
       runAs,
       bound: runAs === getInvestigatorServiceAccountId(spaceId),
+      valid: workflow?.valid ?? null,
     };
   };
 
@@ -231,8 +281,23 @@ export const createInvestigatorServiceAccountService = ({
       }
     }
 
+    // After the installs: the agent is only available once the space's entry point is.
+    await admitAgentToReinforcementAgent(request, spaceId);
+
     const status = await getStatus(request, spaceId);
-    const unbound = status.boundWorkflows.filter(({ installed, bound }) => !installed || !bound);
+    // A workflow that fails validation here (the Slack thread workflow without the Slack trigger)
+    // is reported, not fatal: it starts working once its trigger is registered.
+    const invalid = status.boundWorkflows.filter(({ valid }) => valid === false);
+    if (invalid.length > 0) {
+      logger.warn(
+        `Nightshift setup in space [${spaceId}] installed invalid workflows: ${invalid
+          .map(({ workflowId }) => workflowId)
+          .join(', ')}`
+      );
+    }
+    const unbound = status.boundWorkflows.filter(
+      ({ installed, bound, valid }) => !installed || (!bound && valid !== false)
+    );
     if (unbound.length > 0) {
       throw Boom.internal(
         `Nightshift setup in space [${spaceId}] did not bind ${unbound
