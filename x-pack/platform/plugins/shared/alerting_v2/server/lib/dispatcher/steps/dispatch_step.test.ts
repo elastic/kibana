@@ -154,6 +154,71 @@ describe('DispatchStep', () => {
     );
   });
 
+  it('authenticates with the raw secret when the policy API key is a stored UIAM key', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+    const uiamSecret = 'essu_uiam-secret';
+    const storedUiamApiKey = Buffer.from(`uiam-key-id:${uiamSecret}`).toString('base64');
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    const state = createDispatcherPipelineState({
+      dispatch: [
+        createActionGroup({
+          id: 'g1',
+          policyId: 'p1',
+          destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        }),
+      ],
+      policies: new Map([['p1', createActionPolicy({ id: 'p1', apiKey: storedUiamApiKey })]]),
+    });
+
+    await step.execute(state, loggerService);
+
+    // Presenting the base64 envelope would make Elasticsearch look the id up as a native key.
+    const expectedRequest = expect.objectContaining({
+      headers: expect.objectContaining({ authorization: `ApiKey ${uiamSecret}` }),
+    });
+    expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledWith([
+      expect.objectContaining({ request: expectedRequest }),
+    ]);
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(expect.any(Array), expectedRequest);
+  });
+
+  it('passes an Elasticsearch policy API key through unchanged', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+    const esApiKey = Buffer.from('es-key-id:es-key-secret').toString('base64');
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    const state = createDispatcherPipelineState({
+      dispatch: [
+        createActionGroup({
+          id: 'g1',
+          policyId: 'p1',
+          destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        }),
+      ],
+      policies: new Map([['p1', createActionPolicy({ id: 'p1', apiKey: esApiKey })]]),
+    });
+
+    await step.execute(state, loggerService);
+
+    // Only UIAM keys are unwrapped: an ES key keeps its `base64(id:secret)` form.
+    const expectedRequest = expect.objectContaining({
+      headers: expect.objectContaining({ authorization: `ApiKey ${esApiKey}` }),
+    });
+    expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledWith([
+      expect.objectContaining({ request: expectedRequest }),
+    ]);
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(expect.any(Array), expectedRequest);
+  });
+
   it('skips dispatch when policy has no API key', async () => {
     const step = new DispatchStep(mockWfm, mockLicenseService);
 
