@@ -58,6 +58,10 @@ export const EBT_CLICK_ACTIONS = {
   SET_SORT_OPTION: 'setSortOption',
   /** User sets the direction a chart or grid is sorted in. */
   SET_SORT_DIRECTION: 'setSortDirection',
+  /** User intends to start an investigation of an entity, such as an alert. */
+  START_INVESTIGATION: 'startInvestigation',
+  /** User intends to view an investigation's results. */
+  VIEW_INVESTIGATION: 'viewInvestigation',
 } as const;
 
 /** EBT click `element` for the charts toolbar, shared by the unified histogram and metrics grid toolbars. */

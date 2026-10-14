@@ -7,11 +7,16 @@
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
-import { AgentExecutionMode, isApiAutoApproved, ToolType } from '@kbn/agent-builder-common';
-import type { ApiTarget } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  API_STATE_CHANGED_UI_EVENT,
+  isApiAutoApproved,
+  ToolType,
+} from '@kbn/agent-builder-common';
+import type { ApiStateChangedEventData, ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createErrorResult } from '@kbn/agent-builder-server';
+import { createErrorResult, createNonInteractiveDeclinedResult } from '@kbn/agent-builder-server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { HttpSelfService } from '@kbn/core-http-server';
@@ -35,8 +40,8 @@ const executeSchema = z.object({
   api: z
     .string()
     .describe(
-      `The API identifier returned by the ${internalTools.discoverApis} tool, formed from the namespace ` +
-        'and name (e.g. "indices.create", "bulk", "cluster.health").'
+      'The API identifier, formed from the namespace and name (e.g. "indices.create", "bulk", ' +
+        '"cluster.health").'
     ),
   params: z
     .record(z.string(), z.unknown())
@@ -50,16 +55,24 @@ const executeSchema = z.object({
 
 export const createExecuteApiTool = ({
   selfClient,
+  discoveryEnabled,
 }: {
   selfClient: HttpSelfService;
+  discoveryEnabled: boolean;
 }): InternalBuiltinToolDefinition<typeof executeSchema> => {
+  const identifierGuidance = discoveryEnabled
+    ? `- Use \`${internalTools.discoverApis}\` to find the \`api\` identifier, then
+  \`${internalTools.describeApi}\` to see the \`params\` it accepts.`
+    : `- The \`api\` identifier comes from the instruction you are following, or from what you already
+  know the target exposes. Call \`${internalTools.describeApi}\` first to confirm it exists and to
+  see the \`params\` it accepts, rather than guessing params here.`;
+
   return {
     id: internalTools.executeApi,
     type: ToolType.builtin,
     description: `Execute an HTTP API call on behalf of the current user.
 
-- Use \`${internalTools.discoverApis}\` to find the \`api\` identifier, then
-  \`${internalTools.describeApi}\` to see the \`params\` it accepts.
+${identifierGuidance}
 - Responses are not summarized, and many of these APIs return very large payloads. Prefer params
   that narrow the response (a filter, a \`size\`/\`per_page\` limit, a \`page\`/\`from\` offset, or an
   explicit field selection) over fetching everything, because an oversized result is truncated
@@ -69,7 +82,17 @@ The response is the raw API response body.`,
     schema: executeSchema,
     handler: async (
       { target, api, params = {} },
-      { esClient, request, spaceId, logger, prompts, callContext, executionMode, interactivity }
+      {
+        esClient,
+        request,
+        spaceId,
+        logger,
+        prompts,
+        callContext,
+        executionMode,
+        interactivity,
+        events,
+      }
     ) => {
       const preparedApiRequest = await prepareApiRequest({ target, api, params, spaceId });
       if (preparedApiRequest.status !== 'prepared') {
@@ -80,12 +103,13 @@ The response is the raw API response body.`,
               target,
               api,
               logger,
+              discoveryEnabled,
             }),
           ],
         };
       }
 
-      const { request: apiRequest, destructive } = preparedApiRequest;
+      const { request: apiRequest, destructive, readOnly } = preparedApiRequest;
       const { method, path } = apiRequest;
 
       const preApproved = destructive && isApiAutoApproved({ interactivity, target, api });
@@ -95,13 +119,13 @@ The response is the raw API response body.`,
         if (executionMode === AgentExecutionMode.standalone || !interactivity.enabled) {
           return {
             results: [
-              createErrorResult({
-                message:
-                  `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
+              createNonInteractiveDeclinedResult(
+                `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
                   `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation. ` +
-                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run.`,
-                metadata: { target, api, method, path },
-              }),
+                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run, ` +
+                  `or it can be added to the agent's auto-approved APIs so that it is pre-approved for every run of this agent.`,
+                { target, api, method, path }
+              ),
             ],
           };
         }
@@ -159,6 +183,13 @@ The response is the raw API response body.`,
           selfClient,
           request,
         });
+
+        if (!readOnly && executionMode !== AgentExecutionMode.standalone) {
+          events.sendUiEvent<typeof API_STATE_CHANGED_UI_EVENT, ApiStateChangedEventData>(
+            API_STATE_CHANGED_UI_EVENT,
+            { target, api, method, path }
+          );
+        }
 
         const data: ApiExecuteResultData = {
           target,

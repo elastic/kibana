@@ -164,7 +164,7 @@ export const INVESTIGATE_ALERT_ROLE: KibanaRole = {
   kibana: [
     {
       base: [],
-      feature: { observabilityAlerts: ['read'], agentBuilder: ['all'] },
+      feature: { observabilityAlerts: ['read'], agentBuilder: ['all'], nightshift: ['read'] },
       spaces: ['*'],
     },
   ],
@@ -199,4 +199,22 @@ export const OBSERVABILITY_ALERTS_ONLY_DASHBOARD_ROLE: KibanaRole = {
 export const LOGS_DASHBOARD_ROLE: KibanaRole = observabilityRole({
   logs: ['all'],
   dashboard: ['all'],
+});
+
+/**
+ * Least-privilege chrome roles for Observability Alerting nav tests. `discover`
+ * is included so the suite can land on a page that still renders solution nav
+ * without granting any alerting capability unless the caller adds one.
+ */
+export const observabilityAlertingNavRole = (
+  feature: Record<string, string[]> = {}
+): KibanaRole => ({
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [
+    {
+      base: [],
+      feature: { discover: ['read'], ...feature },
+      spaces: ['*'],
+    },
+  ],
 });

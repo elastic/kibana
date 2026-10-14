@@ -12,6 +12,9 @@ export {
   SEMCONV_HOSTS_DATA_TO,
 } from './semconv_hosts_data';
 
+export { SEMCONV_PODS, SEMCONV_PODS_DATA_FROM, SEMCONV_PODS_DATA_TO } from './semconv_pods_data';
+export type { SemconvPodFixture } from './semconv_pods_data';
+
 export const INTERNAL_HEADERS = {
   'kbn-xsrf': 'scout',
   'x-elastic-internal-origin': 'kibana',

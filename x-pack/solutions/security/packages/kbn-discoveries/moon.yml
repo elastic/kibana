@@ -33,7 +33,10 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/i18n'
   - '@kbn/inference-common'
+  - '@kbn/core-http-server'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/core-http-server-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/security-plugin'
   - '@kbn/security-solution-features'
   - '@kbn/workflows'
@@ -41,6 +44,7 @@ dependsOn:
   - '@kbn/event-log-plugin'
   - '@kbn/workflows-management-plugin'
   - '@kbn/datemath'
+  - '@kbn/core-security-common'
 tags:
   - shared-server
   - package

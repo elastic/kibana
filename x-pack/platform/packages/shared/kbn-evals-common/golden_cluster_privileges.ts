@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EvaluationIndices } from './constants';
+import {
+  EVALS_EVIDENCE_LOG_EVENT_NAMES,
+  EvaluationIndices,
+  LOGS_INDEX_PATTERN,
+  TRACES_INDEX_PATTERN,
+} from './constants';
 
 /**
  * Shared privilege descriptors for the golden cluster API key.
@@ -31,7 +36,7 @@ export const goldenClusterPrivileges = {
             ],
           },
           {
-            names: ['traces-*'],
+            names: [TRACES_INDEX_PATTERN],
             privileges: [
               'auto_configure',
               'create_index',
@@ -39,6 +44,17 @@ export const goldenClusterPrivileges = {
               'read',
               'view_index_metadata',
             ],
+          },
+          {
+            names: [LOGS_INDEX_PATTERN],
+            privileges: ['read', 'view_index_metadata'],
+            // Kibana's API-key route accepts DLS queries as JSON strings. API-key role
+            // descriptors are immutable, so changes to this allowlist require key rotation.
+            query: JSON.stringify({
+              terms: {
+                event_name: Object.values(EVALS_EVIDENCE_LOG_EVENT_NAMES),
+              },
+            }),
           },
           {
             names: [

@@ -21,7 +21,8 @@ export type { SloDataFixture } from './src/playwright/fixtures/worker';
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, tags } from '@kbn/scout';
 
-// Custom global setup/teardown hooks with profiling support
+export { KibanaCodeEditorWrapper } from '@kbn/scout';
+// Custom global setup hook with profiling support
 export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hook';
 
 // re-exported fixtures & configuration from @kbn/scout
@@ -70,7 +71,13 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
+export type {
+  ApiServicesFixture,
+  BrowserAuthFixture,
+  SamlAuth,
+  ApiClientResponse,
+  RoleSessionCredentials,
+} from '@kbn/scout';
 export type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker/api_client';
 
 // Re-exported service & configuration types

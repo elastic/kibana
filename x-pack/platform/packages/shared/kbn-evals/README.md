@@ -51,6 +51,7 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
 | `--grep <pattern>`  | Filter tests by name                                                   |
 | `--repetitions <n>` | Repeat each example N times                                            |
+| `--concurrency <n>` | Examples each experiment runs at once (default 5)                      |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
 | `--skip-init`       | Skip config and connector setup                                        |
@@ -72,14 +73,19 @@ Use `--datasets-profile` when dataset credentials should come from the shared go
 node scripts/evals start --suite agent-builder --datasets-profile dev-vault
 ```
 
-#### Filtering, model selection, judge, repetitions
+#### Filtering, model selection, judge, repetitions, concurrency
 
 ```bash
 node scripts/evals start --suite agent-builder --grep "product documentation"
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-claude-4-5-sonnet
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
 node scripts/evals start --suite agent-builder --repetitions 3
+node scripts/evals start --suite agent-builder --concurrency 8
 ```
+
+`--concurrency` (or `EVAL_CONCURRENCY`) sets how many examples each experiment runs at once. It falls back to the `concurrency` passed to `createPlaywrightEvalsConfig`, then 5. A spec that passes its own `concurrency` to `runExperiment` still wins, and the run logs a warning when that overrides the value you asked for. Server-side limits such as Task Manager capacity stay with the suite's Scout config set.
+
+> **Rate limits:** Concurrent LLM calls are roughly workers × concurrency. Connectors such as EIS and OpenRouter enforce requests-per-minute limits, so a high `--concurrency` can cause 429 (rate limit) errors. If they occur, reduce `--concurrency` or set `KBN_EVALS_HTTP_RETRIES` to retry `fetch` requests (off by default).
 
 #### Advanced options
 
@@ -92,7 +98,7 @@ If you have an OpenRouter API key (from vault config or `OPENROUTER_API_KEY`):
 bash x-pack/platform/packages/shared/kbn-evals/scripts/openrouter/dev_env.sh
 ```
 
-This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_AI_CONNECTORS`.
+This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_INFERENCE_ENDPOINTS`.
 
 </details>
 
@@ -201,6 +207,55 @@ When the labels match, PR CI triggers the dedicated
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
 
+#### Per-spec model groups
+
+The weekly run normally runs every model in a suite against every spec. To run a spec against
+fewer models, list it under `specModelGroups` in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json):
+
+```jsonc
+{
+  "id": "significant-events",
+  "weeklyEisModelGroups": ["eis/openai-gpt-5.4", "eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4-mini"],
+  "specModelGroups": [
+    { "files": ["evals/discovery/discovery.spec.ts"], "models": ["eis/openai-gpt-5.4"] },
+    { "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"], "models": ["eis/openai-gpt-5.4-mini"] }
+  ]
+}
+```
+
+- `files` are paths relative to the suite's config directory.
+- A spec without an entry (or without `models`) runs against the whole `weeklyEisModelGroups` list.
+- Every model in `specModelGroups` must be in `weeklyEisModelGroups`, and every model there must
+  be in the weekly step's `EVAL_MODEL_GROUPS` in `llm_evals.yml`. Both are checked in PR CI. The
+  weekly run requests `EVAL_MODEL_GROUPS`; EIS provisions every model it discovers.
+- `shards` are unrelated. They decide which specs share a CI step, not which models run.
+- Only the weekly run (`KBN_EVALS_WEEKLY=1`) applies this. PR and on-demand runs still run every
+  model against every spec.
+
+`spec_model_groups.test.js` fails PR CI if an entry points at a missing file, lists a file twice,
+names a model outside the weekly list, or leaves a spec on disk unlisted.
+
+**Preview the fanout locally.** `get_fanout_matrix.js` prints one `{ connectorId, shardId,
+specFiles }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
+suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
+
+```bash
+CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
+export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
+  | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })
+  | from_entries' <<<"$EVAL_SUITE_INFO")"
+KBN_EVALS_WEEKLY=1 node $CI/get_fanout_matrix.js
+```
+
+**Run it on real agents.** Start an [on-demand build](#13-on-demand-evals-buildkite) with
+`KBN_EVALS_WEEKLY=1` in the build environment. `KBN_EVALS_WEEKLY` also makes the notify step post
+to the suite's team Slack channel, so build from a branch name in `elastic/kibana` (not
+`refs/pull/<N>/head`) and leave `EVAL_SLACK_NOTIFICATION_CHANNEL` unset. Then no notify step is
+created.
+
 ---
 
 ### 1.3 On-demand evals (Buildkite)
@@ -218,9 +273,11 @@ Run a suite on any branch without a PR:
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_CONCURRENCY`                | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
 | `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
 | `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
@@ -265,6 +322,38 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 Each eval suite lives in its own `kbn-evals-suite-<name>` package. The package contains a Playwright config, evaluation specs, and optionally custom fixtures.
 
 To scaffold a new suite, you can use the [`evals-create-suite`](../../../../../.agents/skills/evals-create-suite/SKILL.md) skill (available to AI coding agents) or follow its templates manually. Register suites in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) for CI labeling and `node scripts/evals list`.
+
+### Suite-owned secrets (`scoutHook`)
+
+A suite whose Scout server needs secrets from the evals config can map them into env with a hook in its own package, rather than teaching the shared evals tooling about them. Point `scoutHook` in its `evals.suites.json` entry at a repo-relative bash script:
+
+```json
+{
+  "id": "my-suite",
+  "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
+  "serverConfigSet": "evals_my_suite",
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+}
+```
+
+The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+
+### Serverless suites (`scoutArch` / `scoutDomain`)
+
+Suites run on a stateful/classic Scout cluster unless their `evals.suites.json` entry says otherwise:
+
+```json
+{
+  "id": "my-suite",
+  "serverConfigSet": "evals_my_suite",
+  "scoutArch": "serverless",
+  "scoutDomain": "observability_complete"
+}
+```
+
+Scout then starts with that arch and domain, locally and in CI, so the config set needs a matching `serverless/observability_complete.serverless.config.ts` (start from the serverless `evals_tracing` config). Serverless Elasticsearch runs in Docker, and GCS snapshot restores work as on stateful.
+
+To run a suite on a different arch or domain locally, pass `--scout-arch` / `--scout-domain` to `node scripts/evals start`, for example `--scout-arch stateful`. Switching restarts Scout.
 
 ### Playwright config
 
@@ -392,7 +481,7 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Correctness` -- checks factual accuracy against expected output
   - `Groundedness` -- verifies claims are supported by provided context
 - **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
-- **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
+- **IR (information retrieval)** -- `createIrEvaluators` (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K)
 - **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
 You can use these as-is or build your own directly in the suite.
@@ -471,6 +560,73 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ## 4. Developer details
 
+### Connector definitions and inference endpoints
+
+Model definitions come from two sources:
+
+1. `KIBANA_TESTING_INFERENCE_ENDPOINTS` — **inference endpoint definitions** (base64-encoded or raw JSON, set by CI or exported by `node scripts/evals init`).
+2. `KIBANA_TESTING_AI_CONNECTORS` or, locally, `xpack.actions.preconfigured` in `config/kibana.dev.yml` — **stack connector definitions** (Actions saved objects, e.g. the workflow suites' mock Slack/email connectors).
+
+`KIBANA_TESTING_INFERENCE_ENDPOINTS` example (decoded):
+
+```json
+{
+  "eis-anthropic-claude-sonnet-4-6": {
+    "name": "EIS anthropic-claude-sonnet-4-6",
+    "inferenceId": ".anthropic-claude-sonnet-4-6-chat_completion",
+    "provider": "elastic",
+    "taskType": "chat_completion",
+    "providerConfig": { "model_id": "anthropic-claude-sonnet-4-6" }
+  },
+  "openrouter-openai-gpt-4o": {
+    "name": "OpenRouter openai/gpt-4o",
+    "inferenceId": "openrouter-openai-gpt-4o",
+    "provider": "openai",
+    "taskType": "chat_completion",
+    "providerConfig": {
+      "model_id": "openai/gpt-4o",
+      "url": "https://openrouter.ai/api/v1/chat/completions"
+    },
+    "secrets": { "providerSecrets": { "api_key": "<api key>" } }
+  }
+}
+```
+
+#### Migrating `.gen-ai` definitions
+
+**deprecated `.gen-ai` stack connector**, `.gen-ai` definitions are no longer recognized as LLM definitions.
+
+Preferred replacement: an inference endpoint definition in `KIBANA_TESTING_INFERENCE_ENDPOINTS` (see the `openrouter-openai-gpt-4o` entry above). If you would rather keep the model in `kibana.dev.yml`, use a preconfigured `.inference` stack connector, Kibana creates the underlying endpoint at startup and evals reuses the preconfigured connector:
+
+```yaml
+# Before
+xpack.actions.preconfigured:
+  my-gpt:
+    name: My GPT
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://openrouter.ai/api/v1/chat/completions
+      defaultModel: openai/gpt-4o
+    secrets:
+      apiKey: '<api key>'
+
+# After
+xpack.actions.preconfigured:
+  openrouter-openai-gpt-4o:
+    name: OpenRouter openai/gpt-4o
+    actionTypeId: .inference
+    config:
+      provider: openai
+      taskType: chat_completion
+      inferenceId: openrouter-openai-gpt-4o
+      providerConfig:
+        model_id: openai/gpt-4o
+        url: https://openrouter.ai/api/v1/chat/completions
+    secrets:
+      providerSecrets:
+        api_key: '<api key>'
+```
+
 ### Automated label sync
 
 `models:*` and `models:judge:*` labels are synced automatically:
@@ -491,11 +647,28 @@ Update all model + judge labels:
 
 Update Vault config:
 
+| `--vault` | Path                                        | Read by                 |
+| --------- | ------------------------------------------- | ----------------------- |
+| `ci-prod` | `kv/ci-shared/kbn-evals/golden` (KV v2)     | CI (`setup_job_env.sh`) |
+| `dev`     | `secret/kibana-issues/dev/kbn-evals/golden` | `--profile dev-vault`   |
+
+Log in to the matching Vault first; the scripts print the login command if your token is missing or expired. `--vault ci-prod` ignores `VAULT_ADDR`; set `KBN_EVALS_CI_PROD_VAULT_ADDR` to override its address.
+
 ```bash
-# Edit scripts/vault/config.json, then generate a vault write command:
-node scripts/vault/get_command.js --vault ci-prod
-# Sync from Vault:
+# Sync scripts/vault/config.json from Vault, edit it, then upload it:
 node scripts/vault/retrieve_secrets.js --vault ci-prod
+node scripts/vault/upload_secrets.js --vault ci-prod
+
+# Or print the vault command instead of running it. The command holds the whole config inline,
+# so running it puts the secret in your shell history; prefer upload_secrets.js.
+node scripts/vault/get_command.js --vault ci-prod
+```
+
+Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again. Retrieve validates the config and fails before touching `config.json` if the version can't be read:
+
+```bash
+node scripts/vault/retrieve_secrets.js --vault ci-prod --version <n>
+node scripts/vault/upload_secrets.js --vault ci-prod
 ```
 
 ### CI telemetry
@@ -510,7 +683,10 @@ Grants:
 
 - Write/read `.evaluation-scores*` (results)
 - Write/read `traces-*` (OTLP traces)
+- Read evidence events from `logs-*`, restricted by document-level security
 - Write/read/delete `.evaluation-dataset*` (managed datasets)
 - Kibana `evals` feature privilege (`all`)
+
+The log-event allowlist is embedded in the API key. Regenerate existing keys when support for a new log-backed instrumentation profile or event name is added.
 
 With `--profile dev-vault`, these keys are read from Vault automatically.

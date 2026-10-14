@@ -15,6 +15,10 @@ Array [
     "taskType": "agent_builder_sml:sml_crawler",
   },
   Object {
+    "priority": 1,
+    "taskType": "nightshift-investigations:reconcile_investigation_statuses",
+  },
+  Object {
     "priority": 40,
     "taskType": "alerting:attack-discovery",
   },

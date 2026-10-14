@@ -7,8 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import {
   ConfirmBuilderToEsqlModal,
   CONFIRM_BUILDER_TO_ESQL_VARIANT,
@@ -30,18 +29,18 @@ describe('ConfirmBuilderToEsqlModal', () => {
       expect(screen.getByText(/Switching to ES\|QL mode is permanent/)).toBeInTheDocument();
     });
 
-    it('calls onConfirm when the confirm button is clicked', async () => {
+    it('calls onConfirm when the confirm button is clicked', () => {
       render(<ConfirmBuilderToEsqlModal onConfirm={onConfirm} onCancel={onCancel} />);
 
-      await userEvent.click(screen.getByText('Open in ES|QL mode'));
+      fireEvent.click(screen.getByText('Open in ES|QL mode'));
       expect(onConfirm).toHaveBeenCalledTimes(1);
       expect(onCancel).not.toHaveBeenCalled();
     });
 
-    it('calls onCancel when the cancel button is clicked', async () => {
+    it('calls onCancel when the cancel button is clicked', () => {
       render(<ConfirmBuilderToEsqlModal onConfirm={onConfirm} onCancel={onCancel} />);
 
-      await userEvent.click(screen.getByText('Cancel'));
+      fireEvent.click(screen.getByText('Cancel'));
       expect(onCancel).toHaveBeenCalledTimes(1);
       expect(onConfirm).not.toHaveBeenCalled();
     });
@@ -63,7 +62,7 @@ describe('ConfirmBuilderToEsqlModal', () => {
       ).toBeInTheDocument();
     });
 
-    it('calls onConfirm when the confirm button is clicked', async () => {
+    it('calls onConfirm when the confirm button is clicked', () => {
       render(
         <ConfirmBuilderToEsqlModal
           variant={CONFIRM_BUILDER_TO_ESQL_VARIANT.INCOMPATIBLE_QUERY}
@@ -72,7 +71,7 @@ describe('ConfirmBuilderToEsqlModal', () => {
         />
       );
 
-      await userEvent.click(screen.getByText('Open in ES|QL mode'));
+      fireEvent.click(screen.getByText('Open in ES|QL mode'));
       expect(onConfirm).toHaveBeenCalledTimes(1);
     });
   });

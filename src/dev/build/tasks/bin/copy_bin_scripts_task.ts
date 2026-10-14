@@ -22,13 +22,11 @@ export const CopyBinScripts: Task = {
       const scriptsDest = build.resolvePathForPlatform(platform, 'bin');
       mkdirSync(scriptsDest, { recursive: true });
 
-      // [rspack-transition] When the legacy optimizer is removed, delete the rspack variable.
       const templateVars = {
         darwin: platform.isMac(),
         linux: platform.isLinux(),
         serverless: platform.isServerless(),
         forcePointerCompression: Boolean(process.env.CI_FORCE_NODE_POINTER_COMPRESSION), // for .buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
-        rspack: process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1',
       };
 
       if (platform.isWindows()) {

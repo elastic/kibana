@@ -29,7 +29,7 @@ test.describe(
     });
 
     test('shows active and total alert counts', async ({ pageObjects }) => {
-      const { alertsTablePage, alertControls } = pageObjects;
+      const { alertsTablePage, controls } = pageObjects;
 
       await test.step('reflects only active alerts while the status filter is active', async () => {
         await expect(alertsTablePage.summaryWidget).toBeVisible();
@@ -39,7 +39,7 @@ test.describe(
       });
 
       await test.step('reflects all alerts once the status filter is cleared', async () => {
-        await alertControls.clearControlSelections(ALERT_STATUS_CONTROL_ID);
+        await controls.clearSelections(ALERT_STATUS_CONTROL_ID);
         await alertsTablePage.waitForTableToLoad();
         await expect(alertsTablePage.summaryActiveAlertCount).toHaveText(`${ALERT_COUNTS.ACTIVE}`);
         await expect(alertsTablePage.summaryTotalAlertCount).toHaveText(`${ALERT_COUNTS.ALL}`);

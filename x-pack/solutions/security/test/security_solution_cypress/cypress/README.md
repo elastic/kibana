@@ -59,7 +59,7 @@ Please, before opening a PR with a new test, make sure that the test fails. If y
 
 When running the tests, FTR is used to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section).
 
-Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
+Run the tests with the following pnpm scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                                                  | Description                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -261,7 +261,7 @@ Note that we use tags in order to select which tests we want to execute, if you 
 
 ### Running serverless tests locally pointing to FTR serverless (First Quality Gate)
 
-Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
+Run the tests with the following pnpm scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                                                         | Description                                                                                                                                                                                                                     |
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -392,7 +392,7 @@ after(() => {
 Note that when using any of the below scripts, the tests are going to be executed through an MKI project with the version that is currently available in QA. If you need to use
 a specific commit (i.e. debugging a failing tests on the periodic pipeline), check the section: `Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image`.
 
-Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
+Run the tests with the following pnpm scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                                               | Description                                                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -455,7 +455,7 @@ In order to check for the existance of an image check: https://container-library
 You need to have everything setup as mentioned above in `Setup required`. Once the setup is ready you just need to execute Cypress with the following option:
 
 ```
-yarn cypress:open:qa:serverless --commit <commitHash>
+pnpm cypress:open:qa:serverless --commit <commitHash>
 ```
 
 #### Testing with different roles
@@ -523,19 +523,19 @@ describe('Entity Analytics Dashboard in Serverless', {
 For test developing or test debugging purposes on QA, you have avaialable the following options:
 
 ```
-yarn cypress:open:qa:serverless --tier <essentials|complete>
+pnpm cypress:open:qa:serverless --tier <essentials|complete>
 ```
 
 The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa environment with the passed tier essentials or complete. If no flag is passed, the project will be created as complete.
 
 ```
-yarn cypress:open:qa:serverless --no-endpoint-addon
+pnpm cypress:open:qa:serverless --no-endpoint-addon
 ```
 
 The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa environment without the endpoint add-on.
 
 ```
-yarn cypress:open:qa:serverless --no-cloud-addon
+pnpm cypress:open:qa:serverless --no-cloud-addon
 ```
 
 The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa environment without the cloud add-on.

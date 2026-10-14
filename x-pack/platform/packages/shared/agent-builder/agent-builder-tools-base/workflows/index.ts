@@ -20,6 +20,7 @@ export {
 export type { WorkflowExecutionResult } from './execute_workflow_types';
 export {
   hasWorkflowReadPrivilege,
+  hasWorkflowExecutionReadPrivilege,
   hasWorkflowExecutePrivilege,
   hasWorkflowCreatePrivilege,
   hasWorkflowUpdatePrivilege,

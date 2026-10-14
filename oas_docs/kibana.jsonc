@@ -1,0 +1,8 @@
+{
+  "type": "tooling",
+  "id": "@kbn/oas-docs",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

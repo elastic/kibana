@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import {
+  ALL_SAVED_OBJECT_INDICES,
+  SEARCH_SOLUTION_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+// No saved object types are registered in the search solution index, so it is not created.
+const SAVED_OBJECT_INDICES = ALL_SAVED_OBJECT_INDICES.filter(
+  (index) => index !== SEARCH_SOLUTION_SAVED_OBJECT_INDEX
+);
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('GET /internal/security/fields/{query}', () => {
       it('should return a list of available index mapping fields', async () => {
         await supertest
-          .get(`/internal/security/fields/${ALL_SAVED_OBJECT_INDICES.join(',')}`)
+          .get(`/internal/security/fields/${SAVED_OBJECT_INDICES.join(',')}`)
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)

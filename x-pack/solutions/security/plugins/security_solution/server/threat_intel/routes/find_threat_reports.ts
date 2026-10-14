@@ -8,6 +8,7 @@
 import {
   FIND_THREAT_REPORTS_API_PATH,
   findThreatReportsQuerySchema,
+  findThreatReportsResponseSchema,
   type ThreatReportSort,
 } from '../../../common/threat_intel';
 import { findThreatReports } from '../services/find_threat_reports';
@@ -36,7 +37,10 @@ export const registerFindThreatReportsRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: { request: { query: findThreatReportsQuerySchema } },
+        validate: {
+          request: { query: findThreatReportsQuerySchema },
+          response: { 200: { body: () => findThreatReportsResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);

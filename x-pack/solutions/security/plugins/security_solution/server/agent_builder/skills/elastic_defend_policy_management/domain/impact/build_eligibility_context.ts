@@ -12,6 +12,7 @@ import {
 } from '../../../../../../common/endpoint/models/policy_config';
 import {
   ensureOnlyEventCollectionIsAllowed,
+  removeCustomYaraSignatures,
   removeDeviceControl,
 } from '../../../../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
@@ -24,6 +25,8 @@ export interface BuildEligibilityContextInput {
   readonly endpointPolicyProtections: boolean;
   readonly endpointTrustedDevices: boolean;
   readonly trustedDevicesExperimental: boolean;
+  readonly endpointCustomYaraSignatures: boolean;
+  readonly customYaraSignaturesExperimental: boolean;
   readonly endpointProtectionUpdates: boolean;
   readonly serverless: boolean;
 }
@@ -34,6 +37,8 @@ export const buildEligibilityContext = ({
   endpointPolicyProtections,
   endpointTrustedDevices,
   trustedDevicesExperimental,
+  endpointCustomYaraSignatures,
+  customYaraSignaturesExperimental,
   endpointProtectionUpdates,
   serverless,
 }: BuildEligibilityContextInput): EligibilityContext => {
@@ -54,6 +59,13 @@ export const buildEligibilityContext = ({
     deviceControlReason: endpointTrustedDevices
       ? 'trusted_devices_experimental_disabled'
       : 'endpoint_trusted_devices_disabled',
+    customYaraSignaturesStripped:
+      endpointCustomYaraSignatures && customYaraSignaturesExperimental
+        ? proposedConfig
+        : removeCustomYaraSignatures(proposedConfig),
+    customYaraSignaturesReason: endpointCustomYaraSignatures
+      ? 'custom_yara_signatures_experimental_disabled'
+      : 'endpoint_custom_yara_signatures_disabled',
     endpointProtectionUpdates,
     serverless,
   };

@@ -25,6 +25,8 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
+import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -34,14 +36,21 @@ import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
-import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import type { AlertingV2HostApp } from '../locators';
+import type { AlertsKibanaServices } from '../alerts_kibana_services';
+import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
+import { ManageRulesHrefProvider } from './manage_rules_href_context';
+
+import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  hostApp?: AlertingV2HostApp;
+  hostApp: AlertingV2HostApp;
+  privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
+  createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  manageRulesHref?: string;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -52,13 +61,15 @@ export interface InternalPageProps extends AlertingV2PageProps {
 const StandardProviders = ({
   container,
   setBreadcrumbs,
-  hostApp = MANAGEMENT_HOST,
+  hostApp,
+  privilegeCheck,
   tabs,
   children,
 }: {
   container: Container;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  hostApp?: AlertingV2HostApp;
+  hostApp: AlertingV2HostApp;
+  privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   children: React.ReactNode;
 }) => {
@@ -73,7 +84,9 @@ const StandardProviders = ({
         <LocatorProvider locators={locators}>
           <TabsProvider tabs={tabs}>
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-              <I18nProvider>{children}</I18nProvider>
+              <PrivilegeCheckProvider value={privilegeCheck}>
+                <I18nProvider>{children}</I18nProvider>
+              </PrivilegeCheckProvider>
             </BreadcrumbProvider>
           </TabsProvider>
         </LocatorProvider>
@@ -86,12 +99,14 @@ export const AlertingV2RulesPage = ({
   container,
   setBreadcrumbs,
   hostApp,
+  privilegeCheck,
   tabs,
 }: InternalPageProps) => (
   <StandardProviders
     container={container}
     setBreadcrumbs={setBreadcrumbs}
     hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
     tabs={tabs}
   >
     <RulesApp />
@@ -102,8 +117,14 @@ export const AlertingV2RuleLibraryPage = ({
   container,
   setBreadcrumbs,
   hostApp,
+  privilegeCheck,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
     <RuleLibraryApp />
   </StandardProviders>
 );
@@ -112,8 +133,14 @@ export const AlertingV2ActionPoliciesPage = ({
   container,
   setBreadcrumbs,
   hostApp,
+  privilegeCheck,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
     <ActionPoliciesApp />
   </StandardProviders>
 );
@@ -122,8 +149,14 @@ export const AlertingV2ExecutionHistoryPage = ({
   container,
   setBreadcrumbs,
   hostApp,
+  privilegeCheck,
 }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp}>
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
     <ExecutionHistoryApp />
   </StandardProviders>
 );
@@ -134,7 +167,10 @@ export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
   setBreadcrumbs,
-  hostApp = MANAGEMENT_HOST,
+  hostApp,
+  privilegeCheck,
+  createActions,
+  manageRulesHref,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
   const locators = useMemo(() => {
@@ -142,7 +178,18 @@ export const AlertingV2EpisodesPage = ({
     return bindLocatorsToHost(getAlertingV2Locators(share), hostApp);
   }, [container, hostApp]);
 
-  const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
+  const dataSource: EpisodeDataSource = useMemo(
+    () =>
+      createActions
+        ? {
+            ...CLASSIC_ALERTS_DATA_SOURCE,
+            createActions,
+          }
+        : CLASSIC_ALERTS_DATA_SOURCE,
+    [createActions]
+  );
+
+  const kibanaReactServices: AlertsKibanaServices = useMemo(
     () => ({
       ...coreStart,
       share: container.get(PluginStart('share')) as SharePluginStart,
@@ -167,9 +214,13 @@ export const AlertingV2EpisodesPage = ({
         <QueryClientProvider client={queryClient}>
           <LocatorProvider locators={locators}>
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-              <I18nProvider>
-                <EpisodesApp />
-              </I18nProvider>
+              <PrivilegeCheckProvider value={privilegeCheck}>
+                <ManageRulesHrefProvider value={manageRulesHref}>
+                  <I18nProvider>
+                    <EpisodesApp dataSource={dataSource} />
+                  </I18nProvider>
+                </ManageRulesHrefProvider>
+              </PrivilegeCheckProvider>
             </BreadcrumbProvider>
           </LocatorProvider>
         </QueryClientProvider>

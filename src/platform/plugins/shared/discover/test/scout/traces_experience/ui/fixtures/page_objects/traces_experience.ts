@@ -31,13 +31,13 @@ export class TracesExperiencePage {
     page: ScoutPage,
     private readonly dataGrid: PageObjects['dataGrid'],
     private readonly docViewer: DiscoverPageObjects['docViewer'],
-    discover: PageObjects['discover']
+    controls: PageObjects['controls']
   ) {
     this.apm = createApmPage(page);
     this.flyout = createTracesFlyout(page);
     this.grid = createTracesGrid();
     this.charts = createTracesCharts(page);
-    this.controls = createTracesControls(discover);
+    this.controls = createTracesControls(controls);
   }
 
   public async openDocumentFlyout(rowIndex = 0) {

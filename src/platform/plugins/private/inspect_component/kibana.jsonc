@@ -5,6 +5,7 @@
   "group": "platform",
   "description": "A plugin which lets you inspect React components in devlopment environment.",
   "visibility": "private",
+  "devOnly": true,
   "plugin": {
     "id": "inspectComponent",
     "browser": true,

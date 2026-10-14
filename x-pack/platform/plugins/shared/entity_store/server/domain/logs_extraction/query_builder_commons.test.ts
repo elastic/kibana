@@ -8,7 +8,10 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import {
+  getEntityDefinition,
+  getBuiltInEntityDefinition,
+} from '../../../common/domain/definitions/registry';
 import type {
   EntityField,
   SetFieldsByCondition,
@@ -50,7 +53,7 @@ describe('exported field name constants', () => {
 describe('buildExtractionSourceClause', () => {
   const baseParams = {
     indexPatterns: ['logs-*', 'metrics-*'],
-    type: 'host' as const,
+    entityDefinition: getEntityDefinition('host', 'default'),
     fromDateISO: '2024-01-01T00:00:00.000Z',
     toDateISO: '2024-01-02T00:00:00.000Z',
   };
@@ -64,7 +67,9 @@ describe('buildExtractionSourceClause', () => {
     expect(withCursor).not.toContain('METADATA');
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
-    expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+    expect(withCursor).toContain(
+      getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))
+    );
 
     const withoutCursor = buildExtractionSourceClause({ ...baseParams });
     expect(withoutCursor).toContain(

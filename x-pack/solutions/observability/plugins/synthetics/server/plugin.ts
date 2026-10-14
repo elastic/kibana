@@ -22,7 +22,8 @@ import type {
   SyntheticsPluginsStartDependencies,
   SyntheticsServerSetup,
 } from './types';
-import { TelemetryEventsSender } from './telemetry/sender';
+import { registerSyntheticsEventTypes } from './telemetry/events';
+import { SyntheticsTelemetry } from './telemetry/synthetics_telemetry';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
 import { syntheticsFeature } from './feature';
@@ -37,6 +38,7 @@ import {
   PRIVATE_LOCATIONS_SYNC_TASK_ID,
 } from './tasks/sync_private_locations_monitors_task';
 import { RebalancePrivateLocationShardsTask } from './tasks/rebalance_private_location_shards_task';
+import { ensureCleanUpTaskScheduled } from './tasks/clean_up_package_policies_task';
 import { flushPendingAgentPolicyRevisionBumps } from './synthetics_service/private_location/package_policy_service';
 import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
@@ -52,14 +54,13 @@ export class Plugin implements PluginType {
   private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
-  private readonly telemetryEventsSender: TelemetryEventsSender;
+  private telemetry?: SyntheticsTelemetry;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
   private rebalancePrivateLocationShardsTask?: RebalancePrivateLocationShardsTask;
   private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
@@ -80,6 +81,8 @@ export class Plugin implements PluginType {
       ],
     });
 
+    this.telemetry = new SyntheticsTelemetry(core.analytics, this.logger);
+
     this.server = {
       config,
       router: core.http.createRouter(),
@@ -87,7 +90,7 @@ export class Plugin implements PluginType {
       stackVersion: this.initContext.env.packageInfo.version,
       basePath: core.http.basePath,
       logger: this.logger,
-      telemetry: this.telemetryEventsSender,
+      telemetry: this.telemetry,
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
       alerting: plugins.alerting,
@@ -101,7 +104,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
-    this.telemetryEventsSender.setup(plugins.telemetry);
+    registerSyntheticsEventTypes(core.analytics);
 
     plugins.features.registerKibanaFeature(syntheticsFeature);
 
@@ -187,9 +190,15 @@ export class Plugin implements PluginType {
       this.logger.error('Failed to start rebalance private location shards task', { error: e });
     });
 
+    if (this.server) {
+      ensureCleanUpTaskScheduled(this.server).catch((e) => {
+        this.logger.error('Failed to schedule package policy clean up task', { error: e });
+      });
+    }
+
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
+    this.telemetry?.loadLicenseInfo(coreStart.elasticsearch.client.asInternalUser).catch(() => {});
   }
 
   public async stop() {

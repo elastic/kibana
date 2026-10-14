@@ -22,8 +22,7 @@ const parseIndicatorListMock = parseIndicatorList as jest.MockedFunction<typeof 
 // ---------------------------------------------------------------------------
 
 const FIXED_NOW = new Date('2024-01-15T12:00:00.000Z');
-const TRAIL_URL =
-  'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt';
+const TRAIL_URL = 'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt';
 
 // Exposed for chunking tests — must match adapter constant.
 const MAX_NESTED_PER_DOC = 5000;

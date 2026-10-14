@@ -7,10 +7,8 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import {
-  OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_RULES_V1_PATH,
-} from '../../../../../public/constants';
+import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ALERTING_RULES_V1_PATH } from '../../../../../public/constants';
 
 const V1_BASE = `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`;
 const escapeRe = (value: string) => value.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -21,10 +19,11 @@ export const OBS_V1_LOGS_URL_RE = new RegExp(`${V1_BASE_RE}\\/logs(\\/|$|\\?|#)`
 export const OBS_V1_CREATE_URL_RE = new RegExp(`${V1_BASE_RE}\\/create\\/`);
 export const OBS_V1_EDIT_URL_RE = new RegExp(`${V1_BASE_RE}\\/edit\\/`);
 export const OBS_V1_DETAILS_URL_RE = new RegExp(`${V1_BASE_RE}\\/rule\\/[^/?#]+`);
-export const OBS_V1_RULE_NAME_HREF_RE = /\/observability\/alerting\/rules\/v1\/rule\//;
-export const OBS_V1_LIST_HREF_RE = /\/observability\/alerting\/rules\/v1\/?(?:\?|#|$)/;
-/** `/rules/v1` is the list; an extra `/rules` segment is the old TAU redirect path. */
-export const OBS_V1_NESTED_RULES_URL_RE = /\/observability\/alerting\/rules\/v1\/rules(\/|$|\?|#)/;
+export const OBS_V1_RULE_NAME_HREF_RE = /\/observability\/alerting\/rules\/classic\/rule\//;
+export const OBS_V1_LIST_HREF_RE = /\/observability\/alerting\/rules\/classic\/?(?:\?|#|$)/;
+/** `/rules/classic` is the list; an extra `/rules` segment is the old TAU redirect path. */
+export const OBS_V1_NESTED_RULES_URL_RE =
+  /\/observability\/alerting\/rules\/classic\/rules(\/|$|\?|#)/;
 
 /** Stack Management classic (v1) Rules tree — observability host-aware nav must not land here. */
 export const MANAGEMENT_CLASSIC_RULES_URL_RE =
@@ -33,7 +32,7 @@ export const STANDALONE_RULES_APP_URL_RE = /\/app\/rules(\/|$|\?|#)/;
 
 /**
  * Drives the classic (v1) Rules page on the Observability Alerting mount
- * (`/app/observability/alerting/rules/v1`).
+ * (`/app/observability/alerting/rules/classic`).
  */
 export class ObservabilityClassicRulesPage {
   public readonly pageTitle: Locator;

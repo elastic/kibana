@@ -20,7 +20,8 @@ export const AiSummarizeStepDefinition = createPublicStepDefinition({
     config: {
       'connector-id': {
         connectorIdSelection: {
-          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          connectorTypes: ['inference.unified_completion'],
+          inferenceFeatureId: 'ai_summarize',
           enableCreation: false,
         },
       },

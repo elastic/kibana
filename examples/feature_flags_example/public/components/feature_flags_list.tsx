@@ -21,24 +21,6 @@ export interface FeatureFlagsListProps {
   featureFlags: FeatureFlagsStart;
 }
 
-export const FeatureFlagsStaticList = ({ featureFlags }: FeatureFlagsListProps) => {
-  // Fetching the feature flags synchronously
-  const bool = featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false);
-  const str = featureFlags.getStringValue(FeatureFlagExampleString, 'red');
-  const num = featureFlags.getNumberValue(FeatureFlagExampleNumber, 1);
-
-  return (
-    <EuiListGroup>
-      <p>
-        The feature flags are:
-        <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool}`} />
-        <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str}`} />
-        <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num}`} />
-      </p>
-    </EuiListGroup>
-  );
-};
-
 export const FeatureFlagsReactiveList = ({ featureFlags }: FeatureFlagsListProps) => {
   // Use React Hooks to observe feature flags changes
   const bool$ = useObservable(featureFlags.getBooleanValue$(FeatureFlagExampleBoolean, false));
@@ -57,35 +39,20 @@ export const FeatureFlagsReactiveList = ({ featureFlags }: FeatureFlagsListProps
   );
 };
 
-export const FeatureFlagsFullList = ({ featureFlags }: FeatureFlagsListProps) => {
-  // Fetching the feature flags synchronously
-  const bool = featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false);
-  const str = featureFlags.getStringValue(FeatureFlagExampleString, 'red');
-  const num = featureFlags.getNumberValue(FeatureFlagExampleNumber, 1);
-
-  // Use React Hooks to observe feature flags changes
-  const bool$ = useObservable(featureFlags.getBooleanValue$(FeatureFlagExampleBoolean, false));
-  const str$ = useObservable(featureFlags.getStringValue$(FeatureFlagExampleString, 'red'));
-  const num$ = useObservable(featureFlags.getNumberValue$(FeatureFlagExampleNumber, 1));
+export const FeatureFlagsHooksList = ({ featureFlags }: FeatureFlagsListProps) => {
+  // Browser start contract hooks: first render is the synchronous evaluation, then updates follow
+  const bool = featureFlags.useBooleanValue(FeatureFlagExampleBoolean, false);
+  const str = featureFlags.useStringValue(FeatureFlagExampleString, 'red');
+  const num = featureFlags.useNumberValue(FeatureFlagExampleNumber, 1);
 
   return (
-    <>
-      <EuiListGroup>
-        <p>
-          The feature flags are:
-          <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool}`} />
-          <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str}`} />
-          <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num}`} />
-        </p>
-      </EuiListGroup>
-      <EuiListGroup>
-        <p>
-          The <strong>observed</strong> feature flags are:
-          <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool$}`} />
-          <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str$}`} />
-          <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num$}`} />
-        </p>
-      </EuiListGroup>
-    </>
+    <EuiListGroup>
+      <p>
+        The <strong>hook</strong> feature flags are:
+        <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool}`} />
+        <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str}`} />
+        <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num}`} />
+      </p>
+    </EuiListGroup>
   );
 };

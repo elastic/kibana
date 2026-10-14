@@ -23,7 +23,7 @@ import {
  *   - move it to build_fields_zod_validator.test.ts with the expectation flipped to `toBe(false)`
  *
  * Run:
- *   yarn test:jest src/platform/plugins/shared/workflows_management/common/lib/json_schema_to_zod.ignored_keywords.test.ts
+ *   pnpm test:jest src/platform/plugins/shared/workflows_management/common/lib/json_schema_to_zod.ignored_keywords.test.ts
  */
 describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
   // ─── uniqueItems ─────────────────────────────────────────────────────────────

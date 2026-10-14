@@ -37,17 +37,17 @@ describe('useConnectorUsedByAgents', () => {
     expect(result.current.usedByAgents.map((a) => a.id)).toEqual(['agent-2']);
   });
 
-  it('includes agents with connector_ids === undefined (means all connectors)', () => {
+  it('excludes agents with connector_ids === undefined (no connectors assigned)', () => {
     const { result } = setup('c1', 'agent-1', [
       agent('agent-1', ['c1']),
       agent('agent-2', undefined),
     ]);
-    expect(result.current.usedByAgents.map((a) => a.id)).toEqual(['agent-2']);
+    expect(result.current.usedByAgents).toEqual([]);
   });
 
-  it('includes agents with connector_ids === null (means all connectors)', () => {
+  it('excludes agents with connector_ids === null (no connectors assigned)', () => {
     const { result } = setup('c1', 'agent-1', [agent('agent-1', ['c1']), agent('agent-2', null)]);
-    expect(result.current.usedByAgents.map((a) => a.id)).toEqual(['agent-2']);
+    expect(result.current.usedByAgents).toEqual([]);
   });
 
   it('excludes agents whose connector_ids list does not include the connector', () => {
@@ -74,7 +74,7 @@ describe('useConnectorUsedByAgents', () => {
       agent('agent-3', undefined),
       agent('agent-4', ['c2']),
     ]);
-    expect(result.current.usedByAgents.map((a) => a.id)).toEqual(['agent-2', 'agent-3']);
+    expect(result.current.usedByAgents.map((a) => a.id)).toEqual(['agent-2']);
   });
 
   it('passes through isLoading and error from useAgentBuilderAgents', () => {

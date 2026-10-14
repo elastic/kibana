@@ -6,7 +6,7 @@ Minimal test application for the `@kbn/ui-side-navigation` package.
 
 ```bash
 # From the Kibana root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # Build the package
 cd src/platform/kbn-ui/side-navigation/packaging
@@ -17,7 +17,7 @@ cd src/platform/kbn-ui/side-navigation/packaging
 
 ```bash
 cd src/platform/kbn-ui/side-navigation/packaging/example
-yarn start
+pnpm start
 ```
 
 Opens http://localhost:3000.

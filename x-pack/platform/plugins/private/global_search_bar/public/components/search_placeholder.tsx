@@ -6,58 +6,55 @@
  */
 
 import React from 'react';
-import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiIllustration, EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { generatePreview } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface SearchPlaceholderProps {
-  basePath: string;
   customPlaceholderMessage?: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
 export const SearchPlaceholder = ({
-  basePath,
   customPlaceholderMessage,
+  'data-test-subj': dataTestSubj = 'nav-search-no-results',
 }: SearchPlaceholderProps) => {
-  const { colorMode } = useEuiTheme();
-
   return (
     <EuiFlexGroup
       style={{ minHeight: 300 }}
-      data-test-subj="nav-search-no-results"
+      data-test-subj={dataTestSubj}
       direction="column"
       gutterSize="xs"
       alignItems="center"
       justifyContent="center"
     >
       <EuiFlexItem grow={false}>
-        <EuiImage
-          alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
-            defaultMessage: 'Illustration of black hole',
-          })}
-          size="fullWidth"
-          url={`${basePath}illustration_product_no_search_results_${
-            colorMode === 'DARK' ? 'dark' : 'light'
-          }.svg`}
+        <EuiIllustration
+          type={generatePreview}
+          alt=""
+          fullWidth={false}
+          style={{ maxInlineSize: 200, marginInline: 'auto' }}
         />
 
         {customPlaceholderMessage ?? (
           <>
-            <EuiText size="m">
-              <p>
+            <EuiTitle size="m">
+              <h2>
                 <FormattedMessage
                   id="xpack.globalSearchBar.searchBar.noResultsHeading"
                   defaultMessage="No results found"
                 />
+              </h2>
+            </EuiTitle>
+
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.noResults"
+                  defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+                />
               </p>
             </EuiText>
-
-            <p>
-              <FormattedMessage
-                id="xpack.globalSearchBar.searchBar.noResults"
-                defaultMessage="Try searching for applications, dashboards, visualizations, and more."
-              />
-            </p>
           </>
         )}
       </EuiFlexItem>

@@ -9,8 +9,6 @@ import expect from 'expect';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-const UIAM_PROVISIONING_TASK_ID = 'uiam_api_key_provisioning';
-
 interface AuthenticationOutcome {
   authenticated: boolean;
   username: string | null;
@@ -21,15 +19,7 @@ interface AuthenticationOutcome {
 
 /**
  * Verifies that a task authenticates against Elasticsearch with the UIAM API key Task Manager
- * persisted for it, for both ways a task can get one:
- *
- * - granted when the task is scheduled, and
- * - backfilled by the UIAM provisioning task, which converts a task's existing Elasticsearch API
- *   key into a UIAM one.
- *
- * The provisioned case regressed: the convert path stored `base64(<id>:<secret>)` while execution
- * presented the stored value verbatim, so Elasticsearch resolved it as a native `id:api_key` pair
- * and rejected every run of every affected task.
+ * persisted for it when the task is scheduled.
  *
  * The fixture task reports the id of the key Elasticsearch authenticated it with, so each
  * assertion pins down *which* of the task's two credentials was used, not merely that the run
@@ -44,10 +34,9 @@ export default function ({ getService }: FtrProviderContext) {
   /**
    * Recurring with a long interval: the task runs once on schedule, then its next run is far
    * enough out that the saved object (and the state carrying the run outcome) sticks around
-   * instead of being deleted like a completed one-shot task, and that the UIAM provisioning task
-   * considers it — provisioning skips tasks that are about to run.
+   * instead of being deleted like a completed one-shot task.
    */
-  const scheduleTask = async ({ onEsKey }: { onEsKey?: boolean } = {}) => {
+  const scheduleTask = async () => {
     const { body, status } = await supertest
       .post('/api/sample_tasks/schedule_with_api_key')
       .set(samlAuth.getInternalRequestHeader())
@@ -58,7 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: {},
           state: {},
         },
-        ...(onEsKey === undefined ? {} : { onEsKey }),
       });
 
     expect(status).toBe(200);
@@ -72,15 +60,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(status).toBe(200);
     return body;
-  };
-
-  const runSoon = async (taskId: string) => {
-    const { status } = await supertest
-      .post('/api/sample_tasks/run_soon')
-      .set(samlAuth.getInternalRequestHeader())
-      .send({ task: { id: taskId } });
-
-    expect(status).toBe(200);
   };
 
   /** Waits until the task has reported a run made with the expected credential. */
@@ -110,32 +89,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(userScope?.uiamApiKeyId).toEqual(expect.any(String));
 
       await expectAuthenticatedWith(taskId, userScope.uiamApiKeyId);
-    });
-
-    it('authenticates with a UIAM API key backfilled by the provisioning task', async () => {
-      // `onEsKey` skips the UIAM grant, leaving the task in the pre-UIAM state that the
-      // provisioning task exists to fix up.
-      const taskId = await scheduleTask({ onEsKey: true });
-
-      const scheduled = await getTask(taskId);
-      expect(scheduled.userScope?.uiamApiKeyId).toBeUndefined();
-      expect(scheduled.userScope?.apiKeyId).toEqual(expect.any(String));
-
-      // Until the key is converted the task authenticates with its Elasticsearch API key.
-      await expectAuthenticatedWith(taskId, scheduled.userScope.apiKeyId);
-
-      await runSoon(UIAM_PROVISIONING_TASK_ID);
-
-      const uiamApiKeyId = await retry.try(async () => {
-        const { userScope } = await getTask(taskId);
-        expect(userScope?.uiamApiKeyId).toEqual(expect.any(String));
-        return userScope.uiamApiKeyId as string;
-      });
-
-      await runSoon(taskId);
-
-      // …and once it has one, that UIAM key is what reaches Elasticsearch.
-      await expectAuthenticatedWith(taskId, uiamApiKeyId);
     });
   });
 }

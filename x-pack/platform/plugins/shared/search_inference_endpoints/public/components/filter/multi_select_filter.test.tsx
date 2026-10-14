@@ -65,6 +65,32 @@ describe('MultiSelectFilter', () => {
     });
   });
 
+  it('announces the number of selected options as part of the button name', () => {
+    const { getByRole } = render(
+      <MultiSelectFilter
+        onChange={() => {}}
+        options={options}
+        buttonLabel="Filter Options"
+        ariaLabel="Filter Options"
+        selectedOptionKeys={['1', '2']}
+      />
+    );
+
+    const button = getByRole('button', { name: /Filter Options/ });
+    expect(button).not.toHaveAttribute('aria-label');
+    expect(button).toHaveAccessibleName('Filter Options 2 active filters');
+  });
+
+  it('announces the number of available options when nothing is selected', () => {
+    const { getByRole } = render(
+      <MultiSelectFilter onChange={() => {}} options={options} buttonLabel="Filter Options" />
+    );
+
+    expect(getByRole('button', { name: /Filter Options/ })).toHaveAccessibleName(
+      'Filter Options 3 available filters'
+    );
+  });
+
   it('should call the onChange function with the updated options when an option is clicked', async () => {
     const onChange = jest.fn();
     const { getByText } = render(
