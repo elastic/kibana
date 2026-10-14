@@ -1049,6 +1049,18 @@ describe('ai indices routes', () => {
       values,
     });
 
+    const validateListKisQuery = (query: unknown) => {
+      const { validate } = getRoute('GET', AI_INDEX_KI_LIST_PATH);
+      const querySchema = (
+        validate as { request: { query: { validate: (v: unknown) => unknown } } }
+      ).request.query;
+      return querySchema.validate(query);
+    };
+
+    it('accepts scalar lifecycle_status as sent by ?lifecycle_status=deleted', () => {
+      expect(() => validateListKisQuery({ size: 25, lifecycle_status: 'deleted' })).not.toThrow();
+    });
+
     it('returns the current Knowledge Indicators from the destination', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esEsqlQuery
