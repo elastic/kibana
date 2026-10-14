@@ -17,10 +17,12 @@ import type {
 } from './create_data_source_flyout_authentication';
 
 const s3AccessAndSecretKeysFormatSettings = (dataSourceWithSecrets: S3DataSourceWithSecrets) => {
-  const { access_key, secret_key, region, endpoint } = dataSourceWithSecrets.settings || {};
+  const { access_key, secret_key, region, endpoint, addressing_style } =
+    dataSourceWithSecrets.settings || {};
   return {
     region,
     endpoint,
+    addressing_style,
     access_key,
     secret_key,
     auth: 'static_credentials',
@@ -28,11 +30,20 @@ const s3AccessAndSecretKeysFormatSettings = (dataSourceWithSecrets: S3DataSource
 };
 
 const s3FederatedIdentityFormatSettings = (dataSourceWithSecrets: S3DataSourceWithSecrets) => {
-  const { role_arn, jwt_audience, role_session_name, sts_endpoint, sts_region, region, endpoint } =
-    dataSourceWithSecrets.settings || {};
+  const {
+    role_arn,
+    jwt_audience,
+    role_session_name,
+    sts_endpoint,
+    sts_region,
+    region,
+    endpoint,
+    addressing_style,
+  } = dataSourceWithSecrets.settings || {};
   return {
     region,
     endpoint,
+    addressing_style,
     role_arn,
     jwt_audience,
     role_session_name,
@@ -43,10 +54,11 @@ const s3FederatedIdentityFormatSettings = (dataSourceWithSecrets: S3DataSourceWi
 };
 
 const s3AnonymousFormatSettings = (dataSourceWithSecrets: S3DataSourceWithSecrets) => {
-  const { region, endpoint } = dataSourceWithSecrets.settings || {};
+  const { region, endpoint, addressing_style } = dataSourceWithSecrets.settings || {};
   return {
     region,
     endpoint,
+    addressing_style,
     auth: 'anonymous',
   };
 };
