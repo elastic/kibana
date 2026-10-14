@@ -490,6 +490,29 @@ describe('DataStreamDataClient', () => {
     expect(esClient.mget).toHaveBeenCalledTimes(1);
   });
 
+  describe('refresh', () => {
+    it('refreshes the data stream and ignores a missing legacy index', async () => {
+      const { esClient, dataAccess } = createClient([LEGACY_INDEX]);
+
+      await dataAccess.refresh();
+
+      expect(esClient.indices.refresh).toHaveBeenNthCalledWith(1, { index: DATA_STREAM });
+      expect(esClient.indices.refresh).toHaveBeenNthCalledWith(2, {
+        index: [LEGACY_INDEX],
+        ignore_unavailable: true,
+      });
+    });
+
+    it('refreshes only the data stream when no legacy index is configured', async () => {
+      const { esClient, dataAccess } = createClient();
+
+      await dataAccess.refresh();
+
+      expect(esClient.indices.refresh).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: DATA_STREAM });
+    });
+  });
+
   describe('deleteByQuery', () => {
     const query = { term: { workflowId: 'wf-1' } };
 

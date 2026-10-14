@@ -300,6 +300,18 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     };
   }
 
+  // The stream refresh must fail if the stream is missing. Legacy indexes are optional, so a
+  // missing one is ignored; otherwise a purge retry would keep seeing a stale version.
+  public async refresh(): Promise<void> {
+    await this.deps.esClient.indices.refresh({ index: this.deps.dataStreamName });
+    if (this.additionalIndexesToQuery.length > 0) {
+      await this.deps.esClient.indices.refresh({
+        index: this.additionalIndexesToQuery,
+        ignore_unavailable: true,
+      });
+    }
+  }
+
   // Soft-deleted documents must not be visible to readers.
   private excludeDeleted(query?: estypes.QueryDslQueryContainer): estypes.QueryDslQueryContainer {
     return {
