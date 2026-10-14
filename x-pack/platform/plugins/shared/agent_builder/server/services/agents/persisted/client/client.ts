@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
+  agentApprovalsEqual,
   agentBuilderDefaultAgentId,
   chatAgentTypeId,
   createAgentNotFoundError,
@@ -28,6 +29,7 @@ import {
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   type AgentAccessControl,
   type AgentAccessControlEntry,
+  type AgentApprovals,
   type CurrentUser,
   type ToolSelection,
   type UserIdAndName,
@@ -50,7 +52,7 @@ import type {
   PersistedAgentDefinitionWithPermissions,
 } from '../types';
 import type { AgentAccess } from '../../agent_source';
-import type { AgentProfileStorage } from './storage';
+import type { AgentProfileStorage, AgentProperties } from './storage';
 import { createStorage } from './storage';
 import {
   accessControlUpdateToEs,
@@ -65,6 +67,7 @@ import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import {
+  hasConfigureApprovalsAccess,
   hasDeleteAccess,
   hasManageAccessControlAccess,
   hasReadAccess,
@@ -109,6 +112,39 @@ const assertCanConfigureWorkflows = ({
   if (!workflowIdsEqual(nextWorkflowIds, currentWorkflowIds ?? [])) {
     throw createBadRequestError(errorMessage);
   }
+};
+
+/**
+ * Guards changes to an agent's auto-approval defaults.
+ *
+ * @param source - The stored agent on update, or the agent being created.
+ * @param currentApprovals - The defaults stored before the write, or `undefined` on create.
+ * @param nextApprovals - The defaults supplied by the write, or `undefined` to keep them.
+ * @throws {Error} a bad request error when the write changes the defaults and the user is not
+ * allowed to configure them.
+ */
+const assertCanConfigureApprovals = ({
+  source,
+  currentApprovals,
+  nextApprovals,
+  user,
+}: {
+  source: AgentProperties;
+  currentApprovals: AgentApprovals | undefined;
+  nextApprovals: AgentApprovals | undefined;
+  user: CurrentUser;
+}): void => {
+  if (nextApprovals === undefined || agentApprovalsEqual(currentApprovals, nextApprovals)) {
+    return;
+  }
+  if (hasConfigureApprovalsAccess({ source, user })) {
+    return;
+  }
+  throw createBadRequestError(
+    source.id === agentBuilderDefaultAgentId
+      ? `Only administrators can configure auto-approved APIs on the default agent (${agentBuilderDefaultAgentId}).`
+      : 'Only the agent owner, managers, and administrators can configure auto-approved APIs.'
+  );
 };
 
 export interface AgentClient {
@@ -491,6 +527,12 @@ class AgentClientImpl implements AgentClient {
       space: this.space,
       creationDate: now,
     });
+    assertCanConfigureApprovals({
+      source: attributes,
+      currentApprovals: undefined,
+      nextApprovals: profile.configuration.approvals,
+      user: this.user,
+    });
 
     await this.storage.getClient().index({
       document: attributes,
@@ -553,6 +595,12 @@ class AgentClientImpl implements AgentClient {
       currentWorkflowIds: currentConfig?.post_execution_workflow_ids,
       isAdmin: this.user.isAdmin,
       errorMessage: 'Only administrators can configure post-execution workflows.',
+    });
+    assertCanConfigureApprovals({
+      source,
+      currentApprovals: currentConfig?.approvals,
+      nextApprovals: profileUpdate.configuration?.approvals,
+      user: this.user,
     });
 
     if (profileUpdate.configuration?.tools) {

@@ -7,6 +7,7 @@
 
 import {
   ConversationRoundStepType,
+  createInjectedContextStep,
   createReasoningStep,
   createSubstitutionStep,
   createToolCallStep,
@@ -51,6 +52,14 @@ const backgroundAgentStep = (): BackgroundAgentCompleteStep => ({
 describe('groupSteps', () => {
   it('returns [] for an empty array', () => {
     expect(groupSteps([])).toEqual([]);
+  });
+
+  it('hides injected context steps without breaking the surrounding tool call group', () => {
+    const a = toolStep('a');
+    const b = toolStep('b');
+    const note = createInjectedContextStep({ hook_id: 'memory', text: 'remember' });
+
+    expect(groupSteps([note, a, note, b])).toEqual([{ kind: 'group', steps: [a, b] }]);
   });
 
   it('wraps a single tool call in a group', () => {

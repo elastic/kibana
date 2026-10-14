@@ -22,12 +22,6 @@ const SolutionOptions: Record<
       defaultMessage: 'Elasticsearch',
     }),
   },
-  workplaceai: {
-    iconType: 'logoElasticsearch',
-    label: i18n.translate('xpack.spaces.spaceSolutionBadge.workplaceai', {
-      defaultMessage: 'Workplace AI',
-    }),
-  },
   vectordb: {
     iconType: 'logoVectorDB',
     label: i18n.translate('xpack.spaces.spaceSolutionBadge.vectordb', {

@@ -381,6 +381,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_attack_discovery` would report not-found.
+    it('fails the run when the discovery search is not authorized', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBeUndefined();
+    });
+
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
     // same value and needs no mapping to be queryable.
     it('reads it by the id it was given', () => {
@@ -513,6 +519,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('require_cited_alerts')?.type).toBe('workflow.fail');
     });
 
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_cited_alerts` would report missing alerts.
+    it('fails the run when the alerts search is not authorized', () => {
+      expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
+    });
+
     it.each(['load_entities', 'load_events'] as const)(
       'continues when optional source %s fails',
       (name) => {
@@ -534,8 +546,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(overrides?.tools).toEqual([]);
     });
 
-    it('routes the agent through the AlertZero reasoning feature', () => {
-      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_reasoning');
+    it('routes the agent through the AlertZero frontier feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_frontier');
     });
 
     it('uses the thin agent', () => {
