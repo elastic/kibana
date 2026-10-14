@@ -91,7 +91,6 @@ export interface RelayTriggerInput {
 export interface RelayTriggerResponse {
   /** The posted message's Slack `ts`. */
   ref: string;
-  tenantKey: string;
   /** Slack conversation id after Relay resolved a name, or the id that was sent. */
   channel: string;
   /** The Relay's key for the thread posted to. Opaque: store and compare it, never build or parse it. */

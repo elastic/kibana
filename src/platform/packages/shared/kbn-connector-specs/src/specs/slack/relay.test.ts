@@ -85,7 +85,6 @@ describe('relaySendMessage', () => {
   it("forwards a channel id and returns Relay's resolved channel", async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0001',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
     const listBindings = jest.fn();
@@ -108,7 +107,6 @@ describe('relaySendMessage', () => {
   it("forwards a channel name and returns Relay's resolved channel id", async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0003',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
     const listBindings = jest.fn();
@@ -131,7 +129,6 @@ describe('relaySendMessage', () => {
   it("returns the Relay's conversation key for the posted thread", async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0001',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
       conversationKey: `slack:team-A:${CHANNEL_ID}:1700.0001`,
     });
@@ -147,7 +144,6 @@ describe('relaySendMessage', () => {
   it('forwards threadTs when replying in a thread', async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0002',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
 
@@ -171,7 +167,6 @@ describe('relaySendMessage', () => {
   it('trims the channel before forwarding it', async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0004',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
 
@@ -234,7 +229,6 @@ describe('relayUpdateMessage', () => {
   it('forwards messageTs and no threadTs, returning the edited message ts', async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0002',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
 
