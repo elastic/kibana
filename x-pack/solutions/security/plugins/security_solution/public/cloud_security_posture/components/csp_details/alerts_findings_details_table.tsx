@@ -184,16 +184,13 @@ export const AlertsDetailsTable = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo((): QueryDslQueryContainer | undefined => {
-      if (!euidApi?.euid) {
+      if (!euidApi?.euid || entityRecord == null || entityType == null) {
         return undefined;
       }
       const definition = euidApi.getBuiltInEntityDefinition(entityTypeResolved);
-      const groupRecords = getEntityGroupRecords(entityRecord, aliasRecords);
-      if (groupRecords.length === 0) {
-        return euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, entityRecord);
-      }
-      return combineEntityGroupFilters(groupRecords, (record) =>
-        euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
+      return combineEntityGroupFilters(
+        getEntityGroupRecords(entityRecord, aliasRecords),
+        (record) => euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
       );
     }, [euidApi, entityTypeResolved, entityRecord, aliasRecords]);
 
