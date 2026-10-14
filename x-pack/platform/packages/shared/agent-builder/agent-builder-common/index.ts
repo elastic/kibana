@@ -6,7 +6,17 @@
  */
 
 export type { AgentBuilderEvent } from './base/events';
-export { apiTargets, type ApiTarget } from './apis';
+export {
+  apiTargets,
+  type ApiTarget,
+  allApisSelector,
+  toApiNamespace,
+  toNamespaceSelector,
+  isApiWildcardSelector,
+  matchesApiSelector,
+  matchesAnyApiSelector,
+  type ApiReference,
+} from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
@@ -174,10 +184,13 @@ export {
   accessControlRoleMeets,
   maxAccessControlRole,
   getDefaultAgentAccessControl,
+  agentApprovalsEqual,
+  normalizeAgentApprovals,
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
   type AgentDefinition,
+  type AgentApprovals,
   type AgentConfiguration,
   type AgentConfigurationInput,
   type AgentConfigurationOverrides,
@@ -197,6 +210,7 @@ export {
   type AutoApprovedApi,
   type InteractivityConfig,
   type InteractivityConfigInput,
+  applyAgentApprovals,
   createNonInteractiveConfig,
   isApiAutoApproved,
   normalizeInteractive,
@@ -276,6 +290,10 @@ export {
   type SubstitutionStepData,
   createSubstitutionStep,
   isSubstitutionStep,
+  type InjectedContextStep,
+  type InjectedContextStepData,
+  createInjectedContextStep,
+  isInjectedContextStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
   type SubagentEntry,
@@ -375,6 +393,9 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isApiStateChangedEvent,
+  API_STATE_CHANGED_UI_EVENT,
+  type ApiStateChangedEventData,
   type AskUserQuestionStep,
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
