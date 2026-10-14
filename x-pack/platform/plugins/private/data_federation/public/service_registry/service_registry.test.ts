@@ -7,9 +7,9 @@
 
 import type { DataFedServiceConfig } from './service_registry';
 import { ServiceRegistry } from './service_registry';
-import { getS3ServiceConfig } from './s3_service';
-import { getGcsServiceConfig } from './gcs_service';
-import { getAzureServiceConfig } from './azure_service';
+import { getS3ServiceConfig } from '../service_definitions/s3_service';
+import { getGcsServiceConfig } from '../service_definitions/gcs_service';
+import { getAzureServiceConfig } from '../service_definitions/azure_service';
 
 describe('ServiceRegistry', () => {
   it('returns registered service configs in registration order', () => {

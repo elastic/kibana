@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  federatedIdentitySourceType,
-  s3AuthOptions,
-} from '../create_data_source_flyout/auth_options';
-import type { DataFedServiceConfig } from './service_registry';
+import { federatedIdentitySourceType, s3AuthOptions } from './auth_options';
+import type { DataFedServiceConfig } from '../service_registry';
 
 export const getS3ServiceConfig = (enabled: boolean): DataFedServiceConfig => ({
   name: 's3',

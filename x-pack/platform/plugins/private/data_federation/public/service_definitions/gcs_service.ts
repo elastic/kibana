@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  federatedIdentitySourceType,
-  gcsAuthOptions,
-} from '../create_data_source_flyout/auth_options';
-import type { DataFedServiceConfig } from './service_registry';
+import { federatedIdentitySourceType, gcsAuthOptions } from './auth_options';
+import type { DataFedServiceConfig } from '../service_registry';
 
 export const getGcsServiceConfig = (enabled: boolean): DataFedServiceConfig => ({
   name: 'gcs',

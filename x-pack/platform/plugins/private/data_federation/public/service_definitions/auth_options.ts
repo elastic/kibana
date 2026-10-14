@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import type { CreateDataSourceAuthenticationMode } from './create_data_source_flyout_authentication';
-import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
+import type { AuthOption } from '../service_registry';
+import { authOptionStrings } from './auth_options_i18n';
 import type { DataSourceType } from '../../common/datasource_types';
-
-export interface AuthOption {
-  value: CreateDataSourceAuthenticationMode;
-  text: string;
-  description: string;
-  recommended?: boolean;
-}
 
 export function federatedIdentitySourceType(dataSourceType: DataSourceType): AuthOption {
   return {
     value: 'federated_identity',
-    text: authenticationStrings.federatedIdentityLabel,
-    description: authenticationStrings.federatedIdentityDescription[dataSourceType],
+    text: authOptionStrings.federatedIdentityLabel,
+    description: authOptionStrings.federatedIdentityDescription[dataSourceType],
     recommended: true,
   };
 }
@@ -28,23 +21,23 @@ export function federatedIdentitySourceType(dataSourceType: DataSourceType): Aut
 export function accessAndSecretKeysSourceType(dataSourceType: DataSourceType): AuthOption {
   return {
     value: 'access_and_secret_keys',
-    text: authenticationStrings.accessAndSecretKeysLabel,
-    description: authenticationStrings.storedCredentialsDescription[dataSourceType],
+    text: authOptionStrings.accessAndSecretKeysLabel,
+    description: authOptionStrings.storedCredentialsDescription[dataSourceType],
   };
 }
 
 export function anonymousSourceType(dataSourceType: DataSourceType): AuthOption {
   return {
     value: 'anonymous',
-    text: authenticationStrings.anonymousLabel,
-    description: authenticationStrings.anonymousDescription[dataSourceType],
+    text: authOptionStrings.anonymousLabel,
+    description: authOptionStrings.anonymousDescription[dataSourceType],
   };
 }
 
 export const azureCredentialsSourceType: AuthOption = {
   value: 'credentials',
-  text: authenticationStrings.azureCredentialsLabel,
-  description: authenticationStrings.storedCredentialsDescription.azure,
+  text: authOptionStrings.azureCredentialsLabel,
+  description: authOptionStrings.storedCredentialsDescription.azure,
 };
 
 export const azureAuthOptions: AuthOption[] = [

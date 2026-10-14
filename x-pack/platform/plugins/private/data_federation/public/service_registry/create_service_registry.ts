@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ServiceRegistry } from './service_registry';
-import { getS3ServiceConfig } from './s3_service';
-import { getGcsServiceConfig } from './gcs_service';
-import { getAzureServiceConfig } from './azure_service';
+import { ServiceRegistry } from '.';
+import { getS3ServiceConfig } from '../service_definitions/s3_service';
+import { getGcsServiceConfig } from '../service_definitions/gcs_service';
+import { getAzureServiceConfig } from '../service_definitions/azure_service';
 
 export const createServiceRegistry = ({
   enableGoogleCloudStorageDataSourceType = false,

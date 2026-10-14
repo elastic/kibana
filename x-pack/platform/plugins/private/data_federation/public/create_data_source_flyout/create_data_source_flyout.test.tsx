@@ -17,7 +17,7 @@ import { getDataSourceByIdApiPath } from '../../common';
 import type { DatasetsClient } from '../datasets_client';
 import type { DataSource, S3DataSourceWithSecrets } from '../../common/datasource_types';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
-import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
+import { authOptionStrings } from '../service_definitions/auth_options_i18n';
 import type { DataFederationKibanaServices } from '../types';
 import { createServiceRegistry } from '../service_registry/create_service_registry';
 import { UI_COUNTER_EVENTS } from '../ui_counters';
@@ -195,7 +195,7 @@ describe('CreateDataSourceFlyout', () => {
       expect(await findAllByRole('option')).toHaveLength(3);
       expect(
         getByRole('option', {
-          name: new RegExp(authenticationStrings.federatedIdentityLabel),
+          name: new RegExp(authOptionStrings.federatedIdentityLabel),
           selected: true,
         })
       ).toBeInTheDocument();
@@ -214,7 +214,7 @@ describe('CreateDataSourceFlyout', () => {
 
       expect(await findAllByRole('option')).toHaveLength(2);
       expect(
-        queryByRole('option', { name: new RegExp(authenticationStrings.federatedIdentityLabel) })
+        queryByRole('option', { name: new RegExp(authOptionStrings.federatedIdentityLabel) })
       ).not.toBeInTheDocument();
     });
   });
@@ -311,7 +311,7 @@ describe('CreateDataSourceFlyout', () => {
 
     fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });
     fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
-    fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
+    fireEvent.click(await findByText(authOptionStrings.anonymousLabel));
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
 
     await waitFor(() => {
@@ -388,7 +388,7 @@ describe('CreateDataSourceFlyout', () => {
       target: { value: 'public-bucket' },
     });
     fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
-    fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
+    fireEvent.click(await findByText(authOptionStrings.anonymousLabel));
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
 
     await waitFor(() => {
@@ -564,7 +564,7 @@ describe('CreateDataSourceFlyout', () => {
       });
 
       fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
-      fireEvent.click(getByText(authenticationStrings.anonymousLabel));
+      fireEvent.click(getByText(authOptionStrings.anonymousLabel));
 
       const settings = await submitAndGetRequestSettings(getByTestId, put);
       expect(settings).toMatchObject({ ...connectionSettings, auth: 'anonymous' });

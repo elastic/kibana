@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  azureAuthOptions,
-  federatedIdentitySourceType,
-} from '../create_data_source_flyout/auth_options';
-import type { DataFedServiceConfig } from './service_registry';
+import { azureAuthOptions, federatedIdentitySourceType } from './auth_options';
+import type { DataFedServiceConfig } from '../service_registry';
 
 export const getAzureServiceConfig = (enabled: boolean): DataFedServiceConfig => ({
   name: 'azure',

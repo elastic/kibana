@@ -6,7 +6,7 @@
  */
 
 import type { DataSourceType } from '../../common/datasource_types';
-import type { AuthOption } from '../create_data_source_flyout/auth_options';
+import type { AuthOption } from './types';
 
 export interface DataFedServiceConfig {
   name: DataSourceType;

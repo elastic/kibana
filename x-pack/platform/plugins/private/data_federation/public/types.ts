@@ -16,7 +16,7 @@ import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/f
 import type { DataSourcesClient } from './data_sources_client';
 import type { DiscoverEsqlLinkParams } from './get_discover_locator';
 import type { DatasetsClient } from './datasets_client';
-import type { ServiceRegistry } from './service_registry/service_registry';
+import type { ServiceRegistry } from './service_registry';
 import type { ReportUiCounter } from './ui_counters';
 
 export interface SetupDependencies {
