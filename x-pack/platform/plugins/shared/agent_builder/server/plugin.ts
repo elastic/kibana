@@ -29,6 +29,10 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
+import {
+  createConversationResolverRegistry,
+  type ConversationResolverRegistry,
+} from './services/conversation_resolvers';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
@@ -79,12 +83,14 @@ export class AgentBuilderPlugin
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
   private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
+  private readonly conversationResolvers: ConversationResolverRegistry;
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
     this.env = context.env;
     this.serviceManager = new ServiceManager(this.config);
+    this.conversationResolvers = createConversationResolverRegistry(this.logger);
   }
 
   setup(
@@ -240,6 +246,7 @@ export class AgentBuilderPlugin
       logger: this.logger,
       pluginsSetup: setupDeps,
       getInternalServices,
+      conversationResolvers: this.conversationResolvers,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });
@@ -306,6 +313,9 @@ export class AgentBuilderPlugin
       },
       conversationEvents: {
         register: serviceSetups.conversationEvents.register.bind(serviceSetups.conversationEvents),
+      },
+      conversationResolvers: {
+        register: this.conversationResolvers.register,
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),

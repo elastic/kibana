@@ -35,6 +35,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     conversationEvents: {
       register: jest.fn(),
     },
+    conversationResolvers: {
+      register: jest.fn(),
+    },
     skills: {
       register: jest.fn(),
     },

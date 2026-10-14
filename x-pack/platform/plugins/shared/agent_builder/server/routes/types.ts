@@ -16,12 +16,16 @@ import type { InternalStartServices } from '../services';
 import type { AgentBuilderRouter } from '../request_handler_context';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
+import type { ConversationResolverRegistry } from '../services/conversation_resolvers';
+
+export type { ConversationResolverRegistry };
 
 export interface RouteDependencies {
   router: AgentBuilderRouter;
   logger: Logger;
   coreSetup: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>;
   getInternalServices: () => InternalStartServices;
+  conversationResolvers: ConversationResolverRegistry;
   pluginsSetup: AgentBuilderSetupDependencies;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;

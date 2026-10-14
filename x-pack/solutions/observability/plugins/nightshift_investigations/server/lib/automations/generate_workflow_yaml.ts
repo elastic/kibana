@@ -31,8 +31,11 @@ const SLACK_MESSAGE_EXCLUSIONS = [
   '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
 ];
 
-// One investigation per message, so concurrent messages in a channel do not share a subject.
-const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
+// The Relay's id for the message's thread, which a later `@bot` mention in that thread carries too,
+// so the investigation this run claims is the one the mention continues. Without the Relay the
+// event has no id, so each message keeps its own subject.
+export const SLACK_SUBJECT_ID =
+  '{% if event.externalConversationId %}{{ event.externalConversationId }}{% else %}{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}{% endif %}';
 
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
@@ -180,7 +183,7 @@ function buildInvestigationStep(
     type: 'nightshift.triggerInvestigation',
     with: {
       ...(kind === 'slack'
-        ? { subject_type: 'manual', subject_id: SLACK_SUBJECT_ID, title: automation.name }
+        ? { subject_type: 'slack_thread', subject_id: SLACK_SUBJECT_ID, title: automation.name }
         : {
             subject_type: 'alert',
             subject_id: hasAlertRows ? '{{ trigger.alert.uuid }}' : automationId,

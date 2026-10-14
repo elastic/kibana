@@ -65,6 +65,17 @@ export const createSubjectClaimStorageClient = ({
     subjectClaimStorageSettings
   ).getClient();
 
+/** Reads a claim by id with the ES get API, which is real time unlike a search. */
+export const createSubjectClaimReader =
+  ({ esClient }: { esClient: ElasticsearchClient }) =>
+  async (id: string): Promise<SubjectClaimDocument | undefined> => {
+    const response = await esClient.get<SubjectClaimDocument>(
+      { index: SUBJECT_CLAIM_INDEX_NAME, id },
+      { ignore: [404] }
+    );
+    return response.found ? response._source : undefined;
+  };
+
 /** One claim document per space and subject. */
 export const subjectClaimId = (spaceId: string, { type, id }: InvestigationSubjectKey): string =>
   hashInvestigationAttachmentId(spaceId, type, id);
@@ -88,7 +99,17 @@ export class SubjectClaimsService {
   /** Every read of the claim index: a missing index has no hits, unallocated shards are retried. */
   private readonly search: SubjectClaimStorage['search'];
 
-  constructor(private readonly deps: { storage: SubjectClaimStorage; now?: () => number }) {
+  constructor(
+    private readonly deps: {
+      storage: SubjectClaimStorage;
+      /**
+       * Reads a claim by document id without waiting for a search refresh. `get` uses it when
+       * given, so a lookup right after a claim doesn't miss it.
+       */
+      readById?: (id: string) => Promise<SubjectClaimDocument | undefined>;
+      now?: () => number;
+    }
+  ) {
     this.now = deps.now ?? Date.now;
     this.search = withTransientSearchRetry<SubjectClaimDocument>((...args) =>
       deps.storage.search(...args)
@@ -126,6 +147,18 @@ export class SubjectClaimsService {
       }
     }
     return { claimed: true };
+  }
+
+  /** The claim on a subject in the space, or `undefined` when unclaimed or the index is missing. */
+  async get(
+    spaceId: string,
+    subject: InvestigationSubjectKey
+  ): Promise<SubjectClaimDocument | undefined> {
+    const id = subjectClaimId(spaceId, subject);
+    const claim = this.deps.readById
+      ? await this.deps.readById(id)
+      : (await this.findVersioned(id))?.claim;
+    return claim?.spaceId === spaceId ? claim : undefined;
   }
 
   /** Maintenance: removes every claim in the space. */

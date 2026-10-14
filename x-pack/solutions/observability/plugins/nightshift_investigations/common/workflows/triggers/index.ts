@@ -13,7 +13,12 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
  * `manual` is the subject for an investigation that is not about a stored entity: the caller's
  * question is the whole subject, so there is no significant event or alert to bind the run to.
  */
-export const INVESTIGATION_SUBJECT_TYPES = ['significant_event', 'alert', 'manual'] as const;
+export const INVESTIGATION_SUBJECT_TYPES = [
+  'significant_event',
+  'alert',
+  'manual',
+  'slack_thread',
+] as const;
 export type InvestigationSubjectType = (typeof INVESTIGATION_SUBJECT_TYPES)[number];
 
 export const INVESTIGATION_TRIGGER_TYPES = ['automatic', 'manual'] as const;

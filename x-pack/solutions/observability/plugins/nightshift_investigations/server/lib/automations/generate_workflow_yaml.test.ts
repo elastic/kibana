@@ -8,7 +8,11 @@
 import { parse } from 'yaml';
 import { evaluateKql } from '@kbn/eval-kql';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import { generateWorkflowYaml, SLACK_MESSAGE_TEXT_LIMIT } from './generate_workflow_yaml';
+import {
+  generateWorkflowYaml,
+  SLACK_MESSAGE_TEXT_LIMIT,
+  SLACK_SUBJECT_ID,
+} from './generate_workflow_yaml';
 import { MAX_PROMPT_TEMPLATE_LENGTH } from './schemas';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
@@ -54,6 +58,7 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'schedule' }];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.settings.concurrency.key).toBe('auto-123');
+      expect(yaml.steps[0].with).not.toHaveProperty('concurrency_key');
     });
 
     it('defaults to drop strategy when overlapPolicy is not set', () => {
@@ -385,11 +390,18 @@ describe('generateWorkflowYaml', () => {
     });
 
     describe('trigger_investigation step', () => {
+      it('keys the subject by the Relay thread id, or by the message without one', () => {
+        expect(SLACK_SUBJECT_ID).toContain('{{ event.externalConversationId }}');
+        expect(SLACK_SUBJECT_ID).toContain(
+          '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}'
+        );
+      });
+
       it('investigates a manual subject keyed by the message', () => {
         const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
         expect(yaml.steps[0].with).toMatchObject({
-          subject_type: 'manual',
-          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
+          subject_type: 'slack_thread',
+          subject_id: SLACK_SUBJECT_ID,
           title: 'Test automation',
         });
       });
@@ -431,8 +443,8 @@ describe('generateWorkflowYaml', () => {
           subject_id: '{{ trigger.alert.uuid }}',
         });
         expect(slackGuard.steps[0].with).toMatchObject({
-          subject_type: 'manual',
-          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
+          subject_type: 'slack_thread',
+          subject_id: SLACK_SUBJECT_ID,
         });
       });
 

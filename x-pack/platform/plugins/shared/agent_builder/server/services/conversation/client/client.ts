@@ -21,6 +21,7 @@ import type {
   ConversationUpdatedTriggerEvent,
   ConversationWriteSource,
   FeedbackChipId,
+  ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
 import {
   type ConversationEvent,
@@ -48,6 +49,7 @@ import {
   isAttachmentEvent,
   isConversationNotFoundError,
   isExecutionTerminalEvent,
+  TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationSearchOptions,
@@ -136,9 +138,21 @@ type ConversationWriteEmission =
   | { source: ConversationWriteSource; emit?: true }
   | { emit: false; source?: never };
 
+export interface ConversationConverseSummary {
+  id: string;
+  agent_id: string;
+  has_rounds: boolean;
+  status?: ConversationRoundStatus;
+}
+
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
+  /**
+   * The conversation's id, agent and whether it has any round, after the same converse and agent
+   * use checks as `get`. Reads only those fields, so it stays cheap on a long conversation.
+   */
+  getForConverse(conversationId: string): Promise<ConversationConverseSummary>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(
     conversation: ConversationCreateRequest,
@@ -250,6 +264,14 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'attachments.id',
   'attachments.type',
   'attachments.active',
+];
+
+/** The stored fields `getForConverse` needs: the access checks, plus what shows a round exists. */
+const CONVERSE_SUMMARY_SOURCE_FIELDS = [
+  ...CONVERSATION_LIST_SOURCE_FIELDS,
+  'conversation_rounds.id',
+  'events.id',
+  'events.type',
 ];
 
 const CONVERSATION_BULK_GET_SOURCE_FIELDS = [
@@ -666,6 +688,24 @@ class ConversationClientImpl implements ConversationClient {
       user: this.getUser(),
       resolveTemplate: getTemplate,
     });
+  }
+
+  async getForConverse(conversationId: string): Promise<ConversationConverseSummary> {
+    const document = await this.getDocumentWithAccess({
+      conversationId,
+      access: 'converse',
+      sourceIncludes: CONVERSE_SUMMARY_SOURCE_FIELDS,
+    });
+    const { conversation_rounds: legacyRounds, events } = document._source;
+
+    return {
+      id: document._id,
+      agent_id: document._source.agent_id,
+      has_rounds:
+        (legacyRounds?.length ?? 0) > 0 ||
+        (events ?? []).some(({ type }) => type === TimelineEventType.userMessage),
+      status: document._source.status,
+    };
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -1367,7 +1407,10 @@ class ConversationClientImpl implements ConversationClient {
     return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
   }
 
-  private async getDocument(conversationId: string): Promise<Document | undefined> {
+  private async getDocument(
+    conversationId: string,
+    sourceIncludes?: string[]
+  ): Promise<Document | undefined> {
     let response: GetResponse<ConversationProperties>;
     try {
       // Bypass the storage adapter (whose `get` still routes through `search`) and use the raw
@@ -1375,6 +1418,7 @@ class ConversationClientImpl implements ConversationClient {
       response = await this.esClient.get<ConversationProperties>({
         index: conversationIndexName,
         id: conversationId,
+        ...(sourceIncludes ? { _source_includes: sourceIncludes } : {}),
       });
     } catch (err) {
       if (err?.meta?.statusCode === 404 || err?.statusCode === 404) {
@@ -1449,11 +1493,13 @@ class ConversationClientImpl implements ConversationClient {
   private async getDocumentWithAccess({
     conversationId,
     access,
+    sourceIncludes,
   }: {
     conversationId: string;
     access: ConversationAccess;
+    sourceIncludes?: string[];
   }): Promise<Document> {
-    const document = await this.getDocument(conversationId);
+    const document = await this.getDocument(conversationId, sourceIncludes);
 
     if (!document) {
       throw createConversationNotFoundError({ conversationId });

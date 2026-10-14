@@ -1066,6 +1066,72 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('getForConverse', () => {
+    it('reads only the summary fields and reports whether a round exists', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+          events: [{ id: 'e1', type: 'user_message' } as ConversationEvent],
+        })
+      );
+
+      await expect(client.getForConverse('conversation-1')).resolves.toEqual({
+        id: 'conversation-1',
+        agent_id: 'agent-1',
+        has_rounds: true,
+      });
+      expect(mockRawEsClient.get).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          _source_includes: expect.arrayContaining(['agent_id', 'events.type']),
+        })
+      );
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+    });
+
+    it('returns the stored status so a running round can be told from an idle one', async () => {
+      const document = createConversationDocument({
+        events: [{ id: 'e1', type: 'user_message' } as ConversationEvent],
+      });
+      mockGetDocumentResponse({
+        ...document,
+        _source: { ...document._source, status: 'in_progress' },
+      } as typeof document);
+
+      await expect(client.getForConverse('conversation-1')).resolves.toMatchObject({
+        status: 'in_progress',
+      });
+    });
+
+    it('reports no rounds for a conversation without a user message', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          events: [{ id: 'e1', type: 'execution_started' } as ConversationEvent],
+        })
+      );
+
+      await expect(client.getForConverse('conversation-1')).resolves.toMatchObject({
+        has_rounds: false,
+      });
+    });
+
+    it('returns not found when the caller cannot converse in the conversation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Private,
+        })
+      );
+
+      await expect(client.getForConverse('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+    });
+  });
+
   describe('exists', () => {
     it('returns true when the document exists, even when owned by another user and private', async () => {
       mockGetDocumentResponse(

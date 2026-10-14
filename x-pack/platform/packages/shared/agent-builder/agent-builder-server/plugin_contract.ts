@@ -282,6 +282,29 @@ export interface ConversationEventsSetup {
   register(definition: ConversationEventTypeDefinition): void;
 }
 
+/** Input to a conversation resolver: the external thread a callback turn came from. */
+export interface ConversationResolverContext {
+  origin: { type: string; external_conversation_id: string };
+  spaceId: string;
+}
+
+/** `held`: the thread is claimed by an existing conversation. `unbound`: no claim, use the plain conversation. */
+export type ConversationResolution =
+  | { status: 'held'; conversationId: string }
+  | { status: 'unbound' }
+  | { status: 'unavailable'; reason: string };
+
+export interface ConversationResolver {
+  id: string;
+  resolve(context: ConversationResolverContext): Promise<ConversationResolution>;
+}
+
+/** AgentBuilder conversation resolvers setup contract. */
+export interface ConversationResolversSetup {
+  /** Registers a resolver that maps an external thread to an existing conversation for callback turns. */
+  register(resolver: ConversationResolver): void;
+}
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
@@ -311,6 +334,10 @@ export interface AgentBuilderPluginSetup {
    * Conversation events setup contract, which can be used to register custom event types.
    */
   conversationEvents: ConversationEventsSetup;
+  /**
+   * Conversation resolvers setup contract, which can be used to bind external threads to conversations.
+   */
+  conversationResolvers: ConversationResolversSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */

@@ -39,6 +39,7 @@ import {
   getConverseHelpers,
   type ResolvedExecutionOptions,
 } from './converse_helpers';
+import { resolveCallbackConversation } from './resolve_callback_conversation';
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -373,6 +374,7 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
+  conversationResolvers,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -562,11 +564,26 @@ export function registerChatRoutes({
 
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
-        const { executionId, conversationId } = await executeAgent({
+        // The execution id hashes the request's own conversation id, so it stays the same
+        // whichever conversation the thread resolves to.
+        const executionOptions = resolveExecutionOptions(payload, spaceId);
+        const resolved = await resolveCallbackConversation({
           payload,
+          spaceId,
+          conversationResolvers,
+          getConversation: async (id) =>
+            (
+              await getInternalServices().conversations.getScopedClient({ request })
+            ).getForConverse(id),
+          logger,
+        });
+
+        const { executionId, conversationId } = await executeAgent({
+          payload: resolved.payload,
           request,
           executionService,
-          executionOptions: resolveExecutionOptions(payload, spaceId),
+          executionOptions,
+          autoCreateConversationWithId: resolved.autoCreateConversationWithId,
         });
 
         if (!conversationId) {

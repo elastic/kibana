@@ -124,6 +124,50 @@ describe('Slack inbound events', () => {
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
   });
 
+  it('exposes the Relay thread id on a message', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          callback(
+            { type: 'message', channel: 'C123', ts: '1355517523.000005', bot_id: 'B123' },
+            {
+              relay: {
+                origin: {
+                  type: 'slack',
+                  external_conversation_id: 'slack:T123:C123:1355517523.000005',
+                },
+              },
+            }
+          )
+        )
+      )
+    );
+
+    expect(result.events[0].payload).toEqual(
+      expect.objectContaining({
+        externalConversationId: 'slack:T123:C123:1355517523.000005',
+      })
+    );
+    expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+  });
+
+  it('ignores an empty or oversized Relay conversation id', async () => {
+    const event = { type: 'message', channel: 'C123', ts: '1355517523.000005' };
+    const [empty, oversized] = await Promise.all(
+      ['', 'k'.repeat(129)].map((external_conversation_id) =>
+        events.handleEvents(
+          createContext(
+            callback(event, { relay: { origin: { type: 'slack', external_conversation_id } } })
+          )
+        )
+      )
+    );
+
+    [empty, oversized].forEach((result) => {
+      expect(expectEmit(result).events[0].payload).not.toHaveProperty('externalConversationId');
+    });
+  });
+
   it('uses the original message id when a message is changed', async () => {
     const result = expectEmit(
       await events.handleEvents(

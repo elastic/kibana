@@ -27,7 +27,7 @@ import {
 import { assertBoundedId } from '../../investigation_attachments/attachment_doc_service';
 import { sameInvestigationAttachmentDocument } from '../../investigation_attachments/same_document';
 import { subjectAttachment } from '../attachments/subject_attachment_type';
-import type { SubjectDocument } from '../storage/subject_storage';
+import type { SubjectClaimDocument, SubjectDocument } from '../storage/subject_storage';
 import type {
   ClaimSubjectsParams,
   ClaimSubjectsResult,
@@ -219,6 +219,14 @@ export class SubjectsService {
     assertBoundedId(params.conversationId, 'conversationId');
     const subjects = parseOrThrow(subjectKeysSchema.min(1), params.subjects);
     return this.deps.claims.claim({ ...params, subjects });
+  }
+
+  /** The claim on a subject, for resolving which investigation a subject belongs to. */
+  async getClaim(
+    spaceId: string,
+    subject: InvestigationSubjectKey
+  ): Promise<SubjectClaimDocument | undefined> {
+    return this.deps.claims.get(spaceId, subject);
   }
 
   /** Maintenance: removes every subject and subject claim in the space. */

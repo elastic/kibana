@@ -124,6 +124,7 @@ const SUBJECT_ID_FIELDS = {
   significant_event: 'significant_event_id',
   alert: 'alert_id',
   manual: 'manual_id',
+  slack_thread: 'slack_thread_id',
 } as const satisfies Record<InvestigationSubject['type'], string>;
 
 const isNightshiftSubjectType = (value: unknown): value is InvestigationSubject['type'] =>

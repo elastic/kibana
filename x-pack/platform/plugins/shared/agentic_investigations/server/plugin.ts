@@ -30,9 +30,11 @@ import { createSetImpactTool } from './impact/tools/set_impact_tool';
 import { registerSubjectAttachment, subjectAttachment } from './subjects/attachments';
 import { SubjectsService } from './subjects/services/subjects_service';
 import {
+  createSubjectClaimReader,
   createSubjectClaimStorageClient,
   SubjectClaimsService,
 } from './subjects/services/subject_claims_service';
+import { createSlackThreadConversationResolver } from './subjects/resolver/slack_thread_conversation_resolver';
 import { createSubjectsClient } from './subjects/services/subjects_client';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
@@ -102,6 +104,12 @@ export class AgenticInvestigationsPlugin
     if (this.escalationsEnabled) {
       registerEscalationConversationEvents(agentBuilder);
     }
+
+    agentBuilder.conversationResolvers.register(
+      createSlackThreadConversationResolver({
+        getClaim: (spaceId, subject) => this.requireSubjectsService().getClaim(spaceId, subject),
+      })
+    );
 
     // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than
@@ -234,6 +242,7 @@ export class AgenticInvestigationsPlugin
       documents: subjectAttachment.createService({ esClient, logger: this.logger }),
       claims: new SubjectClaimsService({
         storage: createSubjectClaimStorageClient({ esClient, logger: this.logger }),
+        readById: createSubjectClaimReader({ esClient }),
       }),
     });
     this.hypothesesService = new HypothesesService({

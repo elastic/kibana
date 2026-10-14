@@ -155,6 +155,40 @@ describe('SubjectClaimsService', () => {
     ).resolves.toEqual({ claimed: false, heldBy: 'conv-1' });
   });
 
+  it('reads the claim on a subject per space, and none when unclaimed', async () => {
+    const { service } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+
+    await expect(service.get(SPACE_ID, ALERT)).resolves.toEqual(
+      expect.objectContaining({ conversationId: 'conv-1' })
+    );
+    await expect(service.get('other', ALERT)).resolves.toBeUndefined();
+    await expect(service.get(SPACE_ID, EVENT)).resolves.toBeUndefined();
+  });
+
+  it('reads a claim by id when a reader is given, only within its space', async () => {
+    const { storage } = setup();
+    const readById = jest.fn().mockResolvedValue({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjectType: 'alert',
+      subjectId: ALERT.id,
+      claimedAt: '2026-09-01T00:00:00.000Z',
+    });
+    const service = new SubjectClaimsService({ storage, readById });
+
+    await expect(service.get(SPACE_ID, ALERT)).resolves.toEqual(
+      expect.objectContaining({ conversationId: 'conv-1' })
+    );
+    await expect(service.get('other', ALERT)).resolves.toBeUndefined();
+    expect(readById).toHaveBeenCalledWith(subjectClaimId(SPACE_ID, ALERT));
+  });
+
   it('keeps claims apart per space', async () => {
     const { service } = setup();
     await service.claim({
