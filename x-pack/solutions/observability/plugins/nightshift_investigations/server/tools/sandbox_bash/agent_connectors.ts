@@ -18,7 +18,7 @@ export interface AgentConnector {
 }
 
 /**
- * Returns the connectors assigned to this agent that the current user can access.
+ * Returns sandbox-capable connectors assigned to this agent that the current user can access.
  * Returns [] when actions is not available or the allow-list is empty.
  */
 export const listAgentConnectors = async (
@@ -29,7 +29,10 @@ export const listAgentConnectors = async (
 
   try {
     const actionsClient = await getActionsClient(callContext.request);
-    const all = await actionsClient.getAll({ includeSystemActions: false });
+    const all = await actionsClient.getAll({
+      includeSystemActions: false,
+      sandboxCapableOnly: true,
+    });
     const allowedSet = new Set(callContext.allowedConnectorIds);
     return all
       .filter((c) => allowedSet.has(c.id))
