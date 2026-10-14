@@ -170,7 +170,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   inferenceClient: [
-    async ({ log, fetch, connector, evaluationConnector }, use) => {
+    async ({ log, fetch, connector }, use) => {
       log.info('Loading inference client');
 
       const inferenceClient = createRestClient({
@@ -181,18 +181,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
       const wrappedInferenceClient = wrapInferenceClientWithEisConnectorTelemetry(inferenceClient);
       const reasoningEffort = getConnectorReasoningEffort(connector);
-      const judgeReasoningEffort = getConnectorReasoningEffort(evaluationConnector);
-      const effortByConnectorId = new Map([
-        [connector.id, reasoningEffort],
-        [evaluationConnector.id, judgeReasoningEffort],
-      ]);
       log.serviceLoaded?.('inferenceClient');
 
       await use(
-        reasoningEffort || judgeReasoningEffort
-          ? withDefaultReasoning(wrappedInferenceClient, reasoningEffort, (connectorId) =>
-              effortByConnectorId.get(connectorId)
-            )
+        reasoningEffort
+          ? withDefaultReasoning(wrappedInferenceClient, reasoningEffort)
           : wrappedInferenceClient
       );
     },
@@ -434,10 +427,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   evaluators: [
-    async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
-      const evaluatorInferenceClient = inferenceClient.bindTo({
-        connectorId: evaluationConnector.id,
-      });
+    async ({ log, fetch, evaluationConnector, traceEsClient }, use) => {
+      const judgeReasoningEffort = getConnectorReasoningEffort(evaluationConnector);
+      const boundJudgeClient = wrapInferenceClientWithEisConnectorTelemetry(
+        createRestClient({ fetch, bindTo: { connectorId: evaluationConnector.id } })
+      );
+      const evaluatorInferenceClient = judgeReasoningEffort
+        ? withDefaultReasoning(boundJudgeClient, judgeReasoningEffort)
+        : boundJudgeClient;
 
       // These judges run in-process against `evaluationConnector`, so unlike the
       // `_evaluate`-backed ones they know their model up front.

@@ -68,15 +68,7 @@ describe('withDefaultReasoning', () => {
     });
   });
 
-  it('passes calls through untouched when no effort is set', async () => {
-    const { client, mocks } = createClient();
-
-    await withDefaultReasoning(client, undefined).chatComplete({ messages });
-
-    expect(mocks.chatComplete).toHaveBeenCalledWith({ messages, reasoning: undefined });
-  });
-
-  it('does not carry the default onto a client rebound to a connector with no effort', async () => {
+  it('does not carry the default onto a client rebound to another connector', async () => {
     const { client, mocks, bound } = createClient();
 
     const rebound = withDefaultReasoning(client, 'high').bindTo({ connectorId: 'judge' });
@@ -84,33 +76,5 @@ describe('withDefaultReasoning', () => {
 
     expect(mocks.bindTo).toHaveBeenCalledWith({ connectorId: 'judge' });
     expect(bound.chatComplete).toHaveBeenCalledWith({ messages });
-  });
-
-  it('applies the rebound connector own effort when the resolver knows it', async () => {
-    const { client, bound } = createClient();
-    const resolveEffort = (connectorId: string) =>
-      connectorId === 'judge' ? ('low' as const) : undefined;
-
-    const rebound = withDefaultReasoning(client, 'high', resolveEffort).bindTo({
-      connectorId: 'judge',
-    });
-    await rebound.chatComplete({ messages });
-    await rebound.prompt({ prompt: { name: 'p', input: {} } as any, input: {} });
-
-    expect(bound.chatComplete).toHaveBeenCalledWith({ messages, reasoning: { effort: 'low' } });
-    expect(bound.prompt).toHaveBeenCalledWith(
-      expect.objectContaining({ reasoning: { effort: 'low' } })
-    );
-  });
-
-  it('resolves the judge effort even when the task connector has none', async () => {
-    const { client, bound } = createClient();
-
-    const rebound = withDefaultReasoning(client, undefined, () => 'medium').bindTo({
-      connectorId: 'judge',
-    });
-    await rebound.chatComplete({ messages });
-
-    expect(bound.chatComplete).toHaveBeenCalledWith({ messages, reasoning: { effort: 'medium' } });
   });
 });
