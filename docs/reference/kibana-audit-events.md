@@ -201,7 +201,7 @@ To ensure that a record of every operation is persisted even in case of an unexp
   * The RAC bulk update API (`/internal/rac/alerts/*`)
   * {applies_to}`stack: ga 9.6+` The Security Solution status routes (`/api/detection_engine/signals/status`, `/api/detection_engine/attacks/status`, and the internal unified alerts status route)
 
-Intent is logged per requested alert ID, or once for query-based updates. Handler validation failures, unavailable alert targets, and Elasticsearch update failures are logged as failures.
+Intent is logged per requested alert ID, or once for query-based updates. Handler validation failures, unavailable alert targets, and Elasticsearch update failures are logged as failures. Authorization denials of these routes are logged as a single bulk `alert_update` failure before the handler runs.
 ::::
 
 #### Type: deletion
