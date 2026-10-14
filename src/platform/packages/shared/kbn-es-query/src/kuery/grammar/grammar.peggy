@@ -242,7 +242,8 @@ UnquotedLiteral
       text: text().replace(cursor, '')
     };
   }
-  / chars:UnquotedCharacter+ {
+  // A value can't start with the NOT operator, so a dangling "not" stays a syntax error.
+  / !Not chars:UnquotedCharacter+ {
     const sequence = chars.join('').trim();
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
@@ -287,11 +288,12 @@ EscapedSpecialCharacter
 EscapedKeyword
   = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
 
-// We don't use the And/Or/Not rules here because they cause recursive backtracking.
+// We don't use the And/Or rules here because they cause recursive backtracking.
+// "not" is intentionally excluded: NOT is only valid at the start of a clause, so "cannot connect"
+// or "do not touch" inside an unquoted value must be read as plain text.
 Keyword
   = Space 'or'i Space
   / Space 'and'i Space
-  / 'not'i Space
 
 SpecialCharacter
   = [\\():<>"*{}]
