@@ -9,27 +9,13 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type {
-  PubSubEvent,
-  PubSubHandler,
-  PubSubHandlerContext,
-  PubSubEventInit,
-  Topic,
-} from '@kbn/core-pubsub-server';
+import type { PubSubEvent, PubSubHandler, PubSubEventInit, Topic } from '@kbn/core-pubsub-server';
 import { scopeConsumerName } from './consumer_name';
 import type { InternalPubSubSetup, InternalPubSubStart } from './internal_contracts';
 
 type Phase = 'created' | 'setup' | 'started' | 'stopped';
 
-type SubscriptionHandler = (
-  event: PubSubEvent<unknown>,
-  context: PubSubHandlerContext
-) => void | Promise<void>;
-
-interface QueuedDelivery {
-  readonly event: PubSubEvent<unknown>;
-  readonly request: PubSubHandlerContext['request'];
-}
+type SubscriptionHandler = (event: PubSubEvent<unknown>) => void | Promise<void>;
 
 interface Subscription {
   readonly topic: string;
@@ -37,7 +23,7 @@ interface Subscription {
   readonly consumer: string;
   readonly pluginId: string;
   readonly handler: SubscriptionHandler;
-  readonly queue: QueuedDelivery[];
+  readonly queue: Array<PubSubEvent<unknown>>;
   running: boolean;
 }
 
@@ -97,7 +83,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     this.phase = 'started';
 
     return {
-      publish: (pluginId, topic, input, context) => this.publish(pluginId, topic, input, context),
+      publish: (pluginId, topic, init) => this.publish(pluginId, topic, init),
     };
   }
 
@@ -108,8 +94,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   public async publish<TData>(
     pluginId: string,
     topic: Topic<TData>,
-    init: PubSubEventInit<TData>,
-    context?: PubSubHandlerContext
+    init: PubSubEventInit<TData>
   ): Promise<PubSubEvent<TData>> {
     this.assertCanPublish();
 
@@ -130,7 +115,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     this.logger.trace(
       `Plugin "${pluginId}" published event "${event.id}" on topic "${topic.name}".`
     );
-    this.enqueue(event, context?.request);
+    this.enqueue(event);
 
     return event;
   }
@@ -173,16 +158,13 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       topic: topic.name,
       consumer: scopedConsumer,
       pluginId,
-      handler: (event, context) => handler(event as PubSubEvent<TData>, context),
+      handler: (event) => handler(event as PubSubEvent<TData>),
       queue: [],
       running: false,
     });
   }
 
-  private enqueue<TData>(
-    event: PubSubEvent<TData>,
-    request: PubSubHandlerContext['request']
-  ): void {
+  private enqueue<TData>(event: PubSubEvent<TData>): void {
     this.subscriptions
       .filter((subscription) => subscription.topic === event.topic)
       .forEach((subscription) => {
@@ -193,7 +175,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
           return;
         }
 
-        subscription.queue.push({ event, request });
+        subscription.queue.push(event);
         this.schedule(subscription);
       });
   }
@@ -211,17 +193,17 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
 
   private async drain(subscription: Subscription): Promise<void> {
     while (this.phase === 'started' && subscription.queue.length > 0) {
-      const delivery = subscription.queue.shift();
-      if (!delivery) {
+      const event = subscription.queue.shift();
+      if (!event) {
         break;
       }
 
       try {
-        await subscription.handler(delivery.event, { request: delivery.request });
+        await subscription.handler(event);
       } catch (error) {
         const detail = error instanceof Error ? error.message : 'unknown failure';
         this.logger.error(
-          `Pubsub consumer "${subscription.consumer}" failed handling topic "${delivery.event.topic}" event "${delivery.event.id}": ${detail}`
+          `Pubsub consumer "${subscription.consumer}" failed handling topic "${event.topic}" event "${event.id}": ${detail}`
         );
       }
     }

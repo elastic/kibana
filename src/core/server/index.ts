@@ -81,7 +81,6 @@ export { defineTopic } from '@kbn/core-pubsub-server';
 export type {
   PubSubEvent,
   PubSubHandler,
-  PubSubHandlerContext,
   PubSubSetup,
   PubSubStart,
   PubSubEventInit,

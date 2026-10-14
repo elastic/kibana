@@ -12,7 +12,6 @@ export type { Topic } from './src/topic';
 export type {
   PubSubEvent,
   PubSubHandler,
-  PubSubHandlerContext,
   PubSubSetup,
   PubSubStart,
   PubSubEventInit,

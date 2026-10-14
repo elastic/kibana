@@ -8,7 +8,6 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { defineTopic } from '@kbn/core-pubsub-server';
 import type { PubSubEventInit } from '@kbn/core-pubsub-server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -280,33 +279,6 @@ describe('PubSubService dispatch', () => {
     overlapGate.resolve();
     await flushDispatch();
     expect(maxActive).toBe(1);
-  });
-
-  it('forwards the publisher request to every handler and leaves it off the event', async () => {
-    const { service, setup, topic } = createHarness();
-    const request = kibanaRequestFactory({
-      headers: { authorization: 'Bearer publisher' },
-    });
-    const seenByLeft: Array<typeof request | undefined> = [];
-    const seenByRight: Array<typeof request | undefined> = [];
-    const events: object[] = [];
-
-    setup.subscribe(PLUGIN, topic, 'left', (event, context) => {
-      events.push(event);
-      seenByLeft.push(context.request);
-    });
-    setup.subscribe(PLUGIN, topic, 'right', (_event, context) => {
-      seenByRight.push(context.request);
-    });
-
-    const { publish } = start(service);
-    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'with-request' } }, { request });
-    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'without-request' } });
-    await flushDispatch();
-
-    expect(seenByLeft).toEqual([request, undefined]);
-    expect(seenByRight).toEqual([request, undefined]);
-    expect(events.every((event) => !Object.hasOwn(event, 'request'))).toBe(true);
   });
 
   it('throws when publishing a topic that was defined but never registered', async () => {

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Topic } from './topic';
 
 /**
@@ -36,23 +35,12 @@ export interface PubSubEvent<TData = unknown> extends PubSubEventInit<TData> {
 }
 
 /**
- * Caller identity for one delivery. Not part of the event.
- * Phase 1 forwards the publisher's KibanaRequest, shared by every handler of that delivery.
- * A durable phase fills the same field with a request rebuilt from stored credentials, which does not carry the original headers or symbols.
+ * Handles one event for one consumer. A rejection is logged and the event is dropped for that consumer.
+ * Handlers run with the consumer's own identity; the publisher's request is not forwarded.
  *
  * @public
  */
-export interface PubSubHandlerContext {
-  readonly request?: KibanaRequest;
-}
-
-/**
- * @public
- */
-export type PubSubHandler<TData> = (
-  event: PubSubEvent<TData>,
-  context: PubSubHandlerContext
-) => void | Promise<void>;
+export type PubSubHandler<TData> = (event: PubSubEvent<TData>) => void | Promise<void>;
 
 /**
  * @public
@@ -77,12 +65,7 @@ export interface PubSubSetup {
  */
 export interface PubSubStart {
   /**
-   * Accepts an event and returns once it is queued.
-   * Does not wait for handlers. `context` is forwarded to handlers and is not stored on the event.
+   * Accepts an event and returns once it is queued. Does not wait for handlers.
    */
-  publish<TData>(
-    topic: Topic<TData>,
-    event: PubSubEventInit<TData>,
-    context?: PubSubHandlerContext
-  ): Promise<PubSubEvent<TData>>;
+  publish<TData>(topic: Topic<TData>, event: PubSubEventInit<TData>): Promise<PubSubEvent<TData>>;
 }

@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PubSubEvent,
-  PubSubHandler,
-  PubSubHandlerContext,
-  PubSubEventInit,
-  Topic,
-} from '@kbn/core-pubsub-server';
+import type { PubSubEvent, PubSubHandler, PubSubEventInit, Topic } from '@kbn/core-pubsub-server';
 
 /**
  * Setup contract consumed by the plugin context, which adds the calling plugin id.
@@ -41,7 +35,6 @@ export interface InternalPubSubStart {
   publish<TData>(
     pluginId: string,
     topic: Topic<TData>,
-    event: PubSubEventInit<TData>,
-    context?: PubSubHandlerContext
+    event: PubSubEventInit<TData>
   ): Promise<PubSubEvent<TData>>;
 }

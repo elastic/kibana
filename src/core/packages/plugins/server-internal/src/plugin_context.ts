@@ -443,7 +443,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
     },
     pubsub: {
-      publish: (topic, input, context) => deps.pubsub.publish(plugin.name, topic, input, context),
+      publish: (topic, event) => deps.pubsub.publish(plugin.name, topic, event),
     },
     userStorage: {
       asScoped: deps.userStorage.asScoped,
