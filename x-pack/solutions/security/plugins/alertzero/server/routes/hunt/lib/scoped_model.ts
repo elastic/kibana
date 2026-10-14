@@ -145,7 +145,7 @@ export const resolveScopedModel = async ({
   inference: InferenceServerStart | undefined;
   /** Optional plugin: absent deployments fall back to the connector chain below. */
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
-  /** AlertZero model tier to resolve, e.g. `alertzero_reasoning` for Tier 2. */
+  /** AlertZero model tier to resolve, e.g. `alertzero_frontier` for Tier 2. */
   featureId: string;
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;

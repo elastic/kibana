@@ -22,6 +22,7 @@ const buildEaName = <TSuffix extends string>(
  */
 export const EA_EXECUTION_CONTEXT_NAMES = {
   ASSET_CRITICALITY: buildEaName('asset_criticality'),
+  ENTITY_DETAILS_FLYOUT: buildEaName('entity_details_flyout'),
   ENTITY_RESOLUTION: buildEaName('entity_resolution'),
   ENTITY_STORE_MANAGEMENT: buildEaName('entity_store_management'),
   EXPLORE_HOSTS_PAGE: buildEaName('explore-hosts_page'),

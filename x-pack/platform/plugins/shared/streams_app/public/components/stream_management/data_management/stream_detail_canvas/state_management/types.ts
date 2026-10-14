@@ -38,7 +38,14 @@ export interface CanvasStateServiceDeps {
 export interface CanvasUrlInput {
   flyoutName: string | null;
   flyoutTab: string | null;
+  query: string | null;
 }
+
+export const defaultCanvasUrlState: CanvasUrlInput = {
+  flyoutName: null,
+  flyoutTab: null,
+  query: null,
+};
 
 export interface CanvasState {
   urlState: CanvasUrlInput;
@@ -56,7 +63,7 @@ export interface CanvasState {
 
 export type CanvasUrlEvent =
   | { type: 'url.init'; urlState: CanvasUrlInput }
-  | { type: 'url.sync' }
+  | { type: 'url.sync'; replace?: boolean }
   | {
       type: 'unit.changed';
       unitDefinition: Unit;
@@ -89,4 +96,5 @@ export type CanvasUrlEvent =
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'flyout.open'; flyoutName: string }
   | { type: 'flyout.tab'; flyoutTab: string }
-  | { type: 'flyout.close' };
+  | { type: 'flyout.close' }
+  | { type: 'search.change'; query: string };

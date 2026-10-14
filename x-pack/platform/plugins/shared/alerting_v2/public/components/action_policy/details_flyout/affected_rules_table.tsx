@@ -51,11 +51,11 @@ export const AffectedRulesTable = ({ matcher }: Props) => {
       ),
     },
     {
-      field: 'metadata.tags',
+      field: 'metadata.routing_tags',
       name: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.column.tags', {
-        defaultMessage: 'Tags',
+        defaultMessage: 'Routing tags',
       }),
-      render: (tags: RuleApiResponse['metadata']['tags']) =>
+      render: (tags: RuleApiResponse['metadata']['routing_tags']) =>
         tags?.length ? <BadgeList items={tags} /> : EMPTY_VALUE,
     },
   ];
@@ -91,7 +91,7 @@ export const AffectedRulesTable = ({ matcher }: Props) => {
             })
           : i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.noRules', {
               defaultMessage:
-                'No rules that create alerts have any of the tags in this policy scope.',
+                'No rules that create alerts have any of the routing tags in this policy scope.',
             })
       }
       pagination={{

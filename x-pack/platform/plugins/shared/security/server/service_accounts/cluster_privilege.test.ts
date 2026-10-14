@@ -83,4 +83,43 @@ describe('ensureClusterPrivilege', () => {
     await expect(check()).rejects.toThrowError('cluster unavailable');
     expect(logger.warn).not.toHaveBeenCalled();
   });
+
+  describe('onRefused', () => {
+    const checkWith = (onRefused: jest.Mock) =>
+      ensureClusterPrivilege({
+        request: httpServerMock.createKibanaRequest(),
+        checkPrivilegesWithRequest,
+        logger,
+        privilege: 'manage_security',
+        action: 'create a service account',
+        onRefused,
+      });
+
+    it('is called with the 403 that is then thrown', async () => {
+      globally.mockResolvedValue({ hasAllRequested: false });
+      const onRefused = jest.fn();
+
+      const rejection = await checkWith(onRefused).catch((e) => e);
+
+      expect(onRefused).toHaveBeenCalledTimes(1);
+      expect(onRefused).toHaveBeenCalledWith(rejection);
+      expect(rejection.output.statusCode).toBe(403);
+    });
+
+    it('is not called when the privilege is held', async () => {
+      const onRefused = jest.fn();
+
+      await checkWith(onRefused);
+
+      expect(onRefused).not.toHaveBeenCalled();
+    });
+
+    it('is not called when the check itself fails', async () => {
+      globally.mockRejectedValue(new Error('cluster unavailable'));
+      const onRefused = jest.fn();
+
+      await expect(checkWith(onRefused)).rejects.toThrowError('cluster unavailable');
+      expect(onRefused).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -38,11 +38,21 @@ const matches = (
     const actual = fieldValue(id, source, field);
     return Array.isArray(values) && actual !== undefined && values.includes(actual);
   }
+  if (clause?.bool) {
+    const { filter = [], should = [] } = clause.bool;
+    const filters = Array.isArray(filter) ? filter : [filter];
+    const shoulds = Array.isArray(should) ? should : [should];
+    return (
+      filters.every((inner) => matches(id, source, inner)) &&
+      (shoulds.length === 0 || shoulds.some((inner) => matches(id, source, inner)))
+    );
+  }
   throw new Error(`Unsupported clause in the in-memory storage: ${JSON.stringify(clause)}`);
 };
 
 /**
- * Just enough of the storage adapter for service tests: term / terms filters, versioned reads,
+ * Just enough of the storage adapter for service tests: term / terms filters and bool
+ * filter / should, versioned reads,
  * `op_type: 'create'` and `if_seq_no` conflicts, bulk deletes.
  */
 export const createInMemoryStorage = <TStored extends StoredInvestigationAttachment>() => {

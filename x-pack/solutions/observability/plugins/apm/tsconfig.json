@@ -44,6 +44,7 @@
     "@kbn/fleet-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
+    "@kbn/flyout-template",
     "@kbn/ui-callout",
     "@kbn/ui-theme",
     "@kbn/synthtrace-client",
@@ -181,7 +182,8 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser-hooks",
     "@kbn/lens-common",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/core-http-browser-mocks",
+    "@kbn/genai-common"
   ],
   "exclude": ["target/**/*"]
 }

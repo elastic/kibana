@@ -13,7 +13,7 @@ import { useFetchErrorToast } from './use_fetch_error_toast';
 import { useKibana } from './use_kibana';
 
 export const useStreamFeatures = (
-  streamName: string,
+  sourceId: string,
   deps: unknown[] = [],
   { enabled = true }: { enabled?: boolean } = {}
 ) => {
@@ -21,10 +21,10 @@ export const useStreamFeatures = (
   const showFetchErrorToast = useFetchErrorToast();
 
   const fetchFeatures = async ({ signal: querySignal }: QueryFunctionContext) => {
-    return significantEventsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
+    return significantEventsRepositoryClient.fetch('GET /internal/streams/{sourceId}/features', {
       params: {
         path: {
-          name: streamName,
+          sourceId,
         },
         query: {
           include_excluded: true,
@@ -35,7 +35,7 @@ export const useStreamFeatures = (
   };
 
   const { data, isLoading, error, refetch } = useQuery<{ features: Feature[] }, Error>({
-    queryKey: ['features', streamName, ...deps],
+    queryKey: ['features', sourceId, ...deps],
     queryFn: fetchFeatures,
     onError: showFetchErrorToast,
     enabled,

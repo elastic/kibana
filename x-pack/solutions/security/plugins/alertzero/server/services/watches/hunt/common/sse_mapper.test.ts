@@ -190,6 +190,7 @@ const tier1Result = (
   index_patterns: ['logs-aws.*'],
   tier2_targets: ['logs-aws.*'],
   tier2_target_sources: ['report_match'],
+  report_intent_targets: [],
   actionable_indices: ['logs-endpoint.events.process-*'],
   has_confirmed_hit: true,
   completeness: 'complete',

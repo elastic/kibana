@@ -199,11 +199,23 @@ export interface AttackEntitiesDescriptor {
 
 // --- Entity main flyouts ---
 
+/**
+ * Entity-store lookup mode persisted for host/user/service flyouts. Only `resolved` is ever written;
+ * the default `single` is omitted so existing URLs stay unchanged.
+ */
+export type EntityDescriptorMode = 'resolved';
+
+/** Normalises a component `mode` into the descriptor field (undefined for the default `single`). */
+export const toEntityDescriptorMode = (
+  mode: string | undefined
+): EntityDescriptorMode | undefined => (mode === 'resolved' ? 'resolved' : undefined);
+
 export interface HostDescriptor {
   kind: 'host';
   hostName: string;
   entityId?: string;
   scopeId?: string;
+  mode?: EntityDescriptorMode;
 }
 
 export interface UserDescriptor {
@@ -211,6 +223,7 @@ export interface UserDescriptor {
   userName: string;
   entityId?: string;
   scopeId?: string;
+  mode?: EntityDescriptorMode;
 }
 
 export interface ServiceDescriptor {
@@ -218,6 +231,7 @@ export interface ServiceDescriptor {
   serviceName: string;
   entityId?: string;
   scopeId?: string;
+  mode?: EntityDescriptorMode;
 }
 
 export interface GenericEntityDescriptor {

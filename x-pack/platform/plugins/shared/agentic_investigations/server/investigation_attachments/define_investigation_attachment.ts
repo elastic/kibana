@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import type {
   AgentBuilderPluginSetup,
@@ -27,7 +27,9 @@ import {
 } from './attachment_doc_service';
 import { attachFromTool, type AttachedFromTool } from './attach_from_tool';
 import { attachWithPublicClient } from './attach_with_public_client';
+import type { AssertCanReadConversation } from './assert_can_read_conversation';
 import { createInvestigationAttachmentType } from './create_attachment_type';
+import { hashInvestigationAttachmentId } from './doc_id';
 
 export interface InvestigationAttachmentConfig<
   TType extends string,
@@ -45,6 +47,12 @@ export interface InvestigationAttachmentConfig<
   schema: z.ZodType<InvestigationAttachmentDocument<TStored>>;
   /** Upper bound on documents per conversation; 1 (the default) for one document per conversation. */
   maxDocumentsPerConversation?: number;
+  /**
+   * Keeps document ids that leave the type out, for an index whose ids predate the factory.
+   * The document id is also the conversation attachment id, so every other type puts its type
+   * into the id; that keeps two types of one conversation from sharing an attachment.
+   */
+  legacyUntypedDocumentIds?: boolean;
   /** Text the LLM sees for the attachment. */
   format: (document: InvestigationAttachmentDocument<TStored>) => string;
   /** Rules the agent follows when the attachment is in the conversation. */
@@ -62,6 +70,16 @@ export interface InvestigationAttachmentConfig<
     current: InvestigationAttachmentDocument<TStored>
   ) => boolean;
   maxContentLength?: number;
+}
+
+/** What the Agent Builder type needs at runtime; resolved lazily, after `start`. */
+export interface InvestigationAttachmentTypeDeps<TStored extends StoredInvestigationAttachment> {
+  getService: () => InvestigationAttachmentDocService<TStored>;
+  /** Checked before `resolve` and `isStale` read the index by a caller-supplied origin. */
+  assertCanRead: (request: KibanaRequest) => Promise<void>;
+  /** Checked against the document's conversation before `resolve` or `isStale` use it. */
+  assertCanReadConversation: AssertCanReadConversation;
+  logger: Logger;
 }
 
 /** How a write reads and changes the document, shared by the route and tool paths. */
@@ -83,6 +101,11 @@ export interface InvestigationAttachmentDefinition<
   type: TType;
   /** Whether the write paths hide the conversation attachment from the chat. */
   hiddenInConversation: boolean;
+  /**
+   * Deterministic document id, which is also the conversation attachment id and origin.
+   * `keyParts` tell several documents of one conversation apart.
+   */
+  documentId: (spaceId: string, conversationId: string, ...keyParts: string[]) => string;
   /** Storage and service on the internal user; callers authorize and pass the request's space. */
   createService: (deps: {
     esClient: ElasticsearchClient;
@@ -92,14 +115,13 @@ export interface InvestigationAttachmentDefinition<
   createServiceFromStorage: (
     storage: InvestigationAttachmentStorage<TStored>
   ) => InvestigationAttachmentDocService<TStored>;
-  createAttachmentType: (deps: {
-    getService: () => InvestigationAttachmentDocService<TStored>;
-    logger: Logger;
-  }) => AttachmentTypeDefinition<TType, InvestigationAttachmentDocument<TStored>>;
+  createAttachmentType: (
+    deps: InvestigationAttachmentTypeDeps<TStored>
+  ) => AttachmentTypeDefinition<TType, InvestigationAttachmentDocument<TStored>>;
   /** Setup-time registration with Agent Builder. */
   registerAttachmentType: (
     agentBuilder: AgentBuilderPluginSetup,
-    deps: { getService: () => InvestigationAttachmentDocService<TStored>; logger: Logger }
+    deps: InvestigationAttachmentTypeDeps<TStored>
   ) => void;
   /** Route / step path: owner check, index write, public-client attach, revert on failure. */
   writeAndAttach: (
@@ -141,13 +163,17 @@ export const defineInvestigationAttachment = <
     type: TId,
     {
       getService,
+      assertCanRead,
+      assertCanReadConversation,
       logger,
-    }: Parameters<InvestigationAttachmentDefinition<TType, TStored>['createAttachmentType']>[0]
+    }: InvestigationAttachmentTypeDeps<TStored>
   ) =>
     createInvestigationAttachmentType<TId, TStored>({
       type,
       schema: config.schema,
       getService,
+      assertCanRead,
+      assertCanReadConversation,
       logger,
       format: config.format,
       agentDescription: config.agentDescription,
@@ -156,10 +182,13 @@ export const defineInvestigationAttachment = <
     });
 
   const hidden = config.hiddenInConversation === true;
+  const typePart = config.legacyUntypedDocumentIds ? [] : [config.type];
 
   return {
     type: config.type,
     hiddenInConversation: hidden,
+    documentId: (spaceId, conversationId, ...keyParts) =>
+      hashInvestigationAttachmentId(...typePart, spaceId, conversationId, ...keyParts),
     createService: ({ esClient, logger }) =>
       createServiceFromStorage(
         new StorageIndexAdapter<TSettings, TStored>(

@@ -6,15 +6,18 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { Impact } from '../../../common/impact/impact';
 import { MAX_IMPACT_CONVERSATION_IDS } from '../../../common/impact/constants';
-import type { ImpactPrivilegesChecker } from './check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { filterReadableConversationIds } from '../../investigations/services/readable_conversation_ids';
 import type { ImpactService } from './impact_service';
 
 /**
  * In-process impact reads. The space and the principal both come from the
  * request, so a caller cannot supply another space or skip the investigations
- * manage privilege.
+ * read privilege (read or manage). Impact of a conversation the caller cannot
+ * read is left out, as if it had none.
  */
 export interface ImpactReadClient {
   listByConversationIds: (conversationIds: string[]) => Promise<Impact[]>;
@@ -29,18 +32,29 @@ export interface ImpactReadClient {
 export interface ImpactClientDeps {
   getImpactService: () => ImpactService;
   getSpaceId: (request: KibanaRequest) => string;
-  privileges: ImpactPrivilegesChecker;
+  privileges: InvestigationsPrivilegesChecker;
+  getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }
 
-/** Builds a request-scoped reader. The privilege check runs before any search. */
+/**
+ * Builds a request-scoped reader. The privilege check runs before any search, and the impact
+ * index (read as the internal user) is only read for conversations the caller can read.
+ */
 export const createImpactClient =
-  ({ getImpactService, getSpaceId, privileges }: ImpactClientDeps) =>
+  ({ getImpactService, getSpaceId, privileges, getConversationClient }: ImpactClientDeps) =>
   (request: KibanaRequest): ImpactReadClient => {
     const listByConversationIds: ImpactReadClient['listByConversationIds'] = async (
       conversationIds
     ) => {
       await privileges.assertCanRead(request);
-      return getImpactService().listByConversationIds(conversationIds, getSpaceId(request));
+      const readableIds = await filterReadableConversationIds(
+        await getConversationClient(request),
+        conversationIds
+      );
+      if (readableIds.length === 0) {
+        return [];
+      }
+      return getImpactService().listByConversationIds(readableIds, getSpaceId(request));
     };
 
     return {

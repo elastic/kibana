@@ -9,7 +9,8 @@
 
 import type { StabilityTier } from '../stability';
 import type { ImpactReportEntry } from './write_impact_report';
-import { ESCALATION_LINK } from './links';
+import { README_LINK } from './links';
+import releaseNote from './release_note.json';
 
 const HEADER = `
 ╔════════════════════════════════════════════════════════════════════════════╗
@@ -18,6 +19,13 @@ const HEADER = `
 
 `.split('\n');
 
+const RELEASE_NOTE = `Release note:
+
+${releaseNote.guidance}
+
+See the @kbn/api-contracts README for tier definitions and the allowlist workflow: ${README_LINK}
+`;
+
 const FOOTER = `
 ────────────────────────────────────────────────────────────────────────────
 
@@ -25,10 +33,23 @@ What to do next:
 
 1. Review the breaking changes above
 2. If unintentional, revert the change
-3. If intentional, add an approved allowlist entry and coordinate with the owning team
+3. If intentional:
+   - add an approved allowlist entry and coordinate with the owning team
+   - ${releaseNote.labelStep}
+   - ${releaseNote.textStep}
 
-Need help? ${ESCALATION_LINK}
+${RELEASE_NOTE}
+`.split('\n');
 
+const ALLOWLISTED_FOOTER = `
+────────────────────────────────────────────────────────────────────────────
+
+Nothing here blocks merge. The approved breaking change(s) still ship with this PR, so:
+
+- ${releaseNote.labelStep}
+- ${releaseNote.textStep}
+
+${RELEASE_NOTE}
 `.split('\n');
 
 const INFORMATIONAL_HEADER = `
@@ -41,10 +62,9 @@ const INFORMATIONAL_HEADER = `
 const INFORMATIONAL_FOOTER = `
 ────────────────────────────────────────────────────────────────────────────
 
-Nothing here blocks merge. Consider whether a release note is worth adding for
-the listed change(s).
+Nothing here blocks merge. ${releaseNote.optionalPrompt}
 
-Need help? ${ESCALATION_LINK}
+See the @kbn/api-contracts README for tier definitions and the rule policy: ${README_LINK}
 
 `.split('\n');
 
@@ -77,8 +97,16 @@ const EXPERIMENTAL_HEADING = `
 
 Informational — not blocking merge:
 
-The following breaking change(s) are in experimental APIs, which are allowed to
-break. They are listed for visibility only and do not fail this check.
+The following breaking change(s) are in experimental APIs, which are allowed to break. They are listed for visibility only and do not fail this check.
+
+`.split('\n');
+
+const ALLOWLISTED_HEADING = `
+────────────────────────────────────────────────────────────────────────────
+
+Approved — not blocking merge:
+
+The following stable/tech_preview breaking change(s) match an approved allowlist entry, so they do not fail this check. They still ship as breaking changes.
 
 `.split('\n');
 
@@ -87,9 +115,7 @@ const REPORT_ONLY_HEADING = `
 
 Informational — not blocking merge:
 
-The following change(s) match oasdiff rules Kibana treats as additive, so they
-do not fail this check. They are listed so the owning team can decide whether a
-release note is still worth adding.
+The following change(s) match oasdiff rules Kibana treats as additive, so they do not fail this check.
 
 `.split('\n');
 
@@ -97,14 +123,18 @@ release note is still worth adding.
  * Format the CI-log summary for detected breaking changes. Gating tiers (stable
  * first, then tech_preview) lead the report and drive the summary count;
  * experimental changes and report-only rules, if any, follow in clearly
- * non-blocking sections. When nothing gates, the same sections are printed under
+ * non-blocking sections. Allowlisted changes follow the gating ones in an
+ * approved section and keep the release note guidance, because they still ship
+ * as breaking changes. When nothing gates, the same sections are printed under
  * an informational header with no failure count or allowlist prompt. Entries are
  * already tier-classified and policy-labeled by check_contracts, so this is
  * presentation only.
  */
 export function formatFailure(entries: ImpactReportEntry[]): string {
-  const reportOnly = entries.filter((e) => e.reportOnly);
-  const gatingCandidates = entries.filter((e) => !e.reportOnly);
+  const allowlisted = entries.filter((e) => e.allowlisted);
+  const unapproved = entries.filter((e) => !e.allowlisted);
+  const reportOnly = unapproved.filter((e) => e.reportOnly);
+  const gatingCandidates = unapproved.filter((e) => !e.reportOnly);
   const stable = gatingCandidates.filter((e) => e.tier === 'stable');
   const techPreview = gatingCandidates.filter((e) => e.tier === 'tech_preview');
   const experimental = gatingCandidates.filter((e) => e.tier === 'experimental');
@@ -116,14 +146,20 @@ export function formatFailure(entries: ImpactReportEntry[]): string {
   const reportOnlySection =
     reportOnly.length > 0 ? [...REPORT_ONLY_HEADING, ...reportOnly.flatMap(formatEntry)] : [];
 
+  const allowlistedSection =
+    allowlisted.length > 0 ? [...ALLOWLISTED_HEADING, ...allowlisted.flatMap(formatEntry)] : [];
+
   if (gating.length === 0) {
     return [
       ...INFORMATIONAL_HEADER,
-      'No breaking changes detected in stable/tech_preview APIs.',
+      allowlisted.length > 0
+        ? 'No unapproved breaking changes detected in stable/tech_preview APIs.'
+        : 'No breaking changes detected in stable/tech_preview APIs.',
       '',
+      ...allowlistedSection,
       ...experimentalSection,
       ...reportOnlySection,
-      ...INFORMATIONAL_FOOTER,
+      ...(allowlisted.length > 0 ? ALLOWLISTED_FOOTER : INFORMATIONAL_FOOTER),
     ].join('\n');
   }
 
@@ -133,6 +169,7 @@ export function formatFailure(entries: ImpactReportEntry[]): string {
       `(${stable.length} stable, ${techPreview.length} tech_preview):`,
     '',
     ...gating.flatMap(formatEntry),
+    ...allowlistedSection,
     ...experimentalSection,
     ...reportOnlySection,
     ...FOOTER,

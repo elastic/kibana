@@ -25,9 +25,10 @@ import {
   optimizeMemory,
   unwrapUserTask,
 } from './optimize';
-import type { MemoryPageStore } from './page_store';
+import type { MemoryPageStore, MemoryPageWrite } from './page_store';
 import type { TranscriptStep } from './transcript';
 import type { MemoryPage } from '../../common/memory';
+import { MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const page = (id: string, title = id, content = 'body'): MemoryPage => ({
   id,
@@ -35,7 +36,7 @@ const page = (id: string, title = id, content = 'body'): MemoryPage => ({
   title,
   content,
   tags: ['memory'],
-  status: 'established',
+  archived: false,
   categories: [],
   references: [],
   created_at: '2026-01-01T00:00:00.000Z',
@@ -360,7 +361,7 @@ describe('createLlmProposeMemoryExtractions', () => {
         {
           slug: 'kafka-lag',
           title: 'Kafka lag',
-          tags: ['kafka', 'consumer lag'],
+          tags: ['kafka', 'consumer-lag'],
           replaces: ['memory_a', 'memory_b'],
         },
       ],
@@ -371,6 +372,27 @@ describe('createLlmProposeMemoryExtractions', () => {
     const output = jest.fn().mockResolvedValue({
       output: {
         extractions: [{ title: 'api_key=sk-live-not-a-real-key', keywords: [], replaces: [] }],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
+      extractions: [],
+    });
+  });
+
+  it('rejects a secret-bearing raw keyword before canonicalization can hide it', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        extractions: [
+          {
+            title: 'Checkout auth',
+            keywords: ['checkout', 'Bearer abcdefghijkl1234'],
+            replaces: [],
+          },
+        ],
       },
     });
     const propose = createLlmProposeMemoryExtractions({
@@ -411,6 +433,59 @@ describe('createLlmProposeMemoryExtractions', () => {
     const item = schema.properties.extractions.items;
     expect(Object.keys(item.properties)).toEqual(['title', 'keywords', 'replaces']);
     expect(item.required).toEqual(['title', 'keywords', 'replaces']);
+  });
+
+  it('canonicalizes proposed keywords and drops the ones that fold to nothing', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        extractions: [
+          {
+            title: 'Agent builder spans',
+            keywords: [
+              'Invoke Agent',
+              'invoke_agent',
+              'cart cache',
+              '  ',
+              'gen_ai.conversation.id',
+              'traces-*',
+            ],
+          },
+        ],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
+      extractions: [
+        {
+          slug: 'agent-builder-spans',
+          title: 'Agent builder spans',
+          tags: ['invoke-agent', 'cart-cache', 'gen_ai.conversation.id', 'traces-*'],
+          replaces: [],
+        },
+      ],
+    });
+  });
+
+  it('caps a proposal at the per-page tag limit', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        extractions: [
+          {
+            title: 'Wide memory',
+            keywords: Array.from({ length: MAX_MEMORY_TAGS_PER_PAGE + 8 }, (_, i) => `tag ${i}`),
+          },
+        ],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    const { extractions } = await propose({ transcript: 'task', recalledMemories: [] });
+    expect(extractions[0].tags).toHaveLength(MAX_MEMORY_TAGS_PER_PAGE);
   });
 });
 
@@ -533,7 +608,6 @@ describe('applyMemoryEdits', () => {
         title: 'Kafka consumer lag',
         context:
           'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/x` — X\n</system_update>',
-        status: 'established',
         source:
           'Merged from memories: memory_kafka-lag, memory_original-kafka-lag, memory_checkout-kafka',
         merged_from: ['memory_kafka-lag', 'memory_original-kafka-lag', 'memory_checkout-kafka'],
@@ -642,7 +716,7 @@ describe('applyMemoryEdits', () => {
       ],
       synthesizeMemoryGroup: async () => {
         current = {
-          page: { ...source, status: 'archived', archive_reason: 'harmful' },
+          page: { ...source, archived: true, archive_reason: 'harmful' },
           seqNo: 2,
           primaryTerm: 1,
         };
@@ -842,7 +916,7 @@ describe('applyMemoryEdits', () => {
       archiveVersioned.mock.invocationCallOrder[0]
     );
     expect(liveSource).toBe(newerSource);
-    expect(liveSource.status).toBe('established');
+    expect(liveSource.archived).toBe(false);
     expect(store.archive).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({
@@ -1118,7 +1192,7 @@ describe('applyMemoryEdits', () => {
     );
   });
 
-  it('merges an old exact slug in place with OCC and preserves its id and title', async () => {
+  it('rewrites an exact slug in place with OCC, keeping id and title and no merge fields', async () => {
     const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
     const store = createStore({
       get: jest
@@ -1132,7 +1206,7 @@ describe('applyMemoryEdits', () => {
     });
     const synthesizeMemoryGroup = jest.fn().mockResolvedValue({ content: 'Old and new facts.' });
 
-    await applyMemoryEdits({
+    const summary = await applyMemoryEdits({
       store,
       recalledIds: [],
       labels: { useful: [], harmful: [] },
@@ -1145,26 +1219,36 @@ describe('applyMemoryEdits', () => {
         },
       ],
       synthesizeMemoryGroup,
+      now: () => Date.parse('2026-01-01T00:00:00.000Z') / 1000,
       logger: loggerMock.create(),
     });
 
     expect(synthesizeMemoryGroup).toHaveBeenCalledWith(
       expect.objectContaining({ sources: [existing] })
     );
+    // Nothing was merged in, so the page must not name itself as a source of itself.
+    const written = (store.update as jest.Mock).mock.calls[0][1] as MemoryPageWrite;
+    expect(written.slug).toBe('checkout-redis');
+    expect(written.title).toBe('Checkout Redis');
+    expect(written.merged_from).toBeUndefined();
+    expect(written.source).toBeUndefined();
+    // The page's own counters carry over, as they do for any write over it.
+    expect(written.telemetry).toEqual(expect.objectContaining({ impressions: 1, conversions: 0 }));
     expect(store.update).toHaveBeenCalledWith(
       'memory_checkout-redis',
-      expect.objectContaining({
-        slug: 'checkout-redis',
-        title: 'Checkout Redis',
-        merged_from: ['memory_checkout-redis'],
-      }),
+      expect.anything(),
       expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
     );
     expect(store.archiveVersioned).not.toHaveBeenCalled();
     expect(store.create).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({ standaloneUpsertCount: 1, mergeSuccessCount: 0 })
+    );
   });
 
-  it('merges a create-conflict winner through the same in-place flow', async () => {
+  it('counts a create-conflict winner as an in-place write, not a merge', async () => {
+    // The create lost a race to a page that already exists, so the retry writes
+    // over that page with no other memory folded in: an upsert, like any rewrite.
     const winner = page('memory_checkout-redis', 'Concurrent winner', 'Winner fact.');
     const get = jest
       .fn()
@@ -1205,7 +1289,11 @@ describe('applyMemoryEdits', () => {
       expect.objectContaining({ seqNo: 4 })
     );
     expect(summary).toEqual(
-      expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 1 })
+      expect.objectContaining({
+        standaloneUpsertCount: 1,
+        mergeSuccessCount: 0,
+        mergeAttemptCount: 0,
+      })
     );
   });
 
@@ -1246,10 +1334,10 @@ describe('applyMemoryEdits', () => {
     );
   });
 
-  it('writes a new memory over an archived one with the same id, resetting its counters', async () => {
+  it('writes a new memory over an archived one with the same id, resetting counters', async () => {
     const archived = {
       ...page('memory_checkout-redis', 'Checkout Redis', 'Old wrong fact.'),
-      status: 'archived' as const,
+      archived: true,
       merged_from: ['memory_older-redis'],
     };
     const store = createStore({ get: jest.fn().mockResolvedValue(archived) });
@@ -1275,7 +1363,6 @@ describe('applyMemoryEdits', () => {
       archived.id,
       expect.objectContaining({
         content: 'New fact.',
-        status: 'tentative',
         merged_from: ['memory_older-redis'],
         telemetry: expect.objectContaining({ impressions: 0, conversions: 0 }),
       }),
@@ -1284,11 +1371,44 @@ describe('applyMemoryEdits', () => {
     expect(summary).toEqual(expect.objectContaining({ standaloneUpsertCount: 1 }));
   });
 
+  it("drops an archived page's own id from the merge history it hands over", async () => {
+    // An archived page written by an in-place rewrite lists itself as its only
+    // source; carrying that over would re-create the self-reference.
+    const archived = {
+      ...page('memory_checkout-redis', 'Checkout Redis', 'Old wrong fact.'),
+      archived: true,
+      merged_from: ['memory_checkout-redis', 'memory_older-redis'],
+    };
+    const store = createStore({ get: jest.fn().mockResolvedValue(archived) });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          tags: [],
+          replaces: [],
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'New fact.' }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.update).toHaveBeenCalledWith(
+      archived.id,
+      expect.objectContaining({ merged_from: ['memory_older-redis'] }),
+      expect.objectContaining({ page: archived })
+    );
+  });
+
   it('merges into an archived id instead of adding a -merged suffix', async () => {
     const source = page('memory_redis-evictions', 'Redis evictions', 'Evicts under load.');
     const archived = {
       ...page('memory_checkout-redis', 'Checkout Redis', 'Old fact.'),
-      status: 'archived' as const,
+      archived: true,
     };
     const pages = [source, archived];
     const store = createStore({
@@ -1317,7 +1437,7 @@ describe('applyMemoryEdits', () => {
     expect(store.create).not.toHaveBeenCalled();
     expect(store.update).toHaveBeenCalledWith(
       archived.id,
-      expect.objectContaining({ slug: 'checkout-redis', status: 'established' }),
+      expect.objectContaining({ slug: 'checkout-redis' }),
       expect.objectContaining({ page: archived })
     );
     expect(store.archiveVersioned).toHaveBeenCalledWith(
@@ -1400,6 +1520,88 @@ describe('applyMemoryEdits', () => {
     expect(store.retrieve).not.toHaveBeenCalled();
     expect(synthesizeMemoryGroup).not.toHaveBeenCalled();
     expect(summary.safetySkipCount).toBe(1);
+  });
+
+  it('canonicalizes and dedupes the merge union, and drops the internal marker', async () => {
+    const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
+    existing.tags = ['memory', 'Cart Cache', 'redis', 'invoke_agent', 'Cart-Cache'];
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === existing.id ? existing : undefined)),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: existing,
+        seqNo: 7,
+        primaryTerm: 2,
+      }),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          // The same tag as the source page, spelled the other way, plus an
+          // identifier whose punctuation must survive.
+          tags: ['memory', 'CART_CACHE', 'Invoke Agent', 'gen_ai.conversation.id'],
+          replaces: [],
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Old and new facts.' }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.update).toHaveBeenCalledWith(
+      existing.id,
+      expect.objectContaining({
+        tags: ['cart-cache', 'redis', 'invoke-agent', 'gen_ai.conversation.id'],
+      }),
+      expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
+    );
+  });
+
+  it('caps the merge union at the per-page tag limit', async () => {
+    const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
+    existing.tags = [
+      'memory',
+      ...Array.from({ length: MAX_MEMORY_TAGS_PER_PAGE }, (_, i) => `source ${i}`),
+    ];
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === existing.id ? existing : undefined)),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: existing,
+        seqNo: 1,
+        primaryTerm: 1,
+      }),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          tags: Array.from({ length: MAX_MEMORY_TAGS_PER_PAGE }, (_, i) => `proposed ${i}`),
+          replaces: [],
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Old and new facts.' }),
+      logger: loggerMock.create(),
+    });
+
+    const write = (store.update as jest.Mock).mock.calls[0][1] as { tags: string[] };
+    expect(write.tags).toHaveLength(MAX_MEMORY_TAGS_PER_PAGE);
+    // The union is ordered sources-first, so the cap drops the proposed tail
+    // rather than the tags the merged pages already carried.
+    expect(write.tags[0]).toBe('source-0');
+    expect(write.tags).not.toContain('memory');
   });
 
   it('keeps extraction slugs and merge page ids out of info logs', async () => {
@@ -1554,6 +1756,37 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     );
   });
 
+  it('keeps the real ancestors of a merge into an existing page, minus the page itself', async () => {
+    // The entry's slug resolves to a page that is both the write target and a
+    // source, so naming the target in `merged_from` would make the page its own
+    // ancestor — and the lineage walk skips an id it has already visited, which
+    // would hide the memories that really were merged into it.
+    const target = page('memory_host-clock-lag', 'Host clock lag', 'The host clock drifts.');
+    target.merged_from = ['memory_older-clock-lag'];
+    const named = page('memory_x509-errors', 'x509 errors', 'x509 not yet valid errors on TLS.');
+    const store = storeWith([target, named]);
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [named.id],
+      recalledMemories: [named],
+      labels: { useful: [], harmful: [] },
+      extractions: [entry({ replaces: [named.id] })],
+      context: 'clock',
+      synthesizeMemoryGroup: jest.fn().mockResolvedValue({ content: 'Merged.' }),
+      logger: loggerMock.create(),
+    });
+
+    const written = (store.update as jest.Mock).mock.calls[0][1] as MemoryPageWrite;
+    // The entry's proposed id is the target's own id here, so it goes too; what is
+    // left is the named source and the target's own earlier lineage.
+    expect(written.merged_from).toEqual(['memory_x509-errors', 'memory_older-clock-lag']);
+    expect(written.source).toBe('Merged from memories: memory_x509-errors, memory_older-clock-lag');
+    expect(summary).toEqual(
+      expect.objectContaining({ standaloneUpsertCount: 0, mergeSuccessCount: 1 })
+    );
+  });
+
   it('merges several named memories into one entry', async () => {
     const first = page('memory_a', 'Clock skew A', 'Clock skew breaks TLS.');
     const second = page('memory_b', 'Clock skew B', 'TLS fails on clock skew.');
@@ -1678,7 +1911,7 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     const store = createStore({
       get: jest.fn(async (id: string) => (id === wrong.id ? stored : undefined)),
       archive: jest.fn(async (id: string, reason) => {
-        stored = { ...stored, status: 'archived', archive_reason: reason };
+        stored = { ...stored, archived: true, archive_reason: reason };
         return stored;
       }),
     });
@@ -1702,11 +1935,10 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
     expect(store.update).toHaveBeenCalledWith(
       wrong.id,
       expect.objectContaining({
-        status: 'tentative',
         content: 'The host clock runs about 1 s behind the sandbox CA.',
         telemetry: expect.objectContaining({ impressions: 0, conversions: 0 }),
       }),
-      expect.objectContaining({ page: expect.objectContaining({ status: 'archived' }) })
+      expect.objectContaining({ page: expect.objectContaining({ archived: true }) })
     );
   });
 
@@ -2131,7 +2363,7 @@ describe('optimizeMemory', () => {
     expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({
         slug: 'checkout-redis',
-        status: 'tentative',
+
         context: 'why is checkout slow?',
       })
     );
