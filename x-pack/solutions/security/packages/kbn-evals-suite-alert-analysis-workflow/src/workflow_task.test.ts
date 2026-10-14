@@ -7,7 +7,7 @@
 
 import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { readAgentVerdict } from './workflow_task';
+import { readVerdict } from './workflow_task';
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
@@ -44,7 +44,7 @@ describe('alert-analysis conversation id extraction', () => {
   });
 });
 
-describe('readAgentVerdict', () => {
+describe('readVerdict', () => {
   const alertId = 'aa-eval-tier1-malicious-file-uuid';
 
   it('matches the agent schema field `id`', () => {
@@ -66,7 +66,7 @@ describe('readAgentVerdict', () => {
       }),
     ];
 
-    expect(readAgentVerdict(steps, alertId)?.classification).toBe('true_positive');
+    expect(readVerdict(steps, alertId)?.classification).toBe('true_positive');
   });
 
   it('does not credit a legacy `alert_id` match (production pairs on `id` only)', () => {
@@ -88,7 +88,7 @@ describe('readAgentVerdict', () => {
       }),
     ];
 
-    expect(readAgentVerdict(steps, alertId)).toBeUndefined();
+    expect(readVerdict(steps, alertId)).toBeUndefined();
   });
 
   it('returns undefined when no verdict matches the seeded alert id', () => {
@@ -104,6 +104,58 @@ describe('readAgentVerdict', () => {
       }),
     ];
 
-    expect(readAgentVerdict(steps, alertId)).toBeUndefined();
+    expect(readVerdict(steps, alertId)).toBeUndefined();
+  });
+});
+
+describe('readVerdict for a prompt', () => {
+  const alertId = 'aa-eval-tier1-malicious-file-uuid';
+  const promptStep = (overrides: Partial<WorkflowStepExecutionDto>) =>
+    step({ stepId: 'runPrompt_step', stepType: 'ai.prompt', ...overrides });
+
+  it('reads the verdict from the prompt step content, where ai.prompt puts its reply', () => {
+    const steps = [
+      promptStep({ output: null }),
+      promptStep({
+        output: {
+          content: {
+            verdicts: [{ id: alertId, classification: 'false_positive', confidence_score: 0.8 }],
+          },
+        },
+      }),
+    ];
+
+    expect(readVerdict(steps, alertId)?.classification).toBe('false_positive');
+  });
+
+  it('finds the prompt step by name when the record omits its type', () => {
+    const steps = [
+      promptStep({
+        stepType: undefined,
+        output: {
+          content: {
+            verdicts: [{ id: alertId, classification: 'true_positive', confidence_score: 0.9 }],
+          },
+        },
+      }),
+    ];
+
+    expect(readVerdict(steps, alertId)?.classification).toBe('true_positive');
+  });
+
+  it('ignores a step that is neither the agent nor the prompt', () => {
+    const steps = [
+      step({
+        stepId: 'other_step',
+        stepType: 'data.set',
+        output: {
+          content: {
+            verdicts: [{ id: alertId, classification: 'true_positive', confidence_score: 0.9 }],
+          },
+        },
+      }),
+    ];
+
+    expect(readVerdict(steps, alertId)).toBeUndefined();
   });
 });

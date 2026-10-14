@@ -20,7 +20,6 @@ const queryClient = new QueryClient();
 
 const ONBOARDING_API_PATHS = {
   apiKey: '/internal/serverless_vectordb/api_key',
-  deploymentStats: '/internal/serverless_vectordb/deployment_stats',
 };
 
 export const renderApp = (

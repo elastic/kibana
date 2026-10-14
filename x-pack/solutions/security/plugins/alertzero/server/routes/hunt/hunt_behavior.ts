@@ -7,7 +7,7 @@
 
 import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
 import {
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntBehaviorRequestBody,
   INTERNAL_API_ACCESS,
@@ -63,7 +63,7 @@ export const registerHuntBehaviorRoute = ({
           const modelOutcome = await resolveScopedModel({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
-            featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+            featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,
