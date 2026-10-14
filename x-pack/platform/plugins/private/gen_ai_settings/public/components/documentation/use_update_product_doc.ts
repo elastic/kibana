@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@kbn/react-query';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { PerformUpdateResponse } from '../../common/http_api/installation';
-import type { ProductDocBasePluginStart } from '../types';
-import { REACT_QUERY_KEYS } from './constants';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import {
+  REACT_QUERY_KEYS,
+  type ProductDocBasePluginStart,
+} from '@kbn/product-doc-base-plugin/public';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
+
+type PerformUpdateResponse = Awaited<
+  ReturnType<ProductDocBasePluginStart['installation']['updateAll']>
+>;
+
+const UPDATE_PRODUCT_DOC_MUTATION_KEY = 'productDocBase.update';
 
 export interface UseUpdateProductDocOptions {
   /** Callback fired on successful update */
@@ -21,10 +28,7 @@ export interface UseUpdateProductDocOptions {
   onError?: (error: ServerError) => void;
 }
 
-/**
- * Hook to force-update product documentation for a specific inference ID.
- * Automatically invalidates the status query on success.
- */
+/** Force-updates product documentation for one inference endpoint without adding it to the productDocBase page-load bundle. */
 export function useUpdateProductDoc(
   productDocBase: ProductDocBasePluginStart,
   options: UseUpdateProductDocOptions = {}
@@ -35,7 +39,7 @@ export function useUpdateProductDoc(
   type UpdateVars = string | { inferenceId?: string } | undefined;
 
   return useMutation<PerformUpdateResponse, ServerError, UpdateVars>(
-    [REACT_QUERY_KEYS.UPDATE_PRODUCT_DOC],
+    [UPDATE_PRODUCT_DOC_MUTATION_KEY],
     async (vars) => {
       const inferenceId =
         typeof vars === 'string' ? vars : vars?.inferenceId ?? defaultInferenceEndpoints.ELSER;

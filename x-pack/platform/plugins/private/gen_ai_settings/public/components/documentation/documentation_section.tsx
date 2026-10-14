@@ -38,7 +38,6 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useInstallProductDoc,
-  useUpdateProductDoc,
   useUninstallProductDoc,
   useDefaultInferenceId,
   REACT_QUERY_KEYS,
@@ -49,6 +48,7 @@ import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
 import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
+import { useUpdateProductDoc } from './use_update_product_doc';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -445,7 +445,6 @@ const DocumentationActionsMenu: React.FC<{
       aria-label={i18n.ROW_ACTIONS_ARIA_LABEL}
     >
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             key="uninstall"

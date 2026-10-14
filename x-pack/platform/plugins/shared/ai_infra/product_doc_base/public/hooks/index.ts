@@ -7,7 +7,6 @@
 
 export { useProductDocStatus, type UseProductDocStatusOptions } from './use_product_doc_status';
 export { useInstallProductDoc, type UseInstallProductDocOptions } from './use_install_product_doc';
-export { useUpdateProductDoc, type UseUpdateProductDocOptions } from './use_update_product_doc';
 export {
   useUninstallProductDoc,
   type UseUninstallProductDocOptions,
