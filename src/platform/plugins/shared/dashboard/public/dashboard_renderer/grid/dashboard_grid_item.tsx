@@ -23,6 +23,7 @@ import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { getHighlightStyles } from './highlight_styles';
 import { PanelContextMenuContext, SelectionPreviewContext } from './panel_context_menu';
 import { SelectedPanelActions } from './selected_panel_actions';
+import { isSelectionModifierPressed } from './selection_modifier';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -102,9 +103,8 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
       'dshDashboardGrid__item--selected': isSelected || isIndicatingRelatedPanels,
-      'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
-      'dshDashboardGrid__item--showSelectionHoverActions':
-        showSelectedPanelActions && !blurPanel && !focusedForEdit,
+      'dshDashboardGrid__item--hideHoverActions':
+        blurPanel || focusedForEdit || showSelectedPanelActions,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
     });
@@ -183,13 +183,13 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const panelContextMenu = useContext(PanelContextMenuContext);
 
-    // In edit mode Shift+click / Shift+drag belong to the dashboard's panel selection. They are
-    // handled in the capture phase so panel content (e.g. Lens Metric, which stops click
-    // propagation, or maps and charts with their own Shift gestures) never receives them.
+    // In edit mode Cmd+click / Cmd+drag (Ctrl outside macOS) belong to the dashboard's panel
+    // selection. They are handled in the capture phase so panel content (e.g. Lens Metric, which
+    // stops click propagation, or maps and charts with their own modifier gestures) never receives them.
     const isSelectionGesture = useCallback(
       (e: React.MouseEvent) =>
         viewMode === 'edit' &&
-        e.shiftKey &&
+        isSelectionModifierPressed(e) &&
         !(e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]'),
       [viewMode]
     );

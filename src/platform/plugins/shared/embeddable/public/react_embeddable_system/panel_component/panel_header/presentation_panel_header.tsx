@@ -76,7 +76,7 @@ export const PresentationPanelHeader = <
     const onClick = (event: MouseEvent) => {
       const start = pointerDownPosition;
       pointerDownPosition = null;
-      if (!start || event.shiftKey) return;
+      if (!start || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       if ((event.target as HTMLElement).closest(INTERACTIVE_ELEMENT_SELECTOR)) return;
       const moved =
         Math.abs(event.clientX - start.x) > CLICK_MOVE_TOLERANCE ||

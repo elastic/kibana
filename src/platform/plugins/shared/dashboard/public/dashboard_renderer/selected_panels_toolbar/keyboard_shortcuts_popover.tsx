@@ -37,10 +37,6 @@ const strings = {
     i18n.translate('dashboard.selectedPanelsToolbar.shortcuts.redo', {
       defaultMessage: 'Redo',
     }),
-  getShift: () =>
-    i18n.translate('dashboard.selectedPanelsToolbar.shortcuts.shiftKey', {
-      defaultMessage: 'Shift',
-    }),
   getDrag: () =>
     i18n.translate('dashboard.selectedPanelsToolbar.shortcuts.dragGesture', {
       defaultMessage: 'Drag',
@@ -56,7 +52,7 @@ const getShortcuts = () => [
   { label: strings.getPaste(), keys: [COMMAND_KEY, 'V'] },
   { label: strings.getUndo(), keys: [COMMAND_KEY, 'Z'] },
   { label: strings.getRedo(), keys: [COMMAND_KEY, 'Y'] },
-  { label: strings.getAreaSelect(), keys: [strings.getShift(), strings.getDrag()] },
+  { label: strings.getAreaSelect(), keys: [COMMAND_KEY, strings.getDrag()] },
 ];
 
 /** Toolbar button that lists the dashboard's keyboard and mouse shortcuts in a popover */

@@ -15,7 +15,6 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiCheckbox,
   EuiContextMenu,
   EuiIcon,
   EuiIconTip,
@@ -39,7 +38,6 @@ import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
 } from '../../embeddable_renderer_context';
-import { apiCanSelectPanels } from './can_select_panels';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -106,8 +104,6 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const selectionParentApi = apiCanSelectPanels(api.parentApi) ? api.parentApi : undefined;
-
   const [
     title,
     description,
@@ -115,19 +111,14 @@ export const PresentationPanelHoverActions = ({
     hasLockedHoverActions,
     parentHideTitle,
     disabledActionIds,
-    selectedPanelIds,
   ] = useBatchedPublishingSubjects(
     api.title$ ?? new BehaviorSubject(undefined),
     api.description$ ?? new BehaviorSubject(undefined),
     api.hideTitle$ ?? new BehaviorSubject(false),
     api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
     (api.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
-    api.disabledActionIds$ ?? new BehaviorSubject(undefined),
-    selectionParentApi?.selectedPanelIds$ ?? new BehaviorSubject<Set<string>>(new Set())
+    api.disabledActionIds$ ?? new BehaviorSubject(undefined)
   );
-
-  const showSelectionCheckbox = viewMode === 'edit' && Boolean(selectionParentApi);
-  const isSelected = selectedPanelIds.has(api.uuid);
 
   const hideTitle = hidePanelTitle || parentHideTitle;
   const showDescription = description && (!title || hideTitle);
@@ -319,6 +310,13 @@ export const PresentationPanelHoverActions = ({
         className={`embPanel--dragHandle`}
         css={css`
           cursor: move;
+          visibility: hidden; // default for every mode **except** edit mode
+          width: 0px;
+
+          .embPanel__hoverActionsAnchor--editMode & {
+            width: auto;
+            visibility: visible; // overwrite visibility in edit mode
+          }
         `}
         ref={(ref) => {
           dragHandleRef.current = ref;
@@ -341,35 +339,6 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  const leftActionsStyles = useMemo(
-    () => css`
-      align-items: center;
-      visibility: hidden; // default for every mode **except** edit mode
-      width: 0px;
-
-      .embPanel__hoverActionsAnchor--editMode & {
-        width: auto;
-        visibility: visible; // overwrite visibility in edit mode
-      }
-    `,
-    []
-  );
-
-  const selectionCheckbox = showSelectionCheckbox ? (
-    <EuiCheckbox
-      id={`embeddablePanelSelect-${api.uuid}`}
-      checked={isSelected}
-      onChange={() => selectionParentApi?.togglePanelSelection(api.uuid)}
-      aria-label={i18n.translate('embeddableApi.selectPanelCheckbox', {
-        defaultMessage: 'Select panel',
-      })}
-      data-test-subj="embeddablePanelSelectCheckbox"
-      css={css`
-        margin: ${euiTheme.size.xs};
-      `}
-    />
-  ) : null;
-
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
@@ -381,12 +350,9 @@ export const PresentationPanelHoverActions = ({
           className={classNames('embPanel__hoverActions', className)}
           data-test-subj={`hover-actions-${api.uuid}`}
         >
-          <span className="embPanel__hoverActionsLeft" css={leftActionsStyles}>
-            {selectionCheckbox}
-            {dragHandle}
-          </span>
+          {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
-          <span className="embPanel__hoverActionsRight">
+          <span>
             {quickActionElements.map(
               ({ iconType, 'data-test-subj': dataTestSubj, MenuItem, onClick, name, id }) => {
                 return MenuItem ? (

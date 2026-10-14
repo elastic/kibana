@@ -252,7 +252,7 @@ describe('cancelRequests on unmount', () => {
   });
 });
 
-test('Shift+click toggles panel selection and applies selected class', async () => {
+test('Cmd/Ctrl+click toggles panel selection and applies selected class', async () => {
   const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
@@ -265,7 +265,7 @@ test('Shift+click toggles panel selection and applies selected class', async () 
 
   await act(async () => {
     panelElement!.dispatchEvent(
-      new MouseEvent('click', { bubbles: true, cancelable: true, shiftKey: true })
+      new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true, ctrlKey: true })
     );
     await new Promise((resolve) => setTimeout(resolve, 1));
   });
@@ -274,7 +274,7 @@ test('Shift+click toggles panel selection and applies selected class', async () 
 
   await act(async () => {
     panelElement!.dispatchEvent(
-      new MouseEvent('click', { bubbles: true, cancelable: true, shiftKey: true })
+      new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true, ctrlKey: true })
     );
     await new Promise((resolve) => setTimeout(resolve, 1));
   });

@@ -24,22 +24,22 @@ import {
   floatingToolbarStyles,
 } from '../floating_toolbar/floating_toolbar';
 import { useToolbarExpandAnimation } from '../selected_panels_toolbar/use_toolbar_expand_animation';
-
-const isMac = () =>
-  typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform ?? '');
+import { isMacPlatform } from '../grid/selection_modifier';
 
 const strings = {
   getAriaLabel: () =>
     i18n.translate('dashboard.hintBar.ariaLabel', {
       defaultMessage: 'Dashboard shortcuts',
     }),
-  getShiftClick: () =>
-    i18n.translate('dashboard.hintBar.shiftClick', {
-      defaultMessage: 'Shift + Click',
+  getModifierClick: (modifier: string) =>
+    i18n.translate('dashboard.hintBar.modifierClick', {
+      defaultMessage: '{modifier} + Click',
+      values: { modifier },
     }),
-  getShiftDrag: () =>
-    i18n.translate('dashboard.hintBar.shiftDrag', {
-      defaultMessage: 'Shift + Drag',
+  getModifierDrag: (modifier: string) =>
+    i18n.translate('dashboard.hintBar.modifierDrag', {
+      defaultMessage: '{modifier} + Drag',
+      values: { modifier },
     }),
   getSelect: () => i18n.translate('dashboard.hintBar.select', { defaultMessage: 'Select' }),
   getAreaSelect: () =>
@@ -79,7 +79,7 @@ export const DashboardHintBar = ({ skipEntrance }: DashboardHintBarProps) => {
   const shared = useMemoCss(floatingToolbarStyles);
   const styles = useMemoCss(hintStyles);
   const { isExpanded, isMoreMounted, toggle, frameRef, moreRef } = useToolbarExpandAnimation();
-  const modifier = isMac() ? 'Cmd' : 'Ctrl';
+  const modifier = isMacPlatform() ? 'Cmd' : 'Ctrl';
 
   return (
     <FloatingToolbar
@@ -109,8 +109,8 @@ export const DashboardHintBar = ({ skipEntrance }: DashboardHintBarProps) => {
         )}
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false} css={styles.mainHints}>
-            <Hint keys={strings.getShiftClick()}>{strings.getSelect()}</Hint>
-            <Hint keys={strings.getShiftDrag()}>{strings.getAreaSelect()}</Hint>
+            <Hint keys={strings.getModifierClick(modifier)}>{strings.getSelect()}</Hint>
+            <Hint keys={strings.getModifierDrag(modifier)}>{strings.getAreaSelect()}</Hint>
           </EuiFlexItem>
           <div css={shared.separator} aria-hidden />
           <EuiFlexItem grow={false}>

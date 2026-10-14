@@ -34,6 +34,7 @@ import {
   PanelContextMenuContext,
   SelectionPreviewContext,
 } from './panel_context_menu';
+import { isSelectionModifierPressed } from './selection_modifier';
 import { useLayoutStyles } from './use_layout_styles';
 
 const DRAG_THRESHOLD_PX = 5;
@@ -130,7 +131,7 @@ export const DashboardGrid = () => {
     [viewMode, selectedPanelIds, dashboardApi]
   );
 
-  // The click that ends a selection drag must not reach the panel, or its Shift+click handler
+  // The click that ends a selection drag must not reach the panel, or its Cmd+click handler
   // would immediately toggle off the panel the drag just selected
   const handleGridClickCapture = useCallback((e: React.MouseEvent) => {
     if (!justDidSelectionDragRef.current) return;
@@ -140,10 +141,10 @@ export const DashboardGrid = () => {
 
   const handleGridMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (viewMode !== 'edit' || !e.shiftKey) return;
-      // keep native Shift+click behavior (extending the text selection) inside editable fields
+      if (viewMode !== 'edit' || !isSelectionModifierPressed(e)) return;
+      // keep native modifier+click behavior inside editable fields
       if ((e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]')) return;
-      // prevent the browser from extending the text selection across the page
+      // prevent the browser from selecting text across the page while dragging
       e.preventDefault();
       window.getSelection()?.removeAllRanges();
       justDidSelectionDragRef.current = false;
@@ -447,10 +448,6 @@ const dashboardGridStyles = {
       // Hide hover actions when dashboard has an overlay
       '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
         visibility: 'hidden !important' as 'hidden',
-      },
-      // On selected panels the right-side hover actions are replaced by the selected panel actions
-      '.dshDashboardGrid__item--showSelectionHoverActions .embPanel__hoverActionsRight': {
-        visibility: 'hidden',
       },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
