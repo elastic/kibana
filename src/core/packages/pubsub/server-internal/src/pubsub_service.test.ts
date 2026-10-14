@@ -458,18 +458,26 @@ describe('PubSubService dispatch', () => {
 });
 
 describe('PubSubEvent shape', () => {
-  it('resolves with the id and acceptedAt, and delivers the producer event plus topic and acceptedAt', async () => {
+  const createHarness = () => {
     const service = new PubSubService(mockCoreContext.create());
     const setup = service.setup();
-    const topic = defineTopic<{ secret: string }>('orders');
+    const topic = defineTopic<{ secret: string; tags?: string[]; at?: Date }>('orders');
     setup.registerTopic(PLUGIN, topic);
-    const delivered: Array<PubSubEvent<{ secret: string }>> = [];
-    setup.subscribe(PLUGIN, topic, {
-      consumer: 'sync',
-      handler: (event) => {
-        delivered.push(event);
-      },
-    });
+    const received: Array<PubSubEvent<{ secret: string; tags?: string[]; at?: Date }>> = [];
+    const subscribe = (consumer: string) =>
+      setup.subscribe(PLUGIN, topic, {
+        consumer,
+        handler: (event) => {
+          received.push(event);
+        },
+      });
+
+    return { service, topic, received, subscribe };
+  };
+
+  it('resolves with the id and acceptedAt, and delivers the producer event plus topic and acceptedAt', async () => {
+    const { service, topic, received, subscribe } = createHarness();
+    subscribe('sync');
     const { publish } = service.start();
     const data = { secret: 'same' };
 
@@ -479,14 +487,46 @@ describe('PubSubEvent shape', () => {
     expect(result).toEqual({ id: 'order-42:v7', acceptedAt: expect.any(String) });
     expect(Number.isNaN(Date.parse(result.acceptedAt))).toBe(false);
 
-    const [event] = delivered;
+    const [event] = received;
     expect(event).toEqual({
       id: 'order-42:v7',
       topic: 'orders',
       data,
       acceptedAt: result.acceptedAt,
     });
-    expect(event.data).toBe(data);
     expect(Object.isFrozen(event)).toBe(true);
+  });
+
+  it('gives each consumer its own copy of the data, detached from the publisher', async () => {
+    const { service, topic, received, subscribe } = createHarness();
+    subscribe('left');
+    subscribe('right');
+    const { publish } = service.start();
+    const data = { secret: 'original', tags: ['a'] };
+
+    await publish(PLUGIN, topic, { id: nextId(), data });
+    data.secret = 'mutated-by-publisher';
+    data.tags.push('b');
+    await flushDispatch();
+
+    const [left, right] = received;
+    expect(left.data).toEqual({ secret: 'original', tags: ['a'] });
+    expect(right.data).toEqual({ secret: 'original', tags: ['a'] });
+    expect(left.data).not.toBe(right.data);
+
+    left.data.tags?.push('left-only');
+    expect(right.data.tags).toEqual(['a']);
+  });
+
+  it('delivers data with JSON semantics, so a Date arrives as a string', async () => {
+    const { service, topic, received, subscribe } = createHarness();
+    subscribe('sync');
+    const { publish } = service.start();
+    const at = new Date('2026-10-14T08:00:00.000Z');
+
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'json', at } });
+    await flushDispatch();
+
+    expect(received[0].data.at).toBe('2026-10-14T08:00:00.000Z');
   });
 });

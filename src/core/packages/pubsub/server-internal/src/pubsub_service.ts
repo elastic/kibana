@@ -23,13 +23,21 @@ type Phase = 'created' | 'setup' | 'started' | 'stopped';
 
 type SubscriptionHandler = (event: PubSubEvent<unknown>) => void | Promise<void>;
 
+/** An accepted event as queued: the data stays serialized until each consumer gets its own copy. */
+interface AcceptedEvent {
+  readonly id: string;
+  readonly topic: string;
+  readonly acceptedAt: string;
+  readonly serializedData: string;
+}
+
 interface Subscription {
   readonly topic: string;
   /** Full consumer name, `${pluginId}.${consumer}`. */
   readonly consumer: string;
   readonly pluginId: string;
   readonly handler: SubscriptionHandler;
-  readonly queue: Array<PubSubEvent<unknown>>;
+  readonly queue: AcceptedEvent[];
   running: boolean;
 }
 
@@ -109,14 +117,14 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     this.assertEventId(init.id);
-    this.assertDataSize(init.data);
+    const serializedData = this.serializeData(init.data);
 
-    const event: PubSubEvent<TData> = Object.freeze({
+    const event: AcceptedEvent = {
       id: init.id,
       topic: topic.name,
-      data: init.data,
       acceptedAt: new Date().toISOString(),
-    });
+      serializedData,
+    };
 
     this.logger.trace(
       `Plugin "${pluginId}" published event "${event.id}" on topic "${topic.name}".`
@@ -169,7 +177,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     });
   }
 
-  private enqueue<TData>(event: PubSubEvent<TData>): void {
+  private enqueue(event: AcceptedEvent): void {
     this.subscriptions
       .filter((subscription) => subscription.topic === event.topic)
       .forEach((subscription) => {
@@ -198,11 +206,12 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
 
   private async drain(subscription: Subscription): Promise<void> {
     while (this.phase === 'started' && subscription.queue.length > 0) {
-      const event = subscription.queue.shift();
-      if (!event) {
+      const accepted = subscription.queue.shift();
+      if (!accepted) {
         break;
       }
 
+      const event = this.deliverable(accepted);
       try {
         await subscription.handler(event);
       } catch (error) {
@@ -218,6 +227,16 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     if (this.phase === 'started' && subscription.queue.length > 0) {
       this.schedule(subscription);
     }
+  }
+
+  /** Each consumer gets its own parsed copy, as it would from a durable store. */
+  private deliverable({
+    id,
+    topic,
+    acceptedAt,
+    serializedData,
+  }: AcceptedEvent): PubSubEvent<unknown> {
+    return Object.freeze({ id, topic, acceptedAt, data: JSON.parse(serializedData) });
   }
 
   private assertCanPublish(): void {
@@ -242,7 +261,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
   }
 
-  private assertDataSize(data: unknown): void {
+  private serializeData(data: unknown): string {
     let serialized: string;
     try {
       const encoded = JSON.stringify(data);
@@ -263,5 +282,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
         `Pubsub event data is ${bytes} bytes, which exceeds the ${PUBSUB_MAX_DATA_BYTES} byte limit.`
       );
     }
+
+    return serialized;
   }
 }

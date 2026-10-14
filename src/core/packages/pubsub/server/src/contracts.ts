@@ -25,7 +25,8 @@ export interface PubSubEventInit<TData> {
 
 /**
  * Event accepted by the bus: the producer's event plus the fields the bus sets.
- * `data` is the caller's reference.
+ * `data` is a JSON copy made for each consumer, never the producer's reference, so a `Date`
+ * arrives as a string and one handler cannot affect another.
  *
  * @public
  */
