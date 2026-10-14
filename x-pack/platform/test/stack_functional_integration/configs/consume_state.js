@@ -9,5 +9,10 @@ import { existsSync, readFileSync } from 'fs';
 import { parseEnv } from 'util';
 
 export default function consumeState(path) {
-  return existsSync(path) ? parseEnv(readFileSync(path, 'utf8')) : undefined;
+  if (!existsSync(path)) {
+    return undefined;
+  } else {
+    process.loadEnvFile(path);
+    return parseEnv(readFileSync(path, 'utf8'));
+  }
 }
