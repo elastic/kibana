@@ -60,6 +60,9 @@ describe('RuleCreateOptionsFlyout', () => {
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
+    expect(screen.getByTestId('ruleCreateOptionsFlyoutUniversalBadge')).toHaveTextContent(
+      'Universal'
+    );
     expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('With AI Agent')).toBeInTheDocument();
     expect(screen.getByText('Threshold rule')).toBeInTheDocument();

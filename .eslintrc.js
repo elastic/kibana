@@ -691,43 +691,6 @@ module.exports = {
       },
     },
     {
-      files: [
-        'x-pack/platform/plugins/shared/aiops/**/*.tsx',
-        'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'src/platform/plugins/shared/ai_assistant_management/**/*.tsx',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-      ],
-      rules: {
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/search/**/*.tsx',
-        'x-pack/platform/plugins/shared/content_connectors/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/search_inference_endpoints/**/*.{ts,tsx}',
-      ],
-      rules: {
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-      ],
-      rules: {
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
-        '@kbn/i18n/formatted_message_should_start_with_the_right_id': 'warn',
-      },
-    },
-    {
       // require explicit return types in route handlers for performance reasons
       files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
       rules: {
@@ -1575,66 +1538,6 @@ module.exports = {
     },
 
     /**
-     * Search overrides
-     */
-
-    {
-      files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
-      rules: {
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
-      },
-    },
-
-    /**
-     * Visualization team overrides
-     */
-
-    {
-      files: [
-        // src/platform/plugins
-        'src/platform/plugins/shared/visualizations',
-        'src/platform/plugins/shared/visualization_listing',
-        'src/platform/plugins/shared/data',
-        'src/platform/plugins/shared/expressions',
-        'src/platform/plugins/shared/charts',
-        'src/platform/plugins/shared/vis_types/timeseries',
-        'src/platform/plugins/shared/chart_expressions',
-        'src/platform/plugins/private/vis_types',
-        'src/platform/plugins/private/event_annotation',
-        'src/platform/plugins/private/event_annotation_listing',
-        'src/platform/plugins/private/vis_default_editor',
-
-        // src/platform/packages
-        'src/platform/packages/shared/kbn-visualization-listing-components',
-        'src/platform/packages/shared/kbn-visualizations-common',
-        'src/platform/packages/shared/kbn-visualization-utils',
-        'src/platform/packages/shared/kbn-visualization-ui-components',
-        'src/platform/packages/shared/kbn-palettes',
-        'src/platform/packages/shared/kbn-event-annotation-components',
-        'src/platform/packages/shared/kbn-dom-drag-drop',
-        'src/platform/packages/shared/kbn-coloring',
-        'src/platform/packages/shared/kbn-chart-icons',
-        'src/platform/packages/shared/chart-test-jest-helpers',
-        'src/platform/packages/private/kbn-test-eui-helpers',
-
-        // x-pack/platform/plugins
-        'x-pack/platform/plugins/shared/lens',
-        'x-pack/platform/plugins/private/graph',
-
-        // x-pack/platform/packages
-        'x-pack/platform/packages/private/kbn-random-sampling',
-      ].map(
-        (path) => `${path}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)`
-      ),
-      rules: {
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
-      },
-    },
-
-    /**
      * Enterprise Search overrides
      * NOTE: We also have a single rule at the bottom of the file that
      * overrides Prettier's default of not linting unnecessary backticks
@@ -1684,7 +1587,6 @@ module.exports = {
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
     {
@@ -1695,20 +1597,6 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-
-    /**
-     * Serverless Search overrides
-     */
-    {
-      // All files
-      files: [
-        'x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}',
-        'x-pack/solutions/search/packages/kbn-search-*',
-      ],
-      rules: {
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
 
@@ -2507,30 +2395,6 @@ module.exports = {
             ],
           },
         ],
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
-      ],
-      excludedFiles: [
-        'x-pack/solutions/observability/plugins/**/*.test.*',
-        'x-pack/solutions/observability/plugins/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/**/*.mock.*',
-        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
-        'x-pack/solutions/observability/packages/**/*.test.*',
-        'x-pack/solutions/observability/packages/**/*.stories.*',
-        'x-pack/solutions/observability/packages/**/*.mock.*',
-        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
-      ],
-      rules: {
-        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
       },
     },
   ],
