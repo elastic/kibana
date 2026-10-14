@@ -111,6 +111,29 @@ steps:
     on-failure:
       continue: true
 
+  # A wrap that errors before settling may mean this Proposal was never created, in
+  # which case the settlement counts below can never reach `expectedProposalCount`
+  # and the Investigation stays open with nothing saying why. Journal it so the
+  # analyst can see that. Best-effort: a failed note must not stop the requery/close
+  # steps. No `error.message`, same as journal_analysis_problem in
+  # forensics_run_endpoint_analysis.yaml: later agent rounds read the journal as
+  # user input.
+  - name: journal_wrap_failed
+    type: workflow.execute
+    if: "${{ steps.create_and_gate_proposal.error != blank }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: >-
+          The containment proposal{% if inputs.title != blank %} "{{ inputs.title }}"{% endif %}
+          ran into an error before it settled. If it was never created, this
+          investigation won't close automatically. See execution `{{ execution.id }}`
+          ([details]({{ execution.url }})).
+    on-failure:
+      continue: true
+
   - name: resolve_gate_wrapper_output
     type: data.set
     with:
