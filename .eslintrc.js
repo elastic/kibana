@@ -2140,7 +2140,11 @@ module.exports = {
     },
 
     {
-      files: ['.github/scripts/label_flaky_fix_pr.ts', '.github/scripts/find_duplicate_fix_prs.js'],
+      files: [
+        '.github/scripts/label_flaky_fix_pr.ts',
+        '.github/scripts/label_flaky_fix_pr_test.ts',
+        '.github/scripts/find_duplicate_fix_prs.js',
+      ],
       rules: {
         // GitHub Actions executes these files directly with Node's native TypeScript support.
         '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
