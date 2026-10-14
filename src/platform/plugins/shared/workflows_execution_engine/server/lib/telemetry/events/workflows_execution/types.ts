@@ -74,6 +74,17 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   parentWorkflowInvocation?: 'sync' | 'async';
   /**
+   * The execution ID of the parent workflow execution that invoked this sub-workflow.
+   * Only present for sub-workflow executions.
+   */
+  parentWorkflowExecutionId?: string;
+  /**
+   * The execution ID of the top-level execution at the root of this chain. A top-level execution
+   * reports its own workflowExecutionId. Omitted only for a sub-workflow execution whose chain
+   * records no root (it started before root lineage was recorded), so a missing value means unknown.
+   */
+  rootWorkflowExecutionId?: string;
+  /**
    * Event-chain depth for runs scheduled via event-driven emits.
    * Not sub-workflow composition; omitted when absent.
    */
@@ -160,13 +171,18 @@ export enum WorkflowExecutionTelemetryEventTypes {
 /**
  * Event-driven execution was skipped in runWorkflow after a task was already scheduled (operator kill switch flipped).
  *
- * Omits composition fields (`compositionDepth`, `parentWorkflowId`, `parentWorkflowInvocation`): suppression is for
- * event-driven executions, not sub-workflow composition. Includes optional `eventChainDepth` when persisted on the execution.
+ * Omits composition fields (`compositionDepth`, `parentWorkflowId`, `parentWorkflowInvocation`,
+ * `parentWorkflowExecutionId`, `rootWorkflowExecutionId`): suppression is for event-driven executions, not
+ * sub-workflow composition. Includes optional `eventChainDepth` when persisted on the execution.
  */
 export interface EventDrivenExecutionSuppressedParams
   extends Omit<
     BaseWorkflowExecutionTelemetryParams,
-    'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation'
+    | 'compositionDepth'
+    | 'parentWorkflowId'
+    | 'parentWorkflowInvocation'
+    | 'parentWorkflowExecutionId'
+    | 'rootWorkflowExecutionId'
   > {
   eventName: string;
   logTriggerEventsEnabled: boolean;

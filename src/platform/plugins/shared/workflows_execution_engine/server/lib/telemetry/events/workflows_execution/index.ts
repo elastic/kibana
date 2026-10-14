@@ -61,6 +61,8 @@ const baseWorkflowExecutionSchema: RootSchema<{
   compositionDepth?: number;
   parentWorkflowId?: string;
   parentWorkflowInvocation?: 'sync' | 'async';
+  parentWorkflowExecutionId?: string;
+  rootWorkflowExecutionId?: string;
   eventChainDepth?: number;
   inputTokensUsed?: number;
   outputTokensUsed?: number;
@@ -180,6 +182,22 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: true,
     },
   },
+  parentWorkflowExecutionId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The execution ID of the parent workflow execution that invoked this sub-workflow. Only present for sub-workflow executions.',
+      optional: true,
+    },
+  },
+  rootWorkflowExecutionId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The execution ID of the top-level workflow execution at the root of this chain. A top-level execution reports its own workflowExecutionId. Omitted only for a sub-workflow execution whose chain records no root (it started before root lineage was recorded), so a missing value means the root is unknown.',
+      optional: true,
+    },
+  },
   eventChainDepth: {
     type: 'integer',
     _meta: {
@@ -241,6 +259,8 @@ const {
   compositionDepth: _compositionDepth,
   parentWorkflowId: _parentWorkflowId,
   parentWorkflowInvocation: _parentWorkflowInvocation,
+  parentWorkflowExecutionId: _parentWorkflowExecutionId,
+  rootWorkflowExecutionId: _rootWorkflowExecutionId,
   ...eventDrivenExecutionSuppressedBaseSchema
 } = baseWorkflowExecutionSchema;
 
