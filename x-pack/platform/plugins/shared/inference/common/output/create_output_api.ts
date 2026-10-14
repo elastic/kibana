@@ -7,7 +7,9 @@
 
 import type {
   ChatCompleteAPI,
+  ChatCompleteCompositeResponse,
   ChatCompleteOptions,
+  ChatCompletionEvent,
   OutputAPI,
   OutputCompositeResponse,
   OutputOptions,
@@ -26,6 +28,7 @@ import {
   toAutoToolChoiceRequest,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';
+import type { Observable } from 'rxjs';
 import { catchError, defer, isObservable, map, throwError } from 'rxjs';
 import { ensureMultiTurn } from '../utils/ensure_multi_turn';
 
@@ -44,7 +47,7 @@ const callWithToolChoiceFallback = (
   chatCompleteApi: ChatCompleteAPI,
   request: ChatCompleteOptions,
   logger?: ToolChoiceFallbackLogger
-) => {
+): ChatCompleteCompositeResponse<ChatCompleteOptions> => {
   const call = chatCompleteApi as (options: ChatCompleteOptions) => any;
   const target = { connectorId: request.connectorId, model: request.modelName };
 
@@ -72,10 +75,10 @@ const callWithToolChoiceFallback = (
       : error;
 
   if (request.stream) {
-    return defer(() => {
+    return defer((): Observable<ChatCompletionEvent> => {
       let hasEmitted = false;
       return call(request).pipe(
-        map((event: unknown) => {
+        map((event) => {
           hasEmitted = true;
           return event;
         }),
@@ -93,16 +96,14 @@ const callWithToolChoiceFallback = (
     });
   }
 
-  return (call(request) as Promise<unknown>).catch((error: unknown) => {
+  return call(request).catch((error: unknown) => {
     if (!isUnsupportedToolChoiceError(error)) {
       throw error;
     }
     onRejected(error);
-    return (call(toAutoToolChoiceRequest(request)) as Promise<unknown>).catch(
-      (retryError: unknown) => {
-        throw toFinalError(retryError);
-      }
-    );
+    return call(toAutoToolChoiceRequest(request)).catch((retryError: unknown) => {
+      throw toFinalError(retryError);
+    });
   });
 };
 
