@@ -73,20 +73,18 @@ const DashboardToolBarComponent = ({
     []
   );
 
-  // Security-only: TopNav under overlay mask; recessed controls + top padding.
+  // Security-only: isolate TopNav sticky z-index; recessed controls + top padding.
   const controlsOverrideStyles = useMemo(
     () =>
       css({
-        // Below mask so KQL (menu + 1) can stack above TopNav when both stick.
-        '.kbnBody & > div': {
-          zIndex: euiTheme.levels.menu,
-        },
+        // Keep TopNav's levels.mask from competing with the shared Security KQL header.
+        isolation: 'isolate',
         '.controlGroup[data-test-subj="controls-group-wrapper"]': {
           backgroundColor: euiTheme.colors.backgroundBaseRecessed,
           paddingTop: euiTheme.size.s,
         },
       }),
-    [euiTheme.colors.backgroundBaseRecessed, euiTheme.levels.menu, euiTheme.size.s]
+    [euiTheme.colors.backgroundBaseRecessed, euiTheme.size.s]
   );
 
   // Always mount so App Header title shows for read-only; write actions stay in Dashboard.

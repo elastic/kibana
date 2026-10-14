@@ -14,10 +14,10 @@ export const GlobalKQLHeader = React.memo(() => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
   const { euiTheme } = useEuiTheme();
 
-  // Above Security-embedded DashboardTopNav (overridden to levels.menu), below overlay mask.
+  // Former euiZHeaderBelowDataGrid (header - 2). Dashboard TopNav stacking is isolated locally.
   const stickyStyles = css`
     position: sticky;
-    z-index: ${Number(euiTheme.levels.menu) + 1};
+    z-index: ${Number(euiTheme.levels.header) - 2};
     top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
   `;
 

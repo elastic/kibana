@@ -28,7 +28,7 @@ import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
-import { DashboardTitle } from '../../components/dashboard_title';
+import { useDashboardTitle } from '../../hooks/use_dashboard_title';
 
 const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
@@ -58,10 +58,10 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
-  const [dashboardTitle, setDashboardTitle] = useState<string>();
 
   const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
     useDashboardRenderer(savedObjectId);
+  const dashboardTitle = useDashboardTitle(dashboardContainer);
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
@@ -89,17 +89,11 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             {dashboardContainer && dashboardInternalApi && (
-              <>
-                <DashboardTitle
-                  dashboardContainer={dashboardContainer}
-                  onTitleLoaded={setDashboardTitle}
-                />
-                <DashboardToolBar
-                  dashboardContainer={dashboardContainer}
-                  dashboardInternalApi={dashboardInternalApi}
-                  onLoad={onDashboardToolBarLoad}
-                />
-              </>
+              <DashboardToolBar
+                dashboardContainer={dashboardContainer}
+                dashboardInternalApi={dashboardInternalApi}
+                onLoad={onDashboardToolBarLoad}
+              />
             )}
           </EuiFlexItem>
           {!errorState && (
