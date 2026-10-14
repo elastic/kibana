@@ -19,6 +19,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { RegexWorkerService, getAnonymizationUiSettings } from '@kbn/ai-anonymization-server';
@@ -300,6 +301,13 @@ export class InferencePlugin
       };
     };
 
+    // the setting is read per request so that it reflects the request's space
+    const isInferenceStreamingEnabledForRequest = (request: KibanaRequest) => async () => {
+      const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+      return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_INFERENCE_STREAMING);
+    };
+
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
@@ -314,6 +322,7 @@ export class InferencePlugin
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
+          isInferenceStreamingEnabled: isInferenceStreamingEnabledForRequest(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -334,6 +343,7 @@ export class InferencePlugin
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
+          isInferenceStreamingEnabled: isInferenceStreamingEnabledForRequest(options.request),
         });
       },
 

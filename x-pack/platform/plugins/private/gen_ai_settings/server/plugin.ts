@@ -11,6 +11,7 @@ import {
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { schema } from '@kbn/config-schema';
@@ -140,6 +141,22 @@ export class GenAiSettingsPlugin
         readonly: true,
         schema: schema.boolean(),
         value: false,
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_INFERENCE_STREAMING]: {
+        name: i18n.translate('genAiSettings.inferenceStreaming.name', {
+          defaultMessage: 'Stream inference endpoint responses',
+        }),
+        description: i18n.translate('genAiSettings.inferenceStreaming.description', {
+          defaultMessage:
+            'Stream LLM responses. Turn this off if your LLM provider does not support streaming, Kibana then waits for the full response. Services that do not support non-streaming chat completion keep streaming.',
+        }),
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.boolean(),
+        value: true,
       },
     });
 

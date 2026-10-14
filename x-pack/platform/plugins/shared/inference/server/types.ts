@@ -171,7 +171,9 @@ export interface InferenceServerStart {
    * {@link KibanaRequest}. This is useful for background tasks (e.g. alerting rule
    * executors) that have scoped clients but no HTTP request context.
    *
-   * Note: anonymization features are not available on clients created this way.
+   * Note: anonymization features are not available on clients created this way, and
+   * inference endpoints are always called in streaming mode because the per-space
+   * streaming setting cannot be read without a request.
    *
    * @param actionsClient - A pre-scoped actions client
    * @param esClient - A pre-scoped Elasticsearch client

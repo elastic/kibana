@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { PassThrough } from 'stream';
+import { PassThrough, type Readable } from 'stream';
+import { text } from 'node:stream/consumers';
+import { errors } from '@elastic/elasticsearch';
 import {
   createInferenceEndpointExecutor,
   type InferenceEndpointExecutor,
 } from './inference_endpoint_executor';
+
+const readSseEvent = async (stream: Readable) =>
+  JSON.parse((await text(stream)).replace(/^data: /, ''));
 
 describe('createInferenceEndpointExecutor', () => {
   let executor: InferenceEndpointExecutor;
@@ -249,5 +254,99 @@ describe('createInferenceEndpointExecutor', () => {
       }),
       expect.anything()
     );
+  });
+
+  describe('when stream is false', () => {
+    const completion = {
+      id: 'chatcmpl-1',
+      object: 'chat.completion',
+      model: 'gpt-4o',
+      choices: [
+        {
+          index: 0,
+          finish_reason: 'tool_calls',
+          message: {
+            role: 'assistant',
+            content: 'Hello',
+            tool_calls: [
+              { id: 'call-1', type: 'function', function: { name: 'f', arguments: '{}' } },
+            ],
+          },
+        },
+      ],
+      usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+    };
+
+    beforeEach(() => {
+      executor = createInferenceEndpointExecutor({
+        inferenceId,
+        esClient: { transport: { request: mockTransportRequest } } as any,
+        stream: false,
+      });
+    });
+
+    it('calls the endpoint without _stream and returns the completion as a single SSE chunk', async () => {
+      mockTransportRequest.mockResolvedValue(completion);
+      const signal = new AbortController().signal;
+
+      const result = await executor.invoke({ body: { messages: [] }, signal, timeout: 95_000 });
+
+      expect(mockTransportRequest).toHaveBeenCalledWith(
+        {
+          method: 'POST',
+          path: `/_inference/chat_completion/${inferenceId}`,
+          querystring: { timeout: '2m' },
+          body: { messages: [] },
+        },
+        {
+          requestTimeout: 95_000,
+          headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+          signal,
+        }
+      );
+      expect(await readSseEvent(result)).toEqual({
+        id: 'chatcmpl-1',
+        object: 'chat.completion.chunk',
+        model: 'gpt-4o',
+        usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+        choices: [
+          {
+            index: 0,
+            finish_reason: 'tool_calls',
+            delta: {
+              role: 'assistant',
+              content: 'Hello',
+              tool_calls: [
+                {
+                  id: 'call-1',
+                  type: 'function',
+                  index: 0,
+                  function: { name: 'f', arguments: '{}' },
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
+
+    it('returns Elasticsearch error bodies as an SSE error event', async () => {
+      const body = {
+        error: { code: 'bad_request', message: 'unsupported', type: 'status_exception' },
+      };
+      mockTransportRequest.mockRejectedValue(
+        new errors.ResponseError({ statusCode: 400, body, warnings: null, meta: {} as never })
+      );
+
+      const result = await executor.invoke({ body: {} });
+
+      expect(await readSseEvent(result)).toEqual(body);
+    });
+
+    it('propagates other errors', async () => {
+      mockTransportRequest.mockRejectedValue(new Error('boom'));
+
+      await expect(executor.invoke({ body: {} })).rejects.toThrow('boom');
+    });
   });
 });
