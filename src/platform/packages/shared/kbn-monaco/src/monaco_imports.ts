@@ -71,6 +71,10 @@ export {
   conf as yamlConf,
   language as yamlLanguage,
 } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+export {
+  conf as shellConf,
+  language as shellLanguage,
+} from 'monaco-editor/esm/vs/languages/definitions/shell/shell.js';
 
 import type { CustomLangModuleType } from './types';
 

@@ -19,7 +19,17 @@ export const getConnectorType = (): ConnectorTypeModel => ({
   selectMessage: i18n.translate('xpack.stackConnectors.components.sshHost.selectMessage', {
     defaultMessage: 'Run scripts on any SSH-accessible host (Linux or macOS).',
   }),
-  validateParams: async () => ({ errors: {} }),
+  validateParams: async (actionParams) => {
+    const errors: Record<string, string[]> = {};
+    if (!actionParams?.subActionParams?.script?.trim()) {
+      errors.script = [
+        i18n.translate('xpack.stackConnectors.components.sshHost.params.script.requiredError', {
+          defaultMessage: 'Bash script is required.',
+        }),
+      ];
+    }
+    return { errors };
+  },
   actionConnectorFields: lazy(() => import('./ssh_host_connector_fields')),
-  actionParamsFields: lazy(async () => ({ default: () => null })),
+  actionParamsFields: lazy(() => import('./ssh_host_params')),
 });

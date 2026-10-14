@@ -37,6 +37,7 @@
     "@kbn/alerting-plugin",
     "@kbn/securitysolution-ecs",
     "@kbn/cases-components",
+    "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/utility-types",
     "@kbn/task-manager-plugin",

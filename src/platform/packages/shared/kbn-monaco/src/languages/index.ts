@@ -21,6 +21,7 @@ import { HandlebarsLang, HANDLEBARS_LANG_ID } from './handlebars';
 import { CssLang, CSS_LANG_ID } from './css';
 import { HJsonLang, HJSON_LANG_ID } from './hjson';
 import { PromQLLang, PROMQL_LANG_ID } from './promql';
+import { ShellLang, SHELL_LANG_ID } from './shell';
 
 // export all language ids
 export {
@@ -37,6 +38,7 @@ export {
   HJSON_LANG_ID,
   PAINLESS_LANG_ID,
   PROMQL_LANG_ID,
+  SHELL_LANG_ID,
 };
 
 // export all language definitions
@@ -54,6 +56,7 @@ export {
   CssLang,
   HJsonLang,
   PromQLLang,
+  ShellLang,
 };
 
 export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from './esql';
@@ -90,5 +93,6 @@ export const initializeSupportedLanguages = () => {
     HandlebarsLang,
     CssLang,
     HJsonLang,
+    ShellLang,
   ].forEach((lang) => registerLanguage(lang));
 };
