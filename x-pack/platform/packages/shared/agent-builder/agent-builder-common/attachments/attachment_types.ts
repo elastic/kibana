@@ -18,7 +18,7 @@ export enum AttachmentType {
   esql = 'esql',
   connector = 'connector',
   image = 'image',
-  pdf = 'pdf',
+  document = 'document',
 }
 
 interface AttachmentDataMap {
@@ -27,7 +27,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
   [AttachmentType.image]: ImageAttachmentData;
-  [AttachmentType.pdf]: PdfAttachmentData;
+  [AttachmentType.document]: DocumentAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -138,10 +138,6 @@ export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number]
 
 export const CHAT_ATTACHMENT_IMAGES_FILE_KIND = 'chat-attachment-images';
 
-export const CHAT_ATTACHMENT_PDFS_FILE_KIND = 'chat-attachment-pdfs';
-
-export const SUPPORTED_PDF_MIME_TYPE = 'application/pdf';
-
 export const MAX_IMAGE_BYTES = 3.5 * 1024 * 1024;
 
 export const MAX_IMAGES_PER_ROUND = 10;
@@ -164,24 +160,47 @@ export interface ImageAttachmentData {
   mime_type: SupportedImageMimeType;
 }
 
-export const MAX_PDF_BYTES = 10 * 1024 * 1024;
+export const CHAT_ATTACHMENT_DOCUMENTS_FILE_KIND = 'chat-attachment-documents';
 
-export const MAX_PDF_TEXT_LENGTH = 500_000;
+export const SUPPORTED_DOCUMENT_MIME_TYPES = [
+  'application/pdf',
+  'text/markdown',
+  'text/plain',
+] as const;
+export type SupportedDocumentMimeType = (typeof SUPPORTED_DOCUMENT_MIME_TYPES)[number];
 
-export const pdfAttachmentDataSchema = z.object({
+export const isSupportedDocumentMimeType = (
+  value: string | undefined
+): value is SupportedDocumentMimeType =>
+  SUPPORTED_DOCUMENT_MIME_TYPES.some((mimeType) => mimeType === value);
+
+export const MAX_DOCUMENT_BYTES: Readonly<Record<SupportedDocumentMimeType, number>> = {
+  'application/pdf': 10 * 1024 * 1024,
+  'text/markdown': 2 * 1024 * 1024,
+  'text/plain': 2 * 1024 * 1024,
+};
+
+export const MAX_DOCUMENT_FILE_KIND_BYTES = Math.max(...Object.values(MAX_DOCUMENT_BYTES));
+
+export const MAX_DOCUMENT_TEXT_LENGTH = 500_000;
+
+export const documentAttachmentDataSchema = z.object({
   file_id: z.string().max(1024),
   name: z.string().max(1024),
-  text: z.string().max(MAX_PDF_TEXT_LENGTH),
+  mime_type: z.enum(SUPPORTED_DOCUMENT_MIME_TYPES),
+  text: z.string().max(MAX_DOCUMENT_TEXT_LENGTH),
 });
 
 /**
- * Data for a pdf attachment. The original PDF stays in the Files API.
+ * Data for a document attachment. The original file stays in the Files API.
  */
-export interface PdfAttachmentData {
+export interface DocumentAttachmentData {
   /** files plugin file id */
   file_id: string;
   /** original filename */
   name: string;
-  /** text read from the PDF, as markdown */
+  /** mime type of the file */
+  mime_type: SupportedDocumentMimeType;
+  /** text read from the file. Markdown for PDFs, as is for text files */
   text: string;
 }
