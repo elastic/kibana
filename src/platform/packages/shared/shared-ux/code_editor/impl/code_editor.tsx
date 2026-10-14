@@ -16,11 +16,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import {
-  monaco,
-  CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
-} from '@kbn/monaco';
+import { monaco, CODE_EDITOR_DEFAULT_THEME_ID } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Interpolation, Theme } from '@emotion/react';
@@ -28,6 +24,9 @@ import { css, Global } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
+  type CodeEditorScope,
+  type KbnCodeEditorChromeOverrides,
+  getCodeEditorScope,
   getEditorInputSurface,
 } from './react_monaco_editor';
 import { remeasureFonts } from './utils/remeasure_fonts';
@@ -42,6 +41,8 @@ import {
   usePersistHoverContentWidget,
 } from './mods';
 import { styles } from './editor.styles';
+
+export type { CodeEditorScope };
 
 export interface CodeEditorProps
   extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
@@ -68,13 +69,15 @@ export interface CodeEditorProps
   options?: Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'editContext' | 'theme'>;
 
   /**
-   * The id of a theme to use instead of the default. Register it with
-   * {@link monaco.editor.registerKbnCodeEditorThemeVariant}: a variant layers its own `colors` over the
-   * Kibana theme and keeps everything else — the shared rules and every language's scoped token
-   * colors. A theme defined by hand with `monaco.editor.defineTheme` replaces all of that, so
-   * while it is active, scoped languages anywhere on the page lose their syntax colors.
+   * Chrome colors for this editor instance: background, gutter, selection, suggest and hover widgets,
+   * diff decorations. Keyed by Monaco color id (`'editor.background'`,
+   * `'editorSuggestWidget.selectedBackground'`, …) and derived from the EUI theme so they follow
+   * light/dark switches. Applied as CSS custom properties on this editor's own DOM nodes, so no
+   * other editor on the page is affected.
+   * Syntax colors are not chrome: they come from the language's registered theme and cannot be changed here.
+   * Declare the function once at module scope, not inline in render.
    */
-  themeOverride?: monaco.editor.IStandaloneEditorConstructionOptions['theme'];
+  chromeOverrides?: KbnCodeEditorChromeOverrides;
 
   /**
    * Suggestion provider for autocompletion
@@ -143,7 +146,8 @@ export interface CodeEditorProps
   editorWillUnmount?: () => void;
 
   /**
-   * Should the editor use a transparent background
+   * Should the editor use a transparent background. Shorthand for a
+   * {@link chromeOverrides} of `{ 'editor.background': 'transparent' }`; explicit overrides win.
    */
   transparentBackground?: boolean;
 
@@ -192,9 +196,20 @@ export interface CodeEditorProps
   dataTestSubj?: string;
 
   /**
-   * Custom CSS class to apply to the container
+   * @deprecated Global styles injected while this editor is mounted.
+   * Any unscoped `.monaco-editor` rule here reaches every editor on the page.
+   * Prefer `chromeOverrides` to set custom colors for this editor instance and `scopedCss` for
+   * anything that needs a selector.
    */
   classNameCss?: Interpolation<Theme>;
+
+  /**
+   * Styles for this editor alone. Receives selectors that match only this instance's nodes —
+   * `scope.editor` for the inline editor's container, `scope.overflowWidgets` for the suggest and
+   * hover widgets portaled to `body` — so rules written against them cannot leak to other editors.
+   * For colors use `chromeOverrides` instead; this is for structure (z-index, padding, hiding).
+   */
+  scopedCss?: (scope: CodeEditorScope) => Interpolation<Theme>;
 
   /**
    * Enables a custom context menu with Cut, Copy, Paste actions. Disabled by default.
@@ -259,6 +274,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   enableFindAction,
   dataTestSubj = 'kibanaCodeEditor',
   classNameCss,
+  scopedCss,
   enableCustomContextMenu = false,
   customContextMenuActions = [],
   htmlId,
@@ -266,7 +282,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onFocus,
   onBlur,
   overflowWidgetsContainerZIndexOverride,
-  themeOverride,
+  chromeOverrides,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -630,9 +646,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
-  const resolvedTheme =
-    themeOverride ??
-    (transparentBackground ? CODE_EDITOR_TRANSPARENT_THEME_ID : CODE_EDITOR_DEFAULT_THEME_ID);
+  const resolvedChromeOverrides = useMemo<KbnCodeEditorChromeOverrides | undefined>(() => {
+    if (!transparentBackground) {
+      return chromeOverrides;
+    }
+    return (theme) => ({ 'editor.background': 'transparent', ...chromeOverrides?.(theme) });
+  }, [transparentBackground, chromeOverrides]);
+
+  const editorInstanceId = useMemo(() => htmlIdGenerator('kbnCodeEditor')(), []);
+
+  const scopedStyles = useMemo(
+    () => scopedCss?.(getCodeEditorScope(editorInstanceId)),
+    [scopedCss, editorInstanceId]
+  );
 
   return (
     <div
@@ -642,6 +668,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       className="kibanaCodeEditor"
     >
       <Global styles={classNameCss} />
+      {scopedStyles !== undefined && <Global styles={scopedStyles} />}
       {accessibilityOverlayEnabled && renderPrompt()}
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
@@ -665,7 +692,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <ReBroadcastMouseDownEvents>
           {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
           <MonacoEditor
-            theme={resolvedTheme}
+            theme={CODE_EDITOR_DEFAULT_THEME_ID}
+            chromeOverrides={resolvedChromeOverrides}
             language={languageId}
             value={value}
             onChange={onChange}
@@ -675,6 +703,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             editorDidMount={_editorDidMount}
             editorWillUnmount={_editorWillUnmount}
             overflowWidgetsContainerZIndexOverride={overflowWidgetsContainerZIndexOverride}
+            editorInstanceId={editorInstanceId}
             options={{
               padding: allowFullScreen || isCopyable ? { top: 24 } : {},
               // Opt-out of the new EditContext API for now.
