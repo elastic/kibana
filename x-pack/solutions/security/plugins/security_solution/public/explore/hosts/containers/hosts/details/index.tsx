@@ -113,7 +113,11 @@ export const useHostDetails = ({
     // resolution-group view the target's and aliases' filters are OR-ed together.
     const recordFilter = combineEntityGroupFilters(
       getEntityGroupRecords(entityRecord, aliasRecords),
-      (record) => euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(euidApi.getBuiltInEntityDefinition('host'), record)
+      (record) =>
+        euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
+          euidApi.getBuiltInEntityDefinition('host'),
+          record
+        )
     );
     if (recordFilter) {
       return recordFilter;

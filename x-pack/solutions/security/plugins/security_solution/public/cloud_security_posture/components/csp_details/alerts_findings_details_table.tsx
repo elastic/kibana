@@ -192,7 +192,7 @@ export const AlertsDetailsTable = memo(
         getEntityGroupRecords(entityRecord, aliasRecords),
         (record) => euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
       );
-    }, [euidApi, entityTypeResolved, entityRecord, aliasRecords]);
+    }, [euidApi, entityTypeResolved, entityRecord, entityType, aliasRecords]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
     /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */
