@@ -9,15 +9,10 @@ import { esManifest } from '@elastic/schemas/es/tools/manifest.js';
 import { kibanaManifest } from '@elastic/schemas/kibana/tools/manifest.js';
 import { compact, uniq } from 'lodash';
 import { allApisSelector, toApiNamespace, toNamespaceSelector } from './api_selectors';
+import type { ApiReference } from './api_selectors';
 import type { ApiTarget } from './targets';
 
-/**
- * An API operation, addressed by the backend it belongs to and its identifier.
- */
-export interface ApiReference {
-  target: ApiTarget;
-  api: string;
-}
+export type { ApiReference } from './api_selectors';
 
 /**
  * Every Elasticsearch operation the API tools can reach.

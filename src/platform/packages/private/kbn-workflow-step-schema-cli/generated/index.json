@@ -186,6 +186,7 @@
     "cases.addObservables",
     "cases.addTags",
     "cases.assignCase",
+    "cases.bulkDeleteObservables",
     "cases.closeCase",
     "cases.createCase",
     "cases.createCaseFromTemplate",
@@ -982,6 +983,7 @@
     "alerting.ruleEventsGenerated",
     "alerting.ruleExecutionFailed",
     "alerting.ruleUpdated",
+    "alerting.v1.alertStatusChanged",
     "cases.attachmentsAdded",
     "cases.attachmentsDeleted",
     "cases.caseCreated",
@@ -1012,11 +1014,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "004804ef217fd163360b3a0579fd275a0389ee80b72104f58dc22061afe4f827"
+      "sha256": "5c264e4a08b45a9c131334f2b26dec748ba4485377c663ce936f31ec2f6dddf1"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "815392cf46be0037a4c42ce7223296b92177743c82d0adbac8602f71d8f68c75"
+      "sha256": "946f95dbb589c3588c3a53aeab6238bdb4a2d722f75b9fe8c9ee311d7bb22990"
     }
   }
 }

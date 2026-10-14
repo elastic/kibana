@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -435,7 +435,7 @@ export class AlertZeroPlugin
     }
     try {
       const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-        ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+        ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
         request
       );
       return endpoints[0]?.connectorId;
