@@ -70,6 +70,21 @@ export const showsAuthenticationCredentialFields = (
   return mode === 'access_and_secret_keys';
 };
 
+const isS3AuthenticationMode = (
+  mode: CreateDataSourceAuthenticationMode
+): mode is S3AuthenticationMode =>
+  mode === 'access_and_secret_keys' || mode === 'federated_identity' || mode === 'anonymous';
+
+const isGcsAuthenticationMode = (
+  mode: CreateDataSourceAuthenticationMode
+): mode is GcsAuthenticationMode =>
+  mode === 'access_and_secret_keys' || mode === 'federated_identity' || mode === 'anonymous';
+
+const isAzureAuthenticationMode = (
+  mode: CreateDataSourceAuthenticationMode
+): mode is AzureAuthenticationMode =>
+  mode === 'credentials' || mode === 'federated_identity' || mode === 'anonymous';
+
 /** Applies UI authentication mode to the payload submitted to the API. */
 export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
@@ -77,19 +92,29 @@ export const applyAuthenticationModeToDataSource = (
 ): DataSourceWithSecrets => {
   switch (data.type) {
     case 's3': {
-      const settings = authFormatSettingsByDataSourceType['s3'][mode as S3AuthenticationMode](data);
+      if (!isS3AuthenticationMode(mode)) {
+        throw new Error(`Invalid S3 authentication mode: ${mode}`);
+      }
+
+      const settings = authFormatSettingsByDataSourceType.s3[mode](data);
 
       return { ...data, settings };
     }
     case 'gcs': {
-      const settings =
-        authFormatSettingsByDataSourceType['gcs'][mode as GcsAuthenticationMode](data);
+      if (!isGcsAuthenticationMode(mode)) {
+        throw new Error(`Invalid GCS authentication mode: ${mode}`);
+      }
+
+      const settings = authFormatSettingsByDataSourceType.gcs[mode](data);
 
       return { ...data, settings };
     }
     case 'azure': {
-      const settings =
-        authFormatSettingsByDataSourceType['azure'][mode as AzureAuthenticationMode](data);
+      if (!isAzureAuthenticationMode(mode)) {
+        throw new Error(`Invalid Azure authentication mode: ${mode}`);
+      }
+
+      const settings = authFormatSettingsByDataSourceType.azure[mode](data);
 
       return { ...data, settings };
     }
