@@ -144,11 +144,26 @@ for (const testCase of CASES) {
     () => {
       let agentPolicyId: string;
       let agent: EnrolledAgent;
-      let agentVariantPolicyId: string;
       let uploadedPackage: UploadedTestPackage;
 
       const getAgentDoc = async (esClient: EsClient) =>
         (await esClient.get<FleetAgentDoc>({ index: '.fleet-agents', id: agent.agentId }))._source!;
+
+      /**
+       * Waits until the agent is on the policy of its minor version, and returns its id. The agent
+       * version is the stack version: from 9.3 on, so the agent is moved to `<id>#<major>.<minor>`
+       * and not to `#sentinel`, which the sentinel version only uses for policies without conditions.
+       */
+      const waitForAgentVariantPolicyId = async (esClient: EsClient) => {
+        await expect
+          .poll(async () => (await getAgentDoc(esClient)).policy_id, {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: POLL_INTERVALS_MS,
+            message: 'the agent should be moved to the policy of its minor version',
+          })
+          .toMatch(new RegExp(`^${agentPolicyId}#\\d+\\.\\d+$`));
+        return (await getAgentDoc(esClient)).policy_id;
+      };
 
       /** Latest `.fleet-policies` doc of every version specific policy of the agent policy. */
       const getVariantPolicyDocs = async (esClient: EsClient) => {
@@ -242,20 +257,9 @@ for (const testCase of CASES) {
         async ({ esClient }) => {
           apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-          // The agent version is the stack version: from 9.3 on, so it is moved to `<id>#<major>.<minor>`
-          // and not to `#sentinel`, which the sentinel version only uses for policies without conditions.
-          await expect
-            .poll(async () => (await getAgentDoc(esClient)).policy_id, {
-              timeout: POLL_TIMEOUT_MS,
-              intervals: POLL_INTERVALS_MS,
-              message: 'the agent should be moved to the policy of its minor version',
-            })
-            .toMatch(new RegExp(`^${agentPolicyId}#\\d+\\.\\d+$`));
-
-          const agentDoc = await getAgentDoc(esClient);
-          agentVariantPolicyId = agentDoc.policy_id;
+          const agentVariantPolicyId = await waitForAgentVariantPolicyId(esClient);
           expect(isOlderThanMinAgentVersion(agentVariantPolicyId)).toBe(false);
-          expect(agentDoc.policy_base_id).toBe(agentPolicyId);
+          expect((await getAgentDoc(esClient)).policy_base_id).toBe(agentPolicyId);
 
           const variants = await getVariantPolicyDocs(esClient);
           const agentVariant = variants.get(agentVariantPolicyId)!;
@@ -278,7 +282,10 @@ for (const testCase of CASES) {
         'the agent applies the compiled policy and runs the input of the package',
         async ({ esClient }) => {
           apiTest.setTimeout(TEST_TIMEOUT_MS);
+          // does not depend on the previous test: the policy of the agent is looked up here
+          const agentVariantPolicyId = await waitForAgentVariantPolicyId(esClient);
           const agentVariant = (await getVariantPolicyDocs(esClient)).get(agentVariantPolicyId)!;
+          expect(agentVariant).toBeDefined();
 
           // the agent checks in with the policy it runs, and acknowledges its revision
           await expect
