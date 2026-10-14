@@ -15,6 +15,15 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getAttackDiscoveryMarkdown, getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import {
+  withActionIcons,
+  withGroupSeparators,
+  withStatusDotIcons,
+} from '../../../../common/utils/action_menu_items';
+import {
+  ACTION_ICONS_BY_ID,
+  ATTACK_STATUS_ICON_COLORS,
+} from '../../../../common/utils/action_icons';
+import {
   ATTACK_TAB_BULK_ACTIONS_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID,
@@ -281,15 +290,22 @@ export const AttackTabBulkActions = ({
     title: caseTitle,
   });
 
+  /**
+   * Grouped and decorated the way the alerts table's bulk action menu and the attacks page's
+   * take-action menu are, so the same verbs read the same wherever they're offered: status first
+   * with its coloured dots, then the attack-management verbs, then workflows, then navigation.
+   */
   const menuItems = useMemo(
-    () => [
-      ...(attacksWithCase.length > 0 ? caseItems : []),
-      ...workflowItems,
-      ...tagsItems,
-      ...assignItems,
-      ...runWorkflowItems,
-      ...investigateInTimelineItems,
-    ],
+    () =>
+      withActionIcons(
+        withGroupSeparators([
+          withStatusDotIcons(workflowItems, ATTACK_STATUS_ICON_COLORS),
+          [...assignItems, ...(attacksWithCase.length > 0 ? caseItems : []), ...tagsItems],
+          runWorkflowItems,
+          investigateInTimelineItems,
+        ]),
+        ACTION_ICONS_BY_ID
+      ),
     [
       assignItems,
       attacksWithCase.length,
