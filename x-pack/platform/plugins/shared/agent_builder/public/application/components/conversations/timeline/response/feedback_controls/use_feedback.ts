@@ -101,13 +101,9 @@ export const useFeedback = (
   const isSubmittingRef = useRef(false);
   const isSubmitInFlightRef = useRef(false);
   const voteRef = useRef(vote);
-  const chipsRef = useRef(chips);
-  const commentRef = useRef(comment);
   const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   voteRef.current = vote;
-  chipsRef.current = chips;
-  commentRef.current = comment;
   isSubmittingRef.current = isSubmitting;
 
   const clearSubmittedTimers = useCallback(() => {
@@ -230,8 +226,7 @@ export const useFeedback = (
         execution_id: executionId,
         conversation_id: conversationId,
         vote: 'down',
-        chips: chipsRef.current as string[],
-        ...(commentRef.current.trim().length > 0 ? { comment: commentRef.current.trim() } : {}),
+        chips: [],
         ...makeEbtPayload(ebtContext),
       });
     }
