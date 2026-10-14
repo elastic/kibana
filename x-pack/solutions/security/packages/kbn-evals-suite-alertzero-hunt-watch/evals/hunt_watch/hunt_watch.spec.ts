@@ -54,8 +54,8 @@ const ALERTS_INDEX = alertsIndexForSpace(SPACE_ID);
  * and M3 CleanValidity are CODE evaluators; no LLM judge is in the gate.
  *
  * The model under test drives the hunt: the `modelSettingsForHuntWatch` auto
- * fixture pins the alertzero fast/reasoning inference features to the
- * connector under test, and Tier 2 resolves its model from the reasoning
+ * fixture pins the alertzero frontier inference feature to the
+ * connector under test, and the coordinator resolves its model from that
  * feature first. The Worker passes tier2_when='always' (HUNT_WORKER_DEFAULTS).
  *
  * INVALID cells: the experiment always has METRICS_EXAMPLE_COUNT examples. A
