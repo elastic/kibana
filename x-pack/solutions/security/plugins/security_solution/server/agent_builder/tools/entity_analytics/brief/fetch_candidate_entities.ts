@@ -78,11 +78,16 @@ export interface CandidateEntities {
   pageQueryFailed: boolean;
   /** The latest `@timestamp` on the entities index, when known. */
   dataTimestamp?: string;
+  /** The earliest first seen on the entities index: when the Entity Store started extracting. */
+  storeStartTimestamp?: string;
 }
 
 interface CandidateAggregations {
   found: { value: number };
-  all_entities: { latest: { value_as_string?: string } };
+  all_entities: {
+    latest: { value_as_string?: string };
+    first_seen: { value_as_string?: string };
+  };
 }
 
 /** Reads the Entity Store records of the scope's tile entities, first by rank, in one search as the requesting user. */
@@ -120,8 +125,14 @@ export const fetchCandidateEntities = async ({
       sort: [buildRankSort(weights), { 'entity.id': 'asc' }],
       aggs: {
         found: { value_count: { field: 'entity.id' } },
-        // `global` ignores the query, so this is the freshness of the whole entities index.
-        all_entities: { global: {}, aggs: { latest: { max: { field: '@timestamp' } } } },
+        // `global` ignores the query, so these describe the whole entities index.
+        all_entities: {
+          global: {},
+          aggs: {
+            latest: { max: { field: '@timestamp' } },
+            first_seen: { min: { field: 'entity.lifecycle.first_seen' } },
+          },
+        },
       },
     });
 
@@ -155,6 +166,7 @@ export const fetchCandidateEntities = async ({
     hasPageQuery,
     pageQueryFailed,
     dataTimestamp: response.aggregations?.all_entities.latest.value_as_string,
+    storeStartTimestamp: response.aggregations?.all_entities.first_seen.value_as_string,
   };
 };
 

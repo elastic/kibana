@@ -93,7 +93,7 @@ describe('renderBrief', () => {
       'all tile entities',
       { riskMovers: { value: 1, entityIds: ['host:a'] } },
       hostA,
-      "_Checked: 1 entities in the page's tiles._",
+      "_Checked: 1 entity in the page's tiles._",
     ],
     [
       'a ranked cut of the tile entities',
@@ -221,19 +221,20 @@ describe('renderBrief', () => {
     expect(brief).toContain('<render_attachment id="x" version="1" />');
   });
 
-  it('escapes link, image and tag syntax in model text', () => {
+  it('escapes link, image and tag syntax and breaks autolinks in model text', () => {
     const brief = renderBrief({
       scope: scopeWith({ tiles: { riskMovers: { value: 1, entityIds: ['host:a'] } } }),
       spaceId: 'default',
       entities: hostA,
       verified: {
-        attention: '{{ entity.id host:a }} see [runbook](https://x.test) ![i](https://y.test) <b>',
+        attention:
+          '{{ entity.id host:a }} see [runbook](https://x.test) ![i](https://y.test) <b> www.z.test ops@corp.test',
         priorities: [],
         droppedPriorityCount: 0,
       },
     });
     expect(brief).toContain(
-      '**web\\_01** see \\[runbook\\](https://x.test) \\!\\[i\\](https://y.test) \\<b\\>'
+      '**web\\_01** see \\[runbook\\](https&#58;//x.test) \\!\\[i\\](https&#58;//y.test) \\<b\\> www\\.z.test ops&#64;corp.test'
     );
   });
 

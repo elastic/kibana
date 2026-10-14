@@ -21,6 +21,7 @@ import {
   filterLabel,
   formatBriefTime,
   formatCount,
+  formatCountOf,
   getPeriodStart,
   getScopeFilters,
   hasNoPreviousValue,
@@ -91,8 +92,18 @@ export const renderBrief = ({
     .join('\n\n');
 };
 
-const escapeMarkdown = (text: string): string => text.replace(/[\\`*_[\]<>|#]/g, '\\$&');
-const escapeProse = (text: string): string => text.replace(/[\\[\]!<>]/g, '\\$&');
+/**
+ * Stops the chat autolinking URLs, `www.` hosts and emails, without a visible backslash: a character
+ * reference for `:` and `@` keeps the text as written.
+ */
+const breakAutolinks = (text: string): string =>
+  text
+    .replace(/:(?=\/\/)/g, '&#58;')
+    .replace(/@(?=[\w-]+\.\w)/g, '&#64;')
+    .replace(/\b(www)\./gi, '$1\\.');
+const escapeMarkdown = (text: string): string =>
+  breakAutolinks(text.replace(/[\\`*_[\]<>|#]/g, '\\$&'));
+const escapeProse = (text: string): string => breakAutolinks(text.replace(/[\\[\]!<>]/g, '\\$&'));
 
 const renderScope = (
   scope: EntityAnalyticsScope,
@@ -137,16 +148,16 @@ const renderDisclosures = (
     hasPageQuery && !pageQueryFailed
       ? 'Headline counts follow the period and entity filters, as on the page. The search query narrows the priorities.'
       : undefined,
-    matchesNoTileEntity(entities)
-      ? `None of the ${formatCount(
-          capturedCount - notFoundCount
-        )} tile entities match the search query.`
-      : undefined,
+    matchesNoTileEntity(entities) ? describeNoMatch(capturedCount - notFoundCount) : undefined,
     pageQueryFailed
       ? "The search query or filters couldn't be applied, so they don't narrow the priorities."
       : undefined,
     notFoundCount > 0
-      ? `${formatCount(notFoundCount)} tile entities were not found in the Entity Store.`
+      ? `${formatCountOf(
+          notFoundCount,
+          'tile entity was',
+          'tile entities were'
+        )} not found in the Entity Store.`
       : undefined,
     unavailable.length > 0
       ? `Unavailable tiles: ${unavailable.map((tileId) => BRIEF_TILE_TITLES[tileId]).join(', ')}.`
@@ -155,6 +166,11 @@ const renderDisclosures = (
   ];
   return compact(disclosures).map((text) => `_${text}_`);
 };
+
+const describeNoMatch = (count: number): string =>
+  count === 1
+    ? "The tile entity doesn't match the search query."
+    : `None of the ${formatCount(count)} tile entities match the search query.`;
 
 const renderAttention = (
   scope: EntityAnalyticsScope,

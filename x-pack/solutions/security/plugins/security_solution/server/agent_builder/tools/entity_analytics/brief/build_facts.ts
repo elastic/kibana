@@ -27,6 +27,7 @@ import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_DEFINITIONS,
   BRIEF_TILE_TITLES,
+  formatCountOf,
   getPeriodStart,
 } from './describe_scope';
 
@@ -53,9 +54,27 @@ export const getRankRisk = ({ entity }: Entity): EntityRisk | undefined =>
 const describeRisk = (label: string, { score, level }: EntityRisk): string =>
   `${label}: ${level} (score ${Math.round(score)})`;
 
-const describeFirstSeen = (firstSeen: string, periodStart: Date, period: string): string => {
+const DAY_MS = 24 * 3_600_000;
+
+/**
+ * First seen is when the Entity Store first extracted the entity, so on the store's first day it
+ * includes every existing entity and doesn't mean the entity is new.
+ */
+const describeFirstSeen = (
+  firstSeen: string,
+  storeStartTimestamp: string | undefined,
+  periodStart: Date,
+  period: string
+): string => {
   const date = firstSeen.slice(0, 10);
-  if (new Date(firstSeen) < periodStart) {
+  const firstSeenTime = new Date(firstSeen).getTime();
+  if (
+    storeStartTimestamp !== undefined &&
+    firstSeenTime - new Date(storeStartTimestamp).getTime() < DAY_MS
+  ) {
+    return `First seen by the Entity Store ${date}, its first day of data`;
+  }
+  if (firstSeenTime < periodStart.getTime()) {
     return `First seen by the Entity Store ${date}`;
   }
   return `First seen by the Entity Store ${date}, inside the last ${period}`;
@@ -127,7 +146,10 @@ const describeScoreChange = (
 export const buildFacts = (
   candidates: BriefCandidate[],
   scope: EntityAnalyticsScope,
-  riskAtStart?: RiskAtStart
+  {
+    riskAtStart,
+    storeStartTimestamp,
+  }: { riskAtStart?: RiskAtStart; storeStartTimestamp?: string } = {}
 ): BriefFact[] => {
   const period = BRIEF_PERIOD_LABELS[scope.period];
   const periodStart = getPeriodStart(scope);
@@ -164,11 +186,11 @@ export const buildFacts = (
     );
     // Watchlist ids are not names, so only the count is stated.
     if (otherWatchlists.length > 0) {
-      add(`On ${otherWatchlists.length} other watchlist${otherWatchlists.length === 1 ? '' : 's'}`);
+      add(`On ${formatCountOf(otherWatchlists.length, 'other watchlist', 'other watchlists')}`);
     }
     const firstSeen = getEntityLifecycle(candidate)?.first_seen;
     if (firstSeen) {
-      add(describeFirstSeen(firstSeen, periodStart, period));
+      add(describeFirstSeen(firstSeen, storeStartTimestamp, periodStart, period));
     }
   }
   return facts;

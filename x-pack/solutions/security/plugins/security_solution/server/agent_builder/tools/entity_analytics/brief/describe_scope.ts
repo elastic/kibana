@@ -86,6 +86,10 @@ const filterValue = (params: unknown, value: unknown): string | undefined => {
 /** A count as the page shows it, with thousands separators. */
 export const formatCount = (count: number): string => count.toLocaleString('en-US');
 
+/** A count with its noun, singular for one. */
+export const formatCountOf = (count: number, one: string, many: string): string =>
+  `${formatCount(count)} ${count === 1 ? one : many}`;
+
 /** True when the tile compares against a previous value of 0, which may be missing history. */
 export const hasNoPreviousValue = ({ value, delta }: EntityAnalyticsScopeTile): boolean =>
   value > 0 && delta === value;
@@ -122,9 +126,11 @@ export const describeCoverage = (
   const isSampled = available.some(({ value, entityIds }) => entityIds.length < value);
   const total = Math.max(capturedCount, ...available.map(({ value }) => value));
   if (!isSampled && checkedCount >= total) {
-    return `${formatCount(checkedCount)} entities in the page's tiles`;
+    return `${formatCountOf(checkedCount, 'entity', 'entities')} in the page's tiles`;
   }
-  return `${formatCount(checkedCount)} of ${isSampled ? 'at least ' : ''}${formatCount(
-    total
-  )} entities in the page's tiles, chosen by selected tile, tile count, then risk`;
+  return `${formatCount(checkedCount)} of ${isSampled ? 'at least ' : ''}${formatCountOf(
+    total,
+    'entity',
+    'entities'
+  )} in the page's tiles, chosen by selected tile, tile count, then risk`;
 };

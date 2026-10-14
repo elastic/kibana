@@ -39,8 +39,10 @@ const riskChangeFacts = (
   aliases: Entity[] = []
 ): string[] =>
   buildFacts([candidate(entityRecord)], scope, {
-    aliasesById: new Map([['user:jdoe', aliases]]),
-    scoresById: new Map(Object.entries(scoresById)),
+    riskAtStart: {
+      aliasesById: new Map([['user:jdoe', aliases]]),
+      scoresById: new Map(Object.entries(scoresById)),
+    },
   })
     .filter(({ riskChangeEntity }) => riskChangeEntity)
     .map(({ text }) => text);
@@ -95,6 +97,43 @@ describe('buildFacts risk change', () => {
   });
 });
 
+describe('buildFacts first seen', () => {
+  it.each<[string, string, string | undefined, string]>([
+    [
+      'before the period',
+      '2026-09-01T00:00:00.000Z',
+      '2026-01-01T00:00:00.000Z',
+      'First seen by the Entity Store 2026-09-01',
+    ],
+    [
+      'inside the period',
+      '2026-10-10T00:00:00.000Z',
+      '2026-01-01T00:00:00.000Z',
+      'First seen by the Entity Store 2026-10-10, inside the last 7 days',
+    ],
+    [
+      "on the Entity Store's first day, inside the period",
+      '2026-10-10T20:00:00.000Z',
+      '2026-10-10T00:00:00.000Z',
+      'First seen by the Entity Store 2026-10-10, its first day of data',
+    ],
+    [
+      'inside the period, when the store start is unknown',
+      '2026-10-10T00:00:00.000Z',
+      undefined,
+      'First seen by the Entity Store 2026-10-10, inside the last 7 days',
+    ],
+  ])('states first seen: %s', (_name, firstSeen, storeStartTimestamp, expected) => {
+    const entityRecord: Entity = {
+      entity: { id: 'user:jdoe', lifecycle: { first_seen: firstSeen } },
+    };
+    const texts = buildFacts([candidate(entityRecord)], scope, { storeStartTimestamp }).map(
+      ({ text }) => text
+    );
+    expect(texts).toContain(expected);
+  });
+});
+
 describe('getCitedRiskChanges', () => {
   it('returns a chart entity only for priorities citing their risk change fact', () => {
     const facts = buildFacts(
@@ -104,11 +143,13 @@ describe('getCitedRiskChanges', () => {
       ],
       scope,
       {
-        aliasesById: new Map(),
-        scoresById: new Map([
-          ['user:jdoe', 38],
-          ['host:web', 20],
-        ]),
+        riskAtStart: {
+          aliasesById: new Map(),
+          scoresById: new Map([
+            ['user:jdoe', 38],
+            ['host:web', 20],
+          ]),
+        },
       }
     );
     const factId = (entityId: string, isRiskChange: boolean) =>

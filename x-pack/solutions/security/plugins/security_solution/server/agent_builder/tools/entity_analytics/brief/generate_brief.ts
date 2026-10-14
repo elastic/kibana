@@ -52,7 +52,10 @@ export const generateBrief = async ({
     }
   );
   const riskChangeFailed = !riskAtStart;
-  const facts = buildFacts(candidates, scope, riskAtStart);
+  const facts = buildFacts(candidates, scope, {
+    riskAtStart,
+    storeStartTimestamp: entities.storeStartTimestamp,
+  });
   const fetched = Date.now();
 
   if (facts.length === 0) {
