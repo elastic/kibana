@@ -15,6 +15,21 @@ const createClient = (response: Record<string, unknown>): AgentBuilderClient => 
   getConversation: jest.fn(),
 });
 
+const confirmationPrompt = {
+  type: 'confirmation',
+  id: 'tools.endpoint-response-actions.isolate_host.confirmation.call-1',
+  title: 'Isolate host?',
+  message: 'This will disconnect **eval-host-isolate** from the network.',
+  confirm_text: 'Isolate host',
+};
+
+const isolateStep = {
+  type: 'tool_call',
+  tool_id: 'endpoint-response-actions.isolate_host',
+  tool_call_id: 'call-1',
+  params: { hostName: 'eval-host-isolate' },
+};
+
 describe('converse_task', () => {
   it('converseQuestionToTaskOutput uses the default agent and maps eval task shape', async () => {
     const agentBuilderClient = createClient({
@@ -35,109 +50,114 @@ describe('converse_task', () => {
       steps: [{ type: 'tool_call', tool_id: 'platform.core.execute_esql' }],
       errors: [],
       traceId: 'trace-abc',
-      prompts: [],
     });
   });
 
-  describe('pending HITL confirmation', () => {
-    const confirmationPrompt = {
-      type: 'confirmation',
-      id: 'tools.endpoint-response-actions.isolate_host.confirmation.call-1',
-      title: 'Isolate host?',
-      message: 'This will disconnect **eval-host-isolate** from the network.',
-      confirm_text: 'Isolate host',
-    };
-    const isolateStep = {
-      type: 'tool_call',
-      tool_id: 'endpoint-response-actions.isolate_host',
-      tool_call_id: 'call-1',
-      params: { hostName: 'eval-host-isolate' },
-    };
-
-    it('records the pending tool, its arguments and the confirmation text in the message', async () => {
-      const agentBuilderClient = createClient({
-        message: '',
+  describe('a round paused on a tool confirmation', () => {
+    const pausedClient = () =>
+      createClient({
+        message: 'Requesting isolation.',
         steps: [isolateStep],
         traceId: 'trace-1',
         prompts: [confirmationPrompt],
       });
 
+    it('leaves the default output unchanged for suites that do not opt in', async () => {
       const result = await converseQuestionToTaskOutput(
-        agentBuilderClient,
+        pausedClient(),
         'Isolate eval-host-isolate'
       );
-      const assistantMessage = result.messages[1].message;
 
-      expect(assistantMessage).toContain('NOT been executed');
-      expect(assistantMessage).toContain('endpoint-response-actions.isolate_host');
-      expect(assistantMessage).toContain('"hostName":"eval-host-isolate"');
-      expect(assistantMessage).toContain('This will disconnect **eval-host-isolate**');
-      expect(result.prompts).toEqual([confirmationPrompt]);
-    });
-
-    it('keeps the assistant text and appends the pending confirmation', async () => {
-      const agentBuilderClient = createClient({
-        message: 'Requesting isolation.',
+      expect(result).toEqual({
+        messages: [{ message: 'Isolate eval-host-isolate' }, { message: 'Requesting isolation.' }],
         steps: [isolateStep],
-        prompts: [confirmationPrompt],
+        errors: [],
+        traceId: 'trace-1',
       });
-
-      const result = await converseQuestionToTaskOutput(
-        agentBuilderClient,
-        'Isolate eval-host-isolate'
-      );
-
-      expect(result.messages[1].message).toMatch(
-        /^Requesting isolation\.\n\n\[Pending confirmation/
-      );
     });
 
-    it('matches the step by tool_call_id so the right host is reported with parallel calls', async () => {
-      const otherStep = {
-        ...isolateStep,
-        tool_call_id: 'call-2',
-        params: { hostName: 'some-other-host' },
-      };
-      const agentBuilderClient = createClient({
+    it('reports which call is pending without putting the tool-rendered card text in the judged output', async () => {
+      const result = await converseQuestionToTaskOutput(
+        pausedClient(),
+        'Isolate eval-host-isolate',
+        {
+          includePendingConfirmations: true,
+        }
+      );
+
+      expect(result.pending_confirmations).toEqual([
+        { tool_id: 'endpoint-response-actions.isolate_host', tool_call_id: 'call-1' },
+      ]);
+      expect(JSON.stringify(result)).not.toContain('This will disconnect');
+      expect(JSON.stringify(result)).not.toContain('Isolate host?');
+      expect(result.messages[1].message).toBe('Requesting isolation.');
+    });
+
+    it('records the model-supplied arguments from steps, not from the card', async () => {
+      const result = await converseQuestionToTaskOutput(
+        pausedClient(),
+        'Isolate eval-host-isolate',
+        {
+          includePendingConfirmations: true,
+        }
+      );
+
+      expect(result.steps[0]).toMatchObject({ params: { hostName: 'eval-host-isolate' } });
+    });
+
+    it('records an empty assistant turn as empty rather than inventing text', async () => {
+      const client = createClient({
         message: '',
-        steps: [otherStep, isolateStep],
+        steps: [isolateStep],
+        traceId: 'trace-2',
         prompts: [confirmationPrompt],
       });
 
-      const result = await converseQuestionToTaskOutput(
-        agentBuilderClient,
-        'Isolate eval-host-isolate'
-      );
+      const result = await converseQuestionToTaskOutput(client, 'Isolate eval-host-isolate', {
+        includePendingConfirmations: true,
+      });
 
-      expect(result.messages[1].message).toContain('eval-host-isolate');
-      expect(result.messages[1].message).not.toContain('some-other-host');
+      expect(result.messages[1].message).toBe('');
+      expect(result.pending_confirmations).toHaveLength(1);
     });
 
-    it('still reports the prompt text when no matching tool step exists', async () => {
-      const agentBuilderClient = createClient({
+    it('ignores prompts that are not tool confirmations and reports none when there are no prompts', async () => {
+      const client = createClient({
+        message: 'ok',
+        steps: [],
+        traceId: 'trace-3',
+        prompts: [{ type: 'authorization', id: 'something.else' }, null, 'x'],
+      });
+
+      const result = await converseQuestionToTaskOutput(client, 'q', {
+        includePendingConfirmations: true,
+      });
+
+      expect(result.pending_confirmations).toEqual([]);
+
+      const noPrompts = await converseQuestionToTaskOutput(
+        createClient({ message: 'ok', steps: [], traceId: 't' }),
+        'q',
+        { includePendingConfirmations: true }
+      );
+      expect(noPrompts.pending_confirmations).toEqual([]);
+    });
+
+    it('handles a confirmation id with no tool-call suffix', async () => {
+      const client = createClient({
         message: '',
         steps: [],
-        prompts: [confirmationPrompt],
+        traceId: 'trace-4',
+        prompts: [{ id: 'tools.endpoint-response-actions.scan_host.confirmation' }],
       });
 
-      const result = await converseQuestionToTaskOutput(
-        agentBuilderClient,
-        'Isolate eval-host-isolate'
-      );
+      const result = await converseQuestionToTaskOutput(client, 'q', {
+        includePendingConfirmations: true,
+      });
 
-      expect(result.messages[1].message).toContain(
-        'Requested tool: endpoint-response-actions.isolate_host'
-      );
-      expect(result.messages[1].message).toContain('eval-host-isolate');
-    });
-
-    it('leaves the message untouched when there are no prompts', async () => {
-      const agentBuilderClient = createClient({ message: 'hi', steps: [] });
-
-      const result = await converseQuestionToTaskOutput(agentBuilderClient, 'hello');
-
-      expect(result.messages[1].message).toBe('hi');
-      expect(result.prompts).toEqual([]);
+      expect(result.pending_confirmations).toEqual([
+        { tool_id: 'endpoint-response-actions.scan_host' },
+      ]);
     });
   });
 });

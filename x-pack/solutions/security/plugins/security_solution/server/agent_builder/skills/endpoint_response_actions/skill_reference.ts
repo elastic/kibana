@@ -47,7 +47,7 @@ When a counter shows dropped items, say that only a sample is shown and give the
 - For follow-up on a prior action ("what happened to scan X?"), use \`get_response_action_status\` with the action ID.
 - For this skill's status and response action lookups, use \`list_endpoints\`, \`get_endpoint_status\`, and \`get_response_action_status\` instead of \`platform.core.search\` or raw Elasticsearch queries. Other skills' diagnostic queries are unaffected.
 
-## Scope (Slice 1)
+## Scope
 
 Supported: list endpoints, isolate, release, host status, running processes, malware scan, action status lookup.
 

@@ -30,8 +30,8 @@ export const ISOLATE_TOOL_ID = toolName('isolate_host');
 export const UNISOLATE_TOOL_ID = toolName('unisolate_host');
 export const GET_ENDPOINT_STATUS_TOOL_ID = toolName('get_endpoint_status');
 export const LIST_ENDPOINTS_TOOL_ID = toolName('list_endpoints');
-export const RUNNING_PROCESSES_TOOL_ID = toolName('running_processes');
-export const SCAN_TOOL_ID = toolName('scan');
+export const RUNNING_PROCESSES_TOOL_ID = toolName('get_running_processes');
+export const SCAN_TOOL_ID = toolName('scan_host');
 export const GET_RESPONSE_ACTION_STATUS_TOOL_ID = toolName('get_response_action_status');
 
 const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
@@ -49,7 +49,7 @@ skill.
 
 The response actions available are isolate, release (unisolate), scan, and
 running processes; each runs solely through this skill's tools (\`isolate_host\`,
-\`unisolate_host\`, \`scan\`, \`running_processes\`), and all four pause for
+\`unisolate_host\`, \`scan_host\`, \`get_running_processes\`), and all four pause for
 the analyst's confirmation. Never improvise one with another
 tool, such as a raw API call. Other response actions (execute, kill-process,
 suspend-process, get-file, upload, runscript, memory-dump) are not available
@@ -64,8 +64,8 @@ from chat: say so and point the analyst to the Response Actions UI.
    - isolate / quarantine / contain → \`isolate_host\` (write, platform-confirmed)
    - release / unisolate / reconnect → \`unisolate_host\` (write, platform-confirmed)
    - status / is isolated → \`get_endpoint_status\`
-   - running processes → \`running_processes\` (write, platform-confirmed)
-   - scan path → \`scan\` (write, platform-confirmed)
+   - running processes → \`get_running_processes\` (write, platform-confirmed)
+   - scan path → \`scan_host\` (write, platform-confirmed)
    - prior action status / action ID → \`get_response_action_status\`
 
 2. **Write tools** — call directly; Agent Builder shows the confirmation card.

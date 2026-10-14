@@ -171,7 +171,10 @@ export function createEvaluateResponseActionsDataset({
     await executorClient.runExperiment(
       {
         datasets: [dataset],
-        task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
+        task: async ({ input }) =>
+          converseQuestionToTaskOutput(agentBuilderClient, input.question, {
+            includePendingConfirmations: true,
+          }),
       },
       buildResponseActionsEvaluators({ evaluators })
     );

@@ -128,7 +128,7 @@ export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
 export const GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS = 60_000;
 
 /**
- * Tool-result token budget for `running_processes`. The result carries only
+ * Tool-result token budget for `get_running_processes`. The result carries only
  * `outputs` (held to `MAX_OUTPUT_TOTAL_CHARS`, 64k chars = 16k tokens) and the
  * bounded `hosts` map for a single dispatched endpoint, so 30_000 tokens
  * (120k chars) leaves room for the envelope and `hosts` without letting the
@@ -174,12 +174,14 @@ export function responseActionErrorResult(
 
 /**
  * Standard tool result returned when the caller lacks the endpoint privilege
- * required to read response-action state. The agent-dispatched path reuses the
- * platform's internal (automated) response-actions client, which does not run
- * the per-user privilege checks the HTTP routes enforce — so each tool must
+ * required to dispatch or read response-action state. The agent-dispatched path
+ * goes through the platform's internal response-actions client, which does not
+ * run the per-user privilege checks the HTTP routes enforce — so each tool must
  * assert the caller's endpoint authz (via `getEndpointAuthz(request)`) itself
  * and return this when the privilege is absent, mirroring the route's
- * `withEndpointAuthz(...)` gate.
+ * `withEndpointAuthz(...)` gate. (The client itself is no longer automated or
+ * unsecured: it is built with `isAutomated: false` for chat-dispatched actions,
+ * and the username comes from the caller's request.)
  */
 export function insufficientPrivilegesResult(privilege: string) {
   return responseActionErrorResult(

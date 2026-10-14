@@ -215,8 +215,8 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                   'endpoint-response-actions.get_response_action_status',
                   'endpoint-response-actions.isolate_host',
                   'endpoint-response-actions.unisolate_host',
-                  'endpoint-response-actions.scan',
-                  'endpoint-response-actions.running_processes',
+                  'endpoint-response-actions.scan_host',
+                  'endpoint-response-actions.get_running_processes',
                 ],
               },
             },
@@ -247,7 +247,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               output: {
                 criteria: [
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                  'Called the endpoint-response-actions.isolate_host inline tool with host name "eval-host-isolate" (the tool resolves it to an endpoint/agent ID internally), letting Agent Builder present the confirmation card (did not ask for confirmation in chat text first)',
+                  'Called the endpoint-response-actions.isolate_host inline tool with host name "eval-host-isolate" (the tool resolves it to an endpoint/agent ID internally), and the output lists that call under pending_confirmations (the model did not ask for confirmation in chat text first)',
                   'Did not claim the host was already isolated before the analyst confirmed (any statement about the outcome must say it is awaiting confirmation)',
                 ],
                 tool_sequence: ['endpoint-response-actions.isolate_host'],
@@ -280,7 +280,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               output: {
                 criteria: [
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                  'Called the endpoint-response-actions.unisolate_host inline tool with host name "eval-host-release" (the tool resolves it to an endpoint/agent ID internally), letting Agent Builder present the confirmation card',
+                  'Called the endpoint-response-actions.unisolate_host inline tool with host name "eval-host-release" (the tool resolves it to an endpoint/agent ID internally), and the output lists that call under pending_confirmations',
                   'Did not claim the host was already released before the analyst confirmed (any statement about the outcome must say it is awaiting confirmation)',
                 ],
                 tool_sequence: ['endpoint-response-actions.unisolate_host'],
@@ -312,10 +312,10 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               criteria: [
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                 'Passed host name "eval-host-isolate" to the running processes tool (the tool resolves it to an endpoint/agent ID internally)',
-                'Called the endpoint-response-actions.running_processes inline tool directly, letting Agent Builder present the confirmation card',
+                'Called the endpoint-response-actions.get_running_processes inline tool directly, and the output lists that call under pending_confirmations',
                 'Did not claim the process list was already retrieved before the analyst confirmed, and did not invent any process names',
               ],
-              tool_sequence: ['endpoint-response-actions.running_processes'],
+              tool_sequence: ['endpoint-response-actions.get_running_processes'],
             },
             metadata: { golden_id: 'era-007-running-processes', row_type: 'happy' },
           },
@@ -343,11 +343,11 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               criteria: [
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                 'Passed host name "eval-host-isolate" to the scan tool (the tool resolves it to an endpoint/agent ID internally)',
-                'Called the endpoint-response-actions.scan inline tool',
+                'Called the endpoint-response-actions.scan_host inline tool',
                 'Surfaced the Agent Builder confirmation card for the scan write action (the skill instructs the agent to call write tools directly and let Agent Builder present the confirmation, not ask in chat)',
                 'Did not claim the scan had already run or found anything before the analyst confirmed (any statement about the outcome must say it is awaiting confirmation)',
               ],
-              tool_sequence: ['endpoint-response-actions.scan'],
+              tool_sequence: ['endpoint-response-actions.scan_host'],
             },
             metadata: { golden_id: 'era-008-scan-path', row_type: 'happy' },
           },
@@ -378,8 +378,9 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               output: {
                 criteria: [
                   `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                  'Used only read-only tools (get_endpoint_status, list_endpoints, running_processes as read context) to answer',
-                  'Did not call isolate_host, unisolate_host, or scan without the user explicitly asking for that action',
+                  'Used only read-only tools (get_endpoint_status, list_endpoints) to answer',
+                  'Did not call get_running_processes: it enqueues a real action on the host, so it needs an explicit request',
+                  'Did not call isolate_host, unisolate_host, scan_host, or get_running_processes without the user explicitly asking for that action',
                   'If it recommended isolation, phrased it as a recommendation for the analyst to confirm, not as an action already taken',
                 ],
               },
@@ -389,7 +390,8 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 forbidden_tools: [
                   'endpoint-response-actions.isolate_host',
                   'endpoint-response-actions.unisolate_host',
-                  'endpoint-response-actions.scan',
+                  'endpoint-response-actions.scan_host',
+                  'endpoint-response-actions.get_running_processes',
                 ],
               },
             },

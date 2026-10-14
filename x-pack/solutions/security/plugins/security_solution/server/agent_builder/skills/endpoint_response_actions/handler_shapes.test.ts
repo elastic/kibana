@@ -59,7 +59,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const result = await (isolateTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host', comment: 'test' },
-        { logger: { error: jest.fn() } }
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn() } }
       );
 
       expect(assertStandardReturn(result)).toHaveLength(1);
@@ -77,7 +77,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const result = await (unisolateTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host', comment: 'test' },
-        { logger: { error: jest.fn() } }
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn() } }
       );
 
       expect(assertStandardReturn(result)).toHaveLength(1);
@@ -95,7 +95,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const result = await (statusTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host' },
-        { logger: { error: jest.fn(), warn: jest.fn() } }
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn(), warn: jest.fn() } }
       );
 
       expect(assertStandardReturn(result)).toHaveLength(1);
@@ -257,7 +257,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       for (const tool of hostLookupTools) {
         const errorResult = await (tool as unknown as { handler: Function }).handler(
           { hostName: 'any-host' },
-          { logger: { error: jest.fn(), warn: jest.fn() } }
+          { callContext: { callSource: 'agent' }, logger: { error: jest.fn(), warn: jest.fn() } }
         );
 
         const errorEntry = assertStandardReturn(errorResult)[0];
@@ -291,7 +291,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       // The service is rebuilt in beforeEach, so the spy needs no manual restore.
       const result = await (listTool as unknown as { handler: Function }).handler(
         {},
-        { logger: { error: jest.fn() } }
+        { callContext: { callSource: 'agent' }, logger: { error: jest.fn() } }
       );
       const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
       // list_endpoints has no single-host lookup to fail — confirm it returns the

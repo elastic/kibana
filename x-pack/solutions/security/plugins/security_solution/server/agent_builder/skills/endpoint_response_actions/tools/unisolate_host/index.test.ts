@@ -39,6 +39,7 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
+  callContext: { callSource: 'agent' },
   logger: mockLogger,
   runContext: {
     runId: 'run-test-1',
@@ -92,12 +93,21 @@ describe('unisolateHostTool', () => {
     it('gates every dispatch with an always-on confirmation prompt', async () => {
       const tool = unisolateHostTool(mockEndpointAppContextService);
       expect(tool.confirmation?.askUser).toBe('always');
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'agent-123', status: 'online', packages: ['endpoint'] }],
+          }),
+        },
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       const prompt = await tool.confirmation?.getConfirmation?.({
         toolParams: { hostName: 'my-host' },
         context: mockContext,
       });
       expect(prompt?.color).toBe('warning');
       expect(prompt?.message).toContain('my-host');
+      expect(prompt?.message).toContain('agent-123');
     });
   });
 
@@ -330,57 +340,39 @@ describe('unisolateHostTool', () => {
       );
     });
 
-    it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {
-      const mockAgentService = {
-        listAgents: jest.fn().mockResolvedValue({
-          agents: [{ id: 'agent-cs-1', packages: ['crowdstrike'] }],
-        }),
-      };
+    it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+      'does not dispatch to a non-Elastic-Defend %s agent: its Fleet id is the collector, not the EDR agent id',
+      async (integration) => {
+        const mockAgentService = {
+          listAgents: jest
+            .fn()
+            .mockResolvedValue({ agents: [{ id: 'agent-edr-1', packages: [integration] }] }),
+        };
+        const mockResponseActionsClient = { release: jest.fn() };
+        mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+        mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+          () => mockResponseActionsClient
+        ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
-      const mockResponseActionsClient = {
-        isolate: jest.fn().mockReturnValue(Promise.resolve()),
-        release: jest.fn().mockResolvedValue({
-          id: 'action-cs-1',
-          status: 'accepted',
-          wasSuccessful: true,
-          hosts: { 'agent-cs-1': { name: 'cs-host' } },
-        }),
-        suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
-        upload: jest.fn().mockReturnValue(Promise.resolve()),
-        getFile: jest.fn().mockReturnValue(Promise.resolve()),
-        execute: jest.fn().mockReturnValue(Promise.resolve()),
-        killProcess: jest.fn().mockReturnValue(Promise.resolve()),
-        runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
-        processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
-        getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
-        getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
-        scan: jest.fn().mockReturnValue(Promise.resolve()),
-        runscript: jest.fn().mockReturnValue(Promise.resolve()),
-        getCustomScripts: jest.fn().mockReturnValue(Promise.resolve()),
-        cancel: jest.fn().mockReturnValue(Promise.resolve()),
-        memoryDump: jest.fn().mockReturnValue(Promise.resolve()),
-      };
+        const edrTool = unisolateHostTool(mockEndpointAppContextService);
+        const result = assertStandardReturn(
+          await edrTool.handler({ hostName: 'edr-host' }, mockContext)
+        );
 
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentService,
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
-        () => mockResponseActionsClient
-      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-      mockActionCompletion({
-        id: 'action-cs-1',
-        status: 'accepted',
-        wasSuccessful: true,
-        hosts: { 'agent-cs-1': { name: 'cs-host' } },
-      });
-
-      await tool.handler({ hostName: 'cs-host' }, mockContext);
-
-      expect(mockEndpointAppContextService.getInternalResponseActionsClient).toHaveBeenCalledWith(
-        expect.objectContaining({ agentType: 'crowdstrike', isAutomated: false })
-      );
-    });
+        expect(result[0].data).toMatchObject({
+          found: false,
+          reason: 'endpoint_not_found',
+          hostName: 'edr-host',
+        });
+        expect(mockResponseActionsClient.release).not.toHaveBeenCalled();
+        expect(
+          mockEndpointAppContextService.getInternalResponseActionsClient
+        ).not.toHaveBeenCalled();
+      }
+    );
 
     it('returns an error result when the agent service throws', async () => {
       const mockAgentService = {

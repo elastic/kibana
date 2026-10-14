@@ -40,6 +40,7 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
+  callContext: { callSource: 'agent' },
   logger: mockLogger,
   request: httpServerMock.createKibanaRequest(),
   runContext: {
@@ -78,19 +79,28 @@ describe('scanHostTool', () => {
     const tool = scanHostTool(service);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.id).toBe(SCAN_TOOL_ID);
-    expect(SCAN_TOOL_ID).toBe('endpoint-response-actions.scan');
+    expect(SCAN_TOOL_ID).toBe('endpoint-response-actions.scan_host');
     expect(tool.description).toContain('confirmation');
   });
 
   it('gates every dispatch with an always-on confirmation prompt naming host and path', async () => {
     const tool = scanHostTool(service);
     expect(tool.confirmation?.askUser).toBe('always');
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123', status: 'online', packages: ['endpoint'] }],
+        }),
+      },
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
     const prompt = await tool.confirmation?.getConfirmation?.({
       toolParams: { hostName: 'my-host', path: '/tmp' },
       context: mockContext,
     });
     expect(prompt?.color).toBe('warning');
     expect(prompt?.message).toContain('my-host');
+    expect(prompt?.message).toContain('agent-123');
     expect(prompt?.message).toContain('/tmp');
   });
 
@@ -219,41 +229,37 @@ describe('scanHostTool', () => {
     expect(data.path).toBe('/home/user/suspicious');
   });
 
-  it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {
-    const mockAgentService = {
-      listAgents: jest.fn().mockResolvedValue({
-        agents: [{ id: 'agent-mde-1', packages: ['microsoft_defender_endpoint'] }],
-      }),
-    };
-    const mockResponseActionsClient = {
-      scan: jest.fn().mockResolvedValue({
-        id: 'action-scan-mde',
-        status: 'pending',
-        wasSuccessful: undefined,
-        hosts: { 'agent-mde-1': { name: 'mde-host' } },
-      }),
-    };
-    service.getInternalFleetServices = jest.fn(() => ({
-      agent: mockAgentService,
-      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-    service.getInternalResponseActionsClient = jest.fn(
-      () => mockResponseActionsClient
-    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-    mockActionCompletion({
-      id: 'action-scan-mde',
-      status: 'successful',
-      wasSuccessful: true,
-      hosts: { 'agent-mde-1': { name: 'mde-host' } },
-    });
+  it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+    'does not dispatch to a non-Elastic-Defend %s agent: its Fleet id is the collector, not the EDR agent id',
+    async (integration) => {
+      const mockAgentService = {
+        listAgents: jest
+          .fn()
+          .mockResolvedValue({ agents: [{ id: 'agent-edr-1', packages: [integration] }] }),
+      };
+      const mockResponseActionsClient = { scan: jest.fn() };
+      service.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      service.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
-    const tool = scanHostTool(service);
-    await tool.handler({ hostName: 'mde-host', path: '/tmp' }, mockContext);
+      const tool = scanHostTool(service);
+      const result = assertStandardReturn(
+        await tool.handler({ hostName: 'edr-host', path: '/tmp' }, mockContext)
+      );
 
-    expect(service.getInternalResponseActionsClient).toHaveBeenCalledWith(
-      expect.objectContaining({ agentType: 'microsoft_defender_endpoint', isAutomated: false })
-    );
-  });
+      expect(result[0].data).toMatchObject({
+        found: false,
+        reason: 'endpoint_not_found',
+        hostName: 'edr-host',
+      });
+      expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
+      expect(service.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    }
+  );
 
   it('returns an error result when the response actions client throws', async () => {
     const mockAgentService = {

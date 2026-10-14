@@ -47,6 +47,7 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
+  callContext: { callSource: 'agent' },
   logger: mockLogger,
   request: httpServerMock.createKibanaRequest(),
   runContext: {
@@ -85,7 +86,7 @@ describe('getRunningProcessesTool', () => {
     const tool = getRunningProcessesTool(service);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.id).toBe(RUNNING_PROCESSES_TOOL_ID);
-    expect(RUNNING_PROCESSES_TOOL_ID).toBe('endpoint-response-actions.running_processes');
+    expect(RUNNING_PROCESSES_TOOL_ID).toBe('endpoint-response-actions.get_running_processes');
     expect(tool.description).toContain('running processes');
   });
 
@@ -285,43 +286,37 @@ describe('getRunningProcessesTool', () => {
     expect(RUNNING_PROCESSES_MAX_RESULT_TOKENS * 4).toBeGreaterThan(MAX_OUTPUT_TOTAL_CHARS);
   });
 
-  it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {
-    const mockAgentService = {
-      listAgents: jest.fn().mockResolvedValue({
-        agents: [{ id: 'agent-s1-1', packages: ['sentinel_one'] }],
-      }),
-    };
-    const mockResponseActionsClient = {
-      runningProcesses: jest.fn().mockResolvedValue({
-        id: 'action-999',
-        status: 'pending',
-        wasSuccessful: undefined,
-        hosts: { 'agent-s1-1': { name: 's1-host' } },
-        outputs: {},
-      }),
-    };
-    service.getInternalFleetServices = jest.fn(() => ({
-      agent: mockAgentService,
-      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-    service.getInternalResponseActionsClient = jest.fn(
-      () => mockResponseActionsClient
-    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-    mockActionCompletion({
-      id: 'action-999',
-      status: 'successful',
-      wasSuccessful: true,
-      hosts: { 'agent-s1-1': { name: 's1-host' } },
-      outputs: {},
-    });
+  it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+    'does not dispatch to a non-Elastic-Defend %s agent: its Fleet id is the collector, not the EDR agent id',
+    async (integration) => {
+      const mockAgentService = {
+        listAgents: jest
+          .fn()
+          .mockResolvedValue({ agents: [{ id: 'agent-edr-1', packages: [integration] }] }),
+      };
+      const mockResponseActionsClient = { runningProcesses: jest.fn() };
+      service.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      service.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
-    const tool = getRunningProcessesTool(service);
-    await tool.handler({ hostName: 's1-host' }, mockContext);
+      const tool = getRunningProcessesTool(service);
+      const result = assertStandardReturn(
+        await tool.handler({ hostName: 'edr-host' }, mockContext)
+      );
 
-    expect(service.getInternalResponseActionsClient).toHaveBeenCalledWith(
-      expect.objectContaining({ agentType: 'sentinel_one', isAutomated: false })
-    );
-  });
+      expect(result[0].data).toMatchObject({
+        found: false,
+        reason: 'endpoint_not_found',
+        hostName: 'edr-host',
+      });
+      expect(mockResponseActionsClient.runningProcesses).not.toHaveBeenCalled();
+      expect(service.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    }
+  );
 
   it('returns an error result when the agent service throws', async () => {
     const mockAgentService = {

@@ -87,7 +87,7 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(reference).toMatch(/isolate_host.*directly/);
       // running processes enqueues a real action, so it is platform-confirmed too
       expect(skill.content).toContain(
-        'running processes → `running_processes` (write, platform-confirmed)'
+        'running processes → `get_running_processes` (write, platform-confirmed)'
       );
       expect(skill.content).toMatch(/all four pause for\s+the analyst's confirmation/);
     });

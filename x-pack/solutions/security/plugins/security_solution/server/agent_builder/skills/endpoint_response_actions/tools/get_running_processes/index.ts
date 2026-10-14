@@ -14,7 +14,6 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { RUNNING_PROCESSES_TOOL_ID } from '../..';
 import {
   buildResponseActionComment,
-  insufficientPrivilegesResult,
   MAX_ACTION_COMMENT_LENGTH,
   responseActionErrorResult,
   RUNNING_PROCESSES_MAX_RESULT_TOKENS,
@@ -22,13 +21,8 @@ import {
   summarizeActionOutputs,
   waitForActionCompletion,
 } from '../types';
-import { createEndpointLookupService } from '../services/endpoint_lookup';
-import {
-  describeTarget,
-  hostTargetFields,
-  requireHostTarget,
-  resolveDispatchTarget,
-} from '../services/resolve_target';
+import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
+import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
 
 const getRunningProcessesSchema = z
   .object({
@@ -60,51 +54,45 @@ export const getRunningProcessesTool = (
     // the analyst for confirmation before every dispatch.
     confirmation: {
       askUser: 'always',
-      getConfirmation: ({ toolParams }) => ({
-        title: 'List running processes?',
-        message: `This will request the list of running processes from **${describeTarget(
-          toolParams
-        )}**.`,
-        color: 'primary',
-        confirm_text: 'List processes',
-      }),
+      getConfirmation: async ({ toolParams, context }) =>
+        buildDispatchConfirmation(
+          {
+            action: 'running-processes',
+            params: {
+              hostName: toolParams.hostName as string | undefined,
+              agentId: toolParams.agentId as string | undefined,
+            },
+            context,
+            endpointAppContextService,
+            requiredPrivilege: 'canGetRunningProcesses',
+          },
+          {
+            title: 'List running processes?',
+            color: 'primary',
+            confirmText: 'List processes',
+            comment: toolParams.comment as string | undefined,
+            describe: (host) => `This will request the list of running processes from ${host}.`,
+          }
+        ),
     },
-    handler: async (params, { logger, request, runContext, spaceId }) => {
+    handler: async (params, context) => {
+      const { logger, request, runContext, spaceId } = context;
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
         const comment = params.comment as string | undefined;
 
-        // This enqueues a real
-        // `running-processes` response action on the host, and the HTTP route
-        // gates it behind `withEndpointAuthz({ all: ['canGetRunningProcesses'] })`.
-        // The internal client skips that check, so assert the caller's privilege
-        // here to keep chat access from bypassing endpoint RBAC.
-        const authz = await endpointAppContextService.getEndpointAuthz(request);
-        if (!authz.canGetRunningProcesses) {
-          return insufficientPrivilegesResult('canGetRunningProcesses');
-        }
-
-        // Resolve hostname -> endpoint id + EDR vendor. The service handles
-        // hostname escaping, space validation, and multi-vendor `agentType`
-        // resolution in one place so every host-lookup tool behaves the same.
-        const lookup = createEndpointLookupService(endpointAppContextService, spaceId);
-        const target = await resolveDispatchTarget(lookup, 'running-processes', {
-          hostName: requestedHostName,
-          agentId: requestedAgentId,
+        const prepared = await prepareDispatch({
+          action: 'running-processes',
+          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          context,
+          endpointAppContextService,
+          requiredPrivilege: 'canGetRunningProcesses',
         });
-
-        if (target.kind === 'respond') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.other,
-                data: target.data,
-              },
-            ],
-          };
+        if (prepared.kind === 'result') {
+          return prepared.result;
         }
+        const { target } = prepared;
 
         const hostName = target.hostLabel;
         const { agentId, agentType } = target.endpoint;

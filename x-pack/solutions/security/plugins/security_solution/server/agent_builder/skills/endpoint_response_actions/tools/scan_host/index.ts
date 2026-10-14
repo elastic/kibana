@@ -14,19 +14,13 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { SCAN_TOOL_ID } from '../..';
 import {
   buildResponseActionComment,
-  insufficientPrivilegesResult,
   MAX_ACTION_COMMENT_LENGTH,
   MAX_FILE_PATH_LENGTH,
   responseActionErrorResult,
   waitForActionCompletion,
 } from '../types';
-import { createEndpointLookupService } from '../services/endpoint_lookup';
-import {
-  describeTarget,
-  hostTargetFields,
-  requireHostTarget,
-  resolveDispatchTarget,
-} from '../services/resolve_target';
+import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
+import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
 
 const scanHostSchema = z
   .object({
@@ -64,52 +58,49 @@ export const scanHostTool = (
     // the analyst for confirmation before every dispatch.
     confirmation: {
       askUser: 'always',
-      getConfirmation: ({ toolParams }) => ({
-        title: 'Run malware scan?',
-        message: `This will scan \`${
-          (toolParams.path as string) ?? 'the specified path'
-        }\` on **${describeTarget(toolParams)}** for malware.`,
-        color: 'warning',
-        confirm_text: 'Run scan',
-      }),
+      getConfirmation: async ({ toolParams, context }) =>
+        buildDispatchConfirmation(
+          {
+            action: 'scan',
+            params: {
+              hostName: toolParams.hostName as string | undefined,
+              agentId: toolParams.agentId as string | undefined,
+            },
+            context,
+            endpointAppContextService,
+            requiredPrivilege: 'canWriteScanOperations',
+          },
+          {
+            title: 'Run malware scan?',
+            color: 'warning',
+            confirmText: 'Run scan',
+            comment: toolParams.comment as string | undefined,
+            describe: (host) =>
+              `This will scan \`${
+                (toolParams.path as string) ?? 'the specified path'
+              }\` on ${host} for malware.`,
+          }
+        ),
     },
-    handler: async (params, { logger, request, runContext, spaceId }) => {
+    handler: async (params, context) => {
+      const { logger, request, runContext, spaceId } = context;
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
         const path = params.path as string;
         const comment = params.comment as string | undefined;
 
-        // The internal response-actions client runs as an automated, unsecured
-        // client and skips the per-user privilege checks the HTTP route enforces
-        // via `withEndpointAuthz({ all: ['canWriteScanOperations'] })`. Assert
-        // the caller's privilege here so reaching the skill via chat cannot
-        // bypass endpoint RBAC.
-        const authz = await endpointAppContextService.getEndpointAuthz(request);
-        if (!authz.canWriteScanOperations) {
-          return insufficientPrivilegesResult('canWriteScanOperations');
-        }
-
-        // Resolve hostname -> endpoint id + EDR vendor. The service handles
-        // hostname escaping, space validation, and multi-vendor `agentType`
-        // resolution in one place so every host-lookup tool behaves the same.
-        const lookup = createEndpointLookupService(endpointAppContextService, spaceId);
-        const target = await resolveDispatchTarget(lookup, 'scan', {
-          hostName: requestedHostName,
-          agentId: requestedAgentId,
+        const prepared = await prepareDispatch({
+          action: 'scan',
+          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          context,
+          endpointAppContextService,
+          requiredPrivilege: 'canWriteScanOperations',
         });
-
-        if (target.kind === 'respond') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.other,
-                data: target.data,
-              },
-            ],
-          };
+        if (prepared.kind === 'result') {
+          return prepared.result;
         }
+        const { target } = prepared;
 
         const hostName = target.hostLabel;
         const { agentId, agentType } = target.endpoint;

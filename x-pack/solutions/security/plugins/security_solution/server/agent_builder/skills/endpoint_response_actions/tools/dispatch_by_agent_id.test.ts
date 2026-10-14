@@ -15,6 +15,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../endpoint/errors';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { createMockEndpointAppContext } from '../../../../endpoint/mocks';
 import { getActionDetailsById } from '../../../../endpoint/services/actions';
 import { getRunningProcessesTool } from './get_running_processes';
@@ -31,6 +32,7 @@ const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
+  callContext: { callSource: 'agent' },
   logger: mockLogger,
   request: httpServerMock.createKibanaRequest(),
   runContext: {
@@ -52,11 +54,17 @@ interface Case {
   action: string;
   build: typeof isolateHostTool;
   extraParams: Record<string, unknown>;
+  privilege:
+    | 'canIsolateHost'
+    | 'canUnIsolateHost'
+    | 'canWriteScanOperations'
+    | 'canGetRunningProcesses';
 }
 
 const CASES: Case[] = [
   {
     label: 'isolate_host',
+    privilege: 'canIsolateHost',
     clientMethod: 'isolate',
     action: 'isolate',
     build: isolateHostTool,
@@ -64,6 +72,7 @@ const CASES: Case[] = [
   },
   {
     label: 'unisolate_host',
+    privilege: 'canUnIsolateHost',
     clientMethod: 'release',
     action: 'unisolate',
     build: unisolateHostTool,
@@ -71,6 +80,7 @@ const CASES: Case[] = [
   },
   {
     label: 'scan_host',
+    privilege: 'canWriteScanOperations',
     clientMethod: 'scan',
     action: 'scan',
     build: scanHostTool as unknown as typeof isolateHostTool,
@@ -78,6 +88,7 @@ const CASES: Case[] = [
   },
   {
     label: 'running_processes',
+    privilege: 'canGetRunningProcesses',
     clientMethod: 'runningProcesses',
     action: 'running-processes',
     build: getRunningProcessesTool,
@@ -87,7 +98,7 @@ const CASES: Case[] = [
 
 describe.each(CASES)(
   '$label: dispatch by agent ID',
-  ({ clientMethod, action, build, extraParams }) => {
+  ({ clientMethod, action, build, extraParams, privilege }) => {
     jest.setTimeout(20000);
 
     let service: EndpointAppContextService;
@@ -204,7 +215,7 @@ describe.each(CASES)(
       expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
-    it('prefers agentId over a conflicting hostName instead of resolving the name', async () => {
+    it('uses agentId without resolving the hostname when both agree', async () => {
       const tool = build(service);
 
       await tool.handler({ hostName: 'dup-host', agentId: 'agent-b', ...extraParams }, mockContext);
@@ -213,6 +224,122 @@ describe.each(CASES)(
       expect(client[clientMethod].mock.calls[0][0]).toEqual(
         expect.objectContaining({ endpoint_ids: ['agent-b'] })
       );
+    });
+
+    it('refuses a hostName that does not match the Fleet hostname of the agentId, instead of acting on the agent', async () => {
+      const tool = build(service);
+
+      const out = results(
+        await tool.handler({ hostName: 'web-01', agentId: 'agent-b', ...extraParams }, mockContext)
+      );
+
+      const data = out[0].data as Record<string, unknown>;
+      expect(out[0].type).toBe('error');
+      expect(data.error).toBe('invalid_argument');
+      expect(String(data.message)).toContain("'web-01'");
+      expect(String(data.message)).toContain("'dup-host'");
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('renders the confirmation card from the resolved Fleet host, not the hostName the model supplied', async () => {
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'dup-host', agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('dup-host');
+      expect(card?.message).toContain('agent-b');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    it('does not present an approvable card when the hostName and agentId name different hosts', async () => {
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'web-01', agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('will be refused');
+      expect(card?.message).toContain("'web-01'");
+      expect(card?.message).toContain("'dup-host'");
+      expect(card?.message).not.toContain('agent ID agent-b)**');
+    });
+
+    it('tells the analyst up front when the agent cannot be resolved, instead of asking them to confirm a no-op', async () => {
+      getAgent.mockResolvedValue({ id: 'agent-b', packages: ['system'] });
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('will be refused');
+      expect(card?.message).toContain('agent-b');
+    });
+
+    it('fails before the prompt when the analyst lacks the endpoint privilege', async () => {
+      service.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ [privilege]: false }));
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('will be refused');
+      expect(card?.message).toContain(privilege);
+    });
+
+    it('shows the model-written comment on the card, since it is logged under the analyst', async () => {
+      const tool = build(service);
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { agentId: 'agent-b', comment: 'Per ticket SEC-42', ...extraParams },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('Per ticket SEC-42');
+    });
+
+    it.each(['user', 'mcp', 'unknown'] as const)(
+      'refuses a %s call source without dispatching, so the confirmation gate cannot be bypassed',
+      async (callSource) => {
+        const tool = build(service);
+
+        const out = results(
+          await tool.handler({ agentId: 'agent-b', ...extraParams }, {
+            ...mockContext,
+            callContext: { callSource },
+          } as unknown as ToolHandlerContext)
+        );
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('invalid_argument');
+        expect(getAgent).not.toHaveBeenCalled();
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
+    it('scopes both lookup paths to Elastic Defend agents', async () => {
+      getAgent.mockResolvedValue({
+        id: 'agent-s1',
+        packages: ['sentinel_one'],
+        local_metadata: { host: { name: 'dup-host' } },
+      });
+      const tool = build(service);
+
+      const byId = results(
+        await tool.handler({ agentId: 'agent-s1', ...extraParams }, mockContext)
+      );
+
+      expect((byId[0].data as Record<string, unknown>).reason).toBe('endpoint_not_found');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
     });
 
     it('keeps the dispatched action ID when every completion read fails', async () => {
