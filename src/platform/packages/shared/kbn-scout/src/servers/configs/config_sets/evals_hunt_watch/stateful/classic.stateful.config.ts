@@ -9,25 +9,26 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
-import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Config set for the hunt-watch eval suite. The suite drives the managed Hunt Watch Worker
- * (`system-security-hunt-continuous-threat-hunt`), so AlertZero, Agentic Investigations, and the
- * Workflows UI/agent settings must all be enabled. `xpack.alertzero.enabled` defaults to `false`
- * so it is set explicitly below.
+ * (`system-security-hunt-continuous-threat-hunt`), which needs four things that are off by
+ * default.
  *
- * `agenticInvestigations` and `proposals` are both **required** plugins of alertzero and both
- * default to `enabled: false`. Without either flag Kibana cascade-disables alertzero entirely, so
- * the managed hunt workflows are never installed. `inbox` is required for the HITL approval spec
- * to respond to the proposal gate.
+ * `xpack.alertzero.enabled` defaults to `false`. `agenticInvestigations` and `proposals` are
+ * optional dependencies of alertzero that also default to `false`, and
+ * `xpack.security.serviceAccounts.enabled` defaults to `false`. AlertZero checks all three at
+ * setup and start (`alertzero/server/plugin.ts`): without any one of them the Worker services are
+ * never created, the managed hunt workflows are never installed, and every `/internal/alertzero/*`
+ * route (the Worker list/enable route this suite's preflight calls) answers 503 "AlertZero
+ * dependencies are unavailable".
  *
- * `serviceAccountsServerArgs` (`xpack.security.serviceAccounts.enabled=true`) is required because
- * every `/internal/alertzero/*` route (the Worker list/enable route this suite's preflight calls)
- * is gated on `hasRequiredDependencies`, which includes `this.serviceAccountsEnabled` in
- * `alertzero/server/plugin.ts`. That is false by default, so every AlertZero route 503s
- * ("AlertZero dependencies are unavailable") without this flag. Detection Watch's config set
- * omits it because that suite never calls an `/internal/alertzero/*` route directly.
+ * Only the service accounts flag is set here, not `serviceAccountsServerArgs`: that helper also
+ * loads the security API integration test plugin, which this suite never calls.
+ *
+ * Nothing else is needed. `workflows:ui:enabled` already defaults to `true`, and `inbox` is only
+ * an optional UI provider for workflows_management; the Proposal approve and dismiss routes the
+ * approval spec calls live in the proposals plugin.
  *
  * Per-space `securitySolution:enableAlertZero` is set by this suite's preflight fixture, not by
  * server config, because it must be set per eval space (default, hunt-a, hunt-b, hunt-blocked)
@@ -42,10 +43,7 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
-      '--xpack.inbox.enabled=true',
-      '--uiSettings.overrides.workflows:ui:enabled=true',
-      '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-      ...serviceAccountsServerArgs,
+      '--xpack.security.serviceAccounts.enabled=true',
     ],
   },
 };
