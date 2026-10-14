@@ -9,6 +9,7 @@ import {
   getEuidNamespaceSourceFields,
   getEuidSourceFields,
 } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
@@ -42,9 +43,10 @@ export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
 const IDENTITY_KEEP_FIELDS = [
   ...new Set([
     ...ALLOWED_ENTITY_TYPES.flatMap((t) => {
-      const { exactMatchFields, prefixMatchFields } = getEuidNamespaceSourceFields(t);
+      const definition = getBuiltInEntityDefinition(t);
+      const { exactMatchFields, prefixMatchFields } = getEuidNamespaceSourceFields(definition);
       return [
-        ...getEuidSourceFields(t).identitySourceFields,
+        ...getEuidSourceFields(definition).identitySourceFields,
         ...exactMatchFields,
         ...prefixMatchFields,
       ];

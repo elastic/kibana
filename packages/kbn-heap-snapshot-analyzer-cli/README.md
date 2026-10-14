@@ -177,7 +177,7 @@ git ls-remote --tags origin 'deploy@*^{}' |
 Set the solution mode separately from the image:
 
 ```sh
-export SOLUTION=oblt # oblt | security | es | workplaceai | vectordb
+export SOLUTION=oblt # oblt | security | es | vectordb
 export NAME="kibana-heap-$SOLUTION"
 ```
 
