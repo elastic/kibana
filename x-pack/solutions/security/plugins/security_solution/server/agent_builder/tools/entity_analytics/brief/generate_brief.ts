@@ -5,14 +5,27 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import { buildRenderAttachmentTag } from '../attachment_utils';
 import { buildListEntityAttachmentId, ensureEntityAttachment } from '../entity_attachment_utils';
-import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './brief_types';
-import { buildFacts } from './build_facts';
+import { resolveSimpleRiskScoreHistoryInterval } from '../risk_score_history/resolve_risk_score_history_interval';
+import {
+  buildRiskScoreHistoryAttachmentId,
+  ensureRiskScoreHistoryAttachment,
+} from '../risk_score_history/risk_score_history_attachment_utils';
+import type {
+  BriefCandidate,
+  GenerateBriefParams,
+  GenerateBriefResult,
+  RiskChangeEntity,
+} from './brief_types';
+import { buildFacts, getCitedRiskChanges } from './build_facts';
 import { composeBrief } from './compose_brief';
-import { describeCoverage } from './describe_scope';
+import { describeCoverage, getPeriodStart } from './describe_scope';
+import { fetchRiskAtStart } from './fetch_risk_at_start';
 import { fetchCandidateEntities } from './fetch_candidate_entities';
 import { renderBrief } from './render_brief';
 import { verifyBrief } from './verify_brief';
@@ -24,20 +37,29 @@ export const generateBrief = async ({
   esClient,
   inferenceClient,
   attachments,
+  riskScoreDataClient,
   abortSignal,
   logger,
 }: GenerateBriefParams): Promise<GenerateBriefResult> => {
   const started = Date.now();
   const entities = await fetchCandidateEntities({ scope, spaceId, esClient, logger });
   const { candidates } = entities;
-  const facts = buildFacts(candidates, scope);
+  // Risk change is supporting detail: a failure leaves its facts out, and the brief says so.
+  const riskAtStart = await fetchRiskAtStart({ candidates, scope, spaceId, esClient }).catch(
+    (error) => {
+      logger.debug(`AI brief: risk change couldn't be read: ${error.message}`);
+      return undefined;
+    }
+  );
+  const riskChangeFailed = !riskAtStart;
+  const facts = buildFacts(candidates, scope, riskAtStart);
   const fetched = Date.now();
 
   if (facts.length === 0) {
     const took = Date.now() - started;
     logger.debug(`AI brief: quiet, ${entities.capturedCount} captured, took ${took}ms`);
     return {
-      brief: renderBrief({ scope, spaceId, entities }),
+      brief: renderBrief({ scope, spaceId, entities, riskChangeFailed }),
       outcome: 'quiet',
       stats: {
         candidateCount: 0,
@@ -65,6 +87,15 @@ export const generateBrief = async ({
     ({ entityId }) => candidates.find(({ id }) => id === entityId) ?? []
   );
   const entityTableTag = await createEntityTable(priorityCandidates, attachments, logger);
+  const riskChartTags = riskScoreDataClient
+    ? await createRiskCharts({
+        cited: getCitedRiskChanges(verified.priorities, facts),
+        scope,
+        riskScoreDataClient,
+        attachments,
+        logger,
+      })
+    : new Map<string, string>();
   const took = Date.now() - started;
   logger.debug(
     `AI brief: fetch ${fetched - started}ms, compose ${composed - fetched}ms, total ${took}ms; ` +
@@ -72,7 +103,15 @@ export const generateBrief = async ({
       `${verified.droppedPriorityCount} dropped, repaired ${repaired}`
   );
   return {
-    brief: renderBrief({ scope, spaceId, entities, verified, entityTableTag }),
+    brief: renderBrief({
+      scope,
+      spaceId,
+      entities,
+      verified,
+      entityTableTag,
+      riskChartTags,
+      riskChangeFailed,
+    }),
     outcome: verified.priorities.length > 0 ? 'brief' : 'no_priorities',
     stats: {
       candidateCount: candidates.length,
@@ -107,4 +146,63 @@ const createEntityTable = async (
     logger,
   });
   return attachment ? buildRenderAttachmentTag(attachment) : undefined;
+};
+
+/** The period's risk-history chart for each priority citing a risk change, as render tags by entity id. */
+const createRiskCharts = async ({
+  cited,
+  scope,
+  riskScoreDataClient,
+  attachments,
+  logger,
+}: Pick<GenerateBriefParams, 'scope' | 'attachments' | 'logger'> & {
+  cited: ReturnType<typeof getCitedRiskChanges>;
+  riskScoreDataClient: RiskScoreDataClient;
+}): Promise<Map<string, string>> => {
+  const from = getPeriodStart(scope).toISOString();
+  const to = new Date(scope.capturedAt).toISOString();
+  const interval = resolveSimpleRiskScoreHistoryInterval({ min: moment(from), max: moment(to) });
+  const createChart = async ({ id, name, type }: RiskChangeEntity): Promise<string | undefined> => {
+    const entries = await riskScoreDataClient.getRiskScoreHistory({
+      entityType: type,
+      entityId: id,
+      range: { gte: from, lte: to },
+      scoreType: 'base',
+      interval,
+    });
+    if (entries.length === 0) {
+      return undefined;
+    }
+    const label = `${type}: ${name}`;
+    const attachment = await ensureRiskScoreHistoryAttachment({
+      attachments,
+      id: buildRiskScoreHistoryAttachmentId(type, id, 'base'),
+      data: {
+        attachmentLabel: label,
+        identifierType: type,
+        identifier: name,
+        entityStoreId: id,
+        from,
+        to,
+        bucketInterval: `${interval.value}${interval.unit}`,
+        scoreType: 'base',
+        entries,
+      },
+      description: label,
+      logger,
+    });
+    return attachment ? buildRenderAttachmentTag(attachment) : undefined;
+  };
+  const tags = new Map<string, string>();
+  for (const [entityId, riskChangeEntity] of cited) {
+    // A chart is supporting detail: a failure leaves the priority without one.
+    const tag = await createChart(riskChangeEntity).catch((error) => {
+      logger.debug(`AI brief: no risk-history chart for ${entityId}: ${error.message}`);
+      return undefined;
+    });
+    if (tag) {
+      tags.set(entityId, tag);
+    }
+  }
+  return tags;
 };

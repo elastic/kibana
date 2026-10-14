@@ -22,6 +22,7 @@ import {
   ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE,
   EntityAnalyticsScope,
 } from '../../../../common/entity_analytics/ai_brief/scope';
+import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { securityTool } from '../constants';
 import { generateBrief } from './brief/generate_brief';
@@ -57,7 +58,8 @@ const schema = lazySchema(() =>
 export const generateEntityAnalyticsBriefTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  kibanaVersion: string
 ): BuiltinToolDefinition<typeof schema> => ({
   id: SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID,
   type: ToolType.builtin,
@@ -83,7 +85,10 @@ export const generateEntityAnalyticsBriefTool = (
         logger,
       }),
   },
-  handler: async ({ scopeAttachmentId }, { spaceId, esClient, modelProvider, attachments }) => {
+  handler: async (
+    { scopeAttachmentId },
+    { spaceId, esClient, savedObjectsClient, modelProvider, attachments }
+  ) => {
     const telemetryTracker = createToolTelemetryTracker({
       core,
       toolId: SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID,
@@ -105,6 +110,15 @@ export const generateEntityAnalyticsBriefTool = (
         esClient: esClient.asCurrentUser,
         inferenceClient,
         attachments,
+        riskScoreDataClient: experimentalFeatures.riskScoreHistoryEnabled
+          ? new RiskScoreDataClient({
+              logger,
+              kibanaVersion,
+              esClient: esClient.asCurrentUser,
+              soClient: savedObjectsClient,
+              namespace: spaceId,
+            })
+          : undefined,
         logger,
       });
       telemetryTracker.recordResultCount(stats.priorityCount);

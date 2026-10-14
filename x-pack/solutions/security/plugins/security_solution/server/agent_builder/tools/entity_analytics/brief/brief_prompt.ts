@@ -97,6 +97,7 @@ export const SYSTEM_PROMPT = `You write a short Entity Analytics brief for a sec
 ## The brief
 - attention: one or two sentences on what needs attention in this view. Mention entities only with their token, copied exactly; the reader sees the name. Never write a display name or EUID on its own.
 - priorities: always include this field. At most ${MAX_PRIORITIES} entities, most important first. An entity in several tiles, with high criticality, privilege or high risk usually deserves a priority. Each cites, in factIds, the ids of facts about that entity only. Use fewer than ${MAX_PRIORITIES} when the facts don't support ${MAX_PRIORITIES}; never pad.
+- A priority for an entity whose risk score went up or down cites its risk change fact.
 - Keep to the word limits in the tool schema. The whole brief is read in about a minute.
 
 ## Accuracy

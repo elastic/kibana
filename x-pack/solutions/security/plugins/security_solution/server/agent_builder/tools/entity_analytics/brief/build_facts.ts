@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { maxBy, uniqBy, upperFirst } from 'lodash';
 import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
@@ -15,7 +16,13 @@ import {
   getEntityLifecycle,
   matchesPrivilegedWatchlist,
 } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
-import type { BriefCandidate, BriefFact } from './brief_types';
+import type {
+  BriefCandidate,
+  BriefFact,
+  BriefPriority,
+  RiskAtStart,
+  RiskChangeEntity,
+} from './brief_types';
 import {
   BRIEF_PERIOD_LABELS,
   BRIEF_TILE_DEFINITIONS,
@@ -54,17 +61,80 @@ const describeFirstSeen = (firstSeen: string, periodStart: Date, period: string)
   return `First seen by the Entity Store ${date}, inside the last ${period}`;
 };
 
-/** Facts about each candidate from its tile membership and Entity Store record, numbered from 1. */
+/**
+ * The risk change of the candidate, or of the member of its resolution group that moved most, as the
+ * Risk movers tile compares it: the score at the start of the period against the record's score now.
+ */
+const describeRiskChange = (
+  candidate: BriefCandidate,
+  { aliasesById, scoresById }: RiskAtStart,
+  period: string,
+  periodStart: Date
+): Pick<BriefFact, 'text' | 'riskChangeEntity'> | undefined => {
+  const members = uniqBy(
+    [candidate.record, ...(aliasesById.get(candidate.id) ?? [])],
+    (record) => record.entity?.id
+  ).flatMap(({ entity }) => {
+    const now = readRisk(entity?.risk);
+    if (!entity?.id || !now) {
+      return [];
+    }
+    const start = scoresById.get(entity.id);
+    return [{ id: entity.id, name: entity.name ?? entity.id, now, start }];
+  });
+  const moved = maxBy(members, ({ now, start }) =>
+    start === undefined ? -1 : Math.abs(Math.round(now.score) - Math.round(start))
+  );
+  if (!moved) {
+    return undefined;
+  }
+  const { id, name, now, start } = moved;
+  const subject = id === candidate.id ? '' : `Resolution group member ${JSON.stringify(name)}: `;
+  return {
+    text: upperFirst(`${subject}${describeScoreChange(start, now.score, period, periodStart)}`),
+    riskChangeEntity: { id, name, type: candidate.type },
+  };
+};
+
+const describeScoreChange = (
+  start: number | undefined,
+  now: number,
+  period: string,
+  periodStart: Date
+): string => {
+  const nowScore = Math.round(now);
+  if (start === undefined) {
+    return `no risk score at the start of the last ${period}, ${nowScore} now`;
+  }
+  const startScore = Math.round(start);
+  const change = nowScore - startScore;
+  const date = periodStart.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  });
+  const prefix = `risk score ${startScore} at the start of the last ${period} (${date}), ${nowScore} now`;
+  if (change === 0) {
+    return `${prefix}, unchanged`;
+  }
+  return `${prefix}, ${change > 0 ? 'up' : 'down'} ${Math.abs(change)} points`;
+};
+
+/**
+ * Facts about each candidate from its tile membership and Entity Store record, numbered from 1. Without
+ * `riskAtStart`, there are no risk change facts.
+ */
 export const buildFacts = (
   candidates: BriefCandidate[],
-  scope: EntityAnalyticsScope
+  scope: EntityAnalyticsScope,
+  riskAtStart?: RiskAtStart
 ): BriefFact[] => {
   const period = BRIEF_PERIOD_LABELS[scope.period];
   const periodStart = getPeriodStart(scope);
   const facts: BriefFact[] = [];
   for (const candidate of candidates) {
-    const add = (text: string) =>
-      facts.push({ id: facts.length + 1, entityId: candidate.id, text });
+    const add = (text: string, riskChangeEntity?: BriefFact['riskChangeEntity']) =>
+      facts.push({ id: facts.length + 1, entityId: candidate.id, text, riskChangeEntity });
     for (const tileId of candidate.tileIds) {
       add(`In the "${BRIEF_TILE_TITLES[tileId]}" tile: ${BRIEF_TILE_DEFINITIONS[tileId](period)}`);
     }
@@ -76,6 +146,11 @@ export const buildFacts = (
     }
     if (groupRisk && Math.round(groupRisk.score) !== Math.round(ownRisk?.score ?? -1)) {
       add(describeRisk('Resolution group risk', groupRisk));
+    }
+    const riskChange =
+      riskAtStart && describeRiskChange(candidate, riskAtStart, period, periodStart);
+    if (riskChange) {
+      add(riskChange.text, riskChange.riskChangeEntity);
     }
     const criticality = getAssetCriticality(candidate);
     if (criticality) {
@@ -98,3 +173,17 @@ export const buildFacts = (
   }
   return facts;
 };
+
+/** The risk change fact each priority cites, by the priority's entity id. Only these get a risk-history chart. */
+export const getCitedRiskChanges = (
+  priorities: BriefPriority[],
+  facts: BriefFact[]
+): Map<string, RiskChangeEntity> =>
+  new Map(
+    priorities.flatMap(({ entityId, factIds }) => {
+      const fact = facts.find(
+        ({ id, riskChangeEntity }) => riskChangeEntity && factIds.includes(id)
+      );
+      return fact?.riskChangeEntity ? [[entityId, fact.riskChangeEntity] as const] : [];
+    })
+  );

@@ -12,6 +12,7 @@ import type { EsClient } from '@kbn/scout-security';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { ENTITY_ANALYTICS_SCOPE_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
+import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { getPrivilegedUserWatchlistSavedObjectId } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/brief_types';
 import { LATEST_ALIAS, LATEST_INDEX } from './maintainers/constants';
@@ -93,6 +94,68 @@ export const seedBriefEntities = async (esClient: EsClient): Promise<void> => {
         host: { name: SEEDED_HOST.name },
       },
     ],
+  });
+};
+
+export const RISK_SCORE_INDEX = getRiskScoreTimeSeriesIndex('default');
+/** The seeded user's base risk score at the start of a 7-day view; it is 82 now. */
+export const SEEDED_USER_START_SCORE = 38;
+
+/**
+ * Seeds the user's base risk score at the start of a 7-day view and now. Creates the risk score index
+ * when the risk engine is not installed, and returns whether it did.
+ */
+export const seedUserRiskScores = async (esClient: EsClient): Promise<boolean> => {
+  const created = !(await esClient.indices.exists({ index: RISK_SCORE_INDEX }));
+  if (created) {
+    await esClient.indices.create({
+      index: RISK_SCORE_INDEX,
+      mappings: {
+        dynamic_templates: [
+          { strings_as_keyword: { match_mapping_type: 'string', mapping: { type: 'keyword' } } },
+        ],
+        properties: { '@timestamp': { type: 'date' } },
+      },
+    });
+  }
+  const now = Date.now();
+  const startScoreTime = now - 7 * 24 * 3_600_000 - 30 * 60_000;
+  const scores: Array<[number, number]> = [
+    [startScoreTime, SEEDED_USER_START_SCORE],
+    [now, 82],
+  ];
+  await esClient.bulk({
+    refresh: 'wait_for',
+    operations: scores.flatMap(([time, score]) => [
+      { create: { _index: RISK_SCORE_INDEX } },
+      {
+        '@timestamp': new Date(time).toISOString(),
+        user: {
+          name: SEEDED_USER.name,
+          risk: {
+            id_field: 'entity.id',
+            id_value: SEEDED_USER.id,
+            score_type: 'base',
+            calculated_score_norm: score,
+            calculated_level: score >= 70 ? 'High' : 'Moderate',
+          },
+        },
+      },
+    ]),
+  });
+  return created;
+};
+
+/** Removes the seeded risk scores, or the risk score index when the test created it. */
+export const cleanupUserRiskScores = async (esClient: EsClient, createdIndex: boolean) => {
+  if (createdIndex) {
+    await esClient.indices.delete({ index: RISK_SCORE_INDEX, ignore_unavailable: true });
+    return;
+  }
+  await esClient.deleteByQuery({
+    index: RISK_SCORE_INDEX,
+    refresh: true,
+    query: { term: { 'user.risk.id_value': SEEDED_USER.id } },
   });
 };
 

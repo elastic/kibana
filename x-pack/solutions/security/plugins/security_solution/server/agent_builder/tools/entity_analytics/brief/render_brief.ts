@@ -49,6 +49,10 @@ export interface RenderBriefParams {
   verified?: VerifiedBrief;
   /** The render tag of the priorities' entity table. */
   entityTableTag?: string;
+  /** Risk-history chart render tags, by the entity id of the priority they go under. */
+  riskChartTags?: Map<string, string>;
+  /** True when the risk at the start of the period couldn't be read. */
+  riskChangeFailed?: boolean;
 }
 
 /** Renders the brief as markdown, for the agent to present verbatim. */
@@ -58,6 +62,8 @@ export const renderBrief = ({
   entities,
   verified,
   entityTableTag,
+  riskChartTags = new Map(),
+  riskChangeFailed = false,
 }: RenderBriefParams): string => {
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
   const boldName = (entityId: string) =>
@@ -69,10 +75,13 @@ export const renderBrief = ({
       .map((part, index) => (index % 2 === 1 ? boldName(part) : escapeProse(part)))
       .join('');
   const sections = [
-    [renderScope(scope, spaceId, entities.dataTimestamp), ...renderDisclosures(scope, entities)],
+    [
+      renderScope(scope, spaceId, entities.dataTimestamp),
+      ...renderDisclosures(scope, entities, riskChangeFailed),
+    ],
     renderAttention(scope, entities, verified, withNames),
     renderChanges(scope),
-    renderPriorities(verified, boldName, withNames),
+    renderPriorities(verified, riskChartTags, boldName, withNames),
     entityTableTag ? [entityTableTag] : [],
     [`_Checked: ${describeCoverage(scope, entities.candidates.length, entities.capturedCount)}._`],
   ];
@@ -117,7 +126,11 @@ const matchesNoTileEntity = ({
 }: CandidateEntities): boolean =>
   hasPageQuery && !pageQueryFailed && matchedCount === 0 && capturedCount > notFoundCount;
 
-const renderDisclosures = (scope: EntityAnalyticsScope, entities: CandidateEntities): string[] => {
+const renderDisclosures = (
+  scope: EntityAnalyticsScope,
+  entities: CandidateEntities,
+  riskChangeFailed: boolean
+): string[] => {
   const { hasPageQuery, pageQueryFailed, capturedCount, notFoundCount } = entities;
   const unavailable = BRIEF_TILE_IDS.filter((tileId) => scope.tiles[tileId]?.unavailable);
   const disclosures = [
@@ -138,6 +151,7 @@ const renderDisclosures = (scope: EntityAnalyticsScope, entities: CandidateEntit
     unavailable.length > 0
       ? `Unavailable tiles: ${unavailable.map((tileId) => BRIEF_TILE_TITLES[tileId]).join(', ')}.`
       : undefined,
+    riskChangeFailed ? "Risk change couldn't be read." : undefined,
   ];
   return compact(disclosures).map((text) => `_${text}_`);
 };
@@ -223,6 +237,7 @@ const asSentence = (text: string): string => (/[.!?…]$/.test(text) ? text : `$
 
 const renderPriorities = (
   verified: VerifiedBrief | undefined,
+  riskChartTags: Map<string, string>,
   boldName: (entityId: string) => string,
   withNames: (text: string) => string
 ): string[] => {
@@ -232,11 +247,15 @@ const renderPriorities = (
   if (verified.priorities.length === 0) {
     return ['**Priorities**', NO_PRIORITIES_LINE];
   }
-  const lines = verified.priorities.map(
-    ({ entityId, observed, whyItMatters, nextStep }, index) =>
-      `${index + 1}. ${boldName(entityId)}: ${asSentence(withNames(observed))} ${asSentence(
-        withNames(whyItMatters)
-      )} _Next:_ ${asSentence(withNames(nextStep))}`
+  // A chart goes on its own line, between blank lines, directly under its priority.
+  const lines = verified.priorities.flatMap(
+    ({ entityId, observed, whyItMatters, nextStep }, index) => {
+      const line = `${index + 1}. ${boldName(entityId)}: ${asSentence(
+        withNames(observed)
+      )} ${asSentence(withNames(whyItMatters))} _Next:_ ${asSentence(withNames(nextStep))}`;
+      const chartTag = riskChartTags.get(entityId);
+      return chartTag ? [line, '', chartTag, ''] : [line];
+    }
   );
   return ['**Priorities**', ...lines];
 };

@@ -22,15 +22,19 @@ import {
   buildBriefConverseBody,
   buildDraft,
   buildScope,
+  cleanupUserRiskScores,
   ensureLatestEntitiesIndex,
   getBriefFromSteps,
   getSubmitBriefRequests,
   mockBriefRound,
   seedBriefEntities,
+  seedUserRiskScores,
+  SEEDED_USER_START_SCORE,
   type ConverseResponseBody,
 } from '../../fixtures/ai_brief_helpers';
 
 const PRIORITY_LINE = `1. **${SEEDED_USER.name}**`;
+const RISK_CHART_ID = 'security.riskscorehistory:user:';
 
 apiTest.describe(
   'Entity Analytics AI brief - security.generate_entity_analytics_brief',
@@ -40,6 +44,7 @@ apiTest.describe(
     let connectorId: string;
     let llmProxy: LlmProxy;
     let createdLatestIndex = false;
+    let createdRiskScoreIndex = false;
     const conversationIds: string[] = [];
 
     /** Asks the default agent for the brief of `scope` and returns the tool's markdown. */
@@ -64,6 +69,7 @@ apiTest.describe(
       ({ connectorId, llmProxy } = await createLeadGenerationConnector({ apiServices, log }));
       createdLatestIndex = await ensureLatestEntitiesIndex(esClient);
       await seedBriefEntities(esClient);
+      createdRiskScoreIndex = await seedUserRiskScores(esClient);
     });
 
     apiTest.beforeEach(() => {
@@ -77,6 +83,7 @@ apiTest.describe(
       await cleanupLeadGenerationConnector({ apiServices, connectorId, llmProxy });
       await cleanupEntity(esClient, SEEDED_USER.id);
       await cleanupEntity(esClient, SEEDED_HOST.id);
+      await cleanupUserRiskScores(esClient, createdRiskScoreIndex);
       if (createdLatestIndex) {
         await esClient.indices.delete({ index: LATEST_INDEX, ignore_unavailable: true });
       }
@@ -105,6 +112,8 @@ apiTest.describe(
       expect(brief).toContain('Unavailable tiles: Entities with anomalies');
       expect(brief).not.toContain('| Entities with anomalies | 0 |');
       expect(brief).toContain('<render_attachment');
+      // The priority doesn't cite the risk change fact, so it has no chart.
+      expect(brief).not.toContain(RISK_CHART_ID);
 
       const submitRequests = getSubmitBriefRequests(llmProxy);
       expect(submitRequests).toHaveLength(1);
@@ -114,6 +123,28 @@ apiTest.describe(
       );
       expect(submitRequests[0]).not.toContain(SEEDED_HOST.id);
     });
+
+    apiTest(
+      'states the risk change and charts it under the priority citing it',
+      async ({ apiClient }) => {
+        // Facts 1 to 3: Risk movers membership, current risk, risk change.
+        mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id, [3]));
+
+        const brief = await askForBrief(
+          apiClient,
+          buildScope({ riskMovers: { value: 1, entityIds: [SEEDED_USER.id] } }, 'riskMovers')
+        );
+
+        const submitRequests = getSubmitBriefRequests(llmProxy);
+        expect(submitRequests).toHaveLength(1);
+        expect(submitRequests[0]).toContain(
+          `3. Risk score ${SEEDED_USER_START_SCORE} at the start of the last 7 days`
+        );
+        expect(submitRequests[0]).toContain('82 now, up 44 points');
+        const priority = brief.split('\n').findIndex((line) => line.startsWith(PRIORITY_LINE));
+        expect(brief.split('\n')[priority + 2]).toContain(RISK_CHART_ID);
+      }
+    );
 
     apiTest(
       'writes the quiet brief without a model call when no tile is flagged',

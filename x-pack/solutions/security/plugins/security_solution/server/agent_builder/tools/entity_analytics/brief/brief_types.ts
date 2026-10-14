@@ -10,6 +10,7 @@ import type { Entity } from '@kbn/entity-store/common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { z, lazySchema } from '@kbn/zod/v4';
+import type { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type {
   BriefTileId,
   EntityAnalyticsScope,
@@ -37,6 +38,23 @@ export interface BriefFact {
   id: number;
   entityId: string;
   text: string;
+  /** On a risk change fact: the entity whose score it states, the candidate or a member of its resolution group. */
+  riskChangeEntity?: RiskChangeEntity;
+}
+
+/** The entity a risk change fact is about, for its risk-history chart. */
+export interface RiskChangeEntity {
+  id: string;
+  name: string;
+  type: BriefEntityType;
+}
+
+/** The risk at the start of the period, read for the risk change facts. */
+export interface RiskAtStart {
+  /** Alias records of each candidate that is a golden entity. */
+  aliasesById: Map<string, Entity[]>;
+  /** Base score at the start of the period, by entity id. Absent when there was none. */
+  scoresById: Map<string, number>;
 }
 
 /** What the model submits. Limits are enforced after the call, so a long answer is trimmed, not rejected. */
@@ -69,6 +87,8 @@ export interface GenerateBriefParams {
   inferenceClient: BoundInferenceClient;
   /** For the entity table attachment. */
   attachments: AttachmentStateManager;
+  /** For the risk-history charts. Absent when risk score history is disabled. */
+  riskScoreDataClient?: RiskScoreDataClient;
   abortSignal?: AbortSignal;
   logger: Logger;
 }

@@ -97,7 +97,9 @@ export const registerTools = (
   agentBuilder.tools.register(getWatchlistIdTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(generateEntityAnalyticsBriefTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    generateEntityAnalyticsBriefTool(core, logger, experimentalFeatures, kibanaVersion)
+  );
   agentBuilder.tools.register(
     setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
   );
