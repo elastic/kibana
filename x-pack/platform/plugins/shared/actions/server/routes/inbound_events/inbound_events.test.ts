@@ -55,6 +55,13 @@ describe('inboundEventsRoute', () => {
             stability: 'experimental',
           },
           body: expect.objectContaining({
+            accepts: [
+              'application/json',
+              'application/*+json',
+              'application/x-www-form-urlencoded',
+              'text/plain',
+              '*/*',
+            ],
             maxBytes: 1024 * 1024,
           }),
         }),
@@ -67,7 +74,7 @@ describe('inboundEventsRoute', () => {
         validate: expect.objectContaining({
           response: expect.objectContaining({
             200: expect.objectContaining({
-              description: expect.stringMatching(/handshake/i),
+              description: expect.stringMatching(/plain-text/i),
             }),
             202: expect.anything(),
             404: expect.anything(),
@@ -176,6 +183,31 @@ describe('inboundEventsRoute', () => {
     await handler({}, request, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
+  });
+
+  it('maps a connector HTTP ack onto the status schema for that response', async () => {
+    const body = { ok: true };
+    const ingest = jest.fn().mockResolvedValue({
+      status: 'spoke_http',
+      statusCode: 202,
+      body,
+    });
+    const { addVersionMock } = registerRoute({ ingest });
+    const [options, handler] = addVersionMock.mock.calls[0];
+    const bodySchema = options.validate.response[202].body();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: 'webhook', connector_id: 'c1' },
+      query: {},
+      body: { hello: 'world' },
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['custom']);
+
+    await handler({}, request, res);
+
+    expect(res.custom).toHaveBeenCalledWith({ statusCode: 202, body });
+    expect(bodySchema.validate(jest.mocked(res.custom).mock.calls[0][0].body)).toEqual(body);
+    expect(() => bodySchema.validate(undefined)).toThrow();
   });
 
   it('maps not_found ingest results to 404', async () => {

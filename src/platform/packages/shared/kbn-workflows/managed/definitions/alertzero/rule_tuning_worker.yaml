@@ -87,6 +87,10 @@ consts:
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
   reviewed_tag: detection-watch:tuning-reviewed
+  # Tuning actions whose proposals can go stale when their rule changes.
+  tuning_action_workflow_ids:
+    - system-alertzero-action-edit-rule
+    - system-alertzero-action-add-rule-exception
 steps:
   # Expire pending tuning proposals whose rule was edited or deleted after they
   # were created, so nobody is asked to approve a change that can't be applied.
@@ -107,13 +111,14 @@ steps:
 
   - name: expire_stale_tuning_proposals
     type: foreach
-    foreach: "${{ steps.list_pending_tuning_proposals.output.proposals | default: consts.no_rows | where: 'actionWorkflowId', 'system-alertzero-action-edit-rule' }}"
+    foreach: "${{ steps.list_pending_tuning_proposals.output.proposals | default: consts.no_rows | where_exp: 'proposal', 'consts.tuning_action_workflow_ids contains proposal.actionWorkflowId' }}"
     steps:
+      # Rule edits carry the rule's id as `id`, exceptions as `rule_id`.
       - name: fetch_proposal_rule
         type: kibana.request
         with:
           method: GET
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ foreach.item.actionInput.id | url_encode }}"
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ foreach.item.actionInput.id | default: foreach.item.actionInput.rule_id | url_encode }}"
           headers:
             elastic-api-version: "2023-10-31"
         on-failure:
