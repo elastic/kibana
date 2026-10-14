@@ -145,14 +145,22 @@ export const estimateProfileVcuRange = (profile: BoostProfile | BoostProfileInpu
   });
 };
 
-export interface RuleImpact {
-  /** The data sources whose applied rule changes, and their total size. */
+/** The search cost of the data sources a change affects, before and after it. */
+export interface CostImpact {
+  /** The data sources the change affects, and their total size. */
   dataSourceCount: number;
   sizeInBytes: number;
-  /** Total search VCUs for those data sources today, and with the rule change. */
+  /** Total search VCUs for those data sources today, and with the change. */
   current: VcuRange;
   next: VcuRange;
 }
+
+const NO_IMPACT: CostImpact = {
+  dataSourceCount: 0,
+  sizeInBytes: 0,
+  current: { atRest: 0, atPeak: 0 },
+  next: { atRest: 0, atPeak: 0 },
+};
 
 interface RuleImpactInput {
   dataSources: readonly BoostDataSource[];
@@ -179,7 +187,7 @@ export const estimateRuleImpact = ({
   profiles,
   nextRule,
   currentRule,
-}: RuleImpactInput): RuleImpact => {
+}: RuleImpactInput): CostImpact => {
   const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
   // Matched by name, since callers may pass a copy of the saved rule.
   const nextRules = [...rules.filter(({ name }) => name !== currentRule?.name), nextRule];
@@ -189,24 +197,60 @@ export const estimateRuleImpact = ({
   };
   const zero: VcuRange = { atRest: 0, atPeak: 0 };
 
-  return dataSources.reduce<RuleImpact>(
-    (impact, dataSource) => {
-      const appliedNow = resolveRule(dataSource, rules, profilesByName);
-      const appliedNext = resolveRule(dataSource, nextRules, profilesByName);
-      const isAffected =
-        (currentRule !== undefined && appliedNow?.name === currentRule.name) ||
-        appliedNext === nextRule;
-      if (!isAffected) {
-        return impact;
-      }
-      const sizeGb = dataSource.size_in_bytes / BYTES_PER_GB;
+  return dataSources.reduce<CostImpact>((impact, dataSource) => {
+    const appliedNow = resolveRule(dataSource, rules, profilesByName);
+    const appliedNext = resolveRule(dataSource, nextRules, profilesByName);
+    const isAffected =
+      (currentRule !== undefined && appliedNow?.name === currentRule.name) ||
+      appliedNext === nextRule;
+    if (!isAffected) {
+      return impact;
+    }
+    const sizeGb = dataSource.size_in_bytes / BYTES_PER_GB;
+    return {
+      dataSourceCount: impact.dataSourceCount + 1,
+      sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
+      current: addRange(impact.current, rangeFor(appliedNow) ?? zero, sizeGb),
+      next: addRange(impact.next, rangeFor(appliedNext) ?? zero, sizeGb),
+    };
+  }, NO_IMPACT);
+};
+
+interface ProfileImpactInput {
+  dataSources: readonly BoostDataSource[];
+  rules: readonly BoostRule[];
+  profiles: readonly BoostProfile[];
+  /** The profile as it would be saved, with the saved profile's name and type. */
+  nextProfile: BoostProfileInput;
+}
+
+/** The cost change of editing a profile, across the data sources whose applied rule uses it. */
+export const estimateProfileImpact = ({
+  dataSources,
+  rules,
+  profiles,
+  nextProfile,
+}: ProfileImpactInput): CostImpact => {
+  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
+  const currentProfile = profilesByName.get(nextProfile.name);
+  if (!currentProfile) {
+    return NO_IMPACT;
+  }
+  const currentRange = estimateProfileVcuRange(currentProfile);
+  const nextRange = estimateProfileVcuRange(nextProfile);
+
+  return dataSources
+    .filter(
+      (dataSource) =>
+        resolveRule(dataSource, rules, profilesByName)?.boost_profile === nextProfile.name
+    )
+    .reduce<CostImpact>((impact, { size_in_bytes: sizeInBytes }) => {
+      const sizeGb = sizeInBytes / BYTES_PER_GB;
       return {
         dataSourceCount: impact.dataSourceCount + 1,
-        sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
-        current: addRange(impact.current, rangeFor(appliedNow) ?? zero, sizeGb),
-        next: addRange(impact.next, rangeFor(appliedNext) ?? zero, sizeGb),
+        sizeInBytes: impact.sizeInBytes + sizeInBytes,
+        current: addRange(impact.current, currentRange, sizeGb),
+        next: addRange(impact.next, nextRange, sizeGb),
       };
-    },
-    { dataSourceCount: 0, sizeInBytes: 0, current: zero, next: zero }
-  );
+    }, NO_IMPACT);
 };

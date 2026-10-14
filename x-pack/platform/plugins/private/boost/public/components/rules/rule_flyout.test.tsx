@@ -203,3 +203,65 @@ describe('RuleFlyout profile creation', () => {
     expect(getTypeRadio('indices')).toBeDisabled();
   });
 });
+
+describe('RuleFlyout estimate', () => {
+  const getEstimate = () => screen.queryByTestId('boostCostEstimate');
+  const getPattern = () => screen.getByTestId('boostRulePattern');
+
+  it("estimates the rule's targets", () => {
+    renderFlyout();
+
+    expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+    expect(getEstimate()).toHaveAttribute('data-stale', 'false');
+  });
+
+  it('fades the last estimate while the pattern is cleared, and hides it once the field is left', async () => {
+    const { blur } = renderFlyout();
+
+    await userEvent.clear(getPattern());
+    expect(getEstimate()).toHaveAttribute('data-stale', 'true');
+
+    await blur();
+    expect(getEstimate()).not.toBeInTheDocument();
+  });
+
+  it("hides a new rule's estimate when its pattern matches nothing once the field is left", async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
+      </IntlProvider>
+    );
+    expect(getEstimate()).not.toBeInTheDocument();
+
+    // Above the existing catalogs rule, so the new rule takes over its index.
+    await userEvent.clear(screen.getByTestId('boostRulePriority'));
+    await userEvent.type(screen.getByTestId('boostRulePriority'), '2');
+    await userEvent.type(getPattern(), 'catalog-*');
+    expect(getEstimate()).toHaveAttribute('data-stale', 'false');
+
+    await userEvent.clear(getPattern());
+    await userEvent.type(getPattern(), 'nothing-*');
+    expect(getEstimate()).toHaveAttribute('data-stale', 'true');
+
+    await userEvent.click(screen.getByTestId('boostRulePriority'));
+    expect(getEstimate()).not.toBeInTheDocument();
+  });
+
+  it('still estimates an edited rule that matches nothing, for the data it gives up', async () => {
+    const { blur } = renderFlyout();
+
+    await userEvent.clear(getPattern());
+    await userEvent.type(getPattern(), 'nothing-*');
+    await blur();
+
+    expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+  });
+
+  it("estimates the rule's targets with a profile being created for it", async () => {
+    renderFlyout();
+
+    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
+
+    expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+  });
+});

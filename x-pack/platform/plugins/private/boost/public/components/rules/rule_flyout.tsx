@@ -42,15 +42,19 @@ import {
   matchesIndexPattern,
   resolveRule,
 } from '../../../common/resolution';
-import type { BoostDataSource, BoostProfileType, BoostRule } from '../../../common/types';
+import type {
+  BoostDataSource,
+  BoostProfileInput,
+  BoostProfileType,
+  BoostRule,
+} from '../../../common/types';
 import { BOOST_DOCS_URL } from '../../doc_links';
 import { estimateRuleImpact } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
-import { ESTIMATE_UNAVAILABLE, LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
+import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { CostEstimate } from '../cost_estimate';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
-import { FullWidthDivider } from '../profiles/full_width_divider';
 import {
   useBoostState,
   useCreateRule,
@@ -109,15 +113,8 @@ const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.ruleForm.managedBadge', 
   defaultMessage: 'Managed',
 });
 
-const formatSize = (bytes: number): string =>
-  i18n.translate('xpack.boost.ruleForm.sizeInGb', {
-    defaultMessage: '{size} GB',
-    values: {
-      size: new Intl.NumberFormat(i18n.getLocale(), {
-        maximumFractionDigits: bytes < 1e9 ? 2 : 1,
-      }).format(bytes / 1e9),
-    },
-  });
+// A profile name no saved profile can have, for estimating with a profile that isn't saved yet.
+const NEW_PROFILE_NAME = '<new profile>';
 
 const SELECT_PROFILE_FIRST = i18n.translate('xpack.boost.ruleForm.selectProfileFirst', {
   defaultMessage: 'Select a boost profile to choose targets.',
@@ -151,6 +148,9 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const [profileFieldKey, setProfileFieldKey] = useState(0);
   // While creating a profile, the flyout shows the profile form in place of the rule's.
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  // Whether the pattern or profile field has focus. While one does, an estimate it made
+  // unavailable stays, faded.
+  const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
   // Set when leaving the profile form, so the link that opened it gets focus back.
   const shouldFocusCreateProfileRef = useRef(false);
   const createProfileLinkRef = useCallback((element: HTMLElement | null) => {
@@ -272,6 +272,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   // Leaving the field empty, or with text that matches no profile, restores the last profile. Text
   // that matches one exactly selects it, which the picker does after this.
   const onProfileBlur = () => {
+    setIsEditingEstimateInput(false);
     if (draft.profileName && !profileSearchRef.current) {
       return;
     }
@@ -322,7 +323,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const hasValidTargets =
     isDefaultRule || (draft.mode === 'pattern' ? !errors.pattern : draft.picked.length > 0);
   const impact =
-    type && hasValidTargets
+    draft.profileName && type && hasValidTargets
       ? estimateRuleImpact({
           dataSources,
           rules,
@@ -331,7 +332,18 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
           currentRule: rule,
         })
       : undefined;
-  const hasImpact = impact !== undefined && impact.dataSourceCount > 0;
+
+  // The same, with a profile being created for this rule in the profile form.
+  const estimateWithNewProfile = (profile: BoostProfileInput) =>
+    hasValidTargets && profile.type === type
+      ? estimateRuleImpact({
+          dataSources,
+          rules,
+          profiles: [...profiles, { ...profile, name: NEW_PROFILE_NAME, is_builtin: false }],
+          nextRule: { ...draftRule, boost_profile: NEW_PROFILE_NAME },
+          currentRule: rule,
+        })
+      : undefined;
 
   const getCurrentRuleName = (dataSource: BoostDataSource) =>
     resolveRule(dataSource, rules, profilesByName)?.name;
@@ -409,6 +421,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
             ruleName: draft.name || undefined,
             type,
             isTypeLocked: isDefaultRule,
+            estimate: estimateWithNewProfile,
             onCreate: onProfileCreate,
           }}
           takenNames={profiles.map(({ name }) => name)}
@@ -506,6 +519,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
             singleSelection={{ asPlainText: true }}
             // A rule always needs a profile, so there's no clear button; see onProfileBlur.
             isClearable={false}
+            onFocus={() => setIsEditingEstimateInput(true)}
             onBlur={onProfileBlur}
             options={profileOptions}
             selectedOptions={
@@ -572,6 +586,8 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
                     fullWidth
                     value={draft.pattern}
                     onChange={({ target: { value } }) => updateDraft({ pattern: value })}
+                    onFocus={() => setIsEditingEstimateInput(true)}
+                    onBlur={() => setIsEditingEstimateInput(false)}
                     placeholder={targetType === 'data_streams' ? 'logs-*' : 'products-*'}
                     isInvalid={Boolean(patternError)}
                     disabled={isSaving || !type}
@@ -728,32 +744,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <CostEstimate
-          title={i18n.translate('xpack.boost.ruleForm.estimateTitle', {
-            defaultMessage: 'Search cost / hour',
-          })}
-          subtitle={
-            hasImpact && type
-              ? i18n.translate('xpack.boost.ruleForm.estimateSubtitle', {
-                  defaultMessage: '{targets} · {size}',
-                  values: {
-                    targets: formatDataSourceCount(type, impact.dataSourceCount),
-                    size: formatSize(impact.sizeInBytes),
-                  },
-                })
-              : undefined
-          }
-          estimate={hasImpact ? impact.next : undefined}
-          comparison={hasImpact ? impact.current : undefined}
-          unavailableText={
-            impact
-              ? i18n.translate('xpack.boost.ruleForm.estimateNoMatches', {
-                  defaultMessage: 'Nothing matches these targets yet',
-                })
-              : ESTIMATE_UNAVAILABLE
-          }
-        />
-        <FullWidthDivider margin="s" />
+        <CostEstimate impact={impact} type={type} isEditing={isEditingEstimateInput} />
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

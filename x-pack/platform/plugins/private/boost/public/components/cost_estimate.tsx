@@ -6,34 +6,53 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiScreenReaderOnly,
   EuiText,
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { VcuRange } from '../../common/vcu_estimate';
+import type { BoostProfileType } from '../../common/types';
+import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
 import { ILLUSTRATIVE_USD_PER_VCU_HOUR } from '../../common/vcu_estimate';
+import { formatDataSourceCount } from './format';
+import { FullWidthDivider } from './profiles/full_width_divider';
 
 interface CostEstimateProps {
-  title: string;
-  /** Context under the title, such as what the estimate covers. */
-  subtitle?: string;
-  /** Omitted while there's nothing to estimate. */
-  estimate?: VcuRange;
-  /** A baseline to compare against, such as the saved profile or today's rules. */
-  comparison?: VcuRange;
-  /** Replaces the values while `estimate` is omitted. */
-  unavailableText: string;
+  /** The cost of the data a change affects, before and after; omitted while it can't be estimated. */
+  impact?: CostImpact;
+  /** The type of the data the change affects. */
+  type?: BoostProfileType;
+  /**
+   * Whether the user is still editing the input that made the estimate unavailable. Until they
+   * finish, the last estimate stays, faded; after that, it's hidden.
+   */
+  isEditing: boolean;
 }
 
-// Rounds to the displayed precision, so comparisons and deltas match what users see. Per-GB values
-// are often below 1, so small values keep two decimals.
+interface ShownEstimate {
+  impact: CostImpact;
+  type: BoostProfileType;
+}
+
+const formatSize = (bytes: number): string =>
+  i18n.translate('xpack.boost.costEstimate.sizeInGb', {
+    defaultMessage: '{size} GB',
+    values: {
+      size: new Intl.NumberFormat(i18n.getLocale(), {
+        maximumFractionDigits: bytes < 1e9 ? 2 : 1,
+      }).format(bytes / 1e9),
+    },
+  });
+
+// Rounds to the displayed precision, so comparisons and deltas match what users see. Small data
+// often costs below 1 VCU, so small values keep two decimals.
 const roundVcus = (vcus: number): number => {
   const decimals = vcus < 1 ? 2 : vcus < 10 ? 1 : 0;
   return Math.round(vcus * 10 ** decimals) / 10 ** decimals;
@@ -97,7 +116,7 @@ interface ChangeIndicatorProps {
   savedVcus: number;
 }
 
-/** Whether a value moved up (costs more) or down (costs less) from the saved profile. */
+/** Whether a value moved up (costs more) or down (costs less) from today's. */
 const ChangeIndicator = ({ vcus, savedVcus }: ChangeIndicatorProps) => {
   const isHigher = vcus > savedVcus;
   const deltaVcus = roundVcus(Math.abs(vcus - savedVcus));
@@ -169,63 +188,96 @@ const EstimateValue = ({ end, estimate, comparison }: EstimateValueProps) => {
   );
 };
 
-/** The profile's illustrative hourly cost and VCU range, updated as the form changes. */
-/** An illustrative hourly cost and VCU range, with changes against an optional comparison. */
-export const CostEstimate = ({
-  title,
-  subtitle,
-  estimate,
-  comparison,
-  unavailableText,
-}: CostEstimateProps) => {
+/**
+ * The illustrative hourly search cost of the data a change affects, compared with today, above a
+ * footer's buttons. It's only shown for real data, so it's hidden until there's some to estimate.
+ */
+export const CostEstimate = ({ impact, type, isEditing }: CostEstimateProps) => {
   const { euiTheme } = useEuiTheme();
+  const lastShownRef = useRef<ShownEstimate>();
+
+  const current = impact && impact.dataSourceCount > 0 && type ? { impact, type } : undefined;
+  const shown = current ?? (isEditing ? lastShownRef.current : undefined);
+  useEffect(() => {
+    lastShownRef.current = shown;
+  });
+
+  if (!shown) {
+    return null;
+  }
+  const isStale = current === undefined;
+  const { next: estimate, current: comparison, dataSourceCount, sizeInBytes } = shown.impact;
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="flexStart"
-      justifyContent="spaceBetween"
-      responsive={false}
-      wrap
-      // Matches the height of the small buttons below the divider, so both halves of the footer
-      // are the same height.
-      css={{ minBlockSize: euiTheme.size.xl }}
-      data-test-subj="boostCostEstimate"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{title}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              type="info"
-              color="subdued"
-              // A flex anchor sizes to the icon, so the row's flex alignment centers it. The default
-              // inline-block anchor gets a line box from the inherited font, which offsets the icon.
-              display="flex"
-              content={i18n.translate('xpack.boost.costEstimate.disclaimer', {
-                defaultMessage:
-                  'Actual usage varies with query load and your data. Costs use an illustrative rate of {rate} per VCU-hour. This is an estimate and may not represent actual pricing.',
-                values: { rate: formatUsd(ILLUSTRATIVE_USD_PER_VCU_HOUR) },
-              })}
-              aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
-                defaultMessage: 'About this estimate',
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {subtitle && (
+    <>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        responsive={false}
+        wrap
+        css={{
+          // Matches the height of the small buttons below the divider, so both halves of the
+          // footer are the same height.
+          minBlockSize: euiTheme.size.xl,
+          // A stale estimate is faded; EUI has no opacity token.
+          opacity: isStale ? 0.5 : 1,
+          transition: `opacity ${euiTheme.animation.fast}`,
+        }}
+        data-test-subj="boostCostEstimate"
+        data-stale={isStale}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('xpack.boost.costEstimate.title', {
+                    defaultMessage: 'Search cost / hour',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                // A flex anchor sizes to the icon, so the row's flex alignment centers it. The
+                // default inline-block anchor gets a line box from the inherited font, which
+                // offsets the icon.
+                display="flex"
+                content={i18n.translate('xpack.boost.costEstimate.disclaimer', {
+                  defaultMessage:
+                    'Actual usage varies with query load and your data. Costs use an illustrative rate of {rate} per VCU-hour. This is an estimate and may not represent actual pricing.',
+                  values: { rate: formatUsd(ILLUSTRATIVE_USD_PER_VCU_HOUR) },
+                })}
+                aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
+                  defaultMessage: 'About this estimate',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiText size="xs" color="subdued">
-            {subtitle}
+            {i18n.translate('xpack.boost.costEstimate.subtitle', {
+              defaultMessage: '{targets} · {size}',
+              values: {
+                targets: formatDataSourceCount(shown.type, dataSourceCount),
+                size: formatSize(sizeInBytes),
+              },
+            })}
           </EuiText>
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div aria-live="polite">
-          {estimate ? (
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div aria-live="polite">
+            {isStale && (
+              <EuiScreenReaderOnly>
+                <span>
+                  {i18n.translate('xpack.boost.costEstimate.staleLabel', {
+                    defaultMessage: 'Last available estimate:',
+                  })}
+                </span>
+              </EuiScreenReaderOnly>
+            )}
             <EuiFlexGroup
               // 16px around the divider, between EUI's 12px and 24px gutters.
               gutterSize="none"
@@ -247,13 +299,10 @@ export const CostEstimate = ({
                 <EstimateValue end="atPeak" estimate={estimate} comparison={comparison} />
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : (
-            <EuiText size="s" color={euiTheme.colors.textDisabled}>
-              {unavailableText}
-            </EuiText>
-          )}
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <FullWidthDivider margin="s" />
+    </>
   );
 };

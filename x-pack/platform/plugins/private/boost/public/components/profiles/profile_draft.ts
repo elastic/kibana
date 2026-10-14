@@ -25,10 +25,7 @@ import {
   getMaxAgeError,
   getProfileNameError,
   parseMaxAge,
-  toMaxAgeHours,
 } from '../../../common/validation';
-import type { VcuRange } from '../../../common/vcu_estimate';
-import { estimateDataStreamsVcuRange, estimateIndicesVcuRange } from '../../../common/vcu_estimate';
 
 // Form fields hold strings so inputs can be empty or mid-edit; they're parsed on validation.
 
@@ -175,34 +172,6 @@ export const getDraftErrors = (
 export const hasDraftErrors = (errors: ProfileDraftErrors): boolean =>
   Object.values(errors).some((error) => error !== undefined);
 
-const toRange = ({ minBoost, maxBoost }: BoostRangeDraft) => ({
-  minBoost: Number(minBoost),
-  maxBoost: Number(maxBoost),
-});
-
-// Only called once the draft's max ages are valid.
-const toMaxAgeDays = ({ maxAge, maxAgeUnit }: AgedPeriodDraft): number =>
-  toMaxAgeHours({ value: Number(maxAge), unit: maxAgeUnit }) / 24;
-
-/** Estimates the draft's search VCU range, or returns `undefined` while its values are invalid. */
-export const getDraftEstimate = (draft: ProfileDraft): VcuRange | undefined => {
-  if (hasDraftErrors(getValueErrors(draft))) {
-    return undefined;
-  }
-
-  if (draft.type === 'indices') {
-    const { extraCopy, prewarm, pinned } = draft.indices;
-    return estimateIndicesVcuRange({ ...toRange(draft.indices), extraCopy, prewarm, pinned });
-  }
-
-  const { recent, standard, background } = draft.dataStreams;
-  return estimateDataStreamsVcuRange({
-    recent: { ...toRange(recent), maxAgeDays: toMaxAgeDays(recent) },
-    standard: { ...toRange(standard), maxAgeDays: toMaxAgeDays(standard) },
-    background: toRange(background),
-  });
-};
-
 const toPeriod = ({ minBoost, maxBoost }: BoostRangeDraft): BoostPeriod => ({
   min_boost: Number(minBoost),
   max_boost: Number(maxBoost),
@@ -234,3 +203,10 @@ export const draftToProfileInput = (draft: ProfileDraft): BoostProfileInput => {
     background: toPeriod(background),
   };
 };
+
+/**
+ * The draft's settings as a profile, for estimates, or `undefined` while a value is invalid. The
+ * name isn't checked, since it doesn't affect cost.
+ */
+export const getDraftProfile = (draft: ProfileDraft): BoostProfileInput | undefined =>
+  hasDraftErrors(getValueErrors(draft)) ? undefined : draftToProfileInput(draft);

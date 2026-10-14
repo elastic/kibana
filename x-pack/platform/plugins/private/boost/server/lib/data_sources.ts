@@ -13,7 +13,11 @@ const BYTES_PER_GB = 1e9;
 
 const isUserFacing = (name: string) => !name.startsWith('.');
 
-/** Reads stored sizes, or an empty map if the user can't read stats. */
+/**
+ * Reads each index's and data stream's dataset size, or an empty map if the user can't read stats.
+ * Serverless keeps data in object storage, so the local store size is always 0; the dataset size
+ * is the data's full size.
+ */
 const getStoredSizes = async (client: ElasticsearchClient): Promise<Map<string, number>> => {
   try {
     const [{ indices = {} }, { data_streams: dataStreams }] = await Promise.all([
@@ -23,7 +27,9 @@ const getStoredSizes = async (client: ElasticsearchClient): Promise<Map<string, 
     return new Map([
       ...Object.entries(indices).map(([name, stats]): [string, number] => [
         name,
-        stats.primaries?.store?.size_in_bytes ?? 0,
+        stats.primaries?.store?.total_data_set_size_in_bytes ??
+          stats.primaries?.store?.size_in_bytes ??
+          0,
       ]),
       ...dataStreams.map(({ data_stream: name, store_size_bytes: bytes }): [string, number] => [
         name,

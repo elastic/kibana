@@ -26,11 +26,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_BOOST, MIN_BOOST } from '../../../common/constants';
-import type { BoostProfile, BoostProfileType } from '../../../common/types';
+import type { BoostProfile, BoostProfileInput, BoostProfileType } from '../../../common/types';
+import type { CostImpact } from '../../../common/vcu_estimate';
+import { estimateProfileImpact } from '../../../common/vcu_estimate';
 import { BOOST_DOCS_URL } from '../../doc_links';
 import { useBoostServices } from '../../hooks/use_boost_services';
-import { ESTIMATE_UNAVAILABLE, LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
-import { useCreateProfile, useUpdateProfile } from '../../hooks/use_boost_state';
+import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
+import { useBoostState, useCreateProfile, useUpdateProfile } from '../../hooks/use_boost_state';
 import { CardLabel } from '../card_label';
 import { PROFILE_TYPE_LABELS } from '../format';
 import { PresetCards } from '../preset_cards';
@@ -38,7 +40,6 @@ import type { PresetOption } from '../preset_options';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { BoostRangeInputs } from './boost_range_inputs';
 import { FormSection, FormSubsection } from './form_section';
-import { FullWidthDivider } from './full_width_divider';
 import type { AgedPeriodDraft, ProfileDraft } from './profile_draft';
 import {
   createEmptyDraft,
@@ -46,7 +47,7 @@ import {
   getCopyName,
   draftToProfileInput,
   getDraftErrors,
-  getDraftEstimate,
+  getDraftProfile,
   hasDraftErrors,
 } from './profile_draft';
 import { PROFILE_NAME_ERROR_MESSAGES } from './profile_messages';
@@ -60,6 +61,8 @@ export interface ProfileForRule {
   type?: BoostProfileType;
   /** Default rules can't change type, so their new profile can't either. */
   isTypeLocked: boolean;
+  /** Estimates the rule's targets with the new profile, once the rule has some. */
+  estimate: (profile: BoostProfileInput) => CostImpact | undefined;
   /** Called once the profile is created, to select it in the rule. */
   onCreate: (profileName: string, type: BoostProfileType) => void;
 }
@@ -171,6 +174,9 @@ export const ProfileFlyoutContent = ({
     getInitialDraft(profile, duplicateOf, forRule, takenNames)
   );
   const [showErrors, setShowErrors] = useState(false);
+  // While focus is in the boost values, an estimate they made unavailable stays, faded.
+  const [isBoostFocused, setIsBoostFocused] = useState(false);
+  const { data: state } = useBoostState();
 
   const { mutate: createProfile, isLoading: isCreating } = useCreateProfile();
   const { mutate: updateProfile, isLoading: isUpdating } = useUpdateProfile();
@@ -215,6 +221,27 @@ export const ProfileFlyoutContent = ({
   };
 
   const nameError = visibleErrors.name && PROFILE_NAME_ERROR_MESSAGES[visibleErrors.name];
+
+  // Estimates use real data, so only a profile that rules use, or one for a rule with targets, has
+  // one.
+  const getImpact = (): CostImpact | undefined => {
+    const draftProfile = getDraftProfile(draft);
+    if (!draftProfile) {
+      return undefined;
+    }
+    if (forRule) {
+      return forRule.estimate(draftProfile);
+    }
+    if (!isEditing || !state) {
+      return undefined;
+    }
+    return estimateProfileImpact({
+      dataSources: state.data_sources,
+      rules: state.rules,
+      profiles: state.profiles,
+      nextProfile: draftProfile,
+    });
+  };
 
   return (
     <>
@@ -329,76 +356,84 @@ export const ProfileFlyoutContent = ({
             </>
           }
         >
-          {draft.type === 'indices' ? (
-            <BoostRangeInputs
-              range={indices}
-              onChange={(range) => updateDraft({ indices: { ...indices, ...range } })}
-              error={visibleErrors.indicesRange}
-              disabled={isSaving}
-              testSubjPrefix="indices"
-            />
-          ) : (
-            <>
-              <FormSubsection
-                title={i18n.translate('xpack.boost.profileForm.recentTitle', {
-                  defaultMessage: 'Recent',
-                })}
-              >
-                <BoostRangeInputs
-                  range={recent}
-                  onChange={(range) => updatePeriod('recent', range)}
-                  error={visibleErrors.recentRange}
-                  maxAge={{
-                    value: recent.maxAge,
-                    unit: recent.maxAgeUnit,
-                    onChange: (maxAge) => updatePeriod('recent', { maxAge }),
-                    onUnitChange: (maxAgeUnit) => updatePeriod('recent', { maxAgeUnit }),
-                    error: visibleErrors.recentMaxAge,
-                  }}
-                  disabled={isSaving}
-                  testSubjPrefix="recent"
-                />
-              </FormSubsection>
-              <EuiSpacer size="s" />
-              <FormSubsection
-                title={i18n.translate('xpack.boost.profileForm.standardTitle', {
-                  defaultMessage: 'Standard',
-                })}
-              >
-                <BoostRangeInputs
-                  range={standard}
-                  onChange={(range) => updatePeriod('standard', range)}
-                  error={visibleErrors.standardRange}
-                  maxAge={{
-                    value: standard.maxAge,
-                    unit: standard.maxAgeUnit,
-                    onChange: (maxAge) => updatePeriod('standard', { maxAge }),
-                    onUnitChange: (maxAgeUnit) => updatePeriod('standard', { maxAgeUnit }),
-                    error: visibleErrors.standardMaxAge,
-                  }}
-                  disabled={isSaving}
-                  testSubjPrefix="standard"
-                />
-              </FormSubsection>
-              <EuiSpacer size="s" />
-              <FormSubsection
-                title={i18n.translate('xpack.boost.profileForm.backgroundTitle', {
-                  defaultMessage: 'Background',
-                })}
-              >
-                <BoostRangeInputs
-                  range={background}
-                  onChange={(range) =>
-                    updateDraft({ dataStreams: { ...dataStreams, background: range } })
-                  }
-                  error={visibleErrors.backgroundRange}
-                  reserveMaxAgeColumn
-                  disabled={isSaving}
-                  testSubjPrefix="background"
-                />
-              </FormSubsection>
-            </>
-          )}
+          {/* Focus moving between the boost values keeps a faded estimate; leaving them hides it. */}
+          <div
+            onFocus={() => setIsBoostFocused(true)}
+            onBlur={({ currentTarget, relatedTarget }) =>
+              setIsBoostFocused(currentTarget.contains(relatedTarget))
+            }
+          >
+            {draft.type === 'indices' ? (
+              <BoostRangeInputs
+                range={indices}
+                onChange={(range) => updateDraft({ indices: { ...indices, ...range } })}
+                error={visibleErrors.indicesRange}
+                disabled={isSaving}
+                testSubjPrefix="indices"
+              />
+            ) : (
+              <>
+                <FormSubsection
+                  title={i18n.translate('xpack.boost.profileForm.recentTitle', {
+                    defaultMessage: 'Recent',
+                  })}
+                >
+                  <BoostRangeInputs
+                    range={recent}
+                    onChange={(range) => updatePeriod('recent', range)}
+                    error={visibleErrors.recentRange}
+                    maxAge={{
+                      value: recent.maxAge,
+                      unit: recent.maxAgeUnit,
+                      onChange: (maxAge) => updatePeriod('recent', { maxAge }),
+                      onUnitChange: (maxAgeUnit) => updatePeriod('recent', { maxAgeUnit }),
+                      error: visibleErrors.recentMaxAge,
+                    }}
+                    disabled={isSaving}
+                    testSubjPrefix="recent"
+                  />
+                </FormSubsection>
+                <EuiSpacer size="s" />
+                <FormSubsection
+                  title={i18n.translate('xpack.boost.profileForm.standardTitle', {
+                    defaultMessage: 'Standard',
+                  })}
+                >
+                  <BoostRangeInputs
+                    range={standard}
+                    onChange={(range) => updatePeriod('standard', range)}
+                    error={visibleErrors.standardRange}
+                    maxAge={{
+                      value: standard.maxAge,
+                      unit: standard.maxAgeUnit,
+                      onChange: (maxAge) => updatePeriod('standard', { maxAge }),
+                      onUnitChange: (maxAgeUnit) => updatePeriod('standard', { maxAgeUnit }),
+                      error: visibleErrors.standardMaxAge,
+                    }}
+                    disabled={isSaving}
+                    testSubjPrefix="standard"
+                  />
+                </FormSubsection>
+                <EuiSpacer size="s" />
+                <FormSubsection
+                  title={i18n.translate('xpack.boost.profileForm.backgroundTitle', {
+                    defaultMessage: 'Background',
+                  })}
+                >
+                  <BoostRangeInputs
+                    range={background}
+                    onChange={(range) =>
+                      updateDraft({ dataStreams: { ...dataStreams, background: range } })
+                    }
+                    error={visibleErrors.backgroundRange}
+                    reserveMaxAgeColumn
+                    disabled={isSaving}
+                    testSubjPrefix="background"
+                  />
+                </FormSubsection>
+              </>
+            )}
+          </div>
         </FormSection>
 
         {draft.type === 'indices' && (
@@ -427,15 +462,7 @@ export const ProfileFlyoutContent = ({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <CostEstimate
-          title={i18n.translate('xpack.boost.profileForm.estimateTitle', {
-            defaultMessage: 'Search cost / GB / hour',
-          })}
-          estimate={getDraftEstimate(draft)}
-          comparison={profile && getDraftEstimate(draftFromProfile(profile))}
-          unavailableText={ESTIMATE_UNAVAILABLE}
-        />
-        <FullWidthDivider margin="s" />
+        <CostEstimate impact={getImpact()} type={draft.type} isEditing={isBoostFocused} />
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

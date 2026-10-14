@@ -15,6 +15,7 @@ import type { BoostDataSource, BoostProfile, BoostRule } from './types';
 import {
   estimateDataStreamsVcuRange,
   estimateIndicesVcuRange,
+  estimateProfileImpact,
   estimateProfileVcuRange,
   estimateRuleImpact,
 } from './vcu_estimate';
@@ -86,7 +87,7 @@ describe('estimateDataStreamsVcuRange', () => {
   });
 });
 
-describe('estimateRuleImpact', () => {
+describe('cost impacts', () => {
   const fast: BoostProfile = {
     name: 'fast',
     type: 'indices',
@@ -145,5 +146,30 @@ describe('estimateRuleImpact', () => {
     expect(impact.next.atRest).toBeCloseTo(
       estimateProfileVcuRange(fast).atRest * 10 + performant.atRest * 2
     );
+  });
+
+  it('compares an edited profile across the data its rules apply to', () => {
+    const faster = { ...fast, min_boost: 8 };
+    const impact = estimateProfileImpact({
+      dataSources,
+      rules: [...defaultRules, rule(['products'])],
+      profiles,
+      nextProfile: faster,
+    });
+
+    expect(impact.dataSourceCount).toBe(1);
+    expect(impact.current.atRest).toBeCloseTo(estimateProfileVcuRange(fast).atRest * 10);
+    expect(impact.next.atRest).toBeCloseTo(estimateProfileVcuRange(faster).atRest * 10);
+  });
+
+  it('has no impact for a profile that no rule applies', () => {
+    const impact = estimateProfileImpact({
+      dataSources,
+      rules: defaultRules,
+      profiles,
+      nextProfile: fast,
+    });
+
+    expect(impact.dataSourceCount).toBe(0);
   });
 });

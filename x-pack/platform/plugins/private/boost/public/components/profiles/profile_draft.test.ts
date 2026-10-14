@@ -11,9 +11,8 @@ import {
   createEmptyDraft,
   draftFromProfile,
   draftToProfileInput,
-  getCopyName,
   getDraftErrors,
-  getDraftEstimate,
+  getDraftProfile,
   hasDraftErrors,
 } from './profile_draft';
 
@@ -75,38 +74,17 @@ describe('profile drafts', () => {
   });
 });
 
-describe('getDraftEstimate', () => {
-  it('estimates profiles of both types, ignoring the name', () => {
-    expect(getDraftEstimate(createEmptyDraft())).toBeDefined();
-    expect(getDraftEstimate(draftFromProfile(dataStreamsProfile))).toBeDefined();
+describe('getDraftProfile', () => {
+  it('returns the draft as a profile, whatever its name', () => {
+    const draft = { ...draftFromProfile(dataStreamsProfile), name: '' };
+
+    expect(getDraftProfile(draft)).toEqual(draftToProfileInput(draft));
   });
 
-  it('reflects the additional index options', () => {
-    const draft = createEmptyDraft();
-    const extraCopy = { ...draft, indices: { ...draft.indices, extraCopy: true } };
-
-    expect(getDraftEstimate(extraCopy)?.atPeak).toBeGreaterThan(
-      getDraftEstimate(draft)?.atPeak ?? Infinity
-    );
-  });
-
-  it('has no estimate while a value is invalid', () => {
+  it('has no profile while a value is invalid', () => {
     const draft = draftFromProfile(dataStreamsProfile);
     draft.dataStreams.recent.maxAge = '';
 
-    expect(getDraftEstimate(draft)).toBeUndefined();
-  });
-});
-
-describe('getCopyName', () => {
-  it('appends -copy and drops the elastic- prefix from managed profiles', () => {
-    expect(getCopyName('products-fast', [])).toBe('products-fast-copy');
-    expect(getCopyName('elastic-performant', [])).toBe('performant-copy');
-  });
-
-  it('adds a number when the copy name is taken', () => {
-    expect(getCopyName('products-fast', ['products-fast-copy', 'products-fast-copy-2'])).toBe(
-      'products-fast-copy-3'
-    );
+    expect(getDraftProfile(draft)).toBeUndefined();
   });
 });
