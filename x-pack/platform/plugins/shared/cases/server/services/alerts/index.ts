@@ -26,7 +26,10 @@ import {
 import type { MgetResponse, MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -490,8 +493,8 @@ export class AlertService {
    * not an alert, or belongs to another space. The status sync later writes to the reference by id
    * alone, so all three are rejected here, before the attachment is persisted.
    *
-   * Scheduled and ad-hoc discoveries are both accepted, but only scheduled ones reach alerting
-   * RBAC — see `ensureScheduledAttacksAuthorized`.
+   * Scheduled, ad-hoc and dev-only generator discoveries are all accepted, but only scheduled ones
+   * reach alerting RBAC — see `ensureScheduledAttacksAuthorized`.
    */
   public async ensureAttacksAuthorized({
     attacks,
@@ -574,6 +577,23 @@ export class AlertService {
     await this.alertsClient.ensureAllAlertsAuthorizedRead({ alerts: scheduledAttacks });
   }
 
+  /**
+   * The rule types that write attack discovery alerts.
+   *
+   * Scheduled and ad hoc are the two production producers. The data generator is a dev-only rule
+   * type that writes through the same AAD config into the same index, so its documents are attack
+   * discoveries too; it is registered only in dev mode or on Elastic-staff-owned cloud
+   * deployments, so recognising it here does not widen production exposure. Rejecting it made the
+   * feature untestable with the generator everyone desk tests with.
+   */
+  private static isAttackDiscoveryRuleType(ruleTypeId: string | undefined): boolean {
+    return (
+      ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
+      ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID ||
+      ruleTypeId === ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID
+    );
+  }
+
   private static isAttackInSpace(
     doc: MgetResponseItem<AttackAuthorizationFields>,
     spaceId: string
@@ -583,11 +603,9 @@ export class AlertService {
     }
 
     const source = doc._source;
-    const ruleTypeId = source?.[ALERT_RULE_TYPE_ID];
 
     return (
-      (ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
-        ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID) &&
+      AlertService.isAttackDiscoveryRuleType(source?.[ALERT_RULE_TYPE_ID]) &&
       Array.isArray(source?.[SPACE_IDS]) &&
       source[SPACE_IDS].includes(spaceId)
     );
