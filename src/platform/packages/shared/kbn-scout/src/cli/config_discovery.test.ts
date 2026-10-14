@@ -310,6 +310,67 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(Array.isArray(callArgs[1])).toBe(true);
   });
 
+  describe('"--validate" test tag checks', () => {
+    const firstTest = () => mockTestableModules.modules[0].configs[0].manifest.tests[0];
+
+    const runValidate = () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => flag === 'validate');
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+    };
+
+    it('rejects a test tagged with limits alone', () => {
+      firstTest().tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(
+        /invalid Scout test tag usage[\s\S]*At least one of the following tags is required/
+      );
+    });
+
+    it('rejects conflicting limit tags', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/only-fips', '@limit/except-fips'];
+
+      expect(runValidate).toThrow(/Conflicting limit tags for the 'fips' target attribute/);
+    });
+
+    it('reports a malformed limit tag instead of failing discovery on it', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/onlyfips'];
+
+      expect(runValidate).toThrow(/Invalid limit tag\(s\): @limit\/onlyfips/);
+    });
+
+    it('names the offending file and test', () => {
+      const test = firstTest();
+      test.tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(`${test.location.file}: test "${test.title}"`);
+    });
+
+    it('tolerates tags Playwright derives from test titles', () => {
+      firstTest().tags = ['@timestamp', '@local-stateful-classic'];
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('ignores global setup and teardown hooks, which carry no target tag', () => {
+      const test = firstTest();
+      test.tags = [];
+      test.location = {
+        ...test.location,
+        file: 'plugin/test/scout/ui/parallel_tests/global.setup.ts',
+      };
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('does not run without "--validate"', () => {
+      firstTest().tags = ['@limit/only-fips'];
+      flagsReader.enum.mockReturnValue('all');
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).not.toThrow();
+    });
+  });
+
   describe('"--configs" flag (explicit allow-list)', () => {
     const requestedPath =
       'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts';

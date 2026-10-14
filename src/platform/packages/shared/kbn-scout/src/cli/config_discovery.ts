@@ -9,8 +9,8 @@
 
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
-import { SCOUT_PLAYWRIGHT_CONFIGS_PATH, targetAttributes } from '@kbn/scout-info';
-import type { ScoutTargetAttribute } from '@kbn/scout-info';
+import { SCOUT_PLAYWRIGHT_CONFIGS_PATH, targetAttributes, testTags } from '@kbn/scout-info';
+import type { ScoutTargetAttribute, ScoutTestTagIssueKind } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
@@ -76,6 +76,36 @@ const buildModuleDiscoveryInfo = (
       };
     }),
   }));
+};
+
+// The `validateTags` fixture only sees UI tests that actually run, and a test without a
+// selection tag or with conflicting limits is filtered out before it ever does. API tests have
+// never been tag-validated and some carry tags Playwright derives from their titles, so the
+// generic unsupported-tag rule is left to the fixture.
+const MANIFEST_TAG_ISSUE_KINDS: ReadonlySet<ScoutTestTagIssueKind> = new Set([
+  'invalid-limit-tag',
+  'missing-selection-tag',
+  'conflicting-limit-tags',
+]);
+
+export const validateTestTags = (): void => {
+  const issues = testableModules.allIncludingConfigs.flatMap((module) =>
+    module.configs.flatMap((config) =>
+      config.manifest.tests.filter(isScoutTestFile).flatMap((test) =>
+        testTags
+          .findIssues(test.tags)
+          .filter(({ kind }) => MANIFEST_TAG_ISSUE_KINDS.has(kind))
+          .map(({ message }) => `${test.location.file}: test "${test.title}": ${message}`)
+      )
+    )
+  );
+
+  if (issues.length > 0) {
+    throw createFailError(
+      `Found ${issues.length} invalid Scout test tag usage(s):\n` +
+        issues.map((issue) => `  - ${issue}`).join('\n')
+    );
+  }
 };
 
 // Filters modules by target tags and computes server run flags
@@ -313,6 +343,12 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   // from raw code-changes, so the decision is computed exactly once per build.
   const scope = testingScopePath ? readScoutTestingScope(testingScopePath) : null;
   const isSelective = scope ? scope.kind !== 'full' : false;
+
+  // Ahead of discovery, which would otherwise throw on the first malformed limit tag it meets
+  // instead of reporting every tag issue together.
+  if (flagsReader.boolean('validate')) {
+    validateTestTags();
+  }
 
   // Build initial module discovery info.
   const modulesWithTests = buildModuleDiscoveryInfo(runTargetAttributes);
