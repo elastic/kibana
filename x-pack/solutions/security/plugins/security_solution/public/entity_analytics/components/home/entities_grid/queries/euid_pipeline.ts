@@ -9,6 +9,7 @@ import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { escapeStringValue } from '@kbn/esql-utils';
 import { ALLOWED_ENTITY_TYPES } from '../common';
 import { indentForkBranch } from './esql';
@@ -18,10 +19,11 @@ import { indentForkBranch } from './esql';
 /** `EVAL`s of the user, host and service EUIDs into `user_euid`, `host_euid`, `service_euid`. */
 export const buildPerTypeEuidEvals = (): string[] =>
   ALLOWED_ENTITY_TYPES.flatMap((entityType) => {
-    const fieldEvals = getFieldEvaluationsEsql(entityType);
+    const definition = getBuiltInEntityDefinition(entityType);
+    const fieldEvals = getFieldEvaluationsEsql(definition);
     return [
       ...(fieldEvals ? [`| EVAL ${fieldEvals}`] : []),
-      `| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`,
+      `| EVAL ${getEuidEsqlEvaluation(definition, `${entityType}_euid`)}`,
     ];
   });
 
