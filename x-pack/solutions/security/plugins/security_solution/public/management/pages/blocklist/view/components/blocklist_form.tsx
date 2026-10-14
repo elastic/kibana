@@ -24,9 +24,13 @@ import {
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid, validateWildcardInput } from '@kbn/securitysolution-utils';
-import { isOneOfOperator, isOperator, matchesOperator } from '@kbn/securitysolution-list-utils';
+import {
+  isOneOfOperator,
+  isOperator,
+  matchesOperator,
+  hasEntryEscaping,
+} from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
-
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
@@ -124,9 +128,6 @@ function resolveFieldForOperator(
 function toDisplayField(field: BlocklistConditionEntryField): BlocklistConditionEntryField {
   return field === 'file.name.caseless' ? 'file.name' : field;
 }
-
-// Endpoint artifact matching does not require escaping `\`, `*`, or `?`
-const UNNECESSARY_ESCAPING_REGEX = /\\[\\*?]/;
 
 type ERROR_KEYS = keyof typeof ERRORS;
 
@@ -394,7 +395,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         // warn if the wildcard value is unnecessarily escaped (Endpoint matching doesn't require it)
         if (
           type === ListOperatorTypeEnum.WILDCARD &&
-          values.some((v) => UNNECESSARY_ESCAPING_REGEX.test(v))
+          hasEntryEscaping(nextItem.entries[0], nextItem.os_types)
         ) {
           newValueWarnings.UNNECESSARY_ESCAPING = createValidationMessage(
             ERRORS.UNNECESSARY_ESCAPING
