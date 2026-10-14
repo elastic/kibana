@@ -378,6 +378,24 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
 
       expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
     });
+
+    // Public Cloud URLs close long kibana.request calls around 120s with
+    // `HTTP 502: backend closed connection`. Internal Hunt routes must stay on
+    // the Kibana process address so a parallel sweep can finish Tier 2.
+    it('routes through use_server_info rather than the public Cloud URL', () => {
+      const requestStepsMissingServerInfo = [
+        renderWorker(),
+        parseChild(ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID),
+        parseChild(ALERTZERO_HUNT_WORKFLOW_ID),
+        parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID),
+        parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID),
+      ]
+        .flatMap((workflow) => requestSteps(workflow))
+        .filter((step) => step.with?.use_server_info !== true)
+        .map((step) => step.name);
+
+      expect(requestStepsMissingServerInfo).toEqual([]);
+    });
   });
 
   // Packaging ranks the asset criticality levels when it resolves a slot, and the proposal gate

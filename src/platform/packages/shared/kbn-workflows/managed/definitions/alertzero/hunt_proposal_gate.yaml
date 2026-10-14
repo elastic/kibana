@@ -146,6 +146,7 @@ steps:
     type: kibana.request
     if: "${{ steps.create_and_gate_proposal.error.message != nil and steps.create_and_gate_proposal.error.message != empty }}"
     with:
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ inputs.proposalId }}"
       headers:
@@ -248,6 +249,7 @@ steps:
   - name: requery_created
     type: kibana.request
     with:
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals"
       headers:
@@ -261,6 +263,7 @@ steps:
   - name: requery_created_retry
     type: kibana.request
     with:
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals"
       headers:
@@ -274,6 +277,7 @@ steps:
   - name: requery_pending
     type: kibana.request
     with:
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals"
       headers:
@@ -288,6 +292,7 @@ steps:
   - name: requery_pending_retry
     type: kibana.request
     with:
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals"
       headers:
@@ -302,6 +307,7 @@ steps:
   - name: requery_executing
     type: kibana.request
     with:
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals"
       headers:
@@ -316,6 +322,7 @@ steps:
   - name: requery_executing_retry
     type: kibana.request
     with:
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/internal/proposals"
       headers:
