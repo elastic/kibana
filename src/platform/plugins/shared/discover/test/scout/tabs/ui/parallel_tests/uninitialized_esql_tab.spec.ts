@@ -64,42 +64,17 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'opens query history on a new ES|QL tab and closes it after searching',
+      'builds the recommended queries from the source of the previous tab',
       async ({ pageObjects }) => {
-        const { discover, unifiedTabs, esqlEditor } = pageObjects;
-        const historyPanel = esqlEditor.historyPanel;
+        const { discover, unifiedTabs } = pageObjects;
 
         await discover.goto({ queryMode: 'esql' });
         await discover.waitUntilSearchingHasFinished();
-
         await unifiedTabs.createNewTab();
 
-        await expect(historyPanel).toBeVisible();
-
-        await esqlEditor.setQuery(QUERY);
-        await discover.submitQuery();
-
-        await expect(historyPanel).toBeHidden();
-        await discover.waitUntilSearchingHasFinished();
-      }
-    );
-
-    spaceTest(
-      'keeps manually opened query history open across searches',
-      async ({ pageObjects }) => {
-        const { discover, esqlEditor } = pageObjects;
-        const historyPanel = esqlEditor.historyPanel;
-
-        await discover.goto({ queryMode: 'esql' });
-        await discover.waitUntilSearchingHasFinished();
-        await expect(historyPanel).toBeHidden();
-
-        await esqlEditor.toggleHistoryPanel();
-        await esqlEditor.setQuery(QUERY);
-        await discover.submitQuery();
-        await discover.waitUntilSearchingHasFinished();
-
-        await expect(historyPanel).toBeVisible();
+        await expect(discover.getRecommendedQueries()).toBeVisible();
+        await expect(discover.getRecommendedQueryRunButton('Search all fields')).toBeAttached();
+        await expect(discover.getRecommendedQueries()).toContainText('FROM logstash-*');
       }
     );
 
@@ -116,11 +91,11 @@ spaceTest.describe(
       await discover.getQueryInEsqlButton().click();
 
       expect(await discover.getCurrentQueryMode()).toBe('esql');
-      await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+      await expect(discover.getRecommendedQueries()).toBeVisible();
     });
 
     spaceTest(
-      'shows keyboard shortcuts and disables search on an empty ES|QL tab until a query is entered',
+      'shows recommended queries and disables search on an empty ES|QL tab until a query is entered and submitted',
       async ({ pageObjects }) => {
         const { discover, unifiedTabs, esqlEditor } = pageObjects;
 
@@ -128,14 +103,37 @@ spaceTest.describe(
         await discover.waitUntilSearchingHasFinished();
         await unifiedTabs.createNewTab();
 
-        await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+        await expect(discover.getRecommendedQueries()).toBeVisible();
         await expect(discover.getQuerySubmitButton()).toBeDisabled();
 
         await esqlEditor.setQuery(QUERY);
 
         await expect(discover.getQuerySubmitButton()).toBeEnabled();
-        await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+        await expect(discover.getRecommendedQueries()).toBeVisible();
+
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getRecommendedQueries()).toBeHidden();
       }
     );
+
+    spaceTest('runs a recommended query on a new ES|QL tab', async ({ pageObjects }) => {
+      const { discover, unifiedTabs } = pageObjects;
+
+      await discover.goto({ queryMode: 'esql' });
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedTabs.createNewTab();
+
+      const runButton = discover.getRecommendedQueryRunButton('Aggregate with STATS');
+      await runButton.hover();
+      await expect(runButton).toHaveCSS('opacity', '1');
+      await runButton.click();
+      await discover.waitUntilSearchingHasFinished();
+
+      await expect(discover.getRecommendedQueries()).toBeHidden();
+      expect(await discover.getEsqlQueryValue()).toContain('| STATS count = COUNT(*');
+      await expect(discover.getErrorCalloutTitle()).toBeHidden();
+      expect(await discover.getHitCount()).toBe('1');
+    });
   }
 );

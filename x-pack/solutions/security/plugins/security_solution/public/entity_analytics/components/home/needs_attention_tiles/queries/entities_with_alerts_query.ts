@@ -6,14 +6,15 @@
  */
 
 import type { TimeRange } from '../../entities_grid/common';
-import { getAlertsIndex, buildLookback } from '../../entities_grid/queries/esql';
+import { getAlertsIndex } from '../../entities_grid/queries/esql';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
+import { buildPeriodCondition } from './tile_period';
+import type { TilePeriod } from './tile_period';
 
 /**
- * Builds a single ES|QL query that computes three tiles in one pass over the alerts index:
+ * Builds a single ES|QL query that computes two tiles in one pass over the alerts index:
  * - severely alerting: entities with at least one high- or critical-severity alert,
- * - watchlisted & alerting: watchlisted entities with an alert of any severity,
- * - new & alerting: entities first seen in the window with an alert of any severity.
+ * - watchlisted & alerting: watchlisted entities with an alert of any severity.
  *
  * This avoids running the EUID pipeline once per tile. Each tile reads its own columns
  * from the single STATS result.
@@ -27,20 +28,24 @@ import { buildAlertEuidPipeline } from './alert_euid_pipeline';
  * qualifies for the watchlist tile when it is watchlisted AND has an alert in the
  * selected time window (based on alert @timestamp, per Marios call 2025-09-18).
  *
- * COUNT_DISTINCT and VALUES ignore null values, so nulling out non-watchlisted rows
+ * COUNT and VALUES ignore null values, so nulling out non-watchlisted rows
  * is all that is needed to produce the watchlist-only aggregation.
+ *
+ * `period` shifts the whole window back by one range ('previous'), for the period-over-period
+ * delta. The previous period only needs the counts, so it leaves out the entity id lists.
  */
 export const buildAlertBasedTilesQuery = (
   entitiesIndexName: string,
   spaceId: string,
   timeRange: TimeRange = '24h',
-  entityFilterClauses: string[] = []
+  entityFilterClauses: string[] = [],
+  period: TilePeriod = 'current'
 ): string => {
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${getAlertsIndex(spaceId)}`);
-  parts.push(`| WHERE @timestamp >= ${buildLookback(timeRange)}`);
+  parts.push(`| WHERE ${buildPeriodCondition('@timestamp', timeRange, period)}`);
   parts.push(...buildAlertEuidPipeline());
 
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
@@ -59,23 +64,22 @@ export const buildAlertBasedTilesQuery = (
     `| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id`
   );
 
-  // The resolved entity's own doc, for its first_seen: an alias record carries its own.
-  parts.push(`| RENAME effective_id AS \`entity.id\``);
-  parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
-  parts.push(`| EVAL is_new = entity.lifecycle.first_seen >= ${buildLookback(timeRange)}`);
+  // Per-tile ids: null for entities outside the tile so COUNT/VALUES ignore them.
+  parts.push(`| EVAL severe_id = CASE(has_severe_alert, effective_id, null)`);
+  parts.push(`| EVAL watchlisted_id = CASE(is_watchlisted, effective_id, null)`);
 
-  // Per-tile ids — null for entities outside the tile so COUNT_DISTINCT/VALUES ignore them.
-  parts.push(`| EVAL severe_id = CASE(has_severe_alert, entity.id, null)`);
-  parts.push(`| EVAL watchlisted_id = CASE(is_watchlisted, entity.id, null)`);
-  parts.push(`| EVAL new_alerting_id = CASE(is_new, entity.id, null)`);
-
+  // Each row is one resolved entity (the STATS BY effective_id above), so counting the non-null ids
+  // is exact. COUNT_DISTINCT would only estimate: it is approximate above about 3,000 values.
   parts.push(`| STATS`);
-  parts.push(`    severe_alerts_count      = COUNT_DISTINCT(severe_id),`);
-  parts.push(`    severe_alerts_entity_ids = VALUES(severe_id),`);
-  parts.push(`    watchlisted_count        = COUNT_DISTINCT(watchlisted_id),`);
-  parts.push(`    watchlisted_entity_ids   = VALUES(watchlisted_id),`);
-  parts.push(`    new_alerting_count       = COUNT_DISTINCT(new_alerting_id),`);
-  parts.push(`    new_alerting_entity_ids  = VALUES(new_alerting_id)`);
+  if (period === 'previous') {
+    parts.push(`    severe_alerts_count      = COUNT(severe_id),`);
+    parts.push(`    watchlisted_count        = COUNT(watchlisted_id)`);
+  } else {
+    parts.push(`    severe_alerts_count      = COUNT(severe_id),`);
+    parts.push(`    severe_alerts_entity_ids = VALUES(severe_id),`);
+    parts.push(`    watchlisted_count        = COUNT(watchlisted_id),`);
+    parts.push(`    watchlisted_entity_ids   = VALUES(watchlisted_id)`);
+  }
 
   return parts.join('\n');
 };
