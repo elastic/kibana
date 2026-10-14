@@ -7,7 +7,7 @@
 
 import type { ChangeHistoryScope } from '../types/change_history_scope';
 import { DEFAULT_CHANGE_HISTORY_PAGE_SIZE } from '../types/change_history_constants';
-import { ChangeHistorySupports } from '../types';
+import type { ChangeHistorySupports } from '../types';
 
 export const CHANGE_HISTORY_QUERY_KEY = ['change-history'] as const;
 
