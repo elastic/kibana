@@ -11,11 +11,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
-  envFromDatasetsProfile,
-  createCorrectnessAnalysisEvaluator,
   createQuantitativeCorrectnessEvaluators,
   createGroundednessAnalysisEvaluator,
   createQuantitativeGroundednessEvaluator,
+  resolveProfileEnvOverrides,
   createCriteriaEvaluator,
   type EvaluationCriterion,
 } from '@kbn/evals';
@@ -28,6 +27,7 @@ import { planReplay, summarizePlan, type ReplayCell } from '../../matrix/replay_
 import { fetchScoreDocs } from '../../matrix/fetch_score_docs';
 import { anonymizeCell, buildAliasMap } from '../../matrix/anonymize_cell';
 import { runRejudge, type CellJudge, type RejudgeScore } from '../../matrix/run_rejudge';
+import { createCorrectnessAnalysis } from '../../matrix/correctness_analysis';
 
 /** The subset of RequestInit the rejudge fetch shim forwards. */
 interface FetchInit {
@@ -289,10 +289,19 @@ export const rejudgeCmd: Command<void> = {
     }
     log.info(`Jury "${jury.name}" recomputes: ${jury.evaluatorNames.join(', ')}`);
 
-    // Only consult the profile when one was asked for: envFromDatasetsProfile
-    // shells out to Vault, which blocks for minutes when no Vault is reachable.
+    // Only consult the profile when one was asked for: resolving it can shell
+    // out to Vault, which blocks for minutes when no Vault is reachable.
     const profileFlag = flagsReader.string('profile') ?? undefined;
-    const profileEnv = profileFlag ? envFromDatasetsProfile(REPO_ROOT, profileFlag) : {};
+    const profileEnv = profileFlag
+      ? (
+          await resolveProfileEnvOverrides({
+            repoRoot: REPO_ROOT,
+            log,
+            flagsReader,
+            profile: profileFlag,
+          })
+        ).profileEnvOverrides
+      : {};
     const evaluationsKbnUrl = profileEnv.EVAL_KBN_URL ?? process.env.EVAL_KBN_URL;
     const evaluationsKbnApiKey = profileEnv.EVAL_KBN_API_KEY ?? process.env.EVAL_KBN_API_KEY;
 
@@ -629,7 +638,7 @@ function buildJuryEvaluator({
     };
   }
 
-  const correctness = createCorrectnessAnalysisEvaluator({ inferenceClient, log });
+  const correctness = createCorrectnessAnalysis({ inferenceClient, log });
   const groundedness = createGroundednessAnalysisEvaluator({ inferenceClient, log });
   const quantitative = [
     ...createQuantitativeCorrectnessEvaluators(),
@@ -638,7 +647,7 @@ function buildJuryEvaluator({
 
   return async (args) => {
     const [correctnessResult, groundednessResult] = await Promise.all([
-      correctness.evaluate(args as never),
+      correctness(args),
       groundedness.evaluate(args as never),
     ]);
 

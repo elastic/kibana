@@ -94,10 +94,7 @@ export type {
   OnExperimentStart,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
-export {
-  createQuantitativeCorrectnessEvaluators,
-  createCorrectnessAnalysisEvaluator,
-} from './src/evaluators/correctness';
+export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { LlmCorrectnessEvaluationPrompt } from './src/evaluators/correctness/prompt';
 export type { CorrectnessAnalysis } from './src/evaluators/correctness/types';
 export {
@@ -139,7 +136,6 @@ export {
   type UpsertDatasetInput,
   type DatasetWithId,
 } from './src/utils/evals_client';
-export { envFromDatasetsProfile } from './src/cli/profiles';
 export { EvaluatorApiClient, type MapContextFn } from './src/utils/evaluator_api_client';
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
