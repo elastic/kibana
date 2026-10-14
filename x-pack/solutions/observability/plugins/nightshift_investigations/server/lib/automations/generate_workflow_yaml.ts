@@ -336,6 +336,9 @@ function buildMessageFilterTerms(messageFilter: string): string {
  * keywords `and` and `or` are also only recognised between whitespace characters. An escaped
  * whitespace character is never seen as whitespace by those rules, but still parses to the same
  * character, so the phrase stays literal text and keeps its order.
+ *
+ * This works around a KQL parser bug, https://github.com/elastic/kibana/issues/297569. Once it is
+ * fixed, the whitespace escaping can be removed.
  */
 function escapeKqlWildcardTerm(text: string): string {
   return text
