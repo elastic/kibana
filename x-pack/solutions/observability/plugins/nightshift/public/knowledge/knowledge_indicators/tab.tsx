@@ -6,11 +6,6 @@
  */
 
 import React from 'react';
-import { DateRangeRedirect } from '../../components/date_range_redirect';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
 
-export const KnowledgeIndicatorsTab = (): React.ReactElement => (
-  <DateRangeRedirect>
-    <KnowledgeIndicatorsTable />
-  </DateRangeRedirect>
-);
+export const KnowledgeIndicatorsTab = (): React.ReactElement => <KnowledgeIndicatorsTable />;
