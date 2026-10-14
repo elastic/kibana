@@ -1286,6 +1286,7 @@ packages:
   - 'x-pack/platform/packages/shared/ingest-pipelines'
   - 'x-pack/platform/packages/shared/isomer/isomer'
   - 'x-pack/platform/packages/shared/isomer/isomer-components'
+  - 'x-pack/platform/packages/shared/isomer/isomer-primitives-charts'
   - 'x-pack/platform/packages/shared/isomer/isomer-theme'
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'
   - 'x-pack/platform/packages/shared/kbn-ai-assistant'

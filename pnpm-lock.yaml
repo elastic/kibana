@@ -2525,6 +2525,9 @@ importers:
       '@kbn/isomer-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/isomer
+      '@kbn/isomer-primitives-charts':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-charts
       '@kbn/isomer-theme':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-theme
@@ -9039,6 +9042,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer: {}
 
   x-pack/platform/packages/shared/isomer/isomer-components: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-primitives-charts: {}
 
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
