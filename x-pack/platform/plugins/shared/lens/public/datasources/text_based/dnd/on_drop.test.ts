@@ -45,13 +45,11 @@ describe('onDrop', () => {
       label: 'Threshold',
       meta: { type: 'number' },
       valueSource: { type: 'query' },
-      previousStaticValue: 1000,
     },
     {
       ...column1,
       fieldName: '',
       valueSource: { type: 'unconfigured' },
-      previousStaticValue: 1000,
     },
   ])('reference column $valueSource.type', (referenceColumn) => {
     it.each<DropType>(['duplicate_compatible', 'replace_duplicate_compatible', 'move_compatible'])(

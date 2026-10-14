@@ -150,7 +150,7 @@ describe('TextBasedDimensionEditor', () => {
     expect(capturedSelectedField).toBeUndefined();
   });
 
-  it('auto-selects the only numeric field and restores the previous static value', async () => {
+  it('auto-selects the only numeric field and defaults static controls without a result', async () => {
     render(
       <StatefulEditor
         {...defaultProps}
@@ -163,10 +163,10 @@ describe('TextBasedDimensionEditor', () => {
     fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
     await waitFor(() => expect(capturedSelectedField?.fieldName).toBe('Field Two'));
     fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
-    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
+    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(0);
   });
 
-  it('preserves the current query result when switching to static', async () => {
+  it('keeps the query active until the temporary static value is edited', async () => {
     const setState = jest.fn();
     render(
       <TextBasedDimensionEditor
@@ -180,10 +180,18 @@ describe('TextBasedDimensionEditor', () => {
     );
     await waitToLoad();
     fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
+    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
+    expect(setState).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
+    expect(setState).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
+    fireEvent.change(screen.getByTestId('lns-indexPattern-static_value-input'), {
+      target: { value: '43' },
+    });
     const nextState = setState.mock.calls[0][0](stateWithColumn());
     expect(nextState.layers.layer1.columns[0]).toMatchObject({
       columnId: 'dim1',
-      valueSource: { type: 'static', value: 42 },
+      valueSource: { type: 'static', value: 43 },
     });
   });
 

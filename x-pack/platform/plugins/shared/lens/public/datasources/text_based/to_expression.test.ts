@@ -62,7 +62,6 @@ describe('toExpression', () => {
               columnId: 'threshold',
               fieldName: '',
               valueSource: { type: 'unconfigured' },
-              previousStaticValue: 42,
             },
           ],
         },

@@ -21,7 +21,7 @@ const LEFT = 'lnsXY_yReferenceLineLeftPanel';
 const RIGHT = 'lnsXY_yReferenceLineRightPanel';
 const TRIGGER = 'lns-dimensionTrigger-textBased';
 const SINGLE_COLUMN_QUERY =
-  'FROM logstash-* | STATS threshold = COUNT(*) / 20 | EVAL message = "threshold"';
+  'FROM logstash-* | STATS threshold = COUNT(*) * 0 + 42 | EVAL message = "threshold"';
 const SHARED_QUERY =
   'FROM logstash-* | STATS lower = COUNT(*) / 20, upper = COUNT(*) / 10 | EVAL message = "thresholds"';
 
@@ -140,9 +140,10 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
 
       await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
       await lens.dimensions.switchToStaticValue();
-      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('123');
+      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('0');
+      await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '0');
       await lens.closeDimensionEditor();
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 123');
+      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 0');
 
       await lens.workspace.submitEsqlQuery(SINGLE_COLUMN_QUERY);
       await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
@@ -156,8 +157,18 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
 
       await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
       await lens.dimensions.switchToStaticValue();
-      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('123');
+      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('42');
       await lens.closeDimensionEditor();
+      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText('threshold');
+      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('threshold');
+
+      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
+      await lens.dimensions.switchToStaticValue();
+      await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '43');
+      await lens.closeDimensionEditor();
+      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
+        'Static value: 43'
+      );
       await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       await cancelLensInlineEditorAndWaitClosed({ lens });
     }

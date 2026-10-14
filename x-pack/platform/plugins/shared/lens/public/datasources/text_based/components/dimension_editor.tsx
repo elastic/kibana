@@ -46,6 +46,7 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const [columnsQuery, setColumnsQuery] = useState<string>();
+  const [temporaryStaticValue, setTemporaryStaticValue] = useState(false);
   const query = props.state.layers[props.layerId]?.query;
   const { euiTheme } = useEuiTheme();
   const {
@@ -182,7 +183,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   );
 
   const isStatic = Boolean(
-    supportStaticValue && (!selectedField || selectedField.valueSource?.type === 'static')
+    supportStaticValue &&
+      (temporaryStaticValue || !selectedField || selectedField.valueSource?.type === 'static')
   );
 
   useEffect(() => {
@@ -231,6 +233,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   ]);
   const setStaticValue = (value: number) => {
     if (!Number.isFinite(value)) return;
+    setTemporaryStaticValue(false);
     setState((previousState) => {
       const layer = previousState.layers[layerId];
       const previousColumn = layer.columns.find((column) => column.columnId === columnId);
@@ -281,9 +284,9 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   defaultMessage: 'Static value',
                 }),
                 onClick: () => {
-                  const value =
-                    selectedField?.previousStaticValue ?? activeTable?.rows[0]?.[columnId];
-                  setStaticValue(typeof value === 'number' ? value : 0);
+                  if (selectedField && selectedField.valueSource?.type !== 'static') {
+                    setTemporaryStaticValue(true);
+                  }
                 },
               },
               {
@@ -294,6 +297,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   defaultMessage: 'ES|QL',
                 }),
                 onClick: () => {
+                  setTemporaryStaticValue(false);
                   if (selectedField?.valueSource?.type !== 'static' && selectedField) return;
                   setState((previousState) => {
                     const layer = previousState.layers[layerId];
@@ -307,10 +311,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                       label: previousColumn?.customLabel ? previousColumn.label : undefined,
                       variable: undefined,
                       valueSource: { type: 'unconfigured' as const },
-                      previousStaticValue:
-                        previousColumn?.valueSource?.type === 'static'
-                          ? previousColumn.valueSource.value
-                          : previousColumn?.previousStaticValue,
                     };
                     return mergeLayer({
                       state: previousState,
@@ -342,7 +342,11 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           >
             <EuiFieldNumber
               value={
-                selectedField?.valueSource?.type === 'static' ? selectedField.valueSource.value : 0
+                selectedField?.valueSource?.type === 'static'
+                  ? selectedField.valueSource.value
+                  : typeof activeTable?.rows[0]?.[columnId] === 'number'
+                  ? activeTable.rows[0][columnId]
+                  : 0
               }
               onChange={(event) => {
                 if (event.target.value !== '') setStaticValue(Number(event.target.value));
