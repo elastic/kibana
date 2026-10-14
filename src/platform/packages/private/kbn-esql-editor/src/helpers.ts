@@ -324,52 +324,52 @@ export const esqlEditorChromeOverrides: KbnCodeEditorChromeOverrides = ({ euiThe
 export const getEditorScopedStyles = (theme: UseEuiTheme<{}>, scope: CodeEditorScope) => {
   return css`
     ${scope.overflowWidgets} .suggest-details .scrollbar {
-      display: none !important;
+      display: none;
     }
 
     ${scope.editor} .monaco-hover,
     ${scope.overflowWidgets} .monaco-hover {
       line-height: 1.5rem;
-      border-radius: ${theme.euiTheme.border.radius.medium} !important;
-      box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+      border-radius: ${theme.euiTheme.border.radius.medium};
+      box-shadow: ${theme.euiTheme.shadows.l.down};
       z-index: ${theme.euiTheme.levels.flyout};
     }
 
     // Fixes inline suggestions hover styles and only
     ${scope.editor} .monaco-hover:has(.inlineSuggestionsHints),
     ${scope.overflowWidgets} .monaco-hover:has(.inlineSuggestionsHints) {
-      height: auto !important;
-      width: auto !important;
-      overflow-y: hidden !important;
+      height: auto;
+      width: auto;
+      overflow-y: hidden;
       a {
-        color: ${theme.euiTheme.colors.textParagraph} !important;
+        color: ${theme.euiTheme.colors.textParagraph};
       }
       .inlineSuggestionStatusBarItemLabel {
-        font-size: 10px !important;
+        font-size: 10px;
         display: flex;
         align-items: center;
-        color: ${theme.euiTheme.colors.textParagraph} !important;
+        color: ${theme.euiTheme.colors.textParagraph};
       }
       .slider {
         display: none;
       }
       .keybinding {
-        opacity: 1 !important;
+        opacity: 1;
       }
       .monaco-keybinding-key {
-        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued} !important;
-        box-shadow: none !important;
-        border: 1px solid ${theme.euiTheme.colors.borderBasePlain} !important;
+        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued};
+        box-shadow: none;
+        border: 1px solid ${theme.euiTheme.colors.borderBasePlain};
       }
       .codicon-toolbar-more {
-        opacity: 0 !important;
+        opacity: 0;
       }
       .codicon-inline-suggestion-hints-next {
-        margin-right: ${theme.euiTheme.size.xs} !important;
+        margin-right: ${theme.euiTheme.size.xs};
       }
       .codicon-inline-suggestion-hints-previous,
       .codicon-inline-suggestion-hints-next {
-        color: ${theme.euiTheme.colors.textParagraph} !important;
+        color: ${theme.euiTheme.colors.textParagraph};
       }
     }
 
@@ -387,11 +387,11 @@ export const getEditorScopedStyles = (theme: UseEuiTheme<{}>, scope: CodeEditorS
     ${scope.overflowWidgets} .suggest-widget,
     ${scope.overflowWidgets} .suggest-details-container {
       // Suggestions must be rendered above flyouts
-      z-index: ${theme.euiTheme.levels.toast} !important;
+      z-index: ${theme.euiTheme.levels.toast};
     }
 
     ${scope.overflowWidgets} .suggest-widget.message {
-      display: none !important;
+      display: none;
     }
 
     ${scope.overflowWidgets} .suggest-details-container {
@@ -413,7 +413,7 @@ export const getEditorScopedStyles = (theme: UseEuiTheme<{}>, scope: CodeEditorS
 
     // fixes the bug with the broken suggestion details https://github.com/elastic/kibana/issues/217998
     ${scope.overflowWidgets} .suggest-details > .monaco-scrollable-element > .body > .header > .type {
-      white-space: normal !important;
+      white-space: normal;
     }
 
     ${scope.overflowWidgets} .suggest-details .rendered-markdown h1 {
@@ -424,7 +424,7 @@ export const getEditorScopedStyles = (theme: UseEuiTheme<{}>, scope: CodeEditorS
     }
 
     ${scope.overflowWidgets} .suggest-details [data-code] {
-      overflow-x: auto !important;
+      overflow-x: auto;
     }
   `;
 };
