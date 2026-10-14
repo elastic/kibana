@@ -24,16 +24,16 @@ import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
 import { pdfErrors } from './errors';
 
 const mockExtractDocument = jest.fn();
-jest.mock('./extract_document', () => ({
+jest.mock('./extraction/extract_document', () => ({
   extractDocument: (params: unknown) => mockExtractDocument(params),
 }));
 
 const mockIsPdfExtractionAvailable = jest.fn();
-jest.mock('./extraction_availability', () => ({
+jest.mock('./extraction/extraction_availability', () => ({
   isPdfExtractionAvailable: () => mockIsPdfExtractionAvailable(),
 }));
 
-import { createPdfAttachmentType } from './pdf';
+import { createPdfAttachmentType } from './document';
 
 const validData: PdfAttachmentData = { file_id: 'file-abc', name: 'invoice.pdf', text: 'Hello' };
 

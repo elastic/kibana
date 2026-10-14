@@ -6,7 +6,7 @@
  */
 
 import { setTimeout as sleep } from 'timers/promises';
-import { pdfErrors } from './errors';
+import { pdfErrors } from '../errors';
 
 const DEFAULT_DELAY_MS = 2000;
 const SLOW_DELAY_MS = 30 * 1000;

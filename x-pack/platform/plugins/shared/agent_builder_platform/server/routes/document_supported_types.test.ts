@@ -9,11 +9,11 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 
 const mockIsPdfExtractionAvailable = jest.fn();
-jest.mock('../attachment_types/pdf/extraction_availability', () => ({
+jest.mock('../attachment_types/document/extraction/extraction_availability', () => ({
   isPdfExtractionAvailable: () => mockIsPdfExtractionAvailable(),
 }));
 
-import { pdfAvailabilityPath, registerPdfAvailabilityRoute } from './pdf_availability';
+import { pdfAvailabilityPath, registerPdfAvailabilityRoute } from './document_supported_types';
 
 describe('registerPdfAvailabilityRoute', () => {
   const setup = () => {

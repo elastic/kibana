@@ -18,7 +18,7 @@ import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
-import { createPdfAttachmentType } from './pdf/pdf';
+import { createPdfAttachmentType } from './document/document';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,

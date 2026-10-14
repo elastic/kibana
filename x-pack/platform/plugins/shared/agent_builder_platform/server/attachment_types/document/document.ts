@@ -25,8 +25,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import { StreamTooLargeError, streamToBuffer } from '../utils/stream_to_buffer';
 import { pdfErrors } from './errors';
-import { extractDocument } from './extract_document';
-import { isPdfExtractionAvailable } from './extraction_availability';
+import { extractDocument } from './extraction/extract_document';
+import { isPdfExtractionAvailable } from './extraction/extraction_availability';
 
 /**
  * Get the PDF and make sure it is of the correct file kind.

@@ -22,8 +22,8 @@ import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
-import { checkPdfExtractionAvailability } from './attachment_types/pdf/extraction_availability';
-import { registerPdfAvailabilityRoute } from './routes/pdf_availability';
+import { checkPdfExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
+import { registerPdfAvailabilityRoute } from './routes/document_supported_types';
 
 export class AgentBuilderPlatformPlugin
   implements

@@ -20,7 +20,7 @@ import {
   USE_FAKE_EXTRACTION,
   // FAKE_EXTRACTION:end
 } from './constants';
-import { pdfErrors } from './errors';
+import { pdfErrors } from '../errors';
 // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
 import { fakeExtractDocument } from './fake_extract_document';
 // FAKE_EXTRACTION:end
