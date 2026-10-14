@@ -15,6 +15,7 @@ import {
 import { mergeFeatureOverride, type InferenceFeatureSetting } from '../inference_override';
 import {
   assertBulkOk,
+  FP_TP_BOOTSTRAP_RULE_ID,
   createEntity,
   deleteDocumentsById,
   deleteEntitiesOnHosts,
@@ -24,10 +25,83 @@ import {
   writeIdentityFields,
   type FpTpLiveKbnRequest,
 } from '../world';
-import { ANONYMIZATION_FIELDS_FIND_ROUTE, anonymizationFieldsIndexForSpace } from './constants';
+import {
+  AD_WORKFLOWS_SETTING,
+  ANONYMIZATION_FIELDS_FIND_ROUTE,
+  anonymizationFieldsIndexForSpace,
+  UI_SETTINGS_ROUTE,
+} from './constants';
 import { workerModeCleanupTargets, type WorkerModeSeedPlan } from './plan';
 
 const PREVIOUS_SEED_PAGE_SIZE = 10_000;
+const DETECTION_ENGINE_API_VERSION = '2023-10-31';
+const BOOTSTRAP_RULE_QUERY = 'data_stream.dataset:never-matches-fptp-seeder-bootstrap';
+const ALERTS_INDEX_TIMEOUT_MS = 180_000;
+const ALERTS_INDEX_POLL_INTERVAL_MS = 5_000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Keeps one enabled query rule that never matches in the space. The space's alerts
+ * index is created by its first rule run, not by `POST /api/detection_engine/index`,
+ * which only acknowledges. Same rule as the serverless seeder (kibana#297538).
+ */
+export const ensureBootstrapNoMatchRule = async (kbnRequest: FpTpLiveKbnRequest): Promise<void> => {
+  const existing = await kbnRequest({
+    method: 'GET',
+    path: `/api/detection_engine/rules?rule_id=${FP_TP_BOOTSTRAP_RULE_ID}`,
+    version: DETECTION_ENGINE_API_VERSION,
+  });
+  if (existing.statusCode < 400) {
+    return;
+  }
+  if (existing.statusCode !== 404) {
+    throw new Error(
+      `Failed to look up bootstrap rule (${existing.statusCode}): ${kbnErrorMessage(existing.body)}`
+    );
+  }
+  const created = await kbnRequest({
+    method: 'POST',
+    path: '/api/detection_engine/rules',
+    version: DETECTION_ENGINE_API_VERSION,
+    body: {
+      name: 'FP/TP seeder bootstrap no-match rule',
+      rule_id: FP_TP_BOOTSTRAP_RULE_ID,
+      enabled: true,
+      index: ['logs-*'],
+      query: BOOTSTRAP_RULE_QUERY,
+      from: 'now-1m',
+      interval: '1m',
+      severity: 'low',
+      risk_score: 1,
+      description: 'Always-on no-match rule that provisions the alerts index.',
+      type: 'query',
+      language: 'lucene',
+      max_signals: 1,
+      threat: [],
+    },
+  });
+  if (created.statusCode >= 400 && created.statusCode !== 409) {
+    throw new Error(
+      `Failed to create bootstrap rule (${created.statusCode}): ${kbnErrorMessage(created.body)}`
+    );
+  }
+};
+
+export const waitForAlertsIndex = async (
+  esClient: EsClient,
+  index: string,
+  timeoutMs: number = ALERTS_INDEX_TIMEOUT_MS
+): Promise<void> => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await esClient.indices.exists({ index })) {
+      return;
+    }
+    await sleep(ALERTS_INDEX_POLL_INTERVAL_MS);
+  }
+  throw new Error(`Detection alerts index ${index} did not appear within ${timeoutMs}ms`);
+};
 
 const readInferenceFeatures = async (
   kbnRequest: FpTpLiveKbnRequest
@@ -119,8 +193,42 @@ export const ensureAnonymizationFields = async (
 };
 
 /**
- * One-time setup for a worker-mode seed: the detection alerts index, an installed Entity
- * Store with extraction stopped (it would otherwise build entities from the seeded
+ * Turns on the space's Attack Discovery workflows Advanced Setting. It is off in a new
+ * space, and generation then fails every batch while the Worker run still completes.
+ */
+export const ensureAttackDiscoveryWorkflowsSetting = async (
+  kbnRequest: FpTpLiveKbnRequest
+): Promise<void> => {
+  const current = await kbnRequest({ method: 'GET', path: UI_SETTINGS_ROUTE });
+  if (current.statusCode >= 400) {
+    throw new Error(
+      `Failed to read Advanced Settings (${current.statusCode}): ${kbnErrorMessage(current.body)}`
+    );
+  }
+  const setting = (
+    current.body as { settings?: Record<string, { userValue?: unknown }> } | undefined
+  )?.settings?.[AD_WORKFLOWS_SETTING];
+  if (setting?.userValue === true) {
+    return;
+  }
+  const updated = await kbnRequest({
+    method: 'POST',
+    path: UI_SETTINGS_ROUTE,
+    body: { changes: { [AD_WORKFLOWS_SETTING]: true } },
+  });
+  if (updated.statusCode >= 400) {
+    throw new Error(
+      `Failed to enable ${AD_WORKFLOWS_SETTING} (${updated.statusCode}): ${kbnErrorMessage(
+        updated.body
+      )}`
+    );
+  }
+};
+
+/**
+ * One-time setup for a worker-mode seed: the detection alerts index (through a no-match
+ * rule that stays enabled in the space), the Attack Discovery workflows setting, an
+ * installed Entity Store with extraction stopped (it would otherwise build entities from the seeded
  * events), the reasoning mapping and the anonymization fields. Extraction stays stopped
  * afterwards, because the Worker reads the entities long after seeding. Returns the
  * reasoning connector id.
@@ -137,12 +245,11 @@ export const ensureWorkerModePrerequisites = async ({
   reasoningConnectorId?: string;
 }): Promise<string> => {
   await ensureFpTpSeedPrerequisites(kbnRequest);
+  await ensureAttackDiscoveryWorkflowsSetting(kbnRequest);
   const connectorId = await ensureReasoningMapping(kbnRequest, reasoningConnectorId);
   await ensureAnonymizationFields(esClient, kbnRequest, space);
-  const { alertsIndex } = workerModeCleanupTargets(space);
-  if (!(await esClient.indices.exists({ index: alertsIndex }))) {
-    throw new Error(`Detection alerts index ${alertsIndex} does not exist after setup`);
-  }
+  await ensureBootstrapNoMatchRule(kbnRequest);
+  await waitForAlertsIndex(esClient, workerModeCleanupTargets(space).alertsIndex);
   return connectorId;
 };
 

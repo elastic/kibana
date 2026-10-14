@@ -10,6 +10,8 @@ import type { FpTpLiveKbnRequest } from '../world';
 import { buildWorkerModePlan } from './plan';
 import {
   cleanupWorkerModeSpace,
+  ensureAttackDiscoveryWorkflowsSetting,
+  ensureBootstrapNoMatchRule,
   ensureAnonymizationFields,
   ensureReasoningMapping,
   seedWorkerModePlan,
@@ -207,5 +209,44 @@ describe('ensureAnonymizationFields', () => {
         'qa-fp'
       )
     ).rejects.toThrow('Open Attack discovery once');
+  });
+});
+
+describe('ensureAttackDiscoveryWorkflowsSetting', () => {
+  it('turns the setting on in the space when it is unset', async () => {
+    const kbnRequest = okKbnRequest({ settings: {} });
+    await ensureAttackDiscoveryWorkflowsSetting(kbnRequest);
+    expect(kbnRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/internal/kibana/settings',
+      body: { changes: { 'securitySolution:enableAttackDiscoveryWorkflows': true } },
+    });
+  });
+
+  it('writes nothing when the setting is already on', async () => {
+    const kbnRequest = okKbnRequest({
+      settings: { 'securitySolution:enableAttackDiscoveryWorkflows': { userValue: true } },
+    });
+    await ensureAttackDiscoveryWorkflowsSetting(kbnRequest);
+    expect(kbnRequest.mock.calls.filter(([{ method }]) => method === 'POST')).toEqual([]);
+  });
+});
+
+describe('ensureBootstrapNoMatchRule', () => {
+  it('creates the enabled no-match rule when the space has none', async () => {
+    const kbnRequest = jest.fn(async ({ method }: KbnCall) =>
+      method === 'GET' ? { statusCode: 404, body: {} } : { statusCode: 200, body: {} }
+    ) as jest.Mock & FpTpLiveKbnRequest;
+    await ensureBootstrapNoMatchRule(kbnRequest);
+    const [[create]] = kbnRequest.mock.calls.filter(([{ method }]) => method === 'POST');
+    expect(create.body).toEqual(
+      expect.objectContaining({ rule_id: 'fptp-seeder-bootstrap-nomatch', enabled: true })
+    );
+  });
+
+  it('keeps an existing rule', async () => {
+    const kbnRequest = okKbnRequest({ id: 'rule' });
+    await ensureBootstrapNoMatchRule(kbnRequest);
+    expect(kbnRequest.mock.calls.filter(([{ method }]) => method === 'POST')).toEqual([]);
   });
 });

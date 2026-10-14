@@ -13,6 +13,7 @@ import {
   enableAdWorker,
   findGeneratedAttacks,
   isReviewSettled,
+  readGenerationErrors,
   startFloorRun,
   toInvestigationId,
   toReviewProgress,
@@ -321,5 +322,41 @@ describe('findGeneratedAttacks', () => {
         },
       })
     );
+  });
+});
+
+describe('readGenerationErrors', () => {
+  it('returns the batch errors of the generation run under the floor run', async () => {
+    const kbnRequest = routeStub([
+      [
+        ({ path }) => path === '/api/workflows/executions/floor-run/children',
+        [{ executionId: 'runner-run', workflowId: 'system-security-attack-discovery-worker' }],
+      ],
+      [
+        ({ path }) => path === '/api/workflows/executions/runner-run/children',
+        [
+          {
+            executionId: 'generation-run',
+            workflowId: 'system-security-attack-discovery-batched-generation',
+          },
+        ],
+      ],
+      [
+        ({ path }) => path.startsWith('/api/workflows/executions/generation-run?'),
+        {
+          ...execution(ExecutionStatus.COMPLETED),
+          context: {
+            output: {
+              batch_errors: [
+                { message: 'Attack Discovery workflows are not enabled for this space' },
+              ],
+            },
+          },
+        },
+      ],
+    ]);
+    await expect(readGenerationErrors(kbnRequest, 'floor-run')).resolves.toEqual([
+      'Attack Discovery workflows are not enabled for this space',
+    ]);
   });
 });

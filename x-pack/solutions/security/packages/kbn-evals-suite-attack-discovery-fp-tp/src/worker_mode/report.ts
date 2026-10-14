@@ -29,6 +29,8 @@ export interface WorkerModeTriggerResult {
   readonly generatedAt: string;
   /** Empty when the Worker generated no attack from the seeded alerts. */
   readonly attacks: readonly WorkerModeAttackResult[];
+  /** Batch errors of the generation run, read when it produced no attack. */
+  readonly generationErrors?: readonly string[];
 }
 
 /** Grades each generated attack's review against the seeded example's gold. */
@@ -58,9 +60,14 @@ export const formatWorkerModeReport = (
 ): string[] => {
   const header = `Floor run ${result.floorExecutionId} ended ${result.floorStatus} (example ${plan.exampleId}, expected ${plan.expectedOutcome})`;
   if (result.attacks.length === 0) {
+    const errors = result.generationErrors ?? [];
     return [
       header,
-      'NO ATTACK GENERATED: the Worker produced no attack citing the seeded alerts. Check the floor run and its generation child in the Workflows UI.',
+      `NO ATTACK GENERATED: the Worker produced no attack citing the seeded alerts. ${
+        errors.length > 0
+          ? `Generation batch errors: ${[...new Set(errors)].join('; ')}`
+          : 'Generation reported no batch error; check the floor run and its children in the Workflows UI.'
+      }`,
     ];
   }
   return [

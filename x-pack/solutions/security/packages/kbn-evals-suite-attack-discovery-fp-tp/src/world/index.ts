@@ -19,6 +19,7 @@ export type { FpTpEntityRoleKey } from './chain_entities';
 export {
   FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_BASE_TIME,
+  FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_INDEX,
   FP_TP_RAW_EVENT_PAGE_SIZE,
   FP_TP_RAW_EVENT_WINDOW_MS,

@@ -47,6 +47,14 @@ export const fpTpAdhocAttackIndexForSpace = (space: string): string =>
 export const fpTpEntityReadAliasForSpace = (space: string): string => `entities-latest-${space}`;
 
 /**
+ * Id of the always-enabled no-match query rule the seeder keeps in a space. On
+ * serverless `POST /api/detection_engine/index` only acknowledges the alerts
+ * index; the backing data stream is provisioned by the first rule execution,
+ * so the seeder needs one enabled rule that can never match.
+ */
+export const FP_TP_BOOTSTRAP_RULE_ID = 'fptp-seeder-bootstrap-nomatch';
+
+/**
  * Inference feature id the managed FP/TP analysis workflow resolves its
  * `alertzero-thin-agent` connector through. Keep in sync with
  * ALERTZERO_REASONING_INFERENCE_FEATURE_ID in @kbn/alertzero-common.

@@ -61,6 +61,15 @@ describe('formatWorkerModeReport', () => {
     expect(lines[1]).toMatch(/^NO ATTACK GENERATED/);
   });
 
+  it('reports the generation batch errors when no attack was generated', () => {
+    const lines = formatWorkerModeReport(plan, {
+      ...trigger,
+      attacks: [],
+      generationErrors: ['not enabled', 'not enabled'],
+    });
+    expect(lines[1]).toMatch(/Generation batch errors: not enabled$/);
+  });
+
   it('returns one line per attack with its ids, verdict and result', () => {
     const lines = formatWorkerModeReport(plan, {
       ...trigger,

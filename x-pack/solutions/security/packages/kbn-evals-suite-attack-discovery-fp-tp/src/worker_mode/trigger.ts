@@ -318,6 +318,47 @@ export const waitForFloorRun = async ({
   throw new Error(`Floor run ${current} did not finish before the wait ran out`);
 };
 
+const GENERATION_WORKFLOW_ID = 'system-security-attack-discovery-batched-generation';
+
+const childExecutionIds = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  executionId: string
+): Promise<Array<{ executionId: string; workflowId: string }>> =>
+  requireOk<Array<{ executionId: string; workflowId: string }>>(
+    `Failed to read the children of execution ${executionId}`,
+    await kbnRequest({
+      method: 'GET',
+      path: `/api/workflows/executions/${encodeURIComponent(executionId)}/children`,
+      version: PUBLIC_API_VERSION,
+    })
+  );
+
+/**
+ * Reads the batch errors of the generation run under a floor run. A failed batch does
+ * not fail the floor run, so a run that generated nothing still ends `completed`.
+ */
+export const readGenerationErrors = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  floorExecutionId: string
+): Promise<string[]> => {
+  const runners = await childExecutionIds(kbnRequest, floorExecutionId);
+  const generations = (
+    await Promise.all(runners.map(({ executionId }) => childExecutionIds(kbnRequest, executionId)))
+  )
+    .flat()
+    .filter(({ workflowId }) => workflowId === GENERATION_WORKFLOW_ID);
+  const executions = await Promise.all(
+    generations.map(({ executionId }) => readExecution(kbnRequest, executionId))
+  );
+  return executions.flatMap((execution) => {
+    const output = (execution.context?.output ?? stepOutput(execution, 'emit_result')) as
+      | { batch_errors?: unknown }
+      | undefined;
+    const errors = Array.isArray(output?.batch_errors) ? output?.batch_errors ?? [] : [];
+    return errors.map((error) => String((error as { message?: unknown }).message ?? error));
+  });
+};
+
 export interface GeneratedAttack {
   readonly attackId: string;
   readonly title: string;

@@ -60,6 +60,11 @@ export const SERVICE_ACCOUNT_ROUTE = '/internal/security/service_account';
 export const ANONYMIZATION_FIELDS_FIND_ROUTE =
   '/api/security_ai_assistant/anonymization_fields/_find';
 
+/** Per-space Advanced Setting the generation step refuses to run without. */
+export const AD_WORKFLOWS_SETTING = 'securitySolution:enableAttackDiscoveryWorkflows';
+
+export const UI_SETTINGS_ROUTE = '/internal/kibana/settings';
+
 /** Per-space index Attack Discovery generation reads; created lazily (security-team#20129). */
 export const anonymizationFieldsIndexForSpace = (space: string): string =>
   `.kibana-elastic-ai-assistant-anonymization-fields-${space}`;

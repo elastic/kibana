@@ -27,6 +27,7 @@ export {
   enableAdWorker,
   ensureAdWorkerServiceAccount,
   findGeneratedAttacks,
+  readGenerationErrors,
   startFloorRun,
   waitForFloorRun,
   waitForReviews,

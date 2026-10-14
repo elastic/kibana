@@ -18,6 +18,7 @@ import {
   ensureWorkerModePrerequisites,
   findGeneratedAttacks,
   formatWorkerModeReport,
+  readGenerationErrors,
   resolveWorkerModeExample,
   seedWorkerModePlan,
   startFloorRun,
@@ -170,6 +171,9 @@ run(
         floorStatus: floor.status,
         generatedAt: new Date().toISOString(),
         attacks: toWorkerModeAttackResults(attacks, reviews, plan.expectedOutcome),
+        ...(attacks.length === 0
+          ? { generationErrors: await readGenerationErrors(kbnRequest, floor.id) }
+          : {}),
       };
       await writeManifest(manifestPath, plan, result);
       for (const line of formatWorkerModeReport(plan, result)) {
