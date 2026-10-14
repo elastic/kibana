@@ -197,9 +197,9 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `workflow_hitl_timed_out` {applies_to}`stack: preview 9.5+` | `success` | A workflow human-input or approval wait has timed out [executionId=x]. |
 
 ::::{note}
-`alert_update` is written for alert workflow status changes made through:
+`alert_update` is written for alert workflow status, tag, and assignee changes made through:
   * The RAC bulk update API (`/internal/rac/alerts/*`)
-  * {applies_to}`stack: ga 9.6+` The Security Solution status routes (`/api/detection_engine/signals/status`, `/api/detection_engine/attacks/status`, and the internal unified alerts status route)
+  * {applies_to}`stack: ga 9.6+` The Security Solution alert routes (`/api/detection_engine/signals/status`, `/api/detection_engine/signals/tags`, `/api/detection_engine/signals/assignees`, `/api/detection_engine/attacks/status`, `/api/detection_engine/attacks/tags`, `/api/detection_engine/attacks/assignees`, and the internal unified alerts status, tag, and assignee routes)
 
 Intent is logged per requested alert ID, or once for query-based updates. Handler validation failures, unavailable alert targets, and Elasticsearch update failures are logged as failures.
 ::::
