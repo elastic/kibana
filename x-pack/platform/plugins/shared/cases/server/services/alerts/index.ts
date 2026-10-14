@@ -555,19 +555,19 @@ export class AlertService {
    * document so it can be filtered on, not hidden — so the caller-scoped `mget` that produced
    * `docs` is the authorization: it is the same Elasticsearch index privilege gate the attack
    * discovery APIs read ad-hoc discoveries with, and the one the status sync writes through.
+   * `docs` pairs with `attacks` by position: `mget` returns one entry per requested doc, in
+   * request order. That positional pairing is load-bearing. Matching on `_index` instead would
+   * silently skip this check, because `doc._index` is the concrete backing index Elasticsearch
+   * resolved, while `attack.index` is whatever the caller sent — and `metadata.index` is
+   * caller-controlled. Naming the alias rather than the backing index would then match nothing,
+   * leave `scheduledAttacks` empty, and bypass alerting RBAC entirely.
    */
   private async ensureScheduledAttacksAuthorized(
     attacks: AlertInfo[],
     docs: Array<MgetResponseItem<AttackAuthorizationFields>>
   ): Promise<void> {
-    const scheduledKeys = new Set(
-      docs
-        .filter((doc) => AlertService.isScheduledAttack(doc))
-        .map((doc) => `${doc._index}:${doc._id}`)
-    );
-
-    const scheduledAttacks = attacks.filter((attack) =>
-      scheduledKeys.has(`${attack.index}:${attack.id}`)
+    const scheduledAttacks = attacks.filter((_, position) =>
+      AlertService.isScheduledAttack(docs[position])
     );
 
     if (scheduledAttacks.length <= 0) {
