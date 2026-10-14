@@ -867,6 +867,7 @@
     "@kbn/isomer-components": "workspace:*",
     "@kbn/isomer-plugin": "workspace:*",
     "@kbn/isomer-primitives-charts": "workspace:*",
+    "@kbn/isomer-primitives-vega": "workspace:*",
     "@kbn/isomer-theme": "workspace:*",
     "@kbn/item-buffer": "workspace:*",
     "@kbn/json-schemas": "workspace:*",

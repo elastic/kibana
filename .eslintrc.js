@@ -964,6 +964,17 @@ module.exports = {
     },
 
     /**
+     * Isomer Vega overrides
+     */
+    {
+      // Inlines Vega's SVG, scrubbed and checked by `renderVegaSvg`, and the spec escaped for a `<script>`.
+      files: ['x-pack/platform/packages/shared/isomer/isomer-primitives-vega/src/primitive.tsx'],
+      rules: {
+        'react/no-danger': 'off',
+      },
+    },
+
+    /**
      * Custom Content overrides
      */
     {

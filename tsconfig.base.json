@@ -1701,6 +1701,8 @@
       "@kbn/isomer-plugin/*": ["./x-pack/platform/plugins/shared/isomer/*"],
       "@kbn/isomer-primitives-charts": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-charts"],
       "@kbn/isomer-primitives-charts/*": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-charts/*"],
+      "@kbn/isomer-primitives-vega": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-vega"],
+      "@kbn/isomer-primitives-vega/*": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-vega/*"],
       "@kbn/isomer-theme": ["./x-pack/platform/packages/shared/isomer/isomer-theme"],
       "@kbn/isomer-theme/*": ["./x-pack/platform/packages/shared/isomer/isomer-theme/*"],
       "@kbn/item-buffer": ["./src/platform/packages/private/kbn-item-buffer"],
