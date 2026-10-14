@@ -21,6 +21,7 @@ import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
   buildTeamsSendChannelMessageInput,
+  executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
   TEAMS_CONTENT_MAX_LENGTH,
@@ -279,5 +280,15 @@ export async function sendWaitForApprovalNotifications({
       abortController,
     });
     assertConnectorSucceeded(result);
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
+      abortController,
+    });
   }
 }

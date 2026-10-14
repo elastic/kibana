@@ -39,9 +39,9 @@ import type {
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
-import { useInventoryRequestSchema } from '../../hooks/use_inventory_request_schema';
 import { getUptimeUrl } from '../../lib/get_uptime_url';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -56,7 +56,7 @@ export const NodeContextMenu = withEuiTheme(
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const { preferredSchema } = useWaffleOptionsContext();
-    const effectiveSchema = useInventoryRequestSchema(nodeType, preferredSchema);
+    const effectiveSchema = getInventoryRequestSchema(preferredSchema);
     const inventoryModel = findInventoryModel(nodeType);
     const { id: nodeIdField } = findInventoryFields(nodeType, effectiveSchema);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;

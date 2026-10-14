@@ -20,9 +20,11 @@ import {
 } from './schema/triggers/manual_trigger_schema';
 import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
 import {
+  HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
   MAX_HITL_EMAIL_ADDRESS_LENGTH,
   MAX_HITL_EMAIL_RECIPIENTS,
@@ -421,6 +423,69 @@ export const HitlTeamsChannelSchema = z.object({
     ),
 });
 
+const MAX_HITL_HTTP_HEADER_COUNT = 20;
+const MAX_HITL_HTTP_HEADER_NAME_LENGTH = 256;
+
+export const HITL_HTTP_DESTINATION_ERROR = 'Set connector-id or url. Either one is enough.';
+
+export const HitlHttpChannelSchema = z
+  .object({
+    'connector-id': z
+      .string()
+      .min(1)
+      .max(CONNECTOR_ID_MAX_LENGTH)
+      .optional()
+      .describe(
+        'Saved HTTP connector id or name. When set, that connector supplies authentication. When omitted, the workflow HTTP system connector sends the request.'
+      ),
+    url: z
+      .string()
+      .min(1)
+      .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+      .optional()
+      .describe(
+        'Full request URL. Required when connector-id is omitted. When connector-id is set, this replaces the connector URL. Rendered as a Liquid template.'
+      ),
+    path: z
+      .string()
+      .min(1)
+      .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+      .optional()
+      .describe(
+        'Path appended to the connector URL, or to url when url is set. Rendered as a Liquid template.'
+      ),
+    method: z
+      .enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+      .optional()
+      .describe('HTTP method. Defaults to POST.'),
+    headers: z
+      .record(
+        z.string().min(1).max(MAX_HITL_HTTP_HEADER_NAME_LENGTH),
+        z.string().max(MAX_HITL_MESSAGE_LENGTH)
+      )
+      .refine((headers) => Object.keys(headers).length <= MAX_HITL_HTTP_HEADER_COUNT, {
+        message: `At most ${MAX_HITL_HTTP_HEADER_COUNT} headers`,
+      })
+      .optional()
+      .describe('Optional request headers. Names and values are Liquid templates.'),
+    body: z
+      .string()
+      .min(1)
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe(
+        'Optional request body template. For waitForInput use {{context.hitl.externalFormLink}}. For waitForApproval use {{context.hitl.externalApproveLink}} and {{context.hitl.externalRejectLink}}.'
+      ),
+  })
+  .strict()
+  .refine((channel) => Boolean(channel['connector-id'] || channel.url), {
+    message: HITL_HTTP_DESTINATION_ERROR,
+    path: ['url'],
+  })
+  .meta({
+    anyOf: [{ required: ['connector-id'] }, { required: ['url'] }],
+  });
+
 const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
   slack_api:
@@ -429,6 +494,7 @@ const hitlChannelDescriptions = {
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
   teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
+  http: 'Send the response links in an HTTP request. Set a connector-id or a url. Uses the workflow HTTP connector, including its destination controls.',
 } as const;
 
 export const WaitForInputChannelsSchema = z
@@ -448,6 +514,7 @@ export const WaitForInputChannelsSchema = z
     teams: HitlTeamsChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.teams),
+    http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -461,6 +528,7 @@ export const WaitForApprovalChannelsSchema = z
     email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
     teams: HitlTeamsChannelSchema.loose().optional().describe(hitlChannelDescriptions.teams),
+    http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -1399,6 +1467,20 @@ export const WorkflowHitlTemplateContextSchema = z.object({
     .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
     .optional()
     .describe('External GET resume URL with token set. Append `&<field>=<value>` per with.schema.'),
+  [HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe(
+      'External waitForApproval approve URL. Populated when rendering an HTTP approval request.'
+    ),
+  [HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe(
+      'External waitForApproval reject URL. Populated when rendering an HTTP approval request.'
+    ),
 });
 
 export const WorkflowTemplatePersistedContextSchema = z.object({

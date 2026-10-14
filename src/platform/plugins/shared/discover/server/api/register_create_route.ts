@@ -30,6 +30,7 @@ export const registerCreateRoute = (
     .post({
       path: basePath,
       summary: 'Create a Discover session',
+      description: 'Creates a Discover session and returns its ID, full state, and metadata.',
       ...routeConfig,
     })
     .addVersion(

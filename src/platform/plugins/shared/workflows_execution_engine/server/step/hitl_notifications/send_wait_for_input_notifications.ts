@@ -25,6 +25,7 @@ import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
   buildTeamsSendChannelMessageInput,
+  executeHitlHttpChannel,
   fitHitlRenderedTextPreservingLink,
   fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
@@ -292,5 +293,15 @@ export async function sendWaitForInputNotifications({
       abortController,
     });
     assertConnectorSucceeded(result);
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
+      abortController,
+    });
   }
 }

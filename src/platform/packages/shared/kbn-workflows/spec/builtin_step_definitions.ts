@@ -348,6 +348,16 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         connector-id: my-teams-connector
         team-id: team-id
         channel-id: channel-id`,
+        `- name: ask_over_http
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"form":"{{ context.hitl.externalFormLink }}"}`,
       ],
     },
   },
@@ -386,7 +396,12 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       teams:
         connector-id: my-teams-connector
         team-id: team-id
-        channel-id: channel-id`,
+        channel-id: channel-id
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"approve":"{{ context.hitl.externalApproveLink }}","reject":"{{ context.hitl.externalRejectLink }}"}`,
       ],
     },
   },

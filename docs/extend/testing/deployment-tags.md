@@ -77,7 +77,7 @@ Use this tag for **platform** specs that need to run across every standard deplo
 - `tags.serverless.observability.complete`
 - `tags.serverless.security.complete`
 
-Workplace AI is excluded because it has no stateful counterpart.
+VectorDB is excluded because it has no stateful counterpart.
 
 ::::{warning}
 `tags.deploymentAgnostic` runs your test across all solutions, which is expensive. If your test lives in a solution module, use explicit targets instead (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`).
@@ -134,12 +134,6 @@ lands.
 | `tags.serverless.security.complete`   | {icon}`logo_security` Security (Complete)        |
 | `tags.serverless.security.essentials` | {icon}`logo_security` Security (Essentials)      |
 | `tags.serverless.security.ease`       | {icon}`logo_security` Security (EASE)            |
-
-#### Workplace AI [scout-deployment-tags-serverless-workplaceai]
-
-| Helper                        | Project type                               |
-| ----------------------------- | ------------------------------------------ |
-| `tags.serverless.workplaceai` | {icon}`logo_workplace_search` Workplace AI |
 
 #### VectorDB [scout-deployment-tags-serverless-vectordb]
 

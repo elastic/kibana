@@ -29,6 +29,12 @@ export const toStoredTabTypeState = (
         counterAggregation: apiTabTypeState.counter_aggregation,
         gaugeAggregation: apiTabTypeState.gauge_aggregation,
         histogramPercentile: apiTabTypeState.histogram_percentile,
+        ...(apiTabTypeState.grid_sort_field !== undefined && {
+          gridSortField: apiTabTypeState.grid_sort_field,
+        }),
+        ...(apiTabTypeState.grid_sort_direction !== undefined && {
+          gridSortDirection: apiTabTypeState.grid_sort_direction,
+        }),
       };
   }
 };
@@ -49,6 +55,12 @@ export const fromStoredTabTypeState = (
         counter_aggregation: tabTypeState.counterAggregation,
         gauge_aggregation: tabTypeState.gaugeAggregation,
         histogram_percentile: tabTypeState.histogramPercentile,
+        ...(tabTypeState.gridSortField !== undefined && {
+          grid_sort_field: tabTypeState.gridSortField,
+        }),
+        ...(tabTypeState.gridSortDirection !== undefined && {
+          grid_sort_direction: tabTypeState.gridSortDirection,
+        }),
       };
   }
 };
