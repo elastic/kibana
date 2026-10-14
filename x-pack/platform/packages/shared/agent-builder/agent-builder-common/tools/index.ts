@@ -29,8 +29,6 @@ export {
   isInternalTool,
   isExcludedFromFilestore,
   isAttachmentTool,
-  getInternalToolKind,
-  type InternalToolKind,
 } from './constants';
 export {
   type ByIdsToolSelection,

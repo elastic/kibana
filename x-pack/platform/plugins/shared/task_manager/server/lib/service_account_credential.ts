@@ -65,6 +65,18 @@ export const getServiceAccountCredentialAttributes = (
 };
 
 /**
+ * Returns the workload a stored credential runs as, or `undefined` if it isn't a complete
+ * service account credential.
+ */
+export const getCredentialRunAs = (credential: TaskCredential): TaskRunAs | undefined => {
+  const { type, workloadType, workloadId, spaceId, expectedServiceAccountId = null } = credential;
+  if (type !== SERVICE_ACCOUNT_CREDENTIAL_TYPE || !workloadType || !workloadId || !spaceId) {
+    return undefined;
+  }
+  return { workloadType, workloadId, spaceId, expectedServiceAccountId };
+};
+
+/**
  * Whether a stored credential runs as the same workload and pin as `runAs`. A credential that isn't
  * a service account matches only the absence of `runAs`.
  */

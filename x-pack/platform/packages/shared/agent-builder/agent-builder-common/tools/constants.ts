@@ -28,6 +28,7 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   executeWorkflow: platformCoreTool('execute_workflow'),
   createVisualization: platformCoreTool('create_visualization'),
+  createDiscoverSession: platformCoreTool('create_discover_session'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   listWorkflowExecutions: platformCoreTool('list_workflow_executions'),
@@ -146,55 +147,6 @@ const isInternalToolName = (toolName: string) => Object.values(internalTools).in
 
 export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isLegacyFilestoreTool(toolName) || isInternalToolName(toolName);
-
-/**
- * What an internal tool does for the agent:
- * - `runtime`: agent scaffolding (planning, skill loading, attachment bookkeeping, user
- *   interaction). It does not read or change user data.
- * - `data_access`: reads data or acts on the user's behalf (files, shell, APIs, sub-agents).
- */
-export type InternalToolKind = 'runtime' | 'data_access';
-
-const internalToolKinds = {
-  runSubagent: 'data_access',
-  sendMessageToAgent: 'data_access',
-  sleep: 'runtime',
-  writeTodos: 'runtime',
-  loadSkill: 'runtime',
-  searchRelevantSkills: 'runtime',
-  askUserQuestion: 'runtime',
-  readFile: 'data_access',
-  listFiles: 'data_access',
-  bash: 'data_access',
-  setConversationMetadata: 'runtime',
-  discoverApis: 'data_access',
-  describeApi: 'data_access',
-  describeApiType: 'data_access',
-  executeApi: 'data_access',
-} as const satisfies Record<keyof typeof internalTools, InternalToolKind>;
-
-const internalToolKindById = new Map<string, InternalToolKind>(
-  (Object.keys(internalTools) as Array<keyof typeof internalTools>).map((key) => [
-    internalTools[key],
-    internalToolKinds[key],
-  ])
-);
-
-/**
- * Returns the kind of an internal tool, or `undefined` when the id is not an internal tool.
- * Known attachment tools are runtime tools; legacy filestore tools access data. Any other id,
- * including an unknown `attachments.*` id, is unclassified so callers surface it instead of
- * silently dropping it.
- */
-export const getInternalToolKind = (toolName: string): InternalToolKind | undefined => {
-  if (isAttachmentTool(toolName)) {
-    return 'runtime';
-  }
-  if (isLegacyFilestoreTool(toolName)) {
-    return 'data_access';
-  }
-  return internalToolKindById.get(toolName);
-};
 
 /**
  * Internal tools whose results are still written to the `/tool_calls` filestore.

@@ -15,7 +15,12 @@ import {
   isEqlSafeLiteral,
   UNASSIGNED_CONDITION,
 } from './assign_by_condition';
-import { assignShard, BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
+import {
+  assignShard,
+  BROWSER_COST_MIB,
+  LIGHTWEIGHT_COST_MIB,
+  UNASSIGNED_AGENT_ID,
+} from './assign_shards';
 
 describe('isEqlSafeLiteral', () => {
   it('accepts ordinary agent ids', () => {
@@ -54,6 +59,7 @@ describe('agentIdFromCondition', () => {
     expect(agentIdFromCondition(null)).toBeUndefined();
     expect(agentIdFromCondition('')).toBeUndefined();
     expect(agentIdFromCondition(UNASSIGNED_CONDITION)).toBeUndefined();
+    expect(agentIdCondition(UNASSIGNED_AGENT_ID)).toBe(UNASSIGNED_CONDITION);
     expect(agentIdFromCondition("${host.id} == 'host-1'")).toBeUndefined();
     expect(agentIdFromCondition("not (${agent.id} == 'agent-1')")).toBeUndefined();
   });

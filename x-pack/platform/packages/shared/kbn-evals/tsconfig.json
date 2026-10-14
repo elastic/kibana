@@ -30,7 +30,6 @@
     "@kbn/es-errors",
     "@kbn/es",
     "@kbn/dot-text",
-    "@kbn/dev-utils",
-    "@kbn/agent-builder-common"
+    "@kbn/dev-utils"
   ]
 }

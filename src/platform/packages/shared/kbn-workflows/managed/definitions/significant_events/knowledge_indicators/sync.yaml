@@ -1,18 +1,19 @@
 # Knowledge Indicator (KI) sync (groundedness) sweep workflow.
 #
 # Runs on its own schedule, independent of the continuous-extraction toggle, and
-# reconciles every stream that has knowledge indicators:
-#   1. Fetches all streams with KIs from the _streams_with_indicators endpoint.
-#   2. For each stream, calls the per-stream _reconcile route (groundedness check,
+# reconciles every source of one space that has knowledge indicators:
+#   1. Fetches all sources with KIs from the _streams_with_indicators endpoint.
+#   2. For each source, calls the per-source _reconcile route (groundedness check,
 #      expiry-driven tombstoning, orphan Streams-owned rule cleanup).
 #
 # Per-stream failures do not abort the sweep (iteration-on-failure: continue),
 # and each _reconcile call retries transient failures on its own.
 #
-# This is a managed workflow installed by the significant_events plugin. It is
-# created disabled and enabled on demand by SyncWorkflowService.ensureEnabled,
-# bootstrapped from the feature-extraction path. Once enabled it keeps running on
-# its own schedule, independent of extraction.
+# This is a per-space managed workflow installed by the significant_events
+# plugin. It is installed and enabled on demand in a space by
+# SyncWorkflowService.ensureEnabled, bootstrapped from the feature-extraction
+# path. Once enabled it keeps running on its own schedule, independent of
+# extraction. Every request is prefixed with the space the workflow runs in.
 
 version: '1'
 name: 'KI Sync'
@@ -39,11 +40,11 @@ triggers:
   - type: manual
 steps:
   # Step 1: Fetch every stream that has knowledge indicators.
-  - name: get_streams
+  - name: get_sources
     type: kibana.request
     with:
       method: GET
-      path: '/internal/streams/_knowledge_indicators/_streams_with_indicators'
+      path: '/s/{{ workflow.spaceId }}/internal/streams/_knowledge_indicators/_streams_with_indicators'
       headers:
         x-elastic-internal-origin: 'kibana'
     on-failure:
@@ -55,11 +56,11 @@ steps:
   # Step 2: Only proceed if there are streams to reconcile.
   - name: has_candidates
     type: if
-    condition: 'steps.get_streams.output.streams[0].streamName:*'
+    condition: 'steps.get_sources.output.sources[0].sourceId:*'
     steps:
       - name: reconcile_all
         type: foreach
-        foreach: '${{ steps.get_streams.output.streams }}'
+        foreach: '${{ steps.get_sources.output.sources }}'
         iteration-on-failure:
           continue: true
         steps:
@@ -67,7 +68,7 @@ steps:
             type: kibana.request
             with:
               method: POST
-              path: '/internal/streams/{{ foreach.item.streamName }}/knowledge_indicators/_reconcile'
+              path: '/s/{{ workflow.spaceId }}/internal/streams/{{ foreach.item.sourceId }}/knowledge_indicators/_reconcile'
               headers:
                 x-elastic-internal-origin: 'kibana'
             on-failure:

@@ -15,6 +15,8 @@ import type { InvestigationSubjectType, InvestigationTriggerType } from './workf
 
 export type { Severity } from '@kbn/significant-events-schema';
 
+export { MAX_RULE_NAMES } from './automation_limits';
+
 export {
   INVESTIGATION_SUBJECT_TYPES,
   type InvestigationSubjectType,
@@ -53,22 +55,35 @@ import type {
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
-  title: string;
+  /**
+   * Optional headline from the caller (significant event title, alert rule name). Accepted for
+   * compatibility and passed to the investigation workflow as its `title` input, but not stored
+   * as the investigation's title: Agent Builder generates that from the investigation's first
+   * round, and UIs name the investigation after its first subject until then.
+   */
+  title?: string;
+  /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
-  stream_names?: string[];
-  connector_id?: string;
   /**
-   * Passed to the workflow engine as `concurrency_key`. Two starts with the same key
-   * cancel-and-replace the in-flight run, so use a stable, unique caller-side id.
+   * Nightshift source ids the investigation should scope its queries to. The
+   * investigation workflow resolves them to slug and ES|QL view.
    */
-  concurrency_key?: string;
+  source_ids?: string[];
+  /** Optional chat model connector or inference endpoint id for this run. */
+  connector_id?: string;
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
 }
 
 export interface StartInvestigationResponse {
+  /**
+   * The investigation, which is an Agent Builder conversation with this id. A start whose
+   * subjects overlap an open investigation continues that one, so the id can be an existing
+   * investigation's. The investigation workflow creates the conversation, so for a few seconds
+   * after a first start the id may not resolve yet.
+   */
   investigation_id: string;
 }
 
