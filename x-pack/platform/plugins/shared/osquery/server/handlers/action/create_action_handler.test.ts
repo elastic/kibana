@@ -354,6 +354,46 @@ describe('createActionHandler', () => {
     expect(result.response.queries[0].error).not.toBe(PACK_NOT_FOUND);
   });
 
+  it('dispatches the inline query when rule_run has no saved query or pack reference', async () => {
+    const soClient = {
+      get: jest.fn(),
+      find: jest.fn(),
+      resolve: jest.fn(),
+    };
+    mockedGetInternalSOClient.mockReturnValue(
+      soClient as unknown as ReturnType<typeof mockedGetInternalSOClient>
+    );
+    mockedBuildQueries.mockImplementation(jest.requireActual('./create_queries').buildQueries);
+    const { context, bulkCreate } = buildOsqueryContext();
+    const ecsMapping = { 'host.uptime': { field: 'total_seconds' } };
+
+    const result = await createActionHandler(
+      context,
+      {
+        query: 'select * from uptime;',
+        ecs_mapping: ecsMapping,
+        agent_ids: [TEST_AGENT],
+      },
+      {
+        space: { id: 'production' },
+        dispatch: {
+          entryPoint: 'rule_run',
+          preflight: undefined,
+        },
+      }
+    );
+
+    expect(result.fleetActionsCount).toBe(1);
+    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    expect(result.response.queries).toEqual([
+      expect.objectContaining({ query: 'select * from uptime;', ecs_mapping: ecsMapping }),
+    ]);
+    expect(result.response.queries[0].error).toBeUndefined();
+    expect(soClient.get).not.toHaveBeenCalled();
+    expect(soClient.find).not.toHaveBeenCalled();
+    expect(soClient.resolve).not.toHaveBeenCalled();
+  });
+
   it('rethrows non-404 pack errors when entry point is live_query', async () => {
     mockedGetInternalSOClient.mockReturnValue({
       get: jest.fn().mockRejectedValue(new Error('elasticsearch unavailable')),
