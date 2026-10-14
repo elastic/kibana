@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { MAX_LOADED_ROWS } from '../hooks/use_entity_grid_data';
 import { useEntityGridView } from './entities_grid_view_context';
 
-/** Rows per Load More. */
-export const ROWS_PER_LOAD = 10;
+/** Rows per load: all the rows the grid shows, in one load. */
+export const ROWS_PER_LOAD = MAX_LOADED_ROWS;
 
 const LOAD_MORE_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.grid.loadMoreLabel',

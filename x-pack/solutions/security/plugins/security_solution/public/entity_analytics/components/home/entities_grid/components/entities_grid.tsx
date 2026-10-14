@@ -176,16 +176,20 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     isLoadingMore,
     loadMore,
     prefetch,
-  } = useEntityGridData({
-    sortField,
-    sortDirection,
-    pageSize: ROWS_PER_LOAD,
-    searchExpression,
-    entityExpression,
-    timeRange,
-    rowsMode,
-    keepFields,
-  });
+    onRowsInViewChange,
+  } = useEntityGridData(
+    {
+      sortField,
+      sortDirection,
+      pageSize: ROWS_PER_LOAD,
+      searchExpression,
+      entityExpression,
+      timeRange,
+      rowsMode,
+      keepFields,
+    },
+    { enrichRowsInView: true }
+  );
 
   const onAddColumn = useCallback(
     (columnId: string) =>
@@ -277,6 +281,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       isAtLoadLimit,
       isLoadingMore,
       loadMore: onLoadMore,
+      onRowsInViewChange,
     }),
     [
       cellContext,
@@ -294,6 +299,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       isAtLoadLimit,
       isLoadingMore,
       onLoadMore,
+      onRowsInViewChange,
     ]
   );
 

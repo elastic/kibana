@@ -42,6 +42,7 @@ const mockGridData = (data: Partial<ReturnType<typeof useEntityGridData>> = {}) 
     isLoadingMore: false,
     loadMore,
     prefetch: jest.fn(),
+    onRowsInViewChange: jest.fn(),
     ...data,
   } as ReturnType<typeof useEntityGridData>);
 
@@ -62,6 +63,15 @@ const renderGrid = (props: Partial<EntitiesGridProps> = {}) =>
   );
 
 describe('EntitiesGrid', () => {
+  // jsdom has no layout: give elements a size, so the virtualized body renders its rows.
+  beforeAll(() => {
+    jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(800);
+    jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(1000);
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockGridData();

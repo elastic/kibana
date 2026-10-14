@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getSeverityColor } from '../../../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { FormattedCount } from '../../../../../../common/components/formatted_number';
 import { SEVERITY_COUNT_FIELDS, getNumber } from '../../common';
@@ -49,8 +48,10 @@ const ALERT_SEVERITIES = [
   },
 ] as const;
 
-const noPointerEventsCss = css`
-  pointer-events: none;
+const severityPartCss = css`
+  border-radius: 2px;
+  block-size: 5px;
+  min-inline-size: 10px;
 `;
 
 interface AlertSeverityCounts {
@@ -60,16 +61,35 @@ interface AlertSeverityCounts {
   low: number;
 }
 
-/** The distribution bar is the most expensive cell content, so it renders only on new counts. */
+/**
+ * The share of each severity, drawn like the distribution bar of the alerts pages. Plain
+ * elements: `DistributionBar` mounts a hidden tooltip for each part, which made this the most
+ * expensive cell to render while scrolling, and the grid shows no tooltips in cells.
+ */
 const AlertSeverityBar = memo(
   ({ euiTheme, ...counts }: AlertSeverityCounts & { euiTheme: EuiThemeComputed }) => {
-    const severities = ALERT_SEVERITIES.map(({ key, label }) => ({
-      key,
-      label,
-      count: counts[key],
-      color: getSeverityColor(key, euiTheme),
-    })).filter((s) => s.count > 0);
-    return <DistributionBar stats={severities} hideLastTooltip />;
+    const barCss = useMemo(
+      () => css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.xxs};
+      `,
+      [euiTheme.size.xxs]
+    );
+    return (
+      <div css={barCss} aria-hidden={true}>
+        {ALERT_SEVERITIES.filter(({ key }) => counts[key] > 0).map(({ key, label }) => (
+          <div
+            key={key}
+            title={label}
+            css={severityPartCss}
+            data-test-subj="alertSeverityBar__part"
+            // Runtime values: the severity's color and its share of the bar.
+            style={{ backgroundColor: getSeverityColor(key, euiTheme), flex: counts[key] }}
+          />
+        ))}
+      </div>
+    );
   }
 );
 AlertSeverityBar.displayName = 'AlertSeverityBar';
@@ -91,7 +111,7 @@ export const AlertCountCell = memo(
     const fullCount = value.toLocaleString();
     return (
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiFlexItem css={noPointerEventsCss}>
+        <EuiFlexItem>
           <AlertSeverityBar
             euiTheme={euiTheme}
             critical={getNumber(row, SEVERITY_COUNT_FIELDS.critical) ?? 0}

@@ -167,8 +167,10 @@ describe('useEntityGridData', () => {
 
     it('does not load a batch that would take the grid over the most rows it loads', async () => {
       mockSortQueryOver(MAX_LOADED_ROWS + 100);
-      const { result } = renderGridData({ ...OPTIONS, pageSize: 300 });
-      await waitFor(() => expect(result.current.rows).toHaveLength(300));
+      // A second batch of this size would pass the limit.
+      const pageSize = MAX_LOADED_ROWS * 0.6;
+      const { result } = renderGridData({ ...OPTIONS, pageSize });
+      await waitFor(() => expect(result.current.rows).toHaveLength(pageSize));
 
       expect(result.current.canLoadMore).toBe(false);
       expect(result.current.isAtLoadLimit).toBe(true);

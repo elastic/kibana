@@ -33,6 +33,8 @@ export interface EntityGridView extends EntityGridCellContext {
   isAtLoadLimit: boolean;
   isLoadingMore: boolean;
   loadMore: () => void;
+  /** The body reports the rows it renders, so only those are enriched. */
+  onRowsInViewChange: (firstRow: number, lastRow: number) => void;
 }
 
 export const EntityGridBodyContext = createContext<EntityGridView | null>(null);

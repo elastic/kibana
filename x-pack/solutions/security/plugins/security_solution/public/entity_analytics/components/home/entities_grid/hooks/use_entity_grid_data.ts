@@ -39,11 +39,8 @@ const GRID_QUERY_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Error loading entities table' }
 );
 
-/**
- * Most rows the grid loads: its custom body renders every loaded row (no virtualization), so
- * it caps them. Not yet profiled in Chrome; raise it if rendering 1k rows stays smooth.
- */
-export const MAX_LOADED_ROWS = 500;
+/** Most rows the grid loads. Its body renders only the rows in view, and enriches only those. */
+export const MAX_LOADED_ROWS = 1_000;
 
 /** Prefix of every query of expanded groups' records, e.g. for `useIsFetching`. */
 export const ENTITY_GRID_CHILDREN_QUERY_KEY = ['entity-grid', 'children'] as const;
@@ -276,11 +273,16 @@ const usePrefetch = (context: GridContext) =>
  * 1. Rows: the sort column's query (see queries/README.md), one batch plus one row. Each Load
  *    More starts after the last loaded row (its cursor).
  * 2. Count: the entities in view, shared by every sort.
- * 3. Enrich: each batch's computed columns, after its rows arrive (see the enrichment hook).
+ * 3. Enrich: the computed columns of the loaded rows, or of the rows in view (see the
+ *    enrichment hook).
  * A new sort or filter starts over from the first batch, painting the previous rows until it
  * arrives. `prefetch` warms the first batch of another view, e.g. a group's records on hover.
  */
-export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
+export const useEntityGridData = (
+  viewOptions: UseEntityGridDataOptions,
+  /** Enrich only the rows the grid reports in view, through `onRowsInViewChange`. */
+  { enrichRowsInView = false }: { enrichRowsInView?: boolean } = {}
+) => {
   const options = useMemo(() => limitPageSize(viewOptions), [viewOptions]);
   const context = useGridContext();
   const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
@@ -298,9 +300,10 @@ export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
     context,
     viewOptions,
     batches,
-    rowsQuery.isPreviousData
+    rowsQuery.isPreviousData,
+    enrichRowsInView
   );
-  const { rows } = enrichment;
+  const { rows, onRowsInViewChange } = enrichment;
   const prefetch = usePrefetch(context);
   useErrorToast(
     GRID_QUERY_ERROR_TITLE,
@@ -326,5 +329,6 @@ export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
     isLoadingMore: rowsQuery.isFetchingNextPage,
     loadMore: rowsQuery.fetchNextPage,
     prefetch,
+    onRowsInViewChange,
   };
 };
