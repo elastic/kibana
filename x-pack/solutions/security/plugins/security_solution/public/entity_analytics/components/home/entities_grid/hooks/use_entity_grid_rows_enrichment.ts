@@ -16,7 +16,12 @@ import { getEntityId, getEntityIds } from '../common';
 import { PAGE_ENRICHERS } from '../grid_columns';
 import { createEsqlRunner } from '../queries/esql';
 import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';
-import { buildQueryArgs, getKeyScope, getViewKey } from './use_entity_grid_context';
+import {
+  buildQueryArgs,
+  getKeyScope,
+  getReadyContext,
+  getViewKey,
+} from './use_entity_grid_context';
 import type { GridContext, RowsBatch, UseEntityGridDataOptions } from './use_entity_grid_context';
 
 const ENRICH_ERROR_TITLE = i18n.translate(
@@ -92,10 +97,11 @@ const fetchEnrichedBatch = (
   batch: RowsBatch,
   signal?: AbortSignal
 ): Promise<EnrichedRows> => {
-  if (!context.concreteEntityIndexName) return Promise.resolve({ rows: [], errors: [] });
+  const ready = getReadyContext(context);
+  if (!ready) return Promise.resolve({ rows: [], errors: [] });
   return fetchEnrichedRows(
     batch.rows,
-    buildQueryArgs(context, options, context.concreteEntityIndexName, null),
+    buildQueryArgs(ready, options, null),
     { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
     PAGE_ENRICHERS[options.rowsMode]
   );
@@ -127,7 +133,7 @@ const useEnrichQueries = (
       queryFn: ({ signal }: QueryFunctionContext) =>
         fetchEnrichedBatch(context, options, batch, signal),
       enabled:
-        !!context.concreteEntityIndexName &&
+        getReadyContext(context) != null &&
         !isPreviousData &&
         batch.rows.length > 0 &&
         !context.isAnomalyJobsLoading,

@@ -81,6 +81,8 @@ describe('useEntityGridData', () => {
       http: httpServiceMock.createSetupContract(),
       spaceId: 'default',
       concreteEntityIndexName: 'entities-index',
+      isEntitiesIndexLoading: false,
+      entitiesIndexError: undefined,
       anomalyJobIds: [],
       isAnomalyJobsLoading: false,
       ...overrides,
@@ -156,6 +158,27 @@ describe('useEntityGridData', () => {
       expect(result.current.isAtLoadLimit).toBe(false);
     });
 
+    it('does not load a batch that would take the grid over the most rows it loads', async () => {
+      mockSortQueryOver(MAX_LOADED_ROWS + 100);
+      const { result } = renderGridData({ ...OPTIONS, pageSize: 300 });
+      await waitFor(() => expect(result.current.rows).toHaveLength(300));
+
+      expect(result.current.canLoadMore).toBe(false);
+      expect(result.current.isAtLoadLimit).toBe(true);
+    });
+
+    it('asks for no more rows in a batch than the most it loads', async () => {
+      mockSortQueryOver(MAX_LOADED_ROWS + 100);
+
+      const { result } = renderGridData({ ...OPTIONS, pageSize: MAX_LOADED_ROWS + 100 });
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(MAX_LOADED_ROWS));
+      expect(mockFetchSortPage).toHaveBeenCalledWith(
+        expect.objectContaining({ pageSize: MAX_LOADED_ROWS }),
+        expect.anything()
+      );
+    });
+
     it('stops loading once the grid holds the most rows it loads', async () => {
       mockSortQueryOver(MAX_LOADED_ROWS + 100);
       const { result } = renderGridData({ ...OPTIONS, pageSize: MAX_LOADED_ROWS / 2 });
@@ -174,11 +197,36 @@ describe('useEntityGridData', () => {
 
   describe('waiting', () => {
     it('does not query until the entity index resolves', async () => {
-      mockContext({ concreteEntityIndexName: null });
+      mockContext({ concreteEntityIndexName: null, isEntitiesIndexLoading: true });
 
       const { result } = renderGridData();
 
       expect(result.current.isFetching).toBe(true);
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+      expect(mockRunQuery).not.toHaveBeenCalled();
+    });
+
+    it('does not query until the space resolves', async () => {
+      mockContext({ spaceId: null });
+
+      renderGridData();
+
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+      expect(mockRunQuery).not.toHaveBeenCalled();
+    });
+
+    it('stops loading and reports it when there is no entity index to read', async () => {
+      const error = new Error('The entities index is not available');
+      mockContext({
+        concreteEntityIndexName: null,
+        isEntitiesIndexLoading: false,
+        entitiesIndexError: error,
+      });
+
+      const { result } = renderGridData();
+
+      expect(result.current.isFetching).toBe(false);
+      expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), error);
       expect(mockFetchSortPage).not.toHaveBeenCalled();
       expect(mockRunQuery).not.toHaveBeenCalled();
     });

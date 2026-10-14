@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import type { QueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
@@ -50,19 +51,44 @@ export interface RowsBatch {
   nextCursor: PageCursor | null;
 }
 
+const ENTITIES_INDEX_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.entitiesIndexUnavailable',
+  {
+    defaultMessage:
+      'The entities index is not available. Check that the entity store is installed and that you can read its index.',
+  }
+);
+
 /**
  * What the grid queries read besides their options: the app's services and space, the entity
- * index they join (`null` until it resolves), and the installed security anomaly jobs.
+ * index they join, and the installed security anomaly jobs. The space and the index are `null`
+ * until they resolve, and the index stays `null` when there is none to read; no query runs
+ * before both are known, and `entitiesIndexError` says why the index is missing or unreadable.
  */
 export interface GridContext {
   queryClient: QueryClient;
   searchService: DataPublicPluginStart['search'];
   http: HttpSetup;
-  spaceId: string;
+  spaceId: string | null;
   concreteEntityIndexName: string | null;
+  isEntitiesIndexLoading: boolean;
+  entitiesIndexError: Error | undefined;
   anomalyJobIds: readonly string[];
   isAnomalyJobsLoading: boolean;
 }
+
+/** The context once its queries can run. */
+export type ReadyGridContext = GridContext & { spaceId: string; concreteEntityIndexName: string };
+
+/** The context when the space and the entity index are known, `null` before: no query runs. */
+export const getReadyContext = (context: GridContext): ReadyGridContext | null =>
+  context.spaceId != null && context.concreteEntityIndexName != null
+    ? {
+        ...context,
+        spaceId: context.spaceId,
+        concreteEntityIndexName: context.concreteEntityIndexName,
+      }
+    : null;
 
 /** What every query of a view depends on. */
 export const getViewKey = (
@@ -80,9 +106,8 @@ export const getViewKey = (
 
 /** The arguments of the column queries for a view, at a cursor. */
 export const buildQueryArgs = (
-  { spaceId, anomalyJobIds }: GridContext,
+  { spaceId, concreteEntityIndexName, anomalyJobIds }: ReadyGridContext,
   options: UseEntityGridDataOptions,
-  concreteEntityIndexName: string,
   cursor: PageCursor | null
 ): QueryArgs => ({
   namespace: spaceId,
@@ -105,9 +130,22 @@ export const useGridContext = (): GridContext => {
     data: { search: searchService },
     http,
   } = useKibana().services;
-  const spaceId = useSpaceId() ?? 'default';
-  const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
+  const spaceId = useSpaceId() ?? null;
+  const {
+    data: resolvedIndex,
+    error: resolveError,
+    isLoading: isEntitiesIndexLoading,
+  } = useResolvedLatestEntitiesIndexName(spaceId ?? undefined);
   const concreteEntityIndexName = resolvedIndex?.indexName ?? null;
+  // The resolver reports no index for a store that is absent or unreadable as a result, not an error.
+  const entitiesIndexError = useMemo(
+    () =>
+      resolveError ??
+      (resolvedIndex && resolvedIndex.indexName === null
+        ? new Error(ENTITIES_INDEX_UNAVAILABLE)
+        : undefined),
+    [resolveError, resolvedIndex]
+  );
   const { jobIds: anomalyJobIds, loading: isAnomalyJobsLoading } = useInstalledSecurityJobsIds();
 
   return useMemo(
@@ -117,6 +155,8 @@ export const useGridContext = (): GridContext => {
       http,
       spaceId,
       concreteEntityIndexName,
+      isEntitiesIndexLoading,
+      entitiesIndexError,
       anomalyJobIds,
       isAnomalyJobsLoading,
     }),
@@ -126,6 +166,8 @@ export const useGridContext = (): GridContext => {
       http,
       spaceId,
       concreteEntityIndexName,
+      isEntitiesIndexLoading,
+      entitiesIndexError,
       anomalyJobIds,
       isAnomalyJobsLoading,
     ]

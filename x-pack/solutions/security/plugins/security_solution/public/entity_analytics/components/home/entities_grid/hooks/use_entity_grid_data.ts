@@ -16,7 +16,13 @@ import { findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
 import { useEntityGridRowsEnrichment } from './use_entity_grid_rows_enrichment';
-import { buildQueryArgs, getKeyScope, getViewKey, useGridContext } from './use_entity_grid_context';
+import {
+  buildQueryArgs,
+  getKeyScope,
+  getReadyContext,
+  getViewKey,
+  useGridContext,
+} from './use_entity_grid_context';
 import type {
   EntityGridKeyScope,
   GridContext,
@@ -92,12 +98,10 @@ const getCountKey = (context: GridContext, options: UseEntityGridDataOptions, co
 
 // ── requests ──────────────────────────────────────────────────────────────────
 
-/** The count query of the view, or `null` until the index resolves. */
+/** The count query of the view, or `null` until the space and the index resolve. */
 const buildCountQuery = (context: GridContext, options: UseEntityGridDataOptions) => {
-  if (!context.concreteEntityIndexName) return null;
-  return buildEntitiesInViewCountQuery(
-    buildQueryArgs(context, options, context.concreteEntityIndexName, null)
-  );
+  const ready = getReadyContext(context);
+  return ready && buildEntitiesInViewCountQuery(buildQueryArgs(ready, options, null));
 };
 
 const fetchCount = async (
@@ -165,18 +169,26 @@ const fetchRowsBatch = async (
   cursor: PageCursor | null,
   signal?: AbortSignal
 ): Promise<RowsBatch> => {
-  if (!context.concreteEntityIndexName) throw new Error('entity store index not resolved');
-  const args = buildQueryArgs(context, options, context.concreteEntityIndexName, cursor);
+  const ready = getReadyContext(context);
+  if (!ready) throw new Error('entities index not resolved');
+  const args = buildQueryArgs(ready, options, cursor);
   return getBatch(await fetchSortRows(context, options, args, signal), args);
 };
 
 // ── rows ──────────────────────────────────────────────────────────────────────
 
-/** Whether more rows can load, or the grid already holds as many as it loads. */
-const getLoadMoreState = (loadedRows: number, hasNextBatch: boolean) => ({
-  canLoadMore: hasNextBatch && loadedRows < MAX_LOADED_ROWS,
-  isAtLoadLimit: hasNextBatch && loadedRows >= MAX_LOADED_ROWS,
-});
+/** Whether another batch fits under the row limit, or the grid holds as many as it loads. */
+const getLoadMoreState = (loadedRows: number, hasNextBatch: boolean, pageSize: number) => {
+  const fitsAnotherBatch = loadedRows + pageSize <= MAX_LOADED_ROWS;
+  return {
+    canLoadMore: hasNextBatch && fitsAnotherBatch,
+    isAtLoadLimit: hasNextBatch && !fitsAnotherBatch,
+  };
+};
+
+/** The options with a batch no larger than the row limit. */
+const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
+  options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
 
 // ── hooks ─────────────────────────────────────────────────────────────────────
 
@@ -186,7 +198,7 @@ const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions) =
     ({ pageParam = null, signal }) => fetchRowsBatch(context, options, pageParam, signal),
     {
       enabled:
-        !!context.concreteEntityIndexName &&
+        getReadyContext(context) != null &&
         !(isAnomalySort(options) && context.isAnomalyJobsLoading),
       getNextPageParam: ({ nextCursor }) => nextCursor ?? undefined,
       // Keep painting the loaded rows while a new sort or filter loads.
@@ -208,8 +220,9 @@ const useCountQuery = (context: GridContext, options: UseEntityGridDataOptions) 
 /** Fetches the first batch of any view ahead of time, e.g. a group's records on hover. */
 const usePrefetch = (context: GridContext) =>
   useCallback(
-    (options: UseEntityGridDataOptions) => {
-      if (!context.concreteEntityIndexName) return;
+    (viewOptions: UseEntityGridDataOptions) => {
+      if (!getReadyContext(context)) return;
+      const options = limitPageSize(viewOptions);
       void context.queryClient.prefetchInfiniteQuery({
         queryKey: getRowsKey(context, options),
         queryFn: ({ signal }) => fetchRowsBatch(context, options, null, signal),
@@ -228,7 +241,8 @@ const usePrefetch = (context: GridContext) =>
  * A new sort or filter starts over from the first batch, painting the previous rows until it
  * arrives. `prefetch` warms the first batch of another view, e.g. a group's records on hover.
  */
-export const useEntityGridData = (options: UseEntityGridDataOptions) => {
+export const useEntityGridData = (viewOptions: UseEntityGridDataOptions) => {
+  const options = useMemo(() => limitPageSize(viewOptions), [viewOptions]);
   const context = useGridContext();
   const rowsQuery = useRowsQuery(context, options);
   const countQuery = useCountQuery(context, options);
@@ -241,7 +255,10 @@ export const useEntityGridData = (options: UseEntityGridDataOptions) => {
   );
   const { rows } = enrichment;
   const prefetch = usePrefetch(context);
-  useErrorToast(GRID_QUERY_ERROR_TITLE, rowsQuery.error ?? countQuery.error ?? enrichment.error);
+  useErrorToast(
+    GRID_QUERY_ERROR_TITLE,
+    context.entitiesIndexError ?? rowsQuery.error ?? countQuery.error ?? enrichment.error
+  );
 
   return {
     rows,
@@ -252,8 +269,8 @@ export const useEntityGridData = (options: UseEntityGridDataOptions) => {
       rowsQuery.isFetching ||
       countQuery.isFetching ||
       enrichment.isFetching ||
-      !context.concreteEntityIndexName,
-    ...getLoadMoreState(rows.length, !!rowsQuery.hasNextPage),
+      context.isEntitiesIndexLoading,
+    ...getLoadMoreState(rows.length, !!rowsQuery.hasNextPage, options.pageSize),
     isLoadingMore: rowsQuery.isFetchingNextPage,
     loadMore: rowsQuery.fetchNextPage,
     prefetch,
