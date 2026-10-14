@@ -115,7 +115,10 @@ export const usePreviousPeriod = <T>({
   localOnly,
 }: PreviousPeriodOptions<T>): {
   previous: T | undefined;
-  /** True or false once the history check has settled without an error, otherwise undefined. */
+  /**
+   * True or false once the history check has settled without an error, otherwise undefined. It does
+   * not depend on the previous-period query, so a sparkline can follow it when only that query fails.
+   */
   reachesBack: boolean | undefined;
   isHistoryMissing: boolean;
   isError: boolean;
@@ -143,7 +146,7 @@ export const usePreviousPeriod = <T>({
 
   return {
     previous: !isError && hasHistory && isPreviousSettled ? previousPeriod.data : undefined,
-    reachesBack: !isError && guardSettled ? guard.data : undefined,
+    reachesBack: !guard.isError && guardSettled ? guard.data : undefined,
     isHistoryMissing: !isError && guardSettled && guard.data === false,
     isError,
   };

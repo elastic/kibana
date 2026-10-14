@@ -135,15 +135,17 @@ describe('usePreviousPeriod', () => {
     expect(renderHook(() => usePreviousPeriod(options)).result.current.previous).toBeUndefined();
   });
 
-  it('shows nothing after an error, even when the cache still holds data (a failed refetch)', () => {
+  it('shows no delta after an error, even when the cache still holds data (a failed refetch)', () => {
+    // The history check answered, so the sparkline can still follow it: only the delta is lost.
     setQueries({ guard: settled(true), previous: { ...settled(40), isError: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
-      reachesBack: undefined,
+      reachesBack: true,
       isHistoryMissing: false,
       isError: true,
     });
 
+    // A failed history check leaves nothing to follow.
     setQueries({ guard: { ...settled(false), isError: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
