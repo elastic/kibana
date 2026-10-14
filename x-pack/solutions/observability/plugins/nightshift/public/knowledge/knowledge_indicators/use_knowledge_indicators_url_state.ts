@@ -35,9 +35,6 @@ export function useKnowledgeIndicatorsUrlState({
 }: UseKnowledgeIndicatorsUrlStateParams) {
   const { query, push, replace } = useKnowledgeIndicatorsQueryParams();
 
-  const timeRangeRef = useRef<{ rangeFrom?: string; rangeTo?: string }>({});
-  timeRangeRef.current = { rangeFrom: query.rangeFrom, rangeTo: query.rangeTo };
-
   const selectedItemRef = useRef<string | undefined>(undefined);
   selectedItemRef.current = query.selectedItem;
 
@@ -155,11 +152,8 @@ export function useKnowledgeIndicatorsUrlState({
 
   // Sync filter state to URL
   useEffect(() => {
-    const { rangeFrom, rangeTo } = timeRangeRef.current;
     const selectedItem = selectedItemRef.current;
     replace({
-      ...(rangeFrom ? { rangeFrom } : {}),
-      ...(rangeTo ? { rangeTo } : {}),
       ...(debouncedSearchTerm ? { search: debouncedSearchTerm } : {}),
       ...(statusFilter !== 'active' ? { status: statusFilter } : {}),
       ...(selectedTypes.length ? { type: selectedTypes } : {}),
@@ -179,11 +173,8 @@ export function useKnowledgeIndicatorsUrlState({
   ]);
 
   const buildQueryParams = useCallback((selectedItem?: string) => {
-    const { rangeFrom, rangeTo } = timeRangeRef.current;
     const p = currentParamsRef.current;
     return {
-      ...(rangeFrom ? { rangeFrom } : {}),
-      ...(rangeTo ? { rangeTo } : {}),
       ...(p.debouncedSearchTerm ? { search: p.debouncedSearchTerm } : {}),
       ...(p.statusFilter !== 'active' ? { status: p.statusFilter } : {}),
       ...(p.selectedTypes.length ? { type: p.selectedTypes } : {}),

@@ -233,8 +233,6 @@ describe('useKnowledgeIndicatorsUrlState', () => {
         subtype: ['sub1'],
         source: ['logs'],
         showComputed: 'true',
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
       };
 
       renderHook(() => useKnowledgeIndicatorsUrlState({ ...defaultParams, isLoading: true }));
@@ -247,8 +245,6 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       expect(params.getAll('subtype')).toEqual(['sub1']);
       expect(params.getAll('source')).toEqual(['logs']);
       expect(params.get('showComputed')).toBe('true');
-      expect(params.get('rangeFrom')).toBe('now-15m');
-      expect(params.get('rangeTo')).toBe('now');
     });
 
     it('preserves selectedItem in URL', () => {

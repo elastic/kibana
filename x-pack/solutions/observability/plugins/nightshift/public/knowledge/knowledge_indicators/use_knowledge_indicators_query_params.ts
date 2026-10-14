@@ -9,8 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 export interface KnowledgeIndicatorsQuery {
-  rangeFrom?: string;
-  rangeTo?: string;
   search?: string;
   status?: string;
   type?: string[];
@@ -21,14 +19,7 @@ export interface KnowledgeIndicatorsQuery {
   selectedItem?: string;
 }
 
-const scalarKeys = [
-  'rangeFrom',
-  'rangeTo',
-  'search',
-  'status',
-  'showComputed',
-  'selectedItem',
-] as const;
+const scalarKeys = ['search', 'status', 'showComputed', 'selectedItem'] as const;
 const arrayKeys = ['type', 'subtype', 'source', 'stream'] as const;
 
 const getLocation = (query: KnowledgeIndicatorsQuery) => {
