@@ -20,6 +20,7 @@ import {
 import { buildSiemResponse } from '../utils';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
+import { auditAlertUpdatePreOperationFailure } from '../common/operations/audit_alert_updates';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
@@ -60,6 +61,10 @@ export const setAlertAssigneesRoute = (
 
         const validationErrors = validateAlertAssigneesArrays(assignees);
         if (validationErrors.length) {
+          auditAlertUpdatePreOperationFailure(
+            (await context.securitySolution)?.getAuditLogger(),
+            'Invalid alert update request'
+          );
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
 
