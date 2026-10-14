@@ -6,17 +6,40 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
+  parsePresetSchedule,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { MAX_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
   isSlackTrigger,
+  toEveryCron,
   type AutomationFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
 
 export const validationLabels = {
-  cronError: i18n.translate('xpack.nightshift.automations.flyout.cronError', {
-    defaultMessage: 'Fix the cron expression to save',
-  }),
+  unsupportedSchedule: i18n.translate(
+    'xpack.nightshift.automations.flyout.unsupportedScheduleErrorMessage',
+    {
+      defaultMessage:
+        'This schedule is not supported. Replace it with an hourly, daily or weekly schedule.',
+    }
+  ),
+  instructionsRequired: i18n.translate(
+    'xpack.nightshift.automations.flyout.instructionsRequiredErrorMessage',
+    {
+      defaultMessage:
+        'Add instructions describing what this scheduled automation should investigate.',
+    }
+  ),
+  instructionsTooLong: i18n.translate(
+    'xpack.nightshift.automations.flyout.instructionsTooLongErrorMessage',
+    {
+      defaultMessage: 'Instructions must be at most {limit} characters.',
+      values: { limit: MAX_AUTOMATION_INSTRUCTIONS_LENGTH },
+    }
+  ),
   triggerRequired: i18n.translate('xpack.nightshift.automations.flyout.triggerRequired', {
     defaultMessage: 'Select a trigger to save',
   }),
@@ -32,15 +55,6 @@ export const validationLabels = {
   }),
 };
 
-const CRON_FIELD = /^[\d*/,-]+$/;
-
-export const isValidCron = (expression: string): boolean => {
-  const fields = expression.trim().split(/\s+/);
-  return fields.length === 5 && fields.every((field) => CRON_FIELD.test(field));
-};
-
-const getHour = (time: string): number => Number(time.split(':')[0]);
-
 export const isValidDailyLimit = (value: string): boolean => {
   const limit = Number(value);
   return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= MAX_DAILY_LIMIT;
@@ -51,18 +65,25 @@ export const hasDailyLimit = (trigger?: TriggerFormValues): boolean =>
 
 export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerFormValues => {
   if (!trigger) return false;
-  if (trigger.kind === 'cron') return isValidCron(trigger.cronExpression);
-  if (trigger.kind === 'every' && trigger.unit === 'week') return trigger.daysOfWeek.length > 0;
-  if (trigger.kind === 'every' && trigger.unit === 'hour' && trigger.betweenHours) {
-    return getHour(trigger.startTime) < getHour(trigger.endTime);
+  if (trigger.kind === 'cron') return false;
+  if (trigger.kind === 'every') {
+    return parsePresetSchedule({
+      schedulePreset: { hour: 'hourly', day: 'daily', week: 'weekly' }[trigger.unit],
+      cronExpression: toEveryCron(trigger),
+      timezone: trigger.timezone,
+    }).success;
   }
   return true;
 };
 
 export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
   if (!values.trigger) return validationLabels.triggerRequired;
-  if (values.trigger?.kind === 'cron' && !isValidCron(values.trigger.cronExpression)) {
-    return validationLabels.cronError;
+  if (values.trigger.kind === 'cron') return validationLabels.unsupportedSchedule;
+  if (values.trigger.kind === 'every') {
+    if (!values.instructions.trim()) return validationLabels.instructionsRequired;
+    if (values.instructions.trim().length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+      return validationLabels.instructionsTooLong;
+    }
   }
   if (values.trigger && isSlackTrigger(values.trigger) && !values.trigger.channels.length) {
     return validationLabels.slackChannelsRequired;

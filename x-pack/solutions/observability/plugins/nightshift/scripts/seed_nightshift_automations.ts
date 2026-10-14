@@ -274,7 +274,13 @@ run(
             tags: automation.tags,
             isEnabled: enabled,
             trigger: { rows: [automation.trigger] },
-            execution: {},
+            execution:
+              automation.trigger.kind === 'schedule'
+                ? {
+                    promptTemplate:
+                      'Review the last 24 hours of telemetry and summarize errors, latency changes and affected services.',
+                  }
+                : {},
             completions: automation.completions ?? [],
             runtime: { dailyDispatchLimit: limit },
           },

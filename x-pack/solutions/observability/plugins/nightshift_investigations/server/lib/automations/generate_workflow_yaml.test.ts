@@ -49,9 +49,9 @@ describe('generateWorkflowYaml', () => {
   });
 
   describe('alert trigger', () => {
-    it('emits alerting.alertStatusChanged when alert rows are present', () => {
+    it('emits alerting.v1.alertStatusChanged when alert rows are present', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
-      expect(yaml.triggers[0].type).toBe('alerting.alertStatusChanged');
+      expect(yaml.triggers[0].type).toBe('alerting.v1.alertStatusChanged');
     });
 
     it('emits no on.condition when alertStatus is any', () => {
@@ -148,12 +148,76 @@ describe('generateWorkflowYaml', () => {
     });
   });
 
-  describe('manual trigger fallback', () => {
-    it('emits manual trigger when no alert rows are present', () => {
-      const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'schedule' }];
+  describe('scheduled triggers', () => {
+    const scheduledAutomation = (): NightshiftAutomationAttributes => ({
+      ...baseAutomation(),
+      trigger: {
+        rows: [
+          {
+            kind: 'schedule',
+            schedulePreset: 'daily',
+            cronExpression: '0 9 * * *',
+            timezone: 'Europe/Berlin',
+            scopeQuery: 'service.name:checkout',
+          },
+        ],
+      },
+      execution: { promptTemplate: 'Assess checkout health in the last hour.' },
+      runtime: { timeoutSeconds: 120 },
+    });
+
+    it('emits a calendar trigger, fresh manual subject, instructions, scope and timeout', () => {
+      const yaml = parse(generateWorkflowYaml('auto-123', scheduledAutomation()));
+      expect(yaml.triggers).toEqual([
+        {
+          type: 'scheduled',
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'Europe/Berlin',
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        },
+      ]);
+      expect(yaml.settings.timeout).toBe('120s');
+      expect(yaml.steps[0]).toEqual({
+        name: 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        with: {
+          subject_type: 'manual',
+          subject_id: 'manual',
+          title: 'Test automation',
+          summary: 'Test automation',
+          trigger_type: 'automatic',
+          message: 'Assess checkout health in the last hour.',
+          scope_query: 'service.name:checkout',
+          timeout_seconds: 120,
+        },
+      });
+    });
+
+    it('isolates scheduled and alert steps when both sources are configured', () => {
+      const automation = scheduledAutomation();
+      automation.trigger.rows.push({ kind: 'alert', alertStatus: 'active' });
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.triggers[0].type).toBe('manual');
+      expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
+        'alerting.v1.alertStatusChanged',
+        'scheduled',
+      ]);
+      expect(yaml.steps[0].if).toBe('execution.triggeredBy: "scheduled"');
+      expect(yaml.steps[1].if).toBe('execution.triggeredBy: "alerting.v1.alertStatusChanged"');
+      expect(yaml.steps[1].with.subject_type).toBe('alert');
+      expect(yaml.steps[1].with.scope_query).toBeUndefined();
+    });
+
+    it('preserves the disabled state', () => {
+      expect(
+        parse(generateWorkflowYaml('auto-123', { ...scheduledAutomation(), isEnabled: false }))
+          .enabled
+      ).toBe(false);
     });
   });
 

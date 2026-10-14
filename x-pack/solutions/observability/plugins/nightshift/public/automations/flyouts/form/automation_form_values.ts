@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parsePresetSchedule } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
 
 export type AlertStatus = 'any' | 'active' | 'inactive';
@@ -114,11 +115,23 @@ const parseDaysOfWeek = (field: string): number[] =>
     return Array.from({ length: Math.max(to - from + 1, 0) }, (_, index) => from + index);
   });
 
+export const toEveryCron = (trigger: Extract<TriggerFormValues, { kind: 'every' }>): string => {
+  const [hour, minute] = trigger.time.split(':').map(Number);
+  if (trigger.unit === 'hour') {
+    const hours = trigger.betweenHours
+      ? `${Number(trigger.startTime.slice(0, 2))}-${Number(trigger.endTime.slice(0, 2))}`
+      : '*';
+    return `0 ${hours} * * *`;
+  }
+  const days = trigger.unit === 'week' ? [...trigger.daysOfWeek].sort().join(',') : '*';
+  return `${minute} ${hour} * * ${days}`;
+};
+
 export const toAutomationFormValues = (automation: Automation): AutomationFormValues => {
   const row = automation.trigger.rows[0];
   const [completion] = automation.completions;
   const schedule = row?.kind === 'schedule' ? row : undefined;
-  const cronFields = schedule?.cronExpression?.split(' ') ?? [];
+  const cronFields = schedule?.cronExpression?.trim().split(/\s+/) ?? [];
   const isHourly = schedule?.schedulePreset === 'hourly';
   const isWeekly = schedule?.schedulePreset === 'weekly';
   const trigger: TriggerFormValues | undefined =
@@ -138,7 +151,7 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           messageFilter: row.messageFilter ?? '',
         }
       : schedule
-      ? isHourly || schedule.schedulePreset === 'daily' || isWeekly
+      ? parsePresetSchedule(schedule).success
         ? {
             kind: 'every',
             unit: isHourly ? 'hour' : isWeekly ? 'week' : 'day',

@@ -266,3 +266,60 @@ it('returns to the Elastic Slack app when the saved connector is explicitly clea
     params: { channel: '#oncall' },
   });
 });
+
+const dailySchedule = { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' };
+
+it('validates merged instructions even when a partial update only enables the schedule', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: { ...existing, trigger: { rows: [dailySchedule] }, execution: {} },
+  });
+  await expect(call({ isEnabled: true })).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('rejects clearing instructions on a saved scheduled automation', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: { ...existing, trigger: { rows: [dailySchedule] } },
+  });
+  await expect(call({ execution: { promptTemplate: null } })).rejects.toMatchObject({
+    output: { statusCode: 400 },
+  });
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('disables a legacy custom schedule without regenerating unsupported YAML', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      trigger: { rows: [{ ...dailySchedule, schedulePreset: 'custom' }] },
+      execution: {},
+    },
+  });
+  await call({ isEnabled: false });
+  expect(updateWorkflow).toHaveBeenCalledWith(
+    'workflow-1',
+    { enabled: false },
+    'default',
+    expect.anything()
+  );
+  expect(soClient.update).toHaveBeenCalledWith(
+    'nightshift-automation',
+    'automation-1',
+    expect.objectContaining({ isEnabled: false }),
+    { mergeAttributes: false }
+  );
+});
+
+it('rejects unsupported schedules on other edits without changing the workflow or saved object', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      trigger: { rows: [{ ...dailySchedule, schedulePreset: 'custom' }] },
+    },
+  });
+  await expect(call({ name: 'Changed' })).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});

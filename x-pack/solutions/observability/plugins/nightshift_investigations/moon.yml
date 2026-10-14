@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/proposals-plugin'
   - '@kbn/proposals-common'
+  - '@kbn/rrule'
 tags:
   - plugin
   - prod

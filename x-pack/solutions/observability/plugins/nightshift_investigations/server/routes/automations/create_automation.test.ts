@@ -115,3 +115,36 @@ describe('request validation', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 });
+
+const dailySchedule = {
+  kind: 'schedule',
+  schedulePreset: 'daily',
+  cronExpression: '0 9 * * *',
+  timezone: 'Europe/Berlin',
+};
+
+it('creates a scheduled workflow with instructions', async () => {
+  await call({
+    trigger: { rows: [dailySchedule] },
+    execution: { promptTemplate: 'Review errors over the last hour.' },
+  });
+  const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
+  expect(workflow.triggers[0].type).toBe('scheduled');
+  expect(workflow.steps[0].with.subject_type).toBe('manual');
+});
+
+it.each([
+  { trigger: { rows: [dailySchedule] }, execution: {} },
+  { trigger: { rows: [dailySchedule] }, execution: { promptTemplate: '   ' } },
+  { trigger: { rows: [dailySchedule] }, execution: { promptTemplate: 'x'.repeat(10001) } },
+  { trigger: { rows: [dailySchedule, dailySchedule] } },
+  { trigger: { rows: [{ ...dailySchedule, cronExpression: '60 25 * * *' }] } },
+  { trigger: { rows: [{ ...dailySchedule, timezone: 'Not/AZone' }] } },
+  { trigger: { rows: [{ ...dailySchedule, schedulePreset: 'custom' }] } },
+])('rejects unusable scheduled configuration before writes: %j', async (overrides) => {
+  await expect(
+    call({ execution: { promptTemplate: 'Review health.' }, ...overrides })
+  ).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(soClient.create).not.toHaveBeenCalled();
+  expect(createWorkflow).not.toHaveBeenCalled();
+});

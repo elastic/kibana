@@ -6,3 +6,4 @@
  */
 
 export const MAX_RULE_NAMES = 100;
+export { MAX_TEXT_LENGTH as MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '@kbn/significant-events-schema';

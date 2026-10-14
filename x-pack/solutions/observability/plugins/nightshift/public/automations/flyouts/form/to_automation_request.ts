@@ -13,6 +13,7 @@ import type {
 } from '../../hooks/use_automations';
 import {
   SLACK_TRIGGER_EVENTS,
+  toEveryCron,
   toAutomationFormValues,
   isSlackTrigger,
   type AutomationFormValues,
@@ -20,22 +21,7 @@ import {
 } from './automation_form_values';
 import { hasDailyLimit } from './validation';
 
-const toCronTime = (time: string): { minute: number; hour: number } => {
-  const [hour, minute] = time.split(':').map(Number);
-  return { minute, hour };
-};
-
-export const toEveryCron = (trigger: Extract<TriggerFormValues, { kind: 'every' }>): string => {
-  const { minute, hour } = toCronTime(trigger.time);
-  if (trigger.unit === 'hour') {
-    const hours = trigger.betweenHours
-      ? `${toCronTime(trigger.startTime).hour}-${toCronTime(trigger.endTime).hour}`
-      : '*';
-    return `0 ${hours} * * *`;
-  }
-  const days = trigger.unit === 'week' ? [...trigger.daysOfWeek].sort().join(',') : '*';
-  return `${minute} ${hour} * * ${days}`;
-};
+export { toEveryCron } from './automation_form_values';
 
 const toTriggerRow = (
   trigger: TriggerFormValues

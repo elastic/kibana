@@ -14,7 +14,7 @@ import {
 } from '../automation_form_values';
 import { DailyLimitField } from './daily_limit_field';
 import { AlertTriggerEditor } from './editors/alert_trigger_editor';
-import { CronTriggerEditor } from './editors/cron_trigger_editor';
+import { UnsupportedSchedule } from './editors/unsupported_schedule';
 import { EveryTriggerEditor } from './editors/every_trigger_editor';
 import { SlackTriggerEditor } from './editors/slack_trigger_editor';
 import { triggerLabels } from './translations';
@@ -100,9 +100,7 @@ export const AutomationTriggerSection = ({
                 readOnly={readOnly}
               />
             )}
-            {trigger.kind === 'cron' && (
-              <CronTriggerEditor trigger={trigger} onChange={onTriggerChange} readOnly={readOnly} />
-            )}
+            {trigger.kind === 'cron' && <UnsupportedSchedule trigger={trigger} />}
             {isSlackTrigger(trigger) && (
               <SlackTriggerEditor
                 trigger={trigger}

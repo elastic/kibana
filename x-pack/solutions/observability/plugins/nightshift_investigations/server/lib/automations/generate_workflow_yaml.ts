@@ -6,10 +6,12 @@
  */
 
 import { stringify } from 'yaml';
+import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
 import type { InvestigationNotificationDestination } from '../../../common';
+import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
 
-// alerting.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
+// alerting.v1.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
 const ALERT_STATUS_TO_KQL: Record<string, string> = {
   active: 'active',
   inactive: 'recovered',
@@ -26,18 +28,7 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
   queue: 'queue',
 };
 
-/**
- * Generates a workflow YAML document from a nightshift automation config.
- *
- * Uses the yaml package to serialize all user-provided strings so that special
- * characters (newlines, colons, quotes) in prompt templates never corrupt the document.
- *
- * Alert-trigger support uses alerting.alertStatusChanged (#291886). The code is complete
- * and ready — it activates the moment #291886 lands with no follow-up change needed here.
- *
- * Dispatch budget gating (nightshift.checkBudget step) is added in a follow-up PR that
- * covers both per-automation daily limits and the global Nightshift cap together.
- */
+/** Generates a workflow document from an automation, serializing user input safely. */
 export function generateWorkflowYaml(
   automationId: string,
   automation: NightshiftAutomationAttributes
@@ -45,6 +36,7 @@ export function generateWorkflowYaml(
   const alertRows = automation.trigger.rows.filter(
     (r): r is Extract<NightshiftTriggerRow, { kind: 'alert' }> => r.kind === 'alert'
   );
+  const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
   const isAlertTrigger = alertRows.length > 0;
 
   const strategy = automation.runtime.overlapPolicy
@@ -52,35 +44,57 @@ export function generateWorkflowYaml(
     : 'drop';
   const notificationDestinations = buildNotificationDestinations(automationId, automation);
 
-  const workflowObj: Record<string, unknown> = {
+  const investigationStep = (scheduled: boolean, name: string, triggeredBy?: string) => ({
+    name,
+    type: 'nightshift.triggerInvestigation',
+    ...(triggeredBy ? { if: `execution.triggeredBy: "${triggeredBy}"` } : {}),
+    with: {
+      subject_type: scheduled ? 'manual' : 'alert',
+      subject_id: scheduled
+        ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID
+        : isAlertTrigger
+        ? '{{ trigger.alert.uuid }}'
+        : automationId,
+      title: scheduled || !isAlertTrigger ? automation.name : '{{ trigger.rule.name }}',
+      summary: automation.name,
+      trigger_type: 'automatic',
+      ...(automation.execution.promptTemplate
+        ? { message: automation.execution.promptTemplate }
+        : {}),
+      ...(scheduled && schedule?.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
+      ...(automation.runtime.timeoutSeconds !== undefined
+        ? { timeout_seconds: automation.runtime.timeoutSeconds }
+        : {}),
+      ...(notificationDestinations ? { notificationDestinations } : {}),
+    },
+  });
+  const steps = schedule
+    ? [
+        investigationStep(true, 'trigger_investigation', isAlertTrigger ? 'scheduled' : undefined),
+        ...(isAlertTrigger
+          ? [
+              investigationStep(
+                false,
+                'trigger_alert_investigation',
+                'alerting.v1.alertStatusChanged'
+              ),
+            ]
+          : []),
+      ]
+    : [investigationStep(false, 'trigger_investigation')];
+
+  const workflowObj = {
     name: automation.name,
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
-      concurrency: {
-        key: automationId,
-        strategy,
-        max: 1,
-      },
+      ...(automation.runtime.timeoutSeconds !== undefined
+        ? { timeout: `${automation.runtime.timeoutSeconds}s` }
+        : {}),
+      concurrency: { key: automationId, strategy, max: 1 },
     },
-    triggers: buildTriggers(alertRows),
-    steps: [
-      {
-        name: 'trigger_investigation',
-        type: 'nightshift.triggerInvestigation',
-        with: {
-          subject_type: 'alert',
-          subject_id: isAlertTrigger ? '{{ trigger.alert.uuid }}' : automationId,
-          title: isAlertTrigger ? '{{ trigger.rule.name }}' : automation.name,
-          summary: automation.name,
-          trigger_type: 'automatic',
-          ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
-            : {}),
-          ...(notificationDestinations ? { notificationDestinations } : {}),
-        },
-      },
-    ],
+    triggers: buildTriggers(alertRows, schedule),
+    steps,
   };
 
   return stringify(workflowObj, { lineWidth: 0 });
@@ -118,18 +132,23 @@ function buildNotificationDestinations(
 }
 
 function buildTriggers(
-  alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>
+  alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
+  schedule?: Extract<NightshiftTriggerRow, { kind: 'schedule' }>
 ): unknown[] {
-  if (alertRows.length === 0) {
-    return [{ type: 'manual' }];
+  const triggers: unknown[] = [];
+  if (alertRows.length) {
+    const condition = buildCondition(alertRows);
+    triggers.push({
+      type: 'alerting.v1.alertStatusChanged',
+      ...(condition ? { on: { condition } } : {}),
+    });
   }
-
-  const trigger: Record<string, unknown> = { type: 'alerting.alertStatusChanged' };
-  const condition = buildCondition(alertRows);
-  if (condition) {
-    trigger.on = { condition };
+  if (schedule) {
+    const parsed = parsePresetSchedule(schedule);
+    if (!parsed.success) throw new Error(parsed.error);
+    triggers.push(parsed.trigger);
   }
-  return [trigger];
+  return triggers.length ? triggers : [{ type: 'manual' }];
 }
 
 function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>): string {

@@ -15,7 +15,8 @@ import type { InvestigationSubjectType, InvestigationTriggerType } from './workf
 
 export type { Severity } from '@kbn/significant-events-schema';
 
-export { MAX_RULE_NAMES } from './automation_limits';
+export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
+export { parsePresetSchedule } from './automation_schedule';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -65,6 +66,8 @@ export interface StartInvestigationRequest {
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
+  /** Optional upper bound for this investigation workflow run, in seconds. */
+  timeout_seconds?: number;
   /**
    * Nightshift source ids the investigation should scope its queries to. The
    * investigation workflow resolves them to slug and ES|QL view.

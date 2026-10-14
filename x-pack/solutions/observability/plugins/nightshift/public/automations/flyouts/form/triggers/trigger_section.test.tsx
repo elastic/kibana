@@ -76,7 +76,7 @@ describe('AutomationTriggerSection', () => {
     expect(await screen.findByText('Elastic')).toBeInTheDocument();
     expect(screen.getByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Every…')).toBeInTheDocument();
-    expect(screen.getByText('Custom cron…')).toBeInTheDocument();
+    expect(screen.queryByText('Custom cron…')).not.toBeInTheDocument();
     expect(screen.getByText('Slack')).toBeInTheDocument();
     expect(screen.getByText('New message in channel')).toBeInTheDocument();
   });
@@ -213,24 +213,24 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({ daysOfWeek: [2, 3, 4, 5, 0] });
   });
 
-  it('describes a custom cron and hides the daily limit', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Custom cron…');
-
-    expect(screen.queryByTestId('automationDailyLimit')).not.toBeInTheDocument();
-    expect(screen.getByTestId('automationCronDescription')).toHaveTextContent('At 09:00 AM (UTC)');
-
-    fireEvent.change(screen.getByTestId('automationCronExpression'), {
-      target: { value: 'bad cron' },
-    });
-    expect(screen.getByTestId('automationCronDescription')).toHaveTextContent(
-      'Fix the cron expression to save'
+  it('shows a saved custom schedule without editable cron controls', () => {
+    render(
+      <TriggerSection
+        initialTrigger={{ kind: 'cron', cronExpression: '*/15 * * * *', timezone: 'UTC' }}
+      />
     );
+    expect(screen.getByTestId('automationCronExpression')).toHaveTextContent('*/15 * * * *');
+    expect(screen.getByTestId('automationUnsupportedSchedule')).toHaveTextContent(
+      'Replace it with an hourly, daily or weekly schedule.'
+    );
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('automationDailyLimit')).not.toBeInTheDocument();
   });
 
   it('lists IANA timezones with their offset', async () => {
     render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Custom cron…');
+    await selectTrigger('automationAddTrigger', 'Every…');
+    fireEvent.click(screen.getByLabelText('between hours'));
 
     fireEvent.click(screen.getByTestId('automationTimezone'));
     fireEvent.change(await screen.findByPlaceholderText('City or timezone…'), {
@@ -238,21 +238,18 @@ describe('AutomationTriggerSection', () => {
     });
     expect(await screen.findByText('GMT+9')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Asia/Tokyo'));
-    expect(lastTrigger()).toMatchObject({ kind: 'cron', timezone: 'Asia/Tokyo' });
+    expect(lastTrigger()).toMatchObject({ kind: 'every', timezone: 'Asia/Tokyo' });
   });
 
-  it('restores the previous values when switching back to a trigger type', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Custom cron…');
-    fireEvent.change(screen.getByTestId('automationCronExpression'), {
-      target: { value: '0 7 * * *' },
-    });
-
-    await selectTrigger('automationChangeTrigger', 'Alert triggered');
-    expect(lastTrigger()).toMatchObject({ kind: 'alert' });
-
-    await selectTrigger('automationChangeTrigger', 'Custom cron…');
-    expect(screen.getByTestId('automationCronExpression')).toHaveValue('0 7 * * *');
+  it('allows replacing a saved custom schedule with a supported preset', async () => {
+    render(
+      <TriggerSection
+        initialTrigger={{ kind: 'cron', cronExpression: '*/15 * * * *', timezone: 'UTC' }}
+      />
+    );
+    await selectTrigger('automationChangeTrigger', 'Every…');
+    expect(lastTrigger()).toMatchObject({ kind: 'every', unit: 'hour' });
+    expect(screen.queryByTestId('automationUnsupportedSchedule')).not.toBeInTheDocument();
   });
 
   it('flags an invalid daily limit', async () => {

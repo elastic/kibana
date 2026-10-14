@@ -62,6 +62,7 @@
     "@kbn/security-plugin",
     "@kbn/agentic-investigations-plugin",
     "@kbn/proposals-plugin",
-    "@kbn/proposals-common"
+    "@kbn/proposals-common",
+    "@kbn/rrule"
   ]
 }
