@@ -100,12 +100,6 @@ export const translations = {
     defaultMessage:
       'Changes affect every dashboard, alert, and other saved object that uses this view.',
   }),
-  viewDetailsTitle: i18n.translate('xpack.esqlViews.managementPage.viewDetailsTitle', {
-    defaultMessage: 'ES|QL view details',
-  }),
-  viewDetailsDescription: i18n.translate('xpack.esqlViews.managementPage.viewDetailsDescription', {
-    defaultMessage: 'Name and describe the view.',
-  }),
   viewNameLabel: i18n.translate('xpack.esqlViews.managementPage.viewNameLabel', {
     defaultMessage: 'Name',
   }),
@@ -138,7 +132,7 @@ export const translations = {
     defaultMessage: 'Write a new query, or select a recently or starred query.',
   }),
   previewResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewResultsTitle', {
-    defaultMessage: 'ES|QL Query Results',
+    defaultMessage: 'ES|QL query results',
   }),
   previewEmptyTitle: i18n.translate('xpack.esqlViews.managementPage.previewEmptyTitle', {
     defaultMessage: 'No results yet',

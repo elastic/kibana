@@ -19,6 +19,7 @@ import {
   MAX_SIGNAL_DESCRIPTION_LENGTH,
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  significantEventManualStatusSchema,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
@@ -64,6 +65,8 @@ export const eventsWriteItemSchema = lazySchema(() =>
       slugs: nightshiftSourceSlugsField(
         'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
       ),
+      // `recovering` is derived by the lifecycle state machine and is never set by a caller.
+      status: significantEventManualStatusSchema,
       event_id: z
         .string()
         .optional()
@@ -352,16 +355,10 @@ export function createEventsWriteTool({
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
       try {
-        const {
-          getEventSearchClient,
-          getKnowledgeIndicatorClient,
-          getAlertEventsClient,
-          emitTrigger,
-          licensing,
-          sourcesClient,
-        } = await getScopedClients({
-          request,
-        });
+        const { getEventSearchClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
@@ -380,8 +377,6 @@ export function createEventsWriteTool({
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
           logger,
         });
 
