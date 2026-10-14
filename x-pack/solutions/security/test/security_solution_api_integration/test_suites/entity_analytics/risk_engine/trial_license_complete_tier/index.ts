@@ -22,6 +22,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./risk_engine_schedule_now'));
     loadTestFile(require.resolve('./risk_engine_so_config'));
     loadTestFile(require.resolve('./migrations'));
-    loadTestFile(require.resolve('./euid_derivation_parity'));
   });
 }

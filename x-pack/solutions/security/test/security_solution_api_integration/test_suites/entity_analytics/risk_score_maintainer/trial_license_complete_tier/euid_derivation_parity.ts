@@ -11,11 +11,9 @@ import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_
 import {
   createSourceExpressions,
   getEuidPainlessRuntimeMapping,
-  getEuidPainlessSourceUpdateScript,
 } from '@kbn/entity-store/common/domain/euid/painless';
 import { getFieldValue } from '@kbn/entity-store/common/domain/euid/commons';
 import { EntityType } from '@kbn/security-solution-plugin/common/entity_analytics/types';
-import { ALERT_ENTITY_ID } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { deleteAllAlerts, deleteAllRules } from '@kbn/detections-response-ftr-services';
 
 import { dataGeneratorFactory } from '../../../detections_response/utils';
@@ -78,23 +76,19 @@ const AGREEING_CASES: Array<{ name: string; field: string; document: Record<stri
 ];
 
 /**
- * The EUID for an alert can be derived two ways, and both are used in production:
+ * The EUID for an alert can be derived three ways, and all three are used in production:
  *
- *  - in Node from `_source`, by `euid.getEuidFromObjectForSearch` — this is what the rule-execution
+ *  - in Node from `_source`, by `euid.getEuidFromObjectForSearch` — what the rule-execution
  *    enrichment stamps onto new alerts;
- *  - in Elasticsearch from doc-values, by the generated Painless — this is what risk scoring falls
- *    back to for alerts that carry no stamp, and what the backfill task writes;
- *  - in Elasticsearch from `_source`, by the same generator with a different field accessor — the
- *    path an `update_by_query` backfill would need, since those scripts have no doc-values.
+ *  - in Elasticsearch from doc-values, by the generated Painless — what risk scoring falls back to
+ *    for alerts that carry no stamp;
+ *  - in Elasticsearch from `_source`, by the same generator with `_source` field expressions —
+ *    what the backfill task writes, because an `update_by_query` script has no doc-values.
  *
  * They are generated from the same entity definitions but read fields through different runtimes,
  * so they can disagree where `_source` and doc-values disagree: multi-valued fields resolve
  * first-in-source versus first-sorted, `ignore_above` drops long values from doc-values entirely,
  * and fields absent from the mapping have no doc-values at all.
- *
- * This suite pins that down on real alerts. A disagreement here is not necessarily a bug — but it
- * is the set of cases where stamping an alert changes its score, so it has to be known rather than
- * assumed.
  */
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -313,70 +307,6 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('service', () => {
       it('agrees on the single-field identity', async () => {
         await expectAgreement(EntityType.service, { service: { name: 'nginx' } });
-      });
-    });
-
-    /**
-     * Whether an `update_by_query` backfill is mechanically possible against the alerts indices.
-     * They are hidden, system-owned, and the write target is an alias over several concrete
-     * indices, so none of this is implied by the bulk writes we already do.
-     */
-    describe('update_by_query against the alerts alias', () => {
-      it('stamps the derived EUID and leaves it searchable', async () => {
-        await deriveBothWays(EntityType.host, { host: { id: 'ubq-host-1' } });
-
-        const response = await es.updateByQuery({
-          index: ALERTS_INDEX,
-          refresh: true,
-          conflicts: 'proceed',
-          // The throttle an update_by_query backfill would use instead of a hand-rolled one.
-          requests_per_second: 500,
-          query: { bool: { must_not: [{ exists: { field: ALERT_ENTITY_ID } }] } },
-          script: {
-            lang: 'painless',
-            source: getEuidPainlessSourceUpdateScript(
-              // Host alone, so an alert with no host identity is genuinely underivable.
-              [getBuiltInEntityDefinition(EntityType.host)],
-              `ctx._source['${ALERT_ENTITY_ID}'] = euids;`
-            ),
-          },
-        });
-
-        expect(response.updated).to.be.greaterThan(0);
-        expect(response.failures).to.eql([]);
-
-        // Searchable, not merely present in _source: alerts are `dynamic: false`, so a write to an
-        // index missing the mapping would succeed and be invisible to scoring.
-        const stamped = await es.search({
-          index: ALERTS_INDEX,
-          query: { term: { [ALERT_ENTITY_ID]: 'host:ubq-host-1' } },
-        });
-
-        expect((stamped.hits.hits ?? []).length).to.be.greaterThan(0);
-      });
-
-      it('skips alerts that resolve to no EUID instead of writing an empty value', async () => {
-        // A source document with no host identity at all.
-        await deriveBothWays(EntityType.host, { user: { name: 'alice' } });
-
-        const response = await es.updateByQuery({
-          index: ALERTS_INDEX,
-          refresh: true,
-          conflicts: 'proceed',
-          query: { bool: { must_not: [{ exists: { field: ALERT_ENTITY_ID } }] } },
-          script: {
-            lang: 'painless',
-            source: getEuidPainlessSourceUpdateScript(
-              // Host alone, so an alert with no host identity is genuinely underivable.
-              [getBuiltInEntityDefinition(EntityType.host)],
-              `ctx._source['${ALERT_ENTITY_ID}'] = euids;`
-            ),
-          },
-        });
-
-        // ctx.op = 'noop' rather than a rewrite, so the document is not touched at all.
-        expect(response.updated).to.be(0);
-        expect(response.noops).to.be.greaterThan(0);
       });
     });
 

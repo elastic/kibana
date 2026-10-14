@@ -44,7 +44,7 @@ export const buildBackfillQuery = (
       {
         bool: {
           should: getEntityAnalyticsEntityTypes().map((entityType) =>
-            euid.dsl.getEuidDocumentsContainsIdFilter(entityType)
+            euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType))
           ),
           minimum_should_match: 1,
         },
@@ -77,8 +77,23 @@ export const resolveTargetIndices = async ({
   const readOnly: string[] = [];
   const unmapped: string[] = [];
 
+  // A space can have no alerts index at all — the risk engine may be enabled before any rule has
+  // run there. `ignore_unavailable` covers a missing member of an existing alias, but not an alias
+  // that has never existed, which still answers 404. Treated as "nothing to back fill" rather than
+  // an error, so such a space is retired instead of failing three times and being abandoned.
+  const emptyWhenMissing = async <T>(read: () => Promise<T>, fallback: T): Promise<T> => {
+    try {
+      return await retryTransientEsErrors(read, { logger });
+    } catch (e) {
+      if (e?.meta?.statusCode === 404) {
+        return fallback;
+      }
+      throw e;
+    }
+  };
+
   const [fieldMappings, settings] = await Promise.all([
-    retryTransientEsErrors(
+    emptyWhenMissing(
       () =>
         esClient.indices.getFieldMapping(
           {
@@ -89,9 +104,9 @@ export const resolveTargetIndices = async ({
           },
           { signal }
         ),
-      { logger }
+      {}
     ),
-    retryTransientEsErrors(
+    emptyWhenMissing(
       () =>
         esClient.indices.getSettings(
           {
@@ -102,7 +117,7 @@ export const resolveTargetIndices = async ({
           },
           { signal }
         ),
-      { logger }
+      {}
     ),
   ]);
 
@@ -211,6 +226,9 @@ export const startBackfill = async ({
           // Alerts are modified concurrently by rule execution and by workflow status changes; a
           // document that moved under us is re-read on the next pass rather than failing this one.
           conflicts: 'proceed',
+          // Refreshes the shards it touched once the request finishes, so the next request sees
+          // what this one stamped and matches only what is left.
+          refresh: true,
           requests_per_second: alertsPerSecond,
           // Bounds the transient disk growth and the running time of any one request; whatever is
           // left over is picked up by the next one, which the query naturally excludes already.
