@@ -39,7 +39,7 @@ describe('buildAlertBasedTilesQuery', () => {
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default');
     expect(query).toContain('is_severe_alert = `kibana.alert.severity` IN ("high", "critical")');
     expect(query).toContain('severe_id = CASE(has_severe_alert, entity.id, null)');
-    expect(query).toContain('severe_alerts_count      = COUNT_DISTINCT(severe_id)');
+    expect(query).toContain('severe_alerts_count      = COUNT(severe_id)');
   });
 
   it('keeps counting watchlisted entities with an alert of any severity', () => {
