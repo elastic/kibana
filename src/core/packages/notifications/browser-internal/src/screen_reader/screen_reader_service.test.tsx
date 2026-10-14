@@ -1,0 +1,92 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { act, screen } from '@testing-library/react';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
+import { ANNOUNCEMENT_SETTLE_MS, estimateReadingTimeMs } from './announcement_queue';
+import type { InternalScreenReaderStart } from './screen_reader_service';
+import { ScreenReaderService } from './screen_reader_service';
+
+describe('ScreenReaderService', () => {
+  let service: ScreenReaderService;
+  let targetDomElement: HTMLElement;
+
+  const startService = (): InternalScreenReaderStart => {
+    let screenReader: InternalScreenReaderStart | undefined;
+    act(() => {
+      screenReader = service.start({ rendering: renderingServiceMock.create(), targetDomElement });
+    });
+    if (!screenReader) {
+      throw new Error('ScreenReaderService did not start');
+    }
+    return screenReader;
+  };
+
+  const advanceTimers = (ms: number) =>
+    act(() => {
+      jest.advanceTimersByTime(ms);
+    });
+
+  const getLiveRegion = () => screen.getByTestId('screenReaderAnnouncer');
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    service = new ScreenReaderService();
+    targetDomElement = document.createElement('div');
+    document.body.appendChild(targetDomElement);
+  });
+
+  afterEach(() => {
+    act(() => service.stop());
+    jest.useRealTimers();
+    document.body.innerHTML = '';
+  });
+
+  it('renders a polite live region into the target element', () => {
+    startService();
+
+    expect(targetDomElement.contains(getLiveRegion())).toBe(true);
+    expect(getLiveRegion().getAttribute('role')).toBe('status');
+    expect(getLiveRegion().getAttribute('aria-live')).toBe('polite');
+  });
+
+  it('announces notified messages through the live region', () => {
+    const screenReader = startService();
+
+    screenReader.notify('Success: Rule exported');
+    screenReader.notify('Detection rules - Elastic');
+    advanceTimers(ANNOUNCEMENT_SETTLE_MS);
+
+    const messages = [...getLiveRegion().querySelectorAll('p')].map((p) => p.textContent);
+    expect(messages).toEqual(['Success: Rule exported', 'Detection rules - Elastic']);
+  });
+
+  it('inserts new nodes when the same message is announced again', () => {
+    const screenReader = startService();
+
+    screenReader.notify('Saved');
+    advanceTimers(ANNOUNCEMENT_SETTLE_MS);
+    const firstMessage = getLiveRegion().querySelector('p');
+
+    screenReader.notify('Saved');
+    advanceTimers(estimateReadingTimeMs(['Saved']));
+
+    const secondMessage = getLiveRegion().querySelector('p');
+    expect(secondMessage?.textContent).toBe('Saved');
+    expect(secondMessage).not.toBe(firstMessage);
+  });
+
+  it('removes the live region when stopped', () => {
+    startService();
+
+    act(() => service.stop());
+
+    expect(targetDomElement.childElementCount).toBe(0);
+  });
+});

@@ -1679,7 +1679,6 @@
     "core.ui.observabilityNavList.label": "オブザーバビリティ",
     "core.ui.overlays.banner.attentionTitle": "注意",
     "core.ui.overlays.banner.closeButtonLabel": "閉じる",
-    "core.ui.pageChangeAnnouncements": "ページ変更のお知らせ",
     "core.ui.primaryNav.addData": "統合の追加",
     "core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel": "このデプロイの管理",
     "core.ui.primaryNav.cloud.deploymentLabel": "デプロイ",

@@ -52,6 +52,7 @@ export type {
   NotificationsStart,
   FeedbackStart,
   ToursStart,
+  ScreenReaderStart,
 } from '@kbn/core-notifications-browser';
 export type {
   ChromeBadge,

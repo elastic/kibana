@@ -9,7 +9,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiLiveAnnouncer, EuiSkipLink, keys } from '@elastic/eui';
+import { EuiSkipLink, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_SELECTOR, MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -28,9 +28,21 @@ const PageAnnouncerView: FC<{
   shouldHandleTab: boolean;
   onInteraction: () => void;
 }> = ({ routeTitle, shouldHandleTab, onInteraction }) => {
+  const { notifications } = useChromeComponentsDeps();
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
   const onInteractionRef = useRef(onInteraction);
   onInteractionRef.current = onInteraction;
+  const lastAnnouncedTitle = useRef('');
+
+  // Announced through the shared screen reader queue, so a page change and a toast caused by the
+  // same action are announced together instead of interrupting each other. Only a different title
+  // is announced: apps that keep state in the URL hash change the location without a new page.
+  useEffect(() => {
+    if (routeTitle && routeTitle !== lastAnnouncedTitle.current) {
+      lastAnnouncedTitle.current = routeTitle;
+      notifications.screenReader.notify(routeTitle);
+    }
+  }, [routeTitle, notifications]);
 
   useEffect(() => {
     const events: Array<keyof WindowEventMap> = ['keydown', 'mousedown'];
@@ -63,30 +75,19 @@ const PageAnnouncerView: FC<{
   }, [shouldHandleTab]);
 
   return (
-    <>
-      <EuiLiveAnnouncer
-        clearAfterMs={false}
-        aria-label={i18n.translate('core.ui.pageChangeAnnouncements', {
-          defaultMessage: 'Page change announcements',
-        })}
-      >
-        {routeTitle}
-      </EuiLiveAnnouncer>
-
-      <EuiSkipLink
-        buttonRef={skipLinkRef}
-        position="fixed"
-        destinationId=""
-        fallbackDestination={[FLYOUT_SELECTOR, ...MAIN_CONTENT_SELECTORS]}
-        overrideLinkBehavior
-        data-test-subj="skipToMainButton"
-        role="button"
-      >
-        {i18n.translate('core.ui.skipToMainButton', {
-          defaultMessage: 'Skip to main content',
-        })}
-      </EuiSkipLink>
-    </>
+    <EuiSkipLink
+      buttonRef={skipLinkRef}
+      position="fixed"
+      destinationId=""
+      fallbackDestination={[FLYOUT_SELECTOR, ...MAIN_CONTENT_SELECTORS]}
+      overrideLinkBehavior
+      data-test-subj="skipToMainButton"
+      role="button"
+    >
+      {i18n.translate('core.ui.skipToMainButton', {
+        defaultMessage: 'Skip to main content',
+      })}
+    </EuiSkipLink>
   );
 };
 

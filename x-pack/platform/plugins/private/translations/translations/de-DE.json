@@ -1660,7 +1660,6 @@
     "core.ui.observabilityNavList.label": "Observability",
     "core.ui.overlays.banner.attentionTitle": "Achtung",
     "core.ui.overlays.banner.closeButtonLabel": "Schließen",
-    "core.ui.pageChangeAnnouncements": "Ankündigungen zum Seitenwechsel",
     "core.ui.primaryNav.addData": "Integrationen hinzufügen",
     "core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel": "Verwalten Sie dieses Deployment",
     "core.ui.primaryNav.cloud.deploymentLabel": "Deployment",

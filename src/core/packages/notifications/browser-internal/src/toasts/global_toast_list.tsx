@@ -19,13 +19,15 @@ import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { ToastWithRichTitle } from './deduplicate_toasts';
 import { deduplicateToasts } from './deduplicate_toasts';
 import type { ToastsTelemetry } from './telemetry';
-import type { GetMountedText, ToastContentPart } from './toast_announcer';
-import { ToastAnnouncer } from './toast_announcer';
+import type { InternalScreenReaderStart } from '../screen_reader';
+import type { GetMountedText, ToastContentPart } from './use_toast_announcements';
+import { useToastAnnouncements } from './use_toast_announcements';
 
 interface Props {
   toasts$: Observable<Toast[]>;
   reportEvent: ReturnType<ToastsTelemetry['start']>;
   dismissToast: (toastId: string) => void;
+  notifyScreenReader: InternalScreenReaderStart['notify'];
 }
 
 interface State {
@@ -39,10 +41,11 @@ export const GlobalToastList: FunctionComponent<Props> = ({
   toasts$,
   dismissToast,
   reportEvent,
+  notifyScreenReader,
 }) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
-  // Rendered mount point content, so that `ToastAnnouncer` can read its text
+  // Rendered mount point content, so that announcements can read its text
   const contentNodes = useRef(new Map<string, HTMLElement>());
 
   const renderContent = (
@@ -80,6 +83,8 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       contentNodes.current.get(getContentNodeKey(toastId, part))?.textContent ?? '',
     []
   );
+
+  useToastAnnouncements({ idToToasts, getMountedText, notifyScreenReader });
 
   const reportToastDismissal = useCallback(
     (representedToasts: State['idToToasts'][number]) => {
@@ -131,24 +136,22 @@ export const GlobalToastList: FunctionComponent<Props> = ({
   );
 
   return (
-    <>
-      <EuiGlobalToastList
-        aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
-          defaultMessage: 'Notification message list',
-        })}
-        // Announced by `ToastAnnouncer` instead, see why there
-        aria-live="off"
-        data-test-subj="globalToastList"
-        toasts={toasts.map(convertToEui)}
-        dismissToast={closeToastsRepresentedById}
-        /**
-         * This prop is overridden by the individual toasts that are added.
-         * Use `Infinity` here so that it's obvious a timeout hasn't been
-         * provided in development.
-         */
-        toastLifeTimeMs={Infinity}
-      />
-      <ToastAnnouncer idToToasts={idToToasts} getMountedText={getMountedText} />
-    </>
+    <EuiGlobalToastList
+      aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
+        defaultMessage: 'Notification message list',
+      })}
+      // Announced through the shared screen reader announcer instead, which waits for open
+      // modals to close and doesn't interrupt other announcements
+      aria-live="off"
+      data-test-subj="globalToastList"
+      toasts={toasts.map(convertToEui)}
+      dismissToast={closeToastsRepresentedById}
+      /**
+       * This prop is overridden by the individual toasts that are added.
+       * Use `Infinity` here so that it's obvious a timeout hasn't been
+       * provided in development.
+       */
+      toastLifeTimeMs={Infinity}
+    />
   );
 };
