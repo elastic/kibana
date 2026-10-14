@@ -325,7 +325,12 @@ export interface DocLinks {
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
+    readonly alertsPage: string;
     readonly attacksPage: string;
+    readonly dashboardsPage: string;
+    readonly detectionResponsePage: string;
+    readonly notesPage: string;
+    readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;

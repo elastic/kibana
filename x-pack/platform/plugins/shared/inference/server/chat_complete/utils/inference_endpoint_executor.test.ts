@@ -128,6 +128,33 @@ describe('createInferenceEndpointExecutor', () => {
     );
   });
 
+  it('sets the trace and space headers, so EIS can tie a call to its trace and space', async () => {
+    mockTransportRequest.mockResolvedValue(new PassThrough());
+
+    await executor.invoke({
+      body: {},
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'alertzero_alert_triage',
+          traceId: 'trace-1',
+          spaceId: 'my-space',
+        },
+      },
+    });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'alertzero_alert_triage',
+          'X-Elastic-Trace-Id': 'trace-1',
+          'X-Elastic-Space-Id': 'my-space',
+          'accept-encoding': 'identity',
+        },
+      })
+    );
+  });
+
   it('sets the inference timeout to 3m when no timeout is provided', async () => {
     const stream = new PassThrough();
     mockTransportRequest.mockResolvedValue(stream);

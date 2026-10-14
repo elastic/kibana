@@ -12,7 +12,11 @@ import type { SignificantEventsServer } from '../../../types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { eventsWriteHandler } from '../event_write/handler';
-import { createEventTool, SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID } from './tool';
+import {
+  createEventSchema,
+  createEventTool,
+  SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
+} from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
@@ -38,6 +42,11 @@ describe('event_create tool', () => {
     });
 
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
+  });
+
+  it('does not let the caller set recovering, which only the status reconciliation writes', () => {
+    expect(createEventSchema.shape.status.safeParse('recovering').success).toBe(false);
+    expect(createEventSchema.shape.status.safeParse('inactive').success).toBe(true);
   });
 
   it('returns success result', async () => {

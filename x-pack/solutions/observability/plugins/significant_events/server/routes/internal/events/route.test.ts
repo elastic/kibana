@@ -6,6 +6,7 @@
  */
 
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
+import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { internalEventsRoutes } from './route';
 
 const mockCleanupStaleEvents = jest.fn();
@@ -56,7 +57,6 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-1'],
-      alertEventsClient: undefined,
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
   });
@@ -332,6 +332,61 @@ describe('GET /internal/significant_events/events/{id}', () => {
   });
 });
 
+describe('POST /internal/significant_events/events/{id}/update', () => {
+  const run = ({
+    findLatestByEventId,
+    createAlertEvent = jest.fn().mockResolvedValue(undefined),
+    emitTrigger,
+    body = { status: 'inactive' as const },
+  }: {
+    findLatestByEventId: jest.Mock;
+    createAlertEvent?: jest.Mock;
+    emitTrigger?: jest.Mock;
+    body?: { status: 'active' | 'inactive'; assessment_note?: string };
+  }) =>
+    eventsUpdateRoute.handler({
+      params: { path: { id: 'event-1' }, body },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () =>
+          asRuleEventsClient(
+            { findLatestByEventId },
+            { getAlertEventsClient: async () => ({ createAlertEvent } as never), emitTrigger }
+          ),
+      }),
+      server: {},
+    } as never);
+
+  const stored = {
+    event_id: 'event-1',
+    status: 'active',
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+  };
+
+  it('appends the next version, notifies, and returns the new status', async () => {
+    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+    const emitTrigger = jest.fn();
+
+    const result = await run({
+      findLatestByEventId: jest.fn().mockResolvedValue(stored),
+      createAlertEvent,
+      emitTrigger,
+      body: { status: 'inactive', assessment_note: ' not an incident ' },
+    });
+
+    expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
+    expect(createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fingerprint: 'event-1',
+        alert_status: 'inactive',
+        data: expect.objectContaining({ assessment_note: 'not an incident' }),
+      })
+    );
+    expect(emitTrigger).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
   const bodySchema = eventsUpdateRoute.params.shape.body;
 
@@ -351,5 +406,9 @@ describe('POST /internal/significant_events/events/{id}/update — body schema',
   it('accepts active status without assessment_note', () => {
     const result = bodySchema.safeParse({ status: 'active' });
     expect(result.success).toBe(true);
+  });
+
+  it('rejects recovering, which only the lifecycle state machine writes', () => {
+    expect(bodySchema.safeParse({ status: 'recovering' }).success).toBe(false);
   });
 });
