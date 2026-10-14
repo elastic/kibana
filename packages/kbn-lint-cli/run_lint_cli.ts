@@ -17,6 +17,10 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs', '.cts', '.mts']);
 
+// `oxlint.config.mjs` with `warn` rules off. Oxlint's `--fix` also fixes warnings and `--quiet`
+// only hides them, so `--fix` runs against this config to fix errors only, as ESLint did.
+const FIX_CONFIG = 'oxlint.fix.config.mjs';
+
 interface LintOptions {
   fix: boolean;
   quiet: boolean;
@@ -56,23 +60,24 @@ run(
 
 async function lintFiles({
   procRunner,
-  options,
+  options: { fix, quiet, paths },
 }: {
   procRunner: ProcRunner;
   options: LintOptions;
 }) {
-  await procRunner.run('oxlint', {
-    cmd: 'oxlint',
-    args: [
-      ...(options.fix ? ['--fix'] : []),
-      ...(options.quiet ? ['--quiet'] : []),
-      '--config',
-      'oxlint.config.mjs',
-      ...options.paths,
-    ],
-    cwd: REPO_ROOT,
-    wait: true,
-  });
+  const runOxlint = (args: string[]) =>
+    procRunner.run('oxlint', { cmd: 'oxlint', args, cwd: REPO_ROOT, wait: true });
+
+  if (fix) {
+    // The errors-only config reports exactly what `--quiet` shows, so with `--quiet` one run is
+    // enough. Errors left after fixing fail this run before warnings are reported.
+    await runOxlint(['--fix', '--quiet', '--config', FIX_CONFIG, ...paths]);
+    if (quiet) {
+      return;
+    }
+  }
+
+  await runOxlint([...(quiet ? ['--quiet'] : []), '--config', 'oxlint.config.mjs', ...paths]);
 }
 
 async function watchAndLintFiles({
