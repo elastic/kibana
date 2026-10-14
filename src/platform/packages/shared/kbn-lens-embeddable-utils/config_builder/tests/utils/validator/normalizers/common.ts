@@ -42,6 +42,9 @@ import {
   LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
   LENS_SAMPLING_DEFAULT_VALUE,
+  LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
+  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+  LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
 } from '../../../../schema/constants';
 import type { LensAttributes } from '../../../../types';
 import { getValues, type NormalizerConfig } from './normalize';
@@ -603,15 +606,15 @@ const isDateHistogramColumn = (
 ): col is DateHistogramIndexPatternColumn => col.operationType === 'date_histogram';
 
 /**
- * Default missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` to `false` on `date_histogram`
- * columns on the ORIGINAL side. The transform emits `Boolean(...)` in both directions
- * (`transforms/columns/date_histogram.ts`), so a missing flag round-trips as an explicit `false`.
+ * Apply runtime defaults for missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` on
+ * `date_histogram` columns in the original SO. The transform uses the same constants when the
+ * SO omits a field, so both sides converge to the same value after round-trip.
  */
 const normalizeDateHistogramColumnParams = (col: DateHistogramIndexPatternColumn): void => {
   const { params } = col;
-  params.ignoreTimeRange = Boolean(params.ignoreTimeRange);
-  params.dropPartials = Boolean(params.dropPartials);
-  params.includeEmptyRows = Boolean(params.includeEmptyRows);
+  params.ignoreTimeRange = params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT;
+  params.dropPartials = params.dropPartials ?? LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT;
+  params.includeEmptyRows = params.includeEmptyRows ?? LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT;
 };
 
 const isRangeColumn = (col: GenericIndexPatternColumn): col is RangeIndexPatternColumn =>
