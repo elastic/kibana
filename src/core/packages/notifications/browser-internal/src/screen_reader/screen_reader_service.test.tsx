@@ -67,6 +67,17 @@ describe('ScreenReaderService', () => {
     expect(messages).toEqual(['Success: Rule exported', 'Detection rules - Elastic']);
   });
 
+  it('keeps the latest announcement until the next one replaces it', () => {
+    const screenReader = startService();
+
+    screenReader.notify('Success: Space "Default" was saved');
+    advanceTimers(ANNOUNCEMENT_SETTLE_MS);
+    // Screen readers may read the region seconds later, e.g. after describing a new page
+    advanceTimers(30_000);
+
+    expect(getLiveRegion().textContent).toBe('Success: Space "Default" was saved');
+  });
+
   it('inserts new nodes when the same message is announced again', () => {
     const screenReader = startService();
 

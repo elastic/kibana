@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type FunctionComponent, type Ref } from 'react';
+import React, { type FunctionComponent, type Ref } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { EuiLiveAnnouncer } from '@elastic/eui';
@@ -24,6 +24,10 @@ interface Props {
  * EuiLiveAnnouncer keeps one region that is always live and only changes its content, which screen
  * readers announce reliably. EuiScreenReaderLive instead un-hides and enables a second region in the
  * same update that inserts the content, which VoiceOver in particular does not reliably announce.
+ *
+ * The latest announcement stays until the next one replaces it. Screen readers read the region when
+ * they get to it, which can be seconds later, e.g. when VoiceOver first describes the new page after
+ * the focused element was removed by a navigation. Clearing it earlier would leave nothing to read.
  */
 export const ScreenReaderAnnouncer: FunctionComponent<Props> = ({
   announcement$,
@@ -31,23 +35,19 @@ export const ScreenReaderAnnouncer: FunctionComponent<Props> = ({
 }) => {
   const announcement = useObservable(announcement$);
 
-  // Memoized so that re-renders don't restart EuiLiveAnnouncer's clear timer. Keys are unique per
-  // announcement, so repeating a message inserts new nodes that screen readers announce again.
-  const content = useMemo(
-    () =>
-      announcement ? (
-        <>
-          {announcement.messages.map((message, index) => (
-            <p key={`${announcement.id}:${index}`}>{message}</p>
-          ))}
-        </>
-      ) : null,
-    [announcement]
-  );
-
   return (
     <div ref={announcerRef}>
-      <EuiLiveAnnouncer data-test-subj="screenReaderAnnouncer">{content}</EuiLiveAnnouncer>
+      <EuiLiveAnnouncer clearAfterMs={false} data-test-subj="screenReaderAnnouncer">
+        {announcement ? (
+          <>
+            {/* Keys are unique per announcement, so repeating a message inserts new nodes that
+                screen readers announce again */}
+            {announcement.messages.map((message, index) => (
+              <p key={`${announcement.id}:${index}`}>{message}</p>
+            ))}
+          </>
+        ) : null}
+      </EuiLiveAnnouncer>
     </div>
   );
 };
