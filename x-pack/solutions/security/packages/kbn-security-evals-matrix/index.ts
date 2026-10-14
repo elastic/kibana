@@ -6,3 +6,6 @@
  */
 
 export * as cli from './src/cli';
+
+// Generic per-example report model + pluggable output adapters (HTML, JSON fallback)
+export * from './src/report';

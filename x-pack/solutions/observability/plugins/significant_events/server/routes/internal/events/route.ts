@@ -23,7 +23,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import {
@@ -92,8 +92,8 @@ const eventsSearchRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
+      from: isoDateTime().optional(),
+      to: isoDateTime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       status: z
@@ -436,7 +436,7 @@ const investigationStatusesRoute = createServerRoute({
     access: 'internal',
     summary: 'Resolve the outcome of investigation runs',
     description:
-      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
+      'Reports whether each investigation is pending (an agent works on it) or complete, from the shared investigations API. The ids are the investigation ids a significant event records in `workflow_execution_id`. Investigations that do not exist or cannot be read are omitted.',
   },
   security: {
     authz: {
@@ -454,7 +454,6 @@ const investigationStatusesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-    getSpaceId,
   }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
     const { licensing } = await getScopedClients({ request });
 
@@ -462,9 +461,8 @@ const investigationStatusesRoute = createServerRoute({
 
     const statuses = await resolveInvestigationStatuses({
       request,
-      workflowsManagement: server.workflowsManagement,
-      spaceId: await getSpaceId(request),
-      workflowExecutionIds: params.body.workflow_execution_ids,
+      agenticInvestigations: server.agenticInvestigations,
+      investigationIds: params.body.workflow_execution_ids,
       logger,
     });
 
