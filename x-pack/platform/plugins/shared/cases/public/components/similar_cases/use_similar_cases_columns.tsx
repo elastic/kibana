@@ -16,6 +16,7 @@ import { EuiBadgeGroup, EuiBadge, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/e
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
+import { FieldType } from '../../../common/types/domain/template/fields';
 import type { ActionConnector } from '../../../common/types/domain';
 
 import type {
@@ -33,6 +34,14 @@ import { ExternalServiceColumn } from '../all_cases/hooks/use_cases_columns';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { tableColumnPresetDateRelative } from '../../utils/table_column_presets';
 import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_columns_configuration';
+import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
+import {
+  getExtendedFieldColumnKey,
+  getExtendedFieldTableColumn,
+  renderExtendedFieldValue,
+} from '../all_cases/components/extended_field_columns';
+import { getFieldCamelKey } from '../../../common/utils';
+import { useCasesConfig } from '../../common/lib/kibana';
 import { SIMILAR_CASES_CHECKED_DEFAULTS } from './use_similar_cases_columns_selection';
 import * as i18n from './translations';
 
@@ -53,7 +62,7 @@ const getLineClampedCss = css`
 
 const SIMILARITIES_FIELD = 'similarities' as const;
 
-// Stable empty map: user profiles are not fetched for the Similar Cases table.
+// Stable empty map: used when the caller passes no user profiles.
 const EMPTY_PROFILES: Map<string, UserProfileWithAvatar> = new Map();
 
 // Stable empty list: connectors are not fetched for the Similar Cases table.
@@ -67,11 +76,15 @@ export interface UseSimilarCasesColumnsReturnValue {
 export const useSimilarCasesColumns = ({
   selectedColumns,
   customFields = [],
+  userProfiles = EMPTY_PROFILES,
 }: {
   selectedColumns?: CasesColumnSelection[];
   customFields?: CasesConfigurationUICustomField[];
+  userProfiles?: Map<string, UserProfileWithAvatar>;
 } = {}): UseSimilarCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(false);
+  const { templatesEnabled } = useCasesConfig();
+  const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
 
   const columnsDict: Record<string, SimilarCasesColumns> = useMemo(
     () => ({
@@ -96,7 +109,7 @@ export const useSimilarCasesColumns = ({
         name: casesColumnsConfig.assignees.name,
         sortable: false,
         render: (assignees: CaseUI['assignees']) => (
-          <AssigneesColumn assignees={assignees} userProfiles={EMPTY_PROFILES} />
+          <AssigneesColumn assignees={assignees} userProfiles={userProfiles} />
         ),
       },
       tags: {
@@ -269,11 +282,33 @@ export const useSimilarCasesColumns = ({
         minWidth: '6em',
       },
     }),
-    [casesColumnsConfig]
+    [casesColumnsConfig, userProfiles]
   );
 
   const allColumnsDict = useMemo(() => {
     const dict: Record<string, SimilarCasesColumns> = { ...columnsDict };
+
+    if (templatesEnabled) {
+      globalInlineFields.forEach((field) => {
+        const column = getExtendedFieldTableColumn(field, EMPTY_PROFILES);
+
+        // User profiles are not fetched here, so an avatar cell would show only anonymous
+        // avatars. Render the stored user names as text instead.
+        dict[getExtendedFieldColumnKey(field)] = (
+          field.control === FieldType.USER_PICKER
+            ? {
+                ...column,
+                render: (theCase: SimilarCaseUI) =>
+                  renderExtendedFieldValue(
+                    field,
+                    theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)]
+                  ),
+              }
+            : column
+        ) as SimilarCasesColumns;
+      });
+      return dict;
+    }
 
     customFields.forEach(({ key, type, label }) => {
       if (type in customFieldsBuilderMap) {
@@ -297,7 +332,7 @@ export const useSimilarCasesColumns = ({
     });
 
     return dict;
-  }, [columnsDict, customFields]);
+  }, [columnsDict, customFields, templatesEnabled, globalInlineFields]);
 
   const similarityReasonColumn: SimilarCasesColumns = useMemo(
     () => ({
