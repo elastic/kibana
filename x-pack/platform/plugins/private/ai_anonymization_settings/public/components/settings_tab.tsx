@@ -92,7 +92,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.aiAnonymizationSettings.settingsTab.onFailureHelpText"
-          defaultMessage="Cluster default: Block the request. Choose how AI requests are handled if a pattern fails to run."
+          defaultMessage="Default: Block the request. Choose how AI requests are handled if a pattern fails to run."
         />
       </EuiText>
       <EuiSpacer size="s" />
