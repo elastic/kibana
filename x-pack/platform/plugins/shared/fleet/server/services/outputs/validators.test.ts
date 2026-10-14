@@ -7,7 +7,7 @@
 
 import { OutputInvalidError } from '../../errors';
 
-import { validateKafkaKerberos, validateKafkaOAuth2 } from './validators';
+import { validateKafkaAuthMethods, validateKafkaKerberos, validateKafkaOAuth2 } from './validators';
 
 const kafkaOutput = (fields: Record<string, unknown>) =>
   ({
@@ -123,6 +123,27 @@ describe('validateKafkaOAuth2', () => {
         })
       )
     ).not.toThrow();
+  });
+});
+
+describe('validateKafkaAuthMethods', () => {
+  const incompleteKerberos = kafkaOutput({ auth_type: 'kerberos' });
+  const incompleteOAuth2 = kafkaOutput({ auth_type: 'oauth2' });
+
+  it('checks every authentication method', () => {
+    expect(() => validateKafkaAuthMethods(incompleteKerberos)).toThrow(
+      'kerberos is required when auth_type is kerberos'
+    );
+    expect(() => validateKafkaAuthMethods(incompleteOAuth2)).toThrow(
+      'oauth2 is required when auth_type is oauth2'
+    );
+  });
+
+  it('does not check the methods that an update keeps as they are', () => {
+    expect(() => validateKafkaAuthMethods(incompleteKerberos, ['kerberos'])).not.toThrow();
+    expect(() => validateKafkaAuthMethods(incompleteOAuth2, ['oauth2'])).not.toThrow();
+    // only the methods it names
+    expect(() => validateKafkaAuthMethods(incompleteOAuth2, ['kerberos'])).toThrow();
   });
 });
 

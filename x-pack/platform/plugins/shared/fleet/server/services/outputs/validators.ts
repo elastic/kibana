@@ -19,6 +19,7 @@ import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../.
 import type { NewBeatsOutput, UpdateTypedOutput } from '../../../common/types';
 import type { NewOutput } from '../../../common';
 import type { Output } from '../../types';
+import type { KafkaAuthMethod } from './kafka_auth';
 import { OutputInvalidError } from '../../errors';
 import { appContextService } from '../app_context';
 import { throwIfSslPathInvalid } from '../../routes/utils/ssl_utils';
@@ -105,10 +106,21 @@ export const validateKafkaKerberos = (output: UpdateTypedOutput | NewOutput): vo
   }
 };
 
-/** Checks the settings of every authentication method of the Kafka output. */
-export const validateKafkaAuthMethods = (output: UpdateTypedOutput | NewOutput): void => {
-  validateKafkaOAuth2(output);
-  validateKafkaKerberos(output);
+/**
+ * Checks the settings of every authentication method of the Kafka output, but those of the methods
+ * in `keptMethods`: an update that keeps the authentication of an output as it is does not need to
+ * have it checked again, e.g. an output with the kerberos type that was saved without settings.
+ */
+export const validateKafkaAuthMethods = (
+  output: UpdateTypedOutput | NewOutput,
+  keptMethods: KafkaAuthMethod[] = []
+): void => {
+  if (!keptMethods.includes('oauth2')) {
+    validateKafkaOAuth2(output);
+  }
+  if (!keptMethods.includes('kerberos')) {
+    validateKafkaKerberos(output);
+  }
 };
 
 export const ensureNoDuplicateSecrets = (output: UpdateTypedOutput | NewOutput): void => {

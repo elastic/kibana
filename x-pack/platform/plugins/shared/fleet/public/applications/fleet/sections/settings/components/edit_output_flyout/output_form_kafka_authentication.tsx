@@ -167,21 +167,24 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   // Authentication method that cannot be edited from this form, e.g. set through the API.
   // Saving the output keeps its authentication settings unchanged.
   const renderManagedElsewhereCallout = () => (
-    <KbnInfoCallout
-      title={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereTitle"
-          defaultMessage="This authentication method is configured outside of this form"
-        />
-      }
-      text={
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereText"
-          defaultMessage="Its authentication settings are kept as they are when you save the output. Select another method to replace them."
-        />
-      }
-      data-test-subj="settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout"
-    />
+    <>
+      <EuiSpacer size="m" />
+      <KbnInfoCallout
+        title={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereTitle"
+            defaultMessage="This authentication method is configured outside of this form"
+          />
+        }
+        text={
+          <FormattedMessage
+            id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereText"
+            defaultMessage="Its authentication settings are kept as they are when you save the output. Select another method to replace them."
+          />
+        }
+        data-test-subj="settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout"
+      />
+    </>
   );
 
   const renderAuthentication = () => {

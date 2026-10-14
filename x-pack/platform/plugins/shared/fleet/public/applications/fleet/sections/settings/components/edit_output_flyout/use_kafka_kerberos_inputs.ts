@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 
 import type { KafkaKerberosConfig, KafkaOutput } from '../../../../../../../common/types/models';
-import { kafkaKerberosAuthType } from '../../../../../../../common/constants';
+import { kafkaAuthType, kafkaKerberosAuthType } from '../../../../../../../common/constants';
 
 import { useInput, useRadioInput, useSecretInput, useSwitchInput } from '../../../../hooks';
 
@@ -144,3 +144,19 @@ export function buildKafkaKerberosConfig(
       : {}),
   };
 }
+
+/** Whether the output has the kerberos type and no settings, e.g. one set up in the advanced YAML. */
+export const isKafkaKerberosWithoutSettings = (output: KafkaOutput | undefined) =>
+  output?.auth_type === kafkaAuthType.Kerberos && !output.kerberos;
+
+/** Whether a Kerberos setting was entered in the form. */
+export const hasKafkaKerberosInput = (inputs: KafkaKerberosInputs) =>
+  [
+    inputs.kafkaKerberosConfigPathInput,
+    inputs.kafkaKerberosRealmInput,
+    inputs.kafkaKerberosServiceNameInput,
+    inputs.kafkaKerberosKeytabInput,
+    inputs.kafkaKerberosUsernameInput,
+  ].some((input) => !!input.value?.trim()) ||
+  !!inputs.kafkaKerberosPasswordInput.value ||
+  inputs.kafkaKerberosEnableFastInput.value;

@@ -105,7 +105,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
 import { checkKafkaAuthMethodAllowed } from './outputs/kafka_auth_gate';
-import type { KafkaAuthOutput } from './outputs/kafka_auth';
+import type { KafkaAuthMethod, KafkaAuthOutput } from './outputs/kafka_auth';
 import {
   KAFKA_AUTH_METHODS,
   clearKafkaAuthFieldsForType,
@@ -1272,7 +1272,11 @@ class OutputService {
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
     const isPreconfigured = (fromPreconfiguration || originalOutput.is_preconfigured) ?? false;
-    this._runOutputValidators(typedFullUpdateData, isPreconfigured);
+    // the authentication methods that the update keeps as they are were checked when they were saved
+    const keptAuthMethods = KAFKA_AUTH_METHODS.filter((method) =>
+      keepsKafkaAuth(method, originalOutput, typedFullUpdateData)
+    );
+    this._runOutputValidators(typedFullUpdateData, isPreconfigured, keptAuthMethods);
 
     // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.
     // id is stripped to prevent poisoning the saved object's identity field.
@@ -1875,14 +1879,15 @@ class OutputService {
 
   private _runOutputValidators(
     output: UpdateTypedOutput | NewOutput,
-    isPreconfigured: boolean
+    isPreconfigured: boolean,
+    keptAuthMethods: KafkaAuthMethod[] = []
   ): void {
     try {
       if (isBeatsOutput(output)) {
         validateOutputSslPaths(output);
       }
       ensureNoDuplicateSecrets(output);
-      validateKafkaAuthMethods(output);
+      validateKafkaAuthMethods(output, keptAuthMethods);
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);

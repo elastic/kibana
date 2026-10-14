@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { kafkaKerberosAuthType } from '../../../../../../../common/constants';
+import { useFleetStatus } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { isKafkaKerberosPassword } from './use_kafka_kerberos_inputs';
@@ -59,6 +60,8 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
   inputs,
 }) => {
   const isPassword = isKafkaKerberosPassword(inputs);
+  // Kerberos does not work in FIPS mode: the warning is only useful in a FIPS environment
+  const { isFipsEnabled } = useFleetStatus();
 
   return (
     <>
@@ -79,23 +82,27 @@ export const OutputFormKafkaKerberos: React.FunctionComponent<{ inputs: OutputFo
         }
         data-test-subj="settingsOutputsFlyout.kafkaKerberosHostFilesCallout"
       />
-      <EuiSpacer size="s" />
-      <KbnWarningCallout
-        size="s"
-        title={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosFipsCalloutTitle"
-            defaultMessage="Not supported on FIPS agents"
+      {isFipsEnabled && (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosFipsCalloutTitle"
+                defaultMessage="Not supported on FIPS agents"
+              />
+            }
+            text={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosFipsCalloutText"
+                defaultMessage="FIPS agents cannot use Kerberos, and fail to send data to an output that uses it."
+              />
+            }
+            data-test-subj="settingsOutputsFlyout.kafkaKerberosFipsCallout"
           />
-        }
-        text={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaKerberosFipsCalloutText"
-            defaultMessage="FIPS agents cannot use Kerberos, and fail to send data to an output that uses it."
-          />
-        }
-        data-test-subj="settingsOutputsFlyout.kafkaKerberosFipsCallout"
-      />
+        </>
+      )}
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth

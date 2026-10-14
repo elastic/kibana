@@ -469,7 +469,13 @@ describe('EditOutputFlyout', () => {
       expect(utils.getByTestId('kafkaAuthenticationKerberosRadioButton')).toBeInTheDocument();
     });
 
-    it('should save the keytab authentication, keeping the timeout', async () => {
+    it('should warn that Kerberos is not supported only in a FIPS environment', () => {
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+        isFipsEnabled: true,
+      } as any);
       const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
 
       fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
@@ -477,6 +483,14 @@ describe('EditOutputFlyout', () => {
       expect(
         utils.getByTestId('settingsOutputsFlyout.kafkaKerberosFipsCallout')
       ).toBeInTheDocument();
+    });
+
+    it('should save the keytab authentication, keeping the timeout', async () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosFipsCallout')).toBeNull();
       expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosPasswordInput')).toBeNull();
       // Kerberos runs on the Beats runtime when the agent cannot translate the timeout
       expect(
@@ -562,6 +576,90 @@ describe('EditOutputFlyout', () => {
         expect(utils.getByText('Keytab file is required')).toBeInTheDocument();
       });
       expect(mockSendPutOutput).not.toHaveBeenCalled();
+    });
+
+    it('should save an output set up before Kerberos had settings when Kerberos is not enabled', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      // only the type and the advanced YAML, as an output created through the API before this form
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        config_yaml: 'kerberos:\n  enabled: true\n',
+      });
+
+      change(utils, 'nameInput', 'renamed kafka output');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({ auth_type: 'kerberos' })
+        );
+      });
+      // there are no settings to send, the server keeps the output as it is
+      expect((mockSendPutOutput.mock.calls[0][1] as any).kerberos).toBeUndefined();
+    });
+
+    describe('output set up before Kerberos had settings, with Kerberos enabled', () => {
+      const legacyOutput = {
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        config_yaml: 'kerberos:\n  enabled: true\n',
+      };
+
+      it('should show the Kerberos form without errors, and save the output as it is', async () => {
+        const { utils } = renderFlyout(legacyOutput);
+
+        expect(
+          utils.getByTestId('settingsOutputsFlyout.kafkaKerberosConfigPathInput')
+        ).toBeVisible();
+        change(utils, 'nameInput', 'renamed kafka output');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({ auth_type: 'kerberos' })
+          );
+        });
+        expect(utils.queryByText('Realm is required')).not.toBeInTheDocument();
+        expect((mockSendPutOutput.mock.calls[0][1] as any).kerberos).toBeUndefined();
+        expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
+      });
+
+      it('should require every setting once one is entered', async () => {
+        const { utils } = renderFlyout(legacyOutput);
+
+        change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
+        save(utils);
+
+        await waitFor(() => {
+          expect(utils.getByText('Realm is required')).toBeInTheDocument();
+          expect(utils.getByText('Keytab file is required')).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should send the saved Kerberos settings unchanged when Kerberos is not enabled', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      const kerberos = {
+        auth_type: 'keytab',
+        config_path: '/etc/krb5.conf',
+        keytab: '/etc/kafka.keytab',
+        realm: 'EXAMPLE.COM',
+      };
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'kerberos', kerberos });
+
+      change(utils, 'nameInput', 'renamed kafka output');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({ auth_type: 'kerberos', kerberos })
+        );
+      });
     });
 
     it('should keep the saved settings of an output that does not allow Kerberos to be edited', () => {

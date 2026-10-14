@@ -90,6 +90,8 @@ import type { KafkaKerberosInputs } from './use_kafka_kerberos_inputs';
 import {
   buildKafkaKerberosConfig,
   extractKafkaKerberosSecrets,
+  hasKafkaKerberosInput,
+  isKafkaKerberosWithoutSettings,
   useKafkaKerberosInputs,
   validateKafkaKerberosInputs,
 } from './use_kafka_kerberos_inputs';
@@ -584,6 +586,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isKafkaKerberosSelected,
     isDisabled('kerberos')
   );
+  // An output with the kerberos type and no settings was set up outside of this form, e.g. in the
+  // advanced YAML. Until a Kerberos setting is entered, whether the form is shown or not, there is
+  // nothing to validate or to send for it: the update keeps the authentication as it is.
+  const isKafkaKerberosConfigured =
+    isKafkaKerberosSelected &&
+    (!isKafkaKerberosWithoutSettings(kafkaOutput) || hasKafkaKerberosInput(kafkaKerberosInputs));
 
   const kafkaSslCertificateAuthoritiesInput = useComboInput(
     'kafkaSslCertificateAuthoritiesComboBox',
@@ -804,7 +812,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     const kafkaPasswordPlainValid = kafkaAuthPasswordInput.validate();
     const kafkaPasswordSecretValid = kafkaAuthPasswordSecretInput.validate();
     const kafkaOAuth2Valid = validateKafkaOAuth2Inputs(kafkaOAuth2Inputs);
-    const kafkaKerberosValid = validateKafkaKerberosInputs(kafkaKerberosInputs);
+    const kafkaKerberosValid =
+      !isKafkaKerberosConfigured || validateKafkaKerberosInputs(kafkaKerberosInputs);
     const kafkaClientIDValid = kafkaClientIdInput.validate();
     const kafkaSslCertificateAuthoritiesValid = kafkaSslCertificateAuthoritiesInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
@@ -907,6 +916,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaHostsInput,
     kafkaOAuth2Inputs,
     kafkaKerberosInputs,
+    isKafkaKerberosConfigured,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaAuthPasswordSecretInput,
@@ -1017,7 +1027,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                 ...(isKafkaOAuth2Selected && {
                   oauth2: extractKafkaOAuth2Secrets(kafkaOAuth2Inputs),
                 }),
-                ...(isKafkaKerberosSelected && {
+                ...(isKafkaKerberosConfigured && {
                   kerberos: extractKafkaKerberosSecrets(kafkaKerberosInputs),
                 }),
               }
@@ -1086,7 +1096,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     oauth2: buildKafkaOAuth2Config(kafkaOutput?.oauth2, kafkaOAuth2Inputs),
                   }
                 : {}),
-              ...(isKafkaKerberosSelected
+              ...(isKafkaKerberosConfigured
                 ? {
                     kerberos: buildKafkaKerberosConfig(kafkaOutput?.kerberos, kafkaKerberosInputs),
                   }
@@ -1302,7 +1312,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     kafkaOAuth2Inputs,
     isKafkaOAuth2Selected,
     kafkaKerberosInputs,
-    isKafkaKerberosSelected,
+    isKafkaKerberosConfigured,
     kafkaOutput,
     nameInput.value,
     kafkaHostsInput.value,
