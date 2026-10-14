@@ -9,7 +9,7 @@ import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from './constants';
-import { toSafeInternalHref } from './internal_link';
+import { isKibanaFramed, toSafeInternalHref, type LinkBasePath } from './internal_link';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
   if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
@@ -137,12 +137,11 @@ const KEPT_ANCHOR_ATTRIBUTES = new Set([
   'aria-label',
 ]);
 
-const hardenAnchor = (node: Element, basePath: string) => {
-  if (node.localName !== 'a') return;
+const LINK_ATTRIBUTES = ['href', 'xlink:href'];
 
-  if (node.namespaceURI !== HTML_NAMESPACE) {
-    node.removeAttribute('href');
-    node.removeAttribute('xlink:href');
+const hardenLinks = (node: Element, basePath: LinkBasePath, linksEnabled: boolean) => {
+  if (node.localName !== 'a' || node.namespaceURI !== HTML_NAMESPACE) {
+    LINK_ATTRIBUTES.forEach((name) => node.removeAttribute(name));
     return;
   }
 
@@ -151,7 +150,7 @@ const hardenAnchor = (node: Element, basePath: string) => {
     if (!KEPT_ANCHOR_ATTRIBUTES.has(name)) node.removeAttribute(name);
   });
 
-  const safeHref = href === null ? undefined : toSafeInternalHref(href, basePath);
+  const safeHref = href === null || !linksEnabled ? undefined : toSafeInternalHref(href, basePath);
   if (safeHref === undefined) {
     ['href', 'target', 'rel'].forEach((name) => node.removeAttribute(name));
     return;
@@ -161,8 +160,12 @@ const hardenAnchor = (node: Element, basePath: string) => {
   node.setAttribute('rel', 'noopener noreferrer');
 };
 
-export function sanitizeHtml(html: string, basePath = ''): string {
-  const hook = (node: Element) => hardenAnchor(node, basePath);
+export function sanitizeHtml(
+  html: string,
+  basePath: LinkBasePath = { requestBasePath: '', serverBasePath: '' }
+): string {
+  const linksEnabled = !isKibanaFramed();
+  const hook = (node: Element) => hardenLinks(node, basePath, linksEnabled);
   DOMPurify.addHook('afterSanitizeAttributes', hook);
   try {
     return DOMPurify.sanitize(html, {

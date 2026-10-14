@@ -16,9 +16,15 @@ import { fetchEsqlData } from './fetch_esql_data';
 import { fillTemplate } from './fill_template';
 import { sanitizeHtml, applyHtmlTheme } from './prepare_html';
 import type { CustomContentRendererServices } from './types';
+import type { LinkBasePath } from './internal_link';
 
 const RENDER_ERROR_MESSAGE = i18n.translate('xpack.customContent.renderError', {
   defaultMessage: 'Failed to render panel. Try refreshing or rephrasing the request.',
+});
+
+const getLinkBasePath = ({ basePath }: CustomContentRendererServices['http']): LinkBasePath => ({
+  requestBasePath: basePath.get(),
+  serverBasePath: basePath.serverBasePath,
 });
 
 export interface UseCustomContentHtmlParams {
@@ -70,7 +76,7 @@ export function useCustomContentHtml({
 
   useEffect(() => {
     if (trimmedTemplate && !esqlQuery) {
-      setProcessedHtml(sanitizeHtml(stripMarkdownFences(trimmedTemplate), http.basePath.get()));
+      setProcessedHtml(sanitizeHtml(stripMarkdownFences(trimmedTemplate), getLinkBasePath(http)));
       setIsLoading(false);
       setError(undefined);
       return;
@@ -97,7 +103,7 @@ export function useCustomContentHtml({
         })
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
-          setProcessedHtml(sanitizeHtml(rawHtml, http.basePath.get()));
+          setProcessedHtml(sanitizeHtml(rawHtml, getLinkBasePath(http)));
           setIsLoading(false);
         })
         .catch((err: Error) => {

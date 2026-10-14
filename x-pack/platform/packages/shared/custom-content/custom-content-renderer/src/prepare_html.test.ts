@@ -8,6 +8,7 @@
 import DOMPurify from 'dompurify';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { applyHtmlTheme, injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
+import * as internalLink from './internal_link';
 
 describe('injectStyleTag', () => {
   it('injects a <style> tag after <head>', () => {
@@ -42,6 +43,10 @@ describe('injectCsp', () => {
     const once = injectCsp('<p>hello</p>');
     const twice = injectCsp(once);
     expect(twice.split('Content-Security-Policy').length).toBe(2);
+  });
+
+  it('forbids form submissions to any destination', () => {
+    expect(injectCsp('<p>hello</p>')).toContain("form-action 'none'");
   });
 });
 
@@ -154,7 +159,7 @@ describe('sanitizeHtml', () => {
   });
 
   describe('links', () => {
-    const anchorOf = (html: string, basePath = '') => {
+    const anchorOf = (html: string, basePath = { requestBasePath: '', serverBasePath: '' }) => {
       const doc = new DOMParser().parseFromString(sanitizeHtml(html, basePath), 'text/html');
       return doc.querySelector('a');
     };
@@ -167,14 +172,30 @@ describe('sanitizeHtml', () => {
       expect(a?.textContent).toBe('go');
     });
 
+    it('drops the href of every link when Kibana is framed by another page', () => {
+      const framed = jest.spyOn(internalLink, 'isKibanaFramed').mockReturnValue(true);
+      const a = anchorOf('<a href="/app/dashboards" target="_top">go</a>');
+      framed.mockRestore();
+      expect(a?.hasAttribute('href')).toBe(false);
+      expect(a?.hasAttribute('target')).toBe(false);
+      expect(a?.textContent).toBe('go');
+    });
+
+    it('drops the href of a link to an app that is not allowed', () => {
+      expect(anchorOf('<a href="/app/dev_tools">go</a>')?.hasAttribute('href')).toBe(false);
+    });
+
     it('prepends the base path', () => {
-      expect(anchorOf('<a href="/app/discover">go</a>', '/kbn')?.getAttribute('href')).toBe(
-        '/kbn/app/discover'
-      );
+      expect(
+        anchorOf('<a href="/app/discover">go</a>', {
+          requestBasePath: '/kbn',
+          serverBasePath: '/kbn',
+        })?.getAttribute('href')
+      ).toBe('/kbn/app/discover');
     });
 
     it('overrides an author-supplied target and rel', () => {
-      const a = anchorOf('<a href="/app/x" target="_blank" rel="opener">go</a>');
+      const a = anchorOf('<a href="/app/dashboards" target="_blank" rel="opener">go</a>');
       expect(a?.getAttribute('target')).toBe('_top');
       expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
     });
@@ -195,7 +216,7 @@ describe('sanitizeHtml', () => {
 
     it('strips attributes that can trigger requests or downloads', () => {
       const a = anchorOf(
-        '<a href="/app/x" ping="https://example.com/p" download="x" referrerpolicy="unsafe-url" hreflang="en">go</a>'
+        '<a href="/app/dashboards" ping="https://example.com/p" download="x" referrerpolicy="unsafe-url" hreflang="en">go</a>'
       );
       expect(a?.getAttributeNames().sort()).toEqual(['href', 'rel', 'target']);
     });
@@ -205,6 +226,13 @@ describe('sanitizeHtml', () => {
         '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><a href="https://example.com"><text>x</text></a><a xlink:href="https://example.com"><text>y</text></a></svg>'
       );
       expect(html).not.toContain('example.com');
+    });
+
+    it('strips href and xlink:href from every element that is not an HTML link', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><use href="/app/dashboards"/><image xlink:href="/app/dashboards"/></svg><div href="/app/dashboards">x</div>'
+      );
+      expect(html).not.toContain('href');
     });
 
     it('validates hrefs filled in from data after templating', () => {

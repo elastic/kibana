@@ -34,7 +34,7 @@ const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getE
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
-const mockHttp = { basePath: { get: () => '' } } as unknown as HttpStart;
+const mockHttp = { basePath: { get: () => '', serverBasePath: '' } } as unknown as HttpStart;
 const mockSearch = jest.fn();
 
 const defaultEsQueryConfig: EsQueryConfig = {

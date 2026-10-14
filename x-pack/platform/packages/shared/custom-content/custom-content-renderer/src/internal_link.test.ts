@@ -7,19 +7,66 @@
 
 import { toSafeInternalHref } from './internal_link';
 
+const noBase = { requestBasePath: '', serverBasePath: '' };
+const onlyServer = { requestBasePath: '/kbn', serverBasePath: '/kbn' };
+const inSpace = { requestBasePath: '/kbn/s/my-space', serverBasePath: '/kbn' };
 const SCRIPT_SCHEME = ['java', 'script'].join('');
 
 describe('toSafeInternalHref', () => {
   it.each([
     ['/app/dashboards#/view/abc', '/app/dashboards#/view/abc'],
     ['/app/discover?foo=bar#/x', '/app/discover?foo=bar#/x'],
-    ['/s/my-space/app/dashboards', '/s/my-space/app/dashboards'],
+    ['/app/discover/', '/app/discover/'],
   ])('accepts %s', (href, expected) => {
-    expect(toSafeInternalHref(href, '')).toBe(expected);
+    expect(toSafeInternalHref(href, noBase)).toBe(expected);
   });
 
+  it('does not produce a double-space prefix', () => {
+    const requestBasePath = '/s/my-space';
+    expect(
+      toSafeInternalHref('/s/my-space/app/dashboards', {
+        requestBasePath,
+        serverBasePath: '',
+      })
+    ).toBe(`${requestBasePath}/app/dashboards`);
+  });
+
+  it('adds the space prefix once to a link without one', () => {
+    expect(toSafeInternalHref('/app/dashboards', inSpace)).toBe('/kbn/s/my-space/app/dashboards');
+  });
+
+  it('does not use the default space prefix', () => {
+    expect(toSafeInternalHref('/s/default/app/dashboards', inSpace)).toBe('/kbn/app/dashboards');
+  });
+
+  it('keeps the space of a cross-space link', () => {
+    expect(toSafeInternalHref('/s/other/app/dashboards#/view/a', inSpace)).toBe(
+      '/kbn/s/other/app/dashboards#/view/a'
+    );
+  });
+
+  it('adds the space of a cross-space link when the current base path has none', () => {
+    expect(toSafeInternalHref('/s/other/app/discover', onlyServer)).toBe(
+      '/kbn/s/other/app/discover'
+    );
+  });
+
+  it.each(['/s/Bad%20Id/app/dashboards', '/s/a.b/app/dashboards', '/s//app/dashboards', '/s/x'])(
+    'rejects a malformed space prefix: %s',
+    (href) => {
+      expect(toSafeInternalHref(href, inSpace)).toBeUndefined();
+    }
+  );
+
+  it.each(['/app/dev_tools#/console?load_from=data:text/plain,abc', '/app/lens', '/s/x/app/maps'])(
+    'rejects an app that is not allowed: %s',
+    (href) => {
+      expect(toSafeInternalHref(href, noBase)).toBeUndefined();
+    }
+  );
+
   it('prepends the base path', () => {
-    expect(toSafeInternalHref('/app/dashboards', '/kbn')).toBe('/kbn/app/dashboards');
+    expect(toSafeInternalHref('/app/dashboards', onlyServer)).toBe('/kbn/app/dashboards');
   });
 
   it.each([
@@ -47,6 +94,6 @@ describe('toSafeInternalHref', () => {
     ' /app/dashboards',
     '',
   ])('rejects %j', (href) => {
-    expect(toSafeInternalHref(href, '')).toBeUndefined();
+    expect(toSafeInternalHref(href, noBase)).toBeUndefined();
   });
 });

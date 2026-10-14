@@ -25,6 +25,7 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/ui-callout",
     "@kbn/core",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/core-spaces-common"
   ]
 }
