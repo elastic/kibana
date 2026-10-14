@@ -14,6 +14,8 @@ import {
   VECTOR_DB_INDEX_MODE,
 } from '../../../common/constants';
 
+export const resolveIndexMode = (mode?: string) => mode ?? STANDARD_INDEX_MODE;
+
 export const indexModeLabels = {
   [STANDARD_INDEX_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.standardIndexModeLabel', {
     defaultMessage: 'Standard',
