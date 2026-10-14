@@ -42,7 +42,7 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
   profileState: TabState['profileState'] | undefined;
-  visorMode?: TabState['uiState']['visorMode'];
+  visorMode?: VisorMode;
 };
 
 const isVisorMode = (value: unknown): value is VisorMode =>
@@ -215,7 +215,7 @@ export const createTabsStorageManager = ({
       appState: tabState.appState,
       globalState: tabState.globalState,
       profileState: getLocallyPersistedProfileState(tabState.profileState),
-      visorMode: tabState.uiState.visorMode,
+      visorMode: tabState.uiState.visor?.visorMode,
     };
   };
 
@@ -299,7 +299,9 @@ export const createTabsStorageManager = ({
       globalState: globalState || {},
       profileState: profileState || defaultTabState.profileState,
       esqlVariables,
-      uiState: visorMode ? { ...defaultTabState.uiState, visorMode } : defaultTabState.uiState,
+      uiState: visorMode
+        ? { ...defaultTabState.uiState, visor: { visorMode } }
+        : defaultTabState.uiState,
     };
 
     // migration from the older format where visContext was stored in internalState

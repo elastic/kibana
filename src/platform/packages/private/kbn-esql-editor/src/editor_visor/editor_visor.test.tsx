@@ -342,22 +342,26 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('keeps a host-owned KQL mode once AI is available and reports user changes', async () => {
-      const onVisorModeChange = jest.fn();
+    it('restores a KQL mode once AI is available and reports user changes', async () => {
+      const onInitialStateChange = jest.fn();
       const { getByTestId, queryByTestId } = renderWithI18n(
-        renderWithEnterprise({ ...props, visorMode: VisorMode.KQL, onVisorModeChange })
+        renderWithEnterprise({
+          ...props,
+          initialState: { visorMode: VisorMode.KQL },
+          onInitialStateChange,
+        })
       );
 
       await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
       expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
-      expect(onVisorModeChange).not.toHaveBeenCalled();
+      expect(onInitialStateChange).not.toHaveBeenCalled();
 
       await act(async () => {
         await userEvent.click(getByTestId('esqlVisorAskAiButton'));
       });
 
-      expect(onVisorModeChange).toHaveBeenCalledWith(VisorMode.NaturalLanguage);
+      expect(onInitialStateChange).toHaveBeenCalledWith({ visorMode: VisorMode.NaturalLanguage });
     });
 
     it('keeps the visor one row and overlays the focused NL textarea', () => {

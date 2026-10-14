@@ -479,12 +479,9 @@ const internalStateSliceDef = createSlice({
         tab.uiState.esqlEditor = action.payload.esqlEditorUiState;
       }),
 
-    setVisorModeUiState: (
-      state,
-      action: TabAction<{ visorMode: TabState['uiState']['visorMode'] }>
-    ) =>
+    setVisorUiState: (state, action: TabAction<{ visorUiState: TabState['uiState']['visor'] }>) =>
       withTab(state, action.payload, (tab) => {
-        tab.uiState.visorMode = action.payload.visorMode;
+        tab.uiState.visor = action.payload.visorUiState;
       }),
 
     setDataGridUiState: (
@@ -718,7 +715,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
             appState: tab.appState,
             globalState: tab.globalState,
             profileState: tab.profileState,
-            visorMode: tab.uiState.visorMode,
+            visorMode: tab.uiState.visor?.visorMode,
           });
         });
       },

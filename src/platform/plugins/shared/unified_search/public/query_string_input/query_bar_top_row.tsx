@@ -235,10 +235,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
 
   /**
-   * Host-owned mode of the ES|QL quick search visor (KQL vs. natural language) and its change callback.
+   * Restorable state of the ES|QL quick search visor (KQL vs. natural language mode), persisted by the host.
    */
-  visorMode?: QuickSearchVisorProps['visorMode'];
-  onVisorModeChange?: QuickSearchVisorProps['onVisorModeChange'];
+  visorInitialState?: QuickSearchVisorProps['initialState'];
+  onVisorInitialStateChange?: QuickSearchVisorProps['onInitialStateChange'];
 
   /**
    * Optional configuration for ES|QL variables.
@@ -1455,8 +1455,8 @@ export const QueryBarTopRow = React.memo(
                     isDisabled={Boolean(isDateRangeInvalid || props.isDisabled)}
                     disableSubmitAction={Boolean(props.disableSubmitAction)}
                     onKqlSubmitted={focusEsqlEditor}
-                    visorMode={props.visorMode}
-                    onVisorModeChange={props.onVisorModeChange}
+                    initialState={props.visorInitialState}
+                    onInitialStateChange={props.onVisorInitialStateChange}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}
