@@ -55,7 +55,7 @@ paths:
         - name: overwrite
           in: query
           required: false
-          description: Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.skipped`.
+          description: Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
           schema:
             type: boolean
             default: false

@@ -23,12 +23,12 @@ import { WarningSchema } from '../../model/warning_schema.gen';
 export const ImportRulesRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.skipped`.
+     * Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
      */
     overwrite: BooleanFromString.optional()
       .default(false)
       .describe(
-        'Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.skipped`.'
+        "Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`."
       ),
     /**
      * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
