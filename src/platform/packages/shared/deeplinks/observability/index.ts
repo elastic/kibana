@@ -36,6 +36,7 @@ export type {
   DeepLinkId,
   ObservabilityAlertingLinkId,
   SignificantEventsLinkId,
+  NightshiftLinkId,
   StreamsLinkId,
 } from './deep_links';
 export * from './locators';

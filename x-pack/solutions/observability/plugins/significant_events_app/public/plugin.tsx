@@ -79,22 +79,6 @@ export class SignificantEventsAppPlugin
           keywords: ['sources', 'esql', 'significant events', 'sig events', 'sig events sources'],
         },
         {
-          id: 'knowledge_indicators' satisfies SignificantEventsLinkId,
-          title: i18n.translate('xpack.significantEventsApp.kiDeepLinkTitle', {
-            defaultMessage: 'Significant events / KIs',
-          }),
-          path: '/knowledge_indicators',
-          visibleIn: [],
-          keywords: [
-            'knowledge indicators',
-            'ki',
-            'kis',
-            'significant events',
-            'sig events',
-            'sig events kis',
-          ],
-        },
-        {
           id: 'events' satisfies SignificantEventsLinkId,
           title: i18n.translate('xpack.significantEventsApp.eventsDeepLinkTitle', {
             defaultMessage: 'Significant events / Events',
