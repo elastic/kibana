@@ -33,7 +33,7 @@ export const alertingGlobalAdvancedSettings = {
       defaultMessage: 'Universal Alerting',
     }),
     type: 'boolean',
-    value: true,
+    value: false,
     description: i18n.translate('xpack.alertingVTwo.enabledSettingDescription', {
       defaultMessage:
         'Enables the Universal Alerting APIs and UI. Turning this setting off hides the UI and rejects API requests, but existing rules keep running and writing alert events. <strong>Disable your rules before turning this setting off.</strong>',
