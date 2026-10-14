@@ -103,9 +103,9 @@ export function createGetScreenshots({
         logger
       );
 
-      return options.format === 'png'
-        ? result$.pipe(Rx.map(toPngResult))
-        : result$.pipe(Rx.map(toPdfResult));
+      return options.format === 'pdf'
+        ? result$.pipe(Rx.map(toPdfResult))
+        : result$.pipe(Rx.map(toPngResult));
     });
   }
 

@@ -118,7 +118,8 @@ export function buildRenderPageRequest(
 ): RenderPageRequest {
   const { url: rawUrl, context } = getSingleUrl(options.urls);
 
-  const layoutId = options.layout?.id ?? 'preserve_layout';
+  // Same default as the screenshotting plugin's createLayout.
+  const layoutId = options.layout?.id ?? 'print';
   const isPrint = options.format === 'pdf' && layoutId === 'print';
 
   const requestHeaders = options.headers
@@ -150,7 +151,7 @@ export function buildRenderPageRequest(
       timezone: options.browserTimezone,
     },
     output: {
-      format: options.format === 'png' ? 'png' : 'pdf',
+      format: options.format === 'pdf' ? 'pdf' : 'png',
     },
   };
 
