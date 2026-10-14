@@ -8,9 +8,9 @@
 import type { Evaluator } from '@kbn/evals';
 import {
   createAgentBuilderToolClassifier,
-  createTrajectoryEvaluator,
+  createSecurityTrajectoryEvaluator,
   createUnclassifiedToolsEvaluator,
-} from '@kbn/evals';
+} from '@kbn/security-evals-matrix';
 import { CLASSIFICATIONS, type Classification } from './constants';
 import type { AlertAnalysisVerdict } from './workflow_task';
 
@@ -90,7 +90,7 @@ export const validVerdict: Evaluator = {
  * (attachments, todos, ...). An unknown tool makes the result N/A.
  */
 export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
-  const inner = createTrajectoryEvaluator({
+  const inner = createSecurityTrajectoryEvaluator({
     extractToolCalls: (output) => asVerdict(output).toolCallIds ?? [],
     goldenPathExtractor: () => [],
     orderWeight: 1,

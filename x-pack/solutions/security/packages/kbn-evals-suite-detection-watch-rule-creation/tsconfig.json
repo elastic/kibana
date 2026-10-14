@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/datemath",
     "@kbn/evals",
+    "@kbn/security-evals-matrix",
     "@kbn/esql-language",
     "@kbn/scout",
     "@kbn/tooling-log",

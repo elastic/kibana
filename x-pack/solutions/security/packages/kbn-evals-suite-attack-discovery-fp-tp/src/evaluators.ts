@@ -8,9 +8,9 @@
 import type { Evaluator } from '@kbn/evals';
 import {
   createAgentBuilderToolClassifier,
-  createTrajectoryEvaluator,
+  createSecurityTrajectoryEvaluator,
   createUnclassifiedToolsEvaluator,
-} from '@kbn/evals';
+} from '@kbn/security-evals-matrix';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   FP_TP_VERDICTS,
@@ -259,7 +259,7 @@ const classifyTool = createAgentBuilderToolClassifier();
  * N/A when the traces are unavailable or a tool is unknown.
  */
 export const createFpTpTrajectoryEvaluator = (): Evaluator => {
-  const inner = createTrajectoryEvaluator({
+  const inner = createSecurityTrajectoryEvaluator({
     extractToolCalls: (output) => asOutput(output).toolCallIds ?? [],
     goldenPathExtractor: () => [],
     orderWeight: 1,

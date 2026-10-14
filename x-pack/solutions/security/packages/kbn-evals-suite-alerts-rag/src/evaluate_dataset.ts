@@ -7,13 +7,9 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createAgentBuilderToolClassifier,
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
   createSkillInvocationEvaluator,
-  createTrajectoryEvaluator,
-  createUnclassifiedToolsEvaluator,
-  getAgentBuilderToolCalls,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
@@ -23,6 +19,12 @@ import {
   type TaskOutput,
   withEvaluatorSpan,
 } from '@kbn/evals';
+import {
+  createAgentBuilderToolClassifier,
+  createSecurityTrajectoryEvaluator,
+  createUnclassifiedToolsEvaluator,
+  getAgentBuilderToolCalls,
+} from '@kbn/security-evals-matrix';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AlertsRagCategory, AlertsRagExample } from './dataset';
 import type { AlertsRagAgentBuilderChatClient } from './chat_client';
@@ -105,7 +107,7 @@ export const createAlertsRagTrajectoryEvaluator = (): Evaluator<
   AlertsRagDatasetExample,
   TaskOutput
 > => {
-  const inner = createTrajectoryEvaluator({
+  const inner = createSecurityTrajectoryEvaluator({
     extractToolCalls: getAgentBuilderToolCalls,
     goldenPathExtractor: (expected) => {
       const exp = expected as AlertsRagDatasetExpected | undefined;
