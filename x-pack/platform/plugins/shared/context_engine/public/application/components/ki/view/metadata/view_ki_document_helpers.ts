@@ -7,6 +7,7 @@
 
 import {
   isKiJsonObject,
+  isKiJsonRecord,
   readKiDocumentLifecycleStatus,
 } from '../../../../../../common/ki_lifecycle_status';
 import type {
@@ -46,21 +47,31 @@ const parseWriter = (value: KiJsonValue | undefined): KiGovernanceWriter | undef
 
 export const readKiGovernance = (document: KiDocument): KiGovernanceView => {
   const governance = document.governance;
-  if (!isKiJsonObject(governance)) {
+  if (!isKiJsonRecord(governance)) {
     return {};
   }
 
   const lifecycleStatus = readKiDocumentLifecycleStatus(document);
 
   const provenance = governance.provenance;
-  if (!isKiJsonObject(provenance)) {
+  if (!isKiJsonRecord(provenance)) {
     return { lifecycleStatus };
   }
 
+  const toWriterValue = (value: unknown): KiJsonValue | undefined => {
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (isKiJsonObject(value as KiJsonValue)) {
+      return value as KiJsonValue;
+    }
+    return undefined;
+  };
+
   return {
     lifecycleStatus,
-    createdBy: parseWriter(provenance.created_by),
-    updatedBy: parseWriter(provenance.updated_by),
+    createdBy: parseWriter(toWriterValue(provenance.created_by)),
+    updatedBy: parseWriter(toWriterValue(provenance.updated_by)),
   };
 };
 

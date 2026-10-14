@@ -15,7 +15,7 @@ import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
-import { CONTEXT_ENGINE_PATHS } from '../paths';
+import { CONTEXT_ENGINE_PATHS, getViewKiPath } from '../paths';
 import { ViewKiPage } from './view_ki_page';
 
 const mockUseViewKi = jest.fn();
@@ -74,6 +74,36 @@ describe('ViewKiPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('resolves kiId from a path built with getViewKiPath when the id contains %', () => {
+    renderViewKiPage(`${getViewKiPath('sample-ki', 'ki-1%2')}?index=ai-index-idx-sample-ki`);
+
+    expect(mockUseViewKi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aiIndexId: 'sample-ki',
+        kiId: 'ki-1%2',
+        index: 'ai-index-idx-sample-ki',
+      })
+    );
+  });
+
+  it('resolves kiId from a path built with getViewKiPath when the id contains a slash', () => {
+    renderViewKiPage(`${getViewKiPath('sample-ki', 'a/b')}?index=ai-index-idx-sample-ki`);
+
+    expect(mockUseViewKi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aiIndexId: 'sample-ki',
+        kiId: 'a/b',
+        index: 'ai-index-idx-sample-ki',
+      })
+    );
+  });
+
+  it('does not crash when a KI id contains a literal %-escape-like substring', () => {
+    renderViewKiPage(`${getViewKiPath('sample-ki', 'a%41b')}?index=ai-index-idx-sample-ki`);
+
+    expect(mockUseViewKi).toHaveBeenCalled();
   });
 
   it('renders missing index prompt when index query param is absent', () => {

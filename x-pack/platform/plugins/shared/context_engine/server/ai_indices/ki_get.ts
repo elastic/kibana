@@ -46,18 +46,14 @@ const isKiLifecycleAllowed = (
 /** How many equal-timestamp revisions to consider when picking the current one. */
 export const REVISION_TIE_WINDOW = 10;
 
-interface RevisionHit {
-  _id?: string;
-  _source?: Record<string, unknown> | undefined;
-  sort?: estypes.SortResults;
-}
+type SearchHitForRevision = Omit<estypes.SearchHit, '_index'>;
 
 /**
  * Picks the current revision from hits sorted by `@timestamp` descending: among
  * the hits sharing the newest indexed timestamp, the greatest `_id`. Matches the
  * list's `MAX(_id)` tie-break so every read path agrees.
  */
-export const pickCurrentRevision = <T extends RevisionHit>(hits: T[]): T | undefined => {
+export const pickCurrentRevision = <T extends SearchHitForRevision>(hits: T[]): T | undefined => {
   const [newest] = hits;
   if (!newest) {
     return undefined;

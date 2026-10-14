@@ -31,7 +31,9 @@ describe('readKiDocumentLifecycleStatus', () => {
 
   it('returns undefined when governance is missing or malformed', () => {
     expect(readKiDocumentLifecycleStatus({})).toBeUndefined();
-    expect(readKiDocumentLifecycleStatus({ governance: [] })).toBeUndefined();
+    expect(
+      readKiDocumentLifecycleStatus({ governance: [] as KiDocument['governance'] })
+    ).toBeUndefined();
     expect(
       readKiDocumentLifecycleStatus({ governance: { lifecycle: { status: 'pending' } } })
     ).toBeUndefined();

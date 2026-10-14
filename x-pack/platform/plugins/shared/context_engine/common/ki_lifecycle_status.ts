@@ -6,7 +6,7 @@
  */
 
 import type { KiDocument, KiJsonValue } from './http_api/knowledge_indicators';
-import type { KiLifecycleStatus } from './step_types/ki';
+import { KI_LIFECYCLE_STATUSES, type KiLifecycleStatus } from './step_types/ki';
 
 export const isKiJsonRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -15,20 +15,17 @@ export const isKiJsonObject = (
   value: KiJsonValue | undefined
 ): value is { [key: string]: KiJsonValue } => isKiJsonRecord(value);
 
+const isKiLifecycleStatus = (value: string): value is KiLifecycleStatus =>
+  (KI_LIFECYCLE_STATUSES as readonly string[]).includes(value);
+
 export const toOptionalKiLifecycleStatus = (value: unknown): KiLifecycleStatus | undefined => {
-  if (value === 'active' || value === 'deleted') {
-    return value;
+  if (typeof value !== 'string' || !isKiLifecycleStatus(value)) {
+    return undefined;
   }
-  return undefined;
+  return value;
 };
 
 export const readKiDocumentLifecycleStatus = (
   document: KiDocument
-): KiLifecycleStatus | undefined => {
-  const governance = document.governance;
-  const rawStatus =
-    isKiJsonRecord(governance) && isKiJsonRecord(governance.lifecycle)
-      ? governance.lifecycle.status
-      : undefined;
-  return toOptionalKiLifecycleStatus(rawStatus);
-};
+): KiLifecycleStatus | undefined =>
+  toOptionalKiLifecycleStatus(document.governance?.lifecycle?.status);

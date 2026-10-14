@@ -333,13 +333,20 @@ export const getKiQuerySchema = schema.object({
     meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
   }),
   lifecycle_status: schema.maybe(
-    schema.arrayOf(kiLifecycleStatusQuerySchema, {
-      maxSize: KI_LIFECYCLE_STATUSES.length,
-      meta: {
-        description:
-          'When set, return the KI only if its governance.lifecycle.status is in this list (unset counts as active). When omitted, deleted KIs are excluded.',
-      },
-    })
+    schema.oneOf(
+      [
+        kiLifecycleStatusQuerySchema,
+        schema.arrayOf(kiLifecycleStatusQuerySchema, {
+          maxSize: KI_LIFECYCLE_STATUSES.length,
+        }),
+      ],
+      {
+        meta: {
+          description:
+            'When set, return the KI only if its governance.lifecycle.status is in this list (unset counts as active). When omitted, deleted KIs are excluded.',
+        },
+      }
+    )
   ),
 });
 
