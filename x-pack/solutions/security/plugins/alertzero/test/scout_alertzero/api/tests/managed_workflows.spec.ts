@@ -39,6 +39,7 @@ const FLOOR_ALERT_TRIAGE_WORKFLOW_ID = `${FLOOR_ALERT_TRIAGE_WORKER_ID}-${DEFAUL
  */
 apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic] }, () => {
   let hasChatCompletionConnector = false;
+  let serviceAccountId: string | undefined;
 
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -49,26 +50,94 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     });
     expect(connectors.statusCode, JSON.stringify(connectors.body)).toBe(200);
     hasChatCompletionConnector = (
-      connectors.body as Array<{ actionTypeId: string; config?: { taskType?: string } }>
+      connectors.body as Array<{ connector_type_id: string; config?: { taskType?: string } }>
     ).some(
       (connector) =>
-        connector.actionTypeId === '.inference' && connector.config?.taskType === 'chat_completion'
+        connector.connector_type_id === '.inference' &&
+        connector.config?.taskType === 'chat_completion'
     );
     if (!hasChatCompletionConnector) {
       return;
     }
 
+    // Enabling a worker needs a service account to run as, and a save that enables a worker
+    // without one is rejected. Create one, bind it, then enable, as the UI does.
+    const headers = { ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader };
+    const account = await apiClient.post('internal/security/service_account', {
+      headers,
+      body: { name: `alertzero-managed-workflows-${Date.now()}`, roles: ['superuser'] },
+      responseType: 'json',
+    });
+    expect(account.statusCode, JSON.stringify(account.body)).toBe(200);
+    serviceAccountId = (account.body as { id: string }).id;
+
+    const workerUrl = `internal/alertzero/workers/${FLOOR_ALERT_TRIAGE_WORKER_ID}`;
+    const catalog = await apiClient.get('internal/alertzero/workers', {
+      headers,
+      responseType: 'json',
+    });
+    expect(catalog.statusCode, JSON.stringify(catalog.body)).toBe(200);
+    const worker = (
+      catalog.body as { workers: Array<{ id: string; settingsRevision?: string | null }> }
+    ).workers.find((candidate) => candidate.id === FLOOR_ALERT_TRIAGE_WORKER_ID);
+    expect(worker, `${FLOOR_ALERT_TRIAGE_WORKER_ID} is in the worker catalog`).toBeDefined();
+
     // Enabling an uninstalled worker installs its per-space managed document, so
     // this drives the same route the UI drives instead of assuming the document.
-    const response = await apiClient.patch(
-      `internal/alertzero/workers/${FLOOR_ALERT_TRIAGE_WORKER_ID}`,
-      {
-        headers: { ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader },
-        body: { enabled: true },
-        responseType: 'json',
-      }
+    const bind = await apiClient.patch(workerUrl, {
+      headers,
+      body: {
+        settingsRevision: worker?.settingsRevision ?? null,
+        settings: { serviceAccountId },
+      },
+      responseType: 'json',
+    });
+    expect(bind.statusCode, JSON.stringify(bind.body)).toBe(200);
+    const enable = await apiClient.patch(workerUrl, {
+      headers,
+      body: { enabled: true },
+      responseType: 'json',
+    });
+    expect(enable.statusCode, JSON.stringify(enable.body)).toBe(200);
+  });
+
+  apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    if (!serviceAccountId) {
+      return;
+    }
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    const headers = { ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader };
+    const workerUrl = `internal/alertzero/workers/${FLOOR_ALERT_TRIAGE_WORKER_ID}`;
+
+    // Unbind before deleting the account: a worker left pointing at a deleted account leaks
+    // into whatever spec runs next. Disable first, since an enabled worker needs an account.
+    const disable = await apiClient.patch(workerUrl, {
+      headers,
+      body: { enabled: false },
+      responseType: 'json',
+    });
+    expect(disable.statusCode, JSON.stringify(disable.body)).toBe(200);
+    const catalog = await apiClient.get('internal/alertzero/workers', {
+      headers,
+      responseType: 'json',
+    });
+    const worker = (
+      catalog.body as { workers: Array<{ id: string; settingsRevision?: string | null }> }
+    ).workers.find((candidate) => candidate.id === FLOOR_ALERT_TRIAGE_WORKER_ID);
+    const unbind = await apiClient.patch(workerUrl, {
+      headers,
+      body: {
+        settingsRevision: worker?.settingsRevision ?? null,
+        settings: { serviceAccountId: null },
+      },
+      responseType: 'json',
+    });
+    expect(unbind.statusCode, JSON.stringify(unbind.body)).toBe(200);
+    const removed = await apiClient.delete(
+      `internal/security/service_account/${encodeURIComponent(serviceAccountId)}`,
+      { headers, responseType: 'json' }
     );
-    expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
+    expect([200, 404], JSON.stringify(removed.body)).toContain(removed.statusCode);
   });
 
   for (const workflowId of [

@@ -94,6 +94,9 @@ export const servers: ScoutServerConfig = {
       '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
       '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
       '--uiSettings.overrides.contextEngine:enabled=true',
+      // Enabling the Alert Triage worker is refused unless alert analysis is on for the space.
+      // The setting is readonly and defaults to false, so only a server override can set it.
+      '--uiSettings.overrides.securitySolution:alertAnalysisWorkflowEnabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',

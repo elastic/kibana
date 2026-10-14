@@ -30,4 +30,13 @@ describe('alertzero stateful classic server config', () => {
     expect(args).toContain('--xpack.alertzero.enabled=true');
     expect(args).toContain('--uiSettings.overrides.securitySolution:enableAlertZero=true');
   });
+
+  it('turns on alert analysis so the Alert Triage worker can be enabled', () => {
+    delete process.env.KIBANA_TESTING_AI_CONNECTORS;
+    const { servers } = jest.requireActual('./classic.stateful.config');
+
+    expect(servers.kbnTestServer.serverArgs).toContain(
+      '--uiSettings.overrides.securitySolution:alertAnalysisWorkflowEnabled=true'
+    );
+  });
 });
