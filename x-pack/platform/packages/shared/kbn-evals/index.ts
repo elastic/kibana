@@ -176,16 +176,7 @@ export type {
 } from './src/evaluators/ir/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
-export {
-  createTrajectoryEvaluator,
-  type ToolCallClass,
-  type TrajectoryToolCall,
-} from './src/evaluators/trajectory';
-export {
-  createAgentBuilderToolClassifier,
-  createUnclassifiedToolsEvaluator,
-  getAgentBuilderToolCalls,
-} from './src/evaluators/trajectory/agent_builder_tool_classifier';
+export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
 export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
 export { createMultiJudgeEvaluator } from './src/evaluators/multi_judge';
 export {

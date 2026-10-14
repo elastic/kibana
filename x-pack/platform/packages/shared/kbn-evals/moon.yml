@@ -41,7 +41,6 @@ dependsOn:
   - '@kbn/es'
   - '@kbn/dot-text'
   - '@kbn/dev-utils'
-  - '@kbn/agent-builder-common'
 tags:
   - test-helper
   - package

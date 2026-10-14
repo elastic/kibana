@@ -234,6 +234,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Discover
   'discover-data-analysis',
+  'discover-session',
 
   // Platform – Streams
   'streams-management',
@@ -371,6 +372,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+  'discover.session',
 
   // Platform – Workflows
   'workflow.yaml',
@@ -457,4 +459,16 @@ export const isAllowedBuiltinAttachment = (
   attachmentTypeId: string
 ): attachmentTypeId is AgentBuilderBuiltinAttachment => {
   return (AGENT_BUILDER_BUILTIN_ATTACHMENTS as readonly string[]).includes(attachmentTypeId);
+};
+
+/**
+ * This is a manually maintained list of all cycle hooks registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
+ */
+export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+
+export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
+
+export const isAllowedCycleHook = (hookId: string): hookId is AgentBuilderCycleHook => {
+  return (AGENT_BUILDER_CYCLE_HOOKS as readonly string[]).includes(hookId);
 };

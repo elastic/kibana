@@ -25,6 +25,7 @@ import {
   ChatTriggerMode,
   ConversationOriginType,
   ConversationRoundStatus,
+  EventActorType,
   ExecutionStatus,
   TimelineEventType,
   createRequestAbortedError,
@@ -792,14 +793,22 @@ describe('AgentExecutionService', () => {
       } as never);
 
       await service.abortExecution('exec-1', {
-        reason: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+        reason: {
+          source: 'api',
+          actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+        },
         waitForTerminal: false,
       });
 
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
         ExecutionStatus.aborted,
-        { abortReason: { source: 'api', actor: { id: 'u1', username: 'alice' } } }
+        {
+          abortReason: {
+            source: 'api',
+            actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+          },
+        }
       );
     });
 
@@ -825,7 +834,10 @@ describe('AgentExecutionService', () => {
         status: ExecutionStatus.running,
       } as never);
 
-      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      abortController.abort({
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      });
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // the client mock's create() answers with a fixed id, so match the aborted id loosely
@@ -836,7 +848,7 @@ describe('AgentExecutionService', () => {
           abortReason: {
             source: 'caller',
             parent_execution_id: 'parent-1',
-            actor: { id: 'u1', username: 'alice' },
+            actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
           },
         }
       );

@@ -16,11 +16,11 @@ export interface ReplayShift {
 }
 
 export const canonicalDetectionsFromGroundTruth = ({
-  streamName,
+  sourceId,
   rules,
   shift,
 }: {
-  streamName: string;
+  sourceId: string;
   rules: Array<Partial<Detection>>;
   shift?: ReplayShift;
 }): Detection[] =>
@@ -35,7 +35,7 @@ export const canonicalDetectionsFromGroundTruth = ({
       detection_id: rule.detection_id ?? `${rule.rule_uuid ?? `rule-${index}`}-canonical-${index}`,
       rule_uuid: rule.rule_uuid ?? `rule-${index}`,
       rule_name: rule.rule_name ?? '',
-      stream_name: rule.stream_name ?? streamName,
+      source_id: rule.source_id ?? sourceId,
       change_point_type: rule.change_point_type ?? 'spike',
       p_value: rule.p_value ?? 0.0001,
       // Derived at read time in production; stamped here to mirror the agent's input contract.
