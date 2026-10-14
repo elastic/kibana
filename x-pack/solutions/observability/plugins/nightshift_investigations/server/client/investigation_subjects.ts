@@ -31,9 +31,9 @@ const MAX_SLACK_PERMALINK_LENGTH = 2048;
 
 /**
  * A subject the start path hands to the investigation workflow in `inputs.subjects`, recorded on
- * the investigation by the workflow's `_ensure` step. The workflow runs as the identity that owns
- * the investigation conversation, so every write to it happens there rather than with the start
- * caller's request. Agentic investigations validates these again when it stores them.
+ * the investigation by the workflow's `_ensure` step, which may run concurrently with the start's
+ * creation of the conversation, so subjects are only ever recorded there. Agentic investigations
+ * validates these again when it stores them.
  */
 export const workflowSubjectInputSchema = z.object({
   type: z.enum(INVESTIGATION_SUBJECT_TYPES),
