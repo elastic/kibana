@@ -532,4 +532,117 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(JSON.parse(rendered)).toEqual([]);
     });
   });
+
+  // The terminal-status decision. Evaluated against the engine's Liquid rather than
+  // asserted as strings, because the branch condition is the whole fix: a regression
+  // to an unconditional `completed` is what reported 3 failed batches as Success
+  // (security-team#19956).
+  describe('terminal status', () => {
+    const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+    const failedBatch = (index: number, message: string) => ({
+      error: { message },
+      index,
+      status: 'failed',
+    });
+    const okBatch = (index: number) => ({
+      index,
+      output: { attack_discoveries: [], status: 'completed' },
+      status: 'completed',
+    });
+
+    const evaluate = async (results: unknown[]) => {
+      const steps: Record<string, unknown> = {
+        generate_batches: { output: { results, total: results.length } },
+      };
+      const output = async (name: string) => {
+        const rendered: Record<string, unknown> = {};
+        for (const [key, template] of Object.entries(step(name).with ?? {})) {
+          rendered[key] = (
+            await engine.parseAndRender(String(template).replace(/^\$(?=\{\{)/, ''), {
+              steps,
+            })
+          ).trim();
+        }
+        return rendered;
+      };
+      steps.aggregate = { output: await output('aggregate') };
+      steps.classify_batches = { output: await output('classify_batches') };
+      // Numbers must stay numbers for the comparison in the `if`.
+      const classified = steps.classify_batches as { output: Record<string, unknown> };
+      classified.output.total = Number(classified.output.total);
+      classified.output.delivered = Number(classified.output.delivered);
+      const condition = String(step('emit_all_batches_failed').if)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+      return {
+        classified: classified.output,
+        fails: engine.evalValueSync(condition, { steps }) as boolean,
+        message: await engine.parseAndRender(
+          String(step('emit_all_batches_failed').with?.message),
+          { steps }
+        ),
+      };
+    };
+
+    it('ends failed when every batch failed, naming the count and the first error', async () => {
+      const { fails, message } = await evaluate([
+        failedBatch(0, 'rate limited'),
+        failedBatch(1, 'connector timeout'),
+        failedBatch(2, 'boom'),
+      ]);
+
+      expect(fails).toBe(true);
+      expect(message).toBe('All 3 batches failed: rate limited');
+    });
+
+    it('stays completed when only some batches failed, so delivered batches keep their discoveries', async () => {
+      const { fails } = await evaluate([
+        okBatch(0),
+        failedBatch(1, 'rate limited'),
+        failedBatch(2, 'boom'),
+      ]);
+
+      expect(fails).toBe(false);
+    });
+
+    it('stays completed when every batch delivered', async () => {
+      const { fails } = await evaluate([okBatch(0), okBatch(1)]);
+
+      expect(fails).toBe(false);
+    });
+
+    // No alerts means no batches. That is a quiet window, not a failure.
+    it('stays completed when there were no alerts and therefore no batches', async () => {
+      const { fails } = await evaluate([]);
+
+      expect(fails).toBe(false);
+    });
+
+    it('counts a completed branch carrying a pending run as not delivered', async () => {
+      const { fails } = await evaluate([
+        { index: 0, output: { execution_uuid: 'u', status: 'pending' }, status: 'completed' },
+      ]);
+
+      expect(fails).toBe(true);
+    });
+
+    it('is a failed workflow.output placed before the success output', () => {
+      const names = (parsed.steps ?? []).map((candidate) => candidate.name);
+
+      expect(step('emit_all_batches_failed').type).toBe('workflow.output');
+      expect(step('emit_all_batches_failed').status).toBe('failed');
+      expect(names.indexOf('emit_all_batches_failed')).toBeLessThan(names.indexOf('emit_result'));
+      expect(step('emit_result').status).toBe('completed');
+    });
+
+    // The runner reads these off the child on a partial failure, and the failure
+    // output must stay shaped like the success one.
+    it('emits the same keys on failure as on success, plus the message', () => {
+      expect(Object.keys(step('emit_all_batches_failed').with ?? {}).sort()).toEqual(
+        [...Object.keys(step('emit_result').with ?? {}), 'message'].sort()
+      );
+    });
+  });
 });

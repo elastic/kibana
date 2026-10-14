@@ -272,11 +272,46 @@ steps:
                 autonomy: "${{ inputs.autonomy }}"
                 parent_run_id: "{{ execution.id }}"
 
+  # Numbers for the terminal-status decision. Its own step because a comparison
+  # operator cannot follow a filter chain in an `if`.
+  - name: scan_outcome
+    type: data.set
+    with:
+      batches_failed: "${{ steps.run_generation.output.batches_failed | default: 0 | plus: 0 }}"
+      first_error: |-
+        {%- assign errors = steps.run_generation.output.batch_errors | default: consts.no_discoveries -%}
+        {{ errors[0].message | default: 'no error message reported' }}
+
   # Every batch has dispatched. This is not a fan-in: the reviews are still running
   # on their own executions, and this run reports only what it did itself.
+  #
+  # Two terminal steps with identical outputs: a failed batch is a gap in the scan,
+  # and a scan with a gap must not report success. The child fails the run only
+  # when NO batch delivered, so a partial failure reaches here. It fails HERE,
+  # after the fan-out, so the delivered batches' attacks are still reviewed. The
+  # Worker calls this run synchronously, so the failure reaches its failed-scan
+  # callout.
+  - name: emit_partial_scan_failed
+    type: workflow.output
+    status: failed
+    if: "${{ steps.scan_outcome.output.batches_failed > 0 }}"
+    with:
+      message: >-
+        Partial scan: {{ steps.scan_outcome.output.batches_failed }} of {{
+        steps.run_generation.output.batches_total }} Attack Discovery batches failed
+        ({{ steps.scan_outcome.output.first_error }}); {{
+        steps.resolve_fanout.output.attack_count }} attacks from the successful
+        batches were sent for review
+      attacks_generated: "{{ steps.run_generation.output.discoveries_generated | default: 0 }}"
+      reviews_requested: "{{ steps.resolve_fanout.output.attack_count }}"
+      alerts_analyzed: "{{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
+      schedule_interval: "{{ inputs.schedule_interval }}"
+      execution_uuids: "{{ steps.run_generation.output.execution_uuids | join: ',' }}"
+
   - name: emit_result
     type: workflow.output
     status: completed
+    if: "${{ steps.scan_outcome.output.batches_failed == 0 }}"
     with:
       # Generation truth: what the model produced, summed across batches and
       # counted BEFORE persistence deduplicated it. Not `attack_discoveries |
