@@ -57,8 +57,9 @@ export class ElasticsearchService {
 
   start(): ElasticsearchServiceStart {
     return {
-      // We'll need to get rid of this as soon as Core's Elasticsearch service exposes this
-      // functionality in the scope of https://github.com/elastic/kibana/issues/41983.
+      // Core's `status.core$` tells us whether Elasticsearch is available, but it doesn't combine
+      // that with the license or schedule retries for work that fails while it's online, so we do
+      // both here.
       watchOnlineStatus$: () => {
         const RETRY_BASE_DELAY = 1000;
         const RETRY_MAX_DELAY = 10000;
