@@ -175,7 +175,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
-        owner: { id: owner.id, username: owner.username },
+        owner: {
+          id: owner.id,
+          username: owner.username,
+          ...(owner.type ? { type: owner.type } : {}),
+        },
         agentParams:
           conversationParams && conversation
             ? {
