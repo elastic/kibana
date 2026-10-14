@@ -66,8 +66,6 @@ export const OnboardingLandingPage = () => {
                 elasticsearchUrl={elasticsearchUrl}
                 apiKey={apiKey}
                 isLoading={isLoading}
-                showConnectionTypeSelector
-                telemetryPage="pathSelection"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
