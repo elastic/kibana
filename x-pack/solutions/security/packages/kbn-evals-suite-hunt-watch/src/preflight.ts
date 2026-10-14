@@ -10,19 +10,20 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { type EvalConnector } from '@kbn/evals';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import {
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_ENABLED_SETTING_ID,
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_WORKERS_URL,
   API_VERSIONS,
   buildWorkerUrl,
   buildSecurityRoleUrl,
+  getWorkerRoleName,
   HUNT_THREAT_INTEL_SUPPLY_URL,
   SECURITY_ROLE_API_VERSION,
   SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  WORKER_ROLE_DEFINITIONS,
+  WORKER_SERVICE_ACCOUNT_NAMES,
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import {
@@ -51,9 +52,9 @@ const SEARCH_INFERENCE_ENDPOINTS_API_VERSION = '1';
 const NON_DEFAULT_EVAL_SPACE_IDS = EVAL_SPACE_IDS.filter((id) => id !== DEFAULT_EVAL_SPACE_ID);
 
 const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 ];
 
 const ensureSpaceExists = async ({
@@ -243,10 +244,38 @@ const listServiceAccounts = async (fetch: HttpHandler): Promise<ServiceAccountEn
   return accounts;
 };
 
+/** The suite runs on the stateful Scout stack, where the Worker role is an ES reserved role. */
+const IS_SERVERLESS = false;
+
+/**
+ * Requires the Worker's built-in role to exist in this deployment. AlertZero no longer creates
+ * Worker roles: stateful ships them as Elasticsearch reserved roles, so an ES snapshot without
+ * them refuses to enable the Worker, and the suite should say so by name.
+ */
+const findBuiltInWorkerRole = async (fetch: HttpHandler, accountName: string): Promise<string> => {
+  const roleName = getWorkerRoleName(accountName, { isServerless: IS_SERVERLESS });
+  const missing = () =>
+    new Error(
+      `[hunt-watch] Elasticsearch has no built-in "${roleName}" role for the Worker. ` +
+        `The ES snapshot must be at least as new as the Kibana under test.`
+    );
+  let role: { metadata?: { _reserved?: unknown } };
+  try {
+    role = await fetch(buildSecurityRoleUrl(roleName), {
+      method: 'GET',
+      headers: apiVersion(SECURITY_ROLE_API_VERSION),
+    });
+  } catch (err) {
+    throw httpStatus(err) === 404 ? missing() : err;
+  }
+  if (role.metadata?._reserved !== true) throw missing();
+  return roleName;
+};
+
 /**
  * Mirrors `ensureWorkerServiceAccounts` in `alertzero/public/service_accounts`: finds or creates
- * the Worker's prebuilt ES role and service account, the same way the Worker settings panel does
- * before a human enables a Worker from the UI. Enabling a Worker without one is refused with
+ * the Worker's service account with its built-in role, the same way the Worker settings panel
+ * does before a human enables a Worker from the UI. Enabling a Worker without one is refused with
  * "Cannot apply a worker that is enabled without a service account" (`workers_service.ts`).
  */
 const ensureWorkerServiceAccount = async ({
@@ -258,26 +287,12 @@ const ensureWorkerServiceAccount = async ({
   log: ToolingLog;
   workerId: string;
 }): Promise<string> => {
-  const definition = WORKER_ROLE_DEFINITIONS[workerId];
-  if (!definition) {
-    throw new Error(`[hunt-watch] no prebuilt role definition for worker "${workerId}"`);
+  const name = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
+  if (!name) {
+    throw new Error(`[hunt-watch] no service account name for worker "${workerId}"`);
   }
-  const { name, role } = definition;
 
   log.info(`[hunt-watch] ensuring service account "${name}" for worker "${workerId}"`);
-
-  // `createOnly` leaves an existing role untouched; a 409 here just means another run (or the
-  // UI) already created it.
-  try {
-    await fetch(buildSecurityRoleUrl(name), {
-      method: 'PUT',
-      headers: apiVersion(SECURITY_ROLE_API_VERSION),
-      query: { createOnly: true },
-      body: JSON.stringify(role),
-    });
-  } catch (err) {
-    if (httpStatus(err) !== 409) throw err;
-  }
 
   const existing = (await listServiceAccounts(fetch)).find((account) => account.name === name);
   if (existing) {
@@ -290,13 +305,14 @@ const ensureWorkerServiceAccount = async ({
     return existing.id;
   }
 
+  const roleName = await findBuiltInWorkerRole(fetch, name);
   try {
     const created = await fetch<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
       method: 'POST',
       body: JSON.stringify({
         name,
         description: `Eval-only service account for the hunt-watch suite's "${workerId}" worker.`,
-        roles: [name],
+        roles: [roleName],
       }),
     });
     return created.id;

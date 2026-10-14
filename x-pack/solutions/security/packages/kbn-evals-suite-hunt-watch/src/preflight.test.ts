@@ -36,6 +36,7 @@ interface MockOverrides {
     { huntEnabled?: boolean; hardGateOk?: boolean; drift?: boolean }
   >;
   enableWorkerErrorSpaces?: string[];
+  builtInRoleMissing?: boolean;
 }
 
 const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
@@ -43,6 +44,7 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     tierFeaturesWithEndpoint = [],
     threatIntelSupplyBySpace = {},
     enableWorkerErrorSpaces = [],
+    builtInRoleMissing = false,
   } = overrides;
 
   return jest.fn(async (...args: unknown[]) => {
@@ -56,9 +58,12 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
       // Every eval space already exists — space-creation is not under test here.
       return {};
     }
-    if (/^\/api\/security\/role\/[^/]+$/.test(path) && method === 'PUT') {
-      // The Worker's prebuilt role already exists — role creation is not under test here.
-      return {};
+    if (/^\/api\/security\/role\/[^/]+$/.test(path) && method === 'GET') {
+      if (builtInRoleMissing) {
+        throw Object.assign(new Error('Not Found'), { status: 404 });
+      }
+      // The Worker's built-in role ships with Elasticsearch; only its presence is checked.
+      return { metadata: { _reserved: true } };
     }
     if (path === '/internal/security/service_account' && method === 'GET') {
       // No account exists yet, so `ensureWorkerServiceAccount` creates one below.
@@ -140,8 +145,14 @@ describe('runPreflight', () => {
 
   it('throws naming the assigned tier feature when an alertzero_* tier endpoint is already assigned', async () => {
     await expect(
-      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_fast'] }))
-    ).rejects.toThrow(/alertzero_fast/);
+      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_efficient'] }))
+    ).rejects.toThrow(/alertzero_efficient/);
+  });
+
+  it('throws naming the built-in role when Elasticsearch does not ship it', async () => {
+    await expect(run(buildMockFetch({ builtInRoleMissing: true }))).rejects.toThrow(
+      /no built-in "alertzero_threat_hunt" role/
+    );
   });
 
   it('throws when TI supply hardGate.ok is false in an eval space', async () => {
