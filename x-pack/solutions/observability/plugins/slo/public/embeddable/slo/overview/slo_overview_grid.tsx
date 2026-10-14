@@ -141,6 +141,7 @@ export function SloCardChartList({
         rules={rules}
         activeAlerts={activeAlerts}
         handleCreateRule={() => {}}
+        isInteractive={isInteractive}
       />
     );
     chartsData[chartsData.length - 1].push(data);
