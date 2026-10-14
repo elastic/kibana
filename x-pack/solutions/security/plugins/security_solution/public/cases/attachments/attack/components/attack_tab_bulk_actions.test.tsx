@@ -13,6 +13,7 @@ import {
   ATTACK_TAB_BULK_ACTIONS_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID,
+  ATTACK_TAB_BULK_ACTIONS_SELECT_ALL_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAttackAssigneesContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
@@ -125,10 +126,23 @@ describe('AttackTabBulkActions', () => {
     );
   });
 
-  const renderBar = (selectedAttacks: SelectedAttack[]) =>
+  const renderBar = (
+    selectedAttacks: SelectedAttack[],
+    overrides: Partial<{
+      totalAttacks: number;
+      areAllAttacksSelected: boolean;
+      onToggleSelectAll: () => void;
+    }> = {}
+  ) =>
     render(
       <TestProviders>
-        <AttackTabBulkActions onActionSuccess={onActionSuccess} selectedAttacks={selectedAttacks} />
+        <AttackTabBulkActions
+          areAllAttacksSelected={overrides.areAllAttacksSelected ?? false}
+          onActionSuccess={onActionSuccess}
+          onToggleSelectAll={overrides.onToggleSelectAll ?? jest.fn()}
+          selectedAttacks={selectedAttacks}
+          totalAttacks={overrides.totalAttacks ?? selectedAttacks.length}
+        />
       </TestProviders>
     );
 
@@ -148,7 +162,7 @@ describe('AttackTabBulkActions', () => {
     renderBar(resolvedSelection);
 
     expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
-      '2 attacks selected'
+      'Selected 2 attacks'
     );
   });
 
@@ -156,8 +170,33 @@ describe('AttackTabBulkActions', () => {
     renderBar([resolvedSelection[0]]);
 
     expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
-      '1 attack selected'
+      'Selected 1 attack'
     );
+  });
+
+  it('offers to select every row while some are unselected', () => {
+    renderBar([resolvedSelection[0]], { totalAttacks: 5 });
+
+    expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_SELECT_ALL_TEST_ID)).toHaveTextContent(
+      'Select all 5 attacks'
+    );
+  });
+
+  it('offers to clear the selection once every row is selected', () => {
+    renderBar(resolvedSelection, { totalAttacks: 2, areAllAttacksSelected: true });
+
+    expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_SELECT_ALL_TEST_ID)).toHaveTextContent(
+      'Clear selection'
+    );
+  });
+
+  it('toggles the whole selection from the select all control', async () => {
+    const onToggleSelectAll = jest.fn();
+    renderBar([resolvedSelection[0]], { totalAttacks: 5, onToggleSelectAll });
+
+    await userEvent.click(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_SELECT_ALL_TEST_ID));
+
+    expect(onToggleSelectAll).toHaveBeenCalledTimes(1);
   });
 
   it('opens nothing until the action is used', () => {
@@ -324,7 +363,7 @@ describe('AttackTabBulkActions', () => {
       renderBar([resolvedSelection[0], { attackId: 'attack-unresolved', title: 'Snapshot only' }]);
 
       expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
-        '2 attacks selected'
+        'Selected 2 attacks'
       );
     });
   });

@@ -911,14 +911,17 @@ const AttackTabTable = ({
         left: {
           append: (
             <AttackTabBulkActions
+              areAllAttacksSelected={areAllRowsSelected}
               onActionSuccess={clearSelection}
+              onToggleSelectAll={toggleAllRowsSelected}
               selectedAttacks={selectedAttacks}
+              totalAttacks={rows.length}
             />
           ),
         },
       },
     }),
-    [clearSelection, selectedAttacks]
+    [areAllRowsSelected, clearSelection, rows.length, selectedAttacks, toggleAllRowsSelected]
   );
 
   return (

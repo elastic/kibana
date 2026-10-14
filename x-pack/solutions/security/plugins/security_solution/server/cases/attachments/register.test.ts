@@ -139,6 +139,7 @@ describe('registerCaseAttachments', () => {
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       schema: AttackAttachmentPayloadSchema,
       onDelete: expect.any(Function),
+      workflow: { validateTargets: expect.any(Function) },
     });
   });
 

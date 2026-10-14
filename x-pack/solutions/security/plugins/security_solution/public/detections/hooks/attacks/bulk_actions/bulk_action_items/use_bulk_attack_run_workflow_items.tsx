@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import type { RenderContentPanelProps } from '@kbn/response-ops-alerts-table/types';
+import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 import * as alertsTableI18n from '../../../../components/alerts_table/translations';
 import {
@@ -60,6 +61,7 @@ export const useBulkAttackRunWorkflowItems = ({
       return (
         <AlertWorkflowsPanel
           alertIds={alertIds}
+          attachmentType={SECURITY_ATTACK_ATTACHMENT_TYPE}
           onClose={closePopoverMenu}
           onExecute={handleExecute}
         />

@@ -1137,12 +1137,12 @@ describe('AttackTabContent', () => {
 
       await user.click(rowCheckbox('so-1'));
       expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
-        '1 attack selected'
+        'Selected 1 attack'
       );
 
       await user.click(rowCheckbox('so-2'));
       expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).toHaveTextContent(
-        '2 attacks selected'
+        'Selected 2 attacks'
       );
     });
 

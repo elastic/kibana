@@ -20,6 +20,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { z } from '@kbn/zod/v4';
 import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments/attack';
+import { validateAttackWorkflowTargets } from './workflow_validation';
 import {
   getCaseAlertAttachments,
   resolveRemovableAlertAttachmentsForAttacks,
@@ -150,4 +151,5 @@ export const getAttackAttachmentType = (
   id: SECURITY_ATTACK_ATTACHMENT_TYPE,
   schema: AttackAttachmentPayloadSchema,
   onDelete: getAttackOnDelete(deps),
+  workflow: { validateTargets: validateAttackWorkflowTargets },
 });
