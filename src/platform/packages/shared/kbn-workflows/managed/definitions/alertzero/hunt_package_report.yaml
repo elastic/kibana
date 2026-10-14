@@ -231,6 +231,7 @@ steps:
     type: kibana.request
     if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.dismiss == true }}"
     with:
+      use_server_info: true
       method: PATCH
       path: "/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ inputs.investigationConversationId }}/metadata"
       headers:

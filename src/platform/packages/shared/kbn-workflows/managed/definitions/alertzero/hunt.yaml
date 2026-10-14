@@ -82,6 +82,11 @@ steps:
   # snake_case mapping layer so no other caller has to repeat it. The coordinator
   # reads what to search (the space's default data view) itself; nothing here
   # scopes the hunt.
+  #
+  # `use_server_info: true` keeps this call on the Kibana process loopback. The
+  # default public Cloud URL is cut by the edge after ~120s with
+  # `HTTP 502: backend closed connection`, which is what a parallel sweep with
+  # Tier 2 always hits when every branch POSTs hunt_coordinator at once.
   - name: run_hunt_coordinator
     type: kibana.request
     # No Investigation to attach findings to (the Worker's find_or_create
@@ -90,6 +95,7 @@ steps:
     # report that can never get a usable conclusion.
     if: "${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}"
     with:
+      use_server_info: true
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/hunt_coordinator"
       headers:
@@ -179,6 +185,7 @@ steps:
     type: kibana.request
     if: "${{ steps.run_hunt_coordinator.output.impacted_entities != nil and steps.run_hunt_coordinator.output.impacted_entities != empty }}"
     with:
+      use_server_info: true
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/investigations/impact"
       headers:
@@ -249,6 +256,7 @@ steps:
     type: kibana.request
     if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
     with:
+      use_server_info: true
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/write_hunt_evidence"
       headers:
