@@ -13,7 +13,12 @@ import { SearchButton } from '../shared/search_button';
 import { AiButtonSlot } from '../shared/ai_button_slot';
 import { HelpButton } from '../shared/help_button';
 import { ChromeHeaderShell } from './header_shell';
-import { useContextSwitcher, useProjectPicker, useUserMenu } from '../shared/chrome_hooks';
+import {
+  useContextSwitcher,
+  useProjectPicker,
+  useSubscriptionBadge,
+  useUserMenu,
+} from '../shared/chrome_hooks';
 import { ChromeHeaderPageAnnouncer } from '../shared/header_page_announcer';
 
 export const ChromeHeader = React.memo(() => {
@@ -27,6 +32,7 @@ export const ChromeHeader = React.memo(() => {
         help={<HelpButton />}
         switcher={useContextSwitcher()}
         projectPicker={useProjectPicker()}
+        subscriptionBadge={useSubscriptionBadge()}
         userMenu={useUserMenu()}
       />
     </>

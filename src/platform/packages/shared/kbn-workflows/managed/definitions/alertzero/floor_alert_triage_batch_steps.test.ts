@@ -137,9 +137,9 @@ const renderTriageStarted = (alertCount: number): string =>
   });
 
 describe('floor_alert_triage_batch — post_comment_triage_started', () => {
-  it('includes the alertzero_reasoning feature name for model routing', () => {
+  it('includes the alertzero_balanced feature name for model routing', () => {
     const comment = renderTriageStarted(3);
-    expect(comment).toContain('alertzero_reasoning');
+    expect(comment).toContain('alertzero_balanced');
   });
 
   it('reports the alert count without listing individual IDs, since the chip attachment above already shows them', () => {
@@ -382,7 +382,7 @@ describe('floor_alert_triage_batch — guard_classification_nonempty', () => {
   it('does not tell the operator to enable Alert Analysis — that path aborted earlier', () => {
     const comment = stepByName('post_comment_classification_empty');
     const input = (comment?.with as { message?: string } | undefined)?.message ?? '';
-    expect(input).toContain('`alertzero_reasoning` Model Management feature has no connector');
+    expect(input).toContain('`alertzero_balanced` Model Management feature has no connector');
     // The sub-workflow skips its dedupe on the Worker path, so tags cannot empty the batch.
     expect(input).not.toContain('already carry the analysis tag');
     expect(input).not.toContain('Verify the Alert Analysis workflow is enabled');
@@ -1132,5 +1132,42 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(rendered).toContain('handed to the closure review');
     expect(rendered).toContain('A human decision is required.');
     expect(rendered).toContain('The outcome is posted here');
+  });
+});
+
+describe('floor_alert_triage_batch — classification comment attribution', () => {
+  const renderResults = (output: Record<string, unknown>): string =>
+    renderString(
+      (stepByName('post_comment_classification_results')?.with as { message: string }).message,
+      {
+        steps: {
+          classify_alerts: {
+            output: {
+              true_positive_count: 1,
+              false_positive_count: 2,
+              inconclusive_count: 0,
+              grouped_counts_summary: '',
+              generated_summary: 'Looks benign.',
+              ...output,
+            },
+          },
+        },
+      }
+    );
+
+  it('names the connector and the agent when an agent classified the alerts', () => {
+    const comment = renderResults({ connector_id: 'connector-1', agent_id: 'elastic-ai-agent' });
+    expect(comment).toContain('Connector: `connector-1`, Agent: `elastic-ai-agent`');
+  });
+
+  it('names only the connector when a prompt classified the alerts, because no agent ran', () => {
+    const comment = renderResults({ connector_id: 'connector-1', agent_id: '' });
+    expect(comment).toContain('_(Connector: `connector-1`)_');
+    expect(comment).not.toContain('Agent:');
+  });
+
+  it('names neither when no call was made', () => {
+    const comment = renderResults({ connector_id: '', agent_id: '' });
+    expect(comment).not.toContain('Connector:');
   });
 });
