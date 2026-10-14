@@ -206,6 +206,7 @@ function TimeseriesVisualization({
             syncCursor={syncCursor}
             palettesService={palettesService}
             indexPattern={indexPattern}
+            isInteractive={interactive}
             fieldFormatMap={indexPattern?.fieldFormatMap}
             {...(interactive && {
               onUiState: handleUiState,

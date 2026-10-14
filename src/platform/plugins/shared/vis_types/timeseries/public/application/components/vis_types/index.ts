@@ -61,6 +61,7 @@ export interface TimeseriesVisProps {
   syncCursor: boolean;
   palettesService: PaletteRegistry;
   indexPattern?: FetchedIndexPattern['indexPattern'];
+  isInteractive?: boolean;
   /** @deprecated please use indexPattern.fieldFormatMap instead **/
   fieldFormatMap?: FieldFormatMap;
   initialRender: () => void | undefined;

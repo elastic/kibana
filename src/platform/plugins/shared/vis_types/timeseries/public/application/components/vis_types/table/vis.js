@@ -247,7 +247,7 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model, indexPattern, initialRender } = this.props;
+    const { visData, model, indexPattern, initialRender, isInteractive } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
       (type, index) => ({
@@ -259,7 +259,8 @@ class TableVis extends Component {
       indexPattern,
       fields,
       this.fieldFormatsService,
-      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
+      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : [],
+      isInteractive
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);
     const header = this.renderHeader(pivotIds);
@@ -292,6 +293,7 @@ class TableVis extends Component {
 
 TableVis.defaultProps = {
   sort: {},
+  isInteractive: true,
 };
 
 TableVis.propTypes = {
@@ -304,6 +306,7 @@ TableVis.propTypes = {
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
   indexPattern: PropTypes.object,
+  isInteractive: PropTypes.bool,
 };
 
 // default export required for React.Lazy
