@@ -10,6 +10,7 @@
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
 import { keys } from '@elastic/eui';
@@ -17,6 +18,7 @@ import { keys } from '@elastic/eui';
 import { MockedMonacoEditor, mockedEditorInstance } from '@kbn/code-editor-mock/monaco_mock';
 
 import { CodeEditor } from './code_editor';
+import { getCodeEditorScope } from './react_monaco_editor';
 
 jest.mock('./react_monaco_editor', () => {
   const original = jest.requireActual('./react_monaco_editor');
@@ -127,6 +129,31 @@ describe('<CodeEditor />', () => {
       1
     );
     expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+  });
+
+  test('scopedCss receives selectors for this instance and is injected once per scope', () => {
+    const scopedCss = jest.fn(() => ({ outline: 'none' }));
+
+    const { rerender } = renderWithI18n(
+      <CodeEditor languageId="loglang" value={logs} onChange={() => {}} scopedCss={scopedCss} />
+    );
+    const callsAfterMount = scopedCss.mock.calls.length;
+    expect(callsAfterMount).toBeGreaterThan(0);
+
+    // `renderWithI18n` wraps the first render in the provider but its `rerender` does not; keep
+    // the tree shape so this is an update of the same instance, not a remount.
+    rerender(
+      <I18nProvider>
+        <CodeEditor languageId="loglang" value={logs} onChange={() => {}} scopedCss={scopedCss} />
+      </I18nProvider>
+    );
+
+    // The instance id is stable across renders, so the styles are not recomputed.
+    expect(scopedCss).toHaveBeenCalledTimes(callsAfterMount);
+    // `htmlIdGenerator` is mocked above to return `1234`; every call is for this instance.
+    scopedCss.mock.calls.forEach((call) => {
+      expect(call).toEqual([getCodeEditorScope('1234')]);
+    });
   });
 
   describe('hint element', () => {
