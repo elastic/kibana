@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(reimport).toMatchObject({
             success: true,
             success_count: 1,
-            rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+            rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
           });
         });
 
@@ -183,7 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(importResponse).toMatchObject({
             success: true,
             success_count: 2,
-            rules_summary: { created: 2, updated: 0, unchanged: 0, failed: 0 },
+            rules_summary: { created: 2, updated: 0, skipped: 0, failed: 0 },
             rules_count: 2,
             errors: [],
             action_connectors_success: true,
@@ -274,7 +274,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(overwriteImportResponseBody).toMatchObject({
             success: true,
             success_count: 1,
-            rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
+            rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
             rules_count: 1,
             errors: [],
             action_connectors_success: true,
@@ -393,7 +393,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(importResponse).toMatchObject({
           success: false,
           success_count: 0,
-          rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 1 },
+          rules_summary: { created: 0, updated: 0, skipped: 0, failed: 1 },
           rules_count: 1,
           errors: [
             {
@@ -529,7 +529,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(importResponse).toMatchObject({
           success: false,
           success_count: 1,
-          rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 1 },
+          rules_summary: { created: 1, updated: 0, skipped: 0, failed: 1 },
           rules_count: 2,
           errors: [
             {

@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllExceptions(supertest, log);
     });
 
-    it('DOES NOT report a conflict if there is an attempt to import two rules with the same rule_id', async () => {
+    it('reports a conflict if there is an attempt to import two rules with the same rule_id', async () => {
       const ndjson = combineToNdJson(
         getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Rule 1' }),
         getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Rule 2' })
@@ -56,10 +56,18 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body).toMatchObject({
-        errors: [],
-        success: true,
+        errors: [
+          {
+            error: {
+              message: 'More than one rule with rule-id: "rule-1" found',
+              status_code: 400,
+            },
+            rule_id: 'rule-1',
+          },
+        ],
+        success: false,
         success_count: 1,
-        rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 1 },
+        rules_summary: { created: 1, updated: 0, skipped: 0, failed: 1 },
         rules_count: 2,
       });
 
@@ -95,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [],
         success: true,
         success_count: 1,
-        rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+        rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
         rules_count: 1,
       });
     });
@@ -128,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [],
         success: true,
         success_count: 1,
-        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
+        rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
         rules_count: 1,
       });
 
@@ -191,7 +199,7 @@ export default ({ getService }: FtrProviderContext): void => {
         errors: [],
         success: true,
         success_count: 1,
-        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
+        rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
         rules_count: 1,
       });
 
@@ -407,7 +415,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(reimport).toMatchObject({
         success: true,
         success_count: 1,
-        rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+        rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
       });
       expect(await getApiKey()).toBe(keyAfter);
     });
@@ -549,7 +557,7 @@ export default ({ getService }: FtrProviderContext): void => {
         success: true,
         success_count: 1,
         errors: [],
-        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
+        rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
       });
 
       const { body } = await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(200);
@@ -628,7 +636,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toMatchObject({
         success: true,
         success_count: 1,
-        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
+        rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
         rules_count: 1,
         errors: [],
         exceptions_success: true,
@@ -715,7 +723,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toMatchObject({
         success: false,
         success_count: 2,
-        rules_summary: { created: 0, updated: 2, unchanged: 0, failed: 1 },
+        rules_summary: { created: 0, updated: 2, skipped: 0, failed: 1 },
         rules_count: 3,
         errors: [
           {
@@ -812,7 +820,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toMatchObject({
         success: false,
         success_count: 2,
-        rules_summary: { created: 0, updated: 2, unchanged: 0, failed: 1 },
+        rules_summary: { created: 0, updated: 2, skipped: 0, failed: 1 },
         rules_count: 3,
         errors: [
           {
@@ -910,7 +918,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(reimport).toMatchObject({
           success: true,
           success_count: 1,
-          rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+          rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
         });
 
         const unchanged = await fetchRule(supertest, { ruleId: 'overwrite-history-rule' });

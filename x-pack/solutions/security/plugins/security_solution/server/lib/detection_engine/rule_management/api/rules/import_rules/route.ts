@@ -138,10 +138,8 @@ export const importRulesRoute = (
             maxExceptionsImportSize: objectLimit,
           });
           // report on duplicate rules
-          const [duplicateIdErrors, rulesToImportOrErrors] = getTupleDuplicateErrorsAndUniqueRules(
-            rules,
-            request.query.overwrite
-          );
+          const [duplicateIdErrors, rulesToImportOrErrors] =
+            getTupleDuplicateErrorsAndUniqueRules(rules);
 
           // import actions-connectors
           const {
@@ -231,7 +229,7 @@ export const importRulesRoute = (
           const rulesSummary = {
             created: 0,
             updated: 0,
-            unchanged: 0,
+            skipped: 0,
             failed: rulesCount - successCount,
           };
           for (const { outcome } of successes) {

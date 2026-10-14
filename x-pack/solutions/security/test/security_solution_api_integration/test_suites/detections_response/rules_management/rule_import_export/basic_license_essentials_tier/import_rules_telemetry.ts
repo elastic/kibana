@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(response).toMatchObject({
         success: false,
         success_count: 3,
-        rules_summary: { created: 1, updated: 1, unchanged: 1, failed: 1 },
+        rules_summary: { created: 1, updated: 1, skipped: 1, failed: 1 },
         rules_count: 4,
       });
       expect(response.errors).toHaveLength(1);
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect.arrayContaining([
           expected(created.id, 'created'),
           expected(updated.id, 'updated'),
-          expected(unchanged.id, 'unchanged'),
+          expected(unchanged.id, 'skipped'),
         ])
       );
       expect(updated.revision).toBe(1);

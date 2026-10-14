@@ -3597,7 +3597,7 @@ paths:
       parameters:
         - description: Determines whether existing rules with the same `rule_id` are
             overwritten. Rules with no changes are left as they are and counted
-            in `rules_summary.unchanged`.
+            in `rules_summary.skipped`.
           in: query
           name: overwrite
           required: false
@@ -3660,7 +3660,7 @@ paths:
                     rules_summary:
                       created: 1
                       failed: 0
-                      unchanged: 0
+                      skipped: 0
                       updated: 0
                     success: true
                     success_count: 1
@@ -3700,7 +3700,7 @@ paths:
                   rules_summary:
                     additionalProperties: false
                     description: Counts of imported rules by outcome. `created`, `updated`, and
-                      `unchanged` are included in `success_count`. `failed` did
+                      `skipped` are included in `success_count`. `failed` did
                       not import successfully.
                     type: object
                     properties:
@@ -3712,7 +3712,7 @@ paths:
                         description: Rules that did not import successfully.
                         minimum: 0
                         type: integer
-                      unchanged:
+                      skipped:
                         description: Existing rules skipped because nothing changed. Included in
                           `success_count`.
                         minimum: 0
@@ -3724,7 +3724,7 @@ paths:
                     required:
                       - created
                       - updated
-                      - unchanged
+                      - skipped
                       - failed
                   success:
                     type: boolean

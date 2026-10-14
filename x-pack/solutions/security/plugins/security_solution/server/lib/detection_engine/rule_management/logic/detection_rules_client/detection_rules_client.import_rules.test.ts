@@ -282,7 +282,7 @@ describe('detectionRulesClient.importRules', () => {
       successes: [
         expect.objectContaining({
           rule_id: 'existing-rule',
-          outcome: 'unchanged',
+          outcome: 'skipped',
           telemetry: expect.objectContaining({ id: existingRule.id }),
         }),
       ],
@@ -297,7 +297,7 @@ describe('detectionRulesClient.importRules', () => {
       ruleType: 'query',
       isPrebuilt: false,
       isCustomized: false,
-      outcome: 'unchanged',
+      outcome: 'skipped',
     });
   });
 
@@ -338,7 +338,7 @@ describe('detectionRulesClient.importRules', () => {
     const outcomes = Object.fromEntries(
       result.successes.map(({ rule_id: ruleId, outcome }) => [ruleId, outcome])
     );
-    expect(outcomes).toEqual({ 'changed-rule': 'updated', 'unchanged-rule': 'unchanged' });
+    expect(outcomes).toEqual({ 'changed-rule': 'updated', 'unchanged-rule': 'skipped' });
     expect(result.errors).toEqual([]);
     expect(analytics.reportEvent).toHaveBeenCalledTimes(2);
     expect(analytics.reportEvent).toHaveBeenCalledWith(
@@ -347,7 +347,7 @@ describe('detectionRulesClient.importRules', () => {
     );
     expect(analytics.reportEvent).toHaveBeenCalledWith(
       DETECTION_RULE_IMPORT_EVENT.eventType,
-      expect.objectContaining({ ruleId: unchanged.id, outcome: 'unchanged' })
+      expect.objectContaining({ ruleId: unchanged.id, outcome: 'skipped' })
     );
   });
 
@@ -388,7 +388,7 @@ describe('detectionRulesClient.importRules', () => {
     it('counts identical actions as unchanged', async () => {
       const { successes } = await importRule({ ...existingRule });
 
-      expect(successes).toEqual([expect.objectContaining({ outcome: 'unchanged' })]);
+      expect(successes).toEqual([expect.objectContaining({ outcome: 'skipped' })]);
       expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
     });
 
@@ -400,7 +400,7 @@ describe('detectionRulesClient.importRules', () => {
         actions: [legacyAction],
       });
 
-      expect(successes).toEqual([expect.objectContaining({ outcome: 'unchanged' })]);
+      expect(successes).toEqual([expect.objectContaining({ outcome: 'skipped' })]);
       expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
     });
 

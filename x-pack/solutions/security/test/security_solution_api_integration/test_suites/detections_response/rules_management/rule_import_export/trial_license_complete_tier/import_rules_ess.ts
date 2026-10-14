@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(reimport).toMatchObject({
         success_count: 1,
-        rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+        rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
       });
       expect((await getLegacyActionSO(es)).hits.hits.length).toBe(1);
 
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(overwrittenImport).toMatchObject({
         success: true,
         success_count: 1,
-        rules_summary: { created: 0, updated: 1, unchanged: 0, failed: 0 },
+        rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
       });
 
       // legacy sidecar action should be gone
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext): void => {
           success: false,
           success_count: 1,
           rules_count: 2,
-          rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 1 },
+          rules_summary: { created: 1, updated: 0, skipped: 0, failed: 1 },
           errors: [
             {
               error: {
@@ -297,7 +297,7 @@ export default ({ getService }: FtrProviderContext): void => {
           success: false,
           success_count: 0,
           rules_count: 1,
-          rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 1 },
+          rules_summary: { created: 0, updated: 0, skipped: 0, failed: 1 },
           action_connectors_success: false,
           action_connectors_success_count: 0,
           action_connectors_errors: [
@@ -368,7 +368,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
           rules_count: 1,
-          rules_summary: { created: 0, updated: 0, unchanged: 0, failed: 1 },
+          rules_summary: { created: 0, updated: 0, skipped: 0, failed: 1 },
           action_connectors_success: false,
           action_connectors_success_count: 0,
           action_connectors_errors: [

@@ -159,7 +159,7 @@ describe('Import rules route', () => {
     expect(response.body).toEqual({
       success: true,
       success_count: 1,
-      rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 0 },
+      rules_summary: { created: 1, updated: 0, skipped: 0, failed: 0 },
       rules_count: 1,
       errors: [],
       exceptions_errors: [],
@@ -221,7 +221,7 @@ describe('Import rules route', () => {
     expect(response.body.rules_summary).toEqual({
       created: 0,
       updated: 0,
-      unchanged: 0,
+      skipped: 0,
       failed: 1,
     });
     expect(response.body.errors).toEqual([
@@ -322,7 +322,7 @@ describe('Import rules route', () => {
         },
         {
           rule_id: 'rule-d',
-          outcome: 'unchanged',
+          outcome: 'skipped',
           telemetry: { id: 'id-rule-d', type: 'query', rule_source: { type: 'internal' } },
         },
       ],
@@ -345,7 +345,7 @@ describe('Import rules route', () => {
     expect(response.body.rules_summary).toEqual({
       created: 0,
       updated: 1,
-      unchanged: 1,
+      skipped: 1,
       failed: 2,
     });
     expect(response.body.errors).toEqual([

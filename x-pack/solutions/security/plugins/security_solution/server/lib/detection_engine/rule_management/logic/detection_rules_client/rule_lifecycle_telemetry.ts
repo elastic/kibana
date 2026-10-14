@@ -68,7 +68,7 @@ export function sendRuleInstallTelemetryEvents(
   }
 }
 
-export type RuleImportOutcome = 'created' | 'updated' | 'unchanged';
+export type RuleImportOutcome = 'created' | 'updated' | 'skipped';
 
 export type RuleImportTelemetryData = RuleLifecycleTelemetryData & { outcome: RuleImportOutcome };
 

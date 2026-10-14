@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(response).toMatchObject({
             success: true,
             success_count: 1,
-            rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+            rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
             errors: [],
           });
 
@@ -242,7 +242,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(reimport).toMatchObject({
             success: true,
             success_count: 1,
-            rules_summary: { created: 0, updated: 0, unchanged: 1, failed: 0 },
+            rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
           });
           await assertImportedRule({ getService, expectedRule });
         });

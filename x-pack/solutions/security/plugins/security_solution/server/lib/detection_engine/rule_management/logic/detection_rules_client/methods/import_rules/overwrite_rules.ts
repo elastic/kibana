@@ -80,7 +80,7 @@ export async function overwriteRules({
         isEqual(convertRuleResponseToAlertingRule(existingRule, actionsClient), data);
 
       if (unchanged) {
-        successes.push({ rule_id: rule.rule_id, outcome: 'unchanged', telemetry });
+        successes.push({ rule_id: rule.rule_id, outcome: 'skipped', telemetry });
       } else {
         if (existingRule.enabled !== requestedEnabled) {
           (requestedEnabled ? toEnable : toDisable).push(existingRule.id);

@@ -167,7 +167,7 @@ describe('sendRuleImportTelemetryEvents', () => {
     jest.clearAllMocks();
   });
 
-  test.each(['created', 'updated', 'unchanged'] as const)(
+  test.each(['created', 'updated', 'skipped'] as const)(
     'reports the lifecycle fields plus outcome "%s"',
     (outcome) => {
       const analytics = mockAnalytics();
@@ -189,7 +189,7 @@ describe('sendRuleImportTelemetryEvents', () => {
     const analytics = mockAnalytics();
     const rules = [
       { ...getRulesSchemaMock(), id: 'rule-1', outcome: 'created' as const },
-      { ...getRulesSchemaMock(), id: 'rule-2', outcome: 'unchanged' as const },
+      { ...getRulesSchemaMock(), id: 'rule-2', outcome: 'skipped' as const },
     ];
 
     sendRuleImportTelemetryEvents(analytics, rules);
@@ -201,7 +201,7 @@ describe('sendRuleImportTelemetryEvents', () => {
     );
     expect(analytics.reportEvent).toHaveBeenCalledWith(
       DETECTION_RULE_IMPORT_EVENT.eventType,
-      expect.objectContaining({ ruleId: 'rule-2', outcome: 'unchanged' })
+      expect.objectContaining({ ruleId: 'rule-2', outcome: 'skipped' })
     );
   });
 

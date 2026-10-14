@@ -23,12 +23,12 @@ import { WarningSchema } from '../../model/warning_schema.gen';
 export const ImportRulesRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.unchanged`.
+     * Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.skipped`.
      */
     overwrite: BooleanFromString.optional()
       .default(false)
       .describe(
-        'Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.unchanged`.'
+        'Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in `rules_summary.skipped`.'
       ),
     /**
      * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
@@ -67,7 +67,7 @@ export const ImportRulesResponse = lazySchema(() =>
       success: z.boolean(),
       success_count: z.number().int().min(0),
       /**
-       * Counts of imported rules by outcome. `created`, `updated`, and `unchanged` are included in `success_count`. `failed` did not import successfully.
+       * Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
        */
       rules_summary: z
         .object({
@@ -86,7 +86,7 @@ export const ImportRulesResponse = lazySchema(() =>
           /**
            * Existing rules skipped because nothing changed. Included in `success_count`.
            */
-          unchanged: z
+          skipped: z
             .number()
             .int()
             .min(0)
@@ -100,7 +100,7 @@ export const ImportRulesResponse = lazySchema(() =>
         })
         .strict()
         .describe(
-          'Counts of imported rules by outcome. `created`, `updated`, and `unchanged` are included in `success_count`. `failed` did not import successfully.'
+          'Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.'
         ),
       errors: z.array(ErrorSchema),
       action_connectors_errors: z.array(ErrorSchema),

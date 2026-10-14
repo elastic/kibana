@@ -190,7 +190,7 @@ export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleImportTelemetry> = {
     ...ruleLifecycleTelemetrySchema,
     outcome: {
       type: 'keyword',
-      _meta: { description: 'Result of importing the rule: created, updated or unchanged' },
+      _meta: { description: 'Result of importing the rule: created, updated or skipped' },
     },
   },
 };
