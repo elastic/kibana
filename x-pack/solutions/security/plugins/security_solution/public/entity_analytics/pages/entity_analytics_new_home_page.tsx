@@ -7,7 +7,14 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -54,6 +61,7 @@ import {
 } from '../components/home/entities_table';
 import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_brief_button';
 
 const combineFilters = (
   parts: Array<QueryDslQueryContainer | null | undefined>
@@ -453,6 +461,25 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ]
   );
 
+  const entityIdsByTile = useMemo(
+    () => ({
+      entitiesWithAlerts: alertsEntityIds,
+      entitiesWithAnomalies: anomaliesEntityIds,
+      riskMovers: riskMoversEntityIds,
+      newlyHighCritical: newlyHCEntityIds,
+      watchlisted: watchlistedEntityIds,
+      newEntity: newEntityEntityIds,
+    }),
+    [
+      alertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+    ]
+  );
+
   const dataViewContextValue = useMemo(
     () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
     [dataView, isDataViewLoading]
@@ -497,6 +524,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             watchlistNames={watchlistNames}
           />
           <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <GenerateAiBriefButton
+                cards={signalCards}
+                entityIdsByTile={entityIdsByTile}
+                timeRange={timeRange}
+                entityFilters={entityFilters}
+                focusTileId={activeFilter?.cardId}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <SignalCards
             activeFilter={activeFilter}
             cards={signalCards}
