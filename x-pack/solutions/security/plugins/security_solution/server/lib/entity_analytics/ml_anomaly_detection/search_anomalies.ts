@@ -9,7 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
@@ -134,7 +134,10 @@ export const searchEntityAnomalies = async ({
 
   if (effectiveJobIds.length === 0) return empty;
 
-  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(
+    getBuiltInEntityDefinition(entityType),
+    entityRecord
+  );
   if (!entityFilter) {
     logger.warn(
       `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`

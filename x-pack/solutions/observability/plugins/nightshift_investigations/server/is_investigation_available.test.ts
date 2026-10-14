@@ -19,6 +19,8 @@ const warn = jest.fn();
 const logger = { warn } as never;
 const workflow = { enabled: true, valid: true, definition: {} };
 const agentBuilder = {} as never;
+const agenticInvestigations = {} as never;
+const proposals = {} as never;
 const workflowsExtensions = {} as never;
 const workflowsManagement = {
   management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue(workflow) }) },
@@ -39,6 +41,8 @@ const createDependencies = (featureFlags = createFeatureFlagsMock(true)) => ({
   request,
   featureFlags,
   agentBuilder,
+  agenticInvestigations,
+  proposals,
   inference,
   logger,
   workflowsExtensions,
@@ -129,4 +133,14 @@ it('returns false when the default model is missing and no connector is explicit
 
   await expect(isInvestigationRunAvailable(createDependencies())).resolves.toBe(false);
   expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.investigation, request);
+});
+
+it.each([
+  ['agenticInvestigations', { agenticInvestigations: undefined }],
+  ['proposals', { proposals: undefined }],
+])('returns false when %s is not enabled', async (_label, missing) => {
+  await expect(
+    isInvestigationInfrastructureAvailable({ ...createDependencies(), ...missing })
+  ).resolves.toBe(false);
+  expect(getConnectorById).not.toHaveBeenCalled();
 });

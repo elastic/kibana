@@ -273,6 +273,12 @@ interface InternalUnifiedDataTableProps {
    */
   showKeyboardShortcuts?: boolean;
   /**
+   * Determines whether the toolbar Sort control should be displayed.
+   * Defaults to `isSortEnabled` and cannot enable sorting when it is disabled.
+   * Column-header sorting still follows `isSortEnabled`.
+   */
+  showSortSelector?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
@@ -602,6 +608,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       settings,
       showTimeCol,
       showKeyboardShortcuts = true,
+      showSortSelector = true,
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
@@ -1504,7 +1511,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled && !isJsonSourceMode,
+        showSortSelector: isSortEnabled && showSortSelector && !isJsonSourceMode,
         showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
@@ -1514,6 +1521,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       [
         isJsonSourceMode,
         isSortEnabled,
+        showSortSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,

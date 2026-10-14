@@ -8,12 +8,13 @@
  */
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
+import { getJsxStringValue } from '../helpers/get_jsx_string_value';
 import {
   getTranslatableValueFromString,
   getValueFromJSXAttribute,
@@ -23,33 +24,32 @@ import {
 export const RULE_WARNING_MESSAGE =
   'Strings should be translated with i18n. Use the autofix suggestion or add your own.';
 
-export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
+export const StringsShouldBeTranslatedWithI18n: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
   },
-  create(context) {
-    const { cwd, filename, sourceCode, report } = context;
-
+  createOnce(context) {
     return {
-      JSXText(node: Rule.Node) {
+      JSXText(node) {
+        const { cwd, filename, sourceCode } = context;
         const jsxTextNode = node as unknown as TSESTree.JSXText;
-        const value = getTranslatableValueFromString(jsxTextNode.value);
+        const text = getJsxStringValue(jsxTextNode);
+        const value = getTranslatableValueFromString(text);
 
         // If the JSXText element is empty or untranslatable we don't need to do anything
         if (!value) return;
 
         // Get the whitespaces before the string so we can add them to the autofix suggestion
         const regex = /^(\s*)(\S)(.*)/;
-        const whiteSpaces = jsxTextNode.value.match(regex)?.[1] ?? '';
+        const whiteSpaces = text.match(regex)?.[1] ?? '';
 
         // Start building the translation ID suggestion
         const intent = getIntentFromNode(value, jsxTextNode.parent);
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionDeclaration = sourceCode.getScope(node).block as TSESTree.FunctionDeclaration;
-        const functionName = getFunctionName(functionDeclaration);
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
 
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`;
 
@@ -61,7 +61,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
           });
 
         // Show warning to developer and offer autofix suggestion
-        report({
+        context.report({
           node,
           message: RULE_WARNING_MESSAGE,
           fix(fixer) {
@@ -79,7 +79,8 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
           },
         });
       },
-      JSXAttribute(node: Rule.Node) {
+      JSXAttribute(node) {
+        const { cwd, filename, sourceCode } = context;
         const jsxAttrNode = node as unknown as TSESTree.JSXAttribute;
 
         // Only check specific attributes that should be translated
@@ -100,8 +101,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionDeclaration = sourceCode.getScope(node).block as TSESTree.FunctionDeclaration;
-        const functionName = getFunctionName(functionDeclaration);
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
 
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`;
 
@@ -113,7 +113,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
           });
 
         // Show warning to developer and offer autofix suggestion
-        report({
+        context.report({
           node,
           message: RULE_WARNING_MESSAGE,
           fix(fixer) {
