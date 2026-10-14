@@ -10,7 +10,10 @@ import { schema } from '@kbn/config-schema';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  isVersionedAttachmentWithOrigin,
+} from '@kbn/agent-builder-common/attachments';
 import { CONVERSATION_ID_MAX_LENGTH, isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -822,6 +825,21 @@ export function registerAttachmentRoutes({
           { id: conversationId, attachments: stateManager.getAll() },
           { access: 'converse', source: 'http_api' }
         );
+
+        const { onOriginUpdated } = attachmentsService.getTypeDefinition(updated.type) ?? {};
+        if (onOriginUpdated && isVersionedAttachmentWithOrigin(updated)) {
+          try {
+            await onOriginUpdated(updated, {
+              request,
+              conversationId,
+              agentId: conversation.agent_id,
+            });
+          } catch (e) {
+            logger.warn(
+              `onOriginUpdated hook failed for attachment '${attachmentId}' (${updated.type}): ${e.message}`
+            );
+          }
+        }
 
         return response.ok<UpdateOriginResponse>({
           body: {

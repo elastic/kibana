@@ -12,6 +12,7 @@ import {
   getToolResultId,
   createErrorResult,
   getAgentConnectorDetail,
+  resolveAllowedConnectorIds,
 } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -39,8 +40,10 @@ export const createGetConnectorSubActionsTool = ({
 }): BuiltinSkillBoundedTool<typeof getConnectorSubActionsSchema> => ({
   id: 'get_connector_sub_actions',
   type: ToolType.builtin,
-  description:
-    'Get the full spec for a connector: its available sub-actions, their descriptions, and parameter schemas. Call this with a connector_id from list_connectors before invoking execute_connector_sub_action.',
+  description: `Get the full spec for a connector this agent can call: its available sub-actions, their descriptions, and parameter schemas.
+
+**When to use:** Before the first execute_connector_sub_action call on a connector, with a connector_id from list_connectors.
+**When NOT to use:** Again for the same connector when the sub-actions are already in the conversation.`,
   schema: getConnectorSubActionsSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {
@@ -48,7 +51,7 @@ export const createGetConnectorSubActionsTool = ({
       const actionsStart = await getActionsStart();
       const actionsClient = await actionsStart.getActionsClientWithRequest(context.request);
 
-      const allowedIds = context.agentConfiguration?.connector_ids;
+      const allowedIds = resolveAllowedConnectorIds(context.agentConfiguration);
       const detail = await getAgentConnectorDetail(actionsClient, input.connector_id, {
         allowedIds,
       });

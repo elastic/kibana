@@ -1004,4 +1004,87 @@ describe('Attachment Routes', () => {
       });
     });
   });
+
+  describe('PUT /conversations/{conversation_id}/attachments/{attachment_id}/origin', () => {
+    const path = '/attachments/{attachment_id}/origin';
+    const request = {
+      params: { conversation_id: 'conv-1', attachment_id: 'att-1' },
+      body: { origin: 'so-1' },
+    };
+
+    const mockTypeDefinition = (onOriginUpdated?: jest.Mock) => {
+      mockGetInternalServices().attachments.getTypeDefinition.mockImplementation(
+        (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          onOriginUpdated,
+        })
+      );
+    };
+
+    it('calls the type onOriginUpdated hook with the conversation agent', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      const onOriginUpdated = jest.fn().mockResolvedValue(undefined);
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(onOriginUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'att-1', origin: 'so-1' }),
+        expect.objectContaining({ conversationId: 'conv-1', agentId: 'agent-1' })
+      );
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('succeeds without calling anything when the type has no onOriginUpdated hook', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      mockTypeDefinition(undefined);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not call the hook when the attachment does not exist', async () => {
+      mockConversationsClient.get.mockResolvedValue(createMockConversation([]));
+      const onOriginUpdated = jest.fn();
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.notFound).toHaveBeenCalled();
+      expect(onOriginUpdated).not.toHaveBeenCalled();
+    });
+
+    it('does not call the hook when the attachment is deleted', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1', active: false })])
+      );
+      const onOriginUpdated = jest.fn();
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.badRequest).toHaveBeenCalled();
+      expect(onOriginUpdated).not.toHaveBeenCalled();
+    });
+
+    it('still succeeds and logs a warning when the hook fails', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      mockTypeDefinition(jest.fn().mockRejectedValue(new Error('boom')));
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    });
+  });
 });
