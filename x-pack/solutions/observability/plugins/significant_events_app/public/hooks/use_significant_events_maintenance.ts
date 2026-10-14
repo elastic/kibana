@@ -21,22 +21,22 @@ const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as c
 
 const PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.pauseSuccessToastTitle',
-  { defaultMessage: 'Paused Significant Events activity' }
+  { defaultMessage: 'Paused significant events activity' }
 );
 
 const PAUSE_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.pauseErrorToastTitle',
-  { defaultMessage: 'Failed to pause Significant Events activity' }
+  { defaultMessage: 'Failed to pause significant events activity' }
 );
 
 const RESUME_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.resumeSuccessToastTitle',
-  { defaultMessage: 'Resumed Significant Events activity' }
+  { defaultMessage: 'Resumed significant events activity' }
 );
 
 const RESUME_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.resumeErrorToastTitle',
-  { defaultMessage: 'Failed to resume Significant Events activity' }
+  { defaultMessage: 'Failed to resume significant events activity' }
 );
 
 const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
@@ -46,7 +46,7 @@ const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
 
 const RESUME_WARNINGS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.resumeWarningsToastTitle',
-  { defaultMessage: 'Resumed Significant Events activity with warnings' }
+  { defaultMessage: 'Resumed significant events activity with warnings' }
 );
 
 const partialFailuresText = (count: number) =>
@@ -56,9 +56,8 @@ const partialFailuresText = (count: number) =>
     values: { count },
   });
 
-// The state is global (deployment-wide) and can be changed from another tab,
-// space, or user, so poll periodically and on window focus to avoid acting on a
-// stale status.
+// The state belongs to the current space and can be changed from another tab or
+// user, so poll periodically and on window focus to avoid acting on a stale status.
 const MAINTENANCE_STATUS_REFETCH_INTERVAL_MS = 30_000;
 
 /** Reads the persisted maintenance state. Cached under a shared key so every
