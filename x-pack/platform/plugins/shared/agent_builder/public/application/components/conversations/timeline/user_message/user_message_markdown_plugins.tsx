@@ -69,7 +69,7 @@ export const escapeCommandBadgeLabels = (text: string): string =>
   );
 
 interface UseUserMessageMarkdownPluginsArgs {
-  onHoverImage?: (name: string | null) => void;
+  onHoverAttachment?: (name: string | null) => void;
   onLinkClick: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -81,7 +81,7 @@ interface UserMessageMarkdownPlugins {
 
 /** Markdown plugins for user messages. Badge links render as badges. */
 export const useUserMessageMarkdownPlugins = ({
-  onHoverImage,
+  onHoverAttachment,
   onLinkClick,
 }: UseUserMessageMarkdownPluginsArgs): UserMessageMarkdownPlugins => {
   const styles = useUserMessageTextStyles();
@@ -113,8 +113,8 @@ export const useUserMessageMarkdownPlugins = ({
               <span
                 css={styles.imageBadgeWrapper}
                 tabIndex={0}
-                onMouseEnter={onHoverImage ? () => onHoverImage(name) : undefined}
-                onMouseLeave={onHoverImage ? () => onHoverImage(null) : undefined}
+                onMouseEnter={onHoverAttachment ? () => onHoverAttachment(name) : undefined}
+                onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
               >
                 <EuiIcon type="image" size="s" aria-hidden={true} />
                 <span className="image-badge-label" css={styles.imageBadgeInner}>
@@ -129,7 +129,12 @@ export const useUserMessageMarkdownPlugins = ({
           const name = decodeBadgeName(parsed.path);
           return (
             <EuiToolTip content={name} disableScreenReaderOutput>
-              <span css={styles.imageBadgeWrapper} tabIndex={0}>
+              <span
+                css={styles.imageBadgeWrapper}
+                tabIndex={0}
+                onMouseEnter={onHoverAttachment ? () => onHoverAttachment(name) : undefined}
+                onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
+              >
                 <EuiIcon type="document" size="s" aria-hidden={true} />
                 <span className="image-badge-label" css={styles.imageBadgeInner}>
                   {name}
@@ -160,7 +165,7 @@ export const useUserMessageMarkdownPlugins = ({
         [rehypeToReactPlugin, rehypeToReactOptions],
       ] as PluggableList,
     };
-  }, [styles, onHoverImage, onLinkClick]);
+  }, [styles, onHoverAttachment, onLinkClick]);
 
   return { parsingPluginList, processingPluginList, styles };
 };

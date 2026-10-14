@@ -29,7 +29,7 @@ export interface AttachmentPillsRowProps {
   uploadingNames?: Set<string>;
   loadingDocumentNames?: Set<string>;
   onRemoveLoadingDocument?: (name: string) => void;
-  hoveredImageName?: string | null;
+  hoveredAttachmentName?: string | null;
 }
 
 const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
@@ -83,7 +83,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   uploadingNames,
   loadingDocumentNames,
   onRemoveLoadingDocument,
-  hoveredImageName,
+  hoveredAttachmentName,
 }) => {
   const { removeAttachment } = useConversationContext();
   const uploadingEntries = uploadingNames ? [...uploadingNames] : [];
@@ -127,9 +127,9 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
         }
 
         const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
-        const imageName =
-          attachment.type === AttachmentType.image
-            ? (attachment.data as { name?: string }).name
+        const fileName =
+          attachment.type === AttachmentType.image || attachment.type === AttachmentType.document
+            ? (attachment.data as { name?: string } | undefined)?.name ?? attachment.description
             : undefined;
         return (
           <EuiFlexItem key={attachmentId} grow={false} role="listitem">
@@ -150,7 +150,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
                         : removeAttachment?.(index)
                   : undefined
               }
-              isHighlighted={Boolean(imageName && hoveredImageName === imageName)}
+              isHighlighted={Boolean(fileName && hoveredAttachmentName === fileName)}
             />
           </EuiFlexItem>
         );
@@ -165,6 +165,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
               description: name,
             }}
             isLoading
+            isHighlighted={hoveredAttachmentName === name}
             onRemoveAttachment={removable ? () => onRemoveLoadingDocument?.(name) : undefined}
           />
         </EuiFlexItem>

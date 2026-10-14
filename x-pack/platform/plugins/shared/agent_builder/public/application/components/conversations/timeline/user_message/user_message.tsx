@@ -29,7 +29,8 @@ import { AttachmentReferences } from '../attachments/attachment_references';
 import { UserMessageText } from './user_message_text';
 import { UserMessageAvatar } from './user_message_avatar';
 import { AuthorHeader } from '../author_header';
-import { UserMessageImages } from './user_message_images';
+import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
+import { useUserMessageDocuments } from './use_user_message_documents';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 
 const labels = {
@@ -49,7 +50,7 @@ interface UserMessageProps {
   fallbackAttachments?: Attachment[];
 }
 
-const EXCLUDE_IMAGE_TYPES: AttachmentType[] = [AttachmentType.image];
+const TILE_ATTACHMENT_TYPES: AttachmentType[] = [AttachmentType.image, AttachmentType.document];
 const USER_ACTOR_FILTER = [ATTACHMENT_REF_ACTOR.user];
 
 export const UserMessage = ({
@@ -64,7 +65,7 @@ export const UserMessage = ({
 }: UserMessageProps) => {
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
-  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
+  const [hoveredAttachmentName, setHoveredAttachmentName] = useState<string | null>(null);
   const {
     profile: authorProfile,
     name: authorName,
@@ -76,9 +77,15 @@ export const UserMessage = ({
     fallbackAttachments,
     actorFilter: USER_ACTOR_FILTER,
   });
+  const documents = useUserMessageDocuments({
+    attachmentRefs,
+    conversationAttachments,
+    fallbackAttachments,
+    actorFilter: USER_ACTOR_FILTER,
+  });
 
   const hasText = input.trim().length > 0;
-  const hasBubble = hasText || thumbnails.length > 0;
+  const hasBubble = hasText || thumbnails.length > 0 || documents.length > 0;
 
   const inputContainerStyles = css`
     width: 100%;
@@ -126,10 +133,14 @@ export const UserMessage = ({
                 aria-label={labels.userMessage}
               >
                 <EuiFlexGroup direction="column" gutterSize="s">
-                  <UserMessageImages thumbnails={thumbnails} hoveredImageName={hoveredImageName} />
+                  <UserMessageAttachmentTiles
+                    thumbnails={thumbnails}
+                    documents={documents}
+                    hoveredAttachmentName={hoveredAttachmentName}
+                  />
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <UserMessageText text={input} onHoverImage={setHoveredImageName} />
+                      <UserMessageText text={input} onHoverAttachment={setHoveredAttachmentName} />
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -142,7 +153,7 @@ export const UserMessage = ({
             fallbackAttachments={fallbackAttachments}
             actorFilter={USER_ACTOR_FILTER}
             justifyContent="flexStart"
-            excludeTypes={EXCLUDE_IMAGE_TYPES}
+            excludeTypes={TILE_ATTACHMENT_TYPES}
           />
           {hasText && (
             <EuiFlexItem grow={false}>

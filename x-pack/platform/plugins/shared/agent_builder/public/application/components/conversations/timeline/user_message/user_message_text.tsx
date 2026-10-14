@@ -15,14 +15,14 @@ import {
 
 interface UserMessageTextProps {
   text: string;
-  onHoverImage?: (name: string | null) => void;
+  onHoverAttachment?: (name: string | null) => void;
 }
 
-export const UserMessageText: React.FC<UserMessageTextProps> = ({ text, onHoverImage }) => {
+export const UserMessageText: React.FC<UserMessageTextProps> = ({ text, onHoverAttachment }) => {
   const { handleLinkClick, externalLinkModal } = useMarkdownLinkClick();
 
   const { parsingPluginList, processingPluginList, styles } = useUserMessageMarkdownPlugins({
-    onHoverImage,
+    onHoverAttachment,
     onLinkClick: handleLinkClick,
   });
   const markdown = useMemo(() => escapeCommandBadgeLabels(text), [text]);

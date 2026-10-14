@@ -252,7 +252,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onEditorFocus,
   onSubmitOverride,
 }) => {
-  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
+  const [hoveredAttachmentName, setHoveredAttachmentName] = useState<string | null>(null);
 
   const { isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
@@ -522,7 +522,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
             onRemoveLoadingDocument={handleRemoveLoadingDocument}
             removable
             onRemoveAttachment={handleRemoveAttachment}
-            hoveredImageName={hoveredImageName}
+            hoveredAttachmentName={hoveredAttachmentName}
           />
         </EuiFlexItem>
       )}
@@ -537,7 +537,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           onPasteFile={upsertAttachments ? handlePasteFile : undefined}
           acceptedDocumentMimeTypes={acceptedDocumentMimeTypes}
           onAfterInput={handleAfterInput}
-          onHoveredPlaceholderChange={setHoveredImageName}
+          onHoveredPlaceholderChange={setHoveredAttachmentName}
           uploadingNames={uploadingChipNames}
         />
       </EuiFlexItem>

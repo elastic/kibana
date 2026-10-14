@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -19,22 +18,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, type Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { DocumentAttachmentPill } from './document_attachment_pill';
 import { ThumbnailAttachmentPill } from './thumbnail_attachment_pill';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
   defaultMessage: 'Remove attachment',
 });
-
-const readingDocumentLabel = i18n.translate(
-  'xpack.agentBuilder.attachmentPill.readingDocumentLabel',
-  {
-    defaultMessage: 'Reading file...',
-  }
-);
 
 export interface AttachmentPillProps {
   attachment: Attachment;
@@ -66,6 +59,19 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         attachmentId={attachment.id}
         thumbnailUrl={thumbnailUrl}
         label={label}
+        onRemoveAttachment={onRemoveAttachment}
+        isHighlighted={isHighlighted}
+      />
+    );
+  }
+
+  if (attachment.type === AttachmentType.document) {
+    return (
+      <DocumentAttachmentPill
+        attachmentId={attachment.id}
+        name={label}
+        mimeType={(attachment.data as { mime_type?: string } | undefined)?.mime_type}
+        isLoading={isLoading}
         onRemoveAttachment={onRemoveAttachment}
         isHighlighted={isHighlighted}
       />
@@ -107,30 +113,13 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      data-test-subj={
-        isLoading
-          ? `agentBuilderLoadingDocumentPill-${attachment.id}`
-          : `agentBuilderAttachmentPill-${attachment.id}`
-      }
+      data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          {isLoading ? (
-            <EuiToolTip content={readingDocumentLabel} disableScreenReaderOutput>
-              <div
-                css={iconContainerStyles}
-                role="status"
-                aria-label={readingDocumentLabel}
-                tabIndex={0}
-              >
-                <EuiLoadingSpinner size="m" />
-              </div>
-            </EuiToolTip>
-          ) : (
-            <div css={iconContainerStyles}>
-              <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
-            </div>
-          )}
+          <div css={iconContainerStyles}>
+            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
+          </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="xs" css={titleStyles}>

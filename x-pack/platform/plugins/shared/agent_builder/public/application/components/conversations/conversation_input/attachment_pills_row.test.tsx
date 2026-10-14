@@ -23,16 +23,19 @@ jest.mock('./attachment_pill', () => ({
   AttachmentPill: ({
     attachment,
     isLoading,
+    isHighlighted,
     onRemoveAttachment,
   }: {
     attachment: { id: string; description?: string };
     isLoading?: boolean;
+    isHighlighted?: boolean;
     onRemoveAttachment?: () => void;
   }) => (
     <button
       type="button"
       data-test-subj={`mock-attachment-pill-${attachment.id}`}
       data-loading={isLoading ? 'true' : undefined}
+      data-highlighted={isHighlighted ? 'true' : undefined}
       data-description={attachment.description}
       onClick={onRemoveAttachment}
     />
@@ -190,6 +193,45 @@ describe('AttachmentPillsRow', () => {
       expect(screen.getByTestId('mock-attachment-pill-pdf-1')).toHaveAttribute(
         'data-description',
         'invoice.pdf'
+      );
+    });
+  });
+
+  describe('highlighting by the hovered chip name', () => {
+    const makeDocument = (id: string, name: string): ConversationAttachment => ({
+      id,
+      type: 'document',
+      data: {},
+      description: name,
+    });
+
+    it('highlights the document pill whose name matches the hovered chip', () => {
+      render(
+        <AttachmentPillsRow
+          attachments={[makeDocument('d1', 'notes.md'), makeDocument('d2', 'other.md')]}
+          hoveredAttachmentName="notes.md"
+        />
+      );
+
+      expect(screen.getByTestId('mock-attachment-pill-d1')).toHaveAttribute(
+        'data-highlighted',
+        'true'
+      );
+      expect(screen.getByTestId('mock-attachment-pill-d2')).not.toHaveAttribute('data-highlighted');
+    });
+
+    it('highlights the loading document pill whose name matches the hovered chip', () => {
+      render(
+        <AttachmentPillsRow
+          attachments={[]}
+          loadingDocumentNames={new Set(['notes.md'])}
+          hoveredAttachmentName="notes.md"
+        />
+      );
+
+      expect(screen.getByTestId('mock-attachment-pill-notes.md')).toHaveAttribute(
+        'data-highlighted',
+        'true'
       );
     });
   });
