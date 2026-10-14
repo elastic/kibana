@@ -20,7 +20,6 @@ import {
   chatAgentTypeId,
   createAgentNotFoundError,
   createBadRequestError,
-  createForbiddenError,
   isAgentNotFoundError,
   getAccessControlEntryKey,
   isAgentAccessControlRole,
@@ -486,13 +485,6 @@ class AgentClientImpl implements AgentClient {
   }
 
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions> {
-    // Without a profile uid the agent would be owned by username, which is not unique across realms.
-    if (!this.user.id) {
-      throw createForbiddenError(
-        'A Kibana user profile is required to create an agent. Log in to Kibana at least once.'
-      );
-    }
-
     const now = new Date();
 
     const validationError = validateAgentId({ agentId: profile.id, builtIn: false });
