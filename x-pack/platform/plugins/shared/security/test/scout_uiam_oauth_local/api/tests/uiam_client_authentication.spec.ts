@@ -137,12 +137,10 @@ apiTest.describe(
           expect(createResponse).toHaveStatusCode(200);
           expect(clientId).toBeDefined();
         } finally {
-          if (clientId) {
-            await apiClient.delete(
-              `internal/security/oauth/clients/${encodeURIComponent(clientId)}`,
-              { headers: apiKeyHeaders }
-            );
-          }
+          await apiClient.delete(
+            `internal/security/oauth/clients/${encodeURIComponent(clientId)}`,
+            { headers: apiKeyHeaders }
+          );
           await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
             headers: { ...COMMON_UNSAFE_HEADERS },
             responseType: 'json',
