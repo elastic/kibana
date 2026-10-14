@@ -11,7 +11,7 @@ import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bu
 export type EventsWriteInput = Pick<
   SignificantEvent,
   | 'status'
-  | 'stream_names'
+  | 'source_ids'
   | 'title'
   | 'symptom_hypothesis'
   | 'summary'
@@ -66,7 +66,7 @@ export interface EventsWriteFailureResult {
   event_id: string;
   status: SignificantEvent['status'];
   written: false;
-  reason: 'bulk_error' | 'duplicate_in_batch' | 'unknown_event_id';
+  reason: 'bulk_error' | 'duplicate_in_batch' | 'superseded' | 'unknown_event_id';
   error: CompactBulkError;
 }
 

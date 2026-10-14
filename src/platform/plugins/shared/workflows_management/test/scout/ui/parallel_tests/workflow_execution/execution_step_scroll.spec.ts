@@ -14,8 +14,7 @@ import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { getScrollTestWorkflowYaml } from '../../fixtures/workflows';
 
-// Failing: See https://github.com/elastic/kibana/issues/288846
-test.describe.skip('Workflow execution - Step scroll', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Workflow execution - Step scroll', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });

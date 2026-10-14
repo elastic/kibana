@@ -34,7 +34,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getTimeZone } from '@kbn/visualization-utils';
 import moment from 'moment-timezone';
-import type { EvidenceChart as EvidenceChartSpec } from '@kbn/significant-events-schema';
+import type { EvidenceChart as EvidenceChartSpec } from '@kbn/agentic-investigations-plugin/common';
 
 const CHART_HEIGHT = 140;
 /** Room above the plot for point annotation markers, which are drawn above its top edge. */

@@ -31,6 +31,9 @@ export interface WorkflowLookupOptions {
   managedFilter?: ManagedFilter;
 }
 
+/** How many workflows {@link WorkflowRepository.getWorkflowNames} reads in one request. */
+export const WORKFLOW_NAMES_CHUNK_SIZE = 1000;
+
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;
 
@@ -307,6 +310,55 @@ export class WorkflowRepository {
     for (const key of uniqueKeys) {
       if (!result.has(key)) {
         result.set(key, { enabled: false });
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Loads the names of workflows, keyed by `${spaceId}:${workflowId}`. Missing and soft-deleted
+   * workflows are left out, and so is a workflow whose ID exists in another space than the one
+   * asked for. Global workflows are not looked up, since they cannot be bound to a service account.
+   *
+   * Reads the workflows by ID in chunks of {@link WORKFLOW_NAMES_CHUNK_SIZE}, one after another,
+   * and starts no further chunk once `signal` is aborted. Throws rather than return a partial
+   * result when a document cannot be read.
+   */
+  async getWorkflowNames(
+    refs: ReadonlyArray<{ workflowId: string; spaceId: string }>,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<Map<string, string>> {
+    const result = new Map<string, string>();
+    const requested = new Set(refs.map(({ workflowId, spaceId }) => `${spaceId}:${workflowId}`));
+    const ids = [...new Set(refs.map(({ workflowId }) => workflowId))];
+
+    for (let start = 0; start < ids.length; start += WORKFLOW_NAMES_CHUNK_SIZE) {
+      signal?.throwIfAborted();
+
+      const response = await this.options.esClient.mget<
+        Pick<EsWorkflow, 'name'> & { spaceId?: string; deleted_at?: string | null }
+      >(
+        {
+          index: this.options.indexName,
+          ids: ids.slice(start, start + WORKFLOW_NAMES_CHUNK_SIZE),
+          _source_includes: ['name', 'spaceId', 'deleted_at'],
+        },
+        { signal }
+      );
+
+      for (const doc of response.docs) {
+        // `_mget` reports a missing index on each document rather than failing the request. That
+        // means there are no workflows to name, not that the read failed.
+        if ('error' in doc && doc.error.type !== 'index_not_found_exception') {
+          throw new Error(`Could not load the name of workflow [${doc._id}]: ${doc.error.type}`);
+        }
+
+        const source = 'found' in doc && doc.found ? doc._source : undefined;
+        const key = `${source?.spaceId}:${doc._id}`;
+        if (source && !source.deleted_at && typeof source.name === 'string' && requested.has(key)) {
+          result.set(key, source.name);
+        }
       }
     }
 

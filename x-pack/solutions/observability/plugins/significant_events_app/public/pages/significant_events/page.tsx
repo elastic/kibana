@@ -16,6 +16,7 @@ import {
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
+import { isValidSignificantEventsTab } from './significant_events_tabs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
@@ -35,26 +36,13 @@ import {
   KiGenerationProvider,
 } from './components/knowledge_indicators_table';
 import { SignificantEventsPageProvider } from './context/significant_events_page_context';
-import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
+import { ONBOARDING_FAILURE_TITLE } from './components/sources_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
-import { StreamsView } from './components/streams_view/streams_view';
+import { SourcesView } from './components/sources_view/sources_view';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { PausedActivityCallout } from './components/paused_activity_callout';
 import { RunLimitsBanner } from './components/run_limits_banner';
-
-const significantEventsTabs = [
-  'streams',
-  'knowledge_indicators',
-  'queries',
-  'detections',
-  SIGNIFICANT_EVENTS_TAB,
-] as const;
-type SignificantEventsTabId = (typeof significantEventsTabs)[number];
-
-function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
-  return significantEventsTabs.includes(value as SignificantEventsTabId);
-}
 
 export function SignificantEventsPage() {
   const {
@@ -145,12 +133,12 @@ export function SignificantEventsPage() {
   const allTabs = useMemo(
     () => [
       {
-        id: 'streams',
-        label: i18n.translate('xpack.significantEventsApp.streamsTab', {
-          defaultMessage: 'Streams',
+        id: 'sources',
+        label: i18n.translate('xpack.significantEventsApp.sourcesTab', {
+          defaultMessage: 'Sources',
         }),
-        href: router.link('/{tab}', { path: { tab: 'streams' } }),
-        isSelected: tab === 'streams',
+        href: router.link('/{tab}', { path: { tab: 'sources' } }),
+        isSelected: tab === 'sources',
       },
       {
         id: 'knowledge_indicators',
@@ -211,8 +199,13 @@ export function SignificantEventsPage() {
     return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
   }
 
+  // The Streams tab was replaced by Sources; the Nightshift app and bookmarks still link here.
+  if (tab === 'streams') {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: 'sources' } }} />;
+  }
+
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'streams' } }} />;
+    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'sources' } }} />;
   }
 
   return (
@@ -287,7 +280,7 @@ export function SignificantEventsPage() {
           {!isBlocked && <RunLimitsBanner />}
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
-              {tab === 'streams' && <StreamsView />}
+              {tab === 'sources' && <SourcesView />}
               {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
               {tab === 'queries' && <QueriesTable />}
             </KiGenerationProvider>
