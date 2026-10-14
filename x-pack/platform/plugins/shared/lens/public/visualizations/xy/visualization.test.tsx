@@ -233,7 +233,6 @@ describe('xy_visualization', () => {
                         "type": "other",
                       },
                     ],
-                    "touched": false,
                   },
                 ],
               },
@@ -251,7 +250,6 @@ describe('xy_visualization', () => {
             "position": "bottom",
           },
           "preferredSeriesType": "bar_stacked",
-          "title": "Empty XY chart",
           "valueLabels": "hide",
         }
       `);

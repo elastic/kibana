@@ -70,6 +70,7 @@ import type {
 import {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isAttackAttachmentType,
   isCommentAttachmentType,
   isUnifiedReferenceAttachmentRequest,
   getIndexFromMetadata,
@@ -214,7 +215,7 @@ export const flattenAttachmentSavedObjects = (
   }, []);
 
 /**
- * Folds migrated types to unified in memory (SO never rewritten); unrecognized types keep the
+ * Folds mapped types to unified in memory (SO never rewritten); unrecognized types keep the
  * legacy shape — no errors channel here, unlike bulkGet. Public routes re-project via `toLegacyCaseResponse`.
  */
 export const flattenAttachmentSavedObject = (
@@ -332,6 +333,19 @@ export const getEventInfoFromComments = (
 ): AlertInfo[] =>
   comments.reduce((acc: AlertInfo[], comment) => {
     acc.push(...getAndValidateIndexedAttachmentInfo(comment, isEventAttachmentType, strict));
+    return acc;
+  }, []);
+
+/**
+ * Same as {@link getAlertInfoFromComments}, but for attacks (`security.attack`). Kept separate
+ * from the alert helper so attacks never inflate alert counts or the case alerts table.
+ */
+export const getAttackInfoFromComments = (
+  comments: AttachmentRequestV2[] = [],
+  strict = false
+): AlertInfo[] =>
+  comments.reduce((acc: AlertInfo[], comment) => {
+    acc.push(...getAndValidateIndexedAttachmentInfo(comment, isAttackAttachmentType, strict));
     return acc;
   }, []);
 
@@ -454,6 +468,25 @@ export function createAlertUpdateStatusRequest({
   closingReason?: string;
 }): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status, closingReason }));
+}
+
+/**
+ * Same as {@link createAlertUpdateStatusRequest}, but for attacks (`security.attack`).
+ */
+export function createAttackUpdateStatusRequest({
+  comment,
+  status,
+  closingReason,
+}: {
+  comment: AttachmentRequestV2;
+  status: CaseStatuses;
+  closingReason?: string;
+}): UpdateAlertStatusRequest[] {
+  return getAttackInfoFromComments([comment]).map((attack) => ({
+    ...attack,
+    status,
+    closingReason,
+  }));
 }
 
 /**

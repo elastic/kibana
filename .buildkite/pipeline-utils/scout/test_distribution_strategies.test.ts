@@ -169,7 +169,7 @@ describe('scoutTestDistributionStrategies', () => {
       expect(uploadedGroup.steps[1].key).toBe('scout_test_lane_2');
     });
 
-    it('step env includes correct target and server config vars', async () => {
+    it('step env includes correct target vars', async () => {
       const track = createMockTrack('local', 'serverless', 'search', 'custom_config', [
         createMockLane(1, 'n2-8-spot', ['config-a.ts']),
       ]);
@@ -183,7 +183,51 @@ describe('scoutTestDistributionStrategies', () => {
       expect(step.env.SCOUT_TEST_TARGET_LOCATION).toBe('local');
       expect(step.env.SCOUT_TEST_TARGET_ARCH).toBe('serverless');
       expect(step.env.SCOUT_TEST_TARGET_DOMAIN).toBe('search');
-      expect(step.env.SCOUT_TEST_SERVER_CONFIG_SET).toBe('custom_config');
+    });
+
+    it("writes the lane loads with the track's server config set", async () => {
+      const track = createMockTrack('local', 'serverless', 'search', 'custom_config', [
+        createMockLane(1, 'n2-8-spot', ['config-a.ts']),
+      ]);
+
+      mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
+      mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([track]));
+
+      await scoutTestDistributionStrategies.lanes();
+
+      const step = mockUploadSteps.mock.calls[0][0][0].steps[0];
+      expect(step.label).toBe('Scout Lane #1 - serverless-search / custom_config');
+
+      const loadInfo = JSON.parse(writeFileSyncSpy.mock.calls[0][1] as string);
+      expect(loadInfo.scout_test_lane_1.loadGroups).toEqual([
+        { configSet: 'custom_config', loadIDs: ['config-a.ts'] },
+      ]);
+    });
+
+    it('writes the load groups of combined lanes', async () => {
+      const combinedLane = createMockLane(1, 'n2-4-spot', ['a.ts', 'b.ts']);
+      combinedLane.metadata.loadGroups = [
+        { configSet: 'config_a', loads: ['a.ts'] },
+        { configSet: 'config_b', loads: ['b.ts'] },
+      ];
+      const combinedTrack: ScoutTestTrack = {
+        ...createMockTrack('local', 'stateful', 'classic', 'default', [combinedLane]),
+        metadata: { testTarget: { location: 'local', arch: 'stateful', domain: 'classic' } },
+      };
+
+      mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
+      mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([combinedTrack]));
+
+      await scoutTestDistributionStrategies.lanes();
+
+      const step = mockUploadSteps.mock.calls[0][0][0].steps[0];
+      expect(step.label).toBe('Scout Lane #1 - stateful-classic / config_a, config_b');
+
+      const loadInfo = JSON.parse(writeFileSyncSpy.mock.calls[0][1] as string);
+      expect(loadInfo.scout_test_lane_1.loadGroups).toEqual([
+        { configSet: 'config_a', loadIDs: ['a.ts'] },
+        { configSet: 'config_b', loadIDs: ['b.ts'] },
+      ]);
     });
 
     it('step command points to run_test_lane.sh', async () => {

@@ -12,6 +12,7 @@ tags:
   - watch-forensics
 
 settings:
+  __WORKER_RUN_AS_LINE__:
   # Concurrency is keyed per (key, spaceId), so a constant key means one
   # sweep per space, not one across the whole deployment. Capped at 1 so
   # overlapping ticks can't dispatch the same pending indicators twice.
@@ -156,6 +157,7 @@ steps:
         type: workflow.executeAsync
         with:
           workflow-id: system-security-forensics-run-endpoint-analysis
+          run-as-mode: inherit
           inputs:
             ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"

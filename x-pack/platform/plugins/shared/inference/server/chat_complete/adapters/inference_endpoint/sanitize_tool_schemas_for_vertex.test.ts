@@ -106,4 +106,75 @@ describe('sanitizeToolSchemasForVertex', () => {
       },
     });
   });
+
+  it('normalizes nullable boolean type arrays', () => {
+    const schema = toToolSchema(z.object({ flag: z.boolean().nullable() }));
+
+    const sanitized = sanitizeToolSchemasForVertex({
+      myTool: { description: 'tool', schema },
+    });
+
+    expect(sanitized?.myTool.schema?.properties?.flag).toEqual({
+      type: 'boolean',
+      nullable: true,
+    });
+  });
+
+  it('normalizes string|number unions into anyOf', () => {
+    const schema = toToolSchema(z.object({ value: z.union([z.string(), z.number()]) }));
+
+    const sanitized = sanitizeToolSchemasForVertex({
+      myTool: { description: 'tool', schema },
+    });
+
+    expect(sanitized?.myTool.schema?.properties?.value).toEqual({
+      anyOf: [{ type: 'string' }, { type: 'number' }],
+    });
+  });
+
+  it('normalizes nullable types inside array items', () => {
+    const schema = toToolSchema(z.object({ tags: z.array(z.string().nullable()) }));
+
+    const sanitized = sanitizeToolSchemasForVertex({
+      myTool: { description: 'tool', schema },
+    });
+
+    expect(sanitized?.myTool.schema?.properties?.tags).toEqual({
+      type: 'array',
+      items: {
+        type: 'string',
+        nullable: true,
+      },
+    });
+  });
+
+  it('inlines a root $ref from zod meta id before sanitizing', () => {
+    const rawSchema = z.toJSONSchema(
+      z
+        .object({
+          name: z.string(),
+        })
+        .meta({ id: 'NamedToolInput' }),
+      { io: 'input' }
+    ) as ToolSchema & { $ref?: string; $defs?: Record<string, unknown> };
+
+    expect(rawSchema.$ref).toBeDefined();
+
+    const sanitized = sanitizeToolSchemasForVertex({
+      myTool: {
+        description: 'tool',
+        schema: pick(rawSchema, ['type', 'properties', 'required', '$ref', '$defs']) as ToolSchema,
+      },
+    });
+
+    expect(sanitized?.myTool.schema).toEqual({
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    });
+    expect(sanitized?.myTool.schema).not.toHaveProperty('$ref');
+    expect(sanitized?.myTool.schema).not.toHaveProperty('$defs');
+  });
 });

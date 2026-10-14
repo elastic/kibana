@@ -14,7 +14,7 @@ import { assertNoBulkErrors } from './bulk';
 import { readJsonFromFile } from './fs_utils';
 import { formatError, getStatusCode, isRecord, isString } from './type_guards';
 
-const INDEX_FIELDS_LIMIT = 6000;
+export const INDEX_FIELDS_LIMIT = 6000;
 
 const mappingCache = new Map<string, MappingTypeMapping>();
 
@@ -61,7 +61,7 @@ const isNoShardAvailable503 = (e: unknown): boolean => {
   );
 };
 
-const waitForIndexSearchable = async ({
+export const waitForIndexSearchable = async ({
   esClient,
   index,
   log,
@@ -135,7 +135,7 @@ const isMappingTypeMapping = (value: unknown): value is MappingTypeMapping => {
   return typeof value === 'object' && value !== null;
 };
 
-const readMappingJsonCached = (mappingPath: string): MappingTypeMapping => {
+export const readMappingJsonCached = (mappingPath: string): MappingTypeMapping => {
   const cached = mappingCache.get(mappingPath);
   if (cached) return cached;
   const parsed: unknown = readJsonFromFile(mappingPath);
@@ -183,6 +183,10 @@ export interface BulkIndexOptions {
    * Approx max docs per bulk request.
    */
   batchSize?: number;
+  /**
+   * Bulk action. Data streams only accept `create`; concrete indices use `index`.
+   */
+  op?: 'index' | 'create';
 }
 
 export const bulkIndex = async ({
@@ -191,14 +195,34 @@ export const bulkIndex = async ({
   docs,
   log,
   batchSize = 1000,
+  op = 'index',
 }: BulkIndexOptions) => {
   if (docs.length === 0) return;
 
   for (let i = 0; i < docs.length; i += batchSize) {
     const slice = docs.slice(i, i + batchSize);
-    const body = slice.flatMap((doc) => [{ index: { _index: index } }, doc]);
+    const body = slice.flatMap((doc) => [{ [op]: { _index: index } }, doc]);
     const resp = await esClient.bulk({ refresh: false, body });
     assertNoBulkErrors(index, resp, log);
+  }
+};
+
+/** Max index names per delete request; a 180d range of names overflows the HTTP line limit. */
+const DELETE_INDICES_CHUNK_SIZE = 50;
+
+/** Deletes indices in URL-safe chunks, ignoring names that do not exist. */
+export const deleteIndicesChunked = async ({
+  esClient,
+  indices,
+}: {
+  esClient: Client;
+  indices: string[];
+}): Promise<void> => {
+  for (let i = 0; i < indices.length; i += DELETE_INDICES_CHUNK_SIZE) {
+    await esClient.indices.delete({
+      index: indices.slice(i, i + DELETE_INDICES_CHUNK_SIZE),
+      ignore_unavailable: true,
+    });
   }
 };
 

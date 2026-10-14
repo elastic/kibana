@@ -14,7 +14,7 @@ import { LINTABLE_EXTENSIONS, LINT_LOG_PREFIX } from './constants';
 
 /**
  * Filters a list of files to only include files oxlint should lint. Ignore
- * patterns from `.oxlintrc.json` and `.eslintignore` are applied by oxlint itself.
+ * patterns from `.oxlint/index.mts` and `.eslintignore` are applied by oxlint itself.
  */
 export async function pickFilesToLint(log: ToolingLog, files: File[]) {
   const filesToLint = [];

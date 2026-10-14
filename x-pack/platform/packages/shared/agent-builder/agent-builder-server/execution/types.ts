@@ -255,6 +255,12 @@ interface ExecuteAgentBaseParams {
    */
   useTaskManager?: boolean;
   /**
+   * When the execution runs on Task Manager, asks background nodes to claim its task right away
+   * instead of on their next poll. Meant for executions a user is actively waiting on, as each
+   * request triggers an extra claim cycle. Best effort, and ignored for local executions.
+   */
+  requestImmediateClaim?: boolean;
+  /**
    * Interactivity configuration for this execution.
    */
   interactive?: InteractivityConfigInput;

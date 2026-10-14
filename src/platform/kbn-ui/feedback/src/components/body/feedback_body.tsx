@@ -51,7 +51,13 @@ export const FeedbackBody = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem data-test-subj="feedbackBody">
-        <EuiForm fullWidth component="form">
+        <EuiForm
+          fullWidth
+          component="form"
+          // Prevent implicit form submission on Enter: the submit button lives in
+          // the modal footer, outside this form, so a native submit would reload the page.
+          onSubmit={(e) => e.preventDefault()}
+        >
           <CsatButtons
             appTitle={appTitle}
             selectedCsatOptionId={selectedCsatOptionId}

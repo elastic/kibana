@@ -11,7 +11,7 @@ import type {
   AttachmentFormatContext,
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ATTACK_DISCOVERY_VERDICT_ATTACHMENT_TYPE } from '../../../../common/constants';
 
@@ -22,11 +22,13 @@ import { ATTACK_DISCOVERY_VERDICT_ATTACHMENT_TYPE } from '../../../../common/con
  * branch on, and the bounds keep a single attachment from dominating the
  * conversation's context.
  */
-export const attackDiscoveryVerdictAttachmentDataSchema = z.object({
-  rationale_markdown: z.string().max(50_000).optional(),
-  summary_markdown: z.string().max(8000),
-  verdict: z.enum(['false_positive', 'true_positive', 'inconclusive', 'failed']),
-});
+export const attackDiscoveryVerdictAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    rationale_markdown: z.string().max(50_000).optional(),
+    summary_markdown: z.string().max(8000),
+    verdict: z.enum(['false_positive', 'true_positive', 'inconclusive', 'failed']),
+  })
+);
 
 export type AttackDiscoveryVerdictAttachmentData = z.infer<
   typeof attackDiscoveryVerdictAttachmentDataSchema

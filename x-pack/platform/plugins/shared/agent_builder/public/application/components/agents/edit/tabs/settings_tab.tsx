@@ -51,6 +51,7 @@ import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mod
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
 import { AiIndicesSection } from './ai_indices_section';
+import { AutoApprovedApisSection } from './auto_approved_apis_section';
 import { SubagentsSection } from './subagents_section';
 
 interface AgentSettingsTabProps {
@@ -59,6 +60,7 @@ interface AgentSettingsTabProps {
   isCreateMode: boolean;
   isFormDisabled: boolean;
   canChangeAccessControl: boolean;
+  canChangeApprovals: boolean;
   owner?: UserIdAndName;
   agentId?: string;
 }
@@ -69,6 +71,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   isCreateMode,
   isFormDisabled,
   canChangeAccessControl,
+  canChangeApprovals,
   owner,
   agentId,
 }) => {
@@ -901,6 +904,12 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
           </EuiFlexGroup>
         </>
       )}
+
+      <AutoApprovedApisSection
+        isFormDisabled={isFormDisabled}
+        canEdit={canChangeApprovals}
+        agentId={agentId}
+      />
 
       <SubagentsSection agentId={agentId} />
     </>
