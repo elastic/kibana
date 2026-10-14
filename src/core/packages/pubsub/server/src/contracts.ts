@@ -20,6 +20,11 @@ export interface PubSubEventInit<TData> {
    * so a durable bus can recognise the duplicate. Phase 1 does not deduplicate.
    */
   readonly id: string;
+  /**
+   * Delivered to each consumer as `JSON.parse(JSON.stringify(data))`, so only JSON-compatible
+   * values survive: `undefined` properties are dropped and anything `defineTopic` rejects at
+   * compile time (`Date`, `Map`, class instances, ...) would arrive mangled.
+   */
   readonly data: TData;
 }
 
@@ -87,6 +92,11 @@ export interface PubSubSetup {
 export interface PubSubStart {
   /**
    * Accepts an event and returns once it is queued. Does not wait for handlers.
+   *
+   * Delivery is best effort and local to this Kibana node; a resolved promise means the event
+   * was accepted, not that any consumer ran. A consumer's copy is dropped (with a warning) when
+   * that consumer already has 1000 events pending, and events still queued when Kibana stops
+   * are discarded. Consumers on other nodes never see the event.
    */
   publish<TData>(topic: Topic<TData>, event: PubSubEventInit<TData>): Promise<PubSubPublishResult>;
 }

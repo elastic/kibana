@@ -461,9 +461,9 @@ describe('PubSubEvent shape', () => {
   const createHarness = () => {
     const service = new PubSubService(mockCoreContext.create());
     const setup = service.setup();
-    const topic = defineTopic<{ secret: string; tags?: string[]; at?: Date }>('orders');
+    const topic = defineTopic<{ secret: string; tags?: string[] }>('orders');
     setup.registerTopic(PLUGIN, topic);
-    const received: Array<PubSubEvent<{ secret: string; tags?: string[]; at?: Date }>> = [];
+    const received: Array<PubSubEvent<{ secret: string; tags?: string[] }>> = [];
     const subscribe = (consumer: string) =>
       setup.subscribe(PLUGIN, topic, {
         consumer,
@@ -518,15 +518,15 @@ describe('PubSubEvent shape', () => {
     expect(right.data.tags).toEqual(['a']);
   });
 
-  it('delivers data with JSON semantics, so a Date arrives as a string', async () => {
+  it('delivers data with JSON semantics, so undefined properties are dropped', async () => {
     const { service, topic, received, subscribe } = createHarness();
     subscribe('sync');
     const { publish } = service.start();
-    const at = new Date('2026-10-14T08:00:00.000Z');
 
-    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'json', at } });
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'json', tags: undefined } });
     await flushDispatch();
 
-    expect(received[0].data.at).toBe('2026-10-14T08:00:00.000Z');
+    expect(received[0].data).toEqual({ secret: 'json' });
+    expect('tags' in received[0].data).toBe(false);
   });
 });

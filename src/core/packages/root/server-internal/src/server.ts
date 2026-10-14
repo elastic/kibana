@@ -712,6 +712,7 @@ export class Server {
     this.httpRateLimiter.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
+    this.pubsub.stop(); // Stop dispatching before consumers are torn down, so no handler starts against a stopped plugin
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
@@ -727,7 +728,6 @@ export class Server {
     this.security.stop();
     this.userProfile.stop();
     this.userStorage.stop();
-    this.pubsub.stop();
   }
 
   private async ensureValidConfiguration() {
