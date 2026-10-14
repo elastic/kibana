@@ -82,6 +82,38 @@ describe('score_resolution_entities', () => {
     );
   });
 
+  it('only pages through resolution targets of the entity type being scored', async () => {
+    (esClient.search as jest.Mock).mockResolvedValue({
+      aggregations: { by_resolution_target: { buckets: [] } },
+    });
+
+    await collectPages(
+      calculateResolutionEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.user,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 10_000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+      })
+    );
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: expect.arrayContaining([{ prefix: { resolution_target_id: 'user:' } }]),
+          },
+        },
+      })
+    );
+  });
+
   it('throws when member fetch receives more than the capped ids', async () => {
     await expect(
       fetchResolutionGroupMemberIds({
