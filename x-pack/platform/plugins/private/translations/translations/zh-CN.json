@@ -50006,7 +50006,6 @@
     "xpack.sharedComponents.trialUsageBadge.daysUsed": "{used}/{total} 天",
     "xpack.sharedComponents.trialUsageBadge.manageSubscription": "管理订阅",
     "xpack.sharedComponents.trialUsageBadge.popoverAriaLabel": "试用用量详情",
-    "xpack.sharedComponents.trialUsageBadge.serverlessTitle": "Elastic Cloud Serverless",
     "xpack.sharedComponents.trialUsageBadge.toggleAriaLabel": "切换试用用量详情",
     "xpack.sharedComponents.trialUsageBadge.trialLabel": "试用版",
     "xpack.sharedComponents.trialUsageBadge.trialPeriodLabel": "试用期",

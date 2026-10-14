@@ -36,6 +36,13 @@ export interface LocatedSchema {
   readonly schema: SpecSchema;
 }
 
+/** A way a request or response breaks the contract, e.g. `query.limit` failing `maximum`. */
+export interface Violation {
+  readonly path: readonly string[];
+  readonly code: string;
+  readonly message: string;
+}
+
 /** `querystring` (OpenAPI 3.2) describes the whole query string as one `content` value. */
 export type ParameterLocation = 'path' | 'query' | 'querystring' | 'header' | 'cookie';
 
@@ -54,6 +61,8 @@ export interface OperationParameter {
   readonly schema?: SpecSchema;
   /** The single media type of a parameter described by `content` instead of `schema`. */
   readonly content?: MediaTypeContent;
+  /** A path parameter whose value may span segments, as Azure's `x-ms-skip-url-encoding` marks. */
+  readonly multiSegment?: true;
 }
 
 export interface OperationHeader {
