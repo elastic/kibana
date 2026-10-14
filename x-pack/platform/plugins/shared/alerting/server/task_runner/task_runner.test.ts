@@ -2276,7 +2276,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('should set authentication errors as user-error', async () => {
+  test('should set authentication errors as user-error and tag them auth-error', async () => {
     jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new errors.ResponseError({
         warnings: [],
@@ -2300,7 +2300,7 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: Response Error"`
     );
-    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error']);
   });
 
   test('should set unexpected errors as framework-error', async () => {
