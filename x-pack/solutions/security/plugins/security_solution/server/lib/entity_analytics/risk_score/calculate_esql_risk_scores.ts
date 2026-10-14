@@ -599,6 +599,7 @@ export const getBaseScoreESQL = (
 };
 
 export const getResolutionCompositeQuery = (
+  entityType: EntityType,
   index: string,
   pageSize: number,
   afterKey?: Record<string, string>,
@@ -608,7 +609,16 @@ export const getResolutionCompositeQuery = (
   size: 0,
   query: targetEntityIds
     ? { terms: { resolution_target_id: targetEntityIds } }
-    : { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+    : {
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            // The lookup index holds every entity type's targets. Without this, each type also
+            // pages through the others' targets, scoring alerts that can never match them.
+            { prefix: { resolution_target_id: `${entityType}:` } },
+          ],
+        },
+      },
   aggs: {
     by_resolution_target: {
       composite: {

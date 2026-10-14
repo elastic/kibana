@@ -34,6 +34,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('builds resolution composite query for lookup index pagination', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         {
@@ -45,8 +46,11 @@ describe('Calculate risk scores with ESQL', () => {
         index: '.entity_analytics.risk_score.lookup-default',
         size: 0,
         query: {
-          term: {
-            relationship_type: 'entity.relationships.resolution.resolved_to',
+          bool: {
+            filter: [
+              { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+              { prefix: { resolution_target_id: 'user:' } },
+            ],
           },
         },
         aggs: {
@@ -63,6 +67,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('scopes query to targetEntityIds when they are provided', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         undefined,
@@ -74,14 +79,33 @@ describe('Calculate risk scores with ESQL', () => {
       });
     });
 
-    it('falls back to relationship_type term query when targetEntityIds is undefined', () => {
-      const query = getResolutionCompositeQuery(
+    it('limits resolution pages to targets of the entity type being scored', () => {
+      const hostQuery = getResolutionCompositeQuery(
+        EntityType.host,
+        '.entity_analytics.risk_score.lookup-default',
+        1000
+      );
+      const userQuery = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000
       );
 
-      expect(query.query).toEqual({
-        term: { relationship_type: 'entity.relationships.resolution.resolved_to' },
+      expect(hostQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'host:' } },
+          ],
+        },
+      });
+      expect(userQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'user:' } },
+          ],
+        },
       });
     });
 
