@@ -178,6 +178,14 @@ const getEsqlDataView = async (indexPattern: string): Promise<DataView> => {
 };
 
 const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: RawColumnValue) => {
+  // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
+  // filterable field, so the field check isn't enough: fieldName would resolve to that
+  // unrelated field, but the value shown is the computed one, not the raw field's value.
+  // Bail out before resolving the data view.
+  if (isUnfilterableComputedColumn(column)) {
+    return [];
+  }
+
   const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
 
   if (!indexPattern) {
@@ -192,10 +200,7 @@ const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: Ra
   const field = dataView.getFieldByName(fieldName);
 
   // The field should be present in the data view and filterable.
-  // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
-  // filterable field, so the field check isn't enough: fieldName would resolve to that
-  // unrelated field, but the value shown is the computed one, not the raw field's value.
-  if (!field?.filterable || isUnfilterableComputedColumn(column)) {
+  if (!field?.filterable) {
     return [];
   }
 

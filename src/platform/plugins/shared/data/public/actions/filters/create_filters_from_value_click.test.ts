@@ -342,15 +342,11 @@ describe('createFiltersFromClickEvent', () => {
 
       test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
         table.columns[0].isComputedColumn = true;
-        mockFieldByName.mockReturnValue({
-          name: 'message',
-          filterable: true,
-        });
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockFieldByName).toHaveBeenCalledTimes(1);
-        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
+        expect(createSourceSpy).not.toHaveBeenCalled();
         expect(filter).toEqual([]);
       });
 
@@ -359,14 +355,11 @@ describe('createFiltersFromClickEvent', () => {
         // must not make an EVAL-computed column look like a genuine RENAME of the real field.
         table.columns[0].isComputedColumn = true;
         table.columns[0].name = 'My Custom Label';
-        mockFieldByName.mockReturnValue({
-          name: 'message',
-          filterable: true,
-        });
 
         const filter = await createFilterESQL(table, 0, 0);
 
-        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
+        expect(createSourceSpy).not.toHaveBeenCalled();
         expect(filter).toEqual([]);
       });
 
