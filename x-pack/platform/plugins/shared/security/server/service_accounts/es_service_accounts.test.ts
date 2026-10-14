@@ -24,6 +24,7 @@ import {
 import { EsServiceAccounts } from './es_service_accounts';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -89,6 +90,8 @@ describe('EsServiceAccounts', () => {
   let getCurrentUser: jest.Mock;
   let getCurrentUserProfileId: jest.Mock;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
+  let audit: ReturnType<typeof auditServiceMock.create>;
+  let auditLogger: ReturnType<typeof auditLoggerMock.create>;
 
   /** Queues the transport responses for the happy path: pre-flight miss, PUT, token. */
   const mockHappyPath = () => {
@@ -121,6 +124,9 @@ describe('EsServiceAccounts', () => {
     request = httpServerMock.createKibanaRequest();
     getCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser({ roles: ['superuser'] }));
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
+    auditLogger = auditLoggerMock.create();
+    audit = auditServiceMock.create();
+    audit.asScoped.mockReturnValue(auditLogger);
 
     serviceAccounts = new EsServiceAccounts({
       requestLifetimeMs: 600_000,
@@ -128,6 +134,7 @@ describe('EsServiceAccounts', () => {
       license,
       clusterClient,
       checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      audit,
       credentialStore,
       canEncrypt: true,
       getCurrentUser,
@@ -398,6 +405,7 @@ describe('EsServiceAccounts', () => {
         license,
         clusterClient,
         checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+        audit,
         credentialStore,
         canEncrypt: false,
         getCurrentUser,
@@ -756,6 +764,221 @@ describe('EsServiceAccounts', () => {
         output: { statusCode: 502 },
       });
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+    });
+
+    describe('audit', () => {
+      const createEvent = (outcome: 'success' | 'failure') =>
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'service_account_create',
+            category: ['iam'],
+            type: ['user', 'creation'],
+            outcome,
+          }),
+        });
+
+      it('logs a `success` event naming the created account, scoped to the request', async () => {
+        mockHappyPath();
+
+        await serviceAccounts.create(request, createParams);
+
+        expect(audit.asScoped).toHaveBeenCalledWith(request);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('success'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { id: 'kibana/nightshift-relay', name: 'nightshift-relay' } },
+            message:
+              'User has created service account [id=kibana/nightshift-relay, name=nightshift-relay]',
+          })
+        );
+      });
+
+      it('logs a `failure` event with the name when the caller is not authorized', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('failure'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { name: 'nightshift-relay' } },
+            error: {
+              code: 'Error',
+              message:
+                'Cannot create a service account: missing `manage_security` cluster privilege',
+            },
+          })
+        );
+      });
+
+      it('logs a `failure` event without a target when the refused name did not validate', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(
+          serviceAccounts.create(request, { ...createParams, name: '../_cluster/settings' })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('failure'));
+        expect(auditLogger.log.mock.calls[0][0]).not.toHaveProperty('user');
+      });
+
+      it('logs nothing when security features are disabled', async () => {
+        license.isEnabled.mockReturnValue(false);
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the name is taken', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the name did not validate', async () => {
+        await expect(
+          serviceAccounts.create(request, { ...createParams, name: '../_cluster/settings' })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the credential cannot be stored and the account is rolled back', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      const leftBehindEvent = expect.objectContaining({
+        event: expect.objectContaining({ action: 'service_account_create', outcome: 'unknown' }),
+        user: { target: { id: 'kibana/nightshift-relay', name: 'nightshift-relay' } },
+        error: { code: 'Error', message: 'encryption failed' },
+        message:
+          'Failed attempt to create service account [id=kibana/nightshift-relay, name=nightshift-relay], which might have been left behind',
+      });
+
+      it('logs `unknown` naming the account when the rollback cannot delete it', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // token delete
+          .mockRejectedValueOnce(new Error('account delete failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(leftBehindEvent);
+      });
+
+      it('logs nothing when only the token delete of the rollback fails', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+        esClient.asCurrentUser.transport.request
+          .mockRejectedValueOnce(new Error('token delete failed'))
+          .mockResolvedValueOnce({}); // forced account delete
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when only the credential delete of the rollback fails', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+        credentialStore.delete.mockRejectedValueOnce(new Error('credential delete failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs `unknown` when a failed account write cannot be reconciled', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET: no such account
+          .mockRejectedValueOnce(new Error('encryption failed')) // PUT
+          .mockRejectedValueOnce(new Error('read failed')); // reconciliation GET
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(leftBehindEvent);
+      });
+
+      it('logs nothing when a failed account write is confirmed never to have committed', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('write failed')) // PUT
+          .mockResolvedValueOnce({}); // reconciliation GET: still absent
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('write failed');
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the account left after a failed write is removed', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('write failed')) // PUT
+          .mockResolvedValueOnce(accountEntry()) // reconciliation GET: present
+          .mockResolvedValueOnce(accountCredentials()) // no token: ours
+          .mockResolvedValueOnce({}) // token delete
+          .mockResolvedValueOnce({}); // forced account delete
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('write failed');
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(6);
+      });
+
+      it('logs `unknown` when the account left after a failed write cannot be removed', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('encryption failed')) // PUT
+          .mockResolvedValueOnce(accountEntry()) // reconciliation GET: present
+          .mockResolvedValueOnce(accountCredentials()) // no token: ours
+          .mockResolvedValueOnce({}) // token delete
+          .mockRejectedValueOnce(new Error('account delete failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).toHaveBeenCalledWith(leftBehindEvent);
+      });
+
+      it("logs nothing when the account left after a failed write is a concurrent create's", async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('write failed')) // PUT
+          .mockResolvedValueOnce(accountEntry()) // reconciliation GET: present
+          .mockResolvedValueOnce(accountCredentials(['kibana-managed'])); // holds a token: not ours
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('write failed');
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(4);
+      });
     });
   });
 

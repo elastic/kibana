@@ -14,13 +14,11 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
   LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2, RESOLUTION_RULE_IDS } from '../../../../../common';
+import { RESOLUTION_RULE_IDS } from '../../../../../common';
 import { hashEuid } from '../../../../../common/domain/euid';
 import {
-  clearEntityStoreIndices,
-  clearResolutionRuleOverrides,
+  clearInstalledEntityStoreDocuments,
   seedUserEntity,
   waitForResolution,
   assertResolutionGroup,
@@ -30,6 +28,8 @@ import {
   ingestDoc,
   forceLogExtraction,
   normalizeKeywordList,
+  startEntityTypes,
+  stopEntityTypes,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
@@ -38,7 +38,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ esClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -48,33 +48,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-    await clearResolutionRuleOverrides(kbnClient);
-
-    await esClient.indices.delete({
-      index: [LATEST_INDEX, UPDATES_INDEX],
-      ignore_unavailable: true,
-    });
-
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect([200, 201]).toContain(installResponse.statusCode);
-
-    const initResponse = await apiClient.post(
-      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
-      {
-        headers: internalHeaders,
-        responseType: 'json',
-        body: {},
-      }
-    );
-    expect([200, 201]).toContain(initResponse.statusCode);
+    await clearInstalledEntityStoreDocuments(esClient);
   });
 
   apiTest.beforeEach(async ({ esClient }) => {
@@ -87,15 +61,12 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     });
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearResolutionRuleOverrides(kbnClient);
-    await clearEntityStoreIndices(esClient);
+  apiTest.afterAll(async ({ apiClient }) => {
+    const enable = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+      { headers: defaultHeaders, responseType: 'json' }
+    );
+    expect(enable.statusCode).toBe(200);
   });
 
   apiTest(
@@ -967,6 +938,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   apiTest(
     'SID bridge links a local entity created by extraction to Active Directory',
     async ({ apiClient, esClient }) => {
+      await startEntityTypes(apiClient, defaultHeaders, ['user']);
       // Own stream/template, name outside logs-entity-store-tests-* so this
       // cannot overlap history_snapshot's default template at the same priority
       // (including a leftover wildcard from an older run).
@@ -1038,6 +1010,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         await triggerMaintainerRun(apiClient, internalHeaders);
         await waitForResolution(esClient, localEntity, adEntity);
       } finally {
+        await stopEntityTypes(apiClient, defaultHeaders, ['user']);
         await teardownLogsTestDataStream(esClient, sidExtractionLogs);
       }
     }

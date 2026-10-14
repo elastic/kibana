@@ -118,6 +118,7 @@ const mockFieldFormatsStart = fieldFormatsServiceMock.createStartContract();
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => ({
     services: {
+      security: { serviceAccounts: { isEnabled: jest.fn(() => false) } },
       http: {},
       notifications: {
         toasts: {

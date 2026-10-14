@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { InvestigationEvidence } from '@kbn/significant-events-schema';
+import type { InvestigationEvidence } from '@kbn/agentic-investigations-plugin/common';
 import { EvidenceChart } from './evidence_chart';
 
 export interface EvidenceItemProps {

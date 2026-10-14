@@ -6,7 +6,7 @@
  */
 
 import type { SyntheticsServerSetup } from '../../types';
-import { getAgentInfo } from './get_agent_info';
+import { getAgentInfo, isCompleteElasticAgent } from './get_agent_info';
 
 const MIB = 1024 * 1024;
 const GIB = 1024 * MIB;
@@ -14,7 +14,10 @@ const GIB = 1024 * MIB;
 interface FakeAgent {
   id?: string;
   last_checkin?: string;
-  local_metadata?: { host?: { memory?: number } };
+  local_metadata?: {
+    host?: { memory?: number };
+    elastic?: { agent?: { complete?: boolean } };
+  };
 }
 
 const agent = (over: FakeAgent = {}): FakeAgent => ({
@@ -56,10 +59,70 @@ describe('getAgentInfo', () => {
     expect(info.get('a')).toEqual({
       lastCheckin: Date.parse('2026-08-01T00:00:00.000Z'),
       memoryMib: null,
+      complete: false,
     });
     expect(info.get('b')).toEqual({
       lastCheckin: Date.parse('2026-08-01T00:01:00.000Z'),
       memoryMib: 2048,
+      complete: false,
+    });
+  });
+
+  it('marks only elastic-agent-complete as browser-capable', async () => {
+    const listAgents = pagedListAgents([
+      [
+        agent({
+          id: 'complete',
+          local_metadata: { elastic: { agent: { complete: true } } },
+        }),
+        agent({
+          id: 'basic',
+          local_metadata: { elastic: { agent: { complete: false } } },
+        }),
+        agent({ id: 'missing', local_metadata: {} }),
+      ],
+    ]);
+
+    const info = await getInfo(listAgents);
+
+    expect(info.get('complete')?.complete).toBe(true);
+    expect(info.get('basic')?.complete).toBe(false);
+    expect(info.get('missing')?.complete).toBe(false);
+    expect(isCompleteElasticAgent(undefined)).toBe(false);
+  });
+
+  describe('Wolfi agents that predate the complete flag', () => {
+    const wolfi = (version?: string, complete = false) => ({
+      os: { platform: 'wolfi' },
+      elastic: { agent: { complete, ...(version ? { version } : {}) } },
+    });
+
+    it.each(['8.19.23', '9.4.8', '9.5.5', '9.3.4', '8.18.0'])(
+      'treats Wolfi %s as browser-capable',
+      (version) => {
+        expect(isCompleteElasticAgent(wolfi(version))).toBe(true);
+      }
+    );
+
+    it.each(['8.19.24', '9.4.9', '9.5.6', '9.6.0', '9.6.0-SNAPSHOT', '10.0.0'])(
+      'trusts the complete flag on Wolfi %s',
+      (version) => {
+        expect(isCompleteElasticAgent(wolfi(version))).toBe(false);
+        expect(isCompleteElasticAgent(wolfi(version, true))).toBe(true);
+      }
+    );
+
+    it('treats a Wolfi agent with no parsable version as browser-capable', () => {
+      expect(isCompleteElasticAgent(wolfi())).toBe(true);
+    });
+
+    it('does not extend the fallback to other platforms', () => {
+      expect(
+        isCompleteElasticAgent({
+          os: { platform: 'ubuntu' },
+          elastic: { agent: { complete: false, version: '9.4.8' } },
+        })
+      ).toBe(false);
     });
   });
 

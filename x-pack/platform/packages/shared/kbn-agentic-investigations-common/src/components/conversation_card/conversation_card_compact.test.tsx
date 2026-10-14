@@ -31,7 +31,6 @@ const renderRow = (props: Partial<React.ComponentProps<typeof ConversationCardCo
   renderWithKibanaRenderContext(
     <ConversationCardCompact
       investigation={investigation}
-      hasBorder={false}
       outcome="Approved by Maya Chen"
       onClickCard={onClickCard}
       onClickAction={jest.fn()}

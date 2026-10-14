@@ -164,6 +164,7 @@ export const createAppContextStartContractMock = (
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     encryptedSavedObjectsSetup: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     savedObjects: mockedSavedObject,
+    isFipsEnabled: false,
     securityCoreStart: securityServiceMock.createStart(),
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
