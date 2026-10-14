@@ -28,7 +28,7 @@ const TOPIC_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9._-]{0,255}$/;
 
 /**
  * Returns a topic token. Registration is a separate setup call.
- * Fails to compile when `TData` is not an object or holds values that do not survive a JSON
+ * Fails to compile when `TData` is not a plain object or holds values that do not survive a JSON
  * round trip (`Date`, `Map`, `Set`, objects with methods, functions, `bigint`, `symbol`,
  * `undefined` array items). Instances of data-only classes are delivered as plain objects.
  */

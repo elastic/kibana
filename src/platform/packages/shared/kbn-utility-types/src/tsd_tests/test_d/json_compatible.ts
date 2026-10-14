@@ -76,8 +76,9 @@ expectNotAssignable<JsonCompatible<{ items: Array<string | undefined> }>>(
   value<{ items: Array<string | undefined> }>()
 );
 
-// Rejected: non-object top-level values and types too loose to check.
+// Rejected: non-object top-level values, functions, and types too loose to check.
 expectNotAssignable<JsonCompatible<string>>(value<string>());
+expectNotAssignable<JsonCompatible<() => void>>(value<() => void>());
 expectNotAssignable<JsonCompatible<bigint>>(value<bigint>());
 expectNotAssignable<JsonCompatible<null>>(value<null>());
 expectNotAssignable<JsonCompatible<undefined>>(value<undefined>());

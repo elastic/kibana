@@ -38,8 +38,13 @@ type JsonCompatibleObject<TObject> = {
  * and optional properties.
  *
  * Rejected: `Date`, `Map`, `Set`, functions, `bigint`, `symbol`, objects with methods,
- * `undefined` array items, and non-object top-level values.
- * Not detectable structurally: class instances with only data fields (delivered as plain
- * objects) and top-level function types.
+ * `undefined` array items, and top-level values that are not objects.
+ * Not detectable structurally: class instances with only data fields are accepted and
+ * delivered as plain objects.
+ *
+ * The top-level callable check is wrapped in a tuple on purpose: a distributive conditional
+ * on `T` makes `T extends JsonCompatible<T>` a circular constraint.
  */
-export type JsonCompatible<T> = object & JsonCompatibleObject<T>;
+export type JsonCompatible<T> = [T] extends [(...args: never[]) => unknown]
+  ? never
+  : object & JsonCompatibleObject<T>;
