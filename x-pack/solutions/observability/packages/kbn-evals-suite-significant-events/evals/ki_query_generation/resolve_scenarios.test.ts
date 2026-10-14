@@ -16,7 +16,7 @@ import {
 const scenario = (id: string): KIQueryGenerationScenario => ({
   input: {
     scenario_id: id,
-    stream_name: 'logs',
+    source_id: 'logs',
     stream_description: id,
   },
   output: {

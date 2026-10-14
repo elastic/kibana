@@ -106,8 +106,8 @@ export interface ConversationPublicClient {
   ): Promise<Conversation>;
   /**
    * Validate updates against the conversation's template and merge them into its metadata.
-   * Defaults to owner-only access. Pass `{ access: 'converse' }` to allow collaborators or
-   * any authenticated user (for public conversations) to write metadata.
+   * Defaults to `converse` access, so members and anyone who can converse in a public conversation
+   * can write metadata. Pass `{ access: 'owner' }` to restrict the write to the owner.
    * The conversation must have a template applied.
    */
   patchMetadata(

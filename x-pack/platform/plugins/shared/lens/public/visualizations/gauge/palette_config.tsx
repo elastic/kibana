@@ -21,7 +21,6 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   rangeMax: DEFAULT_MAX_STOP,
   name: DEFAULT_PALETTE_NAME,
   steps: DEFAULT_COLOR_STEPS,
-  maxSteps: 5,
 };
 
 export const DEFAULT_PALETTE: PaletteOutput<CustomPaletteParams> = {

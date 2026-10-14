@@ -214,7 +214,7 @@ export const createCodeAnalysisProvider = ({
       return undefined;
     }
 
-    // 3. Score each candidate by how well the stream's distinctive strings match
+    // 3. Score each candidate by how well the source's distinctive strings match
     //    its code, selecting the repository with the most verified strings.
     const query = distinctiveStrings.join('\n');
     const normalizedStrings = distinctiveStrings.map((value) => ({
