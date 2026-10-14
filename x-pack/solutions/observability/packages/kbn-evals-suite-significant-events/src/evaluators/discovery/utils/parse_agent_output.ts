@@ -31,6 +31,7 @@ type EventsWriteItemResult =
         | 'existing_active_event'
         | 'bulk_error'
         | 'duplicate_in_batch'
+        | 'superseded'
         | 'unchanged_outcome'
         | 'unknown_event_id';
       existing_event_id?: string;

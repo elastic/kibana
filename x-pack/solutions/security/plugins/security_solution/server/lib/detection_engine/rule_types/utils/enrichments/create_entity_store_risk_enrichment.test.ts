@@ -10,13 +10,15 @@ import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
 import type { EnrichmentFunction } from './types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     getEuidFromObjectForSearch: jest.fn(),
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
@@ -364,7 +366,10 @@ describe('createEntityStoreEnrichment', () => {
       // Gating here would leave IdP-namespace entities with no stamp and no enrichment.
       await runHostEnrichment([createAlert('1', { host: { name: 'server1' } })]);
 
-      expect(mockGetEuidForSearch).toHaveBeenCalledWith('host', expect.any(Object));
+      expect(mockGetEuidForSearch).toHaveBeenCalledWith(
+        getBuiltInEntityDefinition('host'),
+        expect.any(Object)
+      );
     });
   });
 });
