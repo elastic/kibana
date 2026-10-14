@@ -285,7 +285,46 @@ describe('bulkUpdate()', () => {
       });
     });
 
-    test('authorizes valid documents and skips not-found and errored lookups', async () => {
+    test('throws and does not write when a lookup errors', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+          {
+            _id: 'error-id',
+            _index: indexName,
+            error: { type: 'index_not_found_exception', reason: 'no such index' },
+          },
+        ],
+      });
+
+      await expect(
+        alertsClient.bulkUpdate({
+          ids: [fakeAlertId, 'error-id'],
+          query: undefined,
+          index: indexName,
+          status: 'closed',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to fetch alert with id of \\"error-id\\" and operation update"`
+      );
+
+      expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    test('authorizes valid documents and skips not-found lookups', async () => {
       const indexName = '.alerts-observability.apm.alerts';
       const alertsClient = new AlertsClient(alertsClientParams);
       esClientMock.mget.mockResponseOnce({
@@ -302,11 +341,6 @@ describe('bulkUpdate()', () => {
             },
           },
           { found: false, _id: 'absent-id', _index: indexName },
-          {
-            _id: 'error-id',
-            _index: indexName,
-            error: { type: 'index_not_found_exception', reason: 'no such index' },
-          },
         ],
       });
       esClientMock.bulk.mockResponseOnce({
@@ -316,7 +350,7 @@ describe('bulkUpdate()', () => {
       });
 
       await alertsClient.bulkUpdate({
-        ids: [fakeAlertId, 'absent-id', 'error-id'],
+        ids: [fakeAlertId, 'absent-id'],
         query: undefined,
         index: indexName,
         status: 'closed',

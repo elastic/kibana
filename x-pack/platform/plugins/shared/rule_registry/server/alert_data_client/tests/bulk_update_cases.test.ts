@@ -377,7 +377,45 @@ describe('bulkUpdateCases', () => {
     );
   });
 
-  it('links valid alerts and skips not-found and errored lookups', async () => {
+  it('throws and does not write when a lookup errors', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+            [ALERT_RULE_CONSUMER]: 'apm',
+            [ALERT_CASE_IDS]: caseIds,
+          },
+        },
+        {
+          _id: 'error-id',
+          _index: 'alert-index',
+          error: { type: 'index_not_found_exception', reason: 'no such index [alert-index]' },
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    await expect(
+      alertsClient.bulkUpdateCases({
+        caseIds,
+        alerts: [
+          { id: 'alert-id', index: 'alert-index' },
+          { id: 'error-id', index: 'alert-index' },
+        ],
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to fetch alert with id of \\"error-id\\" and operation get"`
+    );
+
+    expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
+  });
+
+  it('links valid alerts and skips not-found lookups', async () => {
     esClientMock.mget.mockResponse({
       docs: [
         {
@@ -391,11 +429,6 @@ describe('bulkUpdateCases', () => {
           },
         },
         { found: false, _id: 'absent-id', _index: 'alert-index' },
-        {
-          _id: 'error-id',
-          _index: 'alert-index',
-          error: { type: 'index_not_found_exception', reason: 'no such index [alert-index]' },
-        },
       ],
     });
     const alertsClient = new AlertsClient(alertsClientParams);
@@ -405,7 +438,6 @@ describe('bulkUpdateCases', () => {
       alerts: [
         { id: 'alert-id', index: 'alert-index' },
         { id: 'absent-id', index: 'alert-index' },
-        { id: 'error-id', index: 'alert-index' },
       ],
     });
 

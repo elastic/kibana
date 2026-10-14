@@ -102,7 +102,7 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
 };
 
 const isAbsentLookup = (item: { found?: boolean; error?: unknown }): boolean =>
-  item.found === false || item.error != null;
+  item.found === false;
 
 /**
  * Reads an authorization field from an alert hit, preferring the `fields` API (which is
@@ -304,7 +304,7 @@ export class AlertsClient {
 
   /**
    * Accepts an array of ES documents and executes ensureAuthorized for the given operation.
-   * Present documents missing ruleTypeId or consumer are rejected; not-found and errored lookups are skipped.
+   * Present documents missing ruleTypeId or consumer are rejected, errored lookups are rejected, and not-found lookups are skipped.
    */
   private async ensureAllAuthorized(
     items: Array<{
@@ -325,8 +325,13 @@ export class AlertsClient {
     // pair, so we only need to call `ensureAuthorized` once per unique pair.
     const ownersAndRuleTypeIds = new Map<string, { ruleTypeId: string; consumer: string }>();
     const invalidAlertIds: string[] = [];
+    const erroredAlertIds: string[] = [];
 
     items.forEach((hit) => {
+      if (hit.error != null) {
+        erroredAlertIds.push(hit._id);
+        return;
+      }
       if (isAbsentLookup(hit)) {
         return;
       }
@@ -343,6 +348,14 @@ export class AlertsClient {
     });
 
     try {
+      if (erroredAlertIds.length > 0) {
+        const errorMessage = `Failed to fetch alert with id of "${erroredAlertIds.join(
+          ', '
+        )}" and operation ${operation}`;
+        this.logger.error(errorMessage);
+        throw Boom.badGateway(errorMessage);
+      }
+
       if (invalidAlertIds.length > 0) {
         const errorMessage = `Invalid alert found with id of "${invalidAlertIds.join(
           ', '
