@@ -48,5 +48,6 @@ module.exports = eslintCompatPlugin({
     security_imports_restriction: require('./rules/security_imports_restriction'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
+    require_lazy_zod_schema: require('./rules/require_lazy_zod_schema'),
   },
 });
