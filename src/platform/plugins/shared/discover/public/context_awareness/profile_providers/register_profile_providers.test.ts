@@ -211,19 +211,9 @@ describe('registerProfileProviders', () => {
     expect(allCollectedProfileIds).toEqual(uniq(allCollectedProfileIds));
   });
 
-  it('distinguishes Search navigation from Classic navigation', async () => {
-    const { rootProfileService } = setupProfileServices();
-
-    await expect(
-      rootProfileService.resolve({ solutionNavId: SolutionType.Search })
-    ).resolves.toEqual(expect.objectContaining({ solutionType: SolutionType.Search }));
-    await expect(rootProfileService.resolve({ solutionNavId: null })).resolves.toEqual(
-      expect.objectContaining({ solutionType: SolutionType.Default })
-    );
-  });
-
   it.each([
     ['Classic navigation', SECURITY_PROFILE_ID.dataSource, null],
+    ['Search navigation', DEFAULT_DATA_SOURCE_PROFILE_ID, SolutionType.Search],
     ['a solution view without a root profile', DEFAULT_DATA_SOURCE_PROFILE_ID, 'vectordb'],
   ])(
     'resolves a Security alerts query in %s to %s',
