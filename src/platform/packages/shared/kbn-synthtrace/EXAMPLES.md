@@ -918,6 +918,12 @@ node scripts/synthtrace otel_profiling --live --scenarioOpts.hosts=3 --scenarioO
 
 `executableIds` is `hex` (default) or `base64url`. The exporter keys executables by their hex file ID, like `hex` does, but Elasticsearch looks them up by base64url, so executable names only resolve with `base64url`.
 
+`hostPrefix` (default `otel-host`) names the hosts `<hostPrefix>-N`. With `up-host`, the OTel data is generated for the hosts of the `universal_profiling` scenario, so that they have profiling data in both schemas:
+
+```sh
+node scripts/synthtrace otel_profiling --live --scenarioOpts.hostPrefix=up-host --scenarioOpts.hosts=1
+```
+
 ### SRE Incident Scenarios
 
 Located in `sre_incidents/` directory:

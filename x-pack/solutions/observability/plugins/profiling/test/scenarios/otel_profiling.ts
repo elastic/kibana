@@ -15,6 +15,10 @@
  * Usage: node scripts/synthtrace otel_profiling --live
  * Options: --scenarioOpts.hosts=3 --scenarioOpts.samplesPerSecond=20 (per host)
  *          --scenarioOpts.executableIds=hex|base64url (default: hex)
+ *          --scenarioOpts.hostPrefix=otel-host (hosts are named `<hostPrefix>-N`)
+ *
+ * With `--scenarioOpts.hostPrefix=up-host`, the OTel data is generated for the hosts of the
+ * `universal_profiling` scenario, so that they have profiling data in both schemas.
  *
  * The exporter keys executables by their hex file ID, but Elasticsearch looks them up by the
  * base64url file ID of the frames, so executable names only resolve with `base64url`.
@@ -182,9 +186,9 @@ const getHostId = (hostName: string): string => {
   ].join('-');
 };
 
-const getHosts = (count: number): Host[] =>
+const getHosts = (count: number, prefix: string): Host[] =>
   Array.from({ length: count }, (_, hostIndex) => {
-    const name = `otel-host-${hostIndex}`;
+    const name = `${prefix}-${hostIndex}`;
     return { id: getHostId(name), name };
   });
 
@@ -235,8 +239,8 @@ const toEvent = (
 
 const scenario: Scenario<OtelProfilingDocument> = async ({ logger, scenarioOpts }) => {
   const { hostCount, samplesPerSecond } = getProfilingScenarioOptions(scenarioOpts);
-  const hosts = getHosts(hostCount);
-  const { executableIds = 'hex' } = scenarioOpts ?? {};
+  const { executableIds = 'hex', hostPrefix = 'otel-host' } = scenarioOpts ?? {};
+  const hosts = getHosts(hostCount, String(hostPrefix));
   const executableIdEncoding = getExecutableIdEncoding(String(executableIds));
   const sampler = new ProfilingSampler(WORKLOADS);
 
