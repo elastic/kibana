@@ -7,6 +7,13 @@
 
 import { KbnClientRequesterError, type KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  SECURITY_ROLE_API_VERSION,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+  WORKER_SERVICE_ACCOUNT_NAMES,
+  buildSecurityRoleUrl,
+  getWorkerRoleName,
+} from '@kbn/alertzero-common';
 
 /**
  * Installs and enables the Continuous Threat Hunt Worker before phase E0.
@@ -15,69 +22,20 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * enabled without a service account"). Without this the manual run route
  * answers 400 "Workflow is disabled".
  *
- * Paths and the role payload are inlined (packages expose one public entry
- * point; the plugin's `worker_roles.ts` is not importable). The payload mirrors
- * WORKER_ROLE_DEFINITIONS for the hunt Worker; the privileges are the same
- * the product grants when a user clicks "Enable".
+ * The service account's role is built in (an Elasticsearch reserved role on
+ * stateful, a predefined role on Serverless). This harness only looks it up
+ * and never creates or changes a role.
  */
 
-export const HUNT_WORKER_ID = 'system-security-hunt-continuous-threat-hunt';
-export const HUNT_WORKER_ACCOUNT_NAME = 'alertzero_threat_hunt';
+export const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
+export const HUNT_WORKER_ACCOUNT_NAME = WORKER_SERVICE_ACCOUNT_NAMES[HUNT_WORKER_ID];
 
 const WORKERS_URL = '/internal/alertzero/workers';
 const SERVICE_ACCOUNT_URL = '/internal/security/service_account';
-const SECURITY_ROLE_API_VERSION = '2023-10-31';
 const INTERNAL_HEADERS = {
   'elastic-api-version': '1',
   'x-elastic-internal-origin': 'Kibana',
   'kbn-xsrf': 'true',
-};
-
-const SECURITY_DATA_PATTERNS = [
-  'apm-*-transaction*',
-  'auditbeat-*',
-  'endgame-*',
-  'filebeat-*',
-  'logs-*',
-  'packetbeat-*',
-  'traces-apm*',
-  'winlogbeat-*',
-];
-
-export const HUNT_WORKER_ROLE = {
-  description:
-    'Privileges for the AlertZero Continuous Threat Hunt worker. Created by the hunt_watch eval.',
-  elasticsearch: {
-    cluster: ['monitor_inference'],
-    indices: [
-      {
-        names: ['ai-index-idx-security-investigations'],
-        privileges: ['read', 'view_index_metadata', 'index', 'auto_configure'],
-      },
-      { names: ['.ai-index-idx-elastic-index'], privileges: ['read', 'view_index_metadata'] },
-      { names: SECURITY_DATA_PATTERNS, privileges: ['read'] },
-    ],
-    run_as: [],
-  },
-  kibana: [
-    {
-      spaces: ['*'],
-      base: [],
-      feature: {
-        alertzero: ['all'],
-        agentBuilder: ['read'],
-        contextEngine: ['all'],
-        proposals: ['all'],
-        actions: ['read'],
-        siemV5: [
-          'minimal_read',
-          'host_isolation_all',
-          'process_operations_all',
-          'actions_log_management_read',
-        ],
-      },
-    },
-  ],
 };
 
 interface ServiceAccountEntry {
@@ -96,27 +54,48 @@ interface WorkerEntry {
 }
 
 /** `KbnClientRequesterError` carries the HTTP status on `.status` (there is no `.response`). */
-const isConflict = (e: unknown): boolean =>
-  e instanceof KbnClientRequesterError && e.status === 409;
+const isNotFound = (e: unknown): boolean =>
+  e instanceof KbnClientRequesterError && e.status === 404;
+
+const isServerlessDeployment = async (kbnClient: KbnClient): Promise<boolean> => {
+  const status = await kbnClient.request<{ version?: { build_flavor?: string } }>({
+    path: '/api/status',
+    method: 'GET',
+  });
+  return status.data.version?.build_flavor === 'serverless';
+};
+
+/** Returns the built-in role name, or throws naming it when this stack lacks the role. */
+const findBuiltInRole = async (kbnClient: KbnClient): Promise<string> => {
+  const isServerless = await isServerlessDeployment(kbnClient);
+  const roleName = getWorkerRoleName(HUNT_WORKER_ACCOUNT_NAME, { isServerless });
+  const missing = () =>
+    new Error(
+      `[hunt-watch] built-in ${
+        isServerless ? 'predefined' : 'reserved'
+      } role ${roleName} is missing on this stack; the eval does not create worker roles`
+    );
+  let role: { metadata?: { _reserved?: unknown } };
+  try {
+    role = (
+      await kbnClient.request<{ metadata?: { _reserved?: unknown } }>({
+        path: buildSecurityRoleUrl(roleName),
+        method: 'GET',
+        headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION },
+      })
+    ).data;
+  } catch (e) {
+    throw isNotFound(e) ? missing() : e;
+  }
+  if (role.metadata?._reserved !== true) throw missing();
+  return roleName;
+};
 
 export const ensureHuntWorkerEnabled = async (
   kbnClient: KbnClient,
   log: ToolingLog
 ): Promise<{ serviceAccountId: string }> => {
-  // 1. role (createOnly: an existing role is reused, never overwritten)
-  try {
-    await kbnClient.request({
-      path: `/api/security/role/${encodeURIComponent(HUNT_WORKER_ACCOUNT_NAME)}`,
-      method: 'PUT',
-      headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
-      query: { createOnly: true },
-      body: HUNT_WORKER_ROLE,
-    });
-  } catch (e) {
-    if (!isConflict(e)) throw e;
-  }
-
-  // 2. service account, found by name first
+  // 1. service account, found by name first
   const accounts: ServiceAccountEntry[] = [];
   let after: string | undefined;
   do {
@@ -137,6 +116,7 @@ export const ensureHuntWorkerEnabled = async (
   );
   let serviceAccountId = usable?.id;
   if (!serviceAccountId) {
+    const roleName = await findBuiltInRole(kbnClient);
     const created = await kbnClient.request<{ id: string }>({
       path: SERVICE_ACCOUNT_URL,
       method: 'POST',
@@ -144,13 +124,13 @@ export const ensureHuntWorkerEnabled = async (
       body: {
         name: HUNT_WORKER_ACCOUNT_NAME,
         description: 'Service account for the hunt_watch eval',
-        roles: [HUNT_WORKER_ACCOUNT_NAME],
+        roles: [roleName],
       },
     });
     serviceAccountId = created.data.id;
   }
 
-  // 3. enable, with the current settings revision (optimistic concurrency)
+  // 2. enable, with the current settings revision (optimistic concurrency)
   const worker = await readWorker(kbnClient);
   if (!(worker.enabled && worker.settings?.serviceAccountId === serviceAccountId)) {
     await kbnClient.request({
@@ -165,7 +145,7 @@ export const ensureHuntWorkerEnabled = async (
     });
   }
 
-  // 4. assert, never assume
+  // 3. assert, never assume
   const after2 = await readWorker(kbnClient);
   if (!after2.enabled) {
     throw new Error(

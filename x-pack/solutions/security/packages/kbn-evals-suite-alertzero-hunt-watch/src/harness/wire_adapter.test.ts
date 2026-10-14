@@ -61,6 +61,7 @@ const wire: HuntCoordinatorResponse = {
   index_patterns: ['logs-*'],
   tier2_targets: ['logs-endpoint*'],
   tier2_target_sources: ['tier1_hits'],
+  report_intent_targets: [],
   actionable_indices: [],
   tier1: tier1Base,
   tier2: {

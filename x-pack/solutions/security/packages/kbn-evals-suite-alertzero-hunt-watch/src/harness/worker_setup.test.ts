@@ -27,16 +27,23 @@ const makeServer = ({
   accounts = [],
   worker = { enabled: false },
   enableWorks = true,
+  flavor = 'traditional',
+  role = () => ({ metadata: { _reserved: true } }),
 }: {
   accounts?: Array<{ id: string; name: string; enabled: boolean; assumable: boolean }>;
   worker?: { enabled: boolean; serviceAccountId?: string };
   enableWorks?: boolean;
+  flavor?: string;
+  role?: (name: string) => unknown;
 }) => {
   const requests: Req[] = [];
   const state = { ...worker };
   const request = jest.fn(async (req: Req) => {
     requests.push(req);
-    if (req.path.startsWith('/api/security/role/')) return { data: {} };
+    if (req.path === '/api/status') return { data: { version: { build_flavor: flavor } } };
+    if (req.path.startsWith('/api/security/role/')) {
+      return { data: role(decodeURIComponent(req.path.slice('/api/security/role/'.length))) };
+    }
     if (req.path === '/internal/security/service_account' && req.method === 'GET') {
       return { data: { serviceAccounts: accounts } };
     }
@@ -70,15 +77,18 @@ const makeServer = ({
   return { kbnClient: { request } as unknown as KbnClient, requests };
 };
 
+const roleRequests = (requests: Req[]) =>
+  requests.filter((r) => r.path.startsWith('/api/security/role/'));
+
 describe('ensureHuntWorkerEnabled (B4)', () => {
-  it('creates the role (createOnly), a service account, and PATCH-enables with the current revision', async () => {
+  it('looks up the built-in role, creates the service account with it, and PATCH-enables with the current revision', async () => {
     const { kbnClient, requests } = makeServer({});
     const out = await ensureHuntWorkerEnabled(kbnClient, log);
     expect(out.serviceAccountId).toBe('sa-new');
 
-    const role = requests.find((r) => r.path.startsWith('/api/security/role/'))!;
-    expect(role.path).toBe(`/api/security/role/${HUNT_WORKER_ACCOUNT_NAME}`);
-    expect(role.query).toEqual({ createOnly: true });
+    expect(roleRequests(requests).map((r) => [r.path, r.method])).toEqual([
+      [`/api/security/role/${HUNT_WORKER_ACCOUNT_NAME}`, 'GET'],
+    ]);
 
     const create = requests.find((r) => r.method === 'POST')!;
     expect(create.body).toMatchObject({
@@ -95,12 +105,64 @@ describe('ensureHuntWorkerEnabled (B4)', () => {
     });
   });
 
-  it('reuses an existing enabled, assumable service account instead of creating one', async () => {
+  it('never issues a PUT to the role API', async () => {
+    const { kbnClient, requests } = makeServer({});
+    await ensureHuntWorkerEnabled(kbnClient, log);
+    expect(roleRequests(requests).some((r) => r.method !== 'GET')).toBe(false);
+    expect(requests.some((r) => r.query && 'createOnly' in r.query)).toBe(false);
+  });
+
+  it('uses the _-prefixed predefined role on Serverless', async () => {
+    const { kbnClient, requests } = makeServer({ flavor: 'serverless' });
+    await ensureHuntWorkerEnabled(kbnClient, log);
+    expect(roleRequests(requests).map((r) => r.path)).toEqual([
+      `/api/security/role/_${HUNT_WORKER_ACCOUNT_NAME}`,
+    ]);
+    expect(requests.find((r) => r.method === 'POST')!.body).toMatchObject({
+      name: HUNT_WORKER_ACCOUNT_NAME,
+      roles: [`_${HUNT_WORKER_ACCOUNT_NAME}`],
+    });
+  });
+
+  it('fails loudly, naming the reserved role, when the stack lacks it (404)', async () => {
+    const { kbnClient, requests } = makeServer({
+      role: () => {
+        throw new KbnClientRequesterError('not found', { status: 404 });
+      },
+    });
+    await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(
+      `reserved role ${HUNT_WORKER_ACCOUNT_NAME} is missing`
+    );
+    expect(requests.some((r) => r.method === 'POST' || r.method === 'PUT')).toBe(false);
+  });
+
+  it('fails loudly, naming the predefined role, on Serverless', async () => {
+    const { kbnClient } = makeServer({
+      flavor: 'serverless',
+      role: () => {
+        throw new KbnClientRequesterError('not found', { status: 404 });
+      },
+    });
+    await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(
+      `predefined role _${HUNT_WORKER_ACCOUNT_NAME} is missing`
+    );
+  });
+
+  it('rejects a same-named role that is not reserved', async () => {
+    const { kbnClient, requests } = makeServer({ role: () => ({ metadata: {} }) });
+    await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(
+      `role ${HUNT_WORKER_ACCOUNT_NAME} is missing`
+    );
+    expect(requests.some((r) => r.method === 'POST')).toBe(false);
+  });
+
+  it('does not look up the role when the service account already exists', async () => {
     const { kbnClient, requests } = makeServer({
       accounts: [{ id: 'sa-1', name: HUNT_WORKER_ACCOUNT_NAME, enabled: true, assumable: true }],
     });
     const out = await ensureHuntWorkerEnabled(kbnClient, log);
     expect(out.serviceAccountId).toBe('sa-1');
+    expect(roleRequests(requests)).toEqual([]);
     expect(requests.some((r) => r.method === 'POST')).toBe(false);
   });
 
@@ -127,20 +189,5 @@ describe('ensureHuntWorkerEnabled (B4)', () => {
     await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(
       /not enabled after setup.*no_service_account/
     );
-  });
-
-  it('treats a 409 on role creation as "already exists"', async () => {
-    const { kbnClient } = makeServer({});
-    const original = (kbnClient.request as jest.Mock).getMockImplementation()!;
-    (kbnClient.request as jest.Mock).mockImplementation(async (req: Req) => {
-      if (req.path.startsWith('/api/security/role/')) {
-        // The real error shape: status on the error itself, as kbn-client throws it.
-        throw new KbnClientRequesterError('conflict', { status: 409 });
-      }
-      return original(req);
-    });
-    await expect(ensureHuntWorkerEnabled(kbnClient, log)).resolves.toEqual({
-      serviceAccountId: 'sa-new',
-    });
   });
 });
