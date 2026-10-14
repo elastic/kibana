@@ -13,3 +13,6 @@ jobs:
       pull-requests: read
       packages: read
     uses: elastic/docs-actions/.github/workflows/release-notes.yml@v1
+    with:
+      # Fail breaking-change PRs whose description or changelog entry lacks Impact and Action.
+      require-impact-action: true
