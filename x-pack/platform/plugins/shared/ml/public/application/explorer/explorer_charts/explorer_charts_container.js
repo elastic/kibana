@@ -401,7 +401,7 @@ export const ExplorerChartsContainerUI = ({
   timefilter,
   timeRange,
   onSelectEntity,
-  isInteractive,
+  isInteractive = true,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
