@@ -86,8 +86,8 @@ describe('assignees changed event UI definition', () => {
         via: { type: 'workflow', workflow_id: 'wf-1', execution_id: 'e1' },
       })
     ).toBe('workflow');
-    expect(
-      icon({ added: ['u1'], removed: [], via: { type: 'agent', agent_id: 'a1' } })
-    ).toBe('productAgent');
+    expect(icon({ added: ['u1'], removed: [], via: { type: 'agent', agent_id: 'a1' } })).toBe(
+      'productAgent'
+    );
   });
 });
