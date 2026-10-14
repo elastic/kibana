@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ConversationActivityEventType, EventActorType } from '@kbn/agent-builder-common';
+import { ConversationActivityEventType } from '@kbn/agent-builder-common';
 import type {
   ActivityEvent,
   ConversationAccessControl,
@@ -19,14 +19,7 @@ import type {
   MetadataUpdatedEventData,
   TitleUpdatedEvent,
   TitleUpdatedEventData,
-  UserIdAndName,
 } from '@kbn/agent-builder-common';
-
-export const userEventActor = ({ id, username }: UserIdAndName): EventActor => ({
-  type: EventActorType.user,
-  id: id ?? username,
-  ...(username ? { username } : {}),
-});
 
 /** Attribution stamped on every activity event. */
 export interface ActivityEnvelope {

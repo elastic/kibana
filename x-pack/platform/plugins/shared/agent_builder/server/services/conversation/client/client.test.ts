@@ -5388,6 +5388,39 @@ describe('ConversationClient', () => {
           data: { agent_id: 'agent-1', parent_conversation_id: 'parent-1' },
         });
       });
+
+      it('types a service account actor like the other user-written events', async () => {
+        const serviceAccountClient = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
+          user: {
+            id: 'service_account:kibana/automation',
+            username: 'kibana/automation',
+            type: 'service_account',
+            isAdmin: false,
+          },
+        });
+
+        await serviceAccountClient.create(
+          {
+            id: 'conversation-1',
+            title: 'Conversation 1',
+            agent_id: 'agent-1',
+            rounds: [],
+          },
+          { source: 'http_api' }
+        );
+
+        expect(indexedEvents()[0].actor).toEqual({
+          type: EventActorType.user,
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          principal_type: 'service_account',
+        });
+      });
     });
 
     describe('title_updated on update', () => {

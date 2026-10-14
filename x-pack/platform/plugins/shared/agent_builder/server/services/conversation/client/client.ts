@@ -103,7 +103,6 @@ import {
   metadataUpdatedEvent,
   metadataUpdatedEvents,
   titleUpdatedEvents,
-  userEventActor,
 } from './activity_events';
 import { conversationIndexName, createStorage } from './storage';
 
@@ -465,7 +464,7 @@ class ConversationClientImpl implements ConversationClient {
     defaultUser: UserIdAndName = this.getUser()
   ): ActivityEnvelope {
     return {
-      actor: activity?.actor ?? userEventActor(defaultUser),
+      actor: activity?.actor ?? currentUserActor(defaultUser),
       created_at: createdAt,
       ...(activity?.execution_id !== undefined ? { execution_id: activity.execution_id } : {}),
     };

@@ -17,7 +17,6 @@ import {
   conversationCreatedEvent,
   metadataUpdatedEvents,
   titleUpdatedEvents,
-  userEventActor,
 } from './activity_events';
 
 const actor = { type: EventActorType.user, id: 'u1', username: 'alice' };
@@ -34,24 +33,6 @@ const accessControl = (
   mode: ConversationAccessControlMode,
   entries: ConversationAccessControl['entries']
 ): ConversationAccessControl => ({ access_mode: mode, entries });
-
-describe('userEventActor', () => {
-  it('uses the profile id and keeps the username', () => {
-    expect(userEventActor({ id: 'profile-1', username: 'alice' })).toEqual({
-      type: EventActorType.user,
-      id: 'profile-1',
-      username: 'alice',
-    });
-  });
-
-  it('falls back to the username as id', () => {
-    expect(userEventActor({ username: 'alice' })).toEqual({
-      type: EventActorType.user,
-      id: 'alice',
-      username: 'alice',
-    });
-  });
-});
 
 describe('conversationCreatedEvent', () => {
   it('stamps a uuid, the envelope and the data', () => {
