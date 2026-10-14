@@ -53,10 +53,10 @@ describe('RedirectWithOffset', () => {
   it('eventually renders the child element', async () => {
     const element = renderUrl({ pathname: '/services', search: location.search, hash: '' }, false);
 
-    await expect(element.findByText('Foo')).resolves.not.toBeUndefined();
+    expect(await element.findByText('Foo')).toBeInTheDocument();
 
-    // assertion to make sure our element test actually works
-    await expect(element.findByText('Bar')).rejects.not.toBeUndefined();
+    // assertion to make sure our element test actually works (sync, no waitFor budget)
+    expect(element.queryByText('Bar')).not.toBeInTheDocument();
   });
 
   it('redirects with comparisonEnabled=false when comparison is disabled in advanced settings', async () => {
@@ -83,6 +83,28 @@ describe('RedirectWithOffset', () => {
         hash: '',
       },
       true
+    );
+
+    const query = qs.parse(history.entries[0].search);
+    expect(query.comparisonEnabled).toBe('false');
+  });
+
+  it('redirects with a valid comparisonEnabled when the url value is a bare key', async () => {
+    // A bare `?comparisonEnabled` key parses to null, which is not a valid boolean.
+    renderUrl({ pathname: '/services', search: 'comparisonEnabled', hash: '' }, true);
+
+    const query = qs.parse(history.entries[0].search);
+    expect(query.comparisonEnabled).toBe('true');
+  });
+
+  it('redirects with the default comparisonEnabled when the url value is invalid', async () => {
+    renderUrl(
+      {
+        pathname: '/services',
+        search: qs.stringify({ comparisonEnabled: 'maybe' }),
+        hash: '',
+      },
+      false
     );
 
     const query = qs.parse(history.entries[0].search);

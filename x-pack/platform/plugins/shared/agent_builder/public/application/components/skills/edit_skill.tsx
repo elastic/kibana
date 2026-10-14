@@ -8,6 +8,7 @@
 import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { useEditSkill } from '../../hooks/skills/use_edit_skill';
+import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 import { appPaths } from '../../utils/app_paths';
 import { SkillForm, SkillFormMode } from './skill_form';
 
@@ -15,11 +16,13 @@ export const EditSkill: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const { skill, isSubmitting, isLoading, editSkill } = useEditSkill({ skillId });
 
+  const { manageSkills } = useUiPrivileges();
+
   if (!skillId) {
     return <Redirect to={appPaths.skills.list} />;
   }
 
-  if (skill?.readonly) {
+  if (skill?.readonly || !manageSkills) {
     return <SkillForm mode={SkillFormMode.View} skill={skill} isLoading={isLoading} />;
   }
 

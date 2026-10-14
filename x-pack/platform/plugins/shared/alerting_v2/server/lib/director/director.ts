@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
+import { v5 as uuidV5 } from 'uuid';
 import { inject, injectable } from 'inversify';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, type RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
@@ -17,28 +18,88 @@ import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_event
 import {
   alertEpisodeStatus,
   alertEventType,
-  type AlertEvent,
+  type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
 import type { ExecutionContext } from '../execution_context';
 
+/**
+ * Namespace for deterministic (uuid v5) episode ids.
+ *
+ * uuid v5 requires the namespace itself to be a UUID, so it cannot be a readable
+ * string; the readable part of the identity is the seed (see
+ * {@link buildNewEpisodeId}). A dedicated namespace (rather than the RFC 4122
+ * `DNS`/`URL` ones) guarantees our ids never collide with any other v5 user
+ * hashing the same seed. Its value is arbitrary but must never change, or
+ * previously generated episode ids would stop reproducing.
+ */
+const EPISODE_ID_NAMESPACE = '17969019-52cb-4d0f-b663-ffdf1b44f3eb';
+
+/**
+ * Deterministic id for a newly opened episode, derived from the rule, the group,
+ * and the run's scheduled timestamp.
+ *
+ * Episode identity must be one-per-`(run, group_hash)`. A single-series
+ * (ungrouped) rule emits one rule event per returned row — many events sharing
+ * one `group_hash` within a run, spread across streamed batches the director
+ * processes independently. A random id per event would split that one series
+ * into many episodes. Seeding from `ruleId | group_hash | scheduledTimestamp`
+ * makes every new-episode event of a run collapse to the same id (within and
+ * across batches, with no shared state), while a later run that reopens the
+ * series gets a different id because the scheduled timestamp differs. A series
+ * opens at most one episode per run, so distinct episodes never collide. As a
+ * bonus the id is idempotent across task retries of the same run.
+ *
+ * Grouped rules emit one event per group per run, so this is behaviorally a
+ * no-op for them beyond swapping a random uuid for a deterministic one.
+ */
+const buildNewEpisodeId = ({
+  ruleId,
+  groupHash,
+  scheduledTimestamp,
+}: {
+  ruleId: string;
+  groupHash: string;
+  scheduledTimestamp: string;
+}): string => uuidV5(`${ruleId}|${groupHash}|${scheduledTimestamp}`, EPISODE_ID_NAMESPACE);
+
 interface RunDirectorParams {
   rule: RuleResponse;
-  alertEvents: readonly AlertEvent[];
+  alertEvents: readonly AlertEventDocument[];
   executionContext: ExecutionContext;
+  spaceId: string;
 }
 
 interface CalculateNextStateParams {
   rule: RuleResponse;
-  currentAlertEvent: AlertEvent;
+  currentAlertEvent: AlertEventDocument;
   previousAlertEvent?: LatestAlertEventState;
   strategy: ITransitionStrategy;
+  evaluatedAt: string;
+  logger: LoggerServiceContract;
 }
 
 interface ResolveEpisodeIdParams {
   previousAlertEvent?: LatestAlertEventState;
   nextStatus: AlertEpisodeStatus;
+  ruleId: string;
+  groupHash: string;
+  scheduledTimestamp: string;
+}
+
+interface ResolveEpisodeIdResult {
+  readonly episodeId: string;
+  readonly isNew: boolean;
+}
+
+export interface DirectorRunStats {
+  readonly newEpisodeIds: readonly string[];
+}
+
+export interface DirectorRunResult {
+  readonly alertEvents: AlertEventDocument[];
+  readonly stats: DirectorRunStats;
 }
 
 @injectable()
@@ -50,22 +111,34 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({
+    rule,
+    alertEvents,
+    executionContext,
+    spaceId,
+  }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return [];
+      return { alertEvents: [], stats: { newEpisodeIds: [] } };
     }
+
+    const logger = this.logger.forSubsystem('director').withLabels({
+      rule_id: rule.id,
+      rule_kind: rule.kind,
+      space_id: spaceId,
+    });
 
     const strategy = this.strategyFactory.getStrategy(rule);
     executionContext.throwIfAborted();
-    return this.processAlertEvents(rule, alertEvents, strategy, executionContext);
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext, logger);
   }
 
   private async processAlertEvents(
     rule: RuleResponse,
-    alertEvents: readonly AlertEvent[],
+    alertEvents: readonly AlertEventDocument[],
     strategy: ITransitionStrategy,
-    executionContext: ExecutionContext
-  ): Promise<AlertEvent[]> {
+    executionContext: ExecutionContext,
+    logger: LoggerServiceContract
+  ): Promise<DirectorRunResult> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
@@ -79,16 +152,36 @@ export class DirectorService {
     try {
       executionContext.throwIfAborted();
 
-      return alertEvents.map((currentAlertEvent) =>
-        this.getAlertEventWithNextEpisode({
+      const newEpisodeIds: string[] = [];
+      const evaluatedAt = new Date().toISOString();
+      const processed = alertEvents.map((currentAlertEvent) => {
+        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
-        })
-      );
+          evaluatedAt,
+          logger,
+        });
+
+        if (isNewEpisode && alertEvent.alert) {
+          newEpisodeIds.push(alertEvent.alert.id);
+        }
+
+        return alertEvent;
+      });
+
+      return { alertEvents: processed, stats: { newEpisodeIds } };
     } finally {
-      await scope.disposeAll();
+      try {
+        await scope.disposeAll();
+      } catch (error) {
+        logger.warn({
+          message: 'Failed to release alert state cache',
+          error,
+          code: ALERTING_LOG_CODES.DIRECTOR_CLEANUP_FAILED,
+        });
+      }
     }
   }
 
@@ -115,49 +208,129 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
-  }: CalculateNextStateParams): AlertEvent {
+    evaluatedAt,
+    logger,
+  }: CalculateNextStateParams): { alertEvent: AlertEventDocument; isNewEpisode: boolean } {
+    // User lock: once a user hits `activate` on a group, the episode
+    // stays `active` regardless of what the strategy computes, until
+    // the user hits `deactivate` (which flips the lifecycle marker
+    // back and lets the strategy own transitions again). We preserve
+    // the incoming event's `status` (e.g. `recovered`) so downstream
+    // analytics keep the raw engine signal. Only `alert.status` is
+    // forced. `alert.status_count` is dropped to mirror how the
+    // strategies emit any → active transitions.
+    if (this.isUserLocked(previousAlertEvent)) {
+      return {
+        alertEvent: {
+          ...currentAlertEvent,
+          type: alertEventType.alert,
+          alert: {
+            id: previousAlertEvent!.last_episode_id!,
+            status: alertEpisodeStatus.active,
+          },
+        },
+        isNewEpisode: false,
+      };
+    }
+
     const currentStatus = previousAlertEvent?.last_episode_status;
 
     const result: StateTransitionResult = strategy.getNextState({
       rule,
       alertEvent: currentAlertEvent,
       previousEpisode: previousAlertEvent,
+      evaluatedAt,
     });
 
-    const episodeId = this.resolveEpisodeId({
+    const { episodeId, isNew } = this.resolveEpisodeId({
       previousAlertEvent,
       nextStatus: result.status,
+      ruleId: rule.id,
+      groupHash: currentAlertEvent.group_hash,
+      // Breach/recovery/no-data events from the executor always carry a
+      // scheduled_timestamp; `evaluatedAt` is a type-level safety net only.
+      scheduledTimestamp: currentAlertEvent.scheduled_timestamp ?? evaluatedAt,
     });
 
     if (currentStatus !== result.status) {
-      this.logger.debug({
-        message: `State Transition [${currentAlertEvent.group_hash}]: ${
-          currentStatus ?? 'unknown'
-        } -> ${result.status} (Episode: ${episodeId})`,
+      logger.debug({
+        message: 'Episode status transition',
+        labels: {
+          group_hash: currentAlertEvent.group_hash,
+          alert_id: episodeId,
+          resource: `${currentStatus ?? 'unknown'}->${result.status}`,
+        },
       });
     }
 
     return {
-      ...currentAlertEvent,
-      type: alertEventType.alert,
-      episode: {
-        id: episodeId,
-        status: result.status,
-        ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+      alertEvent: {
+        ...currentAlertEvent,
+        alert: {
+          id: episodeId,
+          status: result.status,
+          ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+        },
       },
+      isNewEpisode: isNew,
     };
   }
 
-  private resolveEpisodeId({ previousAlertEvent, nextStatus }: ResolveEpisodeIdParams): string {
+  /**
+   * The audit stream is the source of truth for whether a group is
+   * user-owned: if the most recent lifecycle action (`activate` or
+   * `deactivate`) for this group is `activate`, the director must
+   * hold the episode in `active`. `deactivate` or the absence of
+   * any lifecycle action releases the strategy to decide.
+   *
+   * Episode correlation is enforced upstream in
+   * `getLatestAlertEventStateQuery`: `last_lifecycle_action_type` is
+   * only populated when the latest audit doc's `episode_id` matches
+   * `last_episode_id`. When they diverge (concurrent bulk actions on
+   * different episodes of the same group, or a partial `_bulk` write
+   * where only one of the audit / synthetic rule-event docs landed),
+   * the query returns `null` here — which we treat as "no lock" and
+   * hand control back to the strategy. That query-level guard is why
+   * this method can safely trust `last_lifecycle_action_type` to
+   * describe the same episode as `last_episode_id`.
+   *
+   * We still require `last_episode_id` to be present so the
+   * forced-active emit has an episode to pin to; in practice this is
+   * always true when `last_lifecycle_action_type === 'activate'` (the
+   * action client refuses to create an activate audit doc without a
+   * pre-existing `.rule-events` row), but the guard keeps the
+   * director defensive against an edge where the rule-events stream
+   * has been pruned but the audit stream has not.
+   */
+  private isUserLocked(previousAlertEvent?: LatestAlertEventState): boolean {
     if (!previousAlertEvent) {
-      return uuidV4();
+      return false;
+    }
+
+    return (
+      previousAlertEvent.last_lifecycle_action_type === ALERT_EPISODE_ACTION_TYPE.ACTIVATE &&
+      previousAlertEvent.last_episode_id !== null
+    );
+  }
+
+  private resolveEpisodeId({
+    previousAlertEvent,
+    nextStatus,
+    ruleId,
+    groupHash,
+    scheduledTimestamp,
+  }: ResolveEpisodeIdParams): ResolveEpisodeIdResult {
+    const newEpisodeId = () => buildNewEpisodeId({ ruleId, groupHash, scheduledTimestamp });
+
+    if (!previousAlertEvent) {
+      return { episodeId: newEpisodeId(), isNew: true };
     }
 
     const currentEpisodeStatus = previousAlertEvent.last_episode_status;
     const currentEpisodeId = previousAlertEvent.last_episode_id;
 
     if (currentEpisodeStatus == null) {
-      return uuidV4();
+      return { episodeId: newEpisodeId(), isNew: true };
     }
 
     const isNewLifecycle =
@@ -165,9 +338,13 @@ export class DirectorService {
       nextStatus !== alertEpisodeStatus.inactive;
 
     if (isNewLifecycle) {
-      return uuidV4();
+      return { episodeId: newEpisodeId(), isNew: true };
     }
 
-    return currentEpisodeId ?? uuidV4();
+    if (currentEpisodeId == null) {
+      return { episodeId: newEpisodeId(), isNew: true };
+    }
+
+    return { episodeId: currentEpisodeId, isNew: false };
   }
 }

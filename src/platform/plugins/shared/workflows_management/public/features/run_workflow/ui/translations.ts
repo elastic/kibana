@@ -17,6 +17,9 @@ export const TRIGGER_TABS_LABELS: Record<WorkflowTriggerTab, string> = {
   index: i18n.translate('plugins.workflowsManagement.workflowsExecution.indexTriggerLabel', {
     defaultMessage: 'Document',
   }),
+  event: i18n.translate('plugins.workflowsManagement.workflowsExecution.eventTriggerLabel', {
+    defaultMessage: 'Event',
+  }),
   manual: i18n.translate('plugins.workflowsManagement.workflowsExecution.manualTriggerLabel', {
     defaultMessage: 'Manual',
   }),
@@ -38,6 +41,9 @@ export const TRIGGER_TABS_DESCRIPTIONS: Record<WorkflowTriggerTab, string> = {
   }),
   alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
     defaultMessage: 'Choose an existing alert directly',
+  }),
+  event: i18n.translate('plugins.workflowsManagement.workflowsExecution.eventTriggerDescription', {
+    defaultMessage: 'Select one of possible events that you can use to run a workflow',
   }),
   historical: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.historicalTriggerDescription',

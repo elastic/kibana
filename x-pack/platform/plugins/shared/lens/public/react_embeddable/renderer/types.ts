@@ -28,6 +28,7 @@ interface GeneralLensApi {
   };
   forceDSL?: boolean;
   esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+  isApproximate$: BehaviorSubject<boolean | undefined>;
   hideTitle$: BehaviorSubject<boolean | undefined>;
   reload$: BehaviorSubject<void>;
 }

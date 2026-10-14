@@ -9,21 +9,36 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, AnalyticsServiceSetup } from '@kbn/core/server';
 import { FEEDBACK_SUBMITTED_EVENT_TYPE } from '../src';
 
+const MAX_FEEDBACK_CONTEXT_ENTRIES = 16;
+
 const feedbackQuestionSchema = schema.object({
-  id: schema.string(),
-  question: schema.string(),
-  answer: schema.string(),
+  id: schema.string({ minLength: 1, maxLength: 256 }),
+  question: schema.string({ maxLength: 1024 }),
+  answer: schema.string({ maxLength: 16384 }),
 });
 
-const feedbackBodySchema = schema.object({
-  app_id: schema.string(),
-  user_email: schema.maybe(schema.string()),
-  solution: schema.string(),
+export const feedbackBodySchema = schema.object({
+  app_id: schema.string({ minLength: 1, maxLength: 256 }),
+  user_email: schema.maybe(schema.string({ maxLength: 256 })),
+  solution: schema.string({ maxLength: 256 }),
   csat_score: schema.maybe(schema.number()),
   questions: schema.maybe(schema.arrayOf(feedbackQuestionSchema, { maxSize: 2 })),
-  organization_id: schema.maybe(schema.string()),
+  organization_id: schema.maybe(schema.string({ maxLength: 256 })),
   allow_email_contact: schema.boolean(),
-  url: schema.string(),
+  url: schema.string({ maxLength: 2048 }),
+  context: schema.maybe(
+    schema.recordOf(
+      schema.string({ minLength: 1, maxLength: 64 }),
+      schema.oneOf([schema.string({ maxLength: 256 }), schema.boolean(), schema.number()]),
+      {
+        validate: (value) => {
+          if (Object.keys(value).length > MAX_FEEDBACK_CONTEXT_ENTRIES) {
+            return `context cannot have more than ${MAX_FEEDBACK_CONTEXT_ENTRIES} entries`;
+          }
+        },
+      }
+    )
+  ),
 });
 
 export function registerSendFeedbackRoute(router: IRouter, analytics: AnalyticsServiceSetup) {
@@ -44,11 +59,11 @@ export function registerSendFeedbackRoute(router: IRouter, analytics: AnalyticsS
     async (context, request, response) => {
       const core = await context.core;
 
-      const user = await core.userProfile.getCurrent();
+      const userId = await core.userProfile.getCurrentProfileId();
       try {
         analytics.reportEvent(FEEDBACK_SUBMITTED_EVENT_TYPE, {
           ...request.body,
-          user_id: user?.uid,
+          user_id: userId ?? undefined,
           source: 'kibana',
         });
 

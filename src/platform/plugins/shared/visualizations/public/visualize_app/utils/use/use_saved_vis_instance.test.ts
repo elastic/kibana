@@ -267,17 +267,17 @@ describe('useSavedVisInstance', () => {
 
       result.current.visEditorRef.current = document.createElement('div');
 
+      await waitFor(() => {
+        expect(result.current.visEditorController).toBeDefined();
+        expect(result.current.savedVisInstance).toBeDefined();
+      });
+
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, {
         indexPattern: '1a2b3c4d',
         type: 'area',
       });
-
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
       expect(getCreateBreadcrumbs).toHaveBeenCalled();
       expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
-      expect(result.current.visEditorController).toBeDefined();
-      expect(result.current.savedVisInstance).toBeDefined();
     });
 
     test('should throw error if vis type is invalid', async () => {
@@ -288,9 +288,11 @@ describe('useSavedVisInstance', () => {
 
       renderHook(() => useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined));
 
-      expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
-      expect(redirectWhenMissing).toHaveBeenCalled();
-      expect(toastNotifications.addWarning).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
+        expect(redirectWhenMissing).toHaveBeenCalled();
+        expect(toastNotifications.addWarning).toHaveBeenCalled();
+      });
     });
 
     test("should throw error if index pattern or saved search id doesn't exist in search params", async () => {
@@ -301,9 +303,11 @@ describe('useSavedVisInstance', () => {
 
       renderHook(() => useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined));
 
-      expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
-      expect(redirectWhenMissing).toHaveBeenCalled();
-      expect(toastNotifications.addWarning).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
+        expect(redirectWhenMissing).toHaveBeenCalled();
+        expect(toastNotifications.addWarning).toHaveBeenCalled();
+      });
     });
   });
 

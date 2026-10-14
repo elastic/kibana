@@ -28,7 +28,6 @@ export const ScriptNameNavLink = memo<ScriptNameNavLinkProps>(
 
     const href = getAppUrl({ path: toRoutePath });
     return (
-      // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiLink
         data-test-subj={`${dataTestSubj}-name-link`}
         className="eui-displayInline eui-textTruncate"

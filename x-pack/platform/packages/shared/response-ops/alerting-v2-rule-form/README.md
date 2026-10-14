@@ -143,7 +143,6 @@ interface FormValues {
     name: string;
     enabled: boolean;
     description?: string;
-    owner?: string;
     tags?: string[];
   };
   timeField: string;
@@ -151,16 +150,26 @@ interface FormValues {
     every: string;    // Duration string like '5m', '1h'
     lookback: string; // Duration string
   };
-  evaluation: {
-    query: {
-      base: string;   // The ES|QL query
-    };
+  query: {
+    base: string;             // Root ES|QL query
+    breach: { segment: string }; // Condition appended to `base`; '' means no breach condition
+  };
+  recovery?: {
+    strategy: RecoveryStrategy;  // 'no_breach' | 'condition' | 'query' | 'manual'
+    segment?: string;            // strategy 'condition'
+    query?: string;              // strategy 'query'
+  };
+  noData?: {
+    strategy: NoDataStrategy;    // 'ignore' | 'keep_last' | 'resolve' | 'alert'
+    query?: string;
   };
   grouping?: {
-    fields: string[]; // Columns to group alerts by
+    fields: string[];         // Columns to group alerts by
   };
 }
 ```
+
+> `recovery` and `noData` widen the API's discriminated unions so React Hook Form can hold a partially-filled member; `mapFormValuesToRuleRequest` projects the field the selected strategy needs and omits both blocks for `kind: 'signal'`, which the API forbids them on. `query.breach` is dropped from the request when the segment is blank.
 
 ## Required Services
 
@@ -180,7 +189,7 @@ All flyout components require:
 This package includes Storybook stories for visual development and testing.
 
 ```bash
-yarn storybook alerting_v2_rule_form
+pnpm storybook alerting_v2_rule_form
 ```
 
 Stories are located in `flyout/__stories__/`.

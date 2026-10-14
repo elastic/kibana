@@ -6,6 +6,7 @@
  */
 
 import { Parser } from '@elastic/esql';
+import type { RuleQuery } from '../../form/types';
 
 export type SplitConfidence = 'high' | 'low' | 'none';
 
@@ -64,9 +65,11 @@ export function splitQuery(query: string): SplitResult {
   }
 
   if (lastStatsIdx === -1) {
-    // No STATS — find the last non-WHERE command that precedes the last WHERE.
-    // All commands from that point onward (a trailing chain of WHEREs, possibly
-    // interspersed with SORT/LIMIT/EVAL tail commands) become the alert block.
+    /*
+     * No STATS — find the last non-WHERE command that precedes the last WHERE.
+     * All commands from that point onward (a trailing chain of WHEREs, possibly
+     * interspersed with SORT/LIMIT/EVAL tail commands) become the alert block.
+     */
     let lastWhereIdx = -1;
     for (let j = commands.length - 1; j >= 0; j--) {
       if (commands[j].name === 'where') {
@@ -126,6 +129,54 @@ export function splitQuery(query: string): SplitResult {
   const alertBlock = query.slice(cutAt).trim();
 
   return { base, alertBlock, confidence: 'high', reason: 'split_succeeded' };
+}
+
+/** Splits a full ES|QL query (e.g. from Discover) into base + breach segment. */
+export function discoverQueryToRuleQuery(inlinedQuery: string): RuleQuery {
+  const { base, alertBlock } = splitQuery(inlinedQuery);
+  return { base, breach: { segment: alertBlock } };
+}
+
+/**
+ * Outcome of splitting a unified query for the form summary:
+ *
+ * - 'success'            — base and alert condition both identified
+ * - 'no_alert_condition' — base defined, no alert condition
+ * - 'split_failed'       — heuristic could not isolate a base (empty base)
+ * - 'empty'              — no query entered
+ */
+export type SplitOutcome = 'success' | 'no_alert_condition' | 'split_failed' | 'empty';
+
+export interface SplitRuleQueryResult {
+  query: RuleQuery;
+  outcome: SplitOutcome;
+}
+
+/**
+ * Maps a unified ES|QL query into a rule query and an outcome for the form
+ * summary.
+ *
+ * - `success` — base and breach segment both set.
+ * - `no_alert_condition` — base set, empty breach segment.
+ * - `split_failed` / `empty` — incomplete split; summary flags the state.
+ */
+export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult {
+  const { base, alertBlock } = splitQuery(fullQuery);
+
+  const hasBase = base.trim().length > 0;
+  const hasAlert = alertBlock.trim().length > 0;
+
+  if (hasBase && hasAlert) {
+    return { query: { base, breach: { segment: alertBlock } }, outcome: 'success' };
+  }
+  if (hasBase) {
+    return { query: { base, breach: { segment: '' } }, outcome: 'no_alert_condition' };
+  }
+
+  return {
+    query: { base, breach: { segment: alertBlock } },
+    outcome: hasAlert ? 'split_failed' : 'empty',
+  };
 }
 
 /**

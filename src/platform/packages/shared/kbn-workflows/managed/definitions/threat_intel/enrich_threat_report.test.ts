@@ -1,0 +1,295 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { parse } from 'yaml';
+import { THREAT_INTEL_ENRICH_REPORT_WORKFLOW } from '.';
+
+const findStepByName = (steps: unknown[], name: string): Record<string, unknown> | undefined => {
+  for (const step of steps) {
+    const s = step as Record<string, unknown>;
+    if (s.name === name) return s;
+    for (const key of ['steps', 'else']) {
+      const nested = s[key];
+      if (Array.isArray(nested)) {
+        const found = findStepByName(nested, name);
+        if (found) return found;
+      }
+    }
+  }
+  return undefined;
+};
+
+/**
+ * These assertions run against the static yaml the definition ships. There is no
+ * workflow-execution harness in this package, so this cannot prove how the engine
+ * evaluates the gate at run time. What it does pin is the structure the fix depends
+ * on, which is where the original bug lived: the completion gate probed only two of
+ * all continued steps.
+ */
+describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
+  const workflow = parse(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml) as {
+    enabled?: boolean;
+    steps: unknown[];
+  };
+
+  /** Steps whose failure must leave the report retryable. */
+  const GATED_STEPS = ['extract_iocs', 'enrich_report_core'] as const;
+
+  const gateCondition = (name: string) => {
+    const step = findStepByName(workflow.steps, name) as {
+      if?: string;
+      with?: Record<string, unknown>;
+    };
+    expect(step).toBeDefined();
+    return step;
+  };
+
+  describe('completion gate', () => {
+    // The bug: extract_iocs runs with on-failure continue, but the gate only probed
+    // classify_severity and enrich_taxonomy. A transient IOC-route failure therefore
+    // wrote a completed workflow marker, which load_pending_reports filters on, so the report was
+    // never revisited and never produced an indicator.
+    it.each(GATED_STEPS)('requires %s to have succeeded before marking complete', (step) => {
+      const gate = gateCondition('mark_llm_enrich_complete');
+      expect(gate.if).toContain(`steps.${step}.error == null`);
+    });
+
+    it('marks the report workflow_v4 when the gate passes', () => {
+      const gate = gateCondition('mark_llm_enrich_complete');
+      expect(gate.with?.extraction_method).toBe('workflow_v4');
+    });
+
+    it.each(GATED_STEPS)('leaves the report pending when %s failed', (step) => {
+      const gate = gateCondition('mark_llm_enrich_incomplete');
+      expect(gate.if).toContain(`steps.${step}.error != null`);
+    });
+
+    it('marks the report pending when the gate fails', () => {
+      const gate = gateCondition('mark_llm_enrich_incomplete');
+      expect(gate.with?.extraction_method).toBe('pending');
+    });
+
+    // The two gates are separate conditions over the same steps, so updating one
+    // and not the other would leave a report neither marked complete nor retryable.
+    it('keeps the two gates complementary', () => {
+      const complete = gateCondition('mark_llm_enrich_complete').if ?? '';
+      const incomplete = gateCondition('mark_llm_enrich_incomplete').if ?? '';
+
+      expect(complete).toContain(' and ');
+      expect(complete).not.toContain(' or ');
+      expect(incomplete).toContain(' or ');
+      expect(incomplete).not.toContain(' and ');
+
+      for (const step of GATED_STEPS) {
+        expect(complete).toContain(`steps.${step}.`);
+        expect(incomplete).toContain(`steps.${step}.`);
+      }
+    });
+  });
+
+  // Without on-failure continue, a failing step aborts the run before either gate is
+  // reached, so the gate change above would be unreachable.
+  it.each(GATED_STEPS)('%s continues on failure so the gate is reached', (step) => {
+    const s = findStepByName(workflow.steps, step) as {
+      'on-failure'?: { continue?: boolean };
+    };
+    expect(s?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('persists adjudicated IOCs with the deterministic extract fingerprint', () => {
+    const step = findStepByName(workflow.steps, 'persist_extractions') as {
+      if?: string;
+      with?: {
+        path?: string;
+        body?: {
+          doc?: {
+            extracted?: {
+              iocs?: string;
+              ioc_set_hash?: string;
+              core?: { adjudication?: { deferred_unreviewed?: string } };
+            };
+          };
+        };
+      };
+    };
+
+    expect(step.if).toContain('steps.enrich_report_core.error == null');
+    // Internal route, not a direct elasticsearch step: `.kibana-threat-reports` is
+    // plugin-owned and hidden, so a plain `elasticsearch.update` here would run as
+    // whichever identity enabled the workflow and 403 for every non-superuser.
+    // Space-prefixed with the report's own `space_id` so the route can reject a cross-space id.
+    expect(step.with?.path).toBe(
+      "/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields"
+    );
+    expect(step.with?.body?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
+    expect(step.with?.body?.doc?.extracted).not.toHaveProperty('anchor_iocs');
+    // Correlation hash stays on extract_iocs so boost:5 matches pre-adjudication docs.
+    expect(step.with?.body?.doc?.extracted?.ioc_set_hash).toContain(
+      'steps.extract_iocs.output.ioc_set_hash'
+    );
+    expect(step.with?.body?.doc?.extracted?.core?.adjudication?.deferred_unreviewed).toContain(
+      'steps.enrich_report_core.output.adjudication.deferred_unreviewed'
+    );
+  });
+
+  it('hard-stops rejected reports before deterministic, Sonnet, and Opus stages', () => {
+    expect(findStepByName(workflow.steps, 'persist_gate_rejection')).toBeDefined();
+    expect(findStepByName(workflow.steps, 'stop_rejected_report')).toMatchObject({
+      type: 'loop.continue',
+      if: 'variables.gate_is_intelligence: false',
+    });
+  });
+
+  it('excludes hard-rejected reports from related-report scoring', () => {
+    const step = findStepByName(workflow.steps, 'find_related_reports') as {
+      with?: { query?: { bool?: { must_not?: unknown[] } } };
+    };
+    const mustNot = step.with?.query?.bool?.must_not ?? [];
+    expect(mustNot).toEqual(
+      expect.arrayContaining([
+        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+        { term: { 'extracted.gate.is_intelligence': false } },
+      ])
+    );
+  });
+
+  it('gates find_related_reports on enrich_report_core succeeding too', () => {
+    // Its query reads steps.enrich_report_core.output.anchor_iocs; without this
+    // guard an enrich_report_core error would run the step against undefined.
+    const step = findStepByName(workflow.steps, 'find_related_reports') as { if?: string };
+    expect(step.if).toContain('steps.enrich_report_core.error == null');
+  });
+
+  it('excludes hard-rejected reports from already-extracted fingerprint dedup', () => {
+    const step = findStepByName(workflow.steps, 'check_already_extracted') as {
+      with?: { query?: { bool?: { must_not?: unknown[] } } };
+    };
+    const mustNot = step.with?.query?.bool?.must_not ?? [];
+    expect(mustNot).toEqual(
+      expect.arrayContaining([
+        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+        { term: { 'extracted.gate.is_intelligence': false } },
+      ])
+    );
+  });
+
+  it('skips a report on gate-rejection persist failure without aborting the foreach', () => {
+    const persist = findStepByName(workflow.steps, 'persist_gate_rejection') as {
+      'on-failure'?: { continue?: boolean };
+    };
+    expect(persist?.['on-failure']?.continue).toBe(true);
+    expect(findStepByName(workflow.steps, 'retry_gate_rejection_persist_failure')).toMatchObject({
+      type: 'loop.continue',
+      if: '${{ steps.persist_gate_rejection.error != null }}',
+    });
+  });
+
+  it('sends complete article text and contains no blind 30K prefix slice', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('slice: 0, 30000');
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('30000');
+  });
+
+  // Dropped in this PR: it was a closed-set taxonomy field nothing consumed, and the
+  // gate was using its presence as a stand-in for step health.
+  it('no longer references detection_actionability anywhere', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('detection_actionability');
+  });
+
+  // MVP stores and processes plain text only. Reports no longer carry content.body_html,
+  // and the enrichment routes accept bounded text, so the enrich workflow must not send an
+  // html body to any step.
+
+  it('ships disabled so operators must enable in Workflows management', () => {
+    expect(workflow.enabled).toBe(false);
+  });
+
+  // Not "-global": a space literally named "global" running the pre-space-aware
+  // version of this workflow would collide with a real global install's key.
+  it('uses a concurrency key with no space or "global" suffix', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain('key: "threat-intel-enrich"');
+  });
+
+  // No `/s/{id}/` prefix resolves to the `default` space implicitly, same as the
+  // former `routeSpaceId: "default"` variable did, without needing the variable.
+  it('calls the enrich routes with no space prefix, resolving to the default space', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('routeSpaceId');
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
+      'path: "/internal/threat_intel/assess_relevance"'
+    );
+  });
+
+  /**
+   * The writes are the exception to the rule above, and the exception is load-bearing:
+   * `persist_report_fields` writes as the internal user and uses the request's space to reject an id
+   * from another space, so addressing the report through its own `space_id` is what makes that check
+   * pass for this workflow and fail for a hand-crafted call. Unprefixing these would break
+   * enrichment for every report outside the default space.
+   */
+  it("addresses each persist write through the report's own space", () => {
+    const spacePrefixedPersist =
+      "path: \"/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields\"";
+    const occurrences =
+      THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml.split(spacePrefixedPersist).length - 1;
+    expect(occurrences).toBe(4);
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toMatch(
+      /path:\s*"\/internal\/threat_intel\/persist_report_fields"/
+    );
+  });
+
+  // A global report has no addressable space of its own, so it is written through `default`; the
+  // route accepts the global sentinel from any space. Without the fallbacks an unstamped or global
+  // report would produce `/s//...` or `/s/*/...` and the write would silently fail under
+  // `on-failure: continue`.
+  it('routes global and unstamped reports through the default space', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
+      "space_id | default: 'default' | replace: '*', 'default'"
+    );
+  });
+
+  // The write path reads `_source.space_id`, so the driver has to fetch it.
+  it('fetches space_id on the driver query so the persist steps can address the report', () => {
+    const load = findStepByName(workflow.steps, 'load_pending_reports') as {
+      with?: { _source?: string[] };
+    };
+    expect(load.with?._source).toContain('space_id');
+  });
+
+  it('sends the stored article URL to assess_relevance', () => {
+    // The gate prompt uses the URL to identify rollups and render failures;
+    // without it, a terse RSS summary can be permanently mis-gated.
+    const step = findStepByName(workflow.steps, 'assess_relevance') as {
+      with?: { body?: Record<string, unknown> };
+    };
+    expect(step.with?.body?.url).toBe(
+      '{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}'
+    );
+  });
+
+  it('selects pending reports space-blind (no space_id filter on load_pending_reports)', () => {
+    const load = findStepByName(workflow.steps, 'load_pending_reports') as {
+      with?: { query?: { bool?: { filter?: unknown } } };
+    };
+    expect(load.with?.query?.bool?.filter).toBeUndefined();
+  });
+
+  describe('plain-text-only enrichment', () => {
+    it('never references content.body_html', () => {
+      expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('body_html');
+    });
+
+    it.each(['assess_relevance', 'extract_iocs'])('%s sends body_text but not html', (stepName) => {
+      const step = findStepByName(workflow.steps, stepName) as {
+        with?: { body?: Record<string, unknown> };
+      };
+      const body = step?.with?.body ?? {};
+      expect(body).toHaveProperty('text');
+      expect(body).not.toHaveProperty('html');
+    });
+  });
+});

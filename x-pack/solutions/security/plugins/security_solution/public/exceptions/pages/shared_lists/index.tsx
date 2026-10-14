@@ -22,6 +22,7 @@ import {
   EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 
@@ -29,7 +30,6 @@ import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-i
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
@@ -106,10 +106,9 @@ export const SharedLists = React.memo(() => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const {
-    services: { http, application, cps, notifications, timelines },
+    services: { http, application, notifications, timelines },
   } = useKibana();
   const { navigateToApp } = application;
-  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -117,6 +116,7 @@ export const SharedLists = React.memo(() => {
     exceptionReferenceModalInitialState
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
+  const rawSearchInputRef = useRef('');
 
   const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
@@ -269,12 +269,20 @@ export const SharedLists = React.memo(() => {
     [exportExceptionList, handleExportError, handleExportSuccess]
   );
 
+  const handleInputChange = useCallback((value: string): void => {
+    rawSearchInputRef.current = value;
+  }, []);
+
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
       setLastUpdated(Date.now());
-      refreshExceptions();
+      if (!rawSearchInputRef.current && filters) {
+        setFilters(undefined);
+      } else {
+        refreshExceptions();
+      }
     }
-  }, [refreshExceptions]);
+  }, [refreshExceptions, filters]);
 
   useEffect(() => {
     if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
@@ -507,14 +515,16 @@ export const SharedLists = React.memo(() => {
                   <EuiText>{i18n.ALL_EXCEPTIONS_SUBTITLE}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButtonIcon
-                    iconType="external"
-                    aria-label="go-to-rules"
-                    color="primary"
-                    onClick={() =>
-                      navigateToApp('security', { openInNewTab: true, path: '/rules' })
-                    }
-                  />
+                  <EuiToolTip content="go-to-rules" disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="external"
+                      aria-label="go-to-rules"
+                      color="primary"
+                      onClick={() =>
+                        navigateToApp('security', { openInNewTab: true, path: '/rules' })
+                      }
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -528,6 +538,7 @@ export const SharedLists = React.memo(() => {
         }
         rightSideItems={[
           <EuiPopover
+            aria-label={i18n.CREATE_BUTTON}
             data-test-subj="manageExceptionListCreateButton"
             button={
               canEditExceptions && (
@@ -628,7 +639,9 @@ export const SharedLists = React.memo(() => {
             <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
           )}
 
-        {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
+        {!initLoading && (
+          <ListsSearchBar onSearch={handleSearch} onInputChange={handleInputChange} />
+        )}
         <EuiSpacer size="m" />
         {viewerStatus != null ? (
           <EmptyViewerState
@@ -670,33 +683,36 @@ export const SharedLists = React.memo(() => {
             )}
           </>
         )}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="flexStart">
-              <EuiFlexItem>
-                <EuiPopover
-                  button={rowSizeButton}
-                  isOpen={isRowSizePopoverOpen}
-                  closePopover={closeRowSizePopover}
-                >
-                  <EuiContextMenuPanel items={rowSizeItems} />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
-            <EuiFlexGroup alignItems="flexEnd">
-              <EuiFlexItem>
-                <EuiPagination
-                  aria-label={'Custom pagination example'}
-                  pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
-                  activePage={activePage}
-                  onPageClick={goToPage}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {viewerStatus == null && (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiPopover
+                    aria-label={i18n.allExceptionsRowPerPage(rowSize)}
+                    button={rowSizeButton}
+                    isOpen={isRowSizePopoverOpen}
+                    closePopover={closeRowSizePopover}
+                  >
+                    <EuiContextMenuPanel items={rowSizeItems} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem css={{ alignItems: 'flex-end' }}>
+              <EuiFlexGroup alignItems="flexEnd">
+                <EuiFlexItem>
+                  <EuiPagination
+                    aria-label={'Custom pagination example'}
+                    pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
+                    activePage={activePage}
+                    onPageClick={goToPage}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
         <AutoDownload
           blob={exportDownload.blob}

@@ -34,9 +34,10 @@ export function getEsql({
       const [{ savedObjects, uiSettings }, , { search }] = await getStartServices();
       const request = getKibanaRequest();
       const savedObjectsClient = savedObjects.getScopedClient(request);
+      const scopedClient = search.asScoped(request);
 
       return {
-        search: search.asScoped(request).search,
+        searchService: scopedClient,
         uiSettings: uiSettings.asScopedToClient(savedObjectsClient),
       };
     },

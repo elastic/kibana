@@ -1,0 +1,99 @@
+# KI Queries Generation Workflow
+#
+# On-demand workflow that generates KI queries for a single
+# stream via LLM inference. Each run calls the _generate endpoint once and
+# returns the generated queries with token usage.
+#
+# Flow:
+#   generate_queries (retry ×3) → persist_queries (retry ×3) → output
+#
+# Concurrency is keyed per source slug so only one generation run can be
+# active for a given source in a space at any time; overlapping triggers are
+# dropped. Every request targets the space that runs the workflow.
+
+version: "1"
+name: "KI Queries Generation"
+enabled: true
+description: "Generates KI queries for a stream using LLM inference."
+tags:
+  - observability
+  - streams
+  - knowledge-indicators
+  - queries-generation
+settings:
+  timeout: "10m"
+  concurrency:
+    key: "nightshift-source-queries-generation-{{ inputs.sourceSlug }}:{{ inputs.sourceId }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      - name: sourceId
+        type: string
+        required: true
+        description: "The id of the source to generate queries for."
+      - name: sourceRevision
+        type: string
+        required: true
+        description: "Source query revision used by this onboarding run."
+      - name: sourceSlug
+        type: string
+        required: true
+        description: "Slug of the target source. Together with the source id it keys concurrency."
+      - name: connectorId
+        type: string
+        description: "Optional connector ID override. When omitted the code-owned Nightshift default is used."
+      - name: maxExistingQueriesForContext
+        type: number
+        description: "Max number of existing queries to include as LLM context. When omitted the server-side default is used."
+steps:
+  # -----------------------------------------------------------------------
+  # Step 1: Call the LLM-backed generation endpoint (retries up to 3×).
+  # -----------------------------------------------------------------------
+  - name: generate_queries
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_generate"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+      body:
+        connectorId: "${{ inputs.connectorId }}"
+        runId: "${{ execution.id }}"
+        maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+  # -----------------------------------------------------------------------
+  # Step 2: Persist the generated queries.
+  # -----------------------------------------------------------------------
+  - name: persist_queries
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_persist"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+      body:
+        queries: "${{ steps.generate_queries.output.queries }}"
+  # -----------------------------------------------------------------------
+  # Step 3: Output results.
+  # -----------------------------------------------------------------------
+  - name: output_result
+    type: workflow.output
+    with:
+      connectorId: "${{ steps.generate_queries.output.connectorId }}"
+      queries: "${{ steps.generate_queries.output.queries }}"
+      tokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
+      persistedQueries: "${{ steps.persist_queries.output.persistedQueries }}"
+      skippedQueries: "${{ steps.persist_queries.output.skippedQueries }}"

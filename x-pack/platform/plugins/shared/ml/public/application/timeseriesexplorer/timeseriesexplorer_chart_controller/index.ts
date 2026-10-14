@@ -64,8 +64,10 @@ export { PartitionFieldsRequiredCallout } from './partition_fields_required_call
 export { SingleMetricViewerChartSurface } from './single_metric_viewer_chart_surface';
 export { useSingleMetricViewerChartModel } from './use_single_metric_viewer_chart_model';
 export {
+  buildSmvEmptyFocusStatePatch,
   consumeSmvContextLoadResult,
   getSmvContextLoadErrorMessages,
+  getSmvFocusLoadErrorMessage,
   subscribeSmvBrushToFocusZoom,
   type ConsumeSmvContextLoadResultOptions,
   type SmvBrushToFocusZoomHost,

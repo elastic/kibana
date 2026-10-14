@@ -17,16 +17,13 @@ import {
 import { css } from '@emotion/react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useMemo } from 'react';
 
-import { PageScope } from '../../../../../data_view_manager/constants';
 import { useEuiComboBoxReset } from '../../../../../common/components/use_combo_box_reset';
 import { StackByComboBox } from '../../../../../detections/components/alerts_kpis/common/components';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { LensAttributes } from '../../../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { sourcererActions } from '../../../../../sourcerer/store';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
 
@@ -35,10 +32,18 @@ export const RESET_FIELD = 'kibana.alert.rule.name';
 const DEFAULT_DATA_TEST_SUBJ = 'previewTab';
 const VIEW_MODE = 'view';
 
+// Matches ?_tstart / ?_tend named time params used by the default ES|QL query.
+// When the user's custom ES|QL query uses these params, the Lens timeRange is
+// needed to resolve them. When the query has its own time filter (e.g.
+// `NOW() - 30 days`), passing timeRange to Lens adds an extra restriction that
+// causes "Preview matched alerts" to diverge from the Lens table sum.
+const HAS_TIME_NAMED_PARAMS = /\?_tstart|\?_tend/i;
+
 interface Props {
   dataTestSubj?: string;
   embeddableId: string;
   end: string;
+  esqlQuery?: string;
   filters: Filter[];
   getLensAttributes: ({
     defaultPageSize,
@@ -53,10 +58,12 @@ interface Props {
   }) => LensAttributes;
   getPreviewEsqlQuery: ({
     alertsIndexPattern,
+    esqlQuery,
     maxAlerts,
     tableStackBy0,
   }: {
     alertsIndexPattern: string;
+    esqlQuery?: string;
     maxAlerts: number;
     tableStackBy0: string;
   }) => string;
@@ -72,6 +79,7 @@ const PreviewTabComponent = ({
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   embeddableId,
   end,
+  esqlQuery: esqlQueryProp,
   filters,
   getLensAttributes,
   getPreviewEsqlQuery,
@@ -87,7 +95,6 @@ const PreviewTabComponent = ({
   const {
     euiTheme: { font },
   } = useEuiTheme();
-  const dispatch = useDispatch();
 
   const { signalIndexName } = useSignalIndex();
 
@@ -100,14 +107,29 @@ const PreviewTabComponent = ({
 
   const timeRange: TimeRange = useMemo(() => ({ from: start, to: end }), [end, start]);
 
+  // When the user provides a custom ES|QL query with its own time filter (e.g.
+  // `NOW() - 30 days`) rather than named time params (?_tstart / ?_tend), the
+  // Lens EmbeddableComponent would apply settings.start/end as an *additional*
+  // restrictive filter, causing the Lens sum to diverge from the ES|QL count.
+  // In that case, skip passing timeRange so the Lens uses only the query's own
+  // time clause. When the query uses ?_tstart/?_tend, timeRange IS needed for
+  // Lens to resolve those params, so we keep it.
+  const effectiveTimeRange = useMemo(() => {
+    if (esqlQueryProp != null && !HAS_TIME_NAMED_PARAMS.test(esqlQueryProp)) {
+      return undefined;
+    }
+    return timeRange;
+  }, [esqlQueryProp, timeRange]);
+
   const esqlQuery = useMemo(
     () =>
       getPreviewEsqlQuery({
         alertsIndexPattern: signalIndexName ?? '',
+        esqlQuery: esqlQueryProp,
         maxAlerts,
         tableStackBy0,
       }),
-    [getPreviewEsqlQuery, maxAlerts, signalIndexName, tableStackBy0]
+    [esqlQueryProp, getPreviewEsqlQuery, maxAlerts, signalIndexName, tableStackBy0]
   );
 
   const attributes = useMemo(
@@ -153,23 +175,6 @@ const PreviewTabComponent = ({
     [actions, body, tableStackBy0]
   );
 
-  useEffect(() => {
-    if (signalIndexName != null) {
-      // Limit the fields in the StackByComboBox to the fields in the signal index.
-      // NOTE: The page containing this component must also be a member of
-      // `detectionsPaths` in `sourcerer/containers/sourcerer_paths.ts` for this
-      // action to have any effect.
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: PageScope.alerts,
-          selectedDataViewId: signalIndexName,
-          selectedPatterns: [signalIndexName],
-          shouldValidateSelectedPatterns: false,
-        })
-      );
-    }
-  }, [dispatch, signalIndexName]);
-
   if (signalIndexName == null) {
     return null;
   }
@@ -204,7 +209,7 @@ const PreviewTabComponent = ({
                 }
 
                 .euiDataGridHeaderCell {
-                  font-size: ${font.scale.s}${font.defaultUnits};
+                  font-size: ${font.scale.s}${font.defaultUnits} !important;
                 }
 
                 .euiDataGridFooter {
@@ -212,7 +217,7 @@ const PreviewTabComponent = ({
                 }
 
                 .euiDataGridRowCell {
-                  font-size: ${font.scale.xs}${font.defaultUnits} !important;
+                  font-size: ${font.scale.s}${font.defaultUnits} !important;
                 }
 
                 .expExpressionRenderer__expression {
@@ -228,7 +233,7 @@ const PreviewTabComponent = ({
                 hidePanelTitles={true}
                 id={embeddableId}
                 query={query}
-                timeRange={timeRange}
+                timeRange={effectiveTimeRange}
                 viewMode={VIEW_MODE}
                 withDefaultActions={true}
               />

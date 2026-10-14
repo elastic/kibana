@@ -30,7 +30,6 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { DropIllustration } from '@kbn/chart-icons';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { useDragDropContext, Droppable } from '@kbn/dom-drag-drop';
@@ -58,6 +57,11 @@ import {
   isLensMultiFilterEvent,
   isLensEditEvent,
 } from '../../../types_guards';
+import {
+  hasRequestsAdapter,
+  hasTablesAdapter,
+  type OnDataCallback,
+} from '../../../react_embeddable/type_guards';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
@@ -253,8 +257,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
 
-  const onData$ = useCallback(
-    (_data: unknown, adapters?: DefaultInspectorAdapters) => {
+  const onData$: OnDataCallback = useCallback(
+    (_data, adapters) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
 
@@ -264,7 +268,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
         let requestWarnings: UserMessage[] = [];
 
-        if (adapters?.requests) {
+        if (hasRequestsAdapter(adapters)) {
           requestWarnings = getSearchWarningMessages(
             adapters.requests,
             datasource,
@@ -285,7 +289,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           removeSearchWarningMessagesRef.current = undefined;
         }
 
-        if (adapters && adapters.tables) {
+        if (hasTablesAdapter(adapters)) {
           dispatchLens(
             onActiveDataChange({
               activeData: getActiveDataFromDatatable(defaultLayerId, adapters.tables?.tables),
@@ -736,7 +740,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
   onRender$: () => void;
-  onData$: (data: unknown, adapters?: DefaultInspectorAdapters) => void;
+  onData$: OnDataCallback;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
@@ -804,7 +808,6 @@ export const VisualizationWrapper = ({
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
-        // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.getInspectorAdapters()}

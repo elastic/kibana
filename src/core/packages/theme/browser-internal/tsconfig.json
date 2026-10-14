@@ -15,6 +15,7 @@
   "kbn_references": [
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/core-theme-browser",
+    "@kbn/core-theme-browser-internal-types",
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/core-injected-metadata-common-internal",
     "@kbn/ui-theme",

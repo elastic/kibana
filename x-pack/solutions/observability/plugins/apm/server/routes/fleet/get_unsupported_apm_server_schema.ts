@@ -6,14 +6,13 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { UnsupportedApmServerSchema } from '@kbn/apm-api-shared';
 import { INPUT_VAR_NAME_TO_SCHEMA_PATH } from '../../../common/fleet';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
 import { translateLegacySchemaPaths } from './translate_legacy_schema_paths';
-
-export type UnsupportedApmServerSchema = Array<{ key: string; value: unknown }>;
 
 export async function getUnsupportedApmServerSchema({
   savedObjectsClient,

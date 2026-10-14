@@ -17,7 +17,6 @@ import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../../screens/alerts';
-import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const loadDetectionsPage = (role: SecurityRoleName) => {
@@ -55,7 +54,6 @@ describe('Alerts timeline', () => {
   context('Privileges: can crud', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
-      cy.get(LOADING_INDICATOR).should('not.exist');
     });
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {

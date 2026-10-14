@@ -25,10 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import type {
-  AnomalySwimlaneEmbeddableUserInput,
-  AnomalySwimlaneInitialInput,
+  AnomalySwimLaneEmbeddableState,
+  SwimlaneType,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
-import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlLink } from '../../application/contexts/kibana';
@@ -38,12 +37,11 @@ import { JobSelectorControl } from '../../alerting/job_selector';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { getJobSelectionErrors } from '../utils';
-
-export type ExplicitInput = AnomalySwimlaneEmbeddableUserInput;
+import { SeverityControl } from '../../application/components/severity_control';
 
 export interface AnomalySwimlaneInitializerProps {
-  initialInput?: AnomalySwimlaneInitialInput;
-  onCreate: (swimlaneProps: ExplicitInput) => void;
+  initialInput?: Partial<AnomalySwimLaneEmbeddableState>;
+  onCreate: (state: AnomalySwimLaneEmbeddableState) => void;
   onCancel: () => void;
   adJobsApiService: MlApi['jobs'];
 }
@@ -58,7 +56,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
   const titleManuallyChanged = useRef(!!initialInput?.title);
 
-  const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
+  const [jobIds, setJobIds] = useState(initialInput?.job_ids ?? []);
 
   const [influencers, setInfluencers] = useState<string[]>([VIEW_BY_JOB_LABEL]);
 
@@ -80,9 +78,15 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
   const [panelTitle, setPanelTitle] = useState(initialInput?.title ?? '');
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>(
-    initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
+    initialInput?.swimlane_type ?? SWIMLANE_TYPE.OVERALL
   );
-  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
+  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(
+    initialInput?.swimlane_type === SWIMLANE_TYPE.VIEW_BY ? initialInput.view_by : undefined
+  );
+
+  const [severityThreshold, setSeverityThreshold] = useState<number | undefined>(
+    initialInput?.severity_threshold
+  );
 
   useEffect(
     function updateDefaultTitle() {
@@ -125,12 +129,22 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     (swimlaneType === SWIMLANE_TYPE.OVERALL ||
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
 
-  const resultInput: AnomalySwimlaneEmbeddableUserInput = {
-    jobIds,
-    panelTitle,
-    swimlaneType,
-    ...(viewBySwimlaneFieldName ? { viewBy: viewBySwimlaneFieldName } : {}),
-  };
+  const titleField = panelTitle ? { title: panelTitle } : {};
+  const resultInput: AnomalySwimLaneEmbeddableState =
+    swimlaneType === SWIMLANE_TYPE.VIEW_BY && viewBySwimlaneFieldName
+      ? {
+          ...titleField,
+          job_ids: jobIds,
+          swimlane_type: SWIMLANE_TYPE.VIEW_BY,
+          view_by: viewBySwimlaneFieldName,
+          severity_threshold: severityThreshold,
+        }
+      : {
+          ...titleField,
+          job_ids: jobIds,
+          swimlane_type: SWIMLANE_TYPE.OVERALL,
+          severity_threshold: severityThreshold,
+        };
 
   const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
 
@@ -196,7 +210,6 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                 <EuiButtonGroup
                   id="selectSwimlaneType"
                   name="selectSwimlaneType"
-                  color="primary"
                   isFullWidth
                   legend={i18n.translate(
                     'xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel',
@@ -208,6 +221,18 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                   idSelected={swimlaneType}
                   onChange={(id) => setSwimlaneType(id as SwimlaneType)}
                 />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.swimlaneEmbeddable.setupModal.severityThresholdLabel"
+                    defaultMessage="Severity threshold"
+                  />
+                }
+                fullWidth
+              >
+                <SeverityControl value={severityThreshold} onChange={setSeverityThreshold} />
               </EuiFormRow>
             </>
           ) : null}

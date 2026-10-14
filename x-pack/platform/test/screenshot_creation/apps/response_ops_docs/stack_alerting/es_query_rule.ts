@@ -103,9 +103,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('ruleSearchField', esQueryRuleName);
       await browser.pressKeys(browser.keys.ENTER);
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${esQueryRuleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${esQueryRuleName}"]`
+      );
       await alertRule.click();
-      const actionsButton = await testSubjects.find('ruleActionsButton');
+      const actionsButton = await testSubjects.find('app-menu-overflow-button');
       await actionsButton.click();
       const editRule = await testSubjects.find('openEditRuleFlyoutButton');
       await editRule.click();

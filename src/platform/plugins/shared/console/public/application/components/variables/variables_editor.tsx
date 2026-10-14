@@ -29,6 +29,7 @@ import { css } from '@emotion/react';
 
 import type { NotificationsStart } from '@kbn/core/public';
 import { useServicesContext } from '../../contexts';
+import { copyTextToClipboard } from '../../lib/copy_text_to_clipboard';
 import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';
 import { type DevToolsVariable } from './types';
@@ -38,17 +39,11 @@ export interface Props {
   variables: [];
 }
 
-const sendToBrowserClipboard = async (text: string) => {
-  if (window.navigator?.clipboard) {
-    await window.navigator.clipboard.writeText(text);
-    return;
-  }
-  throw new Error('Could not copy to clipboard!');
-};
-
 const copyToClipboard = async (text: string, notifications: Pick<NotificationsStart, 'toasts'>) => {
   try {
-    await sendToBrowserClipboard(text);
+    if (!(await copyTextToClipboard(text))) {
+      throw new Error('Could not copy to clipboard!');
+    }
 
     notifications.toasts.addSuccess({
       title: i18n.translate('console.variabllesPage.copyToClipboardSuccess', {
@@ -210,16 +205,27 @@ export const VariablesEditor = (props: Props) => {
         const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
         return (
-          <EuiButtonIcon
-            iconType={itemIdToExpandedRowMapValues[id] ? 'chevronSingleUp' : 'pencil'}
-            aria-label={i18n.translate('console.variablesPage.variablesTable.columns.editButton', {
+          <EuiToolTip
+            content={i18n.translate('console.variablesPage.variablesTable.columns.editButton', {
               defaultMessage: 'Edit {variable}',
               values: { variable: variable.name },
             })}
-            color="primary"
-            onClick={() => toggleDetails(id)}
-            data-test-subj="variableEditButton"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType={itemIdToExpandedRowMapValues[id] ? 'chevronSingleUp' : 'pencil'}
+              aria-label={i18n.translate(
+                'console.variablesPage.variablesTable.columns.editButton',
+                {
+                  defaultMessage: 'Edit {variable}',
+                  values: { variable: variable.name },
+                }
+              )}
+              color="primary"
+              onClick={() => toggleDetails(id)}
+              data-test-subj="variableEditButton"
+            />
+          </EuiToolTip>
         );
       },
     },
@@ -228,16 +234,27 @@ export const VariablesEditor = (props: Props) => {
       name: '',
       width: '40px',
       render: (id: string, variable: DevToolsVariable) => (
-        <EuiButtonIcon
-          iconType="trash"
-          aria-label={i18n.translate('console.variablesPage.variablesTable.columns.deleteButton', {
+        <EuiToolTip
+          content={i18n.translate('console.variablesPage.variablesTable.columns.deleteButton', {
             defaultMessage: 'Delete {variable}',
             values: { variable: variable.name },
           })}
-          color="danger"
-          onClick={() => setDeleteModalForVariable(id)}
-          data-test-subj="variablesRemoveButton"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            aria-label={i18n.translate(
+              'console.variablesPage.variablesTable.columns.deleteButton',
+              {
+                defaultMessage: 'Delete {variable}',
+                values: { variable: variable.name },
+              }
+            )}
+            color="danger"
+            onClick={() => setDeleteModalForVariable(id)}
+            data-test-subj="variablesRemoveButton"
+          />
+        </EuiToolTip>
       ),
     },
   ];

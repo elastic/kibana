@@ -18,6 +18,7 @@ import { isEmpty, last, merge, repeat, size } from 'lodash';
 import { Subject, Observable } from 'rxjs';
 import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
+import { asSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { ObservabilityAIAssistantClient } from '.';
 import { MessageRole, type Message, CONTEXT_FUNCTION_NAME } from '../../../common';
 import type {
@@ -146,7 +147,7 @@ describe('Observability AI Assistant client', () => {
 
   let llmSimulator: LlmSimulator;
 
-  function createClient(namespace: string = 'default') {
+  function createClient(namespace: SpaceId = DEFAULT_SPACE_ID) {
     jest.resetAllMocks();
 
     // uncomment this line for debugging
@@ -219,7 +220,7 @@ describe('Observability AI Assistant client', () => {
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,
-      namespace: 'default',
+      namespace: DEFAULT_SPACE_ID,
       user: {
         name: 'johndoe',
       },
@@ -1712,6 +1713,36 @@ describe('Observability AI Assistant client', () => {
       );
     });
   });
+  describe('when completing a conversation in non-streaming mode', () => {
+    describe('when the conversation is not found', () => {
+      it('rejects getConversation() without hanging or throwing an uncaughtException', async () => {
+        client = createClient();
+
+        inferenceClientMock.chatComplete.mockImplementation(
+          () =>
+            new Observable((subscriber) => {
+              llmSimulator = createLlmSimulator(subscriber);
+            })
+        );
+
+        const { getConversation } = client.complete({
+          connectorId: 'foo',
+          messages: [user('Hello')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          conversationId: 'does-not-exist',
+          persist: true,
+        });
+
+        await expect(getConversation()).rejects.toThrow('Conversation not found');
+
+        expect(loggerMock.error).toHaveBeenCalledWith(
+          expect.objectContaining({ message: 'Conversation not found' })
+        );
+      });
+    });
+  });
+
   describe('when duplicating a conversation', () => {
     beforeEach(async () => {
       client = createClient();
@@ -1757,7 +1788,7 @@ describe('Observability AI Assistant client', () => {
       );
     });
 
-    const runWithNamespace = async (namespace: string) => {
+    const runWithNamespace = async (namespace: SpaceId) => {
       // client = createClient(namespace);
       client = createClient();
       (client as any).dependencies.namespace = namespace;
@@ -1777,7 +1808,7 @@ describe('Observability AI Assistant client', () => {
     };
 
     it('generates a link without space segment for default space', async () => {
-      await runWithNamespace('default');
+      await runWithNamespace(DEFAULT_SPACE_ID);
 
       expect(functionClientMock.registerInstruction).toHaveBeenCalled();
       expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
@@ -1790,7 +1821,7 @@ describe('Observability AI Assistant client', () => {
 
     it('generates a link with space segment for non-default space', async () => {
       const space = 'myspace';
-      await runWithNamespace('myspace');
+      await runWithNamespace(asSpaceId('myspace'));
 
       expect(functionClientMock.registerInstruction).toHaveBeenCalled();
       expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(

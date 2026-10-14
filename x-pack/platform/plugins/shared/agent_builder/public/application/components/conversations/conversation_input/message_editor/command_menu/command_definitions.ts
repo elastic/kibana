@@ -49,15 +49,16 @@ export const getCommandDefinitionByScheme = (scheme: string) => {
 /**
  * Returns the list of command definitions available based on feature flags.
  * The `/` skill command is always available (GA).
- * The `@` SML command requires experimental features to be enabled.
+ * The `@` SML command lives inside Agent Builder, so it requires only the
+ * Agent Builder experimental flag.
  */
 export const useAvailableCommandDefinitions = (): readonly CommandDefinition[] => {
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const isSmlEnabled = useExperimentalFeatures();
 
   return useMemo(() => {
-    if (isExperimentalFeaturesEnabled) {
+    if (isSmlEnabled) {
       return sortedCommandDefinitions;
     }
     return sortedCommandDefinitions.filter((c) => !c.experimental);
-  }, [isExperimentalFeaturesEnabled]);
+  }, [isSmlEnabled]);
 };

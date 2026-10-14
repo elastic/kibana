@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { render, screen, within } from '@testing-library/react';
 import { ContentBreakdown } from './content_breakdown';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -26,13 +27,13 @@ jest.mock('../hover_popover_action', () => ({
   HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const mockReactConvert = jest.fn((value: unknown) => value);
+const mockConvertToReact = jest.fn((value: unknown) => value);
 
 jest.mock('../../../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
     fieldFormats: {
       getDefaultInstance: () => ({
-        reactConvert: mockReactConvert,
+        convertToReact: mockConvertToReact,
       }),
     },
   }),
@@ -43,7 +44,7 @@ const mockDataView = {
     getAll: () => [],
     getByName: () => undefined,
   },
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  getFormatterForField: jest.fn(() => ({ convertToText: (value: unknown) => value })),
 } as unknown as DataView;
 
 const buildHit = (fields: Record<string, unknown> = {}, highlight?: Record<string, string[]>) =>
@@ -58,9 +59,14 @@ const buildHit = (fields: Record<string, unknown> = {}, highlight?: Record<strin
     highlight,
   });
 
+const LOG_LEVEL_BADGE = /^unifiedDocViewLogsOverviewLogLevel/;
+
+const renderWithTheme = (ui: React.ReactElement) =>
+  render(<EuiProvider highContrastMode={false}>{ui}</EuiProvider>);
+
 describe('ContentBreakdown', () => {
   beforeEach(() => {
-    mockReactConvert.mockClear();
+    mockConvertToReact.mockClear();
   });
 
   describe('Field ranking', () => {
@@ -96,6 +102,125 @@ describe('ContentBreakdown', () => {
     });
   });
 
+  describe('With a message field', () => {
+    it('renders the message panel with the field name, the message and the badges', () => {
+      const hit = buildHit({ message: 'log message' });
+      const formattedDoc = {
+        message: 'log message',
+        '@timestamp': '2026-10-01T10:00:00.000Z',
+        'log.level': 'error',
+      } as any;
+
+      renderWithTheme(
+        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      const messagePanel = screen.getByTestId('unifiedDocViewLogsOverviewMessage');
+      expect(within(messagePanel).getByText('message')).toBeInTheDocument();
+      expect(within(messagePanel).getByTestId('codeBlock')).toHaveTextContent('log message');
+      expect(
+        within(messagePanel).getByTestId('unifiedDocViewLogsOverviewTimestamp')
+      ).toBeInTheDocument();
+      expect(within(messagePanel).getByTestId(LOG_LEVEL_BADGE)).toBeInTheDocument();
+    });
+
+    it('renders the stream processing link', () => {
+      const hit = buildHit({ message: 'log message' });
+      const formattedDoc = { message: 'log message' } as any;
+      const renderFlyoutStreamProcessingLink = jest.fn(() => (
+        <span data-test-subj="streamProcessingLink" />
+      ));
+
+      render(
+        <ContentBreakdown
+          dataView={mockDataView}
+          formattedDoc={formattedDoc}
+          hit={hit}
+          renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+          cpsHasLinkedProjects
+        />
+      );
+
+      expect(screen.getByTestId('streamProcessingLink')).toBeInTheDocument();
+      expect(renderFlyoutStreamProcessingLink).toHaveBeenCalledWith({
+        dataView: mockDataView,
+        doc: hit,
+        cpsHasLinkedProjects: true,
+      });
+    });
+  });
+
+  describe('Without a message field', () => {
+    it('renders no message panel and no badges when there is nothing to show', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = { 'service.name': 'payments' } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('codeBlock')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTimestamp')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(LOG_LEVEL_BADGE)).not.toBeInTheDocument();
+    });
+
+    it('treats an empty message as no message', () => {
+      const hit = buildHit({ message: '' });
+      const formattedDoc = { message: '' } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('codeBlock')).not.toBeInTheDocument();
+    });
+
+    it('keeps the timestamp and log level badges', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = {
+        '@timestamp': '2026-10-01T10:00:00.000Z',
+        'log.level': 'error',
+        'service.name': 'payments',
+      } as any;
+
+      renderWithTheme(
+        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      expect(screen.getByTestId('unifiedDocViewLogsOverviewTimestamp')).toBeInTheDocument();
+      expect(screen.getByTestId(LOG_LEVEL_BADGE)).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+    });
+
+    it('keeps the error event type badge when there is no log level', () => {
+      const hit = buildHit({ 'processor.event': 'error' });
+      const formattedDoc = { 'processor.event': 'error' } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      expect(screen.getByTestId('unifiedDocViewLogsOverviewEventType')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+    });
+
+    it('does not render the stream processing link', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = { '@timestamp': '2026-10-01T10:00:00.000Z' } as any;
+      const renderFlyoutStreamProcessingLink = jest.fn(() => (
+        <span data-test-subj="streamProcessingLink" />
+      ));
+
+      render(
+        <ContentBreakdown
+          dataView={mockDataView}
+          formattedDoc={formattedDoc}
+          hit={hit}
+          renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+        />
+      );
+
+      expect(screen.queryByTestId('streamProcessingLink')).not.toBeInTheDocument();
+      expect(renderFlyoutStreamProcessingLink).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Message rendering', () => {
     it('escapes angle brackets so log text is not treated as HTML', () => {
       const hit = buildHit({
@@ -116,7 +241,7 @@ describe('ContentBreakdown', () => {
       expect(container.querySelector('john')).toBeNull();
     });
 
-    it('renders pretty-printed JSON when message is valid JSON and skips reactConvert', () => {
+    it('renders pretty-printed JSON when message is valid JSON and skips convertToReact', () => {
       const json = { foo: { bar: true } };
       const message = JSON.stringify(json);
       const hit = buildHit({ message });
@@ -126,8 +251,8 @@ describe('ContentBreakdown', () => {
 
       const codeBlock = screen.getByTestId('codeBlock');
       expect(codeBlock.textContent).toBe(JSON.stringify(json, null, 2));
-      // The JSON path uses formattedValue directly — reactConvert should not be called
-      expect(mockReactConvert).not.toHaveBeenCalled();
+      // The JSON path uses formattedValue directly — convertToReact should not be called
+      expect(mockConvertToReact).not.toHaveBeenCalled();
     });
 
     it('applies highlights even when field is not in data view (e.g., OTel body.text)', () => {
@@ -140,9 +265,9 @@ describe('ContentBreakdown', () => {
       const formattedDoc = { message } as any;
 
       // Mock the formatter to return React nodes with highlighted content
-      mockReactConvert.mockImplementationOnce(() => (
+      mockConvertToReact.mockImplementationOnce(() => (
         <>
-          OTel log message with <mark className="ffSearch__highlight">search</mark> term
+          OTel log message with <mark>search</mark> term
         </>
       ));
 
@@ -152,7 +277,7 @@ describe('ContentBreakdown', () => {
 
       // Verify the formatter was called with field name for highlight lookup
       // even though the field is not in the data view (getByName returns undefined)
-      expect(mockReactConvert).toHaveBeenCalledWith(
+      expect(mockConvertToReact).toHaveBeenCalledWith(
         message,
         expect.objectContaining({
           field: { name: fieldName },
@@ -163,7 +288,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the highlighted content is rendered
-      const markElement = container.querySelector('mark.ffSearch__highlight');
+      const markElement = container.querySelector('mark');
       expect(markElement).toBeInTheDocument();
       expect(markElement).toHaveTextContent('search');
     });
@@ -194,9 +319,9 @@ describe('ContentBreakdown', () => {
       } as unknown as DataView;
 
       // Mock the formatter to return React nodes with highlighted content
-      mockReactConvert.mockImplementationOnce(() => (
+      mockConvertToReact.mockImplementationOnce(() => (
         <>
-          log message with <mark className="ffSearch__highlight">search</mark> term
+          log message with <mark>search</mark> term
         </>
       ));
 
@@ -205,7 +330,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the formatter was called with full DataViewField (not just { name })
-      expect(mockReactConvert).toHaveBeenCalledWith(
+      expect(mockConvertToReact).toHaveBeenCalledWith(
         message,
         expect.objectContaining({
           field: mockDataViewField,
@@ -216,7 +341,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the highlighted content is rendered
-      const markElement = container.querySelector('mark.ffSearch__highlight');
+      const markElement = container.querySelector('mark');
       expect(markElement).toBeInTheDocument();
       expect(markElement).toHaveTextContent('search');
     });

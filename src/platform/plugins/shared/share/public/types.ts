@@ -14,7 +14,6 @@ import { type EuiCodeProps, type EuiIconProps, type EuiFlyoutProps } from '@elas
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
-import type { TimeRange } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
@@ -166,6 +165,7 @@ export interface ExportShare<S extends SharingData = SharingData>
        */
       supportsAbsoluteTime?: boolean;
       renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
+      flyoutAriaLabel?: string;
     } & (
       | {
           generateAssetComponent?: never;
@@ -187,25 +187,27 @@ export interface ExportShare<S extends SharingData = SharingData>
   groupId: 'export';
 }
 
+export interface ExportShareParameters extends Record<string, unknown> {
+  label: React.FC<{ openFlyout: () => void }>;
+  toolTipContent?: ReactNode;
+  flyoutContent: React.FC<{
+    closeFlyout: () => void;
+    flyoutRef: React.RefObject<HTMLDivElement>;
+  }>;
+  flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
+  flyoutAriaLabel?: string;
+  shouldRender: ({
+    availableExportItems,
+  }: {
+    availableExportItems: ExportShareConfig[];
+  }) => boolean;
+}
+
 /**
  * @description Share integration implementation definition that build off exports within kibana,
  * reach out to the shared ux team before settling on using this interface
  */
-export interface ExportShareDerivatives
-  extends ShareIntegration<{
-    label: React.FC<{ openFlyout: () => void }>;
-    toolTipContent?: ReactNode;
-    flyoutContent: React.FC<{
-      closeFlyout: () => void;
-      flyoutRef: React.RefObject<HTMLDivElement>;
-    }>;
-    flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
-    shouldRender: ({
-      availableExportItems,
-    }: {
-      availableExportItems: ExportShareConfig[];
-    }) => boolean;
-  }> {
+export interface ExportShareDerivatives extends ShareIntegration<ExportShareParameters> {
   groupId: 'exportDerivatives';
 }
 
@@ -330,10 +332,6 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
-export type ShareableLocatorParams = SerializableRecord & {
-  timeRange: TimeRange | undefined;
-};
-
 /**
  * @public
  * Properties of the current object to share. Registered share
@@ -381,7 +379,7 @@ export interface ShareContext<S extends SharingData = SharingData> {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<SerializableRecord>;
-    params: ShareableLocatorParams;
+    params: SerializableRecord;
   };
   sharingData: S;
   isDirty: boolean;

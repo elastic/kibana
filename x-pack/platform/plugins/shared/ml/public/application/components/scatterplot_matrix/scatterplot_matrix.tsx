@@ -14,7 +14,6 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   useEuiFontSize,
   useEuiTheme,
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +25,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
@@ -571,14 +571,19 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           {splom.messages.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut announceOnMount color="warning">
+              <KbnWarningCallout
+                announceOnMount
+                title={i18n.translate('xpack.ml.splom.chartDataWarningTitle', {
+                  defaultMessage: 'Some documents cannot be visualized',
+                })}
+              >
                 {splom.messages.map((m) => (
                   <span key={stringHash(m)}>
                     {m}
                     <br />
                   </span>
                 ))}
-              </EuiCallOut>
+              </KbnWarningCallout>
             </>
           )}
 

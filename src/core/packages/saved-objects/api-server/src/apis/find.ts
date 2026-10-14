@@ -12,6 +12,7 @@ import type {
   AggregationsAggregationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '../..';
 
 type KueryNode = any;
@@ -212,6 +213,11 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * ```
    */
   sort?: SortResults;
+  /**
+   * Error associated with this result. Populated by consumers such as the Encrypted Saved Objects
+   * client when an individual document fails to decrypt while iterating find results.
+   */
+  error?: SavedObjectError;
 }
 
 /**

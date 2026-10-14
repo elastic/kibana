@@ -38,16 +38,6 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-const mockUseSourcererDataView = jest.fn(
-  (): { indicesExist: boolean; dataViewId: string | null } => ({
-    indicesExist: true,
-    dataViewId: null,
-  })
-);
-jest.mock('../../../sourcerer/containers', () => ({
-  useSourcererDataView: () => mockUseSourcererDataView(),
-}));
-
 jest.mocked(useDataView).mockImplementation(withMatchedIndices);
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
@@ -120,20 +110,17 @@ it('shows timeline for users with timeline read access', async () => {
 
 describe('sourcererDataView', () => {
   it('should show timeline when indices exist', () => {
-    mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: true, dataViewId: 'test' });
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should show timeline when dataViewId is null', () => {
-    mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: null });
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should show timeline even when indices do not exist (data view state does not gate visibility)', () => {
     jest.mocked(useDataView).mockImplementation(defaultImplementation);
-    mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });

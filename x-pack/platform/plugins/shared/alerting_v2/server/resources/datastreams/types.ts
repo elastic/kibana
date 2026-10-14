@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import type { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStreamLifecycleWithRollover,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { MappingsDefinition } from '@kbn/es-mappings';
+
+export interface IngestPipelineDefinition {
+  id: string;
+  version: number;
+  processors: IngestProcessorContainer[];
+}
 
 export interface ResourceDefinition {
   key: string;
   dataStreamName: string;
   version: number;
   mappings: MappingsDefinition;
-  ilmPolicy: {
-    name: string;
-    policy: IlmPolicy;
-  };
+  lifecycle: IndicesDataStreamLifecycleWithRollover;
+  finalPipeline: IngestPipelineDefinition;
+  /**
+   * Deletes the existing data stream on startup when it was created from an index template at or
+   * below `version`, for mapping changes that cannot be applied in place. Its documents are lost.
+   * Must stay below the resource `version`; `DatastreamInitializer` rejects the definition otherwise.
+   */
+  forceReset?: { version: number };
 }

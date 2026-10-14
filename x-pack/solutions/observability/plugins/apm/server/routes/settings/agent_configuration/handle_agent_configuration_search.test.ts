@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { AgentConfigSearchParams } from '@kbn/apm-api-shared';
 import type { Logger } from '@kbn/core/server';
 import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { handleAgentConfigurationSearch } from './handle_agent_configuration_search';
-import type { AgentConfigSearchParams } from './route';
 import { searchConfigurations } from './search_configurations';
 
 jest.mock('./search_configurations', () => ({

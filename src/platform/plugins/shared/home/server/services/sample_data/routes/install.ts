@@ -34,9 +34,9 @@ export function createInstallRoute(
         },
       },
       validate: {
-        params: schema.object({ id: schema.string() }),
+        params: schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) }),
         // TODO validate now as date
-        query: schema.object({ now: schema.maybe(schema.string()) }),
+        query: schema.object({ now: schema.maybe(schema.string({ maxLength: 64 })) }),
       },
     },
     async (context, req, res) => {

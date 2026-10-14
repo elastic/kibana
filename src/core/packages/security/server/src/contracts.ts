@@ -8,9 +8,11 @@
  */
 
 import type { CoreFipsService } from './fips';
-import type { CoreAuthenticationService } from './authc';
-import type { CoreSecurityDelegateContract } from './api_provider';
+import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
+import type { CoreSecurityDelegateContract, CoreSecurityDelegateHandle } from './api_provider';
 import type { CoreAuditService } from './audit';
+import type { CoreServiceAccountsService } from './service_accounts';
+import type { CoreServiceAccountsSetup } from './service_account_workloads';
 /**
  * Setup contract for Core's security service.
  *
@@ -19,15 +21,39 @@ import type { CoreAuditService } from './audit';
 export interface SecurityServiceSetup {
   /**
    * Register the security implementation that then will be used and re-exposed by Core.
+   * Returns what Core shares back with the security implementation, such as the workload types
+   * plugins register.
    *
    * @remark this should **exclusively** be used by the security plugin.
    */
-  registerSecurityDelegate(api: CoreSecurityDelegateContract): void;
+  registerSecurityDelegate(api: CoreSecurityDelegateContract): CoreSecurityDelegateHandle;
+
+  /**
+   * Returns a function that binds originating-user identity fields (currently
+   * `profile_uid` and `username`) to a fake request so that
+   * `security.authc.getCurrentUser(request)` resolves to a synthetic
+   * {@link AuthenticatedUser} exposing only those fields. Reading any other
+   * identity field on the returned user yields `undefined`.
+   *
+   * One-shot: calling it more than once throws. Reserved for Task Manager,
+   * the sole legitimate consumer. The returned enricher throws on non-fake
+   * requests; calling it twice on the same fake request is a no-op
+   * (first-wins) and emits a warning.
+   *
+   * @internal
+   */
+  acquireFakeRequestEnricher(): FakeRequestEnricher;
 
   /**
    * The {@link CoreFipsService | FIPS service}
    */
   fips: CoreFipsService;
+
+  /**
+   * The {@link CoreServiceAccountsSetup | service accounts service}, through which a plugin registers
+   * the workload types it runs as service accounts.
+   */
+  serviceAccounts: CoreServiceAccountsSetup;
 }
 
 /**
@@ -44,4 +70,8 @@ export interface SecurityServiceStart {
    * The {@link CoreAuditService | audit service}
    */
   audit: CoreAuditService;
+  /**
+   * The {@link CoreServiceAccountsService | service accounts service}
+   */
+  serviceAccounts: CoreServiceAccountsService;
 }

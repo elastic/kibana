@@ -57,18 +57,18 @@ export const registerSuggestFixRoute = (
         const { queryString, errorMessage } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
-        const [, { inference }] = await getStartServices();
+        const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
         const connectorId = await resolveConnectorId({
-          uiSettingsClient: core.uiSettings.client,
           inference,
           request,
+          searchInferenceEndpoints,
         });
 
         if (!connectorId) {
           return response.badRequest({
             body: {
-              message: 'No AI connector configured. Please set up a connector to use this feature.',
+              message: 'No AI connector available.',
             },
           });
         }
@@ -78,10 +78,13 @@ export const registerSuggestFixRoute = (
         const result = await generateEsql({
           model,
           esClient: client,
+          internalEsClient: core.elasticsearch.client.asInternalUser,
           logger,
           nlQuery: 'Fix the following ES|QL query. Return only the corrected query.',
           additionalContext: buildSuggestFixContext(queryString, errorMessage),
-          executeQuery: false,
+          execute: 'none',
+          includeDatasets: true,
+          includeViews: true,
         });
 
         return response.ok({

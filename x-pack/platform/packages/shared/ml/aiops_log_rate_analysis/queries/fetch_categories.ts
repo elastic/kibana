@@ -124,7 +124,7 @@ export const fetchCategories = async (
       index: params.index,
       ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
     },
-    omit(getCategoryRequest(params, fieldName, randomSamplerWrapper), ['index']),
+    omit(getCategoryRequest(params, fieldName, randomSamplerWrapper), ['index', 'project_routing']),
   ]);
 
   let mSearchResponse;

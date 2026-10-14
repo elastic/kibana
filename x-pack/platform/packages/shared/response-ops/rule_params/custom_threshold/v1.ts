@@ -47,6 +47,20 @@ const searchConfigSchema = schema.object({
 const customCriterion = schema.object({
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(comparators),
+  warningThreshold: schema.maybe(
+    schema.arrayOf(
+      schema.number({
+        meta: {
+          description:
+            'The threshold value that is used with the `warningComparator`. If the `warningComparator` is `between`, you must specify the boundary values.',
+        },
+      }),
+      // At most two values are ever meaningful: a single threshold, or the
+      // [lower, upper] pair for the `between`/`notBetween` comparators.
+      { maxSize: 2 }
+    )
+  ),
+  warningComparator: schema.maybe(oneOfLiterals(comparators)),
   timeUnit: schema.string(),
   timeSize: schema.number(),
   aggType: schema.maybe(schema.literal('custom')),

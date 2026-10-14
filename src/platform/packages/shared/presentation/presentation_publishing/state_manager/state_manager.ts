@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { camelCase } from 'lodash';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { camelCase, cloneDeep } from 'lodash';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { runComparator } from './state_comparators';
 import type { StateComparators, StateManager, WithAllKeys } from './types';
 
@@ -74,10 +74,13 @@ export const initializeStateManager = <StateType extends object>(
    * Gets the latest state of this state manager.
    */
   const getLatestState: StateManager<StateType>['getLatestState'] = () => {
-    return Object.keys(defaultState).reduce((acc, key) => {
-      acc[key as keyof StateType] = keyToSubjectMap[key as keyof StateType]!.getValue();
-      return acc;
-    }, {} as StateType);
+    return cloneDeep(
+      // prevents getting by-reference state that may be mutated to be out of date
+      Object.keys(defaultState).reduce((acc, key) => {
+        acc[key as keyof StateType] = keyToSubjectMap[key as keyof StateType]!.getValue();
+        return acc;
+      }, {} as StateType)
+    );
   };
 
   /**
@@ -113,6 +116,8 @@ export const initializeStateManager = <StateType extends object>(
     api,
     getLatestState,
     reinitializeState,
-    anyStateChange$: merge(...allSubjects).pipe(map(() => undefined)),
+    anyStateChange$: merge(...allSubjects.map((subject) => subject.pipe(skip(1)))).pipe(
+      map(() => undefined)
+    ),
   };
 };

@@ -1,0 +1,166 @@
+openapi: 3.0.0
+info:
+  title: Review Rule Installation API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/prebuilt_rules/installation/_review:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ReviewRuleInstallation
+      summary: Review prebuilt detection rules available for installation
+      description: Lists prebuilt detection rules that can be installed
+      tags:
+        - Prebuilt Rules API
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                page:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  description: Page number starting from 1.
+                per_page:
+                  type: integer
+                  minimum: 1
+                  maximum: 500
+                  default: 20
+                  description: Rules per page.
+                filter:
+                  description: Filter applied to prebuilt rule assets.
+                  $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
+                search:
+                  description: Free-text search.
+                  $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesSearch'
+                aggregations:
+                  description: |
+                    Aggregation options computed over the filtered set of
+                    installable rules.
+                  $ref: '#/components/schemas/PrebuiltRuleAssetsAggregations'
+                sort:
+                  description: |
+                    Ordered sort criteria (only `name`, `risk_score`, and `severity` as `field` values).
+                  $ref: '#/components/schemas/PrebuiltRuleAssetsSort'
+                fields:
+                  type: array
+                  description: |
+                    Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
+                  items:
+                    type: string
+                    maxLength: 256
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRuleInstallationResponseBody'
+components:
+  schemas:
+    PrebuiltRuleAssetsSortField:
+      type: string
+      description: Field to sort prebuilt rule assets by.
+      enum:
+        - name
+        - risk_score
+        - severity
+
+    PrebuiltRuleAssetsSortItem:
+      type: object
+      additionalProperties: false
+      description: |
+        One sort criterion. Only `name`, `risk_score`, and `severity` are valid for `field`.
+      required:
+        - field
+        - order
+      properties:
+        field:
+          description: Field to sort by.
+          $ref: '#/components/schemas/PrebuiltRuleAssetsSortField'
+        order:
+          description: Sort order.
+          $ref: '../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+
+    PrebuiltRuleAssetsSort:
+      type: array
+      description: |
+        Ordered multi-field sort for prebuilt rule assets. Only `name`, `risk_score`, and `severity`
+        may appear as `field` values (see `PrebuiltRuleAssetsSortField`).
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/PrebuiltRuleAssetsSortItem'
+
+    PrebuiltRuleAssetsFacetCategory:
+      type: string
+      description: |
+        Facet categories available for prebuilt rule asset aggregations.
+      enum:
+        - tags
+        - severity
+
+    PrebuiltRuleAssetsAggregations:
+      type: object
+      additionalProperties: false
+      description: Aggregation options for prebuilt rule asset queries.
+      properties:
+        counts:
+          type: array
+          description: Facet categories for which to compute counts over the filtered + searched set.
+          items:
+            $ref: '#/components/schemas/PrebuiltRuleAssetsFacetCategory'
+
+    RuleInstallationStatsForReview:
+      type: object
+      additionalProperties: false
+      description: Aggregated info about all rules available for installation.
+      properties:
+        num_rules_to_install:
+          type: integer
+          minimum: 0
+          description: Number of prebuilt rules available for installation (before applying filters).
+        tags:
+          description: A union of all tags of all rules available for installation.
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
+      required:
+        - num_rules_to_install
+        - tags
+
+    ReviewRuleInstallationResponseBody:
+      type: object
+      additionalProperties: false
+      properties:
+        page:
+          type: integer
+          description: Current page number.
+        per_page:
+          type: integer
+          description: Rules per page.
+        total:
+          type: integer
+          description: The total number of rules available for installation.
+        stats:
+          $ref: '#/components/schemas/RuleInstallationStatsForReview'
+        rules:
+          type: array
+          description: Individual rules available for installation.
+          items:
+            $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        counts:
+          description: Facet counts per category requested in `aggregations.counts`.
+          $ref: '../../rule_management/granular_rules/granular_rules_contract.schema.yaml#/components/schemas/FacetCounts'
+        warnings:
+          type: array
+          description: Warnings produced while serving the request.
+          items:
+            $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
+      required:
+        - page
+        - per_page
+        - total
+        - stats
+        - rules

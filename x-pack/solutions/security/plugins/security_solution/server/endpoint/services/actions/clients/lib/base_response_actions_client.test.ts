@@ -46,7 +46,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -243,9 +243,9 @@ describe('ResponseActionsClientImpl base class', () => {
           {
             type: 'security.endpoint',
             attachmentId: 'action-123',
+            data: { content: 'this is a case comment' },
             metadata: {
               command: 'isolate',
-              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
@@ -573,6 +573,56 @@ describe('ResponseActionsClientImpl base class', () => {
       });
     });
 
+    describe('And class is instantiated with `isAutomated` set to `false`', () => {
+      beforeEach(() => {
+        constructorOptions.isAutomated = false;
+        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
+      });
+
+      describe('#writeActionRequestToEndpointIndex()', () => {
+        it("should NOT require an Enterprise license (license enforcement for manual actions is the caller's responsibility — e.g. route-level `withEndpointAuthz`, which sets the privilege's license floor)", async () => {
+          (
+            constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
+          ).mockReturnValue(false);
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.not.toHaveProperty('error');
+        });
+
+        it('should throw validation errors instead of swallowing them into the written doc (manual actions are interactive — the caller surfaces the error to the user)', async () => {
+          indexDocOptions.endpoint_ids = [];
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).rejects.toHaveProperty('message', HOST_NOT_ENROLLED);
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).rejects.toHaveProperty('statusCode', 400);
+        });
+
+        it('should validate the action against the manual support map (`RESPONSE_ACTIONS_SUPPORT_MAP`)', async () => {
+          // `isolate` is unsupported for automated actions on some 3rd-party agent types,
+          // but IS supported for manual — assert the manual map is what gets consulted.
+          isActionSupportedByAgentTypeMock.mockImplementation(
+            (agentType, command, actionType) => actionType === 'manual'
+          );
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.not.toHaveProperty('error');
+
+          isActionSupportedByAgentTypeMock.mockImplementation(
+            (agentType, command, actionType) => actionType === 'automated'
+          );
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
+        });
+      });
+    });
+
     describe('Telemetry', () => {
       it('should send action creation success telemetry for manual actions', async () => {
         await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
@@ -746,9 +796,7 @@ describe('ResponseActionsClientImpl base class', () => {
     it('should return an async iterable', () => {
       const iterable = baseClassMock.fetchAllPendingActions();
 
-      expect(iterable).toEqual({
-        [Symbol.asyncIterator]: expect.any(Function),
-      });
+      expect(iterable[Symbol.asyncIterator]).toEqual(expect.any(Function));
     });
 
     it('should query ES with expected criteria', async () => {

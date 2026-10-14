@@ -122,6 +122,7 @@ export async function sendEmailWithExchange(
     logger,
     configurationUtilities,
     credentials: {
+      type: 'client_secret',
       config: {
         clientId: clientId as string,
       },
@@ -203,7 +204,7 @@ async function sendEmailWithNodemailer(
 
   if (service === JSON_TRANSPORT_SERVICE) {
     try {
-      result.message = JSON.parse(result.message);
+      result.message = JSON.parse(result.message as string);
     } catch (err) {
       // try parsing the message for ease of debugging, on error, ignore
     }
@@ -218,6 +219,10 @@ function htmlFromMarkdown(logger: Logger, markdown: string) {
     const md = MarkdownIt({
       linkify: true,
     });
+
+    md.renderer.rules.table_open = () => '<table style="border-collapse: collapse;">';
+    md.renderer.rules.th_open = () => '<th style="border: 1px solid; padding: 0 4px;">';
+    md.renderer.rules.td_open = () => '<td style="border: 1px solid; padding: 0 4px;">';
 
     return md.render(markdown);
   } catch (err) {

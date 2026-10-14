@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { NodeDetailView } from './node_detail';
@@ -77,7 +77,7 @@ describe('<NodeDetailView />', () => {
     );
     expect(getByTestId('resolver:node-detail:title-link')).toBeInTheDocument();
     getByTestId('resolver:node-detail:title-link').click();
-    expect(nodeEventOnClick).toBeCalledWith({
+    expect(nodeEventOnClick).toHaveBeenCalledWith({
       documentId: 'test_id',
       indexName: '_index',
       scopeId: 'test',

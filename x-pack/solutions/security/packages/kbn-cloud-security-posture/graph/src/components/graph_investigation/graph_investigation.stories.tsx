@@ -27,7 +27,6 @@ import {
   groupedTargetMockData,
 } from '../mock/use_fetch_graph_data.mock';
 
-const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
 const defaultProps: GraphInvestigationProps = {
   scopeId: 'storybook-graph-investigation',
   initialState: {
@@ -43,8 +42,8 @@ const defaultProps: GraphInvestigationProps = {
       },
     ],
     timeRange: {
-      from: `${hourAgo.toISOString()}||-15m`,
-      to: `${hourAgo.toISOString()}||+15m`,
+      from: 'now-75m',
+      to: 'now-45m',
     },
   },
   onInvestigateInTimeline: action('onInvestigateInTimeline'),

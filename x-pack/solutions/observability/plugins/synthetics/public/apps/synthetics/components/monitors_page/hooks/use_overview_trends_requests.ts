@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
 import type { TrendRequest } from '../../../../../../common/types';
 import { selectOverviewTrends, trendStatsBatch } from '../../../state';

@@ -11,6 +11,7 @@ import type { monaco } from '@kbn/monaco';
 import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
+import { getEsqlQuerySuggestions } from './esql_query/get_esql_query_suggestions';
 import { getJsonSchemaSuggestions } from './json_schema/get_json_schema_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
@@ -27,6 +28,7 @@ import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
 import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
+import type { WorkflowEsqlCompletionServices } from './workflow_esql_completion_services';
 import type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
 import { getPropertyHandler as getPropertyHandlerFromSchema } from '../../../../../../common/schema';
 import type {
@@ -35,6 +37,7 @@ import type {
 } from '../context/autocomplete.types';
 
 export type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
+export type { WorkflowEsqlCompletionServices } from './workflow_esql_completion_services';
 
 const loopStepTypes = new Set<string>(LoopStepTypes);
 
@@ -163,7 +166,8 @@ async function handleMatchTypeSuggestions(
 export async function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext,
   kqlServices?: WorkflowKqlCompletionServices,
-  getPropertyHandler?: GetStepPropertyHandler
+  getPropertyHandler?: GetStepPropertyHandler,
+  esqlServices?: WorkflowEsqlCompletionServices
 ): Promise<monaco.languages.CompletionItem[]> {
   if (
     kqlServices &&
@@ -173,6 +177,20 @@ export async function getSuggestions(
     autocompleteContext.triggerConditionDefinition
   ) {
     return getTriggerConditionKqlSuggestions(autocompleteContext, kqlServices);
+  }
+
+  // ES|QL completion takes ownership inside `with.query` of an
+  // `elasticsearch.esql.query` step. The helper returns `null` only when the
+  // cursor sits in a Liquid span (`{{ … }}` / `{% … %}`) — only then do we
+  // fall through to the variable-completion path. Any other ES|QL result
+  // (including an empty list) is final, so a literal `|` typed in ES|QL
+  // never accidentally surfaces Liquid filter completions like `abs`,
+  // `capitalize`, etc.
+  if (esqlServices && autocompleteContext.isInEsqlQueryField && autocompleteContext.esqlRegion) {
+    const esqlSuggestions = await getEsqlQuerySuggestions(autocompleteContext, esqlServices);
+    if (esqlSuggestions !== null) {
+      return esqlSuggestions;
+    }
   }
 
   // Check if we're in a scheduled trigger's with block for RRule suggestions

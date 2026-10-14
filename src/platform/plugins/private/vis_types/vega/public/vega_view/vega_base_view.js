@@ -19,6 +19,7 @@ import { TooltipHandler } from './vega_tooltip';
 import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { normalizeDate, normalizeString, normalizeObject } from './utils';
+import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -86,7 +87,7 @@ export class VegaBaseView {
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
-    this._renderMode = opts.renderMode;
+    this._showWarnings = opts.showWarnings;
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
@@ -235,7 +236,14 @@ export class VegaBaseView {
 
     const vegaSpec = this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec;
     const usermetaLoaderOptions = vegaSpec.usermeta?.embedOptions?.loader;
-    vegaLoader.options = usermetaLoaderOptions ?? {};
+    const ALLOWED_LOADER_OPTIONS = ['target', 'rel'];
+    const sanitizedLoaderOptions = {};
+    for (const key of ALLOWED_LOADER_OPTIONS) {
+      if (usermetaLoaderOptions?.[key] != null) {
+        sanitizedLoaderOptions[key] = String(usermetaLoaderOptions[key]);
+      }
+    }
+    vegaLoader.options = sanitizedLoaderOptions;
 
     config.loader = vegaLoader;
 
@@ -262,7 +270,7 @@ export class VegaBaseView {
   }
 
   onWarn(...args) {
-    if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
+    if (this._showWarnings && (!this._parser || !this._parser.hideWarnings)) {
       this._addMessage('warn', Utils.formatWarningToStr(...args));
     }
   }
@@ -381,7 +389,7 @@ export class VegaBaseView {
     const indexId = await this.findIndex(normalizedIndex);
     const filter = buildQueryFilter(normalizedQuery, indexId, normalizedAlias);
 
-    this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
+    this._fireEvent({ name: VEGA_EVENT_APPLY_FILTER, data: { filters: [filter] } });
   }
 
   /**
@@ -421,7 +429,7 @@ export class VegaBaseView {
     const { from, to, mode } = VegaBaseView._parseTimeRange(normalizedStart, normalizedEnd);
 
     this._fireEvent({
-      name: 'applyFilter',
+      name: VEGA_EVENT_APPLY_FILTER,
       data: {
         timeFieldName: '*',
         filters: [

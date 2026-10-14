@@ -108,7 +108,7 @@ describe('actions column builder', () => {
         expect(result).toBeUndefined();
       });
 
-      it('returns `undefined` in read-only mode when `actions.inspect.onItemAction` is not configured', () => {
+      it('returns `undefined` in read-only mode when `features.contentEditor.open` is not configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
@@ -118,17 +118,11 @@ describe('actions column builder', () => {
         expect(result).toBeUndefined();
       });
 
-      it('returns only inspect action in read-only mode when `actions.inspect.onItemAction` is configured', () => {
+      it('returns only the content editor action in read-only mode when `features.contentEditor.open` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
-          itemConfig: {
-            ...defaultContext.itemConfig,
-            actions: {
-              ...defaultContext.itemConfig?.actions,
-              inspect: { onItemAction: jest.fn() },
-            },
-          },
+          features: { contentEditor: { open: jest.fn() } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -140,16 +134,10 @@ describe('actions column builder', () => {
         });
       });
 
-      it('includes inspect action alongside edit and delete when `actions.inspect.onItemAction` is configured', () => {
+      it('includes the content editor action alongside edit and delete when `features.contentEditor.open` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
-          itemConfig: {
-            ...defaultContext.itemConfig,
-            actions: {
-              ...defaultContext.itemConfig?.actions,
-              inspect: { onItemAction: jest.fn() },
-            },
-          },
+          features: { contentEditor: { open: jest.fn() } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 

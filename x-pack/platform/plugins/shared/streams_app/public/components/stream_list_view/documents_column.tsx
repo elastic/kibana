@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,11 +37,14 @@ import { getFormattedError } from '../../util/errors';
 export function DocumentsColumn({
   indexPattern,
   histogramQueryFetch,
+  retainHistogramQueryFetch,
   timeState,
   numDataPoints,
 }: {
   indexPattern: string;
   histogramQueryFetch: Promise<UnparsedEsqlResponse>;
+  /** Called on mount with the histogram request, returns a release callback for unmount. */
+  retainHistogramQueryFetch?: (histogramFetch: Promise<UnparsedEsqlResponse>) => () => void;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
 }) {
@@ -49,6 +52,11 @@ export function DocumentsColumn({
   const { euiTheme } = useEuiTheme();
 
   const histogramQueryResult = useAsync(() => histogramQueryFetch, [histogramQueryFetch]);
+
+  useEffect(
+    () => retainHistogramQueryFetch?.(histogramQueryFetch),
+    [retainHistogramQueryFetch, histogramQueryFetch]
+  );
 
   const allTimeseries = React.useMemo(
     () =>
@@ -84,7 +92,7 @@ export function DocumentsColumn({
       iconColor="danger"
     />
   ) : (
-    <EuiIcon type="chartLine" size="m" />
+    <EuiIcon type="chartLine" size="m" aria-hidden={true} />
   );
 
   const cellAriaLabel = hasData

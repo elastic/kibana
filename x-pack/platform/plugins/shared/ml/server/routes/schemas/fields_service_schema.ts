@@ -7,12 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
-import { indicesOptionsSchema } from './datafeeds_schema';
+import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
 
 const indexPatternSchema = {
-  index: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 10000 })], {
-    meta: { description: 'Index or indexes for which to return the time range.' },
-  }),
+  index: schema.oneOf(
+    [
+      schema.string({ maxLength: 10000 }),
+      schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
+    ],
+    {
+      meta: { description: 'Index or indexes for which to return the time range.' },
+    }
+  ),
 };
 
 const querySchema = {
@@ -23,14 +29,17 @@ const querySchema = {
 
 const timeFieldNameSchema = {
   timeFieldName: schema.maybe(
-    schema.string({ meta: { description: 'Name of the time field in the index' } })
+    schema.string({
+      maxLength: 10000,
+      meta: { description: 'Name of the time field in the index' },
+    })
   ),
 };
 
 export const getCardinalityOfFieldsSchema = schema.object({
   ...indexPatternSchema,
   fieldNames: schema.maybe(
-    schema.arrayOf(schema.string(), {
+    schema.arrayOf(schema.string({ maxLength: 10000 }), {
       maxSize: 10000,
       meta: { description: 'Name(s) of the field(s) to return cardinality information.' },
     })
@@ -38,15 +47,12 @@ export const getCardinalityOfFieldsSchema = schema.object({
   ...querySchema,
   ...timeFieldNameSchema,
   earliestMs: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Earliest timestamp for search, as epoch ms' },
-    })
+    schema.number({ meta: { description: 'Earliest timestamp for search, as epoch ms' } })
   ),
   latestMs: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Latest timestamp for search, as epoch ms' },
-    })
+    schema.number({ meta: { description: 'Latest timestamp for search, as epoch ms' } })
   ),
+  datafeed: schema.maybe(datafeedConfigSchema),
 });
 
 export const getTimeFieldRangeSchema = schema.object({
@@ -58,11 +64,11 @@ export const getTimeFieldRangeSchema = schema.object({
   allowFutureTime: schema.maybe(
     schema.boolean({ meta: { description: 'Return times from the future' } })
   ),
-  projectRouting: schema.maybe(schema.string()),
+  projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
 });
 
 export const getCardinalityOfFieldsResponse = () => {
-  return schema.recordOf(schema.string(), schema.number());
+  return schema.recordOf(schema.string({ maxLength: 10000 }), schema.number());
 };
 
 export const getTimeFieldRangeResponse = () => {

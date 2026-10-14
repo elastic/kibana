@@ -14,7 +14,6 @@ export const transformFindRuleTemplatesQueryV1 = (
   perPage: query.per_page,
   page: query.page,
   search: query.search,
-  defaultSearchOperator: query.default_search_operator,
   sortField: query.sort_field,
   sortOrder: query.sort_order,
   ruleTypeId: query.rule_type_id,

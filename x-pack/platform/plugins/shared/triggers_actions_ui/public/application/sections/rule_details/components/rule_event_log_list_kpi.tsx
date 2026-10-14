@@ -41,7 +41,8 @@ const RESPONSE_TOOLTIP = i18n.translate(
 const ALERTS_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.alertsTooltip',
   {
-    defaultMessage: 'The alert statuses for up to 10,000 most recent rule runs.',
+    defaultMessage:
+      'The alert statuses for up to 10,000 most recent rule runs within the selected time range. Active is the sum of the active alerts reported by each rule run, so an alert that stays active across several runs is counted once per run.',
   }
 );
 

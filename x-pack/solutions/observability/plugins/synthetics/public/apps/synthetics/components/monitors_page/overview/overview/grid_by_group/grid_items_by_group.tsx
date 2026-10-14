@@ -8,7 +8,7 @@
 import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +24,31 @@ import type { OverviewView } from '../../../../../state';
 import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../../state';
 import type { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+
+export const HEARTBEAT_GROUP_ID = '__heartbeat__' as const;
+export const REMOTE_GROUP_ID = '__remote__' as const;
+export const LOCAL_GROUP_ID = '__local__' as const;
+
+const HEARTBEAT_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.heartbeatMonitors',
+  { defaultMessage: 'Heartbeat monitors' }
+);
+const REMOTE_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.remoteMonitors',
+  { defaultMessage: 'Remote monitors' }
+);
+const LOCAL_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.localMonitors',
+  { defaultMessage: 'Local monitors' }
+);
+
+interface OverviewGroupValue {
+  label: string;
+  count: number;
+  id?: typeof HEARTBEAT_GROUP_ID | typeof REMOTE_GROUP_ID;
+}
+
+const groupKey = (groupItem: OverviewGroupValue): string => groupItem.id ?? groupItem.label;
 
 export const GridItemsByGroup = ({
   setFlyoutConfigCallback,
@@ -46,7 +71,16 @@ export const GridItemsByGroup = ({
   }
 
   const { monitorTypes, locations, projects, tags } = data;
-  let selectedGroup = {
+  let selectedGroup: {
+    key: string;
+    items: OverviewGroupValue[];
+    values: OverviewGroupValue[];
+    otherValues: {
+      id?: typeof LOCAL_GROUP_ID;
+      label: string;
+      items: typeof allConfigs;
+    };
+  } = {
     key: 'locationLabel',
     items: locations,
     values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
@@ -120,23 +154,71 @@ export const GridItemsByGroup = ({
     case 'remoteName': {
       const remoteNames = [
         ...new Set(
-          allConfigs
-            ?.map((monitor) => monitor.remote?.remoteName)
+          (allConfigs ?? [])
+            .filter((monitor) => monitor.origin !== 'heartbeat')
+            .map((monitor) => monitor.remote?.remoteName)
             .filter((name): name is string => Boolean(name))
         ),
       ];
+      // Break heartbeat/autodiscovery monitors out into their own bucket instead
+      // of hiding them inside "Local monitors" alongside UI/project monitors.
+      const heartbeatItems = allConfigs?.filter((monitor) => monitor.origin === 'heartbeat') ?? [];
+      const remoteValues: OverviewGroupValue[] = [
+        ...remoteNames.map((name) => ({ label: name, count: 0 })),
+        ...(heartbeatItems.length
+          ? [
+              {
+                id: HEARTBEAT_GROUP_ID,
+                label: HEARTBEAT_MONITORS_LABEL,
+                count: heartbeatItems.length,
+              },
+            ]
+          : []),
+      ];
       selectedGroup = {
         key: 'remote.remoteName',
-        items: remoteNames.map((name) => ({ label: name, count: 0 })),
-        values: remoteNames.map((name) => ({ label: name, count: 0 })),
+        items: remoteValues,
+        values: remoteValues,
         otherValues: {
-          label: i18n.translate(
-            'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.localMonitors',
-            {
-              defaultMessage: 'Local monitors',
-            }
-          ),
-          items: allConfigs?.filter((monitor) => !monitor.remote),
+          id: LOCAL_GROUP_ID,
+          label: LOCAL_MONITORS_LABEL,
+          items: allConfigs?.filter((monitor) => !monitor.remote && monitor.origin !== 'heartbeat'),
+        },
+      };
+      break;
+    }
+    case 'origin': {
+      // Coarse monitor-source grouping (distinct from the per-cluster
+      // "Remote cluster" grouping): break heartbeat/autodiscovery monitors out
+      // of the "Local monitors" catch-all they'd otherwise hide in. Heartbeat
+      // and remote are mutually exclusive; everything else is local (UI/project).
+      const heartbeatItems = allConfigs?.filter((monitor) => monitor.origin === 'heartbeat') ?? [];
+      const remoteItems =
+        allConfigs?.filter(
+          (monitor) => Boolean(monitor.remote) && monitor.origin !== 'heartbeat'
+        ) ?? [];
+      const originValues: OverviewGroupValue[] = [
+        ...(heartbeatItems.length
+          ? [
+              {
+                id: HEARTBEAT_GROUP_ID,
+                label: HEARTBEAT_MONITORS_LABEL,
+                count: heartbeatItems.length,
+              },
+            ]
+          : []),
+        ...(remoteItems.length
+          ? [{ id: REMOTE_GROUP_ID, label: REMOTE_MONITORS_LABEL, count: remoteItems.length }]
+          : []),
+      ];
+      selectedGroup = {
+        key: 'origin',
+        items: originValues,
+        values: originValues,
+        otherValues: {
+          id: LOCAL_GROUP_ID,
+          label: LOCAL_MONITORS_LABEL,
+          items: allConfigs?.filter((monitor) => monitor.origin !== 'heartbeat' && !monitor.remote),
         },
       };
       break;
@@ -145,6 +227,7 @@ export const GridItemsByGroup = ({
   }
 
   const selectedValues = orderBy(selectedGroup.values, 'label', groupOrder ?? 'asc');
+  const otherGroupKey = selectedGroup.otherValues.id ?? selectedGroup.otherValues.label;
 
   if (monitorTypes.length === 0) {
     return <OverviewLoader />;
@@ -155,6 +238,17 @@ export const GridItemsByGroup = ({
       {selectedValues.map((groupItem) => {
         const filteredMonitors =
           allConfigs?.filter((monitor) => {
+            // Match synthetic buckets by id so a remote named "Heartbeat monitors"
+            // is not treated as the Heartbeat group.
+            if (groupItem.id === HEARTBEAT_GROUP_ID) {
+              return monitor.origin === 'heartbeat';
+            }
+            if (groupItem.id === REMOTE_GROUP_ID) {
+              return Boolean(monitor.remote) && monitor.origin !== 'heartbeat';
+            }
+            if (selectedGroup.key === 'origin') {
+              return false;
+            }
             if (selectedGroup.key === 'locationLabel') {
               return monitor.locations?.some((loc) => loc.label === groupItem.label);
             }
@@ -166,12 +260,17 @@ export const GridItemsByGroup = ({
               const typeKey = invert(monitorTypeKeyLabelMap)[groupItem.label];
               return get(monitor, selectedGroup.key) === typeKey;
             }
-            return get(monitor, selectedGroup.key) === groupItem.label;
+            if (selectedGroup.key === 'remote.remoteName') {
+              return monitor.origin !== 'heartbeat' && value === groupItem.label;
+            }
+            return value === groupItem.label;
           }) ?? [];
+        const key = groupKey(groupItem);
         return (
-          <React.Fragment key={groupItem.label}>
-            <WrappedPanel isFullScreen={fullScreenGroup === groupItem.label}>
+          <React.Fragment key={key}>
+            <WrappedPanel isFullScreen={fullScreenGroup === key}>
               <GroupGridItem
+                groupId={key}
                 groupLabel={groupItem.label}
                 groupMonitors={filteredMonitors}
                 loaded={loaded}
@@ -186,8 +285,9 @@ export const GridItemsByGroup = ({
         );
       })}
       {(selectedGroup.otherValues.items ?? []).length > 0 && (
-        <WrappedPanel isFullScreen={fullScreenGroup === selectedGroup.otherValues.label}>
+        <WrappedPanel isFullScreen={fullScreenGroup === otherGroupKey}>
           <GroupGridItem
+            groupId={otherGroupKey}
             groupLabel={selectedGroup.otherValues.label}
             groupMonitors={selectedGroup.otherValues.items ?? []}
             loaded={loaded}

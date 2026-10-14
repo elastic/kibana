@@ -10,10 +10,8 @@ import { LockManagerService } from '@kbn/lock-manager';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
-import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
 import type { AttachmentClient } from './attachments/attachment_client';
-import type { FeatureClient } from './feature';
 
 export class StreamsService {
   constructor(
@@ -24,16 +22,12 @@ export class StreamsService {
 
   async getClient({
     attachmentClient,
-    getQueryClient,
-    getFeatureClient,
     esClient,
     esClientAsInternalUser,
     uiSettingsClient,
     isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    getQueryClient?: () => Promise<QueryClient>;
-    getFeatureClient?: () => Promise<FeatureClient>;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
@@ -50,9 +44,7 @@ export class StreamsService {
 
     return new StreamsClient({
       attachmentClient,
-      getQueryClient,
       logger,
-      getFeatureClient,
       esClient,
       esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),

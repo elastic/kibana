@@ -9,6 +9,9 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 
 import type { Space } from '../../../common';
 
-export function getEnabledFeatures(features: KibanaFeatureConfig[], space: Partial<Space>) {
+export function getEnabledFeatures(
+  features: KibanaFeatureConfig[],
+  space: Partial<Pick<Space, 'disabledFeatures'>>
+) {
   return features.filter((feature) => !(space.disabledFeatures || []).includes(feature.id));
 }

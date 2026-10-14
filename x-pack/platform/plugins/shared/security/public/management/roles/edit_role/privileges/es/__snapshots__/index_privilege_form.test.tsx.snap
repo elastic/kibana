@@ -10,9 +10,12 @@ exports[`it renders without crashing 1`] = `
     className="index-privilege-form"
     responsive={false}
   >
-    <EuiFlexItem>
+    <EuiFlexItem
+      css="unknown styles"
+    >
       <EuiPanel
         color="subdued"
+        css="unknown styles"
       >
         <EuiFlexGrid
           css="unknown styles"
@@ -135,12 +138,17 @@ exports[`it renders without crashing 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonIcon
-        aria-label="Delete index privilege"
-        color="danger"
-        iconType="trash"
-        onClick={[MockFunction]}
-      />
+      <EuiToolTip
+        content="Delete index privilege"
+        disableScreenReaderOutput={true}
+      >
+        <EuiButtonIcon
+          aria-label="Delete index privilege"
+          color="danger"
+          iconType="trash"
+          onClick={[MockFunction]}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
 </Fragment>

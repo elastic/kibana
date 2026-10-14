@@ -92,12 +92,13 @@ export const getListRules = async ({
 export const updateList = async ({ list, http }: UpdateExceptionList) => {
   try {
     const abortCtrl = new AbortController();
-    await updateExceptionList({
+    const result = await updateExceptionList({
       http: http as HttpSetup,
       list,
       signal: abortCtrl.signal,
     });
     abortCtrl.abort();
+    return result;
   } catch (error) {
     throw new Error(error);
   }

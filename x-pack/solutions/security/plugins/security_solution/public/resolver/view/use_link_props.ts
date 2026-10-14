@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { MouseEventHandler } from 'react';
 import { useNavigateOrReplace } from './use_navigate_or_replace';
 

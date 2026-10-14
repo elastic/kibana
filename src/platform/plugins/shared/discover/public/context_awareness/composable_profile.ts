@@ -8,6 +8,7 @@
  */
 
 import type { Profile } from './types';
+import type { ContextAwarenessToolkit } from './toolkit';
 
 /**
  * A partial profile implementation
@@ -22,6 +23,11 @@ export interface ComposableAccessorParams<TContext> {
    * The current context object
    */
   context: TContext;
+
+  /**
+   * Toolkit injected by the host application (Discover, embeddable, etc)
+   */
+  toolkit: ContextAwarenessToolkit;
 }
 
 /**

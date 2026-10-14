@@ -8,7 +8,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
@@ -40,6 +40,10 @@ import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
 import { CloudHandler } from './project_handler/cloud_project_handler';
+import {
+  PROJECT_INIT_TIMEOUT_EXIT_CODE,
+  isProjectInitTimeoutError,
+} from './project_handler/project_init_timeout_error';
 import { ProxyHandler } from './project_handler/proxy_project_handler';
 
 const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
@@ -434,13 +438,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       // This can take so much time that the job can fail by timeout in CI.
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern // use the returned concrete file paths
-        : globby.sync(specPattern); // convert the glob pattern to concrete file paths
+        : globbySync(specPattern); // convert the glob pattern to concrete file paths
 
       const shareStacks = process.env.CYPRESS_SHARE_STACKS === 'true';
       const lbConfig: LoadBalancerConfig | undefined = resolveLoadBalancerConfig();
@@ -457,8 +460,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (!files?.length) {
         log.info('No tests found');
-        // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return;
       }
 
       const failedSpecFilePaths: string[] = [];
@@ -531,7 +533,16 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               }
 
               // Wait for project to be initialized
-              await cloudHandler.waitForProjectInitialized(project.id);
+              try {
+                await cloudHandler.waitForProjectInitialized(project.id);
+              } catch (error) {
+                if (isProjectInitTimeoutError(error)) {
+                  log.error(`${error.message} (exit ${PROJECT_INIT_TIMEOUT_EXIT_CODE})`);
+                  // eslint-disable-next-line no-process-exit
+                  return process.exit(PROJECT_INIT_TIMEOUT_EXIT_CODE);
+                }
+                throw error;
+              }
 
               // Base64 encode the credentials in order to invoke ES and KB APIs
               const auth = btoa(`${credentials.username}:${credentials.password}`);

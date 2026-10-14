@@ -10,7 +10,7 @@ import type { RunContext, TaskDefinition } from './task';
 import { TaskCost, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
-import { sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
+import { REMOVED_TYPES, sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -59,39 +59,41 @@ describe('taskTypeDictionary', () => {
     definitions = new TaskTypeDictionary(logger);
   });
 
+  it('recognizes the retired Significant Events v1 rule task type', () => {
+    expect(REMOVED_TYPES).toContain('alerting:streams.rules.esql');
+  });
+
   describe('sanitizeTaskDefinitions', () => {
     it('provides tasks with defaults', () => {
       const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
       const result = sanitizeTaskDefinitions(taskDefinitions);
 
-      expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_0",
+      expect(result).toEqual([
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_0',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_1",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_1',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_2",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_2',
         },
-      ]
-    `);
+      ]);
     });
 
     it('throws a validation exception for invalid task definition', () => {
@@ -201,9 +203,64 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid priority \\"23\\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50"`
+        `"Invalid priority \\"23\\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100"`
       );
     });
+
+    it('keeps a valid runAs definition', () => {
+      const withScopedRequest = jest.fn();
+      const [definition] = sanitizeTaskDefinitions({
+        some_kind_of_task: {
+          title: 'Test XYZ',
+          runAs: { workloadTypes: ['workflow'], withScopedRequest },
+          createTaskRunner: jest.fn(),
+        },
+      });
+
+      expect(definition.runAs).toEqual({ workloadTypes: ['workflow'], withScopedRequest });
+      expect(definition.runAs?.withScopedRequest).toBe(withScopedRequest);
+    });
+
+    it.each([
+      [
+        'a reserved workload type',
+        { workloadTypes: ['task_identity'], withScopedRequest: jest.fn() },
+        '[runAs.workloadTypes.0]: The workload type "task_identity" is reserved for Task Manager.',
+      ],
+      [
+        'an invalid workload type',
+        { workloadTypes: ['Workflow-Type'], withScopedRequest: jest.fn() },
+        '[runAs.workloadTypes.0]: Invalid workload type "Workflow-Type". Workload types must match /^[a-z0-9_]+$/.',
+      ],
+      [
+        'no workload types',
+        { workloadTypes: [], withScopedRequest: jest.fn() },
+        '[runAs.workloadTypes]: array size is [0], but cannot be smaller than [1]',
+      ],
+      [
+        'a withScopedRequest that is not a function',
+        { workloadTypes: ['workflow'], withScopedRequest: 'nope' },
+        '[runAs.withScopedRequest]: withScopedRequest must be a function.',
+      ],
+      [
+        'no withScopedRequest',
+        { workloadTypes: ['workflow'] },
+        '[runAs.withScopedRequest]: expected value of type [any] but got [undefined]',
+      ],
+    ])(
+      'throws a validation exception for a runAs definition with %s',
+      (_, runAs, expectedError) => {
+        expect(() =>
+          sanitizeTaskDefinitions({
+            some_kind_of_task: {
+              title: 'Test XYZ',
+              runAs: runAs as unknown as TaskDefinition['runAs'],
+              createTaskRunner: jest.fn(),
+            },
+          })
+        ).toThrow(expectedError);
+      }
+    );
   });
 
   describe('registerTaskDefinitions', () => {
@@ -223,7 +280,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
           createTaskRunner: jest.fn(),
         },
       });
@@ -249,7 +306,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,NormalLongRunning => 40,Normal => 50`
+        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });
@@ -284,7 +341,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,ExtraLarge => 10`
+        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,Large => 4,ExtraLarge => 10`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });

@@ -56,18 +56,18 @@ describe('App helpers', () => {
       });
 
       expect(props.application.navigateToApp).not.toHaveBeenCalled();
-      expect(result.current.shouldShowGoBackToVizEditorModal).toBe(true);
+      expect(result.current.shouldShowGoBackToVisEditorModal).toBe(true);
     });
 
-    it('navigateToVizEditor hides modal and navigates back to Viz editor', () => {
+    it('navigateToVisEditor hides modal and navigates back to Vis editor', () => {
       const props = getDefaultProps();
       const { result } = renderHook(() => useNavigateBackToApp(props));
 
       act(() => {
-        result.current.navigateToVizEditor();
+        result.current.navigateToVisEditor();
       });
 
-      expect(result.current.shouldShowGoBackToVizEditorModal).toBe(false);
+      expect(result.current.shouldShowGoBackToVisEditorModal).toBe(false);
       expect(props.application.navigateToApp).toHaveBeenCalledWith(props.legacyEditorAppName, {
         path: props.legacyEditorAppUrl,
       });

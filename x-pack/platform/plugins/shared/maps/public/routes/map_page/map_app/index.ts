@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import type { AnyAction } from 'redux';
+import { connect } from 'react-redux-v7';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import type { AnyAction } from 'redux-v4';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
@@ -19,6 +19,7 @@ import {
   getQueryableUniqueIndexPatternIds,
   getTimeFilters,
   hasDirtyState,
+  isMapLoading,
 } from '../../../selectors/map_selectors';
 import { setQuery, setExecutionContext, enableFullScreen, openMapSettings } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
@@ -27,6 +28,7 @@ import type { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
+    isMapLoading: isMapLoading(state),
     isFullScreen: getIsFullScreen(state),
     isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     isSaveDisabled: hasDirtyState(state),

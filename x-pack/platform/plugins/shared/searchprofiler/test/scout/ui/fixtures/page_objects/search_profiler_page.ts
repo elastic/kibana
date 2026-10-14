@@ -16,6 +16,7 @@ export class SearchProfilerPage {
   readonly profileTree: Locator;
   readonly jsonParseErrorToast: Locator;
   readonly noShardsNotification: Locator;
+  readonly consolePanel: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.container = this.page.testSubj.locator('searchprofiler');
@@ -25,20 +26,26 @@ export class SearchProfilerPage {
     this.profileTree = this.page.testSubj.locator('profileTree');
     this.jsonParseErrorToast = this.page.testSubj.locator('jsonParseErrorToast');
     this.noShardsNotification = this.page.testSubj.locator('noShardsNotification');
+    this.consolePanel = this.page.testSubj.locator('consolePanel');
   }
 
   async goto(options: { index?: string; loadFrom?: string } = {}) {
     const query = new URLSearchParams();
-    if (options.index) {
+    if (options.index !== undefined) {
       query.set('index', options.index);
     }
-    if (options.loadFrom) {
+    if (options.loadFrom !== undefined) {
       query.set('load_from', compressToEncodedURIComponent(options.loadFrom));
     }
 
     const hash = query.size > 0 ? `searchprofiler?${query.toString()}` : 'searchprofiler';
     await this.page.gotoApp('dev_tools', { hash });
     await this.container.waitFor();
+  }
+
+  async gotoConsole() {
+    await this.page.gotoApp('dev_tools', { hash: 'console' });
+    await this.consolePanel.waitFor({ state: 'visible' });
   }
 
   async waitForEditorToLoad() {

@@ -8,9 +8,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
-import { EuiButtonIcon, EuiDescriptionList, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,6 +28,7 @@ import { useHistory } from 'react-router-dom';
 
 import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
+  parseRuleCircuitBreakerErrorMessage,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
@@ -34,6 +40,7 @@ import {
   getCreateRuleRoute,
   getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
+  getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
@@ -74,6 +81,7 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { ManageLicenseModal } from './manage_license_modal';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
+import { RulesListUiamApiKeyBanner } from './rules_list_uiam_api_key_banner';
 import { RulesListPrompts } from './rules_list_prompts';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 
@@ -120,6 +128,7 @@ export interface RulesListProps {
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
   navigateToCreateRuleForm?: (ruleTypeId: string) => void;
+  navigateToCreateRuleFromTemplateForm?: (templateId: string) => void;
 }
 
 export const percentileFields = {
@@ -162,6 +171,7 @@ export const RulesList = ({
   onRefresh,
   navigateToEditRuleForm,
   navigateToCreateRuleForm,
+  navigateToCreateRuleFromTemplateForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -307,7 +317,7 @@ export const RulesList = ({
     }
 
     navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+      path: getTriggersActionsManagementPath(getEditRuleRoute(ruleItem.id)),
       state: {
         returnApp: 'management',
         returnPath: `insightsAndAlerting/triggersActions/rules`,
@@ -656,14 +666,26 @@ export const RulesList = ({
       const RuleCloned = await cloneRule({ http, ruleId });
       cloneRuleId.current = RuleCloned.id;
       await loadRules();
-    } catch {
+    } catch (error) {
       cloneRuleId.current = null;
       setIsCloningRule(false);
-      toasts.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
-          defaultMessage: 'Unable to clone rule',
-        })
-      );
+
+      const parsedError = parseRuleCircuitBreakerErrorMessage(error.body?.message ?? '');
+      if (!!parsedError.details) {
+        toasts.addDanger({
+          title: parsedError.summary,
+          text: toMountPoint(
+            <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>,
+            startServices
+          ),
+        });
+      } else {
+        toasts.addDanger(
+          i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+            defaultMessage: 'Unable to clone rule',
+          })
+        );
+      }
     }
   };
 
@@ -756,6 +778,9 @@ export const RulesList = ({
 
   return (
     <>
+      {kibanaServices.isServerless && config.apiKeyType === 'uiam' ? (
+        <RulesListUiamApiKeyBanner />
+      ) : null}
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
@@ -875,6 +900,7 @@ export const RulesList = ({
             <RulesListTable
               items={tableItems}
               isLoading={isRulesTableLoading}
+              ruleDetailsRoute={ruleDetailsRoute}
               rulesState={rulesState}
               ruleTypesState={ruleTypesState}
               ruleTypeRegistry={ruleTypeRegistry}
@@ -948,13 +974,18 @@ export const RulesList = ({
                   _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
 
                 return isLicenseError || hasErrorMessage ? (
-                  <EuiButtonIcon
-                    onClick={() => toggleErrorMessage(_executionStatus, rule)}
-                    aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={
-                      itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
-                    }
-                  />
+                  <EuiToolTip
+                    content={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      onClick={() => toggleErrorMessage(_executionStatus, rule)}
+                      aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                      iconType={
+                        itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                      }
+                    />
+                  </EuiToolTip>
                 ) : null;
               }}
               renderSelectAllDropdown={() => {
@@ -1018,18 +1049,20 @@ export const RulesList = ({
                 navigateToCreateRuleForm(ruleTypeId);
               } else {
                 navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                  path: getTriggersActionsManagementPath(getCreateRuleRoute(ruleTypeId)),
                 });
               }
             }}
             onSelectTemplate={(templateId) => {
-              // For templates, we need to extract the ruleTypeId or handle it differently
-              // For now, fall back to default behavior
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                  encodeURIComponent(templateId)
-                )}`,
-              });
+              if (navigateToCreateRuleFromTemplateForm) {
+                navigateToCreateRuleFromTemplateForm(templateId);
+              } else {
+                navigateToApp('management', {
+                  path: getTriggersActionsManagementPath(
+                    getCreateRuleFromTemplateRoute(encodeURIComponent(templateId))
+                  ),
+                });
+              }
             }}
             http={http}
             toasts={toasts}

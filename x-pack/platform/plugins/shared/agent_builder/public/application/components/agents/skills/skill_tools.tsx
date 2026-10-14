@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 
 export interface SkillToolsProps {
@@ -44,7 +46,16 @@ export const SkillTools = ({ skillToolIds, onToolClick }: SkillToolsProps) => {
       >
         {skillToolIds.map((toolId) => (
           <EuiFlexItem key={toolId} grow={false}>
-            <EuiLink onClick={() => onToolClick(toolId)}>{toolId}</EuiLink>
+            <EuiLink
+              onClick={() => onToolClick(toolId)}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.SKILL_TOOL_CLICK,
+                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              })}
+            >
+              {toolId}
+            </EuiLink>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

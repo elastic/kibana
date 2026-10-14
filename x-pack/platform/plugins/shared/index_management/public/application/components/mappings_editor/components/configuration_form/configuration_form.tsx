@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
+import { loadSyntheticSourceStatus } from '../../../../services/api';
 import { useForm, Form } from '../../shared_imports';
 import type { GenericObject, MappingsConfiguration } from '../../types';
 import { MapperSizePluginId } from '../../constants';
@@ -26,6 +27,7 @@ import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { SubobjectsSection } from './subobjects_section';
 import { configurationFormSchema } from './configuration_form_schema';
 import type { IndexMode } from '../../../../../../common/types/data_streams';
+import { LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../../../../../../common/constants';
 
 interface Props {
   value?: MappingsConfiguration;
@@ -134,9 +136,14 @@ export const formDeserializer = (formData: GenericObject) => {
 export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode }: Props) => {
   const {
     config: { enableMappingsSourceFieldSection },
+    hasAtLeastEnterpriseLicense,
   } = useAppContext();
 
   const isMounted = useRef(false);
+  const [syntheticSourceFallbackToStoredSource, setSyntheticSourceFallbackToStoredSource] =
+    useState<boolean>();
+  const canUseSyntheticSource =
+    hasAtLeastEnterpriseLicense && syntheticSourceFallbackToStoredSource === false;
 
   const { form } = useForm({
     schema: configurationFormSchema,
@@ -151,6 +158,33 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
 
   const isMapperSizeSectionVisible =
     value?._size !== undefined || esNodesPlugins.includes(MapperSizePluginId);
+
+  useEffect(() => {
+    let isSubscribed = true;
+
+    if (!hasAtLeastEnterpriseLicense || !enableMappingsSourceFieldSection) {
+      setSyntheticSourceFallbackToStoredSource(undefined);
+      return () => {
+        isSubscribed = false;
+      };
+    }
+
+    loadSyntheticSourceStatus()
+      .then(({ syntheticSourceFallbackToStoredSource: fallbackToStoredSource }) => {
+        if (isSubscribed) {
+          setSyntheticSourceFallbackToStoredSource(fallbackToStoredSource);
+        }
+      })
+      .catch(() => {
+        if (isSubscribed) {
+          setSyntheticSourceFallbackToStoredSource(true);
+        }
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [enableMappingsSourceFieldSection, hasAtLeastEnterpriseLicense]);
 
   useEffect(() => {
     const subscription = subscribe(({ data, isValid, validate }) => {
@@ -177,6 +211,26 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
   }, [value, reset]);
 
   useEffect(() => {
+    if (
+      !value?._source &&
+      canUseSyntheticSource &&
+      enableMappingsSourceFieldSection &&
+      (indexMode === LOGSDB_INDEX_MODE || indexMode === TIME_SERIES_MODE)
+    ) {
+      // If the source field is undefined (hasn't been set in the form)
+      // and if the user has selected a `logsdb` or `time_series` index mode in the Logistics step,
+      // update the form data with synthetic _source
+      const nextValue = {
+        ...(value ?? {}),
+        _source: { mode: SYNTHETIC_SOURCE_OPTION },
+      } as MappingsConfiguration;
+
+      reset({ resetValues: true, defaultValue: nextValue });
+      dispatch({ type: 'configuration.save', value: nextValue as any });
+    }
+  }, [canUseSyntheticSource, dispatch, enableMappingsSourceFieldSection, indexMode, reset, value]);
+
+  useEffect(() => {
     isMounted.current = true;
 
     return () => {
@@ -201,7 +255,8 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
       <EuiSpacer size="xl" />
       {enableMappingsSourceFieldSection && (
         <>
-          <SourceFieldSection indexMode={indexMode} /> <EuiSpacer size="xl" />
+          <SourceFieldSection canUseSyntheticSource={canUseSyntheticSource} indexMode={indexMode} />{' '}
+          <EuiSpacer size="xl" />
         </>
       )}
       <RoutingSection />

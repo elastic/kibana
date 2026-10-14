@@ -6,16 +6,19 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { EQUATION_REGEX, validateCustomThreshold } from './validation';
 
 const errorReason = 'this should appear as error reason';
 
 jest.mock('@kbn/es-query', () => {
   return {
+    fromKueryExpression: jest.requireActual('@kbn/es-query').fromKueryExpression,
     buildEsQuery: jest.fn(() => {
       // eslint-disable-next-line no-throw-literal
       throw { shortMessage: errorReason };
@@ -87,5 +90,96 @@ describe('Metric Threshold Validation', () => {
       } as unknown as CustomMetricExpressionParams[],
     });
     expect(res.errors.filterQuery[0]).toBe(`Filter query is invalid. ${errorReason}`);
+  });
+
+  describe('metric KQL filter', () => {
+    const validate = (metric: Partial<CustomThresholdExpressionMetric>) =>
+      validateCustomThreshold({
+        uiSettings: { get: jest.fn() } as unknown as IUiSettingsClient,
+        searchConfiguration: { index: 'test*' },
+        criteria: [
+          { metrics: [{ name: 'A', ...metric }] },
+        ] as unknown as CustomMetricExpressionParams[],
+      }).errors[0].metrics.A;
+
+    it.each(Object.values(Aggregators))(
+      'reports a syntax error for an invalid filter on %s',
+      (aggType) => {
+        expect(validate({ aggType, field: 'metric', filter: 'status: (' }).filter).toEqual(
+          expect.any(String)
+        );
+      }
+    );
+
+    it.each([Aggregators.COUNT, Aggregators.AVERAGE, Aggregators.RATE, Aggregators.LAST_VALUE])(
+      'does not report an error for a valid filter on %s',
+      (aggType) => {
+        expect(validate({ aggType, field: 'metric', filter: 'status: 500' })).toBeUndefined();
+      }
+    );
+  });
+
+  describe('warning threshold', () => {
+    const baseCriterion = {
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [10],
+      timeSize: 1,
+      timeUnit: 'm',
+      metrics: [
+        {
+          name: 'A',
+          aggType: 'avg',
+          field: 'system.cpu.user.pct',
+        },
+      ],
+    } as unknown as CustomMetricExpressionParams;
+
+    it('requires a warning threshold value once warningThreshold is set but empty', () => {
+      const res = validateCustomThreshold({
+        uiSettings: {} as IUiSettingsClient,
+        searchConfiguration: {},
+        criteria: [
+          {
+            ...baseCriterion,
+            warningComparator: COMPARATORS.GREATER_THAN,
+            warningThreshold: [] as number[],
+          },
+        ],
+      });
+      expect(res.errors['0'].warning.threshold0).toContain('Threshold is required.');
+    });
+
+    it('requires warning threshold values to be numbers', () => {
+      const res = validateCustomThreshold({
+        uiSettings: {} as IUiSettingsClient,
+        searchConfiguration: {},
+        criteria: [
+          {
+            ...baseCriterion,
+            warningComparator: COMPARATORS.GREATER_THAN,
+            warningThreshold: [undefined] as unknown as number[],
+          },
+        ],
+      });
+      expect(res.errors['0'].warning.threshold0).toContain(
+        'Thresholds must contain a valid number.'
+      );
+    });
+
+    it('produces no warning errors for a valid warning threshold', () => {
+      const res = validateCustomThreshold({
+        uiSettings: {} as IUiSettingsClient,
+        searchConfiguration: {},
+        criteria: [
+          {
+            ...baseCriterion,
+            warningComparator: COMPARATORS.GREATER_THAN,
+            warningThreshold: [5],
+          },
+        ],
+      });
+      expect(res.errors['0'].warning.threshold0).toHaveLength(0);
+      expect(res.errors['0'].warning.threshold1).toHaveLength(0);
+    });
   });
 });

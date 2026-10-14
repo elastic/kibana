@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
@@ -22,20 +22,29 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
+import { InlineFieldActions } from './inline_field_actions';
 
-type InputTextProps = z.infer<typeof InputTextFieldSchema> & ConditionRenderProps;
+type InputTextProps = z.infer<typeof InputTextFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const InputText = ({
   label,
   name,
   type,
   isRequired,
+  isRequiredOnClose,
   patternValidation,
   minLength,
   maxLength,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
 }: InputTextProps) => {
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const rules = useMemo(() => {
@@ -71,6 +80,11 @@ export const InputText = ({
     return { validate };
   }, [isRequired, patternValidation, minLength, maxLength]);
 
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
+
   return (
     <Controller
       key={name}
@@ -78,25 +92,40 @@ export const InputText = ({
       control={control}
       rules={rules}
       defaultValue=""
-      render={({ field, fieldState }) => (
-        <EuiFormRow
-          label={label}
-          labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-          isInvalid={!!fieldState.error}
-          error={fieldState.error?.message}
-          fullWidth
-        >
-          <EuiFieldText
-            inputRef={field.ref}
-            name={field.name}
-            value={(field.value as string) ?? ''}
-            onChange={(e) => field.onChange(e.target.value)}
-            onBlur={field.onBlur}
-            isInvalid={!!fieldState.error}
-            fullWidth
-          />
-        </EuiFormRow>
-      )}
+      render={({ field, fieldState }) => {
+        const showInlineActions = fieldState.isDirty && onConfirm != null;
+        return (
+          <>
+            <EuiFormRow
+              label={label}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+              isInvalid={Boolean(fieldState.error)}
+              error={fieldState.error?.message}
+              fullWidth
+            >
+              <EuiFieldText
+                inputRef={field.ref}
+                name={field.name}
+                value={(field.value as string) ?? ''}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                isInvalid={Boolean(fieldState.error)}
+                disabled={isSaving}
+                fullWidth
+              />
+            </EuiFormRow>
+            {showInlineActions && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
+      }}
     />
   );
 };

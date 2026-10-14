@@ -100,7 +100,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {
@@ -174,8 +174,8 @@ describe('ReferenceLines', () => {
         <ReferenceLines
           {...defaultProps}
           formatters={{
-            yAccessorLeftFirstId: { convert: convertLeft } as unknown as FieldFormat,
-            yAccessorRightFirstId: { convert: convertRight } as unknown as FieldFormat,
+            yAccessorLeftFirstId: { convertToText: convertLeft } as unknown as FieldFormat,
+            yAccessorRightFirstId: { convertToText: convertRight } as unknown as FieldFormat,
           }}
           layers={createLayers(
             [
@@ -226,7 +226,7 @@ describe('ReferenceLines', () => {
 
       expect(convertLeft).toHaveBeenCalled();
       expect(convertRight).toHaveBeenCalled();
-      expect(defaultProps.xAxisFormatter.convert).not.toHaveBeenCalled();
+      expect(defaultProps.xAxisFormatter.convertToText).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -543,13 +543,69 @@ describe('ReferenceLines', () => {
     );
   });
 
+  it('prefers the shared y axis formatter over a reference column formatter', () => {
+    const wrapper = shallow(
+      <ReferenceLines
+        xAxisFormatter={{ convertToText: (value: unknown) => String(value) } as FieldFormat}
+        isHorizontal={false}
+        paddingMap={{}}
+        yAxesMap={{ left: undefined, right: undefined }}
+        axesConfiguration={[
+          {
+            groupId: 'left',
+            position: 'left',
+            series: [],
+            formatter: {
+              convertToText: (value: unknown) => `axis-${value}`,
+            } as unknown as FieldFormat,
+          },
+        ]}
+        formatters={{
+          yAccessorLeftFirstId: {
+            convertToText: (value: unknown) => `column-${value}`,
+          } as unknown as FieldFormat,
+        }}
+        layers={createLayers(
+          [
+            {
+              forAccessor: 'yAccessorLeftFirstId',
+              position: 'left',
+              lineStyle: 'solid',
+              type: 'referenceLineDecorationConfig',
+            },
+          ],
+          {
+            type: 'datatable',
+            rows: [row],
+            columns: Object.keys(row).map((id) => ({
+              id,
+              name: id,
+              meta: { type: 'number' },
+            })),
+          }
+        )}
+      />
+    );
+
+    expect(
+      wrapper
+        .find(ReferenceLineLayer)
+        .dive()
+        .find(ReferenceLineAnnotations)
+        .first()
+        .dive()
+        .find(LineAnnotation)
+        .prop('dataValues')
+    ).toEqual(expect.arrayContaining([{ dataValue: 5, details: 'axis-5', header: undefined }]));
+  });
+
   describe('referenceLines', () => {
     let defaultProps: Omit<ReferenceLinesProps, 'data' | 'layers'>;
 
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {

@@ -25,4 +25,12 @@ describe('upsellingPages', () => {
 
     expect(aiValuePage?.minimumLicenseRequired).toEqual('enterprise');
   });
+
+  it('should register the Attacks page with the expected minimum license for self managed', () => {
+    const attacksPage = upsellingPages.find(
+      ({ pageName }) => pageName === SecurityPageName.attacks
+    );
+
+    expect(attacksPage?.minimumLicenseRequired).toEqual('enterprise');
+  });
 });

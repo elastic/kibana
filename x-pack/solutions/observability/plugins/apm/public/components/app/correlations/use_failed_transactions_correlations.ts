@@ -22,8 +22,6 @@ import type {
 } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
-import { callApmApi } from '../../../services/rest/create_call_apm_api';
-
 import type { CorrelationsProgress } from './utils/analysis_hook_utils';
 import {
   getInitialResponse,
@@ -31,6 +29,7 @@ import {
   getReducer,
 } from './utils/analysis_hook_utils';
 import { useFetchParams } from './use_fetch_params';
+import { getApmInternalServices } from '../../../plugin';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;
@@ -40,6 +39,7 @@ const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.9 - LOADED_FIELD_CANDIDATES;
 
 export function useFailedTransactionsCorrelations() {
+  const { callApmApi } = getApmInternalServices();
   const fetchParams = useFetchParams();
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -245,7 +245,7 @@ export function useFailedTransactionsCorrelations() {
         setResponse.flush();
       }
     }
-  }, [fetchParams, setResponse]);
+  }, [fetchParams, setResponse, callApmApi]);
 
   const cancelFetch = useCallback(() => {
     abortCtrl.current.abort();

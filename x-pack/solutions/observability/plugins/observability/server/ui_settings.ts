@@ -32,8 +32,10 @@ import {
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
+  apmTraceLogsDefaultColumns,
   searchExcludedDataTiers,
   enableDiagnosticMode,
+  apmMaxNumberOfServices,
 } from '../common/ui_settings_keys';
 
 /**
@@ -156,6 +158,29 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.number({ min: 1 }),
     solutionViews: ['classic', 'oblt'],
   },
+  [apmMaxNumberOfServices]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingName', {
+      defaultMessage: 'Maximum services in the Services Inventory',
+    }),
+    value: 1000,
+    description: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingDescription', {
+      defaultMessage:
+        'Limit the number of services shown in the Services Inventory (minimum: 1, maximum: 5 000). ' +
+        'Increasing this value beyond the default may slow down queries and increase memory usage on Elasticsearch. ' +
+        'The effective safe maximum also depends on how many transaction types and environments exist per service: ' +
+        'the Services Inventory query uses nested aggregations, and very high values combined with diverse service ' +
+        'configurations can exceed the Elasticsearch {maxBucketsSetting} limit (default 65 536). ' +
+        'If you raise this setting above 2 000, verify or increase {maxBucketsSetting} in your cluster settings.',
+      values: { maxBucketsSetting: 'search.max_buckets' },
+    }),
+    schema: schema.number({
+      min: 1,
+      max: 5000,
+      validate: (n) => (!Number.isInteger(n) ? 'must be a whole number' : undefined),
+    }),
+    solutionViews: ['classic', 'oblt'],
+  },
   [enableInfrastructureAssetCustomDashboards]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
@@ -204,6 +229,22 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: true,
     requiresPageReload: true,
     type: 'boolean',
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
+  },
+  [apmTraceLogsDefaultColumns]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmTraceLogsDefaultColumns', {
+      defaultMessage: 'APM trace logs default columns',
+    }),
+    description: i18n.translate('xpack.observability.apmTraceLogsDefaultColumnsDescription', {
+      defaultMessage:
+        'Default columns for the Logs tab in APM trace samples. Specify field names (e.g. message, log.level). Leave empty to use the Summary column. @timestamp is always shown.',
+    }),
+    value: [],
+    schema: schema.arrayOf(schema.string()),
+    type: 'array',
+    requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],
     technicalPreview: true,
   },
@@ -426,7 +467,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
       {
         defaultMessage: `Specify the data tiers to exclude from search, such as data_cold and/or data_frozen.
-        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure`,
+        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure, Synthetics`,
       }
     ),
     value: [],

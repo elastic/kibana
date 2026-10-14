@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/maps-ems-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/maps-ems-plugin'
   description: Moon project for @kbn/maps-ems-plugin
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/private/maps_ems
 dependsOn:
   - '@kbn/core'

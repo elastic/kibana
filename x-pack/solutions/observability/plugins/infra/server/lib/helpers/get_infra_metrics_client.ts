@@ -23,6 +23,8 @@ import { inspectableEsQueriesMap } from './with_inspect';
 type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   size: number;
   track_total_hits: boolean | number;
+  /** Transport-level ceiling passed through to callWithRequest; see adapter_types.ts:100. */
+  requestTimeout?: string | number;
 };
 
 export type MSearchParams = Omit<RequiredParams, 'allow_no_indices'>;
@@ -57,16 +59,21 @@ export async function getInfraMetricsClient({
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       const startTime = Date.now();
       const collector = request ? inspectableEsQueriesMap.get(request) : undefined;
+      // Wrap in an extra `bool` only when excluding tiers; otherwise pass the
+      // query through to avoid a redundant Lucene rewrite on every search.
+      const wrappedQuery = excludedQuery
+        ? {
+            bool: {
+              filter: excludedQuery,
+              must: [searchParams.query],
+            },
+          }
+        : searchParams.query;
       const finalParams = {
         ...searchParams,
         ignore_unavailable: true,
         index: metricsIndices,
-        query: {
-          bool: {
-            filter: excludedQuery,
-            must: [searchParams.query],
-          },
-        },
+        query: wrappedQuery,
       };
 
       return (

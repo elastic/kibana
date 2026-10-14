@@ -40,7 +40,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 let encryptedHeaders: string;
@@ -63,9 +62,7 @@ beforeEach(async () => {
   encryptedHeaders = await encryptHeaders({});
 
   mockPngExportType = new PngExportType(mockCoreSetup, configType, mockLogger, context);
-  mockPngExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockPngExportType.setup({});
   mockPngExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,

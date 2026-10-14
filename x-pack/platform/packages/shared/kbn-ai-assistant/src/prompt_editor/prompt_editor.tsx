@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, keys } from '@elastic/eui';
 import {
   type Message,
   type TelemetryEventTypeWithPayload,
@@ -144,6 +144,11 @@ export function PromptEditor({
     }
   }, [hidden, onChangeHeight]);
 
+  const submitLabel = i18n.translate(
+    'xpack.aiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
+    { defaultMessage: 'Submit' }
+  );
+
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" ref={containerRef}>
       <EuiFlexItem>
@@ -169,27 +174,26 @@ export function PromptEditor({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
-          aria-label={i18n.translate(
-            'xpack.aiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
-            { defaultMessage: 'Submit' }
-          )}
-          disabled={loading || disabled || invalid}
-          display={
-            mode === 'function'
-              ? innerMessage?.function_call?.name
+        <EuiToolTip content={submitLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
+            aria-label={submitLabel}
+            disabled={loading || disabled || invalid}
+            display={
+              mode === 'function'
+                ? innerMessage?.function_call?.name
+                  ? 'fill'
+                  : 'base'
+                : innerMessage?.content
                 ? 'fill'
                 : 'base'
-              : innerMessage?.content
-              ? 'fill'
-              : 'base'
-          }
-          iconType="kqlFunction"
-          isLoading={loading}
-          size="m"
-          onClick={handleSubmit}
-        />
+            }
+            iconType="kqlFunction"
+            isLoading={loading}
+            size="m"
+            onClick={handleSubmit}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

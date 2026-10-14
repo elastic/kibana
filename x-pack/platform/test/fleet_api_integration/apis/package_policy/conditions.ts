@@ -151,34 +151,83 @@ export default function (providerContext: FtrProviderContext) {
       expect(fetched.inputs[0].streams[0].condition).to.eql("${host.name} == 'macbook'");
     });
 
-    it('fans out integration-level condition to inputs in the full agent policy', async () => {
-      const integrationCondition = "${host.platform} == 'linux'";
-      const inputCondition = "${host.platform} != 'windows'";
-      const streamCondition = "${host.name} == 'mybox'";
-
-      await createPackagePolicy({
-        name: `cond-full-${uuidv4()}`,
+    it('clears condition fields when null is sent on update', async () => {
+      const created = await createPackagePolicy({
+        name: `cond-clear-${uuidv4()}`,
         namespace: 'default',
         policy_id: agentPolicyId,
-        condition: integrationCondition,
+        condition: "${host.platform} == 'linux'",
         inputs: [
           {
             type: INPUT_TYPE,
             enabled: true,
-            condition: inputCondition,
-            streams: [makeStream({ condition: streamCondition })],
+            condition: "${host.platform} != 'windows'",
+            streams: [makeStream({ condition: "${host.name} == 'mybox'" })],
           },
         ],
         package: { name: PKG_NAME, version: PKG_VERSION },
       });
+      const id = created.item.id;
 
-      const fullPolicy = await getFullAgentPolicy(agentPolicyId);
-      const input = fullPolicy.inputs.find((i: { type: string }) => i.type === INPUT_TYPE);
-      expect(input).to.be.ok();
-      // Integration- and input-level conditions AND-combine at the input; no template condition for this package.
-      expect(input.condition).to.eql(`(${integrationCondition}) and (${inputCondition})`);
-      // Stream-level condition emits as-is when there is no template stream condition.
-      expect(input.streams[0].condition).to.eql(streamCondition);
+      await supertest
+        .put(`/api/fleet/package_policies/${id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: created.item.name,
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          condition: null,
+          inputs: [
+            {
+              type: INPUT_TYPE,
+              enabled: true,
+              condition: null,
+              streams: [makeStream({ condition: null })],
+            },
+          ],
+          package: { name: PKG_NAME, version: PKG_VERSION },
+        })
+        .expect(200);
+
+      const fetched = await getPackagePolicy(id);
+      expect(fetched.condition).to.be(null);
+      expect(fetched.inputs[0].condition).to.be(null);
+      expect(fetched.inputs[0].streams[0].condition).to.be(null);
+    });
+
+    it('fans out integration-level condition to inputs in the full agent policy', async () => {
+      const tempAgentPolicyId = await createAgentPolicy();
+      try {
+        const integrationCondition = "${host.platform} == 'linux'";
+        const inputCondition = "${host.platform} != 'windows'";
+        const streamCondition = "${host.name} == 'mybox'";
+
+        await createPackagePolicy({
+          name: `cond-full-${uuidv4()}`,
+          namespace: 'default',
+          policy_id: tempAgentPolicyId,
+          condition: integrationCondition,
+          inputs: [
+            {
+              type: INPUT_TYPE,
+              enabled: true,
+              condition: inputCondition,
+              streams: [makeStream({ condition: streamCondition })],
+            },
+          ],
+          package: { name: PKG_NAME, version: PKG_VERSION },
+        });
+
+        const fullPolicy = await getFullAgentPolicy(tempAgentPolicyId);
+        const input = fullPolicy.inputs.find((i: { type: string }) => i.type === INPUT_TYPE);
+        expect(input).to.be.ok();
+        // Integration- and input-level conditions AND-combine at the input; no template condition for this package.
+        expect(input.condition).to.eql(`(${integrationCondition}) and (${inputCondition})`);
+        // Stream-level condition emits as-is when there is no template stream condition.
+        expect(input.streams[0].condition).to.eql(streamCondition);
+      } finally {
+        await deleteAgentPolicy(tempAgentPolicyId);
+      }
     });
 
     it('rejects any condition on agentless package policies (400)', async () => {

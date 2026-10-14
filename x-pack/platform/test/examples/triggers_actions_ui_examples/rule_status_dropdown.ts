@@ -37,17 +37,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.find('statusDropdown');
       await testSubjects.click('statusDropdown');
       await testSubjects.click('statusDropdownSnoozeItem');
+      // Wait for the context menu to finish sliding to the snooze panel (panel-0
+      // items removed) so the typed value isn't dropped mid-transition.
+      await testSubjects.missingOrFail('statusDropdownEnabledItem');
       await testSubjects.setValue('ruleSnoozeIntervalValue', '10');
       await testSubjects.setValue('ruleSnoozeIntervalUnit', 'h');
       await testSubjects.click('ruleSnoozeApply');
 
-      // Wait for the dropdown to finish re-rendering before opening again
-      await new Promise((res) => setTimeout(res, 500));
+      // Wait for the popover to close after applying before reopening it.
+      await testSubjects.missingOrFail('snoozePanel');
 
       await testSubjects.click('statusDropdown');
       await testSubjects.click('statusDropdownSnoozeItem');
+      await testSubjects.missingOrFail('statusDropdownEnabledItem');
       await testSubjects.setValue('ruleSnoozeIntervalValue', '3');
-      expect(await testSubjects.exists('ruleSnoozePreviousText')).to.be(true);
+      await testSubjects.existOrFail('ruleSnoozePreviousText');
       expect(await testSubjects.getVisibleText('ruleSnoozePreviousText')).to.be('10 hours');
     });
   });

@@ -12,17 +12,15 @@ import type {
   PublishesTimeRange,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 
 export interface PatternAnalysisComponentApi {
-  dataViewId: PublishingSubject<PatternAnalysisEmbeddableState['dataViewId']>;
-  fieldName: PublishingSubject<PatternAnalysisEmbeddableState['fieldName']>;
-  minimumTimeRangeOption: PublishingSubject<
-    PatternAnalysisEmbeddableState['minimumTimeRangeOption']
-  >;
-  randomSamplerMode: PublishingSubject<PatternAnalysisEmbeddableState['randomSamplerMode']>;
+  dataViewId: PublishingSubject<PatternAnalysisEmbeddableState['data_view_id']>;
+  fieldName: PublishingSubject<PatternAnalysisEmbeddableState['field_name']>;
+  minimumTimeRangeOption: PublishingSubject<PatternAnalysisEmbeddableState['minimum_time_range']>;
+  randomSamplerMode: PublishingSubject<PatternAnalysisEmbeddableState['random_sampler_mode']>;
   randomSamplerProbability: PublishingSubject<
-    PatternAnalysisEmbeddableState['randomSamplerProbability']
+    PatternAnalysisEmbeddableState['random_sampler_probability']
   >;
   updateUserInput: (update: PatternAnalysisEmbeddableState) => void;
 }

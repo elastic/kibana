@@ -12,6 +12,7 @@ const defaultConfig = require('@kbn/storybook').defaultConfig;
 module.exports = {
   ...defaultConfig,
   typescript: {
+    ...defaultConfig.typescript,
     reactDocgen: 'react-docgen-typescript',
   },
 };

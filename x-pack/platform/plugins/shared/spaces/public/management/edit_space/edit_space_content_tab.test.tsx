@@ -16,6 +16,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -77,7 +78,7 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
 
 describe('EditSpaceContentTab', () => {
   const space: Space = {
-    id: '1',
+    id: asSpaceId('1'),
     name: 'space1',
     disabledFeatures: [],
   };

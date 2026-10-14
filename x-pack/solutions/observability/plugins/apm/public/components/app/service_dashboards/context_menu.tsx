@@ -6,7 +6,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 
 interface Props {
   items: React.ReactNode[];
@@ -29,16 +35,23 @@ export function ContextMenu({ items }: Props) {
         defaultMessage: 'More actions',
       })}
       button={
-        <EuiButtonIcon
-          data-test-subj="apmContextMenuButton"
-          display="base"
-          size="s"
-          iconType="boxesVertical"
-          aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
             defaultMessage: 'More',
           })}
-          onClick={onButtonClick}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="apmContextMenuButton"
+            display="base"
+            size="s"
+            iconType="boxesVertical"
+            aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
+              defaultMessage: 'More',
+            })}
+            onClick={onButtonClick}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

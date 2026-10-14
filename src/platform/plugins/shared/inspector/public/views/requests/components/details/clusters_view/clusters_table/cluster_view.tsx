@@ -10,9 +10,9 @@
 import React from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiText } from '@elastic/eui';
-import { ShardsView } from './shards_view';
-import { OpenShardFailureFlyoutButton } from './shards_view';
+import { EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { ShardsView, useShardFailureFlyout } from './shards_view';
 
 interface Props {
   clusterDetails: estypes.ClusterDetails;
@@ -25,42 +25,49 @@ export function ClusterView({ clusterDetails }: Props) {
   const shardFailures = (clusterDetails.failures ?? []).filter((failure) => {
     return typeof failure.shard !== 'undefined' && failure.shard >= 0;
   });
+  const failedShards = clusterFailure?.reason.failed_shards ?? [];
+  const {
+    triggerLabel: shardFailureButtonLabel,
+    flyout: shardFailureFlyout,
+    openFlyout: openShardFailures,
+  } = useShardFailureFlyout(failedShards);
 
   return (
     <EuiText css={{ width: '100%' }} size="xs" data-test-subj="inspectorRequestClustersDetails">
       {clusterDetails.timed_out ? (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           size="s"
-          color="warning"
           title={i18n.translate('inspector.requests.clusters.timedOutMessage', {
             defaultMessage:
               'Request timed out before completion. Results may be incomplete or empty.',
           })}
-          iconType="warning"
         />
       ) : null}
 
       {clusterFailure ? (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           size="s"
-          color="warning"
           title={i18n.translate('inspector.requests.clusters.failedClusterMessage', {
             defaultMessage: 'Search failed',
           })}
-          iconType="warning"
-        >
-          <p>
-            {clusterFailure.reason.reason
-              ? `${clusterFailure.reason.type}: "${clusterFailure.reason.reason}"`
-              : clusterFailure.reason.type}
-          </p>
-          {clusterFailure.reason.failed_shards ? (
-            <OpenShardFailureFlyoutButton failures={clusterFailure.reason.failed_shards} />
-          ) : null}
-        </EuiCallOut>
+          text={
+            <>
+              {clusterFailure.reason.reason
+                ? `${clusterFailure.reason.type}: "${clusterFailure.reason.reason}"`
+                : clusterFailure.reason.type}
+            </>
+          }
+          actionProps={
+            failedShards.length
+              ? { primary: { children: shardFailureButtonLabel, onClick: openShardFailures } }
+              : undefined
+          }
+        />
       ) : null}
+
+      {shardFailureFlyout}
 
       <ShardsView failures={shardFailures} shardStats={clusterDetails._shards} />
     </EuiText>

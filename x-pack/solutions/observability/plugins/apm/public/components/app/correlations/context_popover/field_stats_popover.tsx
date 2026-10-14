@@ -148,7 +148,7 @@ export function FieldStatsPopoverContent({
             fieldValueStats?.topValues.map((value) => {
               if (progressBarMax === undefined) return null;
 
-              const formatted = formatter.convert(fieldValue);
+              const formatted = formatter.convertToText(fieldValue);
               const decimal = value.doc_count / progressBarMax;
               const valueText = progressBarMax !== undefined ? numeral(decimal).format('0.0%') : '';
 

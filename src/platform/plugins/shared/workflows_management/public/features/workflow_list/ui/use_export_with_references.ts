@@ -93,26 +93,42 @@ export const useExportWithReferences = ({
   );
 
   const exportWithoutReferences = useCallback(
-    (workflowsToExport: WorkflowListItemDto[]) => {
+    async (workflowsToExport: WorkflowListItemDto[]) => {
       if (workflowsToExport.length === 1) {
-        exportSingleWorkflow(workflowsToExport[0]);
-        notifications?.toasts.addSuccess(
-          i18n.translate('workflows.export.singleSuccess', {
-            defaultMessage: 'Workflow exported successfully.',
-          }),
-          { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
-        );
-        telemetry.reportWorkflowExported({
-          workflowCount: 1,
-          format: 'yaml',
-          referenceResolution: 'none',
-        });
-        onComplete?.();
+        try {
+          await exportSingleWorkflow(workflowsToExport[0], api);
+          notifications?.toasts.addSuccess(
+            i18n.translate('workflows.export.singleSuccess', {
+              defaultMessage: 'Workflow exported successfully.',
+            }),
+            { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
+          );
+          telemetry.reportWorkflowExported({
+            workflowCount: 1,
+            format: 'yaml',
+            referenceResolution: 'none',
+          });
+          onComplete?.();
+        } catch (err) {
+          const exportError = err instanceof Error ? err : new Error(String(err));
+          notifications?.toasts.addError(exportError, {
+            title: i18n.translate('workflows.export.error', {
+              defaultMessage: 'Failed to export workflows',
+            }),
+            toastLifeTimeMs: TOAST_LIFE_TIME_MS,
+          });
+          telemetry.reportWorkflowExported({
+            workflowCount: 1,
+            format: 'yaml',
+            referenceResolution: 'none',
+            error: exportError,
+          });
+        }
       } else {
         performExport(workflowsToExport, 'none');
       }
     },
-    [performExport, notifications, onComplete, telemetry]
+    [api, performExport, notifications, onComplete, telemetry]
   );
 
   const startExport = useCallback(

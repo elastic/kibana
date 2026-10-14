@@ -6,8 +6,12 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
+import {
+  evaluateTotalFieldsLimit,
+  getTotalFieldsLimitSettings,
+} from './total_fields_limit_settings';
 
-export const updateIndexTemplateFieldsLimit = ({
+export const updateIndexTemplateFieldsLimit = async ({
   esClient,
   template,
   limit,
@@ -27,6 +31,14 @@ export const updateIndexTemplateFieldsLimit = ({
     ...rest
   } = template.index_template;
 
+  const { isSatisfied, effectiveLimit } = evaluateTotalFieldsLimit(
+    [existingTemplate?.settings],
+    limit
+  );
+  if (isSatisfied) {
+    return;
+  }
+
   return esClient.indices.putIndexTemplate({
     name: template.name,
     ...rest,
@@ -34,8 +46,7 @@ export const updateIndexTemplateFieldsLimit = ({
       ...existingTemplate,
       settings: {
         ...existingTemplate?.settings,
-        'index.mapping.total_fields.limit': limit,
-        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+        ...getTotalFieldsLimitSettings(effectiveLimit),
       },
     },
     // GET brings string | string[] | undefined but this PUT expects string[]

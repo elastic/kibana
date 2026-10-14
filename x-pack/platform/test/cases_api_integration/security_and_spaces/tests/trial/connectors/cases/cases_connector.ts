@@ -458,6 +458,13 @@ export default ({ getService }: FtrProviderContext): void => {
                 value: 'this is a text field value',
               },
             ],
+            // The write-time adapter mirrors customFields into extended_fields when
+            // xpack.cases.templates.enabled is true (set in config_trial.ts). The mirrored
+            // key is the linked definition's label-derived friendly name ("text 1" ->
+            // "text_1"), not the raw v1 custom-field key.
+            extended_fields: {
+              text_1_as_keyword: 'this is a text field value',
+            },
             description: 'case desc',
             duration: null,
             external_service: null,
@@ -1060,11 +1067,11 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          it('sets rule info to null when `internallyManagedAlerts` is `true`', async () => {
+          it('sets rule info to null when `source` is `attack`', async () => {
             await executeConnectorAndVerifyCorrectness({
               supertest,
               connectorId,
-              req: getRequest({ groupingBy: ['host.name'], internallyManagedAlerts: true }),
+              req: getRequest({ groupingBy: ['host.name'], source: 'attack' }),
             });
 
             const cases = await findCases({ supertest });
@@ -1235,7 +1242,7 @@ export default ({ getService }: FtrProviderContext): void => {
             grouping: { field_name_1: 'field_value_3' },
           },
         ];
-        const req = getRequest({ groupedAlerts, internallyManagedAlerts: true });
+        const req = getRequest({ groupedAlerts, source: 'attack' });
 
         describe('Oracle', () => {
           it('should create the oracle records correctly with grouping', async () => {
@@ -1546,7 +1553,7 @@ export default ({ getService }: FtrProviderContext): void => {
               connectorId,
               req: getRequest({
                 groupedAlerts: totalGroupedAlerts,
-                internallyManagedAlerts: true,
+                source: 'attack',
               }),
             });
 
@@ -1766,7 +1773,8 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
-      internallyManagedAlerts: null,
+      templateVersion: null,
+      source: 'rule',
       autoPushCase: null,
       ...params,
     },
@@ -1885,6 +1893,9 @@ const createCaseWithId = async ({
       ...getPostCaseRequest(),
       ...req,
       assignees: [],
+      // Creation-request template ref (version optional) vs. persisted shape (version pinned);
+      // this fixture never sets a template, so normalize to the persisted null.
+      template: null,
       connector: {
         name: 'none',
         type: ConnectorTypes.none,

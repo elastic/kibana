@@ -6,26 +6,28 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { ActionPolicySavedObjectServiceContract } from './types';
 
 /**
  * Pre-configured SavedObjects client with hidden types for action policies
  */
-export const ActionPolicySavedObjectsClientToken = Symbol.for(
+export const ActionPolicySavedObjectsClientToken = createToken<SavedObjectsClientContract>(
   'alerting_v2.ActionPolicySavedObjectsClient'
-) as ServiceIdentifier<SavedObjectsClientContract>;
+);
 
 /**
  * ActionPolicySavedObjectService scoped to the current request
  */
-export const ActionPolicySavedObjectServiceScopedToken = Symbol.for(
-  'alerting_v2.ActionPolicySavedObjectServiceScoped'
-) as ServiceIdentifier<ActionPolicySavedObjectServiceContract>;
+export const ActionPolicySavedObjectServiceScopedToken =
+  createToken<ActionPolicySavedObjectServiceContract>(
+    'alerting_v2.ActionPolicySavedObjectServiceScoped'
+  );
 
 /**
  * ActionPolicySavedObjectService singleton (internal user, no request scope)
  */
-export const ActionPolicySavedObjectServiceInternalToken = Symbol.for(
-  'alerting_v2.ActionPolicySavedObjectServiceInternal'
-) as ServiceIdentifier<ActionPolicySavedObjectServiceContract>;
+export const ActionPolicySavedObjectServiceInternalToken =
+  createToken<ActionPolicySavedObjectServiceContract>(
+    'alerting_v2.ActionPolicySavedObjectServiceInternal'
+  );

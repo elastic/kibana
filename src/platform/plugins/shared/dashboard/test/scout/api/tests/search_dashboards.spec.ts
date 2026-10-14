@@ -10,9 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, KBN_ARCHIVES } from '../fixtures';
-
-const SEARCH_ENDPOINT = 'api/dashboards';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 
 const buildUrl = (params: Record<string, string | string[] | number | undefined>) => {
   const searchParams = new URLSearchParams();
@@ -28,7 +26,7 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
     }
   }
   const query = searchParams.toString();
-  return query ? `${SEARCH_ENDPOINT}?${query}` : SEARCH_ENDPOINT;
+  return query ? `${DASHBOARD_API_PATH}?${query}` : DASHBOARD_API_PATH;
 };
 
 apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
@@ -45,7 +43,7 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('should retrieve a paginated list of dashboards', async ({ apiClient }) => {
-    const response = await apiClient.get(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(DASHBOARD_API_PATH, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
@@ -54,9 +52,10 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(101);
-    expect(response.body.dashboards).toHaveLength(20);
-    expect(response.body.dashboards[0].id).toBe('test-dashboard-00');
+    expect(response.body.meta.total).toBe(101);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(20);
   });
 
   apiTest('should narrow results by query', async ({ apiClient }) => {
@@ -69,8 +68,10 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(1);
-    expect(response.body.dashboards).toHaveLength(1);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(1);
   });
 
   apiTest('should allow users to set a per page limit', async ({ apiClient }) => {
@@ -83,8 +84,22 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(101);
-    expect(response.body.dashboards).toHaveLength(10);
+    expect(response.body.meta.total).toBe(101);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(10);
+    expect(response.body.data).toHaveLength(10);
+  });
+
+  apiTest('should reject per page limits above the GA maximum', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ per_page: 1001 }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
   });
 
   apiTest(
@@ -99,9 +114,10 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(101);
-      expect(response.body.dashboards).toHaveLength(10);
-      expect(response.body.dashboards[0].id).toBe('test-dashboard-40');
+      expect(response.body.meta.total).toBe(101);
+      expect(response.body.meta.page).toBe(5);
+      expect(response.body.meta.per_page).toBe(10);
+      expect(response.body.data).toHaveLength(10);
     }
   );
 
@@ -115,10 +131,12 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(1);
-    expect(response.body.dashboards).toHaveLength(1);
-    expect(response.body.dashboards[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
-    expect(response.body.dashboards[0].data.tags).toStrictEqual(['tag-2', 'tag-3']);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+    expect(response.body.data[0].data.tags).toStrictEqual(['tag-2', 'tag-3']);
   });
 
   apiTest('should narrow results by tags with multiple values', async ({ apiClient }) => {
@@ -131,9 +149,11 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(1);
-    expect(response.body.dashboards).toHaveLength(1);
-    expect(response.body.dashboards[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
   });
 
   apiTest('should narrow results by excluded_tags', async ({ apiClient }) => {
@@ -146,9 +166,11 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(100);
-    expect(response.body.dashboards).toHaveLength(20);
-    expect(response.body.dashboards.map((dashboard: { id: string }) => dashboard.id)).not.toContain(
+    expect(response.body.meta.total).toBe(100);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(20);
+    expect(response.body.data.map((dashboard: { id: string }) => dashboard.id)).not.toContain(
       '8d66658a-f5b7-4482-84dc-f41d317473b8'
     );
   });
@@ -166,7 +188,110 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     );
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(0);
-    expect(response.body.dashboards).toHaveLength(0);
+    expect(response.body.meta.total).toBe(0);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(0);
   });
+
+  apiTest('should narrow results by tag_names (single name)', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: 'bar' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+  });
+
+  apiTest('should narrow results by tag_names with multiple names (OR)', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: ['bar', 'buzz'] }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+  });
+
+  apiTest('should return empty results when tag_names matches no tag', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: 'does-not-exist' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(0);
+    expect(response.body.data).toHaveLength(0);
+  });
+
+  apiTest(
+    'should return empty results when tag_names matches a tag with no dashboards',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(buildUrl({ tag_names: 'foo' }), {
+        headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(0);
+      expect(response.body.data).toHaveLength(0);
+    }
+  );
+
+  apiTest('should combine tags and tag_names with OR semantics', async ({ apiClient }) => {
+    // tag-1 (foo) is referenced by no dashboard; tag_names=buzz resolves to tag-3, which only
+    // dashboard ...473b8 references. OR returns that dashboard; AND would return nothing (the
+    // dashboard does not reference tag-1). Asserting total=1 pins the behaviour to OR.
+    const response = await apiClient.get(buildUrl({ tags: 'tag-1', tag_names: 'buzz' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].id).toBe('8d66658a-f5b7-4482-84dc-f41d317473b8');
+  });
+
+  apiTest('should exclude results by excluded_tag_names (single name)', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      buildUrl({ query: 'tagged*', excluded_tag_names: 'bar' }),
+      { headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader }, responseType: 'json' }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(0);
+  });
+
+  apiTest(
+    'should not exclude results when excluded_tag_names matches no tag',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        buildUrl({ query: 'tagged*', excluded_tag_names: 'does-not-exist' }),
+        { headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader }, responseType: 'json' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(1);
+    }
+  );
+
+  apiTest(
+    'should exclude results by excluded_tag_names with multiple names',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        buildUrl({ query: 'tagged*', excluded_tag_names: ['bar', 'buzz'] }),
+        { headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader }, responseType: 'json' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.meta.total).toBe(0);
+      expect(response.body.data).toHaveLength(0);
+    }
+  );
 });

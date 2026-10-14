@@ -26,8 +26,6 @@ export interface GraphPreviewPanelProps {
   onShowGraph?: () => void;
   /** Whether to show the graph preview panel header icon. */
   showIcon: boolean;
-  /** Whether to hide navigation to the full graph visualization. */
-  disableNavigation: boolean;
   /** Whether the graph preview is available for the current document. */
   shouldShowGraph: boolean;
   /** Whether the graph preview data is currently loading. */
@@ -46,7 +44,6 @@ export const GraphPreviewPanel = ({
   data,
   onShowGraph,
   showIcon,
-  disableNavigation,
 }: GraphPreviewPanelProps) => {
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
@@ -60,7 +57,7 @@ export const GraphPreviewPanel = ({
     return null;
   }
 
-  const showLink = !disableNavigation && shouldShowGraph && onShowGraph != null;
+  const showLink = shouldShowGraph && onShowGraph != null;
 
   return (
     <ExpandablePanel
@@ -74,7 +71,7 @@ export const GraphPreviewPanel = ({
         headerContent: (
           <EuiBetaBadge
             alignment="middle"
-            iconType="beaker"
+            iconType="flask"
             data-test-subj={GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID}
             label={i18n.translate(
               'xpack.securitySolution.flyout.document.visualizations.graphPreview.technicalPreviewLabel',
@@ -89,7 +86,7 @@ export const GraphPreviewPanel = ({
             )}
           />
         ),
-        iconType: showIcon ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'chevronLimitLeft' : undefined,
         ...(showLink && {
           link: {
             callback: onShowGraph,

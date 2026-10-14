@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiThemeProvider,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -188,30 +189,36 @@ export const TTYPlayer = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              isSelected={true}
-              display="fill"
-              isLoading={isFetching}
-              iconType="chartWaterfall"
-              onClick={onClose}
-              size="m"
-              aria-label={TOGGLE_TTY_PLAYER}
-              data-test-subj="sessionView:TTYPlayerClose"
-            />
+            <EuiToolTip content={TOGGLE_TTY_PLAYER} disableScreenReaderOutput>
+              <EuiButtonIcon
+                isSelected={true}
+                display="fill"
+                isLoading={isFetching}
+                iconType="chartWaterfall"
+                onClick={onClose}
+                size="m"
+                aria-label={TOGGLE_TTY_PLAYER}
+                data-test-subj="sessionView:TTYPlayerClose"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="refresh"
-              display="empty"
-              size="m"
-              disabled={true}
-              aria-label="disabled"
-            />
+            <EuiToolTip content="disabled" disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="refresh"
+                display="empty"
+                size="m"
+                disabled={true}
+                aria-label="disabled"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="eye" disabled={true} size="m" aria-label="disabled" />
+            <EuiToolTip content="disabled" disableScreenReaderOutput>
+              <EuiButtonIcon iconType="eye" disabled={true} size="m" aria-label="disabled" />
+            </EuiToolTip>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

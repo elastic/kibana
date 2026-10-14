@@ -77,6 +77,17 @@ class TelemetryConfigurationDTO {
       expectedClusterHealth: ['green', 'yellow'],
       validationIntervalMs: 1000,
     } as ElasticsearchCircuitBreakerConfig,
+    apiQueryAllowlist: [
+      { path: '_transform/*/_stats' },
+      { path: '_nodes/stats' },
+      { path: '_nodes/*/stats' },
+      { path: '_cluster/stats' },
+      { path: '_ml/anomaly_detectors/_stats' },
+      { path: '_ml/anomaly_detectors/*/_stats' },
+      { path: '_ml/trained_models/_stats' },
+      { path: '_ilm/status' },
+      { path: '_watcher/stats' },
+    ],
   };
   private readonly DEFAULT_QUERY_CONFIG: TelemetryQueryConfiguration = {
     pageSize: 500,

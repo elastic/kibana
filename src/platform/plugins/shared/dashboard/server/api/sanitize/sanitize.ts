@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState, Warnings } from '../types';
+import { uniqBy } from 'lodash';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { MAX_RELATED_ITEMS } from './schemas';
 
 export async function sanitize(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  dashboardState: DashboardState
+  dashboardState: DashboardState,
+  getTypeDisplayName: (type: string) => string = (type) => type
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
-
   /**
    * Temporary escape hatch for lens as code
    * TODO remove transforms when lens as code transforms are ready for production
@@ -28,13 +31,29 @@ export async function sanitize(
    */
   const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
-    transformDashboardOut(storedDashboardState ?? {}, references ?? []);
+    transformDashboardOut(
+      storedDashboardState ?? {},
+      references ?? [],
+      undefined,
+      dashboardStateSchema
+    );
 
   const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
     transformedApiDashboardState as Partial<DashboardState>
   );
   warnings.push(...dashboardStateWarnings, ...scopeWarnings);
-  const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
+  // TODO: As part of sanitization, we should drop panels, filters, etc. that exceed their max array sizes
+  const sanitizedDashboardState = dashboardStateSchema.parse(scopedDashboardState);
+
+  const uniqueRelatedItems = uniqBy(references ?? [], ({ type, id }) => `${type}:${id}`);
+  const relatedItems = uniqueRelatedItems.slice(0, MAX_RELATED_ITEMS).map(({ type, id }) => {
+    return {
+      type,
+      type_label: getTypeDisplayName(type),
+      id,
+    };
+  });
+
   // access_control is separate from the transforms and stripping logic since it is not part of the
   // dashboard saved object attributes but it should be preserved in the sanitized output if present
   // in the incoming dashboard state
@@ -45,5 +64,11 @@ export async function sanitize(
       ...(access_control !== undefined && { access_control }),
     },
     ...(warnings.length ? { warnings } : {}),
+    ...(relatedItems.length
+      ? {
+          related_items: relatedItems,
+          related_items_count: uniqueRelatedItems.length,
+        }
+      : {}),
   };
 }

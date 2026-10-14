@@ -25,8 +25,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
-  // Failing: See https://github.com/elastic/kibana/issues/258331
-  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
+  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_gcp']);
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -236,7 +235,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -373,7 +372,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await pageObjects.header.waitUntilLoadingHasFinished();

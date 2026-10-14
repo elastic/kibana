@@ -11,6 +11,7 @@ import type {
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { getId } from '../common/lib/get_id';
@@ -38,7 +39,9 @@ export const createWorkpadRouteContext: () => IContextProvider<
   'canvas'
 > = () => {
   return async (context) => {
-    const soClient = (await context.core).savedObjects.client;
+    const core = await context.core;
+    const soClient = core.savedObjects.client;
+
     return {
       workpad: {
         create: async (workpad: CanvasWorkpad) => {
@@ -102,6 +105,10 @@ export const createWorkpadRouteContext: () => IContextProvider<
         },
         resolve: async (id: string) => {
           const resolved = await soClient.resolve<WorkpadAttributes>(CANVAS_TYPE, id);
+
+          if (isSavedObjectErrorResult(resolved.saved_object)) {
+            throw new Error(resolved.saved_object.error.message);
+          }
 
           // embeddables transform out
           resolved.saved_object.attributes = transformWorkpadOut(

@@ -34,6 +34,8 @@ export {
   asNotificationExecutionSource,
   isNotificationExecutionSource,
   ActionExecutionSourceType,
+  NOTIFICATIONS_REQUESTER_ID,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from './action_execution_source';
 export { parseDate } from './parse_date';
 export type { RelatedSavedObjects } from './related_saved_objects';
@@ -45,3 +47,13 @@ export { createConnectorTypeFromSpec } from './single_file_connectors/create_con
 export { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 export { OAuthAuthorizationService } from './oauth_authorization_service';
 export type { OAuthConfig } from './oauth_authorization_service';
+export { LeasePool } from './lease_pool';
+export type { ClientLease } from './lease_pool';
+export {
+  buildClientLeaseKey,
+  IN_MEMORY_CONNECTOR_REVISION,
+} from './single_file_connectors/build_client_lease_key';
+export {
+  createConnectorNetworkSettings,
+  createPlatformServices,
+} from './single_file_connectors/create_connector_network_settings';

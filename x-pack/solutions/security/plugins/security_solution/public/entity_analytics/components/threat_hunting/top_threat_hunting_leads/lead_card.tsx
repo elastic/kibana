@@ -6,10 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
 import type { HuntingLead } from './types';
-import { MAX_VISIBLE_TAGS } from './utils';
-import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
+import { renderTextWithEntity } from './shared_lead_components';
+import { THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
+import * as i18n from './translations';
 
 interface LeadCardProps {
   lead: HuntingLead;
@@ -19,44 +21,35 @@ interface LeadCardProps {
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const renderedByline = useMemo(
-    () => renderTextWithEntities(lead.byline, lead.entities),
-    [lead.byline, lead.entities]
+    () => renderTextWithEntity(lead.byline, lead.entity, THREAT_HUNTING_LEADS_SCOPE_ID),
+    [lead.byline, lead.entity]
   );
-
-  const tagsFooter =
-    lead.tags.length > 0 ? (
-      <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
-        {lead.tags.slice(0, MAX_VISIBLE_TAGS).map((tag) => (
-          <EuiFlexItem grow={false} key={tag}>
-            <EuiBadge color="hollow">{tag}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {lead.tags.length > MAX_VISIBLE_TAGS && (
-          <EuiFlexItem grow={false}>
-            <TagsPopover tags={lead.tags} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ) : undefined;
 
   return (
     <EuiCard
       title={
-        <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
-          <span>{lead.title}</span>
-        </EuiToolTip>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={1} css={{ minWidth: 0 }}>
+            <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
+              <span tabIndex={0}>{lead.title}</span>
+            </EuiToolTip>
+          </EuiFlexItem>
+          {lead.origin === 'exploratory' && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.EXPLORATORY_ICON_TOOLTIP}>
+                <span tabIndex={0} data-test-subj="leadExploratoryBadge">
+                  <AiIcon iconType="sparkles" size="s" aria-label={i18n.EXPLORATORY_BADGE_LABEL} />
+                </span>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       }
       titleElement="h5"
       titleSize="xs"
       textAlign="left"
       hasBorder={false}
-      description={
-        <EuiText size="xs" color="subdued" css={{ overflowWrap: 'anywhere' }}>
-          {renderedByline}
-        </EuiText>
-      }
-      footer={tagsFooter}
-      paddingSize="l"
+      paddingSize="m"
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
       css={{
@@ -64,6 +57,19 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
         maxWidth: 480,
         '.euiCard__titleButton': { maxWidth: '100%' },
       }}
-    />
+    >
+      <EuiText
+        size="xs"
+        css={{
+          overflowWrap: 'anywhere',
+          display: '-webkit-box',
+          WebkitLineClamp: 4,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
+        {renderedByline}
+      </EuiText>
+    </EuiCard>
   );
 };

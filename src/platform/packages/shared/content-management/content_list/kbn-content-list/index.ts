@@ -98,6 +98,7 @@ export type { ContentListToolbarProps } from '@kbn/content-list-toolbar';
 export {
   ContentListTable,
   Column,
+  createColumn,
   Action,
   getRowId,
   NameColumn,
@@ -113,7 +114,7 @@ export {
   CreatedByCell,
   EditAction,
   DeleteAction,
-  InspectAction,
+  ContentEditorAction,
   useSelection,
 } from '@kbn/content-list-table';
 export type {
@@ -133,7 +134,7 @@ export type {
   ColumnProps,
   EditActionProps,
   DeleteActionProps,
-  InspectActionProps,
+  ContentEditorActionProps,
   ActionNamespace,
   ActionProps,
   UseSelectionReturn,

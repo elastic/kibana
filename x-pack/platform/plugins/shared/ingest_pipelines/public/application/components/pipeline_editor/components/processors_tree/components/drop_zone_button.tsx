@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface Props {
@@ -97,15 +97,17 @@ export const DropZoneButton: FunctionComponent<Props> = (props) => {
 
   return (
     <div css={styles.container}>
-      <EuiButtonIcon
-        data-test-subj={props['data-test-subj']}
-        css={styles.button}
-        aria-label={ariaLabel}
-        // We artificially disable the button so that hover and pointer events are
-        // still enabled
-        onClick={isDisabled ? () => {} : onClick}
-        iconType="empty"
-      />
+      <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj={props['data-test-subj']}
+          css={styles.button}
+          aria-label={ariaLabel}
+          // We artificially disable the button so that hover and pointer events are
+          // still enabled
+          onClick={isDisabled ? () => {} : onClick}
+          iconType="empty"
+        />
+      </EuiToolTip>
     </div>
   );
 };

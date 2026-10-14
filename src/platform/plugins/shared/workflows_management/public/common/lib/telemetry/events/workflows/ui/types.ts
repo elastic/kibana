@@ -36,6 +36,30 @@ export enum WorkflowUIEventTypes {
    * When the workflows UI is blocked because the serverless project tier is insufficient.
    */
   WorkflowAccessDeniedServerlessTier = 'workflows_workflow_access_denied_serverless_tier',
+  /**
+   * When the global executions page is loaded.
+   */
+  WorkflowExecutionsPageViewed = 'workflows_executions_page_viewed',
+  /**
+   * When a filter is applied on the global executions page (time range, status, workflow, trigger type, test/prod, KQL).
+   */
+  WorkflowExecutionsFilterApplied = 'workflows_executions_filter_applied',
+  /**
+   * When a KQL search query is submitted on the global executions page.
+   */
+  WorkflowExecutionsSearchUsed = 'workflows_executions_search_used',
+  /**
+   * When an execution detail flyout is opened from the global executions page.
+   */
+  WorkflowExecutionsDetailOpened = 'workflows_executions_detail_opened',
+  /**
+   * When a step node is expanded/collapsed in the execution detail flyout.
+   */
+  WorkflowExecutionsStepExpanded = 'workflows_executions_step_expanded',
+  /**
+   * When "Edit workflow" (open in editor) is clicked from the executions page actions menu.
+   */
+  WorkflowExecutionsOpenInEditorClicked = 'workflows_executions_open_in_editor_clicked',
 }
 
 export type WorkflowDetailTab = 'workflow' | 'executions';
@@ -86,6 +110,45 @@ export interface ReportWorkflowDetailViewedActionParams {
    * Editor context if viewing the workflow/editor tab
    */
   editorType?: WorkflowEditorType;
+}
+
+/** Page view for the global executions page. */
+export interface ReportWorkflowExecutionsPageViewedActionParams {
+  eventName: string;
+}
+
+/** A filter was applied on the global executions page. */
+export interface ReportWorkflowExecutionsFilterAppliedActionParams {
+  eventName: string;
+  /**
+   * Which filter slots are active, e.g. ['status', 'workflowId', 'timeRange', 'query'].
+   */
+  filterTypes: string[];
+}
+
+/** A KQL search query was submitted on the global executions page. */
+export interface ReportWorkflowExecutionsSearchUsedActionParams {
+  eventName: string;
+  hasQuery: boolean;
+}
+
+/** An execution detail flyout was opened from the global executions page. */
+export interface ReportWorkflowExecutionsDetailOpenedActionParams {
+  eventName: string;
+  executionId: string;
+}
+
+/** A step node was expanded in the execution step tree. */
+export interface ReportWorkflowExecutionsStepExpandedActionParams {
+  eventName: string;
+  stepType: string;
+}
+
+/** "Edit workflow" (open in editor) was clicked from the executions page actions menu. */
+export interface ReportWorkflowExecutionsOpenInEditorClickedActionParams {
+  eventName: string;
+  workflowId: string;
+  origin: 'table_actions' | 'flyout_actions';
 }
 
 /** Shown when the user cannot read workflows due to Kibana privileges. */

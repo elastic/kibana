@@ -57,7 +57,10 @@ export async function bulkEditRuleParamsWithReadAuth<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
-    changeTrackingAction: RuleChangeTrackingAction.ruleUpdate,
+    changeTracking: {
+      action: RuleChangeTrackingAction.ruleUpdate,
+      ...options.changeTracking,
+    },
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleParamsInMemory<Params>({
         ...opts,
@@ -81,6 +84,7 @@ async function updateRuleParamsInMemory<Params extends RuleParams>({
   skipped,
   errors,
   username,
+  profileUid,
   shouldInvalidateApiKeys,
   paramsModifier,
   shouldIncrementRevision = () => true,
@@ -99,6 +103,7 @@ async function updateRuleParamsInMemory<Params extends RuleParams>({
       skipped,
       errors,
       username,
+      profileUid,
       paramsModifier,
       shouldInvalidateApiKeys,
       shouldIncrementRevision,

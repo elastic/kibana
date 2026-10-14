@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFile } from 'child_process';
+import { execFile, execFileSync } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
 import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
@@ -22,10 +22,12 @@ const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'check
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
+const MAX_ANNOTATION_OUTPUT_LINES = 50;
 
 interface QuickCheck {
   script: string;
   mayChangeFiles?: boolean;
+  requiresStableWorkspace?: boolean;
   // Additional properties can be added here in the future
 }
 
@@ -73,20 +75,19 @@ void run(async ({ log, flagsReader }) => {
     checks: flagsReader.string('checks'),
   });
 
-  // Partition checks based on mayChangeFiles flag
-  const fileChangingChecks = checksToRun
-    .filter((check) => check.mayChangeFiles)
+  const workspaceExclusiveChecks = checksToRun
+    .filter((check) => check.mayChangeFiles || check.requiresStableWorkspace)
     .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
 
   const regularChecks = checksToRun
-    .filter((check) => !check.mayChangeFiles)
+    .filter((check) => !check.mayChangeFiles && !check.requiresStableWorkspace)
     .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
 
   logger.write(
-    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} file-changing with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
+    `--- Running ${checksToRun.length} checks (${workspaceExclusiveChecks.length} workspace-exclusive with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
   );
   const startTime = Date.now();
-  const results = await runPartitionedChecks(fileChangingChecks, regularChecks);
+  const results = await runPartitionedChecks(workspaceExclusiveChecks, regularChecks);
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);
@@ -119,6 +120,7 @@ void run(async ({ log, flagsReader }) => {
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
     logger.write(`See the script(s) marked with ❌ above for details.`);
+    annotateFailures(failedChecks);
     process.exitCode = 1;
   } else if (!commitsWereMade) {
     logger.write('--- All checks passed. ✅');
@@ -300,6 +302,69 @@ function validateScriptPath(scriptPath: string) {
 
 function stripRoot(script: string) {
   return script.replace(REPO_ROOT, '');
+}
+
+interface FailureAnnotation {
+  scriptPath: string;
+  section: string;
+}
+
+function buildFailureAnnotation(check: CheckResult): FailureAnnotation {
+  const scriptPath = stripRoot(check.script).slice(1);
+  const runtime = humanizeTime(check.durationMs);
+  const lines = check.output.trim().split('\n');
+  const truncated = lines.length > MAX_ANNOTATION_OUTPUT_LINES;
+  const outputToShow = truncated ? lines.slice(-MAX_ANNOTATION_OUTPUT_LINES) : lines;
+  const output = [
+    ...(truncated ? [`… (truncated, showing last ${MAX_ANNOTATION_OUTPUT_LINES} lines)`] : []),
+    ...outputToShow,
+  ].join('\n');
+
+  return {
+    scriptPath,
+    section: [
+      `<details>`,
+      `<summary>❌ ${scriptPath} (ran in ${runtime})</summary>`,
+      '',
+      '```',
+      output,
+      '```',
+      `</details>`,
+    ].join('\n'),
+  };
+}
+
+export function buildPipelineAnnotation(failedChecks: CheckResult[]): string {
+  const annotations = failedChecks.map(buildFailureAnnotation);
+  const sections = annotations.map((annotation) => annotation.section);
+  const reproduceScripts = annotations.map((annotation) => annotation.scriptPath).join(',');
+
+  return [
+    `## ❌ ${failedChecks.length} quick-check(s) failed`,
+    '',
+    `The following quick-check(s) failed. Run them locally to reproduce and fix:`,
+    '',
+    ...sections,
+    '',
+    `To reproduce locally:`,
+    '```',
+    `node scripts/quick_checks --checks ${reproduceScripts}`,
+    '```',
+  ].join('\n');
+}
+
+function annotateFailures(failedChecks: CheckResult[]): void {
+  if (process.env.CI !== 'true' || failedChecks.length === 0) {
+    return;
+  }
+
+  try {
+    execFileSync('buildkite-agent', ['annotate', '--style', 'error', '--context', 'quick_checks'], {
+      input: buildPipelineAnnotation(failedChecks),
+    });
+  } catch (error) {
+    logger.warning(`Failed to create Buildkite annotation for failed quick checks: ${error}`);
+  }
 }
 
 async function pushCommits(): Promise<void> {

@@ -27,7 +27,7 @@ export const HostsQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {

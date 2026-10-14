@@ -8,9 +8,7 @@
 import type { ComponentType } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ApmIndexSettingsContext } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { OpenInDiscover } from './open_in_discover';
 
@@ -41,28 +39,27 @@ const defaultQueryParams = {
   sortDirection: 'DESC' as const,
 };
 
-const mockApmContext = {
-  share: {
-    url: {
-      locators: {
-        get: () => ({
-          getRedirectUrl: () => 'http://test-discover-url',
-        }),
-      },
-    },
-  },
-} as unknown as ApmPluginContextValue;
-
 export default {
   title: 'shared/links/OpenInDiscover',
   component: OpenInDiscover,
+  parameters: {
+    apmContext: {
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              getRedirectUrl: () => 'http://test-discover-url',
+            }),
+          },
+        },
+      },
+    },
+  },
   decorators: [
     (Story: ComponentType) => (
-      <MockApmPluginStorybook apmContext={mockApmContext}>
-        <ApmIndexSettingsContext.Provider value={mockIndexSettingsContext}>
-          <Story />
-        </ApmIndexSettingsContext.Provider>
-      </MockApmPluginStorybook>
+      <ApmIndexSettingsContext.Provider value={mockIndexSettingsContext}>
+        <Story />
+      </ApmIndexSettingsContext.Provider>
     ),
   ],
 };
@@ -89,6 +86,7 @@ export function AllVariants() {
                 rangeFrom="now-15m"
                 rangeTo="now"
                 queryParams={defaultQueryParams}
+                ebt={{ element: 'story' }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -108,6 +106,7 @@ export function Button() {
       rangeFrom="now-15m"
       rangeTo="now"
       queryParams={defaultQueryParams}
+      ebt={{ element: 'story' }}
     />
   );
 }
@@ -122,6 +121,7 @@ export function EmptyButton() {
       rangeFrom="now-15m"
       rangeTo="now"
       queryParams={defaultQueryParams}
+      ebt={{ element: 'story' }}
     />
   );
 }
@@ -136,6 +136,7 @@ export function IconButton() {
       rangeFrom="now-15m"
       rangeTo="now"
       queryParams={defaultQueryParams}
+      ebt={{ element: 'story' }}
     />
   );
 }
@@ -150,6 +151,7 @@ export function Link() {
       rangeFrom="now-15m"
       rangeTo="now"
       queryParams={defaultQueryParams}
+      ebt={{ element: 'story' }}
     />
   );
 }
@@ -164,6 +166,7 @@ export function CustomLabel() {
       rangeFrom="now-15m"
       rangeTo="now"
       queryParams={{ serviceName: 'my-service', errorGroupId: 'abc123', sortDirection: 'DESC' }}
+      ebt={{ element: 'story' }}
     />
   );
 }
@@ -186,6 +189,7 @@ export function Loading() {
             rangeFrom="now-15m"
             rangeTo="now"
             queryParams={defaultQueryParams}
+            ebt={{ element: 'story' }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -197,6 +201,7 @@ export function Loading() {
             rangeFrom="now-15m"
             rangeTo="now"
             queryParams={defaultQueryParams}
+            ebt={{ element: 'story' }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -208,6 +213,7 @@ export function Loading() {
             rangeFrom="now-15m"
             rangeTo="now"
             queryParams={defaultQueryParams}
+            ebt={{ element: 'story' }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -233,6 +239,7 @@ export function Disabled() {
             rangeFrom="now-15m"
             rangeTo="now"
             queryParams={defaultQueryParams}
+            ebt={{ element: 'story' }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -244,6 +251,7 @@ export function Disabled() {
             rangeFrom="now-15m"
             rangeTo="now"
             queryParams={defaultQueryParams}
+            ebt={{ element: 'story' }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -7,12 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// development env setup includes babel/register after the env is initialized
+// development env setup includes a require hook after the env is initialized
 require('./setup_env');
 
 // restore < Node 16 default DNS lookup behavior
 require('./dns_ipv4_first');
 
-require('@kbn/babel-register').install();
+var fromRoot = require('@kbn/repo-info').fromRoot;
+var enableCompileCache = require('node:module').enableCompileCache;
+
+if (!process.env.NODE_DISABLE_COMPILE_CACHE) {
+  process.env.NODE_COMPILE_CACHE =
+    process.env.NODE_COMPILE_CACHE || fromRoot('data', 'node_compile_cache');
+  if (enableCompileCache) {
+    enableCompileCache();
+  }
+}
+
+require('@kbn/swc-register').install();
 
 require('@kbn/security-hardening');

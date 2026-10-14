@@ -91,19 +91,19 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const sslAgentKeyInput = useInput(fleetServerHost?.ssl?.agent_key ?? '', undefined, undefined);
 
   const sslKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key ?? undefined,
     undefined,
     undefined
   );
 
   const sslESKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key ?? undefined,
     undefined,
     undefined
   );
 
   const sslAgentKeySecretInput = useSecretInput(
-    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key ?? undefined,
     undefined,
     undefined
   );

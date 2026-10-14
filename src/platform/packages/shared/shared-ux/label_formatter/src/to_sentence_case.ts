@@ -49,8 +49,12 @@ const TITLE_CASE_GLOSSARY = [
   'Cloud Connect',
   'SIEM Readiness',
   'V2 Alerting Preview',
+  'Alerts (Classic)',
   'Ingest Hub',
   'Elastic Inference',
+  'ES|QL Data Federation',
+  'ES|QL Views',
+  'AlertZero',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));

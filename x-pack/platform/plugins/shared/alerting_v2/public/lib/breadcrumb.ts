@@ -10,15 +10,13 @@ import { i18n } from '@kbn/i18n';
 export type AlertingV2BreadcrumbPage =
   | 'root'
   | 'rules_list'
-  | 'create'
-  | 'edit'
   | 'rule_details'
+  | 'rule_library_list'
   | 'action_policies_list'
   | 'action_policy_create'
   | 'action_policy_edit'
   | 'episodes_list'
   | 'episode_details'
-  | 'rule_doctor'
   | 'execution_history_list';
 
 export const getAlertingV2Breadcrumb = (
@@ -29,7 +27,7 @@ export const getAlertingV2Breadcrumb = (
     case 'root':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.rootTitle', {
-          defaultMessage: 'Alerting V2',
+          defaultMessage: 'Universal Alerting',
         }),
       };
     case 'rules_list':
@@ -38,16 +36,10 @@ export const getAlertingV2Breadcrumb = (
           defaultMessage: 'Rules',
         }),
       };
-    case 'create':
+    case 'rule_library_list':
       return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.createTitle', {
-          defaultMessage: 'Create',
-        }),
-      };
-    case 'edit':
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.editTitle', {
-          defaultMessage: 'Edit',
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleLibraryListTitle', {
+          defaultMessage: 'Rule library',
         }),
       };
     case 'rule_details':
@@ -75,18 +67,12 @@ export const getAlertingV2Breadcrumb = (
     case 'episodes_list':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.episodesListTitle', {
-          defaultMessage: 'Alert episodes',
+          defaultMessage: 'Alerts',
         }),
       };
     case 'episode_details':
       return {
         text: options?.ruleName ?? '',
-      };
-    case 'rule_doctor':
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleDoctorTitle', {
-          defaultMessage: 'Rule Doctor',
-        }),
       };
     case 'execution_history_list':
       return {

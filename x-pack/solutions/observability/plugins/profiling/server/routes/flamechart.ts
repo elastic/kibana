@@ -6,12 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
-import { getRoutePaths } from '../../common';
+import { getRoutePaths, MAX_KUERY_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { PROFILING_API_PRIVILEGE } from '../feature';
+import { profilingSchemaParam } from './default_api_types';
 
 export function registerFlameChartSearchRoute({
   router,
@@ -26,7 +29,7 @@ export function registerFlameChartSearchRoute({
       path: paths.Flamechart,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
@@ -34,12 +37,13 @@ export function registerFlameChartSearchRoute({
         query: schema.object({
           timeFrom: schema.number(),
           timeTo: schema.number(),
-          kuery: schema.string(),
+          kuery: schema.string({ maxLength: MAX_KUERY_LENGTH }),
+          schema: profilingSchemaParam,
         }),
       },
     },
     async (context, request, response) => {
-      const { timeFrom, timeTo, kuery } = request.query;
+      const { timeFrom, timeTo, kuery, schema: profilingSchema } = request.query;
 
       const core = await context.core;
       const startSecs = timeFrom / 1000;
@@ -50,7 +54,9 @@ export function registerFlameChartSearchRoute({
         const flamegraph = await profilingDataAccess.services.fetchFlamechartData({
           core,
           esClient,
+          abortSignal: getRequestAbortedSignal(request.events.aborted$),
           totalSeconds: endSecs - startSecs,
+          schema: profilingSchema,
           query: {
             bool: {
               filter: [

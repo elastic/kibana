@@ -68,7 +68,7 @@ describe('getSplitDimensionAccessor', () => {
     };
     const columns = [data.columns[0], column, data.columns[2]] as DatatableColumn[];
     const defaultFormatterReturnedVal = fieldFormatsMock.deserialize();
-    const spyOnDefaultFormatterConvert = jest.spyOn(defaultFormatterReturnedVal, 'convert');
+    const spyOnDefaultFormatterConvert = jest.spyOn(defaultFormatterReturnedVal, 'convertToText');
 
     defaultFormatter.mockReturnValueOnce(defaultFormatterReturnedVal);
     const accessor = getSplitDimensionAccessor(columns, splitDimension, defaultFormatter);

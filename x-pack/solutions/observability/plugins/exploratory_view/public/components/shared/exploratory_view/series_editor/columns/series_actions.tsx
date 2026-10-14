@@ -71,13 +71,15 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
   }, [setPopover, isPopoverOpen]);
 
   const popoverButton = (
-    <EuiButtonIcon
-      data-test-subj="exploratoryViewSeriesActionsButton"
-      iconType="boxesVertical"
-      onClick={changePopoverVisibility}
-      color="text"
-      aria-label={POPOVER_BUTTON_LABEL}
-    />
+    <EuiToolTip content={POPOVER_BUTTON_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="exploratoryViewSeriesActionsButton"
+        iconType="boxesVertical"
+        onClick={changePopoverVisibility}
+        color="text"
+        aria-label={POPOVER_BUTTON_LABEL}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -97,6 +99,9 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
 
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={i18n.translate('xpack.exploratoryView.seriesActions.popoverAriaLabel', {
+            defaultMessage: 'Series actions',
+          })}
           button={popoverButton}
           isOpen={isPopoverOpen}
           closePopover={closePopover}

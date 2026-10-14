@@ -45,7 +45,13 @@ export interface ConnectorsActionsContextType {
 
 const ConnectorsActionsContext = createContext<ConnectorsActionsContextType | undefined>(undefined);
 
-export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) => {
+export const ConnectorsProvider = ({
+  children,
+  onConnectorCreated,
+}: {
+  children: React.ReactNode;
+  onConnectorCreated?: (connector: ActionConnector) => void;
+}) => {
   const {
     services: {
       plugins: { triggersActionsUi },
@@ -82,10 +88,14 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
   }, [queryClient]);
 
   // Create flyout
-  const handleConnectorCreated = useCallback(() => {
-    invalidateConnectors();
-    createFlyoutState.closeFlyout();
-  }, [invalidateConnectors, createFlyoutState]);
+  const handleConnectorCreated = useCallback(
+    async (connector: ActionConnector) => {
+      await onConnectorCreated?.(connector);
+      invalidateConnectors();
+      createFlyoutState.closeFlyout();
+    },
+    [onConnectorCreated, invalidateConnectors, createFlyoutState]
+  );
 
   const createFlyout = useMemo(
     () =>

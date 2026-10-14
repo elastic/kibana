@@ -28,6 +28,32 @@ export const isEditorFieldSetting = (settingId: string) => editorSettings.has(se
 
 const SAVE_BUTTON_TEST_SUBJ = 'settings-save-button';
 const PAGE_RELOAD_BUTTON_TEST_SUBJ = 'pageReloadButton';
+const GLOBAL_SETTINGS_TAB_TEST_SUBJ = 'settings-tab-global-settings';
+const SPACE_SETTINGS_TAB_TEST_SUBJ = 'settings-tab-space-settings';
+
+const globalSettings = new Set<string>([
+  settings.ALERTING_V2_ENABLED_SETTING_ID,
+  settings.DATA_FEDERATION_ENABLED_SETTING_ID,
+  settings.CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+  settings.XPACK_CUSTOM_BRANDING_LOGO_ID,
+  settings.XPACK_CUSTOM_BRANDING_FAVICON_PNG_ID,
+  settings.XPACK_CUSTOM_BRANDING_FAVICON_SVG_ID,
+  settings.XPACK_CUSTOM_BRANDING_CUSTOMIZED_LOGO_ID,
+]);
+
+export const isGlobalSetting = (settingId: string) => globalSettings.has(settingId);
+
+const getFieldTestSubj = (settingId: string) => {
+  const isColorPickerField =
+    settingId === settings.BANNERS_TEXT_COLOR_ID ||
+    settingId === settings.BANNERS_BACKGROUND_COLOR_ID;
+
+  return (
+    (isColorPickerField ? 'euiColorPickerAnchor ' : '') +
+    'management-settings-editField-' +
+    settingId
+  );
+};
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -67,21 +93,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(url).to.contain(`/settings`);
     });
 
-    describe('renders common settings', () => {
-      for (const settingId of ALL_COMMON_SETTINGS) {
+    describe('renders common space settings', () => {
+      for (const settingId of ALL_COMMON_SETTINGS.filter(
+        (commonSettingId) => !isGlobalSetting(commonSettingId)
+      )) {
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
           continue;
         }
-        const isColorPickerField =
-          settingId === settings.BANNERS_TEXT_COLOR_ID ||
-          settingId === settings.BANNERS_BACKGROUND_COLOR_ID;
-        const fieldTestSubj =
-          (isColorPickerField ? 'euiColorPickerAnchor ' : '') +
-          'management-settings-editField-' +
-          settingId;
         it('renders ' + settingId + ' edit field', async () => {
-          expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
+          await testSubjects.existOrFail(getFieldTestSubj(settingId), { timeout: 5000 });
+        });
+      }
+    });
+
+    describe('renders common global settings', () => {
+      before(async () => {
+        await testSubjects.click(GLOBAL_SETTINGS_TAB_TEST_SUBJ);
+      });
+
+      after(async () => {
+        await testSubjects.click(SPACE_SETTINGS_TAB_TEST_SUBJ);
+      });
+
+      for (const settingId of ALL_COMMON_SETTINGS.filter(isGlobalSetting)) {
+        // Code editors don't have their test subjects rendered
+        if (isEditorFieldSetting(settingId)) {
+          continue;
+        }
+
+        it('renders ' + settingId + ' edit field', async () => {
+          await testSubjects.existOrFail(getFieldTestSubj(settingId), { timeout: 5000 });
         });
       }
     });
@@ -109,7 +151,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('allows resetting a setting to its default value', async () => {
         const fieldTestSubj = 'management-settings-editField-' + settings.CSV_QUOTE_VALUES_ID;
         const resetLinkTestSubj = 'management-settings-resetField-' + settings.CSV_QUOTE_VALUES_ID;
-        expect(await testSubjects.exists(resetLinkTestSubj)).to.be(true);
+        await testSubjects.existOrFail(resetLinkTestSubj, { timeout: 5000 });
         await testSubjects.click(resetLinkTestSubj);
 
         await retry.waitFor('reset link to be hidden', async () => {
@@ -136,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Save changes
         await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
 
-        expect(await testSubjects.exists(PAGE_RELOAD_BUTTON_TEST_SUBJ)).to.be(true);
+        await testSubjects.existOrFail(PAGE_RELOAD_BUTTON_TEST_SUBJ, { timeout: 5000 });
         await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
         await pageObjects.common.sleep(2000);
 

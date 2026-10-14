@@ -7,37 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
+import { z } from '@kbn/zod';
+import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
-export const controlTitleSchema = schema.object({
-  title: schema.maybe(
-    schema.string({ meta: { description: 'A human-readable title for the control.' } })
-  ),
-});
+export const controlTitleSchema = z
+  .object({
+    title: z.string().optional().meta({ description: 'A human-readable title for the control.' }),
+  })
+  .strict();
 
-export const dataControlSchema = schema.object({
-  ...controlTitleSchema.getPropSchemas(),
-  data_view_id: schema.string({
-    meta: { description: 'The ID of the data view that provides field options for this control.' }, // this will generate a reference
-    minLength: 1,
+const sharedDataControlProps = {
+  ...controlTitleSchema.shape,
+  use_global_filters: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.use_global_filters).meta({
+    description:
+      "When `true`, the control's available options are narrowed by the page's active filters.",
   }),
-  field_name: schema.string({
-    meta: { description: 'The name of the field in the data view that this control filters on.' },
-    minLength: 1,
+  ignore_validations: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.ignore_validations).meta({
+    description:
+      'When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results.',
   }),
-  use_global_filters: schema.boolean({
-    defaultValue: DEFAULT_DATA_CONTROL_STATE.use_global_filters,
-    meta: {
+};
+
+/**
+ * This uses a union with only one option so we can provide a default value for backwards compat
+ */
+export const dataControlFieldValuesSourceSchema = z
+  .union([z.literal(ControlValuesSource.FIELD)])
+  .default(ControlValuesSource.FIELD)
+  .meta({
+    description:
+      'The source of the field options for this control. Defaults to `field` for legacy controls.',
+  });
+
+/**
+ * Injects a default `values_source: 'field'` when the field is absent from the input.
+ * Config-schema's discriminatedUnion applied field defaults before discriminating; Zod does not.
+ * This preprocess step restores backward compatibility for legacy state without values_source.
+ *
+ * Ideally this logic is corrected in the future and removed.
+ */
+export const withFieldValuesSourceDefault = (val: unknown): unknown => {
+  if (typeof val === 'object' && val !== null && !Array.isArray(val) && !('values_source' in val)) {
+    return { values_source: ControlValuesSource.FIELD, ...val };
+  }
+  return val;
+};
+
+export const dataControlFieldVariantSchema = z
+  .object({
+    ...sharedDataControlProps,
+    values_source: dataControlFieldValuesSourceSchema,
+    data_view_id: z.string().min(1).meta({
+      description: 'The ID of the data view that provides field options for this control.', // this will generate a reference
+    }),
+    field_name: z.string().min(1).meta({
+      description: 'The name of the field in the data view that this control filters on.',
+    }),
+  })
+  .strip();
+
+export const dataControlEsqlVariantSchema = z
+  .object({
+    ...sharedDataControlProps,
+    values_source: z.literal(ControlValuesSource.ESQL),
+    esql_query: z.string().min(1).meta({
+      description: 'The ES|QL query that provides field options for this control',
+    }),
+  })
+  .strip();
+
+export const dataControlSchema = z.preprocess(
+  withFieldValuesSourceDefault,
+  z
+    .discriminatedUnion('values_source', [
+      dataControlEsqlVariantSchema,
+      dataControlFieldVariantSchema,
+    ])
+    .meta({
       description:
-        "When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.",
-    },
-  }),
-  ignore_validations: schema.boolean({
-    defaultValue: DEFAULT_DATA_CONTROL_STATE.ignore_validations,
-    meta: {
-      description:
-        'When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.',
-    },
-  }),
-});
+        'The source of the field options for this control, either `field` for all possible values of a field, or `esql` for the results of an ES|QL query.',
+    })
+);

@@ -11,11 +11,15 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import type {
   AttackDiscoveryApiScheduleCreateProps,
   AttackDiscoveryApiScheduleUpdateProps,
+  BulkActionAttackDiscoverySchedulesResponse,
   FindAttackDiscoverySchedulesRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
@@ -193,6 +197,63 @@ export const getAttackDiscoverySchedulesApis = ({
       );
       const configuredTest = configureTest(supertest.post(route), user);
       const response = await configuredTest.expect(expectedHttpCode);
+
+      return response.body;
+    },
+
+    /**
+     * Bulk enables Attack Discovery Schedules
+     */
+    bulkEnable: async ({
+      ids,
+      kibanaSpace = 'default',
+      expectedHttpCode = 200,
+    }: {
+      ids: string[];
+      kibanaSpace?: string;
+      expectedHttpCode?: number;
+    }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE, kibanaSpace);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.send({ ids }).expect(expectedHttpCode);
+
+      return response.body;
+    },
+
+    /**
+     * Bulk disables Attack Discovery Schedules
+     */
+    bulkDisable: async ({
+      ids,
+      kibanaSpace = 'default',
+      expectedHttpCode = 200,
+    }: {
+      ids: string[];
+      kibanaSpace?: string;
+      expectedHttpCode?: number;
+    }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE, kibanaSpace);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.send({ ids }).expect(expectedHttpCode);
+
+      return response.body;
+    },
+
+    /**
+     * Bulk deletes Attack Discovery Schedules
+     */
+    bulkDelete: async ({
+      ids,
+      kibanaSpace = 'default',
+      expectedHttpCode = 200,
+    }: {
+      ids: string[];
+      kibanaSpace?: string;
+      expectedHttpCode?: number;
+    }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE, kibanaSpace);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.send({ ids }).expect(expectedHttpCode);
 
       return response.body;
     },

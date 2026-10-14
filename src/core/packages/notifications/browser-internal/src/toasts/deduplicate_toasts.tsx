@@ -120,8 +120,9 @@ function groupByKey(allToasts: Toast[]) {
 const floatTopRight = css`
   position: absolute;
   top: -8px;
-  right: -8px;
-  z-index: 1;
+  left: -8px;
+  /* keep above toast decor */
+  z-index: 2;
 `;
 
 /**

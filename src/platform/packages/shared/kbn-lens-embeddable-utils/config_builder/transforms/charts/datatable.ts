@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableVisualizationState, TypedLensSerializedState } from '@kbn/lens-common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { DatatableConfig, DatatableConfigNoESQL } from '../../schema';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -55,6 +56,7 @@ export function fromAPItoLensState(
     visualizationType: 'lnsDatatable',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,

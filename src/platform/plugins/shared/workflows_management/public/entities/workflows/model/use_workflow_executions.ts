@@ -18,21 +18,36 @@ import type {
 } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 
-const DEFAULT_PAGE_SIZE = 100;
+/** Window size for cursor-based infinite scroll (newest-first). */
+const DEFAULT_PAGE_SIZE = 50;
 const MAX_RETRIES = 3;
+/** Prefetch when the sentinel is within ~2 windows of the viewport. */
+const SCROLL_ROOT_MARGIN = '800px';
 
 interface UseWorkflowExecutionsParams {
+  /** Workflow ID. */
   workflowId: string | null;
+  /** Filter by execution status. */
   statuses?: ExecutionStatus[];
+  /** Filter by execution type. */
   executionTypes?: ExecutionType[];
+  /** Filter by the user who triggered the execution. */
   executedBy?: string[];
+  /** Number of results per page. */
   size?: number;
+  /** Whether to omit single-step runs from the results. */
   omitStepRuns?: boolean;
+  /** Datemath lower bound for filtering by startedAt (e.g. 'now-1w'). */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt (e.g. 'now'). */
+  startedBefore?: string;
   finishedAfter?: string;
   finishedBefore?: string;
   sortField?: WorkflowExecutionSortField;
   sortOrder?: WorkflowExecutionSortOrder;
 }
+
+type ExecutionsPageParam = { searchAfter?: unknown[] } | undefined;
 
 export function useWorkflowExecutions(
   params: UseWorkflowExecutionsParams,
@@ -60,10 +75,11 @@ export function useWorkflowExecutions(
   const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
 
   const queryFn = useCallback(
-    async ({ pageParam = 1 }: { pageParam?: number }) => {
+    async ({ pageParam }: { pageParam?: ExecutionsPageParam }) => {
       if (!params.workflowId) {
         throw new Error('Workflow ID is required');
       }
+      const searchAfter = pageParam?.searchAfter;
       return api.getWorkflowExecutions(params.workflowId, {
         statuses: params.statuses,
         executionTypes: params.executionTypes,
@@ -71,11 +87,19 @@ export function useWorkflowExecutions(
           ? { executedBy: params.executedBy }
           : {}),
         ...(params.omitStepRuns != null && { omitStepRuns: params.omitStepRuns }),
+        ...(params.startedAfter != null && params.startedAfter !== ''
+          ? { startedAfter: params.startedAfter }
+          : {}),
+        ...(params.startedBefore != null && params.startedBefore !== ''
+          ? { startedBefore: params.startedBefore }
+          : {}),
         ...(params.finishedAfter ? { finishedAfter: params.finishedAfter } : {}),
         ...(params.finishedBefore ? { finishedBefore: params.finishedBefore } : {}),
         ...(params.sortField ? { sortField: params.sortField } : {}),
         ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
-        page: pageParam,
+        ...(searchAfter && searchAfter.length > 0
+          ? { searchAfter: JSON.stringify(searchAfter) }
+          : { page: 1 }),
         size: currentSize,
       });
     },
@@ -86,6 +110,8 @@ export function useWorkflowExecutions(
       params.executionTypes,
       params.executedBy,
       params.omitStepRuns,
+      params.startedAfter,
+      params.startedBefore,
       params.finishedAfter,
       params.finishedBefore,
       params.sortField,
@@ -94,16 +120,15 @@ export function useWorkflowExecutions(
     ]
   );
 
-  const getNextPageParam = useCallback((lastPage: WorkflowExecutionListDto) => {
-    const { page, size, total } = lastPage;
-    const totalPages = Math.ceil(total / size);
-
-    if (page >= totalPages) {
-      return undefined;
-    }
-
-    return page + 1;
-  }, []);
+  const getNextPageParam = useCallback(
+    (lastPage: WorkflowExecutionListDto): ExecutionsPageParam => {
+      if (!lastPage.searchAfter?.length) {
+        return undefined;
+      }
+      return { searchAfter: lastPage.searchAfter };
+    },
+    []
+  );
 
   const {
     data,
@@ -111,6 +136,7 @@ export function useWorkflowExecutions(
     hasNextPage,
     isFetched,
     isFetching,
+    isFetchingNextPage,
     isLoading: isInitialLoading,
     refetch,
     error,
@@ -124,6 +150,8 @@ export function useWorkflowExecutions(
       params.executionTypes,
       params.executedBy,
       params.omitStepRuns,
+      params.startedAfter,
+      params.startedBefore,
       params.finishedAfter,
       params.finishedBefore,
       params.sortField,
@@ -133,13 +161,13 @@ export function useWorkflowExecutions(
     queryFn,
     getNextPageParam,
     enabled: params.workflowId !== null,
-    retry: MAX_RETRIES,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     ...options,
+    retry: options.retry ?? MAX_RETRIES,
+    retryDelay: options.retryDelay ?? ((attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)),
   });
 
-  // Computed loading states for better semantics
-  const isLoadingMore = isFetching && !isInitialLoading;
+  // Only true while paginating — not during background poll refetches
+  const isLoadingMore = isFetchingNextPage;
 
   // Flatten all pages into a single list
   const allExecutions = useMemo<WorkflowExecutionListDto | null>(() => {
@@ -148,13 +176,15 @@ export function useWorkflowExecutions(
     }
 
     const firstPage = data.pages[0];
+    const lastPage = data.pages[data.pages.length - 1];
     const allResults = data.pages.flatMap((page) => page.results);
 
     return {
       results: allResults,
-      page: data.pages.length, // Number of pages loaded
-      size: firstPage.size, // Keep original page size
-      total: firstPage.total, // Total available
+      page: data.pages.length,
+      size: firstPage.size,
+      total: firstPage.total,
+      ...(lastPage.searchAfter ? { searchAfter: lastPage.searchAfter } : {}),
     };
   }, [data]);
 
@@ -164,7 +194,6 @@ export function useWorkflowExecutions(
     async ([{ isIntersecting }]: IntersectionObserverEntry[]) => {
       if (isIntersecting && hasNextPage && !isInitialLoading && !isFetching) {
         await fetchNextPage();
-        // Don't disconnect - the observer will be reattached to the new last element
       }
     },
     [fetchNextPage, hasNextPage, isFetching, isInitialLoading]
@@ -174,8 +203,6 @@ export function useWorkflowExecutions(
     return () => observerRef.current?.disconnect();
   }, []);
 
-  // Attaches an intersection observer to the last element
-  // to trigger a callback to paginate when the user scrolls to it
   const setPaginationObserver = useCallback(
     (ref: HTMLDivElement | null) => {
       observerRef.current?.disconnect();
@@ -186,7 +213,7 @@ export function useWorkflowExecutions(
 
       observerRef.current = new IntersectionObserver(fetchNext, {
         root: null,
-        rootMargin: '0px',
+        rootMargin: SCROLL_ROOT_MARGIN,
         threshold: 0.1,
       });
       observerRef.current.observe(ref);
@@ -199,7 +226,7 @@ export function useWorkflowExecutions(
     isInitialLoading,
     isLoadingMore,
     isFetched,
-    hasNextPage,
+    hasNextPage: Boolean(hasNextPage),
     error,
     refetch,
     setPaginationObserver,

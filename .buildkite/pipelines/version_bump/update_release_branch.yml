@@ -1,7 +1,13 @@
 steps:
   - name: 'Update release branch config'
     key: update-release-branch
-    command: .buildkite/scripts/steps/version_bump/update_release_branch.sh
+    command: |
+      if [ "${DRY_RUN:-}" = "true" ]; then
+        export BRANCH="$(buildkite-agent meta-data get "version_bump:dry_run_branch")"
+        echo "DRY_RUN is enabled — updating temporary branch '$BRANCH'"
+      fi
+
+      .buildkite/scripts/steps/version_bump/update_release_branch.sh
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod

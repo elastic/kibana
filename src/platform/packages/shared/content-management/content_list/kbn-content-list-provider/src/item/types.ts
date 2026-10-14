@@ -101,11 +101,12 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
  * Action identifiers known to the package.
  *
  * The package owns built-in action presets keyed by these IDs
- * ({@link ContentListActions.edit}, {@link ContentListActions.delete},
- * {@link ContentListActions.inspect}). Consumers may also invent custom
- * IDs; see {@link ActionId}.
+ * ({@link ContentListActions.edit}, {@link ContentListActions.delete}).
+ * The content editor (`<Action.ContentEditor />`) does not appear here —
+ * its handler lives on `features.contentEditor.open` rather than on
+ * `item.actions`. Consumers may also invent custom IDs; see {@link ActionId}.
  */
-export type KnownActionId = 'edit' | 'delete' | 'inspect';
+export type KnownActionId = 'edit' | 'delete';
 
 /**
  * Identifier for an action.
@@ -121,7 +122,8 @@ interface ActionConfigBase {
   /**
    * Per-item restriction. Returns a reason string when the action is
    * not permitted on the item; `undefined` otherwise. Drives row icon
-   * disabling and tooltip reasons.
+   * disabling and tooltip reasons. Managed items are not
+   * restricted automatically; check `item.managed` when applicable.
    */
   restriction?: ActionRestriction;
 }

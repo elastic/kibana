@@ -85,7 +85,7 @@ export const AlertCountByRuleByStatus = React.memo(
     entityRecord,
   }: AlertCountByStatusProps) => {
     const entityTypeCacheKey = entityType ?? 'generic';
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
     const euidApi = useEntityStoreEuidApi();
     const entityIdentifiersResolved = useMemo(
       () => resolveEntityIdentifiers(identityFields, entityFilter),
@@ -102,12 +102,12 @@ export const AlertCountByRuleByStatus = React.memo(
           : null;
       } else {
         kqlFilter = euidApi.euid.kql.getEuidFilterBasedOnDocument(
-          entityType as EntityType,
+          euidApi.getBuiltInEntityDefinition(entityType as EntityType),
           entityRecord
         );
       }
       return kqlFilter && kqlFilter.length > 0 ? kqlFilter : '';
-    }, [euidApi?.euid, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
+    }, [euidApi, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
 
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${entityType}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);

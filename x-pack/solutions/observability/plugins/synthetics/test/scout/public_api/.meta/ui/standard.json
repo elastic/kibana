@@ -1,0 +1,24 @@
+{
+  "sha1": "e2330521d2c3db9bc816c42bbf18d9b7da08de82",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1a09a0195a286e4-7ada0e77e30fad0",
+      "title": "GlobalParameters creates, edits, searches, and deletes global parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/ui/tests/global_parameters.spec.ts",
+        "line": 20,
+        "column": 28
+      }
+    }
+  ]
+}

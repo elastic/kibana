@@ -1,0 +1,38 @@
+---
+description: >-
+  Shared setup steps: install the pinned Buildkite CLI (`bk`) and verify its
+  download checksum, then expose the token only as the masked `token` output
+  of the `buildkite_auth` step. Consumers pass that output to engine.env as
+  BUILDKITE_API_TOKEN and set it to an empty value for threat detection, so
+  no other step receives it. Keep the pinned version/SHA here, in one place.
+steps:
+  - name: Install Buildkite CLI
+    env:
+      BK_VERSION: 3.44.0
+      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
+    run: |
+      set -euo pipefail
+      tmp="$(mktemp -d)"
+      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
+      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
+      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
+      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
+      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
+      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
+      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
+  - name: Prepare Buildkite CLI authentication
+    id: buildkite_auth
+    env:
+      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+    run: |
+      set -euo pipefail
+      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
+        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
+        exit 1
+      fi
+      # bk needs the token inside the agent sandbox. The compiler filters direct secret
+      # references in engine.env, so consumers use this explicit masked handoff.
+      # Do not export the token job-wide; the detector must not consume the output.
+      printf '::add-mask::%s\n' "$OPS_BUILDKITE_TOKEN"
+      printf 'token=%s\n' "$OPS_BUILDKITE_TOKEN" >> "$GITHUB_OUTPUT"
+---

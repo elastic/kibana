@@ -6,22 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  ExternalReferenceAttachmentAttributes,
-  ExternalReferenceSOAttachmentAttributes,
-  Case,
-  PersistableStateAttachment,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   postCaseReq,
   getPostCaseRequest,
   postCommentUserReq,
-  postCommentAlertReq,
-  persistableStateAttachment,
-  postExternalReferenceSOReq,
-  postExternalReferenceESReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -55,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
         updatedCase = await bulkCreateAttachments({
           caseId: postedCase.id,
-          params: [postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedAlertReq],
           supertest,
         });
       });
@@ -99,85 +92,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(response.attachments.length).to.be(1);
         expect(response.errors.length).to.be(1);
-        expect(response.errors[0]).to.eql({
-          error: 'Not Found',
-          message: 'Saved object [cases-comments/does-not-exist] not found',
-          status: 404,
-          savedObjectId: 'does-not-exist',
-        });
-      });
-    });
-
-    describe('inject references into attributes', () => {
-      it('should inject the persistable state attachment references into the attributes', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: persistableStateAttachment,
-        });
-
-        const response = await bulkGetAttachments({
-          savedObjectIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const persistableState = response.attachments[0] as PersistableStateAttachment;
-
-        expect(persistableState.persistableStateAttachmentState).to.eql(
-          persistableStateAttachment.persistableStateAttachmentState
-        );
-      });
-
-      it("should inject saved object external reference style attachment's references into the attributes", async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postExternalReferenceSOReq,
-        });
-
-        const response = await bulkGetAttachments({
-          savedObjectIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const externalRefSO = response.attachments[0] as ExternalReferenceSOAttachmentAttributes;
-
-        expect(externalRefSO.externalReferenceId).to.eql(
-          postExternalReferenceSOReq.externalReferenceId
-        );
-        expect(externalRefSO.externalReferenceStorage.soType).to.eql(
-          postExternalReferenceSOReq.externalReferenceStorage.soType
-        );
-        expect(externalRefSO.externalReferenceStorage.type).to.eql(
-          postExternalReferenceSOReq.externalReferenceStorage.type
-        );
-      });
-
-      it("should inject the elasticsearch external reference style attachment's references into the attributes", async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postExternalReferenceESReq,
-        });
-
-        const response = await bulkGetAttachments({
-          savedObjectIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const externalRefES = response.attachments[0] as ExternalReferenceAttachmentAttributes;
-
-        expect(externalRefES.externalReferenceId).to.eql(
-          postExternalReferenceESReq.externalReferenceId
-        );
-        expect(externalRefES.externalReferenceStorage.type).to.eql(
-          postExternalReferenceESReq.externalReferenceStorage.type
+        expect(response.errors[0].error).to.eql('Not Found');
+        expect(response.errors[0].status).to.eql(404);
+        expect(response.errors[0].savedObjectId).to.eql('does-not-exist');
+        // The not-found SO type depends on the attachments feature flag (legacy
+        // `cases-comments` when off, unified `cases-attachments` when on).
+        expect(response.errors[0].message).to.match(
+          /Saved object \[cases-(comments|attachments)\/does-not-exist\] not found/
         );
       });
     });
@@ -380,12 +301,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(attachments.length).to.be(0);
           expect(errors.length).to.be(2);
-          expect(errors[0]).to.eql({
-            error: 'Not Found',
-            message: 'Saved object [cases-comments/does-not-exist] not found',
-            status: 404,
-            savedObjectId: 'does-not-exist',
-          });
+          expect(errors[0].error).to.eql('Not Found');
+          expect(errors[0].status).to.eql(404);
+          expect(errors[0].savedObjectId).to.eql('does-not-exist');
+          // The not-found SO type depends on the attachments feature flag (legacy
+          // `cases-comments` when off, unified `cases-attachments` when on).
+          expect(errors[0].message).to.match(
+            /Saved object \[cases-(comments|attachments)\/does-not-exist\] not found/
+          );
           expect(errors[1]).to.eql({
             savedObjectId: obsSavedObjectId,
             error: 'Bad Request',

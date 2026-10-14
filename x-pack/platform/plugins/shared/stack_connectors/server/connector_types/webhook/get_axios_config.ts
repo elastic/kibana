@@ -60,6 +60,7 @@ const getOAuth2AxiosConfig = async ({
       configurationUtilities,
       oAuthScope: scope,
       credentials: {
+        type: 'client_secret',
         secrets: { clientSecret: clientSecret! },
         config: {
           clientId: clientId!,

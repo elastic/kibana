@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { indicatorSchema, objectiveSchema } from '../../schema';
+import { boundedProjectRoutingSchema, indicatorSchema, objectiveSchema } from '../../schema';
 import { dateType, groupingsSchema } from '../../schema/common';
 
 const getPreviewDataParamsSchema = t.type({
@@ -22,6 +22,7 @@ const getPreviewDataParamsSchema = t.type({
       remoteName: t.string,
       groupings: groupingsSchema,
       groupBy: t.array(t.string),
+      projectRoutings: t.union([boundedProjectRoutingSchema, t.null]),
     }),
   ]),
 });

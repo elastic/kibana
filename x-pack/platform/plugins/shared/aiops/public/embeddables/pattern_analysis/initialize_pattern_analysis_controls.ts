@@ -7,60 +7,62 @@
 
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import type { PatternAnalysisComponentApi } from './types';
-import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 
 type PatternAnalysisState = Pick<
   PatternAnalysisEmbeddableState,
-  | 'dataViewId'
-  | 'fieldName'
-  | 'minimumTimeRangeOption'
-  | 'randomSamplerMode'
-  | 'randomSamplerProbability'
+  | 'data_view_id'
+  | 'field_name'
+  | 'minimum_time_range'
+  | 'random_sampler_mode'
+  | 'random_sampler_probability'
 >;
 
 export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddableState) => {
-  const dataViewId = new BehaviorSubject(state.dataViewId);
-  const fieldName = new BehaviorSubject(state.fieldName);
-  const minimumTimeRangeOption = new BehaviorSubject(state.minimumTimeRangeOption);
-  const randomSamplerMode = new BehaviorSubject(state.randomSamplerMode);
-  const randomSamplerProbability = new BehaviorSubject(state.randomSamplerProbability);
+  const dataViewId = new BehaviorSubject(state.data_view_id);
+  const fieldName = new BehaviorSubject(state.field_name);
+  const minimumTimeRangeOption = new BehaviorSubject(state.minimum_time_range);
+  const randomSamplerMode = new BehaviorSubject(state.random_sampler_mode);
+  const randomSamplerProbability = new BehaviorSubject(state.random_sampler_probability);
 
   const updateUserInput = (update: PatternAnalysisEmbeddableState) => {
-    dataViewId.next(update.dataViewId);
-    fieldName.next(update.fieldName);
-    minimumTimeRangeOption.next(update.minimumTimeRangeOption);
-    randomSamplerMode.next(update.randomSamplerMode);
-    randomSamplerProbability.next(update.randomSamplerProbability);
+    dataViewId.next(update.data_view_id);
+    fieldName.next(update.field_name);
+    minimumTimeRangeOption.next(update.minimum_time_range);
+    randomSamplerMode.next(update.random_sampler_mode);
+    randomSamplerProbability.next(update.random_sampler_probability);
   };
 
   const serializePatternAnalysisChartState = (): PatternAnalysisState => {
     return {
-      dataViewId: dataViewId.getValue(),
-      fieldName: fieldName.getValue(),
-      minimumTimeRangeOption: minimumTimeRangeOption.getValue(),
-      randomSamplerMode: randomSamplerMode.getValue(),
-      randomSamplerProbability: randomSamplerProbability.getValue(),
+      data_view_id: dataViewId.getValue(),
+      field_name: fieldName.getValue(),
+      minimum_time_range: minimumTimeRangeOption.getValue(),
+      random_sampler_mode: randomSamplerMode.getValue(),
+      random_sampler_probability: randomSamplerProbability.getValue(),
     };
   };
 
   const patternAnalysisControlsComparators: StateComparators<PatternAnalysisState> = {
-    dataViewId: 'referenceEquality',
-    fieldName: 'referenceEquality',
-    minimumTimeRangeOption: 'referenceEquality',
-    randomSamplerMode: 'referenceEquality',
-    randomSamplerProbability: 'referenceEquality',
+    data_view_id: 'referenceEquality',
+    field_name: 'referenceEquality',
+    minimum_time_range: 'referenceEquality',
+    random_sampler_mode: 'referenceEquality',
+    random_sampler_probability: 'referenceEquality',
+  };
+
+  const patternAnalysisControlsApi: PatternAnalysisComponentApi = {
+    dataViewId,
+    fieldName,
+    minimumTimeRangeOption,
+    randomSamplerMode,
+    randomSamplerProbability,
+    updateUserInput,
   };
 
   return {
-    patternAnalysisControlsApi: {
-      dataViewId,
-      fieldName,
-      minimumTimeRangeOption,
-      randomSamplerMode,
-      randomSamplerProbability,
-      updateUserInput,
-    } as unknown as PatternAnalysisComponentApi,
+    patternAnalysisControlsApi,
     serializePatternAnalysisChartState,
     patternAnalysisControlsComparators,
   };

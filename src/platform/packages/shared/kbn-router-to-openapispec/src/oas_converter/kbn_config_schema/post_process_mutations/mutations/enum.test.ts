@@ -112,8 +112,89 @@ describe('processEnum', () => {
       },
     },
     {
+      name: 'collapses nullable anyOf for joi-to-json null branch shape (enum: [null])',
+      input: {
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            enum: [null],
+            nullable: true,
+            anyOf: [],
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'string',
+        nullable: true,
+      },
+    },
+    {
+      name: 'collapses nullable anyOf for internal placeholder null branch shape (enum: [])',
+      input: {
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'string',
+        nullable: true,
+      },
+    },
+    {
+      name: 'preserves default null for joi-to-json null branch shape (enum: [null])',
+      input: {
+        default: null,
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            enum: [null],
+            nullable: true,
+            anyOf: [],
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'string',
+        nullable: true,
+        default: null,
+      },
+    },
+    {
+      name: 'preserves default null for internal placeholder null branch shape (enum: [])',
+      input: {
+        default: null,
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'string',
+        nullable: true,
+        default: null,
+      },
+    },
+    {
       name: 'correctly transforms schema.nullable inputs',
       input: {
+        default: null,
         anyOf: [
           {
             description: 'test',
@@ -142,6 +223,29 @@ describe('processEnum', () => {
         },
         required: ['test'],
         nullable: true,
+        default: null,
+      },
+    },
+    {
+      name: 'preserves default null and strips inner default when collapsing nullable',
+      input: {
+        default: null,
+        anyOf: [
+          {
+            type: 'string',
+            default: 'ignored',
+          },
+          {
+            enum: [null],
+            nullable: true,
+            anyOf: [],
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'string',
+        nullable: true,
+        default: null,
       },
     },
     {
@@ -232,6 +336,27 @@ describe('processEnum', () => {
             type: 'boolean',
           },
         ],
+        nullable: true,
+      },
+    },
+    {
+      name: 'collapses nullable anyOf for numeric enums',
+      input: {
+        anyOf: [
+          {
+            type: 'number',
+            enum: [1, 2, 3],
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'number',
+        enum: [1, 2, 3, null],
         nullable: true,
       },
     },

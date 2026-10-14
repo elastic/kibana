@@ -8,7 +8,7 @@
 import { isEmpty, findIndex, indexOf, pickBy, uniq, map } from 'lodash';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
@@ -18,14 +18,24 @@ import { QUERY_TIMEOUT } from '../../../common/constants';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
-import { getSupportedPlatforms } from '../queries/platforms/helpers';
+import { getSupportedPlatforms } from '../queries/platforms';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import { isResultType } from '../../../common/result_type';
+import { serializeSchedule } from './schedule_serializer';
+import type { ScheduleFormData } from '../../components/schedule_section/types';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
+  // Whether the pack SO actually persisted a pack-level schedule, vs. the
+  // form synthesizing an interval default for a legacy pack. See
+  // `resolveInheritedScheduleInput` in `../queries/use_pack_query_form.tsx`.
+  packHasExplicitSchedule?: boolean;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
+  euiFieldProps,
+  packHasExplicitSchedule,
+}) => {
   const {
     field: { value: fieldValue },
   } = useController<{ queries: PackQueryFormData[] }, 'queries'>({
@@ -39,7 +49,34 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   });
 
   const { setValue } = useFormContext();
-  const { name: packName } = useWatch();
+  const packName = useWatch({ name: 'name' });
+  const packScheduleFormData = useWatch({ name: 'schedule' }) as ScheduleFormData | undefined;
+  const packMinOsqueryVersionArr = useWatch({ name: 'min_osquery_version' }) as
+    | string[]
+    | undefined;
+  const packResultTypeValue = useWatch({ name: 'result_type' }) as string | undefined;
+  const packPlatformValue = useWatch({ name: 'platform' }) as string | undefined;
+  // Resolve scalar values from the combobox array / super-select string.
+  const packMinOsqueryVersion = packMinOsqueryVersionArr?.length
+    ? packMinOsqueryVersionArr[0]
+    : undefined;
+  // Narrow the watched string to a real `ResultType` instead of suppressing the
+  // mismatch at each call site. This also defends the wire boundary: an
+  // unrecognised stored value would otherwise reach `mapResultTypeToWire`,
+  // which falls through to `{}` and silently runs the query in snapshot mode.
+  const packResultType = isResultType(packResultTypeValue) ? packResultTypeValue : undefined;
+  const packPlatform = packPlatformValue || undefined;
+
+  const packSchedule = useMemo(
+    () =>
+      packScheduleFormData
+        ? {
+            ...serializeSchedule(packScheduleFormData),
+            hasExplicitSchedule: !!packHasExplicitSchedule,
+          }
+        : undefined,
+    [packScheduleFormData, packHasExplicitSchedule]
+  );
 
   const handleNameChange = useCallback(
     (newName: string) => isEmpty(packName) && setValue('name', newName),
@@ -79,10 +116,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
     (updatedQuery: any) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
+          // The stored identity claim must survive an edit even though the
+          // flyout replaces the draft wholesale and `id` may be renamed.
+          const originalId = fieldValue?.[showEditQueryFlyout]?.originalId;
           update(
             showEditQueryFlyout,
             produce({}, (draft: PackQueryFormData) => {
               draft.id = updatedQuery.id;
+              if (originalId !== undefined) {
+                draft.originalId = originalId;
+              }
+
               draft.interval = updatedQuery.interval;
               draft.query = updatedQuery.query;
               draft.timeout = updatedQuery.timeout;
@@ -102,6 +146,33 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
               draft.snapshot = updatedQuery.snapshot;
               draft.removed = updatedQuery.removed;
 
+              // The draft is built from `{}`, so only explicitly assigned keys
+              // survive. `result_type` is the canonical field the serializer
+              // reads; omitting it here dropped a per-query override the
+              // moment the user reopened and re-saved the flyout, while
+              // `handleAddQuery` (which appends the serialized object whole)
+              // preserved it — an add/edit asymmetry.
+              if (updatedQuery.result_type !== undefined) {
+                draft.result_type = updatedQuery.result_type;
+              } else {
+                delete draft.result_type;
+              }
+
+              // Preserve enabled flag from the existing form state (flyout doesn't touch it yet)
+              draft.enabled = fieldValue?.[showEditQueryFlyout]?.enabled;
+
+              if (updatedQuery.schedule_type) {
+                draft.schedule_type = updatedQuery.schedule_type;
+              } else {
+                delete draft.schedule_type;
+              }
+
+              if (updatedQuery.rrule_schedule) {
+                draft.rrule_schedule = updatedQuery.rrule_schedule;
+              } else {
+                delete draft.rrule_schedule;
+              }
+
               return draft;
             })
           );
@@ -110,7 +181,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
         handleHideEditFlyout();
         resolve();
       }),
-    [handleHideEditFlyout, update, showEditQueryFlyout]
+    [handleHideEditFlyout, update, showEditQueryFlyout, fieldValue]
   );
 
   const handleAddQuery = useCallback(
@@ -123,11 +194,33 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
     [handleHideAddFlyout, append]
   );
 
+  const handleToggleEnabled = useCallback(
+    (query: PackQueryFormData, enabled: boolean) => {
+      // Resolve by identity rather than by `id`. `findIndex(..., ['id', ...])`
+      // returns the *first* row with a matching id, so during a rename — or in
+      // any state where two rows transiently share an id — toggling the second
+      // row silently flipped the first.
+      const streamIndex = indexOf(fieldValue, query);
+      if (streamIndex > -1) {
+        update(streamIndex, { ...fieldValue[streamIndex], enabled });
+      }
+    },
+    [fieldValue, update]
+  );
+
   const handleDeleteQueries = useCallback(() => {
-    const idsToRemove = map(tableSelectedItems, (selectedItem) =>
-      indexOf(fieldValue, selectedItem)
-    );
-    remove(idsToRemove);
+    // `update()` in `handleToggleEnabled` replaces the row with a new object,
+    // but EuiBasicTable keeps the pre-toggle identity in `tableSelectedItems`
+    // (`itemId` matches, so `onSelectionChange` does not re-fire). Resolving
+    // by object identity then `indexOf`s `-1`, and RHF `removeAtIndexes`
+    // `splice(-1, 1)` deletes the last query instead of the selected one.
+    const idsToRemove = tableSelectedItems
+      .map((selectedItem) => findIndex(fieldValue, ['id', selectedItem.id]))
+      .filter((index) => index > -1);
+    if (idsToRemove.length) {
+      remove(idsToRemove);
+    }
+
     setTableSelectedItems([]);
   }, [fieldValue, remove, tableSelectedItems]);
 
@@ -200,8 +293,12 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           isReadOnly={isReadOnly}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
+          onToggleEnabled={handleToggleEnabled}
           selectedItems={tableSelectedItems}
           setSelectedItems={setTableSelectedItems}
+          packSchedule={packSchedule}
+          packMinOsqueryVersion={packMinOsqueryVersion}
+          packPlatform={packPlatform}
         />
       ) : null}
       <EuiSpacer />
@@ -211,6 +308,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           uniqueQueryIds={uniqueQueryIds}
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
+          packSchedule={packSchedule}
+          packMinOsqueryVersion={packMinOsqueryVersion}
+          packResultType={packResultType}
+          packPlatform={packPlatform}
         />
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
@@ -220,6 +321,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           defaultValue={fieldValue[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
+          packSchedule={packSchedule}
+          packMinOsqueryVersion={packMinOsqueryVersion}
+          packResultType={packResultType}
+          packPlatform={packPlatform}
         />
       )}
     </>

@@ -19,6 +19,8 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_LENGTH_PER_WORKFLOW_TAG,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import {
@@ -87,6 +89,9 @@ export const NumberCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+/**
+ * @deprecated Custom fields are superseded by the field library and the case `extended_fields`.
+ */
 export const CustomFieldsConfigurationRt = limitedArraySchema({
   codec: rt.union([
     TextCustomFieldConfigurationRt,
@@ -114,6 +119,17 @@ export const ObservableTypesConfigurationRt = limitedArraySchema({
       max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
     }),
   }),
+});
+
+export const WorkflowTagsConfigurationRt = limitedArraySchema({
+  codec: limitedStringSchema({
+    fieldName: 'workflow tag',
+    min: 1,
+    max: MAX_LENGTH_PER_WORKFLOW_TAG,
+  }),
+  min: 0,
+  max: MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+  fieldName: 'workflow tags',
 });
 
 export const TemplateConfigurationRt = rt.intersection([
@@ -162,6 +178,10 @@ export const TemplateConfigurationRt = rt.intersection([
   ),
 ]);
 
+/**
+ * @deprecated Configuration-embedded templates are superseded by the case templates system
+ * (`GET /api/cases/templates`); their fields are applied via the case `extended_fields`.
+ */
 export const TemplatesConfigurationRt = limitedArraySchema({
   codec: TemplateConfigurationRt,
   min: 0,
@@ -189,6 +209,8 @@ export const ConfigurationRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      extractObservables: rt.boolean,
+      workflowTags: WorkflowTagsConfigurationRt,
     })
   ),
 ]);
@@ -215,6 +237,8 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      extractObservables: ConfigurationBasicWithoutOwnerRt.type.props.extractObservables,
+      workflowTags: WorkflowTagsConfigurationRt,
     })
   ),
   rt.strict({ version: rt.string }),
@@ -226,3 +250,4 @@ export type GetConfigurationFindRequest = rt.TypeOf<typeof GetConfigurationFindR
 export type GetConfigureResponse = Configurations;
 export type CreateConfigureResponse = Configuration;
 export type UpdateConfigureResponse = Configuration;
+export type WorkflowTagsConfiguration = rt.TypeOf<typeof WorkflowTagsConfigurationRt>;

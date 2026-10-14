@@ -36,12 +36,15 @@ import * as knowledgeBaseIndex from './knowledge_base_index';
 
 import {
   getAgentTemplateAssetsMap,
+  getInstalledPackageManifests,
   getInstalledPackages,
   getPackageDependencies,
+  getPackageFromSource,
   getPackageInfo,
   getPackages,
   getPackageUsageStats,
   getPackageKnowledgeBase,
+  getInstallationObject,
 } from './get';
 
 const mockPackagePolicySavedObjectType = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
@@ -480,8 +483,8 @@ test: invalid manifest
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
 
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledTimes(1);
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledWith(
+      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledWith(
         'Installed package invalidpackage 0.0.1 is not a valid package anymore'
       );
     });
@@ -1047,6 +1050,47 @@ owner: elastic`,
     });
   });
 
+  describe('getInstalledPackageManifests', () => {
+    it('parses a manifest stored as base64', async () => {
+      const soClient = savedObjectsClientMock.create();
+      // A Latin-1 byte in a comment makes the manifest invalid UTF-8, so storage keeps it as base64.
+      const manifest = Buffer.concat([
+        Buffer.from('name: test\ntitle: Test\nversion: 1.0.0\n# caf'),
+        Buffer.from([0xe9]),
+        Buffer.from('\ndescription: Test package\n'),
+      ]);
+      soClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [
+          {
+            type: ASSETS_SAVED_OBJECT_TYPE,
+            id: 'test-manifest',
+            attributes: {
+              package_name: 'test',
+              package_version: '1.0.0',
+              install_source: 'upload',
+              asset_path: 'test-1.0.0/manifest.yml',
+              media_type: 'text/yaml; charset=utf-8',
+              data_utf8: '',
+              data_base64: manifest.toString('base64'),
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      } as any);
+
+      const manifests = await getInstalledPackageManifests(soClient, [
+        { name: 'test', version: '1.0.0' },
+      ] as any);
+
+      expect(manifests.get('test-1.0.0/manifest.yml')).toMatchObject({
+        title: 'Test',
+        description: 'Test package',
+      });
+    });
+  });
+
   describe('getPackageInfo', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
@@ -1231,7 +1275,7 @@ owner: elastic`,
           pkgName: 'nginx',
           pkgVersion: '1.0.0',
         })
-      ).rejects.toThrowError(PackageNotFoundError);
+      ).rejects.toThrow(PackageNotFoundError);
     });
 
     it('should do nothing if no excluded data streams', async () => {
@@ -1380,7 +1424,7 @@ owner: elastic`,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
-        ).rejects.toThrowError(PackageNotFoundError);
+        ).rejects.toThrow(PackageNotFoundError);
       });
 
       it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {
@@ -1969,6 +2013,107 @@ owner: elastic`,
       );
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getPackageFromSource', () => {
+    const pkgName = 'apm';
+    const pkgVersion = '9.3.1';
+    const soClient = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const bundledResult = {
+      paths: ['/bundled/path'],
+      packageInfo: { name: pkgName, version: pkgVersion } as any,
+      assetsMap: new Map(),
+      archiveIterator: {} as any,
+    };
+
+    it('falls back to bundled archive for an installed bundled package when ES assets are missing', async () => {
+      const installedPkg = {
+        install_status: 'installed',
+        install_source: 'bundled',
+        version: pkgVersion,
+        package_assets: [{ id: 'asset-1', type: 'epm-packages-assets' }],
+      } as any;
+
+      jest.mocked(getEsPackage).mockResolvedValueOnce(undefined);
+      MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
+
+      const result = await getPackageFromSource({
+        pkgName,
+        pkgVersion,
+        installedPkg,
+        savedObjectsClient: soClient,
+      });
+
+      expect(MockRegistry.getBundledArchive).toHaveBeenCalledWith(pkgName, pkgVersion);
+      expect(result).toMatchObject({ paths: bundledResult.paths });
+    });
+
+    it('falls back to bundled archive when EPR returns 404 for a package not in the registry', async () => {
+      const { RegistryResponseError } = jest.requireActual('../../../errors');
+      MockRegistry.getPackage.mockRejectedValue(new RegistryResponseError('not found', 404));
+      MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
+
+      const result = await getPackageFromSource({
+        pkgName,
+        pkgVersion,
+        savedObjectsClient: soClient,
+      });
+
+      expect(MockRegistry.getBundledArchive).toHaveBeenCalledWith(pkgName, pkgVersion);
+      expect(result).toMatchObject({ paths: bundledResult.paths });
+    });
+  });
+
+  describe('and invoking getInstallationObject()', () => {
+    it('returns undefined when the package saved object is missing', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(
+        getInstallationObject({ savedObjectsClient: soClient, pkgName: 'nginx' })
+      ).resolves.toBeUndefined();
+    });
+
+    it('returns undefined for unexpected saved object errors by default', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(new Error('so unavailable'));
+
+      await expect(
+        getInstallationObject({ savedObjectsClient: soClient, pkgName: 'nginx' })
+      ).resolves.toBeUndefined();
+    });
+
+    it('propagates unexpected saved object errors when failOnUnexpectedError is true', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const error = new Error('so unavailable');
+      soClient.get.mockRejectedValue(error);
+
+      await expect(
+        getInstallationObject({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          failOnUnexpectedError: true,
+        })
+      ).rejects.toBe(error);
+    });
+
+    it('still treats 404 as not installed when failOnUnexpectedError is true', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(
+        getInstallationObject({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          failOnUnexpectedError: true,
+        })
+      ).resolves.toBeUndefined();
     });
   });
 });

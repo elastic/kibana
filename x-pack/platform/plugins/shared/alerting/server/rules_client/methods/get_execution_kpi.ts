@@ -41,7 +41,7 @@ export async function getRuleExecutionKPI(
   { id, dateStart, dateEnd, filter }: GetRuleExecutionKPIParams
 ) {
   context.logger.debug(`getRuleExecutionKPI(): getting execution KPI for rule ${id}`);
-  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id })) as SanitizedRuleWithLegacyId;
 
   try {
     // Make sure user has access to this rule
@@ -113,6 +113,7 @@ export async function getGlobalExecutionKpiWithAuth(
           ruleTypeId: 'kibana.alert.rule.rule_type_id',
           consumer: 'kibana.alert.rule.consumer',
         },
+        namespaces,
       },
     });
   } catch (error) {

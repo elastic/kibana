@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
-import type { GetScopedClients } from '../../routes/types';
+import type { AgentBuilderPluginSetup, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import { streamsManagementSkill } from './streams_management_skill';
-import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
-import { createKiIdentificationManagementSkill } from './ki_identification_management';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
-  getScopedClients,
-  telemetry,
+  availability,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getScopedClients: GetScopedClients;
-  telemetry: EbtTelemetryClient;
+  availability: ToolAvailabilityConfig;
 }): void => {
   if (!agentBuilder) {
     return;
   }
 
-  const streamsSkills = [
-    streamsManagementSkill,
-    knowledgeIndicatorsManagementSkill,
-    createKiIdentificationManagementSkill({ getScopedClients, telemetry }),
-  ];
+  const streamsSkills = [streamsManagementSkill];
 
   for (const skill of streamsSkills) {
-    agentBuilder.skills.register(skill);
+    agentBuilder.skills.register({ ...skill, availability });
   }
 };

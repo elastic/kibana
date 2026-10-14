@@ -22,14 +22,15 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useInstallProductDoc,
   useUninstallProductDoc,
+  useDefaultInferenceId,
   REACT_QUERY_KEYS,
   type ProductDocBasePluginStart,
 } from '@kbn/product-doc-base-plugin/public';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
@@ -49,17 +50,39 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const queryClient = useQueryClient();
 
+  const { inferenceId: productDocInferenceId, isLoading: isProductDocInferenceIdLoading } =
+    useDefaultInferenceId(productDocBase, ResourceTypes.productDoc);
+  const { inferenceId: securityLabsInferenceId, isLoading: isSecurityLabsInferenceIdLoading } =
+    useDefaultInferenceId(productDocBase, ResourceTypes.securityLabs);
+
+  const inferenceIdByResourceType = useMemo(
+    () => ({
+      [ResourceTypes.productDoc]: productDocInferenceId,
+      [ResourceTypes.securityLabs]: securityLabsInferenceId,
+      [ResourceTypes.openapiSpec]: productDocInferenceId,
+    }),
+    [productDocInferenceId, securityLabsInferenceId]
+  );
+
+  const isInferenceIdLoading = isProductDocInferenceIdLoading || isSecurityLabsInferenceIdLoading;
+
   const docsConfig = DOCUMENTATION_ITEMS_CONFIG;
 
   const statusQueries = useQueries({
     queries: docsConfig.map((doc) => {
-      const inferenceId = defaultInferenceEndpoints.ELSER;
       const resourceType = doc.resourceType;
+      const inferenceId = inferenceIdByResourceType[resourceType];
       return {
         // IMPORTANT: use the shared product-doc-base query key so the existing install/uninstall hooks
         // invalidate these queries automatically (otherwise status only updates on full refresh).
         queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId, resourceType],
-        queryFn: async () => doc.getNormalizedStatus({ productDocBase, inferenceId }),
+        queryFn: async () => {
+          if (!inferenceId) {
+            throw new Error('Inference ID is not available');
+          }
+          return doc.getNormalizedStatus({ productDocBase, inferenceId });
+        },
+        enabled: Boolean(inferenceId) && !isInferenceIdLoading,
         keepPreviousData: false,
         refetchOnWindowFocus: false,
         refetchInterval: (queryData?: NormalizedDocStatus) => {
@@ -72,7 +95,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
     }),
   });
 
-  const isLoading = statusQueries.some((q) => q.isLoading);
+  const isLoading = isInferenceIdLoading || statusQueries.some((q) => q.isLoading);
 
   const refetch = useCallback(() => {
     // Invalidate all doc status queries (for all rows) so they refresh together.
@@ -90,32 +113,66 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         name: doc.name,
         status,
         resourceType: doc.resourceType,
+        inferenceId: inferenceIdByResourceType[doc.resourceType],
         ...(updateAvailable ? { updateAvailable } : {}),
         isTechPreview: doc.isTechPreview,
         isStubbed: doc.isStubbed,
         icon: doc.icon,
+        ...(data?.failureReason ? { failureReason: data.failureReason } : {}),
       };
     });
-  }, [docsConfig, statusQueries]);
+  }, [docsConfig, statusQueries, inferenceIdByResourceType]);
 
-  const getStatusBadge = useCallback((itemStatus: DocumentationStatus) => {
-    // Status badge only shows binary state: Installed or Not installed
-    // Action states (installing/uninstalling) are shown in the action button
-    switch (itemStatus) {
-      case 'installed':
-        return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
-      case 'uninstalling':
-        return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
-      case 'error':
-        return <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>;
-      case 'not_available':
-        return <EuiBadge color="warning">{i18n.STATUS_NOT_AVAILABLE}</EuiBadge>;
-      case 'installing':
-      case 'uninstalled':
-      default:
-        return <EuiBadge color="hollow">{i18n.STATUS_NOT_INSTALLED}</EuiBadge>;
-    }
-  }, []);
+  const getErrorSuggestion = useCallback(
+    (failureReason: string, endpointId: string): string | null => {
+      if (failureReason.includes('model_deployment_timeout_exception')) {
+        return i18n.getModelDeploymentTimeoutSuggestion(endpointId);
+      }
+      return null;
+    },
+    []
+  );
+
+  const getStatusBadge = useCallback(
+    (item: DocumentationItem) => {
+      switch (item.status) {
+        case 'installed':
+          return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
+        case 'uninstalling':
+          return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
+        case 'error': {
+          if (!item.failureReason) {
+            return <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>;
+          }
+          const suggestion = getErrorSuggestion(item.failureReason, item.inferenceId ?? '');
+          return (
+            <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {item.failureReason}
+                </EuiText>
+              </EuiFlexItem>
+              {suggestion && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">{suggestion}</EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        }
+        case 'not_available':
+          return <EuiBadge color="warning">{i18n.STATUS_NOT_AVAILABLE}</EuiBadge>;
+        case 'installing':
+        case 'uninstalled':
+        default:
+          return <EuiBadge color="hollow">{i18n.STATUS_NOT_INSTALLED}</EuiBadge>;
+      }
+    },
+    [getErrorSuggestion]
+  );
 
   const getActionButton = useCallback(
     (item: DocumentationItem) => {
@@ -124,11 +181,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
           item={item}
           productDocBase={productDocBase}
           hasManagePrivilege={hasManagePrivilege}
+          isInferenceIdLoading={isInferenceIdLoading}
           onRefetch={refetch}
         />
       );
     },
-    [hasManagePrivilege, productDocBase, refetch]
+    [hasManagePrivilege, isInferenceIdLoading, productDocBase, refetch]
   );
 
   const columns: Array<EuiBasicTableColumn<DocumentationItem>> = useMemo(
@@ -140,7 +198,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         render: (name: string, item: DocumentationItem) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={item.icon ?? 'documents'} />
+              <EuiIcon type={item.icon ?? 'documents'} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{name}</EuiText>
@@ -163,7 +221,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         name: i18n.COLUMN_STATUS,
         sortable: false,
         width: '300px',
-        render: (itemStatus: DocumentationStatus) => getStatusBadge(itemStatus),
+        render: (_: DocumentationStatus, item: DocumentationItem) => getStatusBadge(item),
       },
       {
         field: 'actions',
@@ -213,8 +271,9 @@ const DocumentationRowActions: React.FC<{
   item: DocumentationItem;
   productDocBase: ProductDocBasePluginStart;
   hasManagePrivilege: boolean;
+  isInferenceIdLoading: boolean;
   onRefetch: () => void;
-}> = ({ item, productDocBase, hasManagePrivilege, onRefetch }) => {
+}> = ({ item, productDocBase, hasManagePrivilege, isInferenceIdLoading, onRefetch }) => {
   const { services } = useKibana();
   const { notifications, rendering, docLinks } = services;
 
@@ -255,14 +314,15 @@ const DocumentationRowActions: React.FC<{
 
   const installVars = useMemo(
     () => ({
-      inferenceId: defaultInferenceEndpoints.ELSER,
+      inferenceId: item.inferenceId,
       resourceType: item.resourceType,
     }),
-    [item.resourceType]
+    [item.inferenceId, item.resourceType]
   );
 
   const isItemInstalling = item.status === 'installing' || installMutation.isLoading;
   const isItemUninstalling = item.status === 'uninstalling' || uninstallMutation.isLoading;
+  const isActionDisabled = !hasManagePrivilege || isInferenceIdLoading;
 
   const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
     if (!hasManagePrivilege) {
@@ -310,8 +370,8 @@ const DocumentationRowActions: React.FC<{
       <EuiButtonEmpty
         size="xs"
         iconType="refresh"
-        onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-        isDisabled={!hasManagePrivilege}
+        onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+        isDisabled={isActionDisabled}
         data-test-subj={`documentation-retry-${item.id}`}
       >
         {i18n.ACTION_RETRY}
@@ -347,8 +407,8 @@ const DocumentationRowActions: React.FC<{
             <EuiButtonEmpty
               size="xs"
               iconType="refresh"
-              onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-              isDisabled={!hasManagePrivilege}
+              onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+              isDisabled={isActionDisabled}
               data-test-subj={`documentation-update-${item.id}`}
             >
               {i18n.ACTION_UPDATE}
@@ -357,9 +417,9 @@ const DocumentationRowActions: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
-              iconType="returnKey"
-              onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
-              isDisabled={!hasManagePrivilege}
+              iconType="return"
+              onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
+              isDisabled={isActionDisabled}
               data-test-subj={`documentation-uninstall-${item.id}`}
             >
               {i18n.ACTION_UNINSTALL}
@@ -372,9 +432,9 @@ const DocumentationRowActions: React.FC<{
     return wrapWithPrivilegeTooltip(
       <EuiButtonEmpty
         size="xs"
-        iconType="returnKey"
-        onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
-        isDisabled={!hasManagePrivilege}
+        iconType="return"
+        onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
+        isDisabled={isActionDisabled}
         data-test-subj={`documentation-uninstall-${item.id}`}
       >
         {i18n.ACTION_UNINSTALL}
@@ -401,8 +461,8 @@ const DocumentationRowActions: React.FC<{
     <EuiButtonEmpty
       size="xs"
       iconType="download"
-      onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-      isDisabled={!hasManagePrivilege}
+      onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+      isDisabled={isActionDisabled}
       data-test-subj={`documentation-install-${item.id}`}
     >
       {i18n.ACTION_INSTALL}

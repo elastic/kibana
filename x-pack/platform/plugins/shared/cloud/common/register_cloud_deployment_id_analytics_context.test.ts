@@ -64,7 +64,7 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
 
   describe('cloudInTrial', () => {
     test('when cloudTrialEndDate is available', async () => {
-      const cloudTrialEndDate = new Date(Date.now() + 30).toISOString(); // create a date 30s in the future.
+      const cloudTrialEndDate = new Date(Date.now() + 1_000).toISOString(); // create a date 1 second in the future.
 
       registerCloudDeploymentMetadataAnalyticsContext(analytics, {
         id: 'cloud_id',

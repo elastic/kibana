@@ -8,6 +8,7 @@
  */
 
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { esql } from '@elastic/esql';
 import type {
   SimpleIStorageClient,
   StorageClientBulkResponse,
@@ -558,6 +559,148 @@ describe('StorageIndexAdapter', () => {
 
     it('deletes the documents', async () => {
       await verifyClean();
+    });
+  });
+
+  describe('esql method', () => {
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    describe('round-trips a basic pipeline against the storage index', () => {
+      beforeAll(async () => {
+        await client.bulk({
+          operations: [
+            { index: { _id: 'd1', document: { foo: 'bar' } } },
+            { index: { _id: 'd2', document: { foo: 'baz' } } },
+          ],
+        });
+      });
+
+      afterAll(async () => {
+        await client.clean();
+      });
+
+      it('returns both documents via _source', async () => {
+        const response = await client.esql({
+          metadata: ['_id', '_source'],
+          pipeline: esql`SORT _id ASC | LIMIT 10`,
+        });
+
+        const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+        const idIdx = response.columns.findIndex((c) => c.name === '_id');
+        expect(sourceIdx).toBeGreaterThanOrEqual(0);
+        expect(idIdx).toBeGreaterThanOrEqual(0);
+
+        expect(response.values.map((row) => row[idIdx])).toEqual(['d1', 'd2']);
+        expect(response.values.map((row) => row[sourceIdx])).toEqual([
+          { foo: 'bar' },
+          { foo: 'baz' },
+        ]);
+      });
+
+      it('omits METADATA when metadata is not provided', async () => {
+        const response = await client.esql({
+          pipeline: esql`STATS count = COUNT(*)`,
+        });
+        const countIdx = response.columns.findIndex((c) => c.name === 'count');
+        expect(countIdx).toBeGreaterThanOrEqual(0);
+        expect(response.values[0]?.[countIdx]).toBe(2);
+      });
+    });
+
+    describe('forwards the body filter alongside the ES|QL pipeline', () => {
+      beforeAll(async () => {
+        await client.bulk({
+          operations: [
+            { index: { _id: 'd1', document: { foo: 'bar' } } },
+            { index: { _id: 'd2', document: { foo: 'baz' } } },
+          ],
+        });
+      });
+
+      afterAll(async () => {
+        await client.clean();
+      });
+
+      it('narrows the result set to docs matching the body filter', async () => {
+        const response = await client.esql({
+          metadata: ['_id'],
+          pipeline: esql`SORT _id ASC | LIMIT 10`,
+          filter: { bool: { filter: [{ term: { foo: 'bar' } }] } },
+        });
+
+        const idIdx = response.columns.findIndex((c) => c.name === '_id');
+        expect(response.values.map((row) => row[idIdx])).toEqual(['d1']);
+      });
+    });
+
+    describe('returns an empty response when the storage index does not exist', () => {
+      beforeAll(async () => {
+        await client.clean();
+      });
+
+      it('produces { columns: [], values: [] } instead of throwing', async () => {
+        const freshAdapter = createStorageIndexAdapter(storageSettings);
+        const freshClient = freshAdapter.getClient();
+
+        const response = await freshClient.esql({
+          metadata: ['_id', '_source'],
+          pipeline: esql`LIMIT 10`,
+        });
+
+        expect(response).toEqual({ columns: [], values: [] });
+      });
+    });
+
+    describe('migrateSource handling on _source columns', () => {
+      let migratingClient: SimpleIStorageClient<typeof storageSettings>;
+
+      beforeAll(async () => {
+        const migratingAdapter = createStorageIndexAdapter(storageSettings, {
+          migrateSource: (source) =>
+            ({
+              ...source,
+              migratedProp: String(source.foo).toUpperCase(),
+            } as StorageDocumentOf<typeof storageSettings>),
+        });
+        migratingClient = migratingAdapter.getClient();
+        await migratingClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'm1',
+                document: { foo: 'xyz' } as StorageDocumentOf<typeof storageSettings>,
+              },
+            },
+          ],
+        });
+      });
+
+      afterAll(async () => {
+        await migratingClient.clean();
+      });
+
+      it('applies migrateSource by default when _source is in metadata', async () => {
+        const response = await migratingClient.esql({
+          metadata: ['_source'],
+          pipeline: esql`LIMIT 1`,
+        });
+
+        const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+        expect(response.values[0]?.[sourceIdx]).toEqual({ foo: 'xyz', migratedProp: 'XYZ' });
+      });
+
+      it('returns the raw _source when migrateSource: false is passed', async () => {
+        const response = await migratingClient.esql({
+          metadata: ['_source'],
+          pipeline: esql`LIMIT 1`,
+          migrateSource: false,
+        });
+
+        const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+        expect(response.values[0]?.[sourceIdx]).toEqual({ foo: 'xyz' });
+      });
     });
   });
 

@@ -21,7 +21,6 @@ export const getDslPolicies = async (): Promise<{ data: DataStream[] }> => {
     {
       includeStats: true,
     },
-    undefined,
     {
       headers: {
         'X-Elastic-Internal-Origin': 'Kibana',
@@ -32,4 +31,8 @@ export const getDslPolicies = async (): Promise<{ data: DataStream[] }> => {
 
 export const getIndicesData = async (): Promise<{ data: IndexSizeEntry[] }> => {
   return await apiService.get(SYNTHETICS_API_URLS.INDEX_SIZE);
+};
+
+export const fetchSyntheticsDiagnostics = async (): Promise<Record<string, unknown>> => {
+  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_DIAGNOSTICS);
 };

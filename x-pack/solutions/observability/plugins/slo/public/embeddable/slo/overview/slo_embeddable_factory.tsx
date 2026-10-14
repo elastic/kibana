@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -21,8 +21,8 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
@@ -53,8 +53,17 @@ export const getOverviewEmbeddableFactory = ({
   coreStart: CoreStart;
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
-}): EmbeddableFactory<OverviewEmbeddableState, SloOverviewApi> => ({
+}): EmbeddablePublicDefinition<OverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
+  getPlacementHints: (serializedState?: OverviewEmbeddableState) => {
+    if (
+      (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
+      (serializedState as GroupOverviewCustomState)?.group_filters
+    ) {
+      return { width: 24, height: 8 };
+    }
+    return { width: 12, height: 8 };
+  },
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -91,39 +100,40 @@ export const getOverviewEmbeddableFactory = ({
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
     const reload$ = new Subject<boolean>();
 
-    function serializeState(): OverviewEmbeddableState {
-      const commonState = {
-        ...titleManager.getLatestState(),
-        ...drilldownsManager.getLatestState(),
-      };
-
-      if (overviewMode$.getValue() === 'single') {
-        return {
-          ...commonState,
-          overview_mode: 'single',
-          ...singleSloManager.getLatestState(),
-        };
-      }
-
-      if (overviewMode$.getValue() === 'groups') {
-        return {
-          ...commonState,
-          overview_mode: 'groups',
-          ...groupSloManager.getLatestState(),
-        };
-      }
-
-      throw new Error('overview_mode not provided');
-    }
-
-    const unsavedChangesApi = initializeUnsavedChanges<OverviewEmbeddableState>({
+    const stateApi = initializeStateApi<OverviewEmbeddableState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => {
+        const commonState = {
+          ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+        };
+
+        if (overviewMode$.getValue() === 'single') {
+          return {
+            ...commonState,
+            overview_mode: 'single',
+            ...singleSloManager.getLatestState(),
+          };
+        }
+
+        if (overviewMode$.getValue() === 'groups') {
+          return {
+            ...commonState,
+            overview_mode: 'groups',
+            ...groupSloManager.getLatestState(),
+          };
+        }
+
+        throw new Error('overview_mode not provided');
+      },
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
-        overviewMode$.pipe(map(() => undefined)),
+        overviewMode$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
         singleSloManager.anyStateChange$,
         groupSloManager.anyStateChange$
       ),
@@ -136,17 +146,17 @@ export const getOverviewEmbeddableFactory = ({
         ...titleComparators,
         ...drilldownsManager.comparators,
       }),
-      onReset: (lastSaved) => {
-        drilldownsManager.reinitializeState(lastSaved ?? {});
-        titleManager.reinitializeState(lastSaved);
-        singleSloManager.reinitializeState(lastSaved as SingleOverviewCustomState);
-        groupSloManager.reinitializeState(lastSaved as GroupOverviewCustomState);
-        setOverviewMode(lastSaved?.overview_mode);
+      applySerializedState: (nextState) => {
+        drilldownsManager.reinitializeState(nextState);
+        titleManager.reinitializeState(nextState);
+        singleSloManager.reinitializeState(nextState as SingleOverviewCustomState);
+        groupSloManager.reinitializeState(nextState as GroupOverviewCustomState);
+        setOverviewMode(nextState.overview_mode);
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...stateApi,
       ...titleManager.api,
       ...drilldownsManager.api,
       defaultTitle$,
@@ -171,7 +181,6 @@ export const getOverviewEmbeddableFactory = ({
           return Promise.reject();
         }
       },
-      serializeState,
       getSloGroupOverviewConfig: (): GroupOverviewCustomState => {
         return {
           ...groupSloManager.getLatestState(),

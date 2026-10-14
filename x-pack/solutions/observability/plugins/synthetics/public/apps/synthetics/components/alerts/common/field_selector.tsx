@@ -53,7 +53,7 @@ export function FieldSelector({
   const debouncedSearch = debounce((val) => setSearch(val), 200);
 
   return (
-    <EuiFormRow fullWidth>
+    <EuiFormRow fullWidth aria-label={placeholder}>
       <EuiComboBox
         async
         placeholder={placeholder}

@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiTextTruncate,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
@@ -138,14 +139,19 @@ export function RelatedIntegrationField({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="danger"
-            onClick={onRemove}
-            isDisabled={!integrations}
-            iconType="trash"
-            aria-label={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
-            data-test-subj="relatedIntegrationRemove"
-          />
+          <EuiToolTip
+            content={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              color="danger"
+              onClick={onRemove}
+              isDisabled={!integrations}
+              iconType="trash"
+              aria-label={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
+              data-test-subj="relatedIntegrationRemove"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>

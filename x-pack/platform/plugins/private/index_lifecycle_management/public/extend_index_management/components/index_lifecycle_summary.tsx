@@ -391,12 +391,9 @@ export const IndexLifecycleSummary = ({ index, getUrlForApp }: IndexLifecycleSum
 
 export const indexLifecycleTab: IndexDetailsTab = {
   id: 'ilm',
-  name: (
-    <FormattedMessage
-      defaultMessage="Index lifecycle"
-      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.tabHeaderLabel"
-    />
-  ),
+  name: i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.tabHeaderLabel', {
+    defaultMessage: 'Index lifecycle',
+  }),
   order: 50,
   renderTabContent: ({ index, getUrlForApp }) => (
     <IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />

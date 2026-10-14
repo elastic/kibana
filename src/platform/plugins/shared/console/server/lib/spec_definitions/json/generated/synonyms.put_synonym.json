@@ -5,7 +5,24 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "refresh": "__flag__"
+      "refresh": "__flag__",
+      "append": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "synonyms_set": {
+        "__one_of": [
+          {
+            "id": "",
+            "synonyms": ""
+          },
+          [
+            {
+              "id": "",
+              "synonyms": ""
+            }
+          ]
+        ]
+      }
     },
     "methods": [
       "PUT"

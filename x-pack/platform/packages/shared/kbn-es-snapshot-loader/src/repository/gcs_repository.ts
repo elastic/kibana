@@ -22,7 +22,7 @@ export function createGcsRepository(config: GcsRepositoryConfig): RepositoryStra
         throw new Error('GCS repository bucket is required');
       }
     },
-    async register({ esClient, repoName }) {
+    async register({ esClient, repoName, verify }) {
       await esClient.snapshot.createRepository(
         {
           name: repoName,
@@ -30,6 +30,7 @@ export function createGcsRepository(config: GcsRepositoryConfig): RepositoryStra
           // especially for remote repository types (like GCS). Bump timeouts for reliability.
           master_timeout: '2m',
           timeout: '2m',
+          verify: verify ?? false,
           body: {
             type: 'gcs',
             settings: {

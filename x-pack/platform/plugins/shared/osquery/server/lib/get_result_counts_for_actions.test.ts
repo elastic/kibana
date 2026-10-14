@@ -106,11 +106,44 @@ describe('getResultCountsForActions', () => {
       aggregations: { action_ids: { buckets: [] } },
     });
 
-    await getResultCountsForActions(esClient, ['action-1'], 'production');
+    await getResultCountsForActions(esClient, ['action-1'], ['production']);
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'logs-osquery_manager.action.responses-production',
+        allow_no_indices: true,
+        index: ['logs-osquery_manager.action.responses-production'],
+        ignore_unavailable: true,
+      })
+    );
+  });
+
+  it('uses all resolved integration namespaces', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1'], ['prod', 'default']);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: [
+          'logs-osquery_manager.action.responses-prod',
+          'logs-osquery_manager.action.responses-default',
+        ],
+      })
+    );
+  });
+
+  it('targets the broad results index when no integration namespaces are resolved', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1']);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: ['logs-osquery_manager.action.responses*'],
       })
     );
   });
@@ -120,12 +153,14 @@ describe('getResultCountsForActions', () => {
       aggregations: { action_ids: { buckets: [] } },
     });
 
-    await getResultCountsForActions(esClient, ['action-1'], 'default', true);
+    await getResultCountsForActions(esClient, ['action-1'], ['default'], true);
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index:
-          'logs-osquery_manager.action.responses-default,*:logs-osquery_manager.action.responses-default',
+        index: [
+          'logs-osquery_manager.action.responses-default',
+          '*:logs-osquery_manager.action.responses-default',
+        ],
       })
     );
   });
@@ -226,6 +261,22 @@ describe('getResultCountsForActions', () => {
       respondedAgents: 0,
       successfulAgents: 0,
       errorAgents: 0,
+    });
+  });
+
+  describe('space scoping', () => {
+    // Ids come from action documents already space-scoped on the actions index,
+    // so responses count even when the agent never stamped a space on them.
+    it('filters on the action ids only, with no space clause', async () => {
+      const esClient = createMockEsClient({
+        aggregations: { action_ids: { buckets: [] } },
+      });
+
+      await getResultCountsForActions(esClient, ['action-1']);
+
+      const query = (esClient.search as jest.Mock).mock.calls[0][0].query;
+      expect(query.bool.filter).toEqual([{ terms: { action_id: ['action-1'] } }]);
+      expect(JSON.stringify(query)).not.toContain('space_id');
     });
   });
 });

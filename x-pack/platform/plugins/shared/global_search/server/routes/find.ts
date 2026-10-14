@@ -23,9 +23,15 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
       validate: {
         body: schema.object({
           params: schema.object({
-            term: schema.maybe(schema.string()),
-            types: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-            tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+            // maxLength: matches client-side `input_max_limit` config default (1000)
+            // see x-pack/platform/plugins/private/global_search_bar/server/config.ts
+            term: schema.maybe(schema.string({ maxLength: 1000 })),
+            // maxLength: longest type is 'cloud-security-posture-settings' (31 chars), 128 adds buffer
+            types: schema.maybe(
+              schema.arrayOf(schema.string({ maxLength: 128 }), { maxSize: 100 })
+            ),
+            // maxLength: tags are saved object UUIDs (36 chars), 128 adds buffer for non-standard IDs
+            tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 128 }), { maxSize: 100 })),
           }),
           options: schema.maybe(
             schema.object({

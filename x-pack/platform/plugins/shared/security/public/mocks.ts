@@ -36,12 +36,14 @@ function createStartMock() {
       userProfile$: of({}),
       userProfileLoaded$: of(true),
       enabled$: of(true),
+      dataUpdates$: of({}),
     }),
     uiApi: getUiApiMock.createStart(),
   });
 }
 
 export const securityMock = {
+  createUiApiWithComponents: getUiApiMock.createWithComponents,
   createSetup: createSetupMock,
   createStart: createStartMock,
   createMockAuthenticatedUser: securityServiceMock.createMockAuthenticatedUser,

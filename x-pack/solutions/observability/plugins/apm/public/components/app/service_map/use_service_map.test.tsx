@@ -106,6 +106,40 @@ describe('useServiceMap()', () => {
     });
   });
 
+  describe('esQuery gating', () => {
+    it('returns LOADING when esQuery is null (search bar not yet ready)', () => {
+      mockUseFetcher.mockReturnValue({
+        data: undefined,
+        status: FETCH_STATUS.NOT_INITIATED,
+      });
+
+      const { result } = renderHook(() => useServiceMap({ ...defaultParams, esQuery: null }));
+
+      expect(result.current.status).toBe(FETCH_STATUS.LOADING);
+      expect(result.current.data.nodes).toHaveLength(0);
+    });
+
+    it('proceeds when esQuery is undefined (no search provider)', () => {
+      const apiResponse = { spans: [] };
+      const transformedResponse: ReactFlowServiceMapResponse = {
+        nodes: [],
+        edges: [],
+        nodesCount: 0,
+        tracesCount: 0,
+      };
+
+      mockUseFetcher.mockReturnValue({
+        data: apiResponse,
+        status: FETCH_STATUS.SUCCESS,
+      });
+      mockedTransformToReactFlow.mockReturnValue(transformedResponse);
+
+      const { result } = renderHook(() => useServiceMap({ ...defaultParams, esQuery: undefined }));
+
+      expect(result.current.status).toBe(FETCH_STATUS.SUCCESS);
+    });
+  });
+
   describe('strictEnvironmentScope', () => {
     const opbeansSpan = {
       spanId: 'span-1',

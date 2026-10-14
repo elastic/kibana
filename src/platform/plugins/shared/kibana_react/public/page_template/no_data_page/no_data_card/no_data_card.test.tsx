@@ -38,5 +38,31 @@ describe('NoDataCard', () => {
       );
       expect(component).toMatchSnapshot();
     });
+
+    test('href without button renders a footer button labeled with the title', () => {
+      const component = render(
+        <NoDataCard href="#" title="Card title" description="Description" />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('no button and no href/onClick renders no footer control', () => {
+      const component = render(<NoDataCard title="Card title" description="Description" />);
+      expect(component).toMatchSnapshot();
+    });
+
+    test('target and rel are forwarded to the footer button', () => {
+      const component = render(
+        <NoDataCard
+          href="#"
+          target="_blank"
+          rel="noopener"
+          button="Button"
+          title="Card title"
+          description="Description"
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
   });
 });

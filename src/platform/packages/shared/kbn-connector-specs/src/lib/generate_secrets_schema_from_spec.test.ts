@@ -126,6 +126,97 @@ describe('generateSecretsSchemaFromSpec', () => {
     expect(authTypes).toContain('oauth_authorization_code');
   });
 
+  describe('experimental EARS filtering', () => {
+    const authSpecWithExperimentalEars = {
+      types: [
+        'bearer',
+        {
+          type: 'ears',
+          isExperimental: true,
+          defaults: { provider: 'google', scope: 'https://www.googleapis.com/auth/calendar' },
+        },
+      ],
+    };
+
+    const authSpecWithStableEars = {
+      types: [
+        'bearer',
+        {
+          type: 'ears',
+          defaults: { provider: 'slack', scope: 'channels:read' },
+        },
+      ],
+    };
+
+    test('excludes experimental EARS when isEarsEnabled but isEarsExperimentalEnabled is false', () => {
+      const schema = generateSecretsSchemaFromSpec(authSpecWithExperimentalEars, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: false,
+      });
+      const jsonSchema = z.toJSONSchema(schema) as {
+        oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      };
+      const oneOfOptions = jsonSchema.oneOf || [];
+      const authTypes = oneOfOptions
+        .map((opt) => opt.properties?.authType?.const)
+        .filter(Boolean) as string[];
+
+      expect(authTypes).toContain('bearer');
+      expect(authTypes).not.toContain('ears');
+    });
+
+    test('includes experimental EARS when both isEarsEnabled and isEarsExperimentalEnabled are true', () => {
+      const schema = generateSecretsSchemaFromSpec(authSpecWithExperimentalEars, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const jsonSchema = z.toJSONSchema(schema) as {
+        oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      };
+      const oneOfOptions = jsonSchema.oneOf || [];
+      const authTypes = oneOfOptions
+        .map((opt) => opt.properties?.authType?.const)
+        .filter(Boolean) as string[];
+
+      expect(authTypes).toContain('bearer');
+      expect(authTypes).toContain('ears');
+    });
+
+    test('includes stable EARS when isEarsEnabled is true regardless of isEarsExperimentalEnabled', () => {
+      const schema = generateSecretsSchemaFromSpec(authSpecWithStableEars, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: false,
+      });
+      const jsonSchema = z.toJSONSchema(schema) as {
+        oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      };
+      const oneOfOptions = jsonSchema.oneOf || [];
+      const authTypes = oneOfOptions
+        .map((opt) => opt.properties?.authType?.const)
+        .filter(Boolean) as string[];
+
+      expect(authTypes).toContain('bearer');
+      expect(authTypes).toContain('ears');
+    });
+
+    test('excludes all EARS when isEarsEnabled is false even if isEarsExperimentalEnabled is true', () => {
+      const schema = generateSecretsSchemaFromSpec(authSpecWithExperimentalEars, {
+        isEarsEnabled: false,
+        isEarsExperimentalEnabled: true,
+      });
+      const jsonSchema = z.toJSONSchema(schema) as {
+        oneOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+      };
+      const oneOfOptions = jsonSchema.oneOf || [];
+      const authTypes = oneOfOptions
+        .map((opt) => opt.properties?.authType?.const)
+        .filter(Boolean) as string[];
+
+      expect(authTypes).toContain('bearer');
+      expect(authTypes).not.toContain('ears');
+    });
+  });
+
   describe('runtime parse behavior', () => {
     test('parses valid secrets for none auth type', () => {
       const schema = generateSecretsSchemaFromSpec({ types: ['none'] });

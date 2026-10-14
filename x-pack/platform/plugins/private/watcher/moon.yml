@@ -43,8 +43,10 @@ dependsOn:
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
-  - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
@@ -58,6 +60,7 @@ fileGroups:
     - public/**/*
     - common/**/*
     - __fixtures__/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

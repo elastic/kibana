@@ -27,7 +27,6 @@ describe('ExitConditionBranchNodeImpl', () => {
     };
     wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
     wfExecutionRuntimeManagerMock.navigateToNode = jest.fn();
-    wfExecutionRuntimeManagerMock.exitScope = jest.fn();
 
     workflowGraphMock = {} as unknown as WorkflowGraph;
     impl = new ExitConditionBranchNodeImpl(node, workflowGraphMock, wfExecutionRuntimeManagerMock);

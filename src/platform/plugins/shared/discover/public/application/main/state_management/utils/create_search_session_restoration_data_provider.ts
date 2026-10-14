@@ -11,13 +11,18 @@ import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { ReactiveTabRuntimeState, TabState } from '../redux';
+import type { RuntimeStateManager } from '../redux/runtime_state';
+import { getTabDataView, selectCurrentProfileLocatorState } from '../redux/runtime_state';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../../common';
+import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 
 export function createSearchSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
   getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
+  profileStateRegistry: ProfileStateRegistry;
+  runtimeStateManager: RuntimeStateManager;
 }): SearchSessionInfoProvider {
   return {
     getName: async () => {
@@ -49,16 +54,27 @@ function createUrlGeneratorState({
   getPersistedDiscoverSession,
   getCurrentTab,
   getCurrentTabRuntimeState,
+  profileStateRegistry,
+  runtimeStateManager,
   shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
   getPersistedDiscoverSession: () => DiscoverSession | undefined;
   getCurrentTab: () => TabState;
   getCurrentTabRuntimeState: () => ReactiveTabRuntimeState;
+  profileStateRegistry: ProfileStateRegistry;
+  runtimeStateManager: RuntimeStateManager;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
-  const appState = getCurrentTab().appState;
-  const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();
+  const currentTab = getCurrentTab();
+  const { appState } = currentTab;
+  const profileState = selectCurrentProfileLocatorState({
+    runtimeStateManager,
+    tabId: currentTab.id,
+    profileStateMap: currentTab.profileState,
+    profileStateRegistry,
+  });
+  const dataView = getTabDataView(getCurrentTabRuntimeState());
   return {
     filters: data.query.filterManager.getFilters(),
     dataViewId: dataView?.id,
@@ -82,12 +98,14 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
+    profileState,
     breakdownField: appState.breakdownField,
     dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
     ...(shouldRestoreSearchSession
       ? {
           hideChart: appState.hideChart ?? false,
           hideTable: appState.hideTable ?? false,
+          hideSidebar: appState.hideSidebar ?? false,
           sampleSize: appState.sampleSize,
         }
       : {}),

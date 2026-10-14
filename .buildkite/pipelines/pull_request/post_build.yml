@@ -5,4 +5,15 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     agents:
-      machineType: n2-standard-2
+      provider: k8s
+      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
+      imageUID: 1000
+    plugins:
+      - sparse-checkout#v1.6.0:
+          paths:
+            - .buildkite
+            - .node-version
+            - package.json
+            - tsconfig.base.json
+            - versions.json
+          cleanup_sparse_state: true

@@ -7,23 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildWorkflowFilters } from '@kbn/workflows/server';
 import {
   buildConditionalTermsFilters,
   buildWorkflowTextSearchClause,
-  workflowSpaceFilter,
 } from './workflow_query_filters';
 
-describe('workflowSpaceFilter', () => {
-  it('returns spaceId must clause and deleted_at exclusion by default', () => {
-    const result = workflowSpaceFilter('my-space');
-    expect(result.must).toEqual([{ term: { spaceId: 'my-space' } }]);
+describe('buildWorkflowFilters', () => {
+  it('returns only filters explicitly requested', () => {
+    expect(buildWorkflowFilters()).toEqual({ must: [], must_not: [] });
+  });
+
+  it('returns ids and spaceId must clauses with deleted_at exclusion', () => {
+    const result = buildWorkflowFilters({
+      ids: ['workflow-a'],
+      space: { id: 'my-space' },
+      deleted: 'not_deleted',
+    });
+
+    expect(result.must).toEqual([
+      { ids: { values: ['workflow-a'] } },
+      { term: { spaceId: 'my-space' } },
+    ]);
     expect(result.must_not).toEqual([{ exists: { field: 'deleted_at' } }]);
   });
 
-  it('omits deleted_at exclusion when includeDeleted is true', () => {
-    const result = workflowSpaceFilter('my-space', { includeDeleted: true });
-    expect(result.must).toEqual([{ term: { spaceId: 'my-space' } }]);
+  it('returns deleted_at inclusion when deleted filter is deleted', () => {
+    const result = buildWorkflowFilters({ deleted: 'deleted' });
+
+    expect(result.must).toEqual([{ exists: { field: 'deleted_at' } }]);
     expect(result.must_not).toEqual([]);
+  });
+
+  it('returns space/global visibility clause when includeGlobal is true', () => {
+    const result = buildWorkflowFilters({
+      space: { id: 'my-space', includeGlobal: true },
+      deleted: 'not_deleted',
+    });
+
+    expect(result.must).toEqual([
+      {
+        bool: {
+          should: [{ term: { spaceId: 'my-space' } }, { term: { spaceId: '*' } }],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+    expect(result.must_not).toEqual([{ exists: { field: 'deleted_at' } }]);
+  });
+
+  it('returns managed inclusion when managed filter is managed', () => {
+    const result = buildWorkflowFilters({ managed: 'managed' });
+
+    expect(result.must).toEqual([{ term: { managed: true } }]);
+    expect(result.must_not).toEqual([]);
+  });
+
+  it('returns managed exclusion when managed filter is unmanaged', () => {
+    const result = buildWorkflowFilters({ managed: 'unmanaged' });
+
+    expect(result.must).toEqual([]);
+    expect(result.must_not).toEqual([{ term: { managed: true } }]);
+  });
+
+  it('omits managed clauses when managed filter is all', () => {
+    expect(buildWorkflowFilters({ managed: 'all' })).toEqual({ must: [], must_not: [] });
+  });
+
+  it('omits deleted clauses when deleted filter is all', () => {
+    expect(buildWorkflowFilters({ deleted: 'all' })).toEqual({ must: [], must_not: [] });
   });
 });
 

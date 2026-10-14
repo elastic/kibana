@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve } from 'path';
-
 export { TEST_TYPES_V1, TEST_TYPES_V2 } from './types';
 export { getTestSnapshots } from './snapshots';
-export const BASELINE_MAPPINGS_TEST = resolve(__dirname, './baseline_mappings.json');

@@ -5,204 +5,62 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import { useUrlParams } from '../../common/navigation';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { CaseActionBar } from '../case_action_bar';
-import { HeaderPage } from '../header_page';
-import { EditableTitle } from '../header_page/editable_title';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
-import { CaseViewActivity } from './components/case_view_activity';
-import { CaseViewObservables } from './components/case_view_observables';
 import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps } from './types';
-import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
+
 import { useOnUpdateField } from './use_on_update_field';
-import { CaseViewSimilarCases } from './components/case_view_similar_cases';
-import { CaseViewAttachments } from './components/case_view_attachments';
-import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
-import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { LensAttachReturnConsumer } from '../attachments/lens/lens_return/lens_attach_return_consumer';
+import { KibanaServices } from '../../common/lib/kibana';
+import { CasesPageBody } from '../app/cases_page_body';
+import { CaseDetailsAppHeader } from './components/case_details_header';
+import { CaseViewTabContent } from './components/case_view_tab_content';
+import { CaseDetailsTour } from './tour/case_details_tour';
+import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
 
-const getActiveTabId = (tabId?: string) => {
-  if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
-    return tabId;
-  }
+export type CaseViewPageComponentProps = Omit<CaseViewPageProps, 'fetchCase'>;
 
-  return CASE_VIEW_PAGE_TABS.ACTIVITY;
-};
+export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, refreshRef }) => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showMetrics, setShowMetrics] = useState(true);
 
-const ATTACHMENT_TABS = [
-  CASE_VIEW_PAGE_TABS.ALERTS,
-  CASE_VIEW_PAGE_TABS.EVENTS,
-  CASE_VIEW_PAGE_TABS.FILES,
-  CASE_VIEW_PAGE_TABS.OBSERVABLES,
-];
+  const onSearch = useCallback(
+    (newSearch: string) => {
+      setSearchTerm(newSearch.trim());
+    },
+    [setSearchTerm]
+  );
 
-export const CaseViewPage = React.memo<CaseViewPageProps>(
-  ({ caseData, refreshRef, actionsNavigation }) => {
-    const { features, unifiedAttachmentTypeRegistry } = useCasesContext();
-    const { urlParams } = useUrlParams();
-    const refreshCaseViewPage = useRefreshCaseViewPage();
+  useCasesTitleBreadcrumbs(caseData.title);
 
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const onSearch = useCallback(
-      (newSearch: string) => {
-        const trimSearch = newSearch.trim();
-        setSearchTerm(trimSearch);
-      },
-      [setSearchTerm]
-    );
+  const { onUpdateField, isLoading } = useOnUpdateField({ caseData });
+  useCaseRefreshRef({ refreshRef, isLoading });
 
-    const caseWithFilteredAttachments = useMemo(
-      () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
-      [caseData, searchTerm]
-    );
-
-    useCasesTitleBreadcrumbs(caseData.title);
-
-    const activeTabId = getActiveTabId(urlParams?.tabId);
-
-    const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-      caseData,
-    });
-
-    // Set `refreshRef` if needed
-    useEffect(() => {
-      let isStale = false;
-      if (refreshRef) {
-        refreshRef.current = {
-          refreshCase: async () => {
-            // Do nothing if component (or instance of this render cycle) is stale or it is already loading
-            if (isStale || isLoading) {
-              return;
-            }
-            refreshCaseViewPage();
-          },
-        };
-        return () => {
-          isStale = true;
-          refreshRef.current = null;
-        };
-      }
-    }, [isLoading, refreshRef, refreshCaseViewPage]);
-
-    const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
-    const EventTabComponent = useMemo(() => {
-      const eventType = toUnifiedAttachmentType('event', owner);
-      if (!unifiedAttachmentTypeRegistry.has(eventType)) {
-        return undefined;
-      }
-      return unifiedAttachmentTypeRegistry.get(eventType)?.getAttachmentTabViewObject?.()?.children;
-    }, [unifiedAttachmentTypeRegistry, owner]);
-
-    const AlertTabComponent = useMemo(() => {
-      const alertType = toUnifiedAttachmentType('alert', owner);
-      if (!unifiedAttachmentTypeRegistry.has(alertType)) {
-        return undefined;
-      }
-      return unifiedAttachmentTypeRegistry.get(alertType)?.getAttachmentTabViewObject?.()?.children;
-    }, [unifiedAttachmentTypeRegistry, owner]);
-
-    const FileTabComponent = useMemo(() => {
-      if (!unifiedAttachmentTypeRegistry.has(FILE_ATTACHMENT_TYPE)) {
-        return undefined;
-      }
-      return unifiedAttachmentTypeRegistry.get(FILE_ATTACHMENT_TYPE)?.getAttachmentTabViewObject?.()
-        ?.children;
-    }, [unifiedAttachmentTypeRegistry]);
-
-    const onSubmitTitle = useCallback(
-      (newTitle: string) =>
-        onUpdateField({
-          key: 'title',
-          value: newTitle,
-        }),
-      [onUpdateField]
-    );
-
-    return (
-      <>
-        <HeaderPage
-          border={false}
-          data-test-subj="case-view-title"
-          titleNode={
-            <EditableTitle
-              key={caseData.id}
-              isLoading={isLoading && loadingKey === 'title'}
-              title={caseData.title}
-              onSubmit={onSubmitTitle}
-            />
-          }
-          title={caseData.title}
-          incrementalId={caseData.incrementalId}
-        >
-          <CaseActionBar
-            caseData={caseData}
-            isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
-            onUpdateField={onUpdateField}
-          />
-        </HeaderPage>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+  return (
+    <>
+      <CaseDetailsAppHeader
+        caseData={caseData}
+        onUpdateField={onUpdateField}
+        showMetrics={showMetrics}
+        onShowMetricsChange={setShowMetrics}
+      />
+      <CasesPageBody>
+        {showMetrics && <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />}
         <EuiSpacer size="l" />
-        <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
-          {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
-            <CaseViewActivity
-              caseData={caseWithFilteredAttachments}
-              searchTerm={searchTerm}
-              actionsNavigation={actionsNavigation}
-            />
-          )}
-          {ATTACHMENT_TABS.includes(activeTabId as CASE_VIEW_PAGE_TABS) && (
-            <CaseViewAttachments
-              onSearch={onSearch}
-              searchTerm={searchTerm}
-              activeTab={activeTabId as CASE_VIEW_PAGE_TABS}
-              caseData={caseWithFilteredAttachments}
-            >
-              <>
-                {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS &&
-                  features.alerts.enabled &&
-                  AlertTabComponent != null && (
-                    <AlertTabComponent
-                      key={caseWithFilteredAttachments.updatedAt}
-                      caseData={caseWithFilteredAttachments}
-                    />
-                  )}
-                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS &&
-                  features.events.enabled &&
-                  EventTabComponent != null && (
-                    <EventTabComponent caseData={caseWithFilteredAttachments} />
-                  )}
-                {activeTabId === CASE_VIEW_PAGE_TABS.FILES && FileTabComponent != null && (
-                  <FileTabComponent
-                    caseData={caseWithFilteredAttachments}
-                    searchTerm={searchTerm}
-                  />
-                )}
-                {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
-                  <CaseViewObservables
-                    isLoading={false}
-                    caseData={caseWithFilteredAttachments}
-                    searchTerm={searchTerm}
-                    onUpdateField={onUpdateField}
-                  />
-                )}
-              </>
-            </CaseViewAttachments>
-          )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
-            <CaseViewSimilarCases caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
-          )}
-        </EuiFlexGroup>
-      </>
-    );
-  }
-);
+        {KibanaServices.getConfig()?.attachments?.enabled === true && (
+          <LensAttachReturnConsumer caseId={caseData.id} />
+        )}
+        <CaseViewTabContent
+          caseData={caseData}
+          searchTerm={searchTerm}
+          onSearch={onSearch}
+          onUpdateField={onUpdateField}
+        />
+      </CasesPageBody>
+      <CaseDetailsTour caseData={caseData} />
+    </>
+  );
+});
 CaseViewPage.displayName = 'CaseViewPage';

@@ -1,0 +1,6 @@
+in: query
+name: isEnabled
+description: Filters the returned templates by their enabled state.
+schema:
+  type: boolean
+example: true

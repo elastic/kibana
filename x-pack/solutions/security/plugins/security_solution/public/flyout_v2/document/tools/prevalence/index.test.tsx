@@ -34,6 +34,11 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../shared/components/document_tools_flyout_header', () => ({
+  DocumentToolsFlyoutHeader: ({ title }: { title: string }) => (
+    <div data-test-subj="mockDocumentToolsFlyoutHeader">{title}</div>
+  ),
+}));
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockStorage = jest.fn();
@@ -57,8 +62,8 @@ jest.mock('../../../../common/lib/kibana', () => {
 jest.mock('./hooks/use_prevalence');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,

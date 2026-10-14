@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,10 +15,11 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleCreateOptionsPanel } from './rule_create_options_panel';
+import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
 const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
 
@@ -25,12 +27,16 @@ export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
+  onCreateThresholdRule?: () => void;
+  legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
 export const RuleCreateOptionsFlyout = ({
   onClose,
   onCreateEsqlRule,
   onCreateWithAgent,
+  onCreateThresholdRule,
+  legacyRuleTypes,
 }: RuleCreateOptionsFlyoutProps) => {
   return (
     <EuiFlyout
@@ -45,25 +51,44 @@ export const RuleCreateOptionsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
-              <h2>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleCreateOptionsFlyout.title"
-                  defaultMessage="Create rule"
-                />
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.alertingV2.ruleCreateOptionsFlyout.title"
+                      defaultMessage="Create rule"
+                    />
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" data-test-subj="ruleCreateOptionsFlyoutUniversalBadge">
+                  <FormattedMessage
+                    id="xpack.alertingV2.ruleCreateOptionsFlyout.universalBadge"
+                    defaultMessage="Universal"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              onClick={onClose}
-              aria-label={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
+            <EuiToolTip
+              content={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
                 defaultMessage: 'Close',
               })}
-              data-test-subj="ruleCreateOptionsFlyoutCloseButton"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={onClose}
+                aria-label={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
+                  defaultMessage: 'Close',
+                })}
+                data-test-subj="ruleCreateOptionsFlyoutCloseButton"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
@@ -72,6 +97,8 @@ export const RuleCreateOptionsFlyout = ({
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+          legacyRuleTypes={legacyRuleTypes}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

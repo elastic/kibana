@@ -6,7 +6,12 @@
  */
 
 import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
-import { getFallbackDataBounds, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import {
+  getFallbackDataBounds,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_MAX_STOP,
+  DEFAULT_MIN_STOP,
+} from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -25,7 +30,7 @@ import type {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -55,6 +60,7 @@ import type { LensGridDirection } from '../../../../common/expressions';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
+import { createRenderDatatableCellPopover } from './datatable_cell_popover';
 import { createGridCell } from './cell_value';
 import {
   buildSchemaDetectors,
@@ -73,7 +79,11 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment, hasIncompatibleColorConfig, getColorByValuePalette } from '../utils';
+import {
+  getSupportedColumnAlignment,
+  hasIncompatibleColorConfig,
+  getColorByValuePalette,
+} from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -308,7 +318,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const alignments: Map<string, 'left' | 'right' | 'center'> = useMemo(() => {
     return columnConfig.columns.reduce((acc, column) => {
-      acc.set(column.columnId, getColumnAlignment(column, isNumericMap.get(column.columnId)));
+      acc.set(
+        column.columnId,
+        getSupportedColumnAlignment(column, isNumericMap.get(column.columnId))
+      );
       return acc;
     }, new Map<string, 'left' | 'right' | 'center'>());
   }, [columnConfig.columns, isNumericMap]);
@@ -379,24 +392,31 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         rowCellRender: function RowCellRender({ rowIndex }) {
           const { rowHasRowClickTriggerActions } = useContext(DataContext);
           return (
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.table.actionsLabel', {
                 defaultMessage: 'Show actions',
               })}
-              iconType={
-                !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
-                  ? 'empty'
-                  : 'boxesVertical'
-              }
-              color="text"
-              onClick={() => {
-                onRowContextMenuClick({
-                  rowIndex,
-                  table: firstTableRef.current,
-                  columns: columnConfig.columns.map((col) => col.columnId),
-                });
-              }}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+                  defaultMessage: 'Show actions',
+                })}
+                iconType={
+                  !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
+                    ? 'empty'
+                    : 'boxesVertical'
+                }
+                color="text"
+                onClick={() => {
+                  onRowContextMenuClick({
+                    rowIndex,
+                    table: firstTableRef.current,
+                    columns: columnConfig.columns.map((col) => col.columnId),
+                  });
+                }}
+              />
+            </EuiToolTip>
           );
         },
       },
@@ -453,8 +473,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
               stops: stops.map(({ stop }) => stop),
               gradient: false,
               range: defaultPalette.params?.rangeType ?? 'percent',
-              rangeMin: dataBounds.min,
-              rangeMax: dataBounds.max,
+              rangeMin: defaultPalette.params?.rangeMin ?? DEFAULT_MIN_STOP,
+              rangeMax: defaultPalette.params?.rangeMax ?? DEFAULT_MAX_STOP,
               continuity: defaultPalette.params?.continuity,
             },
           };
@@ -497,13 +517,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       DataContext,
       isDarkMode,
       getCellColor,
-      props.args.fitRowToContent
+      props.paletteService,
+      props.args.fitRowToContent,
+      props.args.density
     );
   }, [
     formatters,
     columnConfig,
     isDarkMode,
     props.args.fitRowToContent,
+    props.args.density,
     props.paletteService,
     palettes,
     sortedTable,
@@ -511,6 +534,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     minMaxByColumnId,
     syncColors,
   ]);
+
+  const renderCellPopover = useMemo(
+    () => createRenderDatatableCellPopover(sortedTable, props.columnFilterable),
+    [sortedTable, props.columnFilterable]
+  );
 
   const columnVisibility = useMemo(
     () => ({
@@ -653,6 +681,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           trailingControlColumns={trailingControlColumns}
           rowCount={sortedTable.rows.length}
           renderCellValue={renderCellValue}
+          renderCellPopover={renderCellPopover}
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
           sorting={sorting}

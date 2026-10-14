@@ -33,7 +33,6 @@ import {
 jest.mock('../../services', () => ({
   agentPolicyService: {
     bumpAllAgentPoliciesForOutput: jest.fn().mockResolvedValue({} as any),
-    bumpAllAgentPolicies: jest.fn().mockResolvedValue({} as any),
   },
   appContextService: {
     getLogger: jest.fn().mockReturnValue({ error: jest.fn() } as any),

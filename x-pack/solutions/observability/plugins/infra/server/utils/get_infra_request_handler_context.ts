@@ -6,7 +6,7 @@
  */
 
 import type { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InfraPluginRequestHandlerContext } from '../types';
 import type { InfraServerPluginSetupDeps } from '../lib/adapters/framework';
 

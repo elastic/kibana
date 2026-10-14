@@ -15,11 +15,11 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 
 import React, { useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -68,6 +68,18 @@ const securityDataView = i18n.translate(
 );
 
 const securitySolution = 'security-solution';
+
+const createButtonLabel = i18n.translate('indexPatternManagement.dataViewTable.createBtn', {
+  defaultMessage: 'Create data view',
+});
+
+const listDescription = i18n.translate(
+  'indexPatternManagement.dataViewTable.indexPatternExplanation',
+  {
+    defaultMessage:
+      'Create and manage the data views that help you retrieve your data from Elasticsearch.',
+  }
+);
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
@@ -260,15 +272,22 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
         name: i18n.translate('indexPatternManagement.dataViewTable.columnDelete', {
           defaultMessage: 'Delete',
         }),
-        description: i18n.translate(
-          'indexPatternManagement.dataViewTable.columnDeleteDescription',
-          {
-            defaultMessage: 'Delete this data view',
-          }
-        ),
+        description: (dataView: RemoveDataViewProps) =>
+          dataView.managed
+            ? i18n.translate(
+                'indexPatternManagement.dataViewTable.columnDeleteDescriptionManaged',
+                {
+                  defaultMessage:
+                    'This data view is managed by Elastic and cannot be deleted. Duplicate it to make changes.',
+                }
+              )
+            : i18n.translate('indexPatternManagement.dataViewTable.columnDeleteDescription', {
+                defaultMessage: 'Delete this data view',
+              }),
         icon: 'trash',
         color: 'danger',
         type: 'icon',
+        enabled: (dataView: RemoveDataViewProps) => !dataView.managed,
         onClick: async (dataView: RemoveDataViewProps) => {
           const relationships = (await getRelationshipsForSelections([dataView])) as Record<
             string,
@@ -365,44 +384,51 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     columns.push(alertColumn);
   }
 
-  const createButton = canSave ? (
-    <EuiButton
-      fill={true}
-      iconType="plusCircle"
-      onClick={() => setShowCreateDialog(true)}
-      data-test-subj="createDataViewButton"
-    >
-      <FormattedMessage
-        id="indexPatternManagement.dataViewTable.createBtn"
-        defaultMessage="Create data view"
-      />
-    </EuiButton>
-  ) : (
-    <></>
+  const showCreateInHeader =
+    canSave && hasDataView && !isLoadingIndexPatterns && !isLoadingDataState;
+  const menu: AppHeaderMenu | undefined = showCreateInHeader
+    ? {
+        primaryActionItem: {
+          id: 'createDataView',
+          label: createButtonLabel,
+          iconType: 'plusCircle',
+          testId: 'createDataViewButton',
+          run: () => setShowCreateDialog(true),
+        },
+      }
+    : undefined;
+
+  const header = (
+    <AppHeader title={title} description={listDescription} menu={menu} spacing="bleed" />
   );
 
-  if (isLoadingIndexPatterns) {
-    return <></>;
+  if (isLoadingIndexPatterns || isLoadingDataState) {
+    return (
+      <>
+        {header}
+        <EuiSpacer size="l" />
+        <div css={{ display: 'flex', justifyContent: 'center' }}>
+          <EuiLoadingSpinner size="xxl" />
+        </div>
+      </>
+    );
   }
 
   const selection = {
     onSelectionChange: setSelectedItems,
+    selectable: (item: IndexPatternTableItem) => !item.managed,
+    selectableMessage: (selectable: boolean) =>
+      selectable
+        ? ''
+        : i18n.translate('indexPatternManagement.dataViewTable.managedDataViewNotSelectable', {
+            defaultMessage:
+              'This data view is managed by Elastic and cannot be deleted. Duplicate it to make changes.',
+          }),
   };
 
   let displayIndexPatternSection = (
     <>
-      <EuiPageHeader
-        pageTitle={title}
-        description={
-          <FormattedMessage
-            id="indexPatternManagement.dataViewTable.indexPatternExplanation"
-            defaultMessage="Create and manage the data views that help you retrieve your data from Elasticsearch."
-          />
-        }
-        bottomBorder
-        rightSideItems={[createButton]}
-      />
-
+      {header}
       <EuiSpacer size="l" />
       <ContextWrapper>
         <EuiInMemoryTable
@@ -449,7 +475,8 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   if (!hasDataView)
     displayIndexPatternSection = (
       <>
-        <EuiSpacer size="xxl" />
+        {header}
+        <EuiSpacer size="l" />
         <NoDataViewsPromptComponent
           onClickCreate={() => setShowCreateDialog(true)}
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
@@ -463,7 +490,8 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   if (!hasDataView && !hasESData)
     displayIndexPatternSection = (
       <>
-        <EuiSpacer size="xxl" />
+        {header}
+        <EuiSpacer size="l" />
         <NoData
           noDataPage={noDataPage}
           docLinks={docLinks}
@@ -476,17 +504,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
       </>
     );
 
-  return (
-    <>
-      {isLoadingDataState ? (
-        <div css={{ display: 'flex', justifyContent: 'center' }}>
-          <EuiLoadingSpinner size="xxl" />
-        </div>
-      ) : (
-        displayIndexPatternSection
-      )}
-    </>
-  );
+  return displayIndexPatternSection;
 };
 
 export const IndexPatternTableWithRouter = withRouter(IndexPatternTable);

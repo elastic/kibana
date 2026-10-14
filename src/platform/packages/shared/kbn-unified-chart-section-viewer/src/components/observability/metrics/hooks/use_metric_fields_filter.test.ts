@@ -18,7 +18,7 @@ describe('useMetricFieldsFilter', () => {
   const baseMetricItems: ParsedMetricItem[] = [
     {
       metricName: 'system.cpu.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -26,7 +26,7 @@ describe('useMetricFieldsFilter', () => {
     },
     {
       metricName: 'system.memory.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -97,6 +97,48 @@ describe('useMetricFieldsFilter', () => {
       );
 
       expect(result.current.filteredMetricItems).toEqual([]);
+    });
+
+    it('filters by space-separated non-contiguous terms', () => {
+      const { result } = renderHook(() =>
+        useMetricFieldsFilter({
+          ...defaultParams,
+          searchTerm: 'system util',
+        })
+      );
+
+      expect(result.current.filteredMetricItems).toHaveLength(2);
+      expect(result.current.filteredMetricItems.map((f) => f.metricName)).toEqual([
+        'system.cpu.utilization',
+        'system.memory.utilization',
+      ]);
+    });
+
+    it('filters by wildcard pattern', () => {
+      const { result } = renderHook(() =>
+        useMetricFieldsFilter({
+          ...defaultParams,
+          searchTerm: 'system.cpu*',
+        })
+      );
+
+      expect(result.current.filteredMetricItems).toHaveLength(1);
+      expect(result.current.filteredMetricItems[0].metricName).toBe('system.cpu.utilization');
+    });
+
+    it('filters with typo tolerance', () => {
+      const { result } = renderHook(() =>
+        useMetricFieldsFilter({
+          ...defaultParams,
+          searchTerm: 'utilizaton',
+        })
+      );
+
+      expect(result.current.filteredMetricItems).toHaveLength(2);
+      expect(result.current.filteredMetricItems.map((f) => f.metricName)).toEqual([
+        'system.cpu.utilization',
+        'system.memory.utilization',
+      ]);
     });
   });
 });

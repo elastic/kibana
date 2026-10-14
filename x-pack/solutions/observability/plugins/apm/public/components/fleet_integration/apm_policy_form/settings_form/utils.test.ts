@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
-import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
+import { getDurationSchema } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
+import { getIntegerSchema } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import type { PackagePolicyVars, SettingsRow } from '../typings';
 import { mergeNewVars, isSettingsFormValid, validateSettingValue } from './utils';
 
@@ -46,18 +46,18 @@ describe('settings utils', () => {
       const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
-        validation: getDurationRt({ min: '1ms' }),
+        validation: getDurationSchema({ min: '1ms' }),
       };
       expect(validateSettingValue(setting, '2ms')).toEqual({
         isValid: true,
-        message: 'No errors!',
+        message: undefined,
       });
     });
     it('returns invalid after validating duration value', () => {
       const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
-        validation: getDurationRt({ min: '1ms' }),
+        validation: getDurationSchema({ min: '1ms' }),
       };
       expect(validateSettingValue(setting, 'foo')).toEqual({
         isValid: false,
@@ -68,18 +68,18 @@ describe('settings utils', () => {
       const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
-        validation: getIntegerRt({ min: 1 }),
+        validation: getIntegerSchema({ min: 1 }),
       };
       expect(validateSettingValue(setting, 1)).toEqual({
         isValid: true,
-        message: 'No errors!',
+        message: undefined,
       });
     });
     it('returns invalid after validating integer value', () => {
       const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
-        validation: getIntegerRt({ min: 1 }),
+        validation: getIntegerSchema({ min: 1 }),
       };
       expect(validateSettingValue(setting, 0)).toEqual({
         isValid: false,
@@ -107,7 +107,7 @@ describe('settings utils', () => {
         type: 'text',
         settings: [{ type: 'text', key: 'bar_1', required: true }],
       },
-      { key: 'baz', type: 'text', validation: getDurationRt({ min: '1ms' }) },
+      { key: 'baz', type: 'text', validation: getDurationSchema({ min: '1ms' }) },
       {
         type: 'advanced_setting',
         settings: [
@@ -119,13 +119,13 @@ describe('settings utils', () => {
               {
                 type: 'text',
                 key: 'advanced_1_1',
-                validation: getDurationRt({ min: '1ms' }),
+                validation: getDurationSchema({ min: '1ms' }),
                 settings: [
                   {
                     type: 'text',
                     key: 'advanced_1_1_1',
                     required: true,
-                    validation: getDurationRt({ min: '1ms' }),
+                    validation: getDurationSchema({ min: '1ms' }),
                   },
                 ],
               },

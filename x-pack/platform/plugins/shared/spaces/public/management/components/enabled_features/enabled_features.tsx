@@ -13,13 +13,13 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FeatureTable } from './feature_table';
-import type { Space } from '../../../../common';
+import type { CustomizeSpaceFormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
 
 interface Props {
-  space: Partial<Space>;
+  space: CustomizeSpaceFormValues;
   features: KibanaFeatureConfig[];
-  onChange: (space: Partial<Space>) => void;
+  onChange: (space: CustomizeSpaceFormValues) => void;
 }
 
 export const EnabledFeatures: FunctionComponent<Props> = (props) => {

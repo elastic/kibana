@@ -8,21 +8,23 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import type { FindRulesRequestQueryInput } from '../../../../../../../common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
 import { validateFindRulesRequestQuery } from '../../../../../../../common/api/detection_engine/rule_management/find_rules/request_schema_validation';
+import type { GranularRulesFilter } from '../../../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
 import type { SearchRulesRequestBodyInput } from '../../../../../../../common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
+import { VALID_SEARCH_FIELDS } from '../../../logic/search/search_rules_field_translation';
 
 export const MAX_SEARCH_RULES_SEARCH_TERM_LENGTH = 1000;
 
 export const MAX_SEARCH_RULES_FILTER_KQL_LENGTH = 10_000;
 
-export const validateSearchRulesKqlFilter = (filter: string | undefined): string[] => {
-  if (filter == null || filter.trim() === '') {
+const validateKqlFilterTerm = (term: string | undefined): string[] => {
+  if (term == null || term.trim() === '') {
     return [];
   }
-  if (filter.length > MAX_SEARCH_RULES_FILTER_KQL_LENGTH) {
+  if (term.length > MAX_SEARCH_RULES_FILTER_KQL_LENGTH) {
     return [`filter exceeds maximum length of ${MAX_SEARCH_RULES_FILTER_KQL_LENGTH}`];
   }
   try {
-    fromKueryExpression(filter);
+    fromKueryExpression(term);
     return [];
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -30,7 +32,18 @@ export const validateSearchRulesKqlFilter = (filter: string | undefined): string
   }
 };
 
-const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): string[] => {
+export const validateSearchRulesFilter = (filter: GranularRulesFilter | undefined): string[] => {
+  if (filter == null) {
+    return [];
+  }
+  const mode = filter.mode ?? 'KQL';
+  if (mode !== 'KQL') {
+    return [`unsupported filter.mode "${mode}"`];
+  }
+  return validateKqlFilterTerm(filter.term);
+};
+
+export const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): string[] => {
   const searchAfter = body.search_after;
   if (searchAfter == null || searchAfter.length === 0) {
     return [];
@@ -41,8 +54,19 @@ const validateSearchAfterRequiresSort = (body: SearchRulesRequestBodyInput): str
   return [];
 };
 
-const validateAggregationsCountsUnique = (
-  aggregations: SearchRulesRequestBodyInput['aggregations']
+export const validateSearchRulesFields = (fields: string[] | undefined): string[] => {
+  if (fields == null || fields.length === 0) {
+    return [];
+  }
+  const invalid = fields.filter((f) => !VALID_SEARCH_FIELDS.has(f));
+  if (invalid.length === 0) {
+    return [];
+  }
+  return [`unsupported fields: ${invalid.map((f) => `"${f}"`).join(', ')}`];
+};
+
+export const validateAggregationsCountsUnique = (
+  aggregations: { counts?: string[] } | undefined
 ): string[] => {
   const counts = aggregations?.counts;
   if (counts == null || counts.length === 0) {
@@ -61,9 +85,10 @@ export const validateSearchRulesRequestBody = (body: SearchRulesRequestBodyInput
     errors.push(`search.term exceeds maximum length of ${MAX_SEARCH_RULES_SEARCH_TERM_LENGTH}`);
   }
 
-  errors.push(...validateSearchRulesKqlFilter(body.filter));
+  errors.push(...validateSearchRulesFilter(body.filter));
   errors.push(...validateSearchAfterRequiresSort(body));
   errors.push(...validateAggregationsCountsUnique(body.aggregations));
+  errors.push(...validateSearchRulesFields(body.fields));
 
   const searchMode = body.search?.mode;
   if (searchMode != null && searchMode !== 'legacy') {

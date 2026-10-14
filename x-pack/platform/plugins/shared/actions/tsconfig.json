@@ -11,6 +11,7 @@
     "common/**/*"
   ],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/human-readable-id",
     "@kbn/spaces-plugin",
@@ -45,6 +46,7 @@
     "@kbn/serverless",
     "@kbn/actions-types",
     "@kbn/core-http-server",
+    "@kbn/core-spaces-common",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/security-plugin-types-server",
     "@kbn/core-application-common",
@@ -61,6 +63,7 @@
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/usage-api-plugin",
     "@kbn/core-security-server",
+    "@kbn/core-test-helpers-model-versions",
   ],
   "exclude": [
     "target/**/*",

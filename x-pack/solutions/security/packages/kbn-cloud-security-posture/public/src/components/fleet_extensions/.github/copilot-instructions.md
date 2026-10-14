@@ -27,5 +27,5 @@
 **Run Tests**:
 
 ```bash
-yarn test:jest --config x-pack/solutions/security/packages/kbn-cloud-security-posture/jest.config.js
+pnpm test:jest --config x-pack/solutions/security/packages/kbn-cloud-security-posture/jest.config.js
 ```

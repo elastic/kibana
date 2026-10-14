@@ -8,7 +8,7 @@
 import type { PackageInfo, RegistryInput, RegistryStream } from '../types';
 
 import { doesPackageHaveIntegrations } from './packages_with_integrations';
-import { getNormalizedInputs, isIntegrationPolicyTemplate } from './policy_template';
+import { getNormalizedInputs, getPolicyTemplateDataStreamPaths } from './policy_template';
 import {
   buildInputKey,
   getInputEffectiveName,
@@ -42,10 +42,7 @@ export const getDocumentationPageInputs = (
     }
 
     const normalizedInputs = getNormalizedInputs(policyTemplate);
-    const dataStreamPaths =
-      isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams?.length
-        ? policyTemplate.data_streams
-        : [];
+    const dataStreamPaths = getPolicyTemplateDataStreamPaths(packageInfo, policyTemplate);
 
     normalizedInputs.forEach((input) => {
       const effectiveName = getInputEffectiveName(input);

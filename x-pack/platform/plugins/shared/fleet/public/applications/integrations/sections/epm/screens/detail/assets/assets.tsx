@@ -8,7 +8,8 @@
 import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { ExperimentalFeaturesService } from '../../../../../../../services';
 
@@ -19,6 +20,7 @@ import type {
   SimpleSOAssetType,
 } from '../../../../../../../../common';
 import { ElasticsearchAssetType } from '../../../../../../../../common';
+import { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
 import { displayedAssetTypes } from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
@@ -135,7 +137,12 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
       if (pkgAssets.length > 0) {
         const deferredAssets = pkgAssets.filter((asset): asset is EsAssetReference => {
-          return 'deferred' in asset && asset.deferred === true;
+          // Deferred alert refs belong to the Alerting tab, not the Assets tab
+          return (
+            'deferred' in asset &&
+            asset.deferred === true &&
+            asset.type !== KibanaSavedObjectType.alert
+          );
         });
         setDeferredInstallations(deferredAssets);
       }
@@ -187,21 +194,21 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
     content = <Loading />;
   } else if (!canReadPackageSettings) {
     content = (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
-        color="warning"
         title={
           <FormattedMessage
             id="xpack.fleet.epm.packageDetails.assets.assetsPermissionErrorTitle"
             defaultMessage="Permission error"
           />
         }
-      >
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetails.assets.assetsPermissionError"
-          defaultMessage="You do not have permission to retrieve the Kibana saved object for that integration. Contact your administrator."
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.assets.assetsPermissionError"
+            defaultMessage="You do not have permission to retrieve the Kibana saved object for that integration. Contact your administrator."
+          />
+        }
+      />
     );
   } else if (pkgAssets.length === 0) {
     if (customAssetsExtension) {
@@ -215,10 +222,8 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       );
     } else {
       content = !hasDeferredInstallations ? (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
-          iconType="info"
-          color="primary"
           title={
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.assets.noAssetsFoundLabel"
@@ -233,7 +238,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       // Show callout if Kibana assets are installed in a different space
       !assetsInstalledInCurrentSpace ? (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             heading="h2"
             title={
@@ -242,8 +247,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
                 defaultMessage="Kibana assets not available in this space"
               />
             }
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceBody"
                 defaultMessage="This integration is installed, but Kibana assets are not available in this space. {learnMoreLink}."
@@ -261,7 +265,8 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
                   ),
                 }}
               />
-            </p>
+            }
+          >
             {useSpaceAwareness ? (
               <InstallKibanaAssetsButton
                 installInfo={pkgInstallationInfo}
@@ -269,7 +274,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
                 onSuccess={forceRefreshAssets}
               />
             ) : null}
-          </EuiCallOut>
+          </KbnInfoCallout>
 
           <EuiSpacer size="m" />
         </>

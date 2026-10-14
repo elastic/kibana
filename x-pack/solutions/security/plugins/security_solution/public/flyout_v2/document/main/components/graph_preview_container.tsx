@@ -17,12 +17,12 @@ import { useGraphPreview } from '../hooks/use_graph_preview';
 import { EventKind } from '../constants/event_kinds';
 
 export interface GraphPreviewContainerProps
-  extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon' | 'disableNavigation'> {
+  extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
   hit: DataTableRecord;
 }
 
 export const GraphPreviewContainer = memo(
-  ({ hit, onShowGraph, showIcon, disableNavigation }: GraphPreviewContainerProps) => {
+  ({ hit, onShowGraph, showIcon }: GraphPreviewContainerProps) => {
     const { eventIds, timestamp, shouldShowGraph } = useGraphPreview({ hit });
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -48,7 +48,6 @@ export const GraphPreviewContainer = memo(
       <GraphPreviewPanel
         onShowGraph={onShowGraph}
         showIcon={showIcon}
-        disableNavigation={disableNavigation}
         shouldShowGraph={shouldShowGraph}
         isLoading={isLoading}
         isError={isError}

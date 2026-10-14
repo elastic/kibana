@@ -54,6 +54,7 @@ function makeContext(
     },
     range,
     workflows,
+    isCurrentWorkflowManaged: false,
     focusedStepInfo: createStepInfo({
       stepId: 'step1',
       stepType: 'workflow.execute',
@@ -157,5 +158,36 @@ describe('getWorkflowSuggestions', () => {
   it('returns all workflows when currentWorkflowId is null', async () => {
     const result = await getWorkflowSuggestions(makeContext({ currentWorkflowId: null }));
     expect(result).toHaveLength(2);
+  });
+
+  it('excludes managed workflows unless the current workflow is managed', async () => {
+    const managedWorkflows: WorkflowsResponse = {
+      workflows: {
+        'wf-user': {
+          id: 'wf-user',
+          name: 'User Workflow',
+        },
+        'wf-managed': {
+          id: 'wf-managed',
+          name: 'Managed Workflow',
+          managed: true,
+        },
+      },
+      totalWorkflows: 2,
+    };
+
+    const userWorkflowResult = await getWorkflowSuggestions(
+      makeContext({ workflows: managedWorkflows })
+    );
+    expect(userWorkflowResult).toHaveLength(1);
+    expect(userWorkflowResult[0].label).toBe('User Workflow (id: wf-user)');
+
+    const managedWorkflowResult = await getWorkflowSuggestions(
+      makeContext({
+        workflows: managedWorkflows,
+        isCurrentWorkflowManaged: true,
+      })
+    );
+    expect(managedWorkflowResult).toHaveLength(2);
   });
 });

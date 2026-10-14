@@ -25,12 +25,36 @@ export const DELETE_CASES_FAILED_MESSAGE = (caseIds: string[], errorMessage: str
     values: { caseIds: caseIds.join(', '), errorMessage },
   });
 
+export const BULK_DELETE_OBSERVABLES_FAILED_MESSAGE = (
+  caseId: string,
+  observableIds: string[],
+  errorMessage: string
+) =>
+  i18n.translate(
+    'xpack.cases.workflowSteps.bulkDeleteObservables.error.observablesCouldNotBeDeleted',
+    {
+      defaultMessage:
+        'Observables could not be deleted on case "{caseId}": {observableIds}. Reason: {errorMessage}',
+      values: { caseId, observableIds: observableIds.join(', '), errorMessage },
+    }
+  );
+
 export const SET_CUSTOM_FIELD_FAILED_MESSAGE = (caseId: string, fieldName: string) =>
   i18n.translate(
     'xpack.cases.workflowSteps.setCustomField.error.caseCustomFieldCouldNotBeUpdated',
     {
       defaultMessage: 'Custom field "{fieldName}" on case "{caseId}" could not be updated.',
       values: { caseId, fieldName },
+    }
+  );
+
+export const SET_EXTENDED_FIELDS_FAILED_MESSAGE = (caseId: string, errorMessage: string) =>
+  i18n.translate(
+    'xpack.cases.workflowSteps.setExtendedFields.error.extendedFieldsCouldNotBeUpdated',
+    {
+      defaultMessage:
+        'Extended fields on case "{caseId}" could not be updated. Reason: {errorMessage}',
+      values: { caseId, errorMessage },
     }
   );
 

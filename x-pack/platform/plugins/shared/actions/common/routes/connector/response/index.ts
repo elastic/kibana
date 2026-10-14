@@ -17,6 +17,8 @@ export type {
 export {
   connectorResponseSchema,
   getAllConnectorsResponseSchema,
+  getConnectorResponseSchema,
+  getGetAllConnectorsResponseSchema,
   connectorTypeResponseSchema,
   connectorExecuteResponseSchema,
   connectorAuthStatusResponseSchema,
@@ -36,6 +38,8 @@ export type {
 export {
   connectorResponseSchema as connectorResponseSchemaV1,
   getAllConnectorsResponseSchema as getAllConnectorsResponseSchemaV1,
+  getConnectorResponseSchema as getConnectorResponseSchemaV1,
+  getGetAllConnectorsResponseSchema as getGetAllConnectorsResponseSchemaV1,
   connectorTypeResponseSchema as connectorTypeResponseSchemaV1,
   getAllConnectorTypesResponseSchema as getAllConnectorTypesResponseSchemaV1,
   connectorExecuteResponseSchema as connectorExecuteResponseSchemaV1,

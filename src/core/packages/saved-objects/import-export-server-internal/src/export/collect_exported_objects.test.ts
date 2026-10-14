@@ -13,6 +13,7 @@ import type {
   SavedObjectsExportTransform,
   SavedObjectsExportablePredicate,
   SavedObject,
+  SavedObjectErrorResult,
 } from '@kbn/core-saved-objects-server';
 import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -35,7 +36,16 @@ const createError = (parts: Partial<SavedObjectError> = {}): SavedObjectError =>
   ...parts,
 });
 
-const toIdTuple = (obj: SavedObject) => ({ type: obj.type, id: obj.id });
+const createErrorObject = (
+  parts: Partial<SavedObjectErrorResult> = {}
+): SavedObjectErrorResult => ({
+  id: 'id',
+  type: 'type',
+  error: createError(),
+  ...parts,
+});
+
+const toIdTuple = (obj: { type: string; id: string }) => ({ type: obj.type, id: obj.id });
 const toExcludedObject = (obj: SavedObject, reason: ExclusionReason = 'excluded') => ({
   type: obj.type,
   id: obj.id,
@@ -431,12 +441,12 @@ describe('collectExportedObjects', () => {
           },
         ],
       });
-      const missing1 = createObject({
+      const missing1 = createErrorObject({
         type: 'missing',
         id: '1',
         error: createError(),
       });
-      const missing2 = createObject({
+      const missing2 = createErrorObject({
         type: 'missing',
         id: '2',
         error: createError(),

@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./require_license_header');
+const rule = require('../oxlint_plugin').rules['require-license-header'];
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
@@ -137,6 +137,21 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
 
         console.log('foo')
       `,
+    },
+
+    // keeps shebang files unfixed
+    {
+      code: `#!/usr/bin/env node
+console.log('foo')`,
+
+      options: [{ license: '/* license */' }],
+      errors: [
+        {
+          message: 'File must start with a license header',
+        },
+      ],
+
+      output: null,
     },
 
     // strips newlines before the license comment

@@ -11,7 +11,7 @@ import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 describe('ScheduleNotificationResponseActions', () => {
   const getSignals = () => [
@@ -331,6 +331,107 @@ describe('ScheduleNotificationResponseActions', () => {
       );
     });
 
+    describe('and command is kill-process with `kill_descendants`', () => {
+      const buildKillProcessResponseAction = (killDescendants?: boolean): RuleResponseAction => ({
+        actionTypeId: ResponseActionTypesEnum['.endpoint'],
+        params: {
+          command: 'kill-process',
+          comment: 'test process comment',
+          config: {
+            overwrite: true,
+            field: '',
+            ...(killDescendants === undefined ? {} : { kill_descendants: killDescendants }),
+          },
+        },
+      });
+
+      const getKillProcessParameters = (): Array<Record<string, unknown>> =>
+        (mockedResponseActionsClient.killProcess as jest.Mock).mock.calls.map(
+          ([requestBody]) => requestBody.parameters
+        );
+
+      afterEach(() => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          false;
+      });
+
+      it('should pass `kill_descendants` when the feature flag is enabled and it is `true`', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          true;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction(true)],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint_ids: ['agent-id-1'],
+            parameters: { pid: 123, kill_descendants: true },
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should NOT pass `kill_descendants` when it is `false`', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          true;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction(false)],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalled();
+        getKillProcessParameters().forEach((parameters) => {
+          expect(parameters).not.toHaveProperty('kill_descendants');
+        });
+      });
+
+      it('should NOT pass `kill_descendants` when it is not defined', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          true;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction()],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalled();
+        getKillProcessParameters().forEach((parameters) => {
+          expect(parameters).not.toHaveProperty('kill_descendants');
+        });
+      });
+
+      it('should NOT pass `kill_descendants` when the feature flag is disabled', async () => {
+        // @ts-expect-error write to readonly prop is ok
+        endpointServiceMock.experimentalFeatures.responseActionsEndpointKillProcessDescendants =
+          false;
+        const signals = getSignals();
+
+        await scheduleNotificationResponseActions({
+          signals,
+          signalsCount: signals.length,
+          responseActions: [buildKillProcessResponseAction(true)],
+        });
+
+        expect(mockedResponseActionsClient.killProcess).toHaveBeenCalled();
+        getKillProcessParameters().forEach((parameters) => {
+          expect(parameters).not.toHaveProperty('kill_descendants');
+        });
+      });
+    });
+
     it('should handle endpoint runscript actions', async () => {
       // @ts-expect-error write to readonly prop is ok
       endpointServiceMock.experimentalFeatures.responseActionsEndpointAutomatedRunScript = true;
@@ -482,7 +583,7 @@ describe('ScheduleNotificationResponseActions', () => {
     describe('and when space awareness is enabled', () => {
       it('should initialize a response action client with the alert space id when space awareness is enabled', async () => {
         const signals = getSignals();
-        signals[0][SPACE_IDS] = ['foo'];
+        signals[0][SPACE_IDS] = [asSpaceId('foo')];
         await scheduleNotificationResponseActions({
           signals,
           signalsCount: 2,

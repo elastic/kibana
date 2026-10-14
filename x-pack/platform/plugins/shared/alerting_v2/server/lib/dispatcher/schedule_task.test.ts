@@ -6,29 +6,15 @@
  */
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
 import { INTERVAL, scheduleDispatcherTask } from './schedule_task';
-import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './task_definition';
+import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './constants';
 
 describe('scheduleDispatcherTask', () => {
   let taskManager: jest.Mocked<Pick<TaskManagerStartContract, 'ensureScheduled'>>;
-  let resourceManager: ReturnType<typeof createMockResourceManager>;
-  let callOrder: string[];
 
   beforeEach(() => {
-    callOrder = [];
-
-    resourceManager = createMockResourceManager();
-    resourceManager.waitUntilReady.mockImplementation(() => {
-      callOrder.push('waitUntilReady');
-      return Promise.resolve();
-    });
-
     taskManager = {
-      ensureScheduled: jest.fn().mockImplementation(() => {
-        callOrder.push('ensureScheduled');
-        return Promise.resolve();
-      }),
+      ensureScheduled: jest.fn().mockResolvedValue(undefined),
     };
   });
 
@@ -36,33 +22,17 @@ describe('scheduleDispatcherTask', () => {
     jest.clearAllMocks();
   });
 
-  it('waits for resources before scheduling the task', async () => {
+  it('schedules the dispatcher task', async () => {
     await scheduleDispatcherTask({
       taskManager: taskManager as unknown as TaskManagerStartContract,
-      resourceManager,
     });
 
-    expect(callOrder).toEqual(['waitUntilReady', 'ensureScheduled']);
-  });
-
-  it('does not schedule when resources fail to initialize', async () => {
-    const error = new Error('resource init failed');
-    resourceManager.waitUntilReady.mockRejectedValue(error);
-
-    await expect(
-      scheduleDispatcherTask({
-        taskManager: taskManager as unknown as TaskManagerStartContract,
-        resourceManager,
-      })
-    ).rejects.toThrow(error);
-
-    expect(taskManager.ensureScheduled).not.toHaveBeenCalled();
+    expect(taskManager.ensureScheduled).toHaveBeenCalledTimes(1);
   });
 
   it('passes the correct task configuration to ensureScheduled', async () => {
     await scheduleDispatcherTask({
       taskManager: taskManager as unknown as TaskManagerStartContract,
-      resourceManager,
     });
 
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith({

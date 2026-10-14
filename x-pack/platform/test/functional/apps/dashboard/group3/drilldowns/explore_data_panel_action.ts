@@ -24,6 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
+  /**
+   * Purpose: Explore data drilldown smoke test
+   *
+   * Migration: Migrate to scout - move to lens scout tests since drilldown is regsitered by in lens plugin
+   */
   describe('Explore underlying data - panel action', function () {
     before(
       'change default index pattern to verify action navigates to correct index pattern',
@@ -66,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitForDiscoverAppOnScreen();
 
       const el = await testSubjects.find('discover-dataView-switch-link');
-      const text = await el.getVisibleText();
+      const text = await (await el.findByTestSubject('fullText')).getVisibleText();
 
       expect(text).to.be('logstash-*');
     });

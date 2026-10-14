@@ -24,19 +24,19 @@ export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureCon
   const settings = {
     id: RULES_SETTINGS_FEATURE_ID,
     name: i18n.translate('xpack.alerting.feature.rulesSettingsFeatureName', {
-      defaultMessage: 'Rules Settings',
+      defaultMessage: 'Classic Rules Settings',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
     app: [],
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     privileges: {
       all: {
         app: [],
         api: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
@@ -48,7 +48,7 @@ export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureCon
         app: [],
         api: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],

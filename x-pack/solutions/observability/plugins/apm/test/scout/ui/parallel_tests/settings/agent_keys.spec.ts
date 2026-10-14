@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
@@ -33,7 +34,7 @@ test.describe(
       await expect(button).toBeEnabled();
 
       await test.step('Create and delete agent key', async () => {
-        await agentKeysPage.createAndDeleteKey('apm-admin-key-test');
+        await agentKeysPage.createAndDeleteKey(`apm-admin-key-test-${randomUUID()}`);
       });
     });
   }

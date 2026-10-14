@@ -46,7 +46,7 @@ const buildContext = (overrides: {
 
 const metricItem: ParsedMetricItem = {
   metricName: 'test.metric',
-  dataStream: 'test-data-stream',
+  indexName: 'test-data-stream',
   units: ['ms'],
   metricTypes: ['counter'],
   fieldTypes: [ES_FIELD_TYPES.LONG],

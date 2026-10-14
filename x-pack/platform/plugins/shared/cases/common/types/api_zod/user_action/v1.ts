@@ -6,10 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
-import { paginationSchema } from '../../../schema_zod';
+import {
+  MAX_USER_ACTIONS_PER_PAGE,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+  MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+} from '../../../constants';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema_zod';
 import { UserActionsSchema } from '../../domain_zod/user_action/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
+import { ActionSourceTypes } from '../../domain/user_action/source/v1';
 
 const UserActionAdditionalFindRequestFilterTypes = {
   action: 'action',
@@ -27,6 +35,12 @@ const UserActionFindRequestTypesValues = Object.values(UserActionFindRequestType
   string,
   ...string[]
 ];
+
+const ActionSourceTypeValues = Object.values(ActionSourceTypes) as [string, ...string[]];
+const UserActionFindRequestSourcesValues = [
+  ...ActionSourceTypeValues,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+] as [string, ...string[]];
 
 export const CaseUserActionStatsSchema = z.object({
   total: z.number(),
@@ -46,6 +60,26 @@ export const UserActionFindRequestSchema = paginationSchema({
   sortOrder: z.enum(['desc', 'asc']).optional(),
 });
 
+export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.extend({
+  authors: limitedArraySchema({
+    codec: z.string().min(1).max(MAX_USER_ACTION_AUTHOR_LENGTH),
+    fieldName: 'authors',
+    min: 0,
+    max: MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  }).optional(),
+  search: limitedStringSchema({
+    fieldName: 'search',
+    min: 1,
+    max: MAX_USER_ACTION_SEARCH_LENGTH,
+  }).optional(),
+  sources: limitedArraySchema({
+    codec: z.enum(UserActionFindRequestSourcesValues),
+    fieldName: 'sources',
+    min: 0,
+    max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  }).optional(),
+});
+
 export const UserActionFindResponseSchema = z.object({
   userActions: UserActionsSchema,
   page: z.number(),
@@ -55,4 +89,5 @@ export const UserActionFindResponseSchema = z.object({
 
 export type CaseUserActionStats = z.infer<typeof CaseUserActionStatsSchema>;
 export type UserActionFindRequest = z.infer<typeof UserActionFindRequestSchema>;
+export type UserActionInternalFindRequest = z.infer<typeof UserActionInternalFindRequestSchema>;
 export type UserActionFindResponse = z.infer<typeof UserActionFindResponseSchema>;

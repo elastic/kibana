@@ -20,6 +20,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const comboBox = getService('comboBox');
 
+  /**
+   * Purpose: Legacy options list control smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('dynamic options', () => {
     before(async () => {
       await visualize.initTests();
@@ -45,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not fetch new options when non-string is filtered', async () => {
-        await comboBox.set('fieldSelect-0', 'clientip', { retryCount: 3 });
+        await comboBox.set('fieldSelect-0', 'clientip', { timeout: 20_000 });
         await visEditor.clickGo();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
@@ -70,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
         await header.waitUntilLoadingHasFinished();
-        await comboBox.set('listControlSelect0', 'win 7', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'win 7', { timeout: 20_000 });
       });
 
       it('should fetch new options when string field is filtered', async () => {

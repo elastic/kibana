@@ -8,12 +8,14 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import { getPathParts } from '../../archive';
 import {
   ElasticsearchAssetType,
   type PackageInstallContext,
 } from '../../../../../common/types/models';
-import type { AssetsMap, EsAssetReference } from '../../../../../common/types/models';
+import type { EsAssetReference } from '../../../../../common/types/models';
+
+import { FleetError } from '../../../../errors';
 
 import { retryTransientEsErrors } from '../retry';
 
@@ -31,44 +33,55 @@ export const installMlModel = async (
   logger: Logger,
   esReferences: EsAssetReference[]
 ) => {
-  const mlModelPath = packageInstallContext.paths.find((path) => isMlModel(path));
+  const mlModelPaths = packageInstallContext.paths.filter((path) => isMlModel(path));
 
-  if (mlModelPath !== undefined) {
-    const mlModelAssetsMap: AssetsMap = new Map();
-    await packageInstallContext.archiveIterator.traverseEntries(
-      async (entry) => {
-        if (!entry.buffer) {
-          return;
-        }
+  if (mlModelPaths.length === 0) {
+    return esReferences;
+  }
 
-        mlModelAssetsMap.set(entry.path, entry.buffer);
-      },
-      (path) => path === mlModelPath
-    );
-
-    const content = getAssetFromAssetsMap(mlModelAssetsMap, mlModelPath).toString('utf-8');
+  const mlModelRefs = mlModelPaths.map((mlModelPath) => {
     const pathParts = mlModelPath.split('/');
     const modelId = pathParts[pathParts.length - 1].replace('.json', '');
+    return { id: modelId, type: ElasticsearchAssetType.mlModel };
+  });
 
-    const mlModelRef = {
-      id: modelId,
-      type: ElasticsearchAssetType.mlModel,
-    };
+  // Save all refs before any installs
+  esReferences = await updateEsAssetReferences(
+    savedObjectsClient,
+    packageInstallContext.packageInfo.name,
+    esReferences,
+    { assetsToAdd: mlModelRefs }
+  );
 
-    // get and save ml model refs before installing ml model
-    esReferences = await updateEsAssetReferences(
-      savedObjectsClient,
-      packageInstallContext.packageInfo.name,
-      esReferences,
-      { assetsToAdd: [mlModelRef] }
-    );
+  const wantedPaths = new Set(mlModelPaths);
+  let installError: unknown;
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (installError) return;
+      if (!wantedPaths.has(entry.path)) return;
+      if (!entry.buffer) {
+        installError = new FleetError(
+          `No buffer for ML model archive entry at path: ${entry.path}`
+        );
+        return;
+      }
+      const pathParts = entry.path.split('/');
+      const modelId = pathParts[pathParts.length - 1].replace('.json', '');
+      try {
+        await handleMlModelInstall({
+          esClient,
+          logger,
+          mlModel: { installationName: modelId, content: entry.buffer.toString('utf-8') },
+        });
+      } catch (err) {
+        installError = err;
+      }
+    },
+    (path) => wantedPaths.has(path)
+  );
 
-    const mlModel: MlModelInstallation = {
-      installationName: modelId,
-      content,
-    };
-
-    await handleMlModelInstall({ esClient, logger, mlModel });
+  if (installError !== undefined) {
+    throw installError;
   }
 
   return esReferences;

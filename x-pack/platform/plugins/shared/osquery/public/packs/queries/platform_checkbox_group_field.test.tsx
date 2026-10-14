@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, useWatch } from 'react-hook-form';
 
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 
-jest.mock('./platforms/platform_icon', () => ({
-  PlatformIcon: ({ platform }: { platform: string }) => (
-    <span data-test-subj={`icon-${platform}`} />
-  ),
-}));
+const PlatformValueProbe: React.FC = () => {
+  const value = useWatch({ name: 'platform' });
+
+  return <div data-test-subj="platform-value">{value ?? ''}</div>;
+};
 
 const FormWrapper: React.FC<{
   children: React.ReactNode;
@@ -28,95 +29,119 @@ const FormWrapper: React.FC<{
   return (
     <EuiProvider>
       <IntlProvider locale="en">
-        <FormProvider {...methods}>{children}</FormProvider>
+        <FormProvider {...methods}>
+          {children}
+          <PlatformValueProbe />
+        </FormProvider>
       </IntlProvider>
     </EuiProvider>
   );
 };
 
+const getSelectedPillLabels = () =>
+  Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[data-test-subj="osquery-platform-checkbox-group"] .euiComboBoxPill'
+    )
+  ).map((el) => el.textContent?.trim() ?? '');
+
 describe('PlatformCheckBoxGroupField', () => {
-  describe('default state', () => {
-    it('should render all three platform checkboxes', () => {
+  describe('default state (empty value)', () => {
+    it('renders an empty combobox when value is an empty string', () => {
       render(
         <FormWrapper>
           <PlatformCheckBoxGroupField />
         </FormWrapper>
       );
 
-      expect(screen.getByText('Linux')).toBeInTheDocument();
-      expect(screen.getByText('macOS')).toBeInTheDocument();
-      expect(screen.getByText('Windows')).toBeInTheDocument();
+      expect(screen.getByRole('combobox')).toBeInTheDocument();
+      expect(getSelectedPillLabels()).toEqual([]);
     });
 
-    it('should check all platforms when no value is provided', () => {
+    it('does not crash when value is seeded as an empty array', () => {
       render(
-        <FormWrapper>
+        <FormWrapper defaultValues={{ platform: [] }}>
           <PlatformCheckBoxGroupField />
         </FormWrapper>
       );
 
-      expect(screen.getByRole('checkbox', { name: /linux/i })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: /macos/i })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: /windows/i })).toBeChecked();
+      expect(getSelectedPillLabels()).toEqual([]);
     });
-  });
 
-  describe('with preset values', () => {
-    it('should check only linux and darwin when platform is "linux,darwin"', () => {
+    it('does not render a clear-all (X) button', () => {
       render(
         <FormWrapper defaultValues={{ platform: 'linux,darwin' }}>
           <PlatformCheckBoxGroupField />
         </FormWrapper>
       );
 
-      expect(screen.getByRole('checkbox', { name: /linux/i })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: /macos/i })).toBeChecked();
-      expect(screen.getByRole('checkbox', { name: /windows/i })).not.toBeChecked();
+      expect(screen.queryByLabelText('Clear input')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('with preset values', () => {
+    it('should show only Linux and macOS pills when platform is "linux,darwin"', () => {
+      render(
+        <FormWrapper defaultValues={{ platform: 'linux,darwin' }}>
+          <PlatformCheckBoxGroupField />
+        </FormWrapper>
+      );
+
+      expect(getSelectedPillLabels()).toEqual(['Linux', 'macOS']);
     });
 
-    it('should check only windows when platform is "windows"', () => {
+    it('should show only the Windows pill when platform is "windows"', () => {
       render(
         <FormWrapper defaultValues={{ platform: 'windows' }}>
           <PlatformCheckBoxGroupField />
         </FormWrapper>
       );
 
-      expect(screen.getByRole('checkbox', { name: /linux/i })).not.toBeChecked();
-      expect(screen.getByRole('checkbox', { name: /macos/i })).not.toBeChecked();
-      expect(screen.getByRole('checkbox', { name: /windows/i })).toBeChecked();
+      expect(getSelectedPillLabels()).toEqual(['Windows']);
     });
   });
 
   describe('user interaction', () => {
-    it('should toggle checkbox state on click', () => {
+    it('drops the OS id from the form value when its pill close button is clicked', async () => {
+      const user = userEvent.setup();
       render(
-        <FormWrapper>
+        <FormWrapper defaultValues={{ platform: 'linux,darwin,windows' }}>
           <PlatformCheckBoxGroupField />
         </FormWrapper>
       );
 
-      const windowsCheckbox = screen.getByRole('checkbox', { name: /windows/i });
-      expect(windowsCheckbox).toBeChecked();
+      const linuxRemoveButton = screen.getByLabelText('Remove Linux from selection in this group');
+      await user.click(linuxRemoveButton);
 
-      fireEvent.click(windowsCheckbox);
-      expect(windowsCheckbox).not.toBeChecked();
+      expect(getSelectedPillLabels()).toEqual(['macOS', 'Windows']);
+      expect(screen.getByTestId('platform-value')).toHaveTextContent(/^darwin,windows$/);
+    });
 
-      fireEvent.click(windowsCheckbox);
-      expect(windowsCheckbox).toBeChecked();
+    it('removing the last pill leaves the field empty (no auto-fill)', async () => {
+      const user = userEvent.setup();
+      render(
+        <FormWrapper defaultValues={{ platform: 'linux' }}>
+          <PlatformCheckBoxGroupField />
+        </FormWrapper>
+      );
+
+      const linuxRemoveButton = screen.getByLabelText('Remove Linux from selection in this group');
+      await user.click(linuxRemoveButton);
+
+      expect(getSelectedPillLabels()).toEqual([]);
+      expect(screen.getByTestId('platform-value')).toHaveTextContent('');
     });
   });
 
   describe('disabled state', () => {
-    it('should disable checkboxes when isDisabled is true', () => {
+    it('renders a non-interactive combobox when isDisabled is true', () => {
       render(
         <FormWrapper>
           <PlatformCheckBoxGroupField euiFieldProps={{ isDisabled: true }} />
         </FormWrapper>
       );
 
-      expect(screen.getByRole('checkbox', { name: /linux/i })).toBeDisabled();
-      expect(screen.getByRole('checkbox', { name: /macos/i })).toBeDisabled();
-      expect(screen.getByRole('checkbox', { name: /windows/i })).toBeDisabled();
+      expect(screen.getByRole('combobox')).toBeDisabled();
     });
   });
 });

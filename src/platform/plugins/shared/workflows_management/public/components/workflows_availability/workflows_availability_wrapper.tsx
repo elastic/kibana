@@ -26,6 +26,9 @@ import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { AccessDenied } from '../access_denied/access_denied';
 
+const isSafeBillingUrl = (url: string | undefined): url is string =>
+  url?.startsWith('https://') ?? false;
+
 /**
  * Wrapper component to render the workflows app with the availability check
  */
@@ -64,7 +67,7 @@ const LicenseAccessDenied = React.memo(() => {
           id="platform.plugins.shared.workflows_management.ui.upgradeLicense.subscriptionPlansButton"
           defaultMessage="Subscription plans"
         />
-        <EuiIcon type="popout" aria-hidden={true} />
+        <EuiIcon type="external" aria-hidden={true} />
       </EuiButton>,
       // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiButtonEmpty
@@ -153,14 +156,14 @@ const ServerlessTierAccessDenied = React.memo<{
   }, [cloud]);
 
   const actions = useMemo(() => {
-    if (billingUrl) {
+    if (isSafeBillingUrl(billingUrl)) {
       return [
         <EuiButton fill href={billingUrl} target="_blank">
           <FormattedMessage
             id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.manageSubscriptionButton"
             defaultMessage="Manage subscription"
           />
-          <EuiIcon type="popout" aria-hidden={true} />
+          <EuiIcon type="external" aria-hidden={true} />
         </EuiButton>,
       ];
     }

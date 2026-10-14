@@ -12,8 +12,6 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import {
   EuiButtonIcon,
-  EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -388,43 +387,40 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut
+          <KbnWarningCallout
+            size="s"
             announceOnMount={false}
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
               defaultMessage:
                 'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
               values: { errorCount: errors.length },
             })}
-            color="warning"
-            iconType="warning"
-            size="s"
+            text={errors.length === 1 ? errors[0] : undefined}
+            actionProps={
+              overrides !== undefined
+                ? {
+                    primary: {
+                      'data-test-subj': 'aiopsLogRateAnalysisResultsTryToContinueAnalysisButton',
+                      onClick: () => startHandler(true),
+                      children: (
+                        <FormattedMessage
+                          id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
+                          defaultMessage="Try to continue analysis"
+                        />
+                      ),
+                    },
+                  }
+                : undefined
+            }
           >
-            <EuiText size="s">
-              {errors.length === 1 ? (
-                <p>{errors[0]}</p>
-              ) : (
-                <ul>
-                  {errors.map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))}
-                </ul>
-              )}
-              {overrides !== undefined ? (
-                <p>
-                  <EuiButton
-                    data-test-subj="aiopsLogRateAnalysisResultsTryToContinueAnalysisButton"
-                    size="s"
-                    onClick={() => startHandler(true)}
-                  >
-                    <FormattedMessage
-                      id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
-                      defaultMessage="Try to continue analysis"
-                    />
-                  </EuiButton>
-                </p>
-              ) : null}
-            </EuiText>
-          </EuiCallOut>
+            {errors.length > 1 && (
+              <ul>
+                {errors.map((e, i) => (
+                  <li key={i}>{e}</li>
+                ))}
+              </ul>
+            )}
+          </KbnWarningCallout>
           <EuiSpacer size="xs" />
         </>
       ) : null}

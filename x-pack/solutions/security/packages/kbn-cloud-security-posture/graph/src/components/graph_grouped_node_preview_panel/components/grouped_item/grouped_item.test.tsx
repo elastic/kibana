@@ -18,19 +18,29 @@ import {
   GROUPED_ITEM_SKELETON_TEST_ID,
   GROUPED_ITEM_GEO_TEST_ID,
 } from '../../test_ids';
-import { GroupedItem } from './grouped_item';
+import { GroupedItem as BaseGroupedItem, type GroupedItemProps } from './grouped_item';
 import { formatDate } from '@elastic/eui';
 import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../filters/filter_store';
 import type { EntityOrEventItem } from './types';
 
-const mockOpenPreviewPanel = jest.fn();
+const mockOnShowDocument = jest.fn();
+const mockOnShowEntity = jest.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-  }),
-}));
+// Distributes `Omit` across the discriminated union so the `isLoading` discriminant is preserved.
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+// Test wrapper supplying default preview handlers (previews are not exercised here),
+// so individual cases stay terse.
+const GroupedItem = (
+  props: DistributiveOmit<GroupedItemProps, 'onShowDocument' | 'onShowEntity'>
+) => (
+  <BaseGroupedItem
+    {...(props as GroupedItemProps)}
+    onShowDocument={mockOnShowDocument}
+    onShowEntity={mockOnShowEntity}
+  />
+);
 
 // Use unique scopeId per test run to prevent cross-test pollution
 let TEST_SCOPE_ID: string;
@@ -90,7 +100,7 @@ describe('<GroupedItem />', () => {
             action: 'process_start',
             timestamp,
             actor: { id: 'a1', label: 'user1', icon: 'user' },
-            target: { id: 'p1', label: 'proc.exe', icon: 'document' },
+            target: { ids: ['p1'], label: 'proc.exe', icon: 'document' },
           }}
         />
       );
@@ -117,7 +127,7 @@ describe('<GroupedItem />', () => {
             action: 'alert_action',
             timestamp,
             actor: { id: 'host-1', label: 'host', icon: 'storage' },
-            target: { id: 'p1', label: 'proc.exe', icon: 'document' },
+            target: { ids: ['p1'], label: 'proc.exe', icon: 'document' },
           }}
         />
       );
@@ -181,7 +191,7 @@ describe('<GroupedItem />', () => {
               label: 'entity-1',
               entity: {},
               actor: { id: 'a1', label: 'actor' },
-              target: { id: 't1', label: 'target' },
+              target: { ids: ['t1'], label: 'target' },
             } as any // eslint-disable-line @typescript-eslint/no-explicit-any
           } // Type assertion needed for test case
         />
@@ -191,59 +201,25 @@ describe('<GroupedItem />', () => {
       expect(queryByTestId(GROUPED_ITEM_TARGET_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('does not render ActorsRow for event when actor is missing', () => {
-      const { queryByTestId } = render(
+    it('renders ActorsRow with a dash for a missing actor', () => {
+      const { getByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
             itemType: 'event',
             id: 'event-1',
             action: 'test_action',
-            target: { id: 't1', label: 'target' },
+            target: { ids: ['t1'], label: 'target' },
           }}
         />
       );
 
-      expect(queryByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TARGET_TEST_ID)).not.toBeInTheDocument();
+      expect(getByTestId(GROUPED_ITEM_ACTOR_TEST_ID).textContent).toBe('-');
+      expect(getByTestId(GROUPED_ITEM_TARGET_TEST_ID).textContent).toBe('target');
     });
 
-    it('does not render ActorsRow for event when target is missing', () => {
-      const { queryByTestId } = render(
-        <GroupedItem
-          scopeId={TEST_SCOPE_ID}
-          item={{
-            itemType: 'event',
-            id: 'event-1',
-            action: 'test_action',
-            actor: { id: 'a1', label: 'actor' },
-          }}
-        />
-      );
-
-      expect(queryByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TARGET_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('does not render ActorsRow for alert when actor is missing', () => {
-      const { queryByTestId } = render(
-        <GroupedItem
-          scopeId={TEST_SCOPE_ID}
-          item={{
-            itemType: 'alert',
-            id: 'alert-1',
-            action: 'test_action',
-            target: { id: 't1', label: 'target' },
-          }}
-        />
-      );
-
-      expect(queryByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(GROUPED_ITEM_TARGET_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('does not render ActorsRow for alert when target is missing', () => {
-      const { queryByTestId } = render(
+    it('renders ActorsRow with a dash for missing targets', () => {
+      const { getByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
@@ -252,6 +228,18 @@ describe('<GroupedItem />', () => {
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
           }}
+        />
+      );
+
+      expect(getByTestId(GROUPED_ITEM_ACTOR_TEST_ID).textContent).toBe('actor');
+      expect(getByTestId(GROUPED_ITEM_TARGET_TEST_ID).textContent).toBe('-');
+    });
+
+    it('does not render ActorsRow when there is neither an actor nor a target', () => {
+      const { queryByTestId } = render(
+        <GroupedItem
+          scopeId={TEST_SCOPE_ID}
+          item={{ itemType: 'event', id: 'event-1', action: 'test_action' }}
         />
       );
 
@@ -268,7 +256,7 @@ describe('<GroupedItem />', () => {
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
-            target: { id: 't1', label: 'target' },
+            target: { ids: ['t1'], label: 'target' },
           }}
         />
       );
@@ -286,7 +274,7 @@ describe('<GroupedItem />', () => {
             id: 'alert-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
-            target: { id: 't1', label: 'target' },
+            target: { ids: ['t1'], label: 'target' },
           }}
         />
       );
@@ -304,7 +292,7 @@ describe('<GroupedItem />', () => {
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1' }, // No label
-            target: { id: 't1', label: 'target' },
+            target: { ids: ['t1'], label: 'target' },
           }}
         />
       );
@@ -322,7 +310,7 @@ describe('<GroupedItem />', () => {
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
-            target: { id: 't1' }, // No label
+            target: { ids: ['t1'] }, // No label
           }}
         />
       );
@@ -340,7 +328,7 @@ describe('<GroupedItem />', () => {
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1' }, // Only id
-            target: { id: 't1' }, // Only id
+            target: { ids: ['t1'] }, // Only id
           }}
         />
       );
@@ -358,7 +346,7 @@ describe('<GroupedItem />', () => {
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor', icon: 'user' },
-            target: { id: 't1', label: 'target', icon: 'document' },
+            target: { ids: ['t1'], label: 'target', icon: 'document' },
           }}
         />
       );
@@ -762,7 +750,7 @@ describe('<GroupedItem />', () => {
 
   describe('memo behavior and component optimization', () => {
     it('should have displayName set correctly', () => {
-      expect(GroupedItem.displayName).toBe('GroupedItem');
+      expect(BaseGroupedItem.displayName).toBe('GroupedItem');
     });
   });
 });

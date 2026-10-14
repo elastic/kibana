@@ -30,6 +30,7 @@ export type {
   ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
+  WorkflowAccessControlUpdateResponseDto,
   WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
   WorkflowExecutionHistoryModel,
@@ -37,6 +38,8 @@ export type {
   WorkflowExecutionListItemDto,
   WorkflowExecutionLogModel,
   WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+  WorkflowStepTokenUsage,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
@@ -45,12 +48,14 @@ export type {
   WorkflowStepExecutionListDto,
   WorkflowMgetResponseDto,
   ChildWorkflowExecutionItem,
+  WorkflowExecutionCollapseField,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
   // api types
+  WorkflowSortField,
   WorkflowsSearchParams,
   // connector types
   ConnectorSubAction,
@@ -60,7 +65,7 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
-  StepStabilityLevel,
+  StabilityLevel,
   HttpMethod,
   EditorHandlers,
   EditorHandlersConfig,
@@ -86,9 +91,11 @@ export {
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
+  ConcurrencySlotOccupyingExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
   // shared constants

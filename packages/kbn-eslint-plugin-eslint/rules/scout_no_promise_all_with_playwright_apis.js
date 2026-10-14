@@ -43,7 +43,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     return {
       CallExpression(node) {
         // Match `Promise.all(...)`.

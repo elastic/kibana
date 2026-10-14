@@ -6,18 +6,17 @@
  */
 
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useCanManageRules } from '../../../../hooks/use_capabilities';
 import { RuleNameWithLoading } from './rule_name_with_loading';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';
 import { ManageRulesLink } from '../common/links/manage_rules_link';
-import type { ClientPluginsStart } from '../../../../plugin';
 import { STATUS_RULE_NAME, TLS_RULE_NAME, ToggleFlyoutTranslations } from './hooks/translations';
 import { useSyntheticsRules } from './hooks/use_synthetics_rules';
 import {
@@ -30,10 +29,9 @@ export const ToggleAlertFlyoutButton = () => {
   const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { application } = useKibana<ClientPluginsStart>().services;
-  const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
+  const canManageRules = useCanManageRules();
 
-  const { EditAlertFlyout, loading, NewRuleFlyout, defaultRules } = useSyntheticsRules(isOpen);
+  const { loading, defaultRules } = useSyntheticsRules(isOpen);
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
 
   const hasMonitors = loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0;
@@ -70,6 +68,8 @@ export const ToggleAlertFlyoutButton = () => {
           name: CREATE_STATUS_RULE,
           'data-test-subj': 'createNewStatusRule',
           icon: 'plusCircle',
+          toolTipContent: !canManageRules ? noWritePermissionsTooltipContent : null,
+          disabled: !canManageRules,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -83,12 +83,12 @@ export const ToggleAlertFlyoutButton = () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
-          toolTipContent: !hasUptimeWrite
+          toolTipContent: !canManageRules
             ? noWritePermissionsTooltipContent
             : !statusRuleExists
             ? statusRuleNotAvailableTooltipContent
             : null,
-          disabled: !hasUptimeWrite || loading || !statusRuleExists,
+          disabled: !canManageRules || loading || !statusRuleExists,
           icon: 'bell',
         },
       ],
@@ -101,6 +101,8 @@ export const ToggleAlertFlyoutButton = () => {
           name: CREATE_TLS_RULE_NAME,
           'data-test-subj': 'createNewTLSRule',
           icon: 'plusCircle',
+          toolTipContent: !canManageRules ? noWritePermissionsTooltipContent : null,
+          disabled: !canManageRules,
           onClick: () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: true }));
             setIsOpen(false);
@@ -114,19 +116,17 @@ export const ToggleAlertFlyoutButton = () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
-          toolTipContent: !hasUptimeWrite
+          toolTipContent: !canManageRules
             ? noWritePermissionsTooltipContent
             : !tlsRuleExists
             ? tlsRuleNotAvailableTooltipContent
             : null,
-          disabled: !hasUptimeWrite || loading || !tlsRuleExists,
+          disabled: !canManageRules || loading || !tlsRuleExists,
           icon: 'bell',
         },
       ],
     },
   ];
-
-  const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
 
   return (
     <>
@@ -148,30 +148,44 @@ export const ToggleAlertFlyoutButton = () => {
         isOpen={isOpen}
         ownFocus
         panelPaddingSize="none"
+        aria-label={i18n.translate('xpack.synthetics.toggleAlertFlyoutButton.popoverAriaLabel', {
+          defaultMessage: 'Alerts and rules menu',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
+      <SyntheticsAlertFlyouts prefetchRules={isOpen} />
+    </>
+  );
+};
+
+export const SyntheticsAlertFlyouts = ({ prefetchRules = false }: { prefetchRules?: boolean }) => {
+  const { EditAlertFlyout, NewRuleFlyout } = useSyntheticsRules(prefetchRules);
+  const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
+
+  return (
+    <>
       {alertFlyoutVisible && EditAlertFlyout}
       {alertFlyoutVisible && NewRuleFlyout}
     </>
   );
 };
 
-const noWritePermissionsTooltipContent = i18n.translate(
+export const noWritePermissionsTooltipContent = i18n.translate(
   'xpack.synthetics.alertDropdown.noPermissions',
   {
     defaultMessage: 'You do not have sufficient permissions to perform this action.',
   }
 );
 
-const statusRuleNotAvailableTooltipContent = i18n.translate(
+export const statusRuleNotAvailableTooltipContent = i18n.translate(
   'xpack.synthetics.alerts.statusRuleNotAvailableTooltip',
   {
     defaultMessage: 'Status rule does not exist. Create the rule before editing.',
   }
 );
 
-const tlsRuleNotAvailableTooltipContent = i18n.translate(
+export const tlsRuleNotAvailableTooltipContent = i18n.translate(
   'xpack.synthetics.alerts.tlsRuleNotAvailableTooltip',
   {
     defaultMessage: 'TLS rule does not exist. Create the rule before editing.',

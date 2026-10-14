@@ -90,7 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.saveDashboard(testDataPanel.dashboardTitle);
       });
 
-      it('should run log rate analysis', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/285513
+      it.skip('should run log rate analysis', async () => {
         await aiops.dashboardEmbeddables.assertDashboardPanelExists(testDataPanel.panelTitle);
         await aiops.logRateAnalysisPage.clickAutoRunButton();
         // Wait for the analysis to finish

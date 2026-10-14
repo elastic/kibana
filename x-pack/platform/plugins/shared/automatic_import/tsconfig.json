@@ -19,6 +19,7 @@
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
     "@kbn/actions-plugin",
+    "@kbn/app-header",
     "@kbn/inference-plugin",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",

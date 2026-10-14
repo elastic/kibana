@@ -16,12 +16,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { NonEmptyString } from '../../../../common_attributes.gen';
 import {
   AttackDiscoveryApiScheduleCreateProps,
   AttackDiscoveryApiSchedule,
   AttackDiscoveryApiScheduleUpdateProps,
 } from './schedules_api.gen';
-import { NonEmptyString } from '../../../../common_attributes.gen';
 
 /**
  * Response body shape for Attack discovery schedule create, read, update, enable, and disable operations. Fields vary by endpoint; refer to each operation’s schema and examples.
@@ -37,18 +37,137 @@ export const AttackDiscoveryGenericError = lazySchema(() =>
     /**
      * HTTP status code
      */
-    status_code: z.number().optional(),
+    status_code: z.number().optional().describe('HTTP status code'),
     /**
      * Error type
      */
-    error: z.string().optional(),
+    error: z.string().optional().describe('Error type'),
     /**
      * Human-readable error message describing what went wrong
      */
-    message: z.string().optional(),
+    message: z
+      .string()
+      .optional()
+      .describe('Human-readable error message describing what went wrong'),
   })
 );
 export type AttackDiscoveryGenericError = z.infer<typeof AttackDiscoveryGenericError>;
+
+export const BulkActionAttackDiscoverySchedulesRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifiers of the Attack Discovery schedules to update.
+     */
+    ids: z
+      .array(NonEmptyString)
+      .min(1)
+      .describe('The unique identifiers of the Attack Discovery schedules to update.'),
+  })
+);
+export type BulkActionAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkActionAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkActionAttackDiscoverySchedulesError = lazySchema(() =>
+  z.object({
+    /**
+     * The error message returned for the failed schedule.
+     */
+    message: z.string().describe('The error message returned for the failed schedule.'),
+    /**
+     * Optional HTTP status associated with the failed schedule operation.
+     */
+    status: z
+      .number()
+      .optional()
+      .describe('Optional HTTP status associated with the failed schedule operation.'),
+    rule: z.object({
+      /**
+       * The unique identifier of the failed schedule.
+       */
+      id: NonEmptyString.describe('The unique identifier of the failed schedule.'),
+      /**
+       * The name of the failed schedule.
+       */
+      name: z.string().describe('The name of the failed schedule.'),
+    }),
+  })
+);
+export type BulkActionAttackDiscoverySchedulesError = z.infer<
+  typeof BulkActionAttackDiscoverySchedulesError
+>;
+
+export const BulkActionAttackDiscoverySchedulesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifiers of the schedules successfully affected by the bulk action.
+     */
+    ids: z
+      .array(NonEmptyString)
+      .describe(
+        'The unique identifiers of the schedules successfully affected by the bulk action.'
+      ),
+    errors: z.array(BulkActionAttackDiscoverySchedulesError),
+    /**
+     * The total number of schedules matched by the bulk action.
+     */
+    total: z.number().describe('The total number of schedules matched by the bulk action.'),
+  })
+);
+export type BulkActionAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkActionAttackDiscoverySchedulesResponse
+>;
+
+export const BulkDeleteAttackDiscoverySchedulesRequestBody = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesRequestBody
+);
+export type BulkDeleteAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkDeleteAttackDiscoverySchedulesRequestBody
+>;
+export type BulkDeleteAttackDiscoverySchedulesRequestBodyInput = z.input<
+  typeof BulkDeleteAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkDeleteAttackDiscoverySchedulesResponse = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesResponse
+);
+export type BulkDeleteAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkDeleteAttackDiscoverySchedulesResponse
+>;
+
+export const BulkDisableAttackDiscoverySchedulesRequestBody = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesRequestBody
+);
+export type BulkDisableAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkDisableAttackDiscoverySchedulesRequestBody
+>;
+export type BulkDisableAttackDiscoverySchedulesRequestBodyInput = z.input<
+  typeof BulkDisableAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkDisableAttackDiscoverySchedulesResponse = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesResponse
+);
+export type BulkDisableAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkDisableAttackDiscoverySchedulesResponse
+>;
+
+export const BulkEnableAttackDiscoverySchedulesRequestBody = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesRequestBody
+);
+export type BulkEnableAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkEnableAttackDiscoverySchedulesRequestBody
+>;
+export type BulkEnableAttackDiscoverySchedulesRequestBodyInput = z.input<
+  typeof BulkEnableAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkEnableAttackDiscoverySchedulesResponse = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesResponse
+);
+export type BulkEnableAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkEnableAttackDiscoverySchedulesResponse
+>;
 
 export const CreateAttackDiscoverySchedulesRequestBody = lazySchema(
   () => AttackDiscoveryApiScheduleCreateProps
@@ -70,7 +189,9 @@ export const DeleteAttackDiscoverySchedulesRequestParams = lazySchema(() =>
     /**
      * The unique identifier (UUID) of the Attack Discovery schedule to delete. This ID is returned when creating a schedule and can be found in schedule listings.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (UUID) of the Attack Discovery schedule to delete. This ID is returned when creating a schedule and can be found in schedule listings.'
+    ),
   })
 );
 export type DeleteAttackDiscoverySchedulesRequestParams = z.infer<
@@ -85,7 +206,7 @@ export const DeleteAttackDiscoverySchedulesResponse = lazySchema(() =>
     /**
      * The unique identifier of the deleted Attack Discovery schedule
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The unique identifier of the deleted Attack Discovery schedule'),
   })
 );
 export type DeleteAttackDiscoverySchedulesResponse = z.infer<
@@ -97,7 +218,9 @@ export const DisableAttackDiscoverySchedulesRequestParams = lazySchema(() =>
     /**
      * The unique identifier (UUID) of the Attack Discovery schedule to disable. This ID is returned when creating a schedule and can be found in schedule listings.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (UUID) of the Attack Discovery schedule to disable. This ID is returned when creating a schedule and can be found in schedule listings.'
+    ),
   })
 );
 export type DisableAttackDiscoverySchedulesRequestParams = z.infer<
@@ -112,7 +235,7 @@ export const DisableAttackDiscoverySchedulesResponse = lazySchema(() =>
     /**
      * The unique identifier of the disabled Attack Discovery schedule
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The unique identifier of the disabled Attack Discovery schedule'),
   })
 );
 export type DisableAttackDiscoverySchedulesResponse = z.infer<
@@ -124,7 +247,9 @@ export const EnableAttackDiscoverySchedulesRequestParams = lazySchema(() =>
     /**
      * The unique identifier (UUID) of the Attack Discovery schedule to enable. This ID is returned when creating a schedule and can be found in schedule listings.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (UUID) of the Attack Discovery schedule to enable. This ID is returned when creating a schedule and can be found in schedule listings.'
+    ),
   })
 );
 export type EnableAttackDiscoverySchedulesRequestParams = z.infer<
@@ -139,7 +264,7 @@ export const EnableAttackDiscoverySchedulesResponse = lazySchema(() =>
     /**
      * The unique identifier of the enabled Attack Discovery schedule
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The unique identifier of the enabled Attack Discovery schedule'),
   })
 );
 export type EnableAttackDiscoverySchedulesResponse = z.infer<
@@ -151,7 +276,9 @@ export const GetAttackDiscoverySchedulesRequestParams = lazySchema(() =>
     /**
      * The unique identifier (UUID) of the Attack Discovery schedule to retrieve. This ID is returned when creating a schedule and can be found in schedule listings.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (UUID) of the Attack Discovery schedule to retrieve. This ID is returned when creating a schedule and can be found in schedule listings.'
+    ),
   })
 );
 export type GetAttackDiscoverySchedulesRequestParams = z.infer<
@@ -171,7 +298,9 @@ export const UpdateAttackDiscoverySchedulesRequestParams = lazySchema(() =>
     /**
      * The unique identifier (UUID) of the Attack Discovery schedule to update. This ID is returned when creating a schedule and can be found in schedule listings.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (UUID) of the Attack Discovery schedule to update. This ID is returned when creating a schedule and can be found in schedule listings.'
+    ),
   })
 );
 export type UpdateAttackDiscoverySchedulesRequestParams = z.infer<

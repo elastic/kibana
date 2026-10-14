@@ -13,7 +13,14 @@ import { of } from 'rxjs';
 const mockUseEffect = useEffect;
 const mockOf = of;
 
+/**
+ * By default the debounce of the preview is collapsed so a param change updates the preview right
+ * away. Tests that need to act within the debounce window can opt in to the real implementation.
+ */
+export const mockDebounce = { useRealImplementation: false };
+
 const EDITOR_ID = 'testEditor';
+const MONACO_MODULE = '@kbn/monaco';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -26,7 +33,13 @@ jest.mock('@elastic/eui', () => {
         data-currentvalue={props.selectedOptions}
         value={props.selectedOptions[0]?.value}
         onChange={async (syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
+          const typedValue = syntheticEvent.target.value;
+          props.onChange([
+            syntheticEvent['0'] ?? {
+              value: typedValue,
+              label: typedValue,
+            },
+          ]);
         }}
       />
     ),
@@ -37,14 +50,16 @@ jest.mock('@elastic/eui', () => {
       onResize(data: { height: number }): void;
       children(): JSX.Element;
     }) => {
-      onResize({ height: 1000 });
+      mockUseEffect(() => {
+        onResize({ height: 1000 });
+      }, [onResize]);
       return children();
     },
   };
 });
 
-jest.mock('@kbn/monaco', () => {
-  const original = jest.requireActual('@kbn/monaco');
+jest.doMock(MONACO_MODULE, () => {
+  const original = jest.requireActual(MONACO_MODULE);
   const originalMonaco = original.monaco;
 
   return {
@@ -70,7 +85,13 @@ jest.mock('@kbn/monaco', () => {
 });
 
 jest.mock('react-use/lib/useDebounce', () => {
+  const originalUseDebounce = jest.requireActual('react-use/lib/useDebounce').default;
+
   return (cb: () => void, ms: number, deps: any[]) => {
+    if (mockDebounce.useRealImplementation) {
+      return originalUseDebounce(cb, ms, deps);
+    }
+
     mockUseEffect(() => {
       cb();
     }, deps);

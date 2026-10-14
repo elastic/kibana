@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
@@ -24,14 +24,16 @@ export const CancelButton: FunctionComponent<Props> = ({ onClick, compressed }) 
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const disabled = !uploading;
   return compressed ? (
-    <EuiButtonIcon
-      color="danger"
-      data-test-subj="cancelButtonIcon"
-      disabled={disabled}
-      iconType="cross"
-      aria-label={i18nTexts.cancel}
-      onClick={onClick}
-    />
+    <EuiToolTip content={i18nTexts.cancel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="danger"
+        data-test-subj="cancelButtonIcon"
+        disabled={disabled}
+        iconType="cross"
+        aria-label={i18nTexts.cancel}
+        onClick={onClick}
+      />
+    </EuiToolTip>
   ) : (
     <EuiButton
       color="danger"

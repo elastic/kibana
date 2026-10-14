@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sha256 } from 'js-sha256';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
@@ -17,16 +17,22 @@ import {
 } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
-import type { TelemetryEventsSender } from '../../telemetry/sender';
-import { createMockTelemetryEventsSender } from '../../telemetry/__mocks__';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { SyntheticsTelemetry } from '../../telemetry/synthetics_telemetry';
 
-import { MONITOR_UPDATE_CHANNEL, MONITOR_CURRENT_CHANNEL } from '../../telemetry/constants';
-
+import {
+  MONITOR_UPDATE_EVENT_TYPE,
+  MONITOR_CURRENT_EVENT_TYPE,
+  MONITOR_ERROR_EVENT_TYPE,
+} from '../../telemetry/constants';
+import { createHash } from 'crypto';
 import {
   formatTelemetryEvent,
   formatTelemetryUpdateEvent,
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
+  sendErrorTelemetryEvents,
 } from './monitor_upgrade_sender';
 
 const stackVersion = '8.2.0';
@@ -94,7 +100,7 @@ describe('monitor upgrade telemetry helpers', () => {
     });
     expect(actual).toEqual({
       stackVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
+      configId: createHash('sha256').update(testConfig.id).digest('hex'),
       locations: ['us_central', 'other'],
       locationsCount: 2,
       monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
@@ -132,7 +138,7 @@ describe('monitor upgrade telemetry helpers', () => {
       });
       expect(actual).toEqual({
         stackVersion,
-        configId: sha256.create().update(testConfig.id).hex(),
+        configId: createHash('sha256').update(testConfig.id).digest('hex'),
         locations: ['us_central', 'other'],
         locationsCount: 2,
         monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
@@ -159,7 +165,7 @@ describe('monitor upgrade telemetry helpers', () => {
     );
     expect(actual).toEqual({
       stackVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
+      configId: createHash('sha256').update(testConfig.id).digest('hex'),
       locations: ['us_central', 'other'],
       locationsCount: 2,
       monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
@@ -185,7 +191,7 @@ describe('monitor upgrade telemetry helpers', () => {
     );
     expect(actual).toEqual({
       stackVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
+      configId: createHash('sha256').update(testConfig.id).digest('hex'),
       locations: ['us_central', 'other'],
       locationsCount: 2,
       monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
@@ -203,28 +209,82 @@ describe('monitor upgrade telemetry helpers', () => {
 });
 
 describe('sendTelemetryEvents', () => {
-  let eventsTelemetryMock: jest.Mocked<TelemetryEventsSender>;
+  let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+  let telemetry: SyntheticsTelemetry;
   let loggerMock: jest.Mocked<Logger>;
 
   beforeEach(() => {
-    eventsTelemetryMock = createMockTelemetryEventsSender();
+    analyticsMock = coreMock.createSetup().analytics as jest.Mocked<AnalyticsServiceSetup>;
     loggerMock = loggingSystemMock.createLogger();
+    telemetry = new SyntheticsTelemetry(analyticsMock, loggerMock);
   });
 
-  it('should queue telemetry events with generic error', () => {
+  it('should report update and current events', () => {
     const event = formatTelemetryEvent({
       monitor: testConfig,
       stackVersion,
       isInlineScript: true,
       errors,
     });
-    sendTelemetryEvents(loggerMock, eventsTelemetryMock, event);
+    sendTelemetryEvents(loggerMock, telemetry, event);
 
-    expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith(MONITOR_UPDATE_CHANNEL, [
-      event,
-    ]);
-    expect(eventsTelemetryMock.queueTelemetryEvents).toHaveBeenCalledWith(MONITOR_CURRENT_CHANNEL, [
-      event,
-    ]);
+    expect(analyticsMock.reportEvent).toHaveBeenCalledWith(MONITOR_UPDATE_EVENT_TYPE, {
+      ...event,
+      issuedTo: undefined,
+    });
+    expect(analyticsMock.reportEvent).toHaveBeenCalledWith(MONITOR_CURRENT_EVENT_TYPE, {
+      ...event,
+      issuedTo: undefined,
+    });
+  });
+
+  it('logs instead of throwing when reporting fails', () => {
+    analyticsMock.reportEvent.mockImplementation(() => {
+      throw new Error('boom');
+    });
+    const event = formatTelemetryEvent({
+      monitor: testConfig,
+      stackVersion,
+      isInlineScript: true,
+    });
+
+    expect(() => sendTelemetryEvents(loggerMock, telemetry, event)).not.toThrow();
+    expect(loggerMock.error).toHaveBeenCalled();
+  });
+});
+
+describe('sendErrorTelemetryEvents', () => {
+  const errorEvent = { type: 'syncError', message: 'boom', stackVersion };
+  let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+  let telemetry: SyntheticsTelemetry;
+  const loggerMock = loggingSystemMock.createLogger() as jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    analyticsMock = coreMock.createSetup().analytics as jest.Mocked<AnalyticsServiceSetup>;
+    telemetry = new SyntheticsTelemetry(analyticsMock, loggerMock);
+  });
+
+  it('reports an error once and suppresses repeats within the throttle window', () => {
+    sendErrorTelemetryEvents(loggerMock, telemetry, errorEvent);
+    sendErrorTelemetryEvents(loggerMock, telemetry, errorEvent);
+
+    expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsMock.reportEvent).toHaveBeenCalledWith(MONITOR_ERROR_EVENT_TYPE, {
+      ...errorEvent,
+      issuedTo: undefined,
+    });
+  });
+
+  it('drops noisy errors without consuming the throttle', () => {
+    sendErrorTelemetryEvents(loggerMock, telemetry, {
+      ...errorEvent,
+      url: 'http://127.0.0.1:1',
+    });
+    sendErrorTelemetryEvents(loggerMock, telemetry, {
+      ...errorEvent,
+      message: 'Cannot sync monitors with the Synthetics service. License is expired.',
+    });
+
+    expect(analyticsMock.reportEvent).not.toHaveBeenCalled();
   });
 });

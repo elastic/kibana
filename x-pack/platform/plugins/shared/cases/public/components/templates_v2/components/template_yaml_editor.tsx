@@ -104,6 +104,11 @@ export const TemplateYamlEditorBase: React.FC<TemplateYamlEditorBaseProps> = ({
       onChange={onChange}
       width="100%"
       height="100%"
+      transparentBackground
+      // Opt into Monaco's built-in find widget (Cmd/Ctrl+F). The shared CodeEditor disables it by
+      // default — it rebinds Cmd/Ctrl+F to a no-op unless this is set — so without it the browser's
+      // native find runs over the whole page instead of searching the YAML. Matches the Workflows editor.
+      enableFindAction
       editorDidMount={handleEditorDidMount}
       options={YAML_EDITOR_OPTIONS}
     />

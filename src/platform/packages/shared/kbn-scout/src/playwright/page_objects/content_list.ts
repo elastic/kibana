@@ -142,7 +142,9 @@ export class ContentListWrapper {
     this.itemLinks = page.testSubj.locator('content-list-table-item-link');
     this.noResultsPanel = page.testSubj.locator('contentListNoResults');
     this.tableSelectAllCheckbox = page.testSubj.locator('checkboxSelectAll');
-    this.selectionBarDeleteButton = page.testSubj.locator('contentListSelectionBar-deleteButton');
+    this.selectionBarDeleteButton = page.testSubj.locator(
+      'contentListToolbar-selectionBar-deleteButton'
+    );
     this.deleteConfirmButton = page.testSubj.locator('confirmModalConfirmButton');
   }
 
@@ -187,6 +189,18 @@ export class ContentListWrapper {
       .locator('sortSelectOptions')
       .getByRole('option', { name: label })
       .click();
+  }
+
+  /**
+   * Open the tags filter popover and select the option for the given tag name.
+   *
+   * The subject is derived inline to mirror `getContentListTagOptionSubj` from
+   * `@kbn/content-list-common`; it isn't imported because `@kbn/scout` is on the
+   * Scout selective-testing critical path and must not depend on that package.
+   */
+  async selectTag(name: string) {
+    await this.tagsFilterButton.click();
+    await this.page.testSubj.locator(`tag-searchbar-option-${name.replace(' ', '_')}`).click();
   }
 
   /** Select all items via the table header checkbox and confirm the bulk-delete dialog. */

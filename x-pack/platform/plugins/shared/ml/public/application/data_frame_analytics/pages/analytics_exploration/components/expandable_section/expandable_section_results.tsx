@@ -342,17 +342,27 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
               }
             )}
             button={
-              <EuiButtonIcon
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.ml.dataframe.analytics.exploration.dataGridActions.showActionsAriaLabel',
                   {
                     defaultMessage: 'Show actions',
                   }
                 )}
-                iconType="gear"
-                color="text"
-                onClick={() => setIsPopoverVisible(!isPopoverVisible)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.dataGridActions.showActionsAriaLabel',
+                    {
+                      defaultMessage: 'Show actions',
+                    }
+                  )}
+                  iconType="gear"
+                  color="text"
+                  onClick={() => setIsPopoverVisible(!isPopoverVisible)}
+                />
+              </EuiToolTip>
             }
             closePopover={closePopover}
           >

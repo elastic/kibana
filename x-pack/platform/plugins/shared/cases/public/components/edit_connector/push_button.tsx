@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import * as i18n from './translations';
 
@@ -18,6 +18,11 @@ interface PushButtonProps {
   showTooltip: boolean;
   connectorName: string;
   pushToService: () => Promise<void>;
+  /**
+   * `empty` (default) matches the legacy text-link look. `outlined` renders a
+   * bordered button, matching the action buttons in the redesigned case header.
+   */
+  variant?: 'empty' | 'outlined';
 }
 
 const PushButtonComponent: React.FC<PushButtonProps> = ({
@@ -28,18 +33,36 @@ const PushButtonComponent: React.FC<PushButtonProps> = ({
   connectorName,
   showTooltip,
   pushToService,
+  variant = 'empty',
 }) => {
-  const button = (
-    <EuiButtonEmpty
-      data-test-subj="push-to-external-service"
-      iconType="download"
-      onClick={pushToService}
-      disabled={disabled}
-      isLoading={isLoading}
-    >
-      {hasBeenPushed ? i18n.UPDATE_INCIDENT(connectorName) : i18n.PUSH_INCIDENT(connectorName)}
-    </EuiButtonEmpty>
-  );
+  const buttonLabel = hasBeenPushed
+    ? i18n.UPDATE_INCIDENT(connectorName)
+    : i18n.PUSH_INCIDENT(connectorName);
+
+  const button =
+    variant === 'outlined' ? (
+      <EuiButton
+        data-test-subj="push-to-external-service"
+        size="s"
+        color="text"
+        iconType="download"
+        onClick={pushToService}
+        disabled={disabled}
+        isLoading={isLoading}
+      >
+        {buttonLabel}
+      </EuiButton>
+    ) : (
+      <EuiButtonEmpty
+        data-test-subj="push-to-external-service"
+        iconType="download"
+        onClick={pushToService}
+        disabled={disabled}
+        isLoading={isLoading}
+      >
+        {buttonLabel}
+      </EuiButtonEmpty>
+    );
 
   return showTooltip ? (
     <EuiToolTip

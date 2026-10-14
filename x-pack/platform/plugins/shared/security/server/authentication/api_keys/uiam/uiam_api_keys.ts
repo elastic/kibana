@@ -6,8 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
+import { timingSafeEqual } from 'crypto';
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   ConvertUiamAPIKeysResponse,
@@ -20,7 +21,9 @@ import type {
 
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
-import type { UiamServicePublic } from '../../../uiam';
+import { type UiamServicePublic, isExternalApiKey as userHasExternalApiKey } from '../../../uiam';
+import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
+import { toServiceAccountGrantError } from '../service_account_grant_error';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -29,6 +32,7 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   license: SecurityLicense;
   uiam: UiamServicePublic;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 /**
@@ -39,11 +43,13 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
+  private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 
-  constructor({ logger, license, uiam }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam, getCurrentUser }: UiamAPIKeysOptions) {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
+    this.getCurrentUser = getCurrentUser;
   }
 
   /**
@@ -78,7 +84,16 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
+      // External API keys must not carry client authentication (`null`). For other credentials,
+      // preserve the request's secret and only default to Kibana's for internally created requests.
+      const clientAuthentication = userHasExternalApiKey(this.getCurrentUser(request))
+        ? null
+        : getUiamClientAuthentication(request);
+      const { id, key, description } = await this.uiam?.grantApiKey(
+        authorization,
+        params,
+        clientAuthentication
+      );
 
       result = {
         id,
@@ -88,8 +103,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
       this.logger.debug('API key was granted successfully');
     } catch (e) {
-      this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-      throw e;
+      const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request));
+      // A refused service account is the caller's to fix, not a Kibana failure.
+      this.logger[serviceAccountError ? 'warn' : 'error'](
+        `Failed to grant API key: ${getDetailedErrorMessage(e)}`
+      );
+      throw serviceAccountError ?? e;
     }
 
     return result;
@@ -123,7 +142,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      await this.uiam?.revokeApiKey(id, authorization.credentials);
+      await this.uiam?.revokeApiKey(request, id);
 
       this.logger.debug(`API key ${id} was invalidated successfully`);
 
@@ -174,6 +193,25 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       this.logger.error(`Failed to convert API keys: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
+  }
+
+  /**
+   * Returns the header(s) trusted loopback callers stamp on real requests carrying an internal
+   * UIAM (`essu_`) credential (see {@link UiamAPIKeysType.getInternalCallerAttestationHeaders}).
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
+    return this.uiam.getInternalCallerAttestationHeaders(credential);
+  }
+
+  isOwnClientAuthentication(value: string): boolean {
+    const own = this.uiam.getClientAuthentication().value;
+    const presented = Buffer.from(value);
+    const expected = Buffer.from(own);
+    return presented.length === expected.length && timingSafeEqual(presented, expected);
+  }
+
+  isExternalApiKey(request: KibanaRequest): boolean {
+    return userHasExternalApiKey(this.getCurrentUser(request));
   }
 
   /**

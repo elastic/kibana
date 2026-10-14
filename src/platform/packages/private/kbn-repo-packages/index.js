@@ -39,22 +39,20 @@ const Jsonc = require('./utils/jsonc');
 const { getPluginPackagesFilter, getPluginSearchPaths } = require('./modern/plugins');
 const { readPackageJson } = require('./modern/parse_package_json');
 
-module.exports = {
-  Package,
-  readHashOfPackageMap,
-  readPackageMap,
-  getPackages,
-  getPkgDirMap,
-  getPkgsById,
-  updatePackageMap,
-  removePackagesFromPackageMap,
-  findPackageForPath,
-  readPackageManifest,
-  Jsonc,
-  getPluginPackagesFilter,
-  getPluginSearchPaths,
-  parseKbnImportReq,
-  getRepoRels,
-  getRepoRelsSync,
-  readPackageJson,
-};
+exports.Package = Package;
+exports.readHashOfPackageMap = readHashOfPackageMap;
+exports.readPackageMap = readPackageMap;
+exports.getPackages = getPackages;
+exports.getPkgDirMap = getPkgDirMap;
+exports.getPkgsById = getPkgsById;
+exports.updatePackageMap = updatePackageMap;
+exports.removePackagesFromPackageMap = removePackagesFromPackageMap;
+exports.findPackageForPath = findPackageForPath;
+exports.readPackageManifest = readPackageManifest;
+exports.Jsonc = Jsonc;
+exports.getPluginPackagesFilter = getPluginPackagesFilter;
+exports.getPluginSearchPaths = getPluginSearchPaths;
+exports.parseKbnImportReq = parseKbnImportReq;
+exports.getRepoRels = getRepoRels;
+exports.getRepoRelsSync = getRepoRelsSync;
+exports.readPackageJson = readPackageJson;

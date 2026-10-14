@@ -22,6 +22,7 @@ import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { DataSource } from '@kbn/data-source';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -177,7 +178,7 @@ export const Content = ({
   isSingleLine = false,
   row,
   shouldShowFieldHandler,
-  columnsMeta,
+  dataSource,
 }: ContentProps) => {
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
 
@@ -187,7 +188,7 @@ export const Content = ({
   const highlightedValue = useMemo(() => {
     if (!value) return undefined;
 
-    // Use field formatter's reactConvert which handles search highlighting natively
+    // Use field formatter's convertToReact which handles search highlighting natively
     const withSearchHighlights = formatFieldStringValueWithHighlights({
       value,
       hit: row.raw,
@@ -215,21 +216,15 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
     />
   );
 };
 
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
-  | 'columnId'
-  | 'dataView'
-  | 'fieldFormats'
-  | 'isCompressed'
-  | 'row'
-  | 'shouldShowFieldHandler'
-  | 'columnsMeta'
->;
+  'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
+> & { dataSource: DataSource | undefined };
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {
   const formattedRow = useMemo(() => formatJsonDocumentForContent(row), [row]);

@@ -1,0 +1,26 @@
+---
+# This file is used to generate "Automatic Import settings" page in the product docs
+# For the schema and an example refer to the automated settings reference:
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Automatic Import settings in Kibana
+id: automatic-import-settings
+page_description: |
+  Configure the following Automatic Import settings in the `kibana.yml` file.
+  Automatic Import helps you create new Elastic integrations using AI.
+
+groups:
+  - group: Automatic Import settings
+    id: automatic-import-settings
+    settings:
+
+      - setting: xpack.automatic_import.enabled
+        description: |
+          Set to `false` to disable the Automatic Import feature. Previously known as `xpack.integration_assistant.enabled`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 8.15
+          ech: ga
+          self: ga

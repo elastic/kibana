@@ -259,20 +259,29 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
    * @param streamIndex name of the data stream
    */
   async function deleteDataStream(streamIndex: string) {
+    // Tolerate 404s so teardown stays idempotent: a non-idempotent DELETE that
+    // gets retried at the transport level, or a partially-created stream, can
+    // leave any of these resources already gone.
     log.info(`Delete ${streamIndex} data stream index...`);
-    await es.indices.deleteDataStream({ name: streamIndex });
+    await es.indices.deleteDataStream({ name: streamIndex }, { ignore: [404] });
     // Uncomment only when needed
     // log.debug(`DELETE _data_stream/${streamIndex}`);
     log.info(`Delete ${streamIndex} index template...`);
-    await es.indices.deleteIndexTemplate({
-      name: `${streamIndex}_index_template`,
-    });
+    await es.indices.deleteIndexTemplate(
+      {
+        name: `${streamIndex}_index_template`,
+      },
+      { ignore: [404] }
+    );
     // Uncomment only when needed
     // log.debug(`DELETE _index_template/${streamIndex}-index-template`);
     log.info(`Delete ${streamIndex} data stream component template...`);
-    await es.cluster.deleteComponentTemplate({
-      name: `${streamIndex}_mapping`,
-    });
+    await es.cluster.deleteComponentTemplate(
+      {
+        name: `${streamIndex}_mapping`,
+      },
+      { ignore: [404] }
+    );
     // Uncomment only when needed
     // log.debug(`DELETE _component_template/${streamIndex}_mappings`);
   }

@@ -9,4 +9,5 @@ import { schema } from '@kbn/config-schema';
 
 export const deleteRuleParamsSchema = schema.object({
   id: schema.string(),
+  invalidateApiKeyNow: schema.maybe(schema.boolean()),
 });

@@ -199,18 +199,28 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           <EuiFlexItem grow={false}>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  iconType="info"
-                  color="text"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.cloudConnect.connectedServices.service.licenseInfoAriaLabel',
                     {
                       defaultMessage: 'License information',
                     }
                   )}
-                  onClick={toggleLicensePopover}
-                  data-test-subj="serviceCardLicenseInfoButton"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="info"
+                    color="text"
+                    aria-label={i18n.translate(
+                      'xpack.cloudConnect.connectedServices.service.licenseInfoAriaLabel',
+                      {
+                        defaultMessage: 'License information',
+                      }
+                    )}
+                    onClick={toggleLicensePopover}
+                    data-test-subj="serviceCardLicenseInfoButton"
+                  />
+                </EuiToolTip>
               }
               isOpen={isLicensePopoverOpen}
               closePopover={closeLicensePopover}
@@ -326,16 +336,23 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
     if (enabled) {
       const moreActionsButton = (
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          aria-label={i18n.translate('xpack.cloudConnect.connectedServices.service.moreActions', {
+        <EuiToolTip
+          content={i18n.translate('xpack.cloudConnect.connectedServices.service.moreActions', {
             defaultMessage: 'More actions',
           })}
-          size="s"
-          display="empty"
-          onClick={togglePopover}
-          isLoading={isLoading}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={i18n.translate('xpack.cloudConnect.connectedServices.service.moreActions', {
+              defaultMessage: 'More actions',
+            })}
+            size="s"
+            display="empty"
+            onClick={togglePopover}
+            isLoading={isLoading}
+          />
+        </EuiToolTip>
       );
 
       const menuItems = [

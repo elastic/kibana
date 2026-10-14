@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { DateNanosFormat } from './date_nanos_server';
 import type { FieldFormatsGetConfigFn } from '../../../common';
 
@@ -32,22 +33,22 @@ describe('Date Nanos Format: Server side edition', () => {
 
   test('should format according to the given timezone parameter', () => {
     const dateNy = new DateNanosFormat({ timezone: 'America/New_York' }, getConfig);
-    convert = dateNy.convert.bind(dateNy);
+    convert = dateNy.convertToText.bind(dateNy);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 10:04:56.201900001"`);
 
     const datePhx = new DateNanosFormat({ timezone: 'America/Phoenix' }, getConfig);
-    convert = datePhx.convert.bind(datePhx);
+    convert = datePhx.convertToText.bind(datePhx);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 07:04:56.201900001"`);
   });
 
   test('should format according to UTC if no timezone parameter is given or exists in settings', () => {
     const utcFormat = 'May 5th 2019, 14:04:56.201900001';
     const dateUtc = new DateNanosFormat({ timezone: 'UTC' }, getConfig);
-    convert = dateUtc.convert.bind(dateUtc);
+    convert = dateUtc.convertToText.bind(dateUtc);
     expect(convert(dateTime)).toBe(utcFormat);
 
     const dateDefault = new DateNanosFormat({}, getConfig);
-    convert = dateDefault.convert.bind(dateDefault);
+    convert = dateDefault.convertToText.bind(dateDefault);
     expect(convert(dateTime)).toBe(utcFormat);
   });
 
@@ -55,15 +56,22 @@ describe('Date Nanos Format: Server side edition', () => {
     mockConfig['dateFormat:tz'] = 'America/Phoenix';
 
     const date = new DateNanosFormat({}, getConfig);
-    convert = date.convert.bind(date);
+    convert = date.convertToText.bind(date);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 07:04:56.201900001"`);
+  });
+
+  test('should format missing values with the shared null label, like the client formatter', () => {
+    const date = new DateNanosFormat({ timezone: 'UTC' }, getConfig);
+    convert = date.convertToText.bind(date);
+    expect(convert(null)).toBe(NULL_LABEL);
+    expect(convert(undefined)).toBe(NULL_LABEL);
   });
 
   test('should defer to meta params for timezone, not the UI config', () => {
     mockConfig['dateFormat:tz'] = 'America/Phoenix';
 
     const date = new DateNanosFormat({ timezone: 'America/New_York' }, getConfig);
-    convert = date.convert.bind(date);
+    convert = date.convertToText.bind(date);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 10:04:56.201900001"`);
   });
 });

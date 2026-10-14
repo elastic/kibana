@@ -36,6 +36,7 @@ import {
   PREVIEW_SECTION,
 } from '../../../../screens/expandable_flyout/alert_details_preview_panel';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -48,6 +49,7 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       login();
       createRule({ ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } });

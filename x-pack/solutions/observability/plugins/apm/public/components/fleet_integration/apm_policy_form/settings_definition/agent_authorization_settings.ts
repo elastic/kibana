@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
+import { getIntegerSchema } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import { OPTIONAL_LABEL } from '../settings_form/utils';
 import type { SettingsRow } from '../typings';
 
@@ -52,7 +52,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
                 'Restrict number of unique API keys per minute, used for auth between APM Agents and Server.',
             }
           ),
-          validation: getIntegerRt({ min: 1 }),
+          validation: getIntegerSchema({ min: 1 }),
         },
       ],
     },
@@ -131,7 +131,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
                 'Number of unique client IPs for which a distinct rate limit will be maintained.',
             }
           ),
-          validation: getIntegerRt({ min: 1 }),
+          validation: getIntegerSchema({ min: 1 }),
         },
         {
           key: 'anonymous_rate_limit_event_limit',
@@ -149,7 +149,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
               defaultMessage: 'Maximum number of events per client IP per second.',
             }
           ),
-          validation: getIntegerRt({ min: 1 }),
+          validation: getIntegerSchema({ min: 1 }),
         },
       ],
     },

@@ -5,25 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 export function SimulatedFunctionCallingCallout() {
   return (
-    <EuiCallOut color="warning">
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiText size="s">
-            {i18n.translate('xpack.aiAssistant.simulatedFunctionCallingCalloutLabel', {
-              defaultMessage:
-                'Simulated function calling is enabled. You might see degraded performance.',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCallOut>
+    <KbnWarningCallout
+      title={i18n.translate('xpack.aiAssistant.simulatedFunctionCallingCalloutLabel', {
+        defaultMessage:
+          'Simulated function calling is enabled. You might see degraded performance.',
+      })}
+    />
   );
 }

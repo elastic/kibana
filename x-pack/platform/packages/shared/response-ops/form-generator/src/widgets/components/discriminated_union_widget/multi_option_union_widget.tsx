@@ -6,7 +6,16 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormFieldset,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   getDiscriminatorFieldValue,
@@ -41,7 +50,8 @@ import { SingleOptionUnionWidget } from './single_option_union_widget';
 const getDefaultOption = (
   options: DiscriminatedUnionWidgetProps['options'],
   discriminatorKey: string,
-  fieldConfig: DiscriminatedUnionWidgetProps['fieldConfig']
+  fieldConfig: DiscriminatedUnionWidgetProps['fieldConfig'],
+  getMeta: DiscriminatedUnionWidgetProps['meta']['getMeta']
 ) => {
   if (fieldConfig.defaultValue && typeof fieldConfig.defaultValue === 'object') {
     const defaultValue = fieldConfig.defaultValue as Record<string, any>;
@@ -53,7 +63,14 @@ const getDefaultOption = (
       return defaultOption;
     }
   }
-  return options[0];
+  // Never default to a legacy option (backwards-compat only) or a Kibana-managed one (set
+  // programmatically, nothing for a user to fill in).
+  return (
+    options.find((option) => {
+      const optionMeta = getMeta(option) as Record<string, unknown>;
+      return !Boolean(optionMeta.isLegacy) && !Boolean(optionMeta.isKibanaManaged);
+    }) ?? options[0]
+  );
 };
 
 /*
@@ -82,7 +99,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
 }) => {
   const { getMeta, setMeta } = meta;
   const [selectedOption, setSelectedOption] = useState(() => {
-    const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
+    const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig, getMeta);
     return getDiscriminatorFieldValue(defaultOption, discriminatorKey);
   });
 
@@ -124,7 +141,14 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const onChange = () => setSelectedOption(discriminatorValue);
         const optionMeta = getMeta(option);
         const label = optionMeta.label;
+        const isRecommended = Boolean((optionMeta as Record<string, unknown>).isRecommended);
+        const isLegacy = Boolean((optionMeta as Record<string, unknown>).isLegacy);
+        const isKibanaManaged = Boolean((optionMeta as Record<string, unknown>).isKibanaManaged);
         const isChecked = selectedOption === discriminatorValue;
+
+        // Neither is offered as a choice, but both still render while active so an existing
+        // connector's credentials stay viewable.
+        if ((isLegacy || isKibanaManaged) && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {
@@ -132,11 +156,55 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         }
         const isDisabled = getMeta(option).disabled;
 
+        // authMode is only present on auth-type unions (set by get_schema_for_auth_type,
+        // always one of 'per-user' | 'shared'). Other discriminated unions omit it, and
+        // any unexpected value falls through to no badge rather than a wrong label.
+        // Label + icon mirror the "Authentication" column in the Stack Management
+        // connectors list (triggers_actions_ui actions_connectors_list.tsx:
+        // authModePerUser = "Personal credentials", authModeShared = "Service account").
+        // Duplicated intentionally to avoid coupling this generic package to that plugin;
+        // keep the wording/icons in sync if either side changes.
+        const authMode = (optionMeta as Record<string, unknown>).authMode;
+        const authModeBadge =
+          authMode === 'per-user' ? (
+            <EuiBadge color="hollow" iconType="user">
+              {i18n.translate('responseOps.formGenerator.multiOptionUnionWidget.perUserAuthLabel', {
+                defaultMessage: 'Personal credentials',
+              })}
+            </EuiBadge>
+          ) : authMode === 'shared' ? (
+            <EuiBadge color="hollow" iconType="users">
+              {i18n.translate('responseOps.formGenerator.multiOptionUnionWidget.sharedAuthLabel', {
+                defaultMessage: 'Service account',
+              })}
+            </EuiBadge>
+          ) : null;
+
+        const cardLabel =
+          isRecommended || authModeBadge ? (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+              <EuiFlexItem grow={false}>{label as string}</EuiFlexItem>
+              {isRecommended && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="success">
+                    {i18n.translate(
+                      'responseOps.formGenerator.multiOptionUnionWidget.recommendedLabel',
+                      { defaultMessage: 'Recommended' }
+                    )}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+              {authModeBadge && <EuiFlexItem grow={false}>{authModeBadge}</EuiFlexItem>}
+            </EuiFlexGroup>
+          ) : (
+            (label as string)
+          );
+
         return (
           <React.Fragment key={discriminatorValue}>
             <EuiCheckableCard
               onChange={onChange}
-              label={label as string}
+              label={cardLabel}
               id={discriminatorValue}
               checked={isChecked}
               data-test-subj={`form-generator-field-${rootPath}-${discriminatorValue}`}

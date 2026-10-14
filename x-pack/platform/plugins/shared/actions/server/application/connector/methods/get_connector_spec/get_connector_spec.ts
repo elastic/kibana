@@ -42,10 +42,22 @@ export async function getConnectorSpecAsJsonSchema({
     const webhookSettings = configurationUtilities.getWebhookSettings();
     const isPfxEnabled = webhookSettings.ssl.pfx.enabled;
     const isEarsEnabled = configurationUtilities.isEarsEnabled();
-    const serialized = serializeConnectorSpec(spec, { isPfxEnabled, isEarsEnabled });
+    const isEarsExperimentalEnabled = configurationUtilities.isEarsExperimentalEnabled();
+    const serialized = serializeConnectorSpec(spec, {
+      isPfxEnabled,
+      isEarsEnabled,
+      isEarsExperimentalEnabled,
+    });
     return {
       metadata: serialized.metadata,
       schema: serialized.schema,
+      isTestable: Boolean(spec.test.enabled),
+      actions: Object.entries(spec.actions).map(([name, def]) => ({
+        name,
+        isTool: Boolean(def.isTool),
+        ...(def.description !== undefined ? { description: def.description } : {}),
+        ...(def.scope !== undefined ? { scope: def.scope } : {}),
+      })),
     };
   } catch (error) {
     throw new Error(

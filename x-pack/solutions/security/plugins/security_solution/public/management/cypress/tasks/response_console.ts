@@ -9,6 +9,7 @@ import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/
 import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
 import { loadPage } from './common';
+import { getTableRow as getEndpointListTableRow } from '../screens';
 import Chainable = Cypress.Chainable;
 
 export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
@@ -16,8 +17,16 @@ export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): voi
   closeAllToasts();
   cy.contains(endpointHostname).should('exist');
 };
-export const openResponseConsoleFromEndpointList = (): void => {
-  cy.getByTestSubj('endpointTableRowActions').first().click();
+export const openResponseConsoleFromEndpointList = (
+  /** If defined, will first find this host on the list then open its response console. If not, first item on the list os used */
+  hostName?: string
+): void => {
+  if (hostName) {
+    getEndpointListTableRow({ hostName }).findByTestSubj('endpointTableRowActions').click();
+  } else {
+    cy.getByTestSubj('endpointTableRowActions').first().click();
+  }
+
   cy.contains('Respond').click();
 };
 

@@ -17,6 +17,7 @@ This plugin provides cases management in Kibana
 
 - [Cases API](#cases-api)
 - [Cases UI](#cases-ui)
+- [Attachment framework](public/client/attachment_framework/README.md)
 
 ## Cases API
 
@@ -88,7 +89,7 @@ cases.getCases({
     read: true,
   },
   owner: ['securitySolution'],
-  features: { alerts: { sync: false }, metrics: ['alerts.count', 'lifespan'] }
+  features: { metrics: ['alerts.count', 'lifespan'] }
   timelineIntegration: {
     plugins: {
       parsingPlugin,
@@ -213,7 +214,6 @@ Arguments:
 | owner                                                                | `string[];` owner ids of the cases                                                                                                                                         |
 | basePath                                                             | `string;` path to mount the Cases router on top of                                                                                                                         |
 | disableAlerts?                                                       | `boolean` (default: false) flag to not show alerts information                                                                                                             |
-| actionsNavigation?                                                   | <code>CasesNavigation<string, 'configurable'></code>                                                                                                                       |
 | onComponentInitialized?                                              | `() => void;` callback when component has initialized                                                                                                                      |
 | features?                                                            | `CasesFeatures` object defining the features to enable/disable                                                                                                             |
 | features?.alerts.sync                                                | `boolean` (default: `true`) defines wether the alert sync action should be enabled/disabled                                                                                |

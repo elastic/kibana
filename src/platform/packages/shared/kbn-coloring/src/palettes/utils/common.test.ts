@@ -13,6 +13,7 @@ import {
   getDataMinMax,
   getPaletteStops,
   getStepValue,
+  isValueBasedPalette,
   remapStopsByNewInterval,
   reversePalette,
 } from './common';
@@ -351,5 +352,43 @@ describe('applyPaletteParams', () => {
       { color: 'blue', stop: 20 },
       { color: 'yellow', stop: 70 },
     ]);
+  });
+});
+
+describe('isValueBasedPalette', () => {
+  it('treats a named palette with a band count (and empty stops) as value-based', () => {
+    expect(
+      isValueBasedPalette({ type: 'palette', name: 'status', params: { stops: [], steps: 3 } })
+    ).toBe(true);
+  });
+
+  it('treats a named palette with params (even empty stops, no steps) as value-based', () => {
+    expect(isValueBasedPalette({ type: 'palette', name: 'status', params: { stops: [] } })).toBe(
+      true
+    );
+  });
+
+  it('treats a custom palette that carries params as value-based', () => {
+    expect(
+      isValueBasedPalette({ type: 'palette', name: 'custom', params: { stops: [], steps: 3 } })
+    ).toBe(true);
+  });
+
+  it('is false for a palette that carries no params', () => {
+    expect(isValueBasedPalette({ type: 'palette', name: 'status' })).toBe(false);
+  });
+
+  it('is true for any palette that carries explicit stops', () => {
+    expect(
+      isValueBasedPalette({
+        type: 'palette',
+        name: 'custom',
+        params: { stops: [{ color: 'r', stop: 1 }] },
+      })
+    ).toBe(true);
+  });
+
+  it('is false for an undefined palette', () => {
+    expect(isValueBasedPalette(undefined)).toBe(false);
   });
 });

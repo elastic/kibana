@@ -12,6 +12,7 @@ export {
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS,
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from './backfill';
+export * from './limits';
 export { PLUGIN } from './plugin';
 export { gapStatus, gapFillStatus } from './gap_status';
 export type { GapStatus, GapFillStatus } from './gap_status';

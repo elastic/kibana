@@ -24,7 +24,7 @@ import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { InspectedSloClientProvider } from './components/inspect/inspected_slo_client_provider';
-import { usePluginContext } from './hooks/use_plugin_context';
+import { useCompositeSloEnabled } from './hooks/use_composite_slo_enabled';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
 import type { ISloTelemetryClient } from './services/telemetry';
@@ -151,8 +151,8 @@ export const renderApp = ({
 };
 
 function App() {
-  const { experimentalFeatures } = usePluginContext();
-  const routes = getRoutes(experimentalFeatures);
+  const isCompositeSloEnabled = useCompositeSloEnabled();
+  const routes = getRoutes(isCompositeSloEnabled);
 
   return (
     <Routes enableExecutionContextTracking={true}>

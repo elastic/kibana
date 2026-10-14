@@ -1,0 +1,122 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        upgradeManagedIntegrationsDryRunRequestExample:
+          description: 'Preview the upgrade of managed integrations to their installed package version'
+          value:
+            policyIds:
+              - d52a7812-5736-4fdc-aed8-72152afa1ffa
+        upgradeManagedIntegrationsDryRunTargetVersionRequestExample:
+          description: 'Preview the upgrade against an explicit target package version (for example, before installing the new version). Defaults to the installed package version when omitted.'
+          value:
+            policyIds:
+              - d52a7812-5736-4fdc-aed8-72152afa1ffa
+            pkgVersion: 1.6.0
+responses:
+  200:
+    description: 'Indicates a successful response. Each clean item (`hasErrors: false`) previews the migrated policy as a consumable managed integration (`proposedPolicy`); a missing id, an id that is not a managed integration, or a migration error, is reported as a per-item failure (`hasErrors: true`, with `proposedPolicy` omitted) without failing the batch. Inspect every item.'
+    content:
+      application/json:
+        examples:
+          upgradeManagedIntegrationsDryRunResponseExample:
+            description: 'Example clean dry-run response (`hasErrors: false`) with the proposed (migrated) policy. `proposedPolicy` is intended for the edit-and-upgrade flow: edit it and submit the edited payload to the update (PUT) endpoint. To apply without edits, use the `_upgrade` endpoint instead.'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                hasErrors: false
+                currentVersion: 1.5.0
+                proposedVersion: 1.6.0
+                proposedPolicy:
+                  id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                  name: ess_billing-1
+                  description: test
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    title: Elasticsearch Service Billing
+                    version: 1.6.0
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      vars:
+                        organization_id: '1234'
+                  created_at: '2025-11-06T18:27:43.541Z'
+                  created_by: test_user
+                  updated_at: '2025-11-06T18:27:43.541Z'
+                  updated_by: test_user
+          upgradeManagedIntegrationsDryRunMigrationErrorsExample:
+            description: 'Example dry-run response where migrating the config to the new version produced errors. `hasErrors` is true and `errors` explains why; do not feed the (partial) proposed config into the update endpoint without resolving them.'
+            value:
+              - id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                name: ess_billing-1
+                hasErrors: true
+                currentVersion: 1.5.0
+                proposedVersion: 1.6.0
+                errors:
+                  - message: 'Variable "organization_id" is required'
+          upgradeManagedIntegrationsDryRunMixedResponseExample:
+            description: 'Example dry-run response for a mixed batch: one managed integration previews cleanly while two ids are missing or not managed integrations. Ids that are missing or not managed integrations are surfaced as per-item failures (`hasErrors: true` + `statusCode`) without failing the batch, and results stay in request order.'
+            value:
+              - id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                name: agentless_hello_world-16
+                hasErrors: false
+                currentVersion: 0.5.0
+                proposedVersion: 0.5.0
+                proposedPolicy:
+                  id: 2e426392-f856-4ab2-bc31-92d4dbb8d134
+                  name: agentless_hello_world-16
+                  description: ''
+                  namespace: default
+                  package:
+                    name: agentless_hello_world
+                    title: Agentless Hello World
+                    version: 0.5.0
+                  inputs:
+                    agentless_hello_world-cel:
+                      enabled: true
+                      streams:
+                        agentless_hello_world.generic:
+                          enabled: true
+                          vars:
+                            url: https://epr.elastic.co
+                        agentless_hello_world.mock_counter:
+                          enabled: false
+                          vars:
+                            mode: constant
+                            events_per_second: 10
+                            spike_events: 100
+                            spike_every_seconds: 60
+                    agentless_hello_world-httpjson:
+                      enabled: false
+                      streams:
+                        agentless_hello_world.generic:
+                          enabled: false
+                          vars:
+                            url: https://epr.elastic.co
+                  cloud_connector: null
+                  created_at: '2026-07-01T15:59:08.299Z'
+                  created_by: admin
+                  updated_at: '2026-07-01T16:02:14.067Z'
+                  updated_by: admin
+              - id: 9300464c-6cfc-4566-850d-e9e7927457fe
+                hasErrors: true
+                statusCode: 404
+                body:
+                  message: 'Agentless policy 9300464c-6cfc-4566-850d-e9e7927457fe not found'
+              - id: 5b8763e9-791a-4038-be29-b384d578200e
+                hasErrors: true
+                statusCode: 404
+                body:
+                  message: 'Agentless policy 5b8763e9-791a-4038-be29-b384d578200e not found'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

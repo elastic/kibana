@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type {
   ActionDetails,
@@ -47,7 +47,7 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
   },
 });
 
-const StyledEuiText = euiStyled(EuiText)`
+const StyledEuiText = styled(EuiText)`
   white-space: pre-wrap;
   line-break: anywhere;
 `;
@@ -55,7 +55,7 @@ const StyledEuiText = euiStyled(EuiText)`
 interface RunscriptActionOutputProps {
   content?: string | React.ReactNode;
   initialIsOpen?: boolean;
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
   type: 'error' | 'output';
   'data-test-subj'?: string;
 }
@@ -104,9 +104,13 @@ export interface RunscriptOutputProps {
   action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
   agentId: string;
   'data-test-subj'?: string;
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
+ * @deprecated
+ */
 export const RunscriptOutput = memo<RunscriptOutputProps>(
   ({ action, agentId, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
     const outputContent = useMemo(
@@ -116,7 +120,7 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
 
     if (!outputContent) {
       return (
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj={dataTestSubj}>
           <RunscriptActionNoOutput
             textSize={textSize}
             data-test-subj={`${dataTestSubj}-no-output`}
@@ -130,7 +134,7 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
 
     if (isFileTooLargeError) {
       return (
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj={dataTestSubj}>
           <EuiText size={textSize} data-test-subj={`${dataTestSubj}-file-too-large`}>
             {i18n.translate(
               'xpack.securitySolution.endpointResponseActions.runScriptAction.outputFileTooLargeMessage',
@@ -148,7 +152,7 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
     const hasStdOutput = stdout && stdout.length > 0;
 
     return (
-      <>
+      <div data-test-subj={dataTestSubj}>
         <EuiFlexItem>
           {hasErrorOutput && (
             <RunscriptOutputAccordion
@@ -172,7 +176,7 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
             </>
           )}
         </EuiFlexItem>
-      </>
+      </div>
     );
   }
 );

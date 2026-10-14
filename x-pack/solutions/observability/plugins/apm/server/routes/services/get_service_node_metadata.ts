@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import type { ServiceNodeMetadataResponse } from '@kbn/apm-api-shared';
 import { HOST_NAME, CONTAINER_ID } from '../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
@@ -13,11 +14,6 @@ import { environmentQuery, serviceNodeNameQuery } from '../../../common/utils/en
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import type { RollupInterval } from '../../../common/rollup';
-
-export interface ServiceNodeMetadataResponse {
-  host: string | number;
-  containerId: string | number;
-}
 
 export async function getServiceNodeMetadata({
   kuery,

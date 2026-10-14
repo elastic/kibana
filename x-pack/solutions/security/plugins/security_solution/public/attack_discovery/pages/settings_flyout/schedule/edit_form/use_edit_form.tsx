@@ -47,6 +47,7 @@ export interface UseEditForm {
 export interface UseEditFormProps {
   isLoading: boolean;
   initialValue?: AttackDiscoveryScheduleSchema;
+  isWorkflowsEnabled?: boolean;
   onFormMutated?: () => void;
   onSave?: (scheduleData: AttackDiscoveryScheduleSchema) => void;
   saveButtonTitle?: string;
@@ -56,6 +57,7 @@ export const useEditForm = (props: UseEditFormProps): UseEditForm => {
   const {
     initialValue = defaultInitialValue,
     isLoading,
+    isWorkflowsEnabled,
     onFormMutated,
     onSave,
     saveButtonTitle,
@@ -92,9 +94,14 @@ export const useEditForm = (props: UseEditFormProps): UseEditForm => {
       );
     }
     return (
-      <EditForm initialValue={initialValue} onChange={setFormState} onFormMutated={onFormMutated} />
+      <EditForm
+        initialValue={initialValue}
+        isWorkflowsEnabled={isWorkflowsEnabled}
+        onChange={setFormState}
+        onFormMutated={onFormMutated}
+      />
     );
-  }, [initialValue, isLoading, onFormMutated]);
+  }, [initialValue, isLoading, isWorkflowsEnabled, onFormMutated]);
 
   const actionButtons = useMemo(() => {
     return (

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Sentinel components for both dashboards and rules
-  version: 'not applicable'
+  version: "not applicable"
 paths: {}
 components:
   x-codegen-enabled: true
@@ -11,3 +11,69 @@ components:
       description: The type of the resource
       enum:
         - watchlist
+
+    SentinelWatchlistResource:
+      type: object
+      description: A Microsoft Sentinel watchlist ARM template resource
+      required:
+        - properties
+      properties:
+        id:
+          type: string
+          description: The ARM resource identifier
+        name:
+          type: string
+          description: The ARM resource name
+        type:
+          type: string
+          description: The ARM resource type
+          example: Microsoft.OperationalInsights/workspaces/providers/Watchlists
+        properties:
+          type: object
+          description: The Sentinel watchlist properties
+          required:
+            - watchlistAlias
+            - rawContent
+          properties:
+            watchlistAlias:
+              type: string
+              minLength: 1
+              description: The Sentinel watchlist alias
+            rawContent:
+              type: string
+              description: The raw CSV content for the watchlist
+            itemsSearchKey:
+              type: string
+              description: The watchlist search key column name
+            numberOfLinesToSkip:
+              type: integer
+              description: The number of raw content lines to skip
+            source:
+              type: string
+              description: The source file name
+            contentType:
+              type: string
+              description: The source content type
+
+    SentinelWatchlistTemplate:
+      type: object
+      description: A Microsoft Sentinel watchlist ARM deployment template
+      required:
+        - resources
+      properties:
+        $schema:
+          type: string
+          description: The ARM deployment template schema
+        contentVersion:
+          type: string
+          description: The ARM deployment template content version
+        parameters:
+          type: object
+          additionalProperties: true
+          description: The ARM deployment template parameters
+        resources:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: "#/components/schemas/SentinelWatchlistResource"

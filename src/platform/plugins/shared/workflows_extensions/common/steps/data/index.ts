@@ -28,6 +28,9 @@ export {
 export {
   DataMapStepTypeId,
   dataMapStepCommonDefinition,
+  DEFAULT_INDEX_BINDING,
+  DEFAULT_ITEM_BINDING,
+  MAP_BINDING_IDENTIFIER_REGEX,
   MAP_DIRECTIVE,
   type FieldsNode,
   type MapDirectiveValue,

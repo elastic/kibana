@@ -41,8 +41,8 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
   );
 
   const onUpdateFailure = useCallback(
-    (error: Error) => {
-      addError(error.message, { title: i18n.UPDATE_ALERT_TAGS_FAILURE });
+    (error: unknown) => {
+      addError(error, { title: i18n.UPDATE_ALERT_TAGS_FAILURE });
     },
     [addError]
   );

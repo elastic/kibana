@@ -5,15 +5,5 @@
  * 2.0.
  */
 
-export enum MobileProperty {
-  Device = 'device',
-  NetworkConnectionType = 'netConnectionType',
-  OsVersion = 'osVersion',
-  AppVersion = 'appVersion',
-}
-
-export type MobilePropertyType =
-  | MobileProperty.Device
-  | MobileProperty.OsVersion
-  | MobileProperty.AppVersion
-  | MobileProperty.NetworkConnectionType;
+export { MobileProperty } from '@kbn/apm-types';
+export type { MobilePropertyType } from '@kbn/apm-types';

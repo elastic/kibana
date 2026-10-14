@@ -20,6 +20,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   allow_multiple_system_actions: allowMultipleSystemActions,
   description,
   is_experimental: isExperimental,
+  is_testable: isTestable,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
@@ -32,6 +33,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   allowMultipleSystemActions,
   description,
   isExperimental,
+  isTestable,
   ...res,
 });
 

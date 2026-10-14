@@ -114,21 +114,23 @@ describe('RuleSwitch', () => {
     });
   });
 
-  test('it calls "setLoadingRules" if in rules table context', async () => {
+  test('it calls "setLoadingRules" if in rules table context', () => {
     const rulesTableContext = useRulesTableContextMock.create();
     (useRulesTableContextOptional as jest.Mock).mockReturnValue(rulesTableContext);
+    // Keeps the bulk action in flight, so the component's loading state is not
+    // reset after the assertion below, outside of `act(...)`.
+    (performBulkAction as jest.Mock).mockReturnValue(new Promise(() => {}));
 
     const wrapper = mount(<RuleSwitchComponent enabled isDisabled={false} id={'7'} />, {
       wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
     wrapper.find('[data-test-subj="ruleSwitch"]').at(2).simulate('click');
 
-    await waitFor(() => {
-      wrapper.update();
-      expect(rulesTableContext.actions.setLoadingRules).toHaveBeenCalledWith({
-        ids: ['7'],
-        action: 'disable',
-      });
+    // `setLoadingRules` is called synchronously by the click handler, before its
+    // first `await`, so this needs no asynchronous wait to observe.
+    expect(rulesTableContext.actions.setLoadingRules).toHaveBeenCalledWith({
+      ids: ['7'],
+      action: 'disable',
     });
   });
 });

@@ -122,21 +122,31 @@ export const SubPanelHeading = ({ className, onGoBack, children }: SubPanelHeadi
   );
 };
 
+interface PanelBodyProps extends PanelSpacingProps, PanelCommonProps {
+  /**
+   * Make the body a flex column so a single child can fill the available height (and scroll
+   * within it) instead of relying on a fixed height. Used by the calendar panel.
+   * @default false
+   */
+  fill?: boolean;
+}
+
 /**
  * Scrollable body section of a panel. Sits between `PanelHeader` and `PanelFooter`.
  * Will fill the vertical space (flew-grow: 1), and can scroll.
  */
 export const PanelBody = ({
   spacingSide = 'inline',
+  fill = false,
   className,
   children,
-}: PanelSpacingProps & PanelCommonProps) => {
+}: PanelBodyProps) => {
   const euiThemeContext = useEuiTheme();
   const styles = panelBodyStyles(euiThemeContext);
   const spacing = panelSpacingStyles(euiThemeContext);
 
   return (
-    <div css={[styles.root, spacing[spacingSide]]} className={className}>
+    <div css={[styles.root, fill && styles.fill, spacing[spacingSide]]} className={className}>
       {children}
     </div>
   );
@@ -284,7 +294,7 @@ export const PanelNavItem = ({
           {icon && <EuiIcon type={icon} size="m" aria-hidden="true" />}
           {children}
         </span>
-        <EuiIcon type="arrowRight" size="m" color="subdued" aria-hidden="true" />
+        <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden="true" />
       </button>
     </li>
   );

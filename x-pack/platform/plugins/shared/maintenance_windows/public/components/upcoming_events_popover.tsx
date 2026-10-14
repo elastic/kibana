@@ -18,6 +18,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   formatDate,
 } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -72,15 +73,17 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
       <EuiPopover
         aria-label={i18n.UPCOMING_EVENTS_POPOVER_ARIA_LABEL}
         button={
-          <EuiButtonIcon
-            data-test-subj="upcoming-events-icon-button"
-            color="text"
-            display="base"
-            iconType="calendar"
-            size="s"
-            aria-label="Upcoming events"
-            onClick={onButtonClick}
-          />
+          <EuiToolTip content="Upcoming events" disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="upcoming-events-icon-button"
+              color="text"
+              display="base"
+              iconType="calendar"
+              size="s"
+              aria-label="Upcoming events"
+              onClick={onButtonClick}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -111,7 +114,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
                 css={{ width: '300px' }}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color="subdued" type="calendar" />
+                  <EuiIcon color="subdued" type="calendar" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="s">

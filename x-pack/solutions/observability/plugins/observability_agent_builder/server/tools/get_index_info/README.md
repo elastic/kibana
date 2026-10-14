@@ -16,7 +16,9 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
-Use data streams for targeted field discovery (e.g., `metrics-system.memory-*` for memory fields).
+Use data streams for targeted field discovery (e.g., `metrics-system.memory-*` for memory fields, or Elastic Streams names like `logs.ecs.nginx`).
+
+`get-index-patterns` discovers classic Fleet/APM data streams (`logs-*`, `metrics-*`) and Elastic Streams dot-hierarchy data streams (`logs.*`, `metrics.*`, `traces.*`).
 
 ### 2. `list-fields` — Fields in an Index
 

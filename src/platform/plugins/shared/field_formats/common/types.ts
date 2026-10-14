@@ -13,17 +13,21 @@ import type { FieldFormat } from './field_format';
 import type { FieldFormatsRegistry } from './field_formats_registry';
 
 /**
- * Content type for string-based field format converters.
- * @public
- */
-export type FieldFormatsContentType = 'text';
-
-/**
  * React converter options
  */
+export interface FieldFormatHighlightTags {
+  preTag: string;
+  postTag: string;
+}
+
+export interface ReactContextTypeHit {
+  highlight?: Record<string, string[]>;
+  inline_highlights?: Record<string, FieldFormatHighlightTags>;
+}
+
 export interface ReactContextTypeOptions {
   field?: { name: string };
-  hit?: { highlight?: Record<string, string[]> };
+  hit?: ReactContextTypeHit;
   skipFormattingInStringifiedJSON?: boolean;
 }
 
@@ -35,18 +39,18 @@ export type ReactContextTypeConvert = (value: any, options?: ReactContextTypeOpt
 
 /**
  * Single-value React node converter. Like {@link ReactContextTypeConvert} but explicitly
- * excludes arrays — use this for `reactConvertSingle` overrides so that callers cannot
+ * excludes arrays — use this for `reactConvert` overrides so that callers cannot
  * accidentally pass an array where only scalar values are expected.
  * @public
  */
-export type ReactContextTypeSingleConvert = (
+export type ReactConvertFunction = (
   value: string | number | boolean | null | undefined | Record<string, unknown>,
   options?: ReactContextTypeOptions
 ) => ReactNode;
 
 /**
  * Plain text converter options
- * @remark
+ * @remarks
  */
 export interface TextContextTypeOptions {
   skipFormattingInStringifiedJSON?: boolean;
@@ -58,17 +62,6 @@ export interface TextContextTypeOptions {
  * @public
  */
 export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
-
-/**
- * Converter function
- * @public
- */
-export type FieldFormatConvertFunction = TextContextTypeConvert;
-
-/** @public **/
-export interface FieldFormatConvert {
-  text: TextContextTypeConvert;
-}
 
 /** @public **/
 export enum FIELD_FORMAT_IDS {
@@ -111,7 +104,7 @@ export type FieldFormatConfig = {
  * should only be used in scenarios where async access to uiSettings is
  * not possible.
  *
- @public
+ * @public
  */
 export type FieldFormatsGetConfigFn<T extends Serializable = Serializable> = (
   key: string,
@@ -121,7 +114,7 @@ export type FieldFormatsGetConfigFn<T extends Serializable = Serializable> = (
 export type IFieldFormat = FieldFormat;
 
 /**
- * @string id type is needed for creating custom converters.
+ * The `string` union member allows creating custom converter IDs beyond the built-in enum.
  */
 export type FieldFormatId = FIELD_FORMAT_IDS | string;
 

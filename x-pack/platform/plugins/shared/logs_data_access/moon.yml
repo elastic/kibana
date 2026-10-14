@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/logs-data-access-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-exploration-team'
+  defaultOwner: '@elastic/obs-signals-logs-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/logs-data-access-plugin'
   description: Moon project for @kbn/logs-data-access-plugin
   channel: ''
-  owner: '@elastic/obs-exploration-team'
+  owner: '@elastic/obs-signals-logs-team'
   sourceRoot: x-pack/platform/plugins/shared/logs_data_access
 dependsOn:
   - '@kbn/core'

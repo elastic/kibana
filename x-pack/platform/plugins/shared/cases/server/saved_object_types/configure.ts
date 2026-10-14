@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
@@ -71,6 +72,10 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       owner: {
         type: 'keyword',
       },
+      workflowTags: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
       /*
       updated_at: {
         type: 'date',
@@ -95,4 +100,28 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: configureMigrations,
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: (attrs) => attrs,
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            // Allows existence/cardinality aggregations over workflow tag configurations in telemetry.
+            workflowTags: { type: 'keyword', ignore_above: 1024 },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: (attrs) => attrs,
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+  },
 };

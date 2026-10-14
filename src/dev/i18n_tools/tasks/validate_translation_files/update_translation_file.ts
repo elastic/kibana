@@ -19,12 +19,14 @@ interface TranslationFileDetails {
   namespacedTranslatedMessages: GroupedMessagesByNamespace;
   targetFilePath: string;
   formats?: Formats;
+  locale?: string;
 }
 
 export async function updateTranslationFile({
   namespacedTranslatedMessages,
   formats,
   targetFilePath,
+  locale,
 }: TranslationFileDetails) {
   try {
     const sortedMessages = [...namespacedTranslatedMessages.values()]
@@ -37,7 +39,7 @@ export async function updateTranslationFile({
       })
       .sort(({ id: key1 }, { id: key2 }) => key1.localeCompare(key2));
 
-    const fileJsonContent = serializeToJson(sortedMessages, formats);
+    const fileJsonContent = serializeToJson(sortedMessages, formats, locale);
     await writeFileAsync(makeAbsolutePath(targetFilePath), fileJsonContent);
   } catch (err) {
     throw err;

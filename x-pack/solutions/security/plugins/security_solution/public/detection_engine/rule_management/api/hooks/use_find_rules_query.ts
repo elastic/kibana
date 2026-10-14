@@ -13,8 +13,8 @@ import type { RuleResponse, WarningSchema } from '../../../../../common/api/dete
 import type { SortOrder } from '../../../../../common/api/detection_engine/model/sorting.gen';
 import type {
   FindRulesSortField,
+  GranularRulesFilter,
   SearchRulesAggregations,
-  SearchRulesField,
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
 } from '../../../../../common/api/detection_engine/rule_management';
@@ -24,8 +24,8 @@ import { fetchSearchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export interface FindRulesQueryArgs {
-  fields?: SearchRulesField[];
-  filter?: string;
+  fields?: string[];
+  filter?: GranularRulesFilter;
   search?: GranularRulesSearch;
   sort_field?: FindRulesSortField;
   sort_order?: SortOrder;

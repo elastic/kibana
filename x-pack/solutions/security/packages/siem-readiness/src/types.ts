@@ -98,6 +98,16 @@ export interface PipelineStats {
   failedDocsCount: number;
   /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
   statsAvailable: boolean;
+  categories?: string[];
+  // Volume / silence health — null means "insufficient history or no events ever"
+  lastEventMs?: number | null;
+  silenceMs?: number | null;
+  isSilent?: boolean;
+  /** Doc count for yesterday (the most recent complete day); the in-progress current day is excluded. */
+  lastFullDayDocs?: number | null;
+  baseline7dAvg?: number | null;
+  /** Clamped to [0, ∞) — negative means volume spike (not a drop). */
+  volumeDropPct?: number | null;
 }
 export interface CasesSearchResponse {
   total: number;
@@ -122,4 +132,89 @@ export interface RetentionInfo {
 
 export interface RetentionResponse {
   items: RetentionInfo[];
+}
+
+export type VisibilityStatus = 'healthy' | 'actionsRequired' | 'noData';
+
+export interface IndexDocCount {
+  index: string;
+  docCount: number;
+  exists: boolean;
+  error?: string;
+}
+
+// Blast radius types for finding enrichment
+export type FindingSeverity = 'CRITICAL' | 'WARNING' | 'INFORMATIONAL';
+
+/** Finding sub-type — currently only emitted by the Continuity dimension. */
+export type ContinuityFindingType =
+  | 'pipeline_failure'
+  | 'silence'
+  | 'volume_drop_warning'
+  | 'volume_drop_critical';
+
+export interface AffectedRule {
+  id: string;
+  name: string;
+}
+
+export interface AffectedTactic {
+  id: string;
+  name: string;
+  totalRules: number;
+  affectedRulesCount: number;
+}
+
+export interface RecommendedAction {
+  label: string;
+  href: string;
+}
+
+export interface ActionableFinding {
+  category?: MainCategories;
+  severity: FindingSeverity;
+  message: string;
+  resource: string;
+  type?: ContinuityFindingType;
+  affectedRules?: AffectedRule[];
+  affectedTactics?: AffectedTactic[];
+  affectedPlatform?: string;
+  recommendedActions?: RecommendedAction[];
+  /**
+   * Indicates the reliability of the blast-radius fields on this finding.
+   * - 'healthy': blast radius is complete and trustworthy.
+   * - 'unavailable': a lookup that this dimension depends on failed entirely (e.g. pipeline map
+   *   for continuity, category map for coverage). The affected* fields are intentionally omitted.
+   * - 'partial': at least one rule's index resolution failed, so affectedRules/Tactics may be
+   *   undercounted.
+   */
+  blastRadiusStatus?: 'healthy' | 'partial' | 'unavailable';
+}
+
+export interface CoveragePayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: CategoryGroup[];
+  actionableFindings: ActionableFinding[];
+}
+
+export interface QualityPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: DataQualityResultDocument[];
+  actionableFindings: ActionableFinding[];
+}
+
+export interface ContinuityPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: PipelineStats[];
+  actionableFindings: ActionableFinding[];
+}
+
+export interface RetentionPayload {
+  status: VisibilityStatus;
+  summary: string;
+  items: RetentionInfo[];
+  actionableFindings: ActionableFinding[];
 }

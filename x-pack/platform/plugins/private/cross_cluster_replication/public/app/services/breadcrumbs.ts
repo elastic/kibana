@@ -12,10 +12,26 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 export type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
-let setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+let setChromeBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 
 export const init = (_setBreadcrumbs: SetBreadcrumbs): void => {
-  setBreadcrumbs = _setBreadcrumbs;
+  setChromeBreadcrumbs = _setBreadcrumbs;
+};
+
+export const setBreadcrumbs = (crumbs: ChromeBreadcrumb[]): void => {
+  if (crumbs.length === 0) {
+    setChromeBreadcrumbs(crumbs);
+    return;
+  }
+  const newCrumbs = [...crumbs];
+  // Pop off last breadcrumb
+  const lastBreadcrumb = newCrumbs.pop()!;
+  // Put last breadcrumb back without href so it's not clickable
+  newCrumbs.push({
+    ...lastBreadcrumb,
+    href: undefined,
+  });
+  setChromeBreadcrumbs(newCrumbs);
 };
 
 export const listBreadcrumb = (section?: string) => {
@@ -38,5 +54,3 @@ export const editBreadcrumb = {
     defaultMessage: 'Edit',
   }),
 };
-
-export { setBreadcrumbs };

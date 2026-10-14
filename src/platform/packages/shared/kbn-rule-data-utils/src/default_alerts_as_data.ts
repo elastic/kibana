@@ -160,6 +160,11 @@ const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
 
 const ALERT_MUTED = `${ALERT_NAMESPACE}.muted` as const;
 
+const ALERT_SNOOZED = `${ALERT_NAMESPACE}.snoozed` as const;
+
+// kibana.alert.tracked - whether this alert is currently tracked for the next execution
+const ALERT_TRACKED = `${ALERT_NAMESPACE}.tracked` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -218,6 +223,8 @@ export const fields = {
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,
+  ALERT_SNOOZED,
+  ALERT_TRACKED,
 };
 
 export {
@@ -278,6 +285,8 @@ export {
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,
+  ALERT_SNOOZED,
+  ALERT_TRACKED,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-doc-links-browser-mocks'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

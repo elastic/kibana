@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/response-stream-plugin",
-  "owner": "@elastic/ml-ui",
+  "owner": "@elastic/search-ml-ux",
   "group": "platform",
   "visibility": "private",
   "plugin": {

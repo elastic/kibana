@@ -6,6 +6,7 @@
  */
 
 import type { AlertsRagExample } from '../dataset';
+import { ALERTS_RAG_EMPTY_SPACE_ID } from '../ensure_empty_alerts_space';
 
 /**
  * Alerts RAG regression dataset.
@@ -14,6 +15,8 @@ import type { AlertsRagExample } from '../dataset';
  * (`/api/agent_builder/converse`). Alerts in the eval cluster come from the
  * shared security-alerts GCS snapshot — the same one the Attack Discovery
  * suite uses — restored before the suite runs by `restoreAlertsSnapshot`.
+ * Space-isolation examples instead converse in `alerts-rag-empty`, which has
+ * no alerts alias, while default still holds the snapshot.
  *
  * Reference answers are phrased to be data-agnostic (they describe the
  * shape of a correct response — prioritisation guidance, host/user listing,
@@ -107,5 +110,18 @@ export const alertsRagDataset: AlertsRagExample[] = [
       tool_sequence: [SECURITY_ALERTS_TOOL],
     },
     metadata: { category: 'single_alert_query', dataset_split: ['base'] },
+  },
+  {
+    input: 'How many security alerts do I have in the last 24 hours?',
+    expected: {
+      reference:
+        'Report that there are 0 security alerts in the current Kibana space because that space has no alerts index yet. The answer must state a zero count (or equivalent "no alerts") and must not invent a non-zero total or cite alerts from another space such as default.',
+      tool_sequence: [SECURITY_ALERTS_TOOL],
+    },
+    metadata: {
+      category: 'space_isolation',
+      dataset_split: ['base'],
+      spaceId: ALERTS_RAG_EMPTY_SPACE_ID,
+    },
   },
 ];

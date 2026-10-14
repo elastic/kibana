@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/elastic-agent-condition-language'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/fleet'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/elastic-agent-condition-language'
   description: Moon project for @kbn/elastic-agent-condition-language
   channel: ''
-  owner: '@elastic/fleet'
+  owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/packages/shared/kbn-elastic-agent-condition-language
 dependsOn: []
 tags:

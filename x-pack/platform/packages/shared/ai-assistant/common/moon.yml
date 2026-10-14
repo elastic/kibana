@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ai-assistant-common'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ai-assistant-common'
   description: Moon project for @kbn/ai-assistant-common
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/ai-assistant/common
 dependsOn:
   - '@kbn/core-capabilities-common'

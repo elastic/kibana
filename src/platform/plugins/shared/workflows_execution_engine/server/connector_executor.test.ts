@@ -9,6 +9,7 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { WORKFLOWS_NOTIFICATION_REQUESTER_ID } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { ConnectorExecutor } from './connector_executor';
 
@@ -158,6 +159,80 @@ describe('ConnectorExecutor', () => {
         actionId: connectorId,
         params: input,
         signal: testAbortController.signal,
+      });
+    });
+
+    it('should execute email connectors as notification-sourced actions', async () => {
+      const connectorId = 'email-connector-id';
+      const expectedResult: ActionTypeExecutorResult<unknown> = {
+        status: 'ok',
+        actionId: connectorId,
+        data: undefined,
+      };
+
+      mockActionsClient.get.mockResolvedValue({
+        id: connectorId,
+        name: 'stakeholder-email',
+        actionTypeId: '.email',
+      } as ConnectorWithExtraFindData);
+      mockActionsClient.execute.mockResolvedValue(expectedResult);
+
+      await connectorExecutor.execute({
+        connectorType: 'email',
+        connectorNameOrId: connectorId,
+        input: {
+          to: ['ops@example.com'],
+          subject: 'Daily CSV report',
+          message: 'Attached is the generated report.',
+          messageHTML: '<p>Attached is the generated report.</p>',
+          attachments: [{ filename: 'report.csv', content: 'host,risk\nhost-1,high\n' }],
+        },
+        abortController,
+      });
+
+      expect(mockActionsClient.execute).toHaveBeenCalledWith({
+        actionId: connectorId,
+        params: expect.objectContaining({
+          messageHTML: '<p>Attached is the generated report.</p>',
+          attachments: [{ filename: 'report.csv', content: 'host,risk\nhost-1,high\n' }],
+        }),
+        signal: abortController.signal,
+        source: {
+          type: 'NOTIFICATION',
+          source: {
+            requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID,
+            connectorId,
+          },
+        },
+      });
+    });
+
+    it('should not set notification source for non-email connectors', async () => {
+      const connectorId = 'slack-connector-id';
+      const expectedResult: ActionTypeExecutorResult<unknown> = {
+        status: 'ok',
+        actionId: connectorId,
+        data: undefined,
+      };
+
+      mockActionsClient.get.mockResolvedValue({
+        id: connectorId,
+        name: 'team-slack',
+        actionTypeId: '.slack',
+      } as ConnectorWithExtraFindData);
+      mockActionsClient.execute.mockResolvedValue(expectedResult);
+
+      await connectorExecutor.execute({
+        connectorType: 'slack',
+        connectorNameOrId: connectorId,
+        input: { text: 'hi' },
+        abortController,
+      });
+
+      expect(mockActionsClient.execute).toHaveBeenCalledWith({
+        actionId: connectorId,
+        params: { text: 'hi' },
+        signal: abortController.signal,
       });
     });
 

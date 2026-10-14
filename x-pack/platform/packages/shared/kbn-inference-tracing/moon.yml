@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-tracing'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/inference-tracing'
   description: Moon project for @kbn/inference-tracing
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/kbn-inference-tracing
 dependsOn:
   - '@kbn/inference-tracing-config'

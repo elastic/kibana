@@ -18,6 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
+  /**
+   * Purpose: Legacy input control chaining smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('chained controls', function () {
     this.tags('includeFirefox');
 
@@ -52,11 +57,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visEditor.inputControlSubmit();
 
-      const hasParentControlFilter = await filterBar.hasFilter('geo.src', 'BR');
-      expect(hasParentControlFilter).to.equal(true);
+      await filterBar.expectFilter('geo.src', 'BR');
 
-      const hasChildControlFilter = await filterBar.hasFilter('clientip', '14.61.182.136');
-      expect(hasChildControlFilter).to.equal(true);
+      await filterBar.expectFilter('clientip', '14.61.182.136');
     });
 
     it('should clear child control dropdown when parent control value is removed', async () => {

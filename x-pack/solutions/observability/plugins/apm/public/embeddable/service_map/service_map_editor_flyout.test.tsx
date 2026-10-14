@@ -150,6 +150,12 @@ describe('<ServiceMapEditorFlyout/>', () => {
           environment: ENVIRONMENT_ALL.value,
           kuery: undefined,
           service_name: undefined,
+          sync_with_dashboard_filters: false,
+          alert_status_filter: undefined,
+          slo_status_filter: undefined,
+          connection_filter: undefined,
+          anomaly_severity_filter: undefined,
+          map_orientation: 'horizontal',
         });
       });
     });
@@ -169,6 +175,12 @@ describe('<ServiceMapEditorFlyout/>', () => {
           environment: ENVIRONMENT_ALL.value,
           kuery: 'host.name: server1',
           service_name: undefined,
+          sync_with_dashboard_filters: false,
+          alert_status_filter: undefined,
+          slo_status_filter: undefined,
+          connection_filter: undefined,
+          anomaly_severity_filter: undefined,
+          map_orientation: 'horizontal',
         });
       });
     });
@@ -182,6 +194,59 @@ describe('<ServiceMapEditorFlyout/>', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
       expect(onCancel).toHaveBeenCalled();
+    });
+  });
+
+  describe('preview-until-save (live preview)', () => {
+    it('does not call onPreview on initial mount', async () => {
+      const onPreview = jest.fn();
+      await renderFlyout({ onPreview });
+
+      expect(onPreview).not.toHaveBeenCalled();
+    });
+
+    it('calls onPreview when a control changes', async () => {
+      const onPreview = jest.fn();
+      await renderFlyout({ onPreview });
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSyncFiltersToggle'));
+
+      await waitFor(() => {
+        expect(onPreview).toHaveBeenCalledWith(
+          expect.objectContaining({ sync_with_dashboard_filters: true })
+        );
+      });
+    });
+
+    it('reverts on unmount when the flyout was not saved', async () => {
+      const onRevert = jest.fn();
+      const { unmount } = await renderFlyout({ onRevert });
+
+      unmount();
+
+      expect(onRevert).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not revert on unmount after saving', async () => {
+      const onRevert = jest.fn();
+      const onSave = jest.fn();
+      const { unmount } = await renderFlyout({ onRevert, onSave });
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      unmount();
+
+      expect(onRevert).not.toHaveBeenCalled();
+    });
+
+    it('shows the preview hint only when live preview is enabled', async () => {
+      const { unmount } = await renderFlyout();
+      expect(screen.queryByTestId('apmServiceMapEditorPreviewHint')).not.toBeInTheDocument();
+      unmount();
+
+      await renderFlyout({ onPreview: jest.fn() });
+      expect(screen.getByTestId('apmServiceMapEditorPreviewHint')).toBeInTheDocument();
     });
   });
 
@@ -308,6 +373,68 @@ describe('<ServiceMapEditorFlyout/>', () => {
         expect(onSave).toHaveBeenCalledWith(
           expect.objectContaining({
             service_name: undefined,
+            highlighted_service_names: undefined,
+          })
+        );
+      });
+    });
+
+    it('saves multi-select as highlighted_service_names without service_name', async () => {
+      const onSave = jest.fn();
+      mockHttpGet.mockResolvedValue({ terms: ['service-a', 'service-b'] });
+      await renderFlyout({ onSave });
+
+      const serviceNameComboBox = screen.getByTestId('apmServiceMapEditorServiceNameComboBox');
+      const input = serviceNameComboBox.querySelector('input')!;
+
+      fireEvent.change(input, { target: { value: 'service-a' } });
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'service-a' })).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByRole('option', { name: 'service-a' }));
+
+      fireEvent.change(input, { target: { value: 'service-b' } });
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'service-b' })).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByRole('option', { name: 'service-b' }));
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            service_name: undefined,
+            highlighted_service_names: ['service-a', 'service-b'],
+          })
+        );
+      });
+    });
+
+    it('clears service_name when loading state that also has highlighted_service_names', async () => {
+      const onSave = jest.fn();
+      await renderFlyout({
+        onSave,
+        initialState: {
+          environment: 'ENVIRONMENT_ALL',
+          service_name: 'stale-single',
+          highlighted_service_names: ['service-a', 'service-b'],
+        },
+      });
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            service_name: undefined,
+            highlighted_service_names: ['service-a', 'service-b'],
           })
         );
       });

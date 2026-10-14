@@ -23,7 +23,6 @@ export const configSchema = schema.object({
     numWords: schema.number({ defaultValue: 750, min: 1, max: 5000 }),
   }),
   tracing: schema.object({
-    send_to_self: schema.boolean({ defaultValue: false }),
     exporters: schema.arrayOf(
       schema.object({
         url: schema.uri({ scheme: ['http', 'https'] }),
@@ -34,6 +33,18 @@ export const configSchema = schema.object({
     opik_distributed_tracing: schema.boolean({ defaultValue: false }),
     scheduledDelay,
   }),
+  /**
+   * Internal-only Deductive AI integration. `register` gates whether the built-in
+   * `deductive.ai` agent and its Advanced Settings are registered at all. It is unset
+   * (default `false`) on customer deployments, so they never see or expose the
+   * integration. The runtime on/off switch is the `agentBuilder:deductiveEnabled`
+   * Global Advanced Setting.
+   */
+  deductive: schema.maybe(
+    schema.object({
+      register: schema.boolean({ defaultValue: false }),
+    })
+  ),
 });
 
 export type AgentBuilderConfig = TypeOf<typeof configSchema>;

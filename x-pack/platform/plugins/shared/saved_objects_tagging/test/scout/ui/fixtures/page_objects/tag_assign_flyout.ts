@@ -26,6 +26,9 @@ export class TagAssignFlyout {
   }
 
   async waitForResultsLoaded() {
-    await this.resultList.locator('.euiLoadingSpinner').waitFor({ state: 'hidden' });
+    await this.resultList.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(
+      () => document.querySelectorAll('[data-is-loading="true"]').length === 0
+    );
   }
 }

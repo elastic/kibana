@@ -18,6 +18,8 @@ project:
   sourceRoot: packages/kbn-api-contracts
 dependsOn:
   - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/router-to-openapispec'
 tags:
   - shared-common
   - package
@@ -28,6 +30,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - src/report/release_note.json
     - '!target/**/*'
   jest-config:
     - jest.config.js

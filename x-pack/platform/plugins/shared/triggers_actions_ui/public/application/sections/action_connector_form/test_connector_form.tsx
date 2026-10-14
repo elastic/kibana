@@ -26,7 +26,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import type { ActionConnector, ActionTypeModel, IErrorObject } from '../../../types';
 import { ActionConnectorMode } from '../../../types';
 
 export interface TestConnectorFormProps {
@@ -37,7 +37,8 @@ export interface TestConnectorFormProps {
   actionParams: Record<string, unknown>;
   onExecutionAction: () => Promise<void>;
   executionResult: Option<ActionTypeExecutorResult<unknown> | undefined>;
-  actionTypeRegistry: ActionTypeRegistryContract;
+  actionTypeModel: ActionTypeModel;
+  hideActionParamsStep?: boolean;
 }
 
 export const TestConnectorForm = ({
@@ -48,17 +49,17 @@ export const TestConnectorForm = ({
   onEditAction,
   onExecutionAction,
   isExecutingAction,
-  actionTypeRegistry,
+  actionTypeModel,
+  hideActionParamsStep = false,
 }: TestConnectorFormProps) => {
   const [actionErrors, setActionErrors] = useState<IErrorObject>({});
   const [hasErrors, setHasErrors] = useState<boolean>(false);
-  const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
   useEffect(() => {
     (async () => {
       const res = (
-        await actionTypeModel?.validateParams(
+        await actionTypeModel.validateParams(
           actionParams,
           connector && 'config' in connector ? connector.config : undefined
         )
@@ -68,103 +69,101 @@ export const TestConnectorForm = ({
     })();
   }, [actionTypeModel, actionParams, connector]);
 
-  const steps = [
-    {
-      title: i18n.translate(
-        'xpack.triggersActionsUI.sections.testConnectorForm.createActionHeader',
-        {
-          defaultMessage: 'Create an action',
-        }
-      ),
-      children: ParamsFieldsComponent ? (
-        <EuiErrorBoundary>
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
-            <ParamsFieldsComponent
-              actionParams={actionParams}
-              index={0}
-              errors={actionErrors}
-              editAction={onEditAction}
-              messageVariables={[]}
-              actionConnector={connector}
-              executionMode={ActionConnectorMode.Test}
-            />
-          </Suspense>
-        </EuiErrorBoundary>
-      ) : (
+  const createActionStep = {
+    title: i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.createActionHeader', {
+      defaultMessage: 'Create an action',
+    }),
+    children: ParamsFieldsComponent ? (
+      <EuiErrorBoundary>
+        <Suspense
+          fallback={
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <ParamsFieldsComponent
+            actionParams={actionParams}
+            index={0}
+            errors={actionErrors}
+            editAction={onEditAction}
+            messageVariables={[]}
+            actionConnector={connector}
+            executionMode={ActionConnectorMode.Test}
+          />
+        </Suspense>
+      </EuiErrorBoundary>
+    ) : (
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.testConnectorForm.noActionParametersRequiredText"
+            defaultMessage="This Connector does not require any Action Parameter."
+          />
+        </p>
+      </EuiText>
+    ),
+  };
+
+  const runTestStep = {
+    title: i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.runTestHeader', {
+      defaultMessage: 'Run the test',
+    }),
+    children: (
+      <>
+        {executeEnabled ? null : (
+          <>
+            <EuiCallOut announceOnMount iconType="warning" color="warning">
+              <p>
+                <FormattedMessage
+                  defaultMessage="Save your changes before testing the connector."
+                  id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestDisabled"
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiText>
-          <p>
+          <EuiButton
+            iconType={'play'}
+            isLoading={isExecutingAction}
+            isDisabled={!executeEnabled || hasErrors || isExecutingAction}
+            data-test-subj="executeActionButton"
+            onClick={onExecutionAction}
+          >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.testConnectorForm.noActionParametersRequiredText"
-              defaultMessage="This Connector does not require any Action Parameter."
+              defaultMessage="Run"
+              id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestButton"
             />
-          </p>
+          </EuiButton>
         </EuiText>
+      </>
+    ),
+  };
+
+  const resultsStep = {
+    title: i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.testResultsHeader', {
+      defaultMessage: 'Results',
+    }),
+    children: pipe(
+      executionResult,
+      map((result) =>
+        result?.status === 'ok' ? (
+          <SuccessfulExecution executionResult={result} />
+        ) : (
+          <FailedExecussion executionResult={result} />
+        )
       ),
-    },
-    {
-      title: i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.runTestHeader', {
-        defaultMessage: 'Run the test',
-      }),
-      children: (
-        <>
-          {executeEnabled ? null : (
-            <>
-              <EuiCallOut announceOnMount iconType="warning" color="warning">
-                <p>
-                  <FormattedMessage
-                    defaultMessage="Save your changes before testing the connector."
-                    id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestDisabled"
-                  />
-                </p>
-              </EuiCallOut>
-              <EuiSpacer size="s" />
-            </>
-          )}
-          <EuiText>
-            <EuiButton
-              iconType={'play'}
-              isLoading={isExecutingAction}
-              isDisabled={!executeEnabled || hasErrors || isExecutingAction}
-              data-test-subj="executeActionButton"
-              onClick={onExecutionAction}
-            >
-              <FormattedMessage
-                defaultMessage="Run"
-                id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestButton"
-              />
-            </EuiButton>
-          </EuiText>
-        </>
-      ),
-    },
-    {
-      title: i18n.translate(
-        'xpack.triggersActionsUI.sections.testConnectorForm.testResultsHeader',
-        {
-          defaultMessage: 'Results',
-        }
-      ),
-      children: pipe(
-        executionResult,
-        map((result) =>
-          result?.status === 'ok' ? (
-            <SuccessfulExecution executionResult={result} />
-          ) : (
-            <FailedExecussion executionResult={result} />
-          )
-        ),
-        getOrElse(() => <AwaitingExecution />)
-      ),
-    },
-  ];
+      getOrElse(() => <AwaitingExecution />)
+    ),
+  };
+
+  const steps = hideActionParamsStep
+    ? [runTestStep, resultsStep]
+    : [createActionStep, runTestStep, resultsStep];
 
   return <EuiSteps steps={steps} data-test-subj="test-connector-form" />;
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { memoize } from 'lodash';
 import type {
   KibanaRequest,
@@ -367,6 +368,23 @@ export function mlSavedObjectServiceFactory(
     const type = jobType;
     if (jobIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
+    }
+
+    if (spacesToAdd.length === 0) {
+      const allJobObjects = await getAllJobObjectsForAllSpaces(
+        jobType,
+        jobIds.length === 1 ? jobIds[0] : undefined
+      );
+      for (const jobId of jobIds) {
+        const currentSpaces =
+          allJobObjects.find((j) => j.attributes.job_id === jobId)?.namespaces ?? [];
+        if (
+          currentSpaces.length > 0 &&
+          currentSpaces.every((space) => spacesToRemove.includes(space))
+        ) {
+          throw Boom.badRequest(`Cannot remove job '${jobId}' from all spaces`);
+        }
+      }
     }
 
     const results: SavedObjectResult = Object.create(null);
@@ -749,6 +767,23 @@ export function mlSavedObjectServiceFactory(
     if (modelIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
+
+    if (spacesToAdd.length === 0) {
+      const allModelObjects = await getAllTrainedModelObjectsForAllSpaces(
+        modelIds.length === 1 ? [modelIds[0]] : undefined
+      );
+      for (const modelId of modelIds) {
+        const currentSpaces =
+          allModelObjects.find((m) => m.attributes.model_id === modelId)?.namespaces ?? [];
+        if (
+          currentSpaces.length > 0 &&
+          currentSpaces.every((space) => spacesToRemove.includes(space))
+        ) {
+          throw Boom.badRequest(`Cannot remove trained model '${modelId}' from all spaces`);
+        }
+      }
+    }
+
     const results: SavedObjectResult = Object.create(null);
     const models = await _getTrainedModelObjects();
     const trainedModelObjectIdMap = new Map<string, string>();

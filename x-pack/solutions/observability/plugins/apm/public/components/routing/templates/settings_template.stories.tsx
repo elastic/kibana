@@ -10,9 +10,7 @@ import type { StoryObj, Meta } from '@storybook/react';
 import { noop } from 'lodash';
 import type { ComponentProps } from 'react';
 import React from 'react';
-import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';
+import { mockApmApiCallResponse } from '../../../services/rest/storybook_mock_http';
 import { SettingsTemplate } from './settings_template';
 
 type Args = ComponentProps<typeof SettingsTemplate>;
@@ -40,24 +38,19 @@ const configMock = {
 const stories: Meta<Args> = {
   title: 'routing/templates/SettingsTemplate',
   component: SettingsTemplate,
+  parameters: {
+    apmContext: {
+      core: coreMock,
+      config: configMock,
+    },
+  },
   decorators: [
     (StoryComponent) => {
       mockApmApiCallResponse('GET /internal/apm/has_data', (params) => ({
         hasData: true,
       }));
 
-      return (
-        <MockApmPluginStorybook
-          apmContext={
-            {
-              core: coreMock,
-              config: configMock,
-            } as unknown as ApmPluginContextValue
-          }
-        >
-          <StoryComponent />
-        </MockApmPluginStorybook>
-      );
+      return <StoryComponent />;
     },
   ],
 };

@@ -30,6 +30,24 @@ describe('ExtractObservablesSwitch', () => {
     expect(toggle).toHaveAttribute('aria-checked', 'true');
   });
 
+  it('calls onSwitchChange with the new value, not the previous one', async () => {
+    const onSwitchChange = jest.fn();
+    render(
+      <ExtractObservablesSwitch
+        disabled={false}
+        isEnabled={false}
+        onSwitchChange={onSwitchChange}
+      />
+    );
+    const toggle = screen.getByTestId('extract-observables-switch');
+
+    await userEvent.click(toggle);
+    expect(onSwitchChange).toHaveBeenCalledWith(true);
+
+    await userEvent.click(toggle);
+    expect(onSwitchChange).toHaveBeenCalledWith(false);
+  });
+
   it('it disables the switch', async () => {
     render(
       <ExtractObservablesSwitch disabled={true} isEnabled={false} onSwitchChange={jest.fn()} />
@@ -53,6 +71,20 @@ describe('ExtractObservablesSwitch', () => {
 
     expect(await screen.findByText('Off')).toBeInTheDocument();
     expect(screen.queryByText('On')).not.toBeInTheDocument();
+  });
+
+  it('syncs to isEnabled when it changes externally, e.g. from another instance of the toggle', async () => {
+    const { rerender } = render(
+      <ExtractObservablesSwitch disabled={false} isEnabled={false} onSwitchChange={jest.fn()} />
+    );
+    const toggle = screen.getByTestId('extract-observables-switch');
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+
+    rerender(
+      <ExtractObservablesSwitch disabled={false} isEnabled={true} onSwitchChange={jest.fn()} />
+    );
+
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
   });
 
   it('it shows the correct labels', async () => {

@@ -9,6 +9,7 @@ import {
   createMigrationTask,
   scheduleAssetCriticalityEcsCompliancyMigration,
 } from './schedule_ecs_compliancy_migration';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -30,11 +31,17 @@ const mockTaskManagerStart = taskManagerMock.createStart();
 const logger = loggerMock.create();
 const auditLogger = auditLoggerMock.create();
 
+const TASK_TYPE = 'security-solution-ea-asset-criticality-ecs-migration';
+const TASK_ID = `${TASK_TYPE}-task-id`;
+
+const mockWithContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+
 const getStartServices = jest.fn().mockResolvedValue([
   {
     elasticsearch: {
       client: elasticsearchServiceMock.createClusterClient(),
     },
+    executionContext: { withContext: mockWithContext },
   },
   { taskManager: mockTaskManagerStart },
 ]);
@@ -58,6 +65,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
@@ -73,6 +81,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         logger,
         getStartServices,
         kibanaVersion: '8.0.0',
+        hasEncryptionKey: true,
       })
     ).resolves.not.toThrow();
   });
@@ -86,6 +95,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
@@ -106,6 +116,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -122,6 +133,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockTaskManagerStart.ensureScheduled).not.toHaveBeenCalled();
@@ -133,7 +145,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })({ abortController: mockAbortController });
+      })({ signal: mockAbortController.signal });
 
       await migrationTask.run();
 
@@ -153,7 +165,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })({ abortController: mockAbortController });
+      })({ signal: mockAbortController.signal });
 
       await migrationTask.run();
 
@@ -163,20 +175,37 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       );
     });
 
-    it('should abort request and log when the task is cancelled', async () => {
+    it('should log when the task is cancelled', async () => {
       const migrationTask = createMigrationTask({
         getStartServices,
         logger,
         auditLogger,
-      })({ abortController: mockAbortController });
+      })({ signal: mockAbortController.signal });
 
       await migrationTask.run();
       await migrationTask.cancel();
 
-      expect(mockAbortController.abort).toHaveBeenCalled();
-
       expect(logger.debug).toHaveBeenCalledWith(
         'Task cancelled: "security-solution-ea-asset-criticality-ecs-migration"'
+      );
+    });
+
+    it('wraps the migration run in coreStart.executionContext.withContext with the expected label and id', async () => {
+      const migrationTask = createMigrationTask({
+        getStartServices,
+        logger,
+        auditLogger,
+      })({ signal: mockAbortController.signal });
+
+      await migrationTask.run();
+
+      expect(mockWithContext).toHaveBeenCalledTimes(1);
+      expect(mockWithContext).toHaveBeenCalledWith(
+        buildEaExecutionContext(
+          EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY_ECS_MIGRATION,
+          TASK_ID
+        ),
+        expect.any(Function)
       );
     });
   });

@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import type { ConfusionMatrix } from '@kbn/ml-data-frame-analytics-utils';
 
 const COL_INITIAL_WIDTH = 165; // in pixels
@@ -101,17 +101,27 @@ export function getTrailingControlColumns(
               }
             )}
             button={
-              <EuiButtonIcon
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.ml.dataframe.analytics.classificationExploration.showActions',
                   {
                     defaultMessage: 'Show actions',
                   }
                 )}
-                iconType="boxesVertical"
-                color="text"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.showActions',
+                    {
+                      defaultMessage: 'Show actions',
+                    }
+                  )}
+                  iconType="boxesVertical"
+                  color="text"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                />
+              </EuiToolTip>
             }
             closePopover={() => setIsPopoverOpen(false)}
             ownFocus={true}

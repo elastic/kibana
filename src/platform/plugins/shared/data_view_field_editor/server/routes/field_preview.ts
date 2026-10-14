@@ -38,9 +38,9 @@ const responseSchema = () => {
   return schema.object({
     values: schema.oneOf([
       // composite field
-      schema.recordOf(schema.string(), schema.arrayOf(valueSchema)),
+      schema.recordOf(schema.string(), schema.arrayOf(valueSchema, { maxSize: 1_000 })),
       // primitive field
-      schema.arrayOf(valueSchema),
+      schema.arrayOf(valueSchema, { maxSize: 1_000 }),
     ]),
     error: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     status: schema.maybe(schema.number()),

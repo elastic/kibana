@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/feature_privilege_iterator';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineAnalyticsRoutes } from './analytics';
@@ -31,6 +32,7 @@ import { defineOAuthRoutes } from './oauth';
 import { defineOAuthMetadataRoutes } from './oauth_metadata';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
+import { defineServiceAccountsRoutes } from './service_accounts';
 import { defineSessionManagementRoutes } from './session_management';
 import { defineUserProfileRoutes } from './user_profile';
 import { defineUsersRoutes } from './users';
@@ -42,6 +44,7 @@ import type { InternalAuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { ServiceAccountsServiceStart } from '../service_accounts';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
 import type { UserProfileServiceStartInternal } from '../user_profile';
@@ -65,6 +68,10 @@ export interface RouteDefinitionParams {
   getAuthenticationService: () => InternalAuthenticationServiceStart;
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
+  /** `null` when service accounts are not enabled for this deployment. */
+  getServiceAccountsService: () => ServiceAccountsServiceStart | null;
+  serverlessProjectId: string | undefined;
+  serverlessProjectType: KibanaSolution | undefined;
   analyticsService: AnalyticsServiceSetup;
   buildFlavor: BuildFlavor;
   docLinks: DocLinksServiceSetup;
@@ -78,6 +85,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthorizationRoutes(params);
   defineOAuthMetadataRoutes(params);
   defineOAuthRoutes(params);
+  defineServiceAccountsRoutes(params);
   defineSessionManagementRoutes(params);
   defineUserProfileRoutes(params);
   defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)

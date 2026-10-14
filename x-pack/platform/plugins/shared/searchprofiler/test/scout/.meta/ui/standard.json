@@ -1,5 +1,8 @@
 {
-  "sha1": "2bf5413103f5f18be46b1f1ea0f9d14482f89787",
+  "sha1": "13f74b388013a81d56f23316d8bbce50e8c5b254",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "82a13b472e8925e-db356015770228d",
@@ -17,8 +20,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/json_parse.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 27,
+        "column": 23
       }
     },
     {
@@ -37,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/json_parse.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 35,
+        "column": 72
       }
     },
     {
@@ -57,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/json_parse.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 46,
+        "column": 5
       }
     },
     {
@@ -77,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/profile.spec.ts",
-        "line": 41,
-        "column": 7
+        "line": 33,
+        "column": 23
       }
     },
     {
@@ -97,8 +100,48 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/query_loading.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 49,
+        "column": 46
+      }
+    },
+    {
+      "id": "20368de8db8665e-87ce801aca07d2b",
+      "title": "Search Profiler query loading updates index and query when URL parameters change in Search Profiler",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/query_loading.spec.ts",
+        "line": 56,
+        "column": 17
+      }
+    },
+    {
+      "id": "20368de8db8665e-79739b1d602c8db",
+      "title": "Search Profiler query loading restores index and query after navigating away and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/query_loading.spec.ts",
+        "line": 74,
+        "column": 23
       }
     }
   ]

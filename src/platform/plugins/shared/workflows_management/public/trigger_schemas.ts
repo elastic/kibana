@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type CustomTriggerSchemaConfig, toCustomTriggerSchemaConfigs } from '@kbn/workflows';
 import type {
   PublicTriggerDefinition,
   WorkflowsExtensionsPublicPluginStart,
@@ -43,6 +44,13 @@ class TriggerSchemas {
    */
   public getRegisteredIds(): string[] {
     return this.getTriggerDefinitions().map((t) => t.id);
+  }
+
+  /**
+   * Trigger entries for YAML schema generation, including `requiresConnectorId`.
+   */
+  public getRegisteredTriggersForSchema(): CustomTriggerSchemaConfig[] {
+    return toCustomTriggerSchemaConfigs(this.getTriggerDefinitions());
   }
 
   /**

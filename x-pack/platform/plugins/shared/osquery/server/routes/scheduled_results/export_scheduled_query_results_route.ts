@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { escapeKuery } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 import { PLUGIN_ID } from '../../../common';
@@ -53,6 +53,7 @@ export const exportScheduledQueryResultsRoute = (
       },
       async (context, request, response) => {
         const { scheduleId, executionCount } = request.params;
+        const cpsActive = await osqueryContext.isCpsActive(request);
 
         let query: string | undefined;
         let ecsMapping: ECSMapping | undefined;
@@ -102,6 +103,7 @@ export const exportScheduledQueryResultsRoute = (
           },
           fileNamePrefix: `osquery-scheduled-results-${scheduleId}-${executionCount}`,
           ecsMapping,
+          ...(cpsActive ? { matchMissingSpaceId: false } : {}),
         });
       }
     );

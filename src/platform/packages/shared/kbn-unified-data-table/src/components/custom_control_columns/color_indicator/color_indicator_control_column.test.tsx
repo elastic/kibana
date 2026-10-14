@@ -8,37 +8,38 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { getColorIndicatorControlColumn } from './color_indicator_control_column';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
+import { getColorIndicatorControlColumn } from './color_indicator_control_column';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { UnifiedDataTableContext } from '../../../table_context';
 
 describe('ColorIndicatorControlColumn', () => {
-  const contextMock = {
-    ...dataTableContextMock,
-  };
-
   it('should render the component', () => {
     const getRowIndicator = jest.fn(() => ({ color: 'red', label: 'error' }));
     const column = getColorIndicatorControlColumn({
       getRowIndicator,
     });
-    const ColorIndicatorControlColumn =
-      column.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
-    mountWithIntl(
-      <UnifiedDataTableContext.Provider value={contextMock}>
+    const ColorIndicatorControlColumn = column.rowCellRender;
+
+    renderWithI18n(
+      <UnifiedDataTableContext.Provider value={dataTableContextMock}>
         <ColorIndicatorControlColumn
-          rowIndex={1}
-          setCellProps={jest.fn()}
-          columnId="color_indicator"
           colIndex={0}
+          columnId="color_indicator"
           isDetails={false}
           isExpandable={false}
           isExpanded={false}
+          rowIndex={1}
+          setCellProps={jest.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
-    expect(getRowIndicator).toHaveBeenCalledWith(contextMock.getRowByIndex(1), expect.any(Object));
+
+    expect(screen.getByTestId('unifiedDataTableRowColorIndicatorCell')).toBeVisible();
+    expect(getRowIndicator).toHaveBeenCalledWith(
+      dataTableContextMock.getRowByIndex(1),
+      expect.any(Object)
+    );
   });
 });

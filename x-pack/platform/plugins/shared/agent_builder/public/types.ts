@@ -13,6 +13,7 @@ import type {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -28,13 +29,27 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type {
+  FilesSetup as FilesPublicSetup,
+  FilesStart as FilesPublicStart,
+} from '@kbn/files-plugin/public';
 
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   ConversationSidebarRef,
+  ConversationTemplateDetailsFlyoutRenderProps,
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateUIContext,
+  ConversationTemplateServiceStartContract,
   OpenConversationSidebarReturn,
+  OpenConversationDetailsOptions,
   PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
 } from '@kbn/agent-builder-browser';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -43,6 +58,7 @@ export interface ConfigSchema {}
 
 export interface AgentBuilderSetupDependencies {
   actions: ActionsPublicPluginSetup;
+  files: FilesPublicSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -55,12 +71,14 @@ export interface AgentBuilderSetupDependencies {
 
 export interface AgentBuilderStartDependencies {
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  files: FilesPublicStart;
   evals?: EvalsPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  embeddable: EmbeddableStart;
   cloud: CloudStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
@@ -68,4 +86,5 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  cps?: CPSPluginStart;
 }

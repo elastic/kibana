@@ -11,6 +11,7 @@ import { getExpressionRendererProps } from './get_expression_renderer_props';
 import type { Vis } from '../vis';
 import type { VisParams } from '../types';
 import { PersistedState } from '../persisted_state';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 
 jest.mock('./to_ast', () => ({
   toExpressionAst: jest.fn().mockResolvedValue('mock expression'),
@@ -52,6 +53,7 @@ describe('getExpressionRendererProps', () => {
           filters: [],
         },
         projectRouting: '_alias:_origin',
+        isApproximate: false,
         timeRange: { from: 'now-15m', to: 'now' },
         disableTriggers: false,
         settings: {
@@ -81,6 +83,7 @@ describe('getExpressionRendererProps', () => {
           filters: [],
         },
         projectRouting: undefined,
+        isApproximate: false,
         timeRange: { from: 'now-15m', to: 'now' },
         disableTriggers: false,
         settings: {
@@ -110,6 +113,7 @@ describe('getExpressionRendererProps', () => {
           filters: [],
         },
         projectRouting: '_alias:*',
+        isApproximate: false,
         timeRange: { from: 'now-15m', to: 'now' },
         disableTriggers: false,
         settings: {
@@ -129,6 +133,152 @@ describe('getExpressionRendererProps', () => {
           projectRouting: '_alias:*',
         })
       );
+    });
+  });
+
+  describe('isApproximate handling', () => {
+    it('should include isApproximate in search context when provided', async () => {
+      const vis = createMockVis();
+      const result = await getExpressionRendererProps({
+        unifiedSearch: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        isApproximate: true,
+        timeRange: { from: 'now-15m', to: 'now' },
+        disableTriggers: false,
+        settings: {
+          syncColors: true,
+          syncCursor: true,
+          syncTooltips: false,
+        },
+        vis,
+        onRender: jest.fn(),
+        onEvent: jest.fn(),
+        onData: jest.fn(),
+      });
+
+      expect(result.params).toBeDefined();
+      expect(result.params?.searchContext).toEqual(
+        expect.objectContaining({
+          isApproximate: true,
+        })
+      );
+    });
+
+    it('should include isApproximate in search context when false', async () => {
+      const vis = createMockVis();
+      const result = await getExpressionRendererProps({
+        unifiedSearch: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        isApproximate: false,
+        timeRange: { from: 'now-15m', to: 'now' },
+        disableTriggers: false,
+        settings: {
+          syncColors: true,
+          syncCursor: true,
+          syncTooltips: false,
+        },
+        vis,
+        onRender: jest.fn(),
+        onEvent: jest.fn(),
+        onData: jest.fn(),
+      });
+
+      expect(result.params).toBeDefined();
+      expect(result.params?.searchContext).toEqual(
+        expect.objectContaining({
+          isApproximate: false,
+        })
+      );
+    });
+  });
+
+  describe('esqlVariables handling', () => {
+    it('should include esqlVariables in search context when provided', async () => {
+      const vis = createMockVis();
+      const esqlVariables = [
+        { key: 'fizzbuzz', value: 'ios', type: 'values' },
+      ] as ExecutionContextSearch['esqlVariables'];
+      const result = await getExpressionRendererProps({
+        unifiedSearch: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        isApproximate: false,
+        esqlVariables,
+        timeRange: { from: 'now-15m', to: 'now' },
+        disableTriggers: false,
+        settings: {
+          syncColors: true,
+          syncCursor: true,
+          syncTooltips: false,
+        },
+        vis,
+        onRender: jest.fn(),
+        onEvent: jest.fn(),
+        onData: jest.fn(),
+      });
+
+      expect(result.params).toBeDefined();
+      expect(result.params?.searchContext).toEqual(
+        expect.objectContaining({
+          esqlVariables,
+        })
+      );
+    });
+  });
+
+  describe('execution context', () => {
+    const baseParams = {
+      unifiedSearch: {
+        query: { query: '', language: 'kuery' },
+        filters: [],
+      },
+      isApproximate: false,
+      timeRange: { from: 'now-15m', to: 'now' },
+      disableTriggers: false,
+      settings: {
+        syncColors: true,
+        syncCursor: true,
+        syncTooltips: false,
+      },
+      onRender: jest.fn(),
+      onEvent: jest.fn(),
+      onData: jest.fn(),
+    };
+
+    it('nests the visualization context on child so it is included in x-opaque-id', async () => {
+      const vis = createMockVis({
+        id: 'vis-id',
+        title: 'My visualization',
+      });
+      const result = await getExpressionRendererProps({
+        ...baseParams,
+        vis,
+        parentExecutionContext: {
+          type: 'dashboard',
+          name: 'dashboards',
+          id: 'dash-id',
+          url: '/app/dashboards',
+        },
+      });
+
+      expect(result.params?.executionContext).toEqual({
+        type: 'dashboard',
+        name: 'dashboards',
+        id: 'dash-id',
+        url: '/app/dashboards',
+        child: {
+          type: 'agg_based',
+          name: 'area',
+          id: 'vis-id',
+          description: 'My visualization',
+        },
+      });
+      expect(result.params?.executionContext).not.toHaveProperty('childContext');
     });
   });
 });

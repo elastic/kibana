@@ -13,5 +13,10 @@ export type RepositoryType = 'url' | 'gcs' | 'fs';
 export interface RepositoryStrategy {
   type: RepositoryType;
   validate(): void;
-  register(params: { esClient: Client; log: ToolingLog; repoName: string }): Promise<void>;
+  register(params: {
+    esClient: Client;
+    log: ToolingLog;
+    repoName: string;
+    verify?: boolean;
+  }): Promise<void>;
 }

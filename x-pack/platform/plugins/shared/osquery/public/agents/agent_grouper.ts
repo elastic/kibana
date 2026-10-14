@@ -6,6 +6,7 @@
  */
 
 import type { AgentStatus } from '@kbn/fleet-plugin/common';
+import { stripPolicyIdVersionSuffix } from '../../common/utils/strip_policy_id_version_suffix';
 import { generateColorPicker, getAgentOsqueryAvailability } from './helpers';
 import {
   ALL_AGENTS_LABEL,
@@ -54,7 +55,9 @@ export const generateAgentOption = (
       value: {
         groupType,
         groups: {
-          policy: agent.policy_id ?? '',
+          // Normalized so it matches the policy group's key; otherwise a
+          // policy and one of its version-suffixed agents double-count.
+          policy: stripPolicyIdVersionSuffix(agent.policy_id ?? ''),
           platform: agent.local_metadata.os.platform,
         },
         id: agent.local_metadata.elastic.agent.id,

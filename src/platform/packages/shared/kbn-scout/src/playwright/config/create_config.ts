@@ -19,6 +19,33 @@ import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
 import { VALID_CONFIG_MARKER } from '../types';
 
+const DEFAULT_CI_RETRIES = 1;
+
+const isBuildkiteStepRetry = (): boolean => {
+  const retryCount = Number.parseInt(process.env.BUILDKITE_RETRY_COUNT ?? '', 10);
+  return Number.isFinite(retryCount) && retryCount > 0;
+};
+
+/**
+ * Number of Playwright retries: 1 on a step's first CI attempt, 0 locally and on step retries
+ * (which already re-run only the previously failed specs). `SCOUT_TEST_RETRIES` overrides both —
+ * e.g. the flaky-test runner sets it to 0.
+ */
+const resolveRetries = (): number => {
+  const override = process.env.SCOUT_TEST_RETRIES;
+
+  if (override === undefined) {
+    return process.env.CI && !isBuildkiteStepRetry() ? DEFAULT_CI_RETRIES : 0;
+  }
+
+  const parsed = Number.parseInt(override, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    throw new Error(`SCOUT_TEST_RETRIES must be a non-negative integer, got '${override}'`);
+  }
+
+  return parsed;
+};
+
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   /**
    * Playwright loads the config file multiple times, so we need to generate a unique run id
@@ -37,7 +64,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'ech',
-
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
         '**/ai_suggestions_*.spec.ts',
@@ -48,6 +77,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'mki',
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
@@ -92,12 +124,13 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
+    metadata: options.metadata,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-    /* Retry on CI only */
-    retries: 0, // disable retry for Playwright runner
+    /* Retries happen immediately, in a fresh worker. See resolveRetries(). */
+    retries: options.retries ?? resolveRetries(),
     /* Opt out of parallel tests on CI. */
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -120,13 +153,19 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
-      /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-      trace: 'on-first-retry',
+      /* Tracing adds per-test overhead (screenshots, DOM snapshots, network/console capture)
+       * for every attempt, which can push already-marginal tests over their timeout in a
+       * shared CI lane. Keep it off, as it was before retries existed. */
+      trace: 'off',
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
       ignoreHTTPSErrors: true,
+      // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+      ...(process.env.KIBANA_TEST_IPV6_ONLY === 'true'
+        ? { launchOptions: { args: ['--host-resolver-rules=MAP localhost [::1]'] } }
+        : {}),
     },
 
     // Timeout for each test, includes test, hooks and fixtures

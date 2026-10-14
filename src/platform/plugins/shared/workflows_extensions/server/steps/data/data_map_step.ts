@@ -9,6 +9,8 @@
 
 import {
   dataMapStepCommonDefinition,
+  DEFAULT_INDEX_BINDING,
+  DEFAULT_ITEM_BINDING,
   type FieldsNode,
   MAP_DIRECTIVE,
   type MapDirectiveValue,
@@ -106,8 +108,8 @@ function processFields(
                   ...options,
                   bindings: {
                     ...bindings,
-                    [mapDir.item ?? 'item']: element,
-                    [mapDir.index ?? 'index']: idx,
+                    [mapDir.item ?? DEFAULT_ITEM_BINDING]: element,
+                    [mapDir.index ?? DEFAULT_INDEX_BINDING]: idx,
                   },
                   depth: depth + 1,
                 })
@@ -126,7 +128,7 @@ export const dataMapStepDefinition = createServerStepDefinition({
   ...dataMapStepCommonDefinition,
   handler: async (context) => {
     try {
-      const items = context.contextManager.renderInputTemplate(context.config.items);
+      const items = context.config.items;
       const rawFields = context.rawInput.fields as Record<string, FieldsNode>;
 
       if (items == null) {
@@ -160,10 +162,17 @@ export const dataMapStepDefinition = createServerStepDefinition({
         `Mapping ${itemsArray.length} item(s) with ${Object.keys(rawFields).length} fields`
       );
 
+      const renderTemplate =
+        context.contextManager.createTemplateRenderer?.() ??
+        ((value, additionalContext) =>
+          context.contextManager.renderInputTemplate(value, additionalContext));
       const mappedItems = itemsArray.map((currentItem, currentIndex) =>
         processFields(rawFields, {
-          renderTemplate: (value, ctx) => context.contextManager.renderInputTemplate(value, ctx),
-          bindings: { item: currentItem, index: currentIndex },
+          renderTemplate,
+          bindings: {
+            [DEFAULT_ITEM_BINDING]: currentItem,
+            [DEFAULT_INDEX_BINDING]: currentIndex,
+          },
         })
       );
 

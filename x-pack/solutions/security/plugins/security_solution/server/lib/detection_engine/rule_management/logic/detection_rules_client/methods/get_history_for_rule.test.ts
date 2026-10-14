@@ -8,55 +8,96 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { Rule, RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import type { RuleParams } from '../../../../rule_schema';
 import { getHistoryForRule } from './get_history_for_rule';
 
 describe('getHistoryForRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let userProfileService: ReturnType<typeof userProfileServiceMock.createStart>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
+    userProfileService = userProfileServiceMock.createStart();
+    userProfileService.bulkGet.mockResolvedValue([]);
   });
 
-  it('requests size = perPage + 1 with offset 0 for page 1', async () => {
-    rulesClient.getHistory.mockResolvedValueOnce({ total: 0, items: buildItems(3) });
+  const mockRuleChangesHistory = (items: ReturnType<typeof buildItems>) => {
+    rulesClient.getHistory
+      .mockResolvedValueOnce({ total: items.length, items })
+      .mockResolvedValueOnce({
+        total: items.length,
+        items: [items[items.length - 1]],
+      });
+  };
 
-    await getHistoryForRule({ rulesClient, ruleId: 'rule-1', page: 1, perPage: 2 });
+  it('requests size = perPage + 1 with offset 0 for page 1', async () => {
+    mockRuleChangesHistory(buildItems(3));
+
+    await getHistoryForRule({
+      rulesClient,
+      userProfileService,
+      ruleId: 'rule-1',
+      page: 1,
+      perPage: 2,
+    });
 
     expect(rulesClient.getHistory).toHaveBeenCalledWith({
       module: 'security',
       ruleId: 'rule-1',
       from: 0,
       size: 3,
+      sort: [{ '@timestamp': { order: 'desc' } }],
     });
   });
 
   it('requests size = perPage + 1 with the correct offset for page > 1', async () => {
-    rulesClient.getHistory.mockResolvedValueOnce({ total: 0, items: buildItems(3) });
+    mockRuleChangesHistory(buildItems(3));
 
-    await getHistoryForRule({ rulesClient, ruleId: 'rule-1', page: 4, perPage: 2 });
+    await getHistoryForRule({
+      rulesClient,
+      userProfileService,
+      ruleId: 'rule-1',
+      page: 4,
+      perPage: 2,
+    });
 
     expect(rulesClient.getHistory).toHaveBeenCalledWith({
       module: 'security',
       ruleId: 'rule-1',
       from: 6,
       size: 3,
+      sort: [{ '@timestamp': { order: 'desc' } }],
+    });
+  });
+
+  it('fetches the oldest item with ascending timestamp sort for tracking_started_at', async () => {
+    mockRuleChangesHistory(buildItems(2));
+
+    await getHistoryForRule({
+      rulesClient,
+      userProfileService,
+      ruleId: 'rule-1',
+      page: 1,
+      perPage: 2,
+    });
+
+    expect(rulesClient.getHistory).toHaveBeenCalledWith({
+      module: 'security',
+      ruleId: 'rule-1',
+      from: 0,
+      size: 1,
+      sort: [{ '@timestamp': { order: 'asc' } }],
     });
   });
 
   it('uses the trailing entry as the predecessor for the oldest item on the page', async () => {
-    rulesClient.getHistory.mockResolvedValueOnce({
-      total: 10,
-      items: [
-        generateHistoryDoc('1', { name: 'name-1' }),
-        generateHistoryDoc('2', { name: 'name-2' }),
-        generateHistoryDoc('3', { name: 'name-3' }),
-      ],
-    });
+    mockRuleChangesHistory(buildItems(3));
 
     const result = await getHistoryForRule({
       rulesClient,
+      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 2,
@@ -64,30 +105,32 @@ describe('getHistoryForRule', () => {
 
     expect(result.items).toHaveLength(2);
     expect(result.items[0].id).toBe('event-1');
-    expect(result.items[0].old_values).toMatchObject({ name: 'name-2' });
+    expect(result.items[0].old_values).toMatchObject({ name: 'rule-2' });
     expect(result.items[1].id).toBe('event-2');
-    expect(result.items[1].old_values).toMatchObject({ name: 'name-3' });
+    expect(result.items[1].old_values).toMatchObject({ name: 'rule-3' });
   });
 
   it('returns the requested page/perPage and total in the response', async () => {
-    rulesClient.getHistory.mockResolvedValueOnce({ total: 100, items: buildItems(3) });
+    mockRuleChangesHistory(buildItems(3));
 
     const result = await getHistoryForRule({
       rulesClient,
+      userProfileService,
       ruleId: 'rule-1',
       page: 3,
       perPage: 2,
     });
 
-    expect(result).toMatchObject({ page: 3, perPage: 2, total: 100 });
+    expect(result).toMatchObject({ page: 3, per_page: 2, total: 3 });
     expect(result.items).toHaveLength(2);
   });
 
   it('exposes the post-change rule snapshot, action, and username on each item', async () => {
-    rulesClient.getHistory.mockResolvedValueOnce({ total: 2, items: buildItems(2) });
+    mockRuleChangesHistory(buildItems(3));
 
     const result = await getHistoryForRule({
       rulesClient,
+      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 1,
@@ -95,7 +138,85 @@ describe('getHistoryForRule', () => {
 
     expect(result.items[0].action).toBe('rule_update');
     expect(result.items[0].user).toEqual({ name: 'test-user' });
-    expect(result.items[0].rule.name).toBe('Rule');
+    expect(result.items[0].rule.name).toBe('rule-1');
+  });
+
+  it('resolves the display name from the user profile when the profile id is known', async () => {
+    const items = buildItems(1).map((item) => ({
+      ...item,
+      user: { id: 'profile-1', name: 'test-user' },
+    }));
+
+    mockRuleChangesHistory(items);
+    userProfileService.bulkGet.mockResolvedValue([
+      {
+        uid: 'profile-1',
+        enabled: true,
+        user: { username: 'test-user', full_name: 'Test User' },
+        data: {},
+      },
+    ]);
+
+    const result = await getHistoryForRule({
+      rulesClient,
+      userProfileService,
+      ruleId: 'rule-1',
+      page: 1,
+      perPage: 1,
+    });
+
+    expect(userProfileService.bulkGet).toHaveBeenCalledWith({ uids: new Set(['profile-1']) });
+    expect(result.items[0].user).toEqual({ id: 'profile-1', name: 'Test User' });
+  });
+
+  it('falls back to the raw username when the user profile cannot be resolved', async () => {
+    const items = buildItems(1).map((item) => ({
+      ...item,
+      user: { id: 'profile-1', name: 'test-user' },
+    }));
+
+    mockRuleChangesHistory(items);
+    userProfileService.bulkGet.mockResolvedValue([]);
+
+    const result = await getHistoryForRule({
+      rulesClient,
+      userProfileService,
+      ruleId: 'rule-1',
+      page: 1,
+      perPage: 1,
+    });
+
+    expect(result.items[0].user).toEqual({ id: 'profile-1', name: 'test-user' });
+  });
+
+  it('sets tracking_started_at from the oldest item timestamp', async () => {
+    const changeHistoryItems = buildItems(3);
+
+    mockRuleChangesHistory(changeHistoryItems);
+
+    const result = await getHistoryForRule({
+      rulesClient,
+      userProfileService,
+      ruleId: 'rule-1',
+      page: 1,
+      perPage: 2,
+    });
+
+    expect(result.tracking_started_at).toBe(changeHistoryItems[2]['@timestamp']);
+  });
+
+  it('omits tracking_started_at when there are no history items', async () => {
+    mockRuleChangesHistory([]);
+
+    const result = await getHistoryForRule({
+      rulesClient,
+      userProfileService,
+      ruleId: 'rule-1',
+      page: 1,
+      perPage: 20,
+    });
+
+    expect(result.tracking_started_at).toBeUndefined();
   });
 
   const buildRule = (overrides: Partial<Rule<RuleParams>> = {}): Rule<RuleParams> => ({
@@ -127,10 +248,11 @@ describe('getHistoryForRule', () => {
 
   const generateHistoryDoc = (
     id: string,
-    ruleOverrides: Partial<Rule<RuleParams>> = {}
+    ruleOverrides: Partial<Rule<RuleParams>> = {},
+    timestamp?: string
   ): RuleChangeHistoryDocument<RuleParams> => ({
     ...generateChangeHistoryDocument({
-      '@timestamp': `2026-05-01T10:00:0${id}.000Z`,
+      '@timestamp': timestamp ?? `2026-05-01T10:00:0${id}.000Z`,
       event: {
         id: `event-${id}`,
         action: 'rule_update',
@@ -143,5 +265,7 @@ describe('getHistoryForRule', () => {
   });
 
   const buildItems = (count: number) =>
-    Array.from({ length: count }, (_, i) => generateHistoryDoc(String(i + 1)));
+    Array.from({ length: count }, (_, i) =>
+      generateHistoryDoc(String(i + 1), { name: `rule-${i + 1}` })
+    );
 });

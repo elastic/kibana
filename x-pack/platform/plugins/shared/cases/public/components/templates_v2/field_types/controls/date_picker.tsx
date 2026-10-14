@@ -8,9 +8,10 @@
 import type { z } from '@kbn/zod/v4';
 import type { Moment } from 'moment';
 import moment from 'moment-timezone';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import {
@@ -18,9 +19,12 @@ import {
   type ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type DatePickerProps = z.infer<typeof DatePickerFieldSchema> & ConditionRenderProps;
+type DatePickerProps = z.infer<typeof DatePickerFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const toMoment = (value: unknown, isLocal: boolean): Moment | null => {
   if (!value) return null;
@@ -40,8 +44,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
 }) => {
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
   const isLocal = metadata?.timezone === 'local';
 
@@ -55,6 +64,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     };
   }, [isRequired]);
 
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
+
   return (
     <Controller
       key={name}
@@ -63,25 +77,37 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       rules={rules}
       defaultValue=""
       render={({ field, fieldState }) => (
-        <EuiFormRow
-          label={label}
-          labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-          error={fieldState.error?.message}
-          isInvalid={!!fieldState.error}
-          fullWidth
-        >
-          <EuiDatePicker
-            selected={toMoment(field.value, isLocal)}
-            onChange={(date) => {
-              field.onChange(toIsoString(date, isLocal));
-              field.onBlur();
-            }}
-            showTimeSelect={metadata?.show_time ?? false}
-            utcOffset={isLocal ? undefined : 0}
-            isInvalid={!!fieldState.error}
+        <>
+          <EuiFormRow
+            label={label}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+            error={fieldState.error?.message}
+            isInvalid={Boolean(fieldState.error)}
             fullWidth
-          />
-        </EuiFormRow>
+          >
+            <EuiDatePicker
+              selected={toMoment(field.value, isLocal)}
+              onChange={(date) => {
+                field.onChange(toIsoString(date, isLocal));
+                field.onBlur();
+              }}
+              showTimeSelect={metadata?.show_time ?? false}
+              utcOffset={isLocal ? undefined : 0}
+              isInvalid={Boolean(fieldState.error)}
+              disabled={isSaving}
+              fullWidth
+            />
+          </EuiFormRow>
+          {fieldState.isDirty && onConfirm && (
+            <InlineFieldActions
+              name={name}
+              onConfirm={onConfirm}
+              onCancel={handleCancel}
+              isLoading={isSaving}
+              isDisabled={isSaveDisabled}
+            />
+          )}
+        </>
       )}
     />
   );

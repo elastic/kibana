@@ -310,10 +310,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanAnomalyDetection() {
-      await this.deleteAllAnomalyDetectionJobs();
+      await this.deleteAllAnnotations();
       await this.deleteAllCalendars();
       await this.deleteAllFilters();
-      await this.deleteAllAnnotations();
+      await this.deleteAllAnomalyDetectionJobs();
       await this.deleteExpiredAnomalyDetectionData();
       await this.syncSavedObjects();
     },
@@ -942,10 +942,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteDatafeedES(datafeedId: string) {
       log.debug(`Deleting datafeed with id '${datafeedId}' ...`);
-      const { body, status } = await esSupertest
-        .delete(`/_ml/datafeeds/${datafeedId}`)
-        .query({ force: true });
-      this.assertResponseStatusCode(200, status, body);
+      await retry.tryForTime(30 * 1000, async () => {
+        const { body, status } = await esSupertest
+          .delete(`/_ml/datafeeds/${datafeedId}`)
+          .query({ force: true });
+        // Force-deleting a sibling job can remove a shared results index mid-cleanup,
+        // making ES answer 404 even though the datafeed itself is gone.
+        if (status === 404) {
+          const { status: getStatus } = await esSupertest.get(`/_ml/datafeeds/${datafeedId}`);
+          if (getStatus === 404) {
+            return;
+          }
+        }
+        this.assertResponseStatusCode(200, status, body);
+      });
 
       await this.waitForDatafeedToNotExist(datafeedId);
       log.debug('> Datafeed deleted.');

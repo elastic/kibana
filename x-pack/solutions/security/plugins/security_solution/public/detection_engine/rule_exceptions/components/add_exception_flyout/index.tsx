@@ -6,12 +6,13 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 
 import {
   EuiButton,
   EuiCallOut,
+  EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
   EuiHorizontalRule,
@@ -30,16 +31,19 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import {
+  getMalformedMatchesFields,
   hasPartialCodeSignatureEntry,
   hasWrongOperatorWithWildcard,
 } from '@kbn/securitysolution-list-utils';
 
 import {
+  MalformedMatchesValueCallout,
   PartialCodeSignatureCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
+import type { AlertClosingReason } from '../../../../../common/types';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -56,6 +60,8 @@ import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { useRuntimeFieldsForBulkClose } from '../flyout_components/alerts_actions/use_runtime_fields_for_bulk_close';
+import { useSignalIndexPatterns } from '../flyout_components/alerts_actions/use_signal_index_patterns';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
@@ -73,9 +79,7 @@ import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } 
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
 `;
 
 export interface AddExceptionFlyoutProps {
@@ -98,11 +102,9 @@ export interface AddExceptionFlyoutProps {
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
-  ${() => css`
-    &.builder-section {
-      overflow-y: scroll;
-    }
-  `}
+  &.builder-section {
+    overflow-y: scroll;
+  }
 `;
 
 export const AddExceptionFlyout = memo(function AddExceptionFlyout({
@@ -161,6 +163,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       bulkCloseAlerts,
       closeSingleAlert,
       bulkCloseIndex,
+      closeAlertsReason,
       addExceptionToRadioSelection,
       selectedRulesToAddTo,
       exceptionListsToAddTo,
@@ -172,6 +175,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       expireErrorExists,
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
+      malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -184,6 +189,23 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
+
+  const {
+    isSignalIndexLoading,
+    signalIndexNames,
+    isSignalIndexPatternLoading,
+    signalIndexPatterns,
+    areSignalIndexPatternsReady,
+  } = useSignalIndexPatterns();
+
+  const runtimeFieldsResolution = useRuntimeFieldsForBulkClose({
+    exceptionListItems: exceptionItems,
+    shouldBulkCloseAlert: bulkCloseAlerts,
+    sourceIndexPatterns: indexPatterns,
+    isSourceIndexPatternsLoading: isLoading,
+    alertsIndexPatterns: signalIndexPatterns,
+    areAlertsIndexPatternsReady: areSignalIndexPatternsReady,
+  });
 
   /**
    * Reducer action dispatchers
@@ -208,6 +230,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
+      dispatch({ type: 'setMalformedMatchesValue', fields });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -326,6 +350,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
+  const setCloseAlertsReason = useCallback(
+    (reason?: AlertClosingReason): void => {
+      dispatch({
+        type: 'setCloseAlertsReason',
+        reason,
+      });
+    },
+    [dispatch]
+  );
+
   const setDisableBulkCloseAlerts = useCallback(
     (disableBulkCloseAlerts: boolean): void => {
       dispatch({
@@ -434,7 +468,14 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       });
 
       if (closeAlerts != null && shouldCloseAlerts) {
-        await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
+        await closeAlerts({
+          ruleStaticIds,
+          exceptionItems: addedItems,
+          alertIdToClose,
+          bulkCloseIndex,
+          runtimeFields: runtimeFieldsResolution.runtimeFields,
+          reason: closeAlertsReason,
+        });
       }
 
       invalidateFetchRuleByIdQuery();
@@ -462,18 +503,20 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
+    closeAlertsReason,
+    runtimeFieldsResolution.runtimeFields,
     setErrorSubmitting,
     invalidateFetchRuleByIdQuery,
     expireTime,
   ]);
 
   const handleOnSubmit = useCallback(() => {
-    if (wildcardWarningExists) {
+    if (wildcardWarningExists || malformedMatchesValueExists) {
       setShowConfirmModal(true);
     } else {
       return submitException();
     }
-  }, [wildcardWarningExists, submitException]);
+  }, [wildcardWarningExists, malformedMatchesValueExists, submitException]);
 
   const isSubmitButtonDisabled = isSubmitDisabled({
     isSubmitting,
@@ -488,6 +531,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     selectedRulesToAddTo,
     listType,
     exceptionListsToAddTo,
+    bulkCloseAlerts,
+    isRuntimeFieldsResolving: runtimeFieldsResolution.isResolving,
   });
 
   const handleDismissError = useCallback((): void => {
@@ -511,7 +556,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const confirmModal = useMemo(() => {
     const labels = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
-      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
+      },
       links
     );
 
@@ -523,10 +571,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [links, listType, submitException, wildcardWarningExists]);
+  }, [links, listType, submitException, wildcardWarningExists, malformedMatchesFields]);
 
   return (
     <EuiFlyout
+      session="never"
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
@@ -589,8 +638,15 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>
             <EuiHorizontalRule />
@@ -638,10 +694,17 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               alertData={alertData}
               alertStatus={alertStatus}
               isAlertDataLoading={isAlertDataLoading ?? false}
+              isSignalIndexLoading={isSignalIndexLoading}
+              signalIndexNames={signalIndexNames}
+              isSignalIndexPatternLoading={isSignalIndexPatternLoading}
+              signalIndexPatterns={signalIndexPatterns}
+              hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
+              closeAlertsReason={closeAlertsReason}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}
               onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
+              onCloseAlertsReasonChange={setCloseAlertsReason}
             />
           </>
         )}

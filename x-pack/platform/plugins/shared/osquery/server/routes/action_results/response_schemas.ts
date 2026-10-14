@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
  */
 export const actionResultsResponseSchema = schema.object(
   {
-    edges: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+    edges: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 10000 }),
     total: schema.number(),
     currentPage: schema.number(),
     pageSize: schema.number(),

@@ -6,7 +6,9 @@
  */
 
 export type { Actions } from './actions';
+export type { AiIndexActions } from './ai_index';
 export type { AlertingActions } from './alerting';
+export type { AlertsActions } from './alerts';
 export type { ApiActions } from './api';
 export type { AppActions } from './app';
 export type { CasesActions } from './cases';

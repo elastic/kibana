@@ -18,9 +18,7 @@ export class TransactionsOverviewPage {
       )}/services/${serviceName}/transactions?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
       { timeout: EXTENDED_TIMEOUT }
     );
-    await this.page
-      .getByTestId('apmMainTemplateHeaderServiceName')
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
+    await this.page.getByTestId('appHeaderTitle').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   getTransactionTypeFilter() {

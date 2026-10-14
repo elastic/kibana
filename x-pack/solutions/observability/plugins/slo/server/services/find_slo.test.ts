@@ -84,6 +84,7 @@ describe('FindSLO', () => {
               syncDelay: '1m',
               frequency: '1m',
               preventInitialBackfill: false,
+              preventCrossProjectSearch: false,
             },
             summary: {
               status: 'HEALTHY',
@@ -204,7 +205,7 @@ describe('FindSLO', () => {
 
     it("throws an error when 'perPage' > 5000", async () => {
       await expect(findSLO.execute({ perPage: '5000' })).resolves.not.toThrow();
-      await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrowError(
+      await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrow(
         'perPage limit set to 5000'
       );
     });
@@ -212,9 +213,7 @@ describe('FindSLO', () => {
     describe('Cursor Pagination', () => {
       it("throws an error when 'size' > 5000", async () => {
         await expect(findSLO.execute({ size: '5000' })).resolves.not.toThrow();
-        await expect(findSLO.execute({ size: '5001' })).rejects.toThrowError(
-          'size limit set to 5000'
-        );
+        await expect(findSLO.execute({ size: '5001' })).rejects.toThrow('size limit set to 5000');
       });
     });
   });

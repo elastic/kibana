@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/observability-ai-server",
-  "owner": "@elastic/obs-ai-team",
-  "group": "observability",
-  "visibility": "private"
-}

@@ -7,10 +7,16 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: Verifies user can view, create, and edit maps from "Visualize library" table
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getService, getPageObjects }) {
   const { visualize, header, maps } = getPageObjects(['visualize', 'header', 'maps']);
   const listingTable = getService('listingTable');
   const security = getService('security');
+  const retry = getService('retry');
 
   describe('visualize create menu', () => {
     describe('maps visualize alias', () => {
@@ -34,8 +40,7 @@ export default function ({ getService, getPageObjects }) {
         it('should take users to Maps application when Maps is clicked', async () => {
           await visualize.clickMapsApp();
           await header.waitUntilLoadingHasFinished();
-          const onMapPage = await maps.onMapPage();
-          expect(onMapPage).to.equal(true);
+          await retry.waitFor('maps application to render', () => maps.onMapPage());
         });
       });
 

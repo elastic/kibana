@@ -8,29 +8,34 @@
  */
 
 import type { ReactNode } from 'react';
-import type {
-  ContentEditorCustomValidators,
-  OpenContentEditorParams,
-} from '@kbn/content-management-content-editor';
+import type { ContentEditorCustomValidators } from '@kbn/content-management-content-editor';
 import type { ContentListItem } from '@kbn/content-list-provider';
 
 /**
  * Content editor configuration for `ContentListClientProvider`.
  *
  * This is the Kibana-specific content editor integration. The base
- * `ContentListProvider` only knows about an `actions.inspect.onItemAction`
- * callback; this config produces that callback by wiring it to the
- * Kibana content editor flyout.
+ * `ContentListProvider` exposes a list-level `features.contentEditor.open`
+ * callback; this config produces that callback by wiring it to the Kibana
+ * content editor flyout, which the provider opens internally via
+ * `useOpenContentEditor` from `@kbn/content-management-content-editor`.
  */
 export interface ContentEditorConfig {
   /**
-   * Callback to open the content editor flyout.
-   * Obtained from `useOpenContentEditor()` in `@kbn/content-management-content-editor`.
+   * Whether the content editor is read-only for every item.
+   *
+   * Defaults to read-only: the flyout is only editable when this is explicitly
+   * `false` and `onSave` is provided.
    */
-  openContentEditor: (params: OpenContentEditorParams) => () => void;
-
-  /** Whether the content editor is readonly. Defaults to `false`. */
   isReadonly?: boolean;
+
+  /**
+   * Message shown in the flyout when the whole list is read-only.
+   *
+   * If an item also has an edit restriction, this list-wide message is shown
+   * instead of the item's restriction reason.
+   */
+  readonlyReason?: string;
 
   /** Custom validators for title/description fields. */
   customValidators?: ContentEditorCustomValidators;

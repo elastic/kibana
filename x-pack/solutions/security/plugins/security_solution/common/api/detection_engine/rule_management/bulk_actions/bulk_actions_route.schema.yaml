@@ -470,7 +470,7 @@ paths:
                             type: 'machine_learning'
                             anomaly_threshold: 50
                             machine_learning_job_id:
-                              - 'packetbeat_dns_tunneling_ea'
+                              - 'dns_tunneling_ea'
                             execution_summary:
                               last_execution:
                                 date: '2022-03-23T16:06:12.787Z'
@@ -1065,6 +1065,11 @@ components:
       enum:
         - NO_GAPS_TO_FILL
 
+    BulkDeleteSkipReason:
+      type: string
+      enum:
+        - RULE_NOT_FOUND
+
     BulkActionSkipResult:
       type: object
       properties:
@@ -1076,6 +1081,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/BulkEditSkipReason'
             - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/BulkDeleteSkipReason'
       required:
         - id
         - skip_reason

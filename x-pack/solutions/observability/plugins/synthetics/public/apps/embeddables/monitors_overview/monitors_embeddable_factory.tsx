@@ -7,12 +7,16 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+  CanCancelRequests,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
@@ -20,15 +24,17 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
 import type { ClientPluginsStart } from '../../../plugin';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 import type { OverviewView } from '../../synthetics/state';
 import type { MonitorFilters } from '../../../../common/types';
+import { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {
@@ -54,19 +60,22 @@ export type OverviewMonitorsEmbeddableState = SerializedTitles &
 export type StatusOverviewApi = DefaultEmbeddableApi<OverviewMonitorsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
-  HasEditCapabilities;
+  HasEditCapabilities &
+  CanCancelRequests;
 
 export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: EmbeddableFactory<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
+  const factory: EmbeddablePublicDefinition<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
+    getPlacementHints: () => ({ width: 30, height: 12 }),
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
+      const requestCancellationManager = new RequestCancellationManager();
       // Ensure filters have all required properties with defaults
       const filters$ = new BehaviorSubject({
         ...DEFAULT_FILTERS,
@@ -74,46 +83,50 @@ export const getMonitorsEmbeddableFactory = (
       });
       const view$ = new BehaviorSubject(initialState.view);
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<OverviewMonitorsEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
           view: view$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OverviewMonitorsEmbeddableState>({
-        parentApi,
-        uuid,
-        serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, filters$, view$).pipe(
-          map(() => undefined)
+        }),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          view$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => ({
           ...titleComparators,
-          filters: 'referenceEquality',
+          filters: 'deepEquality',
           view: 'referenceEquality',
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
-          if (lastSaved) view$.next(lastSaved?.view);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          filters$.next(nextState.filters ?? DEFAULT_FILTERS);
+          view$.next(nextState.view);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         defaultTitle$,
+        cancelRequests: (reason?: AbortReason) => requestCancellationManager.cancel(reason),
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
             defaultMessage: 'filters',
           }),
         isEditingEnabled: () => true,
-        serializeState,
         onEdit: async () => {
           try {
             const result = await openMonitorConfiguration({
@@ -142,6 +155,7 @@ export const getMonitorsEmbeddableFactory = (
       const fetchSubscription = fetch$(api)
         .pipe()
         .subscribe((next) => {
+          requestCancellationManager.startLoad();
           reload$.next(next.isReload);
         });
 
@@ -162,12 +176,12 @@ export const getMonitorsEmbeddableFactory = (
                 maxHeight: '70vh',
                 overflowY: 'auto',
               }}
-              data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
               <StatusGridComponent
                 reload$={reload$}
                 filters={filters || DEFAULT_FILTERS}
                 view={view}
+                requestCancellationManager={requestCancellationManager}
               />
             </div>
           );

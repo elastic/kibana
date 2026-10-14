@@ -33,7 +33,6 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -53,8 +52,7 @@ describe('MoreActionsRowControlColumn', () => {
 
     await userEvent.click(button);
 
-    expect(getByTestId('add-to-existing-case-action')).toBeInTheDocument();
-    expect(getByTestId('add-to-new-case-action')).toBeInTheDocument();
+    expect(getByTestId('add-to-case-action')).toBeInTheDocument();
     expect(getByTestId('alert-tags-context-menu-item')).toBeInTheDocument();
   });
 
@@ -70,7 +68,6 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: false,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -92,8 +89,7 @@ describe('MoreActionsRowControlColumn', () => {
 
     await userEvent.click(button);
 
-    expect(queryByTestId('add-to-existing-case-action')).not.toBeInTheDocument();
-    expect(queryByTestId('add-to-new-case-action')).not.toBeInTheDocument();
+    expect(queryByTestId('add-to-case-action')).not.toBeInTheDocument();
   });
 
   it('should not show tags actions if user is not authorized', async () => {
@@ -108,7 +104,6 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
-            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },

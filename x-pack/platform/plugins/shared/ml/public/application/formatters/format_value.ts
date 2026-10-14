@@ -71,7 +71,7 @@ export function formatSingleValue(
     return formatTimeValue(value, mlFunction, record).formatted;
   } else {
     if (fieldFormat !== undefined) {
-      return fieldFormat.convert(value, 'text');
+      return fieldFormat.convertToText(value);
     } else {
       // If no Kibana FieldFormat object provided,
       // format the value depending on its magnitude.

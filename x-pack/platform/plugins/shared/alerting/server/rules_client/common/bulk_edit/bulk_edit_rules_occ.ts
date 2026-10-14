@@ -13,7 +13,8 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import type { ChangeTrackingAction } from '@kbn/alerting-types';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { logRuleChanges } from '../../../application/rule/methods/common_utils/log_rule_changes';
 import type { RuleParams } from '../../../application/rule/types';
@@ -45,8 +46,7 @@ export interface BulkEditOccOptions<Params extends RuleParams> {
   shouldInvalidateApiKeys: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
-  changeTrackingAction?: ChangeTrackingAction;
-  totalNumOfRules?: number;
+  changeTracking?: RuleChangeTracking;
 }
 
 const isValidInterval = (interval: string | undefined): interval is string => {
@@ -72,6 +72,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const prevInterval: string[] = [];
 
   for await (const response of rulesFinder.find()) {
@@ -96,6 +97,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
           skipped,
           errors,
           username,
+          profileUid,
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
@@ -164,8 +166,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     rules,
     apiKeysMap,
     shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
-    changeTrackingAction: options.changeTrackingAction,
-    totalNumOfRules: options.totalNumOfRules,
+    changeTracking: options.changeTracking,
   });
 
   return {
@@ -182,15 +183,13 @@ async function saveBulkUpdatedRules({
   rules,
   apiKeysMap,
   shouldInvalidateApiKeys,
-  changeTrackingAction,
-  totalNumOfRules,
+  changeTracking,
 }: {
   context: RulesClientContext;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   shouldInvalidateApiKeys: boolean;
   apiKeysMap: ApiKeysMap;
-  changeTrackingAction?: ChangeTrackingAction;
-  totalNumOfRules?: number;
+  changeTracking?: RuleChangeTracking;
 }) {
   const apiKeysToInvalidate: string[] = [];
   let result: SavedObjectsBulkResponse<RawRule>;
@@ -198,8 +197,6 @@ async function saveBulkUpdatedRules({
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
     // bulk_disable, bulk_enable, etc. to fix this cast
-    const bulkEditRulesTimestamp = Date.now();
-
     result = await bulkCreateRulesSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
@@ -208,11 +205,16 @@ async function saveBulkUpdatedRules({
 
     await logRuleChanges({
       ruleSOs: result.saved_objects,
+      encryptedFieldsMap: new Map(
+        [...apiKeysMap.entries()].map(([ruleId, { newApiKey, newUiamApiKey }]) => [
+          ruleId,
+          { apiKey: newApiKey ?? null, uiamApiKey: newUiamApiKey ?? null },
+        ])
+      ),
       rulesClientContext: context,
       changesContext: {
-        action: changeTrackingAction ?? RuleChangeTrackingAction.ruleUpdate,
-        timestamp: bulkEditRulesTimestamp,
-        metadata: totalNumOfRules ? { bulkCount: totalNumOfRules } : undefined,
+        action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
+        metadata: changeTracking?.metadata,
       },
     });
   } catch (e) {
@@ -241,7 +243,8 @@ async function saveBulkUpdatedRules({
   }
 
   if (shouldInvalidateApiKeys) {
-    result.saved_objects.map(({ id, error }) => {
+    result.saved_objects.map((so) => {
+      const { id } = so;
       const apiKey = apiKeysMap.get(id);
 
       const oldApiKey = apiKey?.oldApiKey;
@@ -252,17 +255,23 @@ async function saveBulkUpdatedRules({
       const newUiamApiKey = apiKey?.newUiamApiKey;
 
       // if SO wasn't saved and has new API key it will be invalidated
-      if (error && newApiKey && !newApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(newApiKey);
-        // if SO saved and has old Api Key it will be invalidate
-      } else if (!error && oldApiKey && !oldApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(oldApiKey);
-      }
+      if (isSavedObjectErrorResult(so)) {
+        if (newApiKey && !newApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(newApiKey);
+        }
 
-      if (error && newUiamApiKey && !newApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(newUiamApiKey);
-      } else if (!error && oldUiamApiKey && !oldApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(oldUiamApiKey);
+        if (newUiamApiKey && !newApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(newUiamApiKey);
+        }
+      } else {
+        // if SO saved and has old Api Key it will be invalidate
+        if (oldApiKey && !oldApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(oldApiKey);
+        }
+
+        if (oldUiamApiKey && !oldApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(oldUiamApiKey);
+        }
       }
     });
   }

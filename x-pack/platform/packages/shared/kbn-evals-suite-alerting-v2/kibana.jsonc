@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-alerting-v2",
+  "owner": "@elastic/rna-project-team",
+  "group": "platform",
+  "visibility": "shared"
+}

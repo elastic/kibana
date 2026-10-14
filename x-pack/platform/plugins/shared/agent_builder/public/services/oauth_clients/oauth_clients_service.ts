@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ListOAuthClientsResponse } from '../../../common/http_api/oauth_clients';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
+import type {
+  CreateOAuthClientPayload,
+  CreateOAuthClientResponse,
+  GetOAuthClientResponse,
+  ListOAuthClientsResponse,
+  RevokeOAuthClientPayload,
+  RevokeOAuthClientResponse,
+  UpdateOAuthClientPayload,
+  UpdateOAuthClientResponse,
+} from '../../../common/http_api/oauth_clients';
 
 const OAUTH_API_PATH = '/internal/security/oauth';
 
@@ -19,5 +28,41 @@ export class OAuthClientsService {
 
   async list(): Promise<ListOAuthClientsResponse> {
     return await this.http.get<ListOAuthClientsResponse>(`${OAUTH_API_PATH}/clients`);
+  }
+
+  async get(clientId: string): Promise<GetOAuthClientResponse> {
+    return await this.http.get<GetOAuthClientResponse>(
+      buildPath(`${OAUTH_API_PATH}/clients/{clientId}`, { clientId })
+    );
+  }
+
+  async create(payload: CreateOAuthClientPayload): Promise<CreateOAuthClientResponse> {
+    return await this.http.post<CreateOAuthClientResponse>(`${OAUTH_API_PATH}/clients`, {
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async update(
+    clientId: string,
+    payload: UpdateOAuthClientPayload
+  ): Promise<UpdateOAuthClientResponse> {
+    return await this.http.patch<UpdateOAuthClientResponse>(
+      buildPath(`${OAUTH_API_PATH}/clients/{clientId}`, { clientId }),
+      { body: JSON.stringify(payload) }
+    );
+  }
+
+  async revoke(
+    clientId: string,
+    payload?: RevokeOAuthClientPayload
+  ): Promise<RevokeOAuthClientResponse> {
+    return await this.http.post<RevokeOAuthClientResponse>(
+      buildPath(`${OAUTH_API_PATH}/clients/{clientId}/_revoke`, { clientId }),
+      { body: JSON.stringify(payload ?? {}) }
+    );
+  }
+
+  async delete(clientId: string): Promise<void> {
+    await this.http.delete(buildPath(`${OAUTH_API_PATH}/clients/{clientId}`, { clientId }));
   }
 }

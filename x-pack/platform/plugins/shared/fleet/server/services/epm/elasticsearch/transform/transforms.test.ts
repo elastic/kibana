@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -35,6 +35,12 @@ const meta = getESAssetMetadata({ packageName: 'endpoint' });
 describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  // Tracks the "persisted" epm-packages SO attributes that savedObjectsClient.get/.update mocks
+  // read from and write to below, so repeated get/update cycles within a test see each other's
+  // writes the same way they would against a real saved objects index. Tests seed this with
+  // `currentAttributes = { installed_es: previousInstallation.installed_es }` before calling
+  // installTransforms.
+  let currentAttributes: Partial<Installation> = {};
 
   const mockRequest = httpServerMock.createKibanaRequest();
   const getYamlTestData = (
@@ -178,12 +184,25 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => ({
-      type: PACKAGES_SAVED_OBJECT_TYPE,
-      id: 'endpoint',
-      attributes,
-      references: [],
-    }));
+    currentAttributes = {};
+    savedObjectsClient.get.mockImplementation(
+      async () =>
+        ({
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          id: 'endpoint',
+          attributes: currentAttributes,
+          references: [],
+        } as any)
+    );
+    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
+      currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };
+      return {
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+        id: 'endpoint',
+        attributes,
+        references: [],
+      };
+    });
   });
 
   afterEach(() => {
@@ -227,16 +246,7 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: {
-          installed_es: previousInstallation.installed_es,
-        },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
 
     // Mock transform from old version
     esClient.transform.getTransform.mockResponseOnce({
@@ -508,6 +518,161 @@ _meta:
     ]);
   });
 
+  test('drains ALL accumulated stale YAML versions on upgrade, not just the first', async () => {
+    // Regression test for the YAML-path .find() → .filter() fix.
+    // If two stale YAML fleet_transform_versions accumulate (e.g. a cluster that went
+    // 0.1.0 → 0.15.0 and the 0.1.0 transforms leaked), upgrading to 0.2.0 must stop and
+    // delete BOTH old versions, not just the first one .find() would have returned.
+    const sourceData = getYamlTestData(undefined, '0.2.0');
+
+    const previousInstallation: Installation = {
+      installed_es: [
+        { id: 'metrics-endpoint.policy-0.16.0-dev.0', type: ElasticsearchAssetType.ingestPipeline },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.1.0',
+          type: ElasticsearchAssetType.transform,
+        },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.15.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(previousInstallation)
+    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
+
+    // getTransform is consumed by reconcileTransforms — return no orphans for this test.
+    esClient.transform.getTransform.mockResponseOnce({ count: 0, transforms: [] });
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
+
+    // Both 0.1.0 and 0.15.0 must be stopped and deleted — not just one.
+    const stoppedIds = (esClient.transform.stopTransform.mock.calls as any[])
+      .map((c) => c[0].transform_id)
+      .sort();
+    expect(stoppedIds).toEqual([
+      'logs-endpoint.metadata_current-default-0.1.0',
+      'logs-endpoint.metadata_current-default-0.15.0',
+    ]);
+
+    const deletedIds = (esClient.transform.deleteTransform.mock.calls as any[])
+      .map((c) => c[0].transform_id)
+      .sort();
+    expect(deletedIds).toEqual([
+      'logs-endpoint.metadata_current-default-0.1.0',
+      'logs-endpoint.metadata_current-default-0.15.0',
+    ]);
+  });
+
+  test('removes ALL old JSON schema transforms when migrating to YAML schema', async () => {
+    // Regression test for the versionsFromOldJsonSchema .find() → .filter() fix.
+    // If multiple legacy JSON schema transforms accumulated (e.g. both 0.1.0 and 0.15.0 leaked),
+    // migrating to a YAML package must add ALL of them to transformsToRemoveWithDestIndex.
+    const sourceData = getYamlTestData(undefined, '0.2.0');
+
+    const previousInstallation: Installation = {
+      installed_es: [
+        { id: 'metrics-endpoint.policy-0.1.0-dev.0', type: ElasticsearchAssetType.ingestPipeline },
+        // Two legacy JSON schema transform refs for the same module at different versions
+        {
+          id: 'endpoint.metadata_current-default-0.1.0',
+          type: ElasticsearchAssetType.transform,
+        },
+        {
+          id: 'endpoint.metadata_current-default-0.15.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(previousInstallation)
+    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
+
+    // getTransform is consumed by reconcileTransforms — return no orphans for this test.
+    esClient.transform.getTransform.mockResponseOnce({ count: 0, transforms: [] });
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
+
+    // Both legacy JSON schema transforms must be stopped and deleted (with dest index).
+    const stoppedIds = (esClient.transform.stopTransform.mock.calls as any[])
+      .map((c) => c[0].transform_id)
+      .sort();
+    expect(stoppedIds).toEqual([
+      'endpoint.metadata_current-default-0.1.0',
+      'endpoint.metadata_current-default-0.15.0',
+    ]);
+
+    const deleteCalls = esClient.transform.deleteTransform.mock.calls as any[];
+    const deletedWithDestIndex = deleteCalls.filter((c) => c[0].delete_dest_index === true);
+    expect(deletedWithDestIndex.map((c) => c[0].transform_id).sort()).toEqual([
+      'endpoint.metadata_current-default-0.1.0',
+      'endpoint.metadata_current-default-0.15.0',
+    ]);
+  });
+
   test('can install new versions and removes older version when upgraded from old json schema to new yml schema', async () => {
     const sourceData = getYamlTestData(undefined, '0.2.0');
     const expectedData = getExpectedData('0.2.0');
@@ -545,16 +710,7 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: {
-          installed_es: previousInstallation.installed_es,
-        },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
 
     // Mock transform from old version
     esClient.transform.getTransform.mockResponseOnce({
@@ -842,16 +998,7 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: {
-          installed_es: previousInstallation.installed_es,
-        },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
 
     // Mock transform from old version
     esClient.transform.getTransform.mockResponseOnce({
@@ -1099,14 +1246,7 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: { installed_es: [] },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: [] };
 
     await installTransforms({
       packageInstallContext: {
@@ -1194,14 +1334,7 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: { installed_es: [] },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: [] };
 
     // Mock resp for when index from older version already exists
     esClient.indices.create.mockReturnValueOnce(
@@ -1301,14 +1434,7 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
-
-    (
-      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
-    ).mockReturnValueOnce(
-      Promise.resolve({
-        attributes: { installed_es: currentInstallation.installed_es },
-      } as unknown as SavedObject<Installation>)
-    );
+    currentAttributes = { installed_es: currentInstallation.installed_es };
 
     await installTransforms({
       packageInstallContext: {
@@ -1356,5 +1482,169 @@ _meta:
     // No new transform is created or started
     expect(esClient.transform.putTransform.mock.calls).toEqual([]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([]);
+  });
+
+  test('reconciler does not delete unchanged transform when fleet_transform_version is the same', async () => {
+    // Regression test for the YAML-path reconcileTransforms keepIds bug:
+    // When a module's fleet_transform_version is unchanged, currentTransformSameAsPrev is true and
+    // the transform id is omitted from transformRefs. The reconciler must still treat it as a
+    // keeper (via previousInstalledTransformEsAssets minus explicit removals) — not delete it.
+    const sourceData = getYamlTestData(false, '0.1.0');
+    const unchangedId = 'logs-endpoint.metadata_current-default-0.1.0';
+
+    const previousInstallation: Installation = {
+      installed_es: [{ id: unchangedId, type: ElasticsearchAssetType.transform }],
+    } as unknown as Installation;
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+      Promise.resolve(previousInstallation)
+    );
+    currentAttributes = { installed_es: previousInstallation.installed_es };
+
+    // Simulate the unchanged transform present in ES with _meta.package.name stamped by Fleet.
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          id: unchangedId,
+          _meta: { package: { name: 'endpoint' } },
+        },
+      ],
+    });
+
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              sourceData.FIELDS,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
+
+    // The unchanged transform must NOT be deleted by the reconciler.
+    const deletedIds = (esClient.transform.deleteTransform.mock.calls as any[]).map(
+      (c) => c[0].transform_id
+    );
+    expect(deletedIds).not.toContain(unchangedId);
+  });
+});
+
+describe('installTransforms - cross-cluster source indices', () => {
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
+  const sourceWithRemote = [
+    'metrics-endpoint.metadata_current_default*',
+    '*:metrics-endpoint.metadata_current_default*',
+    '.fleet-agents*',
+  ];
+  const legacyTransformPath =
+    'endpoint-9.5.0-prerelease.1/elasticsearch/transform/metadata_united/default.json';
+  const legacyTransformJson = JSON.stringify({
+    source: { index: sourceWithRemote },
+    dest: { index: '.metrics-endpoint.metadata_united_default' },
+    pivot: { group_by: { 'agent.id': { terms: { field: 'agent.id' } } }, aggs: {} },
+  });
+
+  const installLegacyEndpointTransform = () =>
+    installTransforms({
+      packageInstallContext: {
+        packageInfo: { name: 'endpoint', version: '9.5.0-prerelease.1' },
+        paths: [legacyTransformPath],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([[legacyTransformPath, Buffer.from(legacyTransformJson)]])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: [],
+    });
+
+  beforeEach(() => {
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
+    savedObjectsClient = savedObjectsClientMock.create();
+    // updateEsAssetReferences re-reads the SO directly via savedObjectsClient.get before
+    // recomputing and writing it back via .update — keep both mocks consistent, mirroring the
+    // "test transform install" describe block above.
+    let currentAttributes: Partial<Installation> = { installed_es: [] };
+    savedObjectsClient.get.mockImplementation(
+      async () =>
+        ({
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          id: 'endpoint',
+          attributes: currentAttributes,
+          references: [],
+        } as any)
+    );
+    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
+      currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };
+      return {
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+        id: 'endpoint',
+        attributes,
+        references: [],
+      };
+    });
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('strips the `*:` source before putTransform on serverless (legacy json path)', async () => {
+    appContextService.start(createAppContextStartContractMock({}, true));
+
+    await installLegacyEndpointTransform();
+
+    expect(esClient.transform.putTransform).toHaveBeenCalledTimes(1);
+    expect(esClient.transform.putTransform).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transform_id: 'endpoint.metadata_united-default-9.5.0-prerelease.1',
+        source: expect.objectContaining({
+          index: ['metrics-endpoint.metadata_current_default*', '.fleet-agents*'],
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('keeps the `*:` source in putTransform on stateful (legacy json path)', async () => {
+    appContextService.start(createAppContextStartContractMock());
+
+    await installLegacyEndpointTransform();
+
+    expect(esClient.transform.putTransform).toHaveBeenCalledTimes(1);
+    expect(esClient.transform.putTransform).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: expect.objectContaining({ index: sourceWithRemote }),
+      }),
+      expect.anything()
+    );
   });
 });

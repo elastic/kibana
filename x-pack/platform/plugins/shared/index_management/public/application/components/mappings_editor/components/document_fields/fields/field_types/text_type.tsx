@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiDualRange, EuiFormRow } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type SemVer from 'semver/classes/semver';
 
@@ -202,7 +203,7 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                     formData.index_options !== 'offsets' && (
                       <>
                         <EuiSpacer size="s" />
-                        <EuiCallOut
+                        <KbnDangerCallout
                           announceOnMount
                           title={i18n.translate(
                             'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
@@ -210,16 +211,14 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                               defaultMessage: 'Positions not enabled.',
                             }
                           )}
-                          color="danger"
-                          iconType="warning"
-                        >
-                          <p>
-                            {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {
+                          text={i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
+                            {
                               defaultMessage:
                                 'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
-                            })}
-                          </p>
-                        </EuiCallOut>
+                            }
+                          )}
+                        />
                       </>
                     )}
                 </>

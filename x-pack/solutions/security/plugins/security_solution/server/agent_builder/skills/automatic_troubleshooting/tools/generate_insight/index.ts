@@ -7,25 +7,45 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 
-const generateInsightSchema = z.object({
-  problemDescription: z
-    .string()
-    .min(1)
-    .describe('A brief description of the original problem being diagnosed.'),
-  remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
-  endpointIds: z.array(z.string()).min(1).describe('Related endpoint IDs'),
-  data: z
-    .array(z.object({}).catchall(z.unknown()))
-    .min(1)
-    .describe('Relevant raw unedited documents.'),
+const generateInsightSchema = lazySchema(() =>
+  z.object({
+    problemDescription: z
+      .string()
+      .min(1)
+      .describe('A brief description of the original problem being diagnosed.'),
+    remediation: z.string().min(1).describe('A detailed guide for how to remediate the problem.'),
+    endpointIds: z.array(z.string()).min(1).describe('Related endpoint IDs'),
+    data: z
+      .array(z.object({}).catchall(z.unknown()))
+      .min(1)
+      .describe('Relevant raw unedited documents.'),
+  })
+);
+
+const getErrorMessage = (error: unknown): string => {
+  return error instanceof Error ? error.message : String(error);
+};
+
+const errorResult = (message: string) => ({
+  results: [
+    {
+      type: ToolResultType.error,
+      data: {
+        message,
+      },
+    },
+  ],
 });
 
-export const generateInsightTool = (): BuiltinSkillBoundedTool<typeof generateInsightSchema> => {
+export const generateInsightTool = (
+  endpointAppContextService: EndpointAppContextService
+): BuiltinSkillBoundedTool<typeof generateInsightSchema> => {
   return {
     id: GENERATE_INSIGHT_TOOL_ID,
     type: ToolType.builtin,
@@ -40,32 +60,32 @@ This tool creates structured insights for persisting the results of the troubles
     schema: generateInsightSchema,
     handler: async (
       { problemDescription, remediation, endpointIds, data },
-      { modelProvider, logger }
+      { spaceId, modelProvider, logger, esClient }
     ) => {
       try {
+        await endpointAppContextService
+          .getInternalFleetServices(spaceId)
+          .ensureInCurrentSpace({ agentIds: endpointIds });
+
         const model = await modelProvider.getDefaultModel();
+        const ccsEnabled = await endpointAppContextService.isCcsEnabled();
         const graph = createGenerateInsightGraph({
           model,
           problemDescription,
           remediation,
           endpointIds,
           data,
+          spaceId,
+          esClient: esClient.asInternalUser,
+          ccsEnabled,
         });
         const outState = await graph.invoke({});
 
         return { results: outState.results };
       } catch (error) {
-        logger.error(`Error in ${GENERATE_INSIGHT_TOOL_ID} tool: ${error.message}`);
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message: `Error: ${error.message}`,
-              },
-            },
-          ],
-        };
+        const errorMessage = getErrorMessage(error);
+        logger.error(`Error in ${GENERATE_INSIGHT_TOOL_ID} tool: ${errorMessage}`);
+        return errorResult(`Error: ${errorMessage}`);
       }
     },
   };

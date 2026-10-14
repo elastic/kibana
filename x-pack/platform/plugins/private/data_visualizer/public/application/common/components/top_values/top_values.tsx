@@ -8,16 +8,17 @@
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
-  type EuiProgressProps,
-  EuiText,
-  EuiButtonIcon,
   EuiSpacer,
-  useEuiTheme,
-  euiScrollBarStyles,
+  EuiText,
   EuiTextTruncate,
+  EuiToolTip,
+  euiScrollBarStyles,
+  type EuiProgressProps,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,7 +103,7 @@ export const TopValues: FC<TopValuesProps> = ({
               <strong>
                 {fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(stats.topValuesSampleSize)}
+                  .convertToText(stats.topValuesSampleSize)}
               </strong>
             ),
           }}
@@ -136,7 +137,7 @@ export const TopValues: FC<TopValuesProps> = ({
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampleCount)}
+                .convertToText(sampleCount)}
             </strong>
           ),
         }}
@@ -152,7 +153,7 @@ export const TopValues: FC<TopValuesProps> = ({
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(totalDocuments ?? 0)}
+                .convertToText(totalDocuments ?? 0)}
             </strong>
           ),
         }}
@@ -243,48 +244,70 @@ export const TopValues: FC<TopValuesProps> = ({
                         width: 48px;
                       `}
                     >
-                      <EuiButtonIcon
-                        iconSize="s"
-                        iconType="plusCircle"
-                        onClick={() => onAddFilter(fieldName, fieldValue, '+')}
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
                           {
                             defaultMessage: 'Filter for {fieldName}: "{value}"',
                             values: { fieldName, value: displayValue },
                           }
                         )}
-                        data-test-subj={`dvFieldDataTopValuesAddFilterButton-${fieldName}-${displayValue}`}
-                        style={{
-                          minHeight: 'auto',
-                          minWidth: 'auto',
-                          paddingRight: 2,
-                          paddingLeft: 2,
-                          paddingTop: 0,
-                          paddingBottom: 0,
-                        }}
-                      />
-                      <EuiButtonIcon
-                        iconSize="s"
-                        iconType="minusCircle"
-                        onClick={() => onAddFilter(fieldName, fieldValue, '-')}
-                        aria-label={i18n.translate(
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconSize="s"
+                          iconType="plusCircle"
+                          onClick={() => onAddFilter(fieldName, fieldValue, '+')}
+                          aria-label={i18n.translate(
+                            'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
+                            {
+                              defaultMessage: 'Filter for {fieldName}: "{value}"',
+                              values: { fieldName, value: displayValue },
+                            }
+                          )}
+                          data-test-subj={`dvFieldDataTopValuesAddFilterButton-${fieldName}-${displayValue}`}
+                          style={{
+                            minHeight: 'auto',
+                            minWidth: 'auto',
+                            paddingRight: 2,
+                            paddingLeft: 2,
+                            paddingTop: 0,
+                            paddingBottom: 0,
+                          }}
+                        />
+                      </EuiToolTip>
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',
                           {
                             defaultMessage: 'Filter out {fieldName}: "{value}"',
                             values: { fieldName, value: displayValue },
                           }
                         )}
-                        data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${fieldName}-${displayValue}`}
-                        style={{
-                          minHeight: 'auto',
-                          minWidth: 'auto',
-                          paddingTop: 0,
-                          paddingBottom: 0,
-                          paddingRight: 2,
-                          paddingLeft: 2,
-                        }}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconSize="s"
+                          iconType="minusCircle"
+                          onClick={() => onAddFilter(fieldName, fieldValue, '-')}
+                          aria-label={i18n.translate(
+                            'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',
+                            {
+                              defaultMessage: 'Filter out {fieldName}: "{value}"',
+                              values: { fieldName, value: displayValue },
+                            }
+                          )}
+                          data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${fieldName}-${displayValue}`}
+                          style={{
+                            minHeight: 'auto',
+                            minWidth: 'auto',
+                            paddingTop: 0,
+                            paddingBottom: 0,
+                            paddingRight: 2,
+                            paddingLeft: 2,
+                          }}
+                        />
+                      </EuiToolTip>
                     </div>
                   ) : null}
                 </EuiFlexGroup>

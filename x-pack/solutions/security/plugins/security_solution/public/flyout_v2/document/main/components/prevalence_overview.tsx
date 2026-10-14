@@ -145,7 +145,7 @@ export const PrevalenceOverview: FC<PrevalenceOverviewProps> = ({
           />
         ),
         link,
-        iconType: showIcon ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'chevronLimitLeft' : undefined,
         headerContent: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             {!isServerless && (

@@ -46,7 +46,7 @@ export function useGetDataStreamStatuses(): DataStreamStatusResponse {
     const dataStream = dataStreamMap[indexTemplate];
     if (dataStream) {
       dataStreamStatuses.push(formatDataStreamInfo(dataStream));
-      totalBytes += dataStream.storageSizeBytes ?? 0;
+      totalBytes += getStorageSizeBytes(dataStream) ?? 0;
     } else {
       const missingStream = toMissingDataStream({ indexTemplate, label });
       dataStreamStatuses.push(missingStream);
@@ -95,6 +95,7 @@ function toMissingDataStream({
       delete_index: true,
       manage_data_stream_lifecycle: true,
       read_failure_store: true,
+      manage: true,
     },
     hidden: false,
     nextGenerationManagedBy: 'Data stream lifecycle',
@@ -103,16 +104,20 @@ function toMissingDataStream({
 }
 
 /**
+ * On serverless, data stream stats are disabled and size is reported via the metering API,
+ * so `storageSizeBytes` is undefined and we must fall back to `meteringStorageSizeBytes`.
+ */
+function getStorageSizeBytes({ storageSizeBytes, meteringStorageSizeBytes }: DataStream) {
+  return storageSizeBytes ?? meteringStorageSizeBytes;
+}
+
+/**
  * Overlay inferred fields to match the table's expectations.
  */
-function formatDataStreamInfo({
-  name,
-  lifecycle,
-  indexTemplateName,
-  storageSizeBytes,
-  ...rest
-}: DataStream): DataStreamStatus {
+function formatDataStreamInfo(dataStream: DataStream): DataStreamStatus {
+  const { name, lifecycle, indexTemplateName, ...rest } = dataStream;
   const policyLabel = policyLabels.find(({ indexTemplate }) => indexTemplate === indexTemplateName);
+  const storageSizeBytes = getStorageSizeBytes(dataStream);
   return {
     ...rest,
     name: policyLabel?.label ?? name,

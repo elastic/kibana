@@ -22,6 +22,7 @@ export type LeftPanelTabsType = Array<{
 
 export enum EntityDetailsLeftPanelTab {
   RISK_INPUTS = 'risk_inputs',
+  ANOMALIES = 'anomalies',
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',
@@ -49,7 +50,7 @@ export interface EntityDetailsPath {
 const TechnicalPreviewBadge = () => (
   <EuiIconTip
     aria-label="Technical Preview"
-    type={'beaker'}
+    type={'flask'}
     title={
       <FormattedMessage
         id="xpack.securitySolution.flyout.left.visualize.graphVisualizationButton.technicalPreviewLabel"

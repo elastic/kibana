@@ -14,6 +14,7 @@ import { noConnectorsCasePermission, renderWithTestingProviders } from '../../co
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
 import userEvent from '@testing-library/user-event';
+import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 
 const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
@@ -49,6 +50,15 @@ describe('Connectors', () => {
     expect(screen.getByTestId('case-connectors-form-group')).toBeInTheDocument();
   });
 
+  it('hides the described form group title when hideTitle is true', () => {
+    renderWithTestingProviders(<Connectors {...props} hideTitle />);
+
+    expect(screen.getByTestId('case-connectors-form-group')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'External incident management system' })
+    ).not.toBeInTheDocument();
+  });
+
   it('shows the connectors form row', () => {
     renderWithTestingProviders(<Connectors {...props} />);
 
@@ -64,8 +74,9 @@ describe('Connectors', () => {
   it('the connector is changed successfully', async () => {
     renderWithTestingProviders(<Connectors {...props} />);
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await new EuiSuperSelectTestHarness('dropdown-connectors').select(
+      'dropdown-connector-resilient-2'
+    );
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('resilient-2');
@@ -81,8 +92,9 @@ describe('Connectors', () => {
       />
     );
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await userEvent.click(screen.getByTestId('dropdown-connector-no-connector'));
+    await new EuiSuperSelectTestHarness('dropdown-connectors').select(
+      'dropdown-connector-no-connector'
+    );
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('none');

@@ -7,7 +7,8 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaRequest, Logger } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { APP_ID } from '@kbn/security-solution-features/constants';
 
@@ -16,9 +17,24 @@ import { SyncWatchlistRequestParams } from '../../../../../../common/api/entity_
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
-import { getRequestSavedObjectClient } from '../../shared/utils';
+import { getWatchlistSavedObjectClient } from '../../shared/utils';
+import { getUserWatchlistPrivileges } from '../get_user_watchlist_privileges';
 
-export const syncWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+const hasWatchlistWritePrivileges = async (
+  request: KibanaRequest,
+  security: SecurityPluginStart,
+  namespace: string
+): Promise<boolean> => {
+  const { has_write_permissions } = await getUserWatchlistPrivileges(request, security, namespace);
+  return has_write_permissions ?? false;
+};
+
+export const syncWatchlistRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
+) => {
   router.versioned
     .post({
       access: 'public',
@@ -44,12 +60,24 @@ export const syncWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], 
         try {
           const secSol = await context.securitySolution;
           const core = await context.core;
+          const namespace = secSol.getSpaceId();
+
+          const [, { security }] = await getStartServices();
+
+          if (!(await hasWatchlistWritePrivileges(request, security, namespace))) {
+            return siemResponse.error({
+              statusCode: 403,
+              body: 'User is not authorized to sync watchlists. Write privileges are required.',
+            });
+          }
 
           const entitySourcesService = createEntitySourcesService({
             esClient: core.elasticsearch.client.asCurrentUser,
-            soClient: getRequestSavedObjectClient(core),
+            soClient: getWatchlistSavedObjectClient(core),
             logger,
-            namespace: secSol.getSpaceId(),
+            namespace,
+            getStartServices,
+            hasEncryptionKey,
           });
 
           await entitySourcesService.syncWatchlist(request.params.watchlist_id);

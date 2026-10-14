@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../../common';
 
 type HttpMethod = 'GET' | 'PUT' | 'POST';
 type HttpResponse = Record<string, unknown> | unknown[];
+
+export const resolvePath = (pathOrOptions: string | HttpFetchOptionsWithPath): string =>
+  typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
 
 export interface ResponseError {
   statusCode: number;
@@ -34,15 +38,9 @@ const registerHttpRequestMockHelpers = (
   const mockMethodImplementation = (method: HttpMethod, path: string) =>
     mockResponses.get(method)?.get(path) ?? Promise.resolve({});
 
-  httpSetup.get.mockImplementation((path) =>
-    mockMethodImplementation('GET', path as unknown as string)
-  );
-  httpSetup.post.mockImplementation((path) =>
-    mockMethodImplementation('POST', path as unknown as string)
-  );
-  httpSetup.put.mockImplementation((path) =>
-    mockMethodImplementation('PUT', path as unknown as string)
-  );
+  httpSetup.get.mockImplementation((path) => mockMethodImplementation('GET', resolvePath(path)));
+  httpSetup.post.mockImplementation((path) => mockMethodImplementation('POST', resolvePath(path)));
+  httpSetup.put.mockImplementation((path) => mockMethodImplementation('PUT', resolvePath(path)));
 
   const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
     const defuse = (promise: Promise<unknown>) => {
@@ -59,6 +57,16 @@ const registerHttpRequestMockHelpers = (
     response: HttpResponse = { repositories: [] },
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}repositories`, response, error);
+
+  const setLoadDefaultRepositoryResponse = (
+    response: HttpResponse = { repositoryName: null },
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}default_repository`, response, error);
+
+  const setSetDefaultRepositoryResponse = (
+    response: HttpResponse = { acknowledged: true, repositoryName: null },
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}default_repository`, response, error);
 
   const setLoadRepositoryTypesResponse = (response: HttpResponse = [], error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}repository_types`, response, error);
@@ -155,6 +163,8 @@ const registerHttpRequestMockHelpers = (
 
   return {
     setLoadRepositoriesResponse,
+    setLoadDefaultRepositoryResponse,
+    setSetDefaultRepositoryResponse,
     setLoadRepositoryTypesResponse,
     setGetRepositoryResponse,
     setSaveRepositoryResponse,

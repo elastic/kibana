@@ -78,6 +78,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.fillOpacity.help', {
       defaultMessage: 'Define the area chart fill opacity',
     }),
+  getFillHelp: () =>
+    i18n.translate('expressionXY.xyVis.fill.help', {
+      defaultMessage: 'Define if the area chart is filled in a solid or gradient color',
+    }),
   getHideEndzonesHelp: () =>
     i18n.translate('expressionXY.xyVis.hideEndzones.help', {
       defaultMessage: 'Hide endzone markers for partial data',
@@ -332,7 +336,7 @@ export const strings = {
     }),
   getAxisTruncateHelp: () =>
     i18n.translate('expressionXY.axisConfig.truncate.help', {
-      defaultMessage: 'The number of symbols before truncating',
+      defaultMessage: 'Maximum tick label width in pixels before truncating',
     }),
   getReferenceLineNameHelp: () =>
     i18n.translate('expressionXY.referenceLine.name.help', {

@@ -6,7 +6,7 @@
  */
 
 import * as z from '@kbn/zod/v4';
-
+import { lazySchema } from '@kbn/zod/v4';
 import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
@@ -25,8 +25,8 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  GranularRulesFilter,
   SearchRulesAggregations,
-  SearchRulesField,
   SearchRulesResponse,
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
@@ -60,11 +60,13 @@ export interface PatchRuleProps {
 export type Rule = RuleResponse;
 
 export type PaginationOptions = z.infer<typeof PaginationOptions>;
-export const PaginationOptions = z.object({
-  page: z.number().int().min(0),
-  perPage: z.number().int().min(0),
-  total: z.number().int().min(0),
-});
+export const PaginationOptions = lazySchema(() =>
+  z.object({
+    page: z.number().int().min(0),
+    perPage: z.number().int().min(0),
+    total: z.number().int().min(0),
+  })
+);
 
 export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
@@ -94,10 +96,12 @@ export interface RulesSnoozeSettingsBatchResponse {
 }
 
 export type SortingOptions = z.infer<typeof SortingOptions>;
-export const SortingOptions = z.object({
-  field: FindRulesSortField,
-  order: SortOrder,
-});
+export const SortingOptions = lazySchema(() =>
+  z.object({
+    field: FindRulesSortField,
+    order: SortOrder,
+  })
+);
 
 export interface FilterOptions {
   filter: string;
@@ -122,8 +126,8 @@ export interface FetchRulesResponse {
 
 export interface FetchSearchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
-  fields?: SearchRulesField[];
-  filter?: string;
+  fields?: string[];
+  filter?: GranularRulesFilter;
   search?: GranularRulesSearch;
   sort_field?: z.infer<typeof FindRulesSortField>;
   sort_order?: z.infer<typeof SortOrder>;
@@ -140,6 +144,20 @@ export type FetchSearchRulesResponse = SearchRulesResponse;
 
 export interface FetchRuleProps {
   id: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleHistoryProps {
+  ruleId: string;
+  page: number;
+  perPage: number;
+  signal?: AbortSignal;
+}
+
+export interface RestoreRuleFromHistoryProps {
+  ruleId: string;
+  changeId: string;
+  revision?: number;
   signal?: AbortSignal;
 }
 

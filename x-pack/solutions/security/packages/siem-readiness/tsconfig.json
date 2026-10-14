@@ -14,9 +14,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/kibana-react-plugin",
-    "@kbn/core",
-    "@kbn/react-query",
-  ]
+  "kbn_references": []
 }

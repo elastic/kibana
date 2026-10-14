@@ -9,23 +9,15 @@ import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
-import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { DataVisualizerTableItem } from '../../../common/components/stats_table/types';
 import type { FieldStatsComponentType } from '../../constants/field_stats_component_type';
-import type { FieldStatisticsTableEmbeddableState } from '../../../../../common/embeddables/types';
-
-export { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
-export type {
-  FieldStatsInitialState,
-  FieldStatisticsTableEmbeddableState,
-} from '../../../../../common/embeddables/types';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**
@@ -109,22 +101,17 @@ export interface FieldStatisticTableEmbeddableProps {
   resetData$?: Observable<number>;
   timeRange?: TimeRange;
   onRenderComplete?: () => void;
+  /**
+   * Callback reporting the number of fields currently displayed in the table.
+   * Reports `undefined` while a (re)load is in progress.
+   */
+  onFieldsCountChange?: (fieldsCount: number | undefined) => void;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<
   FieldStatisticTableEmbeddableProps,
   'query'
 > & { query?: ESQLQuery };
-
-export type OnAddFilter = (field: DataViewField | string, value: string, type: '+' | '-') => void;
-export interface FieldStatisticsTableEmbeddableParentApi {
-  executionContext?: { value: string };
-  embeddableState$: BehaviorSubject<FieldStatisticsTableEmbeddableState>;
-  overrideServices?: Partial<DataVisualizerStartDependencies>;
-  onAddFilter?: OnAddFilter;
-}
-
-export type DataVisualizerGridEmbeddableApi = Partial<FieldStatisticsTableEmbeddableState>;
 
 export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
 

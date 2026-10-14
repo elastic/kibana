@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useState } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
+import { getPlotValues } from './plot_utils';
+import { TimelineAxis } from './timeline_axis';
+import { VerticalLines } from './vertical_lines';
+import type { AgentMark } from './marker/agent_marker';
+import type { ErrorMark } from './marker/error_marker';
+
+export type Mark = AgentMark | ErrorMark;
+
+export interface Margins {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+export interface TimelineProps {
+  marks?: Mark[];
+  xMin?: number;
+  xMax?: number;
+  margins: Margins;
+  numberOfTicks?: number;
+  height?: number;
+}
+
+export function TimelineAxisContainer({
+  xMax,
+  xMin,
+  margins,
+  marks,
+  numberOfTicks,
+}: TimelineProps) {
+  const [width, setWidth] = useState(0);
+  if (xMax === undefined) {
+    return null;
+  }
+
+  return (
+    <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
+      {(resizeRef) => {
+        const plotValues = getPlotValues({ width, xMin, xMax, margins, numberOfTicks });
+        const topTraceDuration = xMax - (xMin ?? 0);
+        return (
+          <div
+            style={{ width: '100%', height: '100%' }}
+            ref={resizeRef}
+            data-test-subj="timeline-axis-container"
+          >
+            <TimelineAxis
+              plotValues={plotValues}
+              marks={marks}
+              topTraceDuration={topTraceDuration}
+            />
+          </div>
+        );
+      }}
+    </EuiResizeObserver>
+  );
+}
+
+export function VerticalLinesContainer({ xMax, xMin, margins, marks, height }: TimelineProps) {
+  const [width, setWidth] = useState(0);
+  if (xMax == null) {
+    return null;
+  }
+
+  return (
+    <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
+      {(resizeRef) => {
+        const plotValues = getPlotValues({ width, xMin, xMax, margins });
+        const topTraceDuration = xMax - (xMin ?? 0);
+        return (
+          <div
+            style={{
+              height: height ?? '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              pointerEvents: 'none',
+            }}
+            ref={resizeRef}
+          >
+            <VerticalLines
+              plotValues={plotValues}
+              marks={marks}
+              topTraceDuration={topTraceDuration}
+            />
+          </div>
+        );
+      }}
+    </EuiResizeObserver>
+  );
+}

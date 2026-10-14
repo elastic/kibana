@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: Documents layer smoke test
+ *
+ * Migration: Migrate to Scout
+ */
 export default function ({ getPageObjects, getService }) {
   const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');

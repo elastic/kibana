@@ -2,6 +2,10 @@
 
 Detects statistically significant changes (e.g., "spike", "dip", "trend_change", "step_change", "distribution_change", "non_stationary", "stationary", or "indeterminable") in trace metrics (latency, throughput, and failure rate). Returns the top 25 most significant change points ordered by p-value.
 
+## Minimum time window
+
+The handler enforces a 30-minute floor on the query window. If `end - start` is less than 30 minutes, `start` is silently extended to `end - 30m`. 
+
 ## Examples
 
 ### Basic time range

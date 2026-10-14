@@ -15,7 +15,10 @@ export function toAsyncIterator<T>(observable: Observable<T>): AsyncIterableIter
   let resolve: ((value: IteratorResult<T>) => void) | null = null;
   let reject: ((reason?: any) => void) | null = null;
 
-  const queue: Array<IteratorResult<T>> = [];
+  // head-index queue: shift() re-indexes the whole array, so draining a
+  // large backlog through it is quadratic
+  let queue: Array<IteratorResult<T>> = [];
+  let head = 0;
   let done = false;
   let error: any = null;
 
@@ -32,7 +35,8 @@ export function toAsyncIterator<T>(observable: Observable<T>): AsyncIterableIter
       done = true;
       error = err;
       // Clear any queued values - we fail fast
-      queue.length = 0;
+      queue = [];
+      head = 0;
       if (reject) {
         reject(err);
         reject = null;
@@ -58,8 +62,18 @@ export function toAsyncIterator<T>(observable: Observable<T>): AsyncIterableIter
         return Promise.reject(error);
       }
 
-      if (queue.length > 0) {
-        return Promise.resolve(queue.shift()!);
+      if (head < queue.length) {
+        const result = queue[head];
+        head++;
+        if (head === queue.length) {
+          queue = [];
+          head = 0;
+        } else if (head > 1024 && head * 2 >= queue.length) {
+          // amortized compaction so consumed entries don't accumulate
+          queue = queue.slice(head);
+          head = 0;
+        }
+        return Promise.resolve(result);
       }
 
       if (done) {

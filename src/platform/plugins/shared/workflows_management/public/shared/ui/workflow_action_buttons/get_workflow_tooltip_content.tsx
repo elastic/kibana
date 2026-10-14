@@ -48,15 +48,24 @@ interface GetTestRunTooltipContentProps {
   isValid: boolean;
   canRunWorkflow: boolean;
   isExecutionsTab: boolean;
+  isSaving?: boolean;
+  hasWorkflowAccess?: boolean;
 }
 export function getTestRunTooltipContent({
   isValid,
   canRunWorkflow,
   isExecutionsTab,
+  isSaving = false,
+  hasWorkflowAccess = true,
 }: GetTestRunTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.runWorkflow.executionsTab', {
       defaultMessage: 'Can not run workflow from executions tab',
+    });
+  }
+  if (isSaving) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.saving', {
+      defaultMessage: 'Workflow is saving',
     });
   }
   if (!isValid) {
@@ -66,6 +75,12 @@ export function getTestRunTooltipContent({
   }
   if (!canRunWorkflow) {
     return runWorkflowExecutePrivilegeRequiredTooltip;
+  }
+  if (!hasWorkflowAccess) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.accessRequired', {
+      defaultMessage: 'You need {executor} or {editor} access to run this workflow.',
+      values: { executor: 'Executor', editor: 'Editor' },
+    });
   }
   return null;
 }
@@ -97,11 +112,15 @@ interface GetSaveWorkflowTooltipContentProps {
   isExecutionsTab: boolean;
   canSaveWorkflow: boolean;
   isCreate: boolean;
+  hasUnsavedChanges: boolean;
+  isManagedWorkflow?: boolean;
 }
 export function getSaveWorkflowTooltipContent({
   isExecutionsTab,
   canSaveWorkflow,
   isCreate,
+  hasUnsavedChanges,
+  isManagedWorkflow = false,
 }: GetSaveWorkflowTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.saveWorkflow.executionsTab', {
@@ -118,6 +137,16 @@ export function getSaveWorkflowTooltipContent({
         defaultMessage: 'You are not allowed to update workflows',
       });
     }
+  }
+  if (isManagedWorkflow) {
+    return i18n.translate('workflows.actionButtons.saveWorkflow.managedWorkflow', {
+      defaultMessage: 'Managed workflow YAML is read-only',
+    });
+  }
+  if (!hasUnsavedChanges) {
+    return i18n.translate('workflows.actionButtons.saveWorkflow.noChanges', {
+      defaultMessage: 'No changes to save',
+    });
   }
   return null;
 }

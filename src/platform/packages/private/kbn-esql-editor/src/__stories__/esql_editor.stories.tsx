@@ -7,135 +7,123 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { BehaviorSubject, of } from 'rxjs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { StoryObj } from '@storybook/react';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import React, { useState } from 'react';
+import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLEditor } from '../esql_editor';
 import type { ESQLEditorProps } from '../esql_editor';
+import { EditorServicesProvider } from './mock_services';
 
-const uiConfig: Record<string, unknown> = {};
-const uiSettings = {
-  get: (key: string) => uiConfig[key],
-};
+// Controlled story component — maintains query state locally and delegates
+// to the fn() spies in args so changes are visible in the Actions panel.
+const ControlledEditor = (props: ESQLEditorProps) => {
+  const [query, setQuery] = useState(props.query);
 
-const core = coreMock.createStart();
-core.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject<'oblt' | null>('oblt'));
-(core.http.get as jest.Mock).mockImplementation(async (path: string) => {
-  if (path.includes('/internal/esql/autocomplete/sources/')) {
-    return [
-      { name: 'test_index', hidden: false, type: 'index' },
-      { name: 'logs', hidden: false, type: 'index' },
-    ];
-  }
-  return [];
-});
-
-const kql = kqlPluginMock.createStartContract();
-(kql.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
-
-const storage = {
-  get: (key: string) => null,
-  set: (_key: string, _value: unknown) => {},
-  remove: (_key: string) => {},
-  clear: () => {},
-};
-
-const uiActions = {
-  getTrigger: (_id: string) => ({
-    exec: async () => {},
-  }),
-};
-
-const data = dataPluginMock.createStartContract();
-(data.search.search as jest.Mock).mockReturnValue(
-  of({
-    rawResponse: { columns: [], all_columns: [] },
-    isPartial: false,
-    isRunning: false,
-    total: 0,
-    loaded: 0,
-  })
-);
-
-const services = {
-  core,
-  application: core.application,
-  uiSettings,
-  settings: { client: uiSettings },
-  data,
-  kql,
-  storage,
-  uiActions,
-};
-
-const StoryWrapper = ({ args }: { args: ESQLEditorProps }) => {
-  const stableServices = useMemo(() => services, []);
   return (
-    <KibanaContextProvider services={stableServices}>
-      <ESQLEditor {...args} />
-    </KibanaContextProvider>
+    <EditorServicesProvider>
+      <ESQLEditor
+        {...props}
+        query={query}
+        onTextLangQueryChange={(q: AggregateQuery) => {
+          setQuery(q);
+          props.onTextLangQueryChange(q);
+        }}
+        onTextLangQuerySubmit={props.onTextLangQuerySubmit}
+      />
+    </EditorServicesProvider>
   );
 };
 
-const Template = (args: ESQLEditorProps) => <StoryWrapper args={args} />;
+// ---------------------------------------------------------------------------
+// Stories meta
+// ---------------------------------------------------------------------------
 
-export default {
-  title: 'Text based languages editor',
+const meta: Meta<typeof ESQLEditor> = {
+  title: 'ES|QL Editor',
   component: ESQLEditor,
+  args: {
+    onTextLangQueryChange: fn(),
+    onTextLangQuerySubmit: fn(),
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ padding: '24px' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  parameters: {
+    layout: 'fullscreen',
+    controls: { sort: 'alpha' },
+  },
 };
 
-export const ExpandedMode: StoryObj<typeof ESQLEditor> = {
-  render: Template,
-  name: 'expanded mode',
+export default meta;
+type Story = StoryObj<typeof ESQLEditor>;
 
+// ---------------------------------------------------------------------------
+// Stories
+// ---------------------------------------------------------------------------
+
+export const Default: Story = {
+  name: 'Default',
+  render: (args) => <ControlledEditor {...args} />,
   args: {
-    query: {
-      esql: 'from dataview | keep field1, field2',
-    },
+    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    hideQueryHistory: false,
+    disableAutoFocus: true,
+  },
+};
+
+export const InlineMode: Story = {
+  name: 'Inline mode',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    editorIsInline: true,
     hideQueryHistory: true,
     disableAutoFocus: true,
   },
-
-  argTypes: {
-    onTextLangQueryChange: {
-      action: 'changed',
-    },
-
-    onTextLangQuerySubmit: {
-      action: 'submitted',
-    },
-  },
 };
 
-export const WithErrors: StoryObj<typeof ESQLEditor> = {
-  render: Template,
-  name: 'with errors',
-
+export const WithErrors: Story = {
+  name: 'With errors',
+  render: (args) => <ControlledEditor {...args} />,
   args: {
-    query: {
-      esql: 'from dataview | keep field1, field2',
-    },
-    dataTestSubj: 'test-id',
+    query: { esql: 'FROM kibana_sample_data_logs | KEEP unknown_field' },
     hideQueryHistory: true,
     disableAutoFocus: true,
     errors: [
       new Error(
-        '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+        'verification_exception - Found 1 problem\nline 1:39: Unknown column [unknown_field]'
       ),
     ],
   },
+};
 
-  argTypes: {
-    onTextLangQueryChange: {
-      action: 'changed',
+export const WithWarning: Story = {
+  name: 'With warning',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: {
+      esql: 'FROM kibana_sample_data_logs | EVAL ratio = bytes / 0 | KEEP @timestamp, ratio | LIMIT 10',
     },
+    hideQueryHistory: true,
+    disableAutoFocus: true,
+    warning:
+      'Line 1:43: evaluation of [bytes / 0] failed, treating result as null. Only first 20 failures recorded.',
+  },
+};
 
-    onTextLangQuerySubmit: {
-      action: 'submitted',
-    },
+export const WithHistoryOpen: Story = {
+  name: 'With history open',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    editorIsInline: true,
+    hideQueryHistory: false,
+    disableAutoFocus: true,
+    initialState: { isHistoryOpen: true },
   },
 };

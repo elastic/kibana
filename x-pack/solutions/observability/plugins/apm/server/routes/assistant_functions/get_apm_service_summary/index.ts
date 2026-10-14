@@ -12,7 +12,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { Environment } from '../../../../common/environment_rt';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -26,17 +26,13 @@ import { getServiceAnnotations } from '../../services/annotations';
 import { getServiceMetadataDetails } from '../../services/get_service_metadata_details';
 import { getAnomalies } from './get_anomalies';
 
-export const serviceSummaryRouteRt = t.intersection([
-  t.type({
-    'service.name': t.string,
-    start: t.string,
-    end: t.string,
-  }),
-  t.partial({
-    'service.environment': t.string,
-    'transaction.type': t.string,
-  }),
-]);
+export const serviceSummaryRouteRt = z.object({
+  'service.name': z.string(),
+  start: z.string(),
+  end: z.string(),
+  'service.environment': z.string().optional(),
+  'transaction.type': z.string().optional(),
+});
 
 export interface ServiceSummary {
   'service.name': string;
@@ -74,7 +70,7 @@ export async function getApmServiceSummary({
   apmAlertsClient,
   logger,
 }: {
-  arguments: t.TypeOf<typeof serviceSummaryRouteRt>;
+  arguments: z.infer<typeof serviceSummaryRouteRt>;
   apmEventClient: APMEventClient;
   mlClient?: MlClient;
   esClient: ElasticsearchClient;

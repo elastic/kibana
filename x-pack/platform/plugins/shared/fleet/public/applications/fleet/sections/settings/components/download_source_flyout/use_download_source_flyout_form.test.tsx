@@ -42,7 +42,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslCertificateInput.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -64,7 +64,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslKeyInput.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -88,7 +88,7 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await testRenderer.waitFor(() => {
       expect(result.current.inputs.sslCertificateAuthoritiesInput.props.errors).toBeDefined();
-      expect(onSuccess).not.toBeCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
       expect(result.current.isDisabled).toBeTruthy();
     });
   });
@@ -111,7 +111,31 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
 
     await act(() => result.current.submit());
 
-    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
+  });
+
+  it('should block submission when username contains only spaces', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.authTypeInput.setValue('username_password');
+      result.current.inputs.usernameInput.setValue('   ');
+      result.current.inputs.passwordInput.setValue('password');
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(result.current.inputs.usernameInput.errors).toEqual(['Username is required']);
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(result.current.isDisabled).toBeTruthy();
+    });
   });
 });
 
@@ -227,6 +251,28 @@ describe('Download source form validation', () => {
       const res = validateDownloadSourceHeaders([{ key: '', value: '' }]);
 
       expect(res).toBeUndefined();
+    });
+
+    it('should treat whitespace-only key or value as missing', () => {
+      expect(validateDownloadSourceHeaders([{ key: '   ', value: '\t ' }])).toBeUndefined();
+
+      expect(validateDownloadSourceHeaders([{ key: 'X-Custom-Header', value: '   ' }])).toEqual([
+        {
+          message: 'Missing value for key "X-Custom-Header"',
+          index: 0,
+          hasKeyError: false,
+          hasValueError: true,
+        },
+      ]);
+
+      expect(validateDownloadSourceHeaders([{ key: '   ', value: 'some-value' }])).toEqual([
+        {
+          message: 'Missing key for value "some-value"',
+          index: 0,
+          hasKeyError: true,
+          hasValueError: false,
+        },
+      ]);
     });
 
     it('should return error when key is provided without value', () => {

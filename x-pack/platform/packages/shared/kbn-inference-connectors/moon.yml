@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-connectors'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/inference-connectors'
   description: Moon project for @kbn/inference-connectors
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/kbn-inference-connectors
 dependsOn:
   - '@kbn/i18n'

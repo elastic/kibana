@@ -50,6 +50,9 @@ jest.mock('../../kibana_services', () => {
         },
       };
     },
+    getMapsCapabilities() {
+      return { save: true };
+    },
   };
 });
 
@@ -75,7 +78,7 @@ const mockLayer = {
     return true;
   },
   getLayerTypeIconName: () => {
-    return 'vector';
+    return 'vectorSquare';
   },
   renderSourceSettingsEditor: () => {
     return <div>mockSourceSettings</div>;

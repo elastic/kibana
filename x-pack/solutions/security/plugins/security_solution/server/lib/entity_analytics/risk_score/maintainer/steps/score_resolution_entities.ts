@@ -14,7 +14,7 @@ import {
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
 } from '../../calculate_esql_risk_scores';
-import { MAX_RESOLUTION_TARGETS_PER_PAGE } from '../../constants';
+import { MAX_RESOLUTION_TARGETS_PER_PAGE, RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
@@ -37,6 +37,7 @@ interface ScoreResolutionEntitiesParams {
   calculationRunId: string;
   watchlistConfigs: Map<string, WatchlistObject>;
   abortSignal?: AbortSignal;
+  targetEntityIds?: string[];
 }
 
 interface ResolutionPageResult {
@@ -60,6 +61,7 @@ export const calculateResolutionEntityScores = async function* ({
   calculationRunId,
   watchlistConfigs,
   abortSignal,
+  targetEntityIds,
 }: ScoreResolutionEntitiesParams): AsyncGenerator<EntityRiskScoreRecord[], number> {
   let afterKey: Record<string, string> | undefined;
   let pagesProcessed = 0;
@@ -73,9 +75,11 @@ export const calculateResolutionEntityScores = async function* ({
     // Per page: fetch groups, score them, then apply merged group modifiers.
     const pageResult = await fetchNextResolutionPage({
       esClient,
+      entityType,
       lookupIndex,
       pageSize,
       afterKey,
+      targetEntityIds,
     });
     if (!pageResult) {
       break;
@@ -142,14 +146,18 @@ export const calculateResolutionEntityScores = async function* ({
 
 const fetchNextResolutionPage = async ({
   esClient,
+  entityType,
   lookupIndex,
   pageSize,
   afterKey,
+  targetEntityIds,
 }: {
   esClient: ElasticsearchClient;
+  entityType: EntityType;
   lookupIndex: string;
   pageSize: number;
   afterKey: Record<string, string> | undefined;
+  targetEntityIds?: string[];
 }): Promise<ResolutionPageResult | null> => {
   interface CompositeAgg {
     buckets: Array<{ key: Record<string, string> }>;
@@ -158,9 +166,11 @@ const fetchNextResolutionPage = async ({
 
   const compositeResponse = await esClient.search(
     getResolutionCompositeQuery(
+      entityType,
       lookupIndex,
       Math.min(pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE),
-      afterKey
+      afterKey,
+      targetEntityIds
     )
   );
   const compositeAgg = (
@@ -273,7 +283,10 @@ const scoreResolutionPage = async ({
     alertsIndex,
     lookupIndex
   );
-  const esqlResponse = await esClient.esql.query({ query });
+  const esqlResponse = await esClient.esql.query(
+    { query },
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+  );
   return {
     parsedScores: (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex)),
     esqlRows: esqlResponse.values?.length ?? 0,

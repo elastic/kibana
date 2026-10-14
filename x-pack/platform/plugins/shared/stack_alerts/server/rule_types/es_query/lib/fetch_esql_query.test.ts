@@ -16,7 +16,26 @@ import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitor
 import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlEsqlClusterInfo,
+  EsqlEsqlShardFailure,
+} from '@elastic/elasticsearch/lib/api/types';
+import { errors, type TransportResult } from '@elastic/elasticsearch';
+
+const createVerificationError = (reason: string) =>
+  new errors.ResponseError({
+    statusCode: 400,
+    headers: {},
+    warnings: [],
+    meta: {} as TransportResult['meta'],
+    body: {
+      error: {
+        type: 'verification_exception',
+        reason,
+        root_cause: [{ type: 'verification_exception', reason }],
+      },
+    },
+  } as TransportResult);
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -50,6 +69,7 @@ jest.mock('../../../../common', () => {
 
 const logger = loggingSystemMock.create().get();
 const mockRuleResultService = publicRuleResultServiceMock.create();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
 describe('fetchEsqlQuery', () => {
   afterAll(() => {
@@ -69,19 +89,59 @@ describe('fetchEsqlQuery', () => {
 
   describe('fetch', () => {
     it('should throw a user error when the error is a verification_exception error', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-
-      scopedClusterClient.asCurrentUser.transport.request.mockRejectedValueOnce(
+      scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
         new Error(
           'verification_exception: Found 1 problem line 1:23: Unknown column [user_agent.original]'
         )
       );
 
-      try {
-        await fetchEsqlQuery({
+      const error = await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: defaultParams,
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        sourceFields: [],
+      }).catch((e) => e);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['all', [{ count: 0, group: 'all documents', hits: [], sourceFields: {} }]],
+      ['row', []],
+    ])(
+      'should return an empty run with a warning when the index is unknown (groupBy: %s)',
+      async (groupBy, expectedResults) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError('Found 1 problem\nline 1:1: Unknown index [logs-missing]')
+        );
+        (getEsqlQueryHits as jest.Mock).mockImplementationOnce(
+          jest.requireActual('../../../../common').getEsqlQueryHits
+        );
+
+        const result = await fetchEsqlQuery({
           ruleId: 'testRuleId',
           alertLimit: 1,
-          params: defaultParams,
+          params: { ...defaultParams, groupBy, esqlQuery: { esql: 'from logs-missing' } },
           services: {
             logger,
             scopedClusterClient,
@@ -102,10 +162,127 @@ describe('fetchEsqlQuery', () => {
           dateEnd: new Date().toISOString(),
           sourceFields: [],
         });
-      } catch (e) {
-        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+
+        expect(result).toEqual({
+          index: null,
+          link: '/app/r?l=DISCOVER_APP_LOCATOR',
+          parsedResults: { results: expectedResults, truncated: false },
+        });
+        const warning =
+          'The target index [logs-missing] does not exist. The query returned no results.';
+        expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+        expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+        const debugMessages = jest
+          .mocked(logger.debug)
+          .mock.calls.map(([message]) => (typeof message === 'function' ? message() : message));
+        expect(debugMessages).toContainEqual(
+          expect.stringContaining('Unknown index [logs-missing]')
+        );
       }
-    });
+    );
+
+    it.each([
+      ['multiple indices', 'from logs-exists, logs-missing'],
+      ['a TS source command', 'ts logs-missing'],
+      ['a quoted index', 'from "logs-missing"'],
+      ['a FROM subquery', 'from logs-exists, (from logs-missing)'],
+    ])(
+      'should return an empty run with a warning when the index is unknown and the query uses %s',
+      async (_, esql) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError('Found 1 problem\nline 1:1: Unknown index [logs-missing]')
+        );
+        (getEsqlQueryHits as jest.Mock).mockImplementationOnce(
+          jest.requireActual('../../../../common').getEsqlQueryHits
+        );
+
+        const result = await fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: { ...defaultParams, esqlQuery: { esql } },
+          services: {
+            logger,
+            scopedClusterClient,
+            // @ts-expect-error
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+                },
+              },
+            } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+          sourceFields: [],
+        });
+
+        expect(result.parsedResults.results).toEqual([
+          { count: 0, group: 'all documents', hits: [], sourceFields: {} },
+        ]);
+        expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+          'The target index [logs-missing] does not exist. The query returned no results.'
+        );
+      }
+    );
+
+    it.each([
+      [
+        'a lookup join',
+        'from logs-exists | lookup join logs-missing on host.name',
+        'Found 1 problem\nline 1:32: Unknown index [logs-missing]',
+      ],
+      [
+        'a WHERE subquery',
+        'from logs-exists | where host.name in (from logs-missing)',
+        'Found 1 problem\nline 1:45: Unknown index [logs-missing]',
+      ],
+      [
+        'a source index and a lookup join',
+        'from logs-missing | lookup join lookup-missing on host.name',
+        'Found 2 problems\nline 1:6: Unknown index [logs-missing]\nline 1:33: Unknown index [lookup-missing]',
+      ],
+    ])(
+      'should throw a user error when the unknown index is not a top-level source and the query uses %s',
+      async (_, esql, reason) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError(reason)
+        );
+
+        const error = await fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: { ...defaultParams, esqlQuery: { esql } },
+          services: {
+            logger,
+            scopedClusterClient,
+            // @ts-expect-error
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+                },
+              },
+            } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+          sourceFields: [],
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(Error);
+        expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+        expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+      }
+    );
 
     it('should add a warning when is_partial is true', async () => {
       const shardFailure: EsqlEsqlShardFailure = {
@@ -114,18 +291,17 @@ describe('fetchEsqlQuery', () => {
         index: 'test-index',
       };
 
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [],
         values: [],
-        is_partial: true, // is_partial is true
+        is_partial: true,
         _clusters: {
           details: {
             'cluster-1': {
               failures: [shardFailure],
             },
           },
-        },
+        } as unknown as EsqlEsqlClusterInfo,
       });
 
       (getEsqlQueryHits as jest.Mock).mockReturnValue({
@@ -174,14 +350,13 @@ describe('fetchEsqlQuery', () => {
     });
 
     it('should add a warning when is_partial is true but there is no shard failure', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [],
         values: [],
-        is_partial: true, // is_partial is true
+        is_partial: true,
         _clusters: {
           details: {},
-        },
+        } as unknown as EsqlEsqlClusterInfo,
       });
 
       (getEsqlQueryHits as jest.Mock).mockReturnValue({
@@ -230,11 +405,10 @@ describe('fetchEsqlQuery', () => {
     });
 
     it('should not add a warning when is_partial is false', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [],
         values: [],
-        is_partial: false, // is_partial is true
+        is_partial: false,
       });
 
       (getEsqlQueryHits as jest.Mock).mockReturnValue({
@@ -309,7 +483,8 @@ describe('fetchEsqlQuery', () => {
               ],
             },
           },
-          "query": "FROM test | LIMIT 1000",
+          "query": "from test
+        | LIMIT 1000",
         }
       `);
     });
@@ -349,7 +524,8 @@ describe('fetchEsqlQuery', () => {
               "_tend": "2020-02-09T23:15:41.941Z",
             },
           ],
-          "query": "FROM test | WHERE event.action == \\"execute\\" AND event.duration > 0 AND @timestamp > ?_tstart | STATS duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | WHERE duration > 0 | LIMIT 1000",
+          "query": "from test | where event.action == \\"execute\\" AND event.duration > 0 AND @timestamp > ?_tstart | stats duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | where duration > 0
+        | LIMIT 1000",
         }
       `);
     });
@@ -376,15 +552,15 @@ describe('fetchEsqlQuery', () => {
               ],
             },
           },
-          "query": "FROM test | LIMIT 100",
+          "query": "from test
+        | LIMIT 100",
         }
       `);
     });
   });
 
   it('should bubble up warnings if there are duplicate alerts', async () => {
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+    scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
       columns: [],
       values: [],
     });

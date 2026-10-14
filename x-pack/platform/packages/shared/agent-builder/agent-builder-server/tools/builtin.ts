@@ -7,96 +7,88 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod/v4';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type {
+  ToolCallWithResult,
+  ToolDefinition,
+  ToolType,
+  ToolConfirmationPolicy,
+} from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
-import type { ToolHandlerFn } from './handler';
+import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import type {
+  AvailabilityContext,
+  AvailabilityResult,
+  AvailabilityHandler,
+  AvailabilityConfig,
+} from '../availability';
+import type { ToolHandlerContext, ToolHandlerFn } from './handler';
 
 /**
- * Information exposed to the {@link ToolAvailabilityHandler}.
- */
-export interface ToolAvailabilityContext {
-  request: KibanaRequest;
-  uiSettings: IUiSettingsClient;
-  spaceId: string;
-}
-
-/**
- * Information exposed to the {@link ToolAvailabilityHandler}.
- */
-export interface ToolAvailabilityResult {
-  /**
-   * Whether the tool is available or not.
-   */
-  status: 'available' | 'unavailable';
-  /**
-   * Optional reason for why the tool is unavailable.
-   */
-  reason?: string;
-}
-
-/**
- * Availability handler for a tool.
- */
-export type ToolAvailabilityHandler = (
-  context: ToolAvailabilityContext
-) => MaybePromise<ToolAvailabilityResult>;
-
-export interface ToolAvailabilityConfig {
-  /**
-   * handler which can be defined to add conditional availability of the tool.
-   *
-   * Note: this is meant to be used for tools that are gated behind a feature flag,
-   *       or tools which have some condition to be available.
-   *       it *IS NOT* meant to be used as a replacement for RBAC.
-   */
-  handler: ToolAvailabilityHandler;
-  /**
-   * Cache mode for the result
-   * - global: the result will be cached globally, for all spaces
-   * - space: the result will be cached per-space
-   * - none: the result shouldn't be cached (warning: this can lead to performance issues)
-   */
-  cacheMode: 'global' | 'space' | 'none';
-  /**
-   * Optional TTL for the cached result, *in seconds*.
-   * Default to 300 seconds (5 minutes).
-   */
-  cacheTtl?: number;
-}
-
-/**
- * Controls how often the user is prompted for confirmation when the agent calls a tool.
+ * MCP tool annotations for builtin tools exposed via the Agent Builder MCP server.
  *
- * - once:   prompt once per tool type for the entire conversation. After the user
- *           accepts (or rejects), all subsequent calls to the same tool reuse that
- *           response — including retries after failures.
- * - always: prompt on every individual tool call. Each invocation gets its own
- *           confirmation, even if it targets the same tool type.
- * - never:  skip confirmation entirely.
+ * All five fields are required so tool authors must make an explicit classification
+ * choice. The type is derived from the MCP SDK's ToolAnnotations to stay in sync
+ * with the spec — if the SDK renames or removes a field, TypeScript will surface
+ * the break here.
+ *
+ * Annotation guide (copy these values directly):
+ *
+ * Pure read (search, list, get):
+ *   readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false
+ *
+ * Create / upsert (non-destructive write):
+ *   readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false
+ *
+ * Delete / irreversible overwrite:
+ *   readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false
+ *
+ * Calls external API / webhook / email (combine with one of the above):
+ *   openWorldHint: true
+ *
+ * Rules:
+ * - readOnlyHint and destructiveHint must not both be true.
+ * - Read-only tools should always set idempotentHint: true.
+ *
+ * See: https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations
  */
-export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
+export type McpToolAnnotations = Required<
+  Pick<
+    ToolAnnotations,
+    'title' | 'readOnlyHint' | 'destructiveHint' | 'idempotentHint' | 'openWorldHint'
+  >
+>;
+
+/**
+ * Tool-specific aliases for the shared availability types.
+ * See {@link AvailabilityConfig} for full documentation.
+ */
+export type ToolAvailabilityContext = AvailabilityContext;
+export type ToolAvailabilityResult = AvailabilityResult;
+export type ToolAvailabilityHandler = AvailabilityHandler;
+export type ToolAvailabilityConfig = AvailabilityConfig;
 
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
-export interface ToolConfirmationPolicy<
+export interface BuiltInToolConfirmationContext<
   TParams extends Record<string, unknown> = Record<string, unknown>
 > {
-  /**
-   * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
-   */
-  askUser?: ToolConfirmationPolicyMode;
+  toolParams: TParams;
+  context: ToolHandlerContext;
+}
+
+export interface BuiltInToolConfirmationPolicy<
+  TParams extends Record<string, unknown> = Record<string, unknown>
+> extends ToolConfirmationPolicy {
   /**
    * If set, will be used to get the confirmation
    */
-  getConfirmation?: (opts: {
-    toolParams: TParams;
-  }) => MaybePromise<ToolPolicyConfirmationDefinition>;
+  getConfirmation?: (
+    context: BuiltInToolConfirmationContext<TParams>
+  ) => MaybePromise<ToolPolicyConfirmationDefinition>;
 }
 
 export interface BuiltInToolSpecificConfig<
@@ -115,7 +107,7 @@ export interface BuiltInToolSpecificConfig<
   /**
    * Optional tool call policy to control tool call confirmation behavior
    */
-  confirmation?: ToolConfirmationPolicy<TParams>;
+  confirmation?: BuiltInToolConfirmationPolicy<TParams>;
   /**
    * Optional function to summarize a tool return for conversation history.
    * When provided, this function will be called when processing conversation history
@@ -123,6 +115,17 @@ export interface BuiltInToolSpecificConfig<
    * This helps prevent context bloat in long conversations.
    */
   summarizeToolReturn?: ToolReturnSummarizerFn;
+  /**
+   * Per-tool override of the tool-result length guardrail's token budget.
+   * When set, replaces the ToolManager-wide default for this tool specifically.
+   * Set to `Infinity` to fully exempt this tool's results from truncation.
+   */
+  maxResultTokens?: number;
+  /**
+   * When true, this tool is excluded from the MCP server's tool list but
+   * remains available to 1P Agent Builder chat via the builtin tool registry.
+   */
+  excludeFromMcp?: boolean;
 }
 
 /**
@@ -146,7 +149,10 @@ export type ToolReturnSummarizerFn = (
 export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   TResult extends ToolResult = ToolResult
-> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration' | 'experimental'>,
+> extends Omit<
+      ToolDefinition,
+      'type' | 'readonly' | 'configuration' | 'experimental' | 'confirmation'
+    >,
     BuiltInToolSpecificConfig<z.infer<RunInput>> {
   /**
    * built-in tool types
@@ -165,7 +171,22 @@ export interface BuiltinToolDefinition<
    * Refer to {@link ToolAvailabilityConfig}
    */
   availability?: ToolAvailabilityConfig;
+  /**
+   * MCP annotations for this tool. Required for all builtin tools exposed via the MCP server.
+   * See {@link McpToolAnnotations} for the full guide.
+   */
+  annotations: McpToolAnnotations;
 }
+
+/**
+ * Tool definition for internal agent-runner tools (bash, sleep, etc.) that use
+ * BuiltinToolDefinition but are never exposed via the MCP server.
+ * Omits annotations since these tools bypass MCP registration.
+ */
+export type InternalBuiltinToolDefinition<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'annotations'>;
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
   BuiltInToolSpecificConfig;

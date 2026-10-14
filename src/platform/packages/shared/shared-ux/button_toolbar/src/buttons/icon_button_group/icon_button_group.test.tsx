@@ -8,13 +8,55 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { IconButtonGroup } from './icon_button_group';
 
 describe('<IconButtonGroup />', () => {
-  test('is rendered', () => {
-    const component = mountWithIntl(
+  it('renders the button with its label as the accessible name', () => {
+    renderWithI18n(
+      <IconButtonGroup
+        legend="Legend"
+        buttons={[{ label: 'Text', onClick: jest.fn(), iconType: 'text' }]}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Text' })).toBeInTheDocument();
+  });
+
+  it('does not expose a native browser title when toolTipContent is provided', () => {
+    renderWithI18n(
+      <IconButtonGroup
+        legend="Legend"
+        buttons={[
+          { label: 'Text', onClick: jest.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
+        ]}
+      />
+    );
+
+    expect(screen.queryByTitle('Text')).not.toBeInTheDocument();
+  });
+
+  it('shows the EuiToolTip content on hover when toolTipContent is provided', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <IconButtonGroup
+        legend="Legend"
+        buttons={[
+          { label: 'Text', onClick: jest.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
+        ]}
+      />
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Text' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Tooltip');
+  });
+
+  it('forwards EBT click attributes to the button', () => {
+    renderWithI18n(
       <IconButtonGroup
         legend="Legend"
         buttons={[
@@ -22,11 +64,25 @@ describe('<IconButtonGroup />', () => {
             label: 'Text',
             onClick: jest.fn(),
             iconType: 'text',
+            'data-ebt-action': 'editGridSettings',
+            'data-ebt-element': 'chartsToolbar',
+            'data-ebt-detail': 'detail',
           },
         ]}
       />
     );
 
-    expect(component.render()).toMatchSnapshot();
+    expect(screen.getByRole('button', { name: 'Text' })).toHaveAttribute(
+      'data-ebt-action',
+      'editGridSettings'
+    );
+    expect(screen.getByRole('button', { name: 'Text' })).toHaveAttribute(
+      'data-ebt-element',
+      'chartsToolbar'
+    );
+    expect(screen.getByRole('button', { name: 'Text' })).toHaveAttribute(
+      'data-ebt-detail',
+      'detail'
+    );
   });
 });

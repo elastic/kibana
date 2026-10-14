@@ -6,12 +6,10 @@
  */
 import { apm, dedot } from '@kbn/synthtrace-client';
 import type { StoryFn } from '@storybook/react';
-import type { ComponentProps, ComponentType } from 'react';
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { TransactionFlyout } from '.';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 type Args = ComponentProps<typeof TransactionFlyout>;
@@ -55,25 +53,19 @@ const data = generateData();
 export default {
   title: 'app/TransactionDetails/waterfall/TransactionFlyout',
   component: TransactionFlyout,
-  decorators: [
-    (StoryComponent: ComponentType) => {
-      const coreMock = {
+  parameters: {
+    routePath:
+      '/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c',
+    apmContext: {
+      core: {
         http: {
           get: async (): Promise<TransactionDetailsApiReturnType> => {
             return dedot(data.transactionEvent, {}) as unknown as Transaction;
           },
         },
-      };
-      return (
-        <MockApmPluginStorybook
-          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-          routePath="/services/testServiceName/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=Api::CustomersController%23index&transactionType=request&latencyAggregationType=avg&flyoutDetailTab=&waterfallItemId=0863ecffc80f0aed&traceId=1d63e25e7345627176e172ae690f9462&transactionId=969fe48e33f4e13c"
-        >
-          <StoryComponent />
-        </MockApmPluginStorybook>
-      );
+      },
     },
-  ],
+  },
 };
 
 export const Example: StoryFn<Args> = () => {

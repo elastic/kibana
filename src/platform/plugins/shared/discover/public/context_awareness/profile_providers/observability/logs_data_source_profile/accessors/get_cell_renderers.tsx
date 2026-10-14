@@ -18,7 +18,8 @@ import { getServiceNameCell } from '../../../../../components/data_types/logs/se
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
-  (prev) => (params) => ({
+  (prev, { toolkit }) =>
+  (params) => ({
     ...prev(params),
     ...LOG_LEVEL_FIELDS.reduce(
       (acc, field) => ({
@@ -31,10 +32,10 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
     ...SERVICE_NAME_FIELDS.reduce(
       (acc, field) => ({
         ...acc,
-        [field]: getServiceNameCell(field, params),
-        [`${field}.keyword`]: getServiceNameCell(`${field}.keyword`, params),
+        [field]: getServiceNameCell(field, toolkit),
+        [`${field}.keyword`]: getServiceNameCell(`${field}.keyword`, toolkit),
       }),
       {}
     ),
-    [SOURCE_COLUMN]: getSummaryColumn(params),
+    [SOURCE_COLUMN]: getSummaryColumn(params, toolkit),
   });

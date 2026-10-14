@@ -13,7 +13,7 @@ import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 // After this many consecutive "no data" responses with filters applied,
 // drop the extra filters and fall back to the basic time-window query.
-// This prevents users from getting stuck if a field like host.os.type
+// This prevents users from getting stuck if a field like os.type
 // is missing from indexed documents due to mapping or collector differences.
 const FALLBACK_POLL_THRESHOLD = 30;
 
@@ -26,6 +26,7 @@ interface UseTimeWindowDataDetectionOptions {
   onboardingId: string;
   endpoint: string;
   extraQueryParams?: Record<string, string>;
+  keepExtraParamsOnFallback?: boolean;
 }
 
 export function useTimeWindowDataDetection({
@@ -37,6 +38,7 @@ export function useTimeWindowDataDetection({
   onboardingId,
   endpoint,
   extraQueryParams,
+  keepExtraParamsOnFallback = false,
 }: UseTimeWindowDataDetectionOptions) {
   const [checkDataStartTime, setCheckDataStartTime] = useState<number | null>(null);
   const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
@@ -57,11 +59,14 @@ export function useTimeWindowDataDetection({
     [JSON.stringify(extraQueryParams)]
   );
 
-  // After FALLBACK_POLL_THRESHOLD consecutive "no data" responses,
-  // drop extra filters (e.g. osType) and fall back to basic time-window.
+  // Default: after FALLBACK_POLL_THRESHOLD empty polls, drop extra filters so a
+  // missing/late os.type can't strand the user. Opt out via
+  // keepExtraParamsOnFallback when the caller needs the filter pinned (e.g. V2
+  // per-OS pages where unscoped data would mean cross-OS false completion).
   const hasExtraParams =
     stableExtraQueryParams !== undefined && Object.keys(stableExtraQueryParams).length > 0;
-  const shouldFallback = hasExtraParams && noDataPollCount >= FALLBACK_POLL_THRESHOLD;
+  const shouldFallback =
+    hasExtraParams && !keepExtraParamsOnFallback && noDataPollCount >= FALLBACK_POLL_THRESHOLD;
   const effectiveExtraParams = shouldFallback ? undefined : stableExtraQueryParams;
 
   const {

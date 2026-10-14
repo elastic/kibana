@@ -23,6 +23,7 @@ import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actio
 import { type AdditionalCellAction, type DiscoverCellActionExecutionContext } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { type ScopedProfilesManager } from '../profiles_manager';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import { v4 as uuidv4 } from 'uuid';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
@@ -94,6 +95,7 @@ describe('useAdditionalCellActions', () => {
     mockScopedEbtManager = scopedEbtManagerMock;
     mockScopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
       scopedEbtManager: mockScopedEbtManager,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     (uuidv4 as jest.Mock).mockImplementation(() => (++mockUuid).toString());
   });

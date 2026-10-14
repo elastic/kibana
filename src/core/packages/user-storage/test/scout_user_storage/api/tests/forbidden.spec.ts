@@ -9,8 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest } from '../fixtures';
-import { createHelpers } from './helpers';
+import { apiTest, createHelpers } from '../fixtures';
 
 apiTest.describe(
   'User Storage - Forbidden (no user profile)',
@@ -24,7 +23,7 @@ apiTest.describe(
     });
 
     apiTest('GET returns 403 with API key auth', async ({ apiClient }) => {
-      const response = await h.get(apiClient);
+      const response = await h.getKey(apiClient, 'test:string_key');
       expect(response).toHaveStatusCode(403);
     });
 

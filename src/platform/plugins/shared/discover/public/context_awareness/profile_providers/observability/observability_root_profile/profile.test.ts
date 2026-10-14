@@ -10,6 +10,7 @@
 import { SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
@@ -62,7 +63,7 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual('logs-*');
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([
         {
@@ -70,6 +71,7 @@ describe('observabilityRootProfileProvider', () => {
           name: 'All logs',
           timeFieldName: '@timestamp',
           title: 'logs-*',
+          managed: true,
         },
       ]);
     });
@@ -87,7 +89,7 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual(undefined);
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([]);
     });
@@ -104,7 +106,7 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual('logs-*');
       const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
         () => ({ query: 'FROM prev-pattern' }),
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultEsqlQuery).toEqual({ query: 'FROM logs-*' });
     });
@@ -126,6 +128,7 @@ describe('observabilityRootProfileProvider', () => {
         prev,
         {
           context: result.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       )();
       expect(prev).toHaveBeenCalled();
@@ -145,11 +148,11 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
       const docViewer = getDocViewer({
-        actions: {},
         record: buildMockRecord('test-index', {
           foo: 'bar',
         }),
@@ -175,11 +178,11 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
       const docViewer = getDocViewer({
-        actions: {},
         record: buildMockRecord('test-index', {
           'attributes.foo': 'bar',
         }),
@@ -213,11 +216,11 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
       const docViewer = getDocViewer({
-        actions: {},
         record: buildMockRecord('test-index', {
           'scope.attributes.foo': 'bar',
         }),
@@ -251,11 +254,11 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
       const docViewer = getDocViewer({
-        actions: {},
         record: buildMockRecord('test-index', {
           'resource.attributes.foo': 'bar',
         }),

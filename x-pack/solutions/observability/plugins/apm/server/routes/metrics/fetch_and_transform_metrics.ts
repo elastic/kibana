@@ -10,6 +10,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { FetchAndTransformMetrics } from '@kbn/apm-api-shared';
 import type {
   APMEventClient,
   APMEventESSearchRequest,
@@ -18,7 +19,6 @@ import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import type { ChartBase } from './types';
 import { environmentQuery, serviceNodeNameQuery } from '../../../common/utils/environment_query';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
-import type { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
 import type { APMConfig } from '../..';
 
 type MetricsAggregationMap = Unionize<{
@@ -38,22 +38,6 @@ export type GenericMetricsRequest = APMEventESSearchRequest & {
     };
   } & MetricAggs;
 };
-
-export type GenericMetricsChart = FetchAndTransformMetrics;
-
-export interface FetchAndTransformMetrics {
-  title: string;
-  key: string;
-  yUnit: YUnit;
-  series: Array<{
-    title: string;
-    key: string;
-    type: ChartType;
-    overallValue: number;
-    data: Coordinate[];
-  }>;
-  description?: string;
-}
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,

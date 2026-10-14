@@ -10,8 +10,8 @@
 import { execSync } from 'child_process';
 import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { BuildkiteClient } from '..';
-import type { Artifact } from '../buildkite/types/artifact';
+import { BuildkiteClient } from '../index.ts';
+import type { Artifact } from '../buildkite/types/artifact.ts';
 
 const buildkite = new BuildkiteClient();
 
@@ -30,7 +30,15 @@ export interface TestFailure {
   jobName: string;
   githubIssue?: string;
   failureCount?: number;
+  /** Set for Scout failures attributed to infrastructure; no GitHub issue is filed for these. */
+  infraReason?: {
+    category: string;
+    message: string;
+  };
 }
+
+const getInfraTag = ({ infraReason }: TestFailure) =>
+  infraReason ? ` [infra: ${infraReason.category}]` : '';
 
 const recursiveReadDir = (dirPath: string, allFiles: string[] = []) => {
   const files = readdirSync(dirPath);
@@ -65,8 +73,11 @@ export const getAnnotation = (
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+        const issueLink = failure.githubIssue ? ` [[issue]](${failure.githubIssue})` : '';
 
-        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+        return `[[job]](${jobUrl})${logsLink}${issueLink}${getInfraTag(failure)} ${
+          failure.jobName
+        } / ${failure.name}`;
       })
       .join('<br />\n')
   );
@@ -130,7 +141,9 @@ export const getSlackMessage = (
               }]>`
             : '';
 
-        return `<${jobUrl}|[job]>${logsLink}${failuresCount} ${failure.jobName} / ${failure.name}`;
+        return `<${jobUrl}|[job]>${logsLink}${failuresCount}${getInfraTag(failure)} ${
+          failure.jobName
+        } / ${failure.name}`;
       })
       .join('\n')
   );

@@ -13,14 +13,19 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { AppDeepLinkLocations } from '@kbn/core/public';
+import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 
-/** Tab interface with optional deep link support. */
+/** Tab interface with optional deep link and create action support. */
 export type DashboardListingTab = TableListTab & {
   deepLink?: {
-    /** Title to display in global search results */
     title: string;
-    /** Where this deep link should be visible. */
     visibleIn?: AppDeepLinkLocations[];
+  };
+  createAction?: {
+    order: AppMenuPopoverItem['order'];
+    label: AppMenuPopoverItem['label'];
+    iconType: AppMenuPopoverItem['iconType'];
+    create: (path: string) => void | Promise<void>;
   };
 };
 

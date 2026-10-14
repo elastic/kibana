@@ -11,7 +11,7 @@ Directory contains ES serverless resources that can be used to override the defa
 Example executed from the root directory of Kibana: 
 
 ```shell
-yarn es serverless \
+pnpm es serverless \
 --clean \
 --kill \
 -E xpack.security.authc.api_key.enabled=true \

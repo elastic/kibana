@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DELAY_MODE } from '../types';
 import type { FormValues } from '../types';
-import { deriveAlertDelayModeFromStateTransition } from '../utils/rule_request_mappers';
+import { deriveAlertDelayModeFromStateTransition } from '../utils/state_transition_helpers';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 import { useRuleFormMeta } from '../contexts';
@@ -87,6 +87,7 @@ export const AlertDelayField = () => {
               ...st,
               pendingCount: null,
               pendingTimeframe: null,
+              pendingOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -99,6 +100,7 @@ export const AlertDelayField = () => {
               ...st,
               pendingCount: st.pendingCount || DEFAULT_PENDING_COUNT,
               pendingTimeframe: null,
+              pendingOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -111,6 +113,7 @@ export const AlertDelayField = () => {
               ...st,
               pendingCount: null,
               pendingTimeframe: st.pendingTimeframe ?? DEFAULT_PENDING_TIMEFRAME,
+              pendingOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );

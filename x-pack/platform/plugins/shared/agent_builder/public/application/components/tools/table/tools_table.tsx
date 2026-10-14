@@ -9,7 +9,9 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
-import React, { memo, useEffect, useState } from 'react';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import React, { memo, useEffect, useRef, useState } from 'react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
 import { useToolsTableColumns } from './tools_table_columns';
@@ -19,12 +21,26 @@ import { useToolsTableSearch } from './tools_table_search';
 
 export const AgentBuilderToolsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { analytics },
+  } = useKibana();
   const { tools, isLoading: isLoadingTools, error: toolsError } = useToolsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
   const [selectedTools, setSelectedTools] = useState<ToolDefinition[]>([]);
   const { searchConfig, results: tableTools } = useToolsTableSearch();
   const columns = useToolsTableColumns();
+  const hasFiredListViewRef = useRef(false);
+
+  useEffect(() => {
+    if (!isLoadingTools && !hasFiredListViewRef.current) {
+      hasFiredListViewRef.current = true;
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityListView, {
+        entity_type: AGENT_BUILDER_UI_EBT.entity.TOOL,
+        entity_count: tools.length,
+      });
+    }
+  }, [isLoadingTools, tools.length, analytics]);
 
   useEffect(() => {
     setTablePageIndex(0);

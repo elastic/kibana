@@ -21,5 +21,13 @@ export default createTestConfig({
 
   // include settings from project controller
   esServerArgs: [],
-  kbnServerArgs: [],
+  // Pin the Cases templates flag ON so the Configure suite exercises the v2
+  // templates / field-library pages regardless of the plugin default. The flag
+  // only affects Cases; the legacy in-page flow is covered by the flag-OFF
+  // stateful `configure_legacy.ts` suite.
+  kbnServerArgs: [
+    `--xpack.cases.templates.enabled=true`,
+    // Keeps the plain Alerts nav link that the rules suites click, which Alerting V2 replaces.
+    `--uiSettings.globalOverrides.alerting:v2:enabled=false`,
+  ],
 });

@@ -8,10 +8,21 @@
  */
 
 export { takeSnapshot } from './take_snapshot';
-export { fetchSnapshot } from './fetch_snapshot';
+export { extractMappingsFromSnapshot } from './extract_mappings_from_snapshot';
+export { fetchSnapshot, gcsSnapshotUrl } from './fetch_snapshot';
+export {
+  resolveSnapshotSha,
+  snapshotExists,
+  getParentCommitSha,
+  ATTEMPTS_PER_SHA,
+  MAX_ANCESTOR_DEPTH,
+  SNAPSHOT_FETCH_RETRY_DELAY_MS,
+} from './resolve_snapshot_sha';
+export type { ResolvedSnapshotSha, SnapshotCheckResult } from './resolve_snapshot_sha';
 export { compareSnapshots } from './compare_snapshots';
 export { getNewTypes } from './get_new_types';
-export { getUpdatedTypes } from './get_updated_types';
+export { classifyUpdatedTypes } from './classify_updated_types';
+export type { ClassifiedUpdatedTypes } from './classify_updated_types';
 export {
   validateChangesNewType,
   validateChangesExistingType,

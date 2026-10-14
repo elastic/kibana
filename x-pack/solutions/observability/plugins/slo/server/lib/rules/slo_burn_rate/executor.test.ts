@@ -43,6 +43,7 @@ import {
 } from '@kbn/task-manager-plugin/server/task_running/errors';
 import { get, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   ALERT_ACTION,
   ALERT_ACTION_ID,
@@ -226,7 +227,7 @@ describe('BurnRateRuleExecutor', () => {
             id: '123-456',
             name: 'an slo rule',
           } as SanitizedRuleConfig,
-          spaceId: 'irrelevant',
+          spaceId: asSpaceId('irrelevant'),
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
@@ -239,6 +240,39 @@ describe('BurnRateRuleExecutor', () => {
           'Rule "an slo rule" 123-456 is referencing an SLO which cannot be found: "non-existent": SLO [non-existent] not found'
         );
       }
+    });
+
+    it('keeps the failure that stopped the lookup as `cause`', async () => {
+      const authError = Object.assign(new Error('security_exception'), {
+        statusCode: 401,
+        body: {
+          error: {
+            type: 'security_exception',
+            reason: 'failed to authenticate cloud API key: [0x28D520]',
+            caused_by: { authentication_error_code: '0x28D520' },
+          },
+        },
+      });
+      soClientMock.find.mockRejectedValue(authError);
+      const executor = getRuleExecutor(basePathMock);
+
+      await expect(
+        executor({
+          params: someRuleParamsWithWindows({ sloId: 'some-slo' }),
+          startedAt: new Date(),
+          startedAtOverridden: false,
+          services: servicesMock,
+          executionId: 'irrelevant',
+          logger: loggerMock,
+          previousStartedAt: null,
+          rule: { id: '123-456', name: 'an slo rule' } as SanitizedRuleConfig,
+          spaceId: asSpaceId('irrelevant'),
+          state: {},
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          getTimeRange,
+          isServerless: false,
+        })
+      ).rejects.toMatchObject({ cause: authError });
     });
 
     it('returns early when the slo is disabled', async () => {
@@ -255,7 +289,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -306,15 +340,15 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).not.toBeCalled();
-      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
     });
 
     it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
@@ -354,15 +388,15 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).not.toBeCalled();
-      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
@@ -420,14 +454,14 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'foo,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
@@ -458,7 +492,7 @@ describe('BurnRateRuleExecutor', () => {
           'client.geo.continent_name': 'asia',
         },
       });
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'bar,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
@@ -587,14 +621,14 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'foo',
         actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
         state: {
@@ -619,7 +653,7 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       });
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'bar',
         actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
         state: {
@@ -726,14 +760,14 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
         id: 'foo',
         actionGroup: HIGH_PRIORITY_ACTION_ID,
         state: {
@@ -758,7 +792,7 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       });
-      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
         id: 'bar',
         actionGroup: HIGH_PRIORITY_ACTION_ID,
         state: {
@@ -860,14 +894,14 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
         id: '*',
         actionGroup: ALERT_ACTION.id,
         state: {
@@ -920,7 +954,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: { id: ruleId, name: 'test rule' } as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -950,7 +984,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: { id: 'abc', name: 'test' } as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -979,7 +1013,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: { id: 'abc', name: 'test' } as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,

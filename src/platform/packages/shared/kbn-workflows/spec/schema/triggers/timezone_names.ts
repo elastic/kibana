@@ -466,7 +466,6 @@ export const timezoneNames = [
   'Europe/Istanbul',
   'Europe/Jersey',
   'Europe/Kaliningrad',
-  'Europe/Kiev',
   'Europe/Kirov',
   'Europe/Kyiv',
   'Europe/Lisbon',

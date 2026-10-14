@@ -29,11 +29,23 @@ describe('HmrServer', () => {
   });
 
   it('starts and listens on the requested port', async () => {
-    const expectedPort = Number(process.env.KBN_HMR_PORT) || 5678;
-    server = new HmrServer();
-    const port = await server.start();
-    expect(port).toBe(expectedPort);
-    expect(server.port).toBe(expectedPort);
+    // Use an OS-assigned ephemeral port so the test does not assume a specific
+    // host port (e.g. 5678) is free — common when a dev server is also running.
+    const original = process.env.KBN_HMR_PORT;
+    process.env.KBN_HMR_PORT = '0';
+
+    try {
+      server = new HmrServer();
+      const port = await server.start();
+      expect(port).toBeGreaterThan(0);
+      expect(server.port).toBe(port);
+    } finally {
+      if (original === undefined) {
+        delete process.env.KBN_HMR_PORT;
+      } else {
+        process.env.KBN_HMR_PORT = original;
+      }
+    }
   });
 
   it('returns correct SSE headers', async () => {
@@ -161,6 +173,74 @@ describe('HmrServer', () => {
         process.env.KBN_HMR_PORT = original;
       }
     }
+  });
+
+  describe('port-collision fallback', () => {
+    let squatter: http.Server;
+    let squattedPort: number;
+    let originalEnv: string | undefined;
+
+    beforeEach(async () => {
+      originalEnv = process.env.KBN_HMR_PORT;
+      squatter = http.createServer();
+      await new Promise<void>((resolve, reject) => {
+        squatter.once('error', reject);
+        squatter.listen(0, '127.0.0.1', () => resolve());
+      });
+      const addr = squatter.address();
+      if (!addr || typeof addr !== 'object') {
+        throw new Error('Failed to capture squatter port');
+      }
+      squattedPort = addr.port;
+      process.env.KBN_HMR_PORT = String(squattedPort);
+    });
+
+    afterEach(async () => {
+      if (originalEnv === undefined) {
+        delete process.env.KBN_HMR_PORT;
+      } else {
+        process.env.KBN_HMR_PORT = originalEnv;
+      }
+      await new Promise<void>((resolve) => squatter.close(() => resolve()));
+    });
+
+    it('falls back to an ephemeral port when the requested port is in use', async () => {
+      server = new HmrServer();
+      const port = await server.start();
+
+      expect(port).not.toBe(squattedPort);
+      expect(port).toBeGreaterThan(0);
+      expect(server.port).toBe(port);
+    });
+
+    it('emits a warning explaining the fallback when a log is provided', async () => {
+      const warning = jest.fn();
+      const log = { warning } as unknown as ConstructorParameters<typeof HmrServer>[1];
+
+      server = new HmrServer(undefined, log);
+      await server.start();
+
+      expect(warning).toHaveBeenCalledTimes(1);
+      const message: string = warning.mock.calls[0][0];
+      expect(message).toContain(`HMR port ${squattedPort} is already in use`);
+      expect(message).toContain(`lsof -i :${squattedPort}`);
+      expect(message).toMatch(/ephemeral port/i);
+    });
+
+    it('serves SSE traffic on the fallback port', async () => {
+      server = new HmrServer();
+      const port = await server.start();
+      const { res, data } = await connectClient(port);
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      server.broadcast('after-fallback');
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(data.join('')).toContain('"hash":"after-fallback"');
+      res.destroy();
+    });
   });
 
   describe('basePath welcome message', () => {

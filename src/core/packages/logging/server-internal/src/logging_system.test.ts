@@ -20,9 +20,13 @@ const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof c
 import { LoggingSystem, config } from '..';
 import { EcsVersion } from '@elastic/ecs';
 import { unsafeConsole } from '@kbn/security-hardening';
+import moment from 'moment-timezone';
+
+const TEST_TIMEZONE = 'America/New_York';
 
 let system: LoggingSystem;
 beforeEach(() => {
+  moment.tz.setDefault(TEST_TIMEZONE);
   mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
   jest.spyOn(process, 'uptime').mockReturnValue(10);
@@ -30,6 +34,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  moment.tz.setDefault();
   jest.clearAllMocks();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
@@ -117,6 +122,34 @@ test('appends records via multiple appenders.', async () => {
   expect(mockStreamWrite).toHaveBeenCalledTimes(2);
   expect(mockStreamWrite.mock.calls[0][0]).toMatchSnapshot('file logs');
   expect(mockStreamWrite.mock.calls[1][0]).toMatchSnapshot('file logs');
+});
+
+test('applies meta filters from config through to appenders', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'pattern' } } },
+      loggers: [
+        {
+          name: 'plugins.alerting',
+          level: 'warn',
+          filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'debug' }],
+        },
+        {
+          name: 'plugins.alerting.rules',
+          level: 'info',
+        },
+      ],
+    })
+  );
+
+  const childLogger = system.get('plugins', 'alerting', 'rules');
+  childLogger.debug('filtered debug message', { labels: { ruleType: 'esql' } });
+  childLogger.debug('dropped debug message', { labels: { ruleType: 'kql' } });
+  childLogger.info('nominal info message');
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(2);
+  expect(mockConsoleLog.mock.calls[0][0]).toContain('filtered debug message');
+  expect(mockConsoleLog.mock.calls[1][0]).toContain('nominal info message');
 });
 
 test('uses `root` logger if context name is not specified.', async () => {
@@ -262,7 +295,9 @@ test('setContextConfig() updates config with relative contexts', async () => {
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   testsLogger.warn('tests log to default!');
@@ -317,7 +352,7 @@ test('setContextConfig() updates config for a root context', async () => {
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: '', appenders: ['custom'], level: 'debug' }],
+    loggers: [{ name: '', appenders: ['custom'], level: 'debug', filters: [] }],
   });
 
   testsLogger.warn('tests log to default!');
@@ -351,7 +386,9 @@ test('custom context name configs are applied on subsequent calls to update()', 
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   // Calling upgrade after setContextConfig should not throw away the context-specific config
@@ -395,7 +432,9 @@ test('subsequent calls to setContextConfig() for the same context name override 
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   // Call again, this time with level: 'warn' and a different pattern
@@ -409,7 +448,7 @@ test('subsequent calls to setContextConfig() for the same context name override 
         },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'warn', filters: [] }],
   });
 
   const logger = system.get('tests', 'child', 'grandchild');
@@ -445,7 +484,9 @@ test('subsequent calls to setContextConfig() for the same context name can disab
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   // Call again, this time no customizations (effectively disabling)

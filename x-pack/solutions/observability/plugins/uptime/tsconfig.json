@@ -83,6 +83,8 @@
     "@kbn/ml-common-types",
     "@kbn/connector-schemas",
     "@kbn/kql",
+    "@kbn/core-spaces-common",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

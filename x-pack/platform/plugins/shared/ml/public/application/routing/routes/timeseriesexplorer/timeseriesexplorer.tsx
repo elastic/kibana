@@ -44,7 +44,6 @@ export const timeSeriesExplorerRouteFactory = (
       }),
     },
   ],
-  enableDatePicker: true,
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {

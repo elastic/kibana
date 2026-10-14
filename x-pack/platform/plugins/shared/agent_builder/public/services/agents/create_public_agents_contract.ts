@@ -17,5 +17,15 @@ export const createPublicAgentsContract = ({
     list: async () => {
       return agentService.list();
     },
+    addSkillToAgent: async ({ agentId, skillId }) => {
+      const agent = await agentService.get(agentId);
+      const currentSkillIds = agent.configuration.skill_ids ?? [];
+      if (currentSkillIds.includes(skillId)) {
+        return agent;
+      }
+      return agentService.update(agentId, {
+        configuration: { skill_ids: [...currentSkillIds, skillId] },
+      });
+    },
   };
 };

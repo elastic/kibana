@@ -9,6 +9,7 @@ import { AddAlertsStepTypeId, addAlertsStepCommonDefinition } from './add_alerts
 import { AddEventsStepTypeId, addEventsStepCommonDefinition } from './add_events';
 import { AddObservablesStepTypeId, addObservablesStepCommonDefinition } from './add_observables';
 import { AddTagsStepTypeId, addTagsStepCommonDefinition } from './add_tags';
+import { RemoveTagsStepTypeId, removeTagsStepCommonDefinition } from './remove_tags';
 import { AssignCaseStepTypeId, assignCaseStepCommonDefinition } from './assign_case';
 import { CloseCaseStepTypeId, closeCaseStepCommonDefinition } from './close_case';
 import { DeleteCasesStepTypeId, deleteCasesStepCommonDefinition } from './delete_cases';
@@ -38,7 +39,12 @@ import {
   DeleteObservableStepTypeId,
   deleteObservableStepCommonDefinition,
 } from './delete_observable';
+import {
+  BulkDeleteObservablesStepTypeId,
+  bulkDeleteObservablesStepCommonDefinition,
+} from './bulk_delete_observables';
 import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
+import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_cases';
 import {
   addAlertsInputFixture,
   addCategoryInputFixture,
@@ -64,8 +70,12 @@ import {
   updateObservableInputFixture,
   deleteObservableInputFixture,
   deleteObservableOutputFixture,
+  bulkDeleteObservablesInputFixture,
+  bulkDeleteObservablesOutputFixture,
   getCasesInputFixture,
   getCasesOutputFixture,
+  pushCasesInputFixture,
+  pushCasesOutputFixture,
 } from './test_fixtures';
 
 const singleCaseOutput = { case: createCaseResponseFixture };
@@ -150,6 +160,12 @@ const stepDefinitions = [
     output: singleCaseOutput,
   },
   {
+    typeId: RemoveTagsStepTypeId,
+    definition: removeTagsStepCommonDefinition,
+    input: addTagInputFixture,
+    output: singleCaseOutput,
+  },
+  {
     typeId: SetCategoryStepTypeId,
     definition: setCategoryStepCommonDefinition,
     input: addCategoryInputFixture,
@@ -180,10 +196,22 @@ const stepDefinitions = [
     output: deleteObservableOutputFixture,
   },
   {
+    typeId: BulkDeleteObservablesStepTypeId,
+    definition: bulkDeleteObservablesStepCommonDefinition,
+    input: bulkDeleteObservablesInputFixture,
+    output: bulkDeleteObservablesOutputFixture,
+  },
+  {
     typeId: GetCasesStepTypeId,
     definition: getCasesStepCommonDefinition,
     input: getCasesInputFixture,
     output: getCasesOutputFixture,
+  },
+  {
+    typeId: PushCasesStepTypeId,
+    definition: pushCasesStepCommonDefinition,
+    input: pushCasesInputFixture,
+    output: pushCasesOutputFixture,
   },
 ] as const;
 

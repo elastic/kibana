@@ -10,6 +10,7 @@ import { fireEvent, render as rtlRender, screen, within } from '@testing-library
 import userEvent from '@testing-library/user-event';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { RuleDetails } from './rule_details';
 
 jest.mock('../hooks', () => ({
@@ -50,6 +51,31 @@ describe('RuleDetails', () => {
     expect(screen.getByTestId('ruleDetails')).toBeInTheDocument();
   });
 
+  test('shows related dashboards when uiActions is available', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+        uiActions: uiActionsPluginMock.createStartContract(),
+      },
+      formData: {
+        name: 'test',
+        tags: [],
+      },
+    });
+
+    render(<RuleDetails />);
+
+    const section = screen.getByTestId('ruleLinkedDashboards');
+    expect(section).toBeVisible();
+    expect(within(section).getByText('Related dashboards')).toBeVisible();
+  });
+
+  test('omits related dashboards when uiActions is unavailable', () => {
+    render(<RuleDetails />);
+
+    expect(screen.queryByTestId('ruleLinkedDashboards')).not.toBeInTheDocument();
+  });
+
   test('Should allow name to be changed', () => {
     render(<RuleDetails />);
 
@@ -71,6 +97,66 @@ describe('RuleDetails', () => {
       type: 'setTags',
       payload: ['tag'],
     });
+  });
+
+  test('Should split a typed comma-separated value into multiple tags', async () => {
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'tag1, tag2 , tag3{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['tag1', 'tag2', 'tag3'],
+    });
+  });
+
+  test('Should split a pasted newline-separated value into multiple tags', async () => {
+    render(<RuleDetails />);
+
+    const input = within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput');
+    await userEvent.click(input);
+    await userEvent.paste('tag1\ntag2\ntag3');
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['tag1', 'tag2', 'tag3'],
+    });
+  });
+
+  test('Should de-duplicate tags case-insensitively, keeping the first occurrence casing', async () => {
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'Tag1, tag1 , TAG1{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['Tag1'],
+    });
+  });
+
+  test('Should disable the copy tags button when there are no tags', () => {
+    render(<RuleDetails />);
+
+    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeDisabled();
+  });
+
+  test('Should enable the copy tags button when tags exist', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+      },
+      formData: {
+        name: 'test',
+        tags: ['tag1', 'tag2'],
+      },
+    });
+    render(<RuleDetails />);
+
+    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeEnabled();
   });
 
   test('Should display error', () => {

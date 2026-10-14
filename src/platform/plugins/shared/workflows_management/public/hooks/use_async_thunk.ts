@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AsyncThunk, type AsyncThunkAction, unwrapResult } from '@reduxjs/toolkit';
-import type { AsyncThunkFulfilledActionCreator } from '@reduxjs/toolkit/dist/createAsyncThunk';
 import { useCallback, useReducer } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
+import { type AsyncThunk, type AsyncThunkAction, unwrapResult } from 'redux-toolkit-v1';
+import type { AsyncThunkFulfilledActionCreator } from 'redux-toolkit-v1/dist/createAsyncThunk';
 
 type AsyncThunkDispatch = <R, P, C extends {}>(
   action: AsyncThunkAction<R, P, C>

@@ -1,0 +1,155 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import type { ConversationEvent, UserMessageEvent } from '@kbn/agent-builder-common';
+import { TimelineEventType, EventActorType, TimelineTriggerType } from '@kbn/agent-builder-common';
+import type { TimelineDisplayEvent } from '../../../../services/events';
+import type { OptimisticAttachments } from '../../../utils/build_optimistic_attachments';
+import { useConversation } from '../../../hooks/use_conversation';
+import { useLiveEvents } from '../../../hooks/use_live_events';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useStreamRecord } from '../../../context/streaming/streaming_context';
+import { buildItems } from './to_timeline_items';
+import { resolveTimelineItems } from './resolve_timeline_items';
+import type { TimelineItem } from './types';
+
+const PENDING_USER_MESSAGE_ID = 'pending::user_message';
+/** Key of the placeholder turn shown between hitting send and the run reporting that it started. */
+const AWAITING_RUN_ITEM_KEY = 'active';
+
+const startsARunTriggeredByAUserMessage = (event: TimelineDisplayEvent): boolean =>
+  event.type === TimelineEventType.executionStarted &&
+  event.data.trigger_type === TimelineTriggerType.userMessage;
+
+/**
+ * The id the server gave the message being sent, once the run started. Renaming the local copy to
+ * it is what lets the saved twin replace it, instead of showing twice.
+ */
+const savedUserMessageId = (liveEvents: TimelineDisplayEvent[]): string | undefined =>
+  liveEvents.filter(startsARunTriggeredByAUserMessage).at(-1)?.trigger_event_id;
+
+const isUserMessageEvent = (event: ConversationEvent): event is UserMessageEvent =>
+  event.type === TimelineEventType.userMessage;
+
+const isSentMessageStillMissingItsRefs = (
+  event: ConversationEvent,
+  sentMessageId: string
+): event is UserMessageEvent =>
+  event.id === sentMessageId && isUserMessageEvent(event) && !event.data.attachment_refs?.length;
+
+const withStagedAttachments = (
+  event: UserMessageEvent,
+  staged: OptimisticAttachments
+): UserMessageEvent => ({
+  ...event,
+  data: {
+    ...event.data,
+    attachments: staged.fallbackAttachments,
+    attachment_refs: staged.attachmentRefs,
+  },
+});
+
+export const useTimelineItems = (): TimelineItem[] => {
+  const conversationId = useConversationId();
+  const { conversation } = useConversation();
+  const liveEvents = useLiveEvents();
+  const { attachmentsService, conversationEventsService } = useAgentBuilderServices();
+  const conversationAttachments = conversation?.attachments;
+
+  const { pendingMessage, pendingAttachments } = useStreamRecord(conversationId);
+  const startedUserMessageId = savedUserMessageId(liveEvents);
+  const pendingUserMessageId = startedUserMessageId ?? PENDING_USER_MESSAGE_ID;
+  const awaitingRunStart = !!pendingMessage && startedUserMessageId === undefined;
+  const pendingUserMessage = useMemo<UserMessageEvent | null>(
+    () =>
+      pendingMessage
+        ? {
+            id: pendingUserMessageId,
+            type: TimelineEventType.userMessage,
+            created_at: new Date().toISOString(),
+            actor: { type: EventActorType.user, id: '' },
+            data: {
+              message: pendingMessage,
+              attachments: pendingAttachments?.fallbackAttachments,
+              attachment_refs: pendingAttachments?.attachmentRefs,
+            },
+          }
+        : null,
+    [pendingMessage, pendingAttachments, pendingUserMessageId]
+  );
+
+  const docEvents = conversation?.events;
+  // Once the saved twin is in the cache the message is no longer pending, even though the local
+  // copy still exists.
+  const isPendingUnsaved =
+    !!pendingMessage && !docEvents?.some((event) => event.id === pendingUserMessageId);
+
+  const events = useMemo(() => {
+    // The saved copy wins: every live event gets a saved twin with the same id after the refetch,
+    // so the live list stops mattering on its own. Saved events keep their order; live-only events
+    // belong to the run in flight, so they go last.
+    const byId = new Map<string, ConversationEvent>(
+      (docEvents ?? []).map((event) => [event.id, event])
+    );
+    // The message goes in before the live events: it is what started the run they describe.
+    if (pendingUserMessage && !byId.has(pendingUserMessage.id)) {
+      byId.set(pendingUserMessage.id, pendingUserMessage);
+    }
+    for (const event of liveEvents) {
+      if (!byId.has(event.id)) {
+        byId.set(event.id, event);
+      }
+    }
+
+    if (!pendingAttachments) {
+      return [...byId.values()];
+    }
+    return [...byId.values()].map((event) =>
+      isSentMessageStillMissingItsRefs(event, pendingUserMessageId)
+        ? withStagedAttachments(event, pendingAttachments)
+        : event
+    );
+  }, [docEvents, liveEvents, pendingUserMessage, pendingUserMessageId, pendingAttachments]);
+
+  const items = useMemo(
+    () =>
+      resolveTimelineItems(
+        buildItems(events, isPendingUnsaved ? pendingUserMessageId : undefined),
+        {
+          attachments: conversationAttachments,
+          attachmentsService,
+          conversationEventsService,
+        }
+      ),
+    [
+      events,
+      isPendingUnsaved,
+      pendingUserMessageId,
+      conversationAttachments,
+      attachmentsService,
+      conversationEventsService,
+    ]
+  );
+
+  return useMemo(() => {
+    if (!awaitingRunStart) {
+      return items;
+    }
+    // The run has no id yet, so it has no events either. Show a spinner under the message until
+    // `execution_started` arrives and the real turn takes this one's place.
+    const awaitingTurn: TimelineItem = {
+      kind: 'agentTurn',
+      key: AWAITING_RUN_ITEM_KEY,
+      status: 'running',
+      startedAt: new Date().toISOString(),
+      steps: [],
+    };
+    return [...items, awaitingTurn];
+  }, [items, awaitingRunStart]);
+};

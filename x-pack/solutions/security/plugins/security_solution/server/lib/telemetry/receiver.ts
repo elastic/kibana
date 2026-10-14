@@ -46,11 +46,7 @@ import {
 } from '@kbn/securitysolution-rules';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
-import type {
-  AgentClient,
-  AgentPolicyServiceInterface,
-  PackageService,
-} from '@kbn/fleet-plugin/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
 
@@ -114,6 +110,7 @@ import type {
   Processor,
   Totals,
 } from './ingest_pipelines_stats.types';
+import type { EndpointInternalFleetServicesInterface } from '../../endpoint/services/fleet';
 
 export interface ITelemetryReceiver {
   start(
@@ -291,8 +288,7 @@ export interface ITelemetryReceiver {
 
 export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly logger: TelemetryLogger;
-  private agentClient?: AgentClient;
-  private agentPolicyService?: AgentPolicyServiceInterface;
+  private fleetServices?: EndpointInternalFleetServicesInterface;
   private _esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
@@ -326,8 +322,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   ) {
     this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
-    this.agentClient = endpointContextService?.getInternalFleetServices().agent;
-    this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
+    this.fleetServices = endpointContextService?.getInternalFleetServices();
     this._esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
     this.packageService = packageService;
@@ -369,8 +364,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     return (
-      this.agentClient
-        ?.listAgents({
+      this.fleetServices
+        ?.fetchAgentList({
           perPage: this.maxRecords,
           showInactive: true,
           kuery: 'status:*', // include unenrolled agents
@@ -663,7 +658,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       );
     }
 
-    return this.agentPolicyService?.get(this.soClient, id);
+    return this.fleetServices?.agentPolicy?.get(this.soClient, id);
   }
 
   public async fetchTrustedApplications() {

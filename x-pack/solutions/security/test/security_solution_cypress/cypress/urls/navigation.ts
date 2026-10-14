@@ -23,6 +23,7 @@ export const TRUSTED_DEVICES_URL = '/app/security/administration/trusted_devices
 export const ENDPOINT_EXCEPTIONS_URL = '/app/security/administration/endpoint_exceptions';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
+export const CUSTOM_YARA_SIGNATURES_URL = '/app/security/administration/custom_yara_signatures';
 export const HOST_ISOLATION_EXCEPTIONS_URL = `app/security/administration/host_isolation_exceptions`;
 export const RESPONSE_ACTIONS_HISTORY = `app/security/administration/response_actions_history`;
 
@@ -84,6 +85,7 @@ export const MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP = 'app/ml/data_frame_anal
 
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
+export const ALERT_DETECTIONS_URL = '/app/security/alert_detections';
 export const ALERTS_URL = '/app/security/alerts';
 export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
@@ -107,15 +109,12 @@ export const APP_DASHBOARDS_URL = '/app/dashboards';
 export const ADVANCED_SETTINGS_URL = '/app/management/kibana/settings';
 
 // Entity Analytics
-export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
-export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL =
-  '/app/security/entity_analytics_privileged_user_monitoring';
 export const ENTITY_ANALYTICS_HOME_PAGE_URL = '/app/security/entity_analytics_home_page';
 
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
 export const ASSET_INVENTORY_INTEGRATION_URL =
-  '/app/fleet/integrations/cloud_asset_inventory/add-integration';
+  '/app/integrations/detail/cloud_asset_inventory/add-integration';
 
 // Custom Role Creation
 export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';

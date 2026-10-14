@@ -37,12 +37,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.vulnerabilitiesIndex.add(vulnerabilitiesLatestMock);
 
       await findings.navigateToLatestVulnerabilitiesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor(
         'Findings table to be loaded',
         async () =>
           (await latestVulnerabilitiesTable.getRowsCount()) === vulnerabilitiesLatestMock.length
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: resourceName1,
         });
 
-        expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(true);
+        await filterBar.expectFilter('resource.name', resourceName1);
         expect(
           await latestVulnerabilitiesTable.hasColumnValue('resource.name', resourceName1)
         ).to.be(true);
@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('remove filter', async () => {
         await filterBar.removeFilter('resource.name');
 
-        expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(false);
+        await filterBar.expectNoFilter('resource.name', resourceName1);
         expect(await latestVulnerabilitiesTable.getRowsCount()).to.be(
           vulnerabilitiesLatestMock.length
         );
@@ -104,17 +104,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await fieldsButton.click();
         await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
 
-        const agentIdCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.id'
-        );
-        await agentIdCheckbox.click();
-
-        const agentNameCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.name'
-        );
-        await agentNameCheckbox.click();
-
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.id', 'check');
         await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.name', 'check');
         await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
 
         const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
@@ -125,18 +118,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Remove fields from the Vulnerabilities DataTable', async () => {
         const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
         await fieldsButton.click();
+        await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
 
-        const agentIdCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.id'
-        );
-        await agentIdCheckbox.click();
-
-        const agentNameCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.name'
-        );
-        await agentNameCheckbox.click();
-
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.id', 'uncheck');
         await testSubjects.missingOrFail('dataGridHeaderCell-agent.id');
+
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.name', 'uncheck');
         await testSubjects.missingOrFail('dataGridHeaderCell-agent.name');
 
         const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
@@ -146,18 +133,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Reset fields to default', async () => {
         const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
         await fieldsButton.click();
+        await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
 
-        const agentIdCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.id'
-        );
-        await agentIdCheckbox.click();
-
-        const agentNameCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.name'
-        );
-        await agentNameCheckbox.click();
-
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.id', 'check');
         await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.name', 'check');
         await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
 
         const resetFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_RESET_BUTTON);

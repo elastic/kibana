@@ -29,7 +29,7 @@ export class DefaultTransformManager implements TransformManager {
     private generators: Record<IndicatorTypes, TransformGenerator>,
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
-    private abortController: AbortController = new AbortController()
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
@@ -51,7 +51,7 @@ export class DefaultTransformManager implements TransformManager {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams, {
-            signal: this.abortController.signal,
+            signal: this.signal,
           }),
         { logger: this.logger }
       );
@@ -91,7 +91,7 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -111,7 +111,7 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
             { transform_id: transformId },
-            { ignore: [409], signal: this.abortController.signal }
+            { ignore: [409], signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -137,7 +137,7 @@ export class DefaultTransformManager implements TransformManager {
               force: true,
               allow_no_match: true,
             },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -157,7 +157,7 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -177,7 +177,7 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -203,7 +203,7 @@ export class DefaultTransformManager implements TransformManager {
 
   private async scheduleNowTransform(transformId: TransformId) {
     this.scopedClusterClient.asSecondaryAuthUser.transform
-      .scheduleNowTransform({ transform_id: transformId }, { signal: this.abortController.signal })
+      .scheduleNowTransform({ transform_id: transformId }, { signal: this.signal })
       .then(() => {
         this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);
       })

@@ -7,18 +7,12 @@
 
 import type { PromptFactoryParams, PromptFactory } from './types';
 import { getResearchAgentPrompt } from './research_agent';
-import { getAnswerAgentPrompt, getStructuredAnswerPrompt } from './answer_agent';
+import { getStructuredAnswerPrompt } from './answer_agent';
 
 export const createPromptFactory = (params: PromptFactoryParams): PromptFactory => {
   return {
     getMainPrompt: async (args) => {
       return getResearchAgentPrompt({
-        ...params,
-        ...args,
-      });
-    },
-    getAnswerPrompt: async (args) => {
-      return getAnswerAgentPrompt({
         ...params,
         ...args,
       });

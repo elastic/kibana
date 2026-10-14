@@ -139,12 +139,19 @@ export class Session {
   private readonly crypto: Crypto;
 
   /**
+   * Dedicated logger for session invalidation events, allowing them to be managed
+   * independently of general session logs.
+   */
+  private readonly invalidationLogger: Logger;
+
+  /**
    * Promise-based version of the NodeJS native `randomBytes`.
    */
   private readonly randomBytes = promisify(randomBytes);
 
   constructor(private readonly options: Readonly<SessionOptions>) {
     this.crypto = nodeCrypto({ encryptionKey: this.options.config.encryptionKey });
+    this.invalidationLogger = this.options.logger.get('invalidation');
   }
 
   /**
@@ -178,6 +185,9 @@ export class Session {
 
     if (idleExpired || lifespanExpired) {
       sessionLogger.debug('Session has expired and will be invalidated.');
+      this.invalidationLogger.debug(
+        `Invalidating session: ${lifespanExpired ? 'lifespan' : 'idle'} timeout expired.`
+      );
       await this.invalidate(request, { match: 'current' });
       // Prefer lifespan if both expired (lifespan is the hard limit)
       const reason = lifespanExpired
@@ -204,6 +214,7 @@ export class Session {
       sessionLogger.warn(
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
+      this.invalidationLogger.warn('Invalidating session: content decryption failed.');
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionUnexpectedError(), value: null };
     }
@@ -224,6 +235,7 @@ export class Session {
       sessionLogger.warn(
         'Session is outside the concurrent session limit and will be invalidated.'
       );
+      this.invalidationLogger.warn('Invalidating session: concurrent session limit exceeded.');
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionConcurrencyLimitError(), value: null };
     }
@@ -295,8 +307,15 @@ export class Session {
    * Updates session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
+   * @param options Session update options.
+   * @param options.extend Whether to extend the idle timeout. Defaults to true. When false, preserves
+   * the idle and lifespan deadlines from the current session cookie while persisting updated state.
    */
-  async update(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
+  async update(
+    request: KibanaRequest,
+    sessionValue: Readonly<SessionValue>,
+    { extend = true }: { extend?: boolean } = {}
+  ) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     const sessionLogger = this.getLoggerForSID(sessionValue.sid);
     if (!sessionCookieValue) {
@@ -304,10 +323,13 @@ export class Session {
       return null;
     }
 
-    const sessionExpirationInfo = this.calculateExpiry(
-      sessionValue.provider,
-      sessionCookieValue.lifespanExpiration
-    );
+    // Persisting refreshed credentials need not count as activity. The cookie has the latest expiry.
+    const sessionExpirationInfo = extend
+      ? this.calculateExpiry(sessionValue.provider, sessionCookieValue.lifespanExpiration)
+      : {
+          idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+          lifespanExpiration: sessionCookieValue.lifespanExpiration,
+        };
     // We filter out the `createdAt` field and rely on the one stored in `metadata.index` since it isn't
     // supposed to be updated after it was initially set during creation.
     const { username, userProfileId, state, metadata, createdAt, ...publicSessionInfo } =

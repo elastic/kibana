@@ -11,38 +11,36 @@ import {
   compositeTargetSchema,
   compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
-  compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
-  compositeSloDefinitionSchema,
-  COMPOSITE_SLO_MIN_MEMBERS,
-  COMPOSITE_SLO_MAX_MEMBERS,
 } from '../../../schema/composite_slo';
+
+const updateCompositeSLOBodySchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  members: compositeSloMembersSchema.optional(),
+  compositeMethod: compositeMethodSchema.optional(),
+  timeWindow: compositeRollingTimeWindowSchema.optional(),
+  budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
+  objective: compositeTargetSchema.optional(),
+  tags: compositeTagsSchema.optional(),
+  enabled: z.boolean().optional(),
+});
 
 const updateCompositeSLOParamsSchema = z.object({
   path: z.object({
     id: compositeSloIdSchema,
   }),
-  body: z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-    members: z
-      .array(compositeSloMemberSchema)
-      .min(COMPOSITE_SLO_MIN_MEMBERS)
-      .max(COMPOSITE_SLO_MAX_MEMBERS)
-      .optional(),
-    compositeMethod: compositeMethodSchema.optional(),
-    timeWindow: compositeRollingTimeWindowSchema.optional(),
-    budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
-    objective: compositeTargetSchema.optional(),
-    tags: compositeTagsSchema.optional(),
-    enabled: z.boolean().optional(),
-  }),
+  body: updateCompositeSLOBodySchema,
 });
 
-const updateCompositeSLOResponseSchema = compositeSloDefinitionSchema;
+const updateCompositeSLOInputSchema = updateCompositeSLOBodySchema.extend({
+  id: compositeSloIdSchema,
+  spaceId: z.string(),
+  userId: z.string(),
+});
 
-type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOParamsSchema.shape.body>;
-type UpdateCompositeSLOResponse = z.infer<typeof updateCompositeSLOResponseSchema>;
+type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOInputSchema>;
 
-export { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema };
-export type { UpdateCompositeSLOInput, UpdateCompositeSLOResponse };
+export type { UpdateCompositeSLOInput };
+export { updateCompositeSLOParamsSchema };

@@ -8,7 +8,7 @@
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -20,24 +20,28 @@ import {
   timeRangeComparators,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import { getPatternAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
 import type { PatternAnalysisEmbeddableApi } from './types';
-import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 import { canUseAiops } from '../../capabilities';
+import { toUiMinimumTimeRange } from '../../../common/embeddables/pattern_analysis/normalize_legacy_state';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
 
 export const getPatternAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    PatternAnalysisEmbeddableState,
+    PatternAnalysisEmbeddableApi
+  > = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
@@ -56,52 +60,61 @@ export const getPatternAnalysisEmbeddableFactory = (
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const initialDataViewId =
-        runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId());
+        runtimeState.data_view_id ?? (await pluginStart.data.dataViews.getDefaultId());
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         initialDataViewId ? [await pluginStart.data.dataViews.get(initialDataViewId)] : []
       );
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<PatternAnalysisEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...serializePatternAnalysisChartState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<PatternAnalysisEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          patternAnalysisControlsApi.dataViewId,
-          patternAnalysisControlsApi.fieldName,
-          patternAnalysisControlsApi.minimumTimeRangeOption,
-          patternAnalysisControlsApi.randomSamplerMode,
-          patternAnalysisControlsApi.randomSamplerProbability
-        ).pipe(map(() => undefined)),
+          patternAnalysisControlsApi.dataViewId.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.fieldName.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.minimumTimeRangeOption.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerMode.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerProbability.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
         getComparators: () => ({
           ...timeRangeComparators,
           ...titleComparators,
           ...patternAnalysisControlsComparators,
         }),
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) {
-            patternAnalysisControlsApi.updateUserInput(lastSaved);
-          }
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          patternAnalysisControlsApi.updateUserInput(nextState);
         },
       });
 
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         ...patternAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.patternAnalysis.typeDisplayName', {
@@ -133,7 +146,6 @@ export const getPatternAnalysisEmbeddableFactory = (
         dataLoading$,
         blockingError$,
         dataViews$,
-        serializeState,
       });
 
       const PatternAnalysisComponent = getPatternAnalysisComponent(coreStart, pluginStart);
@@ -193,7 +205,7 @@ export const getPatternAnalysisEmbeddableFactory = (
               filtersApi={filtersApi}
               dataViewId={dataViewId ?? ''}
               fieldName={fieldName}
-              minimumTimeRangeOption={minimumTimeRangeOption}
+              minimumTimeRangeOption={toUiMinimumTimeRange(minimumTimeRangeOption)}
               randomSamplerMode={randomSamplerMode}
               randomSamplerProbability={randomSamplerProbability}
               timeRange={timeRange}

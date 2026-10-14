@@ -8,6 +8,8 @@
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import type { Moment } from 'moment';
 
+import type { AlertClosingReason } from '../../../../../common/types';
+
 export interface State {
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionItemMeta: { name: string };
@@ -16,11 +18,14 @@ export interface State {
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
+  closeAlertsReason: AlertClosingReason | undefined;
   entryErrorExists: boolean;
   expireTime: Moment | undefined;
   expireErrorExists: boolean;
   wildcardWarningExists: boolean;
   partialCodeSignatureWarningExists: boolean;
+  malformedMatchesValueExists: boolean;
+  malformedMatchesFields: string[];
 }
 
 export type Action =
@@ -49,6 +54,10 @@ export type Action =
       bulkCloseIndex: string[] | undefined;
     }
   | {
+      type: 'setCloseAlertsReason';
+      reason: AlertClosingReason | undefined;
+    }
+  | {
       type: 'setExceptionItems';
       items: ExceptionsBuilderReturnExceptionItem[];
     }
@@ -71,6 +80,10 @@ export type Action =
   | {
       type: 'setPartialCodeSignature';
       warningExists: boolean;
+    }
+  | {
+      type: 'setMalformedMatchesValue';
+      fields: string[];
     };
 
 export const createExceptionItemsReducer =
@@ -128,6 +141,14 @@ export const createExceptionItemsReducer =
           bulkCloseIndex,
         };
       }
+      case 'setCloseAlertsReason': {
+        const { reason } = action;
+
+        return {
+          ...state,
+          closeAlertsReason: reason,
+        };
+      }
       case 'setExceptionItems': {
         const { items } = action;
 
@@ -172,6 +193,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           partialCodeSignatureWarningExists: warningExists,
+        };
+      }
+      case 'setMalformedMatchesValue': {
+        const { fields } = action;
+        return {
+          ...state,
+          malformedMatchesValueExists: fields.length > 0,
+          malformedMatchesFields: fields,
         };
       }
       default:

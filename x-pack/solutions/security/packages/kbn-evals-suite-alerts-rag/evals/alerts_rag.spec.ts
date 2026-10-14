@@ -14,6 +14,7 @@ import {
 import { evaluate } from '../src/evaluate';
 import { alertsRagDataset, filterByCategory, getDatasetCategories } from '../src/datasets';
 import { verifyAlertsRagSnapshot } from '../src/datasets/snapshot_invariants';
+import { ensureEmptyAlertsSpace } from '../src/ensure_empty_alerts_space';
 
 const ALERTS_SNAPSHOT_ENV_PREFIX = 'ALERTS_RAG_ALERTS_SNAPSHOT';
 
@@ -23,7 +24,7 @@ const DATASET_DESCRIPTION =
   'over the shared Security alerts snapshot (reused with the Attack Discovery eval suite).';
 
 evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ esClient, log }) => {
+  evaluate.beforeAll(async ({ esClient, fetch, log }) => {
     const snapshotConfig = resolveAlertsSnapshotConfig(ALERTS_SNAPSHOT_ENV_PREFIX);
     if (snapshotConfig) {
       log.info(
@@ -44,6 +45,10 @@ evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {
           'Agent Builder will be evaluated against whatever alerts already exist in the cluster.'
       );
     }
+
+    // Space-isolation examples converse in a space with no alerts alias while
+    // default still holds the restored snapshot (something that would leak).
+    await ensureEmptyAlertsSpace({ fetch, log });
 
     log.info(
       `[alerts-rag] dataset has ${alertsRagDataset.length} examples across ${

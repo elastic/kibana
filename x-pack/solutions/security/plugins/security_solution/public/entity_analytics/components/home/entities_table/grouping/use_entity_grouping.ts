@@ -14,32 +14,36 @@ import {
   getGroupingQuery,
   useGrouping,
 } from '@kbn/grouping';
-import { parseGroupingQuery, MAX_QUERY_SIZE } from '@kbn/grouping/src';
+import { parseGroupingQuery, type ParsedGroupingAggregation } from '@kbn/grouping/src';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import dedent from 'dedent';
 import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import type { ESBoolQuery } from '../../../../../../common/typed_json';
-import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
 import {
+  ALLOWED_ENTITY_TYPES,
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
   ENTITY_TYPE_FILTER,
-  LOCAL_STORAGE_GROUPING_KEY,
 } from '../constants';
+import { hasActiveTopLevelBoolClauses } from '../utils';
 import {
   type EntitiesGroupingAggregation,
   type EntitiesGroupingQuery,
+  type TargetMetadataMap,
+  useFetchFilteredResolutionGroupData,
   useFetchGroupedData,
-  useFetchTargetMetadata,
+  useFetchUnfilteredResolutionGroupData,
 } from './use_fetch_grouped_data';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
 
 const MAX_GROUPING_LEVELS = 3;
+
+const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
 
 const entitiesUnit = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.unit', {
@@ -87,95 +91,27 @@ export const getAggregationsByGroupField = (field: string): NamedAggregation[] =
   return aggMetrics;
 };
 
-export const buildResolutionGroupingQuery = ({
-  filters,
-  pageIndex,
-  pageSize,
-}: {
-  filters: ESBoolQuery[];
-  pageIndex: number;
-  pageSize: number;
-}): EntitiesGroupingQuery => ({
-  size: 0,
-  runtime_mappings: {
-    groupByField: {
-      type: 'keyword' as MappingRuntimeFieldType,
-      script: {
-        source: dedent(`
-          if (doc.containsKey('${ENTITY_FIELDS.RESOLVED_TO}')
-              && !doc['${ENTITY_FIELDS.RESOLVED_TO}'].empty) {
-            emit(doc['${ENTITY_FIELDS.RESOLVED_TO}'].value);
-          } else if (doc.containsKey('${ENTITY_FIELDS.ENTITY_ID}')
-              && !doc['${ENTITY_FIELDS.ENTITY_ID}'].empty) {
-            emit(doc['${ENTITY_FIELDS.ENTITY_ID}'].value);
-          }
-        `),
-      },
-    },
-    bucketRiskScore: {
-      type: 'double' as MappingRuntimeFieldType,
-      script: {
-        source: dedent(`
-          if (doc.containsKey('${ENTITY_FIELDS.RESOLVED_TO}')
-              && !doc['${ENTITY_FIELDS.RESOLVED_TO}'].empty) {
-            return;
-          }
-          if (doc.containsKey('${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}')
-              && !doc['${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}'].empty) {
-            emit(doc['${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}'].value);
-          } else if (doc.containsKey('${ENTITY_FIELDS.ENTITY_RISK}')
-              && !doc['${ENTITY_FIELDS.ENTITY_RISK}'].empty) {
-            emit(doc['${ENTITY_FIELDS.ENTITY_RISK}'].value);
-          }
-        `),
-      },
-    },
-  },
-  aggs: {
-    groupByFields: {
-      terms: {
-        field: 'groupByField',
-        size: MAX_QUERY_SIZE,
-        order: [{ bucketRiskScore: 'desc' as const }, { _count: 'desc' as const }],
-      },
-      aggs: {
-        bucketRiskScore: {
-          max: { field: 'bucketRiskScore' },
-        },
-        resolutionRiskScore: {
-          max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
-        },
-        bucket_truncate: {
-          bucket_sort: {
-            from: pageIndex * pageSize,
-            size: pageSize,
-          },
-        },
-      },
-    },
-    unitsCount: { value_count: { field: 'groupByField' } },
-    groupsCount: { cardinality: { field: 'groupByField' } },
-  },
-  query: {
-    bool: {
-      filter: filters,
-    },
-  },
-  _source: false,
-});
-
 export const useEntityGrouping = ({
   state,
   groupFilters = [],
   selectedGroup,
+  tableId,
+  groupingId,
 }: {
   state: EntityURLStateResult;
   groupFilters?: Filter[];
   selectedGroup?: string;
+  /** Forwarded to `createGroupPanelRenderer` so resolution group flyouts open in the right scope. */
+  tableId: string;
+  /**
+   * Identifier used by `@kbn/grouping` to persist the active grouping
+   * selection. Required so independent mounts (e.g. the cases attachments
+   * accordion) pass their own and grouping state doesn't leak between tables.
+   */
+  groupingId: string;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
-  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
   const hasResolutionLicense = useHasEntityResolutionLicense();
 
   const defaultGroupingOptions = useMemo<GroupOption[]>(() => {
@@ -202,7 +138,7 @@ export const useEntityGrouping = ({
   const initialGroupings = useMemo(
     () => ({
       groupById: {
-        [LOCAL_STORAGE_GROUPING_KEY]: {
+        [groupingId]: {
           activeGroups: hasResolutionLicense
             ? [ENTITY_GROUPING_OPTIONS.RESOLUTION]
             : [ENTITY_GROUPING_OPTIONS.NONE],
@@ -210,27 +146,90 @@ export const useEntityGrouping = ({
         },
       },
     }),
-    [defaultGroupingOptions, hasResolutionLicense]
+    [defaultGroupingOptions, hasResolutionLicense, groupingId]
   );
 
-  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
+  // Memoized so the downstream filteredResolutionFilter / nonResolutionGroupingQuery memos aren't
+  // defeated by buildEsQuery returning a fresh object reference on every render.
+  const additionalFilters = useMemo(
+    () => buildEsQuery(dataView, [], groupFilters),
+    [dataView, groupFilters]
+  );
   const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
-  const groupingQuery = useMemo(() => {
-    const allFilters = [
-      ...(query ? [query] : []),
-      additionalFilters,
-      ENTITY_TYPE_FILTER,
-      ...(globalFilterQuery ? [globalFilterQuery] : []),
-    ];
+  // The fast target-only query is valid without filters. Filtered grouping requires a STATS join
+  // so a match on an alias still surfaces its target group.
+  const isUserFilterActive = useMemo(
+    () => hasActiveTopLevelBoolClauses(query) || groupFilters.length > 0,
+    [query, groupFilters]
+  );
 
+  // state.query already includes any active global filter from useBaseEsQuery.
+  const filteredResolutionFilter = useMemo((): ESBoolQuery | undefined => {
+    if (!isResolutionGrouping || !isUserFilterActive) return undefined;
+    const filterClauses: ESBoolQuery[] = [];
+    if (hasActiveTopLevelBoolClauses(query)) filterClauses.push(query);
+    if (groupFilters.length > 0) filterClauses.push(additionalFilters);
+    if (filterClauses.length === 0) return undefined;
+    if (filterClauses.length === 1) return filterClauses[0];
+    return { bool: { must: [], filter: filterClauses, should: [], must_not: [] } };
+  }, [isResolutionGrouping, isUserFilterActive, query, groupFilters, additionalFilters]);
+
+  // Resolution fetch hooks are always called; enabled controls execution.
+  const unfilteredResolutionResult = useFetchUnfilteredResolutionGroupData({
+    pageIndex,
+    pageSize,
+    enabled: isResolutionGrouping && !isUserFilterActive,
+  });
+
+  const filteredResolutionResult = useFetchFilteredResolutionGroupData({
+    pageIndex,
+    pageSize,
+    filter: filteredResolutionFilter,
+    enabled: isResolutionGrouping && isUserFilterActive,
+  });
+
+  const nonResolutionGroupingQuery = useMemo((): EntitiesGroupingQuery => {
     if (isResolutionGrouping) {
-      return buildResolutionGroupingQuery({
-        filters: allFilters,
-        pageIndex,
-        pageSize,
-      });
+      // Resolution uses dedicated ES|QL hooks instead. Return an inert query only to satisfy
+      // the required `query` arg — useFetchGroupedData is disabled for this case (see enabled flag).
+      return { size: 0 } as EntitiesGroupingQuery;
+    }
+
+    const allFilters = [...(query ? [query] : []), additionalFilters, ENTITY_TYPE_FILTER];
+
+    // Entity type: use the plain mapped field directly — no Painless script needed.
+    // A plain terms agg is both correct and much faster than the generic runtime-field path.
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
+      const lastEntityTypePageIndex = Math.floor((ALLOWED_ENTITY_TYPES.length - 1) / pageSize);
+      return {
+        size: 0,
+        aggs: {
+          groupByFields: {
+            terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: ALLOWED_ENTITY_TYPES.length },
+            aggs: {
+              entityType: { terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 } },
+              bucket_truncate: {
+                bucket_sort: {
+                  // Clamp stale page indexes to the last page that can contain an allowed entity type.
+                  from: Math.min(pageIndex, lastEntityTypePageIndex) * pageSize,
+                  size: pageSize,
+                },
+              },
+            },
+          },
+          unitsCount: { value_count: { field: ENTITY_FIELDS.ENTITY_TYPE } },
+          groupsCount: { cardinality: { field: ENTITY_FIELDS.ENTITY_TYPE } },
+          nullGroupItems: { missing: { field: ENTITY_FIELDS.ENTITY_TYPE } },
+        },
+        query: {
+          bool: {
+            filter: allFilters,
+          },
+        },
+        _source: false,
+      } as EntitiesGroupingQuery;
     }
 
     const currentGroup = selectedGroup || ENTITY_GROUPING_OPTIONS.ENTITY_TYPE;
@@ -262,6 +261,8 @@ export const useEntityGrouping = ({
           }
           boolean treatAsUndefined = false;
           int count = groupValues.size();
+          // no value, or a high-cardinality multi-value field (>100) that would explode the
+          // terms agg, is folded into the single "undefined"/none group instead
           treatAsUndefined = (count == 0 || count > 100);
           if (treatAsUndefined) {
             emit(params['uniqueValue']);
@@ -278,43 +279,59 @@ export const useEntityGrouping = ({
       },
     };
   }, [
-    selectedGroup,
     isResolutionGrouping,
+    selectedGroup,
     uniqueValue,
     additionalFilters,
     query,
     pageIndex,
     pageSize,
-    globalFilterQuery,
   ]);
 
-  const { data, isFetching } = useFetchGroupedData({
-    query: groupingQuery,
-    enabled: !!selectedGroup && !isNoneGroup([selectedGroup]),
+  const { data: nonResolutionData, isFetching: isNonResolutionFetching } = useFetchGroupedData({
+    query: nonResolutionGroupingQuery,
+    enabled: !isResolutionGrouping && !!selectedGroup && !isNoneGroup([selectedGroup]),
   });
 
-  const groupData = useMemo(
-    () =>
-      parseGroupingQuery(
-        selectedGroup || ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
-        uniqueValue,
-        data as GroupingAggregation<EntitiesGroupingAggregation>
-      ),
-    [data, selectedGroup, uniqueValue]
-  );
+  const activeResolutionResult = isUserFilterActive
+    ? filteredResolutionResult
+    : unfilteredResolutionResult;
 
-  const targetEntityIds = useMemo(() => {
-    if (!isResolutionGrouping || !('groupByFields' in groupData)) return [];
-    const buckets = groupData.groupByFields?.buckets;
-    if (!buckets) return [];
-    return buckets.map((bucket) => String(bucket.key_as_string ?? bucket.key));
-  }, [groupData, isResolutionGrouping]);
+  const isFetching = isResolutionGrouping
+    ? activeResolutionResult.isFetching
+    : isNonResolutionFetching;
 
-  const targetMetadata = useFetchTargetMetadata(targetEntityIds);
+  const targetMetadata: TargetMetadataMap = isResolutionGrouping
+    ? activeResolutionResult.data?.targetMetadata ?? EMPTY_TARGET_METADATA
+    : EMPTY_TARGET_METADATA;
+
+  const groupData = useMemo((): ParsedGroupingAggregation<EntitiesGroupingAggregation> => {
+    if (isResolutionGrouping) {
+      const resolutionData = activeResolutionResult.data?.groupData ?? {
+        groupByFields: { buckets: [] },
+        groupsCount: { value: 0 },
+        unitsCount: { value: 0 },
+      };
+      // ResolutionGroupData is structurally compatible at runtime but lacks the
+      // Record<string,...> index signature that ParsedGroupingAggregation requires.
+      return resolutionData as unknown as ParsedGroupingAggregation<EntitiesGroupingAggregation>;
+    }
+    return parseGroupingQuery(
+      selectedGroup || ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
+      uniqueValue,
+      nonResolutionData as GroupingAggregation<EntitiesGroupingAggregation>
+    ) as ParsedGroupingAggregation<EntitiesGroupingAggregation>;
+  }, [
+    isResolutionGrouping,
+    activeResolutionResult.data,
+    nonResolutionData,
+    selectedGroup,
+    uniqueValue,
+  ]);
 
   const groupPanelRenderer = useMemo(
-    () => createGroupPanelRenderer(targetMetadata),
-    [targetMetadata]
+    () => createGroupPanelRenderer(targetMetadata, tableId),
+    [targetMetadata, tableId]
   );
 
   const groupStatsRenderer = useMemo(
@@ -332,7 +349,7 @@ export const useEntityGrouping = ({
     defaultGroupingOptions,
     initialGroupings,
     fields: dataViewIsLoading ? [] : dataView.fields,
-    groupingId: LOCAL_STORAGE_GROUPING_KEY,
+    groupingId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
     onGroupChange: ({ groupByFields }) => {

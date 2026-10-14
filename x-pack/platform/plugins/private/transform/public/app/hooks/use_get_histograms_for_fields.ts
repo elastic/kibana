@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, type IHttpFetchError } from '@kbn/core-http-browser';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import type { SavedSearchQuery } from '@kbn/ml-query-utils';
@@ -16,7 +16,7 @@ import type {
   FieldHistogramsRequestSchema,
   FieldHistogramsResponseSchema,
 } from '../../../server/routes/api_schemas/field_histograms';
-import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
+import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
 
@@ -30,6 +30,7 @@ export const useGetHistogramsForFields = (
   fields: FieldHistogramRequestConfig[],
   query: string | SavedSearchQuery,
   runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
+  projectRouting?: FieldHistogramsRequestSchema['projectRouting'],
   enabled?: boolean,
   samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
 ) => {
@@ -43,18 +44,20 @@ export const useGetHistogramsForFields = (
         fields,
         query,
         runtimeMappings,
+        projectRouting,
         samplerShardSize,
       },
     ],
     ({ signal }) =>
       http.post<FieldHistogramsResponseSchema>(
-        addInternalBasePath(`field_histograms/${dataViewTitle}`),
+        buildPath('/internal/transform/field_histograms/{dataViewTitle}', { dataViewTitle }),
         {
           body: JSON.stringify({
             query,
             fields,
             samplerShardSize,
             ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
+            ...(projectRouting !== undefined ? { projectRouting } : {}),
           }),
           version: '1',
           signal,

@@ -6,11 +6,10 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { SpacesClient } from './spaces_client';
 import type { Space } from '../../common';
-import { DEFAULT_SPACE_ID } from '../../common/constants';
-
 const createSpacesClientMock = () => {
   const repositoryMock = savedObjectsRepositoryMock.create();
   return {
@@ -30,6 +29,8 @@ const createSpacesClientMock = () => {
       });
     }),
     getPersistedFeatureVisibility: jest.fn().mockResolvedValue([]),
+    isInitialSolutionSetupRequired: jest.fn().mockResolvedValue(false),
+    completeInitialSolutionSetup: jest.fn().mockResolvedValue(undefined),
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     createSavedObjectFinder: repositoryMock.createPointInTimeFinder,

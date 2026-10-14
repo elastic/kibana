@@ -43,7 +43,7 @@ export const ConnectionDetailsFlyoutContent: React.FC<{ headerId?: string }> = (
           {!!ctx.links?.learnMore && (
             // Below onClick is used only for telemetry, but `href` is the real
             // semantic action.
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
+
             <EuiLink
               external
               href={ctx.links.learnMore}

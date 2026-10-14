@@ -13,7 +13,12 @@ import type { MonitorFilterState } from '../../state';
 
 export type SyntheticsMonitorFilterField = keyof Omit<
   MonitorFilterState,
-  'query' | 'monitorQueryIds' | 'showFromAllSpaces'
+  | 'query'
+  | 'monitorQueryIds'
+  | 'showFromAllSpaces'
+  | 'includeHeartbeatMonitors'
+  | 'dateRangeStart'
+  | 'dateRangeEnd'
 >;
 
 export interface LabelWithCountValue {
@@ -28,7 +33,15 @@ export interface SyntheticsMonitorFilterItem {
 }
 
 export function getMonitorFilterFields(): SyntheticsMonitorFilterField[] {
-  return ['tags', 'locations', 'monitorTypes', 'projects', 'schedules', 'useLogicalAndFor'];
+  return [
+    'tags',
+    'locations',
+    'monitorTypes',
+    'projects',
+    'schedules',
+    'remoteNames',
+    'useLogicalAndFor',
+  ];
 }
 
 export type SyntheticsMonitorFilterChangeHandler = (
@@ -91,8 +104,9 @@ export const valueToLabelWithEmptyCount = (value?: string | string[]): LabelWith
 };
 
 export const monitorTypeKeyLabelMap: Record<MonitorTypeEnum, string> = {
-  [MonitorTypeEnum.BROWSER]: 'Journey / Page',
+  [MonitorTypeEnum.BROWSER]: 'Browser / Page',
   [MonitorTypeEnum.HTTP]: 'HTTP',
   [MonitorTypeEnum.TCP]: 'TCP',
   [MonitorTypeEnum.ICMP]: 'ICMP',
+  [MonitorTypeEnum.API]: 'API Journey',
 };

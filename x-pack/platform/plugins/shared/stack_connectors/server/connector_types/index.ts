@@ -50,12 +50,14 @@ export function registerConnectorTypes({
   actions,
   publicBaseUrl,
   experimentalFeatures,
+  isElasticCloudTrial,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
+  isElasticCloudTrial?: () => Promise<boolean>;
 }) {
-  actions.registerType(getEmailConnectorType({ publicBaseUrl }));
+  actions.registerType(getEmailConnectorType({ publicBaseUrl, isElasticCloudTrial }));
   actions.registerType(getIndexConnectorType());
   actions.registerType(getPagerDutyConnectorType());
   actions.registerType(getSwimlaneConnectorType());
@@ -84,7 +86,9 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
-  actions.registerSubActionConnectorType(getMcpConnectorType());
+  actions.registerSubActionConnectorType(
+    getMcpConnectorType({ getClientLeasePool: actions.getClientLeasePool })
+  );
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

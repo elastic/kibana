@@ -7,13 +7,9 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type {
-  SOSecretPath,
-  KafkaOutput,
-  NewRemoteElasticsearchOutput,
-  Output,
-} from '../../../common/types';
+import type { SOSecretPath, SOSecret, Output } from '../../../common/types';
 import type { NewOutput } from '../../../common';
+import { isBeatsOutput, isOtlpOutput } from '../../../common/services/output_helpers';
 import type { SecretReference } from '../../types';
 import { OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 
@@ -96,18 +92,50 @@ export async function deleteOutputSecrets(opts: {
   await deleteSOSecrets(esClient, outputSecretPaths);
 }
 
+/**
+ * Returns every secret of a Kafka output, whatever its depth under `secrets` (e.g. `password` or
+ * `oauth2.client_secret`). `ssl.key` is skipped because it is handled for all Beats outputs.
+ */
+export function getKafkaSecretLeaves(secrets: unknown): Array<{ path: string; value: SOSecret }> {
+  const leaves: Array<{ path: string; value: SOSecret }> = [];
+
+  const walk = (node: unknown, parents: string[]) => {
+    if (!node || typeof node !== 'object') {
+      return;
+    }
+    Object.entries(node).forEach(([key, value]) => {
+      const path = [...parents, key];
+      if (path.join('.') === 'ssl') {
+        return;
+      }
+      if (typeof value === 'string' && value) {
+        leaves.push({ path: path.join('.'), value });
+      } else if (value && typeof value === 'object' && typeof (value as any).id === 'string') {
+        leaves.push({ path: path.join('.'), value: value as SOSecret });
+      } else {
+        walk(value, path);
+      }
+    });
+  };
+  walk(secrets, []);
+
+  return leaves;
+}
+
 export function getOutputSecretReferences(output: Output): SecretReference[] {
   const outputSecretPaths: SecretReference[] = [];
 
-  if (typeof output.secrets?.ssl?.key === 'object') {
+  if (isBeatsOutput(output) && typeof output.secrets?.ssl?.key === 'object') {
     outputSecretPaths.push({
       id: output.secrets.ssl.key.id,
     });
   }
 
-  if (output.type === 'kafka' && typeof output?.secrets?.password === 'object') {
-    outputSecretPaths.push({
-      id: output.secrets.password.id,
+  if (output.type === 'kafka') {
+    getKafkaSecretLeaves(output.secrets).forEach(({ value }) => {
+      if (typeof value === 'object') {
+        outputSecretPaths.push({ id: value.id });
+      }
     });
   }
 
@@ -119,6 +147,18 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
     }
   }
 
+  if (isOtlpOutput(output)) {
+    if (typeof output.secrets?.otlp_exporter?.tls?.key_pem === 'object') {
+      outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.key_pem.id });
+    }
+    if (typeof output.secrets?.otlp_exporter?.tls?.tpm?.owner_auth === 'object') {
+      outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.tpm.owner_auth.id });
+    }
+    if (typeof output.secrets?.otlp_exporter?.tls?.tpm?.auth === 'object') {
+      outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.tpm.auth.id });
+    }
+  }
+
   return outputSecretPaths;
 }
 
@@ -127,33 +167,43 @@ function getOutputSecretPaths(
   output: NewOutput | Partial<Output>
 ): SOSecretPath[] {
   const outputSecretPaths: SOSecretPath[] = [];
+  const typed = { ...output, type: outputType } as NewOutput;
 
-  if (outputType === 'kafka') {
-    const kafkaOutput = output as KafkaOutput;
-    if (kafkaOutput?.secrets?.password) {
-      outputSecretPaths.push({
-        path: 'secrets.password',
-        value: kafkaOutput.secrets.password,
-      });
-    }
-  }
-
-  if (outputType === 'remote_elasticsearch') {
-    const remoteESOutput = output as NewRemoteElasticsearchOutput;
-    if (remoteESOutput.secrets?.service_token) {
-      outputSecretPaths.push({
-        path: 'secrets.service_token',
-        value: remoteESOutput.secrets.service_token,
-      });
-    }
-  }
-
-  // common to all outputs
-  if (output?.secrets?.ssl?.key) {
-    outputSecretPaths.push({
-      path: 'secrets.ssl.key',
-      value: output.secrets.ssl.key,
+  if (typed.type === 'kafka') {
+    getKafkaSecretLeaves(typed.secrets).forEach(({ path, value }) => {
+      outputSecretPaths.push({ path: `secrets.${path}`, value });
     });
+  }
+
+  if (typed.type === 'remote_elasticsearch') {
+    if (typed.secrets?.service_token) {
+      outputSecretPaths.push({ path: 'secrets.service_token', value: typed.secrets.service_token });
+    }
+  }
+
+  if (isOtlpOutput(typed)) {
+    if (typed.secrets?.otlp_exporter?.tls?.key_pem) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.tls.key_pem',
+        value: typed.secrets.otlp_exporter.tls.key_pem,
+      });
+    }
+    if (typed.secrets?.otlp_exporter?.tls?.tpm?.owner_auth) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.tls.tpm.owner_auth',
+        value: typed.secrets.otlp_exporter.tls.tpm.owner_auth,
+      });
+    }
+    if (typed.secrets?.otlp_exporter?.tls?.tpm?.auth) {
+      outputSecretPaths.push({
+        path: 'secrets.otlp_exporter.tls.tpm.auth',
+        value: typed.secrets.otlp_exporter.tls.tpm.auth,
+      });
+    }
+  }
+
+  if (isBeatsOutput(typed) && typed.secrets?.ssl?.key) {
+    outputSecretPaths.push({ path: 'secrets.ssl.key', value: typed.secrets.ssl.key });
   }
 
   return outputSecretPaths;

@@ -6,4 +6,5 @@
  */
 
 export const VECTORDB_APP_ID = 'vectordb';
-export const TUTORIALS_DEEP_LINK_ID = 'tutorials';
+export const GETTING_STARTED_DEEP_LINK_ID = 'getting_started';
+export const GETTING_STARTED_PATH = `/${GETTING_STARTED_DEEP_LINK_ID}`;

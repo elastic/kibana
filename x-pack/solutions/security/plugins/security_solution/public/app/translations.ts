@@ -47,6 +47,13 @@ export const ENTITY_ANALYTICS = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_SETTINGS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalyticsSettings',
+  {
+    defaultMessage: 'Entity analytics settings',
+  }
+);
+
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   'xpack.securitySolution.navigation.privilegedUserMonitoring',
   {
@@ -100,6 +107,13 @@ export const SIEM_RULES = i18n.translate('xpack.securitySolution.navigation.dete
 export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRules', {
   defaultMessage: 'Add Rules',
 });
+
+export const ALERT_ANALYSIS_WORKFLOW = i18n.translate(
+  'xpack.securitySolution.navigation.alertAnalysisWorkflow',
+  {
+    defaultMessage: 'Alert analysis workflow',
+  }
+);
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
   defaultMessage: 'Shared exception lists',

@@ -13,6 +13,7 @@ import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 import type { Agent, OTelCollectorConfig } from '../../../../../common/types';
 
 import { AgentHealth } from '../../../../applications/fleet/sections/agents/components/agent_health';
+import { getCollectorLabel } from './collector_detail';
 
 interface CollectorDetailInfoProps {
   agent: Agent;
@@ -56,7 +57,7 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent,
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.name', {
             defaultMessage: 'Name',
           }),
-          description: nonIdentifying?.['elastic.display.name'] ?? agent.id,
+          description: getCollectorLabel(agent),
         },
         {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.agentId', {
@@ -125,10 +126,7 @@ export const CollectorDetailInfo: React.FC<CollectorDetailInfoProps> = ({ agent,
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.platform', {
             defaultMessage: 'Platform',
           }),
-          description:
-            typeof agent.local_metadata?.os?.platform === 'string'
-              ? agent.local_metadata.os.platform
-              : '-',
+          description: nonIdentifying?.['os.description'] ?? '-',
         },
         {
           title: i18n.translate('xpack.fleet.otelUi.collectorDetail.info.collectorGroup', {

@@ -25,7 +25,12 @@ const useStyles = () => {
 export const EditorContentSpinner: FunctionComponent = () => {
   const styles = useStyles();
   return (
-    <EuiPageSection alignment="center" grow={true} css={styles.editorSpinner}>
+    <EuiPageSection
+      alignment="center"
+      grow={true}
+      css={styles.editorSpinner}
+      data-test-subj="consoleEditorContentSpinner"
+    >
       <EuiLoadingSpinner size="xxl" />
     </EuiPageSection>
   );

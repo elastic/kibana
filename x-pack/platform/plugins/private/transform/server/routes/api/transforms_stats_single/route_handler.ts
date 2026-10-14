@@ -28,7 +28,6 @@ export const routeHandler: RequestHandler<
     const body = await esClient.asCurrentUser.transform.getTransformStats(
       {
         transform_id: transformId,
-        // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
         basic,
       },
       { maxRetries: 0 }

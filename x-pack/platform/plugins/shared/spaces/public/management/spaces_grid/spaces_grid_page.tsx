@@ -8,14 +8,12 @@
 import {
   EuiBadge,
   type EuiBasicTableColumn,
-  EuiButton,
   EuiCallOut,
   EuiFlexGrid,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiPageSection,
   type EuiSearchBarOnChangeArgs,
   EuiSpacer,
@@ -23,18 +21,20 @@ import {
 import { debounce } from 'lodash';
 import React, { Component, lazy, Suspense } from 'react';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type {
   ApplicationStart,
   Capabilities,
   NotificationsStart,
   ScopedHistory,
 } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { addSpaceIdToPath, type Space } from '../../../common';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -46,6 +46,15 @@ import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
+
+const spacesTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
+  defaultMessage: 'Spaces',
+});
+
+const createSpaceButtonLabel = i18n.translate(
+  'xpack.spaces.management.spacesGridPage.createSpaceButtonLabel',
+  { defaultMessage: 'Create space' }
 );
 
 interface Props {
@@ -64,6 +73,7 @@ interface Props {
 interface State {
   spaces: Space[];
   spacesFiltered: Space[];
+  queryText: string;
   activeSpace: Space | null;
   features: KibanaFeature[];
   loading: boolean;
@@ -77,6 +87,7 @@ export class SpacesGridPage extends Component<Props, State> {
     this.state = {
       spaces: [],
       spacesFiltered: [],
+      queryText: '',
       activeSpace: null,
       features: [],
       loading: true,
@@ -96,41 +107,57 @@ export class SpacesGridPage extends Component<Props, State> {
   public render() {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.spaces.management.spacesGridPage.spacesTitle"
-              defaultMessage="Spaces"
-            />
-          }
-          description={getSpacesFeatureDescription()}
-          rightSideItems={
-            !this.state.loading && this.canCreateSpaces()
-              ? [this.getPrimaryActionButton()]
-              : undefined
-          }
-        />
+        {this.renderHeader()}
         <EuiSpacer size="l" />
-        {this.getPageContent()}
+        <div>{this.getPageContent()}</div>
         {this.getConfirmDeleteModal()}
       </div>
     );
   }
 
-  public onQueryChange = ({ query }: EuiSearchBarOnChangeArgs) => {
-    const text = query?.text?.toLowerCase() || '';
+  private renderHeader() {
+    const showCreate = !this.state.loading && this.canCreateSpaces();
+    const menu: AppHeaderMenu | undefined = showCreate
+      ? {
+          primaryActionItem: {
+            id: 'createSpace',
+            label: createSpaceButtonLabel,
+            iconType: 'plusCircle',
+            testId: 'createSpace',
+            href: this.props.history.createHref({ pathname: '/create' }),
+            run: () => this.props.history.push('/create'),
+          },
+        }
+      : undefined;
 
-    this.setState({ loading: true });
-
-    const spacesFiltered = this.state.spaces.filter(
-      (space) =>
-        space.name.toLowerCase().includes(text) || space.description?.toLowerCase().includes(text)
+    return (
+      <AppHeader
+        title={spacesTitle}
+        description={getSpacesFeatureDescription()}
+        menu={menu}
+        spacing="bleed"
+      />
     );
+  }
+
+  private filterSpacesByQuery = (spaces: Space[], queryText: string): Space[] => {
+    if (!queryText) {
+      return spaces;
+    }
+
+    return spaces.filter(
+      (space) =>
+        space.name.toLowerCase().includes(queryText) ||
+        space.description?.toLowerCase().includes(queryText)
+    );
+  };
+
+  public onQueryChange = ({ query }: EuiSearchBarOnChangeArgs) => {
+    const queryText = query?.text?.toLowerCase() || '';
 
     this.setState({
-      spacesFiltered,
-      loading: false,
+      queryText,
+      spacesFiltered: this.filterSpacesByQuery(this.state.spaces, queryText),
     });
   };
 
@@ -199,22 +226,6 @@ export class SpacesGridPage extends Component<Props, State> {
     return this.props.maxSpaces > this.state.spaces.length;
   }
 
-  public getPrimaryActionButton() {
-    return (
-      <EuiButton
-        fill
-        iconType="plusCircle"
-        {...reactRouterNavigate(this.props.history, '/create')}
-        data-test-subj="createSpace"
-      >
-        <FormattedMessage
-          id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-          defaultMessage="Create space"
-        />
-      </EuiButton>
-    );
-  }
-
   public getConfirmDeleteModal = () => {
     if (!this.state.showConfirmDeleteModal || !this.state.selectedSpace) {
       return null;
@@ -260,13 +271,16 @@ export class SpacesGridPage extends Component<Props, State> {
         getActiveSpace,
         getFeatures(),
       ]);
-      this.setState({
+      // Re-apply any query typed while load was in flight; otherwise an early
+      // filter is wiped when this resolves and the table shows every space
+      // while the search box still shows the query text.
+      this.setState((state) => ({
         loading: false,
         spaces,
-        spacesFiltered: spaces,
+        spacesFiltered: this.filterSpacesByQuery(spaces, state.queryText),
         activeSpace,
         features,
-      });
+      }));
     } catch (error) {
       this.setState({
         loading: false,

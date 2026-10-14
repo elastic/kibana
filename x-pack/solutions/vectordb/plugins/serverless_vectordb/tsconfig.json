@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
   ],
   "exclude": [
@@ -27,9 +28,17 @@
     "@kbn/core-chrome-browser",
     "@kbn/cloud-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/agent-builder-plugin",
     "@kbn/vectordb-onboarding",
+    "@kbn/elasticsearch-home",
     "@kbn/react-query",
     "@kbn/i18n",
+    "@kbn/core-application-browser",
+    "@kbn/deeplinks-management",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
+    "@kbn/deeplinks-workflows",
+    "@kbn/data-views-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/scout",
   ]
 }

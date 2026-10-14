@@ -7,8 +7,8 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { EuiFormRow, EuiSpacer, useEuiTheme, EuiText, EuiSwitch } from '@elastic/eui';
+import { type ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import type {
@@ -17,11 +17,17 @@ import type {
   DatasourceDimensionEditorProps,
   DataType,
 } from '@kbn/lens-common';
-import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
+import {
+  mergeLayer,
+  updateColumnFormat,
+  updateColumnLabel,
+  isNotNumeric,
+  isNumeric,
+  updateColumnDropPartials,
+} from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
-import { isNotNumeric, isNumeric } from '../utils';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
 export type TextBasedDimensionEditorProps =
@@ -43,55 +49,87 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     dateRange,
     expressions,
     esqlVariables,
+    isApproximate,
     enableFormatSelector,
+    isMetricDimension,
+    filterOperations,
   } = props;
+
+  // Extract the primitives the fetch effect actually depends on so that a
+  // rebuilt but structurally-equal `query` or `indexPatterns` object from the
+  // parent does not retrigger the ES|QL round trip.
+  const queryEsql = query?.esql;
+  const timeFieldName = useMemo(() => {
+    const values = Object.values(indexPatterns);
+    return values.length ? values[0].timeFieldName : undefined;
+  }, [indexPatterns]);
 
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
+    if (!queryEsql) return;
+
+    // Cancel the in-flight request when the inputs change or the editor unmounts so
+    // a slower, stale response cannot overwrite the columns of a newer query.
+    const controller = new AbortController();
+    let cancelled = false;
+
     async function fetchColumns() {
-      if (query) {
+      try {
         const table = await fetchFieldsFromESQLExpression(
-          { esql: `${query.esql} | limit 0` },
+          { esql: `${queryEsql} | limit 0` },
           expressions,
           { from: dateRange.fromDate, to: dateRange.toDate },
-          undefined,
-          Object.values(indexPatterns).length
-            ? Object.values(indexPatterns)[0].timeFieldName
-            : undefined,
-          esqlVariables
+          controller,
+          timeFieldName,
+          esqlVariables,
+          isApproximate
         );
 
-        if (table) {
-          const hasNumberTypeColumns = table.columns?.some(isNumeric);
-          const columns = table.columns.map((col) => {
-            return {
-              id: col.variable ?? col.id,
-              name: col.variable ? `??${col.variable}` : col.name,
-              meta: col?.meta ?? { type: 'number' },
-              variable: col.variable,
-              compatible:
-                props.isMetricDimension && hasNumberTypeColumns
-                  ? props.filterOperations({
-                      dataType: col?.meta?.type as DataType,
-                      isBucketed: Boolean(isNotNumeric(col)),
-                      scale: 'ordinal',
-                    })
-                  : true,
-            };
-          });
-          setAllColumns(columns);
+        if (cancelled || !table) return;
+
+        const hasNumberTypeColumns = table.columns?.some(isNumeric);
+        const columns = table.columns.map((col) => {
+          return {
+            id: col.variable ?? col.id,
+            name: col.variable ? `??${col.variable}` : col.name,
+            meta: col?.meta ?? { type: 'number' },
+            variable: col.variable,
+            compatible:
+              isMetricDimension && hasNumberTypeColumns
+                ? filterOperations({
+                    dataType: col?.meta?.type as DataType,
+                    isBucketed: Boolean(isNotNumeric(col)),
+                    scale: 'ordinal',
+                  })
+                : true,
+          };
+        });
+        setAllColumns(columns);
+      } catch (err) {
+        // Only swallow the abort we caused via cleanup; let real fetch /
+        // ES|QL errors propagate as an unhandled promise rejection, matching
+        // the pre-fix behavior where they surfaced in the browser console.
+        if (!cancelled) {
+          throw err;
         }
       }
     }
     fetchColumns();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [
     dateRange.fromDate,
     dateRange.toDate,
     esqlVariables,
+    isApproximate,
     expressions,
-    indexPatterns,
-    props,
-    query,
+    queryEsql,
+    timeFieldName,
+    isMetricDimension,
+    filterOperations,
   ]);
 
   const selectedField = useMemo(() => {
@@ -118,6 +156,19 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     [columnId, layerId, state.layers, updateLayer]
   );
 
+  const onDropPartialsChange = useCallback(
+    (value: boolean) => {
+      updateLayer(
+        updateColumnDropPartials({
+          layer: state.layers[layerId],
+          columnId,
+          value,
+        })
+      );
+    },
+    [columnId, layerId, state.layers, updateLayer]
+  );
+
   const activeTable = props.activeData?.[layerId];
   const activeColumnMeta = activeTable?.columns.find((col) => col.id === columnId)?.meta;
   const isNumericColumn =
@@ -125,80 +176,114 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       ? activeColumnMeta?.type === 'number'
       : selectedField?.meta?.type === 'number';
 
+  const isDateHistogramColumn =
+    activeColumnMeta?.esType === 'date' && activeColumnMeta?.esMeta?.bucket !== undefined;
+
   return (
     <>
-      <EuiFormRow
-        data-test-subj="text-based-languages-field-selection-row"
-        label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
-          defaultMessage: 'Field',
-        })}
-        fullWidth
-        className="lnsIndexPatternDimensionEditor--padded"
-      >
-        <FieldSelect
-          data-test-subj="text-based-dimension-field"
-          existingFields={allColumns ?? []}
-          selectedField={selectedField}
-          onChoose={(choice) => {
-            const column = allColumns?.find((f) => f.name === choice.field);
-            const newColumn = {
-              columnId: props.columnId,
-              fieldName: choice.field,
-              meta: column?.meta,
-              variable: column?.variable,
-              label: choice.field,
-              ...(props.isMetricDimension && { inMetricDimension: true }),
-            };
-            return props.setState(
-              !selectedField
-                ? {
-                    ...props.state,
-                    layers: {
-                      ...props.state.layers,
-                      [props.layerId]: {
-                        ...props.state.layers[props.layerId],
-                        columns: [...props.state.layers[props.layerId].columns, newColumn],
+      <div className="lnsIndexPatternDimensionEditor--padded">
+        <EuiFormRow
+          data-test-subj="text-based-languages-field-selection-row"
+          label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
+            defaultMessage: 'Field',
+          })}
+          fullWidth
+        >
+          <FieldSelect
+            data-test-subj="text-based-dimension-field"
+            existingFields={allColumns ?? []}
+            selectedField={selectedField}
+            onChoose={(choice) => {
+              const column = allColumns?.find((f) => f.name === choice.field);
+              const newColumn = {
+                columnId: props.columnId,
+                fieldName: choice.field,
+                meta: column?.meta,
+                variable: column?.variable,
+                label: choice.field,
+                ...(isMetricDimension && { inMetricDimension: true }),
+              };
+              return props.setState(
+                !selectedField
+                  ? {
+                      ...props.state,
+                      layers: {
+                        ...props.state.layers,
+                        [props.layerId]: {
+                          ...props.state.layers[props.layerId],
+                          columns: [...props.state.layers[props.layerId].columns, newColumn],
+                        },
                       },
-                    },
-                  }
-                : {
-                    ...props.state,
-                    layers: {
-                      ...props.state.layers,
-                      [props.layerId]: {
-                        ...props.state.layers[props.layerId],
-                        columns: props.state.layers[props.layerId].columns.map((col) => {
-                          if (col.columnId !== props.columnId) {
-                            return col;
-                          }
+                    }
+                  : {
+                      ...props.state,
+                      layers: {
+                        ...props.state.layers,
+                        [props.layerId]: {
+                          ...props.state.layers[props.layerId],
+                          columns: props.state.layers[props.layerId].columns.map((col) => {
+                            if (col.columnId !== props.columnId) {
+                              return col;
+                            }
 
-                          const isNewColumnNumeric = column?.meta?.type === 'number';
-                          const shouldKeepCustomLabel = Boolean(col.customLabel);
+                            const isNewColumnNumeric = column?.meta?.type === 'number';
+                            const shouldKeepCustomLabel = Boolean(col.customLabel);
 
-                          return {
-                            ...col,
-                            fieldName: choice.field,
-                            meta: column?.meta,
-                            variable: column?.variable,
-                            // If the new column is not numeric, remove the format selector params
-                            ...(!isNewColumnNumeric && col.params ? { params: undefined } : {}),
-                            // If the previous column has a custom label, keep it
-                            ...(shouldKeepCustomLabel
-                              ? {}
-                              : {
-                                  label: choice.field,
-                                  customLabel: false,
-                                }),
-                          };
-                        }),
+                            return {
+                              ...col,
+                              fieldName: choice.field,
+                              meta: column?.meta,
+                              variable: column?.variable,
+                              // If the new column is not numeric, remove the format selector params
+                              ...(!isNewColumnNumeric && col.params ? { params: undefined } : {}),
+                              // If the previous column has a custom label, keep it
+                              ...(shouldKeepCustomLabel
+                                ? {}
+                                : {
+                                    label: choice.field,
+                                    customLabel: false,
+                                  }),
+                            };
+                          }),
+                        },
                       },
-                    },
-                  }
-            );
-          }}
-        />
-      </EuiFormRow>
-      {props.dataSectionExtra}
+                    }
+              );
+            }}
+          />
+        </EuiFormRow>
+        {selectedField && isDateHistogramColumn && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+              <EuiSwitch
+                label={
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.dateHistogram.dropPartialBuckets', {
+                      defaultMessage: 'Drop partial intervals',
+                    })}
+                  </EuiText>
+                }
+                data-test-subj="lensDropPartialIntervals"
+                checked={selectedField.params?.dropPartials ?? true}
+                onChange={(e) => onDropPartialsChange(e.target.checked)}
+                compressed
+              />
+            </EuiFormRow>
+          </>
+        )}
+      </div>
+      {props.dataSectionExtra && (
+        <div
+          css={css`
+            &:not(:empty) {
+              padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+            }
+          `}
+        >
+          {props.dataSectionExtra}
+        </div>
+      )}
       {!isFullscreen && selectedField && (
         <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
           <EuiText

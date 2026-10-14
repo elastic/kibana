@@ -10,6 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { z } from '@kbn/zod/v4';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { InlineFieldActions } from '../inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../../common/utils';
 import type {
@@ -28,7 +29,10 @@ import type { SelectedUser } from './utils';
 import { toSelectedUsers } from './utils';
 import { UserPickerCombobox } from './user_picker_combobox';
 
-type UserPickerProps = z.infer<typeof UserPickerFieldSchema> & ConditionRenderProps;
+type UserPickerProps = z.infer<typeof UserPickerFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const UserPicker: React.FC<UserPickerProps> = ({
   label,
@@ -36,8 +40,13 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
 }) => {
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const { owner: owners } = useCasesContext();
@@ -60,6 +69,10 @@ export const UserPicker: React.FC<UserPickerProps> = ({
 
   const isLoading = isLoadingSuggest || isFetchingSuggest || isUserTyping;
   const isMultiple = metadata?.multiple !== false;
+  const suggestedUids = useMemo(
+    () => new Set(suggestedProfiles.map(({ uid }) => uid)),
+    [suggestedProfiles]
+  );
 
   const rules = useUserPickerValidators({ isRequired: isRequired ?? false, security });
 
@@ -75,6 +88,11 @@ export const UserPicker: React.FC<UserPickerProps> = ({
     [onContentChange]
   );
 
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
+
   return (
     <Controller
       key={name}
@@ -84,28 +102,42 @@ export const UserPicker: React.FC<UserPickerProps> = ({
       defaultValue={defaultValue}
       render={({ field, fieldState }) => {
         const selectedUsers = toSelectedUsers(field.value);
-        const missingUids = selectedUsers
-          .filter((u) => !suggestedProfiles.some((p) => p.uid === u.uid))
-          .map((u) => u.uid);
+        const missingUids = selectedUsers.reduce<string[]>((uids, { uid }) => {
+          if (!suggestedUids.has(uid)) uids.push(uid);
+          return uids;
+        }, []);
 
         return (
-          <UserPickerComboboxWithProfiles
-            label={label}
-            name={name}
-            isInvalid={!!fieldState.error}
-            errorMessage={fieldState.error?.message ?? null}
-            isLoading={isLoading}
-            isMultiple={isMultiple}
-            isRequired={isRequired ?? false}
-            selectedUsers={selectedUsers}
-            suggestedProfiles={suggestedProfiles}
-            missingUids={missingUids}
-            onSearchChange={onSearchChange}
-            onChange={(next) => {
-              field.onChange(JSON.stringify(next));
-              field.onBlur();
-            }}
-          />
+          <>
+            <UserPickerComboboxWithProfiles
+              label={label}
+              name={name}
+              isInvalid={Boolean(fieldState.error)}
+              errorMessage={fieldState.error?.message ?? null}
+              isLoading={isLoading}
+              isMultiple={isMultiple}
+              isRequired={isRequired ?? false}
+              isRequiredOnClose={isRequiredOnClose ?? false}
+              isDisabled={isSaving}
+              selectedUsers={selectedUsers}
+              suggestedProfiles={suggestedProfiles}
+              missingUids={missingUids}
+              onSearchChange={onSearchChange}
+              onChange={(next) => {
+                field.onChange(JSON.stringify(next));
+                field.onBlur();
+              }}
+            />
+            {fieldState.isDirty && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
         );
       }}
     />
@@ -122,6 +154,8 @@ interface UserPickerComboboxWithProfilesProps {
   isLoading: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isRequiredOnClose?: boolean;
+  isDisabled?: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];
   missingUids: string[];
