@@ -159,7 +159,7 @@ export function AttacksGroupTakeActionItems({
   );
 
   // Only attachable as a `security.attack` when we know which index the attack document came
-  // from — the attachment metadata requires it for the duplicate check and for status sync — so
+  // from — the attachment metadata requires it for status sync and for reopening the flyout — so
   // without it the menu falls back to the markdown-comment payload.
   const attackToAttach = useMemo<Omit<AttackToAttach, 'alertsIndex'> | undefined>(
     () =>

@@ -337,8 +337,9 @@ export const buildAttackAttachments = (
       // The attack's own alert count, which is what the preview card means by "alerts" — it can
       // exceed the number of ids actually attached when the batch above was capped.
       alertCount: originalAlertIds.length,
-      // Lets the Cases platform pair this attachment's id with an index so the "already attached"
-      // duplicate check works, and so status sync knows which index to write to.
+      // Tells status sync which index to write the attack's status to, lets the flyout reopen
+      // the attack document, and is what authorization checks resolve the attack against.
+      // Note the "already attached" duplicate check matches on the attack id alone.
       index,
       ...(snapshot.summaryMarkdown != null ? { summaryMarkdown: snapshot.summaryMarkdown } : {}),
       ...(snapshot.detailsMarkdown != null ? { detailsMarkdown: snapshot.detailsMarkdown } : {}),
