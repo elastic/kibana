@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID } from '@kbn/alertzero-common';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
@@ -17,6 +24,7 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import type { ThreatIntelSupplyWorkflowInstaller } from '../../types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { evaluateHuntSupplyHardGate } from './hard_gate';
+import { evaluateHuntModelTiers } from './hunt_model_tiers';
 import { ThreatIntelSupplyHardGateError } from './threat_intel_supply_hard_gate_error';
 import { ThreatIntelSupplyHuntDisabledError } from './threat_intel_supply_hunt_disabled_error';
 import { ThreatIntelSupplyNotInstalledError } from './threat_intel_supply_not_installed_error';
@@ -47,6 +55,12 @@ export interface ThreatIntelSupplyServiceDeps {
    * that plugin's `start()` registers it.
    */
   getWorkflowInstaller?: () => ThreatIntelSupplyWorkflowInstaller | undefined;
+  /** Model-tier registry, for reporting where each Hunt tier gets its model. Optional plugin. */
+  getSearchInferenceEndpoints?: () => SearchInferenceEndpointsPluginStart | undefined;
+  /** The inference plugin is optional; this returns undefined without it, and every tier then reads unavailable. */
+  getInference: () => InferenceServerStart | undefined;
+  /** The requesting user's space-scoped settings, for the deployment default connector. */
+  getUiSettingsClient: (request: KibanaRequest) => IUiSettingsClient;
 }
 
 /**
@@ -232,8 +246,15 @@ export class ThreatIntelSupplyService {
   }
 
   async getSupplyStatus(spaceId: string, request: KibanaRequest): Promise<ThreatIntelSupplyStatus> {
-    const [hardGate, huntEnabled, ingest, enrich, attribute] = await Promise.all([
+    const [hardGate, modelTiers, huntEnabled, ingest, enrich, attribute] = await Promise.all([
       this.evaluateHardGate(request),
+      evaluateHuntModelTiers({
+        inference: this.deps.getInference(),
+        searchInferenceEndpoints: this.deps.getSearchInferenceEndpoints?.(),
+        uiSettingsClient: this.deps.getUiSettingsClient(request),
+        request,
+        logger: this.deps.logger,
+      }),
       this.isHuntEnabledInSpace(spaceId),
       this.readWorkflowStatus(
         THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
@@ -271,7 +292,7 @@ export class ThreatIntelSupplyService {
 
     const drift = huntEnabled && workflows.some((row) => !row.installed || !row.enabled);
 
-    return { workflows, hardGate, drift, huntEnabled };
+    return { workflows, hardGate, drift, huntEnabled, modelTiers };
   }
 
   private async setWorkflowEnabled({

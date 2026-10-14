@@ -346,6 +346,10 @@ export class AlertZeroPlugin
               enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
             // security_solution registers after this plugin starts; read lazily.
             getWorkflowInstaller: () => this.threatIntelSupplyWorkflowInstaller,
+            getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+            getInference: () => plugins.inference,
+            getUiSettingsClient: (request) =>
+              core.uiSettings.asScopedToClient(core.savedObjects.getScopedClient(request)),
           })
         : undefined;
 

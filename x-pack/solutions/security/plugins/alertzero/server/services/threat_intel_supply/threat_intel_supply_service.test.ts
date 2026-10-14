@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID } from '@kbn/alertzero-common';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
@@ -98,7 +105,10 @@ describe('ThreatIntelSupplyService', () => {
 
   const createService = (
     spaceIds: string[] = [SPACE_A, SPACE_B],
-    opts?: { withInstaller?: boolean }
+    opts?: {
+      withInstaller?: boolean;
+      searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+    }
   ) =>
     new ThreatIntelSupplyService({
       management,
@@ -107,6 +117,9 @@ describe('ThreatIntelSupplyService', () => {
       getEsClient: async () => esClient,
       enumerateSpaceIds: async () => spaceIds,
       getWorkflowInstaller: opts?.withInstaller === false ? undefined : () => ensureInstaller,
+      getSearchInferenceEndpoints: () => opts?.searchInferenceEndpoints,
+      getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+      getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
     });
 
   const seedAllTiWorkflows = (enabled: boolean) => {
@@ -458,6 +471,51 @@ describe('ThreatIntelSupplyService', () => {
     huntEnabledBySpace.set(SPACE_B, true);
     const status = await createService().getSupplyStatus(SPACE_A, request);
     expect(status.workflows.find((w) => w.key === 'enrich')?.inUseElsewhere).toBe(true);
+  });
+
+  it('reports where each Hunt model tier gets its model alongside the workflows', async () => {
+    seedAllTiWorkflows(true);
+    huntEnabledBySpace.set(SPACE_A, true);
+    const searchInferenceEndpoints = {
+      endpoints: {
+        getForFeature: jest.fn().mockResolvedValue({
+          endpoints: [{ connectorId: 'opus', isRecommended: true }],
+          soEntryFound: false,
+        }),
+      },
+    } as unknown as SearchInferenceEndpointsPluginStart;
+
+    const status = await createService([SPACE_A, SPACE_B], {
+      searchInferenceEndpoints,
+    }).getSupplyStatus(SPACE_A, request);
+
+    expect(status.modelTiers).toEqual([
+      { tier: 'efficient', state: 'recommended' },
+      { tier: 'balanced', state: 'recommended' },
+      { tier: 'frontier', state: 'recommended' },
+    ]);
+  });
+
+  it('keeps the hard gate open when a model tier is unavailable', async () => {
+    const searchInferenceEndpoints = {
+      endpoints: {
+        getForFeature: jest.fn().mockResolvedValue({ endpoints: [], soEntryFound: false }),
+      },
+    } as unknown as SearchInferenceEndpointsPluginStart;
+
+    const status = await createService([SPACE_A, SPACE_B], {
+      searchInferenceEndpoints,
+    }).getSupplyStatus(SPACE_A, request);
+
+    expect(status.modelTiers.every(({ state }) => state === 'unavailable')).toBe(true);
+    expect(status.hardGate).toEqual({ ok: true, reasonCodes: [] });
+  });
+
+  it('still reports every tier when the model-tier registry is not installed', async () => {
+    // No registry and no default connector: nothing for Hunt to run on, so every tier says so.
+    expect(
+      (await createService().getSupplyStatus(SPACE_A, request)).modelTiers.map(({ state }) => state)
+    ).toEqual(['unavailable', 'unavailable', 'unavailable']);
   });
 
   it('reports drift when Hunt is on and a required TI workflow is off', async () => {
