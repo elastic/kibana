@@ -27,10 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepContext } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../../hooks/use_workflows_monaco_theme';
+import { workflowsEditorChromeOverrides } from '../../lib/workflow_monaco_layout_options';
 
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
@@ -81,7 +78,6 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   onClose,
   useRunButton = false,
 }) => {
-  useWorkflowsMonacoTheme();
   const { euiTheme, colorMode, modifications, highContrastMode } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
 
@@ -207,7 +203,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           onChange={handleInputChange}
           dataTestSubj="workflow-resume-json-editor"
           overflowWidgetsContainerZIndexOverride={6001}
-          themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
+          chromeOverrides={workflowsEditorChromeOverrides}
           options={{
             language: 'json',
             fixedOverflowWidgets: true,

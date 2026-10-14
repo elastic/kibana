@@ -11,6 +11,9 @@ import React from 'react';
 jest.mock('@kbn/code-editor', () => {
   const actual = jest.requireActual('@kbn/code-editor');
   return {
+    CODE_EDITOR_DEFAULT_THEME_ID: actual.CODE_EDITOR_DEFAULT_THEME_ID,
+    initializeRegisteredLanguagesTheme: jest.fn(),
+    applyKbnCodeEditorChromeOverrides: jest.fn(() => ({ dispose: jest.fn() })),
     monaco: {
       ...actual.monaco,
       editor: {
@@ -19,6 +22,7 @@ jest.mock('@kbn/code-editor', () => {
         createDiffEditor: jest.fn(() => ({
           setModel: jest.fn(),
           updateOptions: jest.fn(),
+          getContainerDomNode: jest.fn(() => document.createElement('div')),
           getModifiedEditor: jest.fn(() => ({ layout: jest.fn() })),
           dispose: jest.fn(),
         })),
@@ -31,8 +35,6 @@ jest.mock('@kbn/workflows-ui', () => {
   const actual = jest.requireActual('@kbn/workflows-ui');
   return {
     ...actual,
-    useWorkflowsMonacoTheme: jest.fn(),
-    WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
     computeWorkflowYamlDiffStats: jest.fn(actual.computeWorkflowYamlDiffStats),
   };
 });
