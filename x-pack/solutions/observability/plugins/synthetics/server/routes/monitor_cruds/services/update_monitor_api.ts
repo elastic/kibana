@@ -214,8 +214,14 @@ export class UpdateMonitorAPI {
       return;
     }
 
+    // Only check a script that changed, so a monitor saved with a broken script can still be
+    // edited or disabled
+    const checkInlineScript =
+      normalizedMonitor[ConfigKey.SOURCE_INLINE] !==
+      (prevAttrs as MonitorFields)[ConfigKey.SOURCE_INLINE];
+
     const validation = validateMonitor(normalizedMonitor, this.routeContext.spaceId, undefined, {
-      checkInlineScript: true,
+      checkInlineScript,
     });
     if (!validation.valid || !validation.decodedMonitor) {
       this.result.perIdErrors[monitorId] = {
