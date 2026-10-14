@@ -364,4 +364,56 @@ describe('SyntheticsMonitorClient', () => {
       maintenanceWindows
     );
   });
+
+  describe('testNowConfigs', () => {
+    const testNow = (createPackagePolicies: jest.Mock, runOnceConfigs: jest.Mock) => {
+      const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+      client.privateLocationAPI.createPackagePolicies = createPackagePolicies;
+      syntheticsService.runOnceConfigs = runOnceConfigs;
+      syntheticsService.getSyntheticsParams = jest.fn().mockResolvedValue({});
+      jest.spyOn(client as any, 'formatConfigWithParams').mockResolvedValue({
+        formattedConfig: { ...monitor, locations: [{ ...privateLocations[0] }] },
+        params: {},
+        config: { monitor, id: monitor.id, params: {}, spaceId: 'default' },
+      });
+
+      return client.testNowConfigs(
+        { monitor, id: monitor.id as string, testRunId: 'run-id' },
+        privateLocations,
+        'default'
+      );
+    };
+
+    it('returns the private location errors from the policy creation', async () => {
+      const errors = [{ locationId: 'loc-0', error: { reason: 'no complete agent', status: 400 } }];
+
+      const [, result] = await testNow(
+        jest.fn().mockResolvedValue({ created: [], failed: [], errors }),
+        jest.fn().mockResolvedValue(undefined)
+      );
+
+      expect(result).toEqual(errors);
+    });
+
+    it('merges public service errors with private location errors', async () => {
+      const privateError = { locationId: 'loc-0', error: { reason: 'private', status: 400 } };
+      const publicError = { locationId: 'loc-1', error: { reason: 'public', status: 500 } };
+
+      const [, result] = await testNow(
+        jest.fn().mockResolvedValue({ created: [], failed: [], errors: [privateError] }),
+        jest.fn().mockResolvedValue([publicError])
+      );
+
+      expect(result).toEqual([publicError, privateError]);
+    });
+
+    it('returns no errors when every location was scheduled', async () => {
+      const [, result] = await testNow(
+        jest.fn().mockResolvedValue({ created: [{ id: 'tn-1' }], failed: [] }),
+        jest.fn().mockResolvedValue(undefined)
+      );
+
+      expect(result).toBeUndefined();
+    });
+  });
 });
