@@ -154,6 +154,61 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   // Dashboard and discover are displayed in larger cards
   const mainApps = ['dashboards', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
+<<<<<<< HEAD
+=======
+  const mainAppsUserHasAccessTo = useMemo(() => {
+    const applications = [];
+    if (application.capabilities.dashboard_v2?.show) {
+      applications.push('dashboards');
+    }
+
+    if (application.capabilities.discover_v2?.show) {
+      applications.push('discover');
+    }
+
+    return applications;
+  }, [application.capabilities]);
+
+  // `fileUpload.show` is resolved from the user's privileges to create data views, which file upload
+  // and sample data both need.
+  const canIngestData =
+    application.capabilities.navLinks.integrations === true ||
+    application.capabilities.fileUpload?.show === true;
+
+  const menu = useMemo<AppHeaderMenu>(() => {
+    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+      application.capabilities.navLinks;
+    const items: NonNullable<AppHeaderMenu['items']> = [];
+
+    if (managementHref && isManagementEnabled) {
+      items.push({
+        id: 'manage',
+        label: i18n.translate('kibanaOverview.header.stackManagementButtonLabel', {
+          defaultMessage: 'Manage',
+        }),
+        iconType: 'gear',
+        href: managementHref,
+        testId: 'homeManage',
+        order: 0,
+      });
+    }
+
+    if (devToolsHref && !!devTools && isDevToolsEnabled) {
+      items.push({
+        id: 'devTools',
+        label: i18n.translate('kibanaOverview.header.devToolsButtonLabel', {
+          defaultMessage: 'Dev tools',
+        }),
+        iconType: 'wrench',
+        href: devToolsHref,
+        testId: 'homeDevTools',
+        order: 1,
+      });
+    }
+
+    return { items };
+  }, [application.capabilities.navLinks, devTools, devToolsHref, managementHref]);
+>>>>>>> 7bd8fd1d3b21 ([Analytics overview] Hide "Ingest your data" for users who can't add data (#297717))
 
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
@@ -337,9 +392,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                     : 'kbnOverviewData--expanded'
                 }`}
               >
-                <EuiFlexItem>
-                  <AddData addBasePath={addBasePath} features={addDataFeatures} />
-                </EuiFlexItem>
+                {canIngestData ? (
+                  <EuiFlexItem>
+                    <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                  </EuiFlexItem>
+                ) : null}
 
                 <EuiFlexItem>
                   <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
