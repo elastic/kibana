@@ -139,6 +139,31 @@ describe('Microsoft Teams inbound events', () => {
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
   });
 
+  it('emits a channel reply id rather than the root message id', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          notification({
+            resource: "teams('team-1')/channels('channel-1')/messages('root-1')/replies('reply-1')",
+            resourceData: {
+              '@odata.type': '#Microsoft.Graph.chatMessage',
+              id: 'reply-1',
+            },
+          })
+        )
+      )
+    );
+    expect(result.events[0]).toMatchObject({
+      eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
+      payload: {
+        team_id: 'team-1',
+        channel_id: 'channel-1',
+        message_id: 'reply-1',
+        tenant_id: 'tenant-1',
+      },
+    });
+  });
+
   it('emits a chat message from a slash resource path', async () => {
     const result = expectEmit(
       await events.handleEvents(

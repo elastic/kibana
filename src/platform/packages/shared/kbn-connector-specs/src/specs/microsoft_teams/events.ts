@@ -43,14 +43,14 @@ const teamsId = (description: string) => z.string().min(1).max(TEAMS_ID_MAX).des
 
 const optionalTeamsId = (description: string) => teamsId(description).optional();
 
-const tenantIdField = optionalTeamsId('Entra tenant id, when the notification includes one.');
+const tenantIdField = () => optionalTeamsId('Entra tenant id, when the notification includes one.');
 
 const ChannelMessageEventSchema = lazySchema(() =>
   z.object({
     team_id: teamsId('Team that owns the channel.'),
     channel_id: teamsId('Channel the message was posted in.'),
     message_id: teamsId('Id of the posted message.'),
-    tenant_id: tenantIdField,
+    tenant_id: tenantIdField(),
   })
 );
 
@@ -58,7 +58,7 @@ const ChatMessageEventSchema = lazySchema(() =>
   z.object({
     chat_id: teamsId('Chat the message was posted in.'),
     message_id: teamsId('Id of the posted message.'),
-    tenant_id: tenantIdField,
+    tenant_id: tenantIdField(),
   })
 );
 
@@ -66,14 +66,14 @@ const ChannelCreatedEventSchema = lazySchema(() =>
   z.object({
     team_id: teamsId('Team the channel was created in.'),
     channel_id: teamsId('Id of the created channel.'),
-    tenant_id: tenantIdField,
+    tenant_id: tenantIdField(),
   })
 );
 
 const ChatCreatedEventSchema = lazySchema(() =>
   z.object({
     chat_id: teamsId('Id of the created chat.'),
-    tenant_id: tenantIdField,
+    tenant_id: tenantIdField(),
   })
 );
 
@@ -81,7 +81,7 @@ const TeamMemberAddedEventSchema = lazySchema(() =>
   z.object({
     team_id: teamsId('Team the member was added to.'),
     user_id: teamsId('Entra user id of the added member.'),
-    tenant_id: tenantIdField,
+    tenant_id: tenantIdField(),
   })
 );
 
@@ -175,7 +175,7 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
   const ids = readResourceIds(item.resource);
 
   if (typeName === 'chatmessage') {
-    const messageId = ids.messages ?? readId(item.resourceData.id);
+    const messageId = ids.replies ?? ids.messages ?? readId(item.resourceData.id);
     if (ids.teams !== undefined && ids.channels !== undefined && messageId !== undefined) {
       return {
         eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
@@ -320,7 +320,7 @@ export const microsoftTeamsEvents: ConnectorSpecEvents = {
         'core.kibanaConnectorSpecs.microsoftTeams.events.channelMessage.description',
         {
           defaultMessage:
-            'A message was posted in a Teams channel. The event includes the team, channel, and message ids. Message content is not included.',
+            'A message was posted in a Teams channel. The event includes the team, channel, and message ids. For a reply, message_id is the reply. Message content is not included.',
         }
       ),
       eventSchema: ChannelMessageEventSchema,
