@@ -24,13 +24,16 @@ describe('getServerlessProject', () => {
     }
   );
 
-  it.each([['es'], ['workplaceai'], ['vectordb']])('reads the %s project without a tier', (projectType) => {
-    expect(
-      getServerlessProject([`--serverless=${projectType}`, obltProducts('logs_essentials')])
-    ).toEqual({
-      projectType,
-    });
-  });
+  it.each([['es'], ['workplaceai'], ['vectordb']])(
+    'reads the %s project without a tier',
+    (projectType) => {
+      expect(
+        getServerlessProject([`--serverless=${projectType}`, obltProducts('logs_essentials')])
+      ).toEqual({
+        projectType,
+      });
+    }
+  );
 
   it('defaults security and oblt projects to the complete tier', () => {
     expect(getServerlessProject(['--serverless=security'])).toEqual({
