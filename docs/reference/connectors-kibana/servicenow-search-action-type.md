@@ -48,7 +48,7 @@ To use the connector, set up OAuth in {{sn}}, create the connector in {{kib}}, a
 
 #### OAuth 2.0 Client Credentials
 
-1. Select **System OAuth > Application Registry**.
+1. Select **System OAuth → Application Registry**.
 2. Select **New**, then select **Create an OAuth API endpoint for external clients**.
 3. Enter a name for your application.
 4. Enter a **Client Secret** value, or let {{sn}} generate one.
@@ -62,7 +62,7 @@ To use the connector, set up OAuth in {{sn}}, create the connector in {{kib}}, a
 
 Use this method to let individual users sign in to {{sn}} through {{kib}}. {{kib}} stores refreshable tokens on the user's behalf.
 
-1. Select **System OAuth** > **Application Registry**.
+1. Select **System OAuth** → **Application Registry**.
 2. Select **New**, then select **Create an OAuth API endpoint for external clients**.
 3. Configure the application as follows:
    - **Name**: Enter a name for the application (for example, "Elastic Kibana").
@@ -82,7 +82,7 @@ The connector automatically configures the correct {{sn}} OAuth endpoints for yo
 
 ### Connector configuration [servicenow-search-connector-configuration]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create connectors in **{{stack-manage-app}} → {{connectors-ui}}**.
 
 {{sn}} connectors support **OAuth 2.0 Client Credentials** and **OAuth 2.0 Authorization Code** authentication. Select the authentication type when you create or edit the connector.
 
@@ -378,11 +378,11 @@ The rules run after the database write and send the call with `executeAsync()`, 
 
 ### Create the outbound REST message [servicenow-search-inbound-rest-message]
 
-In the {{sn}} banner, select **All** and enter `REST Message`. Open **System Web Services > Outbound > REST Message**. The Admin workspace menu does not list this record.
+In the {{sn}} banner, select **All** and enter `REST Message`. Open **System Web Services → Outbound → REST Message**. The Admin workspace menu does not list this record.
 
 Create a message whose **Name** is exactly `Elastic Workflows`, then save it before adding a method. Under **HTTP Methods**, select **New** and set:
 
-- **Name**: `post`. The scripts look up this name. It is case sensitive. **POST**, `Default POST`, or any other name throws `com.glide.communications.ProcessingException` and writes nothing to the outbound HTTP log. That error is in **System Logs > Errors**.
+- **Name**: `post`. The scripts look up this name. It is case sensitive. **POST**, `Default POST`, or any other name throws `com.glide.communications.ProcessingException` and writes nothing to the outbound HTTP log. That error is in **System Logs → Errors**.
 - **HTTP method**: POST. This dropdown is the verb. It is separate from **Name**.
 - **Endpoint**: the **Webhook URL** from the connector, on a host the {{sn}} instance can reach.
 - HTTP header `Content-Type`: `application/json`
@@ -392,7 +392,7 @@ The three business rules call `new sn_ws.RESTMessageV2('Elastic Workflows', 'pos
 
 ### Create the incident rule [servicenow-search-inbound-incident-rule]
 
-Select **All**, enter `Business Rules`, and open **System Definition > Business Rules**. Create an **after** business rule on `incident` with **Advanced**, **Insert**, and **Update** selected. Put the script on the **Advanced** tab. Set **When** to **after**, not **async**. An **async** rule has no `previous` record, so `previous.nil()` is true for an update and the workflow receives `servicenow_search.incident_created`.
+Select **All**, enter `Business Rules`, and open **System Definition → Business Rules**. Create an **after** business rule on `incident` with **Advanced**, **Insert**, and **Update** selected. Put the script on the **Advanced** tab. Set **When** to **after**, not **async**. An **async** rule has no `previous` record, so `previous.nil()` is true for an update and the workflow receives `servicenow_search.incident_created`.
 
 On insert, `current.operation()` is `insert` and the script sends `incident.created`.
 
@@ -549,7 +549,7 @@ Create a new incident after the REST message and the incident rule are saved. Th
 
 Look for a row whose hostname is the {{kib}} host:
 
-- **No {{kib}} row, and System Logs > Errors shows `ProcessingException`.** The REST message **Name** is not `Elastic Workflows`, or the HTTP method **Name** is not `post`.
+- **No {{kib}} row, and System Logs → Errors shows `ProcessingException`.** The REST message **Name** is not `Elastic Workflows`, or the HTTP method **Name** is not `post`.
 - **No {{kib}} row and no error.** The incident script returned before the REST call. On an update, a watched field has to change. A journal-only save does not call {{kib}}.
 - **An update starts `servicenow_search.incident_created`.** **When** is **async**. Set it to **after** and detect the insert with `current.operation() == 'insert'` only. An async rule has no `previous` object, so treating an empty `previous` as an insert labels every save as created.
 - **A connection error.** The endpoint is not reachable from the {{sn}} instance. Use a public host, and set `server.publicBaseUrl` to that host.

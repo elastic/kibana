@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type {
@@ -143,6 +144,11 @@ interface ParsedServicenowEvent {
   readonly payload: Record<string, unknown>;
 }
 
+interface InboundParseNotes {
+  truncatedFields: string[];
+  rejectedFields: string[];
+}
+
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -158,16 +164,91 @@ const readId = (value: unknown): string | undefined => readBoundedString(value, 
 const readValue = (value: unknown): string | undefined =>
   readBoundedString(value, SERVICENOW_VALUE_MAX);
 
-/** Keeps an empty string so a cleared ServiceNow value stays distinct from an omitted one. */
-const readOptionalValue = (value: unknown): string | undefined => {
-  if (typeof value !== 'string' || value.length > SERVICENOW_VALUE_MAX) {
+const safeLogToken = (value: string): string => value.replace(/[^\w.]/g, '_');
+
+/**
+ * Keeps an empty string so a cleared ServiceNow value stays distinct from an omitted one.
+ * Values past the schema max are truncated and recorded so the event is still delivered.
+ */
+const readOptionalValue = (
+  value: unknown,
+  notes: InboundParseNotes,
+  field: string
+): string | undefined => {
+  if (typeof value !== 'string') {
     return undefined;
   }
-  return value;
+  if (value.length <= SERVICENOW_VALUE_MAX) {
+    return value;
+  }
+  notes.truncatedFields.push(safeLogToken(field));
+  return value.slice(0, SERVICENOW_VALUE_MAX);
 };
 
 const readText = (value: unknown): string | undefined =>
   readBoundedString(value, SERVICENOW_TEXT_MAX);
+
+const rejectionReason = (value: unknown, maxLength: number): string => {
+  if (typeof value !== 'string') {
+    return 'not a string';
+  }
+  if (value.length === 0) {
+    return 'empty';
+  }
+  if (value.length > maxLength) {
+    return `longer than ${maxLength} characters`;
+  }
+  return 'invalid';
+};
+
+/** Required fields reject the event when missing, empty, or longer than the schema allows. */
+const readRequiredBoundedString = (
+  value: unknown,
+  maxLength: number,
+  notes: InboundParseNotes,
+  field: string
+): string | undefined => {
+  const read = readBoundedString(value, maxLength);
+  if (read === undefined) {
+    notes.rejectedFields.push(`${safeLogToken(field)} (${rejectionReason(value, maxLength)})`);
+  }
+  return read;
+};
+
+const readRequiredId = (
+  value: unknown,
+  notes: InboundParseNotes,
+  field: string
+): string | undefined => readRequiredBoundedString(value, SERVICENOW_ID_MAX, notes, field);
+
+const readRequiredValue = (
+  value: unknown,
+  notes: InboundParseNotes,
+  field: string
+): string | undefined => readRequiredBoundedString(value, SERVICENOW_VALUE_MAX, notes, field);
+
+const readRequiredText = (
+  value: unknown,
+  notes: InboundParseNotes,
+  field: string
+): string | undefined => readRequiredBoundedString(value, SERVICENOW_TEXT_MAX, notes, field);
+
+const logInboundParseNotes = (log: Logger, notes: InboundParseNotes): void => {
+  if (notes.truncatedFields.length > 0) {
+    log.warn(
+      `Truncated ServiceNow inbound field values to ${SERVICENOW_VALUE_MAX} characters: ${notes.truncatedFields.join(
+        ', '
+      )}`
+    );
+  }
+  if (notes.rejectedFields.length > 0) {
+    log.warn(
+      `Dropped ServiceNow inbound event because required fields were missing or invalid: ${notes.rejectedFields.join(
+        ', '
+      )}`
+    );
+  }
+};
 
 const omitUndefined = (fields: Record<string, string | undefined>): Record<string, string> =>
   Object.fromEntries(
@@ -191,7 +272,10 @@ const incidentCorrelationKey = (
   return boundedCorrelationKey(`${sysId}:${occurrence}:${sysUpdatedOn}`);
 };
 
-const readChangedFields = (value: unknown): ChangedField[] | undefined => {
+const readChangedFields = (
+  value: unknown,
+  notes: InboundParseNotes
+): ChangedField[] | undefined => {
   if (!Array.isArray(value)) {
     return undefined;
   }
@@ -202,8 +286,8 @@ const readChangedFields = (value: unknown): ChangedField[] | undefined => {
       if (field === undefined) {
         return [];
       }
-      const previous = readOptionalValue(entry.previous);
-      const current = readOptionalValue(entry.current);
+      const previous = readOptionalValue(entry.previous, notes, `changed_fields.${field}.previous`);
+      const current = readOptionalValue(entry.current, notes, `changed_fields.${field}.current`);
       const changed: ChangedField = {
         field,
         ...(previous !== undefined ? { previous } : {}),
@@ -215,10 +299,13 @@ const readChangedFields = (value: unknown): ChangedField[] | undefined => {
   return fields.length > 0 ? fields : undefined;
 };
 
-const parseIncidentCreated = (body: Record<string, unknown>): ParsedServicenowEvent | undefined => {
-  const table = readId(body.table);
-  const sysId = readId(body.sys_id);
-  const number = readId(body.number);
+const parseIncidentCreated = (
+  body: Record<string, unknown>,
+  notes: InboundParseNotes
+): ParsedServicenowEvent | undefined => {
+  const table = readRequiredId(body.table, notes, 'table');
+  const sysId = readRequiredId(body.sys_id, notes, 'sys_id');
+  const number = readRequiredId(body.number, notes, 'number');
   if (table === undefined || sysId === undefined || number === undefined) {
     return undefined;
   }
@@ -238,13 +325,16 @@ const parseIncidentCreated = (body: Record<string, unknown>): ParsedServicenowEv
   };
 };
 
-const parseIncidentUpdated = (body: Record<string, unknown>): ParsedServicenowEvent | undefined => {
-  const table = readId(body.table);
-  const sysId = readId(body.sys_id);
+const parseIncidentUpdated = (
+  body: Record<string, unknown>,
+  notes: InboundParseNotes
+): ParsedServicenowEvent | undefined => {
+  const table = readRequiredId(body.table, notes, 'table');
+  const sysId = readRequiredId(body.sys_id, notes, 'sys_id');
   if (table === undefined || sysId === undefined) {
     return undefined;
   }
-  const changedFields = readChangedFields(body.changed_fields);
+  const changedFields = readChangedFields(body.changed_fields, notes);
   return {
     eventId: SERVICENOW_INCIDENT_UPDATED_EVENT_ID,
     correlationKey: incidentCorrelationKey(body, sysId, SERVICENOW_OCCURRENCE_INCIDENT_UPDATED),
@@ -260,11 +350,12 @@ const parseIncidentUpdated = (body: Record<string, unknown>): ParsedServicenowEv
 };
 
 const parseIncidentResolved = (
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  notes: InboundParseNotes
 ): ParsedServicenowEvent | undefined => {
-  const table = readId(body.table);
-  const sysId = readId(body.sys_id);
-  const state = readValue(body.state);
+  const table = readRequiredId(body.table, notes, 'table');
+  const sysId = readRequiredId(body.sys_id, notes, 'sys_id');
+  const state = readRequiredValue(body.state, notes, 'state');
   if (table === undefined || sysId === undefined || state === undefined) {
     return undefined;
   }
@@ -284,13 +375,14 @@ const parseIncidentResolved = (
 
 const parseJournal = (
   body: Record<string, unknown>,
-  eventId: string
+  eventId: string,
+  notes: InboundParseNotes
 ): ParsedServicenowEvent | undefined => {
-  const table = readId(body.table);
-  const sysId = readId(body.sys_id);
-  const journalEntryId = readId(body.journal_entry_id);
-  const author = readValue(body.author);
-  const text = readText(body.text);
+  const table = readRequiredId(body.table, notes, 'table');
+  const sysId = readRequiredId(body.sys_id, notes, 'sys_id');
+  const journalEntryId = readRequiredId(body.journal_entry_id, notes, 'journal_entry_id');
+  const author = readRequiredValue(body.author, notes, 'author');
+  const text = readRequiredText(body.text, notes, 'text');
   if (
     table === undefined ||
     sysId === undefined ||
@@ -315,10 +407,13 @@ const parseJournal = (
   };
 };
 
-const parseChangeApproval = (body: Record<string, unknown>): ParsedServicenowEvent | undefined => {
-  const changeRequestId = readId(body.change_request_id);
-  const approvalId = readId(body.approval_id);
-  const state = readValue(body.state);
+const parseChangeApproval = (
+  body: Record<string, unknown>,
+  notes: InboundParseNotes
+): ParsedServicenowEvent | undefined => {
+  const changeRequestId = readRequiredId(body.change_request_id, notes, 'change_request_id');
+  const approvalId = readRequiredId(body.approval_id, notes, 'approval_id');
+  const state = readRequiredValue(body.state, notes, 'state');
   if (changeRequestId === undefined || approvalId === undefined || state === undefined) {
     return undefined;
   }
@@ -337,26 +432,27 @@ const parseChangeApproval = (body: Record<string, unknown>): ParsedServicenowEve
 
 const parseByOccurrence: Record<
   string,
-  (body: Record<string, unknown>) => ParsedServicenowEvent | undefined
+  (body: Record<string, unknown>, notes: InboundParseNotes) => ParsedServicenowEvent | undefined
 > = {
   [SERVICENOW_OCCURRENCE_INCIDENT_CREATED]: parseIncidentCreated,
   [SERVICENOW_OCCURRENCE_INCIDENT_UPDATED]: parseIncidentUpdated,
   [SERVICENOW_OCCURRENCE_INCIDENT_RESOLVED]: parseIncidentResolved,
-  [SERVICENOW_OCCURRENCE_COMMENT_ADDED]: (body) =>
-    parseJournal(body, SERVICENOW_COMMENT_ADDED_EVENT_ID),
-  [SERVICENOW_OCCURRENCE_WORK_NOTE_ADDED]: (body) =>
-    parseJournal(body, SERVICENOW_WORK_NOTE_ADDED_EVENT_ID),
+  [SERVICENOW_OCCURRENCE_COMMENT_ADDED]: (body, notes) =>
+    parseJournal(body, SERVICENOW_COMMENT_ADDED_EVENT_ID, notes),
+  [SERVICENOW_OCCURRENCE_WORK_NOTE_ADDED]: (body, notes) =>
+    parseJournal(body, SERVICENOW_WORK_NOTE_ADDED_EVENT_ID, notes),
   [SERVICENOW_OCCURRENCE_CHANGE_APPROVAL_STATE_CHANGED]: parseChangeApproval,
 };
 
 const parseServicenowOccurrence = (
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  notes: InboundParseNotes
 ): ParsedServicenowEvent | undefined => {
   const occurrence = readBoundedString(body.occurrence, SERVICENOW_OCCURRENCE_MAX);
   if (occurrence === undefined || !Object.hasOwn(parseByOccurrence, occurrence)) {
     return undefined;
   }
-  return parseByOccurrence[occurrence](body);
+  return parseByOccurrence[occurrence](body, notes);
 };
 
 const handleServicenowEvents = async (
@@ -365,7 +461,9 @@ const handleServicenowEvents = async (
   if (!isPlainObject(ctx.rawBody)) {
     return { type: 'emit', events: [] };
   }
-  const parsed = parseServicenowOccurrence(ctx.rawBody);
+  const notes: InboundParseNotes = { truncatedFields: [], rejectedFields: [] };
+  const parsed = parseServicenowOccurrence(ctx.rawBody, notes);
+  logInboundParseNotes(ctx.log, notes);
   if (parsed === undefined) {
     return { type: 'emit', events: [] };
   }

@@ -246,6 +246,28 @@ describe('ServiceNow inbound events', () => {
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
   });
 
+  it('truncates a long changed-field value and logs the field', async () => {
+    const longValue = 'x'.repeat(1025);
+    const ctx = createContext({
+      occurrence: SERVICENOW_OCCURRENCE_INCIDENT_UPDATED,
+      table: 'incident',
+      sys_id: SYS_ID,
+      changed_fields: [{ field: 'short_description', previous: 'old', current: longValue }],
+      sys_updated_on: SYS_UPDATED_ON,
+    });
+    const result = expectEmit(await events.handleEvents(ctx));
+
+    expect(result.events[0]?.payload).toEqual({
+      table: 'incident',
+      sys_id: SYS_ID,
+      changed_fields: [{ field: 'short_description', previous: 'old', current: 'x'.repeat(1024) }],
+    });
+    expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+    expect(ctx.log.warn).toHaveBeenCalledWith(
+      'Truncated ServiceNow inbound field values to 1024 characters: changed_fields.short_description.current'
+    );
+  });
+
   it('emits incident resolved or closed as its own event', async () => {
     const result = expectEmit(
       await events.handleEvents(
@@ -278,6 +300,19 @@ describe('ServiceNow inbound events', () => {
       },
     ]);
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+  });
+
+  it('logs the required fields when an incident resolved event is dropped', async () => {
+    const ctx = createContext({
+      occurrence: SERVICENOW_OCCURRENCE_INCIDENT_RESOLVED,
+      close_notes: 'done',
+      state: 's'.repeat(1025),
+    });
+
+    await expect(events.handleEvents(ctx)).resolves.toEqual({ type: 'emit', events: [] });
+    expect(ctx.log.warn).toHaveBeenCalledWith(
+      'Dropped ServiceNow inbound event because required fields were missing or invalid: table (not a string), sys_id (not a string), state (longer than 1024 characters)'
+    );
   });
 
   it.each([
