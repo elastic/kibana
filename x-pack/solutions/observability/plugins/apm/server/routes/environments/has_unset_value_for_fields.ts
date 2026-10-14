@@ -12,22 +12,21 @@ import { getProcessorEventForTransactions } from '../../lib/helpers/transactions
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 /**
- * This is used for getting the list of environments for the environment selector,
- * filtered by range.
+ * Returns true when at least one document in range has none of the given fields set.
+ * Used by the environment selector to decide whether to offer "Not defined".
  */
-
-export async function hasUnsetValueForField({
+export async function hasUnsetValueForFields({
   searchAggregatedTransactions,
   apmEventClient,
   serviceName,
-  fieldName,
+  fieldNames,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   serviceName: string | undefined;
-  fieldName: string;
+  fieldNames: readonly string[];
   start: number;
   end: number;
 }): Promise<boolean> {
@@ -45,16 +44,10 @@ export async function hasUnsetValueForField({
     query: {
       bool: {
         filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
-        must_not: [
-          {
-            exists: {
-              field: fieldName,
-            },
-          },
-        ],
+        must_not: fieldNames.map((field) => ({ exists: { field } })),
       },
     },
   };
-  const resp = await apmEventClient.search('has_unset_value_for_field', params);
+  const resp = await apmEventClient.search('has_unset_value_for_fields', params);
   return resp.hits.total?.value > 0;
 }
