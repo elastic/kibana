@@ -8,8 +8,12 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import {
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+  getManagedWorkflowDefinition,
+} from '@kbn/workflows/managed';
+import {
+  COVERAGE_CHECK_INFERENCE_FEATURE_ID,
   DRAFT_STEP_ID,
   INVESTIGATION_INPUT,
   PROPOSE_STEP_ID,
@@ -51,6 +55,14 @@ describe('managed rule-creation workflow contract', () => {
 
   it('resolves the draft connector from the feature the suite binds', () => {
     expect(yaml).toContain(`connector-id-by-feature: ${RULE_CREATION_INFERENCE_FEATURE_ID}`);
+  });
+
+  it('resolves the coverage check connector from the feature the suite binds', () => {
+    const coverageYaml =
+      getManagedWorkflowDefinition(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID)?.yaml ?? '';
+    expect(coverageYaml).toContain(
+      `connector-id-by-feature: ${COVERAGE_CHECK_INFERENCE_FEATURE_ID}`
+    );
   });
 });
 
@@ -174,7 +186,7 @@ describe('bindModelUnderTest', () => {
     expect(JSON.parse(calls[1].body!).features).toEqual([
       { feature_id: 'agent_builder', endpoints: [{ id: 'keep' }] },
       { feature_id: RULE_CREATION_INFERENCE_FEATURE_ID, endpoints: [{ id: 'model-under-test' }] },
-      { feature_id: 'alertzero_fast', endpoints: [{ id: 'model-under-test' }] },
+      { feature_id: COVERAGE_CHECK_INFERENCE_FEATURE_ID, endpoints: [{ id: 'model-under-test' }] },
     ]);
 
     await restore();

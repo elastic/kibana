@@ -6,7 +6,7 @@ that worker. It scores the rule-creation child dispatched by coverage review, no
 run of the globally managed rule-creation workflow. Preview and proposal children inherit the
 worker's service account. Product workflows are not modified by the suite.
 
-Both `alertzero_fast` (coverage check) and `alertzero_reasoning` (draft creation) are bound to
+Both `alertzero_efficient` (coverage check) and `alertzero_frontier` (draft creation) are bound to
 the model under test and restored afterward. Coverage review can judge a gap already covered;
 in that case the client fails explicitly because no rule-creation draft ran. It does not turn
 that path into a successful empty/N/A score. Dataset `confidence` remains metadata: the
