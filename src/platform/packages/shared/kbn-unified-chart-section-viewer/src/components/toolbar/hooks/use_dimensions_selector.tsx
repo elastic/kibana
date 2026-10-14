@@ -138,8 +138,7 @@ export const useDimensionsSelector = ({
     }, DEBOUNCE_TIME);
   }, [singleSelection]);
 
-  // Flush rather than cancel: the host swaps the whole toolbar out for a
-  // loading/error state, which would otherwise discard a pending selection.
+  // Flush rather than cancel so a selection made just before unmount is still committed
   useEffect(() => {
     return () => {
       debouncedOnChange?.flush();
