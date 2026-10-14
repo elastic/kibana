@@ -30,8 +30,7 @@ export interface HuntReportExpectation {
   /**
    * Whether report `evidence[]` and `last_hunted_at` are written. The hunt child writes evidence
    * exactly when its coordinator completed (`hunt.output.status === 'success'`), independent of
-   * packaging, so a no-hit run that later fails its benign close still records evidence.
-   * `iff_hunt_success` is for rows where the hunt may legitimately end partial.
+   * packaging. `iff_hunt_success` is for rows where the hunt may legitimately end partial.
    */
   evidenceWritten: boolean | 'iff_hunt_success';
   /** Whether a schema-valid SSE attachment is expected on the Investigation. */
@@ -50,7 +49,7 @@ export interface HuntExpected {
    * gated on the scope gate / skip reason / zero writes instead.
    */
   outcome?: HuntRunOutcome[];
-  /** Expected `incomplete_stage` when `partial`, e.g. `packaging` when the benign close fails. */
+  /** Expected `incomplete_stage` when `partial`, e.g. `packaging`. */
   incompleteStage?: string;
   /** Whether the scope gate short-circuits before find-or-create (`index_scope_blocked`). */
   indexScopeBlocked: boolean;

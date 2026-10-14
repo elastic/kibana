@@ -22,7 +22,7 @@ stays trustworthy.
 | Hit, `has_confirmed_hit` and `hit_sources` agree | `Hit Consistency` (code) | tested |
 | Proposals raised only on confirmed hits, never on canary or clean reports | `Proposal Presence`, `Canary Inverted` (code) | tested |
 | Investigation stays in the triggering space | space-isolation case in `evals/hunt_watch.spec.ts` | tested |
-| Approve executes the action, dismiss does not, and the Investigation closes either way | `evals/hunt_watch_approval.spec.ts` | tested, red on main until the close moves off the in-process metadata patch |
+| Approve executes the action, dismiss does not, and the Investigation closes either way | `evals/hunt_watch_approval.spec.ts` | tested |
 | Report, queries and findings are grounded in the Worker's own tool calls | `Groundedness Analysis` (LLM judge) | tested |
 | Hunt narrative is correct against the pinned expectation | `Correctness Analysis`, `Factuality`, `Relevance` (LLM judge) | tested |
 | Prompt and definition surfaces contain no fixture literal | `src/lockdown.test.ts` (Jest) | tested |
@@ -40,8 +40,8 @@ stays trustworthy.
 | Kill: action executed without an approve decision | any instance | hard rule |
 | Kill: fixture literal in a prompt or definition surface | any instance | hard rule |
 
-The numbers above come from the Phase 4 runs recorded in the plan (golden 0.942 / 0.829 / 0.935 and
-hard 0.954 / 0.933 / 0.957 for Groundedness / Factuality / Relevance). They are a starting point
+The numbers above come from the baseline run on main of 2026-10-14 (golden 1.000 / 0.921 / 0.917 and
+hard 1.000 / 0.959 / 0.952 for Groundedness / Factuality / Relevance). They are a starting point
 for review, not a promise. The playbook allows unratified thresholds for the MVP slice but requires
 sign-off before any Pilot claim.
 
@@ -72,11 +72,8 @@ results arrive. This profile takes the second path and records the numbers it wo
 - Correlation across reports, and any claim about Entity Store scoring. The Worker does not do
   these and the suite does not score them.
 - A chat skill or conversational surface for hunts.
-- A `failed` outcome row. No seeded report reliably produces one without breaking the stack.
-- The clean report's benign dismiss and close. The Worker's `ai.conversation.metadata.patch` step
-  cannot resolve the owner of the Investigation it is closing, so the clean row pins `partial` at
-  `packaging` and the approval spec cannot see `closed` on main. Tracked as `kibana-58i.7`; the pins
-  flip to `completed` and `closed` once that lands.
+- A `failed` or `partial` outcome row. No seeded report reliably produces one on main without
+  fault injection (`kibana-58i.3.1`).
 - D1 and D2 authorization gates. The suite has no view of the orchestrator identity.
 - Modify, defer and expire decisions on Proposals; only approve and dismiss are exercised.
 - Coverage handoff to the Detection Watch.

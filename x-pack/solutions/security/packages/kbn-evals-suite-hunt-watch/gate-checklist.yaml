@@ -60,7 +60,7 @@ gates:
     family: D
     name: authz-scoping
     status: n/a
-    reason: "The suite runs the Worker under the prebuilt role the preflight installs and does not attempt reads or writes beyond it. Space containment is covered under D3, role scoping is not."
+    reason: "The suite runs the Worker under its built-in Elasticsearch role and does not attempt reads or writes beyond it. Space containment is covered under D3, role scoping is not."
   D3:
     family: D
     name: investigation-containment
@@ -90,7 +90,7 @@ gates:
     family: D
     name: approval-identity-rekey
     status: tested
-    evidence: "evals/hunt_watch_approval.spec.ts: after approve, the actioned Proposal's action executes (status succeeded) and the gate's resumed close writes closed / resolved on the Investigation the service account owns; waitForInvestigationClosed fails loud when the resumed write does not apply. This gate is red on main today: the in-process metadata patch step resolves no owner id from the resumed fake request and the close is refused as Conversation not found. Both tests pass with the close moved to kibana.request."
+    evidence: "evals/hunt_watch_approval.spec.ts: after approve, the actioned Proposal's action executes (status succeeded) and the gate's resumed close writes closed / resolved on the Investigation the service account owns; waitForInvestigationClosed fails loud when the resumed write does not apply. Passes on main since Public conversation access (#297385) let the service account's resumed patch reach the Investigation it owns."
   D9:
     family: D
     name: thread-depth-fork-root-containment

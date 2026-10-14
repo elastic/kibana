@@ -63,27 +63,26 @@ export const hardCases: HuntWatchExample[] = [
     },
   },
   {
-    // Labelled probe for the outcome state machine's `partial`: today a clean run concludes
-    // `partial` / `incomplete_stage: package` because of the packaging gap.
-    id: 'hard-partial-clean-probe',
+    // A second clean report on a different id: the no-hit path must be stable across reports,
+    // not just on the golden one. Started life as a `partial` probe when the benign close failed
+    // on main; a deterministic `partial`/`failed` row now needs fault injection (kibana-58i.3.1).
+    id: 'hard-clean-repeat',
     cohort: 'hard',
-    input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.partial] },
+    input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.cleanRepeat] },
     output: {
       expected: {
-        outcome: ['partial'],
-        incompleteStage: 'packaging',
+        outcome: ['completed'],
         indexScopeBlocked: false,
         reports: [
           {
-            reportId: HUNT_REPORT_IDS.partial,
+            reportId: HUNT_REPORT_IDS.cleanRepeat,
             hasConfirmedHit: false,
             tier1Status: 'no_environment_hits',
             tier2Executed: true,
             pendingProposals: 0,
-            // The hunt completes, so evidence is recorded even though packaging then fails.
             evidenceWritten: true,
             sseAttachment: false,
-            investigationStatus: 'open',
+            investigationStatus: 'closed',
           },
         ],
       },

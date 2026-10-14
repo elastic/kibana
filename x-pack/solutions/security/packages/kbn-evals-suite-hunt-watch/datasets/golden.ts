@@ -53,18 +53,15 @@ export const goldenDataset: HuntWatchExample[] = [
     },
   },
   {
-    // Observed on main (2026-10-13): the hunt completes with no hit, then packaging tries to close
-    // the Investigation as benign and fails with "Conversation <id> not found", so the run ends
-    // `partial` / `incomplete_stage: packaging` and the Investigation stays open. This row pins
-    // that behavior; when the benign close works it flips to `completed` / `closed`
-    // (kibana-58i.7). The benign-dismiss assertion is skipped until then.
+    // Observed on main (2026-10-14): the hunt completes with no hit and packaging closes the
+    // Investigation as benign (`status: closed`, `close_reason: benign`), so the run ends
+    // `completed` with no SSE and no Proposal.
     id: 'golden-clean-aws-iam-clean',
     cohort: 'golden',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.clean] },
     output: {
       expected: {
-        outcome: ['partial'],
-        incompleteStage: 'packaging',
+        outcome: ['completed'],
         indexScopeBlocked: false,
         reports: [
           {
@@ -73,10 +70,9 @@ export const goldenDataset: HuntWatchExample[] = [
             tier1Status: 'no_environment_hits',
             tier2Executed: true,
             pendingProposals: 0,
-            // The hunt completes, so evidence is recorded even though packaging then fails.
             evidenceWritten: true,
             sseAttachment: false,
-            investigationStatus: 'open',
+            investigationStatus: 'closed',
           },
         ],
       },

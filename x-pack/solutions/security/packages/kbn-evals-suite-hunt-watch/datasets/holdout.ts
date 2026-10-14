@@ -78,15 +78,13 @@ export const holdoutDataset: HuntWatchExample[] = [
     },
   },
   {
-    // Same pin as the golden clean row: the benign close fails on main, so the run ends
-    // `partial` / `packaging` with the Investigation open. Flips with the golden row.
+    // Same pin as the golden clean row: no hit, benign close, Investigation closed.
     id: 'holdout-clean-aws-iam-clean',
     cohort: 'holdout',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [CLEAN_HOLDOUT] },
     output: {
       expected: {
-        outcome: ['partial'],
-        incompleteStage: 'packaging',
+        outcome: ['completed'],
         indexScopeBlocked: false,
         reports: [
           {
@@ -97,7 +95,7 @@ export const holdoutDataset: HuntWatchExample[] = [
             pendingProposals: 0,
             evidenceWritten: true,
             sseAttachment: false,
-            investigationStatus: 'open',
+            investigationStatus: 'closed',
           },
         ],
       },

@@ -237,7 +237,7 @@ describe('dataset bindings', () => {
   it('returns the exact hard rows from the plan', () => {
     expect(hardCases.map((row) => row.id)).toEqual([
       'hard-multi-candidate',
-      'hard-partial-clean-probe',
+      'hard-clean-repeat',
       'hard-no-candidates-missing-report',
       'hard-difficult-hit-ioc-only',
     ]);

@@ -69,7 +69,7 @@ pre-run reset. Scored tasks never decide a Proposal.
 ## Datasets
 
 - `datasets/golden.ts`: one row per core path (confirmed hit, clean no-hit, blocked index scope).
-- `datasets/hard_cases.ts`: multi-candidate fan-out, partial clean probe, unknown report id,
+- `datasets/hard_cases.ts`: multi-candidate fan-out, clean repeat, unknown report id,
   IOC-only difficult hit.
 - `datasets/canary.ts`: a suite-authored prose-only report scored only by the inverted evaluator.
 - `datasets/holdout.ts`: one hit, one IOC-only hit and one clean row on report ids the iteration
@@ -157,7 +157,7 @@ required `tested` because the Worker declares `hitl-resumed-writes`.
 | D5 allowlist-boundary | n/a | callable surface fixed by managed children |
 | D6 open-vs-append-determinism | n/a | append not exercised |
 | D7 incident-fork-integrity | n/a | no Incident fork |
-| D8 approval-identity-rekey | tested | approve path in the approval spec, red on main |
+| D8 approval-identity-rekey | tested | approve path in the approval spec |
 | D9 thread-depth-fork-root-containment | n/a | no threads or forks |
 | D10 proposal-gate-exclusivity | tested | `Proposal Presence`, `Canary Inverted`, approval spec |
 | D10a watch-tag-grouping | n/a | Worker triggered directly |
@@ -168,11 +168,11 @@ required `tested` because the Worker declares `hitl-resumed-writes`.
 
 ## Known Worker behavior pinned by the datasets
 
-- The in-process `ai.conversation.metadata.patch` step cannot close an Investigation the Worker
-  owns (`Conversation <id> not found`). Until the close runs over `kibana.request`, no-hit rows
-  end `partial` with `incomplete_stage: packaging` and the Investigation stays open, and the
-  proposal gate spec fails at `waitForInvestigationClosed` with the Proposal records already
-  settled correctly. With the close fixed, no-hit rows flip to `completed` and `closed` and the
-  gate spec passes as written.
+- No-hit rows end `completed` with the Investigation `closed` / `close_reason: benign`, and the
+  gate's resumed close writes `closed` / `resolved`. Both depend on the Worker's in-process
+  `ai.conversation.metadata.patch` being allowed to patch a conversation the service account owns
+  (Public conversation access, #297385). Before that landed the clean rows pinned `partial` at
+  `packaging` and the gate spec timed out at `waitForInvestigationClosed`; if either comes back,
+  that is the first place to look.
 - A confirmed hit raises more than one Proposal, so the hit rows use a minimum rather than an
   exact count.

@@ -122,8 +122,8 @@ export const HUNT_REPORT_IDS = {
   hit: buildHistoricReportId('aws-iam-behavior-only', 2),
   /** Golden `clean`: password-spray advisory disjoint from seeded telemetry. */
   clean: buildHistoricReportId('aws-iam-clean', 1),
-  /** Hard `partial` probe: a second clean report. */
-  partial: buildHistoricReportId('aws-iam-clean', 2),
+  /** Hard clean repeat: a second clean report on a different id. */
+  cleanRepeat: buildHistoricReportId('aws-iam-clean', 2),
   /** Hard `difficult hit`: IOC-only narrative with no technique ids for Tier 2. */
   difficultHit: buildHistoricReportId('aws-iam-ioc-only', 2),
   /** Hard `multi-candidate`: three named reports in one trigger. */
