@@ -47,11 +47,13 @@ import type {
   BoostProfileInput,
   BoostProfileType,
   BoostRule,
+  BoostState,
 } from '../../../common/types';
 import { BOOST_DOCS_URL } from '../../doc_links';
 import { estimateRuleImpact } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
+import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
@@ -82,6 +84,8 @@ import {
 interface RuleFlyoutProps {
   /** The rule to edit. Names can't change, and default rules can only change their profile. */
   rule?: BoostRule;
+  /** A custom rule to copy into a new rule, which keeps its type. Ignored when editing. */
+  duplicateOf?: BoostRule;
   /** Prefills the profile when creating, such as right after creating the profile. */
   initialProfileName?: string;
   onClose: () => void;
@@ -155,8 +159,28 @@ interface TargetPreview {
   overriddenBy?: string;
 }
 
-/** Creates a custom boost rule, or edits a custom or default one. */
-export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProps) => {
+const getInitialDraft = (
+  rule: BoostRule | undefined,
+  duplicateOf: BoostRule | undefined,
+  initialProfileName: string | undefined,
+  state: BoostState | undefined
+): RuleDraft => {
+  const existingNames = new Set(state?.data_sources.map(({ name }) => name));
+  if (rule) {
+    return ruleToDraft(rule, existingNames);
+  }
+  if (duplicateOf) {
+    const ruleNames = state?.rules.map(({ name }) => name) ?? [];
+    return {
+      ...ruleToDraft(duplicateOf, existingNames),
+      name: getCopyName(duplicateOf.name, ruleNames),
+    };
+  }
+  return createEmptyRuleDraft(initialProfileName);
+};
+
+/** Creates a custom boost rule, from scratch or a copy, or edits a custom or default one. */
+export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: RuleFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const { notifications } = useBoostServices();
@@ -164,14 +188,12 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const titleId = useGeneratedHtmlId();
   const modeIdPrefix = useGeneratedHtmlId({ prefix: 'ruleTargetMode' });
   const [draft, setDraft] = useState<RuleDraft>(() =>
-    rule
-      ? ruleToDraft(rule, new Set(state?.data_sources.map(({ name }) => name)))
-      : createEmptyRuleDraft(initialProfileName)
+    getInitialDraft(rule, duplicateOf, initialProfileName, state)
   );
   const [showErrors, setShowErrors] = useState(false);
   // The last profile picked from the list, restored if the field is left empty or unmatched.
   const [lastProfileName, setLastProfileName] = useState(
-    () => rule?.boost_profile ?? initialProfileName ?? ''
+    () => (rule ?? duplicateOf)?.boost_profile ?? initialProfileName ?? ''
   );
   // Remounting the picker clears text typed into it, which it otherwise keeps after a restore.
   const [profileFieldKey, setProfileFieldKey] = useState(0);
@@ -213,8 +235,10 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
   const type = profilesByName.get(draft.profileName || lastProfileName)?.type;
   // Wording for the disabled target controls until a profile sets the type.
   const targetType = type ?? 'indices';
-  // A saved rule keeps its type, so its targets stay valid; it only offers profiles of that type.
-  const ruleType = rule ? profilesByName.get(rule.boost_profile)?.type : undefined;
+  // A saved rule, or a copy of one, keeps its type, so its targets stay valid; it only offers
+  // profiles of that type.
+  const sourceRule = rule ?? duplicateOf;
+  const ruleType = sourceRule ? profilesByName.get(sourceRule.boost_profile)?.type : undefined;
   const defaultRuleType = isDefaultRule ? ruleType : undefined;
   // The rule being edited is replaced by the draft when previewing what the draft would apply to.
   const otherRules = rules.filter(({ name }) => name !== rule?.name);
@@ -425,6 +449,11 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
         defaultMessage: 'Edit boost rule "{name}"',
         values: { name: draft.name },
       })
+    : duplicateOf
+    ? i18n.translate('xpack.boost.ruleForm.duplicateTitle', {
+        defaultMessage: 'Duplicate boost rule "{name}"',
+        values: { name: duplicateOf.name },
+      })
     : i18n.translate('xpack.boost.ruleForm.createTitle', {
         defaultMessage: 'Create boost rule',
       });
@@ -449,7 +478,7 @@ export const RuleFlyout = ({ rule, initialProfileName, onClose }: RuleFlyoutProp
           forRule={{
             ruleName: draft.name || undefined,
             type,
-            isTypeLocked: isEditing,
+            isTypeLocked: ruleType !== undefined,
             estimate: estimateWithNewProfile,
             onCreate: onProfileCreate,
           }}

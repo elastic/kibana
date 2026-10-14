@@ -56,7 +56,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   const deleteModalTitleId = useGeneratedHtmlId();
   const [ruleToDelete, setRuleToDelete] = useState<RuleRow>();
   // Undefined while closed; an empty object creates a rule, and `rule` edits one.
-  const [flyout, setFlyout] = useState<{ rule?: BoostRule }>();
+  const [flyout, setFlyout] = useState<{ rule?: BoostRule; duplicateOf?: BoostRule }>();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
 
   const rows = useMemo<RuleRow[]>(() => {
@@ -69,9 +69,9 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     }));
   }, [rules, profiles, dataSources]);
 
-  // Wide enough for two icon buttons: Edit, and Delete for custom rules.
+  // Wide enough for up to three icon buttons (two primary actions plus the "All actions" menu).
   const actionsColumn: EuiTableActionsColumnType<RuleRow> = {
-    width: '72px',
+    width: '104px',
     name: (
       <EuiScreenReaderOnly>
         <span>
@@ -87,8 +87,25 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         }),
         icon: 'pencil',
         type: 'icon',
+        isPrimary: true,
         onClick: (rule) => setFlyout({ rule }),
         'data-test-subj': 'editBoostRule',
+      },
+      {
+        name: i18n.translate('xpack.boost.rulesTab.duplicateAction', {
+          defaultMessage: 'Duplicate',
+        }),
+        description: i18n.translate('xpack.boost.rulesTab.duplicateActionDescription', {
+          defaultMessage: 'Create a new boost rule from this one',
+        }),
+        icon: 'copy',
+        type: 'icon',
+        isPrimary: true,
+        // A copy of a default rule would match everything at the same priority, so only custom
+        // rules can be duplicated.
+        available: isCustomRule,
+        onClick: (rule) => setFlyout({ duplicateOf: rule }),
+        'data-test-subj': 'duplicateBoostRule',
       },
       {
         name: i18n.translate('xpack.boost.rulesTab.deleteAction', { defaultMessage: 'Delete' }),
@@ -209,7 +226,13 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         data-test-subj="boostRulesTable"
       />
 
-      {flyout && <RuleFlyout rule={flyout.rule} onClose={() => setFlyout(undefined)} />}
+      {flyout && (
+        <RuleFlyout
+          rule={flyout.rule}
+          duplicateOf={flyout.duplicateOf}
+          onClose={() => setFlyout(undefined)}
+        />
+      )}
 
       {ruleToDelete && (
         <EuiConfirmModal

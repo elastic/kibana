@@ -78,23 +78,6 @@ const toMaxAge = ({ maxAge, maxAgeUnit }: AgedPeriodDraft): MaxAge | undefined =
   return value === undefined ? undefined : { value, unit: maxAgeUnit };
 };
 
-const ELASTIC_NAME_PREFIX = 'elastic-';
-
-/**
- * Suggests an unused name for a copy of a profile. Copies of Elastic-managed profiles drop the
- * `elastic-` prefix so they don't look Elastic-owned.
- */
-export const getCopyName = (name: string, takenNames: readonly string[]): string => {
-  const baseName = `${
-    name.startsWith(ELASTIC_NAME_PREFIX) ? name.slice(ELASTIC_NAME_PREFIX.length) : name
-  }-copy`;
-  let candidate = baseName;
-  for (let suffix = 2; takenNames.includes(candidate); suffix++) {
-    candidate = `${baseName}-${suffix}`;
-  }
-  return candidate;
-};
-
 /** A new profile starts from the out-of-the-box Performant and Last 7 days values. */
 export const createEmptyDraft = (): ProfileDraft => ({
   name: '',

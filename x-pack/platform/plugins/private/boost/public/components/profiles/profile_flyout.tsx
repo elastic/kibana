@@ -44,13 +44,13 @@ import type { AgedPeriodDraft, ProfileDraft } from './profile_draft';
 import {
   createEmptyDraft,
   draftFromProfile,
-  getCopyName,
   draftToProfileInput,
   getDraftErrors,
   getDraftProfile,
   hasDraftErrors,
 } from './profile_draft';
 import { PROFILE_NAME_ERROR_MESSAGES } from './profile_messages';
+import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 
 /** A new profile created from a rule flyout, which shows this form in place of the rule's. */

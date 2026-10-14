@@ -290,3 +290,35 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
   });
 });
+
+describe('RuleFlyout duplicate', () => {
+  it('copies a rule under a new name, keeping its type', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout duplicateOf={rule} onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Duplicate boost rule "catalogs"' })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('boostRuleName')).toHaveValue('catalogs-copy');
+    expect(screen.getByTestId('boostRulePattern')).toHaveValue('catalog-*');
+
+    await userEvent.click(
+      within(screen.getByTestId('boostRuleProfile')).getByTestId('comboBoxSearchInput')
+    );
+    expect(screen.queryByText('Data streams')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('boostRuleSave'));
+    expect(mutation.mutate).toHaveBeenCalledWith(
+      {
+        name: 'catalogs-copy',
+        index_patterns: ['catalog-*'],
+        boost_profile: 'zeta-search',
+        priority: 1,
+      },
+      expect.anything()
+    );
+  });
+});

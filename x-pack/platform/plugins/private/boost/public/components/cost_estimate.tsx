@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -14,12 +13,10 @@ import {
   EuiIconTip,
   EuiScreenReaderOnly,
   EuiText,
-  EuiTextColor,
   euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { BoostProfileType } from '../../common/types';
 import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
 import { ILLUSTRATIVE_USD_PER_VCU_HOUR } from '../../common/vcu_estimate';
@@ -81,30 +78,17 @@ const formatCost = (vcus: number): string => {
   return formatUsd(usd);
 };
 
-// The end's label follows the cost at the same size and weight, in subdued text.
-const renderLabel = (chunks: ReactNode) => (
-  <EuiTextColor color="subdued">
-    <strong>{chunks}</strong>
-  </EuiTextColor>
-);
-
 /** The cost for one end of the range, such as "$0.03 at rest". */
-const CostLine = ({ end, vcus }: { end: keyof VcuRange; vcus: number }) => {
-  const cost = <strong>{formatCost(vcus)}</strong>;
-  return end === 'atRest' ? (
-    <FormattedMessage
-      id="xpack.boost.costEstimate.atRestCost"
-      defaultMessage="{cost} <label>at rest</label>"
-      values={{ cost, label: renderLabel }}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.boost.costEstimate.atPeakCost"
-      defaultMessage="{cost} <label>at peak</label>"
-      values={{ cost, label: renderLabel }}
-    />
-  );
-};
+const getCostText = (end: keyof VcuRange, vcus: number): string =>
+  end === 'atRest'
+    ? i18n.translate('xpack.boost.costEstimate.atRestCost', {
+        defaultMessage: '{cost} at rest',
+        values: { cost: formatCost(vcus) },
+      })
+    : i18n.translate('xpack.boost.costEstimate.atPeakCost', {
+        defaultMessage: '{cost} at peak',
+        values: { cost: formatCost(vcus) },
+      });
 
 const getVcusText = (vcus: number): string =>
   i18n.translate('xpack.boost.costEstimate.vcus', {
@@ -172,9 +156,7 @@ const EstimateValue = ({ end, estimate, comparison }: EstimateValueProps) => {
     <div data-test-subj={`boostCostEstimate-${end}`}>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <CostLine end={end} vcus={vcus} />
-          </EuiText>
+          <EuiText size="s">{getCostText(end, vcus)}</EuiText>
         </EuiFlexItem>
         {savedVcus !== undefined && savedVcus !== vcus && (
           <EuiFlexItem grow={false}>
