@@ -61,7 +61,7 @@ export const registerHistoryListRoute = (
       security: CHANGE_HISTORY_ROUTE_SECURITY,
     },
     async (ctx, req, res) => {
-      const context = await getChangeHistoryContext(ctx, req, res);
+      const context = await getChangeHistoryContext(ctx, req, res, req.params.id);
       if (context.error) return context.error;
       const { client, spaceId } = context;
 

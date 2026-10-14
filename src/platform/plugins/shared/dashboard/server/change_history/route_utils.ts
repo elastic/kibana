@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -15,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 
 import { getChangeHistoryClient } from './change_history_service';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { spacesService } from '../kibana_services';
 
 export const CHANGE_HISTORY_ROUTE_SECURITY = {
@@ -25,13 +27,14 @@ export const CHANGE_HISTORY_ROUTE_SECURITY = {
 } as const;
 
 /**
- * Checks dashboard edit privileges and resolves the change history client and space for a
+ * Checks dashboard edit privileges and access to the target dashboard saved object, then resolves the change history client and space for a
  * request. Returns the error response to send when the request cannot be served.
  */
 export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   ctx: RequestHandlerContext,
   req: KibanaRequest<P, Q, B, M>,
-  res: KibanaResponseFactory
+  res: KibanaResponseFactory,
+  dashboardId: string
 ) => {
   const core = await ctx.core;
   const spaceId = spacesService?.getSpaceId(req) ?? 'default';
@@ -46,6 +49,15 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
       ],
     });
   if (!hasAllPrivileges) return { error: res.forbidden() };
+
+  // history is read with an internally privileged client, so access to the dashboard must be verified
+  try {
+    await core.savedObjects.client.get(DASHBOARD_SAVED_OBJECT_TYPE, dashboardId);
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) return { error: res.notFound() };
+    if (SavedObjectsErrorHelpers.isForbiddenError(e)) return { error: res.forbidden() };
+    throw e;
+  }
 
   let client;
   try {

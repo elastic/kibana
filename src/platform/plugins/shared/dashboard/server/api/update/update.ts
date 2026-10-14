@@ -118,13 +118,15 @@ export async function update(
       throw changeAccessModeResponse.objects[0].error;
     }
 
-    // changeAccessMode updates the same saved object and advances its version, so the version
-    // read earlier is stale; re-read it to use for the optimistic concurrency check below.
-    ({ version: expectedVersion } =
-      await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
-        DASHBOARD_SAVED_OBJECT_TYPE,
-        id
-      ));
+    /**
+     * `changeAccessMode`  updates the same saved object and advances its version, so the object
+     * read earlier is stale
+     */
+    existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
+    expectedVersion = existing.version;
   }
 
   let savedObject: SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>;

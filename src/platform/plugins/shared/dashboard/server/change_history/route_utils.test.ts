@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { getChangeHistoryClient } from './change_history_service';
@@ -23,6 +24,7 @@ const mockedGetClient = getChangeHistoryClient as jest.MockedFunction<
 >;
 
 const hasPrivileges = jest.fn();
+const getSavedObject = jest.fn();
 
 const getContext = (hasAllRequested: boolean) => {
   hasPrivileges.mockResolvedValue({ has_all_requested: hasAllRequested });
@@ -35,6 +37,7 @@ const getContext = (hasAllRequested: boolean) => {
           },
         },
       },
+      savedObjects: { client: { get: getSavedObject } },
     }),
   } as unknown as RequestHandlerContext;
 };
@@ -48,15 +51,45 @@ describe('getChangeHistoryContext', () => {
     const res = httpServerMock.createResponseFactory();
     const forbidden = { status: 403 };
     res.forbidden.mockReturnValue(forbidden as never);
-    const result = await getChangeHistoryContext(getContext(false), req, res);
+    const result = await getChangeHistoryContext(getContext(false), req, res, 'dash-1');
 
     expect(result).toEqual({ error: forbidden });
     expect(mockedGetClient).not.toHaveBeenCalled();
   });
 
+  it('returns forbidden when the user cannot access the dashboard saved object', async () => {
+    getSavedObject.mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error()));
+    const res = httpServerMock.createResponseFactory();
+    const forbidden = { status: 403 };
+    res.forbidden.mockReturnValue(forbidden as never);
+    const result = await getChangeHistoryContext(getContext(true), req, res, 'dash-1');
+
+    expect(getSavedObject).toHaveBeenCalledWith('dashboard', 'dash-1');
+    expect(result).toEqual({ error: forbidden });
+    expect(mockedGetClient).not.toHaveBeenCalled();
+  });
+
+  it('returns not found when the dashboard saved object does not exist', async () => {
+    getSavedObject.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('dashboard', 'dash-1')
+    );
+    const res = httpServerMock.createResponseFactory();
+    const notFound = { status: 404 };
+    res.notFound.mockReturnValue(notFound as never);
+    const result = await getChangeHistoryContext(getContext(true), req, res, 'dash-1');
+
+    expect(result).toEqual({ error: notFound });
+    expect(mockedGetClient).not.toHaveBeenCalled();
+  });
+
   it('checks dashboard edit privileges on the space of the request', async () => {
     mockedGetClient.mockReturnValue({} as never);
-    await getChangeHistoryContext(getContext(true), req, httpServerMock.createResponseFactory());
+    await getChangeHistoryContext(
+      getContext(true),
+      req,
+      httpServerMock.createResponseFactory(),
+      'dash-1'
+    );
 
     expect(hasPrivileges).toHaveBeenCalledWith({
       application: [
@@ -76,7 +109,7 @@ describe('getChangeHistoryContext', () => {
     const res = httpServerMock.createResponseFactory();
     const unavailable = { status: 503 };
     res.customError.mockReturnValue(unavailable as never);
-    const result = await getChangeHistoryContext(getContext(true), req, res);
+    const result = await getChangeHistoryContext(getContext(true), req, res, 'dash-1');
 
     expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
     expect(result).toEqual({ error: unavailable });
@@ -86,7 +119,7 @@ describe('getChangeHistoryContext', () => {
     const client = {};
     mockedGetClient.mockReturnValue(client as never);
     const res = httpServerMock.createResponseFactory();
-    const result = await getChangeHistoryContext(getContext(true), req, res);
+    const result = await getChangeHistoryContext(getContext(true), req, res, 'dash-1');
 
     expect(result).toEqual({ client, spaceId: 'space-for-req-1' });
   });

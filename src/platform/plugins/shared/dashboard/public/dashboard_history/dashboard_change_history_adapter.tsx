@@ -13,6 +13,7 @@ import type { ChangeDetailsResponse } from '../../server/change_history/register
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
 import type { RestoreChangeResponse } from '../../server/change_history/register_restore_route';
 import type { DashboardApi } from '../dashboard_api/types';
+import { dashboardClient } from '../dashboard_client';
 
 const BASE_HISTORY_PATH = `/internal/dashboard/change_history` as const;
 
@@ -53,6 +54,8 @@ export const createDashboardChangeHistoryAdapter = (
               signal,
             }
           );
+          // the restore route bypasses dashboardClient.update(), so evict the stale cached read
+          await dashboardClient.invalidateCache(objectId);
           dashboardApi.setState(response, true);
         } catch (e) {
           throw mapChangeHistoryHttpError(e);

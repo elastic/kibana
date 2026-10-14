@@ -356,7 +356,8 @@ export const useDashboardMenuItems = ({
 
       history: {
         order: 7,
-        disableButton: disableTopNav,
+        // an unsaved dashboard has no persisted history, so there is nothing to list or restore
+        disableButton: disableTopNav || !lastSavedId,
         id: 'dashboard-history',
         testId: 'dashboardHistoryMenuItem',
         iconType: 'clock',

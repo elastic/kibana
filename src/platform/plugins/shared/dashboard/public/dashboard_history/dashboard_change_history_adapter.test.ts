@@ -10,7 +10,12 @@
 import type { HttpSetup } from '@kbn/core-http-browser';
 
 import type { DashboardApi } from '../dashboard_api/types';
+import { dashboardClient } from '../dashboard_client';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
+
+jest.mock('../dashboard_client', () => ({
+  dashboardClient: { invalidateCache: jest.fn() },
+}));
 
 const getHttp = () =>
   ({ get: jest.fn(), post: jest.fn() } as unknown as jest.Mocked<Pick<HttpSetup, 'get' | 'post'>> &
@@ -102,6 +107,7 @@ describe('createDashboardChangeHistoryAdapter', () => {
         '/internal/dashboard/change_history/dash-1/c1/_restore',
         { signal: undefined }
       );
+      expect(dashboardClient.invalidateCache).toHaveBeenCalledWith('dash-1');
       expect(dashboardApi.setState).toHaveBeenCalledWith(restored, true);
     });
   });
