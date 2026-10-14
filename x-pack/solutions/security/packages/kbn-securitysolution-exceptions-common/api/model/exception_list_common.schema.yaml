@@ -300,16 +300,50 @@ components:
           type: array
           items:
             type: string
+            minLength: 1
+            maxLength: 4096
           minItems: 1
+          maxItems: 2000
           description: Array of hash values
         operator:
           type: string
           enum: [included]
           description: Must be the value "included"
 
-    BlocklistPathOrFileNameEntry:
+    BlocklistPathOrFileNameMatchAnyEntry:
       type: object
-      title: Blocklist path or file name entry
+      title: Blocklist path or file name "is one of" entry
+      required: [field, type, value, operator]
+      properties:
+        field:
+          type: string
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          description: File path or file name field (available on all OS)
+        type:
+          type: string
+          enum: [match_any]
+          description: Must be `match_any` ("is one of")
+        value:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 4096
+          minItems: 1
+          maxItems: 2000
+          description: Array of values
+        operator:
+          type: string
+          enum: [included]
+          description: Must be the value "included"
+
+    BlocklistPathOrFileNameWildcardEntry:
+      type: object
+      title: Blocklist path or file name "Match" entry
       required: [field, type, value, operator]
       properties:
         field:
@@ -324,18 +358,13 @@ components:
             `wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.
         type:
           type: string
-          enum: [match_any, wildcard]
-          description: |
-            Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)
+          enum: [wildcard]
+          description: Must be `wildcard` ("Match", supports `*` and `?` wildcards)
         value:
-          oneOf:
-            - type: string
-              description: Single value (used with wildcard)
-            - type: array
-              items:
-                type: string
-              minItems: 1
-              description: Array of values (used with match_any)
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Single value
         operator:
           type: string
           enum: [included]
@@ -965,7 +994,8 @@ components:
           items:
             oneOf:
               - $ref: '#/components/schemas/BlocklistHashEntry'
-              - $ref: '#/components/schemas/BlocklistPathOrFileNameEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameWildcardEntry'
               - $ref: '#/components/schemas/BlocklistWindowsCodeSignatureEntry'
         os_types:
           type: array
@@ -998,7 +1028,8 @@ components:
           items:
             oneOf:
               - $ref: '#/components/schemas/BlocklistHashEntry'
-              - $ref: '#/components/schemas/BlocklistPathOrFileNameEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameWildcardEntry'
         os_types:
           type: array
           items:
@@ -1030,7 +1061,8 @@ components:
           items:
             oneOf:
               - $ref: '#/components/schemas/BlocklistHashEntry'
-              - $ref: '#/components/schemas/BlocklistPathOrFileNameEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/BlocklistPathOrFileNameWildcardEntry'
         os_types:
           type: array
           items:
