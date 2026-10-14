@@ -1,5 +1,5 @@
 {
-  "sha1": "ac921cfdfd69ae5fd12331c1b2c08ac76e61621b",
+  "sha1": "58f34b067d71f6a9e359bd1f09f6b83980432462",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,12 +9,11 @@
       "title": "ES|QL View create and edit creates, edits, and validates a view",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/crud.spec.ts",
-        "line": 24,
+        "line": 23,
         "column": 5
       }
     },
@@ -23,12 +22,11 @@
       "title": "ES|QL View deletion deletes one view and multiple selected views",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/delete.spec.ts",
-        "line": 33,
+        "line": 32,
         "column": 23
       }
     },
@@ -37,12 +35,11 @@
       "title": "ES|QL View query preview runs the form query and renders its real results",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/preview.spec.ts",
-        "line": 35,
+        "line": 34,
         "column": 31
       }
     },
@@ -51,12 +48,11 @@
       "title": "ES|QL Views privilege gating hides the management navigation and rejects direct navigation without read access",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/privileges.spec.ts",
-        "line": 27,
+        "line": 26,
         "column": 13
       }
     },
@@ -65,12 +61,11 @@
       "title": "ES|QL Views privilege gating shows the table without mutation controls with read-only access",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/privileges.spec.ts",
-        "line": 34,
+        "line": 33,
         "column": 15
       }
     },
@@ -79,13 +74,12 @@
       "title": "ES|QL Views privilege gating shows create and edit controls without delete controls with create access",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/privileges.spec.ts",
         "line": 48,
-        "column": 5
+        "column": 27
       }
     },
     {
@@ -93,12 +87,11 @@
       "title": "ES|QL Views privilege gating shows delete controls without create or edit controls with delete access",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/privileges.spec.ts",
-        "line": 58,
+        "line": 61,
         "column": 20
       }
     },
@@ -107,12 +100,11 @@
       "title": "ES|QL Views table lists, searches, reloads, and opens a view in Discover",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/esql_views/test/scout_esql_views/ui/parallel_tests/table.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 60
       }
     }
