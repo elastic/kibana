@@ -189,25 +189,10 @@ export const CREATE_FORM_ALERTING_V2_QUERY_INVALID_ERROR_MESSAGE = i18n.translat
   }
 );
 
-export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
-  'xpack.maintenanceWindows.technicalPreviewLabel',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
 export const CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2FiltersPlaceholder',
   {
     defaultMessage: 'Search alerts (e.g. data.host.name:"my-host" or data.severity:"low")',
-  }
-);
-
-export const CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
-  'xpack.maintenanceWindows.createForm.alertingV2FiltersTechnicalPreviewTooltip',
-  {
-    defaultMessage:
-      'This feature is in technical preview and may change or be removed in future releases.',
   }
 );
 
