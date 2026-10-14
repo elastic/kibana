@@ -7,10 +7,11 @@
 
 import type { HttpFetchOptions, HttpHandler } from '@kbn/core/public';
 import {
-  buildSecurityRoleUrl,
   SECURITY_ROLE_API_VERSION,
-  WORKER_ROLE_DEFINITIONS,
-} from '@kbn/alertzero-plugin/common/worker_roles';
+  WORKER_SERVICE_ACCOUNT_NAMES,
+  buildSecurityRoleUrl,
+  getWorkerRoleName,
+} from '@kbn/alertzero-common';
 import { SECURITY_SERVICE_ACCOUNT_URL } from './constants';
 
 interface ServiceAccountEntry {
@@ -54,26 +55,49 @@ const listAccounts = async (fetch: HttpHandler): Promise<ServiceAccountEntry[]> 
 const findUsable = (accounts: readonly ServiceAccountEntry[], name: string) =>
   accounts.find((a) => a.name === name && a.enabled && a.assumable);
 
-const ensureRole = async (fetch: HttpHandler, name: string, role: unknown): Promise<void> => {
-  try {
-    await fetch(buildSecurityRoleUrl(name), {
-      method: 'PUT',
-      version: SECURITY_ROLE_API_VERSION,
-      headers: { ...XSRF, 'elastic-api-version': SECURITY_ROLE_API_VERSION },
-      query: { createOnly: true },
-      body: JSON.stringify(role),
-    } satisfies HttpFetchOptions);
-  } catch (error) {
-    // Already exists: reused as is, never overwritten (same rule as the onboarding flow).
-    if (statusOf(error) !== 409) throw error;
-  }
+const isServerlessDeployment = async (fetch: HttpHandler): Promise<boolean> => {
+  const status = (await fetch('/api/status', { method: 'GET' })) as {
+    version?: { build_flavor?: string };
+  };
+  return status.version?.build_flavor === 'serverless';
 };
 
 /**
- * Finds or creates the prebuilt role and service account of each Worker (the
- * same definitions the onboarding "ensure worker service accounts" step uses),
- * as the eval user. Returns Worker id -> service account id. Fails loudly,
- * naming the Worker, when an account cannot be created or exists but is
+ * The Worker roles are built in: Elasticsearch reserved roles on stateful, predefined roles on
+ * Serverless. The harness only looks one up and never creates or changes it.
+ */
+const findBuiltInRole = async (
+  fetch: HttpHandler,
+  accountName: string,
+  isServerless: boolean
+): Promise<string> => {
+  const roleName = getWorkerRoleName(accountName, { isServerless });
+  const missing = () =>
+    new Error(
+      `Built-in ${
+        isServerless ? 'predefined' : 'reserved'
+      } role "${roleName}" is missing on this ` +
+        'stack; the eval harness does not create Worker roles.'
+    );
+  let role: { metadata?: { _reserved?: unknown } };
+  try {
+    role = (await fetch(buildSecurityRoleUrl(roleName), {
+      method: 'GET',
+      version: SECURITY_ROLE_API_VERSION,
+      headers: { ...XSRF, 'elastic-api-version': SECURITY_ROLE_API_VERSION },
+    } satisfies HttpFetchOptions)) as { metadata?: { _reserved?: unknown } };
+  } catch (error) {
+    throw statusOf(error) === 404 ? missing() : error;
+  }
+  if (role.metadata?._reserved !== true) throw missing();
+  return roleName;
+};
+
+/**
+ * Finds or creates the service account of each Worker, bound to the Worker's built-in role (the
+ * same lookup the onboarding "ensure worker service accounts" step uses), as the eval user.
+ * Returns Worker id -> service account id. Fails loudly, naming the missing role, when the stack
+ * lacks it, and naming the Worker, when an account cannot be created or exists but is
  * disabled / not assumable; a fresh stack has none, so the harness cannot rely
  * on a pre-seeded `ALERTZERO_EVAL_SERVICE_ACCOUNT_ID`.
  */
@@ -84,39 +108,43 @@ export const provisionWorkerServiceAccounts = async (
   const result: Record<string, string> = {};
   let accounts = await listAccounts(fetch);
   for (const workerId of workerIds) {
-    const definition = WORKER_ROLE_DEFINITIONS[workerId];
-    if (!definition) {
-      throw new Error(`No prebuilt role/service account definition for Worker "${workerId}".`);
+    const accountName = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
+    if (!accountName) {
+      throw new Error(`No built-in role/service account for Worker "${workerId}".`);
     }
-    let account = findUsable(accounts, definition.name);
+    let account = findUsable(accounts, accountName);
     if (!account) {
-      if (accounts.some((a) => a.name === definition.name)) {
+      if (accounts.some((a) => a.name === accountName)) {
         throw new Error(
-          `Service account "${definition.name}" for Worker "${workerId}" exists but is disabled or not assumable.`
+          `Service account "${accountName}" for Worker "${workerId}" exists but is disabled or not assumable.`
         );
       }
+      const roleName = await findBuiltInRole(
+        fetch,
+        accountName,
+        await isServerlessDeployment(fetch)
+      );
       try {
-        await ensureRole(fetch, definition.name, definition.role);
         account = (await fetch(SECURITY_SERVICE_ACCOUNT_URL, {
           method: 'POST',
           headers: XSRF,
           body: JSON.stringify({
-            name: definition.name,
-            description: `AlertZero eval harness account for ${definition.name}`,
-            roles: [definition.name],
+            name: accountName,
+            description: `AlertZero eval harness account for ${accountName}`,
+            roles: [roleName],
           }),
         } satisfies HttpFetchOptions)) as ServiceAccountEntry;
       } catch (error) {
         if (statusOf(error) !== 409) {
           throw new Error(
-            `Could not provision service account "${definition.name}" for Worker "${workerId}": ${
+            `Could not provision service account "${accountName}" for Worker "${workerId}": ${
               error instanceof Error ? error.message : String(error)
             }. Is xpack.security.serviceAccounts.enabled=true on the stack?`
           );
         }
         // Created concurrently: re-read.
         accounts = await listAccounts(fetch);
-        account = findUsable(accounts, definition.name);
+        account = findUsable(accounts, accountName);
         if (!account) throw error;
       }
     }

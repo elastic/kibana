@@ -45,6 +45,10 @@ interface Opts {
   existingAccounts?: Account[];
   /** Whether the space's alert-analysis workflow is already on (default: off, as on a fresh stack). */
   priorAnalysis?: boolean;
+  /** `/api/status` build flavor. */
+  flavor?: 'traditional' | 'serverless';
+  /** Answers GET /api/security/role/<name>. Default: every role exists and is reserved. */
+  role?: (name: string) => unknown;
 }
 
 /** A tiny in-memory Kibana: the setting gates the Workers routes exactly like the product. */
@@ -53,6 +57,8 @@ const makeStack = ({
   installOnEnable = true,
   existingAccounts = [],
   priorAnalysis = false,
+  flavor = 'traditional',
+  role = () => ({ metadata: { _reserved: true } }),
 }: Opts = {}) => {
   const calls: string[] = [];
   let setting: unknown = priorSetting;
@@ -139,7 +145,10 @@ const makeStack = ({
       return created;
     }
     if (path === '/internal/security/me') return { username: 'eval_user' };
-    if (path.startsWith('/api/security/role/')) return {};
+    if (path === '/api/status') return { version: { build_flavor: flavor } };
+    if (path.startsWith('/api/security/role/')) {
+      return role(decodeURIComponent(path.slice('/api/security/role/'.length)));
+    }
     throw new Error(`unexpected ${method} ${path}`);
   });
   return {
@@ -198,6 +207,93 @@ describe('setupWorkerChainHarness / teardownWorkerChainHarness', () => {
     });
     expect(stack.calls.filter((c) => c === `POST ${SA_URL}`)).toHaveLength(0);
     expect(state.workerServiceAccounts[WORKER_IDS.alertTriage]).toBe('sa-t');
+  });
+
+  it('binds each account to its built-in reserved role and never writes a role', async () => {
+    const stack = makeStack();
+    await setupWorkerChainHarness({
+      fetch: stack.fetch,
+      ctx: ctxFor(stack.fetch),
+      state: createHarnessState(),
+      log: makeLog(),
+    });
+    const roleCalls = stack.calls.filter((c) => c.includes('/api/security/role/'));
+    expect(roleCalls.sort()).toEqual([
+      'GET /api/security/role/alertzero_alert_triage',
+      'GET /api/security/role/alertzero_attack_discovery',
+    ]);
+    expect(
+      stack.accounts.map((a) => [a.name, (a as Account & { roles?: string[] }).roles]).sort()
+    ).toEqual([
+      ['alertzero_alert_triage', ['alertzero_alert_triage']],
+      ['alertzero_attack_discovery', ['alertzero_attack_discovery']],
+    ]);
+  });
+
+  it('uses the _-prefixed predefined role on Serverless', async () => {
+    const stack = makeStack({ flavor: 'serverless' });
+    await setupWorkerChainHarness({
+      fetch: stack.fetch,
+      ctx: ctxFor(stack.fetch),
+      state: createHarnessState(),
+      log: makeLog(),
+    });
+    expect(stack.calls.filter((c) => c.includes('/api/security/role/')).sort()).toEqual([
+      'GET /api/security/role/_alertzero_alert_triage',
+      'GET /api/security/role/_alertzero_attack_discovery',
+    ]);
+    expect(stack.accounts.map((a) => (a as Account & { roles?: string[] }).roles).sort()).toEqual([
+      ['_alertzero_alert_triage'],
+      ['_alertzero_attack_discovery'],
+    ]);
+  });
+
+  it('fails loudly, naming the role, when the built-in role is missing, without creating an account or a role', async () => {
+    const stack = makeStack({
+      role: () => {
+        throw Object.assign(new Error('Not Found'), { status: 404 });
+      },
+    });
+    await expect(
+      setupWorkerChainHarness({
+        fetch: stack.fetch,
+        ctx: ctxFor(stack.fetch),
+        state: createHarnessState(),
+        log: makeLog(),
+      })
+    ).rejects.toThrow('reserved role "alertzero_alert_triage" is missing');
+    expect(stack.calls.some((c) => c.startsWith('PUT /api/security/role/'))).toBe(false);
+    expect(stack.calls.some((c) => c === `POST ${SA_URL}`)).toBe(false);
+  });
+
+  it('names the predefined role on Serverless when it is missing', async () => {
+    const stack = makeStack({
+      flavor: 'serverless',
+      role: () => {
+        throw Object.assign(new Error('Not Found'), { status: 404 });
+      },
+    });
+    await expect(
+      setupWorkerChainHarness({
+        fetch: stack.fetch,
+        ctx: ctxFor(stack.fetch),
+        state: createHarnessState(),
+        log: makeLog(),
+      })
+    ).rejects.toThrow('predefined role "_alertzero_alert_triage" is missing');
+  });
+
+  it('rejects a same-named role that is not reserved', async () => {
+    const stack = makeStack({ role: () => ({ metadata: {} }) });
+    await expect(
+      setupWorkerChainHarness({
+        fetch: stack.fetch,
+        ctx: ctxFor(stack.fetch),
+        state: createHarnessState(),
+        log: makeLog(),
+      })
+    ).rejects.toThrow('role "alertzero_alert_triage" is missing');
+    expect(stack.calls.some((c) => c === `POST ${SA_URL}`)).toBe(false);
   });
 
   it('skips provisioning when a service account is pinned', async () => {
