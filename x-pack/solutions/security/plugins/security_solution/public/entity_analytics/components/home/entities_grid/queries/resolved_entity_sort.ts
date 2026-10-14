@@ -9,11 +9,11 @@ import { ENTITY_ID_FIELD, getEntityId, getEntityIds } from '../common';
 import type { PageCursor, QueryArgs, Row, SortDir, SortValue } from '../common';
 import { buildKeepClause, compareEntityIds, fetchPerIdChunk, getMaxAliasGroups } from './esql';
 import { buildEntityFilterConditions, buildSearchedTargetsQuery } from './entities_in_view';
-import type { EsqlRunner, SortPageFetcher } from './types';
+import type { EsqlRunner } from './types';
 
-// A sort by a column that shows the resolved entity's value reads the resolved entities with aliases and the other
-// entities apart. Most entities have no aliases and sort natively, by their own value.
-// The few resolved entities with aliases come from the alias docs, and the two streams are merged here.
+// A sort by a value that a resolved entity takes over its aliases reads the few resolved entities
+// with aliases apart from the other entities, which sort natively by their own value. The two are
+// merged here.
 
 /**
  * The end of every query of resolved entity rows: the filters on the entity fields, which by now hold the
@@ -55,77 +55,47 @@ const isAfterCursor = (field: string, direction: SortDir, cursor: PageCursor | n
   return (row: Row): boolean => getEntityId(row) !== cursor.entityId && compare(row, cursorRow) > 0;
 };
 
-export interface ResolvedEntitySortOptions {
-  /** The resolved entities with aliases that pass the filters, as rows with the resolved entity's values. */
-  buildResolvedEntityRowsQuery: (args: QueryArgs) => string;
-  /**
-   * The other entities, sorted and filtered by their own value like the rows of a resolved entity without aliases,
-   * with `extraRows` more than the page and its extra row, as resolved entities are dropped.
-   */
-  fetchEntityRows: (extraRows: number) => Promise<Row[]>;
-}
-
 /**
- * One page of rows plus one, sorted by a column that shows the resolved entity's value.
- *
- * The resolved entities with aliases that pass the filters are read first. The other entities are read
- * sorted and filtered by their own value, with as many extra rows as there are groups, since an
- * entity that is itself a resolved entity is dropped for its row. A search can't run after the
- * join of the resolved entities, so its matches among them are read separately.
- *
- * It fails when there are more groups than one query returns: a page from a partial list of
- * groups would be in the wrong order.
+ * The resolved entities with aliases that pass the filters and the search, with their values, from
+ * `query`. A search can't run after the join of the main entities, so its matches among them are
+ * read apart. Fails when there are more of them than a page can be built from: a page from part
+ * of them would be in the wrong order.
  */
-export const fetchResolvedEntitySortPage = async (
+export const fetchResolvedEntitiesWithAliases = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
-  { buildResolvedEntityRowsQuery, fetchEntityRows }: ResolvedEntitySortOptions
+  query: string
 ): Promise<Row[]> => {
-  const { sort, cursor, pageSize } = args;
-  const groups = await runQuery(buildResolvedEntityRowsQuery(args));
-  if (groups.length > getMaxAliasGroups(pageSize)) {
+  const rows = await runQuery(query);
+  if (rows.length > getMaxAliasGroups(args.pageSize)) {
     throw new Error('Too many groups of entities to sort by this column');
   }
-  const groupIds = new Set(getEntityIds(groups));
-
-  const searchedIds = args.searchExpression
-    ? new Set(
-        getEntityIds(
-          await fetchPerIdChunk(runQuery, [...groupIds], (chunk) =>
-            buildSearchedTargetsQuery(args, chunk)
-          )
-        )
+  if (!args.searchExpression) return rows;
+  const searchedIds = new Set(
+    getEntityIds(
+      await fetchPerIdChunk(runQuery, getEntityIds(rows), (chunk) =>
+        buildSearchedTargetsQuery(args, chunk)
       )
-    : groupIds;
-  const groupRows = groups
-    .filter((row) => searchedIds.has(getEntityId(row) ?? ''))
-    .filter(isAfterCursor(sort.field, sort.direction, cursor));
-
-  const entityRows = (await fetchEntityRows(groupIds.size)).filter(
-    (row) => !groupIds.has(getEntityId(row) ?? '')
+    )
   );
-
-  return [...groupRows, ...entityRows]
-    .sort(compareRows(sort.field, sort.direction))
-    .slice(0, pageSize + 1);
+  return rows.filter((row) => searchedIds.has(getEntityId(row) ?? ''));
 };
 
 /**
- * A sort page fetcher that, for the rows `isResolvedEntityRows` says show their resolved entity's value, reads the
- * resolved entities with aliases apart from the other entities, which `fetchPage` reads like the rows of a
- * group of one. Other rows are read by `fetchPage` as they are.
+ * One page from the resolved entities with aliases and the other entities, both sorted: the row
+ * of a resolved entity with aliases replaces its own row among the others, then the rows after
+ * the cursor are sorted and cut to the page and its extra row.
  */
-export const withResolvedEntityRows =
-  (
-    fetchPage: SortPageFetcher,
-    buildResolvedEntityRowsQuery: (args: QueryArgs) => string,
-    isResolvedEntityRows: (args: QueryArgs) => boolean = ({ rowsMode }) => rowsMode === 'resolved'
-  ): SortPageFetcher =>
-  (args, ctx) =>
-    isResolvedEntityRows(args)
-      ? fetchResolvedEntitySortPage(args, ctx.runQuery, {
-          buildResolvedEntityRowsQuery,
-          fetchEntityRows: (extraRows) =>
-            fetchPage({ ...args, pageSize: args.pageSize + extraRows }, ctx),
-        })
-      : fetchPage(args, ctx);
+export const getMergedPage = (
+  { sort, cursor, pageSize }: QueryArgs,
+  withAliases: readonly Row[],
+  others: readonly Row[]
+): Row[] => {
+  const withAliasesIds = new Set(getEntityIds(withAliases));
+  return [
+    ...withAliases.filter(isAfterCursor(sort.field, sort.direction, cursor)),
+    ...others.filter((row) => !withAliasesIds.has(getEntityId(row) ?? '')),
+  ]
+    .sort(compareRows(sort.field, sort.direction))
+    .slice(0, pageSize + 1);
+};

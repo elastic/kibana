@@ -6,55 +6,72 @@
  */
 
 import { RESOLVED_TO_FIELD } from '../common';
+import type { QueryArgs } from '../common';
 import { buildEntitiesInViewSteps } from './entities_in_view';
 import {
   ENTITY_TYPE_FILTER,
-  buildKeepClause,
   buildCursorClause,
+  buildKeepClause,
   buildSortSuffix,
   getEntityAlias,
 } from './esql';
-import { buildResolvedEntityRowsOutput, withResolvedEntityRows } from './resolved_entity_sort';
 import {
-  RESOLVED_ENTITY_VALUE_SORT_FIELDS,
-  buildResolvedEntityRowSteps,
-} from './resolved_entity_values';
-import type { QueryArgs } from '../common';
-import type { ColumnQuerySpec } from './types';
+  buildResolvedEntityRowsOutput,
+  fetchResolvedEntitiesWithAliases,
+  getMergedPage,
+} from './resolved_entity_sort';
+import { buildResolvedEntityRowSteps } from './resolved_entity_values';
+import type { ColumnQuerySpec, SortPageContext } from './types';
 
-/** The page of entities sorted by their own value. */
-const buildNativeEntitySortQuery = (args: QueryArgs): string => {
-  const {
-    sort: { field, direction: dir },
-    cursor,
-    pageSize,
-  } = args;
-  return [
-    ...buildEntitiesInViewSteps(args),
-    buildKeepClause(args),
-    ...buildCursorClause(cursor),
-    ...buildSortSuffix(field, dir, pageSize + 1),
-  ].join('\n');
+/** The entity fields whose value on a resolved row is taken over its main entity and aliases. */
+const FIELDS_OVER_ALIASES: readonly string[] = [
+  'asset.criticality',
+  'entity.lifecycle.first_seen',
+  '@timestamp',
+];
+
+/** Sorted by a field of the entity doc. */
+export const nativeSortQuerySpec = {
+  fetchSortPage: (args, ctx) =>
+    args.rowsMode === 'resolved' && FIELDS_OVER_ALIASES.includes(args.sort.field)
+      ? fetchSortedWithAliases(args, ctx)
+      : fetchSortedByField(args, ctx),
+} satisfies ColumnQuerySpec;
+
+const fetchSortedByField = (args: QueryArgs, { runQuery }: SortPageContext) =>
+  runQuery(buildSortedByFieldQuery(args));
+
+/**
+ * The few resolved entities with aliases are read apart, with their value over the aliases. The
+ * others sort by their own value, with as many extra rows as can be dropped, then both merge.
+ */
+const fetchSortedWithAliases = async (args: QueryArgs, ctx: SortPageContext) => {
+  const withAliases = await fetchResolvedEntitiesWithAliases(
+    args,
+    ctx.runQuery,
+    buildResolvedEntitiesWithAliasesQuery(args)
+  );
+  const others = await fetchSortedByField(
+    { ...args, pageSize: args.pageSize + withAliases.length },
+    ctx
+  );
+  return getMergedPage(args, withAliases, others);
 };
 
-/** The resolved entities with aliases that pass the filters, with the resolved entity's values of the columns. */
-const buildResolvedEntityValueRowsQuery = (args: QueryArgs): string =>
+/** The page of entities sorted by their own value. */
+const buildSortedByFieldQuery = (args: QueryArgs): string =>
+  [
+    ...buildEntitiesInViewSteps(args),
+    buildKeepClause(args),
+    ...buildCursorClause(args.cursor),
+    ...buildSortSuffix(args.sort.field, args.sort.direction, args.pageSize + 1),
+  ].join('\n');
+
+/** The resolved entities with aliases that pass the filters, with their values over the aliases. */
+const buildResolvedEntitiesWithAliasesQuery = (args: QueryArgs): string =>
   [
     `FROM ${getEntityAlias(args.namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
     ...buildResolvedEntityRowSteps(args),
     ...buildResolvedEntityRowsOutput(args),
   ].join('\n');
-
-/** Resolved rows show the resolved entity's value in these columns, so their sort has to see the resolved entities. */
-const isResolvedEntityValueSort = ({ rowsMode, sort }: QueryArgs): boolean =>
-  rowsMode === 'resolved' && RESOLVED_ENTITY_VALUE_SORT_FIELDS.includes(sort.field);
-
-/** Sort of a column whose value is on the entity doc. */
-export const nativeSortQuerySpec = {
-  fetchSortPage: withResolvedEntityRows(
-    (args, { runQuery }) => runQuery(buildNativeEntitySortQuery(args)),
-    buildResolvedEntityValueRowsQuery,
-    isResolvedEntityValueSort
-  ),
-} satisfies ColumnQuerySpec;

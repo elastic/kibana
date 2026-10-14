@@ -92,13 +92,6 @@ const buildResolvedEntityValueSteps = (): string[] => [
   )}, ${LAST_SEEN_FIELD} = ${buildExtreme('GREATEST', LAST_SEEN_FIELD, 'alias_last_seen')}`,
 ];
 
-/** The columns that show the resolved entity's value and sort: their sort has to see the resolved entities. */
-export const RESOLVED_ENTITY_VALUE_SORT_FIELDS: readonly string[] = [
-  CRITICALITY_FIELD,
-  FIRST_SEEN_FIELD,
-  '@timestamp',
-];
-
 /** The resolved entities with aliases as rows: the alias docs per resolved entity, with the resolved entity values over them. */
 export const buildResolvedEntityRowSteps = (
   args: Pick<QueryArgs, 'concreteEntityIndexName'>

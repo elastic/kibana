@@ -6,8 +6,7 @@
  */
 
 import type { QueryArgs, Row } from '../common';
-import type { SortPageContext } from './types';
-import { fetchResolvedEntitySortPage, withResolvedEntityRows } from './resolved_entity_sort';
+import { fetchResolvedEntitiesWithAliases, getMergedPage } from './resolved_entity_sort';
 
 const ARGS: QueryArgs = {
   namespace: 'default',
@@ -20,7 +19,7 @@ const ARGS: QueryArgs = {
   anomalyJobIds: [],
 };
 
-const GROUP_ROWS_QUERY = 'GROUPS';
+const WITH_ALIASES_QUERY = 'WITH ALIASES';
 
 const row = (id: string, criticality: string | null): Row => ({
   'entity.id': id,
@@ -29,104 +28,98 @@ const row = (id: string, criticality: string | null): Row => ({
 
 const getIds = (rows: Row[]) => rows.map((r) => r['entity.id']);
 
-/** The group rows and the entity rows a plan reads, and the ids that a search matches. */
-const createPlan = ({
-  groups,
-  entities,
-  searched = [],
-}: {
-  groups: Row[];
-  entities: Row[];
-  searched?: string[];
-}) => {
-  const runQuery = jest.fn(
+/** Answers the query of the resolved entities with aliases with `rows`, a search with `searched`. */
+const createRunner = (rows: Row[], searched: string[] = []) =>
+  jest.fn(
     async (query: string): Promise<Row[]> =>
-      query === GROUP_ROWS_QUERY ? groups : searched.map((id) => ({ 'entity.id': id }))
+      query === WITH_ALIASES_QUERY ? rows : searched.map((id) => ({ 'entity.id': id }))
   );
-  const fetchEntityRows = jest.fn(async (_extraRows: number) => entities);
-  return {
-    runQuery,
-    fetchEntityRows,
-    options: { buildResolvedEntityRowsQuery: () => GROUP_ROWS_QUERY, fetchEntityRows },
-  };
-};
 
-describe('fetchResolvedEntitySortPage', () => {
-  it('merges the groups and the other entities in the order of the sort', async () => {
-    const { runQuery, options } = createPlan({
-      groups: [row('host:g1', 'medium_impact'), row('host:g2', 'low_impact')],
-      entities: [row('host:e1', 'low_impact'), row('host:e2', 'high_impact'), row('host:e3', null)],
-    });
+describe('fetchResolvedEntitiesWithAliases', () => {
+  it('reads the resolved entities with aliases, without a search', async () => {
+    const runQuery = createRunner([row('host:g1', null)]);
 
-    const page = await fetchResolvedEntitySortPage({ ...ARGS, pageSize: 10 }, runQuery, options);
+    expect(
+      getIds(await fetchResolvedEntitiesWithAliases(ARGS, runQuery, WITH_ALIASES_QUERY))
+    ).toEqual(['host:g1']);
+    expect(runQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps only those whose main entity the search matches', async () => {
+    const runQuery = createRunner(
+      [row('host:g1', 'low_impact'), row('host:g2', 'low_impact')],
+      ['host:g2']
+    );
+
+    const rows = await fetchResolvedEntitiesWithAliases(
+      { ...ARGS, searchExpression: 'KQL("""entity.name: web*""")' },
+      runQuery,
+      WITH_ALIASES_QUERY
+    );
+
+    expect(getIds(rows)).toEqual(['host:g2']);
+  });
+
+  it('fails when there are more of them than a page can be built from', async () => {
+    const runQuery = createRunner(Array.from({ length: 9_997 }, (_, i) => row(`host:${i}`, null)));
+
+    await expect(
+      fetchResolvedEntitiesWithAliases(ARGS, runQuery, WITH_ALIASES_QUERY)
+    ).rejects.toThrow('Too many groups');
+  });
+});
+
+describe('getMergedPage', () => {
+  const PAGE_ARGS: QueryArgs = { ...ARGS, pageSize: 10 };
+
+  it('merges the resolved entities with aliases and the others in the order of the sort', () => {
+    const page = getMergedPage(
+      PAGE_ARGS,
+      [row('host:g1', 'medium_impact'), row('host:g2', 'low_impact')],
+      [row('host:e1', 'low_impact'), row('host:e2', 'high_impact'), row('host:e3', null)]
+    );
 
     // Criticality sorts by its label, so medium comes before low and high.
     expect(getIds(page)).toEqual(['host:g1', 'host:e1', 'host:g2', 'host:e2', 'host:e3']);
   });
 
-  it('puts the rows without a value last in both directions, and breaks ties by entity id', async () => {
-    const { runQuery, options } = createPlan({
-      groups: [row('host:b', 'low_impact'), row('host:z', null)],
-      entities: [row('host:a', 'low_impact'), row('host:c', null)],
-    });
-    const fetch = (direction: 'asc' | 'desc') =>
-      fetchResolvedEntitySortPage(
-        { ...ARGS, pageSize: 10, sort: { field: 'asset.criticality', direction } },
-        runQuery,
-        options
+  it('puts the rows without a value last in both directions, and breaks ties by entity id', () => {
+    const merge = (direction: 'asc' | 'desc') =>
+      getMergedPage(
+        { ...PAGE_ARGS, sort: { field: 'asset.criticality', direction } },
+        [row('host:b', 'low_impact'), row('host:z', null)],
+        [row('host:a', 'low_impact'), row('host:c', null)]
       );
 
-    expect(getIds(await fetch('asc'))).toEqual(['host:a', 'host:b', 'host:c', 'host:z']);
-    expect(getIds(await fetch('desc'))).toEqual(['host:a', 'host:b', 'host:c', 'host:z']);
+    expect(getIds(merge('asc'))).toEqual(['host:a', 'host:b', 'host:c', 'host:z']);
+    expect(getIds(merge('desc'))).toEqual(['host:a', 'host:b', 'host:c', 'host:z']);
   });
 
-  it('sorts numbers by their value', async () => {
-    const { runQuery, options } = createPlan({
-      groups: [{ 'entity.id': 'host:g', alert_count: 10 }],
-      entities: [
+  it('sorts numbers by their value', () => {
+    const page = getMergedPage(
+      { ...PAGE_ARGS, sort: { field: 'alert_count', direction: 'desc' } },
+      [{ 'entity.id': 'host:g', alert_count: 10 }],
+      [
         { 'entity.id': 'host:a', alert_count: 9 },
         { 'entity.id': 'host:b', alert_count: 100 },
-      ],
-    });
-
-    const page = await fetchResolvedEntitySortPage(
-      { ...ARGS, pageSize: 10, sort: { field: 'alert_count', direction: 'desc' } },
-      runQuery,
-      options
+      ]
     );
 
     expect(getIds(page)).toEqual(['host:b', 'host:g', 'host:a']);
   });
 
-  it('drops an entity that heads a group, for the row of its group', async () => {
-    const { runQuery, options } = createPlan({
-      groups: [row('host:g1', 'extreme_impact')],
-      entities: [row('host:g1', 'low_impact'), row('host:e1', 'low_impact')],
-    });
-
-    const page = await fetchResolvedEntitySortPage({ ...ARGS, pageSize: 10 }, runQuery, options);
+  it("replaces a resolved entity's own row with its row over the aliases", () => {
+    const page = getMergedPage(
+      PAGE_ARGS,
+      [row('host:g1', 'extreme_impact')],
+      [row('host:g1', 'low_impact'), row('host:e1', 'low_impact')]
+    );
 
     expect(page).toEqual([row('host:e1', 'low_impact'), row('host:g1', 'extreme_impact')]);
   });
 
-  it('reads as many extra entities as there are groups, which may be dropped', async () => {
-    const { runQuery, options, fetchEntityRows } = createPlan({
-      groups: [row('host:g1', 'low_impact'), row('host:g2', 'low_impact')],
-      entities: [],
-    });
-
-    await fetchResolvedEntitySortPage(ARGS, runQuery, options);
-
-    expect(fetchEntityRows).toHaveBeenCalledWith(2);
-  });
-
-  it('keeps the groups after the cursor, and the page and its extra row', async () => {
-    const { runQuery, options } = createPlan({
-      groups: [row('host:g1', 'medium_impact'), row('host:g2', 'low_impact')],
-      entities: [row('host:e1', 'low_impact'), row('host:e2', 'low_impact')],
-    });
-
-    const page = await fetchResolvedEntitySortPage(
+  it('keeps the rows after the cursor, and the page and its extra row', () => {
+    const page = getMergedPage(
       {
         ...ARGS,
         pageSize: 2,
@@ -137,94 +130,11 @@ describe('fetchResolvedEntitySortPage', () => {
           entityId: 'host:g1',
         },
       },
-      runQuery,
-      options
+      [row('host:g1', 'medium_impact'), row('host:g2', 'low_impact')],
+      [row('host:e1', 'low_impact'), row('host:e2', 'low_impact')]
     );
 
     // host:g1 is the cursor itself, so the page starts after it.
     expect(getIds(page)).toEqual(['host:e1', 'host:e2', 'host:g2']);
-  });
-
-  it('keeps only the groups whose main entity the search matches', async () => {
-    const { runQuery, options } = createPlan({
-      groups: [row('host:g1', 'low_impact'), row('host:g2', 'low_impact')],
-      entities: [],
-      searched: ['host:g2'],
-    });
-
-    const page = await fetchResolvedEntitySortPage(
-      { ...ARGS, pageSize: 10, searchExpression: 'KQL("""entity.name: web*""")' },
-      runQuery,
-      options
-    );
-
-    expect(getIds(page)).toEqual(['host:g2']);
-  });
-
-  it('does not search without a search', async () => {
-    const { runQuery, options } = createPlan({ groups: [row('host:g1', null)], entities: [] });
-
-    await fetchResolvedEntitySortPage(ARGS, runQuery, options);
-
-    expect(runQuery).toHaveBeenCalledTimes(1);
-  });
-
-  it('fails when there are more groups than a page can be built from', async () => {
-    const { runQuery, options } = createPlan({
-      groups: Array.from({ length: 9_997 }, (_, i) => row(`host:${i}`, null)),
-      entities: [],
-    });
-
-    await expect(fetchResolvedEntitySortPage(ARGS, runQuery, options)).rejects.toThrow(
-      'Too many groups'
-    );
-  });
-});
-
-describe('withResolvedEntityRows', () => {
-  const entityPage = [row('host:b', 'low_impact')];
-
-  const createFetcher = (isResolvedEntityRows?: (args: QueryArgs) => boolean) => {
-    const fetchPage = jest.fn(async (_args: QueryArgs, _ctx: SortPageContext) => entityPage);
-    const runQuery = jest.fn(async (_query: string): Promise<Row[]> => []);
-    const ctx = { runQuery, fetchViewSize: async () => 0 };
-    return {
-      fetchPage,
-      runQuery,
-      fetchSortPage: (args: QueryArgs) =>
-        withResolvedEntityRows(fetchPage, () => GROUP_ROWS_QUERY, isResolvedEntityRows)(args, ctx),
-    };
-  };
-
-  it('reads the groups apart, and asks the page for the entities the groups may drop', async () => {
-    const { fetchPage, runQuery, fetchSortPage } = createFetcher();
-    runQuery.mockResolvedValueOnce([row('host:a', 'high_impact'), row('host:c', null)]);
-
-    const page = await fetchSortPage(ARGS);
-
-    expect(runQuery).toHaveBeenCalledWith(GROUP_ROWS_QUERY);
-    expect(fetchPage).toHaveBeenCalledWith(
-      { ...ARGS, pageSize: ARGS.pageSize + 2 },
-      expect.anything()
-    );
-    // Descending by value: 'low_impact' > 'high_impact', and the row without a value last.
-    expect(getIds(page)).toEqual(['host:b', 'host:a', 'host:c']);
-  });
-
-  it('reads individual rows with the page as it is', async () => {
-    const { fetchPage, runQuery, fetchSortPage } = createFetcher();
-    const args: QueryArgs = { ...ARGS, rowsMode: 'individual' };
-
-    expect(await fetchSortPage(args)).toBe(entityPage);
-    expect(fetchPage).toHaveBeenCalledWith(args, expect.anything());
-    expect(runQuery).not.toHaveBeenCalled();
-  });
-
-  it('leaves the rows that do not show a value of their group to the page', async () => {
-    const { runQuery, fetchSortPage } = createFetcher(({ sort }) => sort.field !== 'entity.name');
-
-    await fetchSortPage({ ...ARGS, sort: { field: 'entity.name', direction: 'asc' } });
-
-    expect(runQuery).not.toHaveBeenCalled();
   });
 });
