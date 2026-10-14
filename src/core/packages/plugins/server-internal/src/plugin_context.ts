@@ -334,8 +334,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     pubsub: {
       registerTopic: (topic) => deps.pubsub.registerTopic(plugin.name, topic),
-      subscribe: (topic, consumer, handler) =>
-        deps.pubsub.subscribe(plugin.name, topic, consumer, handler),
+      subscribe: (topic, subscription) => deps.pubsub.subscribe(plugin.name, topic, subscription),
     },
     userStorage: {
       register: deps.userStorage.register,

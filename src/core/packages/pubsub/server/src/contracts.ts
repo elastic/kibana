@@ -43,6 +43,17 @@ export interface PubSubEvent<TData = unknown> extends PubSubEventInit<TData> {
 export type PubSubHandler<TData> = (event: PubSubEvent<TData>) => void | Promise<void>;
 
 /**
+ * A named consumer of one topic.
+ *
+ * @public
+ */
+export interface PubSubSubscription<TData> {
+  /** Plugin-local consumer name; core prefixes it with the plugin id. */
+  readonly consumer: string;
+  readonly handler: PubSubHandler<TData>;
+}
+
+/**
  * @public
  */
 export interface PubSubSetup {
@@ -54,10 +65,9 @@ export interface PubSubSetup {
 
   /**
    * Subscribes during plugin setup.
-   * `consumer` is the plugin-local name; core prefixes it with the plugin id.
    * Every event published on the topic is delivered to the consumer.
    */
-  subscribe<TData>(topic: Topic<TData>, consumer: string, handler: PubSubHandler<TData>): void;
+  subscribe<TData>(topic: Topic<TData>, subscription: PubSubSubscription<TData>): void;
 }
 
 /**

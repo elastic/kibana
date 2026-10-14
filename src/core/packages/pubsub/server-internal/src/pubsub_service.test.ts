@@ -82,7 +82,7 @@ describe('PubSubService registration', () => {
     const setup = service.setup();
     const topic = defineTopic('orders');
 
-    setup.subscribe(PLUGIN, topic, 'sync', () => {});
+    setup.subscribe(PLUGIN, topic, { consumer: 'sync', handler: () => {} });
     setup.registerTopic(PLUGIN, topic);
 
     expect(() => service.start()).not.toThrow();
@@ -92,7 +92,7 @@ describe('PubSubService registration', () => {
     const service = createService();
     const setup = service.setup();
 
-    setup.subscribe(PLUGIN, defineTopic('orders'), 'sync', () => {});
+    setup.subscribe(PLUGIN, defineTopic('orders'), { consumer: 'sync', handler: () => {} });
 
     expect(() => service.start()).toThrow(/not registered/);
   });
@@ -101,9 +101,9 @@ describe('PubSubService registration', () => {
     const setup = createService().setup();
     const topic = defineTopic('orders');
     setup.registerTopic(PLUGIN, topic);
-    setup.subscribe(PLUGIN, topic, 'sync', () => {});
+    setup.subscribe(PLUGIN, topic, { consumer: 'sync', handler: () => {} });
 
-    expect(() => setup.subscribe(PLUGIN, topic, 'sync', () => {})).toThrow(
+    expect(() => setup.subscribe(PLUGIN, topic, { consumer: 'sync', handler: () => {} })).toThrow(
       'Consumer "ordersPlugin.sync" is already subscribed to topic "orders".'
     );
   });
@@ -112,9 +112,11 @@ describe('PubSubService registration', () => {
     const setup = createService().setup();
     const topic = defineTopic('orders');
     setup.registerTopic(PLUGIN, topic);
-    setup.subscribe(PLUGIN, topic, 'sync', () => {});
+    setup.subscribe(PLUGIN, topic, { consumer: 'sync', handler: () => {} });
 
-    expect(() => setup.subscribe('shippingPlugin', topic, 'sync', () => {})).not.toThrow();
+    expect(() =>
+      setup.subscribe('shippingPlugin', topic, { consumer: 'sync', handler: () => {} })
+    ).not.toThrow();
   });
 
   it('rejects a consumer name that could impersonate another plugin', () => {
@@ -122,9 +124,9 @@ describe('PubSubService registration', () => {
     const topic = defineTopic('orders');
     setup.registerTopic(PLUGIN, topic);
 
-    expect(() => setup.subscribe(PLUGIN, topic, 'shippingPlugin.sync', () => {})).toThrow(
-      /invalid/i
-    );
+    expect(() =>
+      setup.subscribe(PLUGIN, topic, { consumer: 'shippingPlugin.sync', handler: () => {} })
+    ).toThrow(/invalid/i);
   });
 });
 
@@ -147,10 +149,13 @@ describe('PubSubService dispatch', () => {
     let finished = false;
     const gate = deferred();
 
-    setup.subscribe(PLUGIN, topic, 'sync', async () => {
-      started = true;
-      await gate.promise;
-      finished = true;
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'sync',
+      handler: async () => {
+        started = true;
+        await gate.promise;
+        finished = true;
+      },
     });
 
     const { publish } = start(service);
@@ -175,11 +180,17 @@ describe('PubSubService dispatch', () => {
     const seenByOrders: string[] = [];
     const seenByShipments: string[] = [];
 
-    setup.subscribe(PLUGIN, topic, 'sync', (event) => {
-      seenByOrders.push(event.id);
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'sync',
+      handler: (event) => {
+        seenByOrders.push(event.id);
+      },
     });
-    setup.subscribe('shippingPlugin', other, 'sync', (event) => {
-      seenByShipments.push(event.id);
+    setup.subscribe('shippingPlugin', other, {
+      consumer: 'sync',
+      handler: (event) => {
+        seenByShipments.push(event.id);
+      },
     });
 
     const { publish } = start(service);
@@ -201,15 +212,21 @@ describe('PubSubService dispatch', () => {
     let failures = 0;
     const delivered: string[] = [];
 
-    setup.subscribe(PLUGIN, topic, 'fails', () => {
-      failures++;
-      if (failures === 1) {
-        throw new Error('nope');
-      }
-      return Promise.reject(new Error('nope'));
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'fails',
+      handler: () => {
+        failures++;
+        if (failures === 1) {
+          throw new Error('nope');
+        }
+        return Promise.reject(new Error('nope'));
+      },
     });
-    setup.subscribe(PLUGIN, topic, 'ok', (event) => {
-      delivered.push(event.id);
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'ok',
+      handler: (event) => {
+        delivered.push(event.id);
+      },
     });
 
     const { publish } = start(service);
@@ -240,14 +257,17 @@ describe('PubSubService dispatch', () => {
     const bothStarted = deferred();
     let startedConsumers = 0;
 
-    setup.subscribe(PLUGIN, topic, 'serial', async () => {
-      serialCalls++;
-      active++;
-      maxActive = Math.max(maxActive, active);
-      if (serialCalls === 1) {
-        await firstGate.promise;
-      }
-      active--;
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'serial',
+      handler: async () => {
+        serialCalls++;
+        active++;
+        maxActive = Math.max(maxActive, active);
+        if (serialCalls === 1) {
+          await firstGate.promise;
+        }
+        active--;
+      },
     });
 
     const markStarted = () => {
@@ -257,13 +277,19 @@ describe('PubSubService dispatch', () => {
       }
     };
     const overlapGate = deferred();
-    setup.subscribe(PLUGIN, topic, 'left', async () => {
-      markStarted();
-      await overlapGate.promise;
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'left',
+      handler: async () => {
+        markStarted();
+        await overlapGate.promise;
+      },
     });
-    setup.subscribe(PLUGIN, topic, 'right', async () => {
-      markStarted();
-      await overlapGate.promise;
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'right',
+      handler: async () => {
+        markStarted();
+        await overlapGate.promise;
+      },
     });
 
     const { publish } = start(service);
@@ -330,8 +356,11 @@ describe('PubSubService dispatch', () => {
   it('delivers two events with the same id twice: phase 1 does not deduplicate', async () => {
     const { service, setup, topic } = createHarness();
     const seen: string[] = [];
-    setup.subscribe(PLUGIN, topic, 'sync', (event) => {
-      seen.push(event.id);
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'sync',
+      handler: (event) => {
+        seen.push(event.id);
+      },
     });
 
     const { publish } = start(service);
@@ -348,16 +377,22 @@ describe('PubSubService dispatch', () => {
     let slowCalls = 0;
     const gate = deferred();
 
-    setup.subscribe(PLUGIN, topic, 'slow', async () => {
-      slowCalls++;
-      if (slowCalls === 1) {
-        await gate.promise;
-      }
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'slow',
+      handler: async () => {
+        slowCalls++;
+        if (slowCalls === 1) {
+          await gate.promise;
+        }
+      },
     });
 
     let fastCalls = 0;
-    setup.subscribe(PLUGIN, topic, 'fast', () => {
-      fastCalls++;
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'fast',
+      handler: () => {
+        fastCalls++;
+      },
     });
 
     const { publish } = start(service);
@@ -396,11 +431,14 @@ describe('PubSubService dispatch', () => {
     let calls = 0;
     const gate = deferred();
 
-    setup.subscribe(PLUGIN, topic, 'slow', async () => {
-      calls++;
-      if (calls === 1) {
-        await gate.promise;
-      }
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'slow',
+      handler: async () => {
+        calls++;
+        if (calls === 1) {
+          await gate.promise;
+        }
+      },
     });
 
     const { publish } = start(service);

@@ -14,5 +14,6 @@ export type {
   PubSubHandler,
   PubSubSetup,
   PubSubStart,
+  PubSubSubscription,
   PubSubEventInit,
 } from './src/contracts';

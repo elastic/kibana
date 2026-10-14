@@ -9,7 +9,12 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { PubSubEvent, PubSubHandler, PubSubEventInit, Topic } from '@kbn/core-pubsub-server';
+import type {
+  PubSubEvent,
+  PubSubEventInit,
+  PubSubSubscription,
+  Topic,
+} from '@kbn/core-pubsub-server';
 import { scopeConsumerName } from './consumer_name';
 import type { InternalPubSubSetup, InternalPubSubStart } from './internal_contracts';
 
@@ -61,8 +66,8 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       registerTopic: (pluginId, topic) => {
         this.registerTopic(pluginId, topic);
       },
-      subscribe: (pluginId, topic, consumer, handler) => {
-        this.subscribe(pluginId, topic, consumer, handler);
+      subscribe: (pluginId, topic, subscription) => {
+        this.subscribe(pluginId, topic, subscription);
       },
     };
   }
@@ -136,8 +141,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   private subscribe<TData>(
     pluginId: string,
     topic: Topic<TData>,
-    consumer: string,
-    handler: PubSubHandler<TData>
+    { consumer, handler }: PubSubSubscription<TData>
   ): void {
     if (this.phase !== 'setup') {
       throw new Error(

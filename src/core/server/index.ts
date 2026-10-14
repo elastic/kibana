@@ -83,6 +83,7 @@ export type {
   PubSubHandler,
   PubSubSetup,
   PubSubStart,
+  PubSubSubscription,
   PubSubEventInit,
   Topic,
 } from '@kbn/core-pubsub-server';
