@@ -81,18 +81,18 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       const secondAction = actions.find((doc) => doc.group_hash === groupHashTwo);
 
       // Series actions target the series as a whole, so the persisted doc
-      // carries `episode_id: null` even though an episode exists.
+      // carries `alert_id: null` even though an episode exists.
       expect(firstAction).toMatchObject({
         action_type: 'snooze',
         group_hash: groupHashOne,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
         expiry: '2099-01-01T00:00:00Z',
       });
       expect(secondAction).toMatchObject({
         action_type: 'snooze',
         group_hash: groupHashTwo,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
         expiry: '2099-06-01T00:00:00Z',
       });
@@ -111,6 +111,12 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       }),
     ]);
 
+    const snoozeResponse = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
+      headers: writerHeaders,
+      body: { items: [{ group_hash: groupHash }] },
+    });
+    expect(snoozeResponse).toHaveStatusCode(200);
+
     const response = await apiClient.post(BULK_UNSNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
       body: { items: [{ group_hash: groupHash }] },
@@ -127,10 +133,56 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
     expect(actions[0]).toMatchObject({
       action_type: 'unsnooze',
       group_hash: groupHash,
-      episode_id: null,
+      alert_id: null,
       rule_id: ruleId,
     });
   });
+
+  apiTest(
+    'precondition: reports INVALID_ALERT_STATE_TRANSITION for a series that is not snoozed',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-series-unsnooze-no-op-rule';
+      const snoozedGroup = buildGroupHash('bulk-series-unsnooze-no-op-snoozed-group');
+      const notSnoozedGroup = buildGroupHash('bulk-series-unsnooze-no-op-not-snoozed-group');
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: snoozedGroup,
+          alert: { id: 'bulk-series-unsnooze-no-op-snoozed-episode', status: 'active' },
+        }),
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: notSnoozedGroup,
+          alert: { id: 'bulk-series-unsnooze-no-op-not-snoozed-episode', status: 'active' },
+        }),
+      ]);
+
+      const snoozeResponse = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ group_hash: snoozedGroup }] },
+      });
+      expect(snoozeResponse).toHaveStatusCode(200);
+
+      const response = await apiClient.post(BULK_UNSNOOZE_SERIES_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ group_hash: snoozedGroup }, { group_hash: notSnoozedGroup }] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe(notSnoozedGroup);
+      expect(response.body.errors[0].error.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['unsnooze'],
+      });
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({ group_hash: snoozedGroup });
+    }
+  );
 
   apiTest(
     'partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown',
@@ -171,7 +223,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       expect(actions[0]).toMatchObject({
         action_type: 'snooze',
         group_hash: knownGroup,
-        episode_id: null,
+        alert_id: null,
       });
     }
   );

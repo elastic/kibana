@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
   INTERNAL_API_ACCESS,
@@ -20,13 +20,14 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
+import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
 import { resolveScopedModel } from './lib/scoped_model';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 /**
- * Resolves the Reasoning-tier model, or `undefined` when none is available. A missing
+ * Resolves the Frontier-tier model, or `undefined` when none is available. A missing
  * connector is the ordinary outcome, not an error, so it never fails the request: the
  * coordinator degrades (no model fallback for Tier 2 targets, Tier 2 reports `no_inference`).
  */
@@ -118,7 +119,7 @@ export const registerHuntCoordinatorRoute = ({
             run_id,
           } = request.body;
 
-          // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
+          // Same Frontier tier as the standalone hunt_behavior route, so this path (the
           // one that actually runs Tier 2 in production) resolves the same model. It is
           // resolved regardless of `tier2_when`, since resolving a connector spends no
           // tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
@@ -128,7 +129,7 @@ export const registerHuntCoordinatorRoute = ({
               resolveScopedModel({
                 inference: getInference(),
                 searchInferenceEndpoints: getSearchInferenceEndpoints(),
-                featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+                featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
                 request,
                 uiSettingsClient: core.uiSettings.client,
                 logger,
@@ -161,11 +162,14 @@ export const registerHuntCoordinatorRoute = ({
 
           // SSE entries ride the response only on a confirmed hit for a named
           // report; the hunt child fans out over them with ai.attachment.add.
-          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone.
-          const body: HuntCoordinatorResponse =
-            result.has_confirmed_hit && report_id
-              ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
-              : result;
+          // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone. The impact
+          // entities come from those same entries, so a run attaches impact only
+          // for what it confirmed.
+          let body: HuntCoordinatorResponse = result;
+          if (result.has_confirmed_hit && report_id) {
+            const sse = buildSseData(result, report_id, { spaceId });
+            body = { ...result, sse, impacted_entities: buildImpactEntities(sse) };
+          }
           return response.ok({ body });
         } catch (err) {
           if (err instanceof InvalidHuntWindowError) {

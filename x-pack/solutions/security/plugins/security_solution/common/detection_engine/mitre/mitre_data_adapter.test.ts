@@ -69,6 +69,90 @@ describe('transformLegacyMitreData', () => {
         expect(tactic.position).toBe(expectedPosition);
       }
     });
+
+    it('returns tactics sorted by position and leaves technique and subtechnique order untouched', () => {
+      // Pass tactics in a non-position order: TA0043 (Reconnaissance) is position 0,
+      // TA0001 (Initial Access) is position 2, TA0040 (Impact) is position 14.
+      const tactics = [
+        {
+          id: 'TA0040',
+          name: 'Impact',
+          reference: 'https://attack.mitre.org/tactics/TA0040/',
+          value: 'impact',
+          label: 'Impact (TA0040)',
+        },
+        {
+          id: 'TA0043',
+          name: 'Reconnaissance',
+          reference: 'https://attack.mitre.org/tactics/TA0043/',
+          value: 'reconnaissance',
+          label: 'Reconnaissance (TA0043)',
+        },
+        {
+          id: 'TA0001',
+          name: 'Initial Access',
+          reference: 'https://attack.mitre.org/tactics/TA0001/',
+          value: 'initialAccess',
+          label: 'Initial Access (TA0001)',
+        },
+      ];
+
+      // Techniques are deliberately in non-alphabetical order to prove the adapter does not re-sort them.
+      const techniques = [
+        {
+          id: 'T1595',
+          name: 'Zeta Scan',
+          reference: 'https://attack.mitre.org/techniques/T1595/',
+          value: 'zetaScan',
+          label: 'Zeta Scan (T1595)',
+          tactics: ['reconnaissance'],
+        },
+        {
+          id: 'T1190',
+          name: 'Alpha Exploit',
+          reference: 'https://attack.mitre.org/techniques/T1190/',
+          value: 'alphaExploit',
+          label: 'Alpha Exploit (T1190)',
+          tactics: ['initial-access'],
+        },
+      ];
+
+      // Subtechniques are deliberately in non-alphabetical order to prove the adapter does not re-sort them.
+      const subtechniques = [
+        {
+          id: 'T1595.002',
+          name: 'Zebra Subtechnique',
+          reference: 'https://attack.mitre.org/techniques/T1595/002/',
+          value: 'zebraSubtechnique',
+          label: 'Zebra Subtechnique (T1595.002)',
+          tactics: ['reconnaissance'],
+          techniqueId: 'T1595',
+        },
+        {
+          id: 'T1595.001',
+          name: 'Apple Subtechnique',
+          reference: 'https://attack.mitre.org/techniques/T1595/001/',
+          value: 'appleSubtechnique',
+          label: 'Apple Subtechnique (T1595.001)',
+          tactics: ['reconnaissance'],
+          techniqueId: 'T1595',
+        },
+      ];
+
+      const result = transformLegacyMitreData({ tactics, techniques, subtechniques });
+
+      // Tactics should come out in position order: TA0043 < TA0001 < TA0040
+      expect(result.tactics.map((t) => t.id)).toEqual(['TA0043', 'TA0001', 'TA0040']);
+
+      // Techniques should preserve input order: Zeta Scan, then Alpha Exploit
+      expect(result.techniques.map((t) => t.name)).toEqual(['Zeta Scan', 'Alpha Exploit']);
+
+      // Subtechniques should preserve input order: Zebra Subtechnique, then Apple Subtechnique
+      expect(result.subtechniques.map((s) => s.name)).toEqual([
+        'Zebra Subtechnique',
+        'Apple Subtechnique',
+      ]);
+    });
   });
 
   describe('technique tactic_ids resolution', () => {

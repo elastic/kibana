@@ -71,6 +71,7 @@ export const casesQueriesKeys = {
   alertFeatureIds: (alertIds: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
+  workflowTagAggs: () => [...casesQueriesKeys.all, 'workflow-tag-aggs'] as const,
 };
 
 export const casesMutationsKeys = {
@@ -88,6 +89,7 @@ export const casesMutationsKeys = {
   postObservable: ['post-observable'] as const,
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
+  bulkDeleteObservables: ['bulk-delete-observables'] as const,
   createTemplate: ['create-template'] as const,
   updateTemplate: ['update-template'] as const,
   deleteTemplate: ['delete-template'] as const,

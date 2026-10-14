@@ -101,15 +101,17 @@ const useTableListViewProps = (
 
   const createNewVis = useCallback(() => {
     closeNewVisModal.current = showNewVisModal({
-      originatingApp: VisualizeConstants.APP_ID,
-      breadcrumbs: [
-        {
-          text: visualizeLibraryPageTitle,
-          href: application.getUrlForApp(VisualizeConstants.APP_ID, {
-            path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
-          }),
-        },
-      ],
+      embeddableState: {
+        originatingApp: VisualizeConstants.APP_ID,
+        breadcrumbs: [
+          {
+            text: visualizeLibraryPageTitle,
+            href: application.getUrlForApp(VisualizeConstants.APP_ID, {
+              path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+            }),
+          },
+        ],
+      },
     });
   }, [closeNewVisModal, application]);
 

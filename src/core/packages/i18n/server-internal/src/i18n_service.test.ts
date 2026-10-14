@@ -24,7 +24,8 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 const getConfigService = (
   defaultLocale = 'en',
-  locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR']
+  locales: string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR'],
+  { allowLocaleCookie = true, detectBrowserLocale = true } = {}
 ) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
@@ -32,6 +33,8 @@ const getConfigService = (
       return new BehaviorSubject({
         defaultLocale,
         locales,
+        allowLocaleCookie,
+        detectBrowserLocale,
       });
     }
     return new BehaviorSubject({});
@@ -179,6 +182,21 @@ describe('I18nService', () => {
       ]);
       expect(getTranslationFiles()).toEqual(translationFiles);
     });
+
+    it.each([true, false])(
+      'exposes i18n.detectBrowserLocale: %s on the preboot and setup contracts',
+      async (detectBrowserLocale) => {
+        configService = getConfigService(undefined, undefined, { detectBrowserLocale });
+        coreContext = mockCoreContext.create({ configService });
+        service = new I18nService(coreContext);
+
+        const preboot = await service.preboot({ pluginPaths: [], http: httpPreboot });
+        const setup = await service.setup({ pluginPaths: [], http: httpSetup });
+
+        expect(preboot.detectBrowserLocale).toBe(detectBrowserLocale);
+        expect(setup.detectBrowserLocale).toBe(detectBrowserLocale);
+      }
+    );
 
     it('hashes the defaultLocale even when i18n.locales is empty', async () => {
       configService = getConfigService('en', []);

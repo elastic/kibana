@@ -110,8 +110,7 @@ const addMappingField = async ({
   await expect(page.getByText(name)).toBeVisible();
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/295469
-test.describe.skip(
+test.describe(
   'ES|QL Data Federation — create CSV dataset wizard',
   { tag: tags.stateful.classic },
   () => {
@@ -477,9 +476,7 @@ test.describe.skip(
       });
 
       await test.step('edit only the description and save', async () => {
-        const row = pageObjects.dataFederation.getDataSetRow(createdDataSetName);
-        await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
-        await pageObjects.dataFederation.createDatasetWizard.waitFor({ state: 'visible' });
+        await pageObjects.dataFederation.openEditDataSetWizard(createdDataSetName);
 
         await page.getByTestId('createDatasetDescription').fill(updatedDescription);
         await pageObjects.dataFederation.wizardNextButton.click();

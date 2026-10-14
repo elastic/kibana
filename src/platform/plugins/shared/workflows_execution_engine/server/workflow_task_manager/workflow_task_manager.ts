@@ -10,8 +10,10 @@
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  type RunSoonOptions,
   TaskAlreadyRunningError,
   type TaskManagerStartContract,
+  TaskPriority,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
@@ -24,6 +26,9 @@ import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 
+export const getTaskPriority = (context?: Record<string, unknown> | null): TaskPriority =>
+  context?.isUserInteractive === true ? TaskPriority.UserInteractive : TaskPriority.Standard;
+
 /** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
 export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-global-timeout-${workflowExecutionId}`;
@@ -31,6 +36,8 @@ export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string
 /**
  * Stable task id / deduplication key for any immediate `workflow:resume` (no runAt).
  * Task Manager owns this document throughout the run; callers must never replace it.
+ * While the execution is not terminal the runner stays parked between resumes, so every
+ * wake-up reuses the API key granted when it was first scheduled.
  */
 export const getWorkflowImmediateResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-immediate-resume-${workflowExecutionId}`;
@@ -40,6 +47,15 @@ export const getWorkflowWakeTaskId = (executionId: string): string =>
   `workflow-wake-${executionId}`;
 
 export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
+
+/** Tasks beyond one page re-arm the wake task when they fire, which removes them. */
+const REMOVE_EXECUTION_TASKS_PAGE_SIZE = 100;
+
+/**
+ * Parked runners only run when woken via `runSoon`; the far-future runAt keeps Task Manager
+ * from claiming them on its own.
+ */
+export const WORKFLOW_PARKED_RUNNER_DELAY_MS = 365 * 24 * 60 * 60 * 1000;
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
@@ -173,6 +189,8 @@ export class WorkflowTaskManager {
 
     await this.taskManager.removeIfExists(taskId);
 
+    const priority = getTaskPriority(workflowExecution.context);
+
     const task = await this.taskManager.schedule(
       {
         id: taskId,
@@ -189,6 +207,7 @@ export class WorkflowTaskManager {
         runAt,
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
+        priority,
       },
       { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
     );
@@ -250,12 +269,16 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    isUserInteractive,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
+    const priority = getTaskPriority({ isUserInteractive });
+
     await this.taskManager.ensureScheduled(
       {
         id: taskId,
@@ -263,6 +286,7 @@ export class WorkflowTaskManager {
         params: { workflowRunId: executionId, spaceId } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
+        priority,
       },
       fakeRequest
         ? { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
@@ -271,15 +295,50 @@ export class WorkflowTaskManager {
     return { taskId };
   }
 
+  /**
+   * Removes the remaining tasks scoped to a terminal execution, releasing their API keys.
+   * Skips active claims, since Task Manager cannot complete a task deleted mid-run; a claim
+   * taken between the read and the removal only loses its completion write. Also skips tasks
+   * awaiting a retry, which still finish the post-execution work of a failed attempt.
+   */
+  async removeTasksForExecution(
+    executionId: string,
+    { exceptTaskId }: { exceptTaskId?: string } = {}
+  ): Promise<void> {
+    const { docs } = await this.taskManager.fetch({
+      size: REMOVE_EXECUTION_TASKS_PAGE_SIZE,
+      query: {
+        bool: {
+          filter: [{ term: { 'task.scope': `workflow:execution:${executionId}` } }],
+          must_not: [{ terms: { 'task.status': [TaskStatus.Running, TaskStatus.Claiming] } }],
+        },
+      },
+    });
+    const candidateIds = docs.map(({ id }) => id).filter((id) => id !== exceptTaskId);
+    if (!candidateIds.length) return;
+
+    // Search results can trail a fresh claim; re-read each candidate before removing it.
+    const removableIds = (await this.taskManager.bulkGet(candidateIds))
+      .flatMap((result) => (result.tag === 'ok' ? [result.value] : []))
+      .filter(({ status, attempts }) => status === TaskStatus.Idle && attempts === 0)
+      .map(({ id }) => id);
+    if (!removableIds.length) return;
+
+    await this.taskManager.bulkRemove(removableIds);
+  }
+
   /** Returns false when a wake-up must be retried after the current runner releases its claim. */
   async tryRunImmediateResume(params: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
     try {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = params.isUserInteractive
+        ? await this.taskManager.runSoon(taskId, { priority: TaskPriority.UserInteractive })
+        : await this.taskManager.runSoon(taskId);
       return !result?.conflict;
     } catch (error) {
       // The task may complete between ensureScheduled and runSoon. Neither a busy
@@ -299,11 +358,15 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
   }): Promise<void> {
     if (await this.tryRunImmediateResume(params)) return;
     await this.ensureWakeTask(params);
     try {
-      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(params.executionId));
+      await this.runSoonWithConflictRetry(
+        getWorkflowWakeTaskId(params.executionId),
+        params.isUserInteractive ? { priority: TaskPriority.UserInteractive } : undefined
+      );
     } catch (error) {
       // A claimed wake task is retained and polls again; it cannot delete this request on success.
       if (!(error instanceof TaskAlreadyRunningError)) throw error;
@@ -372,10 +435,12 @@ export class WorkflowTaskManager {
     }
   }
 
-  private async runSoonWithConflictRetry(taskId: string): Promise<void> {
+  private async runSoonWithConflictRetry(taskId: string, options?: RunSoonOptions): Promise<void> {
     // Re-read after a conflicting update; never report a wake-up that was not accepted.
     for (let attempt = 0; attempt < 3; attempt++) {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = options
+        ? await this.taskManager.runSoon(taskId, options)
+        : await this.taskManager.runSoon(taskId);
       if (!result.conflict) return;
     }
     throw SavedObjectsErrorHelpers.createConflictError(

@@ -17,10 +17,7 @@ import {
   type EntityType,
   type GatedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import {
-  getEuidEsqlEvaluation,
-  getFieldEvaluationsEsqlFromDefinition,
-} from '../../../common/domain/euid/esql';
+import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
@@ -118,10 +115,12 @@ export function buildLogsExtractionEsqlQuery({
 
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
-    const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
-    const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
-      withTypeId: false,
-    });
+    const fieldEvalsEsql = getFieldEvaluationsEsql(entityDefinition);
+    const euidEsql = getEuidEsqlEvaluation(
+      entityDefinition,
+      recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+      { withTypeId: false }
+    );
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 

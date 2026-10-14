@@ -17,12 +17,24 @@ const nightshiftPageTitle = i18n.translate('xpack.nightshift.pageTitle', {
   defaultMessage: 'Nightshift',
 });
 
-const investigationsPageTitle = i18n.translate('xpack.nightshift.investigationsPageTitle', {
-  defaultMessage: 'Investigations',
+const automationsLabel = i18n.translate('xpack.nightshift.automationsLabel', {
+  defaultMessage: 'Automations',
+});
+
+export const SETTINGS_PAGE_TITLE = i18n.translate('xpack.nightshift.settingsPage.title', {
+  defaultMessage: 'Settings',
+});
+
+export const KNOWLEDGE_PAGE_TITLE = i18n.translate('xpack.nightshift.knowledgePage.title', {
+  defaultMessage: 'Knowledge',
 });
 
 const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
   defaultMessage: 'Settings',
+});
+
+const knowledgeLabel = i18n.translate('xpack.nightshift.knowledgeLinkLabel', {
+  defaultMessage: 'Knowledge',
 });
 
 const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
@@ -33,29 +45,13 @@ const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkL
   defaultMessage: 'Sandbox secrets',
 });
 
-const investigationsLabel = i18n.translate('xpack.nightshift.investigationsButtonLabel', {
-  defaultMessage: 'Investigations',
-});
-
-export const nightshiftTabs: AppHeaderTab[] = [
-  {
-    id: 'allInvestigations',
-    'data-test-subj': 'nightshiftTabAllInvestigations',
-    label: i18n.translate('xpack.nightshift.allInvestigationsTab', {
-      defaultMessage: 'All investigations',
-    }),
-  },
-  {
-    id: 'automations',
-    'data-test-subj': 'nightshiftTabAutomations',
-    label: i18n.translate('xpack.nightshift.automations.tabLabel', {
-      defaultMessage: 'Automations',
-    }),
-  },
-];
-
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
+const knowledgeEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_KNOWLEDGE,
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
@@ -79,41 +75,51 @@ const applyEbtProps = (
   });
 };
 
-export function NightshiftAppHeader({
-  onManagementClick,
-  managementHref,
-  onSettingsClick,
-  settingsHref,
-  onSandboxSecretsClick,
-  onAutomationsClick,
-  investigationsHref,
-  tabs,
-  back,
-}: {
+export interface NightshiftAppHeaderProps {
+  page?: 'landing' | 'automations' | 'knowledge' | 'settings';
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
+  onKnowledgeClick?: () => void | Promise<void>;
+  knowledgeHref?: string;
   onSettingsClick?: () => void | Promise<void>;
   settingsHref?: string;
   /** Shows the sandbox secrets menu item when set. */
   onSandboxSecretsClick?: () => void;
   onAutomationsClick?: () => void | Promise<void>;
-  investigationsHref?: string;
+  automationsHref?: string;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
-}): React.ReactElement {
-  const isInvestigationsPage = Boolean(tabs?.length);
+}
+
+export function NightshiftAppHeader({
+  page = 'landing',
+  onManagementClick,
+  managementHref,
+  onKnowledgeClick,
+  knowledgeHref,
+  onSettingsClick,
+  settingsHref,
+  onSandboxSecretsClick,
+  onAutomationsClick,
+  automationsHref,
+  tabs,
+  back,
+}: NightshiftAppHeaderProps): React.ReactElement {
+  const isAutomationsPage = page === 'automations';
+  const isKnowledgePage = page === 'knowledge';
+  const isSettingsPage = page === 'settings';
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
-        ...(onAutomationsClick && investigationsHref && !isInvestigationsPage
+        ...(onAutomationsClick && automationsHref && !isAutomationsPage
           ? [
               {
-                id: 'nightshiftInvestigations',
-                label: investigationsLabel,
-                iconType: 'reporter',
-                href: investigationsHref,
+                id: 'nightshiftAutomations',
+                label: automationsLabel,
+                iconType: 'workflow',
+                href: automationsHref,
                 run: () => void onAutomationsClick(),
-                testId: 'nightshiftInvestigationsPrimaryAction',
+                testId: 'nightshiftAutomationsPrimaryAction',
               },
             ]
           : []),
@@ -141,7 +147,23 @@ export function NightshiftAppHeader({
           testId: 'nightshiftManagementLink',
           overflow: true,
         },
-        ...(onSettingsClick && settingsHref
+        ...(onKnowledgeClick && knowledgeHref && !isKnowledgePage
+          ? [
+              {
+                id: 'nightshiftKnowledge',
+                label: knowledgeLabel,
+                iconType: 'documentation' as const,
+                href: knowledgeHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(knowledgeEbtProps, params);
+                  void onKnowledgeClick();
+                },
+                testId: 'nightshiftKnowledgeLink',
+                overflow: true,
+              },
+            ]
+          : []),
+        ...(onSettingsClick && settingsHref && !isSettingsPage
           ? [
               {
                 id: 'nightshiftSettings',
@@ -153,17 +175,21 @@ export function NightshiftAppHeader({
                   void onSettingsClick();
                 },
                 testId: 'nightshiftSettingsLink',
-                overflow: !isInvestigationsPage,
+                overflow: !isAutomationsPage,
               },
             ]
           : []),
       ],
     }),
     [
-      investigationsHref,
-      isInvestigationsPage,
+      automationsHref,
+      isAutomationsPage,
+      isKnowledgePage,
+      isSettingsPage,
+      knowledgeHref,
       managementHref,
       onAutomationsClick,
+      onKnowledgeClick,
       onManagementClick,
       onSandboxSecretsClick,
       onSettingsClick,
@@ -173,7 +199,15 @@ export function NightshiftAppHeader({
 
   return (
     <AppHeader
-      title={isInvestigationsPage ? investigationsPageTitle : nightshiftPageTitle}
+      title={
+        isAutomationsPage
+          ? automationsLabel
+          : isKnowledgePage
+          ? KNOWLEDGE_PAGE_TITLE
+          : isSettingsPage
+          ? SETTINGS_PAGE_TITLE
+          : nightshiftPageTitle
+      }
       back={back}
       tabs={tabs}
       menu={menu}

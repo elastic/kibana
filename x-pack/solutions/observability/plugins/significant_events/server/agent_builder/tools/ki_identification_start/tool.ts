@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -16,64 +17,83 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
+import {
+  assertSourceEnabled,
+  loadSourceCatalog,
+  resolveSourcesBySlug,
+  toSourceRef,
+} from '../../utils/resolve_source_slugs';
 import { startKiIdentificationToolHandler } from './handler';
+import type { GetScopedClients } from '../../../routes/types';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';
 
-const onboardingStartSchema = z.object({
-  stream_name: z.string().max(MAX_ID_LENGTH).describe('Target stream name, e.g. "logs.ecs.nginx".'),
-  steps: z
-    .array(z.enum(KIsOnboardingStep))
-    .optional()
-    .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
-    .describe('Optional ordered KI identification steps for the background task.'),
-  connectors: z
-    .object({
-      features: z.string().max(MAX_ID_LENGTH).optional(),
-      queries: z.string().max(MAX_ID_LENGTH).optional(),
-    })
-    .optional(),
-});
+const onboardingStartSchema = lazySchema(() =>
+  z.object({
+    slug: nightshiftSourceSlugField('The source must be enabled.'),
+    steps: z
+      .array(z.enum(KIsOnboardingStep))
+      .optional()
+      .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
+      .describe('Optional ordered KI identification steps for the background task.'),
+    connectors: z
+      .object({
+        features: z.string().max(MAX_ID_LENGTH).optional(),
+        queries: z.string().max(MAX_ID_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 
 export const createKiIdentificationStartTool = ({
+  server,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
+  getScopedClients,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
+  getScopedClients: GetScopedClients;
 }): BuiltinSkillBoundedTool<typeof onboardingStartSchema> => ({
   id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Start stream Knowledge Indicator (KI) identification as a background task.
+    Start Knowledge Indicator (KI) identification for a Nightshift source as a background task.
 
     This tool schedules the KI identification background task and returns immediately with a
-    Kibana path to the Significant Events knowledge indicators view where progress can be tracked.
+    Kibana path to the significant events knowledge indicators view where progress can be tracked.
 
     Use this tool to:
-    - Kick off KI identification for a stream
+    - Kick off KI identification for an enabled source
     - Run feature identification and query generation steps in a background task
-    - Get a direct Kibana path to track background task progress in the Significant Events UI
+    - Get a direct Kibana path to track background task progress in the significant events UI
 
     Returns:
-    - On success: \`{ kibanaPath: "${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?stream=<stream>" }\`
-    - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
+    - On success: \`{ slug, title, view_name, kibanaPath: "${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?source=<source id>" }\`
+    - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,
-  handler: async ({ stream_name: streamName, steps, connectors }, { request }) => {
+  handler: async ({ slug, steps, connectors }, { request }) => {
+    let sourceId = '';
     try {
-      const resolvedSteps = steps ?? [
-        KIsOnboardingStep.FeaturesIdentification,
-        KIsOnboardingStep.QueriesGeneration,
-      ];
+      await assertCanManageSignificantEvents({ request, server });
+      const scopedClients = await getScopedClients({ request });
+      const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
+      const [source] = resolveSourcesBySlug(catalog, [slug]);
+      assertSourceEnabled(source);
+      sourceId = source.id;
 
       const data = await startKiIdentificationToolHandler({
-        streamName,
-        steps: resolvedSteps,
+        sourceId: source.id,
+        sourceSlug: source.slug,
+        steps,
         connectors,
         streamsKIsOnboardingClient,
         maintenanceService,
@@ -82,14 +102,14 @@ export const createKiIdentificationStartTool = ({
 
       telemetry.trackAgentToolKiIdentificationStarted({
         success: true,
-        stream_name: streamName,
+        source_id: source.id,
       });
 
       return {
         results: [
           {
             type: ToolResultType.other,
-            data,
+            data: { ...toSourceRef(source), ...data },
           },
         ],
       };
@@ -98,7 +118,7 @@ export const createKiIdentificationStartTool = ({
 
       telemetry.trackAgentToolKiIdentificationStarted({
         success: false,
-        stream_name: streamName,
+        source_id: sourceId,
         error_message: message,
       });
 
@@ -107,8 +127,8 @@ export const createKiIdentificationStartTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to start KI identification background task for "${streamName}": ${message}`,
-              stream: streamName,
+              message: `Failed to start KI identification background task for "${slug}": ${message}`,
+              slug,
               operation: 'ki_identification_start',
               likely_cause: classifyError(err),
             },

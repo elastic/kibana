@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
 import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import {
@@ -176,21 +177,24 @@ describe('investigation impact routes', () => {
       type: 'investigation_impact',
       origin: 'impact-1',
       data: impact,
+      hidden: true,
     });
     expect(attach.mock.invocationCallOrder[0]).toBeLessThan(create.mock.invocationCallOrder[0]);
     expect(response.ok).toHaveBeenCalledWith({ body: impact });
   });
 
-  it('does not write impact when the caller cannot update the conversation', async () => {
+  it('does not write impact when the caller cannot converse with the conversation', async () => {
     const attach = jest.fn();
+    // `conversations.get` itself enforces `converse` access and fails closed as not-found;
+    // the write path relies on that instead of a separate permission check.
     const { posts } = registerAndCollect(
       { attach },
       async () => ({ create: jest.fn() } as never),
       async () =>
         ({
-          get: jest.fn().mockResolvedValue({
-            permissions: { update_access_control: false },
-          }),
+          get: jest
+            .fn()
+            .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' })),
         } as never)
     );
     const response = httpServerMock.createResponseFactory();

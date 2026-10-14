@@ -15,6 +15,7 @@ import { ProcessResult } from './components/process_result';
 import { RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 import type {
   ActionDetails,
   KillProcessActionOutputContent,
@@ -36,6 +37,10 @@ export interface KillSuspendProcessActionResultProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
+ * @deprecated
+ */
 export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResultProps>(
   ({ action: _action, agentId: _agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const action = _action as ActionDetails<
@@ -48,16 +53,10 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
     const command = action.command;
     const hostActionOutput = action.outputs?.[agentId]?.content;
 
-    const { wasSuccessful, isCompleted } = useMemo(() => {
-      return (
-        action.agentState[agentId] ?? {
-          wasSuccessful: action.wasSuccessful,
-          isCompleted: action.isCompleted,
-          completedAt: action.completedAt,
-          wasCanceled: action.wasCanceled,
-        }
-      );
-    }, [action, agentId]);
+    const { wasSuccessful, isCompleted } = useMemo(
+      () => getAgentActionState(action, agentId),
+      [action, agentId]
+    );
 
     if (command !== 'kill-process' && command !== 'suspend-process') {
       window.console.warn(
@@ -96,7 +95,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
               </div>
             ) : (
               <>
-                {hostActionOutput ? (
+                {hostActionOutput && command === 'kill-process' ? (
                   <>
                     <EuiSpacer size="s" />
                     <ProcessResult command={command} processResult={hostActionOutput} />

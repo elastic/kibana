@@ -30,7 +30,12 @@ import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_ov
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import type { DashboardRedirect } from '../types';
-import { coreServices, shareService, dataService } from '../../services/kibana_services';
+import {
+  coreServices,
+  shareService,
+  dataService,
+  searchSessionsManagementService,
+} from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
@@ -305,7 +310,7 @@ export const useDashboardMenuItems = ({
         iconType: 'backgroundTask',
         testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
-          dataService.search.showSearchSessionsFlyout({
+          searchSessionsManagementService?.openFlyout({
             appId: appId!,
             trackingProps: { openedFrom: 'background search button' },
           }),
@@ -458,7 +463,11 @@ export const useDashboardMenuItems = ({
       items.push(resetChangesMenuItem);
     }
 
-    if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
+    if (
+      storeSearchSession &&
+      searchSessionsManagementService &&
+      dataService.search.isBackgroundSearchEnabled
+    ) {
       items.push(menuItems.backgroundSearch);
     }
 
@@ -506,7 +515,11 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.export);
     }
 
-    if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
+    if (
+      storeSearchSession &&
+      searchSessionsManagementService &&
+      dataService.search.isBackgroundSearchEnabled
+    ) {
       items.push(menuItems.backgroundSearch);
     }
 

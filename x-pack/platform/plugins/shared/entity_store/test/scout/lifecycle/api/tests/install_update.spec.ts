@@ -82,18 +82,6 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     }
   );
 
-  apiTest('Should fail with feature flag disabled', async ({ apiClient, kbnClient }) => {
-    await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: false });
-    await kbnClient.uiSettings.waitForEventualCacheRefresh();
-
-    const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(install.statusCode).toBe(403);
-  });
-
   apiTest('logExtraction is not mandatory on install', async ({ apiClient }) => {
     const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,

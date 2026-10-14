@@ -11,12 +11,18 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { IMPACT_INDEX_NAME } from '../../../common/impact/constants';
 import type { Impact } from '../../../common/impact/impact';
 
-const storageSettings = {
+/**
+ * Mapping changes must stay additive: the adapter applies them in place with `putMapping`.
+ * Evidence is stored but not indexed (`enabled: false`); nothing filters on chart points.
+ */
+export const impactStorageSettings = {
   name: IMPACT_INDEX_NAME,
   schema: {
     properties: {
       spaceId: types.keyword({}),
       conversationId: types.keyword({}),
+      summary: types.text({}),
+      evidence: types.object({ enabled: false }),
       // Nested so a filter can match `entities.id` or `entities.featureId` without
       // scanning a flattened blob. Pill filtering stays client-side for the MVP.
       entities: types.nested({
@@ -26,9 +32,11 @@ const storageSettings = {
           type: types.keyword({}),
           featureId: types.keyword({}),
           streamName: types.keyword({}),
+          evidence: types.object({ enabled: false }),
         },
       }),
       createdAt: types.date({}),
+      updatedAt: types.date({}),
       createdBy: types.object({
         properties: {
           username: types.keyword({}),
@@ -41,7 +49,7 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export type ImpactStorageSettings = typeof storageSettings;
+export type ImpactStorageSettings = typeof impactStorageSettings;
 
 /** Stored shape: the id lives in `_id`, everything else in `_source`. */
 export type ImpactDocument = Omit<Impact, 'id'>;
@@ -58,7 +66,7 @@ export const createImpactStorageClient = ({
   const adapter = new StorageIndexAdapter<ImpactStorageSettings, ImpactDocument>(
     esClient,
     logger,
-    storageSettings
+    impactStorageSettings
   );
   return adapter.getClient();
 };

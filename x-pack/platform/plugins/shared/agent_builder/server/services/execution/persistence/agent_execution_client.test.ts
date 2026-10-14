@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
+import { EventActorType, AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 
 const mockStorageClient = {
   index: jest.fn(),
@@ -44,12 +44,27 @@ describe('AgentExecutionClient', () => {
       await client.create(createParams);
 
       expect(mockStorageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'exec-1', op_type: 'create' })
+        expect.objectContaining({ id: 'exec-1', op_type: 'create', refresh: false })
       );
     });
 
     it('stores the owner on the document and returns it', async () => {
       const owner = { id: 'profile-alice', username: 'alice' };
+
+      const execution = await client.create({ ...createParams, owner });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ owner }) })
+      );
+      expect(execution.owner).toEqual(owner);
+    });
+
+    it('stores a service account owner with its principal type', async () => {
+      const owner = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
 
       const execution = await client.create({ ...createParams, owner });
 
@@ -116,7 +131,10 @@ describe('AgentExecutionClient', () => {
     });
 
     it('records the abort reason when given', async () => {
-      const abortReason = { source: 'api' as const, actor: { id: 'u1', username: 'alice' } };
+      const abortReason = {
+        source: 'api' as const,
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      };
       await statusClient.updateStatus('exec-1', ExecutionStatus.aborted, { abortReason });
 
       const [request] = esClient.update.mock.calls[0];
