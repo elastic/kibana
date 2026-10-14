@@ -6,8 +6,8 @@
  */
 
 /**
- * The system flyout and the in-chat flyout. They live on different pages and share a flyout
- * history key, so at most one of them is on the document.
+ * The snapshot system flyout and the live panel have different entry points, so normally
+ * only one is mounted.
  */
 const CONVERSATION_FLYOUT_TEST_SUBJECTS = [
   'agentBuilderConversationDetailsFlyout-snapshot',

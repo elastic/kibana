@@ -60,29 +60,29 @@ export const useOpenFlyout = (): OpenFlyout => {
   const {
     session: mainSession,
     historyKey,
-    type: ambientType,
-    size: ambientSize,
+    type: mainType,
+    size: mainSize,
   } = useFlyoutSessionContext();
 
   return useCallback(
     (children, properties, meta, sessionOverride, options) => {
       const session = sessionOverride ?? mainSession;
       // Seed the flyout's push/overlay mode from the persisted preference (read
-      // fresh at open time), unless the caller or the ambient session pinned a `type`. The
+      // fresh at open time), unless the caller or the main session pinned a `type`. The
       // core system flyout keeps this reactive, so the settings menu can switch
       // it live afterwards.
-      const type = properties.type ?? ambientType ?? getStoredFlyoutType(storage);
+      const type = properties.type ?? mainType ?? getStoredFlyoutType(storage);
 
       // Child flyouts are always overlays and don't own a persisted width, so the settings menu
       // (push/overlay toggle + reset size) is inert for them — the header hides the gear entirely.
-      // A numeric ambient size is also ignored here: EUI throws on a numeric size for
+      // A numeric main session size is also ignored here: EUI throws on a numeric size for
       // `session: 'inherit'`.
       const isChildFlyout = properties.session === 'inherit';
       // A size pinned on the session replaces the persisted Security width for this open.
       // `defaultSize` is that same width so Reset size can return to it. `onResize` is omitted
       // so a resize here does not overwrite the user's saved Security width. The pin is not
       // copied onto the flyout this opens, same as `type`.
-      const pinnedSize = !isChildFlyout ? ambientSize : undefined;
+      const pinnedSize = !isChildFlyout ? mainSize : undefined;
 
       // Persist/restore the user-resized width for main flyouts (document/entity/…) only.
       // Tool flyouts (surface === TOOL) are skipped: they can open side-by-side with a document,
@@ -131,6 +131,6 @@ export const useOpenFlyout = (): OpenFlyout => {
 
       return ref;
     },
-    [overlays, storage, services, store, history, mainSession, historyKey, ambientType, ambientSize]
+    [overlays, storage, services, store, history, mainSession, historyKey, mainType, mainSize]
   );
 };
