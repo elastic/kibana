@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, targetAttributes } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import { computeTestID } from '@kbn/scout-reporting';
@@ -19,7 +19,6 @@ import {
   ScoutReportEventAction,
   type ScoutTestRunInfo,
   generateTestRunId,
-  buildScoutTargetInfo,
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
@@ -30,6 +29,7 @@ import {
 } from '@kbn/code-owners';
 import type { Runner, Test } from '../../../fake_mocha_types';
 import type { Config as FTRConfig } from '../../config';
+import { getScoutTestTarget } from './scout_test_target';
 
 /**
  * Configuration options for the Scout Mocha reporter
@@ -69,7 +69,7 @@ export class ScoutFTRReporter {
 
     this.baseTestRunInfo = {
       id: this.runId,
-      target: buildScoutTargetInfo(),
+      target: { ...getScoutTestTarget(config), attributes: targetAttributes.current() },
       config: {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),
         category: config.get('testConfigCategory'),
