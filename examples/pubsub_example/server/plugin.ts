@@ -18,12 +18,12 @@ import type {
 import { defineTopic } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 
-interface PingPayload {
+interface PingData {
   source: 'http' | 'timer';
   message: string;
 }
 
-const pingTopic = defineTopic<PingPayload>('pubsubExample.ping');
+const pingTopic = defineTopic<PingData>('pubsubExample.ping');
 const TIMER_INTERVAL_MS = 30_000;
 
 export class PubSubExamplePlugin implements Plugin {
@@ -36,12 +36,12 @@ export class PubSubExamplePlugin implements Plugin {
 
   public setup(core: CoreSetup) {
     core.pubsub.registerTopic(pingTopic);
-    core.pubsub.subscribe(pingTopic, 'echo', ['default'], (event, context) => {
+    core.pubsub.subscribe(pingTopic, 'echo', (event, context) => {
       const requestId = context.request?.id ?? 'none';
-      this.logger.info(`echo ${event.id} ${event.payload.message} request ${requestId}`);
+      this.logger.info(`echo ${event.id} ${event.data.message} request ${requestId}`);
     });
-    core.pubsub.subscribe(pingTopic, 'length', ['*'], (event) => {
-      this.logger.info(`length ${event.id} ${event.payload.message.length}`);
+    core.pubsub.subscribe(pingTopic, 'length', (event) => {
+      this.logger.info(`length ${event.id} ${event.data.message.length}`);
     });
 
     const router = core.http.createRouter();
@@ -73,10 +73,7 @@ export class PubSubExamplePlugin implements Plugin {
           const [start] = await core.getStartServices();
           const event = await start.pubsub.publish(
             pingTopic,
-            {
-              namespaces: ['default'],
-              payload: { source: 'http', message: request.body.message },
-            },
+            { data: { source: 'http', message: request.body.message } },
             { request }
           );
 
@@ -88,10 +85,7 @@ export class PubSubExamplePlugin implements Plugin {
   public start(core: CoreStart) {
     this.timer = setInterval(() => {
       void core.pubsub
-        .publish(pingTopic, {
-          namespaces: ['default'],
-          payload: { source: 'timer', message: 'tick' },
-        })
+        .publish(pingTopic, { data: { source: 'timer', message: 'tick' } })
         .catch((error: unknown) => {
           const detail = error instanceof Error ? error.message : 'unknown failure';
           this.logger.warn(`timer publish failed: ${detail}`);
