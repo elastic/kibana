@@ -112,6 +112,7 @@ steps:
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
+    key: osquery-cypress-stateful
     depends_on: build
     retry:
       automatic:
@@ -128,6 +129,7 @@ steps:
       preemptible: true
     timeout_in_minutes: 60
     parallelism: 8
+    key: osquery-cypress-serverless
     depends_on: build
     retry:
       automatic:
@@ -149,6 +151,9 @@ steps:
       - jest-integration
       - defend-workflows-stateful
       - defend-workflows-serverless
+      - osquery-cypress-stateful
+      - osquery-cypress-serverless
+      - scout_test_lanes
     if: "build.branch == 'main'"
     retry:
       automatic:
