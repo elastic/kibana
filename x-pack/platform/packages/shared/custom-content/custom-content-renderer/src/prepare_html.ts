@@ -137,11 +137,20 @@ const KEPT_ANCHOR_ATTRIBUTES = new Set([
   'aria-label',
 ]);
 
+// On elements that do not navigate, a same-document reference (href="#id") loads nothing, and SVG
+// needs it for gradients, text paths and the like. Links never keep one, because a click navigates.
 const LINK_ATTRIBUTES = ['href', 'xlink:href'];
 
 const hardenLinks = (node: Element, basePath: LinkBasePath, linksEnabled: boolean) => {
-  if (node.localName !== 'a' || node.namespaceURI !== HTML_NAMESPACE) {
+  if (node.localName === 'a' && node.namespaceURI !== HTML_NAMESPACE) {
     LINK_ATTRIBUTES.forEach((name) => node.removeAttribute(name));
+    return;
+  }
+
+  if (node.localName !== 'a') {
+    LINK_ATTRIBUTES.forEach((name) => {
+      if (!node.getAttribute(name)?.startsWith('#')) node.removeAttribute(name);
+    });
     return;
   }
 

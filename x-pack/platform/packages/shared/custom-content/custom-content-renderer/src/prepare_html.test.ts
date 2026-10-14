@@ -228,6 +228,32 @@ describe('sanitizeHtml', () => {
       expect(html).not.toContain('example.com');
     });
 
+    it('keeps same-document references on SVG elements', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="arc" d="M0 0"/><linearGradient id="base"/><linearGradient id="derived" href="#base"/></defs><text><textPath href="#arc">x</textPath></text><rect fill="url(#derived)" xlink:href="#base"/></svg>'
+      );
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      expect(doc.querySelector('textPath')?.getAttribute('href')).toBe('#arc');
+      expect(doc.querySelector('#derived')?.getAttribute('href')).toBe('#base');
+      expect(html).toContain('#base');
+    });
+
+    it('strips even a same-document href from an SVG link, since a click navigates', () => {
+      const html = sanitizeHtml(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><a href="#x"><text>x</text></a><a xlink:href="#y"><text>y</text></a></svg>'
+      );
+      expect(html).not.toContain('#x');
+      expect(html).not.toContain('#y');
+    });
+
+    it('strips an external reference from an SVG element that also has fragment references', () => {
+      const html = sanitizeHtml(
+        '<svg><linearGradient id="g" href="https://example.com/x.svg#base"/><text><textPath href="/app/dashboards#a">x</textPath></text></svg>'
+      );
+      expect(html).not.toContain('example.com');
+      expect(html).not.toContain('/app/dashboards');
+    });
+
     it('strips href and xlink:href from every element that is not an HTML link', () => {
       const html = sanitizeHtml(
         '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><use href="/app/dashboards"/><image xlink:href="/app/dashboards"/></svg><div href="/app/dashboards">x</div>'
