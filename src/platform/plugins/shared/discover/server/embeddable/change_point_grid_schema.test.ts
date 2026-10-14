@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { ESQLVariableType } from '@kbn/esql-types';
+import { changePointGridEmbeddableSchema } from './change_point_grid_schema';
+
+const validState = {
+  esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp',
+  apply_dashboard_context: true,
+};
+
+describe('changePointGridEmbeddableSchema', () => {
+  it('accepts a following panel and a static panel', () => {
+    expect(changePointGridEmbeddableSchema.safeParse(validState).success).toBe(true);
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        apply_dashboard_context: false,
+        static_context: {
+          time_range: { from: '2020-01-01T00:00:00.000Z', to: '2020-01-02T00:00:00.000Z' },
+          query: { expression: 'status:active', language: 'kql' },
+          esql_variables: [{ key: 'service', value: 'orders', type: ESQLVariableType.VALUES }],
+        },
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects an oversized query and unknown fields', () => {
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        esql: 'x'.repeat(10_001),
+      }).success
+    ).toBe(false);
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        series: [],
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a static panel without context and an oversized static context', () => {
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        apply_dashboard_context: false,
+      }).success
+    ).toBe(false);
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        apply_dashboard_context: false,
+        static_context: {
+          time_range: { from: 'x'.repeat(129), to: 'now' },
+        },
+      }).success
+    ).toBe(false);
+  });
+});

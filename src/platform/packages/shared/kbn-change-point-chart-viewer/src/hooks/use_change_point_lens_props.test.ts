@@ -55,15 +55,25 @@ const absoluteTimeRangeStub: TimeRange = {
   to: '2024-01-31T23:59:59.000Z',
 };
 
+const layerQuery = { esql: 'FROM logs | CHANGE_POINT metric' };
 const attributesStub = {
   title: 'test chart',
   visualizationType: 'lnsXY',
-  state: { query: { esql: 'FROM logs' }, filters: [], datasourceStates: {}, visualization: {} },
+  state: {
+    query: { language: 'kuery', query: '' },
+    filters: [],
+    datasourceStates: {
+      textBased: {
+        layers: { layer1: { query: layerQuery, columns: [] } },
+      },
+    },
+    visualization: {},
+  },
   references: [],
 } as unknown as LensAttributes;
 
-// chartLayers must be non-empty to pass the early-return guard inside buildAttributesFn.
-const sampleLayers = [{ type: 'series' }] as HookProps['chartLayers'];
+// layers must be non-empty to pass the early-return guard inside buildAttributesFn.
+const sampleChartLayers = [{ type: 'series' }] as HookProps['chartLayers'];
 
 // ---- helpers ----
 
@@ -90,7 +100,7 @@ const makeDefaultProps = (overrides: Partial<HookProps> = {}): HookProps => ({
   lensInstanceId: 'lens-1',
   title: 'My chart',
   query: 'FROM logs | CHANGE_POINT metric',
-  chartLayers: sampleLayers,
+  chartLayers: sampleChartLayers,
   fetchParams: makeFetchParams(),
   services: {} as HookProps['services'],
   discoverFetch$: makeDiscoverFetch$(),
@@ -199,6 +209,32 @@ describe('useChangePointLensProps', () => {
     expect(result.current.lensProps?.attributes.description).toBe('host: web-01');
   });
 
+  it('forwards the dashboard query and filters without changing the built attributes', async () => {
+    const searchContext = {
+      filters: [{ meta: { key: 'status' } }],
+      query: { query: 'host.name: "host-1"', language: 'kuery' },
+    } as NonNullable<HookProps['searchContext']>;
+    const props = makeDefaultProps({ searchContext });
+    const { result } = renderHook(() => useChangePointLensProps(props));
+
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
+    expect(result.current.lensProps?.filters).toBe(searchContext.filters);
+    expect(result.current.lensProps?.query).toBe(searchContext.query);
+    expect(result.current.lensProps?.attributes.state.query).toEqual({
+      language: 'kuery',
+      query: '',
+    });
+    expect(result.current.lensProps?.attributes.state.datasourceStates).toEqual(
+      attributesStub.state.datasourceStates
+    );
+    expect(mockBuild).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fittingFunction: 'Linear',
+        areaFill: 'solid',
+      })
+    );
+  });
+
   it('does not set attributes.description when no description is provided', async () => {
     // Guards the `if (description) { result.description = description }` branch in
     // buildAttributesFn. Without this test, removing the `if` guard and always assigning
@@ -261,8 +297,8 @@ describe('useChangePointLensProps', () => {
     await waitFor(() => expect(mockBuild.mock.calls.length).toBeGreaterThan(buildCallsAfterMount));
   });
 
-  it('rebuilds when a card config prop changes (query)', async () => {
-    // Guards the useEffect(() => chartConfigUpdates$.current.next(), [query, title, ...]) trigger.
+  it('rebuilds when the chart query changes', async () => {
+    // Guards the useEffect that emits on chartConfigUpdates$ when the query changes.
     // If that effect were removed, the initial BehaviorSubject emission would still cause one
     // build on mount, but subsequent prop changes would silently stop triggering rebuilds.
     let query = 'FROM logs | CHANGE_POINT metric';
@@ -273,7 +309,6 @@ describe('useChangePointLensProps', () => {
     await waitFor(() => expect(result.current.lensProps).toBeDefined());
     const buildCallsAfterMount = mockBuild.mock.calls.length;
 
-    // Change the query prop and re-render — chartConfigUpdates$ should emit, triggering a rebuild.
     query = 'FROM metrics | CHANGE_POINT value';
     rerender();
 

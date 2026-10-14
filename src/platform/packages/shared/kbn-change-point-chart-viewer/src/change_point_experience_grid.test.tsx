@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import {
   KibanaErrorBoundaryProvider,
   KibanaSectionErrorBoundary,
@@ -21,7 +21,33 @@ jest.mock('@elastic/apm-rum');
 
 jest.mock('@kbn/unified-histogram', () => ({
   // Render children directly so we can test the grid content in isolation.
-  ChartSectionTemplate: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  ChartSectionTemplate: ({
+    children,
+    toolbar,
+  }: {
+    children?: React.ReactNode;
+    toolbar?: {
+      rightSide?: Array<{
+        label: string;
+        onClick: () => void;
+        'data-test-subj'?: string;
+      }>;
+    };
+  }) => (
+    <>
+      {toolbar?.rightSide?.map((button) => (
+        <button
+          key={button['data-test-subj']}
+          type="button"
+          data-test-subj={button['data-test-subj']}
+          onClick={button.onClick}
+        >
+          {button.label}
+        </button>
+      ))}
+      {children}
+    </>
+  ),
 }));
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -185,6 +211,55 @@ describe('ChangePointExperienceGrid UI states', () => {
     // EuiSkeletonText renders multiple lines; at least one should be present.
     const skeleton = document.querySelector('.euiSkeletonText');
     expect(skeleton).not.toBeNull();
+  });
+
+  it('does not show add to dashboard without the action', () => {
+    buildChangePointCards().mockReturnValue([{ id: 'card-1', title: 'Series 1' }]);
+    getChangePointSeriesColumns().mockReturnValue({
+      valueColumn: 'count',
+      timeColumn: '@timestamp',
+    });
+    render(
+      <ChangePointExperienceGrid
+        {...minimalProps}
+        fetchParams={fetchParamsWithRows}
+        isChartLoading={false}
+      />
+    );
+    expect(screen.queryByTestId('changePointAddPageToDashboard')).not.toBeInTheDocument();
+  });
+
+  it('sends the ES|QL query when adding the panel', () => {
+    const cards = Array.from({ length: 9 }, (_, index) => ({
+      id: `card-${index}`,
+      title: `Series ${index}`,
+      lineEsql: `FROM logs | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour) | WHERE id == ${index}`,
+      annotationEvents: [],
+      entityValues: { id: String(index) },
+      entityDescription: `id: ${index}`,
+    }));
+    buildChangePointCards().mockReturnValue(cards);
+    getChangePointSeriesColumns().mockReturnValue({
+      valueColumn: 'count',
+      timeColumn: '@timestamp',
+    });
+    const addPageToDashboard = jest.fn();
+    render(
+      <ChangePointExperienceGrid
+        {...minimalProps}
+        actions={{ addPageToDashboard }}
+        fetchParams={fetchParamsWithRows}
+        isChartLoading={false}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('changePointAddPageToDashboard'));
+
+    expect(addPageToDashboard).toHaveBeenCalledTimes(1);
+    const [page] = addPageToDashboard.mock.calls[0];
+    expect(page).toEqual({
+      esql: 'esql' in fetchParamsWithRows.query ? fetchParamsWithRows.query.esql : undefined,
+    });
   });
 
   it('renders grid content when table has rows and cards are available', () => {
