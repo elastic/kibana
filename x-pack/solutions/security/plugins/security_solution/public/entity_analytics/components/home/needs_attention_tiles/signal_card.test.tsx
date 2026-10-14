@@ -133,6 +133,44 @@ describe('SignalCard', () => {
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toBeInTheDocument();
   });
 
+  describe('accessible name', () => {
+    const tile = () => screen.getByTestId('eaFaceliftSignalCard-newEntity');
+
+    it('is the title alone when the tile shows no delta', () => {
+      renderCard({ delta: undefined });
+      expect(tile()).toHaveAttribute('aria-label', 'New entity');
+    });
+
+    it('adds the change when the tile shows a delta', () => {
+      const up = renderCard({ delta: 1234 });
+      expect(tile()).toHaveAttribute(
+        'aria-label',
+        'New entity. Up 1,234 compared with the previous period'
+      );
+      up.unmount();
+
+      renderCard({ delta: -3 });
+      expect(tile()).toHaveAttribute(
+        'aria-label',
+        'New entity. Down 3 compared with the previous period'
+      );
+    });
+
+    it('adds that the history is too short when the tile says so', () => {
+      renderCard({ isDeltaUnavailable: true });
+      expect(tile()).toHaveAttribute('aria-label', 'New entity. Not enough history to compare');
+    });
+
+    it('stays the title alone while the delta loads or at a zero count', () => {
+      const loading = renderCard({ isDeltaLoading: true, delta: 5 });
+      expect(tile()).toHaveAttribute('aria-label', 'New entity');
+      loading.unmount();
+
+      renderCard({ value: 0, delta: 5 });
+      expect(tile()).toHaveAttribute('aria-label', 'New entity');
+    });
+  });
+
   it('draws the sparkline from the series values', () => {
     renderCard({ trend: [3, 5, 4] });
     expect(mockSeriesData).toEqual([

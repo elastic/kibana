@@ -101,6 +101,24 @@ const getTrendReversedBadgeColors = (
 /** Delta text with a thousands separator like the main number, e.g. `+3` or `+1,627`. */
 const formatDelta = (delta: number): string => `${delta > 0 ? '+' : ''}${delta.toLocaleString()}`;
 
+/** What the delta row says, for a screen reader: the signed change, or that the history is too short. */
+const getDeltaDescription = (
+  shownDelta: number | undefined,
+  showNoHistory: boolean
+): string | undefined => {
+  if (shownDelta === undefined) return showNoHistory ? notEnoughHistory : undefined;
+  const amount = Math.abs(shownDelta).toLocaleString();
+  return shownDelta > 0
+    ? i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.ariaLabelUp', {
+        defaultMessage: 'Up {amount} compared with the previous period',
+        values: { amount },
+      })
+    : i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.ariaLabelDown', {
+        defaultMessage: 'Down {amount} compared with the previous period',
+        values: { amount },
+      });
+};
+
 const DeltaLabel: React.FC<{ text?: string; testSubj?: string }> = ({
   text = vsPreviousPeriod,
   testSubj = 'eaFaceliftSignalCardDeltaLabel',
@@ -390,6 +408,9 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
     !card.isDeltaLoading &&
     shownDelta === undefined;
 
+  const deltaDescription = getDeltaDescription(shownDelta, showNoHistory);
+  const ariaLabel = deltaDescription ? `${card.title}. ${deltaDescription}` : card.title;
+
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       if (!interactive) {
@@ -409,7 +430,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
       tabIndex={interactive ? 0 : -1}
       aria-pressed={interactive ? selected : undefined}
       aria-disabled={!interactive || undefined}
-      aria-label={card.title}
+      aria-label={ariaLabel}
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
       onClick={interactive ? onToggle : undefined}
       onKeyDown={onKeyDown}
