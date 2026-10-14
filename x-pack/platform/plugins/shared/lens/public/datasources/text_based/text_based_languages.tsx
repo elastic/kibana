@@ -8,6 +8,7 @@
 import {
   LENS_DATASOURCE_ID,
   LENS_METRIC_GROUP_ID,
+  ofNameStaticValue,
   buildTrendlineBucketExpression,
   buildTrendlineQueryWithMetricFieldMap,
 } from '@kbn/lens-common';
@@ -799,8 +800,12 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
+          const defaultLabel =
+            column.valueSource?.type === 'static'
+              ? ofNameStaticValue(column.valueSource.value)
+              : column.fieldName;
           columnLabelMap[column.columnId] = uniqueLabelGenerator(
-            column.customLabel ? column.label ?? column.fieldName : column.fieldName
+            column.customLabel ? column.label ?? defaultLabel : defaultLabel
           );
         });
       });

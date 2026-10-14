@@ -113,11 +113,13 @@ export class LensLayers {
     const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${layerIndex}`);
     await splitButton.waitFor({ state: 'visible' });
     await splitButton.click();
+    await this.page.testSubj.locator('lnsLayerActionsMenu').waitFor({ state: 'visible' });
   }
 
   /** Closes the open layer-actions popover. */
-  async closeLayerActions() {
-    await this.page.keyboard.press('Escape');
+  async closeLayerActions(layerIndex = 0) {
+    await this.page.testSubj.click(`lnsLayerSplitButton--${layerIndex}`);
+    await this.page.testSubj.locator('lnsLayerActionsMenu').waitFor({ state: 'hidden' });
   }
 
   /**

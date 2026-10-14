@@ -34,9 +34,12 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
 
   const layer = state.layers[target.layerId];
   const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
-  const sourceField = allColumns.find((f) => f.columnId === source.id || f.variable === source.id);
-  const targetField = allColumns.find((f) => f.columnId === target.columnId);
+  const sourceField = isOperation(source)
+    ? state.layers[source.layerId]?.columns.find((column) => column.columnId === source.columnId)
+    : allColumns.find((column) => column.columnId === source.id || column.variable === source.id);
+  const targetField = layer.columns.find((column) => column.columnId === target.columnId);
   const newColumn = {
+    ...sourceField,
     columnId: target.columnId,
     fieldName: sourceField?.variable ? `??${sourceField.variable}` : sourceField?.fieldName ?? '',
     meta: sourceField?.meta,
@@ -64,6 +67,7 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
           ? newColumn
           : c.columnId === source.columnId
           ? {
+              ...targetField,
               columnId: source.columnId,
               fieldName: targetField?.fieldName ?? '',
               meta: targetField?.meta,

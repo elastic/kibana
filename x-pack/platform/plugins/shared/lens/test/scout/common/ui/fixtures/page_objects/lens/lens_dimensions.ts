@@ -47,6 +47,8 @@ export class LensDimensions {
   readonly quickFunctionsTab;
   readonly formulaTab;
   readonly staticValueTab;
+  readonly esqlTab;
+  readonly textBasedField;
   /** Number input only — EuiRange also stamps the same test-subj on the slider. */
   readonly formatDecimalsInput;
   readonly dimensionColorPicker;
@@ -59,6 +61,8 @@ export class LensDimensions {
     this.quickFunctionsTab = this.page.testSubj.locator('lens-dimensionTabs-quickFunctions');
     this.formulaTab = this.page.testSubj.locator('lens-dimensionTabs-formula');
     this.staticValueTab = this.page.testSubj.locator('lens-dimensionTabs-static_value');
+    this.esqlTab = this.page.testSubj.locator('lens-dimensionTabs-esql');
+    this.textBasedField = this.page.testSubj.locator('text-based-dimension-field');
     this.formatDecimalsInput = this.page.locator(
       'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
     );
@@ -305,6 +309,34 @@ export class LensDimensions {
     await this.page.testSubj.click('lens-dimensionTabs-quickFunctions');
   }
 
+  /** Switches the open reference-line dimension to a query output. */
+  async switchToEsql() {
+    await this.esqlTab.click();
+    await this.textBasedField.waitFor({ state: 'visible' });
+  }
+
+  /** Selects a query output without closing the dimension editor. */
+  async selectTextBasedDimensionField(field: string) {
+    await this.textBasedDimensionFieldCombo.setSelectedOptions([field]);
+  }
+
+  /** Reads the selected query outputs in the open dimension editor. */
+  async getSelectedTextBasedDimensionFields(): Promise<string[]> {
+    return this.textBasedDimensionFieldCombo.getSelectedOptions();
+  }
+
+  /** Opens the query-output picker for option assertions. */
+  async openTextBasedDimensionFieldOptions() {
+    await this.textBasedField.locator('[data-test-subj="comboBoxSearchInput"]').click();
+  }
+
+  /** Hovers a query-output dimension to reveal its validation tooltip. */
+  async hoverTextBasedDimensionTrigger(dimension: string, layerIndex = 0) {
+    await this.page.testSubj
+      .locator(`lns-layerPanel-${layerIndex} > ${dimension} > lns-dimensionTrigger-textBased`)
+      .hover();
+  }
+
   async switchToStaticValue() {
     await this.page.testSubj.click('lens-dimensionTabs-static_value');
   }
@@ -371,10 +403,17 @@ export class LensDimensions {
   }
 
   /** Changes the axis side of the currently open dimension editor. */
-  async changeAxisSide(newSide: 'left' | 'right' | 'auto') {
+  async changeAxisSide(
+    newSide: 'left' | 'right' | 'auto',
+    { inline = false }: { inline?: boolean } = {}
+  ) {
     const chartTestSubj = 'xyVisChart';
-    await this.deps.waitForVisualization(chartTestSubj);
-    const renderCountBeforeChange = await this.deps.getVisualizationRenderCount(chartTestSubj);
+    if (!inline) {
+      await this.deps.waitForVisualization(chartTestSubj);
+    }
+    const renderCountBeforeChange = inline
+      ? undefined
+      : await this.deps.getVisualizationRenderCount(chartTestSubj);
     const axisSideButtonTestSubj = `lnsXY_axisSide_groups_${newSide}`;
 
     await this.page.testSubj.click(axisSideButtonTestSubj);
@@ -385,9 +424,11 @@ export class LensDimensions {
       axisSideButtonTestSubj,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
-    await this.deps.waitForVisualization(chartTestSubj, {
-      afterCount: renderCountBeforeChange ?? undefined,
-    });
+    if (!inline) {
+      await this.deps.waitForVisualization(chartTestSubj, {
+        afterCount: renderCountBeforeChange ?? undefined,
+      });
+    }
   }
 
   /** Returns the selected axis side label from an open dimension editor. */

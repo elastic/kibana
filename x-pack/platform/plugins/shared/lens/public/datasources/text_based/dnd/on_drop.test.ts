@@ -9,7 +9,11 @@ import type { DropType } from '@kbn/dom-drag-drop';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { onDrop } from './on_drop';
 import { column1, column2, column3, emptyDimensionTarget, defaultProps, fieldList } from './mocks';
-import type { DatasourceDimensionDropHandlerProps, TextBasedPrivateState } from '@kbn/lens-common';
+import type {
+  DatasourceDimensionDropHandlerProps,
+  TextBasedLayerColumn,
+  TextBasedPrivateState,
+} from '@kbn/lens-common';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 describe('onDrop', () => {
@@ -26,6 +30,60 @@ describe('onDrop', () => {
       } as DatatableColumn;
     })
   );
+  describe.each<TextBasedLayerColumn>([
+    {
+      ...column1,
+      fieldName: '1000',
+      label: 'Threshold',
+      customLabel: true,
+      meta: { type: 'number' },
+      valueSource: { type: 'static', value: 1000 },
+    },
+    {
+      ...column1,
+      fieldName: 'threshold',
+      label: 'Threshold',
+      meta: { type: 'number' },
+      valueSource: { type: 'query' },
+      previousStaticValue: 1000,
+    },
+    {
+      ...column1,
+      fieldName: '',
+      valueSource: { type: 'unconfigured' },
+      previousStaticValue: 1000,
+    },
+  ])('reference column $valueSource.type', (referenceColumn) => {
+    it.each<DropType>(['duplicate_compatible', 'replace_duplicate_compatible', 'move_compatible'])(
+      'preserves the column configuration for %s',
+      (dropType) => {
+        const state = {
+          ...defaultProps.state,
+          layers: {
+            ...defaultProps.state.layers,
+            first: {
+              ...defaultProps.state.layers.first,
+              columns: [referenceColumn, column2, column3],
+            },
+          },
+        };
+        const result = onDrop({
+          ...defaultProps,
+          state,
+          target: emptyDimensionTarget,
+          dropType,
+        });
+        expect(result?.layers.first.columns).toContainEqual({
+          ...referenceColumn,
+          columnId: emptyDimensionTarget.columnId,
+        });
+        expect(
+          result?.layers.first.columns.some(({ columnId }) => columnId === column1.columnId)
+        ).toBe(dropType !== 'move_compatible');
+      }
+    );
+  });
+
   it('should return false if dropType is not in the list', () => {
     const props = {
       ...defaultProps,
