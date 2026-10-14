@@ -31,6 +31,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   apm_metrics_dashboards:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_metrics_dashboards.ts',
   apm_ml_anomalies: 'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_ml_anomalies.ts',
+  apm_profiling_correlation:
+    'x-pack/solutions/observability/plugins/profiling/test/scenarios/apm_profiling_correlation.ts',
   apm_service_legacy_to_otel_metrics:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_service_legacy_to_otel_metrics.ts',
   apm_service_multi_env_otel_migration:
