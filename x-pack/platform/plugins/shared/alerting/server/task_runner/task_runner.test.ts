@@ -2303,6 +2303,29 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error']);
   });
 
+  test('should tag authentication errors with user-key when the rule holds a user-supplied API key', async () => {
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, apiKeyCreatedByUser: true },
+    });
+
+    await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error', 'user-key']);
+  });
+
   test('should set unexpected errors as framework-error', async () => {
     jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new Error('test');

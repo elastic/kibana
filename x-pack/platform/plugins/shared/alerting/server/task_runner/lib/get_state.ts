@@ -27,6 +27,7 @@ export function getState({
   logger,
   stackTraceLog,
   originalState,
+  apiKeyCreatedByUser = false,
 }: {
   runRuleResult: Result<RunRuleResult, Error>;
   startedAt: Date | null;
@@ -36,6 +37,7 @@ export function getState({
   logger: Logger;
   stackTraceLog: RuleRunnerErrorStackTraceLog | null;
   originalState: RuleTaskState;
+  apiKeyCreatedByUser?: boolean;
 }) {
   return map<RunRuleResult, ElasticsearchError, RuleTaskState>(
     runRuleResult,
@@ -44,11 +46,14 @@ export function getState({
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
       // The executor error arrives wrapped in an ErrorWithReason; unwrap it so a 401 from
       // Elasticsearch gets a stable tag that log-based alerts can match regardless of source.
+      // `user-key` marks an auth failure on a key the user supplied rather than one Kibana
+      // created, so alerts can tell the two apart without hiding either.
       const isAuthError = isUnauthorizedError(isErrorWithReason(err) ? err.error : err);
       const tags = [
         'rule-run-failed',
         `${errorSource}-error`,
         ...(isAuthError ? ['auth-error'] : []),
+        ...(isAuthError && apiKeyCreatedByUser ? ['user-key'] : []),
       ];
 
       if (isAlertSavedObjectNotFoundError(err, ruleId) || isClusterBlockError(err)) {
