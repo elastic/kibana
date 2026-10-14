@@ -38,13 +38,13 @@ jest.mock('../otel/instrumentation', () => ({
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
 
 /**
- * Builds a request carrying a UIAM bearer token and, optionally, an inbound client authentication
+ * Builds a request carrying a UIAM credential and, optionally, an inbound client authentication
  * header that rode in with it.
  */
-function createUiamRequest(sharedSecret?: string) {
+function createUiamRequest(sharedSecret?: string, authorization = 'Bearer essu_access-token') {
   return httpServerMock.createKibanaRequest({
     headers: {
-      authorization: 'Bearer essu_access-token',
+      authorization,
       ...(sharedSecret === undefined ? {} : { [ES_CLIENT_AUTHENTICATION_HEADER]: sharedSecret }),
     },
   });
@@ -392,7 +392,7 @@ describe('UiamService', () => {
 
   describe('forwarded client authentication', () => {
     // Methods that act on behalf of a request forward the client authentication that rode in with
-    // its UIAM bearer token, or Kibana's own shared secret when none was supplied.
+    // its UIAM credential, or Kibana's own shared secret when none was supplied.
     const requestOperations: Array<{
       name: string;
       run: (service: UiamService, request: KibanaRequest) => Promise<object | void>;
@@ -452,6 +452,18 @@ describe('UiamService', () => {
     ];
 
     describe.each(requestOperations)('$name', ({ run }) => {
+      it.each(['Bearer essu_access-token', 'ApiKey essu_api-key'])(
+        'preserves the incoming authorization header %j',
+        async (authorization) => {
+          fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+
+          await run(uiamService, createUiamRequest(undefined, authorization));
+
+          expect(fetchSpy).toHaveBeenCalledTimes(1);
+          expect(fetchSpy.mock.calls[0][1].headers.Authorization).toBe(authorization);
+        }
+      );
+
       it.each(['upstream-shared-secret', ''])(
         'preserves the incoming secret %j',
         async (sharedSecret) => {

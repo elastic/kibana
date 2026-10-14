@@ -8,7 +8,35 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
-import { assertUiamCredential, getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import {
+  assertUiamCredential,
+  getUiamAuthorizationSchemeFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
+
+describe('getUiamAuthorizationSchemeFromRequest', () => {
+  it.each([
+    ['Bearer', 'Bearer'],
+    ['bearer', 'Bearer'],
+    ['ApiKey', 'ApiKey'],
+    ['apikey', 'ApiKey'],
+    ['Basic', 'Bearer'],
+  ])('maps the %s scheme to %s', (scheme, expectedScheme) => {
+    expect(
+      getUiamAuthorizationSchemeFromRequest(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: `${scheme} essu_credential` },
+        })
+      )
+    ).toBe(expectedScheme);
+  });
+
+  it('defaults to Bearer when the authorization header is missing', () => {
+    expect(getUiamAuthorizationSchemeFromRequest(httpServerMock.createKibanaRequest())).toBe(
+      'Bearer'
+    );
+  });
+});
 
 describe('getUiamCredentialsFromRequest', () => {
   it.each([

@@ -37,7 +37,10 @@ import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
 } from './get_client_authentication';
-import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import {
+  getUiamAuthorizationSchemeFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -522,13 +525,14 @@ export class UiamService implements UiamServicePublic {
 
   /**
    * Builds the `Authorization` and client authentication headers for a UIAM call made on behalf of
-   * the given request: the request's own UIAM access token, plus the client authentication that
-   * rode in with it, or Kibana's own shared secret when none was supplied.
+   * the given request: the request's own UIAM credential, plus the client authentication that rode
+   * in with it, or Kibana's own shared secret when none was supplied.
    */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
+    const scheme = getUiamAuthorizationSchemeFromRequest(request);
     return {
       ...this.#getClientAuthenticationHeaders(getUiamClientAuthentication(request)),
-      Authorization: `Bearer ${getUiamCredentialsFromRequest(request)}`,
+      Authorization: `${scheme} ${getUiamCredentialsFromRequest(request)}`,
     };
   }
 

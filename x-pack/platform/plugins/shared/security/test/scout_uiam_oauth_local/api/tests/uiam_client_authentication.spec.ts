@@ -72,6 +72,49 @@ apiTest.describe(
     );
 
     apiTest(
+      'preserves the API key authorization scheme for direct UIAM calls',
+      async ({ apiClient, esClient, ephemeralToken }) => {
+        const grantResponse = await apiClient.post('test_endpoints/api_keys/_grant', {
+          headers: {
+            ...COMMON_UNSAFE_HEADERS,
+            Authorization: `Bearer ${ephemeralToken}`,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_GATEWAY_SHARED_SECRET,
+          },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(grantResponse).toHaveStatusCode(200);
+        const { id, encoded }: { id: string; encoded: string } = grantResponse.body;
+        const apiKeyHeaders = {
+          ...COMMON_UNSAFE_HEADERS,
+          Authorization: `ApiKey ${encoded}`,
+        };
+        const createResponse = await apiClient.post('internal/security/oauth/clients', {
+          headers: apiKeyHeaders,
+          responseType: 'json',
+          body: {
+            client_name: `scout-api-key-${Date.now()}`,
+            client_type: 'public',
+            redirect_uris: ['https://example.com/callback'],
+          },
+        });
+        const clientId = createResponse.body.id as string;
+
+        try {
+          expect(createResponse).toHaveStatusCode(200);
+          expect(clientId).toBeDefined();
+        } finally {
+          await apiClient.delete(
+            `internal/security/oauth/clients/${encodeURIComponent(clientId)}`,
+            { headers: apiKeyHeaders }
+          );
+          await esClient.security.invalidateApiKey({ ids: [id] });
+        }
+      }
+    );
+
+    apiTest(
       'preserves the gateway secret when granting an Elasticsearch API key',
       async ({ apiClient, esClient, ephemeralToken }) => {
         const grantResponse = await apiClient.post('test_endpoints/api_keys/_grant', {
