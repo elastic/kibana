@@ -19,12 +19,13 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/api/security/entity_store/install` | Install entity store |
-| POST | `/api/security/entity_store/start` | Start/reschedule extraction tasks |
-| POST | `/api/security/entity_store/stop` | Stop extraction tasks |
+| PUT | `/api/security/entity_store/start` | Start/reschedule extraction tasks (both processes for user when the dual-process flag is on) |
+| PUT | `/api/security/entity_store/stop` | Stop extraction tasks (both processes for user when the dual-process flag is on) |
 | POST | `/api/security/entity_store/uninstall` | Uninstall entity store |
-| GET | `/api/security/entity_store/status` | Status (`?include_components=true`) |
-| PUT | `/api/security/entity_store` | Update `logExtraction` and/or `historySnapshot` (`frequency`, `retentionDays`) config without reinstall |
-| POST | `/api/security/entity_store/check_privileges` | Check security privileges |
+| GET | `/api/security/entity_store/status` | Status (`?include_components=true`). With the dual-process flag on, the user engine also has a `nonPriority` block for the non-priority process (shape in `server/routes/apis/status.ts`) |
+| PUT | `/api/security/entity_store` | Update `logExtraction` (store-wide, all types), `excludedUserNames` and/or `historySnapshot` (`frequency`, `retentionDays`) config without reinstall. Per-type config goes through internal `PUT /{entityType}` |
+| PUT | `/api/security/entity_store/history_snapshot/enable` | Enable history snapshot |
+| PUT | `/api/security/entity_store/history_snapshot/disable` | Disable history snapshot |
 
 ### CRUD
 
@@ -64,12 +65,20 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | POST | `/internal/security/entity_store/entity_maintainers/run/{id}` | Run maintainer immediately |
 | POST | `/internal/security/entity_store/entity_maintainers/init` | Initialize maintainers |
 
+### Lifecycle and config
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/internal/security/entity_store/check_privileges` | Check security privileges |
+| PUT | `/internal/security/entity_store/{entityType}` | Per-type log extraction config. Body `{ logExtraction?, nonPriorityOverride? }`. `logExtraction` applies to every process of the type, except that non-priority ignores its volume fields (`maxLogsPerPage`, `maxTimeWindowSize`, `maxLogsPerWindow`, `maxLogsPerWindowCapBehavior`, `docsLimit`). `nonPriorityOverride` (incl. `samplingRate`) applies to non-priority only, and is 400 with the dual-process flag off or for a type without a priority gate. `null` clears a field; arrays replace, they do not merge |
+| PUT | `/internal/security/entity_store/start` | Start one or both processes. Body `{ entityTypes?, process?: "priority" \| "nonPriority" \| "both" }`, default `both`. 404 with the dual-process flag off |
+| PUT | `/internal/security/entity_store/stop` | Stop one or both processes. Same body and flag rule as `start` |
+
 ### Utility / Debugging
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/internal/security/entity_store/{entityType}/force_log_extraction` | Force manual extraction |
-| POST | `/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates` | Force CCS extraction |
+| POST | `/internal/security/entity_store/{entityType}/force_log_extraction` | Force manual extraction. Body `{ fromDateISO, toDateISO, process?: "single" \| "priority" \| "nonPriority" \| "all" }`. Without `process` it runs the mode the task would run: `priority` for user with the dual-process flag on, `single` otherwise. `all` runs priority and non-priority at the same time. Anything but `single` is 400 for a type without a priority gate |
 | POST | `/internal/security/entity_store/force_history_snapshot` | Force history snapshot |
 
 ## curl Examples
@@ -110,5 +119,12 @@ curl -s -X POST "http://localhost:5601/kbn/internal/security/entity_store/entity
 # Force extraction (INTERNAL)
 curl -s -X POST "http://localhost:5601/kbn/internal/security/entity_store/user/force_log_extraction" \
   -u elastic:changeme -H "Content-Type: application/json" -H "kbn-xsrf: true" \
-  -H "x-elastic-internal-origin: kibana" -H "elastic-api-version: 2"
+  -H "x-elastic-internal-origin: kibana" -H "elastic-api-version: 2" \
+  -d '{"fromDateISO": "2026-01-01T00:00:00.000Z", "toDateISO": "2026-01-01T01:00:00.000Z", "process": "all"}'
+
+# Set a per-type override (INTERNAL)
+curl -s -X PUT "http://localhost:5601/kbn/internal/security/entity_store/user" \
+  -u elastic:changeme -H "Content-Type: application/json" -H "kbn-xsrf: true" \
+  -H "x-elastic-internal-origin: kibana" -H "elastic-api-version: 2" \
+  -d '{"logExtraction": {"frequency": "2m"}, "nonPriorityOverride": {"samplingRate": 0.5}}'
 ```

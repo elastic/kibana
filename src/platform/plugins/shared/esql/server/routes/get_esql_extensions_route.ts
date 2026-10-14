@@ -60,7 +60,6 @@ export const registerESQLExtensionsRoute = (
               schema.literal('es'),
               schema.literal('oblt'),
               schema.literal('security'),
-              schema.literal('workplaceai'),
               schema.literal('vectordb'),
               schema.literal('classic'),
             ],
