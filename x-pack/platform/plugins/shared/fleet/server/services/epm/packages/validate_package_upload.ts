@@ -11,9 +11,11 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { parse } from 'yaml';
 
 import { ElasticsearchAssetType } from '../../../../common';
 import type { Installation } from '../../../../common';
+import type { ArchiveIterator } from '../../../../common/types';
 import {
   dataStreamUsesOtelInput,
   getRegistryDataStreamAssetBaseName,
@@ -25,6 +27,8 @@ import { appContextService } from '../../app_context';
 import { airGappedUtils } from '../airgapped';
 import { getPathParts } from '../archive';
 import { isTopLevelPipeline } from '../elasticsearch/ingest_pipeline/helpers';
+import { isRemoteIndexExpression } from '../elasticsearch/transform/ccs_transform_source';
+import { isTransform } from '../elasticsearch/transform/transform_utils';
 import * as Registry from '../registry';
 
 import { getBundledPackageByName } from './bundled_packages';
@@ -71,16 +75,23 @@ const FORBIDDEN_ARCHIVE_TYPES = new Set<string>([
 export async function validatePackageUpload({
   packageInfo,
   paths,
+  archiveIterator,
   installedPkg,
   savedObjectsClient,
   esClient,
 }: {
   packageInfo: UploadPackageInfo;
   paths: string[];
+  archiveIterator: ArchiveIterator;
   installedPkg?: SavedObject<Installation>;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
 }): Promise<void> {
+  // Deliberately ahead of the escape hatch below: an uploaded transform that targets a
+  // restricted index is a privilege-escalation vector, not a packaging-convention issue, so
+  // it stays blocked even on stacks that opt out of upload validation.
+  await assertNoRestrictedTransformIndices(paths, archiveIterator);
+
   // Test/development escape hatch (e.g. elastic-package stacks, FTR suites): skip
   // every upload validation so uploads behave as if this validator did not exist.
   if (appContextService.getConfig()?.internal?.skipUploadPackageValidation) {
@@ -130,6 +141,121 @@ function assertNoForbiddenArchiveAssets(paths: string[]): void {
       );
     }
   }
+}
+
+/**
+ * Reduce an index expression to the bare index/alias pattern so a prefix check cannot be
+ * evaded. `-` marks an exclusion, `<...>` wraps date math, and `<cluster>:<index>` targets a
+ * remote cluster — each can still name a restricted index on this cluster.
+ */
+function normalizeIndexExpression(expression: string): string {
+  let normalized = expression.trim();
+  if (normalized.startsWith('-')) {
+    normalized = normalized.slice(1);
+  }
+  if (isRemoteIndexExpression(normalized)) {
+    normalized = normalized.slice(normalized.indexOf(':') + 1);
+  }
+  if (normalized.startsWith('<')) {
+    normalized = normalized.slice(1);
+  }
+  return normalized;
+}
+
+function collectTransformIndexExpressions(content: unknown): string[] {
+  if (!content || typeof content !== 'object') {
+    return [];
+  }
+
+  const { source, dest } = content as {
+    source?: { index?: unknown };
+    dest?: { index?: unknown; aliases?: unknown };
+  };
+
+  const expressions: string[] = [];
+  const push = (value: unknown) => {
+    if (typeof value === 'string' && value.length > 0) {
+      expressions.push(value);
+    }
+  };
+
+  const sourceIndex = source?.index;
+  if (Array.isArray(sourceIndex)) {
+    sourceIndex.forEach(push);
+  } else {
+    push(sourceIndex);
+  }
+
+  push(dest?.index);
+
+  const aliases = dest?.aliases;
+  if (Array.isArray(aliases)) {
+    for (const alias of aliases) {
+      if (typeof alias === 'string') {
+        push(alias);
+      } else if (alias && typeof alias === 'object') {
+        push((alias as { alias?: unknown }).alias);
+      }
+    }
+  }
+
+  return expressions;
+}
+
+/**
+ * Uploaded packages must not ship transforms that read from or write to a system/restricted
+ * index. Transforms are the one package asset that keeps executing against Elasticsearch after
+ * installation, so a caller-authored transform pointed at `.fleet-policies` is a path to
+ * disclosing and rewriting Agent policies in Spaces the uploader cannot reach. Transform
+ * identity is separately bound to the installing user (see `install_source.ts`); this check
+ * also stops such a transform from being installed in a deferred state and later started with
+ * a Fleet admin's credentials through the reauthorize flow.
+ *
+ * Paths come from the same `isTransform` predicate the installer uses, so an archive cannot
+ * place a transform where this check does not look but the installer still picks it up. Every
+ * such file is parsed — including `manifest.yml` and `fields/*.yml` — and we key off the
+ * presence of `source`/`dest` rather than the filename, which covers both the yml spec and the
+ * legacy `*.json` spec without assuming a naming convention.
+ */
+async function assertNoRestrictedTransformIndices(
+  paths: string[],
+  archiveIterator: ArchiveIterator
+): Promise<void> {
+  const transformSpecPaths = paths.filter(isTransform);
+  if (transformSpecPaths.length === 0) {
+    return;
+  }
+
+  const transformSpecPathSet = new Set(transformSpecPaths);
+  await archiveIterator.traverseEntries(
+    async ({ path, buffer }) => {
+      if (!buffer) {
+        return;
+      }
+
+      let content: unknown;
+      try {
+        // `parse` from the yaml package reads JSON too, since JSON is a subset of YAML.
+        content = parse(buffer.toString('utf-8'));
+      } catch {
+        // Malformed spec; the install will fail later with a more specific parse error.
+        return;
+      }
+
+      for (const expression of collectTransformIndexExpressions(content)) {
+        if (normalizeIndexExpression(expression).startsWith('.')) {
+          throw new PackageInvalidArchiveError(
+            i18n.translate('xpack.fleet.packageUpload.restrictedTransformIndex', {
+              defaultMessage:
+                'Uploaded package contains a transform in "{path}" that targets the restricted index "{index}". Transforms in uploaded packages cannot read from or write to system indices.',
+              values: { path, index: expression },
+            })
+          );
+        }
+      }
+    },
+    (path) => transformSpecPathSet.has(path)
+  );
 }
 
 function assertValidUploadDataStreams(dataStreams: UploadDataStream[]): void {

@@ -53,7 +53,8 @@ import { getPackageFieldsMetadata } from './registry';
 import * as Registry from './registry';
 import { fetchFindLatestPackageOrThrow } from './registry';
 
-import { installTransforms, isTransform } from './elasticsearch/transform/install';
+import { installTransforms } from './elasticsearch/transform/install';
+import { isTransform } from './elasticsearch/transform/transform_utils';
 import {
   ensureInstalledPackage,
   getInstallation,
@@ -492,6 +493,9 @@ class PackageClientImpl implements PackageClient {
       force: true,
       esReferences: undefined,
       request: this.request,
+      // Reinstalls replay the archive stored at install time, so the original install source
+      // decides whether these transforms may run as kibana_system.
+      installSource: installation.install_source,
     });
     return installedTransforms;
   }
