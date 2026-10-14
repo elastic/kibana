@@ -7,9 +7,7 @@
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
-import type { Logger } from '@kbn/logging';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
@@ -18,7 +16,8 @@ import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
-import { createPdfAttachmentType } from './document/document';
+import { createDocumentAttachmentType } from './document/document';
+import type { DocumentConverters } from './document/converters';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -28,22 +27,17 @@ import type {
 export const registerAttachmentTypes = ({
   coreSetup,
   setupDeps,
-  logger,
+  documentConverters,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
-  logger: Logger;
+  documentConverters: DocumentConverters;
 }) => {
   const { agentBuilder } = setupDeps;
 
   const getFilesPlugin = async (): Promise<FilesStart> => {
     const [, startDeps] = await coreSetup.getStartServices();
     return startDeps.files;
-  };
-
-  const getEsClient = async (): Promise<ElasticsearchClient> => {
-    const [coreStart] = await coreSetup.getStartServices();
-    return coreStart.elasticsearch.client.asInternalUser;
   };
 
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
@@ -55,7 +49,7 @@ export const registerAttachmentTypes = ({
     createConnectorSetupAttachmentType(),
     createSkillAttachmentType(),
     createImageAttachmentType({ getFilesPlugin }),
-    createPdfAttachmentType({ getFilesPlugin, getEsClient, logger: logger.get('pdf-extraction') }),
+    createDocumentAttachmentType({ getFilesPlugin, documentConverters }),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

@@ -22,8 +22,9 @@ import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
-import { checkPdfExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
-import { registerPdfAvailabilityRoute } from './routes/document_supported_types';
+import { createDocumentConverters } from './attachment_types/document/converters';
+import { checkDocumentExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
+import { registerDocumentSupportedTypesRoute } from './routes/document_supported_types';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -48,12 +49,23 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+    const getEsClient = async () => {
+      const [coreStart] = await coreSetup.getStartServices();
+      return coreStart.elasticsearch.client.asInternalUser;
+    };
+    const documentConverters = createDocumentConverters({
+      getEsClient,
+      logger: this.logger.get('document-extraction'),
+    });
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
-      logger: this.logger,
+      documentConverters,
     });
-    registerPdfAvailabilityRoute({ router: coreSetup.http.createRouter() });
+    registerDocumentSupportedTypesRoute({
+      router: coreSetup.http.createRouter(),
+      documentConverters,
+    });
     registerConversationTemplates({ setupDeps });
     registerConversationEventTypes({ setupDeps });
     const getActionsStart = async () => {
@@ -86,9 +98,9 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
-    void checkPdfExtractionAvailability({
+    void checkDocumentExtractionAvailability({
       esClient: coreStart.elasticsearch.client.asInternalUser,
-      logger: this.logger.get('pdf-extraction'),
+      logger: this.logger.get('document-extraction'),
     });
 
     return {

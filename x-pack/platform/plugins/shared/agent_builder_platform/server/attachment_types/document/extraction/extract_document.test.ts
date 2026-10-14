@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DOCUMENT_EXTRACTION_ENDPOINT_ID, PDF_EXTRACTION_TIMEOUT_MS } from './constants';
+import { DOCUMENT_EXTRACTION_ENDPOINT_ID, DOCUMENT_EXTRACTION_TIMEOUT_MS } from './constants';
 import { extractDocument } from './extract_document';
 
 jest.mock('./constants', () => ({
@@ -60,7 +60,7 @@ describe('extractDocument', () => {
     });
     expect(options).toEqual({
       signal: expect.any(AbortSignal),
-      requestTimeout: PDF_EXTRACTION_TIMEOUT_MS,
+      requestTimeout: DOCUMENT_EXTRACTION_TIMEOUT_MS,
     });
   });
 
@@ -75,7 +75,7 @@ describe('extractDocument', () => {
   ])('fails when the response %s', async (_name, response) => {
     request.mockResolvedValue(response);
 
-    await expect(run()).rejects.toThrow('Could not read the PDF. Try again later.');
+    await expect(run()).rejects.toThrow('Could not read the file. Try again later.');
     expect(logger.error).toHaveBeenCalled();
   });
 
@@ -84,7 +84,7 @@ describe('extractDocument', () => {
       Object.assign(new Error('bad gateway'), { meta: { body: { error: 'reader down' } } })
     );
 
-    await expect(run()).rejects.toThrow('Could not read the PDF. Try again later.');
+    await expect(run()).rejects.toThrow('Could not read the file. Try again later.');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('reader down'));
   });
 
@@ -99,9 +99,9 @@ describe('extractDocument', () => {
 
     const result = run();
     const expectation = expect(result).rejects.toThrow(
-      'Reading the PDF took too long. Try a smaller PDF.'
+      'Reading the file took too long. Try a smaller file.'
     );
-    await jest.advanceTimersByTimeAsync(PDF_EXTRACTION_TIMEOUT_MS);
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_TIMEOUT_MS);
 
     await expectation;
   });
@@ -111,7 +111,7 @@ describe('extractDocument', () => {
     timeoutError.name = 'TimeoutError';
     request.mockRejectedValue(timeoutError);
 
-    await expect(run()).rejects.toThrow('Reading the PDF took too long. Try a smaller PDF.');
+    await expect(run()).rejects.toThrow('Reading the file took too long. Try a smaller file.');
   });
 
   it('cancels the ES call and rethrows when the caller aborts', async () => {

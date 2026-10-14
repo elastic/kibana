@@ -8,14 +8,21 @@
 import type { IRouter } from '@kbn/core/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { internalApiPath } from '@kbn/agent-builder-plugin/common/constants';
-import { isPdfExtractionAvailable } from '../attachment_types/document/extraction/extraction_availability';
+import type { DocumentConverters } from '../attachment_types/document/converters';
+import { getAvailableDocumentMimeTypes } from '../attachment_types/document/converters';
 
-export const pdfAvailabilityPath = `${internalApiPath}/attachments/pdf/_available`;
+export const documentSupportedTypesPath = `${internalApiPath}/attachments/document/_supported_types`;
 
-export const registerPdfAvailabilityRoute = ({ router }: { router: IRouter }) => {
+export const registerDocumentSupportedTypesRoute = ({
+  router,
+  documentConverters,
+}: {
+  router: IRouter;
+  documentConverters: DocumentConverters;
+}) => {
   router.get(
     {
-      path: pdfAvailabilityPath,
+      path: documentSupportedTypesPath,
       validate: false,
       options: { access: 'internal' },
       security: {
@@ -23,6 +30,6 @@ export const registerPdfAvailabilityRoute = ({ router }: { router: IRouter }) =>
       },
     },
     async (_context, _request, response) =>
-      response.ok({ body: { available: isPdfExtractionAvailable() } })
+      response.ok({ body: { mime_types: getAvailableDocumentMimeTypes(documentConverters) } })
   );
 };

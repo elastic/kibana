@@ -6,33 +6,44 @@
  */
 
 import { createAttachmentInvalidError, createInternalError } from '@kbn/agent-builder-common';
-import { MAX_PDF_BYTES } from '@kbn/agent-builder-common/attachments';
 
-export const pdfErrors = {
+const BYTES_PER_MB = 1024 * 1024;
+
+export const documentErrors = {
   notAvailable: () =>
-    createInternalError('PDF reading is not available on this deployment.', {
-      pdfErrorCode: 'not_available',
+    createInternalError('Reading this file type is not available on this deployment.', {
+      documentErrorCode: 'not_available',
       statusCode: 503,
     }),
   fileNotFound: () =>
-    createAttachmentInvalidError('PDF file not found.', { pdfErrorCode: 'file_not_found' }),
-  tooBig: () =>
-    createAttachmentInvalidError(`The PDF is larger than ${MAX_PDF_BYTES / (1024 * 1024)} MB.`, {
-      pdfErrorCode: 'too_big',
+    createAttachmentInvalidError('File not found.', { documentErrorCode: 'file_not_found' }),
+  unsupportedType: () =>
+    createAttachmentInvalidError('This file type is not supported.', {
+      documentErrorCode: 'unsupported_type',
     }),
-  notAPdf: () =>
-    createAttachmentInvalidError('The file is not a valid PDF.', { pdfErrorCode: 'not_a_pdf' }),
+  tooBig: (maxBytes: number) =>
+    createAttachmentInvalidError(`The file is larger than ${maxBytes / BYTES_PER_MB} MB.`, {
+      documentErrorCode: 'too_big',
+    }),
+  invalidContent: () =>
+    createAttachmentInvalidError('The file is damaged or has the wrong file type.', {
+      documentErrorCode: 'invalid_content',
+    }),
+  notUtf8: () =>
+    createAttachmentInvalidError('The file must be UTF-8 text.', {
+      documentErrorCode: 'not_utf8',
+    }),
   extractionFailed: () =>
-    createInternalError('Could not read the PDF. Try again later.', {
-      pdfErrorCode: 'extraction_failed',
+    createInternalError('Could not read the file. Try again later.', {
+      documentErrorCode: 'extraction_failed',
     }),
   textTooLong: () =>
-    createAttachmentInvalidError('The text of the PDF is too long. Try a smaller PDF.', {
-      pdfErrorCode: 'text_too_long',
+    createAttachmentInvalidError('The text of the file is too long. Try a smaller file.', {
+      documentErrorCode: 'text_too_long',
     }),
   timeout: () =>
-    createInternalError('Reading the PDF took too long. Try a smaller PDF.', {
-      pdfErrorCode: 'timeout',
+    createInternalError('Reading the file took too long. Try a smaller file.', {
+      documentErrorCode: 'timeout',
       statusCode: 504,
     }),
 };

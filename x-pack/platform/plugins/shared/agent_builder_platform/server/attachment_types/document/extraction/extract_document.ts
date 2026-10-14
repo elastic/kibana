@@ -15,12 +15,12 @@ import {
 import type { Logger } from '@kbn/logging';
 import {
   DOCUMENT_EXTRACTION_ENDPOINT_ID,
-  PDF_EXTRACTION_TIMEOUT_MS,
+  DOCUMENT_EXTRACTION_TIMEOUT_MS,
   // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
   USE_FAKE_EXTRACTION,
   // FAKE_EXTRACTION:end
 } from './constants';
-import { pdfErrors } from '../errors';
+import { documentErrors } from '../errors';
 // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
 import { fakeExtractDocument } from './fake_extract_document';
 // FAKE_EXTRACTION:end
@@ -57,13 +57,14 @@ export const extractDocument = ({
   logger: Logger;
 }): Promise<string> =>
   withActiveInferenceSpan(
-    'pdf_extraction',
+    'document_extraction',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
         [GenAISemanticConventions.GenAIRequestModel]: DOCUMENT_EXTRACTION_ENDPOINT_ID,
-        'pdf.file_id': fileId,
-        'pdf.size_bytes': pdf.length,
+        'document.file_id': fileId,
+        'document.size_bytes': pdf.length,
+        'document.mime_type': 'application/pdf',
       },
     },
     async () => {
@@ -72,7 +73,7 @@ export const extractDocument = ({
       const timer = setTimeout(() => {
         timedOut = true;
         controller.abort();
-      }, PDF_EXTRACTION_TIMEOUT_MS);
+      }, DOCUMENT_EXTRACTION_TIMEOUT_MS);
       const abortOnCallerAbort = () => controller.abort();
       if (signal?.aborted) {
         controller.abort();
@@ -93,7 +94,7 @@ export const extractDocument = ({
             path: `/_inference/document_extraction/${encodeURIComponent(
               DOCUMENT_EXTRACTION_ENDPOINT_ID
             )}`,
-            querystring: { timeout: `${PDF_EXTRACTION_TIMEOUT_MS / 1000}s` },
+            querystring: { timeout: `${DOCUMENT_EXTRACTION_TIMEOUT_MS / 1000}s` },
             body: {
               input: [
                 {
@@ -106,20 +107,20 @@ export const extractDocument = ({
               ],
             },
           },
-          { signal: controller.signal, requestTimeout: PDF_EXTRACTION_TIMEOUT_MS }
+          { signal: controller.signal, requestTimeout: DOCUMENT_EXTRACTION_TIMEOUT_MS }
         );
 
         const content = response.document_extraction?.[0]?.content;
         if (!content) {
           logger.error('The document extraction response has no content.');
-          throw pdfErrors.extractionFailed();
+          throw documentErrors.extractionFailed();
         }
         return content;
       } catch (error) {
-        if (timedOut || (error as Error).name === 'TimeoutError') throw pdfErrors.timeout();
+        if (timedOut || (error as Error).name === 'TimeoutError') throw documentErrors.timeout();
         if (signal?.aborted || isAgentBuilderError(error)) throw error;
         logger.error(`Document extraction failed for the PDF: ${getErrorDetails(error)}`);
-        throw pdfErrors.extractionFailed();
+        throw documentErrors.extractionFailed();
       } finally {
         clearTimeout(timer);
         signal?.removeEventListener('abort', abortOnCallerAbort);

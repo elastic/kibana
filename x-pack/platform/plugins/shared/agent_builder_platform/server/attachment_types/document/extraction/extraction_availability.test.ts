@@ -28,7 +28,7 @@ const loadFreshModule = (): ExtractionAvailabilityModule => {
 const createEsClient = (get: jest.Mock) =>
   ({ inference: { get } } as unknown as ElasticsearchClient);
 
-describe('pdf extraction availability', () => {
+describe('document extraction availability', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
@@ -36,67 +36,67 @@ describe('pdf extraction availability', () => {
   });
 
   it('is not available before the check runs', () => {
-    const { isPdfExtractionAvailable } = loadFreshModule();
-    expect(isPdfExtractionAvailable()).toBe(false);
+    const { isDocumentExtractionAvailable } = loadFreshModule();
+    expect(isDocumentExtractionAvailable()).toBe(false);
   });
 
   it('is available when the endpoint is found', async () => {
-    const { checkPdfExtractionAvailability, isPdfExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
     const get = jest.fn(async () => ({
       endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
     }));
 
-    await checkPdfExtractionAvailability({ esClient: createEsClient(get), logger });
+    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
 
     expect(get).toHaveBeenCalledWith({ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID });
-    expect(isPdfExtractionAvailable()).toBe(true);
+    expect(isDocumentExtractionAvailable()).toBe(true);
   });
 
   it('is not available when ES returns no endpoints', async () => {
-    const { checkPdfExtractionAvailability, isPdfExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
     const get = jest.fn(async () => ({ endpoints: [] }));
 
-    await checkPdfExtractionAvailability({ esClient: createEsClient(get), logger });
+    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
 
-    expect(isPdfExtractionAvailable()).toBe(false);
+    expect(isDocumentExtractionAvailable()).toBe(false);
   });
 
   it('is not available when the endpoint is not found (404)', async () => {
-    const { checkPdfExtractionAvailability, isPdfExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
     const get = jest.fn(async () => {
       throw Object.assign(new Error('not found'), { statusCode: 404 });
     });
 
-    await checkPdfExtractionAvailability({ esClient: createEsClient(get), logger });
+    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
 
-    expect(isPdfExtractionAvailable()).toBe(false);
+    expect(isDocumentExtractionAvailable()).toBe(false);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('is not available and logs a warning for any other error', async () => {
-    const { checkPdfExtractionAvailability, isPdfExtractionAvailable } = loadFreshModule();
+    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } = loadFreshModule();
     const get = jest.fn(async () => {
       throw Object.assign(new Error('server error'), { statusCode: 500 });
     });
 
-    await checkPdfExtractionAvailability({ esClient: createEsClient(get), logger });
+    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
 
-    expect(isPdfExtractionAvailable()).toBe(false);
+    expect(isDocumentExtractionAvailable()).toBe(false);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('server error'));
   });
 
   it('checks only once', async () => {
-    const { checkPdfExtractionAvailability } = loadFreshModule();
+    const { checkDocumentExtractionAvailability } = loadFreshModule();
     const get = jest.fn(async () => ({
       endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
     }));
     const esClient = createEsClient(get);
 
     await Promise.all([
-      checkPdfExtractionAvailability({ esClient, logger }),
-      checkPdfExtractionAvailability({ esClient, logger }),
+      checkDocumentExtractionAvailability({ esClient, logger }),
+      checkDocumentExtractionAvailability({ esClient, logger }),
     ]);
-    await checkPdfExtractionAvailability({ esClient, logger });
+    await checkDocumentExtractionAvailability({ esClient, logger });
 
     expect(get).toHaveBeenCalledTimes(1);
   });

@@ -17,7 +17,7 @@ import {
 let available = false;
 let availabilityCheck: Promise<void> | undefined;
 
-export const isPdfExtractionAvailable = (): boolean => {
+export const isDocumentExtractionAvailable = (): boolean => {
   // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
   if (USE_FAKE_EXTRACTION) {
     return true;
@@ -32,7 +32,7 @@ const getStatusCode = (error: unknown): number | undefined =>
 /**
  * Looks for the document extraction endpoint once. Later calls reuse the first result.
  */
-export const checkPdfExtractionAvailability = ({
+export const checkDocumentExtractionAvailability = ({
   esClient,
   logger,
 }: {
