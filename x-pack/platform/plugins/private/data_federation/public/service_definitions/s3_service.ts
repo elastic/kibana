@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { federatedIdentitySourceType, s3AuthOptions } from './auth_options';
+import { federatedIdentityAuthOption, s3AuthOptions } from './auth_options';
 import type { DataFedServiceConfig } from '../service_registry';
 
 export const getS3ServiceConfig = (enabled: boolean): DataFedServiceConfig => ({
   name: 's3',
   enabled,
   authOptions: (federatedIdentity: boolean) =>
-    federatedIdentity ? [federatedIdentitySourceType('s3'), ...s3AuthOptions] : s3AuthOptions,
+    federatedIdentity ? [federatedIdentityAuthOption('s3'), ...s3AuthOptions] : s3AuthOptions,
 });

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { federatedIdentitySourceType, gcsAuthOptions } from './auth_options';
+import { federatedIdentityAuthOption, gcsAuthOptions } from './auth_options';
 import type { DataFedServiceConfig } from '../service_registry';
 
 export const getGcsServiceConfig = (enabled: boolean): DataFedServiceConfig => ({
   name: 'gcs',
   enabled,
   authOptions: (federatedIdentity: boolean) =>
-    federatedIdentity ? [federatedIdentitySourceType('gcs'), ...gcsAuthOptions] : gcsAuthOptions,
+    federatedIdentity ? [federatedIdentityAuthOption('gcs'), ...gcsAuthOptions] : gcsAuthOptions,
 });

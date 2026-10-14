@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { azureAuthOptions, federatedIdentitySourceType } from './auth_options';
+import { azureAuthOptions, federatedIdentityAuthOption } from './auth_options';
 import type { DataFedServiceConfig } from '../service_registry';
 
 export const getAzureServiceConfig = (enabled: boolean): DataFedServiceConfig => ({
@@ -13,6 +13,6 @@ export const getAzureServiceConfig = (enabled: boolean): DataFedServiceConfig =>
   enabled,
   authOptions: (federatedIdentity: boolean) =>
     federatedIdentity
-      ? [federatedIdentitySourceType('azure'), ...azureAuthOptions]
+      ? [federatedIdentityAuthOption('azure'), ...azureAuthOptions]
       : azureAuthOptions,
 });

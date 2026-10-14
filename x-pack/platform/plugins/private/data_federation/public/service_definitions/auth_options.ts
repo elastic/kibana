@@ -9,7 +9,7 @@ import type { AuthOption } from '../service_registry';
 import { authOptionStrings } from './auth_options_i18n';
 import type { DataSourceType } from '../../common/datasource_types';
 
-export function federatedIdentitySourceType(dataSourceType: DataSourceType): AuthOption {
+export function federatedIdentityAuthOption(dataSourceType: DataSourceType): AuthOption {
   return {
     value: 'federated_identity',
     text: authOptionStrings.federatedIdentityLabel,
@@ -18,7 +18,7 @@ export function federatedIdentitySourceType(dataSourceType: DataSourceType): Aut
   };
 }
 
-export function accessAndSecretKeysSourceType(dataSourceType: DataSourceType): AuthOption {
+export function accessAndSecretKeysAuthOption(dataSourceType: DataSourceType): AuthOption {
   return {
     value: 'access_and_secret_keys',
     text: authOptionStrings.accessAndSecretKeysLabel,
@@ -26,7 +26,7 @@ export function accessAndSecretKeysSourceType(dataSourceType: DataSourceType): A
   };
 }
 
-export function anonymousSourceType(dataSourceType: DataSourceType): AuthOption {
+export function anonymousAuthOption(dataSourceType: DataSourceType): AuthOption {
   return {
     value: 'anonymous',
     text: authOptionStrings.anonymousLabel,
@@ -42,15 +42,15 @@ export const azureCredentialsSourceType: AuthOption = {
 
 export const azureAuthOptions: AuthOption[] = [
   azureCredentialsSourceType,
-  anonymousSourceType('azure'),
+  anonymousAuthOption('azure'),
 ];
 
 export const s3AuthOptions: AuthOption[] = [
-  accessAndSecretKeysSourceType('s3'),
-  anonymousSourceType('s3'),
+  accessAndSecretKeysAuthOption('s3'),
+  anonymousAuthOption('s3'),
 ];
 
 export const gcsAuthOptions: AuthOption[] = [
-  accessAndSecretKeysSourceType('gcs'),
-  anonymousSourceType('gcs'),
+  accessAndSecretKeysAuthOption('gcs'),
+  anonymousAuthOption('gcs'),
 ];

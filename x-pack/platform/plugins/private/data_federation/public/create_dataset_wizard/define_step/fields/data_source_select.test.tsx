@@ -90,7 +90,7 @@ describe('DataSourceSelect', () => {
   });
 
   it('shows the authentication callout when an existing data source is selected', async () => {
-    const { getByTestId } = renderComponent();
+    const { getByTestId, getAllByTestId } = renderComponent();
 
     await act(async () => {
       fireEvent.click(getByTestId('createDatasetDataSource'));
@@ -103,9 +103,11 @@ describe('DataSourceSelect', () => {
     expect(getByTestId('createDatasetDataSourceAuthenticationCallout')).toHaveTextContent(
       createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle
     );
-    expect(getByTestId('createDatasetDataSourceAuthenticationLearnMore')).toHaveAttribute(
-      'href',
-      'https://example.com/grant-read-access'
-    );
+    // The callout's live announcer renders a delayed screen-reader copy of the link
+    const learnMoreLinks = getAllByTestId('createDatasetDataSourceAuthenticationLearnMore');
+    expect(learnMoreLinks.length).toBeGreaterThan(0);
+    learnMoreLinks.forEach((link) => {
+      expect(link).toHaveAttribute('href', 'https://example.com/grant-read-access');
+    });
   });
 });
