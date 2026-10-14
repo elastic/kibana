@@ -19,6 +19,7 @@ import {
   createRiskScoreValidityEvaluator,
   createRuleTypeLanguageEvaluator,
   createSeverityValidityEvaluator,
+  withReasonBelowOne,
 } from './dataset_evaluator';
 
 // `expected` in EvaluatorParams is TExample['output'], i.e. RuleCreationExample['output'],
@@ -148,6 +149,30 @@ describe('createMitreAccuracyEvaluator', () => {
       )
     );
     expect(result.score).toBeLessThan(1);
+    expect(result.explanation).toContain('T1059');
+  });
+
+  it('carries no explanation when the score is 1', async () => {
+    expect((await evaluator.evaluate(makeArgs(makeRule()))).explanation).toBeUndefined();
+  });
+});
+
+describe('every score below 1 carries a reason', () => {
+  it('falls back to the metadata for code evaluators', async () => {
+    const result = await createSeverityValidityEvaluator().evaluate(
+      makeArgs(makeRule({ severity: 'urgent' }))
+    );
+    expect(result.score).toBe(0);
+    expect((result.explanation ?? '').length).toBeGreaterThan(0);
+  });
+
+  it('keeps an evaluator-provided explanation untouched', () => {
+    expect(withReasonBelowOne({ score: 0.5, explanation: 'mine' }).explanation).toBe('mine');
+  });
+
+  it('leaves score 1 and null scores alone', () => {
+    expect(withReasonBelowOne({ score: 1 }).explanation).toBeUndefined();
+    expect(withReasonBelowOne({ score: null }).explanation).toBeUndefined();
   });
 });
 

@@ -52,11 +52,25 @@ const NO_RULE_NA = {
   explanation: 'No rule in output — workflow did not produce a draft_creation result',
 };
 
+type RuleEvaluatorResult = Awaited<ReturnType<RuleEvaluator['evaluate']>>;
+
+// Every score below 1 must say why. Evaluators that already set an explanation keep it; the rest
+// fall back to the error recorded in metadata, else to the metadata itself.
+export const withReasonBelowOne = (result: RuleEvaluatorResult): RuleEvaluatorResult => {
+  if (typeof result.score !== 'number' || result.score >= 1 || result.explanation) return result;
+  const metadata = (result.metadata ?? {}) as Record<string, unknown>;
+  const explanation =
+    typeof metadata.error === 'string' && metadata.error.length > 0
+      ? metadata.error
+      : `Score ${result.score} < 1: ${JSON.stringify(metadata)}`;
+  return { ...result, explanation };
+};
+
 const skipNoRule = (evaluator: RuleEvaluator): RuleEvaluator => ({
   ...evaluator,
   evaluate: async (args) => {
     if (!args.output?.rule) return NO_RULE_NA;
-    return evaluator.evaluate(args);
+    return withReasonBelowOne(await evaluator.evaluate(args));
   },
 });
 
@@ -139,8 +153,18 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
       // garbage, which is exactly where the hard-cases 0.6x was hiding structure.
       const metrics = ordinalMitreF1(scoredTechniques, expectedTechniques);
       const invalidFormat = [...generatedTechniques].filter((t) => !/^T\d{4}(\.\d{3})?$/.test(t));
+      const generatedList = [...generatedTechniques].join(', ');
+      const expectedList = [...expectedTechniques].join(', ');
       return {
         score: metrics.f1,
+        explanation:
+          metrics.f1 < 1
+            ? `MITRE F1 ${metrics.f1.toFixed(2)} (precision ${metrics.precision.toFixed(
+                2
+              )}, recall ${metrics.recall.toFixed(
+                2
+              )}): generated [${generatedList}] vs expected [${expectedList}]`
+            : undefined,
         metadata: {
           precision: metrics.precision,
           recall: metrics.recall,
