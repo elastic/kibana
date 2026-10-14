@@ -13,8 +13,10 @@ import {
   DEFAULT_COLOR_STEPS,
   LEGACY_COMPLIMENTARY_PALETTE,
   COMPLEMENTARY_PALETTE,
+  SINGLE_VALUE_PALETTE_RANGE_FACTOR,
 } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
+import { getPalettes } from '@kbn/palettes';
 import type {
   AllColoringTypes,
   AutoColorType,
@@ -331,6 +333,51 @@ export function fromColorByValueLensStateToAPI(
     range,
     steps,
   };
+}
+
+/**
+ * Where a single value with no max and no breakdown sits in the palette's percent range: the
+ * metric runtime colors it against bounds of `[0, SINGLE_VALUE_PALETTE_RANGE_FACTOR * value]`
+ * (see `getDataBoundsForPalette`), so the value is always at the same percent of the range.
+ */
+const SINGLE_VALUE_PERCENT = 100 / SINGLE_VALUE_PALETTE_RANGE_FACTOR;
+
+/**
+ * The color a percent-ranged palette paints a single value. Such a palette can't respond to the
+ * data, so it is equivalent to a static color.
+ * - custom: the band that contains 50%.
+ * - named: the band that contains 50% when `steps` uniform bands span the range.
+ *
+ * This is a best-effort conversion and is not theme-aware: named palette colors come from the
+ * default (Borealis) palettes, so another theme's variants (e.g. legacy `amsterdam`) are not
+ * reflected. It returns `undefined`, and the caller falls back to no color, when there is no
+ * palette, the palette can't be resolved, or 50% falls outside every band.
+ */
+export function getSingleValuePercentColor(
+  palette: PaletteOutput<CustomPaletteParams> | undefined
+): string | undefined {
+  const colorByValue = fromColorByValueLensStateToAPI(palette);
+
+  if (colorByValue?.type === 'distributed_palette') {
+    const bands = palette?.params?.steps || palette?.params?.stops?.length || DEFAULT_COLOR_STEPS;
+    const colors = getPalettes(false).query(colorByValue.palette)?.colors(bands);
+    if (!colors?.length) {
+      return;
+    }
+    // Same rule as the runtime's uniform band lookup (`findColorSegment`)
+    const step = 100 / colors.length;
+    return colors[colors.findIndex((_, i) => SINGLE_VALUE_PERCENT <= (1 + i) * step)];
+  }
+
+  if (colorByValue?.type !== 'dynamic') {
+    return;
+  }
+
+  return colorByValue.steps.find(
+    ({ gte, lt, lte }) =>
+      (gte == null || gte <= SINGLE_VALUE_PERCENT) &&
+      (lt != null ? SINGLE_VALUE_PERCENT < lt : lte == null || SINGLE_VALUE_PERCENT <= lte)
+  )?.color;
 }
 
 export function fromStaticColorLensStateToAPI(

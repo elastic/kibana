@@ -14,6 +14,7 @@ import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import type { MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { getPalettes } from '@kbn/palettes';
 import { LensConfigBuilder } from '../../config_builder';
 import {
   simpleMetricAttributes,
@@ -501,6 +502,51 @@ describe('Metric', () => {
 
       expect(viz.palette?.params?.rangeType).toBe('percent');
       expect(apiOutput.metrics[0].color).toEqual(config.metrics[0].color);
+    });
+
+    it('(SO -> API) turns a single-value custom percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          continuity: 'above',
+          stops: [
+            { color: '#f6726a', stop: 50 },
+            { color: '#24c292', stop: 100 },
+          ],
+          colorStops: [
+            { color: '#f6726a', stop: 0 },
+            { color: '#24c292', stop: 50 },
+          ],
+        },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({ type: 'static', color: '#24c292' });
+    });
+
+    it('(SO -> API) turns a single-value named percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'status',
+        params: { name: 'status', rangeType: 'percent', steps: 3, continuity: 'all' },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({
+        type: 'static',
+        color: getPalettes(false).get('status').colors(3)[1],
+      });
     });
 
     it('(SO -> API -> SO) keeps the numeric range of a single-value named palette ', () => {
