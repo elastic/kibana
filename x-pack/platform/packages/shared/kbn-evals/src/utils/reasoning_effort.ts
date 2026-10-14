@@ -6,7 +6,7 @@
  */
 
 import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
-import { REASONING_EFFORT_LEVELS, isReasoningEffort } from './inference_endpoint_definition';
+import { REASONING_EFFORT_LEVELS, isReasoningEffort } from '@kbn/inference-common';
 
 /** Parses a run's requested reasoning effort, returning undefined when it's empty or unset. */
 export const parseReasoningEffort = (

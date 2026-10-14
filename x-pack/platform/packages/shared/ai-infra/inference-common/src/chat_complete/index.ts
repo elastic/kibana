@@ -17,6 +17,7 @@ export type {
   ChatCompleteRetryConfiguration,
 } from './api';
 export type { ChatCompletionReasoning, ChatCompletionReasoningEffort } from './reasoning';
+export { REASONING_EFFORT_LEVELS, isReasoningEffort } from './reasoning';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export {
   ChatCompletionEventType,

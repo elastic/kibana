@@ -9,20 +9,9 @@ import type {
   ChatCompletionReasoningEffort,
   InferenceEndpointRequestBody,
 } from '@kbn/inference-common';
+import { REASONING_EFFORT_LEVELS, isReasoningEffort } from '@kbn/inference-common';
 
 type AddEndpointConfig = InferenceEndpointRequestBody['config'];
-
-export const REASONING_EFFORT_LEVELS: readonly ChatCompletionReasoningEffort[] = [
-  'none',
-  'minimal',
-  'low',
-  'medium',
-  'high',
-  'xhigh',
-];
-
-export const isReasoningEffort = (value: unknown): value is ChatCompletionReasoningEffort =>
-  typeof value === 'string' && (REASONING_EFFORT_LEVELS as readonly string[]).includes(value);
 
 export interface InferenceEndpointDefinition
   extends Pick<AddEndpointConfig, 'inferenceId' | 'provider' | 'taskType'>,

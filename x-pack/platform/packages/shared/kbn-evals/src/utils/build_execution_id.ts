@@ -6,7 +6,7 @@
  */
 
 import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
-import { isReasoningEffort } from './inference_endpoint_definition';
+import { isReasoningEffort } from '@kbn/inference-common';
 
 interface BuildExecutionIdArgs {
   baseExecutionId?: string;

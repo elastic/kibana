@@ -7,8 +7,14 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { ToolCall } from '@kbn/inference-common';
-import { MessageRole, ModelFamily, ModelProvider, ToolChoiceType } from '@kbn/inference-common';
+import type { ChatCompletionReasoningEffort, ToolCall } from '@kbn/inference-common';
+import {
+  MessageRole,
+  ModelFamily,
+  ModelProvider,
+  REASONING_EFFORT_LEVELS,
+  ToolChoiceType,
+} from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common';
 import type { PromptRequestBody } from '../../common/http_apis';
 
@@ -55,18 +61,15 @@ export const messageOptionsSchema = schema.object({
   toolChoice: toolChoiceSchema,
 });
 
+export const reasoningEffortSchema: Type<ChatCompletionReasoningEffort> = schema.oneOf(
+  REASONING_EFFORT_LEVELS.map((level) => schema.literal(level)) as [
+    Type<ChatCompletionReasoningEffort>
+  ]
+);
+
 const reasoningSchema = schema.maybe(
   schema.object({
-    effort: schema.maybe(
-      schema.oneOf([
-        schema.literal('none'),
-        schema.literal('minimal'),
-        schema.literal('low'),
-        schema.literal('medium'),
-        schema.literal('high'),
-        schema.literal('xhigh'),
-      ])
-    ),
+    effort: schema.maybe(reasoningEffortSchema),
     enabled: schema.maybe(schema.boolean()),
     summary: schema.maybe(
       schema.oneOf([schema.literal('auto'), schema.literal('concise'), schema.literal('detailed')])

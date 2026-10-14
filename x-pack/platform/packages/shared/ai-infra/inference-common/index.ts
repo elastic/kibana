@@ -35,6 +35,8 @@ export {
   type ChatCompleteCompositeResponse,
   type ChatCompletionReasoning,
   type ChatCompletionReasoningEffort,
+  REASONING_EFFORT_LEVELS,
+  isReasoningEffort,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,
   type ChatCompletionChunkEvent,
