@@ -20,11 +20,13 @@ import type { AiAnonymizationSettingsStartDeps } from '../plugin';
 interface MountSectionParams {
   core: CoreSetup<AiAnonymizationSettingsStartDeps>;
   mountParams: ManagementAppMountParams;
+  isPatternTesterEnabled: boolean;
 }
 
 export const mountManagementSection = async ({
   core,
   mountParams: { element, setBreadcrumbs, history },
+  isPatternTesterEnabled,
 }: MountSectionParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
 
@@ -38,7 +40,10 @@ export const mountManagementSection = async ({
     <I18nProvider>
       <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
         <Router history={history}>
-          <AnonymizationSettingsApp setBreadcrumbs={setBreadcrumbs} />
+          <AnonymizationSettingsApp
+            setBreadcrumbs={setBreadcrumbs}
+            isPatternTesterEnabled={isPatternTesterEnabled}
+          />
         </Router>
       </KibanaContextProvider>
     </I18nProvider>

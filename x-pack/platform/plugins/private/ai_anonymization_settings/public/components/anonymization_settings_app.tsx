@@ -28,6 +28,7 @@ import { useKibana } from '../hooks/use_kibana';
 
 interface AnonymizationSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  isPatternTesterEnabled: boolean;
 }
 
 const pageTitle = i18n.translate('xpack.aiAnonymizationSettings.pageTitle', {
@@ -38,6 +39,7 @@ type TabId = 'builtin' | 'custom' | 'tester' | 'settings';
 
 export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> = ({
   setBreadcrumbs,
+  isPatternTesterEnabled,
 }) => {
   const {
     services: { application },
@@ -96,15 +98,19 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
       onClick: () => setSelectedTab('custom'),
       'data-test-subj': 'aiAnonymizationSettingsTab-custom',
     },
-    {
-      id: 'tester',
-      label: i18n.translate('xpack.aiAnonymizationSettings.tabs.tester', {
-        defaultMessage: 'Pattern tester',
-      }),
-      isSelected: selectedTab === 'tester',
-      onClick: () => setSelectedTab('tester'),
-      'data-test-subj': 'aiAnonymizationSettingsTab-tester',
-    },
+    ...(isPatternTesterEnabled
+      ? [
+          {
+            id: 'tester',
+            label: i18n.translate('xpack.aiAnonymizationSettings.tabs.tester', {
+              defaultMessage: 'Pattern tester',
+            }),
+            isSelected: selectedTab === 'tester',
+            onClick: () => setSelectedTab('tester'),
+            'data-test-subj': 'aiAnonymizationSettingsTab-tester',
+          },
+        ]
+      : []),
     {
       id: 'settings',
       label: i18n.translate('xpack.aiAnonymizationSettings.tabs.settings', {
@@ -176,6 +182,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
                 patterns={builtInPatterns}
                 onToggle={setRuleEnabled}
                 isSavingEnabled={canEditAdvancedSettings}
+                isPatternTesterEnabled={isPatternTesterEnabled}
               />
             )}
             {selectedTab === 'custom' && (
@@ -194,7 +201,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
                 isSavingEnabled={canEditAdvancedSettings}
               />
             )}
-            {selectedTab === 'tester' && (
+            {selectedTab === 'tester' && isPatternTesterEnabled && (
               <PatternTesterTab builtInPatterns={builtInPatterns} customPatterns={customPatterns} />
             )}
             {selectedTab === 'settings' && (
@@ -214,6 +221,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
         <PatternFlyout
           pattern={flyoutPattern}
           enabledRules={enabledRules}
+          isPatternTesterEnabled={isPatternTesterEnabled}
           onSave={handleSavePattern}
           onClose={closeFlyout}
         />

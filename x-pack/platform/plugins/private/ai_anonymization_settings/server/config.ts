@@ -21,5 +21,7 @@ const configSchema = schema.object({
 export type AiAnonymizationSettingsConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<AiAnonymizationSettingsConfig> = {
+  // The management page hides the pattern tester when it is switched off.
+  exposeToBrowser: { patternTester: true },
   schema: configSchema,
 };

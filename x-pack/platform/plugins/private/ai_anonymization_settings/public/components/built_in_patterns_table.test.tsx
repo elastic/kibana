@@ -37,16 +37,27 @@ const patterns: RegexAnonymizationRule[] = [
   },
 ];
 
-const renderTable = () =>
+const renderTable = (isPatternTesterEnabled = true) =>
   render(
     <I18nProvider>
-      <BuiltInPatternsTable patterns={patterns} onToggle={jest.fn()} isSavingEnabled={true} />
+      <BuiltInPatternsTable
+        patterns={patterns}
+        onToggle={jest.fn()}
+        isSavingEnabled={true}
+        isPatternTesterEnabled={isPatternTesterEnabled}
+      />
     </I18nProvider>
   );
 
 describe('BuiltInPatternsTable', () => {
   beforeEach(() => {
     mockTest.mockClear();
+  });
+
+  it('does not call the tester at all when it is disabled', () => {
+    renderTable(false);
+
+    expect(mockTest).not.toHaveBeenCalled();
   });
 
   it('requests the example outputs silently so a disabled tester does not toast on every visit', () => {

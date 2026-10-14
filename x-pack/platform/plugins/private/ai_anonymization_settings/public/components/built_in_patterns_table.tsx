@@ -57,19 +57,21 @@ interface BuiltInPatternsTableProps {
   patterns: RegexAnonymizationRule[];
   onToggle: (id: string, enabled: boolean) => void;
   isSavingEnabled: boolean;
+  isPatternTesterEnabled: boolean;
 }
 
 export const BuiltInPatternsTable: React.FC<BuiltInPatternsTableProps> = ({
   patterns,
   onToggle,
   isSavingEnabled,
+  isPatternTesterEnabled,
 }) => {
   const { test, result } = usePatternTester();
 
   const patternIds = patterns.map((pattern) => pattern.id).join(',');
 
   useEffect(() => {
-    if (!patterns.length) {
+    if (!isPatternTesterEnabled || !patterns.length) {
       return;
     }
     const sampleInput = Object.fromEntries(

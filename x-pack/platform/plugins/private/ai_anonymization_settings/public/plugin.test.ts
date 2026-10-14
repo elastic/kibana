@@ -16,7 +16,9 @@ describe('AiAnonymizationSettingsPlugin', () => {
       sections: { section: { ai: { registerApp: jest.fn().mockReturnValue(app) } } },
     } as unknown as ManagementSetup;
 
-    const plugin = new AiAnonymizationSettingsPlugin();
+    const plugin = new AiAnonymizationSettingsPlugin(
+      coreMock.createPluginInitializerContext({ patternTester: { enabled: true } })
+    );
     plugin.setup(coreMock.createSetup(), { management });
 
     return { plugin, app };

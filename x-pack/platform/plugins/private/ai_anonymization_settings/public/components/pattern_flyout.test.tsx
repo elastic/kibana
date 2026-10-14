@@ -13,11 +13,16 @@ import { PatternFlyout } from './pattern_flyout';
 // The tester modal's Monaco editor is not rendered unless the modal is opened, and loading it is slow.
 jest.mock('@kbn/code-editor', () => ({ CodeEditor: () => null }));
 
-const renderFlyout = (onSave: jest.Mock) => {
+const renderFlyout = (onSave: jest.Mock, isPatternTesterEnabled = true) => {
   const onClose = jest.fn();
   render(
     <I18nProvider>
-      <PatternFlyout enabledRules={[]} onSave={onSave} onClose={onClose} />
+      <PatternFlyout
+        enabledRules={[]}
+        isPatternTesterEnabled={isPatternTesterEnabled}
+        onSave={onSave}
+        onClose={onClose}
+      />
     </I18nProvider>
   );
   return { onClose };
@@ -36,6 +41,24 @@ const fillValidPattern = async () => {
 
 const clickSave = () =>
   userEvent.click(screen.getByTestId('aiAnonymizationSettingsPatternFlyoutSave'));
+
+describe('PatternFlyout tester button', () => {
+  it('offers the tester when it is enabled', () => {
+    renderFlyout(jest.fn(), true);
+
+    expect(
+      screen.getByTestId('aiAnonymizationSettingsPatternFlyoutTestButton')
+    ).toBeInTheDocument();
+  });
+
+  it('hides the tester button when the tester is disabled, since every request would be refused', () => {
+    renderFlyout(jest.fn(), false);
+
+    expect(
+      screen.queryByTestId('aiAnonymizationSettingsPatternFlyoutTestButton')
+    ).not.toBeInTheDocument();
+  });
+});
 
 describe('PatternFlyout saving', () => {
   it('closes once the pattern is saved', async () => {

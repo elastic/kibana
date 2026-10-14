@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { AiAnonymizationSettingsPlugin } from './plugin';
 
-export function plugin() {
-  return new AiAnonymizationSettingsPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new AiAnonymizationSettingsPlugin(initializerContext);
 }
 
 export type {

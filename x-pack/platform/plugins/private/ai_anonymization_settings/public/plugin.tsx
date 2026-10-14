@@ -6,8 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
+
+interface AiAnonymizationSettingsPublicConfig {
+  patternTester: { enabled: boolean };
+}
 
 export interface AiAnonymizationSettingsSetupDeps {
   management: ManagementSetup;
@@ -33,10 +37,16 @@ export class AiAnonymizationSettingsPlugin
 {
   private registeredApp?: ManagementApp;
 
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup(
     core: CoreSetup<AiAnonymizationSettingsStartDeps, AiAnonymizationSettingsPluginStart>,
     { management }: AiAnonymizationSettingsSetupDeps
   ): AiAnonymizationSettingsPluginSetup {
+    const {
+      patternTester: { enabled: isPatternTesterEnabled },
+    } = this.initializerContext.config.get<AiAnonymizationSettingsPublicConfig>();
+
     this.registeredApp = management.sections.section.ai.registerApp({
       id: 'aiAnonymizationSettings',
       title: i18n.translate('xpack.aiAnonymizationSettings.managementSectionLabel', {
@@ -48,7 +58,7 @@ export class AiAnonymizationSettingsPlugin
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section/mount_section');
 
-        return mountManagementSection({ core, mountParams });
+        return mountManagementSection({ core, mountParams, isPatternTesterEnabled });
       },
     });
 

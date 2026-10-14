@@ -43,6 +43,8 @@ interface PatternFlyoutProps {
   pattern?: RegexAnonymizationRule;
   /** All other currently-enabled rules, used so the inline tester reflects the full pipeline. */
   enabledRules: RegexAnonymizationRule[];
+  /** When false the inline tester is not offered. */
+  isPatternTesterEnabled: boolean;
   /** Resolves to whether the pattern was saved; the flyout stays open when it was not. */
   onSave: (pattern: NewCustomPattern) => Promise<boolean>;
   onClose: () => void;
@@ -68,6 +70,7 @@ const testerModalStyles = css`
 export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
   pattern,
   enabledRules,
+  isPatternTesterEnabled,
   onSave,
   onClose,
 }) => {
@@ -234,19 +237,21 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
               data-test-subj="aiAnonymizationSettingsPatternFlyoutEnabled"
             />
           </EuiFormRow>
-          <EuiFormRow>
-            <EuiButton
-              iconType="play"
-              onClick={() => setIsTesterOpen(true)}
-              isDisabled={!regexPattern.trim() || Boolean(patternError)}
-              data-test-subj="aiAnonymizationSettingsPatternFlyoutTestButton"
-            >
-              <FormattedMessage
-                id="xpack.aiAnonymizationSettings.patternFlyout.testButton"
-                defaultMessage="Test pattern"
-              />
-            </EuiButton>
-          </EuiFormRow>
+          {isPatternTesterEnabled && (
+            <EuiFormRow>
+              <EuiButton
+                iconType="play"
+                onClick={() => setIsTesterOpen(true)}
+                isDisabled={!regexPattern.trim() || Boolean(patternError)}
+                data-test-subj="aiAnonymizationSettingsPatternFlyoutTestButton"
+              >
+                <FormattedMessage
+                  id="xpack.aiAnonymizationSettings.patternFlyout.testButton"
+                  defaultMessage="Test pattern"
+                />
+              </EuiButton>
+            </EuiFormRow>
+          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
