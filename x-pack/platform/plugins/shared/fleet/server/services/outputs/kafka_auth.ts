@@ -182,6 +182,10 @@ export function withSavedKafkaAuth<T extends object>(
  * Whether an update keeps the authentication of an output exactly as it is: the same settings, and
  * the saved secrets sent back as references. Such an update does not need the method to be
  * allowed, it is an ordinary edit of the output.
+ *
+ * An update that names the authentication but leaves out the saved secrets does not keep it: the
+ * secrets would be deleted. (An update that does not name it gets the saved secrets restored first,
+ * see `withSavedKafkaAuth`.)
  */
 export function keepsKafkaAuth(
   method: KafkaAuthMethod,
@@ -203,7 +207,11 @@ export function keepsKafkaAuth(
   }
 
   const saved = secretsOf(original, method) ?? {};
-  const sent = secretsOf(update, method) ?? saved;
+  const sent = secretsOf(update, method);
+  if (!sent) {
+    // nothing to lose when nothing is saved, e.g. an output set up before the settings existed
+    return isEmpty(saved);
+  }
   const isSavedReference = (key: string) =>
     isPlainObject(sent[key]) &&
     (sent[key] as { id?: string }).id === (saved[key] as { id?: string } | undefined)?.id;

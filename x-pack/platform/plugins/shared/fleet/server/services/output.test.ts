@@ -236,6 +236,33 @@ function getMockedSoClient(
           config_yaml: 'kerberos:\n  enabled: true\n  auth_type: keytab\n',
         });
       }
+      case outputIdToUuid('existing-kafka-kerberos-password-output'): {
+        return mockOutputSO('existing-kafka-kerberos-password-output', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'password',
+            config_path: '/etc/krb5.conf',
+            username: 'kafka',
+            realm: 'EXAMPLE.COM',
+          },
+          secrets: { kerberos: { password: { id: 'saved-password-id' } } },
+        });
+      }
+      case outputIdToUuid('existing-kafka-kerberos-keytab-output'): {
+        return mockOutputSO('existing-kafka-kerberos-keytab-output', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'keytab',
+            config_path: '/etc/krb5.conf',
+            keytab: '/etc/kafka.keytab',
+            realm: 'EXAMPLE.COM',
+          },
+        });
+      }
       case outputIdToUuid('existing-kafka-oauth2-output'): {
         return mockOutputSO('existing-kafka-oauth2-output', {
           type: 'kafka',
@@ -448,6 +475,33 @@ function getMockedEncryptedSoClient() {
           is_default: false,
           auth_type: 'kerberos',
           config_yaml: 'kerberos:\n  enabled: true\n  auth_type: keytab\n',
+        });
+      }
+      case outputIdToUuid('existing-kafka-kerberos-password-output'): {
+        return mockOutputSO('existing-kafka-kerberos-password-output', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'password',
+            config_path: '/etc/krb5.conf',
+            username: 'kafka',
+            realm: 'EXAMPLE.COM',
+          },
+          secrets: { kerberos: { password: { id: 'saved-password-id' } } },
+        });
+      }
+      case outputIdToUuid('existing-kafka-kerberos-keytab-output'): {
+        return mockOutputSO('existing-kafka-kerberos-keytab-output', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'keytab',
+            config_path: '/etc/krb5.conf',
+            keytab: '/etc/kafka.keytab',
+            realm: 'EXAMPLE.COM',
+          },
         });
       }
       case outputIdToUuid('existing-kafka-oauth2-output'): {
@@ -3190,6 +3244,62 @@ describe('Output Service', () => {
           outputService.update(soClient, esClientMock, 'existing-kafka-output', kerberosUpdate())
         ).rejects.toThrow('Kerberos authentication of Kafka outputs is not enabled');
         expect(soClient.update).not.toHaveBeenCalled();
+      });
+
+      describe('updates that would leave the output without what Kerberos needs', () => {
+        const passwordKerberos = {
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          realm: 'EXAMPLE.COM',
+        };
+
+        it('should not take an update that names Kerberos but leaves out the password for an unchanged output', async () => {
+          const soClient = getMockedSoClient({});
+
+          // the password secret would be deleted, leaving an output the agent cannot use
+          await expect(
+            outputService.update(
+              soClient,
+              esClientMock,
+              'existing-kafka-kerberos-password-output',
+              {
+                auth_type: 'kerberos',
+                kerberos: passwordKerberos,
+              } as any
+            )
+          ).rejects.toThrow('secrets.kerberos.password is required');
+          expect(soClient.update).not.toHaveBeenCalled();
+        });
+
+        it('should keep an update that sends the saved password reference back', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-kerberos-password-output',
+            {
+              auth_type: 'kerberos',
+              kerberos: passwordKerberos,
+              secrets: { kerberos: { password: { id: 'saved-password-id' } } },
+            } as any
+          );
+
+          expect(soClient.update).toHaveBeenCalled();
+        });
+
+        it('should validate a partial update with the saved authentication type', async () => {
+          const soClient = getMockedSoClient({});
+
+          // no auth_type in the update: the saved output uses Kerberos, so the settings are checked
+          await expect(
+            outputService.update(soClient, esClientMock, 'existing-kafka-kerberos-keytab-output', {
+              kerberos: passwordKerberos,
+            } as any)
+          ).rejects.toThrow('secrets.kerberos.password is required');
+          expect(soClient.update).not.toHaveBeenCalled();
+        });
       });
 
       describe('output set up before Kerberos had settings, e.g. in the advanced YAML', () => {

@@ -561,8 +561,7 @@ describe('keepsKafkaAuth', () => {
     secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
   };
 
-  it('is true for an edit that does not touch the authentication', () => {
-    expect(keepsKafkaAuth('oauth2', saved, { type: 'kafka' })).toBe(true);
+  it('is true for an edit that sends back the same settings and the saved secrets', () => {
     expect(
       keepsKafkaAuth('oauth2', saved, {
         type: 'kafka',
@@ -570,6 +569,27 @@ describe('keepsKafkaAuth', () => {
         oauth2: { ...saved.oauth2 },
         secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
       })
+    ).toBe(true);
+  });
+
+  it('is false when the update leaves out the saved secrets, which would delete them', () => {
+    expect(keepsKafkaAuth('oauth2', saved, { type: 'kafka' })).toBe(false);
+    expect(
+      keepsKafkaAuth('oauth2', saved, {
+        type: 'kafka',
+        auth_type: 'oauth2',
+        oauth2: { ...saved.oauth2 },
+      })
+    ).toBe(false);
+  });
+
+  it('is true without secrets when none are saved', () => {
+    expect(
+      keepsKafkaAuth(
+        'oauth2',
+        { type: 'kafka', auth_type: 'oauth2', oauth2: saved.oauth2 },
+        { type: 'kafka', auth_type: 'oauth2', oauth2: { ...saved.oauth2 } }
+      )
     ).toBe(true);
   });
 
@@ -904,7 +924,20 @@ describe('Kerberos authentication', () => {
       expect(keepsKafkaAuth('kerberos', original, { kerberos, secrets: original.secrets })).toBe(
         true
       );
-      expect(keepsKafkaAuth('kerberos', original, { name: 'renamed' } as any)).toBe(true);
+    });
+
+    it('does not keep the authentication when the update leaves out the saved secrets', () => {
+      expect(keepsKafkaAuth('kerberos', original, { auth_type: 'kerberos', kerberos })).toBe(false);
+    });
+
+    it('keeps an output with the kerberos type and no settings, which has no secrets to lose', () => {
+      expect(
+        keepsKafkaAuth(
+          'kerberos',
+          { type: 'kafka', auth_type: 'kerberos' },
+          { type: 'kafka', auth_type: 'kerberos' }
+        )
+      ).toBe(true);
     });
 
     it('does not keep the authentication when a setting or the secret changes', () => {

@@ -1281,7 +1281,17 @@ class OutputService {
     const keptAuthMethods = KAFKA_AUTH_METHODS.filter((method) =>
       keepsKafkaAuth(method, originalOutput, typedFullUpdateData)
     );
-    this._runOutputValidators(typedFullUpdateData, isPreconfigured, keptAuthMethods);
+    // the update may leave out the authentication type: the one of the saved output applies
+    const validatedData =
+      mergedType === outputType.Kafka
+        ? ({
+            ...typedFullUpdateData,
+            auth_type:
+              (typedFullUpdateData as KafkaOutput).auth_type ??
+              (originalOutput as KafkaOutput).auth_type,
+          } as UpdateTypedOutput)
+        : typedFullUpdateData;
+    this._runOutputValidators(validatedData, isPreconfigured, keptAuthMethods);
 
     // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.
     // id is stripped to prevent poisoning the saved object's identity field.
