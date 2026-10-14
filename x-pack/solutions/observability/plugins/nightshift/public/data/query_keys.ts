@@ -8,4 +8,5 @@
 export const DISCOVERY_QUERIES_QUERY_KEY = ['discoveryQueries'] as const;
 export const DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY = ['discoveryQueriesOccurrences'] as const;
 export const SOURCES_QUERY_KEY = ['nightshiftSources'] as const;
+export const SOURCE_ONBOARDING_STATUS_QUERY_KEY = ['sourceOnboardingStatus'] as const;
 export const FEATURES_QUERY_KEY = ['features'] as const;
