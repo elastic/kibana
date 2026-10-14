@@ -735,18 +735,36 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
       expect(awsJson).not.toEqual(gcpJson);
     });
 
-    it('aws IAM record: filters on the stored user.entity.id with no higher-ranked guards', () => {
+    it('aws IAM record: does not guard user.entity.id, which the record does not store', () => {
       const roleArn = 'arn:aws:iam::123456789012:role/Admin';
       const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { id: `user:${roleArn}@aws`, namespace: 'aws' },
         cloud: { provider: 'aws' },
-        user: { id: [roleArn, 'AROAEXAMPLE:session-1'], entity: { id: [roleArn] }, name: 'Admin' },
+        user: { id: [roleArn, 'AROAEXAMPLE:session-1'], name: 'Admin' },
       });
 
       expect(result?.bool?.filter).toEqual(
-        expect.arrayContaining([{ term: { 'user.entity.id': roleArn } }])
+        expect.arrayContaining([{ term: { 'user.id': roleArn } }])
       );
-      expect(result?.bool?.must).toBeUndefined();
+      // user.entity.id ranks first but is not on the record. Requiring it to be missing would
+      // match no document, because every AWS document carries it.
+      expect(result?.bool?.must).toEqual([fieldMissingOrEmpty('user.email')]);
+    });
+
+    it('guards only the higher-ranked identity fields that the record stores', () => {
+      const userDefinition = getBuiltInEntityDefinition('user');
+      const withoutStoredEmail = {
+        ...userDefinition,
+        fields: userDefinition.fields.filter(({ destination }) => destination !== 'user.email'),
+      };
+      const record = { entity: { namespace: 'okta' }, user: { id: 'u1' } };
+
+      expect(getEuidDslFilterBasedOnEntityRecord(userDefinition, record)?.bool?.must).toEqual([
+        fieldMissingOrEmpty('user.email'),
+      ]);
+      expect(
+        getEuidDslFilterBasedOnEntityRecord(withoutStoredEmail, record)?.bool?.must
+      ).toBeUndefined();
     });
 
     it('never emits a term on the evaluated entity.namespace destination', () => {

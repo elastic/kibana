@@ -41,14 +41,6 @@ describe('getEuidSourceFields', () => {
     expect(result.identitySourceFields).toContain('user.entity.id');
     expect(result.identitySourceFields).not.toContain('cloud.provider');
   });
-
-  it('stores every user identity source field on the entity record (record-based lookups rank on them)', () => {
-    const userDefinition = getBuiltInEntityDefinition(EntityType.enum.user);
-    const storedFields = new Set(userDefinition.fields.map(({ destination }) => destination));
-    const { identitySourceFields } = getEuidSourceFields(userDefinition);
-
-    expect(identitySourceFields.filter((field) => !storedFields.has(field))).toEqual([]);
-  });
 });
 
 describe('getEuidNamespaceSourceFields', () => {

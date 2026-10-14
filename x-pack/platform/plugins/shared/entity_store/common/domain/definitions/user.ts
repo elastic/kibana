@@ -274,8 +274,9 @@ export function buildUserEntityDefinition(
       }),
       collect({ source: 'user.hash' }),
       collect({ source: 'user.id' }),
-      // Ranked first for CLOUD_PROVIDERS_RANKING_USER_ENTITY_ID; record-based lookups need it.
-      collect({ source: 'user.entity.id' }),
+      // `user.entity.id` is an identity field but is deliberately not stored: a new stored field
+      // is not mapped on an existing `latest` index, which breaks the extraction LOOKUP JOIN.
+      // Store it once entity index mappings can be migrated (see MAPPING_VERSION).
       collect({ source: 'user.roles' }),
       collect({ source: 'user.group.domain' }),
       collect({ source: 'user.group.id' }),
