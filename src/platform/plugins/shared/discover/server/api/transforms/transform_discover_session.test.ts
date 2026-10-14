@@ -747,6 +747,8 @@ describe('discover session API transforms', () => {
                 counterAggregation: 'max',
                 gaugeAggregation: 'min',
                 histogramPercentile: 'p99',
+                gridSortField: 'recency',
+                gridSortDirection: 'desc',
               },
             },
           },
@@ -1220,6 +1222,8 @@ describe('discover session API transforms', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p99',
+        gridSortField: 'recency',
+        gridSortDirection: 'desc',
       };
       const savedMetricsSession = {
         ...discoverSessionAttributes,
@@ -1243,6 +1247,8 @@ describe('discover session API transforms', () => {
         counter_aggregation: 'max',
         gauge_aggregation: 'min',
         histogram_percentile: 'p99',
+        grid_sort_field: 'recency',
+        grid_sort_direction: 'desc',
       });
 
       expect(sessionState.tabs[0]).not.toHaveProperty('tabTypeState');
