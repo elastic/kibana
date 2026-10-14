@@ -10,6 +10,7 @@
     "@kbn/agent-builder-common",
     "@kbn/core",
     "@kbn/evals",
+    "@kbn/security-evals-matrix",
     "@kbn/security-evals-alerts-snapshot",
     "@kbn/tooling-log"
   ]

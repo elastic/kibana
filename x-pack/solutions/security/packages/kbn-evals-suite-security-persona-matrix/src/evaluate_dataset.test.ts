@@ -89,7 +89,7 @@ describe('toDatasetExample', () => {
 describe('createPersonaMatrixTrajectoryEvaluator', () => {
   const buildArgs = (
     example: PersonaMatrixExample,
-    steps: Array<{ type?: string; tool_id?: string }>
+    steps: Array<{ type?: string; tool_id?: string; tool_origin?: string }>
   ) => {
     const wrapped: PersonaMatrixDatasetExample = toDatasetExample(example);
     return {
@@ -131,17 +131,30 @@ describe('createPersonaMatrixTrajectoryEvaluator', () => {
     expect(result.score).toBeGreaterThan(0);
   });
 
-  it('excludes filestore.read from the actual tool sequence', async () => {
+  it('drops Agent Builder runtime tools from the actual tool sequence', async () => {
     const evaluator = createPersonaMatrixTrajectoryEvaluator();
     const result = await evaluator.evaluate(
       buildArgs(baseExample, [
-        { type: 'tool_call', tool_id: 'filestore.read' },
-        { type: 'tool_call', tool_id: 'security.alerts' },
-        { type: 'tool_call', tool_id: 'security.get_related_alerts' },
+        { type: 'tool_call', tool_id: 'load_skill', tool_origin: 'internal' },
+        { type: 'tool_call', tool_id: 'security.alerts', tool_origin: 'registry' },
+        { type: 'tool_call', tool_id: 'write_todos', tool_origin: 'internal' },
+        { type: 'tool_call', tool_id: 'security.get_related_alerts', tool_origin: 'registry' },
       ])
     );
     const metadata = result.metadata as { actual: string[] } | undefined;
-    expect(metadata?.actual).not.toContain('filestore.read');
+    expect(metadata?.actual).toEqual(['security.alerts', 'security.get_related_alerts']);
+  });
+
+  it('scores the suite-registered custom tools, which the runtime reports as registry', async () => {
+    const evaluator = createPersonaMatrixTrajectoryEvaluator();
+    const result = await evaluator.evaluate(
+      buildArgs(baseExample, [
+        { type: 'tool_call', tool_id: 'virustotal_lookup', tool_origin: 'registry' },
+        { type: 'tool_call', tool_id: 'security.alerts', tool_origin: 'registry' },
+      ])
+    );
+    expect(result.score).not.toBeNull();
+    expect((result.metadata as { actual: string[] }).actual).toContain('virustotal_lookup');
   });
 
   it('every real dataset example resolves a non-empty expected tool list in evaluator metadata', async () => {

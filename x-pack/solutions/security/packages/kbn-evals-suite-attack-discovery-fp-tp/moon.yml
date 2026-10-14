@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/dev-cli-runner'
   - '@kbn/evals'
+  - '@kbn/security-evals-matrix'
   - '@kbn/evals-suite-attack-discovery-agent-builder'
   - '@kbn/scout'
   - '@kbn/security-evals-workflow-traces'

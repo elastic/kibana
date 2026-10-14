@@ -8,8 +8,6 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  createTrajectoryEvaluator,
-  getToolCallSteps,
   type AgentBuilderClient,
   type DefaultEvaluators,
   type EvaluationDataset,
@@ -18,6 +16,12 @@ import {
   type Example,
   type TaskOutput,
 } from '@kbn/evals';
+import {
+  createAgentBuilderToolClassifier,
+  createSecurityTrajectoryEvaluator,
+  createUnclassifiedToolsEvaluator,
+  getAgentBuilderToolCalls,
+} from '@kbn/security-evals-matrix';
 import { converseQuestionToTaskOutput } from './converse_task';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
 // Security-owned fork: also scores load_skill spans (platform createSkillInvocationEvaluator is filestore.read only).
@@ -45,26 +49,21 @@ export type EvaluateForensicDataset = (options: {
   };
 }) => Promise<void>;
 
-const FILESTORE_READ_TOOL_ID = 'filestore.read';
-const LOAD_SKILL_TOOL_ID = 'load_skill';
-
-const SKILL_ROUTING_TOOL_IDS = new Set([FILESTORE_READ_TOOL_ID, LOAD_SKILL_TOOL_ID]);
+const classifyTool = createAgentBuilderToolClassifier();
 
 export const createForensicTrajectoryEvaluator = (): Evaluator<
   ForensicDatasetExample,
   TaskOutput
 > => {
-  const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) =>
-      getToolCallSteps(output as TaskOutput)
-        .map((step) => step.tool_id)
-        .filter((id): id is string => typeof id === 'string' && !SKILL_ROUTING_TOOL_IDS.has(id)),
+  const inner = createSecurityTrajectoryEvaluator({
+    extractToolCalls: getAgentBuilderToolCalls,
     goldenPathExtractor: (expected) => {
       const exp = expected as ForensicDatasetExample['output'] | undefined;
       return exp?.tool_sequence ?? [];
     },
     orderWeight: 0.6,
     coverageWeight: 0.4,
+    classifyTool,
   });
 
   return {
@@ -144,6 +143,12 @@ export const buildForensicEvaluators = ({
       }) as Evaluator<ForensicDatasetExample, TaskOutput>
     ),
     createForensicTrajectoryEvaluator(),
+    createUnclassifiedToolsEvaluator({
+      extractToolCalls: getAgentBuilderToolCalls,
+      goldenPathExtractor: (expected) =>
+        (expected as ForensicDatasetExample['output'] | undefined)?.tool_sequence ?? [],
+      classifyTool,
+    }) as Evaluator<ForensicDatasetExample, TaskOutput>,
   ];
 };
 

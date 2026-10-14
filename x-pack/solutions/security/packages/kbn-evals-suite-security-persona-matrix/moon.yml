@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/core'
   - '@kbn/evals'
+  - '@kbn/security-evals-matrix'
   - '@kbn/evals-suite-attack-discovery'
   - '@kbn/scout'
   - '@kbn/security-evals-alerts-snapshot'
