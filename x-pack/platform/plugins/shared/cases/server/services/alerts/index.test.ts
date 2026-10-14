@@ -890,6 +890,25 @@ describe('updateAlertsStatus', () => {
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
+    it('authorizes a dev-only data generator attack discovery alert in the current space', async () => {
+      esClient.mget.mockResolvedValueOnce(
+        attackDoc({
+          'kibana.alert.rule.rule_type_id': 'security.attack_discovery.data_generator',
+          'kibana.space_ids': ['default'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      // The generator rule writes through the same AAD config into the same index, so its
+      // documents are attack discoveries. It is registered only in dev mode or on Elastic-owned
+      // cloud, which is where the production gate lives. Rejecting these made the feature
+      // untestable with the generator everyone desk tests with.
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
     it('sends only the scheduled attacks of a mixed batch through alerting RBAC', async () => {
       esClient.mget.mockResolvedValueOnce({
         docs: [
