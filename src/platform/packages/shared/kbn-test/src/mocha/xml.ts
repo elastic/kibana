@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @ts-ignore
-import regenerate from 'regenerate';
 import stripAnsi from 'strip-ansi';
 
 // selects any code point not allowed by https://www.w3.org/TR/xml/#NT-Char. Keep it a single
