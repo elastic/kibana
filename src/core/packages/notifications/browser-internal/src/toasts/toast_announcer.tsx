@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState, type FunctionComponent } from 'react';
-import { EuiScreenReaderLive } from '@elastic/eui';
+import { EuiLiveAnnouncer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Toast } from '@kbn/core-notifications-browser';
 
@@ -31,7 +31,8 @@ interface Props {
 }
 
 interface Announcement {
-  id: string;
+  /** Unique per announcement, so that repeating a message inserts a new node that is announced. */
+  key: string;
   message: string;
 }
 
@@ -101,6 +102,7 @@ export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMounte
   const announcerRef = useRef<HTMLDivElement>(null);
   const seenToastIds = useRef(new Set<string>());
   const pendingIds = useRef(new Set<string>());
+  const announcementCount = useRef(0);
 
   useEffect(() => {
     // A group is pending when any of its toasts is new, so repeated toasts are announced again
@@ -119,6 +121,7 @@ export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMounte
     }
 
     const announce = () => {
+      const batch = ++announcementCount.current;
       const nextAnnouncements = [...pendingIds.current].flatMap((id): Announcement[] => {
         // Toasts dismissed before they could be announced are skipped
         const toast = idToToasts[id]?.[0];
@@ -126,7 +129,9 @@ export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMounte
           return [];
         }
         const content = getToastContent(id, toast, getMountedText);
-        return content ? [{ id, message: withToastType(toast.color, content) }] : [];
+        return content
+          ? [{ key: `${batch}:${id}`, message: withToastType(toast.color, content) }]
+          : [];
       });
 
       pendingIds.current.clear();
@@ -154,16 +159,25 @@ export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMounte
     return () => clearTimeout(timeoutId);
   }, [idToToasts, getMountedText]);
 
-  // EuiScreenReaderLive announces whenever its children change identity, so keep them stable
-  // across re-renders of the toast list
+  // Memoized so that re-renders of the toast list don't restart EuiLiveAnnouncer's clear timer
   const content = useMemo(
-    () => announcements.map(({ id, message }) => <p key={id}>{message}</p>),
+    () =>
+      announcements.length ? (
+        <>
+          {announcements.map(({ key, message }) => (
+            <p key={key}>{message}</p>
+          ))}
+        </>
+      ) : null,
     [announcements]
   );
 
+  // EuiLiveAnnouncer keeps one region that is always live and only changes its content.
+  // EuiScreenReaderLive instead un-hides and enables a second region in the same update that
+  // inserts the content, which VoiceOver in particular does not reliably announce.
   return (
     <div ref={announcerRef}>
-      <EuiScreenReaderLive>{content}</EuiScreenReaderLive>
+      <EuiLiveAnnouncer data-test-subj="globalToastListAnnouncer">{content}</EuiLiveAnnouncer>
     </div>
   );
 };

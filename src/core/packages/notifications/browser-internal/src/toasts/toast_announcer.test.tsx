@@ -40,7 +40,7 @@ const advanceTimers = async (ms: number) => {
   });
 };
 
-const getAnnouncer = () => screen.getByRole('status');
+const getAnnouncer = () => screen.getByTestId('globalToastListAnnouncer');
 const getAnnouncement = () => getAnnouncer().textContent;
 
 describe('ToastAnnouncer', () => {
@@ -57,6 +57,13 @@ describe('ToastAnnouncer', () => {
     renderToastList();
 
     expect(screen.getByTestId('globalToastList').getAttribute('aria-live')).toBe('off');
+  });
+
+  it('announces through a live region that is always polite', () => {
+    renderToastList();
+
+    expect(getAnnouncer().getAttribute('role')).toBe('status');
+    expect(getAnnouncer().getAttribute('aria-live')).toBe('polite');
   });
 
   it('announces a new toast with its type after a short delay', async () => {
@@ -192,14 +199,14 @@ describe('ToastAnnouncer', () => {
     addToast({ id: '1', title: 'Saved', color: 'success' });
     await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS);
 
-    const [firstRegion, secondRegion] = screen.getAllByRole('status', { hidden: true });
-    const regionWithAnnouncement = firstRegion.textContent ? firstRegion : secondRegion;
+    const firstMessage = getAnnouncer().querySelector('p');
 
     addToast({ id: '2', title: 'Saved', color: 'success' });
     await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS);
 
-    expect(getAnnouncement()).toContain('Success: Saved');
-    // The announcement moved to the other live region, so screen readers announce it again
-    expect(getAnnouncer()).not.toBe(regionWithAnnouncement);
+    // A new node is inserted into the live region, so screen readers announce it again
+    const secondMessage = getAnnouncer().querySelector('p');
+    expect(secondMessage?.textContent).toBe('Success: Saved');
+    expect(secondMessage).not.toBe(firstMessage);
   });
 });
