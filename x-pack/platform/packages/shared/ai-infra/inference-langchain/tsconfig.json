@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/inference-common",
+    "@kbn/logging",
     "@kbn/zod",
   ]
 }
