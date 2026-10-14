@@ -7,7 +7,7 @@
 
 import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
@@ -28,6 +28,7 @@ import {
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   ruleTagsParamsSchema,
+  ruleResponseSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
 import { tagsResponseSchema } from './common';
@@ -367,6 +368,17 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: { name: 'test rule', routing_tags: ['a'.repeat(129)] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('metadata.template', () => {
+    it('is not accepted in a request body', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', template: { id: 'template-1' } },
       });
 
       expect(result.success).toBe(false);
@@ -1368,6 +1380,11 @@ describe('updateRuleDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('rejects metadata.template', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { template: { id: 'template-1' } } });
+    expect(result.success).toBe(false);
+  });
+
   it('accepts artifacts in update payload and supports null removal', () => {
     const withArtifacts = updateRuleDataSchema.parse({
       artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
@@ -1689,6 +1706,21 @@ describe('updateRuleDataSchema', () => {
   });
 });
 
+describe('ruleResponseSchema metadata', () => {
+  it('returns metadata.template when present', () => {
+    const result = ruleResponseSchema.shape.metadata.parse({
+      name: 'test rule',
+      template: { id: 'template-1' },
+    });
+
+    expect(result.template).toEqual({ id: 'template-1' });
+  });
+
+  it('accepts metadata without a template', () => {
+    expect(ruleResponseSchema.shape.metadata.safeParse({ name: 'test rule' }).success).toBe(true);
+  });
+});
+
 describe('getBreachEsqlQuery', () => {
   it('returns base verbatim when the breach block is omitted', () => {
     expect(getBreachEsqlQuery({ base: 'FROM metrics-*' })).toBe('FROM metrics-*');
@@ -1795,10 +1827,9 @@ describe('getRootEsqlQuery', () => {
 
 describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleDataSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-    }) as {
+    const json = inlineRootJsonSchemaRef(
+      z.toJSONSchema(updateRuleDataSchema, { target: 'draft-7', unrepresentable: 'any' })
+    ) as {
       properties?: Record<string, { description?: string }>;
       definitions?: Record<string, { description?: string }>;
     };

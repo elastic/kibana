@@ -97,9 +97,12 @@ describe('useWatchSettingsDraft', () => {
         await result.current.save();
       });
 
-      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, [
-        SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
-      ]);
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID],
+        { isServerless: false }
+      );
       expect(mutateAsync).toHaveBeenCalledWith({
         workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
         patch: {
@@ -178,7 +181,9 @@ describe('useWatchSettingsDraft', () => {
         await result.current.save();
       });
 
-      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, []);
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, [], {
+        isServerless: false,
+      });
       expect(mutateAsync).toHaveBeenCalledWith({
         workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
         patch: { enabled: true },

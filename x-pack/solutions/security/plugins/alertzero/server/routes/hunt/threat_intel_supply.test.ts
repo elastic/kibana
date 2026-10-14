@@ -151,6 +151,23 @@ describe('registerHuntThreatIntelSupplyRoutes', () => {
     expect(response.badRequest).toHaveBeenCalled();
   });
 
+  it('names the template-free reports index when Restore is rejected for it', async () => {
+    const restoreSupplyForSpace = jest
+      .fn()
+      .mockRejectedValue(new ThreatIntelSupplyHardGateError(['reports_index_unmanaged']));
+    const { postHandler } = setupRoutes({
+      getSupplyStatus: jest.fn(),
+      restoreSupplyForSpace,
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await postHandler(createRouteContextMock({ manageSecurity: true }), restoreRequest(), response);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: expect.stringContaining('exists without its template') },
+    });
+  });
+
   it('rejects Restore when Hunt is off', async () => {
     const restoreSupplyForSpace = jest
       .fn()

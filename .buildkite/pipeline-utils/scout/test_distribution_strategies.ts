@@ -106,6 +106,7 @@ async function distributeScoutTestsOnLanes() {
           process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
         ...envVarsIfSet([
           'SERVERLESS_TESTS_ONLY',
+          'TEST_ES_SERVERLESS_IMAGE',
           'UIAM_DOCKER_IMAGE',
           'UIAM_COSMOSDB_DOCKER_IMAGE',
         ]),

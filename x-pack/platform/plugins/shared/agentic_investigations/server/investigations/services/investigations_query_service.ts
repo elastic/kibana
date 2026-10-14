@@ -39,6 +39,7 @@ import type {
   ListInvestigationsQuery,
   ListInvestigationsResponse,
 } from '../../../common/investigations/investigation';
+import { countPendingProposals } from './count_pending_proposals';
 import { isInvestigationSeverity } from '../../../common/investigations/severity';
 import { isInvestigationTitlePending } from '../../../common/investigations/title';
 import type {
@@ -116,7 +117,7 @@ export class InvestigationsQueryService {
       this.deps.getSubjectsService().listByConversationIds([id], spaceId),
       this.deps.getImpactService().findByConversationId(id, spaceId),
       this.deps.getHypothesesService().findByConversationId(id, spaceId),
-      this.deps.inProgress.isInProgress(request, spaceId, id),
+      this.deps.inProgress.isInProgress(request, spaceId, conversation),
       this.listProposals(request, id, spaceId),
     ]);
 
@@ -141,13 +142,11 @@ export class InvestigationsQueryService {
     const { page, per_page: perPage, sort_field: sortField, sort_order: sortOrder } = query;
     const spaceId = this.deps.getSpaceId(request);
     const client = await this.deps.getConversationClient(request);
-    const inProgressIds = await this.deps.inProgress.findInProgressIds(request, spaceId);
 
     const candidates = await this.findCandidates({
       client,
       spaceId,
       filters: query,
-      inProgressIds,
       searchSort:
         sortField === 'severity'
           ? { field: 'updated_at', order: 'desc' }
@@ -162,7 +161,6 @@ export class InvestigationsQueryService {
       client,
       spaceId,
       conversations: candidates.slice(start, start + perPage),
-      inProgressIds,
     });
     return { results, pagination: { total: candidates.length, page, per_page: perPage } };
   }
@@ -173,16 +171,11 @@ export class InvestigationsQueryService {
   ): Promise<InvestigationSeverityCounts> {
     const spaceId = this.deps.getSpaceId(request);
     const client = await this.deps.getConversationClient(request);
-    const inProgressIds =
-      filters.in_progress === undefined
-        ? new Set<string>()
-        : await this.deps.inProgress.findInProgressIds(request, spaceId);
 
     const candidates = await this.findCandidates({
       client,
       spaceId,
       filters,
-      inProgressIds,
       searchSort: { field: 'updated_at', order: 'desc' },
       compare: compareConversations('updated_at', 'desc'),
     });
@@ -229,14 +222,12 @@ export class InvestigationsQueryService {
       return [];
     }
 
-    const inProgressIds = await this.deps.inProgress.findInProgressIds(request, spaceId);
     const wanted = new Set(subjects.map(subjectKey));
     const hydrated = await this.hydrate({
       request,
       client,
       spaceId,
       conversations: open,
-      inProgressIds,
     });
     return hydrated.filter((investigation) =>
       investigation.subjects.some((subject) => wanted.has(subjectKey(subject)))
@@ -253,21 +244,18 @@ export class InvestigationsQueryService {
     client,
     spaceId,
     filters,
-    inProgressIds,
     searchSort,
     compare,
   }: {
     client: ConversationPublicClient;
     spaceId: string;
     filters: InvestigationFilters;
-    inProgressIds: Set<string>;
     searchSort: ConversationSearchSort;
     compare: (a: ConversationSummary, b: ConversationSummary) => number;
   }): Promise<ConversationSummary[]> {
-    const matches = (conversation: ConversationSummary) =>
-      matchesFilters(conversation, filters, inProgressIds);
+    const matches = (conversation: ConversationSummary) => matchesFilters(conversation, filters);
 
-    const ids = await this.findCandidateIds(spaceId, filters, inProgressIds);
+    const ids = await this.findCandidateIds(spaceId, filters);
     if (ids === undefined) {
       return this.searchCandidates({ client, filters, searchSort, matches });
     }
@@ -285,8 +273,8 @@ export class InvestigationsQueryService {
   /**
    * Candidates from an access-checked conversation search, read page by page in `searchSort`
    * order until {@link MAX_INVESTIGATION_CANDIDATES} of them pass the in-memory filters (the ones
-   * the search filter cannot express, such as `in_progress` or the free-text query) or the
-   * search runs out, within Elasticsearch's result window.
+   * the search filter cannot express, such as the free-text query) or the search runs out, within
+   * Elasticsearch's result window.
    */
   private async searchCandidates({
     client,
@@ -317,13 +305,12 @@ export class InvestigationsQueryService {
   }
 
   /**
-   * Candidate ids from the side indexes and the in-progress set, intersected. Undefined when no
-   * such filter is set, so candidates come from a conversation search instead.
+   * Candidate ids from the side indexes, intersected. Undefined when no such filter is set, so
+   * candidates come from a conversation search instead.
    */
   private async findCandidateIds(
     spaceId: string,
-    filters: InvestigationFilters,
-    inProgressIds: Set<string>
+    filters: InvestigationFilters
   ): Promise<string[] | undefined> {
     const sets: string[][] = [];
 
@@ -373,10 +360,6 @@ export class InvestigationsQueryService {
       );
     }
 
-    if (filters.in_progress === true) {
-      sets.push([...inProgressIds]);
-    }
-
     if (sets.length === 0) {
       return undefined;
     }
@@ -395,22 +378,27 @@ export class InvestigationsQueryService {
     client,
     spaceId,
     conversations,
-    inProgressIds,
   }: {
     request: KibanaRequest;
     client: ConversationPublicClient;
     spaceId: string;
     conversations: ConversationSummary[];
-    inProgressIds: Set<string>;
   }): Promise<InvestigationSummary[]> {
     if (conversations.length === 0) {
       return [];
     }
     const ids = conversations.map(({ id }) => id);
-    const [subjects, impacts, pendingProposalCounts] = await Promise.all([
+    const [subjects, impacts, pendingProposalCounts, inProgressIds] = await Promise.all([
       this.deps.getSubjectsService().listByConversationIds(ids, spaceId),
       this.deps.getImpactService().listByConversationIds(ids, spaceId),
-      this.countPendingProposals(request, ids, spaceId),
+      countPendingProposals({
+        proposals: this.deps.getProposals(),
+        request,
+        conversationIds: ids,
+        spaceId,
+        logger: this.deps.logger,
+      }),
+      this.deps.inProgress.findInProgressIds(request, spaceId, conversations),
     ]);
     const subjectsByConversation = groupBy(subjects, ({ conversationId }) => conversationId);
     const impactByConversation = new Map(impacts.map((impact) => [impact.conversationId, impact]));
@@ -512,34 +500,6 @@ export class InvestigationsQueryService {
   }
 
   /**
-   * Pending proposals per conversation, in one aggregation. Undefined when the proposals plugin
-   * is absent or the caller may not read proposals, so a list does not need that privilege.
-   */
-  private async countPendingProposals(
-    request: KibanaRequest,
-    conversationIds: string[],
-    spaceId: string
-  ): Promise<Map<string, number> | undefined> {
-    const proposals = this.deps.getProposals();
-    if (!proposals) {
-      return undefined;
-    }
-    try {
-      await proposals.getProposalPrivileges().assertCanRead(request);
-    } catch {
-      return undefined;
-    }
-    try {
-      return await proposals
-        .getProposalsService()
-        .countPendingByConversationIds(conversationIds, spaceId);
-    } catch (error) {
-      this.deps.logger.debug(`Could not count pending proposals: ${errorMessage(error)}`);
-      return undefined;
-    }
-  }
-
-  /**
    * The investigation's live proposals. Empty when the proposals plugin is absent or the caller
    * may not read proposals, so an investigation read does not need the proposals privilege.
    */
@@ -562,6 +522,7 @@ export class InvestigationsQueryService {
         {
           conversationId,
           excludeSuperseded: true,
+          excludeUndecidedSuperseded: false,
           excludeExpired: false,
           size: MAX_INVESTIGATION_PROPOSALS,
           from: 0,
@@ -606,8 +567,7 @@ const buildSearchFilter = (filters: InvestigationFilters): KueryNode => {
 
 const matchesFilters = (
   conversation: ConversationSummary,
-  filters: InvestigationFilters,
-  inProgressIds: Set<string>
+  filters: InvestigationFilters
 ): boolean => {
   if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
     return false;
@@ -628,11 +588,6 @@ const matchesFilters = (
   }
   if (filters.created_before && !(createdAt <= Date.parse(filters.created_before))) {
     return false;
-  }
-  if (filters.in_progress !== undefined) {
-    if (inProgressIds.has(conversation.id) !== filters.in_progress) {
-      return false;
-    }
   }
   if (filters.query !== undefined) {
     // A title Agent Builder has not generated yet is its placeholder, which says nothing about

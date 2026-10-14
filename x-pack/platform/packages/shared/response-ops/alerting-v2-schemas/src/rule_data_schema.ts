@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
   validateEsqlQuery,
@@ -923,6 +923,16 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
+    // `template` is server-managed: it is returned but not accepted on write.
+    metadata: metadataSchema
+      .extend({
+        template: z
+          .object({ id: z.string().describe('Id of the rule template.') })
+          .strict()
+          .optional()
+          .describe('The rule template this rule was created from.'),
+      })
+      .describe('Rule metadata.'),
     id: z.string().describe('Unique rule identifier.'),
     version: z
       .number()
@@ -933,9 +943,9 @@ export const ruleResponseSchema = createRuleDataBaseSchema
       ),
     enabled: z.boolean().describe('Whether the rule is enabled.'),
     created_by: actorSchema.nullable().describe('Actor who created the rule.'),
-    created_at: z.iso.datetime().describe('ISO timestamp when the rule was created.'),
+    created_at: isoDateTime().describe('ISO timestamp when the rule was created.'),
     updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
-    updated_at: z.iso.datetime().describe('ISO timestamp when the rule was last updated.'),
+    updated_at: isoDateTime().describe('ISO timestamp when the rule was last updated.'),
   })
   .meta({ id: 'alerting_rule_response' });
 
