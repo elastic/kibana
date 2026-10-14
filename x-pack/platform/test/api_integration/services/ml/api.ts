@@ -948,8 +948,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           .query({ force: true });
         // Force-deleting a sibling job can remove a shared results index mid-cleanup,
         // making ES answer 404 even though the datafeed itself is gone.
-        if (status === 404 && (await this.datafeedExist(datafeedId)) === false) {
-          return;
+        if (status === 404) {
+          const { status: getStatus } = await esSupertest.get(`/_ml/datafeeds/${datafeedId}`);
+          if (getStatus === 404) {
+            return;
+          }
         }
         this.assertResponseStatusCode(200, status, body);
       });
