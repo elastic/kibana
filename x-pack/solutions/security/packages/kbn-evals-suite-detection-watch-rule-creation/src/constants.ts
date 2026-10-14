@@ -11,6 +11,11 @@
  * 2.0.
  */
 
+import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
+
 /**
  * Managed workflow id, installed globally by the alertzero plugin at start via installStatic /
  * ALERTZERO_WATCH_WORKFLOW_IDS. The eval asserts this exact document is present — it does not create or
@@ -38,12 +43,12 @@ export const INVESTIGATION_INPUT = 'investigation_id';
 
 /**
  * Inference feature the workflow's `ai.agent` step resolves its connector from
- * (`connector-id-by-feature`). Inlined to match ALERTZERO_REASONING_INFERENCE_FEATURE_ID in
- * @kbn/alertzero-common, which a test package cannot depend on.
+ * (`connector-id-by-feature`). Taken from @kbn/alertzero-common so a tier rename cannot leave the
+ * suite binding an id nothing reads; workflow_contract.test.ts pins it to the managed yaml.
  */
-export const RULE_CREATION_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+export const RULE_CREATION_INFERENCE_FEATURE_ID = ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID;
 /** Feature the coverage review's `coverage_check` ai.agent step resolves its connector from. */
-export const COVERAGE_CHECK_INFERENCE_FEATURE_ID = 'alertzero_fast';
+export const COVERAGE_CHECK_INFERENCE_FEATURE_ID = ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID;
 export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
 export const INFERENCE_SETTINGS_API_VERSION = '1';
 
