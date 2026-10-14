@@ -2905,6 +2905,15 @@ describe('add_controls / remove_controls operations', () => {
       expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY \`host.keyword\``]);
     });
 
+    it('leaves a dashboard without controls unchanged when every control is dropped', async () => {
+      const { dashboardData } = await addControls(
+        [{ type: 'options_list_control', field_name: 'missing', index }],
+        createFieldCapabilitiesResolver({})
+      );
+
+      expect(dashboardData).toEqual(emptyDashboard);
+    });
+
     const notMapped = `Not mapped on index "${index}".`;
     const notAggregatable = `Is not aggregatable on index "${index}".`;
     const conflicting = `Has conflicting mappings on index "${index}".`;
@@ -3050,6 +3059,16 @@ describe('add_controls / remove_controls operations', () => {
     const remaining = (afterRemove.pinned_panels as Array<Record<string, unknown>>)[0];
     expect(remaining.id).not.toBe(idToRemove);
     expect((remaining.config as Record<string, unknown>).title).toBe('Host');
+  });
+
+  it('remove_controls leaves a dashboard without controls unchanged', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [{ operation: 'remove_controls', control_ids: ['nonexistent-id'] }],
+      logger,
+    });
+
+    expect(dashboardData).toEqual(emptyDashboard);
   });
 
   it('remove_controls with unknown id leaves controls unchanged', async () => {

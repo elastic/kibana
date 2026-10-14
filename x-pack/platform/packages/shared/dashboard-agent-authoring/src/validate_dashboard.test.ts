@@ -285,6 +285,34 @@ describe('discardInvalidChanges', () => {
     ]);
   });
 
+  it('leaves no controls list when all new controls of a dashboard without controls are dropped', () => {
+    const originalDashboardData = { title: 'Dashboard', panels: [] };
+
+    const result = discardInvalidChanges({
+      originalDashboardData,
+      dashboardData: { ...originalDashboardData, pinned_panels: [{ id: 'new', invalid: true }] },
+      validator,
+    });
+
+    expect(result.dashboardData).toEqual(originalDashboardData);
+  });
+
+  it('keeps the removal of all existing controls when the new controls are dropped', () => {
+    const originalDashboardData = {
+      title: 'Dashboard',
+      panels: [],
+      pinned_panels: [{ id: 'existing', field: 'host.name' }],
+    };
+
+    const result = discardInvalidChanges({
+      originalDashboardData,
+      dashboardData: { ...originalDashboardData, pinned_panels: [{ id: 'new', invalid: true }] },
+      validator,
+    });
+
+    expect(result.dashboardData).toEqual({ ...originalDashboardData, pinned_panels: [] });
+  });
+
   it('reverts an invalid change to a dashboard field', () => {
     const originalDashboardData = { title: 'Dashboard', panels: [] };
 
