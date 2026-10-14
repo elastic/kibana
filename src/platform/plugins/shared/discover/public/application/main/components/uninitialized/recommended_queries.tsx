@@ -20,12 +20,16 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  mathWithUnits,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { QueryTemplate } from '@kbn/esql-language';
 
 const RUN_BUTTON_CLASS = 'discoverRecommendedQuery__run';
+
+// Share of the viewport the section takes, below and from the EUI `xl` breakpoint.
+const SECTION_VIEWPORT_SHARE = { default: 85, wide: 75 };
 
 const cardStyles = css`
   .${RUN_BUTTON_CLASS} {
@@ -62,9 +66,13 @@ const RecommendedQueryCard = ({
   onRunQuery: (query: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const codeBlockHeight = mathWithUnits(
+    [euiTheme.size.xxxxl, euiTheme.size.xxxl],
+    (xxxxl, xxxl) => xxxxl + xxxl
+  );
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m" css={cardStyles}>
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s" css={cardStyles}>
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
@@ -98,6 +106,7 @@ const RecommendedQueryCard = ({
         fontSize="s"
         paddingSize="s"
         isCopyable
+        overflowHeight={codeBlockHeight}
         css={{ marginTop: euiTheme.size.m }}
       >
         {queryString}
@@ -118,7 +127,19 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
     <section
       aria-labelledby={titleId}
       data-test-subj="discoverRecommendedQueries"
-      css={{ paddingInline: euiTheme.size.l }}
+      css={{
+        paddingInline: euiTheme.size.l,
+        boxSizing: 'border-box',
+        minWidth: 0,
+        width: `${SECTION_VIEWPORT_SHARE.default}vw`,
+        maxWidth: '100%',
+        [`@media (max-width: ${euiTheme.breakpoint.m - 1}px)`]: {
+          paddingTop: euiTheme.size.l,
+        },
+        [`@media (min-width: ${euiTheme.breakpoint.xl}px)`]: {
+          width: `${SECTION_VIEWPORT_SHARE.wide}vw`,
+        },
+      }}
     >
       <EuiTitle size="xs">
         <h2 id={titleId}>
@@ -127,7 +148,20 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
           })}
         </h2>
       </EuiTitle>
-      <EuiFlexGrid columns={3} gutterSize="m" css={{ marginTop: euiTheme.size.base }}>
+      <EuiFlexGrid
+        columns={3}
+        gutterSize="m"
+        css={{
+          marginTop: euiTheme.size.base,
+          width: '100%',
+          minWidth: 0,
+          // minmax(0, 1fr) keeps long queries from stretching the columns.
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          [`@media (max-width: ${euiTheme.breakpoint.m - 1}px)`]: {
+            gridTemplateColumns: '1fr',
+          },
+        }}
+      >
         {queries.map((query) => (
           <EuiFlexItem key={query.queryString}>
             <RecommendedQueryCard query={query} onRunQuery={onRunQuery} />
