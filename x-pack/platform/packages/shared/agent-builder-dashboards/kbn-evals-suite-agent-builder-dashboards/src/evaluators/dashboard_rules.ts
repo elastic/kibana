@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
+import {
+  isSection,
+  type AttachmentPanel,
+  type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import {
   GRID_COLUMNS,
@@ -118,15 +119,39 @@ const overlaps = (a: AttachmentPanel, b: AttachmentPanel): boolean =>
   a.grid.y < b.grid.y + b.grid.h &&
   b.grid.y < a.grid.y + a.grid.h;
 
-const covers = ({ grid }: AttachmentPanel, x: number, y: number): boolean =>
-  x >= grid.x && x < grid.x + grid.w && y >= grid.y && y < grid.y + grid.h;
+type GridBox = AttachmentPanel['grid'];
 
-/** The first empty cell, in reading order, that has a panel starting below it. */
-const findFirstGap = (panels: readonly AttachmentPanel[]): { x: number; y: number } | undefined => {
-  const lastTop = Math.max(...panels.map(({ grid }) => grid.y));
-  for (let y = 0; y < lastTop; y++) {
+const coversColumn = (box: GridBox, x: number): boolean => x >= box.x && x < box.x + box.w;
+
+const covers = (box: GridBox, x: number, y: number): boolean =>
+  coversColumn(box, x) && y >= box.y && y < box.y + box.h;
+
+/** Top of the last row, where a row is a run of boxes whose heights overlap. */
+const getLastRowTop = (boxes: readonly GridBox[]): number => {
+  let top = -Infinity;
+  let bottom = -Infinity;
+  for (const { y, h } of [...boxes].sort((a, b) => a.y - b.y)) {
+    if (y >= bottom) {
+      top = y;
+    }
+    bottom = Math.max(bottom, y + h);
+  }
+  return top;
+};
+
+/**
+ * The first empty cell, in reading order, above the last row or above a box
+ * in the same column that could move up into it.
+ */
+const findFirstGap = (boxes: readonly GridBox[]): { x: number; y: number } | undefined => {
+  const lastRowTop = getLastRowTop(boxes);
+  const bottom = Math.max(...boxes.map(({ y, h }) => y + h));
+  for (let y = 0; y < bottom; y++) {
     for (let x = 0; x < GRID_COLUMNS; x++) {
-      if (!panels.some((panel) => covers(panel, x, y))) {
+      const isGap =
+        !boxes.some((box) => covers(box, x, y)) &&
+        (y < lastRowTop || boxes.some((box) => box.y > y && coversColumn(box, x)));
+      if (isGap) {
         return { x, y };
       }
     }
@@ -183,22 +208,28 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
     { appliesTo: 'all' }
   ),
   // Rows fill the 48 columns down to the last one, so no panel below could move into an empty cell.
-  layout_gap: dashboardRule('appearance', (dashboard) =>
-    getPanelContainers(dashboard).flatMap(({ sectionTitle, panels }) => {
-      const gap = findFirstGap(panels);
-      const container = describeContainer(sectionTitle);
+  // In the top level each section takes one full-width row.
+  layout_gap: dashboardRule('appearance', (dashboard) => {
+    const sectionRows = dashboard.panels
+      .filter(isSection)
+      .map(({ grid: { y } }) => ({ x: 0, y, w: GRID_COLUMNS, h: 1 }));
+    return getPanelContainers(dashboard).flatMap(({ sectionId, sectionTitle, panels }) => {
+      const grids = panels.map(({ grid }) => grid);
+      const gap = findFirstGap(sectionId === undefined ? [...grids, ...sectionRows] : grids);
       return gap === undefined
         ? []
         : [
             {
               rule: 'layout_gap' as const,
               panelIds: [],
-              container,
-              detail: `empty cell at x=${gap.x} y=${gap.y} in ${container}, above other panels`,
+              container: sectionId,
+              detail: `empty cell at x=${gap.x} y=${gap.y} in ${describeContainer(
+                sectionTitle
+              )}, above other panels`,
             },
           ];
-    })
-  ),
+    });
+  }),
   full_width_kpi: panelRule('full_width_kpi', {
     appliesTo: ['metric', 'gauge'],
     check: (panel) =>

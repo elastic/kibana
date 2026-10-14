@@ -17,7 +17,7 @@ export interface RuleViolation<TRuleId extends string = string> {
   detail: string;
   /** JSON path inside the panel config, when the rule points at one field. */
   path?: string;
-  /** The top level or a section, when a dashboard-level rule is checked per container. */
+  /** Section id when a dashboard-level rule is checked per container; unset for the top level. */
   container?: string;
 }
 

@@ -21,13 +21,16 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 /** Panels that share one coordinate space: the top level, or one section. */
 export interface PanelContainer {
   /** `undefined` for the top level. */
+  sectionId?: string;
+  /** `undefined` for the top level. */
   sectionTitle?: string;
   panels: AttachmentPanel[];
 }
 
 export const getPanelContainers = (dashboard: DashboardAttachmentData): PanelContainer[] => [
   { panels: dashboard.panels.filter((widget): widget is AttachmentPanel => !isSection(widget)) },
-  ...dashboard.panels.filter(isSection).map(({ title, panels }) => ({
+  ...dashboard.panels.filter(isSection).map(({ id, title, panels }) => ({
+    sectionId: id,
     sectionTitle: title,
     panels,
   })),
