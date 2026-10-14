@@ -80,14 +80,17 @@ describe('DEFAULT_SOURCES approved catalog', () => {
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
     'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
     'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
+    'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
+    'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
+    'rss:cert-fr-iocs': 'https://cert.cyber.gouv.fr/ioc/feed/',
   };
 
   it('contains only the approved source IDs and URLs', () => {
     expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly four sources enabled', () => {
-    expect(DEFAULT_SOURCES).toHaveLength(4);
+  it('ships exactly seven sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(7);
     expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
   });
 

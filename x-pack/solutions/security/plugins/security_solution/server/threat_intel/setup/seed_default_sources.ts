@@ -18,8 +18,8 @@ import {
  *
  * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
  * sources index. This fixed catalog contains Elastic Security Labs reporting,
- * CISA vulnerability and advisory data, and UK NCSC publications. Operators can
- * only list and enable / disable entries.
+ * CISA vulnerability and advisory data, and publications from the UK NCSC and
+ * CERT-FR. Operators can only list and enable / disable entries.
  */
 interface DefaultSource {
   id: string;
@@ -60,6 +60,27 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     adapter_type: 'rss',
     name: 'UK National Cyber Security Centre',
     tags: ['government', 'advisories', 'research', 'guidance'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cert-fr-alerts',
+    adapter_type: 'rss',
+    name: 'CERT-FR Security Alerts',
+    tags: ['government', 'france', 'advisories', 'vulnerability'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cert-fr-threats',
+    adapter_type: 'rss',
+    name: 'CERT-FR Threats and Incidents',
+    tags: ['government', 'france', 'research', 'threat-report'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cert-fr-iocs',
+    adapter_type: 'rss',
+    name: 'CERT-FR IOC Publications',
+    tags: ['government', 'france', 'indicators', 'ioc'],
     enabled: true,
   },
 ];
