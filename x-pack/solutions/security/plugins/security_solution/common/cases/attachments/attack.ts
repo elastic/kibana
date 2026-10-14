@@ -89,11 +89,12 @@ const AttackAttachmentMetadataSchema = z
      * The index the attached attack lives in — either
      * `alerts-security.attack.discovery.alerts` (scheduled) or
      * `.adhoc.alerts-security.attack.discovery.alerts` (adhoc). Read by the Cases
-     * platform (`getIndexFromMetadata`) so the "already attached" duplicate check can
-     * pair this attachment's id with an index — unified attachment matching requires a
-     * 1:1 id/index mapping, and without it the attachment is dropped from the check.
-     * Required here (unlike `security.alert`) because there is no legacy attachment
-     * shape to stay compatible with.
+     * platform (`getIndexFromMetadata`) so status sync knows which index to write to,
+     * so the flyout can reopen the attack document, and so authorization can resolve it.
+     * The "already attached" duplicate check matches on the attack id alone — unlike
+     * `security.alert`, an attack carries exactly one id, so there is no id/index pairing
+     * to maintain. Required here (unlike `security.alert`) because there is no legacy
+     * attachment shape to stay compatible with.
      */
     index: z.string().min(1).max(MAX_ATTACK_INDEX_LENGTH),
   })
