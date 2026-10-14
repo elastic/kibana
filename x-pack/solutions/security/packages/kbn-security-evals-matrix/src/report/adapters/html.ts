@@ -219,19 +219,21 @@ export const mdToHtml = (md: string): string => {
     } else if (/^\d+\.\s/.test(trimmed)) {
       if (!inOl) {
         closeList();
+        out.push('<ol>');
         inOl = true;
       }
       out.push(`<li>${inlineMd(esc(trimmed.replace(/^\d+\.\s/, '')))}</li>`);
     } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       if (!inUl) {
         closeList();
+        out.push('<ul>');
         inUl = true;
       }
       // Indented sub-bullets open a nested <ul> inside the previous <li>.
       const content = inlineMd(esc(trimmed.slice(2)));
-      if (indent >= 2) {
+      if (indent >= 2 && (inNested || out[out.length - 1].endsWith('</li>'))) {
         if (!inNested) {
-          const last = (out.pop() ?? '<li></li>').replace(/<\/li>$/, '');
+          const last = (out.pop() as string).replace(/<\/li>$/, '');
           out.push(`${last}<ul>`);
           inNested = true;
         }

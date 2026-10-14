@@ -115,6 +115,24 @@ describe('mdToHtml', () => {
     expect(html).toContain('<li>c</li>');
   });
 
+  it('opens and closes a standalone unordered list', () => {
+    expect(mdToHtml('- a\n- b')).toBe('<ul>\n<li>a</li>\n<li>b</li>\n</ul>');
+  });
+
+  it('opens and closes a standalone ordered list', () => {
+    expect(mdToHtml('1. a\n2. b')).toBe('<ol>\n<li>a</li>\n<li>b</li>\n</ol>');
+  });
+
+  it('balances list tags when a nested list is followed by an ordered list', () => {
+    expect(mdToHtml('- a\n  - b\n1. c')).toBe(
+      '<ul>\n<li>a<ul>\n<li>b</li>\n</ul></li>\n</ul>\n<ol>\n<li>c</li>\n</ol>'
+    );
+  });
+
+  it('opens a top-level list when the first bullet is indented', () => {
+    expect(mdToHtml('intro\n  - a')).toBe('<p>intro</p>\n<ul>\n<li>a</li>\n</ul>');
+  });
+
   it('renders blockquotes and horizontal rules', () => {
     const html = mdToHtml('> quoted\n\n---');
     expect(html).toContain('<blockquote>');

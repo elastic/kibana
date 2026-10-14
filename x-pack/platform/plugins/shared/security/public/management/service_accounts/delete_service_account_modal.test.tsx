@@ -41,7 +41,7 @@ describe('DeleteServiceAccountModal', () => {
     const onDeleted = jest.fn();
     const onError = jest.fn();
 
-    renderWithI18n(
+    const { unmount } = renderWithI18n(
       <EuiProvider>
         <DeleteServiceAccountModal
           serviceAccount={serviceAccount}
@@ -53,8 +53,90 @@ describe('DeleteServiceAccountModal', () => {
       </EuiProvider>
     );
 
-    return { listWorkloads, deleteAccount, onClose, onDeleted, onError };
+    return {
+      listWorkloads,
+      deleteAccount,
+      onClose,
+      onDeleted,
+      onError,
+      unmount,
+    };
   };
+
+  it('opens at once with a loading state while it checks the workloads', async () => {
+    let answer: (response: { workloads: ServiceAccountBoundWorkload[] }) => void = () => {};
+    renderModal({
+      listWorkloads: jest.fn(
+        () =>
+          new Promise((resolve) => {
+            answer = resolve;
+          })
+      ),
+    });
+
+    const loading = screen.getByTestId('serviceAccountDeleteLoadingModal');
+    expect(loading).toHaveTextContent('Delete "workflow-runner"?');
+    expect(within(loading).getByTestId('serviceAccountDeleteLoading')).toBeVisible();
+    expect(within(loading).getByTestId('serviceAccountDeleteLoadingCancel')).toBeEnabled();
+
+    answer({ workloads: [] });
+
+    expect(await screen.findByTestId('serviceAccountDeleteConfirmModal')).toBeVisible();
+    expect(screen.queryByTestId('serviceAccountDeleteLoadingModal')).not.toBeInTheDocument();
+  });
+
+  it('can be cancelled while it checks the workloads, and ignores the answer that follows', async () => {
+    let fail: (error: Error) => void = () => {};
+    const { onClose, onError, deleteAccount, unmount } = renderModal({
+      listWorkloads: jest.fn(
+        () =>
+          new Promise((_, reject) => {
+            fail = reject;
+          })
+      ),
+    });
+
+    fireEvent.click(screen.getByTestId('serviceAccountDeleteLoadingCancel'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    // The page closes the modal when it is told to.
+    unmount();
+
+    fail(new Error('Network failure'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(deleteAccount).not.toHaveBeenCalled();
+  });
+
+  it('links the workloads it can, in a new tab, and names their types', async () => {
+    renderModal({
+      listWorkloads: jest.fn().mockResolvedValue({
+        workloads: [
+          {
+            ...workload('w-1'),
+            displayName: 'Nightly report',
+            typeName: 'Workflow',
+            href: '/s/marketing/app/workflows/w-1',
+          },
+          { ...workload('w-2'), displayName: 'w-2', typeName: 'Workflow' },
+          { ...workload('r-1'), pluginId: 'alerting', workloadType: 'rule', displayName: 'r-1' },
+        ],
+      }),
+    });
+
+    const table = await screen.findByTestId('serviceAccountBoundWorkloadsTable');
+    const links = within(table).getAllByTestId('serviceAccountBoundWorkloadLink');
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveTextContent('Nightly report');
+    expect(links[0]).toHaveAttribute('href', '/s/marketing/app/workflows/w-1');
+    expect(links[0]).toHaveAttribute('target', '_blank');
+
+    expect(within(table).getByText('w-2').closest('a')).toBeNull();
+    expect(within(table).getByText('r-1').closest('a')).toBeNull();
+    expect(within(table).getAllByText('Workflow')).toHaveLength(2);
+    expect(within(table).getByText('rule')).toBeVisible();
+  });
 
   it('asks to confirm an unbound account, then deletes it', async () => {
     const deleteAccount = jest.fn().mockResolvedValue({ warnings: ['a token was left behind'] });
