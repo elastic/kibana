@@ -148297,8 +148297,6 @@ components:
             type: string
           maxItems: 1000
           type: array
-        max_attempts:
-          type: number
         name:
           description: The monitor name.
           maxLength: 4096
@@ -149398,8 +149396,6 @@ components:
             type: string
           maxItems: 1000
           type: array
-        max_attempts:
-          type: number
         name:
           description: The monitor name.
           maxLength: 4096
@@ -152813,8 +152809,6 @@ components:
             type: string
           maxItems: 1000
           type: array
-        max_attempts:
-          type: number
         max_redirects:
           anyOf:
             - maxLength: 32
@@ -155449,8 +155443,6 @@ components:
             type: string
           maxItems: 1000
           type: array
-        max_attempts:
-          type: number
         max_redirects:
           anyOf:
             - maxLength: 32
@@ -155697,8 +155689,6 @@ components:
             type: string
           maxItems: 1000
           type: array
-        max_attempts:
-          type: number
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
           enum:
@@ -172160,8 +172150,6 @@ components:
             type: string
           maxItems: 1000
           type: array
-        max_attempts:
-          type: number
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
           enum:
