@@ -39,7 +39,7 @@
       "tags": [
         "platform",
         "agent-builder",
-        "security"
+        "kibana-security"
       ],
       "ciLabels": [
         "evals:agent-builder-security"
