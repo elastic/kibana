@@ -35,10 +35,6 @@ interface ListKiTableProps {
   kis: KiListItem[];
 }
 
-const clickableRowClassName = css({
-  cursor: 'pointer',
-});
-
 const toTableRow = (ki: KiListItem): ListKiTableRow => ({
   ...ki,
   rowKey: `${ki.index}:${ki.id}`,
@@ -126,7 +122,6 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
             navigateToContextEngine(getViewKiPath(aiIndexId, ki.id), {
               index: ki.index,
             }),
-          className: clickableRowClassName,
           'aria-label': i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.viewKi', {
             defaultMessage: 'View Knowledge Indicator {title}',
             values: { title },
