@@ -60,6 +60,10 @@ describe('ElasticsearchService', () => {
       });
     });
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it('exposes proper contract', () => {
       expect(service.start()).toEqual({ watchOnlineStatus$: expect.any(Function) });
     });
@@ -89,6 +93,8 @@ describe('ElasticsearchService', () => {
 
     it('`watchOnlineStatus$` allows to schedule retry', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
+      // Pin the jitter to its lower bound, so every delay is half of its max.
+      jest.spyOn(Math, 'random').mockReturnValue(0);
 
       // Both ES and license are available.
       mockLicense.isEnabled.mockReturnValue(true);
@@ -103,46 +109,81 @@ describe('ElasticsearchService', () => {
 
       const [[{ scheduleRetry }]] = mockHandler.mock.calls;
 
-      // Next retry isn't performed immediately, retry happens only after a timeout.
-      scheduleRetry();
-      await nextTick();
-      expect(mockHandler).toHaveBeenCalledTimes(1);
-      jest.advanceTimersByTime(100);
-      expect(mockHandler).toHaveBeenCalledTimes(2);
+      const expectRetryAfter = async (delay: number) => {
+        const callCount = mockHandler.mock.calls.length;
+        scheduleRetry();
+        await nextTick();
+        jest.advanceTimersByTime(delay - 1);
+        expect(mockHandler).toHaveBeenCalledTimes(callCount);
+        jest.advanceTimersByTime(1);
+        expect(mockHandler).toHaveBeenCalledTimes(callCount + 1);
+        await nextTick();
+      };
 
-      // Delay between consequent retries is increasing.
-      scheduleRetry();
-      await nextTick();
-      jest.advanceTimersByTime(100);
-      expect(mockHandler).toHaveBeenCalledTimes(2);
-      await nextTick();
-      jest.advanceTimersByTime(100);
-      expect(mockHandler).toHaveBeenCalledTimes(3);
-
-      // Delay between consequent retries is increasing.
-      scheduleRetry();
-      await nextTick();
-      jest.advanceTimersByTime(200);
-      expect(mockHandler).toHaveBeenCalledTimes(3);
-      await nextTick();
-      jest.advanceTimersByTime(100);
-      expect(mockHandler).toHaveBeenCalledTimes(4);
+      // Delay between consequent retries doubles until it reaches the max.
+      await expectRetryAfter(500);
+      await expectRetryAfter(1000);
+      await expectRetryAfter(2000);
+      await expectRetryAfter(4000);
+      await expectRetryAfter(5000);
+      await expectRetryAfter(5000);
+      expect(mockHandler).toHaveBeenCalledTimes(7);
 
       // If `scheduleRetry` isn't called retries aren't scheduled anymore.
-      await nextTick();
       jest.runAllTimers();
-      expect(mockHandler).toHaveBeenCalledTimes(4);
+      expect(mockHandler).toHaveBeenCalledTimes(7);
 
       // New changes still trigger handler once again and reset retry timer.
       mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
-      expect(mockHandler).toHaveBeenCalledTimes(5);
+      expect(mockHandler).toHaveBeenCalledTimes(8);
 
       // Retry timer is reset.
+      await nextTick();
+      await expectRetryAfter(500);
+    });
+
+    it('`watchOnlineStatus$` randomizes the upper half of the retry delay', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+      // Pin the jitter to its upper bound, so every delay is (almost) its max.
+      jest.spyOn(Math, 'random').mockReturnValue(1 - Number.EPSILON);
+
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockStatusSubject.next({
+        elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+        savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+      });
+
+      const mockHandler = jest.fn();
+      service.start().watchOnlineStatus$().subscribe(mockHandler);
+      const [[{ scheduleRetry }]] = mockHandler.mock.calls;
+
       scheduleRetry();
       await nextTick();
-      expect(mockHandler).toHaveBeenCalledTimes(5);
-      jest.advanceTimersByTime(100);
-      expect(mockHandler).toHaveBeenCalledTimes(6);
+      jest.advanceTimersByTime(999);
+      expect(mockHandler).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+      expect(mockHandler).toHaveBeenCalledTimes(2);
+    });
+
+    it('`watchOnlineStatus$` keeps a single pending retry', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+      jest.spyOn(Math, 'random').mockReturnValue(0);
+
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockStatusSubject.next({
+        elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+        savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+      });
+
+      const mockHandler = jest.fn();
+      service.start().watchOnlineStatus$().subscribe(mockHandler);
+      const [[{ scheduleRetry }]] = mockHandler.mock.calls;
+
+      scheduleRetry();
+      scheduleRetry();
+      await nextTick();
+      jest.runAllTimers();
+      expect(mockHandler).toHaveBeenCalledTimes(2);
     });
 
     it('`watchOnlineStatus$` cancels scheduled retry if status changes before retry timeout fires', async () => {
