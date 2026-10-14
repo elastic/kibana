@@ -1348,12 +1348,14 @@ const InternalUnifiedDataTable = React.forwardRef<
         filteredLeadColumns.unshift(colorIndicatorControlColumn);
       }
 
-      const actionsColumn = getActionsColumn({
-        baseColumns: leadColumnsExtraContent,
-        rowAdditionalLeadingControls,
-        externalControlColumns,
-        visibleRowLeadingControls,
-      });
+      const actionsColumn = isInteractive
+        ? getActionsColumn({
+            baseColumns: leadColumnsExtraContent,
+            rowAdditionalLeadingControls,
+            externalControlColumns,
+            visibleRowLeadingControls,
+          })
+        : undefined;
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
       }

@@ -2288,6 +2288,22 @@ describe('UnifiedDataTable', () => {
       ).toBe(false);
     });
 
+    it('removes additional and external leading controls', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+        externalControlColumns: [testLeadingControlColumn],
+        rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
+      });
+
+      expect(getLastEuiDataGridProps().leadingControlColumns).toEqual([]);
+      expect(
+        screen.queryByTestId('exampleRowControl-chartBarVerticalStack')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('test-body-control-column-cell')).not.toBeInTheDocument();
+    });
+
     it('hides the rows-per-page options while leaving pagination active', async () => {
       await renderComponent({
         ...getProps(),
