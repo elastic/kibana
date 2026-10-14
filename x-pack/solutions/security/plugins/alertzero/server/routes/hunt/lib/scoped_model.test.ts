@@ -34,7 +34,7 @@ const mockSearchInferenceEndpoints = {
   },
 };
 
-const featureId = 'alertzero_reasoning';
+const featureId = 'alertzero_frontier';
 
 beforeEach(() => {
   jest.clearAllMocks();

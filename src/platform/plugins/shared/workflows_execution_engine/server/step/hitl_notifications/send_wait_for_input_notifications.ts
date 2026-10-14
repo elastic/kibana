@@ -24,6 +24,7 @@ import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
+  executeHitlHttpChannel,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -246,5 +247,15 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const httpConfig = channels.http;
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
+      abortController,
+    });
   }
 }
