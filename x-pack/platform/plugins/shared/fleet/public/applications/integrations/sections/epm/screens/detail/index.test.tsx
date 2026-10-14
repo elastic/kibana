@@ -500,6 +500,70 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package has non FIPS policy templates', () => {
+    const renderWithFips = async ({
+      isFipsEnabled,
+      fipsCompatible,
+    }: {
+      isFipsEnabled: boolean;
+      fipsCompatible: boolean;
+    }) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          policy_templates: baseResponse.item.policy_templates?.map((template) => ({
+            ...template,
+            fips_compatible: fipsCompatible,
+          })),
+        },
+      });
+      mockedApi.responseProvider.fleetSetup.mockReturnValue({
+        isReady: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+        is_fips_enabled: isFipsEnabled,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should hide the Configs tab when FIPS is enabled and all policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: false });
+
+        await renderResult.findByTestId('tab-settings');
+        expect(renderResult.queryByTestId('tab-configs')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is enabled and the policy templates are FIPS compatible',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: true });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is not enabled even if the policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: false, fipsCompatible: false });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();

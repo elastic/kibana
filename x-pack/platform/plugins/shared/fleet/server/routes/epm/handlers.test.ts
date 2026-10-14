@@ -27,6 +27,7 @@ jest.mock('../../services', () => {
     },
     appContextService: {
       getTaskManagerStart: jest.fn().mockReturnValue({}),
+      getIsFipsEnabled: jest.fn().mockReturnValue(false),
       getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     },
   };
@@ -267,5 +268,92 @@ describe('getListHandler — withPackagePoliciesCount SO client', () => {
 
     expect(mockGetGlobalClient).not.toHaveBeenCalled();
     expect(mockGetCount).not.toHaveBeenCalled();
+  });
+});
+
+describe('getListHandler — FIPS filtering', () => {
+  const fipsPkg = {
+    name: 'all-non-fips',
+    id: 'all-non-fips',
+    status: 'not_installed',
+    policy_templates: [{ name: 't', title: 't', description: '', fips_compatible: false }],
+  };
+  const mixedPkg = {
+    name: 'mixed',
+    id: 'mixed',
+    status: 'not_installed',
+    policy_templates: [
+      { name: 'ok', title: 'ok', description: '', fips_compatible: undefined },
+      { name: 'bad', title: 'bad', description: '', fips_compatible: false },
+    ],
+  };
+  const cleanPkg = {
+    name: 'clean',
+    id: 'clean',
+    status: 'not_installed',
+    policy_templates: [{ name: 'good', title: 'good', description: '', fips_compatible: true }],
+  };
+
+  const listContext = {
+    core: Promise.resolve({}),
+    fleet: Promise.resolve({ internalSoClient: {}, spaceId: 'default' }),
+  } as any;
+  const listRequest = { query: {} } as any;
+  const listResponse = { ok: jest.fn() } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (getPackages as jest.Mock).mockResolvedValue([fipsPkg, mixedPkg, cleanPkg]);
+    listResponse.ok.mockImplementation(() => {});
+  });
+
+  it('does not filter packages when FIPS is disabled', async () => {
+    (appContextService.getIsFipsEnabled as jest.Mock).mockReturnValue(false);
+
+    await getListHandler(listContext, listRequest, listResponse);
+
+    const body = listResponse.ok.mock.calls[0][0].body;
+    const names = body.items.map((p: any) => p.name);
+    expect(names).toContain('all-non-fips');
+    expect(names).toContain('mixed');
+    expect(names).toContain('clean');
+  });
+
+  it('drops packages where all templates are non-FIPS when FIPS is enabled', async () => {
+    (appContextService.getIsFipsEnabled as jest.Mock).mockReturnValue(true);
+
+    await getListHandler(listContext, listRequest, listResponse);
+
+    const body = listResponse.ok.mock.calls[0][0].body;
+    const names = body.items.map((p: any) => p.name);
+    expect(names).not.toContain('all-non-fips');
+  });
+
+  it('keeps partially-FIPS packages but strips their non-FIPS templates when FIPS is enabled', async () => {
+    (appContextService.getIsFipsEnabled as jest.Mock).mockReturnValue(true);
+
+    await getListHandler(listContext, listRequest, listResponse);
+
+    const body = listResponse.ok.mock.calls[0][0].body;
+    const mixed = body.items.find((p: any) => p.name === 'mixed');
+    expect(mixed).toBeDefined();
+    expect(mixed.policy_templates).toHaveLength(1);
+    expect(mixed.policy_templates[0].name).toBe('ok');
+  });
+
+  it('always excludes security_ai_prompts regardless of FIPS mode', async () => {
+    const aiPkg = {
+      name: 'security_ai_prompts',
+      id: 'security_ai_prompts',
+      status: 'not_installed',
+    };
+    (getPackages as jest.Mock).mockResolvedValue([cleanPkg, aiPkg]);
+    (appContextService.getIsFipsEnabled as jest.Mock).mockReturnValue(false);
+
+    await getListHandler(listContext, listRequest, listResponse);
+
+    const body = listResponse.ok.mock.calls[0][0].body;
+    const names = body.items.map((p: any) => p.name);
+    expect(names).not.toContain('security_ai_prompts');
   });
 });

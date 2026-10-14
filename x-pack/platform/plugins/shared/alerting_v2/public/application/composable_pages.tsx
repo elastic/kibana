@@ -37,11 +37,11 @@ import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
 import type { AlertingV2HostApp } from '../locators';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { ManageRulesHrefProvider } from './manage_rules_href_context';
 
-import { CLASSIC_EPISODES_DATA_SOURCE } from '../episode_sources';
+import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
@@ -182,14 +182,14 @@ export const AlertingV2EpisodesPage = ({
     () =>
       createActions
         ? {
-            ...CLASSIC_EPISODES_DATA_SOURCE,
+            ...CLASSIC_ALERTS_DATA_SOURCE,
             createActions,
           }
-        : CLASSIC_EPISODES_DATA_SOURCE,
+        : CLASSIC_ALERTS_DATA_SOURCE,
     [createActions]
   );
 
-  const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
+  const kibanaReactServices: AlertsKibanaServices = useMemo(
     () => ({
       ...coreStart,
       share: container.get(PluginStart('share')) as SharePluginStart,

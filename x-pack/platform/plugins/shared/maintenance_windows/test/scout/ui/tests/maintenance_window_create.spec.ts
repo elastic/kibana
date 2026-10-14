@@ -237,7 +237,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     // Enter a KQL episode filter. The QueryStringInput renders with the supplied dataTestSubj
     // directly on the text input element (it replaces the default 'queryInput' test-subj).
     const episodeInput = page.testSubj.locator('maintenanceWindowAlertingV2FilterInput');
-    await episodeInput.fill('episode_id: "test-episode"');
+    await episodeInput.fill('alert_id: "test-alert"');
     await episodeInput.press('Enter');
 
     await page.testSubj.click(SUBMIT_BUTTON);
@@ -254,7 +254,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
 
     // Episodes KQL must be restored.
     await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toHaveValue(
-      'episode_id: "test-episode"'
+      'alert_id: "test-alert"'
     );
   });
 });

@@ -12,15 +12,21 @@ import { isEmpty } from 'lodash';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNonLocalIndexName } from '@kbn/es-query';
+import {
+  ALERT_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MgetResponse, MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -477,6 +483,125 @@ export class AlertService {
   }
 
   /**
+   * Authorizes attack attachments, which reference an attack discovery AAD alert.
+   *
+   * `ensureAlertsAuthorized` alone is not enough: it authorizes the (rule type, consumer) pair of
+   * every document that carries those fields, and silently accepts a document that is missing, is
+   * not an alert, or belongs to another space. The status sync later writes to the reference by id
+   * alone, so all three are rejected here, before the attachment is persisted.
+   *
+   * Scheduled and ad-hoc discoveries are both accepted, but only scheduled ones reach alerting
+   * RBAC — see `ensureScheduledAttacksAuthorized`.
+   */
+  public async ensureAttacksAuthorized({
+    attacks,
+    spaceId,
+  }: {
+    attacks: AlertInfo[];
+    spaceId: string;
+  }): Promise<void> {
+    try {
+      const nonEmptyAttacks = this.getNonEmptyAlerts(attacks);
+
+      if (nonEmptyAttacks.length <= 0) {
+        return;
+      }
+
+      this.rejectNonLocalIndices(nonEmptyAttacks, 'an attack');
+
+      const { docs } = await this.scopedClusterClient.mget<AttackAuthorizationFields>({
+        docs: nonEmptyAttacks.map((attack) => ({ _id: attack.id, _index: attack.index })),
+        _source_includes: [ALERT_RULE_TYPE_ID, SPACE_IDS],
+      });
+
+      const missingIds = docs.filter((doc) => !('found' in doc && doc.found)).map((doc) => doc._id);
+
+      if (missingIds.length > 0) {
+        throw Boom.badRequest(`Referenced attack(s) not found: ${missingIds.join(', ')}`);
+      }
+
+      const invalidIds = docs
+        .filter((doc) => !AlertService.isAttackInSpace(doc, spaceId))
+        .map((doc) => doc._id);
+
+      if (invalidIds.length > 0) {
+        throw Boom.badRequest(
+          `Referenced document(s) are not attack discoveries in space ${spaceId}: ${invalidIds.join(
+            ', '
+          )}`
+        );
+      }
+
+      await this.ensureScheduledAttacksAuthorized(nonEmptyAttacks, docs);
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to authorize attacks: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
+   * Runs alerting RBAC over the scheduled attacks of an already space-checked batch.
+   *
+   * Ad-hoc discoveries are deliberately left out. `ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID` is a
+   * sentinel the alerting framework never registers and no feature privilege grants, so
+   * `ensureAllAlertsAuthorizedRead` would reject every ad-hoc attack for any caller that is not a
+   * superuser. They carry no privacy of their own — the generating user is recorded on the
+   * document so it can be filtered on, not hidden — so the caller-scoped `mget` that produced
+   * `docs` is the authorization: it is the same Elasticsearch index privilege gate the attack
+   * discovery APIs read ad-hoc discoveries with, and the one the status sync writes through.
+   */
+  private async ensureScheduledAttacksAuthorized(
+    attacks: AlertInfo[],
+    docs: Array<MgetResponseItem<AttackAuthorizationFields>>
+  ): Promise<void> {
+    const scheduledKeys = new Set(
+      docs
+        .filter((doc) => AlertService.isScheduledAttack(doc))
+        .map((doc) => `${doc._index}:${doc._id}`)
+    );
+
+    const scheduledAttacks = attacks.filter((attack) =>
+      scheduledKeys.has(`${attack.index}:${attack.id}`)
+    );
+
+    if (scheduledAttacks.length <= 0) {
+      return;
+    }
+
+    await this.alertsClient.ensureAllAlertsAuthorizedRead({ alerts: scheduledAttacks });
+  }
+
+  private static isAttackInSpace(
+    doc: MgetResponseItem<AttackAuthorizationFields>,
+    spaceId: string
+  ): boolean {
+    if (!('found' in doc) || !doc.found) {
+      return false;
+    }
+
+    const source = doc._source;
+    const ruleTypeId = source?.[ALERT_RULE_TYPE_ID];
+
+    return (
+      (ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
+        ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID) &&
+      Array.isArray(source?.[SPACE_IDS]) &&
+      source[SPACE_IDS].includes(spaceId)
+    );
+  }
+
+  private static isScheduledAttack(doc: MgetResponseItem<AttackAuthorizationFields>): boolean {
+    if (!('found' in doc) || !doc.found) {
+      return false;
+    }
+
+    return doc._source?.[ALERT_RULE_TYPE_ID] === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
+  }
+
+  /**
    * Existence check for non-alert indexed attachments (events) — no alerting RBAC, and CPS/CCS
    * refs are rejected before `mget`.
    */
@@ -597,6 +722,12 @@ export interface Alert {
   _id: string;
   _index: string;
   _source: Record<string, unknown>;
+}
+
+/** The only `_source` fields `ensureAttacksAuthorized` reads back from the referenced document. */
+interface AttackAuthorizationFields {
+  [ALERT_RULE_TYPE_ID]?: string;
+  [SPACE_IDS]?: string[];
 }
 
 interface AlertIdIndex {

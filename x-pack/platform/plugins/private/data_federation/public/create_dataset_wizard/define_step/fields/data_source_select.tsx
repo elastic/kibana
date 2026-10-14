@@ -8,9 +8,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
+  EuiSpacer,
   EuiSuperSelect,
   useEuiTheme,
   type EuiSuperSelectOption,
@@ -22,6 +25,7 @@ import { DATA_SOURCE_TYPES_TO_ICONS } from '../../../../common';
 import { CreateDataSourceFlyout } from '../../../create_data_source_flyout';
 import { getFlyoutSaveErrorMessage } from '../../../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../../../types';
+import { getDatasourceCreateEvents } from '../../../ui_counters';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 
 const CONNECT_NEW_DATA_SOURCE = '__connect_new_data_source__';
@@ -57,7 +61,7 @@ export function DataSourceSelect({
 }) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { dataSourcesClient },
+    services: { dataSourcesClient, docLinks, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const [isCreateDataSourceOpen, setIsCreateDataSourceOpen] = useState(false);
 
@@ -121,15 +125,23 @@ export function DataSourceSelect({
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
         await dataSourcesClient.add(dataSource);
-        await loadDataSources();
-        onChange(dataSource.name);
-        setIsCreateDataSourceOpen(false);
-        return null;
       } catch (error) {
         return getFlyoutSaveErrorMessage(error);
       }
+      reportUiCounter?.(getDatasourceCreateEvents(dataSource.type));
+      try {
+        await loadDataSources();
+      } catch (error) {
+        return createDatasetWizardStrings.dataSourceRefreshAfterSaveError(
+          dataSource.name,
+          getFlyoutSaveErrorMessage(error)
+        );
+      }
+      onChange(dataSource.name);
+      setIsCreateDataSourceOpen(false);
+      return null;
     },
-    [dataSourcesClient, loadDataSources, onChange]
+    [dataSourcesClient, loadDataSources, onChange, reportUiCounter]
   );
 
   return (
@@ -146,6 +158,31 @@ export function DataSourceSelect({
         placeholder={createDatasetWizardStrings.dataSourcePlaceholder}
         isInvalid={isInvalid}
       />
+      {value ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            iconType="info"
+            title={createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle}
+            data-test-subj="createDatasetDataSourceAuthenticationCallout"
+          >
+            <p>
+              {createDatasetWizardStrings.dataSourceAuthenticationCalloutDescription}{' '}
+              <EuiLink
+                color="primary"
+                href={docLinks.links.dataFederation.grantReadAccess}
+                target="_blank"
+                external
+                data-test-subj="createDatasetDataSourceAuthenticationLearnMore"
+              >
+                {createDatasetWizardStrings.learnMore}
+              </EuiLink>
+            </p>
+          </EuiCallOut>
+        </>
+      ) : null}
       {isCreateDataSourceOpen ? (
         <CreateDataSourceFlyout
           existingDataSourceNames={existingDataSourceNames}

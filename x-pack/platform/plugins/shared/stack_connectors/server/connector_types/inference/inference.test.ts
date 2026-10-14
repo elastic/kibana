@@ -205,6 +205,7 @@ describe('InferenceConnector', () => {
 
     const services = actionsMock.createServices();
     services.scopedClusterClient = mockEsClient;
+    const textEmbeddingLogger = loggingSystemMock.createLogger();
     const connectorTextEmbedding = new InferenceConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
@@ -218,7 +219,7 @@ describe('InferenceConnector', () => {
         taskTypeConfig: {},
       },
       secrets: { providerSecrets: {} },
-      logger: loggingSystemMock.createLogger(),
+      logger: textEmbeddingLogger,
       services,
     });
 
@@ -251,6 +252,29 @@ describe('InferenceConnector', () => {
           inputType: 'ingest',
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('redacts upstream credentials before they reach the server log', async () => {
+      const secret = 'AKIAIOSFODNN7EXAMPLE';
+      jest.mocked(textEmbeddingLogger.error).mockClear();
+      mockEsClient.inference.inference.mockRejectedValueOnce(
+        new Error(`upstream rejected request signed with ${secret}`)
+      );
+
+      await expect(
+        connectorTextEmbedding.performApiTextEmbedding({
+          input: 'Hello world',
+          inputType: 'ingest',
+        })
+      ).rejects.toThrow();
+
+      const logged = jest
+        .mocked(textEmbeddingLogger.error)
+        .mock.calls.map(([message]) => String(message))
+        .join('\n');
+      expect(logged).toContain('error perform inference endpoint API');
+      expect(logged).toContain('[redacted]');
+      expect(logged).not.toContain(secret);
     });
   });
 
@@ -392,6 +416,25 @@ describe('InferenceConnector', () => {
         });
       } catch (e) {
         expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
+
+    it('keeps a 429 without the quota marker framework-side', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"rate_limit_exceeded\",\"message\":\"Rate limit reached for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Please try again later.\"}}`,
+        ]),
+        statusCode: 429,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletionStream({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+        throw new Error('expected the 429 to be thrown');
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
       }
     });
 

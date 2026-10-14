@@ -411,21 +411,17 @@ describe('matchDatasetsWithModel', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector down'));
   });
 
-  it.each([
-    ['a missing confidence', { datasets: [{ dataset: 'okta.system' }] }],
-    ['a NaN confidence', { datasets: [{ dataset: 'okta.system', confidence: Number.NaN }] }],
-    ['an out-of-range confidence', { datasets: [{ dataset: 'okta.system', confidence: 1.5 }] }],
-    ['a non-array datasets', { datasets: 'okta.system' }],
-    ['bare string items', { datasets: ['okta.system'], confidence: 0.9 }],
-  ])('returns undefined and warns when the model output has %s', async (_label, raw) => {
+  it('returns undefined and warns when structured output parsing fails', async () => {
     const logger = loggerMock.create();
-    const invoke = jest.fn().mockResolvedValue(raw);
+    const invoke = jest.fn().mockRejectedValue(new Error('Failed to parse structured output'));
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
     ).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid shape'));
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to parse structured output')
+    );
   });
 
   it('offers the model at most MAX_MODEL_DATASET_OPTIONS datasets and says so', async () => {

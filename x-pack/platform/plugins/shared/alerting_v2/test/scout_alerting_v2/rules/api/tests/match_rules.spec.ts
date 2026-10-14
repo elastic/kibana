@@ -17,11 +17,11 @@ import {
 
 const MATCH_RULES_URL = testData.INTERNAL_RULE_MATCH_API_PATH;
 
-const ALERT_RULES: ReadonlyArray<{ name: string; tags?: string[] }> = [
-  { name: 'rule-cpu', tags: ['cpu'] },
-  { name: 'rule-cpu-production', tags: ['cpu', 'production'] },
-  { name: 'rule-memory', tags: ['memory'] },
-  { name: 'rule-untagged' },
+const ALERT_RULES: ReadonlyArray<{ name: string; tags?: string[]; routing_tags?: string[] }> = [
+  { name: 'rule-cpu', routing_tags: ['cpu'] },
+  { name: 'rule-cpu-production', routing_tags: ['cpu', 'production'] },
+  { name: 'rule-memory', routing_tags: ['memory'] },
+  { name: 'rule-tags-only', tags: ['cpu', 'production', 'memory', 'rule-tag-only'] },
 ];
 
 const SIGNAL_RULE = {
@@ -65,7 +65,7 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'tags: should return the alert rules with any of the matcher tags, sorted by name',
+    'tags: should return the alert rules with any of the matcher tags as routing tags, sorted by name',
     async ({ apiClient }) => {
       const response = await apiClient.post(MATCH_RULES_URL, {
         headers: readerHeaders,
@@ -106,6 +106,20 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'tags: should not match rules that only have the matcher tags as rule tags',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(MATCH_RULES_URL, {
+        headers: readerHeaders,
+        body: { matcher: { tags: ['rule-tag-only'] } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toStrictEqual([]);
+      expect(response.body.total).toBe(0);
+    }
+  );
+
+  apiTest(
     'kind: should not return signal rules, even when they have the matcher tags',
     async ({ apiClient }) => {
       const response = await apiClient.post(MATCH_RULES_URL, {
@@ -125,7 +139,6 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
       for (const body of [
         {},
         { matcher: null },
-        { matcher: { tags: null, expression: null } },
         { matcher: { expression: 'data.host.name: "host-1"' } },
       ]) {
         const response = await apiClient.post(MATCH_RULES_URL, { headers: readerHeaders, body });
@@ -151,6 +164,22 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
     expect(response.body.page).toBe(2);
     expect(response.body.per_page).toBe(1);
   });
+
+  // A catch-all is spelled by omitting `matcher` or sending `null`, never by an empty object.
+  apiTest(
+    'validation: should return 400 for an empty or half-null matcher',
+    async ({ apiClient }) => {
+      for (const matcher of [{}, { tags: null }, { expression: null }]) {
+        const response = await apiClient.post(MATCH_RULES_URL, {
+          headers: readerHeaders,
+          body: { matcher },
+        });
+
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
+    }
+  );
 
   apiTest('validation: should return 400 for unknown top-level keys', async ({ apiClient }) => {
     const response = await apiClient.post(MATCH_RULES_URL, {

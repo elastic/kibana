@@ -19,7 +19,7 @@ export type FetchSearchApplicationApiResponse = EnterpriseSearchApplicationDetai
 export const fetchSearchApplication = async ({
   name,
 }: FetchSearchApplicationApiParams): Promise<FetchSearchApplicationApiResponse> => {
-  const route = `/internal/enterprise_search/search_applications/${name}`;
+  const route = `/internal/enterprise_search/search_applications/${encodeURIComponent(name)}`;
 
   return await HttpLogic.values.http.get<EnterpriseSearchApplicationDetails>(route);
 };
