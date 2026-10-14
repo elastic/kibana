@@ -45,6 +45,7 @@ interface StoredTask {
 
 interface ScheduleBody {
   enabled?: boolean;
+  runAt?: string;
   runAs?: ReturnType<typeof runAsFor>;
   params?: { expectedServiceAccountId?: string; renewAfterMs?: number };
 }
@@ -71,6 +72,15 @@ apiTest.describe(
     const removeTask = async (apiClient: ApiClientFixture, id: string) => {
       const removed = await apiClient.delete(`internal/task_manager/tasks/${id}`, { headers });
       expect(removed).toHaveStatusCode(200);
+    };
+
+    const runSoon = async (apiClient: ApiClientFixture, id: string) => {
+      const ranSoon = await apiClient.post(`internal/ftr/task_manager/${id}/run_soon`, {
+        headers,
+        responseType: 'json',
+      });
+      expect(ranSoon).toHaveStatusCode(200);
+      expect(ranSoon.body).toStrictEqual({ id, forced: false });
     };
 
     const bindWorkload = async (
@@ -268,12 +278,16 @@ apiTest.describe(
           .toStrictEqual(ranAs(accountA));
 
         await bindWorkload(apiClient, accountB, workloadId);
+        // Held back so the replacement first runs only after the old task is removed.
         const newTaskId = await scheduleTask(apiClient, {
           enabled: true,
+          runAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           runAs: runAsFor(workloadId, accountB),
         });
         const { credential, encryptedCredential } = await readStoredTask(esClient, newTaskId);
         await removeTask(apiClient, oldTaskId);
+        expect(await readTaskState(esClient, newTaskId)).toStrictEqual({});
+        await runSoon(apiClient, newTaskId);
 
         await expect
           .poll(() => readTaskState(esClient, newTaskId), {
