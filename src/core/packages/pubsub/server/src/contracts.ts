@@ -43,6 +43,16 @@ export interface PubSubEvent<TData = unknown> extends PubSubEventInit<TData> {
 export type PubSubHandler<TData> = (event: PubSubEvent<TData>) => void | Promise<void>;
 
 /**
+ * What `publish` resolves with. `acceptedAt` is the bus clock at accept time.
+ *
+ * @public
+ */
+export interface PubSubPublishResult {
+  readonly id: string;
+  readonly acceptedAt: string;
+}
+
+/**
  * A named consumer of one topic.
  *
  * @public
@@ -77,5 +87,5 @@ export interface PubSubStart {
   /**
    * Accepts an event and returns once it is queued. Does not wait for handlers.
    */
-  publish<TData>(topic: Topic<TData>, event: PubSubEventInit<TData>): Promise<PubSubEvent<TData>>;
+  publish<TData>(topic: Topic<TData>, event: PubSubEventInit<TData>): Promise<PubSubPublishResult>;
 }

@@ -8,8 +8,8 @@
  */
 
 import type {
-  PubSubEvent,
   PubSubEventInit,
+  PubSubPublishResult,
   PubSubSubscription,
   Topic,
 } from '@kbn/core-pubsub-server';
@@ -40,5 +40,5 @@ export interface InternalPubSubStart {
     pluginId: string,
     topic: Topic<TData>,
     event: PubSubEventInit<TData>
-  ): Promise<PubSubEvent<TData>>;
+  ): Promise<PubSubPublishResult>;
 }

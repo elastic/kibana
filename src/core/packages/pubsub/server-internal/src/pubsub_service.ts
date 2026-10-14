@@ -12,6 +12,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type {
   PubSubEvent,
   PubSubEventInit,
+  PubSubPublishResult,
   PubSubSubscription,
   Topic,
 } from '@kbn/core-pubsub-server';
@@ -100,7 +101,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     pluginId: string,
     topic: Topic<TData>,
     init: PubSubEventInit<TData>
-  ): Promise<PubSubEvent<TData>> {
+  ): Promise<PubSubPublishResult> {
     this.assertCanPublish();
 
     if (!this.topics.has(topic.name)) {
@@ -122,7 +123,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     );
     this.enqueue(event);
 
-    return event;
+    return { id: event.id, acceptedAt: event.acceptedAt };
   }
 
   private registerTopic<TData>(pluginId: string, topic: Topic<TData>): void {

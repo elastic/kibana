@@ -9,7 +9,7 @@
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { defineTopic } from '@kbn/core-pubsub-server';
-import type { PubSubEventInit } from '@kbn/core-pubsub-server';
+import type { PubSubEvent, PubSubEventInit } from '@kbn/core-pubsub-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { scopeConsumerName } from './consumer_name';
 import type { InternalPubSubStart } from './internal_contracts';
@@ -458,24 +458,35 @@ describe('PubSubService dispatch', () => {
 });
 
 describe('PubSubEvent shape', () => {
-  it('keeps the producer id, assigns acceptedAt, and does not replace the data reference', async () => {
+  it('resolves with the id and acceptedAt, and delivers the producer event plus topic and acceptedAt', async () => {
     const service = new PubSubService(mockCoreContext.create());
     const setup = service.setup();
     const topic = defineTopic<{ secret: string }>('orders');
     setup.registerTopic(PLUGIN, topic);
+    const delivered: Array<PubSubEvent<{ secret: string }>> = [];
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'sync',
+      handler: (event) => {
+        delivered.push(event);
+      },
+    });
     const { publish } = service.start();
     const data = { secret: 'same' };
 
-    const event = await publish(PLUGIN, topic, { id: 'order-42:v7', data });
+    const result = await publish(PLUGIN, topic, { id: 'order-42:v7', data });
+    await flushDispatch();
 
+    expect(result).toEqual({ id: 'order-42:v7', acceptedAt: expect.any(String) });
+    expect(Number.isNaN(Date.parse(result.acceptedAt))).toBe(false);
+
+    const [event] = delivered;
     expect(event).toEqual({
       id: 'order-42:v7',
       topic: 'orders',
       data,
-      acceptedAt: expect.any(String),
+      acceptedAt: result.acceptedAt,
     });
     expect(event.data).toBe(data);
-    expect(Number.isNaN(Date.parse(event.acceptedAt))).toBe(false);
     expect(Object.isFrozen(event)).toBe(true);
   });
 });
