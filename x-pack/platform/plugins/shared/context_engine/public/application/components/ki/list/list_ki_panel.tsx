@@ -38,6 +38,7 @@ export const ListKiPanel = ({ aiIndex }: ListKiPanelProps) => {
   return (
     <div data-test-subj="contextListKiPanel">
       <ListKiHeader
+        total={total}
         destValue={destValue}
         indexManagementHref={indexManagementHref}
         discoverHref={discoverHref}

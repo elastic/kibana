@@ -28,7 +28,6 @@ const stableCountsByType = [
 ];
 
 const selectTypeFilter = (type: string) => {
-  fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
   fireEvent.click(screen.getByTestId(`contextListKiFilter-${type}`));
 };
 
@@ -60,7 +59,6 @@ describe('ListKiHeader', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
 
     expect(screen.getByTestId('contextListKiTypeFilters')).toHaveTextContent('All (6)');
-    fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
     expect(screen.getByTestId('contextListKiFilter-playbook')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTestId('contextListKiPanelDestLink')).toHaveAttribute(
@@ -92,16 +90,15 @@ describe('ListKiHeader', () => {
   it('keeps all filter options after selecting a type', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     selectTypeFilter('playbook');
-    fireEvent.click(screen.getByTestId('contextListKiTypeFilters'));
     expect(screen.getByTestId('contextListKiFilter-all')).toBeInTheDocument();
     expect(screen.getByTestId('contextListKiFilter-faq')).toBeInTheDocument();
   });
 
-  it('keeps backing index label when a type is selected', () => {
+  it('keeps summary label when a type is selected', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     selectTypeFilter('playbook');
     expect(screen.getByTestId('contextListKiPanelSummary')).toHaveTextContent(
-      'Backing index ai-index-idx-sample-ki'
+      '1 Knowledge Indicator in ai-index-idx-sample-ki'
     );
   });
 

@@ -11,6 +11,10 @@ import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { toOptionalKiLifecycleStatus } from '../../common/ki_lifecycle_status';
 import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import {
+  MAX_KI_TYPE_FILTER_COUNT,
+  takeTopKiTypeCounts,
+} from '../../common/ki_type_counts';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
@@ -196,6 +200,7 @@ export const getKis = async (
     'WHERE type IS NOT NULL',
     'STATS count = COUNT(*) BY type',
     'SORT count DESC, type ASC',
+    `LIMIT ${MAX_KI_TYPE_FILTER_COUNT}`,
   ].join('\n| ');
 
   const [rows, totals, buckets] = await Promise.all([
@@ -207,10 +212,12 @@ export const getKis = async (
   const [totalRow] = toRecords(totals as unknown as ESQLSearchResponse);
   const totalAll = Number(totalRow?.total ?? 0);
   const total = type === undefined ? totalAll : Number(totalRow?.filtered ?? 0);
-  const countsByType = toRecords(buckets as unknown as ESQLSearchResponse).map((row) => ({
-    type: String(row.type),
-    count: Number(row.count),
-  }));
+  const countsByType = takeTopKiTypeCounts(
+    toRecords(buckets as unknown as ESQLSearchResponse).map((row) => ({
+      type: String(row.type),
+      count: Number(row.count),
+    }))
+  );
 
   return {
     kis: rows ? toRecords(rows as unknown as ESQLSearchResponse).map(toKiListItem) : [],

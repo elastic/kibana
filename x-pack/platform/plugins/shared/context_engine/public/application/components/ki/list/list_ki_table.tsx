@@ -11,6 +11,7 @@ import {
   EuiText,
   EuiTextBlockTruncate,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -33,6 +34,10 @@ interface ListKiTableProps {
   aiIndexId: string;
   kis: KiListItem[];
 }
+
+const clickableRowClassName = css({
+  cursor: 'pointer',
+});
 
 const toTableRow = (ki: KiListItem): ListKiTableRow => ({
   ...ki,
@@ -121,7 +126,7 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
             navigateToContextEngine(getViewKiPath(aiIndexId, ki.id), {
               index: ki.index,
             }),
-          style: { cursor: 'pointer' },
+          className: clickableRowClassName,
           'aria-label': i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.viewKi', {
             defaultMessage: 'View Knowledge Indicator {title}',
             values: { title },

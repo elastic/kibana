@@ -6,29 +6,28 @@
  */
 
 import {
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiSuperSelect,
-  type EuiSuperSelectOption,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import { ALL_TYPE_FILTER, type ListKiTypeFilter } from './list_ki_helpers';
 
-const TYPE_FILTER_MIN_WIDTH = '18rem';
-
 interface TypeFilterOption {
-  value: string;
+  id: string;
   label: string;
   'data-test-subj': string;
 }
 
 interface ListKiHeaderProps {
+  total: number;
   destValue: string;
   indexManagementHref?: string;
   discoverHref?: string;
@@ -38,6 +37,7 @@ interface ListKiHeaderProps {
 }
 
 export const ListKiHeader = ({
+  total,
   destValue,
   indexManagementHref,
   discoverHref,
@@ -61,85 +61,74 @@ export const ListKiHeader = ({
       <code data-test-subj="contextListKiPanelDest">{destValue}</code>
     );
 
-  const typeFilterLegend = i18n.translate(
-    'xpack.contextEngine.aiIndexDetail.listKi.typeFilterLegend',
-    {
-      defaultMessage: 'Filter Knowledge Indicators by type',
-    }
-  );
-
-  const superSelectOptions = useMemo(
-    (): Array<EuiSuperSelectOption<string>> =>
-      typeFilterOptions.map(({ value, label, 'data-test-subj': dataTestSubj, ...ebtProps }) => ({
-        value,
-        inputDisplay: label,
-        dropdownDisplay: label,
-        'data-test-subj': dataTestSubj,
-        ...ebtProps,
-      })),
-    [typeFilterOptions]
-  );
-
-  const showTypeFilter = typeFilterOptions.length > 1;
-
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-      {showTypeFilter && (
+    <>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div style={{ minWidth: TYPE_FILTER_MIN_WIDTH }}>
-            <EuiSuperSelect
-              aria-label={typeFilterLegend}
-              compressed
-              fullWidth
-              data-test-subj="contextListKiTypeFilters"
-              options={superSelectOptions}
-              valueOfSelected={typeFilter.value}
-              onChange={(id) => {
-                onTypeFilterChange(
-                  id === ALL_TYPE_FILTER.value ? ALL_TYPE_FILTER : { kind: 'type', value: id }
-                );
+          <EuiText size="s" data-test-subj="contextListKiPanelSummary">
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.listKi.summary"
+              defaultMessage="{count, plural, one {# {indicatorLabel}} other {# {indicatorLabel}}} in"
+              values={{
+                count: total,
+                indicatorLabel: (
+                  <strong>
+                    {i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.listKi.summaryIndicatorLabel',
+                      {
+                        defaultMessage:
+                          '{count, plural, one {Knowledge Indicator} other {Knowledge Indicators}}',
+                        values: { count: total },
+                      }
+                    )}
+                  </strong>
+                ),
               }}
-            />
-          </div>
+            />{' '}
+            {destLink}
+          </EuiText>
         </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        <EuiFlexGroup
-          gutterSize="m"
-          alignItems="center"
-          justifyContent="flexEnd"
-          responsive={false}
-        >
+        {discoverHref && (
           <EuiFlexItem grow={false}>
-            <EuiText size="s" data-test-subj="contextListKiPanelSummary">
+            <EuiLink
+              href={discoverHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-test-subj="contextListKiDiscoverLink"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK,
+              })}
+            >
               <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.listKi.backingIndex"
-                defaultMessage="Backing index {dest}"
-                values={{ dest: destLink }}
+                id="xpack.contextEngine.aiIndexDetail.listKi.discoverLink"
+                defaultMessage="View raw docs in Discover"
               />
-            </EuiText>
+            </EuiLink>
           </EuiFlexItem>
-          {discoverHref && (
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                href={discoverHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-test-subj="contextListKiDiscoverLink"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.listKi.DISCOVER_LINK,
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.listKi.discoverLink"
-                  defaultMessage="View raw docs in Discover"
-                />
-              </EuiLink>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        )}
+      </EuiFlexGroup>
+
+      {typeFilterOptions.length > 1 && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.typeFilterLegend', {
+              defaultMessage: 'Filter Knowledge Indicators by type',
+            })}
+            type="single"
+            buttonSize="compressed"
+            idSelected={typeFilter.value}
+            onChange={(id) => {
+              onTypeFilterChange(
+                id === ALL_TYPE_FILTER.value ? ALL_TYPE_FILTER : { kind: 'type', value: id }
+              );
+            }}
+            options={typeFilterOptions}
+            data-test-subj="contextListKiTypeFilters"
+          />
+        </>
+      )}
+    </>
   );
 };

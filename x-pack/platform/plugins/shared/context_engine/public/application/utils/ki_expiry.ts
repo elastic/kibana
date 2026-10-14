@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KiLifecycleStatus } from './step_types/ki';
+import type { KiLifecycleStatus } from '../../../common/step_types/ki';
 
 export type KiStatus = 'active' | 'deleted' | 'expired';
 

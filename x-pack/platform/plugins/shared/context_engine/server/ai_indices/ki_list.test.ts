@@ -156,9 +156,8 @@ describe('ki_list', () => {
     );
     expect(queryText(1)).toContain('| STATS total = COUNT(*)');
     expect(queryText(2)).toContain(
-      '| WHERE type IS NOT NULL\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC'
+      '| WHERE type IS NOT NULL\n| STATS count = COUNT(*) BY type\n| SORT count DESC, type ASC\n| LIMIT 5'
     );
-    expect(queryText(2)).not.toContain('| LIMIT');
   });
 
   it('returns expired KIs without filtering on expires_at', async () => {

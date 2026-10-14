@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { resolveKiStatus } from '../../../../../../common/ki_expiry';
+import { resolveKiStatus } from '../../../../utils/ki_expiry';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
 import { getViewKiHeaderBadges } from './view_ki_header_badges';
 

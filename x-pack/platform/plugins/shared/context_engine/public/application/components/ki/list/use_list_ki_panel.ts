@@ -51,7 +51,7 @@ export const useListKiPanel = ({ id: aiIndexId, dest }: GetAiIndexResponse) => {
     () =>
       [{ type: ALL_TYPE_FILTER.value, count: summary.total }, ...summary.countsByType].map(
         ({ type, count }) => ({
-          value: type,
+          id: type,
           label: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.filterType', {
             defaultMessage: '{typeLabel} ({count})',
             values: { typeLabel: getListKiTypeFilterLabel(type), count },
