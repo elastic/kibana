@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createEsqlView, deleteEsqlViews } from '../fixtures/esql_views_api';
 import {
@@ -18,7 +19,7 @@ import { spaceTest } from '../fixtures';
 
 const VIEW_NAME = `scout-esql-views-privileges-${randomUUID().slice(0, 8)}`;
 
-spaceTest.describe('ES|QL Views privilege gating', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('ES|QL Views privilege gating', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ esClient }) => {
     await createEsqlView(esClient, { name: VIEW_NAME, query: 'ROW value = 1' });
   });
