@@ -144,7 +144,7 @@ export const PatternTesterPanel: React.FC<PatternTesterPanelProps> = ({
               helpText={
                 <FormattedMessage
                   id="xpack.aiAnonymizationSettings.patternTester.inputHelpText"
-                  defaultMessage="What the analyst sees. Paste JSON or plain text to try your own values."
+                  defaultMessage="Sample input. Paste JSON or plain text to try your own values."
                 />
               }
               fullWidth
