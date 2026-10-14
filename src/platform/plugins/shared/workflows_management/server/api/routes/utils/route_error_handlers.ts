@@ -13,6 +13,7 @@ import { InvalidAccessControlError } from '@kbn/entity-access-control';
 import {
   WorkflowDisabledError,
   WorkflowExecutionInvalidStatusError,
+  WorkflowExecutionNotAdmittedError,
   WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
@@ -147,6 +148,16 @@ export function handleRouteError(
     return response.badRequest({
       body: {
         message: error.message,
+      },
+    });
+  }
+
+  if (error instanceof WorkflowExecutionNotAdmittedError) {
+    return response.customError({
+      statusCode: 429,
+      body: {
+        message: error.message,
+        attributes: { code: 'EXECUTION_NOT_ADMITTED', guardId: error.guardId },
       },
     });
   }

@@ -603,6 +603,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },
   },
+  'contextEngine:budgets:suggestionsMonthlyUsd': {
+    type: 'float',
+    _meta: {
+      description: 'Monthly spend limit in USD for Context Engine automation suggestions.',
+    },
+  },
+  'contextEngine:budgets:automationsMonthlyUsd': {
+    type: 'float',
+    _meta: { description: 'Monthly spend limit in USD for Context Engine automation runs.' },
+  },
   'agentBuilder:tracing:enabled': {
     type: 'boolean',
     _meta: {

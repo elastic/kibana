@@ -8,6 +8,7 @@
 export { AiIndexCreatedCallout } from './ai_index_created_callout';
 export { AutomationRow } from './automation_row';
 export { AutomationsPanel } from './automations_panel';
+export { BudgetPanel } from './budget_panel';
 export { DescriptionPanel } from './description_panel';
 export { LockedSectionPanel } from './locked_section_panel';
 export { MemoryPanel } from './memory_panel';

@@ -51,6 +51,7 @@ import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_d
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { ensureBoundExecutionAdmitted } from './lib/ensure_bound_execution_admitted';
+import { ensureExecutionAdmitted } from './lib/ensure_execution_admitted';
 import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
@@ -926,6 +927,22 @@ export class WorkflowsExecutionEnginePlugin
                   );
                   return { state: taskInstance.state };
                 }
+                const admission = await pluginsStart.workflowsExtensions.checkExecutionAdmission({
+                  workflowId,
+                  spaceId,
+                  triggeredBy: 'scheduled',
+                });
+                if (!admission.admitted) {
+                  logger.info(
+                    `Skipping scheduled workflow ${workflowId} in space ${spaceId}: ${admission.reason}`
+                  );
+                  stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                    workflow_id: workflowId,
+                    space_id: spaceId,
+                    outcome: 'skipped',
+                  });
+                  return { state: taskInstance.state };
+                }
                 logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
                 // Overlap / recovery: always run so past-tick abandoned `pending` orphans are
@@ -1339,6 +1356,12 @@ export class WorkflowsExecutionEnginePlugin
       const spaceId = (context.spaceId as string | undefined) || 'default';
       await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
+      await ensureExecutionAdmitted({
+        workflow,
+        spaceId,
+        triggeredBy: (context.triggeredBy as string | undefined) ?? defaultTriggeredBy,
+        workflowsExtensions: plugins.workflowsExtensions,
+      });
       const inheritedIdentity = resolveInheritedWorkflowIdentity(originalRequest, workflow, {
         inheritParentIdentity: context.inheritParentIdentity === true,
         parentWorkflowId:
@@ -1662,6 +1685,12 @@ export class WorkflowsExecutionEnginePlugin
               );
             }
           }
+          await ensureExecutionAdmitted({
+            workflow: item.workflow,
+            spaceId,
+            triggeredBy: (item.context.triggeredBy as string | undefined) ?? 'alert',
+            workflowsExtensions: plugins.workflowsExtensions,
+          });
           const workflowExecution = await buildExecutionDocument({
             workflow: item.workflow,
             spaceId,

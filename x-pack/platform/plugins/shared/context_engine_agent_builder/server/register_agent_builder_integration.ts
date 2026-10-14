@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
@@ -23,6 +23,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   coreSetup,
   agentBuilder,
   workflowsManagement,
+  logger,
 }: {
   coreSetup: CoreSetup<
     ContextEngineAgentBuilderStartDependencies,
@@ -30,8 +31,15 @@ export const registerContextEngineAgentBuilderIntegration = ({
   >;
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsManagementApi;
+  logger: Logger;
 }): void => {
-  registerAttachmentTypes(agentBuilder);
+  registerAttachmentTypes(agentBuilder, {
+    logger,
+    getBudgetService: async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.contextEngine.getBudgetService();
+    },
+  });
   registerContextEngineAgent(agentBuilder);
 
   agentBuilder.agents.registerAiIndexResolver(async ({ ids, request }) => {

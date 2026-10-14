@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/**/*.json",
     "scripts/**/*",
     "test/scout_agent_builder/**/*"
   ],
@@ -79,6 +80,7 @@
     "@kbn/react-hooks",
     "@kbn/datemath",
     "@kbn/esql-utils",
-    "@kbn/ebt-click"
+    "@kbn/ebt-click",
+    "@kbn/cloud-plugin"
   ]
 }

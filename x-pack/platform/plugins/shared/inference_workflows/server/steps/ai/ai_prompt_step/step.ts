@@ -12,6 +12,7 @@ import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
+import { buildAiPromptOutputMetadata } from './build_output_metadata';
 
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
@@ -105,7 +106,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           // so we keep the same output structure with potential response_metadata addition in the future.
           output: {
             content: invocationResult.parsed.response,
-            metadata: invocationResult.raw.response_metadata,
+            metadata: buildAiPromptOutputMetadata(invocationResult.raw, resolvedConnectorId),
           },
         };
       }
@@ -117,7 +118,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       return {
         output: {
           content: invocationResult.content,
-          metadata: invocationResult.response_metadata,
+          metadata: buildAiPromptOutputMetadata(invocationResult, resolvedConnectorId),
         },
       };
     },

@@ -112,6 +112,11 @@ jest.mock('../hooks/use_agent_builder_agents', () => ({
 const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 
+jest.mock('../hooks/use_ai_index_budget', () => ({
+  useAiIndexBudget: () => ({ budget: undefined, isLoading: true, error: undefined }),
+  useSaveAiIndexBudget: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
+
 jest.mock('../hooks/use_signals', () => ({
   useSignals: () => ({
     signals: [],

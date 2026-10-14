@@ -19,6 +19,12 @@ import type { UseSuggestAutomationResult } from '../../hooks/use_suggest_automat
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
+import { useAiIndexBudget } from '../../hooks/use_ai_index_budget';
+import type {
+  AiIndexBudgetStatusResponse,
+  BucketBudgetStatus,
+  BudgetState,
+} from '../../../../common/budgets';
 import { AutomationsPanel } from './automations_panel';
 
 jest.mock('../../hooks/use_automations_editor', () => ({
@@ -31,6 +37,10 @@ jest.mock('../../hooks/use_suggest_automation', () => ({
 
 jest.mock('../../hooks/use_workflow_summaries', () => ({
   useWorkflowSummaries: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_ai_index_budget', () => ({
+  useAiIndexBudget: jest.fn(),
 }));
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -60,6 +70,30 @@ jest.mock('./automation_row', () => ({
 const mockUseAutomationsEditor = jest.mocked(useAutomationsEditor);
 const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
 const mockUseWorkflowSummaries = jest.mocked(useWorkflowSummaries);
+const mockUseAiIndexBudget = jest.mocked(useAiIndexBudget);
+
+const bucketStatus = (state: BudgetState): BucketBudgetStatus => ({
+  ...(state !== 'unlimited' && { limit_usd: 10 }),
+  spend: {
+    cost_usd: state === 'exhausted' ? 10 : state === 'warning' ? 9 : 1,
+    unpriced_tokens: 0,
+    tokens: { input_tokens: 1000, output_tokens: 100, cached_tokens: 0 },
+  },
+  state,
+});
+
+const budgetStatus = ({
+  automations = 'ok',
+  suggestions = 'ok',
+}: { automations?: BudgetState; suggestions?: BudgetState } = {}): AiIndexBudgetStatusResponse => ({
+  ai_index_id: 'my-ai-index',
+  period: { start: '2026-10-01T00:00:00.000Z', end: '2026-11-01T00:00:00.000Z' },
+  pricing: { source: 'elastic_price_catalog' },
+  config: {},
+  cost_tier: 'medium',
+  ai_index: { automations: bucketStatus(automations), suggestions: bucketStatus(suggestions) },
+  space: { automations: bucketStatus('unlimited'), suggestions: bucketStatus('unlimited') },
+});
 
 const editorResult = (
   overrides: Partial<UseAutomationsEditorResult> = {}
@@ -159,10 +193,79 @@ describe('AutomationsPanel', () => {
     mockUseAutomationsEditor.mockReturnValue(editorResult());
     mockUseSuggestAutomation.mockReturnValue(suggestResult());
     mockUseWorkflowSummaries.mockReturnValue(summariesResult());
+    mockUseAiIndexBudget.mockReturnValue({
+      budget: budgetStatus(),
+      isLoading: false,
+      error: undefined,
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('budget', () => {
+    const withAutomation = () =>
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
+      );
+
+    it('says automation runs are paused once their budget is spent', () => {
+      withAutomation();
+      mockUseAiIndexBudget.mockReturnValue({
+        budget: budgetStatus({ automations: 'exhausted' }),
+        isLoading: false,
+        error: undefined,
+      });
+
+      renderPanel();
+
+      expect(screen.getByTestId('contextAutomationsBudgetPausedCallout')).toHaveTextContent(
+        'Automation runs are paused until Nov 1, 2026'
+      );
+    });
+
+    it('warns when the automation runs budget is nearly spent', () => {
+      withAutomation();
+      mockUseAiIndexBudget.mockReturnValue({
+        budget: budgetStatus({ automations: 'warning' }),
+        isLoading: false,
+        error: undefined,
+      });
+
+      renderPanel();
+
+      expect(screen.getByTestId('contextAutomationsBudgetWarningCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextAutomationsBudgetPausedCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows no budget callout while within budget', () => {
+      withAutomation();
+
+      renderPanel();
+
+      expect(
+        screen.queryByTestId('contextAutomationsBudgetWarningCallout')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextAutomationsBudgetPausedCallout')).not.toBeInTheDocument();
+    });
+
+    it('disables suggesting an automation once the suggestions budget is spent', () => {
+      const suggestAutomation = jest.fn();
+      mockUseSuggestAutomation.mockReturnValue(
+        suggestResult({ canSuggest: true, suggestAutomation })
+      );
+      mockUseAiIndexBudget.mockReturnValue({
+        budget: budgetStatus({ suggestions: 'exhausted' }),
+        isLoading: false,
+        error: undefined,
+      });
+
+      renderPanel();
+      openAddAutomationMenu();
+
+      expect(screen.getByTestId('contextSuggestAutomationButton')).toBeDisabled();
+    });
   });
 
   it('shows the loading skeleton and nothing else while the AI index loads', () => {

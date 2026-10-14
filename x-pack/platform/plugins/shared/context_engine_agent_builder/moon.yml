@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/scout'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/es-errors'
 tags:
   - plugin
   - prod

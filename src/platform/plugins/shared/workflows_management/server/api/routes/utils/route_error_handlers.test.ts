@@ -9,7 +9,10 @@
 
 import Boom from '@hapi/boom';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
+import {
+  WorkflowDisabledError,
+  WorkflowExecutionNotAdmittedError,
+} from '@kbn/workflows/common/errors';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { handleRouteError } from './route_error_handlers';
 import {
@@ -32,6 +35,23 @@ describe('handleRouteError', () => {
       body: { message: 'manage_security is required' },
     });
   });
+  it('returns too many requests when an admission guard refuses the run', () => {
+    const response = httpServerMock.createResponseFactory();
+
+    handleRouteError(
+      response,
+      new WorkflowExecutionNotAdmittedError('wf-1', 'contextEngine.budget', 'Budget spent.')
+    );
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 429,
+      body: expect.objectContaining({
+        message: expect.stringContaining('Budget spent.'),
+        attributes: { code: 'EXECUTION_NOT_ADMITTED', guardId: 'contextEngine.budget' },
+      }),
+    });
+  });
+
   it('returns forbidden for managed workflow update policy errors', () => {
     const response = httpServerMock.createResponseFactory();
 
