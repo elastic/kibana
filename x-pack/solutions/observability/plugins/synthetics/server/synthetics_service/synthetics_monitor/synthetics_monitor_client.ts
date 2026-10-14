@@ -283,7 +283,10 @@ export class SyntheticsMonitorClient {
 
     const syncErrors = this.syntheticsService.runOnceConfigs(publicConfig);
 
-    return await Promise.all([newPolicies, syncErrors]);
+    const [policies, publicErrors] = await Promise.all([newPolicies, syncErrors]);
+    const errors = [...(publicErrors ?? []), ...(policies.errors ?? [])];
+
+    return [policies, errors.length > 0 ? errors : undefined] as const;
   }
 
   hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>) {

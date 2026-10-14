@@ -381,6 +381,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_attack_discovery` would report not-found.
+    it('fails the run when the discovery search is not authorized', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBeUndefined();
+    });
+
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
     // same value and needs no mapping to be queryable.
     it('reads it by the id it was given', () => {
@@ -511,6 +517,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('fails the run when a cited alert is missing', () => {
       expect(stepIn('require_cited_alerts')?.type).toBe('workflow.fail');
+    });
+
+    // A missing privilege must fail the search. `ignore_unavailable` would turn
+    // that 403 into zero hits and `require_cited_alerts` would report missing alerts.
+    it('fails the run when the alerts search is not authorized', () => {
+      expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
     });
 
     it.each(['load_entities', 'load_events'] as const)(

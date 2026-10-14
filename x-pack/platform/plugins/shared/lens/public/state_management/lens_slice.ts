@@ -1342,26 +1342,30 @@ function addInitialValueIfAvailable({
       });
 
       if (!noDatasource && activeDatasource?.initializeDimension) {
+        const initializedDatasourceState = activeDatasource.initializeDimension(
+          datasourceState,
+          layerId,
+          framePublicAPI.dataViews.indexPatterns,
+          {
+            ...info,
+            columnId: columnId || info.columnId,
+            visualizationGroups: activeVisualization.getConfiguration({
+              layerId,
+              frame: framePublicAPI,
+              state: activeVisualizationState,
+            }).groups,
+            activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
+              activeVisualizationState,
+              layerId
+            ),
+          }
+        );
         return {
-          activeDatasourceState: activeDatasource.initializeDimension(
-            datasourceState,
-            layerId,
-            framePublicAPI.dataViews.indexPatterns,
-            {
-              ...info,
-              columnId: columnId || info.columnId,
-              visualizationGroups: activeVisualization.getConfiguration({
-                layerId,
-                frame: framePublicAPI,
-                state: activeVisualizationState,
-              }).groups,
-              activeVisualizationTypeId: activeVisualization.getVisualizationTypeId?.(
-                activeVisualizationState,
-                layerId
-              ),
-            }
-          ),
-          activeVisualizationState,
+          activeDatasourceState: initializedDatasourceState,
+          activeVisualizationState:
+            initializedDatasourceState === datasourceState
+              ? visualizationState
+              : activeVisualizationState,
         };
       } else {
         return {
