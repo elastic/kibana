@@ -36,9 +36,8 @@ export class PubSubExamplePlugin implements Plugin {
 
   public setup(core: CoreSetup) {
     core.pubsub.registerTopic(pingTopic);
-    core.pubsub.subscribe(pingTopic, 'echo', (event, context) => {
-      const requestId = context.request?.id ?? 'none';
-      this.logger.info(`echo ${event.id} ${event.data.message} request ${requestId}`);
+    core.pubsub.subscribe(pingTopic, 'echo', (event) => {
+      this.logger.info(`echo ${event.id} from ${event.data.source}: ${event.data.message}`);
     });
     core.pubsub.subscribe(pingTopic, 'length', (event) => {
       this.logger.info(`length ${event.id} ${event.data.message.length}`);
@@ -73,14 +72,10 @@ export class PubSubExamplePlugin implements Plugin {
         },
         async (_context, request, response) => {
           const [start] = await core.getStartServices();
-          const event = await start.pubsub.publish(
-            pingTopic,
-            {
-              id: request.body.idempotencyKey,
-              data: { source: 'http', message: request.body.message },
-            },
-            { request }
-          );
+          const event = await start.pubsub.publish(pingTopic, {
+            id: request.body.idempotencyKey,
+            data: { source: 'http', message: request.body.message },
+          });
 
           return response.ok({ body: { id: event.id } });
         }
