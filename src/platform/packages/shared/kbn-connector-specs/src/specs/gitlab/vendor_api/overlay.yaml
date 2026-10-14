@@ -1,0 +1,169 @@
+overlay: 1.0.0
+info:
+  title: GitLab REST API v4 corrections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.postApiV4ProjectsIdIssuesRequest.properties.labels
+    description: >-
+      https://docs.gitlab.com/api/issues/#create-an-issue documents `labels` as a string of
+      comma-separated label names; the spec only allows an array.
+    remove: true
+  - target: $.components.schemas.postApiV4ProjectsIdIssuesRequest.properties
+    description: Comma-separated string or array, per https://docs.gitlab.com/api/issues/#create-an-issue.
+    update:
+      labels:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        nullable: true
+
+  - target: $.components.schemas.putApiV4ProjectsIdIssuesIssueIidRequest.properties.labels
+    description: >-
+      https://docs.gitlab.com/api/issues/#update-an-issue documents `labels` as a string of
+      comma-separated label names; the spec only allows an array.
+    remove: true
+  - target: $.components.schemas.putApiV4ProjectsIdIssuesIssueIidRequest.properties
+    description: Comma-separated string or array, per https://docs.gitlab.com/api/issues/#update-an-issue.
+    update:
+      labels:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        nullable: true
+
+  - target: $.components.schemas.postApiV4ProjectsIdMergeRequestsRequest.properties.labels
+    description: >-
+      https://docs.gitlab.com/api/merge_requests/#create-a-merge-request documents `labels` as a
+      comma-separated string; the spec only allows an array.
+    remove: true
+  - target: $.components.schemas.postApiV4ProjectsIdMergeRequestsRequest.properties
+    description: >-
+      Comma-separated string or array, per
+      https://docs.gitlab.com/api/merge_requests/#create-a-merge-request.
+    update:
+      labels:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        nullable: true
+
+  - target: $.components.schemas.putApiV4ProjectsIdMergeRequestsMergeRequestIidRequest.properties.labels
+    description: >-
+      https://docs.gitlab.com/api/merge_requests/#update-a-merge-request documents `labels` as a
+      comma-separated string; the spec only allows an array.
+    remove: true
+  - target: $.components.schemas.putApiV4ProjectsIdMergeRequestsMergeRequestIidRequest.properties
+    description: >-
+      Comma-separated string or array, per
+      https://docs.gitlab.com/api/merge_requests/#update-a-merge-request.
+    update:
+      labels:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        nullable: true
+
+  - target: $.paths['/api/v4/projects/{id}/repository/files/{file_path}'].post.requestBody.content
+    description: >-
+      https://docs.gitlab.com/api/repository_files/#create-a-file-in-a-repository sends the
+      attributes as a JSON body (`Content-Type: application/json`); the spec only lists a
+      multipart/form-data body with a single `file` field.
+    update:
+      application/json:
+        schema:
+          type: object
+          required: [branch, commit_message, content]
+          properties:
+            branch:
+              type: string
+            commit_message:
+              type: string
+            content:
+              type: string
+            author_email:
+              type: string
+            author_name:
+              type: string
+            encoding:
+              type: string
+              enum: [text, base64]
+            execute_filemode:
+              type: boolean
+            start_branch:
+              type: string
+  - target: $.paths['/api/v4/projects/{id}/repository/files/{file_path}'].put.requestBody.content
+    description: >-
+      https://docs.gitlab.com/api/repository_files/#update-a-file-in-a-repository sends the
+      attributes as a JSON body (`Content-Type: application/json`); the spec only lists a
+      multipart/form-data body with a single `file` field.
+    update:
+      application/json:
+        schema:
+          type: object
+          required: [branch, commit_message, content]
+          properties:
+            branch:
+              type: string
+            commit_message:
+              type: string
+            content:
+              type: string
+            author_email:
+              type: string
+            author_name:
+              type: string
+            encoding:
+              type: string
+              enum: [text, base64]
+            execute_filemode:
+              type: boolean
+            last_commit_id:
+              type: string
+            start_branch:
+              type: string
+
+  - target: $.paths['/api/v4/projects/{id}/repository/files/{file_path}'].delete.parameters[?@.name == 'branch' || @.name == 'commit_message']
+    description: >-
+      https://docs.gitlab.com/api/repository_files/#delete-a-file-in-a-repository sends `branch`
+      and `commit_message` in a JSON body; the spec only documents them in the query.
+    update:
+      required: false
+  - target: $.paths['/api/v4/projects/{id}/repository/files/{file_path}'].delete
+    description: >-
+      The JSON body https://docs.gitlab.com/api/repository_files/#delete-a-file-in-a-repository
+      documents.
+    update:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [branch, commit_message]
+              properties:
+                branch:
+                  type: string
+                commit_message:
+                  type: string
+                start_branch:
+                  type: string
+                author_email:
+                  type: string
+                author_name:
+                  type: string
+                last_commit_id:
+                  type: string
+
+  - target: $.paths['/api/v4/projects/{id}/pipelines/{pipeline_id}/jobs'].get.parameters[?@.name == 'scope']
+    description: >-
+      https://docs.gitlab.com/api/jobs/#list-all-jobs-by-pipeline passes several statuses as
+      `scope[]=pending&scope[]=running`; the spec names the parameter `scope`.
+    update:
+      name: scope[]

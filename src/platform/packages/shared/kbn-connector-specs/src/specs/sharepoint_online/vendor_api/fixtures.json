@@ -1,0 +1,26 @@
+{
+  "callGraphAPI": {
+    "input": {
+      "method": "GET",
+      "path": "/v1.0/sites/root",
+      "query": {
+        "$select": "id,displayName,webUrl"
+      },
+      "body": null
+    }
+  },
+  "downloadItemFromURL": {
+    "input": {
+      "downloadUrl": "https://contoso.sharepoint.com/sites/marketing/_layouts/15/download.aspx?UniqueId=0f4e5d1a-2b3c-4d5e-8f90-a1b2c3d4e5f6&Translate=false&tempauth=v1.eyJ0eXAiOiJKV1QifQ&ApiVersion=2.0"
+    }
+  },
+  "search": {
+    "queries": [
+      {
+        "source": "v1",
+        "method": "POST",
+        "path": "/search/query"
+      }
+    ]
+  }
+}

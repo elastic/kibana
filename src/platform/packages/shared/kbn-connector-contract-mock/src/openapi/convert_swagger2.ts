@@ -96,6 +96,9 @@ const toParameter = (parameter: Node): Node => {
     in: location,
     required,
     description,
+    ...(parameter['x-ms-skip-url-encoding'] === undefined
+      ? {}
+      : { 'x-ms-skip-url-encoding': parameter['x-ms-skip-url-encoding'] }),
     schema: toSchema(parameter),
     ...(serialization && (location === 'query' || serialization.style === undefined)
       ? { style: serialization.style, explode: serialization.explode }
@@ -103,9 +106,19 @@ const toParameter = (parameter: Node): Node => {
   };
 };
 
-const toContent = (mediaTypes: readonly string[], schema: unknown): Node =>
+// Swagger 2.0 response `examples` map media types to example values.
+const toContent = (mediaTypes: readonly string[], schema: unknown, examples?: unknown): Node =>
   Object.fromEntries(
-    mediaTypes.map((mediaType) => [mediaType, isRecord(schema) ? { schema } : {}])
+    mediaTypes.map((mediaType) => {
+      const example = isRecord(examples) ? examples[mediaType] : undefined;
+      return [
+        mediaType,
+        {
+          ...(isRecord(schema) ? { schema } : {}),
+          ...(example === undefined ? {} : { example }),
+        },
+      ];
+    })
   );
 
 // Swagger 2.0 sends form fields as `formData` parameters; OpenAPI 3.0 as one object schema.
@@ -128,7 +141,9 @@ const toFormBody = (fields: readonly Node[], consumes: readonly string[]): Node 
 
 const toResponse = (response: Node, produces: readonly string[]): Node => ({
   description: response.description ?? '',
-  ...(response.schema === undefined ? {} : { content: toContent(produces, response.schema) }),
+  ...(response.schema === undefined
+    ? {}
+    : { content: toContent(produces, response.schema, response.examples) }),
   ...(isRecord(response.headers)
     ? {
         headers: Object.fromEntries(
@@ -141,10 +156,42 @@ const toResponse = (response: Node, produces: readonly string[]): Node => ({
     : {}),
 });
 
+const OAUTH2_FLOWS: Readonly<Record<string, string>> = {
+  implicit: 'implicit',
+  password: 'password',
+  application: 'clientCredentials',
+  accessCode: 'authorizationCode',
+};
+
+const toSecuritySchemes = (definitions: unknown): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(isRecord(definitions) ? definitions : {}).flatMap(([name, definition]) => {
+      if (!isRecord(definition)) {
+        return [];
+      }
+      const { type, flow, authorizationUrl, tokenUrl, scopes, description } = definition;
+      const described = typeof description === 'string' ? { description } : {};
+      if (type === 'basic') {
+        return [[name, { type: 'http', scheme: 'basic', ...described }]];
+      }
+      if (type === 'oauth2' && typeof flow === 'string' && flow in OAUTH2_FLOWS) {
+        const urls = { authorizationUrl, tokenUrl };
+        const flowUrls = Object.fromEntries(
+          Object.entries(urls).filter(([, url]) => typeof url === 'string')
+        );
+        const flows = {
+          [OAUTH2_FLOWS[flow]]: { ...flowUrls, scopes: isRecord(scopes) ? scopes : {} },
+        };
+        return [[name, { type, flows, ...described }]];
+      }
+      return [[name, definition]];
+    })
+  );
+
 /**
  * Converts a Swagger 2.0 document to OpenAPI 3.0, so it can be loaded like any other spec.
  * Parameter and response refs are inlined; schema refs keep pointing at the converted
- * `components.schemas`.
+ * `components.schemas`, and security definitions become `components.securitySchemes`.
  */
 export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
   const document = structuredClone(source);
@@ -217,7 +264,11 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
     info: document.info,
     servers,
     paths,
-    components: { schemas: isRecord(document.definitions) ? document.definitions : {} },
+    components: {
+      schemas: isRecord(document.definitions) ? document.definitions : {},
+      securitySchemes: toSecuritySchemes(document.securityDefinitions),
+    },
+    ...(Array.isArray(document.security) ? { security: document.security } : {}),
   };
   convertSchemas(converted);
   return converted;

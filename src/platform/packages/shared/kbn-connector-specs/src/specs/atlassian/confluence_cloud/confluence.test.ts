@@ -39,7 +39,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/wiki/api/v2/pages',
-        { params: { limit: 25 } }
+        { params: { limit: 25 }, paramsSerializer: { indexes: null } }
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -64,6 +64,7 @@ describe('ConfluenceCloudConnector', () => {
             'space-id': ['789'],
             title: 'test',
           },
+          paramsSerializer: { indexes: null },
         }
       );
     });
@@ -81,6 +82,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith('https://acme.atlassian.net/wiki/api/v2/pages', {
         params: { limit: 25 },
+        paramsSerializer: { indexes: null },
       });
     });
   });
@@ -138,7 +140,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/wiki/api/v2/spaces',
-        { params: { limit: 25 } }
+        { params: { limit: 25 }, paramsSerializer: { indexes: null } }
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -161,6 +163,7 @@ describe('ConfluenceCloudConnector', () => {
             cursor: 'xyz',
             keys: ['DEMO'],
           },
+          paramsSerializer: { indexes: null },
         }
       );
     });

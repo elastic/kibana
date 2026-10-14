@@ -11,9 +11,11 @@ import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Misp } from './misp';
 import {
+  AddAttributeInputSchema,
   AddSightingInputSchema,
   CheckIndicatorInputSchema,
   CreateEventInputSchema,
+  GetEventInputSchema,
   SearchAttributesInputSchema,
 } from './types';
 
@@ -75,6 +77,28 @@ describe('Misp', () => {
 
     it('rejects addSighting without attributeId or value at the schema', () => {
       expect(AddSightingInputSchema.safeParse({}).success).toBe(false);
+    });
+
+    it('accepts numeric event ids and UUIDs only', () => {
+      expect(GetEventInputSchema.safeParse({ eventId: '42' }).success).toBe(true);
+      expect(
+        GetEventInputSchema.safeParse({ eventId: '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60' }).success
+      ).toBe(true);
+      expect(GetEventInputSchema.safeParse({ eventId: 'event-42' }).success).toBe(false);
+      expect(SearchAttributesInputSchema.safeParse({ eventId: 'abc' }).success).toBe(false);
+    });
+
+    it('accepts only MISP attribute types and categories', () => {
+      const base = { eventId: '1', value: '1.2.3.4' };
+      expect(AddAttributeInputSchema.safeParse({ ...base, type: 'ip-dst' }).success).toBe(true);
+      expect(AddAttributeInputSchema.safeParse({ ...base, type: 'ipv4' }).success).toBe(false);
+      expect(
+        AddAttributeInputSchema.safeParse({ ...base, type: 'ip-dst', category: 'Network' }).success
+      ).toBe(false);
+      expect(
+        AddAttributeInputSchema.safeParse({ ...base, type: 'ip-dst', category: 'Network activity' })
+          .success
+      ).toBe(true);
     });
 
     it('defaults createEvent published to false', () => {

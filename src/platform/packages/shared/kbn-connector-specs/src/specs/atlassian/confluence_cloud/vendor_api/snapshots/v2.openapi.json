@@ -1,0 +1,1424 @@
+{
+  "components": {
+    "schemas": {
+      "AbstractPageLinks": {
+        "properties": {
+          "editui": {
+            "type": "string"
+          },
+          "tinyui": {
+            "type": "string"
+          },
+          "webui": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BodyBulk": {
+        "properties": {
+          "atlas_doc_format": {
+            "$ref": "#/components/schemas/BodyType"
+          },
+          "storage": {
+            "$ref": "#/components/schemas/BodyType"
+          }
+        },
+        "type": "object"
+      },
+      "BodySingle": {
+        "properties": {
+          "atlas_doc_format": {
+            "$ref": "#/components/schemas/BodyType"
+          },
+          "storage": {
+            "$ref": "#/components/schemas/BodyType"
+          },
+          "view": {
+            "$ref": "#/components/schemas/BodyType"
+          }
+        },
+        "type": "object"
+      },
+      "BodyType": {
+        "properties": {
+          "representation": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ContentProperty": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {},
+          "version": {
+            "$ref": "#/components/schemas/Version"
+          }
+        },
+        "type": "object"
+      },
+      "ContentStatus": {
+        "enum": [
+          "current",
+          "draft",
+          "archived",
+          "historical",
+          "trashed",
+          "deleted",
+          "any"
+        ],
+        "type": "string"
+      },
+      "Label": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Like": {
+        "properties": {
+          "accountId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MultiEntityLinks": {
+        "properties": {
+          "base": {
+            "type": "string"
+          },
+          "next": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Operation": {
+        "properties": {
+          "operation": {
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OptionalFieldLinks": {
+        "properties": {
+          "self": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OptionalFieldMeta": {
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "PageBulk": {
+        "properties": {
+          "_links": {
+            "$ref": "#/components/schemas/AbstractPageLinks"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/components/schemas/BodyBulk"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastOwnerId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ownerId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "parentType": {
+            "$ref": "#/components/schemas/ParentContentType"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "spaceId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ContentStatus"
+          },
+          "subtype": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "$ref": "#/components/schemas/Version"
+          }
+        },
+        "type": "object"
+      },
+      "PageSingle": {
+        "properties": {
+          "_links": {
+            "$ref": "#/components/schemas/AbstractPageLinks"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/components/schemas/BodySingle"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isFavoritedByCurrentUser": {
+            "type": "boolean"
+          },
+          "labels": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/Label"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "lastOwnerId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "likes": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/Like"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "operations": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/Operation"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "ownerId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "parentType": {
+            "$ref": "#/components/schemas/ParentContentType"
+          },
+          "position": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "properties": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/ContentProperty"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "spaceId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ContentStatus"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "$ref": "#/components/schemas/Version"
+          },
+          "versions": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/Version"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "PageSortOrder": {
+        "enum": [
+          "id",
+          "-id",
+          "created-date",
+          "-created-date",
+          "modified-date",
+          "-modified-date",
+          "title",
+          "-title"
+        ],
+        "type": "string"
+      },
+      "ParentContentType": {
+        "enum": [
+          "page",
+          "whiteboard",
+          "database",
+          "embed",
+          "folder"
+        ],
+        "type": "string"
+      },
+      "PrimaryBodyRepresentation": {
+        "enum": [
+          "storage",
+          "atlas_doc_format"
+        ],
+        "type": "string"
+      },
+      "PrimaryBodyRepresentationSingle": {
+        "enum": [
+          "storage",
+          "atlas_doc_format",
+          "view",
+          "export_view",
+          "anonymous_export_view",
+          "styled_view",
+          "editor"
+        ],
+        "type": "string"
+      },
+      "SpaceBulk": {
+        "properties": {
+          "_links": {
+            "$ref": "#/components/schemas/SpaceLinks"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currentActiveAlias": {
+            "type": "string"
+          },
+          "description": {
+            "$ref": "#/components/schemas/SpaceDescription"
+          },
+          "homepageId": {
+            "type": "string"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/SpaceIcon"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "spaceOwnerId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SpaceStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SpaceType"
+          }
+        },
+        "type": "object"
+      },
+      "SpaceDescription": {
+        "properties": {
+          "plain": {
+            "$ref": "#/components/schemas/BodyType"
+          },
+          "view": {
+            "$ref": "#/components/schemas/BodyType"
+          }
+        },
+        "type": "object"
+      },
+      "SpaceDescriptionBodyRepresentation": {
+        "enum": [
+          "plain",
+          "view"
+        ],
+        "type": "string"
+      },
+      "SpaceIcon": {
+        "properties": {
+          "apiDownloadLink": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SpaceLinks": {
+        "properties": {
+          "webui": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SpacePermissionAssignment": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "operation": {
+            "properties": {
+              "key": {
+                "enum": [
+                  "use",
+                  "create",
+                  "read",
+                  "update",
+                  "delete",
+                  "copy",
+                  "move",
+                  "export",
+                  "purge",
+                  "purge_version",
+                  "administer",
+                  "restore",
+                  "create_space",
+                  "restrict_content",
+                  "archive"
+                ],
+                "type": "string"
+              },
+              "targetType": {
+                "enum": [
+                  "page",
+                  "blogpost",
+                  "comment",
+                  "attachment",
+                  "whiteboard",
+                  "database",
+                  "embed",
+                  "folder",
+                  "space",
+                  "application",
+                  "userProfile"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "principal": {
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "user",
+                  "group",
+                  "role"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "SpaceProperty": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {},
+          "version": {
+            "properties": {
+              "createdAt": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "createdBy": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "number": {
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "SpaceSingle": {
+        "properties": {
+          "_links": {
+            "$ref": "#/components/schemas/SpaceLinks"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "$ref": "#/components/schemas/SpaceDescription"
+          },
+          "homepageId": {
+            "type": "string"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/SpaceIcon"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "labels": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/Label"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "operations": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/Operation"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "permissions": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/SpacePermissionAssignment"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "properties": {
+            "properties": {
+              "_links": {
+                "$ref": "#/components/schemas/OptionalFieldLinks"
+              },
+              "meta": {
+                "$ref": "#/components/schemas/OptionalFieldMeta"
+              },
+              "results": {
+                "items": {
+                  "$ref": "#/components/schemas/SpaceProperty"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "spaceOwnerId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SpaceStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SpaceType"
+          }
+        },
+        "type": "object"
+      },
+      "SpaceSortOrder": {
+        "enum": [
+          "id",
+          "-id",
+          "key",
+          "-key",
+          "name",
+          "-name"
+        ],
+        "type": "string"
+      },
+      "SpaceStatus": {
+        "enum": [
+          "current",
+          "archived",
+          "trashed"
+        ],
+        "type": "string"
+      },
+      "SpaceType": {
+        "enum": [
+          "global",
+          "collaboration",
+          "knowledge_base",
+          "personal",
+          "system",
+          "onboarding",
+          "xflow_sample_space"
+        ],
+        "type": "string"
+      },
+      "Version": {
+        "properties": {
+          "authorId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "minorEdit": {
+            "type": "boolean"
+          },
+          "number": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "scheme": "basic",
+        "type": "http"
+      },
+      "oAuthDefinitions": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://auth.atlassian.com/authorize",
+            "scopes": {
+              "delete:comment:confluence": "Delete comments.",
+              "delete:custom-content:confluence": "Delete custom content.",
+              "delete:database:confluence": "Delete databases.",
+              "delete:embed:confluence": "Delete Smart Links in the content tree.",
+              "delete:folder:confluence": "Delete folders.",
+              "delete:page:confluence": "Delete pages and blog posts.",
+              "delete:whiteboard:confluence": "Delete whiteboards.",
+              "read:attachment:confluence": "View attachments and their properties.",
+              "read:comment:confluence": "View comments and their properties.",
+              "read:custom-content:confluence": "View custom content and their properties.",
+              "read:database:confluence": "View databases and their properties.",
+              "read:embed:confluence": "View Smart Links in the content tree and their properties.",
+              "read:folder:confluence": "View folders and their properties.",
+              "read:hierarchical-content:confluence": "View children and descendants in the content tree.",
+              "read:page:confluence": "View pages and blogposts and their properties.",
+              "read:space:confluence": "View spaces and their properties.",
+              "read:task:confluence": "View tasks.",
+              "read:whiteboard:confluence": "View whiteboards and their properties.",
+              "write:app-data:confluence": "Create, update and delete app properties.",
+              "write:comment:confluence": "Create and update comments and their properties.",
+              "write:custom-content:confluence": "Create and update custom content and their properties.",
+              "write:database:confluence": "Create and update databases and their properties.",
+              "write:embed:confluence": "Create and update Smart Links in the content tree and their properties.",
+              "write:folder:confluence": "Create and update folders and their properties.",
+              "write:page:confluence": "Create and update pages and blog posts and their properties.",
+              "write:space:confluence": "Create and update spaces and their properties.",
+              "write:whiteboard:confluence": "Create and update whiteboards and their properties."
+            },
+            "tokenUrl": "https://auth.atlassian.com/oauth/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "The Confluence Cloud REST API v2"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/pages": {
+      "get": {
+        "operationId": "getPages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "maxItems": 250,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "space-id",
+            "required": false,
+            "schema": {
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "maxItems": 100,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PageSortOrder"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "current",
+                  "archived",
+                  "deleted",
+                  "trashed"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "body-format",
+            "schema": {
+              "$ref": "#/components/schemas/PrimaryBodyRepresentation"
+            }
+          },
+          {
+            "in": "query",
+            "name": "subtype",
+            "required": false,
+            "schema": {
+              "enum": [
+                "live",
+                "page"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 250,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "_links": {
+                      "$ref": "#/components/schemas/MultiEntityLinks"
+                    },
+                    "results": {
+                      "items": {
+                        "$ref": "#/components/schemas/PageBulk"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "title": "MultiEntityResult<Page>",
+                  "type": "object"
+                }
+              }
+            },
+            "headers": {
+              "Link": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {}
+          },
+          "401": {
+            "content": {}
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "oAuthDefinitions": [
+              "read:page:confluence"
+            ]
+          }
+        ]
+      }
+    },
+    "/pages/{id}": {
+      "get": {
+        "operationId": "getPageById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "body-format",
+            "schema": {
+              "$ref": "#/components/schemas/PrimaryBodyRepresentationSingle"
+            }
+          },
+          {
+            "in": "query",
+            "name": "get-draft",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "items": {
+                "enum": [
+                  "current",
+                  "archived",
+                  "trashed",
+                  "deleted",
+                  "historical",
+                  "draft"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-labels",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-properties",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-operations",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-likes",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-versions",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-version",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-favorited-by-current-user-status",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-webresources",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-collaborators",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-direct-children",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PageSingle"
+                    },
+                    {
+                      "properties": {
+                        "_links": {
+                          "properties": {
+                            "base": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {}
+          },
+          "401": {
+            "content": {}
+          },
+          "404": {
+            "content": {}
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "oAuthDefinitions": [
+              "read:page:confluence"
+            ]
+          }
+        ]
+      }
+    },
+    "/spaces": {
+      "get": {
+        "operationId": "getSpaces",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "maxItems": 250,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "keys",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 250,
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "enum": [
+                "global",
+                "collaboration",
+                "knowledge_base",
+                "personal",
+                "system",
+                "onboarding",
+                "xflow_sample_space"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "current",
+                "archived",
+                "trashed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "labels",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "favorited-by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "not-favorited-by",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SpaceSortOrder"
+            }
+          },
+          {
+            "in": "query",
+            "name": "description-format",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SpaceDescriptionBodyRepresentation"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-icon",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 25,
+              "format": "int32",
+              "maximum": 250,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "_links": {
+                      "$ref": "#/components/schemas/MultiEntityLinks"
+                    },
+                    "results": {
+                      "items": {
+                        "$ref": "#/components/schemas/SpaceBulk"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "title": "MultiEntityResult<Space>",
+                  "type": "object"
+                }
+              }
+            },
+            "headers": {
+              "Link": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {}
+          },
+          "401": {
+            "content": {}
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "oAuthDefinitions": [
+              "read:space:confluence"
+            ]
+          }
+        ]
+      }
+    },
+    "/spaces/{id}": {
+      "get": {
+        "operationId": "getSpaceById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "description-format",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/SpaceDescriptionBodyRepresentation"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-icon",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-operations",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-properties",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-permissions",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-role-assignments",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include-labels",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SpaceSingle"
+                    },
+                    {
+                      "properties": {
+                        "_links": {
+                          "properties": {
+                            "base": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {}
+          },
+          "401": {
+            "content": {}
+          },
+          "404": {
+            "content": {}
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "oAuthDefinitions": [
+              "read:space:confluence"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{your-domain}/wiki/api/v2",
+      "variables": {
+        "your-domain": {
+          "default": "no-default"
+        }
+      }
+    }
+  ]
+}

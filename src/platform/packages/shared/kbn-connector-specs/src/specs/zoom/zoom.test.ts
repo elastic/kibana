@@ -182,16 +182,11 @@ describe('Zoom', () => {
       });
     });
 
-    it('should double-encode a UUID that starts with /', async () => {
-      const mockResponse = { data: { id: 111, topic: 'Test' } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await Zoom.actions.getMeetingDetails.handler(mockContext, {
-        meetingId: '/abc+123==',
-      });
-
-      const expectedId = encodeURIComponent(encodeURIComponent('/abc+123=='));
-      expect(mockClient.get).toHaveBeenCalledWith(`https://api.zoom.us/v2/meetings/${expectedId}`);
+    it('should reject a meeting UUID, as the endpoint only takes the numeric ID', async () => {
+      await expect(
+        Zoom.actions.getMeetingDetails.handler(mockContext, { meetingId: '/abc+123==' })
+      ).rejects.toThrow();
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
 
     it('should strip whitespace from a meeting ID', async () => {

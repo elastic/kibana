@@ -1,0 +1,610 @@
+{
+  "components": {
+    "schemas": {
+      "Actions": {
+        "properties": {
+          "actionGroups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "customProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Condition": {
+        "properties": {
+          "dimensions": {
+            "items": {
+              "$ref": "#/components/schemas/Dimension"
+            },
+            "type": "array"
+          },
+          "failingPeriods": {
+            "properties": {
+              "minFailingPeriodsToAlert": {
+                "default": 1,
+                "format": "int64",
+                "type": "integer"
+              },
+              "numberOfEvaluationPeriods": {
+                "default": 1,
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
+          "metricMeasureColumn": {
+            "type": "string"
+          },
+          "metricName": {
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "Equals",
+              "GreaterThan",
+              "GreaterThanOrEqual",
+              "LessThan",
+              "LessThanOrEqual"
+            ],
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "resourceIdColumn": {
+            "type": "string"
+          },
+          "threshold": {
+            "format": "double",
+            "type": "number"
+          },
+          "timeAggregation": {
+            "enum": [
+              "Count",
+              "Average",
+              "Minimum",
+              "Maximum",
+              "Total"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Dimension": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "Include",
+              "Exclude"
+            ],
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "operator",
+          "values"
+        ],
+        "type": "object"
+      },
+      "ErrorAdditionalInfo": {
+        "properties": {
+          "info": {
+            "readOnly": true,
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorContract": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorResponse"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "additionalInfo": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorAdditionalInfo"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "code": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "message": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "target": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "title": "Error Response",
+        "type": "object"
+      },
+      "Resource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "title": "Resource",
+        "type": "object"
+      },
+      "ScheduledQueryRuleCriteria": {
+        "properties": {
+          "allOf": {
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ScheduledQueryRuleProperties": {
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/Actions",
+            "type": "object"
+          },
+          "autoMitigate": {
+            "type": "boolean"
+          },
+          "checkWorkspaceAlertsStorageConfigured": {
+            "type": "boolean"
+          },
+          "createdWithApiVersion": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "criteria": {
+            "$ref": "#/components/schemas/ScheduledQueryRuleCriteria"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "evaluationFrequency": {
+            "format": "duration",
+            "type": "string"
+          },
+          "isLegacyLogAnalyticsRule": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "isWorkspaceAlertsStorageConfigured": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "muteActionsDuration": {
+            "format": "duration",
+            "type": "string"
+          },
+          "overrideQueryTimeRange": {
+            "format": "duration",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "skipQueryValidation": {
+            "type": "boolean"
+          },
+          "targetResourceTypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "windowSize": {
+            "format": "duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScheduledQueryRuleResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TrackedResource"
+          }
+        ],
+        "properties": {
+          "etag": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "LogAlert",
+              "LogToMetric"
+            ],
+            "type": "string"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/ScheduledQueryRuleProperties",
+            "required": [
+              "enabled",
+              "criteria",
+              "scopes"
+            ]
+          },
+          "systemData": {
+            "$ref": "#/components/schemas/systemData",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "properties"
+        ],
+        "type": "object"
+      },
+      "ScheduledQueryRuleResourceCollection": {
+        "properties": {
+          "nextLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduledQueryRuleResource"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ScheduledQueryRuleResourcePatch": {
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/ScheduledQueryRuleProperties"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "TrackedResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Resource"
+          }
+        ],
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "title": "Tracked Resource",
+        "type": "object"
+      },
+      "systemData": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          },
+          "lastModifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastModifiedBy": {
+            "type": "string"
+          },
+          "lastModifiedByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Scheduled Query Rules API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/scheduledQueryRules": {
+      "get": {
+        "operationId": "ScheduledQueryRules_ListBySubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledQueryRuleResourceCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorContract"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/scheduledQueryRules": {
+      "get": {
+        "operationId": "ScheduledQueryRules_ListByResourceGroup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledQueryRuleResourceCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorContract"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/scheduledQueryRules/{ruleName}": {
+      "patch": {
+        "operationId": "ScheduledQueryRules_Update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduledQueryRuleResourcePatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledQueryRuleResource"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorContract"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

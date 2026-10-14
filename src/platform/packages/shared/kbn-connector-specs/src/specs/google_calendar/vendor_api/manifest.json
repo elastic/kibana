@@ -1,0 +1,80 @@
+{
+  "operations": {
+    "freeBusy": [
+      {
+        "method": "post",
+        "path": "/freeBusy",
+        "source": "v3"
+      }
+    ],
+    "getEvent": [
+      {
+        "method": "get",
+        "path": "/calendars/{calendarId}/events/{eventId}",
+        "source": "v3"
+      }
+    ],
+    "listCalendars": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/users/me/calendarList",
+        "source": "v3"
+      }
+    ],
+    "listEvents": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/calendars/{calendarId}/events",
+        "source": "v3"
+      }
+    ],
+    "searchEvents": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/calendars/{calendarId}/events",
+        "source": "v3"
+      }
+    ]
+  },
+  "sources": {
+    "v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:20:40.364Z",
+      "format": "discovery",
+      "url": "https://calendar-json.googleapis.com/$discovery/rest?version=v3"
+    }
+  }
+}

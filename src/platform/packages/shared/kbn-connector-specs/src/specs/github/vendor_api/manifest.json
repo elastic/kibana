@@ -1,0 +1,259 @@
+{
+  "operations": {
+    "addAssignee": [
+      {
+        "method": "post",
+        "path": "/repos/{owner}/{repo}/issues/{issue_number}/assignees",
+        "source": "2022-11-28"
+      }
+    ],
+    "addIssueComment": [
+      {
+        "method": "post",
+        "path": "/repos/{owner}/{repo}/issues/{issue_number}/comments",
+        "source": "2022-11-28"
+      }
+    ],
+    "addLabels": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/repos/{owner}/{repo}/issues/{issue_number}/labels",
+        "source": "2022-11-28"
+      }
+    ],
+    "callTool": [],
+    "createBranch": [
+      {
+        "method": "post",
+        "path": "/repos/{owner}/{repo}/git/refs",
+        "source": "2022-11-28"
+      }
+    ],
+    "createIssue": [
+      {
+        "method": "post",
+        "path": "/repos/{owner}/{repo}/issues",
+        "source": "2022-11-28"
+      }
+    ],
+    "createOrUpdateFile": [
+      {
+        "method": "put",
+        "path": "/repos/{owner}/{repo}/contents/{path}",
+        "source": "2022-11-28"
+      }
+    ],
+    "createPullRequest": [
+      {
+        "method": "post",
+        "path": "/repos/{owner}/{repo}/pulls",
+        "source": "2022-11-28"
+      }
+    ],
+    "getCommit": [],
+    "getFileContents": [],
+    "getIssue": [],
+    "getIssueComments": [],
+    "getLatestRelease": [],
+    "getMe": [],
+    "listBranches": [],
+    "listCommits": [],
+    "listIssues": [],
+    "listPullRequests": [],
+    "listReleases": [],
+    "listTags": [],
+    "listTools": [],
+    "mergePullRequest": [
+      {
+        "method": "put",
+        "path": "/repos/{owner}/{repo}/pulls/{pull_number}/merge",
+        "source": "2022-11-28"
+      }
+    ],
+    "pullRequestRead": [],
+    "requestReviewers": [
+      {
+        "method": "post",
+        "path": "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
+        "source": "2022-11-28"
+      }
+    ],
+    "searchCode": [],
+    "searchIssues": [],
+    "searchPullRequests": [],
+    "searchRepositories": [],
+    "searchUsers": [],
+    "triggerWorkflow": [
+      {
+        "method": "post",
+        "path": "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
+        "source": "2022-11-28"
+      }
+    ],
+    "updateIssue": [
+      {
+        "method": "patch",
+        "path": "/repos/{owner}/{repo}/issues/{issue_number}",
+        "source": "2022-11-28"
+      }
+    ],
+    "updatePullRequest": [
+      {
+        "method": "patch",
+        "path": "/repos/{owner}/{repo}/pulls/{pull_number}",
+        "source": "2022-11-28"
+      }
+    ]
+  },
+  "sources": {
+    "2022-11-28": {
+      "apiVersion": "1.1.4",
+      "fetchedAt": "2026-10-07T20:20:34.696Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json"
+    }
+  },
+  "unmatched": {
+    "callTool": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "getCommit": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "getFileContents": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "getIssue": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "getIssueComments": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "getLatestRelease": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "getMe": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "listBranches": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "listCommits": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "listIssues": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "listPullRequests": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "listReleases": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "listTags": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "listTools": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "pullRequestRead": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "searchCode": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "searchIssues": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "searchPullRequests": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "searchRepositories": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ],
+    "searchUsers": [
+      {
+        "method": "post",
+        "path": "/mcp/",
+        "reason": "GitHub's remote MCP server (JSON-RPC over Streamable HTTP at https://api.githubcopilot.com/mcp/), which the REST API spec doesn't cover; see https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md"
+      }
+    ]
+  }
+}

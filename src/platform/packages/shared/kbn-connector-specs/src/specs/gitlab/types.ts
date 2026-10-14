@@ -230,6 +230,7 @@ export const ListCommitsInputSchema = lazySchema(() =>
     since: z
       .string()
       .max(50)
+      .datetime({ offset: true })
       .optional()
       .describe(
         'ISO 8601 datetime — only commits after this date. Example: "2024-01-01T00:00:00Z".'
@@ -237,6 +238,7 @@ export const ListCommitsInputSchema = lazySchema(() =>
     until: z
       .string()
       .max(50)
+      .datetime({ offset: true })
       .optional()
       .describe(
         'ISO 8601 datetime — only commits before this date. Example: "2024-12-31T23:59:59Z".'
@@ -582,6 +584,7 @@ const isoDateField = (what: string) =>
   z
     .string()
     .max(64)
+    .datetime({ offset: true })
     .optional()
     .describe(`${what} as an ISO 8601 timestamp, e.g. "2026-01-15T00:00:00Z".`);
 
