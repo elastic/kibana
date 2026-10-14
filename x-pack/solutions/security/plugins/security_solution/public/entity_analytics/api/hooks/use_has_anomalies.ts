@@ -11,7 +11,6 @@ import { useAnomalyOverview } from './use_anomaly_overview';
 interface UseHasAnomaliesParams {
   entityId: string;
   entityType: string;
-  /** Must match the mode of the panel's overview query for the cached answer to be reused. */
   mode?: EntityViewMode;
   enabled?: boolean;
 }

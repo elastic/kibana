@@ -10,7 +10,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { AnomaliesTab } from '../../../../../entity_analytics/components/anomalies/anomalies_tab';
-import type { EntityViewMode } from '../../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 import { ANOMALY_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 

@@ -16,10 +16,6 @@ export const ANOMALY_OVERVIEW_QUERY_KEY = ['POST', 'FETCH_ANOMALY_OVERVIEW'] as 
 interface UseAnomalyOverviewParams {
   entityId: string;
   entityType: string;
-  /**
-   * `single` (default) covers `entityId` only; `resolved` makes the server include the whole
-   * resolution group (the target plus every entity resolved to it).
-   */
   mode?: EntityViewMode;
   from?: number;
   to?: number;

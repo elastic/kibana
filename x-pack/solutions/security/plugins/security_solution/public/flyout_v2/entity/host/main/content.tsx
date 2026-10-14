@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';

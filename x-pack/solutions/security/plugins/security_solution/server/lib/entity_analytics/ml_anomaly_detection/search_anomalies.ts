@@ -82,9 +82,7 @@ const DEFAULT_SORT_SPEC: Array<{ field: AnomalySortField; order: AnomalySortOrde
 
 export interface SearchEntityAnomaliesOpts {
   entityType: EntityType;
-  /** Entity ids covered by the search (target first, then any resolution-group aliases). */
   entityIds: string[];
-  /** Entity-store records matching `entityIds`; anomalies of any of them are returned. */
   entityRecords: Entity[];
   fromMs?: number;
   toMs?: number;

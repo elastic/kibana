@@ -56,7 +56,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HostProps {
   /**

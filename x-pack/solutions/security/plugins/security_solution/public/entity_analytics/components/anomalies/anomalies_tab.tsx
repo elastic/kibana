@@ -92,7 +92,6 @@ interface AnomaliesTabProps {
   entityId: string;
   entityName: string;
   entityType: EntityType;
-  /** `resolved` shows the anomalies of the whole resolution group; defaults to `single`. */
   mode?: EntityViewMode;
 }
 

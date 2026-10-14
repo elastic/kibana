@@ -7,10 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type {
-  AnomalySummaryRequestBody,
-  GetAnomalySummaryRequestBodyInput,
-} from '../../../../common/api/entity_analytics';
+import type { GetAnomalySummaryRequestBodyInput } from '../../../../common/api/entity_analytics';
 import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useEntityAnalyticsRoutes } from '../api';
 
@@ -19,10 +16,6 @@ export const ANOMALY_SUMMARY_QUERY_KEY = ['POST', 'FETCH_ANOMALY_SUMMARY'] as co
 interface UseAnomalySummaryParams {
   entityId: string;
   entityType: string;
-  /**
-   * `single` (default) covers `entityId` only; `resolved` makes the server include the whole
-   * resolution group (the target plus every entity resolved to it).
-   */
   mode?: EntityViewMode;
   body?: Omit<GetAnomalySummaryRequestBodyInput, 'mode'>;
   enabled?: boolean;
@@ -33,7 +26,7 @@ interface UseAnomalySummaryParams {
   executionContext?: KibanaExecutionContext;
 }
 
-type AnomalySummaryBody = AnomalySummaryRequestBody;
+type AnomalySummaryBody = GetAnomalySummaryRequestBodyInput;
 
 const DEFAULT_BODY: Required<Pick<AnomalySummaryBody, 'page' | 'page_size' | 'sort'>> = {
   page: 1,

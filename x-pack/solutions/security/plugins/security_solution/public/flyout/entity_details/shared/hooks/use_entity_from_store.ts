@@ -20,10 +20,9 @@ import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import {
   buildEntityIdFilter,
   RESOLVED_MODE_MAX_RECORDS,
-  RESOLVED_TO_FIELD,
 } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
-import type { EntityViewMode } from '../types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
@@ -62,9 +61,6 @@ export function applyEntityStoreSearchCachePatch(
     }
   );
 }
-
-// Shared with the server-side resolution-group lookup; re-exported for existing consumers.
-export { buildEntityIdFilter, RESOLVED_MODE_MAX_RECORDS, RESOLVED_TO_FIELD };
 
 export function serializeIdentityFieldsForQueryKey(
   fields: Record<string, string> | null | undefined
