@@ -12,7 +12,14 @@ import type {
   EuiSearchBarProps,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { EuiBadge, EuiButton, EuiInMemoryTable, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiFilterGroup,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { countRulesByProfile } from '../../../common/resolution';
@@ -24,6 +31,7 @@ import type {
 } from '../../../common/types';
 import { PROFILE_TYPE_LABELS, formatBoost } from '../format';
 import { DeleteProfileModal } from './delete_profile_modal';
+import { TypeFilter, matchesTypeFilter } from '../type_filter';
 import { RuleFlyout } from '../rules/rule_flyout';
 import { getProfileRulesLocation } from '../rules/rules_tab';
 import { ProfileFlyout } from './profile_flyout';
@@ -69,6 +77,7 @@ const USED_BY_DEFAULT_RULE_DESCRIPTIONS: Record<BoostProfileType, string> = {
 export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesTabProps) => {
   const history = useHistory();
   const [flyout, setFlyout] = useState<FlyoutState>();
+  const [typeFilter, setTypeFilter] = useState<BoostProfileType>();
   const [profileToDelete, setProfileToDelete] = useState<BoostProfile>();
   // A profile just created with "Save and create rule", which the rule flyout starts with.
   const [ruleProfileName, setRuleProfileName] = useState<string>();
@@ -218,6 +227,10 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
     ...(canEdit ? [actionsColumn] : []),
   ];
 
+  const filteredRows = rows.filter(({ type }) => matchesTypeFilter(typeFilter, type));
+
+  // The search box only searches text. The filter sits beside it and filters the rows itself, so it
+  // doesn't write query syntax into the box.
   const search: EuiSearchBarProps = {
     compressed: true,
     box: {
@@ -226,23 +239,26 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
         defaultMessage: 'Search boost profiles',
       }),
     },
-    filters: [
-      {
-        type: 'field_value_toggle_group',
-        field: 'type',
-        items: [
-          { value: 'indices', name: PROFILE_TYPE_LABELS.indices },
-          { value: 'data_streams', name: PROFILE_TYPE_LABELS.data_streams },
-        ],
-      },
+    toolsRight: [
+      <EuiFilterGroup key="filters" compressed>
+        <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+      </EuiFilterGroup>,
+      ...(canEdit
+        ? [
+            <EuiButton
+              key="create"
+              fill
+              size="s"
+              onClick={() => setFlyout({})}
+              data-test-subj="createBoostProfile"
+            >
+              {i18n.translate('xpack.boost.profilesTab.createButton', {
+                defaultMessage: 'Create boost profile',
+              })}
+            </EuiButton>,
+          ]
+        : []),
     ],
-    toolsRight: canEdit ? (
-      <EuiButton fill size="s" onClick={() => setFlyout({})} data-test-subj="createBoostProfile">
-        {i18n.translate('xpack.boost.profilesTab.createButton', {
-          defaultMessage: 'Create boost profile',
-        })}
-      </EuiButton>
-    ) : undefined,
   };
 
   return (
@@ -251,13 +267,13 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
         tableCaption={i18n.translate('xpack.boost.profilesTab.caption', {
           defaultMessage: 'Boost profiles',
         })}
-        items={rows}
+        items={filteredRows}
         itemId="name"
         columns={columns}
         search={search}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}
         pagination={
-          rows.length > PAGE_SIZE
+          filteredRows.length > PAGE_SIZE
             ? { pageSize: PAGE_SIZE, pageSizeOptions: [PAGE_SIZE, 25, 50] }
             : undefined
         }

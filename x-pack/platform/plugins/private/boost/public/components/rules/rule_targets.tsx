@@ -8,28 +8,31 @@
 import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiCode,
   EuiNotificationBadge,
   EuiPopover,
   EuiPopoverTitle,
+  EuiText,
   useEuiOverflowScroll,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
+import { TargetName, getHigherRankedRuleLabel } from './target_name';
 
 interface RuleTargetsProps {
   patterns: readonly string[];
   /** The rule's profile type, which names the targets in the full list. */
   type?: BoostProfileType;
+  /** Targets that a higher-ranked rule applies to instead, with that rule's name. */
+  supersededBy: ReadonlyMap<string, string>;
 }
 
 // Names shown before the rest collapse into a "+N" badge.
 const VISIBLE_PATTERNS = 2;
 
 /** A rule's pattern, or the first of its picked names with the rest in a scrollable list. */
-export const RuleTargets = ({ patterns, type }: RuleTargetsProps) => {
+export const RuleTargets = ({ patterns, type, supersededBy }: RuleTargetsProps) => {
   const hiddenCount = patterns.length - VISIBLE_PATTERNS;
 
   // Inline text in one span, since table cells are flex containers that would stretch each code
@@ -39,14 +42,18 @@ export const RuleTargets = ({ patterns, type }: RuleTargetsProps) => {
       {patterns.slice(0, VISIBLE_PATTERNS).map((pattern, index) => (
         <Fragment key={pattern}>
           {index > 0 && ' '}
-          {/* Names wrap between each other, not at their hyphens. */}
-          <EuiCode css={{ whiteSpace: 'nowrap' }}>{pattern}</EuiCode>
+          <TargetName name={pattern} supersededBy={supersededBy.get(pattern)} describeSuperseding />
         </Fragment>
       ))}
       {hiddenCount > 0 && (
         <>
           {' '}
-          <AllPatternsPopover patterns={patterns} type={type} hiddenCount={hiddenCount} />
+          <AllPatternsPopover
+            patterns={patterns}
+            type={type}
+            supersededBy={supersededBy}
+            hiddenCount={hiddenCount}
+          />
         </>
       )}
     </span>
@@ -57,7 +64,12 @@ interface AllPatternsPopoverProps extends RuleTargetsProps {
   hiddenCount: number;
 }
 
-const AllPatternsPopover = ({ patterns, type, hiddenCount }: AllPatternsPopoverProps) => {
+const AllPatternsPopover = ({
+  patterns,
+  type,
+  supersededBy,
+  hiddenCount,
+}: AllPatternsPopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const [isOpen, setIsOpen] = useState(false);
@@ -111,13 +123,29 @@ const AllPatternsPopover = ({ patterns, type, hiddenCount }: AllPatternsPopoverP
         `}
       >
         <ul css={{ display: 'grid', gap: euiTheme.size.s }}>
-          {patterns.map((pattern) => (
-            // A flex item, so each name's padded background takes up space in the list instead of
-            // overlapping the next one.
-            <li key={pattern} css={{ display: 'flex' }}>
-              <EuiCode>{pattern}</EuiCode>
-            </li>
-          ))}
+          {patterns.map((pattern) => {
+            const supersedingRule = supersededBy.get(pattern);
+            return (
+              // A flex row, so each name's padded background takes up space in the list instead of
+              // overlapping the next one, with any higher-ranked rule on the right.
+              <li
+                key={pattern}
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: euiTheme.size.m,
+                }}
+              >
+                <TargetName name={pattern} supersededBy={supersedingRule} />
+                {supersedingRule && (
+                  <EuiText size="xs" color="subdued">
+                    {getHigherRankedRuleLabel(supersedingRule)}
+                  </EuiText>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </EuiPopover>

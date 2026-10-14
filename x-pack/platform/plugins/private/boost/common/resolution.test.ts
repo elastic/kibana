@@ -125,8 +125,19 @@ describe('getRuleCoverage', () => {
       [...defaultRules, rule('wildcard', 'products*'), rule('exact', 'products')],
       profiles
     );
-    expect(coverage.get('wildcard')).toEqual({ matches: 2, appliesTo: 1 });
-    expect(coverage.get('exact')).toEqual({ matches: 1, appliesTo: 1 });
-    expect(coverage.get('elastic-default-indices')).toEqual({ matches: 3, appliesTo: 1 });
+    expect(coverage.get('wildcard')).toEqual({
+      matches: 2,
+      appliesTo: 1,
+      supersededBy: new Map([['products', 'exact']]),
+    });
+    expect(coverage.get('exact')).toEqual({ matches: 1, appliesTo: 1, supersededBy: new Map() });
+    expect(coverage.get('elastic-default-indices')).toEqual({
+      matches: 3,
+      appliesTo: 1,
+      supersededBy: new Map([
+        ['products', 'exact'],
+        ['products-2', 'wildcard'],
+      ]),
+    });
   });
 });

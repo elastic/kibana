@@ -47,7 +47,10 @@ const state: BoostState = {
   },
   profiles: [...BUILTIN_PROFILES, customProfile('zeta-search'), customProfile('alpha-search')],
   rules: [...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)), rule],
-  data_sources: [{ name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 }],
+  data_sources: [
+    { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
+    { name: 'products', type: 'index', size_in_bytes: 1e9 },
+  ],
 };
 
 const mutation = { mutate: jest.fn(), isLoading: false };
@@ -372,6 +375,40 @@ describe('RuleFlyout pattern matches', () => {
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'Select a boost profile to choose targets.'
+    );
+  });
+});
+
+describe('RuleFlyout superseded targets', () => {
+  // A new rule at priority 0, below the saved catalogs rule at priority 1.
+  const renderNewRule = () =>
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+  it('strikes through pattern matches that a higher-ranked rule keeps', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+
+    const matches = within(screen.getByTestId('boostRulePatternMatches'));
+    expect(matches.getByTestId('boostSupersededTarget')).toHaveTextContent('catalog-fall');
+    expect(matches.getByText('Higher-ranked rule: catalogs')).toBeInTheDocument();
+  });
+
+  it('only notes the data sources in the list that a higher-ranked rule keeps', async () => {
+    renderNewRule();
+
+    await userEvent.click(screen.getByText('Select indices'));
+
+    const picker = within(screen.getByTestId('boostRulePicker'));
+    expect(picker.getByRole('option', { name: /catalog-fall/ })).toHaveTextContent(
+      'Higher-ranked rule: catalogs'
+    );
+    expect(picker.getByRole('option', { name: /products/ })).not.toHaveTextContent(
+      'Higher-ranked rule'
     );
   });
 });

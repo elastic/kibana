@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCode,
   EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
@@ -24,6 +23,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiHighlight,
   EuiLink,
   EuiPanel,
   EuiSelectable,
@@ -54,6 +54,7 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
+import { TargetName, getHigherRankedRuleLabel } from './target_name';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import {
@@ -134,6 +135,11 @@ const getProfileHelpText = (defaultRuleType: BoostProfileType | undefined) => {
       "The profile's type decides whether this rule applies to indices or data streams.",
   });
 };
+
+interface PickOptionData {
+  /** A higher-ranked rule that keeps the data source if this rule targets it. */
+  supersededBy?: string;
+}
 
 interface TargetPreview {
   name: string;
@@ -394,18 +400,29 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         })
       : undefined;
 
-  const getCurrentRuleName = (dataSource: BoostDataSource) =>
-    resolveRule(dataSource, rules, profilesByName)?.name;
+  // A higher-ranked rule that would still apply to a data source if this rule targeted it, so the
+  // list only notes the ones this rule can't take.
+  const getSupersedingRule = (dataSource: BoostDataSource): string | undefined => {
+    const targetingRule = { ...draftRule, index_patterns: [dataSource.name] };
+    const winner = resolveRule(dataSource, [...otherRules, targetingRule], profilesByName);
+    return winner && winner !== targetingRule ? winner.name : undefined;
+  };
 
-  const pickOptions: EuiSelectableOption[] = typedDataSources.map((dataSource) => ({
-    label: dataSource.name,
-    checked: draft.picked.includes(dataSource.name) ? 'on' : undefined,
-    append: (
-      <EuiText size="xs" color="subdued">
-        {getCurrentRuleName(dataSource)}
-      </EuiText>
-    ),
-  }));
+  const pickOptions: Array<EuiSelectableOption<PickOptionData>> = typedDataSources.map(
+    (dataSource) => {
+      const supersededBy = getSupersedingRule(dataSource);
+      return {
+        label: dataSource.name,
+        checked: draft.picked.includes(dataSource.name) ? 'on' : undefined,
+        supersededBy,
+        append: supersededBy && (
+          <EuiText size="xs" color="subdued">
+            {getHigherRankedRuleLabel(supersededBy)}
+          </EuiText>
+        ),
+      };
+    }
+  );
 
   const modeToggle = (
     <EuiButtonGroup
@@ -726,16 +743,13 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                             >
                               <EuiFlexItem grow={false}>
                                 <EuiText size="xs">
-                                  <EuiCode>{name}</EuiCode>
+                                  <TargetName name={name} supersededBy={overriddenBy} />
                                 </EuiText>
                               </EuiFlexItem>
                               {overriddenBy && (
                                 <EuiFlexItem grow={false}>
                                   <EuiText size="xs" color="subdued">
-                                    {i18n.translate('xpack.boost.ruleForm.overriddenBy', {
-                                      defaultMessage: 'Higher-ranked rule: {rule}',
-                                      values: { rule: overriddenBy },
-                                    })}
+                                    {getHigherRankedRuleLabel(overriddenBy)}
                                   </EuiText>
                                 </EuiFlexItem>
                               )}
@@ -781,6 +795,19 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                     }),
                   }}
                   options={pickOptions}
+                  // A selected name that a higher-ranked rule keeps is struck through, as in the
+                  // rules table.
+                  renderOption={({ label, checked, supersededBy }, searchValue) => (
+                    <EuiHighlight
+                      search={searchValue}
+                      css={{
+                        textDecoration:
+                          checked === 'on' && supersededBy ? 'line-through' : undefined,
+                      }}
+                    >
+                      {label}
+                    </EuiHighlight>
+                  )}
                   onChange={(options) =>
                     updateDraft({
                       picked: options

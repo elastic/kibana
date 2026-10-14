@@ -83,9 +83,14 @@ export interface RuleCoverage {
   matches: number;
   /** Matching data sources the rule actually applies to, after higher-ranked rules. */
   appliesTo: number;
+  /** Matching data sources that a higher-ranked rule applies to instead, with that rule's name. */
+  supersededBy: Map<string, string>;
 }
 
-/** For each rule, counts the data sources it matches and the ones it applies to. */
+/**
+ * For each rule, counts the data sources it matches and the ones it applies to, and names the
+ * rule that applies to each of the others.
+ */
 export const getRuleCoverage = (
   dataSources: readonly BoostDataSource[],
   rules: readonly BoostRule[],
@@ -93,21 +98,26 @@ export const getRuleCoverage = (
 ): Map<string, RuleCoverage> => {
   const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
   const coverage = new Map(
-    rules.map(({ name }): [string, RuleCoverage] => [name, { matches: 0, appliesTo: 0 }])
+    rules.map(({ name }): [string, RuleCoverage] => [
+      name,
+      { matches: 0, appliesTo: 0, supersededBy: new Map() },
+    ])
   );
 
   dataSources.forEach((dataSource) => {
+    const appliedRule = resolveRule(dataSource, rules, profilesByName);
     rules.forEach((rule) => {
       const ruleCoverage = coverage.get(rule.name);
-      if (ruleCoverage && getMatchingPattern(rule, dataSource, profilesByName) !== undefined) {
-        ruleCoverage.matches++;
+      if (!ruleCoverage || getMatchingPattern(rule, dataSource, profilesByName) === undefined) {
+        return;
+      }
+      ruleCoverage.matches++;
+      if (appliedRule?.name === rule.name) {
+        ruleCoverage.appliesTo++;
+      } else if (appliedRule) {
+        ruleCoverage.supersededBy.set(dataSource.name, appliedRule.name);
       }
     });
-    const appliedRule = resolveRule(dataSource, rules, profilesByName);
-    const appliedCoverage = appliedRule && coverage.get(appliedRule.name);
-    if (appliedCoverage) {
-      appliedCoverage.appliesTo++;
-    }
   });
   return coverage;
 };

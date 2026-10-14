@@ -16,9 +16,11 @@ import {
   EuiBadge,
   EuiButton,
   EuiConfirmModal,
+  EuiFilterGroup,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
-  Query,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,8 +34,10 @@ import type {
 } from '../../../common/types';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteRule } from '../../hooks/use_boost_state';
-import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
-import { PROFILE_FILTER_FIELD, ProfileFilter } from './profile_filter';
+import { formatDataSourceCount } from '../format';
+import { TypeFilter, matchesTypeFilter } from '../type_filter';
+import type { ProfileSelections } from './profile_filter';
+import { ProfileFilter, matchesProfileFilter } from './profile_filter';
 import { RuleTargets } from './rule_targets';
 import { RuleFlyout } from './rule_flyout';
 
@@ -54,6 +58,53 @@ const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', 
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
 
+const getSupersededDescription = (type: BoostProfileType | undefined, count: number) =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.boost.rulesTab.supersededDataStreams', {
+        defaultMessage:
+          '{count, plural, one {# data stream this rule matches uses} other {# data streams this rule matches use}} a higher-ranked rule instead.',
+        values: { count },
+      })
+    : i18n.translate('xpack.boost.rulesTab.supersededIndices', {
+        defaultMessage:
+          '{count, plural, one {# index this rule matches uses} other {# indices this rule matches use}} a higher-ranked rule instead.',
+        values: { count },
+      });
+
+/**
+ * How many data sources a rule applies to, noting any it matches that a higher-ranked rule takes.
+ * Default rules match everything by design, so they don't note the rest.
+ */
+const AppliesTo = ({ row, appliesTo }: { row: RuleRow; appliesTo: number }) => {
+  const { euiTheme } = useEuiTheme();
+  const { profileType, supersededBy, is_builtin: isBuiltin } = row;
+  const count = formatDataSourceCount(profileType, appliesTo);
+  if (isBuiltin || supersededBy.size === 0) {
+    return <>{count}</>;
+  }
+  const description = getSupersededDescription(profileType, supersededBy.size);
+  // The count can wrap in a narrow column, but its last word and the icon stay together, so the
+  // icon never sits on a line of its own, centered on that line.
+  const lastSpace = count.lastIndexOf(' ');
+  return (
+    <span>
+      {count.slice(0, lastSpace + 1)}
+      <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+        {count.slice(lastSpace + 1)}
+        {/* A stack: another rule sits on top of this one for these. */}
+        <EuiIconTip
+          type="layers"
+          color="subdued"
+          display="flex"
+          content={description}
+          aria-label={description}
+          iconProps={{ 'data-test-subj': 'boostRuleSuperseded' }}
+        />
+      </span>
+    </span>
+  );
+};
+
 // The search parameter that opens this tab filtered by one profile.
 const PROFILE_FILTER_PARAM = 'profile';
 
@@ -71,14 +122,12 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   const [flyout, setFlyout] = useState<{ rule?: BoostRule; duplicateOf?: BoostRule }>();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { search: locationSearch } = useLocation();
-  // Read once, so the filter is the user's to change afterwards. The profile filter matches values
-  // in its "or" form, so the query is built that way.
-  const [defaultQuery] = useState(() => {
+  // Read once, so the filter is the user's to change afterwards.
+  const [profileSelections, setProfileSelections] = useState<ProfileSelections>(() => {
     const profileName = new URLSearchParams(locationSearch).get(PROFILE_FILTER_PARAM);
-    return profileName
-      ? Query.parse('').addOrFieldValue(PROFILE_FILTER_FIELD, profileName, true, 'eq')
-      : undefined;
+    return new Map(profileName ? [[profileName, 'on']] : []);
   });
+  const [typeFilter, setTypeFilter] = useState<BoostProfileType>();
 
   const rows = useMemo<RuleRow[]>(() => {
     const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
@@ -86,7 +135,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     return rules.map((rule) => ({
       ...rule,
       profileType: profileTypes.get(rule.boost_profile),
-      ...(coverage.get(rule.name) ?? { matches: 0, appliesTo: 0 }),
+      ...(coverage.get(rule.name) ?? { matches: 0, appliesTo: 0, supersededBy: new Map() }),
     }));
   }, [rules, profiles, dataSources]);
 
@@ -173,8 +222,8 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       name: i18n.translate('xpack.boost.rulesTab.targetsColumn', {
         defaultMessage: 'Targets',
       }),
-      render: (patterns: string[], { profileType }: RuleRow) => (
-        <RuleTargets patterns={patterns} type={profileType} />
+      render: (patterns: string[], { profileType, supersededBy }: RuleRow) => (
+        <RuleTargets patterns={patterns} type={profileType} supersededBy={supersededBy} />
       ),
     },
     {
@@ -194,51 +243,56 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       }),
       width: '12%',
       sortable: true,
-      render: (appliesTo: number, { profileType }: RuleRow) =>
-        formatDataSourceCount(profileType, appliesTo),
+      render: (appliesTo: number, row: RuleRow) => <AppliesTo row={row} appliesTo={appliesTo} />,
     },
     ...(canEdit ? [actionsColumn] : []),
   ];
 
-  // Only profiles that rules use, since the others would filter to an empty table. The filter
-  // component keeps its identity while the names don't change, so its popover stays open.
-  const usedProfileNamesKey = [...new Set(rules.map(({ boost_profile: name }) => name))]
-    .sort((a, b) => a.localeCompare(b))
-    .join('\n');
-  const RulesProfileFilter = useMemo(() => {
-    const profileNames = usedProfileNamesKey ? usedProfileNamesKey.split('\n') : [];
-    return (props: { query: Query; onChange?: (query: Query) => void }) => (
-      <ProfileFilter {...props} profileNames={profileNames} />
-    );
-  }, [usedProfileNamesKey]);
+  // Only profiles that rules use, since the others would filter to an empty table.
+  const usedProfileNames = [...new Set(rules.map(({ boost_profile: name }) => name))].sort((a, b) =>
+    a.localeCompare(b)
+  );
+  const filteredRows = rows.filter(
+    ({ boost_profile: profileName, profileType }) =>
+      matchesProfileFilter(profileSelections, profileName) &&
+      matchesTypeFilter(typeFilter, profileType)
+  );
 
+  // The search box only searches text. The filters sit beside it and filter the rows themselves,
+  // so they don't write query syntax into the box.
   const search: EuiSearchBarProps = {
     compressed: true,
-    defaultQuery,
     box: {
       incremental: true,
       placeholder: i18n.translate('xpack.boost.rulesTab.searchPlaceholder', {
         defaultMessage: 'Search boost rules',
       }),
     },
-    filters: [
-      { type: 'custom_component', component: RulesProfileFilter },
-      {
-        type: 'field_value_toggle_group',
-        field: 'profileType',
-        items: [
-          { value: 'indices', name: PROFILE_TYPE_LABELS.indices },
-          { value: 'data_streams', name: PROFILE_TYPE_LABELS.data_streams },
-        ],
-      },
+    toolsRight: [
+      <EuiFilterGroup key="filters" compressed>
+        <ProfileFilter
+          selections={profileSelections}
+          onChange={setProfileSelections}
+          profileNames={usedProfileNames}
+        />
+        <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+      </EuiFilterGroup>,
+      ...(canEdit
+        ? [
+            <EuiButton
+              key="create"
+              fill
+              size="s"
+              onClick={() => setFlyout({})}
+              data-test-subj="createBoostRule"
+            >
+              {i18n.translate('xpack.boost.rulesTab.createButton', {
+                defaultMessage: 'Create boost rule',
+              })}
+            </EuiButton>,
+          ]
+        : []),
     ],
-    toolsRight: canEdit ? (
-      <EuiButton fill size="s" onClick={() => setFlyout({})} data-test-subj="createBoostRule">
-        {i18n.translate('xpack.boost.rulesTab.createButton', {
-          defaultMessage: 'Create boost rule',
-        })}
-      </EuiButton>
-    ) : undefined,
   };
 
   return (
@@ -247,13 +301,13 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         tableCaption={i18n.translate('xpack.boost.rulesTab.caption', {
           defaultMessage: 'Boost rules',
         })}
-        items={rows}
+        items={filteredRows}
         itemId="name"
         columns={columns}
         search={search}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}
         pagination={
-          rows.length > PAGE_SIZE
+          filteredRows.length > PAGE_SIZE
             ? { pageSize: PAGE_SIZE, pageSizeOptions: [PAGE_SIZE, 25, 50] }
             : undefined
         }

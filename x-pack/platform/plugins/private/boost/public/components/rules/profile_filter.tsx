@@ -7,49 +7,44 @@
 
 import React, { useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable, Query } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-/** The rule field the filter matches. */
-export const PROFILE_FILTER_FIELD = 'boost_profile';
+/** Whether each profile is included in or excluded from the rules shown. */
+export type ProfileSelections = ReadonlyMap<string, 'on' | 'off'>;
 
 const FILTER_LABEL = i18n.translate('xpack.boost.profileFilter.label', {
   defaultMessage: 'Profile',
 });
 
 interface ProfileFilterProps {
-  /** The search bar's query, which holds the filter's clauses. */
-  query: Query;
-  onChange?: (query: Query) => void;
+  selections: ProfileSelections;
+  onChange: (selections: ProfileSelections) => void;
   /** Profile names to filter by, in the order they're listed. */
   profileNames: readonly string[];
 }
 
-// Included profiles form one "or" clause, so a rule using any of them matches; excluded ones are
-// separate "not" clauses, so a rule using any of them doesn't.
-const getChecked = (query: Query, name: string): EuiSelectableOption['checked'] => {
-  if (query.getOrFieldClause(PROFILE_FILTER_FIELD, name)) {
-    return 'on';
-  }
-  // A single value typed into the search box can be either.
-  const clause = query.getSimpleFieldClause(PROFILE_FILTER_FIELD, name);
-  if (!clause) {
-    return undefined;
-  }
-  return Query.isMust(clause) ? 'on' : 'off';
+/**
+ * Whether a rule using this profile passes the filter: it must use an included profile, if any are
+ * included, and not an excluded one.
+ */
+export const matchesProfileFilter = (selections: ProfileSelections, profileName: string) => {
+  const selection = selections.get(profileName);
+  const hasInclusions = [...selections.values()].includes('on');
+  return selection !== 'off' && (!hasInclusions || selection === 'on');
 };
 
 /**
  * Filters rules by profile, including or excluding each one. EUI's own selection filter can't
  * exclude, so this follows its multi-select filter pattern with an exclusion-aware list.
  */
-export const ProfileFilter = ({ query, onChange, profileNames }: ProfileFilterProps) => {
+export const ProfileFilter = ({ selections, onChange, profileNames }: ProfileFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Listed alphabetically whether or not they're selected, so nothing moves while the list is open.
   const options: EuiSelectableOption[] = profileNames.map((name) => ({
     label: name,
-    checked: getChecked(query, name),
+    checked: selections.get(name),
   }));
   const activeCount = options.filter(({ checked }) => checked !== undefined).length;
 
@@ -58,16 +53,13 @@ export const ProfileFilter = ({ query, onChange, profileNames }: ProfileFilterPr
     _event: unknown,
     { label, checked }: EuiSelectableOption
   ) => {
-    const cleared = query
-      .removeOrFieldValue(PROFILE_FILTER_FIELD, label)
-      .removeSimpleFieldValue(PROFILE_FILTER_FIELD, label);
-    onChange?.(
-      checked === 'on'
-        ? cleared.addOrFieldValue(PROFILE_FILTER_FIELD, label, true, 'eq')
-        : checked === 'off'
-        ? cleared.addSimpleFieldValue(PROFILE_FILTER_FIELD, label, false, 'eq')
-        : cleared
-    );
+    const next = new Map(selections);
+    if (checked === 'on' || checked === 'off') {
+      next.set(label, checked);
+    } else {
+      next.delete(label);
+    }
+    onChange(next);
   };
 
   return (

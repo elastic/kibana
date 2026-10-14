@@ -38,11 +38,16 @@ const customProfile = (name: string): BoostProfile => ({
   pinned: false,
 });
 
-const customRule = (name: string, profileName: string): BoostRule => ({
+const customRule = (
+  name: string,
+  profileName: string,
+  patterns = [`${name}-*`],
+  priority = 1
+): BoostRule => ({
   name,
-  index_patterns: [`${name}-*`],
+  index_patterns: patterns,
   boost_profile: profileName,
-  priority: 1,
+  priority,
   is_builtin: false,
 });
 
@@ -55,13 +60,19 @@ const renderTab = (path: string) =>
             ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
             customRule('catalogs', 'catalog-search'),
             customRule('archives', 'archive-search'),
+            // Picks two indices, one of which a higher-priority rule takes.
+            customRule('picked', 'archive-search', ['products', 'users']),
+            customRule('products-first', 'catalog-search', ['products'], 5),
           ]}
           profiles={[
             ...BUILTIN_PROFILES,
             customProfile('catalog-search'),
             customProfile('archive-search'),
           ]}
-          dataSources={[]}
+          dataSources={[
+            { name: 'products', type: 'index', size_in_bytes: 0 },
+            { name: 'users', type: 'index', size_in_bytes: 0 },
+          ]}
           canEdit
         />
       </IntlProvider>
@@ -137,5 +148,54 @@ describe('RulesTab profile filter', () => {
         checked: true,
       })
     ).toBeInTheDocument();
+  });
+});
+
+describe('RulesTab filters', () => {
+  it('filter without writing query syntax into the search box', async () => {
+    renderTab('/rules');
+
+    await userEvent.click(screen.getByTestId('boostRulesProfileFilter'));
+    await userEvent.click(
+      within(screen.getByTestId('boostRulesProfileFilterList')).getByRole('option', {
+        name: /catalog-search/,
+      })
+    );
+    await userEvent.click(screen.getByTestId('boostTypeFilter-indices'));
+
+    expect(screen.getByRole('searchbox')).toHaveValue('');
+    expect(screen.getByText('catalogs')).toBeInTheDocument();
+    expect(screen.queryByText('archives')).not.toBeInTheDocument();
+  });
+});
+
+describe('RulesTab superseded targets', () => {
+  const getRow = (name: string) => {
+    const row = screen.getByText(name).closest('tr');
+    if (!row) {
+      throw new Error(`No row for ${name}`);
+    }
+    return within(row);
+  };
+
+  it('notes and strikes through targets a higher-ranked rule applies to', () => {
+    renderTab('/rules');
+
+    const picked = getRow('picked');
+    expect(picked.getByTestId('boostRuleSuperseded')).toBeInTheDocument();
+    expect(picked.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
+    expect(picked.getByText('(Higher-ranked rule: products-first)')).toBeInTheDocument();
+
+    const productsFirst = getRow('products-first');
+    expect(productsFirst.queryByTestId('boostRuleSuperseded')).not.toBeInTheDocument();
+    expect(productsFirst.queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
+  });
+
+  it("doesn't note the targets default rules leave to other rules", () => {
+    renderTab('/rules');
+
+    expect(
+      getRow('elastic-default-indices').queryByTestId('boostRuleSuperseded')
+    ).not.toBeInTheDocument();
   });
 });
