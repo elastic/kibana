@@ -173,7 +173,7 @@ for (const testCase of CASES) {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
         // the packages of the registry have no agent version conditions: upload the test package
         uploadedPackage = await uploadTestPackage(
-          kbnClient,
+          kbnClient as any,
           packagePolicy.packageName,
           packagePolicy.packageVersion
         );
