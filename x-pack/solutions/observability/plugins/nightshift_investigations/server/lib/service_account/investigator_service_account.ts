@@ -145,17 +145,17 @@ export const createInvestigatorServiceAccountService = ({
     const serviceAccountId = await ensureServiceAccount(core, request);
 
     const client = await workflowsExtensions.getClient(request);
-    // The investigation first: the Slack thread workflow calls it by id.
-    await client.managedWorkflows.install(
-      NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
+    // Both call the global investigation workflow, which runs as the account they are bound to.
+    for (const id of [
       NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
-      { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
-    );
-    await client.managedWorkflows.install(
-      NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
       NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
-      { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId, spaceId } }
-    );
+    ] as const) {
+      await client.managedWorkflows.install(NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER, id, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+        values: { serviceAccountId },
+      });
+    }
     logger.info(
       `Nightshift in space [${spaceId}] now runs as service account [${serviceAccountId}]`
     );

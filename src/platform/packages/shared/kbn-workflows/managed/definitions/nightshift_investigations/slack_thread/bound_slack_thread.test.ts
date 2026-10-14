@@ -12,38 +12,29 @@ import { NIGHTSHIFT_SLACK_THREAD_WORKFLOW } from '.';
 import { NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW } from './bound_slack_thread';
 import { WorkflowSchema } from '../../../../spec/schema';
 
-interface Step {
-  name: string;
-  type: string;
-  with?: Record<string, unknown>;
-  steps?: Step[];
-}
-
-const flatten = (steps: Step[]): Step[] =>
-  steps.flatMap((step) => [step, ...flatten(step.steps ?? [])]);
-
 describe('Nightshift bound Slack thread workflow', () => {
-  const render = (spaceId: string) =>
+  const render = () =>
     NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW.yamlTemplate({
       serviceAccountId: 'kibana/nightshift_investigator',
-      spaceId,
     });
 
-  it('runs as the service account and calls the bound investigation of its space', () => {
-    const workflow = parse(render('obs'));
-    const investigate = flatten(workflow.steps).find(({ name }) => name === 'investigate');
+  it('renders the shared Slack thread YAML with settings.run_as', () => {
+    const rendered = parse(render());
+    const shared = parse(NIGHTSHIFT_SLACK_THREAD_WORKFLOW.yaml);
 
-    expect(workflow.settings.run_as).toBe('kibana/nightshift_investigator');
-    expect(investigate?.with?.['workflow-id']).toBe('system-nightshift-investigation-bound-obs');
-    // The bound child runs with its own binding, so the call keeps the default identity mode.
-    expect(investigate?.with?.['run-as-mode']).toBeUndefined();
-    // Same schema outcome as the shared YAML: only run_as and the child id change.
-    expect(WorkflowSchema.safeParse(workflow).success).toBe(
-      WorkflowSchema.safeParse(parse(NIGHTSHIFT_SLACK_THREAD_WORKFLOW.yaml)).success
+    expect(rendered.settings.run_as).toBe('kibana/nightshift_investigator');
+    expect({ ...rendered, settings: { ...rendered.settings, run_as: undefined } }).toEqual({
+      ...shared,
+      settings: { ...shared.settings, run_as: undefined },
+    });
+    expect(WorkflowSchema.safeParse(rendered).success).toBe(
+      WorkflowSchema.safeParse(shared).success
     );
   });
 
-  it('refuses a value that is not a space id', () => {
-    expect(() => render('Bad Space')).toThrow(/Invalid space id/);
+  it('refuses to render without an account', () => {
+    expect(() =>
+      NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW.yamlTemplate({ serviceAccountId: '' })
+    ).toThrow(/requires a serviceAccountId/);
   });
 });

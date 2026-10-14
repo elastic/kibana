@@ -94,7 +94,7 @@ describe('createInvestigatorServiceAccountService', () => {
       {
         spaceId: SPACE_ID,
         workflowIdSuffix: SPACE_ID,
-        values: { serviceAccountId: 'kibana/nightshift_investigator', spaceId: SPACE_ID },
+        values: { serviceAccountId: 'kibana/nightshift_investigator' },
       }
     );
     expect(managedWorkflows.install.mock.calls[0][1]).toBe(

@@ -51,20 +51,25 @@ POST /internal/nightshift/investigations/service_account/_disable  # teardown, n
 `_enable` runs with the caller's privileges:
 1. It creates the `nightshift_investigator` role and service account if they are missing. Existing ones are reused unchanged.
 2. It installs two workflows in the caller's space, both with `settings.run_as` set to the account:
-   - `system-nightshift-investigation-bound-<spaceId>`, which uses the same YAML as `system-nightshift-investigation`.
-   - `system-nightshift-slack-thread-bound-<spaceId>`, whose investigation call targets the space's bound investigation.
+   - `system-nightshift-investigation-bound-<spaceId>`, the space's entry point. It only calls the global `system-nightshift-investigation` with `run-as-mode: inherit`, passing its inputs through, and names the investigation after its own execution.
+   - `system-nightshift-slack-thread-bound-<spaceId>`, which calls the global investigation the same way.
 
 Running `_enable` again repairs a space whose setup was removed.
 
-A workflow can only be bound to the account from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings without a request. The global `system-nightshift-investigation` and `system-nightshift-slack-thread` are no longer installed, and the boot-time orphan cleanup removes copies left from earlier versions.
+A workflow can only be bound to the account from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings without a request.
+
+The investigation itself is installed once, globally and unbound, at startup. A change to its YAML updates that one copy on the next boot; the per-space entry points only change when their own small template does. The global `system-nightshift-slack-thread` is no longer installed, and the boot-time orphan cleanup removes copies left from earlier versions.
+
+The investigation run started by an entry point has its own execution id, so `_ensure` treats it as the run the investigation is named after when its engine-set parent is that entry point run. The record's `execution_id` then points at the investigation run.
 
 **Effects**
 - `POST /internal/nightshift/investigations`, automatic significant-event investigations, and the investigation agent's Agent Builder availability all require the bound workflow and `xpack.security.serviceAccounts.enabled`.
 - The investigation, its Agent Builder conversation, and every `kibana.request` step run as the service account. `executed_by` still records the user who started it.
+- `_ensure` rejects any run that does not execute as the account. Anyone allowed to run workflows can start the global investigation directly, but such a run executes as them and fails before it touches an investigation.
 
 **Known gaps**
 - **Agent Builder hook workflows.** `system-nightshift-sandbox-materialize-workspace`, `system-nightshift-agent-optimize` and `system-nightshift-decision-tree-hydrate` run as the user who started the investigation. Agent Builder starts them with the service account's scoped request, and the workflows engine unwraps that to the original caller (`getWorkflowOriginalRequest`). It keeps the service account only through a `workflow.execute` step with `run-as-mode: inherit`, and hooks are not steps.
-- **Chat-started investigations.** The `streams-investigation-management` skill starts `system-nightshift-investigation` by id through `execute_workflow`. That id is no longer installed, and the per-space id includes the space, which the static skill text cannot name.
+- **Chat-started investigations.** The `streams-investigation-management` skill starts `system-nightshift-investigation` by id through `execute_workflow`. That run executes as the chat user, so `_ensure` rejects it. The skill would need to start the space's entry point, whose id includes the space, which the static skill text cannot name.
 - **Deleted account.** If the account is force-deleted, every run fails with a token exchange error. Recovery: delete the leftover token, then run `_disable` and `_enable` again.
 - **Broad role.** The role is deliberately broad for the POC: Kibana `all` on every space, plus read on observability data.
 

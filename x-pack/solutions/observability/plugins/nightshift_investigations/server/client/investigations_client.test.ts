@@ -137,6 +137,12 @@ const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): Investigat
   ...overrides,
 });
 
+/** How an investigation run started through a space's bound entry point executes. */
+const INVESTIGATOR_IDENTITY = {
+  type: 'service_account' as const,
+  id: 'kibana/nightshift_investigator',
+};
+
 const makeRecord = (
   overrides: Partial<InvestigationAttributes> = {},
   { id = 'inv-1', version = '1' }: { id?: string; version?: string } = {}
@@ -1279,6 +1285,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
   const makeEnsureExecution = (overrides: Record<string, unknown> = {}) => ({
     id: EXECUTION_ID,
     workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+    effectiveIdentity: INVESTIGATOR_IDENTITY,
     status: ExecutionStatus.RUNNING,
     startedAt: '2024-01-01T00:00:00Z',
     executedBy: 'workflow-user',
@@ -1677,6 +1684,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({
         workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        effectiveIdentity: INVESTIGATOR_IDENTITY,
         originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
         context: {
           inputs: {
@@ -1724,6 +1732,23 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       InvestigationMetadataMissingError
     );
     expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, Record<string, unknown>]>([
+    ['as its caller', { effectiveIdentity: undefined }],
+    [
+      'as another service account',
+      { effectiveIdentity: { type: 'service_account', id: 'kibana/other' } },
+    ],
+  ])('rejects a run of the global investigation executing %s', async (_, overrides) => {
+    repository.get.mockResolvedValue(undefined);
+    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution(overrides));
+
+    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+      InvestigationUnavailableError
+    );
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('tolerates a conflict from a concurrent ensure', async () => {
@@ -1946,6 +1971,7 @@ describe('NightshiftInvestigationsClient notificationDestinations', () => {
     mockManagement.getWorkflowExecution.mockResolvedValue({
       id: 'exec-notify',
       workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      effectiveIdentity: INVESTIGATOR_IDENTITY,
       status: ExecutionStatus.RUNNING,
       startedAt: '2024-01-01T00:00:00Z',
       executedBy: 'workflow-user',
@@ -1974,6 +2000,7 @@ describe('NightshiftInvestigationsClient notificationDestinations', () => {
       mockManagement.getWorkflowExecution.mockResolvedValue({
         id: 'exec-notify',
         workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        effectiveIdentity: INVESTIGATOR_IDENTITY,
         status: ExecutionStatus.RUNNING,
         startedAt: '2024-01-01T00:00:00Z',
         executedBy: 'workflow-user',
@@ -2026,6 +2053,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
   const makeFollowUpExecution = (inputs: Record<string, unknown> = {}) => ({
     id: EXECUTION_ID,
     workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+    effectiveIdentity: INVESTIGATOR_IDENTITY,
     status: ExecutionStatus.RUNNING,
     startedAt: '2024-01-02T00:00:00Z',
     executedBy: 'slack-app',
@@ -2091,6 +2119,20 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
 
     await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
       InvestigationConflictError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a continuing run that executes as its caller', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'completed', conversation_id: 'conv-slack' }, { id: INVESTIGATION_ID })
+    );
+    mockExecutions({
+      [EXECUTION_ID]: { ...makeFollowUpExecution(), effectiveIdentity: undefined },
+    });
+
+    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+      InvestigationUnavailableError
     );
     expect(repository.update).not.toHaveBeenCalled();
   });
@@ -2207,7 +2249,124 @@ describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investig
     await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
       InvestigationNotFoundError
     );
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('NightshiftInvestigationsClient.ensureOrCreate() for an entry point run', () => {
+  // A space's bound entry point is named after its own run and starts the global investigation
+  // as a child, which then calls _ensure with its own execution id.
+  const ENTRY_POINT_ID = 'exec-entry-point';
+  const CHILD_ID = 'exec-child';
+
+  const entryPoint = {
+    id: ENTRY_POINT_ID,
+    workflowId: 'system-nightshift-investigation-bound-default',
+    originManagedWorkflowId: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+    status: ExecutionStatus.RUNNING,
+    startedAt: '2024-01-01T00:00:00Z',
+    executedBy: 'kibana/nightshift_investigator',
+    context: { inputs: { investigation_id: ENTRY_POINT_ID } },
+  };
+
+  const makeChild = (overrides: Record<string, unknown> = {}) => ({
+    id: CHILD_ID,
+    workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+    effectiveIdentity: INVESTIGATOR_IDENTITY,
+    status: ExecutionStatus.RUNNING,
+    startedAt: '2024-01-01T00:00:01Z',
+    executedBy: 'kibana/nightshift_investigator',
+    context: {
+      parentWorkflowExecutionId: ENTRY_POINT_ID,
+      inputs: {
+        investigation_id: ENTRY_POINT_ID,
+        message: 'Investigate this',
+        title: 'Investigate this',
+        context: { source: 'alert', alert_id: 'alert-42', trigger_type: 'automatic' },
+      },
+    },
+    ...overrides,
+  });
+
+  const mockExecutions = (executions: Record<string, unknown>) =>
+    mockManagement.getWorkflowExecution.mockImplementation(
+      async (id: string) => executions[id] ?? null
+    );
+
+  it('moves the pending record start() created to running, owned by the child', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ status: 'pending' }, { id: ENTRY_POINT_ID, version: 'v1' })
+    );
+    mockExecutions({ [ENTRY_POINT_ID]: entryPoint, [CHILD_ID]: makeChild() });
+
+    await makeClient().ensureOrCreate(ENTRY_POINT_ID, CHILD_ID);
+
+    expect(repository.update).toHaveBeenCalledWith({
+      id: ENTRY_POINT_ID,
+      patch: {
+        status: 'running',
+        started_at: '2024-01-01T00:00:01Z',
+        executed_by: 'kibana/nightshift_investigator',
+        execution_id: CHILD_ID,
+      },
+      version: 'v1',
+    });
+  });
+
+  it('creates the record owned by the child when start() has not written it yet', async () => {
+    repository.get.mockResolvedValueOnce(undefined);
+    repository.create.mockImplementation(async ({ id, attributes }) => {
+      repository.get.mockResolvedValue({ ...attributes, id, version: 'created' });
+    });
+    mockExecutions({ [ENTRY_POINT_ID]: entryPoint, [CHILD_ID]: makeChild() });
+
+    await makeClient().ensureOrCreate(ENTRY_POINT_ID, CHILD_ID);
+
+    expect(repository.create).toHaveBeenCalledWith({
+      id: ENTRY_POINT_ID,
+      attributes: expect.objectContaining({ status: 'running', execution_id: CHILD_ID }),
+    });
+  });
+
+  it('lets a retried ensure of the child through once it owns the record', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { status: 'running', execution_id: CHILD_ID, conversation_id: 'conv' },
+        { id: ENTRY_POINT_ID }
+      )
+    );
+    mockExecutions({ [ENTRY_POINT_ID]: entryPoint, [CHILD_ID]: makeChild() });
+
+    await expect(makeClient().ensureOrCreate(ENTRY_POINT_ID, CHILD_ID)).resolves.toBe('conv');
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, Record<string, unknown>]>([
+    [
+      'a run whose parent is not the run the record is named after',
+      {
+        [CHILD_ID]: makeChild({
+          context: { ...makeChild().context, parentWorkflowExecutionId: 'x' },
+        }),
+      },
+    ],
+    [
+      'a child of a run that is not an entry point',
+      {
+        [ENTRY_POINT_ID]: { ...entryPoint, originManagedWorkflowId: 'some-other-workflow' },
+        [CHILD_ID]: makeChild(),
+      },
+    ],
+  ])('treats %s as a continuing run', async (_, executions) => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'pending' }, { id: ENTRY_POINT_ID }));
+    mockExecutions({ [ENTRY_POINT_ID]: entryPoint, ...executions });
+
+    // A pending record named after a live run is not claimable by anyone else.
+    await expect(makeClient().ensureOrCreate(ENTRY_POINT_ID, CHILD_ID)).rejects.toThrow(
+      InvestigationConflictError
+    );
+    expect(repository.update).not.toHaveBeenCalled();
   });
 });
 
@@ -2261,6 +2420,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
         ? {
             id: 'exec-slack',
             workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+            effectiveIdentity: INVESTIGATOR_IDENTITY,
             status: ExecutionStatus.RUNNING,
             startedAt: '2024-01-02T00:00:00Z',
             context: { inputs: { investigation_id: created?.investigation_id } },

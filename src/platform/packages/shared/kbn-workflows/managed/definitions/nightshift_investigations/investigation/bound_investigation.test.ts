@@ -8,7 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from '.';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '.';
 import {
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
@@ -27,16 +27,39 @@ describe('Nightshift bound investigation workflow', () => {
     expect(NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW.management.lifecycle).toBe('dynamic');
   });
 
-  it('renders the shared investigation YAML with settings.run_as', () => {
+  it('runs as the service account and hands its inputs to the global investigation', () => {
     const rendered = parse(render('kibana/nightshift_investigator'));
-    const shared = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml);
 
     expect(rendered.settings.run_as).toBe('kibana/nightshift_investigator');
-    expect({ ...rendered, settings: { ...rendered.settings, run_as: undefined } }).toEqual({
-      ...shared,
-      settings: { ...shared.settings, run_as: undefined },
-    });
+    expect(rendered.steps).toEqual([
+      {
+        name: 'investigate',
+        type: 'workflow.execute',
+        with: {
+          'workflow-id': NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+          'run-as-mode': 'inherit',
+          inputs: '${{ inputs }}',
+        },
+      },
+    ]);
     expect(WorkflowSchema.safeParse(rendered).success).toBe(true);
+  });
+
+  it('names the investigation after its own run unless the caller names one', () => {
+    const [trigger] = parse(render('kibana/nightshift_investigator')).triggers;
+
+    expect(trigger.inputs.properties.investigation_id.default).toBe('{{ execution.id }}');
+    expect(trigger.inputs.additionalProperties).toBe(true);
+  });
+
+  it('outlives the investigation it waits for', () => {
+    const toMinutes = (timeout: string) => Number(timeout.replace(/m$/, ''));
+    const wrapper = parse(render('kibana/nightshift_investigator'));
+    const investigation = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml);
+
+    expect(toMinutes(wrapper.settings.timeout)).toBeGreaterThan(
+      toMinutes(investigation.settings.timeout)
+    );
   });
 
   it('quotes the account id so YAML special characters stay literal', () => {

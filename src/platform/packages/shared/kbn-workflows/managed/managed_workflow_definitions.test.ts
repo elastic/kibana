@@ -87,7 +87,6 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   },
   [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID]: {
     serviceAccountId: 'kibana/nightshift_investigator',
-    spaceId: 'default',
   },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',

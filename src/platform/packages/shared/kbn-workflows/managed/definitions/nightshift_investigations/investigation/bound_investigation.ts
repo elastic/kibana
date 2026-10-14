@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
+import BOUND_INVESTIGATION_WORKFLOW_YAML from './bound_investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
 import { renderRunAs } from '../render_bound_yaml';
 
@@ -22,20 +22,22 @@ export interface NightshiftBoundInvestigationTemplateValues extends ManagedWorkf
   serviceAccountId: string;
 }
 
-/** Renders the investigation YAML with `settings.run_as` set to the bound service account. */
+/** Renders the space entry point with `settings.run_as` set to the bound service account. */
 export const renderBoundInvestigationYaml = ({
   serviceAccountId,
 }: NightshiftBoundInvestigationTemplateValues): string =>
-  renderRunAs(INVESTIGATION_WORKFLOW_YAML, serviceAccountId);
+  renderRunAs(BOUND_INVESTIGATION_WORKFLOW_YAML, serviceAccountId);
 
 /**
- * The investigation workflow, installed per space and bound to the Nightshift service account.
- * Investigations only run through this copy; a space without it cannot run investigations.
+ * The space's entry point to investigations, installed per space and bound to the Nightshift
+ * service account. It calls the global investigation workflow, which inherits its identity, so a
+ * change to the investigation only updates the one global copy. A space without this entry point
+ * cannot run investigations.
  */
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yamlTemplate: renderBoundInvestigationYaml,
   management: {

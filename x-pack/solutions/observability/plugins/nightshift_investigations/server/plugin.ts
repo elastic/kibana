@@ -28,6 +28,7 @@ import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
+import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import {
@@ -746,9 +747,11 @@ export class NightshiftInvestigationsPlugin
     const client = await workflowsExtensions.initManagedWorkflowsClient(
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
-    // The investigation and Slack thread workflows are installed per space, bound to the
-    // Nightshift service account, when an admin enables it (see lib/service_account). Not
-    // installing their global copies here lets ready() remove any left from earlier versions.
+    // Each space reaches the global investigation through an entry point bound to the Nightshift
+    // service account, installed with the bound Slack thread workflow when an admin enables it
+    // (see lib/service_account). Not installing the Slack thread's global copy here lets ready()
+    // remove any left from earlier versions.
+    await installInvestigationWorkflow({ client });
     if (this.cortexEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });

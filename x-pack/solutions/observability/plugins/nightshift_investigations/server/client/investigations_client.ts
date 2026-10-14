@@ -27,8 +27,14 @@ import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { validateNotificationDestination } from '../lib/notifications/notification_delivery';
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
-import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
-import { getBoundInvestigationWorkflowId } from '../lib/service_account/constants';
+import {
+  isInvestigationEntryPointExecution,
+  isInvestigationWorkflowExecution,
+} from '../lib/managed_workflows/is_investigation_workflow_execution';
+import {
+  getBoundInvestigationWorkflowId,
+  NIGHTSHIFT_INVESTIGATOR_SERVICE_ACCOUNT_ID,
+} from '../lib/service_account/constants';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
@@ -403,6 +409,22 @@ function recoverTriggerTypeFromInput(
 const SERVICE_ACCOUNT_REQUIRED_MESSAGE =
   'Nightshift is not set up in this space. An admin with manage_security must enable the Nightshift service account.';
 
+/**
+ * Whether a run executes as the Nightshift service account. The investigation workflow is
+ * installed globally, so anyone allowed to run workflows can start it directly, as themselves;
+ * such a run must not act on an investigation.
+ */
+const runsAsInvestigator = ({
+  effectiveIdentity,
+}: {
+  effectiveIdentity?: { type: string; id?: string };
+}): boolean =>
+  effectiveIdentity?.type === 'service_account' &&
+  effectiveIdentity.id === NIGHTSHIFT_INVESTIGATOR_SERVICE_ACCOUNT_ID;
+
+const NOT_RUN_AS_INVESTIGATOR_MESSAGE =
+  'Investigations only run as the Nightshift service account, through the entry point of the space.';
+
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -690,7 +712,9 @@ export class NightshiftInvestigationsClient {
    * the persist step happened to run rather than to when the run began.
    *
    * A run whose execution is not the one the investigation is named after continues it instead,
-   * and resolves to the conversation it resumes, so callers name only the investigation.
+   * and resolves to the conversation it resumes, so callers name only the investigation. The
+   * exception is the investigation a space's entry point run started: it runs in that run's place,
+   * and the record points at it.
    */
   async ensureOrCreate(investigationId: string, executionId = investigationId): Promise<string> {
     await this.claimInvestigationExecution(investigationId, executionId);
@@ -728,6 +752,9 @@ export class NightshiftInvestigationsClient {
       (inputs?.investigation_id ?? executionId) !== investigationId
     ) {
       throw new InvestigationNotFoundError(investigationId);
+    }
+    if (!runsAsInvestigator(execution)) {
+      throw new InvestigationUnavailableError(NOT_RUN_AS_INVESTIGATOR_MESSAGE);
     }
     const { notificationDestinations = [] } = parseExecutionInvestigationMetadata(context);
     return { execution, notificationDestinations };
@@ -831,16 +858,21 @@ export class NightshiftInvestigationsClient {
     investigationId: string,
     executionId = investigationId
   ): Promise<string | undefined> {
-    if (executionId !== investigationId) {
+    const isNamedRun =
+      executionId === investigationId ||
+      (await this.isStartedByEntryPointRun(investigationId, executionId));
+    if (!isNamedRun) {
       return this.continueInvestigation(investigationId, executionId);
     }
+    // Set when the run is the investigation an entry point run started, not that run itself.
+    const childExecutionId = executionId !== investigationId ? executionId : undefined;
 
     const existing = await this.investigationRepository.get(investigationId);
     if (existing && isTerminalStatus(existing.status)) {
       throw InvestigationConflictError.settled(investigationId, existing.status);
     }
     if (existing && existing.status !== 'pending') {
-      if (getOwningExecutionId(existing) !== investigationId) {
+      if (getOwningExecutionId(existing) !== executionId) {
         throw InvestigationConflictError.runInProgress(investigationId);
       }
       await this.readInvestigationExecution(investigationId, executionId);
@@ -862,6 +894,7 @@ export class NightshiftInvestigationsClient {
           version: existing.version,
           startedAt,
           executedBy: execution.executedBy,
+          executionId: childExecutionId,
         });
       } catch (error) {
         if (!(error instanceof InvestigationStaleWriteError)) {
@@ -869,7 +902,7 @@ export class NightshiftInvestigationsClient {
         }
         // Losing the race is fine only to another ensure of this same run.
         const fresh = await this.investigationRepository.get(investigationId);
-        if (!fresh || getOwningExecutionId(fresh) !== investigationId) {
+        if (!fresh || getOwningExecutionId(fresh) !== executionId) {
           throw InvestigationConflictError.runInProgress(investigationId);
         }
       }
@@ -899,8 +932,44 @@ export class NightshiftInvestigationsClient {
         executed_by: execution.executedBy,
         created_at: startedAt,
         started_at: startedAt,
+        ...(childExecutionId && { execution_id: childExecutionId }),
       },
     });
+  }
+
+  /**
+   * Whether `executionId` is the investigation a space's bound entry point started for the run
+   * `investigationId` is named after. That run only hands its inputs to the investigation, so the
+   * investigation claims the record as that run would have. The engine sets the parent link, so a
+   * run started any other way cannot claim a record this way.
+   */
+  private async isStartedByEntryPointRun(
+    investigationId: string,
+    executionId: string
+  ): Promise<boolean> {
+    if (!this.workflowsManagement) {
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+    const { management } = this.workflowsManagement;
+    const options = { includeOutput: false, request: this.request };
+    const execution = await management.getWorkflowExecution(
+      executionId,
+      this.getSpaceId(),
+      options
+    );
+    if (
+      !execution ||
+      !isPlainObject(execution.context) ||
+      execution.context.parentWorkflowExecutionId !== investigationId
+    ) {
+      return false;
+    }
+    const parent = await management.getWorkflowExecution(
+      investigationId,
+      this.getSpaceId(),
+      options
+    );
+    return !!parent && isInvestigationEntryPointExecution(parent);
   }
 
   /**
@@ -944,6 +1013,9 @@ export class NightshiftInvestigationsClient {
       inputs?.investigation_id !== investigationId
     ) {
       throw new InvestigationNotFoundError(investigationId);
+    }
+    if (!runsAsInvestigator(execution)) {
+      throw new InvestigationUnavailableError(NOT_RUN_AS_INVESTIGATOR_MESSAGE);
     }
 
     parseExecutionInvestigationMetadata(execution.context);
