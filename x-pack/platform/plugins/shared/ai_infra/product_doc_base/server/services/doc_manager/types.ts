@@ -26,8 +26,8 @@ export interface DocumentationManagerAPI {
    */
   update(options?: DocUpdateOptions): Promise<void>;
   /**
-   * Update the product documentation for all previously installed inference IDs to the latest version.
-   * No-op if the product documentation is not currently installed.
+   * Update product documentation for the requested inference IDs, or every previously installed ID.
+   * When the default model changed, the previous default is deleted and the new one is installed.
    */
   updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
   /**
@@ -73,8 +73,8 @@ export interface DocumentationManagerAPI {
   }): Promise<SecurityLabsStatusResponse>;
 
   /**
-   * Update Security Labs content for all previously installed inference IDs to the latest version.
-   * No-op if Security Labs content is not currently installed.
+   * Update Security Labs content for every previously installed inference ID.
+   * When the default model changed, the previous default is deleted and the new one is installed.
    */
   updateSecurityLabsAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
 }

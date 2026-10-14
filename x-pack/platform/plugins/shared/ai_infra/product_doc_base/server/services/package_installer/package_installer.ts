@@ -523,7 +523,7 @@ export class PackageInstaller {
   }): Promise<boolean> {
     const { productName, inferenceId, forceUpdate, since } = params;
     const [{ versions: repositoryVersions }, installStatuses] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const productState = installStatuses[productName];
@@ -596,7 +596,7 @@ export class PackageInstaller {
   }): Promise<void> {
     const { inferenceId, forceUpdate, since } = params;
     const [{ versions: repositoryVersions }, openapiSpecInstallStatus] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      fetchArtifactVersions(this.getArtifactRepositoryOptions(inferenceId)),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
     const openAPISpecVersionToUpgradeTo = selectVersion(

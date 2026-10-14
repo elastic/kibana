@@ -611,6 +611,9 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.updateProductIfNeeded(params)).resolves.toBe(true);
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: '.elser' })
+      );
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({
         productName: 'kibana',
         productVersion: '8.16',

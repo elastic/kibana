@@ -11,6 +11,7 @@ import {
   getProductDocInferenceIdCandidates,
   isEisAvailable,
   isEisAvailableFromInferenceGet,
+  planDefaultInferenceMigration,
   resolveDefaultInferenceId,
   resolveDefaultInferenceIdFromInferenceGet,
   resolveInstalledProductDocInferenceId,
@@ -141,6 +142,90 @@ describe('resolveDefaultInferenceIdFromInferenceGet', () => {
     await expect(
       resolveDefaultInferenceIdFromInferenceGet(() => Promise.reject(new Error('failed')))
     ).resolves.toBe(defaultInferenceEndpoints.ELSER);
+  });
+});
+
+describe('planDefaultInferenceMigration', () => {
+  const installedFromPreviousVersion = [
+    defaultInferenceEndpoints.ELSER,
+    defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+  ];
+
+  it('replaces installed ELSER with Jina and leaves custom models alone', () => {
+    expect(
+      planDefaultInferenceMigration({
+        installedInferenceIds: installedFromPreviousVersion,
+        currentDefaultInferenceId: defaultInferenceEndpoints.JINAv5,
+      })
+    ).toEqual({
+      currentDefaultInferenceId: defaultInferenceEndpoints.JINAv5,
+      supersededInferenceIds: [defaultInferenceEndpoints.ELSER],
+      installCurrentDefault: true,
+    });
+  });
+
+  it('removes ELSER when Jina documentation is already installed', () => {
+    expect(
+      planDefaultInferenceMigration({
+        installedInferenceIds: [defaultInferenceEndpoints.JINAv5, defaultInferenceEndpoints.ELSER],
+        currentDefaultInferenceId: defaultInferenceEndpoints.JINAv5,
+      })
+    ).toEqual({
+      currentDefaultInferenceId: defaultInferenceEndpoints.JINAv5,
+      supersededInferenceIds: [defaultInferenceEndpoints.ELSER],
+      installCurrentDefault: false,
+    });
+  });
+
+  it('treats ELSER and ELSER on EIS as the same installation', () => {
+    expect(
+      planDefaultInferenceMigration({
+        installedInferenceIds: [defaultInferenceEndpoints.ELSER],
+        currentDefaultInferenceId: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+      })
+    ).toBeUndefined();
+  });
+
+  it('does not migrate when ELSER is still the default', () => {
+    expect(
+      planDefaultInferenceMigration({
+        installedInferenceIds: installedFromPreviousVersion,
+        currentDefaultInferenceId: defaultInferenceEndpoints.ELSER,
+      })
+    ).toBeUndefined();
+  });
+
+  it('uninstalls Jina when the default falls back to ELSER', () => {
+    expect(
+      planDefaultInferenceMigration({
+        installedInferenceIds: [defaultInferenceEndpoints.JINAv5],
+        currentDefaultInferenceId: defaultInferenceEndpoints.ELSER,
+      })
+    ).toEqual({
+      currentDefaultInferenceId: defaultInferenceEndpoints.ELSER,
+      supersededInferenceIds: [defaultInferenceEndpoints.JINAv5],
+      installCurrentDefault: true,
+    });
+  });
+
+  it('migrates when the request targets the new default', () => {
+    expect(
+      planDefaultInferenceMigration({
+        installedInferenceIds: installedFromPreviousVersion,
+        currentDefaultInferenceId: defaultInferenceEndpoints.JINAv5,
+        requestedInferenceIds: [defaultInferenceEndpoints.JINAv5],
+      })?.supersededInferenceIds
+    ).toEqual([defaultInferenceEndpoints.ELSER]);
+  });
+
+  it('does not migrate a request that only updates a custom model', () => {
+    expect(
+      planDefaultInferenceMigration({
+        installedInferenceIds: installedFromPreviousVersion,
+        currentDefaultInferenceId: defaultInferenceEndpoints.JINAv5,
+        requestedInferenceIds: [defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL],
+      })
+    ).toBeUndefined();
   });
 });
 
