@@ -2543,6 +2543,48 @@ describe('ConversationClient', () => {
         );
       });
 
+      it('emits exactly the pinned metadata updated trigger payload keys', async () => {
+        const eventEmitter = buildEventEmitter();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          eventEmitter,
+        });
+
+        const docWithParent = {
+          ...createConversationDocumentWithTemplate({
+            templateId: template.id,
+          }),
+        };
+        (docWithParent._source as unknown as Record<string, unknown>).parent_conversation = {
+          id: 'parent-conv-1',
+          relation: 'subagent',
+        };
+
+        mockGetDocumentResponse(docWithParent);
+
+        await clientWithCb.patchMetadata(
+          'conversation-1',
+          { status: 'closed' },
+          { source: 'http_api' }
+        );
+
+        // The bridge forwards this payload as is to the ai.conversation.metadataUpdated
+        // workflow trigger, so any new key here would reach customer workflows.
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledTimes(1);
+        const [[payload]] = eventEmitter.emitMetadataPatched.mock.calls;
+        expect(Object.keys(payload).sort()).toEqual([
+          'changedFields',
+          'conversationId',
+          'parentId',
+          'templateId',
+        ]);
+      });
+
       it('does not emit when all values are identical (no-op suppression)', async () => {
         const eventEmitter = buildEventEmitter();
         const clientWithCb = createClient({
@@ -2594,6 +2636,45 @@ describe('ConversationClient', () => {
         ).rejects.toThrow('disk full');
 
         expect(eventEmitter.emitMetadataPatched).not.toHaveBeenCalled();
+      });
+
+      it('a throwing callback does not fail the write', async () => {
+        const logger = loggerMock.create();
+        const eventEmitter = {
+          ...buildEventEmitter(),
+          emitMetadataPatched: jest.fn(() => {
+            throw new Error('listener exploded');
+          }),
+        };
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          conversationEvents: mockConversationEvents,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          eventEmitter,
+        });
+
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: template.id,
+            metadata: { status: 'open' },
+          })
+        );
+
+        await expect(
+          clientWithCb.patchMetadata('conversation-1', { severity: 'high' }, { source: 'http_api' })
+        ).resolves.toEqual({
+          conversation: expect.objectContaining({ id: 'conversation-1' }),
+          changedFields: ['severity'],
+        });
+
+        expect(eventEmitter.emitMetadataPatched).toHaveBeenCalledTimes(1);
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Failed to notify metadata patched for conversation "conversation-1": Error: listener exploded'
+        );
       });
     });
   });
