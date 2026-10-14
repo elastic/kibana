@@ -52,10 +52,7 @@ export const useAlertBasedTilesDelta = ({
     useResolvedLatestEntitiesIndexName(spaceId);
   const index = resolvedIndex?.indexName;
 
-  const guardQuery = useMemo(
-    () => buildAlertsHistoryReachesBackQuery(spaceId, timeRange),
-    [spaceId, timeRange]
-  );
+  const guardQuery = buildAlertsHistoryReachesBackQuery(spaceId, timeRange);
   const previousQuery = useMemo(
     () =>
       index

@@ -46,10 +46,7 @@ export const useNewEntityDelta = ({
     useResolvedLatestEntitiesIndexName(spaceId);
   const index = resolvedIndex?.indexName;
 
-  const guardQuery = useMemo(
-    () => (index ? buildNewEntityHistoryReachesBackQuery(index, timeRange) : null),
-    [index, timeRange]
-  );
+  const guardQuery = index ? buildNewEntityHistoryReachesBackQuery(index, timeRange) : null;
   const previousQuery = useMemo(
     () =>
       index

@@ -51,10 +51,8 @@ export const useEntitiesWithAnomaliesDelta = ({
   const isLoadingInputs = isIndexLoading || isJobsLoading;
   const hasInputs = Boolean(index) && jobIds.length > 0;
 
-  const guardQuery = useMemo(
-    () => (jobIds.length > 0 ? buildAnomaliesHistoryReachesBackQuery(timeRange, jobIds) : null),
-    [timeRange, jobIds]
-  );
+  const guardQuery =
+    jobIds.length > 0 ? buildAnomaliesHistoryReachesBackQuery(timeRange, jobIds) : null;
   const previousQuery = useMemo(
     () =>
       index && jobIds.length > 0

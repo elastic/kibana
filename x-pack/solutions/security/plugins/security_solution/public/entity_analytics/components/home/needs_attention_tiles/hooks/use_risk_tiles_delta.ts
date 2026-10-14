@@ -52,10 +52,7 @@ const useRiskTileDelta = (
     useResolvedLatestEntitiesIndexName(spaceId);
   const index = resolvedIndex?.indexName;
 
-  const guardQuery = useMemo(
-    () => buildRiskHistoryReachesBackQuery(spaceId, timeRange),
-    [spaceId, timeRange]
-  );
+  const guardQuery = buildRiskHistoryReachesBackQuery(spaceId, timeRange);
   const previousQuery = useMemo(
     () =>
       index
