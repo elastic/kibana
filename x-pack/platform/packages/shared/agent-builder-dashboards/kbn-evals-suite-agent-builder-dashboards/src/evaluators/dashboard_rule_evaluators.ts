@@ -93,7 +93,10 @@ export const createRuleEvaluator = (
   };
 };
 
-/** Panels inside the 48-column grid, not overlapping, and no full-width KPI; default sizes are guidance. */
+/**
+ * Panels inside the 48-column grid, not overlapping, no empty cell above other
+ * panels, and no full-width KPI; default sizes are guidance.
+ */
 export const dashboardLayoutRulesEvaluator = createRuleEvaluator(
   DASHBOARD_LAYOUT_RULES_EVALUATOR_NAME,
   LAYOUT_RULES

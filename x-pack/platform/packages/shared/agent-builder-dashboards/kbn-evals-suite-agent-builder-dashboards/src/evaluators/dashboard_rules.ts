@@ -46,6 +46,7 @@ export type DashboardRuleId =
   | ChartRuleId
   | 'out_of_bounds'
   | 'overlapping_panels'
+  | 'layout_gap'
   | 'full_width_kpi'
   | 'size_by_kind'
   | 'width_divides_48'
@@ -117,6 +118,25 @@ const overlaps = (a: AttachmentPanel, b: AttachmentPanel): boolean =>
   a.grid.y < b.grid.y + b.grid.h &&
   b.grid.y < a.grid.y + a.grid.h;
 
+const covers = ({ grid }: AttachmentPanel, x: number, y: number): boolean =>
+  x >= grid.x && x < grid.x + grid.w && y >= grid.y && y < grid.y + grid.h;
+
+/** The first empty cell, in reading order, that has a panel starting below it. */
+const findFirstGap = (panels: readonly AttachmentPanel[]): { x: number; y: number } | undefined => {
+  const lastTop = Math.max(...panels.map(({ grid }) => grid.y));
+  for (let y = 0; y < lastTop; y++) {
+    for (let x = 0; x < GRID_COLUMNS; x++) {
+      if (!panels.some((panel) => covers(panel, x, y))) {
+        return { x, y };
+      }
+    }
+  }
+  return undefined;
+};
+
+const describeContainer = (sectionTitle: string | undefined): string =>
+  sectionTitle === undefined ? 'the top level' : `section "${sectionTitle}"`;
+
 /**
  * A rule that checks the dashboard as a whole. With a panel `appliesTo` its
  * violations name the panels involved, which are scored like panel rules, so
@@ -161,6 +181,23 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
         )
       ),
     { appliesTo: 'all' }
+  ),
+  // Rows fill the 48 columns down to the last one, so no panel below could move into an empty cell.
+  layout_gap: dashboardRule('appearance', (dashboard) =>
+    getPanelContainers(dashboard).flatMap(({ sectionTitle, panels }) => {
+      const gap = findFirstGap(panels);
+      return gap === undefined
+        ? []
+        : [
+            {
+              rule: 'layout_gap' as const,
+              panelIds: [],
+              detail: `empty cell at x=${gap.x} y=${gap.y} in ${describeContainer(
+                sectionTitle
+              )}, above other panels`,
+            },
+          ];
+    })
   ),
   full_width_kpi: panelRule('full_width_kpi', {
     appliesTo: ['metric', 'gauge'],
@@ -209,9 +246,11 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
               {
                 rule: 'summary_not_first' as const,
                 panelIds: late.map(({ id }) => id),
-                detail: `${late.length} metric/gauge panel(s) placed after other charts in ${
-                  sectionTitle === undefined ? 'the top level' : `section "${sectionTitle}"`
-                }`,
+                detail: `${
+                  late.length
+                } metric/gauge panel(s) placed after other charts in ${describeContainer(
+                  sectionTitle
+                )}`,
               },
             ];
       }),
@@ -305,6 +344,7 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
 export const LAYOUT_RULES: readonly DashboardRuleId[] = [
   'out_of_bounds',
   'overlapping_panels',
+  'layout_gap',
   'full_width_kpi',
   'size_by_kind',
   'width_divides_48',

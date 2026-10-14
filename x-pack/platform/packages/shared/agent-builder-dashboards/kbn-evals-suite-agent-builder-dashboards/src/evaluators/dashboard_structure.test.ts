@@ -49,6 +49,29 @@ describe('dashboard structure evaluator', () => {
     expect(result.explanation).toContain('sections[1]');
   });
 
+  it('checks that each gold row sits directly below the previous one', async () => {
+    const rows: DashboardStructureGold['rows'] = [
+      { kind: 'metric' },
+      { kind: 'xy', fullWidth: true },
+    ];
+    const asked = await evaluateStructure({ rows }, [
+      metric('a', { x: 0, y: 0, w: 24, h: 5 }),
+      metric('b', { x: 24, y: 0, w: 24, h: 6 }),
+      xy('c', { x: 0, y: 6, w: 48, h: 10 }),
+    ]);
+    expect(asked.score).toBe(1);
+
+    const misplaced = await evaluateStructure({ rows }, [
+      metric('a', { x: 0, y: 0, w: 24, h: 5 }),
+      metric('b', { x: 0, y: 5, w: 24, h: 5 }),
+      xy('c', { x: 0, y: 12, w: 24, h: 10 }),
+    ]);
+    expect(misplaced.score).toBe(0);
+    expect(misplaced.explanation).toContain('metric panels are not in one row');
+    expect(misplaced.explanation).toContain('xy panels are not full width');
+    expect(misplaced.explanation).toContain('xy row is not directly below rows[0]');
+  });
+
   it('skips without gold and scores 0 without a dashboard', async () => {
     const skipped = await dashboardStructureEvaluator.evaluate({
       input: { question: 'q' },
