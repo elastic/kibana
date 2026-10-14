@@ -7,7 +7,7 @@
 
 import {
   EuiBasicTable,
-  type EuiBasicTableColumn,
+  type EuiTableFieldDataColumnType,
   EuiText,
   EuiTextBlockTruncate,
 } from '@elastic/eui';
@@ -50,7 +50,7 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
 
   const items = useMemo(() => kis.map(toTableRow), [kis]);
 
-  const columns = useMemo((): Array<EuiBasicTableColumn<ListKiTableRow>> => {
+  const columns = useMemo((): Array<EuiTableFieldDataColumnType<ListKiTableRow>> => {
     return [
       {
         field: 'title',
@@ -59,9 +59,9 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
         }),
         sortable: false,
         width: '55%',
-        render: (_, ki) => (
+        render: (title: ListKiTableRow['title']) => (
           <EuiTextBlockTruncate lines={1} cloneElement>
-            <span data-test-subj="contextKiRowTitle">{getKiDisplayTitle(ki.title)}</span>
+            <span data-test-subj="contextKiRowTitle">{getKiDisplayTitle(title)}</span>
           </EuiTextBlockTruncate>
         ),
       },
@@ -72,8 +72,8 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
         }),
         sortable: false,
         width: '25%',
-        render: (_, ki) => (
-          <KiTypeDisplay as="text" type={ki.type} data-test-subj="contextKiRowType" />
+        render: (type: ListKiTableRow['type']) => (
+          <KiTypeDisplay as="text" type={type} data-test-subj="contextKiRowType" />
         ),
       },
       {
@@ -83,8 +83,8 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
         }),
         sortable: false,
         width: '10%',
-        render: (_, ki) => (
-          <KiLifecycleStatusBadge lifecycleStatus={ki.lifecycle_status} expiresAt={ki.expires_at} />
+        render: (lifecycleStatus: ListKiTableRow['lifecycle_status'], ki) => (
+          <KiLifecycleStatusBadge lifecycleStatus={lifecycleStatus} expiresAt={ki.expires_at} />
         ),
       },
       {
@@ -94,10 +94,10 @@ export const ListKiTable = ({ aiIndexId, kis }: ListKiTableProps) => {
         }),
         sortable: false,
         width: '10%',
-        render: (_, ki) =>
-          ki.updated_at ? (
+        render: (updatedAt: ListKiTableRow['updated_at']) =>
+          updatedAt ? (
             <EuiText size="s" data-test-subj="contextKiRowUpdatedAt">
-              <KiFormattedDate value={ki.updated_at} />
+              <KiFormattedDate value={updatedAt} />
             </EuiText>
           ) : (
             <EuiText size="s" color="subdued" data-test-subj="contextKiRowUpdatedAt">

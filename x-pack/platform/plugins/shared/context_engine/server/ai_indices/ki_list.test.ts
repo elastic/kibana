@@ -84,7 +84,7 @@ describe('ki_list', () => {
     query.mockResolvedValueOnce(probeResponse(ALL_FIELDS));
   });
 
-  it('returns the current revision of each KI with exact totals and all type buckets', async () => {
+  it('returns the current revision of each KI with exact totals and capped type buckets', async () => {
     query
       .mockResolvedValueOnce(
         rowsResponse([

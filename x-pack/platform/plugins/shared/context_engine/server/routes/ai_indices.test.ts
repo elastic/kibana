@@ -182,6 +182,15 @@ describe('ai indices routes', () => {
     return route;
   };
 
+  const getQuerySchema = (method: string, path: string): Type<unknown> => {
+    const { validate } = getRoute(method, path);
+    const querySchema = validate && validate.request?.query;
+    if (!querySchema) {
+      throw new Error(`No query schema registered for ${method} ${path}`);
+    }
+    return querySchema;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     routes = {};
@@ -1049,13 +1058,8 @@ describe('ai indices routes', () => {
       values,
     });
 
-    const validateListKisQuery = (query: unknown) => {
-      const { validate } = getRoute('GET', AI_INDEX_KI_LIST_PATH);
-      const querySchema = (
-        validate as { request: { query: { validate: (v: unknown) => unknown } } }
-      ).request.query;
-      return querySchema.validate(query);
-    };
+    const validateListKisQuery = (query: unknown) =>
+      getQuerySchema('GET', AI_INDEX_KI_LIST_PATH).validate(query);
 
     it('accepts scalar lifecycle_status as sent by ?lifecycle_status=deleted', () => {
       expect(() => validateListKisQuery({ size: 25, lifecycle_status: 'deleted' })).not.toThrow();
@@ -1183,13 +1187,8 @@ describe('ai indices routes', () => {
   });
 
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
-    const validateGetKiQuery = (query: unknown) => {
-      const { validate } = getRoute('GET', AI_INDEX_KI_BY_ID_PATH);
-      const querySchema = (
-        validate as { request: { query: { validate: (v: unknown) => unknown } } }
-      ).request.query;
-      return querySchema.validate(query);
-    };
+    const validateGetKiQuery = (query: unknown) =>
+      getQuerySchema('GET', AI_INDEX_KI_BY_ID_PATH).validate(query);
 
     it('accepts scalar lifecycle_status as sent by ?lifecycle_status=deleted', () => {
       expect(() =>
