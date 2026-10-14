@@ -14,28 +14,30 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { UNISOLATE_TOOL_ID } from '../..';
 import {
   buildResponseActionComment,
-  endpointNotFoundData,
   insufficientPrivilegesResult,
   MAX_ACTION_COMMENT_LENGTH,
-  MAX_HOSTNAME_LENGTH,
   responseActionErrorResult,
   waitForActionCompletion,
 } from '../types';
 import { createEndpointLookupService } from '../services/endpoint_lookup';
+import {
+  describeTarget,
+  hostTargetFields,
+  requireHostTarget,
+  resolveDispatchTarget,
+} from '../services/resolve_target';
 
-const unisolateHostSchema = z.object({
-  hostName: z
-    .string()
-    .min(1)
-    .max(MAX_HOSTNAME_LENGTH)
-    .describe('The hostname of the endpoint to un-isolate.'),
-  comment: z
-    .string()
-    .min(1)
-    .max(MAX_ACTION_COMMENT_LENGTH)
-    .optional()
-    .describe('An optional comment explaining why the host is being un-isolated.'),
-});
+const unisolateHostSchema = z
+  .object({
+    ...hostTargetFields('The hostname of the endpoint to un-isolate.'),
+    comment: z
+      .string()
+      .min(1)
+      .max(MAX_ACTION_COMMENT_LENGTH)
+      .optional()
+      .describe('An optional comment explaining why the host is being un-isolated.'),
+  })
+  .refine(requireHostTarget.check, { message: requireHostTarget.message });
 
 export const unisolateHostTool = (
   endpointAppContextService: EndpointAppContextService
@@ -43,7 +45,7 @@ export const unisolateHostTool = (
   return {
     id: UNISOLATE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Un-isolates a host by its hostname. Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
+    description: `Un-isolates a host by its hostname or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
     // HITL gate enforced by the framework, not skill prose: the runner prompts
     // the analyst for confirmation before every dispatch.
@@ -51,16 +53,15 @@ export const unisolateHostTool = (
       askUser: 'always',
       getConfirmation: ({ toolParams }) => ({
         title: 'Release host from isolation?',
-        message: `This will reconnect **${
-          (toolParams.hostName as string) ?? 'the host'
-        }** to the network.`,
+        message: `This will reconnect **${describeTarget(toolParams)}** to the network.`,
         color: 'warning',
         confirm_text: 'Release host',
       }),
     },
     handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
-        const hostName = params.hostName as string;
+        const requestedHostName = params.hostName as string | undefined;
+        const requestedAgentId = params.agentId as string | undefined;
         const comment = params.comment as string | undefined;
 
         // The internal response-actions client runs as an automated, unsecured
@@ -77,50 +78,25 @@ export const unisolateHostTool = (
         // hostname escaping, space validation, and multi-vendor `agentType`
         // resolution in one place so every host-lookup tool behaves the same.
         const lookup = createEndpointLookupService(endpointAppContextService, spaceId);
-        const resolved = await lookup.resolveByHostName(hostName);
+        const target = await resolveDispatchTarget(lookup, 'unisolate', {
+          hostName: requestedHostName,
+          agentId: requestedAgentId,
+        });
 
-        if (resolved.kind === 'not_found') {
+        if (target.kind === 'respond') {
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
-                data: endpointNotFoundData({ hostName }),
+                data: target.data,
               },
             ],
           };
         }
 
-        if (resolved.kind === 'ambiguous') {
-          // Ambiguity is a first-class lookup outcome, not an error: two live
-          // machines can share a hostname, and a write action must never guess
-          // which one to act on. Surface the candidates and ask the analyst to
-          // identify the target by agent ID before retrying.
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.other,
-                data: {
-                  kind: 'response_action_result' as const,
-                  action: 'unisolate' as const,
-                  hostName,
-                  found: false,
-                  reason: 'ambiguous_hostname' as const,
-                  candidates: resolved.candidates,
-                  ...(resolved.truncated
-                    ? { truncated: true as const, totalCandidates: resolved.totalCandidates }
-                    : {}),
-                  message: resolved.truncated
-                    ? `More endpoints match the hostname "${hostName}" than could be examined, so it cannot be resolved to a single host. Ask the analyst to identify the target by agent ID before retrying.`
-                    : `Multiple online endpoints share the hostname "${hostName}". Ask the analyst to identify the target by agent ID before retrying — a write action must not guess.`,
-                },
-              },
-            ],
-          };
-        }
-
-        const { agentId, agentType } = resolved.endpoint;
+        const hostName = target.hostLabel;
+        const { agentId, agentType } = target.endpoint;
         const endpointIds = [agentId];
 
         const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
@@ -156,7 +132,8 @@ export const unisolateHostTool = (
           endpointAppContextService,
           spaceId,
           dispatchedAction.id,
-          logger
+          logger,
+          dispatchedAction
         );
 
         return {

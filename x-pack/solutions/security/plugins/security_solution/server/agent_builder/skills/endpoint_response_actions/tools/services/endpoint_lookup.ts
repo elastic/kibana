@@ -42,6 +42,12 @@ export interface ResolvedEndpoint {
   agentId: string;
   agentType: ResponseActionAgentType;
   packages: string[];
+  /**
+   * The hostname Fleet records for the agent. Set only by `resolveByAgentId`,
+   * where the caller supplied an ID rather than a name, so the audit label and
+   * confirmation can name the host that will really be acted on.
+   */
+  hostName?: string;
 }
 
 /** A Fleet agent record that matched the hostname but could not be selected. */
@@ -76,6 +82,12 @@ export type EndpointLookupResult =
 
 export interface EndpointLookupService {
   resolveByHostName(hostName: string): Promise<EndpointLookupResult>;
+  /**
+   * Resolves one specific agent by its Fleet agent ID, behind the same space
+   * and supported-integration gates as the hostname walk. Never `ambiguous`:
+   * an ID names exactly one agent.
+   */
+  resolveByAgentId(agentId: string): Promise<EndpointLookupResult>;
 }
 
 interface CandidatePage<T> {
@@ -237,6 +249,19 @@ export function createEndpointLookupService(
   const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
   const supportedAgentTypes = options?.agentTypes;
 
+  // Packages of the response-action integrations this lookup may resolve.
+  // When the caller scopes the lookup (`agentTypes`), the set narrows
+  // accordingly. Shared by the hostname walk and the agent-ID lookup so both
+  // paths agree on which agents are response-action targets.
+  const supportedPackages = new Set(
+    Object.entries(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES)
+      .filter(
+        ([agentType]) =>
+          !supportedAgentTypes || supportedAgentTypes.includes(agentType as ResponseActionAgentType)
+      )
+      .flatMap(([, packageNames]) => packageNames)
+  );
+
   interface NormalizedCandidate {
     agentId: string;
     isLive: boolean;
@@ -323,17 +348,6 @@ export function createEndpointLookupService(
     // merely share the hostname without a supported integration (e.g. an
     // auditing agent) must not surface as candidates — they would otherwise
     // inflate the ambiguity set or win the tiebreak over a real endpoint.
-    // When the caller scopes the lookup (`agentTypes`), the package set
-    // narrows accordingly.
-    const supportedPackages = new Set(
-      Object.entries(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES)
-        .filter(
-          ([agentType]) =>
-            !supportedAgentTypes ||
-            supportedAgentTypes.includes(agentType as ResponseActionAgentType)
-        )
-        .flatMap(([, packageNames]) => packageNames)
-    );
     const visible: NormalizedCandidate[] = items
       .filter((candidate) => (candidate.packages ?? []).some((p) => supportedPackages.has(p)))
       .map((candidate) => ({
@@ -437,6 +451,43 @@ export function createEndpointLookupService(
   };
 
   return {
+    async resolveByAgentId(agentId: string): Promise<EndpointLookupResult> {
+      // The same space gate the hostname walk applies per page: an agent
+      // outside the caller's space answers `not_found`, so an ID probe cannot
+      // reveal that an agent exists in another space.
+      try {
+        await fleetServices.ensureInCurrentSpace({ agentIds: [agentId] });
+      } catch (e) {
+        if (e instanceof NotFoundError) {
+          return { kind: 'not_found' };
+        }
+        throw e;
+      }
+
+      const agent = await fleetServices.agent.getAgent(agentId);
+      const packages = agent.packages ?? [];
+
+      // An agent without a supported (or, when scoped, requested) integration
+      // is not a response-action target — same filter as the hostname path.
+      if (!packages.some((p) => supportedPackages.has(p))) {
+        return { kind: 'not_found' };
+      }
+
+      const fleetHostName = agent.local_metadata?.host?.name;
+
+      return {
+        kind: 'found',
+        endpoint: {
+          agentId: agent.id,
+          agentType: resolveAgentTypeFromPackages(packages),
+          packages,
+          ...(typeof fleetHostName === 'string' && fleetHostName
+            ? { hostName: fleetHostName }
+            : {}),
+        },
+      };
+    },
+
     async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
       const [fleet, metadata] = await Promise.all([
         listVisibleFleetCandidates(hostName),

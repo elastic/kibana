@@ -930,4 +930,95 @@ describe('createEndpointLookupService', () => {
       expect(result).toEqual({ kind: 'not_found' });
     });
   });
+
+  describe('resolveByAgentId', () => {
+    const buildByIdService = (agent: Record<string, unknown> | Error, ensure?: jest.Mock) => {
+      const getAgent = jest.fn();
+      if (agent instanceof Error) {
+        getAgent.mockRejectedValue(agent);
+      } else {
+        getAgent.mockResolvedValue(agent);
+      }
+      const ensureInCurrentSpace = ensure ?? jest.fn().mockResolvedValue(undefined);
+      const endpointAppContextService = {
+        getInternalFleetServices: jest.fn(() => ({
+          agent: { listAgents: jest.fn(), getAgent },
+          ensureInCurrentSpace,
+        })),
+        getEndpointMetadataService: jest.fn(),
+      } as unknown as EndpointAppContextService;
+
+      return {
+        lookup: createEndpointLookupService(endpointAppContextService, spaceId),
+        getAgent,
+        ensureInCurrentSpace,
+      };
+    };
+
+    it('resolves the agent, its agentType and its Fleet hostname after the space check', async () => {
+      const { lookup, ensureInCurrentSpace, getAgent } = buildByIdService({
+        id: 'agent-s1',
+        packages: ['sentinel_one'],
+        local_metadata: { host: { name: 'sentinel-host' } },
+      });
+
+      const result = await lookup.resolveByAgentId('agent-s1');
+
+      expect(ensureInCurrentSpace).toHaveBeenCalledWith({ agentIds: ['agent-s1'] });
+      expect(getAgent).toHaveBeenCalledWith('agent-s1');
+      expect(result).toEqual({
+        kind: 'found',
+        endpoint: {
+          agentId: 'agent-s1',
+          agentType: 'sentinel_one',
+          packages: ['sentinel_one'],
+          hostName: 'sentinel-host',
+        },
+      });
+    });
+
+    it('answers not_found for an agent outside the current space without reading it', async () => {
+      const { lookup, getAgent } = buildByIdService(
+        { id: 'agent-x', packages: ['endpoint'] },
+        jest.fn().mockRejectedValue(new NotFoundError('not in space'))
+      );
+
+      expect(await lookup.resolveByAgentId('agent-x')).toEqual({ kind: 'not_found' });
+      expect(getAgent).not.toHaveBeenCalled();
+    });
+
+    it('propagates a non-NotFound space-check failure instead of reporting not_found', async () => {
+      const { lookup } = buildByIdService(
+        { id: 'agent-x', packages: ['endpoint'] },
+        jest.fn().mockRejectedValue(new Error('fleet unavailable'))
+      );
+
+      await expect(lookup.resolveByAgentId('agent-x')).rejects.toThrow('fleet unavailable');
+    });
+
+    it('answers not_found for an agent without a response-action integration', async () => {
+      const { lookup } = buildByIdService({ id: 'agent-sys', packages: ['system'] });
+
+      expect(await lookup.resolveByAgentId('agent-sys')).toEqual({ kind: 'not_found' });
+    });
+
+    it('honours the agentTypes scope on the ID path', async () => {
+      const getAgent = jest.fn().mockResolvedValue({ id: 'agent-s1', packages: ['sentinel_one'] });
+      const endpointAppContextService = {
+        getInternalFleetServices: jest.fn(() => ({
+          agent: { listAgents: jest.fn(), getAgent },
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })),
+        getEndpointMetadataService: jest.fn(),
+      } as unknown as EndpointAppContextService;
+      const lookup = createEndpointLookupService(
+        endpointAppContextService,
+        spaceId,
+        undefined as never,
+        { agentTypes: ['endpoint'] }
+      );
+
+      expect(await lookup.resolveByAgentId('agent-s1')).toEqual({ kind: 'not_found' });
+    });
+  });
 });

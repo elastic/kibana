@@ -20,6 +20,13 @@ import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { RUNNING_PROCESSES_TOOL_ID } from '../..';
 import { getRunningProcessesTool } from '.';
+import {
+  MAX_OUTPUT_ENTRIES_PER_AGENT,
+  MAX_OUTPUT_STRING_LENGTH,
+  MAX_OUTPUT_TOTAL_CHARS,
+  RUNNING_PROCESSES_MAX_RESULT_TOKENS,
+  summarizeActionOutputs,
+} from '../types';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -219,6 +226,63 @@ describe('getRunningProcessesTool', () => {
     const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
     expect(data.found).toBe(true);
     expect(data.actionId).toBe('action-999');
+  });
+
+  it('bounds a large process list and declares a result budget (outputs are not forwarded raw)', async () => {
+    const mockAgentService = {
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-123', packages: ['endpoint'] }],
+      }),
+    };
+    service.getInternalFleetServices = jest.fn(() => ({
+      agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+    })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+    service.getInternalResponseActionsClient = jest.fn(() => ({
+      runningProcesses: jest.fn().mockResolvedValue({ id: 'action-big', status: 'pending' }),
+    })) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const entryCount = MAX_OUTPUT_ENTRIES_PER_AGENT * 10;
+    const hugeCommandLine = 'x'.repeat(MAX_OUTPUT_STRING_LENGTH * 5);
+    const rawOutputs = {
+      'agent-123': {
+        type: 'json',
+        content: {
+          code: '0',
+          entries: Array.from({ length: entryCount }, (_, i) => ({
+            pid: i,
+            command: hugeCommandLine,
+          })),
+        },
+      },
+    };
+    mockActionCompletion({
+      id: 'action-big',
+      status: 'successful',
+      wasSuccessful: true,
+      hosts: { 'agent-123': { name: 'my-host' } },
+      outputs: rawOutputs,
+    });
+
+    const tool = getRunningProcessesTool(service);
+    const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+    const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+    const serializedOutputs = JSON.stringify(data.outputs);
+    // The raw payload is 200 entries x 10k chars; the bounded sample must be a
+    // small fraction of it and stay within the documented total budget.
+    expect(JSON.stringify(rawOutputs).length).toBeGreaterThan(1_000_000);
+    expect(serializedOutputs.length).toBeLessThanOrEqual(MAX_OUTPUT_TOTAL_CHARS);
+    expect(serializedOutputs).not.toContain(hugeCommandLine);
+    // What was dropped is reported rather than silently lost.
+    expect(serializedOutputs).toContain(String(entryCount));
+    expect(data.outputs).toEqual(summarizeActionOutputs(rawOutputs));
+    expect(data.totalHosts).toBe(1);
+
+    // The tool declares a budget above the platform default so the structured
+    // truncation counters are not replaced by a generic truncated preview.
+    expect(tool.maxResultTokens).toBe(RUNNING_PROCESSES_MAX_RESULT_TOKENS);
+    expect(RUNNING_PROCESSES_MAX_RESULT_TOKENS * 4).toBeGreaterThan(MAX_OUTPUT_TOTAL_CHARS);
   });
 
   it('resolves agentType from the agent packages for a non-Elastic-Defend host (multi-vendor)', async () => {

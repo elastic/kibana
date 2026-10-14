@@ -28,6 +28,7 @@ import {
 } from './types';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
+import type { ActionDetails } from '../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { getActionDetailsById } from '../../../../endpoint/services/actions';
 
@@ -526,7 +527,7 @@ describe('summarizeAgentState', () => {
 });
 
 describe('waitForActionCompletion', () => {
-  const logger = { debug: jest.fn(), error: jest.fn() } as unknown as Logger;
+  const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
   const service = {} as unknown as EndpointAppContextService;
 
   beforeEach(() => {
@@ -584,6 +585,27 @@ describe('waitForActionCompletion', () => {
     await jest.advanceTimersByTimeAsync(5 * 60_000);
 
     await expect(pending).resolves.toEqual({ id: 'a-1', isCompleted: false });
+  });
+
+  it('returns the dispatch snapshot when no completion read ever succeeded (the action is queued, not failed)', async () => {
+    mockGetActionDetailsById.mockRejectedValue(new Error('es unavailable'));
+    const dispatched = { id: 'a-1', isCompleted: false, status: 'pending' } as ActionDetails;
+
+    const pending = waitForActionCompletion(service, 'default', 'a-1', logger, dispatched);
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+
+    await expect(pending).resolves.toBe(dispatched);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('a-1'));
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('prefers a later successful read over the dispatch snapshot', async () => {
+    mockGetActionDetailsById.mockResolvedValue({ id: 'a-1', isCompleted: true });
+    const dispatched = { id: 'a-1', isCompleted: false, status: 'pending' } as ActionDetails;
+
+    await expect(
+      waitForActionCompletion(service, 'default', 'a-1', logger, dispatched)
+    ).resolves.toEqual({ id: 'a-1', isCompleted: true });
   });
 
   it('logs and rethrows when no poll ever succeeded', async () => {

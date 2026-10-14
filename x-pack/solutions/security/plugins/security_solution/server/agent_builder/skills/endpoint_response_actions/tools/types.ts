@@ -128,6 +128,16 @@ export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
 export const GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS = 60_000;
 
 /**
+ * Tool-result token budget for `running_processes`. The result carries only
+ * `outputs` (held to `MAX_OUTPUT_TOTAL_CHARS`, 64k chars = 16k tokens) and the
+ * bounded `hosts` map for a single dispatched endpoint, so 30_000 tokens
+ * (120k chars) leaves room for the envelope and `hosts` without letting the
+ * platform's truncated preview replace the structured truncation counters the
+ * model relies on.
+ */
+export const RUNNING_PROCESSES_MAX_RESULT_TOKENS = 30_000;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
@@ -815,15 +825,31 @@ const ACTION_COMPLETION_POLL_CONFIG = {
  * tools had neither, so they surfaced the action's write-time snapshot
  * instead of its outcome.
  *
- * Never throws: on error or exhausted retries it returns the last known
- * `ActionDetails` (still `pending`) so the tool can report an honest,
- * non-final status rather than failing the whole tool call.
+ * Never throws when a snapshot of the action is available: on error or
+ * exhausted retries it returns the last known `ActionDetails` (still
+ * `pending`) so the tool can report an honest, non-final status rather than
+ * failing the whole tool call. When no poll ever succeeded and no
+ * `dispatchedFallback` was supplied it rethrows — a caller with no snapshot at
+ * all has nothing truthful to report.
  */
 export async function waitForActionCompletion<T extends ActionDetails = ActionDetails>(
   endpointAppContextService: EndpointAppContextService,
   spaceId: string,
   actionId: string,
-  logger: Logger
+  logger: Logger,
+  /**
+   * The dispatch response for `actionId`, used when no completion read ever
+   * succeeds.
+   *
+   * Dispatching the action is the write; polling is a best-effort read of its
+   * outcome. A monitoring outage must not be reported as a failed dispatch —
+   * without this fallback the tool returns `unknown_error` and drops the
+   * action ID, so a queued (and possibly executing) action looks like one that
+   * never happened and invites a duplicate re-issue. The snapshot carries the
+   * action ID and its write-time status, so the model can report "dispatched,
+   * completion unknown" and re-check with `get_response_action_status`.
+   */
+  dispatchedFallback?: T
 ): Promise<T> {
   let lastKnown: T | undefined;
 
@@ -860,6 +886,13 @@ export async function waitForActionCompletion<T extends ActionDetails = ActionDe
   } catch (error) {
     if (lastKnown) {
       return lastKnown;
+    }
+
+    if (dispatchedFallback) {
+      logger.warn(
+        `Could not read completion status for dispatched action [${actionId}]; returning the dispatch snapshot: ${error.message}`
+      );
+      return dispatchedFallback;
     }
 
     logger.error(`Failed to fetch completion status for action [${actionId}]: ${error.message}`);

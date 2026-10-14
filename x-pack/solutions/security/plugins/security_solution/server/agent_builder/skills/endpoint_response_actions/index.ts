@@ -88,7 +88,8 @@ from chat: say so and point the analyst to the Response Actions UI.
   resolves the host itself and returns \`reason: endpoint_not_found\` or
   \`reason: ambiguous_hostname\` instead of acting on a guess, so no
   \`get_endpoint_status\` pre-check is needed. On \`ambiguous_hostname\`, ask which
-  agent ID is meant; never pick a candidate.
+  agent ID is meant, then call the same tool again with that \`agentId\`; never
+  pick a candidate.
 - Branch on the typed signals the tools return: a missing host or action is
   \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
   (and \`reason: ambiguous_hostname\` when several endpoints share the name);
