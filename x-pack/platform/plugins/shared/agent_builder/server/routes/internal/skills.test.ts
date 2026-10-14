@@ -129,7 +129,7 @@ describe('registerInternalSkillsRoutes', () => {
     });
 
     it('flags nothing as default when the agent type has no base skills', async () => {
-      mockResolveAgentBaseConfiguration.mockResolvedValue(undefined);
+      mockResolveAgentBaseConfiguration.mockResolvedValue({});
 
       const result = await callListAgentSkills();
 

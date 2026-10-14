@@ -48,12 +48,11 @@ export function registerInternalSkillsRoutes({
 
       const skillRegistry = await skillService.getRegistry({ request });
 
-      const agentConfiguration = await agentsService.resolveAgentConfiguration({ agent, request });
-      const baseConfiguration = await agentsService.resolveAgentBaseConfiguration({
-        agentType: agent.type,
-        request,
-      });
-      const inheritedSkillIds = new Set(baseConfiguration?.skill_ids ?? []);
+      const [agentConfiguration, baseConfiguration] = await Promise.all([
+        agentsService.resolveAgentConfiguration({ agent, request }),
+        agentsService.resolveAgentBaseConfiguration({ agentType: agent.type, request }),
+      ]);
+      const inheritedSkillIds = new Set(baseConfiguration.skill_ids ?? []);
 
       const agentSkills = await resolveAgentSkills({
         skills: skillRegistry,
