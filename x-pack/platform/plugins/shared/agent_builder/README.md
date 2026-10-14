@@ -124,7 +124,7 @@ const { result } = await agentBuilder.tools.execute({
   toolParams: { someNumber: 9000 },
   request,
   approvals: {
-    autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
+    autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.put_mapping' }],
   },
 });
 ```
@@ -146,7 +146,7 @@ input of the step:
 {
   "approvals": {
     "auto_approved_apis": {
-      "elasticsearch": ["indices.create", "indices.update_aliases"],
+      "elasticsearch": ["indices.put_mapping", "indices.update_aliases"],
       "kibana": ["alerting.delete-alerting-rule-id"]
     }
   }
@@ -157,6 +157,10 @@ In a conversation, the grant can widen when a delegating agent requests destruct
 sub-agent through `run_subagent`, and the user is asked once to approve them before it starts. That
 approval covers only the delegated execution, so a sub-agent can hold access the parent run was not
 configured with, though never more than the delegating user could exercise themselves.
+
+An agent can also store the grant as a default in `configuration.approvals`, either via API, from the
+auto-approved APIs section of the agent editor, or in a built-in agent's definition. Every run of the
+agent, including as a sub-agent, adds the stored defaults to the grant supplied by the caller.
 
 ### Error handling
 
