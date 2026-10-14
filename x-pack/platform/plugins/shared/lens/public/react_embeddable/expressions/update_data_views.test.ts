@@ -204,9 +204,30 @@ describe('getUsedDataViews', () => {
       });
 
       expect(post).toHaveBeenCalledWith(expect.stringContaining('timefield'), expect.anything());
-      expect(createSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ query: 'FROM logs-resolve-*', timeFieldName: '@timestamp' })
+      const [, registeredSource] = mockRegisterEsqlSourceInDataViewsCache.mock.calls[0];
+      expect((registeredSource as EsqlSource).timeFieldName).toBe('@timestamp');
+    });
+
+    it('requests the time field and the schema of a layer without a time field in parallel', async () => {
+      let releaseTimeField = () => {};
+      const post = jest.fn((path: string) =>
+        path.includes('timefield')
+          ? new Promise((resolve) => {
+              releaseTimeField = () => resolve({ timeField: '@timestamp' });
+            })
+          : Promise.resolve({ columns: [] })
       );
+
+      const pending = getUsedDataViews([], { [asCodeSpec.id!]: asCodeSpec }, dataViews, {
+        layers: asCodeLayers('FROM logs-parallel-*'),
+        http: { post } as unknown as HttpStart,
+      });
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(post).toHaveBeenCalledWith(expect.stringContaining('source_info'), expect.anything());
+
+      releaseTimeField();
+      await pending;
     });
 
     it('does not resolve the time field of a layer saved with the dataset id', async () => {

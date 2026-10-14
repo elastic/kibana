@@ -9,7 +9,6 @@ import { uniqBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import {
-  getESQLTimeField,
   getProjectRoutingFromEsqlQuery,
   getSourceCommandQueryFromESQLQuery,
 } from '@kbn/esql-utils';
@@ -31,7 +30,7 @@ interface EsqlContext {
  * same DataView, with the filterable fields of the FROM target, as the rest of the ES|QL code, and
  * the filters created from it match the DataViews of the panel.
  * A layer that was not saved with the dataset id (e.g. created as code) has no persisted time
- * field to rely on, so it is resolved like the click path does.
+ * field to rely on, so it is resolved like the click path does, in parallel with the schema.
  */
 const getEsqlDataView = async (
   spec: DataViewSpec,
@@ -48,18 +47,13 @@ const getEsqlDataView = async (
     projectRouting: routing,
     timeFieldName: persistedTimeField,
   });
-  const timeFieldName =
-    persistedTimeField ??
-    (datasetId === spec.id
-      ? undefined
-      : await getESQLTimeField({ query, http, projectRouting: routing }));
 
   const source = await EsqlSource.create({
     query,
     http,
     projectRouting: routing,
-    timeFieldName,
-    resolveTimeField: false,
+    timeFieldName: persistedTimeField,
+    resolveTimeField: persistedTimeField === undefined && datasetId !== spec.id,
   });
   return registerEsqlSourceInDataViewsCache(dataViews, source);
 };
