@@ -72,7 +72,6 @@ describe('SignificantEventsMaintenanceService', () => {
             knowledgeIndicators: 2,
             storedQueries: 2,
             rules: 3,
-            investigations: 0,
             dataStreams: 3,
           },
           partialFailures: [],
@@ -248,16 +247,26 @@ describe('SignificantEventsMaintenanceService', () => {
       });
     });
 
-    it('leaves investigations alone', async () => {
+    it('keeps investigations out of the reset scope', async () => {
       const { api } = makeManagementApi();
-      const { service } = makeService({ management: api });
+      const { service, soClient } = makeService({ management: api });
+      // A paused space keeps its document through reset, so the stored summary can be read back.
+      await service.pause({ request: REQUEST });
 
       const summary = await service.reset({ request: REQUEST });
 
-      expect(summary.deleted?.investigations).toBe(0);
+      expect(summary.deleted).not.toHaveProperty('investigations');
       expect(summary.partialFailures).not.toContainEqual(
-        expect.objectContaining({ target: 'investigations' })
+        expect.objectContaining({ target: expect.stringContaining('investigation') })
       );
+      // Released model versions require the count, so the stored summary still carries a 0.
+      const stored = soClient.readDocument('default') as {
+        lastSummary?: { deleted?: { investigations?: number } };
+      };
+      expect(stored.lastSummary?.deleted?.investigations).toBe(0);
+      expect(
+        (await service.getStatus({ request: REQUEST })).lastSummary?.deleted
+      ).not.toHaveProperty('investigations');
     });
 
     it('restores non-settings workflows after a paused reset but leaves settings-backed workflows off', async () => {
@@ -508,7 +517,6 @@ describe('SignificantEventsMaintenanceService', () => {
         knowledgeIndicators: 0,
         storedQueries: 0,
         rules: 0,
-        investigations: 0,
         dataStreams: 0,
       });
       expect(second.partialFailures).toEqual([]);

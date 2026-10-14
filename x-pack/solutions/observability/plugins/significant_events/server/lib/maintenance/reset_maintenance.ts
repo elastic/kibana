@@ -466,9 +466,6 @@ export const createResetRunner = ({
         knowledgeIndicators: indicatorsWiped ? knowledgeIndicators : 0,
         storedQueries: indicatorsWiped ? storedQueries : 0,
         rules,
-        // Investigations are shared with other solutions and stay; the count is kept for the
-        // stored summary schema.
-        investigations: 0,
         dataStreams: wipedDataStreams.size,
       },
       partialFailures: failures,
