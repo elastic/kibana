@@ -19,6 +19,8 @@ import {
   fromTabStateToSavedObjectTab,
   internalStateActions,
   selectHasUnsavedChanges,
+  getDataViewOfSource,
+  getTabDataView,
   selectTabRuntimeState,
   createRuntimeStateManager,
   selectTabSavedSearch,
@@ -561,10 +563,9 @@ describe('Discover state', () => {
         }).hasUnsavedChanges
       ).toBe(false);
 
-      const dataViewBeforeRefresh = selectTabRuntimeState(
-        firstLoad.runtimeStateManager,
-        tabId
-      ).currentDataView$.getValue();
+      const dataViewBeforeRefresh = getTabDataView(
+        selectTabRuntimeState(firstLoad.runtimeStateManager, tabId)
+      );
       expect(dataViewBeforeRefresh?.id).toBeDefined();
       expectLoadedFilters(services, dataViewBeforeRefresh?.id);
 
@@ -597,9 +598,9 @@ describe('Discover state', () => {
       );
       await reloaded.initializeSingleTab({ tabId });
 
-      expect(
-        selectTabRuntimeState(reloaded.runtimeStateManager, tabId).currentDataView$.getValue()?.id
-      ).toBe(dataViewBeforeRefresh?.id);
+      expect(getTabDataView(selectTabRuntimeState(reloaded.runtimeStateManager, tabId))?.id).toBe(
+        dataViewBeforeRefresh?.id
+      );
       expectLoadedFilters(reloadedServices, dataViewBeforeRefresh?.id);
       expect(
         selectHasUnsavedChanges(reloaded.internalState.getState(), {
@@ -643,27 +644,25 @@ describe('Discover state', () => {
       });
       const firstTabId = state.getCurrentTab().id;
       await state.initializeSingleTab({ tabId: firstTabId });
-      const firstDataViewId = selectTabRuntimeState(
-        state.runtimeStateManager,
-        firstTabId
-      ).currentDataView$.getValue()?.id;
+      const firstDataViewId = getTabDataView(
+        selectTabRuntimeState(state.runtimeStateManager, firstTabId)
+      )?.id;
       expect(firstDataViewId).toEqual(expect.any(String));
       expectLoadedFilters(services, firstDataViewId);
 
       await state.initializeSingleTab({ tabId: secondTab.id });
-      const secondDataViewId = selectTabRuntimeState(
-        state.runtimeStateManager,
-        secondTab.id
-      ).currentDataView$.getValue()?.id;
+      const secondDataViewId = getTabDataView(
+        selectTabRuntimeState(state.runtimeStateManager, secondTab.id)
+      )?.id;
       expect(secondDataViewId).toEqual(expect.any(String));
       expect(firstDataViewId === secondDataViewId).toBe(sameId);
       expectLoadedFilters(services, secondDataViewId);
       expect(getUnsavedChanges()).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
 
       await state.switchToTab({ tabId: firstTabId });
-      expect(
-        selectTabRuntimeState(state.runtimeStateManager, firstTabId).currentDataView$.getValue()?.id
-      ).toBe(firstDataViewId);
+      expect(getTabDataView(selectTabRuntimeState(state.runtimeStateManager, firstTabId))?.id).toBe(
+        firstDataViewId
+      );
       expectLoadedFilters(services, firstDataViewId);
       expect(getUnsavedChanges()).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
 
@@ -682,8 +681,7 @@ describe('Discover state', () => {
 
       await state.switchToTab({ tabId: secondTab.id });
       expect(
-        selectTabRuntimeState(state.runtimeStateManager, secondTab.id).currentDataView$.getValue()
-          ?.id
+        getTabDataView(selectTabRuntimeState(state.runtimeStateManager, secondTab.id))?.id
       ).toBe(secondDataViewId);
       expectLoadedFilters(services, secondDataViewId);
       expect(getUnsavedChanges()).toEqual({
@@ -795,10 +793,7 @@ describe('Discover state', () => {
       expect(apiClient.get).toHaveBeenCalledWith(savedId);
       expect(reloadedTabId).toBe(savedTab?.id);
       expect(
-        selectTabRuntimeState(
-          reloaded.runtimeStateManager,
-          reloadedTabId
-        ).currentDataView$.getValue()?.id
+        getTabDataView(selectTabRuntimeState(reloaded.runtimeStateManager, reloadedTabId))?.id
       ).toBe(savedDataViewId);
       expectLoadedFilters(reloadedServices, savedDataViewId);
       expect(
@@ -840,9 +835,9 @@ describe('Discover state', () => {
       expect(initialTabState?.dataViewSpec).toEqual(dataViewSpec);
       await state.initializeSingleTab({ tabId, dataViewSpec: initialTabState?.dataViewSpec });
 
-      expect(
-        selectTabRuntimeState(state.runtimeStateManager, tabId).currentDataView$.getValue()?.id
-      ).toBe(dataViewSpec.id);
+      expect(getTabDataView(selectTabRuntimeState(state.runtimeStateManager, tabId))?.id).toBe(
+        dataViewSpec.id
+      );
       expectLoadedFilters(services, dataViewSpec.id);
       expect(
         selectHasUnsavedChanges(state.internalState.getState(), {
@@ -1325,11 +1320,11 @@ describe('Discover state', () => {
           },
         }
       `);
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toEqual('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toEqual('the-data-view-id');
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
@@ -1613,11 +1608,11 @@ describe('Discover state', () => {
           },
         })
       );
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe('the-data-view-id');
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
           'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
@@ -1665,11 +1660,11 @@ describe('Discover state', () => {
           },
         })
       );
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe('the-data-view-id');
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
           'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
@@ -1694,11 +1689,11 @@ describe('Discover state', () => {
           },
         })
       );
-      let { currentDataView$ } = selectTabRuntimeState(
+      let { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe('the-data-view-id');
       let { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,
@@ -1743,11 +1738,13 @@ describe('Discover state', () => {
           },
         })
       );
-      ({ currentDataView$ } = selectTabRuntimeState(
+      ({ currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       ));
-      expect(currentDataView$.getValue()?.id).toBe('index-pattern-with-timefield-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(
+        'index-pattern-with-timefield-id'
+      );
       ({ hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,
@@ -1794,11 +1791,13 @@ describe('Discover state', () => {
           },
         })
       );
-      ({ currentDataView$ } = selectTabRuntimeState(
+      ({ currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       ));
-      expect(currentDataView$.getValue()?.id).toBe('index-pattern-with-timefield-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(
+        'index-pattern-with-timefield-id'
+      );
       ({ hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,
@@ -1835,11 +1834,11 @@ describe('Discover state', () => {
         })
       );
       expect(state.internalState.getState().persistedDiscoverSession?.id).toEqual(undefined);
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toEqual(dataViewSpecMock.id);
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toEqual(dataViewSpecMock.id);
       const currentSavedSearch = await selectTabSavedSearch({
         tabId: state.getCurrentTab().id,
         getState: state.internalState.getState,
@@ -1952,11 +1951,11 @@ describe('Discover state', () => {
           },
         })
       );
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()).toEqual(
+      expect(getDataViewOfSource(currentDataSource$.getValue())).toEqual(
         expect.objectContaining({ type: ESQL_TYPE, title: 'index-pattern-esql' })
       );
     });
@@ -1979,7 +1978,7 @@ describe('Discover state', () => {
       );
 
       // Get dataStateContainer created by initializeSingleTab and set up spy
-      const { currentDataView$, dataStateContainer$ } = selectTabRuntimeState(
+      const { currentDataSource$, dataStateContainer$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
@@ -1988,7 +1987,7 @@ describe('Discover state', () => {
 
       await new Promise(process.nextTick);
       // test initial state
-      expect(currentDataView$.getValue()?.id).toBe(dataViewMock.id);
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(dataViewMock.id);
       expect(getCurrentUrl()).toContain(dataViewMock.id);
 
       // change data view
@@ -2004,7 +2003,7 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
-      expect(currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(dataViewComplexMock.id);
       // check if the changed data view is reflected in the URL
       expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
@@ -2115,7 +2114,7 @@ describe('Discover state', () => {
       expect(getCurrentUrl()).toBe(
         "/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,hideTable:!f,interval:auto,query:(language:kuery,query:''),sort:!())"
       );
-      expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewMock.id);
+      expect(getTabDataView(tabRuntimeState)?.id).toBe(dataViewMock.id);
 
       // Change the data view, this should change the URL and trigger a fetch
       await state.internalState.dispatch(
@@ -2130,7 +2129,7 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(dataState.fetch).toHaveBeenCalledTimes(1);
       });
-      expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
+      expect(getTabDataView(tabRuntimeState)?.id).toBe(dataViewComplexMock.id);
 
       // Undo all changes to the saved search, this should trigger a fetch, again
       await state.internalState.dispatch(internalStateActions.resetDiscoverSession());
@@ -2141,7 +2140,7 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(dataState.fetch).toHaveBeenCalledTimes(2);
       });
-      expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewMock.id);
+      expect(getTabDataView(tabRuntimeState)?.id).toBe(dataViewMock.id);
 
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });

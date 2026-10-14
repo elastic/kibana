@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -218,19 +219,10 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
 
       <EuiFlyoutBody>
         <EuiForm component="form" id={formId} onSubmit={handleSubmit}>
-          <EuiTitle size="s">
-            <h3>{translations.viewDetailsTitle}</h3>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>{translations.viewDetailsDescription}</p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
           <EuiFormRow
             error={nameError}
             fullWidth
-            helpText={translations.viewNameDescription}
+            helpText={isEditing ? undefined : translations.viewNameDescription}
             isInvalid={Boolean(nameError)}
             label={translations.viewNameLabel}
           >
@@ -328,7 +320,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
                 setQuery(nextQuery.esql);
                 setQueryError(undefined);
                 setSaveError(undefined);
-                preview.resetPreviewIfQueryChanged(nextQuery.esql);
+                preview.clearPreviewErrorIfQueryChanged(nextQuery.esql);
               }}
               onTextLangQuerySubmit={async (_submittedQuery, abortController) => {
                 const currentQuery = queryRef.current;
@@ -344,11 +336,15 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
             />
           </Suspense>
         </EuiFormRow>
+        {preview.error && (
+          <EuiScreenReaderLive aria-live="assertive" aria-atomic="true">
+            {preview.error.message}
+          </EuiScreenReaderLive>
+        )}
 
         <EuiSpacer size="m" />
 
         <EsqlViewPreviewResults
-          error={preview.error}
           hasRun={preview.hasRun}
           isLoading={preview.isLoading}
           isOpen={isPreviewOpen}
