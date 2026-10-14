@@ -10,3 +10,5 @@
 export { logRequest } from './src/log_request';
 export { findWithTagFilter } from './src/resolve_tags';
 export { writeErrorHandler } from './src/write_error_handler';
+export { formatValidationError, formatValidationIssues } from './src/format_validation_error';
+export { validateAsCodeRequest } from './src/validate_as_code_request';

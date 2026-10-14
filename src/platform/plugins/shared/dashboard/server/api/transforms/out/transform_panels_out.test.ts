@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
@@ -25,6 +26,47 @@ beforeEach(() => {
 });
 
 describe('transformPanelsOut', () => {
+  it('summarizes a Lens validation failure and drops only the invalid panel', () => {
+    mockGetTransforms.mockReturnValue({
+      transformOut: (config: object) => config,
+      schema: lensApiConfigSchema,
+    });
+
+    const panels = ['total', 42].map((column, index) => ({
+      type: 'lens',
+      panelIndex: `lens-${index}`,
+      gridData: { h: 15, w: 24, x: 0, y: index * 15, i: `lens-${index}` },
+      embeddableConfig: {
+        type: 'xy',
+        title: 'Logs',
+        layers: [
+          {
+            type: 'bar',
+            data_source: { type: 'esql', query: 'FROM logs | STATS total = COUNT(*)' },
+            y: [{ column }],
+          },
+        ],
+      },
+    }));
+
+    const result = transformPanelsOut(JSON.stringify(panels));
+
+    expect(result.panels).toHaveLength(1);
+    expect(result.panels[0]).toMatchObject({ id: 'lens-0' });
+    expect(result.warnings).toEqual([
+      {
+        type: 'dropped_panel',
+        panel_type: 'vis',
+        panel_config: panels[1].embeddableConfig,
+        panel_references: [],
+        message:
+          'Unable to transform panel config. Error: ' +
+          '✖ Input does not match any supported format. Depending on the intended format, check: ' +
+          'type, data_source, metrics, metric, layers, x, tag_by, region',
+      },
+    ]);
+  });
+
   it('should drop panels with missing sectionId', () => {
     const panelsJSON = JSON.stringify([
       {
