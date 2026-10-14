@@ -2660,7 +2660,8 @@ describe('LogsExtractionClient sampling wiring', () => {
 
   function createSamplingContext(
     mode: ExtractionMode,
-    descriptorExtras: Record<string, unknown> = {}
+    descriptorExtras: Record<string, unknown> = {},
+    lookbackPeriod = '10m'
   ) {
     jest.clearAllMocks();
     mockExecuteEsqlQuery.mockReset();
@@ -2691,7 +2692,7 @@ describe('LogsExtractionClient sampling wiring', () => {
       dataViewsService: mockDataViewsService,
       engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
       globalStateClient: createMockGlobalStateClient({
-        lookbackPeriod: '10m',
+        lookbackPeriod,
       }) as unknown as EntityStoreGlobalStateClient,
       extractionMode: mode,
     });
@@ -2931,6 +2932,46 @@ describe('LogsExtractionClient sampling wiring', () => {
     expect(result.success).toBe(true);
     expect(extractionQueries()[0]).toContain('| SAMPLE 0.');
     expect(result.success && result.logsCapApplied).toBe(false);
+  });
+
+  it("does not double-subtract an earlier sub-window's consumption from a later one", async () => {
+    // A 19-minute window (lookbackPeriod 20m, 1m delay) is split by the 15m default
+    // maxTimeWindowSize into two sub-windows: 11:40-11:55, then 11:55-11:59. runMainPath hands
+    // each sub-window only its *remaining* budget (already reduced by what earlier sub-windows
+    // consumed), but also passes that same prior consumption again separately. The rate
+    // calculation must add it back before subtracting it a second time, or the second
+    // sub-window ends up with far less budget than is actually left.
+    const { client } = createSamplingContext(
+      EXTRACTION_MODE.nonPriority,
+      { nonPriorityLogExtractionConfig: { maxLogsPerWindow: 60_000 } },
+      '20m'
+    );
+
+    // Sub-window 1 keeps its full 60K budget, so its per-probe "last page" threshold stays at
+    // the default 5000 sampled docs. 3500 sits below that, so the probe reports nothing left:
+    // the slice is deterministic, consuming exactly 3500 / 0.1 = 35K raw logs without sampling.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:41:00.000Z', 3500))
+      .mockResolvedValueOnce(extractionRow)
+      // Sub-window 2 only has 25K of budget left (60K - 35K), which shrinks its own "last page"
+      // threshold to 2500 sampled docs. 4999 sits above that, so the probe reports more pages
+      // remain, forcing the extrapolation path this test exists to check: raw count 4999 / 0.1
+      // ≈ 50K, projected over the time left to ~200K, giving the correct rate 25K / 200K = 0.125.
+      // The bug would instead compute 25K - 35K = -10K, clamped to the 0.1 floor - a clearly
+      // different, wrong value. (A second, empty probe follows because this slice alone doesn't
+      // reach the sub-window's end.)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2025-01-15T11:56:00.000Z', 4999))
+      .mockResolvedValueOnce(extractionRow)
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: [], values: [] });
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+    const queries = extractionQueries();
+    expect(queries[0]).not.toContain('SAMPLE');
+    const rateOf = (query: string) => Number(query.match(/\| SAMPLE ([\d.]+)/)?.[1]);
+    expect(rateOf(queries[1])).toBeCloseTo(0.125, 2);
   });
 
   it('the budget counts processed volume, so a sampled over-cap window does not fire the cap', async () => {
