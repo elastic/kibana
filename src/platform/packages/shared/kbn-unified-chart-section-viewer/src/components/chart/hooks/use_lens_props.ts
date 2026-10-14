@@ -301,7 +301,6 @@ const buildLensParams = ({
     yTitle: yAxisTitle,
     layers: chartLayers,
     fittingFunction: 'Linear',
-    areaFill: 'solid',
     yBounds,
   };
 };
