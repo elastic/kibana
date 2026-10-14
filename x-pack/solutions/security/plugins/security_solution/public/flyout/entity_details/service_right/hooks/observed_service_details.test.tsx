@@ -108,41 +108,4 @@ describe('useObservedServiceDetails', () => {
       })
     );
   });
-
-  it('omits filterQuery from the request by default', () => {
-    renderHook(
-      () =>
-        useObservedServiceDetails({
-          endDate: defaultProps.endDate,
-          startDate: defaultProps.startDate,
-          indexNames: defaultProps.indexNames,
-          serviceName: 'my-service',
-        }),
-      { wrapper: TestProviders }
-    );
-
-    expect(mockSearch).toHaveBeenCalledWith(
-      expect.not.objectContaining({ filterQuery: expect.anything() })
-    );
-    expect(mockSearch).toHaveBeenCalledWith(expect.objectContaining({ serviceName: 'my-service' }));
-  });
-
-  it('serializes the provided filterQuery into the request', () => {
-    const filterQuery = { terms: { 'service.name': ['svc-a', 'svc-b'] } };
-    renderHook(
-      () =>
-        useObservedServiceDetails({
-          endDate: defaultProps.endDate,
-          startDate: defaultProps.startDate,
-          indexNames: defaultProps.indexNames,
-          serviceName: 'svc-a',
-          filterQuery,
-        }),
-      { wrapper: TestProviders }
-    );
-
-    expect(mockSearch).toHaveBeenCalledWith(
-      expect.objectContaining({ filterQuery: JSON.stringify(filterQuery) })
-    );
-  });
 });

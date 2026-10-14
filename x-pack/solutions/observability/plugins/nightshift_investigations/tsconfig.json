@@ -49,18 +49,19 @@
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
     "@kbn/actions-plugin",
-    "@kbn/investigation-output",
     "@kbn/sandbox-plugin",
     "@kbn/context-engine-plugin",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
-    "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/es-errors",
     "@kbn/test",
     "@kbn/tooling-log",
     "@kbn/occ",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/agentic-investigations-plugin",
+    "@kbn/proposals-plugin",
+    "@kbn/proposals-common"
   ]
 }

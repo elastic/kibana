@@ -7,9 +7,8 @@
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
+import type { EntityDefinitionOfAnyType, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
   applyWhenConditionTrueSetFields,
@@ -28,23 +27,22 @@ import {
 } from './field_evaluations';
 
 /**
- * Returns a DSL filter that matches documents considered for the given entity type.
+ * Returns a DSL filter that matches documents considered for the given entity definition.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
- * resolve to an entity of the requested type.
+ * resolve to an entity of the definition's type.
  *
  * @example
  * ```ts
- * const filter = getEuidDslDocumentsContainsIdFilter('host');
+ * const filter = getEuidDslDocumentsContainsIdFilter(hostDefinition);
  * // documentsFilter for host is or(isNotEmpty × 4), so filter is e.g.:
  * // { bool: { should: [ { bool: { must: [ ... ] } }, ... ], minimum_should_match: 1 } }
  * ```
  */
 export function getEuidDslDocumentsContainsIdFilter(
-  entityType: EntityType
+  entityDefinition: EntityDefinitionOfAnyType
 ): QueryDslQueryContainer {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
   if (isSingleFieldIdentity(identityField)) {
     return conditionToQueryDsl(
@@ -55,7 +53,7 @@ export function getEuidDslDocumentsContainsIdFilter(
 }
 
 /**
- * Constructs an Elasticsearch DSL filter for the provided entity type and document.
+ * Constructs an Elasticsearch DSL filter for the provided entity definition and document.
  *
  * It supports both flattened and nested document shapes.
  * If a document contains `_source` property, it will be unwrapped before processing.
@@ -65,7 +63,7 @@ export function getEuidDslDocumentsContainsIdFilter(
  * import { getEuidDslFilterBasedOnDocument } from './dsl';
  *
  * const doc = { host: { name: 'server1', domain: 'example.com' } };
- * const filter = getEuidDslFilterBasedOnDocument('host', doc);
+ * const filter = getEuidDslFilterBasedOnDocument(hostDefinition, doc);
  * // filter may look like:
  * // {
  * //   bool: {
@@ -81,7 +79,7 @@ export function getEuidDslDocumentsContainsIdFilter(
  * // }
  * ```
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules build the filter
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @param options.excludeHigherRankedFields - When `true` (default), higher-ranked identity fields
  *   absent from the document must also be missing-or-empty in matched documents (partition
@@ -94,7 +92,7 @@ export function getEuidDslDocumentsContainsIdFilter(
  *   and `whenConditionTrueSetFieldsPreAgg`.
  */
 export function getEuidDslFilterBasedOnDocument(
-  entityType: EntityType,
+  entityDefinition: EntityDefinitionOfAnyType,
   doc: any,
   { excludeHigherRankedFields = true }: { excludeHigherRankedFields?: boolean } = {}
 ): QueryDslQueryContainer | undefined {
@@ -103,7 +101,6 @@ export function getEuidDslFilterBasedOnDocument(
   }
 
   doc = getDocument(doc);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField)) {
@@ -195,7 +192,7 @@ export function getEuidDslFilterBasedOnDocument(
 }
 
 /**
- * Constructs an Elasticsearch DSL filter for the provided entity type from an already-resolved
+ * Constructs an Elasticsearch DSL filter for the provided entity definition from an already-resolved
  * entity-store record (not a raw source document).
  *
  * This is the counterpart of {@link getEuidDslFilterBasedOnDocument} for entity-store records.
@@ -205,19 +202,20 @@ export function getEuidDslFilterBasedOnDocument(
  * collapse it to the fallback and the resulting IdP source clause would match no documents.
  * Instead, this function trusts the record's already-resolved evaluated fields (e.g.
  * `entity.namespace`) and reverse-maps them back to the raw source-field conditions that produce
- * them (see {@link buildResolvedEvaluationSourceClause}).
+ * them (see {@link buildResolvedEvaluationSourceClause}). Higher-ranked identity fields that the
+ * definition does not store on the record are not required to be missing.
  *
  * Single-field identities (service, generic) and calculated identities without field evaluations
  * (host) carry their raw identity fields directly on the record, so this delegates to
  * {@link getEuidDslFilterBasedOnDocument}.
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules build the filter
  * @param record - The entity-store record (host/user/service). May be a flattened or nested shape.
  * @returns An Elasticsearch DSL query container, or `undefined` if the record does not contain
  *   enough identifying information.
  */
 export function getEuidDslFilterBasedOnEntityRecord(
-  entityType: EntityType,
+  entityDefinition: EntityDefinitionOfAnyType,
   record: any
 ): QueryDslQueryContainer | undefined {
   if (!record) {
@@ -225,11 +223,10 @@ export function getEuidDslFilterBasedOnEntityRecord(
   }
 
   const doc = getDocument(record);
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
 
   if (isSingleFieldIdentity(identityField) || !identityField.fieldEvaluations?.length) {
-    return getEuidDslFilterBasedOnDocument(entityType, record);
+    return getEuidDslFilterBasedOnDocument(entityDefinition, record);
   }
 
   const fieldEvaluations = identityField.fieldEvaluations;
@@ -260,8 +257,11 @@ export function getEuidDslFilterBasedOnEntityRecord(
 
   const dsl: QueryDslQueryContainer = { bool: { filter } };
 
+  // A record only holds the fields the definition stores. Requiring an unstored identity field
+  // to be missing would match no document, since that field is on the source documents.
+  const storedFields = new Set(entityDefinition.fields.map(({ destination }) => destination));
   const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
-    (field) => !evaluatedDestinations.has(field)
+    (field) => !evaluatedDestinations.has(field) && storedFields.has(field)
   );
   if (toBeFilteredOut.length > 0) {
     dsl.bool!.must = toBeFilteredOut.map(fieldMissingOrEmptyDsl);

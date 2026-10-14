@@ -134,6 +134,75 @@ describe('getEntityGroupRecords', () => {
     expect(getEntityGroupRecords({ id: 'target' }, undefined)).toEqual([{ id: 'target' }]);
     expect(getEntityGroupRecords(undefined, [])).toEqual([]);
   });
+
+  it('returns only the target when there are no aliases', () => {
+    expect(getEntityGroupRecords({ id: 'target' }, [])).toEqual([{ id: 'target' }]);
+  });
+
+  it('returns an empty list when neither a target nor aliases are given', () => {
+    expect(getEntityGroupRecords(null, undefined)).toEqual([]);
+    expect(getEntityGroupRecords(undefined, undefined)).toEqual([]);
+    expect(getEntityGroupRecords(null, [])).toEqual([]);
+  });
+
+  it('drops null and undefined entries inside the alias list', () => {
+    expect(
+      getEntityGroupRecords<{ id: string } | null | undefined>({ id: 'target' }, [
+        null,
+        { id: 'alias-1' },
+        undefined,
+        { id: 'alias-2' },
+      ])
+    ).toEqual([{ id: 'target' }, { id: 'alias-1' }, { id: 'alias-2' }]);
+  });
+
+  it('returns an empty list when every entry is missing', () => {
+    expect(getEntityGroupRecords<null | undefined>(null, [null, undefined])).toEqual([]);
+  });
+
+  it('keeps falsy records that are not null or undefined', () => {
+    expect(getEntityGroupRecords<number | string | boolean>(0, ['', false])).toEqual([
+      0,
+      '',
+      false,
+    ]);
+  });
+
+  it('preserves order and keeps repeated records once, at their first position', () => {
+    const target = { id: 'target' };
+    const alias = { id: 'alias' };
+    const other = { id: 'other' };
+
+    const result = getEntityGroupRecords(target, [alias, target, other, alias]);
+
+    expect(result).toEqual([target, alias, other]);
+    expect(result[0]).toBe(target);
+    expect(result[1]).toBe(alias);
+  });
+
+  it('collapses duplicate records by entity id', () => {
+    expect(getEntityGroupRecords({ id: 'a' }, [{ id: 'a' }])).toEqual([{ id: 'a' }, { id: 'a' }]);
+  });
+
+  it('keeps a plain identity document first, followed by entity store alias records', () => {
+    const identityDocument = { host: { name: 'h1' } };
+    const storeAlias = { entity: { id: 'e2' }, host: { name: 'h2' } };
+
+    const result = getEntityGroupRecords<object>(identityDocument, [storeAlias]);
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toBe(identityDocument);
+    expect(result[1]).toBe(storeAlias);
+  });
+
+  it('returns a new array and does not mutate the alias list', () => {
+    const aliasRecords = [{ id: 'alias' }] as const;
+
+    const result = getEntityGroupRecords({ id: 'target' }, aliasRecords);
+
+    expect(result).not.toBe(aliasRecords);
+    expect(aliasRecords).toEqual([{ id: 'alias' }]);
+  });
 });
 
 describe('getEntityGroupIds', () => {
@@ -210,6 +279,88 @@ describe('mergeEntityGroupDetails', () => {
   });
 });
 
+describe('mergeEntityGroupDetails malformed data and edge cases', () => {
+  it('treats keys named like Object.prototype members as plain data', () => {
+    const merged = mergeEntityGroupDetails({ a: 1 }, [
+      JSON.parse('{"constructor":"x","toString":"y","hasOwnProperty":"z"}'),
+    ]);
+
+    expect(merged).toEqual({ a: 1, constructor: 'x', toString: 'y', hasOwnProperty: 'z' });
+  });
+
+  it('merges inherited-looking keys present on both sides without picking up the prototype', () => {
+    const merged = mergeEntityGroupDetails(JSON.parse('{"constructor":"a"}'), [
+      JSON.parse('{"constructor":"b"}'),
+    ]);
+
+    expect(merged).toEqual({ constructor: ['a', 'b'] });
+  });
+
+  it('keeps a __proto__ key as own data without changing the prototype', () => {
+    const merged = mergeEntityGroupDetails({ a: 1 }, [
+      JSON.parse('{"__proto__":{"polluted":true}}'),
+    ]);
+
+    expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+    expect((merged as Record<string, unknown>).polluted).toBeUndefined();
+    expect(Object.keys(merged)).toEqual(['a', '__proto__']);
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it('keeps distinct nested array values instead of collapsing them', () => {
+    expect(mergeEntityGroupDetails({ l: [[1, 2]] }, [{ l: [['1', '2']] }])).toEqual({
+      l: [
+        [1, 2],
+        ['1', '2'],
+      ],
+    });
+    expect(mergeEntityGroupDetails({ l: [[{ x: 1 }]] }, [{ l: [[{ x: 2 }]] }])).toEqual({
+      l: [[{ x: 1 }], [{ x: 2 }]],
+    });
+  });
+
+  it('de-duplicates equal nested values regardless of object key order', () => {
+    expect(
+      mergeEntityGroupDetails({ l: [{ a: 1, b: { c: 2, d: 3 } }] }, [
+        { l: [{ b: { d: 3, c: 2 }, a: 1 }] },
+      ])
+    ).toEqual({ l: [{ a: 1, b: { c: 2, d: 3 } }] });
+  });
+
+  it('treats null like an absent value', () => {
+    expect(
+      mergeEntityGroupDetails({ a: null, b: 'x', c: null }, [{ a: 'v', b: null, c: null }])
+    ).toEqual({ a: 'v', b: 'x', c: null });
+  });
+
+  it('ignores alias entries that are not plain objects', () => {
+    const details = { a: 1 };
+    const malformedAliases = [[1, 2], null, undefined, 'x', 3] as unknown as object[];
+
+    expect(mergeEntityGroupDetails(details, malformedAliases)).toBe(details);
+    expect(mergeEntityGroupDetails(details, [...malformedAliases, { b: 2 }])).toEqual({
+      a: 1,
+      b: 2,
+    });
+  });
+
+  it('returns details untouched when it is not a plain object', () => {
+    const details = [1] as unknown as { a: number };
+
+    expect(mergeEntityGroupDetails(details, [{ a: 1 }])).toBe(details);
+  });
+
+  it('does not mutate the details or alias records', () => {
+    const details = { a: 'x', nested: { l: [1] } };
+    const alias = { a: 'y', nested: { l: [2] } };
+
+    mergeEntityGroupDetails(details, [alias]);
+
+    expect(details).toEqual({ a: 'x', nested: { l: [1] } });
+    expect(alias).toEqual({ a: 'y', nested: { l: [2] } });
+  });
+});
+
 describe('getEntityGroupLifecycle', () => {
   const withLifecycle = (first_seen?: string, last_seen?: string, last_activity?: string) => ({
     entity: { lifecycle: { first_seen, last_seen, last_activity } },
@@ -230,6 +381,70 @@ describe('getEntityGroupLifecycle', () => {
         withLifecycle(undefined, '2024-02-05T00:00:00.000Z', '2024-03-01T00:00:00.000Z'),
       ])
     ).toEqual({ firstSeen: '2024-01-01T00:00:00.000Z', lastSeen: '2024-03-01T00:00:00.000Z' });
+  });
+});
+
+describe('getEntityGroupLifecycle malformed data and edge cases', () => {
+  const withLifecycle = (first_seen?: string, last_seen?: string, last_activity?: string) => ({
+    entity: { lifecycle: { first_seen, last_seen, last_activity } },
+  });
+
+  it('is null for an empty record list', () => {
+    expect(getEntityGroupLifecycle([])).toEqual({ firstSeen: null, lastSeen: null });
+  });
+
+  it('ignores unparseable timestamps whatever their position', () => {
+    const valid = withLifecycle('2024-01-01T00:00:00.000Z', '2024-01-02T00:00:00.000Z');
+    const malformed = withLifecycle('garbage', 'garbage');
+    const expected = {
+      firstSeen: '2024-01-01T00:00:00.000Z',
+      lastSeen: '2024-01-02T00:00:00.000Z',
+    };
+
+    expect(getEntityGroupLifecycle([malformed, valid])).toEqual(expected);
+    expect(getEntityGroupLifecycle([valid, malformed])).toEqual(expected);
+  });
+
+  it('is null when every timestamp is malformed', () => {
+    expect(getEntityGroupLifecycle([withLifecycle('garbage', 'nope', 'also-bad')])).toEqual({
+      firstSeen: null,
+      lastSeen: null,
+    });
+  });
+
+  it('falls back to last_seen when last_activity is empty or malformed', () => {
+    expect(
+      getEntityGroupLifecycle([withLifecycle(undefined, '2024-01-05T00:00:00.000Z', '')])
+    ).toEqual({ firstSeen: null, lastSeen: '2024-01-05T00:00:00.000Z' });
+    expect(
+      getEntityGroupLifecycle([withLifecycle(undefined, '2024-01-05T00:00:00.000Z', 'garbage')])
+    ).toEqual({ firstSeen: null, lastSeen: '2024-01-05T00:00:00.000Z' });
+  });
+
+  it('prefers last_activity over last_seen even when it is older', () => {
+    expect(
+      getEntityGroupLifecycle([
+        withLifecycle(undefined, '2024-02-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z'),
+      ])
+    ).toEqual({ firstSeen: null, lastSeen: '2024-01-01T00:00:00.000Z' });
+  });
+
+  it('compares by instant and keeps the first record on equal timestamps', () => {
+    expect(
+      getEntityGroupLifecycle([
+        withLifecycle('2024-01-01T01:00:00.000+01:00', '2024-01-02T00:00:00.000Z'),
+        withLifecycle('2024-01-01T00:00:00.000Z', '2024-01-02T01:00:00.000+01:00'),
+      ])
+    ).toEqual({
+      firstSeen: '2024-01-01T01:00:00.000+01:00',
+      lastSeen: '2024-01-02T00:00:00.000Z',
+    });
+  });
+
+  it('treats the epoch (1970-01-01) as a valid timestamp', () => {
+    expect(
+      getEntityGroupLifecycle([withLifecycle('1970-01-01T00:00:00.000Z', undefined)]).firstSeen
+    ).toBe('1970-01-01T00:00:00.000Z');
   });
 });
 

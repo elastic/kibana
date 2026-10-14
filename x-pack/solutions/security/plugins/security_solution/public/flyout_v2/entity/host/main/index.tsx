@@ -134,7 +134,13 @@ export const Host: FC<HostProps> = memo(function Host({
 
   // Compute entityId from hit when provided, otherwise use the prop
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('host', hit.flattened) : entityIdProp),
+    () =>
+      hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('host'),
+            hit.flattened
+          )
+        : entityIdProp,
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -169,13 +175,13 @@ export const Host: FC<HostProps> = memo(function Host({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'host',
+          euidApi.getBuiltInEntityDefinition('host'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
+  }, [entityStoreV2Enabled, euidApi, entityFromStoreResult.entityRecord, hostName]);
 
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -361,6 +367,7 @@ export const Host: FC<HostProps> = memo(function Host({
               return openEntityVulnerabilityInsights({
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_VULNERABILITY,
@@ -370,6 +377,8 @@ export const Host: FC<HostProps> = memo(function Host({
                 entityType: EntityType.host,
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
                 onShowEntity: onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
@@ -379,6 +388,7 @@ export const Host: FC<HostProps> = memo(function Host({
                 entityType: EntityType.host,
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowEntity: onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
@@ -424,6 +434,7 @@ export const Host: FC<HostProps> = memo(function Host({
       panelDisplayEntityId,
       entityStoreEntityId,
       anomalyAliasEntityIds,
+      mode,
       onShowHost,
       onShowRelatedEntityFromGraph,
       onShowRelatedEntityFromResolution,

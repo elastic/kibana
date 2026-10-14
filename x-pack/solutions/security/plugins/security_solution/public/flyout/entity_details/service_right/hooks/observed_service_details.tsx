@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import type { inputsModel } from '../../../../common/store';
 import type { InspectResponse } from '../../../../types';
@@ -36,11 +35,6 @@ export interface ServiceDetailsArgs {
 interface UseServiceDetails {
   endDate: string;
   serviceName: string;
-  /**
-   * Identity filter replacing the default `service.name` term, e.g. to cover every service of a
-   * resolution group. When omitted the search is scoped to `serviceName` only.
-   */
-  filterQuery?: QueryDslQueryContainer;
   id?: string;
   indexNames: string[];
   skip?: boolean;
@@ -50,7 +44,6 @@ interface UseServiceDetails {
 export const useObservedServiceDetails = ({
   endDate,
   serviceName,
-  filterQuery,
   indexNames,
   id = OBSERVED_SERVICE_QUERY_ID,
   skip = false,
@@ -91,14 +84,13 @@ export const useObservedServiceDetails = ({
       defaultIndex: indexNames,
       factoryQueryType: ServicesQueries.observedDetails,
       serviceName,
-      ...(filterQuery ? { filterQuery: JSON.stringify(filterQuery) } : {}),
       timerange: {
         interval: '12h',
         from: startDate,
         to: endDate,
       },
     }),
-    [endDate, indexNames, startDate, serviceName, filterQuery]
+    [endDate, indexNames, startDate, serviceName]
   );
 
   useEffect(() => {

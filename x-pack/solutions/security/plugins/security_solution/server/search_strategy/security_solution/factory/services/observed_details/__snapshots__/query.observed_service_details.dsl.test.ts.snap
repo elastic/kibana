@@ -208,6 +208,11 @@ Object {
           },
         },
         Object {
+          "term": Object {
+            "service.name": "bastion00.siem.estc.dev",
+          },
+        },
+        Object {
           "range": Object {
             "@timestamp": Object {
               "format": "strict_date_optional_time",

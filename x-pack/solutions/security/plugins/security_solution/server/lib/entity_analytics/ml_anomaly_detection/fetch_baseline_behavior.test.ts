@@ -19,6 +19,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
         .mockReturnValue({ bool: { filter: [{ term: { 'user.name': 'alice' } }] } }),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };

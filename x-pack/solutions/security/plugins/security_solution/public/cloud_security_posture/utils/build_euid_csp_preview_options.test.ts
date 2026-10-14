@@ -14,6 +14,7 @@ import {
 const buildEuidApi = (getEuidFilterBasedOnDocument: jest.Mock): EntityStoreEuidApi =>
   ({
     euid: { dsl: { getEuidFilterBasedOnDocument } },
+    getBuiltInEntityDefinition: jest.fn((entityType: string) => entityType),
   } as unknown as EntityStoreEuidApi);
 
 const termOnHostName = jest.fn((_type: string, document: { host?: { name?: string } }) =>
@@ -66,6 +67,51 @@ describe('buildEuidCspPreviewOptions', () => {
         ],
       },
     });
+  });
+
+  it('combines a plain identity document with entity store alias records', () => {
+    const options = buildEuidCspPreviewOptions(
+      'host',
+      { host: { name: 'h1' } },
+      buildEuidApi(termOnHostName),
+      {
+        aliasRecords: [
+          { entity: { id: 'e2' }, host: { name: 'h2' } },
+          { entity: { id: 'e3' } },
+          { entity: { id: 'e4' }, host: { name: 'h4' } },
+        ],
+      }
+    );
+
+    expect(options.enabled).toBe(true);
+    expect(options.query).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'host.name': 'h1' } },
+                { term: { 'host.name': 'h2' } },
+                { term: { 'host.name': 'h4' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('uses the alias records alone when the identity document yields no EUID filter', () => {
+    const options = buildEuidCspPreviewOptions(
+      'host',
+      { user: { name: 'not-a-host' } },
+      buildEuidApi(termOnHostName),
+      { aliasRecords: [{ entity: { id: 'e2' }, host: { name: 'h2' } }] }
+    );
+
+    expect(options.enabled).toBe(true);
+    expect(options.query).toEqual({ bool: { filter: [{ term: { 'host.name': 'h2' } }] } });
   });
 
   it('falls back to a legacy name term when no record yields an EUID filter', () => {

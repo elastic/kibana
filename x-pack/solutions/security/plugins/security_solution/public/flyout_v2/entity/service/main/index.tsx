@@ -121,11 +121,11 @@ export const Service: FC<ServiceProps> = memo(function Service({
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     return (
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        'service',
+        euidApi.getBuiltInEntityDefinition('service'),
         entityFromStoreResult.entityRecord ?? {}
       ) ?? {}
     );
-  }, [entityFromStoreResult.entityRecord, euidApi?.euid]);
+  }, [entityFromStoreResult.entityRecord, euidApi]);
 
   const serviceNameFilterQuery = useMemo(
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
@@ -141,15 +141,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
 
   const { inspect, loading } = riskScoreState;
   const { setQuery, deleteQuery } = useGlobalTime();
-  const observedServiceGroup = useMemo(
-    () => ({ entityRecord: entityFromStoreResult.entityRecord, aliasRecords }),
-    [entityFromStoreResult.entityRecord, aliasRecords]
-  );
-  const observedService = useObservedService(
-    documentEntityIdentifiers,
-    scopeId,
-    observedServiceGroup
-  );
+  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
 
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({

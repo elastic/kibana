@@ -134,7 +134,13 @@ export const User: FC<UserProps> = memo(function User({
   } = useFlyoutApi();
 
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('user', hit.flattened) : entityIdProp),
+    () =>
+      hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('user'),
+            hit.flattened
+          )
+        : entityIdProp,
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -169,13 +175,13 @@ export const User: FC<UserProps> = memo(function User({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'user',
+          euidApi.getBuiltInEntityDefinition('user'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
+  }, [entityStoreV2Enabled, euidApi, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -364,6 +370,8 @@ export const User: FC<UserProps> = memo(function User({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
                 onShowEntity: onOpenUser,
                 title: userName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
@@ -373,6 +381,7 @@ export const User: FC<UserProps> = memo(function User({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowEntity: onOpenUser,
                 title: userName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
@@ -442,6 +451,7 @@ export const User: FC<UserProps> = memo(function User({
       panelDisplayEntityId,
       entityStoreEntityId,
       anomalyAliasEntityIds,
+      mode,
       managedUser,
       onOpenUser,
       onShowRelatedEntityFromGraph,
