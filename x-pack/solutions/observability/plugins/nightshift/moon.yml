@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/date-range-picker'
+  - '@kbn/datemath'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-observability'
   - '@kbn/dev-cli-errors'
