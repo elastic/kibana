@@ -119,6 +119,18 @@ describe('loadDashboardApi', () => {
         expect(getDashboardApiMock.mock.calls[0][0].initialState.esql_approximation).toBe(true);
       });
 
+      test('last saved state should include stored fast mode', async () => {
+        jest.mocked(getDefaultApproximation).mockReturnValue({ esql_approximation: true });
+        await loadDashboardApi({
+          getCreationOptions: async () => ({ useSessionStorageIntegration: false }),
+          savedObjectId: '12345',
+        });
+        // @ts-ignore
+        expect(getDashboardApiMock.mock.calls[0][0].initialState.esql_approximation).toBe(true);
+        // @ts-ignore
+        expect(getDashboardApiMock.mock.calls[0][0].lastSavedState.esql_approximation).toBe(true);
+      });
+
       test('prefers saved object value over localStorage', async () => {
         jest.mocked(getDefaultApproximation).mockReturnValue({ esql_approximation: true });
         jest.mocked(dashboardClient.get).mockResolvedValueOnce({

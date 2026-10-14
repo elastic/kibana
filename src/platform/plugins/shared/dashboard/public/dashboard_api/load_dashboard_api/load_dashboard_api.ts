@@ -89,17 +89,22 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
+  const lastSavedState = {
+    ...getDefaultApproximation(),
+    ...getLastSavedState(readResult),
+  };
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     panelFlyoutType,
     incomingEmbeddables,
     initialState: {
-      ...getDefaultApproximation(),
-      ...getLastSavedState(readResult),
+      ...lastSavedState,
       ...unsavedChanges,
       ...overrideState,
     },
     readResult,
+    lastSavedState,
     savedObjectId,
     user,
     isAccessControlEnabled,
