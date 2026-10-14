@@ -43,8 +43,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('vega chart in visualize app', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+      // import the fixtures and set `defaultIndex` before the first page load, otherwise the browser promotes another data view
       await PageObjects.visualize.initTests();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVega');

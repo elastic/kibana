@@ -414,7 +414,9 @@ export const AnsibleControllerConnector: ConnectorSpec = {
     ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    // Step 2 of the two-step release. `.ansible_controller` shipped with
+    // ['agentBuilder'] only and is now registered on every Production-NonCanary node.
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
 
   auth: {

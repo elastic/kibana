@@ -80,6 +80,7 @@ steps:
           SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
           SCOUT_TEST_CHANNELS: ci-on-commit
           SERVERLESS_TESTS_ONLY: 'true'
+          TEST_ES_SERVERLESS_IMAGE: $ES_SERVERLESS_IMAGE
         retry:
           automatic:
             - exit_status: '*'
