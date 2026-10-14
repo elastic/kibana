@@ -546,8 +546,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(overrides?.tools).toEqual([]);
     });
 
-    it('routes the agent through the AlertZero reasoning feature', () => {
-      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_reasoning');
+    it('routes the agent through the AlertZero frontier feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_frontier');
     });
 
     it('uses the thin agent', () => {
