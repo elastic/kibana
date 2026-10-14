@@ -9,9 +9,10 @@ import type { KibanaIsomerRuntime } from '@kbn/isomer';
 
 /** Loads Kibana's primitive packs and builds a runtime with them. */
 export const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
-  const [{ createKibanaIsomerRuntime }, { componentsPack }] = await Promise.all([
+  const [{ createKibanaIsomerRuntime }, { componentsPack }, { chartsPack }] = await Promise.all([
     import('@kbn/isomer'),
     import('@kbn/isomer-components'),
+    import('@kbn/isomer-primitives-charts'),
   ]);
-  return createKibanaIsomerRuntime({ packs: [componentsPack] });
+  return createKibanaIsomerRuntime({ packs: [componentsPack, chartsPack] });
 };

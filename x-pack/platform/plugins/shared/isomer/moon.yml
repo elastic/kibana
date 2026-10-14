@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/isomer'
   - '@kbn/isomer-components'
+  - '@kbn/isomer-primitives-charts'
 tags:
   - plugin
   - prod
