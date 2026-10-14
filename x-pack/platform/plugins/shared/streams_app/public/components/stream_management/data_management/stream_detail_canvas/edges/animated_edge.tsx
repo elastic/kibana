@@ -111,6 +111,15 @@ export function AnimatedEdge({
     cancelClose();
   }, [hover, cancelClose]);
 
+  const menuClick = useCallback(
+    (e: React.MouseEvent<SVGGElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      menu.toggle();
+    },
+    [menu]
+  );
+
   const [edgePath, centerX, centerY] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -160,7 +169,7 @@ export function AnimatedEdge({
           cursor: pointer;
         }
       `}
-      onClick={menu.toggle}
+      onClick={menuClick}
     />
   );
 

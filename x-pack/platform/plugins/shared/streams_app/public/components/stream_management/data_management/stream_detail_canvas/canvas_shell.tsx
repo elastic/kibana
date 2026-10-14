@@ -234,7 +234,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   connectionLineType = ConnectionLineType.SmoothStep,
   connectionLineStyle,
   connectionRadius = 24,
-  reconnectRadius = 36,
+  reconnectRadius = 6,
   edgesReconnectable = false,
   onNodeClick,
   onNodeContextMenu,
