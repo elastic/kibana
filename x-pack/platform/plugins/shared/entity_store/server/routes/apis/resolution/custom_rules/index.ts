@@ -19,6 +19,7 @@ import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
+  CustomResolutionRuleForbiddenError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -53,6 +54,9 @@ const toErrorResponseOrThrow = (
     error instanceof EntityStoreNotInstalledError
   ) {
     return res.notFound({ body: { message: error.message } });
+  }
+  if (error instanceof CustomResolutionRuleForbiddenError) {
+    return res.forbidden({ body: { message: error.message } });
   }
   if (error instanceof Error && SavedObjectsErrorHelpers.isForbiddenError(error)) {
     return res.forbidden({

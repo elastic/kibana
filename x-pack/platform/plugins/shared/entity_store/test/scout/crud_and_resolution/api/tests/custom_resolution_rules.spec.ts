@@ -109,12 +109,15 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
   });
 
   apiTest(
-    'Security all can manage rules; Security read can list them but not write',
+    'Security all can manage rules, and enabling one needs write on the entity index; Security read can list them but not write',
     async ({ apiClient, samlAuth }) => {
-      const securityRole = (privilege: 'all' | 'read') => ({
+      const securityRole = (
+        privilege: 'all' | 'read',
+        entityIndexPrivileges = ['read', 'view_index_metadata']
+      ) => ({
         elasticsearch: {
           cluster: [],
-          indices: [{ names: ['.entities.v2.*'], privileges: ['read', 'view_index_metadata'] }],
+          indices: [{ names: ['.entities.v2.*'], privileges: entityIndexPrivileges }],
         },
         kibana: [{ base: [], feature: { siemV5: [privilege] }, spaces: ['*'] }],
       });
@@ -128,6 +131,23 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
         body: { name: 'Security all rule', ...LOCAL_USERS_TO_AD_RULE },
       });
       expect(created.statusCode).toBe(200);
+
+      const enableRule = () =>
+        apiClient.put(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(created.body.id), {
+          headers: managerHeaders,
+          responseType: 'json',
+          body: { enabled: true },
+        });
+      const enabledWithoutWrite = await enableRule();
+      expect(enabledWithoutWrite.statusCode).toBe(403);
+      expect(enabledWithoutWrite.body.message).toContain("'write' index privilege");
+
+      await samlAuth.asInteractiveUser(
+        securityRole('all', ['read', 'view_index_metadata', 'write'])
+      );
+      const enabledWithWrite = await enableRule();
+      expect(enabledWithWrite.statusCode).toBe(200);
+      expect(enabledWithWrite.body.enabled).toBe(true);
 
       const reader = await samlAuth.asInteractiveUser(securityRole('read'));
       const readerHeaders = { ...reader.cookieHeader, ...INTERNAL_HEADERS };
@@ -197,6 +217,8 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest(
     'previews, links local users to AD, stops on disable, resumes on enable, and cleans up on delete',
     async ({ apiClient, esClient }) => {
+      // Four synchronous maintainer runs; each is slow on a loaded serverless CI node.
+      apiTest.setTimeout(180_000);
       let ruleId = '';
 
       await apiTest.step('seed AD and endpoint users', async () => {

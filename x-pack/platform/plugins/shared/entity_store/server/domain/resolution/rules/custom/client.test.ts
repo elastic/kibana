@@ -10,6 +10,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  CustomResolutionRuleForbiddenError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -62,6 +63,7 @@ const setup = () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockResolvedValue({ columns: [], values: [] } as never);
   esClient.indices.exists.mockResolvedValue(true as never);
+  esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as never);
   soClient.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 100, page: 1 });
   soClient.create.mockImplementation(async (_type, attributes) =>
     savedObject('new-id', attributes as CustomResolutionRuleAttributes)
@@ -175,6 +177,33 @@ describe('CustomResolutionRulesClient', () => {
       const error = await client.create(LOCAL_USERS_TO_AD).catch((e) => e);
       expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
+
+    it('creates a disabled rule without checking write access to the entity index', async () => {
+      const { client, esClient } = setup();
+      await client.create(LOCAL_USERS_TO_AD);
+
+      expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('creates an enabled rule only for a user who can write links to the entity index', async () => {
+      const { client, soClient, esClient } = setup();
+      await client.create({ ...LOCAL_USERS_TO_AD, enabled: true });
+
+      expect(esClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['.entities.v2.latest.default'], privileges: ['write'] }],
+      });
+      expect(soClient.create).toHaveBeenCalled();
+    });
+
+    it('refuses an enabled rule from a user who cannot write to the entity index', async () => {
+      const { client, soClient, esClient } = setup();
+      esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
+
+      await expect(client.create({ ...LOCAL_USERS_TO_AD, enabled: true })).rejects.toBeInstanceOf(
+        CustomResolutionRuleForbiddenError
+      );
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {
@@ -214,6 +243,39 @@ describe('CustomResolutionRulesClient', () => {
         InvalidCustomResolutionRuleError
       );
       expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses to turn a rule on for a user who cannot write to the entity index', async () => {
+      const { client, soClient, esClient } = setup();
+      soClient.get.mockResolvedValue(savedObject('a'));
+      esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
+
+      await expect(client.update('a', { enabled: true })).rejects.toBeInstanceOf(
+        CustomResolutionRuleForbiddenError
+      );
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses to change an enabled rule for a user who cannot write to the entity index', async () => {
+      const { client, soClient, esClient } = setup();
+      soClient.get.mockResolvedValue(savedObject('a', { ...ATTRIBUTES, enabled: true }));
+      esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
+
+      await expect(
+        client.update('a', { match_value: 'TO_UPPER(user.name)' })
+      ).rejects.toBeInstanceOf(CustomResolutionRuleForbiddenError);
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('changes a disabled rule without checking write access to the entity index', async () => {
+      const { client, soClient, esClient } = setup();
+      soClient.get.mockResolvedValue(savedObject('a'));
+      soClient.update.mockResolvedValue(savedObject('a') as never);
+
+      await client.update('a', { match_value: 'TO_UPPER(user.name)' });
+
+      expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('validates a changed definition', async () => {

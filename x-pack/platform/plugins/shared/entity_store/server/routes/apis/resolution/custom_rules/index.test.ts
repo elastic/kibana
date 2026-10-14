@@ -16,6 +16,7 @@ import type { EntityStorePluginRouter } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
+  CustomResolutionRuleForbiddenError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -130,6 +131,7 @@ describe('custom resolution rules routes', () => {
       ['an invalid rule', 400, new InvalidCustomResolutionRuleError('bad')],
       ['a missing rule', 404, new CustomResolutionRuleNotFoundError('x')],
       ['a missing entity store', 404, new EntityStoreNotInstalledError()],
+      ['no write access to the entity index', 403, new CustomResolutionRuleForbiddenError('i')],
       [
         'a saved-objects authorization error',
         403,

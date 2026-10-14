@@ -12,6 +12,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
 import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
 import {
+  CustomResolutionRuleForbiddenError,
   CustomResolutionRuleNotFoundError,
   EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
@@ -155,7 +156,10 @@ export class CustomResolutionRulesClient {
       decline_same_namespace_duplicates: input.decline_same_namespace_duplicates ?? true,
       enabled: input.enabled ?? false,
     };
-    await this.validate(toRuleDefinition(rule));
+    const { index } = await this.validate(toRuleDefinition(rule));
+    if (rule.enabled) {
+      await this.assertCanWriteLinks(index);
+    }
 
     const existing = await this.list();
     if (existing.length >= MAX_CUSTOM_RULES_PER_SPACE) {
@@ -200,7 +204,10 @@ export class CustomResolutionRulesClient {
     const definitionChanged =
       canonicalDefinitionKey(toRuleDefinition(current)) !== canonicalDefinitionKey(nextDefinition);
     if (definitionChanged || (next.enabled && !current.enabled)) {
-      await this.validate(nextDefinition);
+      const { index } = await this.validate(nextDefinition);
+      if (next.enabled) {
+        await this.assertCanWriteLinks(index);
+      }
     }
 
     const updated = await this.deps.soClient.update<CustomResolutionRuleAttributes>(
@@ -253,6 +260,22 @@ export class CustomResolutionRulesClient {
         throw new CustomResolutionRuleNotFoundError(id);
       }
       throw error;
+    }
+  }
+
+  /**
+   * The maintainer applies an enabled rule's links with the entity store
+   * owner's credentials, so whoever enables or changes one must be able to
+   * write those links themselves, as with the link API.
+   *
+   * @throws CustomResolutionRuleForbiddenError
+   */
+  private async assertCanWriteLinks(index: string): Promise<void> {
+    const { has_all_requested: canWrite } = await this.deps.esClient.security.hasPrivileges({
+      index: [{ names: [index], privileges: ['write'] }],
+    });
+    if (!canWrite) {
+      throw new CustomResolutionRuleForbiddenError(index);
     }
   }
 
