@@ -28,13 +28,13 @@ describe('isHiddenFromAssistiveTech', () => {
     expect(isHiddenFromAssistiveTech(element)).toBe(false);
   });
 
-  it('returns true while a modal is open elsewhere on the page', () => {
+  // JAWS, NVDA and Narrator still read live regions outside of `aria-modal` elements
+  it('returns false while an aria-modal element is open elsewhere on the page', () => {
     const modal = document.createElement('div');
     modal.setAttribute('aria-modal', 'true');
     document.body.appendChild(modal);
 
-    expect(isHiddenFromAssistiveTech(element)).toBe(true);
-    expect(isHiddenFromAssistiveTech(null)).toBe(true);
+    expect(isHiddenFromAssistiveTech(element)).toBe(false);
   });
 
   it.each([

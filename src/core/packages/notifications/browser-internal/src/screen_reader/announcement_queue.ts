@@ -20,7 +20,7 @@ export interface Announcement {
 }
 
 interface AnnouncementQueueOptions {
-  /** Whether screen readers currently ignore the live region, e.g. because a modal is open. */
+  /** Whether screen readers currently ignore the live region, e.g. because an ancestor is `inert`. */
   isHidden: () => boolean;
   onAnnounce: (announcement: Announcement) => void;
 }

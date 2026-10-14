@@ -4,7 +4,6 @@
 
 Status messages (WCAG 2.2 SC 4.1.3) must reach screen reader users without moving focus. Kibana announces them through **one shared live region** owned by core. That region:
 
-- holds messages back while a modal, flyout or popover hides the rest of the page from screen readers;
 - reads messages that arrive close together (e.g. a toast and a page change) as one announcement;
 - waits until the previous announcement is likely read, so they don't interrupt each other.
 
@@ -12,8 +11,8 @@ Status messages (WCAG 2.2 SC 4.1.3) must reach screen reader users without movin
 
 - **Feedback for an action** (saved, deleted, exported, failed) → use **`notifications.toasts`**. Toasts are announced automatically with their type, e.g. "Success: Rule exported". Don't add your own announcement for the same message.
 - **Visual change that isn't a toast** (results filtered, form reset, items reordered) → call **`notifications.screenReader.notify(message)`** with a localized message.
-- **Errors in a form that stays open** → render them inside the form, e.g. **`EuiCallOut`** with **`announceOnMount`** (see `callouts.md`). A toast fired while a modal or flyout stays open is announced only after it closes.
-- Don't add **`EuiLiveAnnouncer`**, **`EuiScreenReaderLive`** or **`aria-live`** regions outside an open modal for announcements: screen readers ignore them while the modal is open, and they compete with the shared region.
+- **Errors in a modal or flyout that stays open** → render them inside it, e.g. **`EuiCallOut`** with **`announceOnMount`** (see `callouts.md`). VoiceOver ignores live regions outside an open modal ([w3c/aria#1854](https://github.com/w3c/aria/issues/1854)), so it doesn't read toasts or `notify` messages while the modal stays open.
+- Don't add your own **`EuiLiveAnnouncer`**, **`EuiScreenReaderLive`** or **`aria-live`** regions outside a modal for announcements: they compete with the shared region.
 
 ## Examples
 
@@ -39,7 +38,7 @@ useEffect(() => {
 notifications.toasts.addSuccess(savedMessage);
 notifications.screenReader.notify(savedMessage);
 
-// WRONG — a separate live region competes with the shared one, and is ignored while a modal is open
+// WRONG — a separate live region competes with the shared one
 <EuiScreenReaderLive>{savedMessage}</EuiScreenReaderLive>
 
 // RIGHT
