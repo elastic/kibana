@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { resolveScopedModel } from './scoped_model';
 
-const FEATURE_ID = 'alertzero_fast';
+const FEATURE_ID = 'alertzero_efficient';
 
 const request = {} as KibanaRequest;
 
@@ -85,7 +85,7 @@ describe('resolveScopedModel', () => {
     );
   });
 
-  it.each(['alertzero_fast', 'alertzero_reasoning'])(
+  it.each(['alertzero_efficient', 'alertzero_frontier'])(
     'returns no_connector when %s is unregistered even if the registry offers a default',
     async (featureId) => {
       const inference = createInference();
@@ -231,7 +231,7 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'alertzero_fast',
+      featureId: 'alertzero_efficient',
       logger: loggingSystemMock.createLogger(),
     });
 
@@ -252,7 +252,7 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'alertzero_fast',
+      featureId: 'alertzero_efficient',
       logger: loggingSystemMock.createLogger(),
     });
 
