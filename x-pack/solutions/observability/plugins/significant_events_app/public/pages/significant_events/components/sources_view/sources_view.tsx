@@ -21,6 +21,7 @@ import { FindSignificantEventsButton } from '../shared/find_significant_events_b
 import { GenerateSplitButton } from '../shared/generate_split_button';
 import { getGenerateDisabledTooltip } from '../shared/translations';
 import { ConfirmSourceActionModal, type SourceAction } from './confirm_source_action_modal';
+import { RecommendedSourcesPanel } from './recommended_sources/recommended_sources_panel';
 import { SourceFlyout } from './source_flyout/source_flyout';
 import { SourcesTable } from './sources_table';
 import { isOnboardingInProgress } from './utils';
@@ -123,6 +124,8 @@ export function SourcesView() {
   // With cached sources, a failed refetch keeps the table; the toast already reports it.
   const hasSourcesLoadFailed = isSourcesError && sources.length === 0;
   const hasNoSources = !isSourcesLoading && !isSourcesError && sources.length === 0;
+  // Duplicates are judged against the full list, so recommend only once it has loaded.
+  const showRecommendations = canManage && !isSourcesLoading && !isSourcesError;
 
   return (
     <>
@@ -199,6 +202,12 @@ export function SourcesView() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+
+        {showRecommendations && (
+          <EuiFlexItem grow={false}>
+            <RecommendedSourcesPanel sources={sources} />
+          </EuiFlexItem>
+        )}
 
         {hasSourcesLoadFailed ? (
           <EuiFlexItem>

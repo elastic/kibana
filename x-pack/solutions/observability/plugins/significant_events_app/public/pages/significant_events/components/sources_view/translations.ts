@@ -141,6 +141,29 @@ export const EMPTY_STATE_BODY = i18n.translate(
   }
 );
 
+export const RECOMMENDED_SOURCES_TITLE = i18n.translate(
+  'xpack.significantEventsApp.sources.recommended.title',
+  { defaultMessage: 'Recommended sources' }
+);
+
+export const RECOMMENDED_SOURCES_DESCRIPTION = i18n.translate(
+  'xpack.significantEventsApp.sources.recommended.description',
+  {
+    defaultMessage:
+      'Start with a ready-made source. It is created and enabled only when you add it, and you can edit, disable or delete it later.',
+  }
+);
+
+export const ADD_RECOMMENDED_SOURCE_BUTTON_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sources.recommended.addButtonLabel',
+  { defaultMessage: 'Add and enable' }
+);
+
+export const ADD_RECOMMENDED_SOURCE_ERROR_TITLE = i18n.translate(
+  'xpack.significantEventsApp.sources.recommended.addErrorTitle',
+  { defaultMessage: 'Could not add the source' }
+);
+
 export const getSourcesCountLabel = (count: number) =>
   i18n.translate('xpack.significantEventsApp.sources.countLabel', {
     defaultMessage: '{count, plural, one {# source} other {# sources}}',
