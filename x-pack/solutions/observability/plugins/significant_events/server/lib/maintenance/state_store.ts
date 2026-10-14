@@ -145,8 +145,9 @@ export const buildPausedIntent = ({
 /**
  * Maps a summary to its saved-object shape. The failure schema only allows `target` and
  * `error`, and rejects unknown keys, so the in-memory `spaceId` is dropped. Reset no longer
- * touches investigations, but released model versions require `deleted.investigations`, and
- * older nodes validate documents against them during a rolling upgrade, so it is stored as 0.
+ * touches investigations and `deleted.investigations` is optional since model version 4, but
+ * it is still written as 0: nodes on version 3 require it during a rolling upgrade. See
+ * `maintenanceDeletedCountsSchemaV4`.
  */
 const toStoredSummary = ({
   deleted,
