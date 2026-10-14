@@ -11,10 +11,7 @@ import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { toOptionalKiLifecycleStatus } from '../../common/ki_lifecycle_status';
 import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import {
-  MAX_KI_TYPE_FILTER_COUNT,
-  takeTopKiTypeCounts,
-} from '../../common/ki_type_counts';
+import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
