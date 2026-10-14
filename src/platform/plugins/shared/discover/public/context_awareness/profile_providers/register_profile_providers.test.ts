@@ -93,7 +93,7 @@ const setupObservabilityProfileStack = async () => {
   };
 };
 
-const setupRootProfileService = () => {
+const setupProfileServices = () => {
   const profileProviderServices = createProfileProviderSharedServicesMock();
   const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
     createContextAwarenessMocks({ shouldRegisterProviders: false });
@@ -105,7 +105,10 @@ const setupRootProfileService = () => {
     sharedServices: profileProviderServices,
     services: profileProviderServices,
   });
-  return rootProfileServiceMock;
+  return {
+    rootProfileService: rootProfileServiceMock,
+    dataSourceProfileService: dataSourceProfileServiceMock,
+  };
 };
 
 describe('registerProfileProviders', () => {
@@ -209,7 +212,7 @@ describe('registerProfileProviders', () => {
   });
 
   it('distinguishes Search navigation from Classic navigation', async () => {
-    const rootProfileService = setupRootProfileService();
+    const { rootProfileService } = setupProfileServices();
 
     await expect(
       rootProfileService.resolve({ solutionNavId: SolutionType.Search })
@@ -218,6 +221,24 @@ describe('registerProfileProviders', () => {
       expect.objectContaining({ solutionType: SolutionType.Default })
     );
   });
+
+  it.each([
+    ['Classic navigation', SECURITY_PROFILE_ID.dataSource, null],
+    ['a solution view without a root profile', DEFAULT_DATA_SOURCE_PROFILE_ID, 'vectordb'],
+  ])(
+    'resolves a Security alerts query in %s to %s',
+    async (_, expectedProfileId, solutionNavId) => {
+      const { rootProfileService, dataSourceProfileService } = setupProfileServices();
+      const rootContext = await rootProfileService.resolve({ solutionNavId });
+      const dataSourceContext = await dataSourceProfileService.resolve({
+        rootContext,
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'FROM .alerts-security.alerts-default' },
+      });
+
+      expect(dataSourceContext.profileId).toBe(expectedProfileId);
+    }
+  );
 
   it('registers Security after solution-agnostic profiles and before Observability profiles', () => {
     const profileProviderServices = createProfileProviderSharedServicesMock();

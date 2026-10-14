@@ -20,6 +20,10 @@ import { createSecurityDataSourceProfileProvider } from './profile';
 const services = createProfileProviderSharedServicesMock();
 const provider = createSecurityDataSourceProfileProvider(services);
 const rootContext = (solutionType: SolutionType) => ({ profileId: 'root', solutionType });
+const CLASSIC_ROOT_CONTEXT = {
+  profileId: 'classic-nav-root-profile',
+  solutionType: SolutionType.Default,
+};
 
 describe('createSecurityDataSourceProfileProvider', () => {
   it('matches any otherwise unclaimed data source in Security navigation', async () => {
@@ -38,7 +42,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
   it('matches a managed Security data view in Classic navigation', async () => {
     await expect(
       provider.resolve({
-        rootContext: rootContext(SolutionType.Default),
+        rootContext: CLASSIC_ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: 'security-solution-default' }),
         dataView: createStubIndexPattern({
           spec: { id: 'security-solution-default', title: 'logs-*,filebeat-*' },
@@ -54,10 +58,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
     jest.spyOn(services.uiSettings, 'get').mockReturnValueOnce(false);
     await expect(
       provider.resolve({
-        rootContext: {
-          profileId: 'root',
-          solutionType: SolutionType.Default,
-        },
+        rootContext: CLASSIC_ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: 'security-solution-default' }),
         dataView: createStubIndexPattern({
           spec: { id: 'security-solution-default', title: 'logs-*,filebeat-*' },
@@ -76,7 +77,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
     ];
     await expect(
       provider.resolve({
-        rootContext: rootContext(SolutionType.Default),
+        rootContext: CLASSIC_ROOT_CONTEXT,
         dataSource: createEsqlDataSource(),
         query: {
           esql: 'FROM .alerts-security.alerts-default,logs-endpoint.events.process-*',
@@ -99,7 +100,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
     ];
     await expect(
       provider.resolve({
-        rootContext: rootContext(SolutionType.Default),
+        rootContext: CLASSIC_ROOT_CONTEXT,
         dataSource: createEsqlDataSource(),
         query: { esql: 'FROM .alerts-security.alerts-default,logs-nginx.access-*' },
         dataView,
@@ -110,7 +111,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
   it('falls back to the ES|QL index pattern in Classic navigation when there is no resolved data view', async () => {
     await expect(
       provider.resolve({
-        rootContext: rootContext(SolutionType.Default),
+        rootContext: CLASSIC_ROOT_CONTEXT,
         dataSource: createEsqlDataSource(),
         query: { esql: 'FROM .alerts-security.alerts-default,logs-endpoint.events.process-*' },
       })
@@ -128,7 +129,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
     ];
     await expect(
       provider.resolve({
-        rootContext: rootContext(SolutionType.Default),
+        rootContext: CLASSIC_ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: 'my-logs' }),
         dataView,
       })
@@ -143,7 +144,7 @@ describe('createSecurityDataSourceProfileProvider', () => {
     dataView.matchedIndices = [];
     await expect(
       provider.resolve({
-        rootContext: rootContext(SolutionType.Default),
+        rootContext: CLASSIC_ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: 'my-logs' }),
         dataView,
       })
@@ -162,6 +163,16 @@ describe('createSecurityDataSourceProfileProvider', () => {
       ).resolves.toEqual({ isMatch: false });
     }
   );
+
+  it('does not match in solution views without a root profile, which fall back to SolutionType.Default', async () => {
+    await expect(
+      provider.resolve({
+        rootContext: { profileId: 'default-root-profile', solutionType: SolutionType.Default },
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'FROM .alerts-security.alerts-default' },
+      })
+    ).resolves.toEqual({ isMatch: false });
+  });
 
   it('adds Security cell renderers for alert data without overriding existing renderers', async () => {
     const MockRenderer: FunctionComponent<DataGridCellValueElementProps> = () => null;

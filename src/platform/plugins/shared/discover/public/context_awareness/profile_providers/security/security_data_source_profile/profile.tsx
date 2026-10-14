@@ -12,7 +12,10 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { isSolutionProfilesInClassicEnabled } from '../../is_solution_profiles_in_classic_enabled';
+import {
+  isClassicNavRootContext,
+  isSolutionProfileEnabled,
+} from '../../is_solution_profile_enabled';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
 import { createDefaultSecuritySolutionAppStateGetter } from '../accessors/get_default_app_state';
@@ -71,27 +74,21 @@ export const createSecurityDataSourceProfileProvider = (
       getDefaultAppState: createDefaultSecuritySolutionAppStateGetter(),
     },
     resolve: async (params) => {
-      const { solutionType } = params.rootContext;
+      const { rootContext, dataView } = params;
 
-      const isClassicNav = solutionType === SolutionType.Default;
-
-      if (solutionType !== SolutionType.Security && !isClassicNav) {
+      if (!isSolutionProfileEnabled(rootContext, SolutionType.Security, services.uiSettings)) {
         return { isMatch: false };
       }
 
-      const isSolutionProfilesInClassicDisabled = !isSolutionProfilesInClassicEnabled(
-        services.uiSettings
-      );
-
-      const isSecuritySource =
-        isSecurityDataViewId(params.dataView?.id) ||
-        containsOnlySecuritySourcePatterns(
-          params.dataView?.matchedIndices,
-          extractIndexPatternFrom(params)
-        );
-
       // In Classic navigation, only match when Security known sources are detected.
-      if (isClassicNav && (isSolutionProfilesInClassicDisabled || !isSecuritySource)) {
+      if (
+        isClassicNavRootContext(rootContext) &&
+        !isSecurityDataViewId(dataView?.id) &&
+        !containsOnlySecuritySourcePatterns(
+          dataView?.matchedIndices,
+          extractIndexPatternFrom(params)
+        )
+      ) {
         return { isMatch: false };
       }
 

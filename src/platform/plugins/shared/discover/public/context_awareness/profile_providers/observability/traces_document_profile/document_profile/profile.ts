@@ -18,7 +18,7 @@ import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
-import { isSolutionProfilesInClassicEnabled } from '../../../is_solution_profiles_in_classic_enabled';
+import { isSolutionProfileEnabled } from '../../../is_solution_profile_enabled';
 import { createGetDocViewer } from './accessors';
 
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-document-profile';
@@ -45,12 +45,8 @@ export const createObservabilityTracesDocumentProfileProvider = ({
     ),
   },
   resolve: ({ record, rootContext }) => {
-    const { solutionType } = rootContext;
-    const isSupportedSolution =
-      solutionType === SolutionType.Observability ||
-      (solutionType === SolutionType.Default && isSolutionProfilesInClassicEnabled(uiSettings));
     if (
-      isSupportedSolution &&
+      isSolutionProfileEnabled(rootContext, SolutionType.Observability, uiSettings) &&
       isTraceDocument(record, apmContextService.tracesService.isTracesIndexPattern)
     ) {
       return {

@@ -14,7 +14,7 @@ import {
   type DataSourceProfileProvider,
 } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { isSolutionProfilesInClassicEnabled } from '../../is_solution_profiles_in_classic_enabled';
+import { isSolutionProfileEnabled } from '../../is_solution_profile_enabled';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import {
   getCellRenderers,
@@ -41,14 +41,8 @@ export const createTracesDataSourceProfileProvider = ({
     getDeepAnalysisPlaybook,
   },
   resolve: (params) => {
-    const { solutionType } = params.rootContext;
-
-    const isSupportedNav =
-      solutionType === SolutionType.Observability ||
-      (solutionType === SolutionType.Default && isSolutionProfilesInClassicEnabled(uiSettings));
-
     if (
-      isSupportedNav &&
+      isSolutionProfileEnabled(params.rootContext, SolutionType.Observability, uiSettings) &&
       apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
       (params.dataSource?.type === DataSourceType.DataView ||
         isValidNonTransformationalESQLQuery(params.query))

@@ -15,8 +15,8 @@ export interface CreateRegExpPatternFromOptions {
   /**
    * Whether the base pattern may be preceded by another index-name segment (e.g. `shipping-traces`
    * matching `traces`). Defaults to true. When false, the base pattern must be at the start of the
-   * index name — after an optional remote cluster — so `traces-*` matches but `shipping-traces` does
-   * not.
+   * index name — after an optional remote cluster and data stream backing index prefix (`.ds-`) — so
+   * `traces-*` and `.ds-traces-apm-default-2026.10.14-000001` match but `shipping-traces` does not.
    */
   allowPrefix?: boolean;
 }
@@ -32,7 +32,7 @@ export const createRegExpPatternFrom = (
   const selectorsSuffix = `(?:::(?:${escapeRegExp(selector)}))${
     isDefaultSelector(selector) ? '?' : ''
   }`;
-  const indexNamePrefix = allowPrefix ? optionalIndexNamePrefix : '';
+  const indexNamePrefix = allowPrefix ? optionalIndexNamePrefix : optionalBackingIndexPrefix;
 
   return new RegExp(
     `^(?:${optionalRemoteCluster}${indexNamePrefix}${indexNames}${optionalIndexNameSuffix}${selectorsSuffix},?)+$`,
@@ -49,4 +49,5 @@ const nameCharacters = '[^:,\\s]+';
 const segmentBoundary = '(?:\\b|_)';
 const optionalRemoteCluster = `(?:${nameCharacters}:)?`;
 const optionalIndexNamePrefix = `(?:${nameCharacters}${segmentBoundary})?`;
+const optionalBackingIndexPrefix = '(?:\\.ds-)?';
 const optionalIndexNameSuffix = `(?:${segmentBoundary}${nameCharacters})?`;

@@ -26,9 +26,10 @@ describe('traces_context_service', () => {
       expect(service.isTracesIndexPattern('apm.traces')).toBe(false);
     });
 
-    it('still resolves remote clusters and the data selector', () => {
+    it('still resolves remote clusters, data stream backing indices and the data selector', () => {
       const service = createTracesContextService({ indices: null });
       expect(service.isTracesIndexPattern('cluster1:traces-*')).toBe(true);
+      expect(service.isTracesIndexPattern('.ds-traces-apm-default-2026.10.14-000001')).toBe(true);
       expect(service.isTracesIndexPattern('traces-*::data')).toBe(true);
     });
   });

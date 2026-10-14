@@ -142,9 +142,16 @@ describe('logDocumentProfileProvider', () => {
     expect(
       logDocumentProfileProvider.resolve({
         ...params,
-        rootContext: { profileId: 'other-data-source-profile', solutionType: SolutionType.Default },
+        rootContext: { profileId: 'classic-nav-root-profile', solutionType: SolutionType.Default },
       })
     ).toEqual(RESOLUTION_MATCH);
+    // Solution views without a root profile fall back to SolutionType.Default but are not Classic.
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: { profileId: 'default-root-profile', solutionType: SolutionType.Default },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
     expect(
       logDocumentProfileProvider.resolve({
         ...params,

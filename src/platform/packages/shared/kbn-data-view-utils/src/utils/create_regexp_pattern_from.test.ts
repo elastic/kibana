@@ -131,6 +131,12 @@ describe('createRegExpPatternFrom with allowPrefix: false', () => {
     expect('mytraces').not.toMatch(regExpPattern);
   });
 
+  it('matches data stream backing indices of names that start with the base pattern', () => {
+    expect('.ds-traces-apm-default-2026.10.14-000001').toMatch(regExpPattern);
+    expect('cluster1:.ds-traces-apm-default-2026.10.14-000001').toMatch(regExpPattern);
+    expect('.ds-shipping-traces-default-2026.10.14-000001').not.toMatch(regExpPattern);
+  });
+
   it('still resolves remote clusters, the data selector, and comma-separated lists', () => {
     expect('cluster1:traces-*').toMatch(regExpPattern);
     expect('traces-*::data').toMatch(regExpPattern);

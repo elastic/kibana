@@ -16,7 +16,7 @@ import {
   type DataSourceProfileProviderParams,
 } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
-import { isSolutionProfilesInClassicEnabled } from '../../../is_solution_profiles_in_classic_enabled';
+import { isSolutionProfileEnabled } from '../../../is_solution_profile_enabled';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
 export interface CreateResolveOptions {
@@ -54,15 +54,13 @@ export const createResolve = (
   };
 
   return (params) => {
-    const { solutionType } = params.rootContext;
+    const { rootContext } = params;
 
     // Observability always resolves solution profiles; Classic only when the integration and the
     // opt-out setting both allow it. The matching itself is identical for both.
-    const isSupportedNav =
-      solutionType === SolutionType.Observability ||
-      (solutionType === SolutionType.Default &&
-        enabledInClassicNav &&
-        isSolutionProfilesInClassicEnabled(uiSettings));
+    const isSupportedNav = enabledInClassicNav
+      ? isSolutionProfileEnabled(rootContext, SolutionType.Observability, uiSettings)
+      : rootContext.solutionType === SolutionType.Observability;
 
     if (!isSupportedNav || !matchesIntegration(params)) {
       return { isMatch: false };
