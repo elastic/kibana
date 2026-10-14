@@ -152876,6 +152876,9 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_conditionSchema'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_groupConditionSchema'
           type: array
+        negate:
+          description: When `true`, the filter is negated and matches documents that do NOT satisfy the condition. Defaults to `false`.
+          type: boolean
         operator:
           anyOf:
             - enum:
