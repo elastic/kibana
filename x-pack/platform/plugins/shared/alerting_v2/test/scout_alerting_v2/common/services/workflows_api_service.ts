@@ -7,24 +7,43 @@
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import { COMMON_HEADERS } from '../constants';
+import { expect } from '@kbn/scout/api';
+import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 
 const WORKFLOWS_API_PATH = '/api/workflows';
+
+/** Execution statuses after which a workflow execution no longer changes. */
+const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out'];
 
 export interface WorkflowSummary {
   id: string;
   name: string;
 }
 
+export interface WorkflowExecutionSummary {
+  id: string;
+  status: string;
+  triggeredBy?: string;
+  executedBy?: string;
+  error: unknown;
+}
+
+interface WorkflowExecutionListResponse {
+  results: WorkflowExecutionSummary[];
+}
+
 /**
  * Minimal workflows client used to seed the destinations that action policies
- * point at. Action policy destinations are workflow references, so UI specs
- * that drive the `destinationsInput` combo box need at least one real workflow
- * for the workflows plugin to return.
+ * point at, and to observe the executions the dispatcher starts on them. Action
+ * policy destinations are workflow references, so UI specs that drive the
+ * `destinationsInput` combo box need at least one real workflow for the
+ * workflows plugin to return.
  */
 export interface WorkflowsApiService {
   create: (yaml: string) => Promise<WorkflowSummary>;
   bulkDelete: (ids: string[]) => Promise<void>;
+  /** Polls until the workflow has an execution in a terminal status, and returns it. */
+  waitForFinishedExecution: (workflowId: string) => Promise<WorkflowExecutionSummary>;
 }
 
 export const getWorkflowsApiService = ({
@@ -57,5 +76,33 @@ export const getWorkflowsApiService = ({
         ignoreErrors: [404],
         retries: 0,
       });
+    }),
+
+  waitForFinishedExecution: (workflowId) =>
+    measurePerformanceAsync(log, 'workflows.waitForFinishedExecution', async () => {
+      const findFinished = async (): Promise<WorkflowExecutionSummary | undefined> => {
+        const response = await kbnClient.request<WorkflowExecutionListResponse>({
+          method: 'GET',
+          path: `${WORKFLOWS_API_PATH}/workflow/${encodeURIComponent(workflowId)}/executions`,
+          headers: COMMON_HEADERS,
+          retries: 0,
+        });
+        return response.data.results.find(({ status }) =>
+          TERMINAL_EXECUTION_STATUSES.includes(status)
+        );
+      };
+
+      await expect
+        .poll(async () => (await findFinished())?.id, {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBeDefined();
+
+      const execution = await findFinished();
+      if (!execution) {
+        throw new Error(`Workflow ${workflowId} has no finished execution`);
+      }
+      return execution;
     }),
 });
