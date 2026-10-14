@@ -7,7 +7,10 @@
 
 import { createHash } from 'crypto';
 import { validate as uuidValidate } from 'uuid';
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import { REASONING_EFFORT_LEVELS } from '@kbn/inference-common';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
@@ -300,19 +303,15 @@ export const conversePayloadSchema = schema.object({
   ),
   reasoning_level: schema.maybe(
     schema.oneOf(
-      [
-        schema.literal('none'),
-        schema.literal('minimal'),
-        schema.literal('low'),
-        schema.literal('medium'),
-        schema.literal('high'),
-        schema.literal('xhigh'),
+      REASONING_EFFORT_LEVELS.map((level) => schema.literal(level)) as [
+        Type<ChatCompletionReasoningEffort>
       ],
       {
         meta: {
           availability: { stability: 'experimental', since: '9.6.0' },
-          description:
-            'Reasoning effort level for the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.',
+          description: `Reasoning effort level for the LLM. One of: ${REASONING_EFFORT_LEVELS.join(
+            ', '
+          )}. Support depends on the underlying model and provider.`,
         },
       }
     )
