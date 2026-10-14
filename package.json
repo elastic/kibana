@@ -1816,8 +1816,6 @@
     "cli-table3": "0.6.1",
     "content-security-policy-parser": "0.6.0",
     "css-loader": "7.1.2",
-    "cssnano": "7.1.3",
-    "cssnano-preset-default": "7.0.11",
     "cssstyle": "5.3.7",
     "csstype": "3.0.7",
     "cypress": "15.12.0",

@@ -68,14 +68,7 @@ export const defaultConfig: StorybookConfig = {
             use: [
               { loader: 'style-loader' },
               { loader: 'css-loader', options: { importLoaders: 2 } },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  postcssOptions: {
-                    config: require.resolve('@kbn/optimizer/postcss.config'),
-                  },
-                },
-              },
+              { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
               {
                 loader: 'sass-loader',
                 options: {
