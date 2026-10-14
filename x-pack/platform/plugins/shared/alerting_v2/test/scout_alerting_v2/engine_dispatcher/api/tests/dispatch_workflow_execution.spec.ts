@@ -38,7 +38,7 @@ const ACTION_POLICY_TRIGGER = 'action_policy';
 
 apiTest.describe(
   'Dispatcher runs the workflow of an action policy',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let workflowId: string;
 
