@@ -1,0 +1,34 @@
+{
+  "sha1": "b09b7040f6ef528af6f4e247f618d3d7b09458fd",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "6cb21ca8e3593d9-dae09b093b80946",
+      "title": "Subscription status badge for billing admins shows the trial popover with subscribe and pricing links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/billing_admin.spec.ts",
+        "line": 33,
+        "column": 18
+      }
+    },
+    {
+      "id": "f5b0c8dfcdebe68-d4bdf534246a342",
+      "title": "Subscription status badge for users without billing access shows a tooltip asking to contact the administrator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/no_billing_access.spec.ts",
+        "line": 15,
+        "column": 54
+      }
+    }
+  ]
+}

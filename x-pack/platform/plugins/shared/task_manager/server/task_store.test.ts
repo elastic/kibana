@@ -3410,6 +3410,15 @@ describe('TaskStore', () => {
       references: [],
       version: '123',
     };
+    const serviceAccountTask = {
+      ...mockTask,
+      id: 'serviceAccountTask1',
+      attributes: {
+        ..._.omit(mockTask.attributes, 'apiKey', 'userScope'),
+        credential: serviceAccountCredential,
+        encryptedCredential: 'encrypted-value',
+      },
+    };
 
     beforeEach(() => {
       (coreStart.savedObjects.getUnsafeInternalClient as jest.Mock).mockReturnValue(
@@ -3463,6 +3472,15 @@ describe('TaskStore', () => {
           type: 'api_key_to_invalidate',
         },
       ]);
+    });
+
+    test('does not mark anything for invalidation when the task runs as a service account', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(serviceAccountTask);
+      await store.remove(serviceAccountTask.id);
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', serviceAccountTask.id, {
+        refresh: false,
+      });
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -3535,6 +3553,16 @@ describe('TaskStore', () => {
       version: '123',
     };
 
+    const serviceAccountTask = {
+      ...mockTask1,
+      id: 'serviceAccountTask1',
+      attributes: {
+        ..._.omit(mockTask1.attributes, 'apiKey', 'userScope'),
+        credential: serviceAccountCredential,
+        encryptedCredential: 'encrypted-value',
+      },
+    };
+
     const tasksIdsToDelete = [randomId(), randomId()];
 
     beforeEach(() => {
@@ -3597,6 +3625,38 @@ describe('TaskStore', () => {
         },
         {
           attributes: { apiKeyId: 'apiKeyId2', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('does not mark anything for invalidation when only service account tasks are removed', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [serviceAccountTask],
+      });
+      await store.bulkRemove([serviceAccountTask.id]);
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+        [{ type: 'task', id: serviceAccountTask.id }],
+        { refresh: false }
+      );
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    test('marks only the API key of the API key task when removed with a service account task', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, serviceAccountTask],
+      });
+      await store.bulkRemove([mockTask1.id, serviceAccountTask.id]);
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+        [
+          { type: 'task', id: mockTask1.id },
+          { type: 'task', id: serviceAccountTask.id },
+        ],
+        { refresh: false }
+      );
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyId1', createdAt: expect.any(String) },
           type: 'api_key_to_invalidate',
         },
       ]);

@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
   INTERNAL_API_ACCESS,
@@ -27,7 +27,7 @@ import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 /**
- * Resolves the Reasoning-tier model, or `undefined` when none is available. A missing
+ * Resolves the Frontier-tier model, or `undefined` when none is available. A missing
  * connector is the ordinary outcome, not an error, so it never fails the request: the
  * coordinator degrades (no model fallback for Tier 2 targets, Tier 2 reports `no_inference`).
  */
@@ -119,7 +119,7 @@ export const registerHuntCoordinatorRoute = ({
             run_id,
           } = request.body;
 
-          // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
+          // Same Frontier tier as the standalone hunt_behavior route, so this path (the
           // one that actually runs Tier 2 in production) resolves the same model. It is
           // resolved regardless of `tier2_when`, since resolving a connector spends no
           // tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
@@ -129,7 +129,7 @@ export const registerHuntCoordinatorRoute = ({
               resolveScopedModel({
                 inference: getInference(),
                 searchInferenceEndpoints: getSearchInferenceEndpoints(),
-                featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+                featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
                 request,
                 uiSettingsClient: core.uiSettings.client,
                 logger,
