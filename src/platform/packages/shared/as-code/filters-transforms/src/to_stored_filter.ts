@@ -262,6 +262,7 @@ function convertFromFilterGroup(
       ...baseStored.meta,
       type: FILTERS.COMBINED,
       relation: group.operator.toUpperCase(),
+      ...(resolveNegate(baseStored.meta.negate, group.negate) ? { negate: true } : {}),
       params: filterParams,
     },
   };

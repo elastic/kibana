@@ -221,7 +221,10 @@ function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['gr
       return paramFilter.condition;
     }
     if (paramFilter && 'group' in paramFilter && paramFilter.group) {
-      return paramFilter.group;
+      return {
+        ...paramFilter.group,
+        ...(paramFilter.negate && { negate: true }),
+      };
     }
     // If it's a DSL filter, we can't convert it to a condition
     throw new FilterConversionError('Cannot convert combined filter param to condition');

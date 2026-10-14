@@ -201,6 +201,7 @@ const conditionSchema = z
 
 export interface AsCodeGroupFilterRecursive {
   operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
+  negate?: boolean;
   conditions: Array<z.output<typeof conditionSchema> | AsCodeGroupFilterRecursive>;
 }
 
@@ -231,6 +232,7 @@ const groupConditionSchema: z.ZodType<AsCodeGroupFilterRecursive> = z
         description:
           'Logical operator applied across all entries in `conditions`. Use `and` to require all conditions, or `or` to require at least one.',
       }),
+    negate: negatePropertySchema,
     conditions: z.array(z.union([conditionSchema, z.lazy(() => groupConditionSchema)])).meta({
       description: 'Ordered list of conditions or nested groups combined by the group `operator`.',
     }),

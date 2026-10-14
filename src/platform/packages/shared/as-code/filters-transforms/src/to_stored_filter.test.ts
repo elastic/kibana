@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { asCodeFilterSchema, type AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type { StoredFilter } from './types';
 import { toStoredFilter } from './to_stored_filter';
 import { fromStoredFilter } from './from_stored_filter';
 import { FilterStateStore } from '@kbn/es-query-constants';
-import { FILTERS } from '@kbn/es-query';
+import { BooleanRelation, buildCombinedFilter, FILTERS } from '@kbn/es-query';
 import { spatialFilterFixture } from './__fixtures__/spatial_filter';
 import { isConditionFilter, isDSLFilter } from './type_guards';
 
@@ -206,6 +206,36 @@ describe('toStoredFilter', () => {
   });
 
   describe('round-trip conversion', () => {
+    it('preserves the negation of a nested group through the API format', () => {
+      const dataView = { id: 'logs' };
+      const [css, js, country] = [
+        ['extension.keyword', 'css'],
+        ['extension.keyword', 'js'],
+        ['geo.dest', 'US'],
+      ].map(([field, value]) => ({
+        meta: { type: FILTERS.PHRASE, key: field, params: { query: value } },
+        query: { match_phrase: { [field]: value } },
+      }));
+      const excludedGroup = buildCombinedFilter(
+        BooleanRelation.OR,
+        [css, js],
+        dataView,
+        false,
+        true
+      );
+      const original = buildCombinedFilter(BooleanRelation.AND, [country, excludedGroup], dataView);
+
+      const apiFilter = asCodeFilterSchema.parse(fromStoredFilter(original));
+      const restored = toStoredFilter(apiFilter);
+
+      expect(restored).toMatchObject({
+        meta: {
+          relation: BooleanRelation.AND,
+          params: [expect.anything(), { meta: { relation: BooleanRelation.OR, negate: true } }],
+        },
+      });
+    });
+
     it('should preserve simple condition filter data through round-trip conversion', () => {
       const originalFilter = {
         meta: {
