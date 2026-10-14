@@ -14,16 +14,6 @@ All errors in `server/domain/errors/`. Exported from `errors/index.ts`.
 | `ResolutionSearchTruncatedError` | 500 | ES search hit max results during resolution query |
 | `ResolutionUpdateError` | 500 | Bulk update during resolution partially failed |
 
-## Custom Resolution Rule Errors
-
-| Error Class | HTTP | Condition |
-|-------------|------|-----------|
-| `InvalidCustomResolutionRuleError` | 400 | Expression isn't one ES\|QL expression, a syntax error, an unknown field or type error from the `LIMIT 0` check, a malformed namespace, or the per-space cap |
-| `CustomResolutionRuleNotFoundError` | 404 | No rule with that id in the space |
-| `EntityStoreNotInstalledError` | 404 | Validating or previewing in a space with no latest-entities index |
-
-Saved-objects forbidden errors map to 403, and conflicts (concurrent updates) map to 409.
-
 ## CRUD Errors
 
 | Error Class | HTTP | Condition |
@@ -38,6 +28,13 @@ Saved-objects forbidden errors map to 403, and conflicts (concurrent updates) ma
 |-------------|------|-----------|
 | `EntityNotFoundError` | 404 | Entity not found by ID |
 | `EntityStoreNotRunningError` | 400 | Operation requires entity store to be running |
+| `EntityStoreNotInstalledError` | 400 | CRUD or relationships call before the store is installed |
+
+## Extraction Errors
+
+| Error Class | HTTP | Condition |
+|-------------|------|-----------|
+| `NonPriorityExtractionDisabledError` | n/a | Non-priority extraction run while `nonPriorityStatus` is `stopped` (dual-process flag off, or the process stopped through internal `stop`). Soft failure: `extractLogs` returns `{ success: false, error }`, and the task writes no engine error and counts no task error |
 
 ## Important: Unlink Behavior
 

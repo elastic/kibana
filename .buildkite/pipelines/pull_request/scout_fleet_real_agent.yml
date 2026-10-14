@@ -1,0 +1,18 @@
+steps:
+  - command: .buildkite/scripts/steps/test/scout_fleet_real_agent.sh
+    label: 'Scout Fleet Real Agent'
+    key: scout-fleet-real-agent
+    agents:
+      machineType: n2-highmem-4
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    # One stack with a Docker Fleet Server and Docker Elastic Agents.
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1

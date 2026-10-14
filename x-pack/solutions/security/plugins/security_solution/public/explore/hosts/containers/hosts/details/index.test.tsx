@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { ID, useHostDetails } from '.';
@@ -114,7 +115,7 @@ describe('useHostDetails', () => {
 
   it('does not run search when both entityId and hostName are empty and entity store v2 is enabled', () => {
     mockUseUiSetting.mockReturnValue(true);
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {} });
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
 
     renderHook(() => useHostDetails({ ...defaultProps, hostName: '', entityId: undefined }), {
       wrapper: TestProviders,
@@ -125,7 +126,7 @@ describe('useHostDetails', () => {
 
   it('runs search with host.name filter when entity store v2 is enabled and entityId is undefined but hostName is provided', () => {
     mockUseUiSetting.mockReturnValue(true);
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {} });
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
 
     renderHook(() => useHostDetails(defaultProps), { wrapper: TestProviders });
 
@@ -138,7 +139,7 @@ describe('useHostDetails', () => {
 
   it('does not run search when entity store v2 is enabled and entity Id is specified but euidApi.euid is undefined', () => {
     mockUseUiSetting.mockReturnValue(true);
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: undefined });
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: undefined, getBuiltInEntityDefinition });
 
     renderHook(() => useHostDetails({ ...defaultProps, entityId: 'my-macbook' }), {
       wrapper: TestProviders,
@@ -153,6 +154,7 @@ describe('useHostDetails', () => {
     const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
     });
 
     const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
@@ -167,7 +169,10 @@ describe('useHostDetails', () => {
       { wrapper: TestProviders }
     );
 
-    expect(getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith('host', entityRecord);
+    expect(getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      entityRecord
+    );
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         filterQuery: JSON.stringify(recordFilter),
@@ -180,6 +185,7 @@ describe('useHostDetails', () => {
     const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(undefined);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
     });
 
     const entityRecord = { entity: { id: 'host:host-1' }, host: {} };
@@ -202,7 +208,7 @@ describe('useHostDetails', () => {
   });
 
   it('uses host.name in filterQuery when entity store v2 is disabled', () => {
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {} });
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
 
     renderHook(() => useHostDetails(defaultProps), { wrapper: TestProviders });
 
@@ -215,7 +221,7 @@ describe('useHostDetails', () => {
 
   it('does not run search while the entity-store record is loading and no record is available yet', () => {
     mockUseUiSetting.mockReturnValue(true);
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {} });
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
 
     renderHook(() => useHostDetails({ ...defaultProps, entityStoreInitialLoading: true }), {
       wrapper: TestProviders,
@@ -230,6 +236,7 @@ describe('useHostDetails', () => {
     const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
     });
 
     const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
@@ -258,6 +265,7 @@ describe('useHostDetails', () => {
     const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
     });
 
     const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
@@ -282,7 +290,7 @@ describe('useHostDetails', () => {
 
   it('runs the host.name fallback once the store has resolved with no record', () => {
     mockUseUiSetting.mockReturnValue(true);
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {} });
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
 
     renderHook(
       () =>
@@ -303,7 +311,7 @@ describe('useHostDetails', () => {
   });
 
   it('ignores entityStoreInitialLoading when entity store v2 is disabled', () => {
-    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {} });
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
 
     renderHook(() => useHostDetails({ ...defaultProps, entityStoreInitialLoading: true }), {
       wrapper: TestProviders,

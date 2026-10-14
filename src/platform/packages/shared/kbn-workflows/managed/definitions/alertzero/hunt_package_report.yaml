@@ -19,14 +19,14 @@ settings:
   # Keyed per Investigation, not per report or globally: the Worker's own per-space
   # concurrency (hunt-continuous-threat-hunt, max 1) only serializes sweeps against each
   # other, and does nothing for a manual report_ids bypass or a direct invocation of this
-  # workflow racing one. This narrows, but does not close, decide_and_package's
-  # existing-Proposals lookup race: dispatch_gate below is workflow.executeAsync, so this
-  # workflow (and its concurrency slot) returns, and releases the slot, before any gate child
-  # has actually called system-create-alertzero-proposal -- a second packaging run can still
-  # enter the serialized section while the first run's Proposal is still being created, see
-  # zero Proposals, and mint its own. Closing that window for good is the Proposals service's
-  # job once it owns atomic dedup; `queue`, not `drop`, at least means a racing run still
-  # packages (just after the first), rather than being silently lost. The key itself is a
+  # workflow racing one. Kept for what it still buys, not for Proposal correctness: two runs on
+  # one Investigation write its coverage knowledge items and read its settlement baseline one
+  # after the other rather than interleaved, and a rerun's look-up does not overlap another's.
+  # It does not close the race over a Proposal itself, and does not need to: dispatch_gate below
+  # is workflow.executeAsync, so this workflow releases its slot before any gate has created its
+  # Proposal, but each gate creates it under an id derived from what it proposes, and the
+  # Proposals service refuses a second create of that id. `queue`, not `drop`, means a racing run
+  # still packages (just after the first), rather than being silently lost. The key itself is a
   # template and does resolve (ConcurrencyManager renders it with Liquid against the workflow
   # context, same as every other concurrency key here): the point is only that
   # investigationConversationId arrives as an already-rendered, concrete conversation id by the
@@ -170,6 +170,7 @@ steps:
           run-as-mode: inherit
           inputs:
             conversationId: "{{ foreach.item.conversationId }}"
+            proposalId: "{{ foreach.item.proposalId }}"
             title: "{{ foreach.item.title }}"
             comment: "{{ foreach.item.comment }}"
             category: "{{ foreach.item.category }}"
@@ -181,6 +182,29 @@ steps:
             runId: "{{ inputs.runId }}"
             closureSummary: "{{ steps.decide_and_package.output.closureSummary }}"
             expectedProposalCount: "${{ steps.decide_and_package.output.expectedProposalCount }}"
+
+  # A finding a live Proposal already covers creates nothing here. The Investigation that raised
+  # that Proposal is named in a journal line on this one, so an analyst reading it can see where
+  # its finding went. `mode: settled` for the same reason as the gates above: a failed note is
+  # observed, not allowed to abort the others, and the note workflow itself continues on failure.
+  # The line is composed by packaging, which knows whether this Investigation was added to the
+  # Proposal's comment, so this step only delivers it.
+  - name: write_convergence_notes
+    type: parallel
+    if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.converged != nil and steps.decide_and_package.output.converged != empty }}"
+    foreach: "${{ steps.decide_and_package.output.converged }}"
+    mode: settled
+    concurrency:
+      max: 5
+    steps:
+      - name: write_convergence_note
+        type: workflow.execute
+        with:
+          workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
+          inputs:
+            conversation_id: "{{ inputs.investigationConversationId }}"
+            message: "{{ foreach.item.note }}"
 
   # A scalar `default: 0` is fine in this engine; it is only a bracket array
   # literal that gets silently dropped. Safe when start_proposal_gates was
@@ -274,6 +298,9 @@ steps:
     with:
       package_summary: |-
         {% assign packaged = steps.decide_and_package.output -%}
+        {% assign convergedCount = packaged.converged | size -%}
+        {% assign alreadyOpen = packaged.alreadyOpenCount | default: 0 -%}
+        {% assign coveredCount = convergedCount | plus: alreadyOpen -%}
         {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
         {% elsif packaged.dismiss == true and variables.dismiss_close_failed == true -%}
@@ -285,9 +312,9 @@ steps:
         {% elsif packaged.dismiss == true -%}
         No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.mintSuppression == 'check_failed' -%}
-        This run found something mint-worthy, but packaging could not verify whether the Investigation already has a Proposal, so no new one was created this time{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. The next scheduled sweep will not retry this report on its own -- this run's hunt already marked it hunted -- so a manual run targeting this reportId is what actually retries it.
-        {% elsif packaged.mintSuppression == 'existing_proposals' -%}
-        This run found something mint-worthy, but the Investigation already has a Proposal from an earlier run, so no new one was created. Review the existing Proposal{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; also recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        This run found something mint-worthy, but packaging could not verify which Proposals already exist, so no new one was created this time{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. The next scheduled sweep will not retry this report on its own -- this run's hunt already marked it hunted -- so a manual run targeting this reportId is what actually retries it.
+        {% elsif packaged.proposals == empty and coveredCount > 0 -%}
+        This run found something mint-worthy, but every proposal it would have raised already exists, so none was created{% if convergedCount > 0 %}: {{ convergedCount }} {% if convergedCount == 1 %}was{% else %}were{% endif %} raised by another Investigation (the journal says where){% endif %}{% if alreadyOpen > 0 %}{% if convergedCount > 0 %} and {% else %}: {% endif %}{{ alreadyOpen }} {% if alreadyOpen == 1 %}is{% else %}are{% endif %} already open on this Investigation{% endif %}{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; also recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% else -%}
         Packaging prepared {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review and launched an approval gate for each; the gate is what creates the Proposal.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} The Investigation stays open until every gate is decided.{% endif %}
         {% for bullet in packaged.proposalBullets -%}
@@ -295,6 +322,9 @@ steps:
         {% endfor -%}
         {% if packaged.omittedProposalCount > 0 -%}
           - ...and {{ packaged.omittedProposalCount }} more proposal{% if packaged.omittedProposalCount != 1 %}s{% endif %} not listed here.
+        {% endif -%}
+        {% if coveredCount > 0 -%}
+          - {{ coveredCount }} more finding{% if coveredCount != 1 %}s{% endif %} already {% if coveredCount != 1 %}have{% else %}has{% endif %} a Proposal, so none was created for {% if coveredCount != 1 %}them{% else %}it{% endif %}.
         {% endif -%}
         {% if packaged.coverage.written != nil and packaged.coverage.written != empty -%}
           - Recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch.
