@@ -10,7 +10,7 @@ import {
   buildSecurityRoleUrl,
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
-} from '@kbn/alertzero-plugin/common/worker_roles';
+} from '@kbn/alertzero-common';
 import { SECURITY_SERVICE_ACCOUNT_URL } from './constants';
 
 interface ServiceAccountEntry {
