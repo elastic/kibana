@@ -50,7 +50,7 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
 import { fetchData } from './tab_state';
-import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
+import { fromSavedObjectTabToTabState, withStoredAppStateDefaults } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
 import { showSessionWarnings } from '../../../../../session';
@@ -565,7 +565,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
   Promise<void>
 > = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
   function openInNewTabThunkFn(dispatch, getState) {
-    const initialAppState = appState ? cloneDeep(appState) : {};
+    const initialAppState = withStoredAppStateDefaults(appState ? cloneDeep(appState) : {});
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
     const currentState = getState();
     const currentTabs = selectAllTabs(currentState);

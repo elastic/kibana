@@ -21,6 +21,7 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { esqlApproximationStorage } from '@kbn/esql-browser';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -553,6 +554,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
         appState: {
           expandedDoc: undefined,
           query: { esql: queryString },
+          esqlApproximation: appState.esqlApproximation ?? esqlApproximationStorage.get() ?? false,
           filters: [],
           dataSource: {
             type: DataSourceType.Esql,

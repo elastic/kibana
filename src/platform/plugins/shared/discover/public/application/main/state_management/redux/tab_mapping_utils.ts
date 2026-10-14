@@ -13,6 +13,7 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { esqlApproximationStorage } from '@kbn/esql-browser';
 import { isEqual, isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
@@ -58,6 +59,21 @@ export const fromSavedObjectTabToAppState = ({
   );
 };
 
+/**
+ * Seeds `esqlApproximation` from the stored preference for ES|QL tabs that do not set it,
+ * so fetches use the same value the approximation toggle displays.
+ */
+export const withStoredAppStateDefaults = (appState: DiscoverAppState): DiscoverAppState => {
+  if (
+    appState.esqlApproximation !== undefined ||
+    !isOfAggregateQueryType(appState.query) ||
+    !esqlApproximationStorage.get()
+  ) {
+    return appState;
+  }
+  return { ...appState, esqlApproximation: true };
+};
+
 export const fromSavedObjectTabToTabState = ({
   tab,
   existingTab,
@@ -69,7 +85,9 @@ export const fromSavedObjectTabToTabState = ({
   initialAppState?: DiscoverAppState;
   profileStateRegistry: ProfileStateRegistry;
 }): TabState => {
-  const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
+  const appState: DiscoverAppState = withStoredAppStateDefaults(
+    initialAppState ?? fromSavedObjectTabToAppState({ tab })
+  );
 
   const globalState = {
     timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
