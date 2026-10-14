@@ -13,10 +13,10 @@ import type { EntityGridCellContext, EntityGridRows } from './entities_cell_rend
 
 /**
  * The React context of the custom body and the expander: the cell context plus the expanded
- * groups (expand state lives here, not in the cell context), the columns, the load-more state
- * and the callbacks. `timeRange` and `keepFields` are those of the expanded groups' records,
- * `cellPadding` is the display selector's density, which child rows match, and `total` is the
- * number of entities in view.
+ * groups (expand state lives here, not in the cell context), the columns and the callbacks.
+ * `timeRange` and `keepFields` are those of the expanded groups' records, `cellPadding` is the
+ * display selector's density, which child rows match, and `total` is the number of entities in
+ * view.
  */
 export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
   expandedIds: ReadonlySet<string>;
@@ -29,10 +29,6 @@ export interface EntityGridView extends EntityGridCellContext, EntityGridRows {
   isFetching: boolean;
   cellPadding: EuiDataGridStyleCellPaddings;
   total: number;
-  canLoadMore: boolean;
-  isAtLoadLimit: boolean;
-  isLoadingMore: boolean;
-  loadMore: () => void;
   /** The body reports the rows it renders, so only those are enriched. */
   onRowsInViewChange: (firstRow: number, lastRow: number) => void;
 }

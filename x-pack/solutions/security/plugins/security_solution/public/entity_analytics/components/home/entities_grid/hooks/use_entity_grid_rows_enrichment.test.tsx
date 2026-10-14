@@ -39,7 +39,7 @@ jest.mock('../grid_columns', () => ({
 }));
 
 describe('getLoadedRows', () => {
-  it('shows the rows of every batch in order', () => {
+  it('shows the rows of every chunk in order', () => {
     expect(
       getLoadedRows([
         { rows: [{ 'entity.id': 'a' }, { 'entity.id': 'b' }] },
@@ -48,7 +48,7 @@ describe('getLoadedRows', () => {
     ).toEqual([{ 'entity.id': 'a' }, { 'entity.id': 'b' }, { 'entity.id': 'c' }]);
   });
 
-  it("adds a batch's computed columns once its enrich data arrives", () => {
+  it("adds a chunk's computed columns once its enrich data arrives", () => {
     expect(
       getLoadedRows([
         {
@@ -67,7 +67,7 @@ describe('getLoadedRows', () => {
     ]);
   });
 
-  it('keeps the fresh entity fields of a refetched batch over its earlier enrich data', () => {
+  it('keeps the fresh entity fields of refetched rows over their earlier enrich data', () => {
     expect(
       getLoadedRows([
         {
@@ -149,7 +149,6 @@ describe('useEntityGridRowsEnrichment', () => {
   const ROWS: Row[] = Array.from({ length: ENRICH_CHUNK_SIZE * 3 }, (_, i) => ({
     'entity.id': `e${i}`,
   }));
-  const BATCHES = [{ rows: ROWS, nextCursor: null }];
   const OPTIONS: UseEntityGridDataOptions = {
     sortField: 'entity.name',
     sortDirection: 'asc',
@@ -178,7 +177,7 @@ describe('useEntityGridRowsEnrichment', () => {
         useEntityGridRowsEnrichment(
           { ...CONTEXT, queryClient },
           OPTIONS,
-          BATCHES,
+          ROWS,
           false,
           enrichRowsInView
         ),

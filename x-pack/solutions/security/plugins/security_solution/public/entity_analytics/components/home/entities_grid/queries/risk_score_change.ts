@@ -7,8 +7,7 @@
 
 import { getEntityIds, getEntityId, getNumber, getString, RISK_SCORE_NORM_FIELD } from '../common';
 import {
-  buildAfterIdClause,
-  buildKeepClause,
+  buildRowFieldsSteps,
   buildSortSuffix,
   buildLookupJoinClause,
   buildLookback,
@@ -18,12 +17,15 @@ import {
   toList,
   compareEntityIds,
 } from './esql';
-import { buildMergedForeignRows, buildMergedForeignSortQuery } from './foreign_sort';
-import type { QueryArgs } from '../common';
-import type { MergedForeignRowsOptions } from './foreign_sort';
-import { buildEmptyRowsQuery, buildValueCursorClause, fetchSplitSortPage } from './split_sort';
+import {
+  buildEntitiesInViewWithComputedColumns,
+  buildComputedColumnSortQuery,
+} from './computed_column_sort';
+import type { QueryArgs, Row } from '../common';
+import type { ComputedColumnsOptions } from './computed_column_sort';
+import { buildEmptyRowsQuery, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
-import type { ColumnQuerySpec, PageEnricher } from './types';
+import type { ColumnQuerySpec, EnrichedFields, RunContext } from './types';
 
 const RISK_SCORE_CHANGE_FIELD = 'risk_score_change';
 
@@ -74,11 +76,21 @@ const buildReferenceScoreStats = ({ rowsMode }: QueryArgs, key: string): string[
       ]
     : [`| STATS reference_score = LAST(score, \`@timestamp\`) BY ${key}`];
 
-// ── sort queries ──────────────────────────────────────────────────────────────
+// ── what the column does ─────────────────────────────────────────────────────
+
+export const riskScoreChangeQuerySpec = {
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
+  enricher: {
+    fields: [RISK_SCORE_CHANGE_FIELD],
+    fetch: (rows, args, ctx) => fetchRiskScoreChanges(rows, args, ctx),
+  },
+} satisfies ColumnQuerySpec;
+
+// ── sorts ────────────────────────────────────────────────────────────────────
 
 /** Reference and current scores merged per entity in view, with the change. */
-const buildRiskScoreChangeRows = (args: QueryArgs): MergedForeignRowsOptions => ({
-  foreignRows: [
+const buildRiskScoreChangeRows = (args: QueryArgs): ComputedColumnsOptions => ({
+  sourceRows: [
     ...buildReferenceScoreDocs(args),
     `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
     `| EVAL \`entity.id\` = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
@@ -93,13 +105,11 @@ const buildRiskScoreChangeRows = (args: QueryArgs): MergedForeignRowsOptions => 
 });
 
 /** Entities without a reference or a current score have no change and sort last. */
-const buildRiskScoreChangeSortQuery = (args: QueryArgs): string =>
-  buildMergedForeignSortQuery(args, {
+const buildRiskScoreChangeSortQuery = (args: QueryArgs): string[] =>
+  buildComputedColumnSortQuery(args, {
     ...buildRiskScoreChangeRows(args),
     sortField: RISK_SCORE_CHANGE_FIELD,
   });
-
-// ── split sort (see split_sort.ts) ───────────────────────────────────────────
 
 /**
  * Only scored entities can have a change, and there are few of them, so the merge reads
@@ -107,27 +117,25 @@ const buildRiskScoreChangeSortQuery = (args: QueryArgs): string =>
  * scored entities without one, which are empty rows.
  */
 const buildScoredEntityRows = (args: QueryArgs): string[] =>
-  buildMergedForeignRows(args, {
+  buildEntitiesInViewWithComputedColumns(args, {
     ...buildRiskScoreChangeRows(args),
     entityConditions: [`${RISK_SCORE_NORM_FIELD} IS NOT NULL`],
   });
 
 const riskScoreChangeSplitSortPlan: SplitSortPlan = {
   emptyValue: null,
-  buildValueRowsQuery: (args, limit) =>
-    [
-      ...buildScoredEntityRows(args),
-      `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NOT NULL`,
-      ...buildValueCursorClause(args.cursor),
-      ...buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, limit),
-      buildLookupJoinClause(args.concreteEntityIndexName),
-      buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
-      // LOOKUP JOIN may not keep the input order.
-      ...buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, limit),
-    ].join('\n'),
+  buildValueRowsQuery: (args, limit) => [
+    ...buildScoredEntityRows(args),
+    `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NOT NULL`,
+    ...buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, limit),
+    buildLookupJoinClause(args.concreteEntityIndexName),
+    ...buildRowFieldsSteps(args, RISK_SCORE_CHANGE_FIELD),
+    // LOOKUP JOIN may not keep the input order.
+    ...buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, limit),
+  ],
   buildSortQuery: buildRiskScoreChangeSortQuery,
   // Empty rows: unscored entities, plus scored entities without a reference score.
-  fetchEmptyRows: async (args, runQuery, afterId, limit) => {
+  fetchEmptyRows: async (args, runQuery, limit) => {
     const [unscored, unreferenced] = await Promise.all([
       runQuery(
         buildEmptyRowsQuery(
@@ -137,29 +145,25 @@ const riskScoreChangeSplitSortPlan: SplitSortPlan = {
             emptyColumns: `${RISK_SCORE_CHANGE_FIELD} = TO_DOUBLE(null)`,
             columns: [RISK_SCORE_CHANGE_FIELD],
           },
-          afterId,
           limit
         )
       ),
-      runQuery(
-        [
-          ...buildScoredEntityRows(args),
-          `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NULL`,
-          ...buildAfterIdClause(afterId),
-          '| SORT `entity.id` ASC',
-          `| LIMIT ${limit}`,
-          buildLookupJoinClause(args.concreteEntityIndexName),
-          buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
-        ].join('\n')
-      ),
+      runQuery([
+        ...buildScoredEntityRows(args),
+        `| WHERE ${RISK_SCORE_CHANGE_FIELD} IS NULL`,
+        '| SORT `entity.id` ASC',
+        `| LIMIT ${limit}`,
+        buildLookupJoinClause(args.concreteEntityIndexName),
+        ...buildRowFieldsSteps(args, RISK_SCORE_CHANGE_FIELD),
+      ]),
     ]);
     return [...unscored, ...unreferenced].sort(compareEntityIds).slice(0, limit);
   },
 };
 
-// ── enrichment ────────────────────────────────────────────────────────────────
+// ── enrich ───────────────────────────────────────────────────────────────────
 
-const buildRiskScoreChangeEnrichQuery = (args: QueryArgs, entityIds: string[]): string => {
+const buildRiskScoreChangeEnrichQuery = (args: QueryArgs, entityIds: string[]): string[] => {
   const ids = toList(entityIds);
   return [
     ...buildReferenceScoreDocs(args),
@@ -169,37 +173,32 @@ const buildRiskScoreChangeEnrichQuery = (args: QueryArgs, entityIds: string[]): 
     `| EVAL entity_id = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
     `| WHERE entity_id IN (${ids})`,
     ...buildReferenceScoreStats(args, 'entity_id'),
-  ].join('\n');
+  ];
 };
 
-const riskScoreChangeEnricher: PageEnricher = {
-  fields: [RISK_SCORE_CHANGE_FIELD],
-  fetch: async (pageRows, args, { runQuery }) => {
-    const entityIds = getEntityIds(pageRows);
-    if (!entityIds.length) return new Map();
+/** The change of each row's risk score since its last score before the window. */
+const fetchRiskScoreChanges = async (
+  pageRows: readonly Row[],
+  args: QueryArgs,
+  { runQuery }: RunContext
+): Promise<EnrichedFields> => {
+  const entityIds = getEntityIds(pageRows);
+  if (!entityIds.length) return new Map();
 
-    const rows = await runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds));
+  const rows = await runQuery(buildRiskScoreChangeEnrichQuery(args, entityIds));
 
-    const byId = new Map(
-      rows.map((r) => [getString(r, 'entity_id'), getNumber(r, 'reference_score')])
-    );
-    return new Map(
-      pageRows.flatMap((row) => {
-        const id = getEntityId(row);
-        if (id == null) return [];
-        const currentScore = getNumber(row, RISK_SCORE_NORM_FIELD) ?? null;
-        const referenceScore = byId.get(id) ?? null;
-        const change =
-          currentScore != null && referenceScore != null ? currentScore - referenceScore : null;
-        return [[id, { [RISK_SCORE_CHANGE_FIELD]: change }]];
-      })
-    );
-  },
+  const byId = new Map(
+    rows.map((r) => [getString(r, 'entity_id'), getNumber(r, 'reference_score')])
+  );
+  return new Map(
+    pageRows.flatMap((row) => {
+      const id = getEntityId(row);
+      if (id == null) return [];
+      const currentScore = getNumber(row, RISK_SCORE_NORM_FIELD) ?? null;
+      const referenceScore = byId.get(id) ?? null;
+      const change =
+        currentScore != null && referenceScore != null ? currentScore - referenceScore : null;
+      return [[id, { [RISK_SCORE_CHANGE_FIELD]: change }]];
+    })
+  );
 };
-
-// ── query spec ────────────────────────────────────────────────────────────────
-
-export const riskScoreChangeQuerySpec = {
-  fetchSortPage: (args, ctx) => fetchSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
-  enricher: riskScoreChangeEnricher,
-} satisfies ColumnQuerySpec;

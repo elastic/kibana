@@ -7,22 +7,13 @@
 
 import type { QueryArgs, Row } from '../common';
 import { ESQL_MAX_RESULT_ROWS } from './esql';
-import {
-  SPLIT_SORT_MIN_VIEW_SIZE,
-  buildEntityListSortPlan,
-  buildEmptyRowsQuery,
-  buildValueCursorClause,
-  fetchSplitSortPage,
-} from './split_sort';
+import { buildEntityListSortPlan, buildEmptyRowsQuery, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
-
-const LARGE_VIEW = SPLIT_SORT_MIN_VIEW_SIZE;
 
 const baseArgs: QueryArgs = {
   namespace: 'default',
   timeRange: '30d',
   sort: { field: 'alert_count', direction: 'desc' },
-  cursor: null,
   pageSize: 2,
   rowsMode: 'resolved',
   concreteEntityIndexName: '.entities.v2.latest.default-00001',
@@ -40,18 +31,18 @@ const fakePlan = (
   const calls: string[] = [];
   const plan: SplitSortPlan = {
     emptyValue,
-    buildValueRowsQuery: (args, limit) =>
-      `values cursor=${args.cursor?.entityId ?? '-'} limit=${limit}`,
-    fetchEmptyRows: async (_args, _runQuery, afterId, limit) => {
-      calls.push(`empty after=${afterId ?? '-'} limit=${limit}`);
+    buildValueRowsQuery: (_args, limit) => [`values limit=${limit}`],
+    fetchEmptyRows: async (_args, _runQuery, limit) => {
+      calls.push(`empty limit=${limit}`);
       return emptyRows == null ? null : emptyRows.slice(0, limit);
     },
-    buildSortQuery: () => 'general',
+    buildSortQuery: () => ['general'],
   };
   return { plan, calls };
 };
 
-const runner = (calls: string[], valueRows: Row[]) => async (query: string) => {
+const runner = (calls: string[], valueRows: Row[]) => async (steps: readonly string[]) => {
+  const query = steps.join('\n');
   calls.push(query);
   if (query === 'general') return [row('general', 1)];
   const limit = Number(query.match(/limit=(\d+)/)?.[1]);
@@ -59,26 +50,14 @@ const runner = (calls: string[], valueRows: Row[]) => async (query: string) => {
 };
 
 describe('fetchSplitSortPage', () => {
-  it('runs the general query for views below the threshold', async () => {
+  it('runs the general query for a search', async () => {
     const { plan, calls } = fakePlan(0, [row('a', 3)], []);
-    const rows = await fetchSplitSortPage(plan, baseArgs, {
-      runQuery: runner(calls, []),
-      fetchViewSize: async () => LARGE_VIEW - 1,
-    });
-    expect(rows).toEqual([row('general', 1)]);
-    expect(calls).toEqual(['general']);
-  });
-
-  it('runs the general query for a search without waiting for the view size', async () => {
-    const { plan, calls } = fakePlan(0, [row('a', 3)], []);
-    const fetchViewSize = jest.fn(async () => LARGE_VIEW);
     await fetchSplitSortPage(
       plan,
       { ...baseArgs, searchExpression: 'KQL("""x""")' },
-      { runQuery: runner(calls, []), fetchViewSize }
+      { runQuery: runner(calls, []) }
     );
     expect(calls).toEqual(['general']);
-    expect(fetchViewSize).not.toHaveBeenCalled();
   });
 
   it('reads only value rows when they fill the page', async () => {
@@ -86,10 +65,9 @@ describe('fetchSplitSortPage', () => {
     const { plan, calls } = fakePlan(0, values, []);
     const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, values),
-      fetchViewSize: async () => LARGE_VIEW,
     });
     expect(rows).toEqual(values);
-    expect(calls).toEqual(['values cursor=- limit=3']);
+    expect(calls).toEqual(['values limit=3']);
   });
 
   it('completes the page with the first empty rows after the last value row', async () => {
@@ -97,29 +75,9 @@ describe('fetchSplitSortPage', () => {
     const { plan, calls } = fakePlan(0, values, [row('x', 0), row('y', 0)]);
     const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, values),
-      fetchViewSize: async () => LARGE_VIEW,
     });
     expect(rows).toEqual([row('a', 3), row('x', 0), row('y', 0)]);
-    expect(calls).toEqual(['values cursor=- limit=3', 'empty after=- limit=2']);
-  });
-
-  it('reads only empty rows when the cursor is in the empty block', async () => {
-    const { plan, calls } = fakePlan(null, [], [row('x', null), row('y', null), row('z', null)]);
-    const cursor = {
-      sortField: 'alert_count',
-      sortDirection: 'desc' as const,
-      sortValue: null,
-      entityId: 'w',
-    };
-    await fetchSplitSortPage(
-      plan,
-      { ...baseArgs, cursor },
-      {
-        runQuery: runner(calls, []),
-        fetchViewSize: async () => LARGE_VIEW,
-      }
-    );
-    expect(calls).toEqual(['empty after=w limit=3']);
+    expect(calls).toEqual(['values limit=3', 'empty limit=2']);
   });
 
   it('puts empty rows first for a 0 empty value in ascending order', async () => {
@@ -128,10 +86,10 @@ describe('fetchSplitSortPage', () => {
     const rows = await fetchSplitSortPage(
       plan,
       { ...baseArgs, sort: { field: 'alert_count', direction: 'asc' } },
-      { runQuery: runner(calls, values), fetchViewSize: async () => LARGE_VIEW }
+      { runQuery: runner(calls, values) }
     );
     expect(rows).toEqual([row('x', 0), row('a', 1), row('b', 2)]);
-    expect(calls).toEqual(['empty after=- limit=3', 'values cursor=- limit=2']);
+    expect(calls).toEqual(['empty limit=3', 'values limit=2']);
   });
 
   it('keeps null empty rows last in ascending order', async () => {
@@ -140,7 +98,7 @@ describe('fetchSplitSortPage', () => {
     const rows = await fetchSplitSortPage(
       plan,
       { ...baseArgs, sort: { field: 'alert_count', direction: 'asc' } },
-      { runQuery: runner(calls, values), fetchViewSize: async () => LARGE_VIEW }
+      { runQuery: runner(calls, values) }
     );
     expect(rows).toEqual([row('a', 1), row('x', null), row('y', null)]);
   });
@@ -149,52 +107,24 @@ describe('fetchSplitSortPage', () => {
     const { plan, calls } = fakePlan(0, [row('a', 3)], null);
     const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, [row('a', 3)]),
-      fetchViewSize: async () => LARGE_VIEW,
     });
     expect(rows).toEqual([row('general', 1)]);
     expect(calls[calls.length - 1]).toBe('general');
   });
 });
 
-describe('buildValueCursorClause', () => {
-  it('keeps the rows after the cursor without the empty rows', () => {
-    expect(
-      buildValueCursorClause({
-        sortField: 'alert_count',
-        sortDirection: 'desc',
-        sortValue: 5,
-        entityId: 'host:a',
-      })
-    ).toEqual(['| WHERE (alert_count < 5) OR (alert_count == 5 AND entity.id > "host:a")']);
-  });
-
-  it('adds nothing on the first page or in the empty block', () => {
-    expect(buildValueCursorClause(null)).toEqual([]);
-    expect(
-      buildValueCursorClause({
-        sortField: 'alert_count',
-        sortDirection: 'desc',
-        sortValue: null,
-        entityId: 'host:a',
-      })
-    ).toEqual([]);
-  });
-});
-
 describe('buildEmptyRowsQuery', () => {
-  it('reads entities in view without a value, after the cursor, by entity.id', () => {
+  it('reads entities in view without a value, by entity.id', () => {
     const query = buildEmptyRowsQuery(
       baseArgs,
       {
-        excludeIds: ['host:a'],
+        conditions: ['risk IS NULL'],
         emptyColumns: 'alert_count = TO_LONG(0)',
         columns: ['alert_count'],
       },
-      'host:b',
       11
-    );
-    expect(query).toContain('| WHERE NOT entity.id IN ("host:a")');
-    expect(query).toContain('| WHERE entity.id > "host:b"');
+    ).join('\n');
+    expect(query).toContain('| WHERE risk IS NULL');
     expect(query).toContain('| SORT entity.id ASC\n| LIMIT 11');
     expect(query).toContain('| EVAL alert_count = TO_LONG(0)');
     expect(query).not.toContain('LOOKUP JOIN');
@@ -205,8 +135,8 @@ describe('buildEntityListSortPlan', () => {
   const plan = buildEntityListSortPlan({
     sortField: 'alert_count',
     emptyValue: 0,
-    buildForeignRows: () => ['FROM alerts'],
-    buildSortQuery: () => 'general',
+    buildSourceRows: () => ['FROM alerts'],
+    buildSortQuery: () => ['general'],
     aggregations: [{ field: 'alert_count', aggregation: 'COUNT(*)', resolvedEntity: 'SUM' }],
     columns: ['alert_count'],
     emptyColumns: 'alert_count = 0',
@@ -216,7 +146,8 @@ describe('buildEntityListSortPlan', () => {
   /** Answers the value ids query with `valueIds` and records every query and its LIMIT. */
   const recordingRunner = (valueIds: Row[]) => {
     const limits: number[] = [];
-    const runQuery = async (query: string): Promise<Row[]> => {
+    const runQuery = async (steps: readonly string[]): Promise<Row[]> => {
+      const query = steps.join('\n');
       limits.push(Number(query.match(/LIMIT (\d+)\s*$/m)?.[1]));
       return query.includes('NOT entity.id IN') ? [row('empty', 0)] : valueIds;
     };
@@ -225,7 +156,7 @@ describe('buildEntityListSortPlan', () => {
 
   it('excludes the value ids from the empty rows', async () => {
     const { runQuery } = recordingRunner(ids(2));
-    expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toEqual([row('empty', 0)]);
+    expect(await plan.fetchEmptyRows(baseArgs, runQuery, 3)).toEqual([row('empty', 0)]);
   });
 
   it('gives up when the excluded ids are longer than ES|QL parses', async () => {
@@ -233,14 +164,14 @@ describe('buildEntityListSortPlan', () => {
       'entity.id': `user:${'x'.repeat(110)}-${i}`,
     }));
     const { runQuery, limits } = recordingRunner(longIds);
-    expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toBeNull();
+    expect(await plan.fetchEmptyRows(baseArgs, runQuery, 3)).toBeNull();
     // Only the value ids query ran.
     expect(limits).toHaveLength(1);
   });
 
   it('gives up when ES|QL returns as many value ids as it can', async () => {
     const { runQuery, limits } = recordingRunner(ids(ESQL_MAX_RESULT_ROWS));
-    expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toBeNull();
+    expect(await plan.fetchEmptyRows(baseArgs, runQuery, 3)).toBeNull();
     expect(Math.max(...limits)).toBeLessThanOrEqual(ESQL_MAX_RESULT_ROWS);
   });
 });

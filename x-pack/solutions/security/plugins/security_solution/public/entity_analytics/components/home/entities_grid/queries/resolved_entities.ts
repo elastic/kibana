@@ -7,11 +7,19 @@
 
 import { escapeStringValue } from '@kbn/esql-utils';
 import { CriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
-import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD, getEntityId, getEntityIds } from '../common';
+import {
+  ENTITY_ID_FIELD,
+  RESOLVED_TO_FIELD,
+  getEntityId,
+  getEntityIds,
+  getString,
+} from '../common';
 import type { ResolvedEntityFilterOverrides, QueryArgs, Row } from '../common';
 import {
   ENTITY_TYPE_FILTER,
+  ID_LIST_CHUNK_SIZE,
   buildResolvedEntitySteps,
+  buildRowFieldsSteps,
   fetchPerIdChunk,
   getEntityAlias,
   toList,
@@ -101,21 +109,19 @@ export const buildResolvedEntityRowSteps = (
  * One row per resolved entity with aliases among `targetIds`, with its resolved entity values under the entity
  * field names, so the page rows take them as they are.
  */
-export const buildResolvedEntityValuesQuery = (
+const buildResolvedEntityValuesQuery = (
   args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName'>,
   targetIds: readonly string[]
-): string =>
-  [
-    `FROM ${getEntityAlias(args.namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`,
-    ...buildResolvedEntityRowSteps(args),
-    `| KEEP \`entity.id\`, ${RESOLVED_ENTITY_VALUE_FIELDS.join(', ')}`,
-  ].join('\n');
+): string[] => [
+  `FROM ${getEntityAlias(args.namespace)}`,
+  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`,
+  ...buildResolvedEntityRowSteps(args),
+  `| KEEP \`entity.id\`, ${RESOLVED_ENTITY_VALUE_FIELDS.join(', ')}`,
+];
 
 /**
  * The resolved rows with their resolved entities' values: a row whose main entity has aliases takes the
- * values of the whole group, the others keep their own. Individual rows are the entities
- * themselves, so they are returned as they are.
+ * values of the whole group, the others keep their own.
  */
 export const withResolvedEntityValues = async (
   rows: Row[],
@@ -123,7 +129,7 @@ export const withResolvedEntityValues = async (
   runQuery: EsqlRunner
 ): Promise<Row[]> => {
   const ids = getEntityIds(rows);
-  if (args.rowsMode !== 'resolved' || !ids.length) return rows;
+  if (!ids.length) return rows;
   const groups = await fetchPerIdChunk(runQuery, ids, (chunk) =>
     buildResolvedEntityValuesQuery(args, chunk)
   );
@@ -134,7 +140,7 @@ export const withResolvedEntityValues = async (
   });
 };
 
-// ── filters on the resolved entity values ───────────────────────────────────────────────
+// ── filters on the resolved entity values ────────────────────────────────────
 
 /**
  * Most resolved entities the filters on the resolved entity values may add or remove.
@@ -164,20 +170,19 @@ export const needsResolvedEntityFilterOverrides = ({
  * entity: `resolved_entity_matches` is whether the resolved entity passes, where `own_matches` of
  * the main entity is the opposite. Every other resolved entity passes as its main entity does.
  */
-export const buildResolvedEntityFilterOverridesQuery = (
+const buildResolvedEntityFilterOverridesQuery = (
   args: Required<Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'entityExpression'>>
-): string =>
-  [
-    `FROM ${getEntityAlias(args.namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
-    ...buildResolvedEntityAliasSteps(args),
-    `| EVAL own_matches = COALESCE(${args.entityExpression}, false)`,
-    ...buildResolvedEntityValueSteps(),
-    `| EVAL resolved_entity_matches = COALESCE(${args.entityExpression}, false)`,
-    '| WHERE own_matches != resolved_entity_matches',
-    '| KEEP `entity.id`, resolved_entity_matches',
-    `| LIMIT ${MAX_RESOLVED_ENTITY_FILTER_OVERRIDES + 1}`,
-  ].join('\n');
+): string[] => [
+  `FROM ${getEntityAlias(args.namespace)}`,
+  `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+  ...buildResolvedEntityAliasSteps(args),
+  `| EVAL own_matches = COALESCE(${args.entityExpression}, false)`,
+  ...buildResolvedEntityValueSteps(),
+  `| EVAL resolved_entity_matches = COALESCE(${args.entityExpression}, false)`,
+  '| WHERE own_matches != resolved_entity_matches',
+  '| KEEP `entity.id`, resolved_entity_matches',
+  `| LIMIT ${MAX_RESOLVED_ENTITY_FILTER_OVERRIDES + 1}`,
+];
 
 const EMPTY_OVERRIDES: ResolvedEntityFilterOverrides = { include: [], exclude: [] };
 
@@ -216,4 +221,57 @@ export const applyResolvedEntityFilterOverrides = (
     ? `(${expression}) AND NOT ${ENTITY_ID_FIELD} IN (${toList(exclude)})`
     : expression;
   return include.length ? `(${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)})` : passing;
+};
+
+// ── aliases of the page's rows ───────────────────────────────────────────────
+
+/**
+ * The rows with the aliases of the resolved entities among them, for a read of other data to
+ * find the rows of the aliases too: they count for their resolved entity.
+ */
+export const withEntityAliases = async (
+  rows: readonly Row[],
+  args: QueryArgs,
+  runQuery: EsqlRunner
+): Promise<readonly Row[]> => {
+  const ids = getEntityIds(rows);
+  if (!ids.length) return rows;
+  const aliases = await runQuery([
+    `FROM ${getEntityAlias(args.namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(ids)})`,
+    ...buildRowFieldsSteps(args),
+    `| LIMIT ${ID_LIST_CHUNK_SIZE + 1}`,
+  ]);
+  // The ids and identities of the aliases go into the query of the read, which has a size limit.
+  if (aliases.length > ID_LIST_CHUNK_SIZE) {
+    throw new Error(
+      'The resolved entities of this page have too many aliases to read their columns'
+    );
+  }
+  return [...rows, ...aliases];
+};
+
+/**
+ * The rows in parts of at most `maxRows`, each resolved entity in one part with its aliases, so
+ * that a part aggregates them together. Fails for a resolved entity with more rows than that.
+ */
+export const getPartsByResolvedEntity = (rows: readonly Row[], maxRows: number): Row[][] => {
+  const byResolvedEntity = new Map<string, Row[]>();
+  rows.forEach((row) => {
+    const key = getString(row, RESOLVED_TO_FIELD) ?? getEntityId(row) ?? '';
+    byResolvedEntity.set(key, [...(byResolvedEntity.get(key) ?? []), row]);
+  });
+  const parts: Row[][] = [];
+  let part: Row[] = [];
+  for (const group of byResolvedEntity.values()) {
+    if (group.length > maxRows) {
+      throw new Error('A resolved entity has too many aliases to read its columns');
+    }
+    if (part.length + group.length > maxRows) {
+      parts.push(part);
+      part = [];
+    }
+    part = [...part, ...group];
+  }
+  return part.length ? [...parts, part] : parts;
 };

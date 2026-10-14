@@ -22,7 +22,7 @@ import {
   getReadyContext,
   getViewKey,
 } from './use_entity_grid_context';
-import type { GridContext, RowsBatch, UseEntityGridDataOptions } from './use_entity_grid_context';
+import type { GridContext, UseEntityGridDataOptions } from './use_entity_grid_context';
 
 const ENRICH_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.enrichError',
@@ -116,7 +116,7 @@ const fetchEnrichedChunk = (
   if (!ready) return Promise.resolve({ rows: [], errors: [] });
   return fetchEnrichedRows(
     chunk,
-    buildQueryArgs(ready, options, null),
+    buildQueryArgs(ready, options),
     { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
     PAGE_ENRICHERS[options.rowsMode]
   );
@@ -124,7 +124,7 @@ const fetchEnrichedChunk = (
 
 /**
  * The loaded rows: each chunk's rows with its computed columns once they are read. The rows
- * come from the loaded batches, so a refetch shows fresh entity fields right away; the computed
+ * come from the rows query, so a refetch shows fresh entity fields right away; the computed
  * columns come from the chunk's enrich data, matched by entity id.
  */
 export const getLoadedRows = (
@@ -228,11 +228,11 @@ const useLoadedRows = (
 export const useEntityGridRowsEnrichment = (
   context: GridContext,
   options: UseEntityGridDataOptions,
-  batches: readonly RowsBatch[],
+  loadedRows: readonly Row[] | undefined,
   isPreviousData: boolean,
   enrichRowsInView: boolean
 ) => {
-  const chunks = useMemo(() => getChunks(batches.flatMap(({ rows }) => rows)), [batches]);
+  const chunks = useMemo(() => getChunks(loadedRows ?? []), [loadedRows]);
   const enrichQueries = useEnrichQueries(
     context,
     options,

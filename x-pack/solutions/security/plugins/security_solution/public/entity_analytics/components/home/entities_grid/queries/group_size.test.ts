@@ -8,15 +8,12 @@
 import type { QueryArgs, Row } from '../common';
 import { groupSizeQuerySpec } from './group_size';
 import { ESQL_MAX_RESULT_ROWS } from './esql';
-import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
-
-const LARGE_VIEW = SPLIT_SORT_MIN_VIEW_SIZE;
+import type { EsqlRunner } from './types';
 
 const baseArgs: QueryArgs = {
   namespace: 'default',
   timeRange: '30d',
   sort: { field: 'group_size', direction: 'desc' },
-  cursor: null,
   pageSize: 2,
   rowsMode: 'resolved',
   concreteEntityIndexName: '.entities.v2.latest.default-00001',
@@ -44,7 +41,8 @@ const fakeRunner = (
   { targets = [], sizes = [], searched = [] }: SearchFixtures = {}
 ) => {
   const kinds: string[] = [];
-  const runQuery = async (query: string): Promise<Row[]> => {
+  const runQuery = async (steps: readonly string[]): Promise<Row[]> => {
+    const query = steps.join('\n');
     if (query.includes('alias_count')) {
       kinds.push('groups');
       return groups;
@@ -80,18 +78,12 @@ const fakeRunner = (
   return { runQuery, kinds };
 };
 
-const runPage = (args: QueryArgs, runQuery: (q: string) => Promise<Row[]>, viewSize = LARGE_VIEW) =>
-  groupSizeQuerySpec.fetchSortPage(args, { runQuery, fetchViewSize: async () => viewSize });
+const runPage = (args: QueryArgs, runQuery: EsqlRunner) =>
+  groupSizeQuerySpec.fetchSortPage(args, { runQuery });
 
 const ids = (rows: Row[]) => rows.map((r) => r['entity.id']);
 
 describe('group size sort page', () => {
-  it('runs the single query for small views without a search', async () => {
-    const { runQuery, kinds } = fakeRunner([], []);
-    await runPage(baseArgs, runQuery, 10);
-    expect(kinds).toEqual(['general']);
-  });
-
   it('reads the targets a search matches with the size of their whole groups', async () => {
     const { runQuery, kinds } = fakeRunner([], [], {
       targets: [{ 'entity.id': 'a' }, { 'entity.id': 't' }],
@@ -100,8 +92,7 @@ describe('group size sort page', () => {
         { 'entity.id': 'a', group_size: 1 },
       ],
     });
-    // A small view: the single search query would group every entity in the store.
-    const rows = await runPage({ ...baseArgs, searchExpression: SEARCH }, runQuery, 1);
+    const rows = await runPage({ ...baseArgs, searchExpression: SEARCH }, runQuery);
     expect(rows).toEqual([
       { 'entity.id': 't', 'entity.name': 't name', group_size: 3 },
       { 'entity.id': 'a', 'entity.name': 'a name', group_size: 1 },
@@ -146,53 +137,16 @@ describe('group size sort page', () => {
     expect(ids(rows)).toEqual(['a', 't']);
   });
 
-  it('continues single entities after a cursor among them', async () => {
-    const { runQuery } = fakeRunner([], [single('a'), single('b'), single('c'), single('d')]);
-    const cursor = {
-      sortField: 'group_size',
-      sortDirection: 'asc' as const,
-      sortValue: 1,
-      entityId: 'b',
-    };
-    const rows = await runPage(
-      { ...baseArgs, sort: { field: 'group_size', direction: 'asc' }, cursor },
-      runQuery
-    );
-    expect(ids(rows)).toEqual(['c', 'd']);
-  });
-
-  it('skips single entities ascending once the cursor is past them', async () => {
-    const { runQuery, kinds } = fakeRunner([group('t', 2), group('u', 3)], [single('a')]);
-    const cursor = {
-      sortField: 'group_size',
-      sortDirection: 'asc' as const,
-      sortValue: 2,
-      entityId: 't',
-    };
-    const rows = await runPage(
-      { ...baseArgs, sort: { field: 'group_size', direction: 'asc' }, cursor },
-      runQuery
-    );
-    expect(ids(rows)).toEqual(['u']);
-    expect(kinds).not.toContain('singles');
-  });
-
   it('asks for no more rows than ES|QL returns', async () => {
     const limits: number[] = [];
     const { runQuery } = fakeRunner([group('t', 2)], [single('a')], { targets: [single('a')] });
-    const record = async (query: string) => {
-      limits.push(...[...query.matchAll(/LIMIT (\d+)/g)].map((m) => Number(m[1])));
-      return runQuery(query);
+    const record = async (steps: readonly string[]) => {
+      limits.push(...[...steps.join('\n').matchAll(/LIMIT (\d+)/g)].map((m) => Number(m[1])));
+      return runQuery(steps);
     };
     await runPage(baseArgs, record);
     await runPage({ ...baseArgs, searchExpression: SEARCH }, record);
     await runPage({ ...baseArgs, entityExpression: 'asset.criticality == "high_impact"' }, record);
-    // The small view query of entity filters, which reads the groups and a page of singles.
-    await runPage(
-      { ...baseArgs, entityExpression: 'asset.criticality == "high_impact"' },
-      record,
-      10
-    );
     expect(Math.max(...limits)).toBeLessThanOrEqual(ESQL_MAX_RESULT_ROWS);
   });
 
@@ -210,9 +164,9 @@ describe('group size sort page', () => {
     }));
     const { runQuery } = fakeRunner(groups, [], { targets });
     const queries: string[] = [];
-    await runPage({ ...baseArgs, searchExpression: SEARCH }, async (query) => {
-      queries.push(query);
-      return runQuery(query);
+    await runPage({ ...baseArgs, searchExpression: SEARCH }, async (steps) => {
+      queries.push(steps.join('\n'));
+      return runQuery(steps);
     });
     expect(queries[queries.length - 1]).toContain(SEARCH);
   });

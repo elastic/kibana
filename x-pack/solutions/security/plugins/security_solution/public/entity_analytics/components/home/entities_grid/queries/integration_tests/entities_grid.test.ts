@@ -9,52 +9,21 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
 import { EMPTY_ENTITY_FILTERS } from '../../common';
-import type { PageCursor, QueryArgs, Row, SortDir } from '../../common';
+import type { QueryArgs, Row, SortDir } from '../../common';
 import { COLUMN_ENRICHERS, findSortPageFetcher } from '../../grid_columns';
 import { toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
-import {
-  fetchResolvedEntityFilterOverrides,
-  withResolvedEntityValues,
-} from '../resolved_entity_values';
+import { fetchResolvedEntityFilterOverrides, withResolvedEntityValues } from '../resolved_entities';
 import { buildEntitiesInViewCountQuery } from '../entities_in_view';
-import { SPLIT_SORT_MIN_VIEW_SIZE } from '../split_sort';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';
 import { DAY_MS, HOUR_MS } from './fixture/fixture_index';
 import type { FixtureCluster } from './fixture';
 
-/** The general queries run below the threshold; the split plans at or above it. */
-const VIEW_SIZES = { 'a small view': 10, 'a large view': SPLIT_SORT_MIN_VIEW_SIZE };
-
-const fetchPage = (runQuery: EsqlRunner, args: QueryArgs, viewSize: number): Promise<Row[]> => {
+const fetchPage = (runQuery: EsqlRunner, args: QueryArgs): Promise<Row[]> => {
   const fetchSortPage = findSortPageFetcher(args.sort.field);
   if (!fetchSortPage) throw new Error(`${args.sort.field} is not sortable`);
-  return fetchSortPage(args, { runQuery, fetchViewSize: async () => viewSize });
-};
-
-const toCursor = (row: Row, { field, direction }: QueryArgs['sort']): PageCursor => {
-  const value = row[field];
-  return {
-    sortField: field,
-    sortDirection: direction,
-    sortValue: typeof value === 'string' || typeof value === 'number' ? value : null,
-    entityId: String(row['entity.id']),
-  };
-};
-
-/** Every row from the cursor on, read a page of `pageSize` at a time like Load More does. */
-const fetchAllPages = async (
-  runQuery: EsqlRunner,
-  args: QueryArgs,
-  viewSize: number
-): Promise<Row[]> => {
-  const page = await fetchPage(runQuery, args, viewSize);
-  const rows = page.slice(0, args.pageSize);
-  // The page reads one row more than it shows: only then is there a next page.
-  if (page.length <= args.pageSize) return rows;
-  const cursor = toCursor(rows[rows.length - 1], args.sort);
-  return [...rows, ...(await fetchAllPages(runQuery, { ...args, cursor }, viewSize))];
+  return fetchSortPage(args, { runQuery });
 };
 
 /** Expected resolved rows in order, per sort. */
@@ -91,6 +60,12 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
     ['user:alice@okta', 'host:h1', 'host:h2', 'user:bob@okta', 'host:h3', 'service:payments'],
   ],
   [
+    'anomaly_count',
+    'asc',
+    // Entities without anomalies have no value, so they come last in both directions.
+    ['host:h1', 'host:h2', 'user:bob@okta', 'user:alice@okta', 'host:h3', 'service:payments'],
+  ],
+  [
     'risk_score_change',
     'desc',
     ['host:h1', 'host:h2', 'user:alice@okta', 'host:h3', 'service:payments', 'user:bob@okta'],
@@ -99,6 +74,12 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
     'group_size',
     'desc',
     ['host:h1', 'user:bob@okta', 'host:h2', 'host:h3', 'service:payments', 'user:alice@okta'],
+  ],
+  [
+    'group_size',
+    'asc',
+    // The entities alone in their group (1 record) come first, by entity id.
+    ['host:h2', 'host:h3', 'service:payments', 'user:alice@okta', 'user:bob@okta', 'host:h1'],
   ],
   // Criticality sorts by its label. host:h1 is extreme through one of its aliases.
   [
@@ -252,7 +233,7 @@ describe('entities grid on Elasticsearch', () => {
     await cluster?.stop();
   });
 
-  describe.each(Object.entries(VIEW_SIZES))('on %s', (_view, viewSize) => {
+  describe('rows', () => {
     /** The query arguments of a filter case, its filters compiled by the grid's own `toEsql`. */
     const getFilteredArgs = async ([
       ,
@@ -278,29 +259,32 @@ describe('entities grid on Elasticsearch', () => {
     };
 
     const fetchFilteredPage = async (filterCase: FilterCase): Promise<Row[]> =>
-      fetchPage(cluster.runQuery, await getFilteredArgs(filterCase), viewSize);
+      fetchPage(cluster.runQuery, await getFilteredArgs(filterCase));
 
     describe('sorts', () => {
       it.each(EXPECTED_ORDERS)('sorts by %s %s', async (field, direction, expected) => {
-        const rows = await fetchPage(
-          cluster.runQuery,
-          { ...BASE_ARGS, sort: { field, direction } },
-          viewSize
-        );
+        const rows = await fetchPage(cluster.runQuery, {
+          ...BASE_ARGS,
+          sort: { field, direction },
+        });
 
         expect(getIds(rows)).toEqual(expected);
       });
 
       it.each(EXPECTED_ORDERS)(
-        'reads the same %s %s order two rows at a time',
+        'reads the first rows of the %s %s order at every limit',
         async (field, direction, expected) => {
-          const rows = await fetchAllPages(
-            cluster.runQuery,
-            { ...BASE_ARGS, sort: { field, direction }, pageSize: 2 },
-            viewSize
-          );
+          // Each limit cuts the rows at another place, in the value rows or the empty rows of a
+          // split sort, or where they meet. The rows read one more than the limit.
+          for (let pageSize = 1; pageSize < expected.length; pageSize++) {
+            const rows = await fetchPage(cluster.runQuery, {
+              ...BASE_ARGS,
+              sort: { field, direction },
+              pageSize,
+            });
 
-          expect(getIds(rows)).toEqual(expected);
+            expect(getIds(rows)).toEqual(expected.slice(0, pageSize + 1));
+          }
         }
       );
     });
@@ -373,7 +357,7 @@ describe('entities grid on Elasticsearch', () => {
       rowsMode: QueryArgs['rowsMode'] = 'resolved'
     ): Promise<Record<string, Row>> => {
       const args = { ...BASE_ARGS, rowsMode };
-      const rows = await fetchPage(cluster.runQuery, args, 0);
+      const rows = await fetchPage(cluster.runQuery, args);
       const enricher = COLUMN_ENRICHERS.find(([id]) => id === columnId)?.[1];
       if (!enricher) throw new Error(`${columnId} has no enricher`);
       const fields = await enricher.fetch(rows, args, {
@@ -445,23 +429,19 @@ describe('entities grid on Elasticsearch', () => {
     });
 
     describe.each(['anomaly_count', 'alert_count', 'last_seen_alert'])('%s', (field) => {
-      it.each(Object.entries(VIEW_SIZES))(
-        'gives an entity the same value sorted by it as enriched, on %s',
-        async (_view, viewSize) => {
-          const sorted = await fetchAllPages(
-            cluster.runQuery,
-            { ...BASE_ARGS, sort: { field, direction: 'desc' } },
-            viewSize
-          );
-          // The alert count's enricher reads the last alert too.
-          const enriched = await fetchColumnValues(
-            field === 'last_seen_alert' ? 'alert_count' : field
-          );
-          expect(Object.fromEntries(sorted.map((row) => [row['entity.id'], row[field]]))).toEqual(
-            Object.fromEntries(Object.entries(enriched).map(([id, values]) => [id, values[field]]))
-          );
-        }
-      );
+      it('gives an entity the same value sorted by it as enriched', async () => {
+        const sorted = await fetchPage(cluster.runQuery, {
+          ...BASE_ARGS,
+          sort: { field, direction: 'desc' },
+        });
+        // The alert count's enricher reads the last alert too.
+        const enriched = await fetchColumnValues(
+          field === 'last_seen_alert' ? 'alert_count' : field
+        );
+        expect(Object.fromEntries(sorted.map((row) => [row['entity.id'], row[field]]))).toEqual(
+          Object.fromEntries(Object.entries(enriched).map(([id, values]) => [id, values[field]]))
+        );
+      });
     });
 
     it('sizes each group with its records', async () => {

@@ -34,7 +34,6 @@ import { RenderEntityGridCell } from './entities_cell_renderer';
 import type { EntityGridCellContext } from './entities_cell_renderer';
 import { ExpandedEntityGroup, ROW_HEIGHT_PX, getCellPaddingBlock } from './entities_expanded_row';
 import { gridRowCellsCss, gridRowCss } from './entities_grid_styles';
-import { EntityGridLoadMore } from './entities_grid_load_more';
 import { useEntityGridView } from './entities_grid_view_context';
 
 const EMPTY_GRID_MESSAGE = i18n.translate(
@@ -329,7 +328,6 @@ export const EntityGridCustomBody = memo(
             })}
           </div>
         )}
-        <EntityGridLoadMore />
         {footerRow}
       </>
     );

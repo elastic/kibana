@@ -8,62 +8,63 @@
 import { ENTITY_ID_FIELD } from '../common';
 import type { QueryArgs } from '../common';
 import {
-  buildEffectiveRiskSteps,
+  buildRowRiskScoreSteps,
   buildJoinedPageSteps,
-  buildResolvedEntityAggregationSteps,
+  buildAliasesToResolvedEntitySteps,
 } from './esql';
-import { IN_VIEW_FIELD, buildEntitiesInViewSteps } from './entities_in_view';
+import type { EntityAggregation } from './esql';
+import { IN_VIEW_AGGREGATION, IN_VIEW_FIELD, buildEntitiesInViewSteps } from './entities_in_view';
 
-// ── foreign sorts ────────────────────────────────────────────────────────────
+// ── computed column sorts ────────────────────────────────────────────────────
 
-export interface MergedForeignRowsOptions {
+export interface ComputedColumnsOptions {
   /** Statements that go before the query, for example `SET …;`. */
   settings?: readonly string[];
-  /** Pipeline over the foreign index that ends in `STATS … BY entity.id`. */
-  foreignRows: readonly string[];
+  /** Pipeline over the source index that ends in `STATS … BY entity.id`. */
+  sourceRows: readonly string[];
   /** Entity doc fields the merge needs besides `entity.id`. */
   entityFields?: readonly string[];
   /** Conditions on the entities side besides being in view. */
   entityConditions?: readonly string[];
-  /** Merge aggregations that carry the foreign columns, e.g. `x = MAX(x)`. */
+  /** Merge aggregations that carry the computed columns, e.g. `x = MAX(x)`. */
   mergeAggregations: readonly string[];
   /**
-   * On resolved rows, the foreign rows of an alias count for its resolved entity: how its columns
-   * aggregate. They go after the merge, which has the entity docs to join, even when no foreign
+   * For resolved rows: the computed columns, whose rows of an alias count for its resolved entity.
+   * They aggregate after the merge, which has the entity docs to join, even when no source
    * index exists.
    */
-  resolvedEntityAggregations?: readonly string[];
+  resolvedEntityAggregations?: readonly EntityAggregation[];
   /** Steps after the merge that compute the sort column. */
   afterMerge?: readonly string[];
 }
 
-interface MergedForeignSortOptions extends MergedForeignRowsOptions {
+interface ComputedColumnSortOptions extends ComputedColumnsOptions {
   sortField: string;
 }
 
 /**
- * One row per entity in view with its foreign columns: the foreign aggregation and the
+ * One row per entity in view with its computed columns: the source aggregation and the
  * entities in view are read side by side and merged by `entity.id`, so entities without
- * foreign data stay as rows. Filters apply to the entities side.
+ * source data stay as rows. Filters apply to the entities side.
  */
-export const buildMergedForeignRows = (
+export const buildEntitiesInViewWithComputedColumns = (
   args: QueryArgs,
   {
     settings = [],
-    foreignRows,
+    sourceRows,
     entityFields = [],
     entityConditions = [],
     mergeAggregations,
     resolvedEntityAggregations,
     afterMerge = [],
-  }: MergedForeignRowsOptions
+  }: ComputedColumnsOptions
 ): string[] => [
   ...settings,
   'FROM (',
-  ...foreignRows,
+  ...sourceRows,
   '), (',
   ...buildEntitiesInViewSteps(args),
-  ...buildEffectiveRiskSteps(args),
+  ...buildRowRiskScoreSteps(args),
   ...entityConditions.map((condition) => `| WHERE ${condition}`),
   `| EVAL ${IN_VIEW_FIELD} = 1`,
   `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...entityFields].join(', ')}`,
@@ -72,9 +73,9 @@ export const buildMergedForeignRows = (
     ', '
   )} BY \`${ENTITY_ID_FIELD}\``,
   ...(resolvedEntityAggregations
-    ? buildResolvedEntityAggregationSteps(args, [
+    ? buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, [
         ...resolvedEntityAggregations,
-        `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
+        IN_VIEW_AGGREGATION,
       ])
     : []),
   `| WHERE ${IN_VIEW_FIELD} == 1`,
@@ -82,12 +83,14 @@ export const buildMergedForeignRows = (
 ];
 
 /**
- * Sort query for a foreign column that keeps every entity in view (see
- * {@link buildMergedForeignRows}): entities without foreign data sort last, so the
+ * Sort query for a computed column that keeps every entity in view (see
+ * {@link buildEntitiesInViewWithComputedColumns}): entities without a source value sort last, so the
  * result matches the native sorts' rows and their count.
  */
-export const buildMergedForeignSortQuery = (
+export const buildComputedColumnSortQuery = (
   args: QueryArgs,
-  { sortField, ...options }: MergedForeignSortOptions
-): string =>
-  [...buildMergedForeignRows(args, options), ...buildJoinedPageSteps(args, sortField)].join('\n');
+  { sortField, ...options }: ComputedColumnSortOptions
+): string[] => [
+  ...buildEntitiesInViewWithComputedColumns(args, options),
+  ...buildJoinedPageSteps(args, sortField),
+];

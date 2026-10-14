@@ -28,6 +28,8 @@ const INDIVIDUAL_ROWS_TOTAL_TITLE = i18n.translate(
 
 interface UseEntityGridToolbarOptions {
   total: number;
+  /** The rows the grid shows, when the view has more. */
+  shown?: number;
   isIndividualRows: boolean;
   visibleColumns: string[];
   onAddColumn: (columnId: string) => void;
@@ -41,6 +43,7 @@ interface UseEntityGridToolbarOptions {
 /** The grid's toolbar: the total with the fields button, when it was updated, and the group selector. */
 export const useEntityGridToolbarVisibility = ({
   total,
+  shown,
   isIndividualRows,
   visibleColumns,
   onAddColumn,
@@ -78,6 +81,7 @@ export const useEntityGridToolbarVisibility = ({
                   >
                     <AdditionalControls
                       total={total}
+                      shown={shown}
                       title={
                         isIndividualRows ? INDIVIDUAL_ROWS_TOTAL_TITLE : RESOLVED_ROWS_TOTAL_TITLE
                       }
@@ -107,6 +111,7 @@ export const useEntityGridToolbarVisibility = ({
     [
       showToolbar,
       total,
+      shown,
       isIndividualRows,
       visibleColumns,
       onAddColumn,

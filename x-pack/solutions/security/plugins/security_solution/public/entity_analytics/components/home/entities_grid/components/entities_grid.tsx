@@ -21,14 +21,17 @@ import { i18n } from '@kbn/i18n';
 import { useIsFetching } from '@kbn/react-query';
 import { APP_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { ENTITY_GRID_CHILDREN_QUERY_KEY, useEntityGridData } from '../hooks/use_entity_grid_data';
+import {
+  ENTITY_GRID_CHILDREN_QUERY_KEY,
+  MAX_LOADED_ROWS,
+  useEntityGridData,
+} from '../hooks/use_entity_grid_data';
 import { EntityGridRowsContext, RenderEntityGridCell } from './entities_cell_renderer';
 import type { CellHandlers, EntityGridCellContext, EntityGridRows } from './entities_cell_renderer';
 import { RowActionsCell } from './cells/row_actions_cell';
 import type { RowActions } from './cells/row_actions_cell';
 import { EXPANDER_COLUMN, getGroupRecordsOptions } from './entities_expanded_row';
 import { EntityGridCustomBody } from './entities_grid_custom_body';
-import { ROWS_PER_LOAD } from './entities_grid_load_more';
 import { useEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';
 import type { EntityGridView } from './entities_grid_view_context';
@@ -171,17 +174,14 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     total,
     updatedAt,
     isFetching,
-    canLoadMore,
     isAtLoadLimit,
-    isLoadingMore,
-    loadMore,
     prefetch,
     onRowsInViewChange,
   } = useEntityGridData(
     {
       sortField,
       sortDirection,
-      pageSize: ROWS_PER_LOAD,
+      pageSize: MAX_LOADED_ROWS,
       searchExpression,
       entityExpression,
       timeRange,
@@ -236,14 +236,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const gridColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
 
-  const onLoadMore = useCallback(() => {
-    void loadMore();
-  }, [loadMore]);
-
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
   const toolbarVisibility = useEntityGridToolbarVisibility({
     total,
+    shown: isAtLoadLimit ? rows.length : undefined,
     isIndividualRows,
     visibleColumns,
     onAddColumn,
@@ -273,10 +270,6 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       isFetching,
       cellPadding,
       total,
-      canLoadMore,
-      isAtLoadLimit,
-      isLoadingMore,
-      loadMore: onLoadMore,
       onRowsInViewChange,
     }),
     [
@@ -292,10 +285,6 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       isFetching,
       cellPadding,
       total,
-      canLoadMore,
-      isAtLoadLimit,
-      isLoadingMore,
-      onLoadMore,
       onRowsInViewChange,
     ]
   );

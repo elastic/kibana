@@ -8,56 +8,35 @@
 import { ENTITY_ID_FIELD, getEntityIds } from '../common';
 import { buildEntitiesInViewConditions, buildEntitiesInViewSteps } from './entities_in_view';
 import {
-  buildAfterIdClause,
-  buildAfterValuePredicate,
-  buildEffectiveRiskSteps,
-  buildKeepClause,
+  buildRowRiskScoreSteps,
+  buildRowFieldsSteps,
   buildLookupJoinClause,
   buildEntityAggregations,
-  buildResolvedEntityAggregations,
-  buildResolvedEntityAggregationSteps,
+  buildStatsByEntityClause,
+  buildAliasesToResolvedEntitySteps,
   buildSortSuffix,
   ESQL_MAX_QUERY_LENGTH,
   ESQL_MAX_RESULT_ROWS,
   toList,
 } from './esql';
 import type { EntityAggregation } from './esql';
-import type { PageCursor, QueryArgs, Row } from '../common';
+import type { QueryArgs, Row } from '../common';
 import type { EsqlRunner, SortPageContext } from './types';
 
 /*
- * Split sort: a foreign sort that reads its two kinds of rows separately.
+ * Split sort: sorting by a column computed from another index (alerts, anomalies, risk score
+ * change).
  *
- * The general sort query (`buildSortQuery`) merges the foreign values with every entity in
- * view, so it reads `entity.id` for every entity in view. On a large view that read is
- * most of the cost (about 20s for 10M entities on ECH). Yet the rows split in two:
- * - value rows: entities with a foreign value (alerts, anomalies, a risk score change).
- *   There are few of them, and they come from the foreign index plus a LOOKUP JOIN.
- * - empty rows: every other entity in view. Their sort value is the column's empty value
- *   (0 or null), so they sort as one block, by `entity.id` ascending, and a native query
- *   over the entity index reads them.
- * Pages use a cursor (sort value + entity.id), so each page reads from one block, or the end
- * of one block and the start of the other. Every page has the same rows as the general query.
- *
- * Above SPLIT_SORT_MIN_VIEW_SIZE entities in view this is about 5–10x faster on ECH; below
- * it the general query is cheaper. Search keeps the general query: KQL can't run after a
- * LOOKUP JOIN.
+ * The values of these columns aren't on the entity doc. An entity with no rows in the other
+ * index gets the column's empty value (0 for the alert count, null otherwise), so all such
+ * entities tie. The general query reads every entity to sort them, which is slow on large
+ * views. Instead, read two blocks separately:
+ * - value rows: the entities with a value, sorted by it.
+ * - empty rows: everyone else, sorted by entity.id.
+ * The rows are the first block, then the second when the first is short: the same rows as the
+ * general query's. Measured on 10M entities (ECH, Oct 2026): 15–22s → 0.8–6s without filters.
+ * Search uses the general query: KQL can't run after a LOOKUP JOIN.
  */
-
-/**
- * Views with fewer entities keep the general sort query.
- *
- * Why: the split sort avoids reading `entity.id` for every entity in view, but costs one or
- * two extra queries, so it only pays off on large views.
- * Measured (10M entities, 16GB ECH, Oct 2026): no filter 15–22s → 0.8–6s, a host filter
- * 5–8s → 0.4–2s; the two lines cross at about 500k entities in view. The alerts were all
- * stamped, so alert sorts skipped EUID evaluation. Anomaly sorts were measured with faster
- * EUID expressions than the entity store generates today; with the current ones, both sides
- * of the split pay the same extra EUID cost.
- * Rejected: caching the value ids per filter set. It would only help pages inside the empty
- * block, and goes stale as new alerts arrive.
- */
-export const SPLIT_SORT_MIN_VIEW_SIZE = 500_000;
 
 /**
  * Most value rows a split sort reads. Above it, the split sort can't list the value ids to
@@ -67,188 +46,141 @@ export const SPLIT_SORT_MIN_VIEW_SIZE = 500_000;
 const MAX_VALUE_ROWS = ESQL_MAX_RESULT_ROWS - 1;
 
 export interface SplitSortPlan {
-  /** Sort value of an entity without foreign data: 0 sorts first ascending, null always last. */
+  /** Sort value of an entity without a source value: 0 sorts first ascending, null always last. */
   emptyValue: 0 | null;
-  /** Page of value rows after the cursor, sorted, at most `limit` rows. */
-  buildValueRowsQuery: (args: QueryArgs, limit: number) => string;
+  /** The value rows, sorted, at most `limit` rows. */
+  buildValueRowsQuery: (args: QueryArgs, limit: number) => string[];
   /** General sort query, for views where the split does not apply. */
-  buildSortQuery: (args: QueryArgs) => string;
-  /** Page of empty rows after `afterId`, sorted by entity.id, at most `limit` rows. */
-  fetchEmptyRows: (
-    args: QueryArgs,
-    runQuery: EsqlRunner,
-    afterId: string | null,
-    limit: number
-  ) => Promise<Row[] | null>;
+  buildSortQuery: (args: QueryArgs) => string[];
+  /** The empty rows, sorted by entity.id, at most `limit` rows. */
+  fetchEmptyRows: (args: QueryArgs, runQuery: EsqlRunner, limit: number) => Promise<Row[] | null>;
 }
 
-/**
- * Keeps the value rows after the cursor in `SORT field <dir>, entity.id ASC` order. Unlike
- * `buildCursorClause` it leaves out empty rows: the empty block is read separately.
- */
-export const buildValueCursorClause = (cursor: PageCursor | null): string[] =>
-  cursor?.sortValue != null
-    ? [`| WHERE ${buildAfterValuePredicate(cursor, cursor.sortValue)}`]
-    : [];
-
 interface EmptyRowsOptions {
-  /** Entities to leave out: the entities with a value. */
-  excludeIds?: readonly string[];
   /** Conditions that select entities without a value. */
   conditions?: readonly string[];
-  /** `EVAL` that sets the foreign columns to their empty values. */
+  /** `EVAL` that sets the computed columns to their empty values. */
   emptyColumns: string;
-  /** Foreign columns the rows carry, kept after the entity fields. */
+  /** Computed columns the rows carry, kept after the entity fields. */
   columns: readonly string[];
 }
 
-/** Page of entities in view without a value, after `afterId`, sorted by entity.id. */
+/** Entities in view without a value, sorted by entity.id. */
 export const buildEmptyRowsQuery = (
   args: QueryArgs,
-  { excludeIds = [], conditions = [], emptyColumns, columns }: EmptyRowsOptions,
-  afterId: string | null,
+  { conditions = [], emptyColumns, columns }: EmptyRowsOptions,
   limit: number
-): string =>
-  [
-    ...buildEntitiesInViewSteps(args),
-    ...buildEffectiveRiskSteps(args),
-    ...conditions.map((condition) => `| WHERE ${condition}`),
-    ...(excludeIds.length ? [`| WHERE NOT ${ENTITY_ID_FIELD} IN (${toList(excludeIds)})`] : []),
-    ...buildAfterIdClause(afterId),
-    `| SORT ${ENTITY_ID_FIELD} ASC`,
-    `| LIMIT ${limit}`,
-    `| EVAL ${emptyColumns}`,
-    buildKeepClause(args, ...columns),
-  ].join('\n');
-
-/**
- * Empty rows when the value rows come from a list of entities: the empty rows are the
- * entities in view that are not in the list. `null` when the list doesn't fit in one response,
- * or its ids don't fit in one query.
- */
-const fetchEmptyRowsExcludingValueIds = async (
-  args: QueryArgs,
-  runQuery: EsqlRunner,
-  /** Entities with a value, one row per `entity.id`. */
-  valueEntities: readonly string[],
-  options: Omit<EmptyRowsOptions, 'excludeIds'>,
-  afterId: string | null,
-  limit: number
-): Promise<Row[] | null> => {
-  const valueIdsQuery = [...valueEntities, '| KEEP `entity.id`', `| LIMIT ${MAX_VALUE_ROWS + 1}`];
-  const ids = getEntityIds(await runQuery(valueIdsQuery.join('\n')));
-  if (ids.length > MAX_VALUE_ROWS) return null;
-  const emptyRowsQuery = buildEmptyRowsQuery(args, { ...options, excludeIds: ids }, afterId, limit);
-  // Long ids can make the excluded list longer than ES|QL parses.
-  if (emptyRowsQuery.length > ESQL_MAX_QUERY_LENGTH) return null;
-  return runQuery(emptyRowsQuery);
-};
+): string[] => [
+  ...buildEntitiesInViewSteps(args),
+  ...buildRowRiskScoreSteps(args),
+  ...conditions.map((condition) => `| WHERE ${condition}`),
+  `| SORT ${ENTITY_ID_FIELD} ASC`,
+  `| LIMIT ${limit}`,
+  `| EVAL ${emptyColumns}`,
+  ...buildRowFieldsSteps(args, ...columns),
+];
 
 interface EntityListSortOptions {
   sortField: string;
   emptyValue: SplitSortPlan['emptyValue'];
-  /** Foreign index rows mapped to `entity.id`, before any STATS. */
-  buildForeignRows: (args: QueryArgs) => readonly string[];
-  buildSortQuery: (args: QueryArgs) => string;
-  /** The foreign columns: how they aggregate per entity, and for a resolved entity. */
+  /** Source index rows mapped to `entity.id`, before any STATS. */
+  buildSourceRows: (args: QueryArgs) => readonly string[];
+  buildSortQuery: (args: QueryArgs) => string[];
+  /**
+   * The computed columns: how they aggregate per entity, and for a resolved entity. On resolved
+   * rows the source rows of an alias count for its resolved entity.
+   */
   aggregations: readonly EntityAggregation[];
-  /** Foreign columns the rows carry. */
+  /** Computed columns the rows carry. */
   columns: readonly string[];
-  /** `EVAL` that sets the foreign columns of an empty row. */
+  /** `EVAL` that sets the computed columns of an empty row. */
   emptyColumns: string;
 }
 
 /**
- * Split sort plan for a foreign index that lists the entities with a value (alerts,
+ * Split sort plan for a source index that lists the entities with a value (alerts,
  * anomalies): value rows aggregate the list, empty rows are the entities not in it.
  */
-export const buildEntityListSortPlan = ({
-  sortField,
-  emptyValue,
-  buildForeignRows,
-  buildSortQuery,
-  aggregations,
-  columns,
-  emptyColumns,
-}: EntityListSortOptions): SplitSortPlan => {
-  /** Entities in view with a value, with their entity docs. */
-  const buildEntitiesWithValues = (
-    args: QueryArgs,
-    groupBy: string,
-    resolvedEntityAggregations: readonly string[]
-  ): string[] => [
-    ...buildForeignRows(args),
-    groupBy,
-    ...buildResolvedEntityAggregationSteps(args, resolvedEntityAggregations),
-    buildLookupJoinClause(args.concreteEntityIndexName),
-    ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
+export const buildEntityListSortPlan = (options: EntityListSortOptions): SplitSortPlan => ({
+  emptyValue: options.emptyValue,
+  buildSortQuery: options.buildSortQuery,
+  buildValueRowsQuery: (args, limit) => buildEntityListValueRowsQuery(options, args, limit),
+  fetchEmptyRows: (args, runQuery, limit) =>
+    fetchEntityListEmptyRows(options, args, runQuery, limit),
+});
+
+/** Entities in view with a value, with their entity docs and the given columns. */
+const buildEntitiesWithValuesSteps = (
+  { buildSourceRows }: EntityListSortOptions,
+  args: QueryArgs,
+  aggregations: readonly EntityAggregation[]
+): string[] => [
+  ...buildSourceRows(args),
+  buildStatsByEntityClause(buildEntityAggregations(aggregations)),
+  ...(args.rowsMode === 'resolved'
+    ? buildAliasesToResolvedEntitySteps(args.concreteEntityIndexName, aggregations)
+    : []),
+  buildLookupJoinClause(args.concreteEntityIndexName),
+  ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
+];
+
+const buildEntityListValueRowsQuery = (
+  options: EntityListSortOptions,
+  args: QueryArgs,
+  limit: number
+): string[] => [
+  ...buildEntitiesWithValuesSteps(options, args, options.aggregations),
+  ...buildSortSuffix(options.sortField, args.sort.direction, limit),
+  ...buildRowFieldsSteps(args, ...options.columns),
+];
+
+/**
+ * The entities in view that are not in the list. Null when the list doesn't fit in one
+ * response, or its ids don't fit in one query.
+ */
+const fetchEntityListEmptyRows = async (
+  options: EntityListSortOptions,
+  args: QueryArgs,
+  runQuery: EsqlRunner,
+  limit: number
+): Promise<Row[] | null> => {
+  const valueIdsQuery = [
+    ...buildEntitiesWithValuesSteps(options, args, []),
+    '| KEEP `entity.id`',
+    `| LIMIT ${MAX_VALUE_ROWS + 1}`,
   ];
-  return {
-    emptyValue,
-    buildValueRowsQuery: (args, limit) =>
-      [
-        ...buildEntitiesWithValues(
-          args,
-          `| STATS ${buildEntityAggregations(aggregations).join(', ')} BY \`entity.id\``,
-          buildResolvedEntityAggregations(aggregations)
-        ),
-        ...buildValueCursorClause(args.cursor),
-        ...buildSortSuffix(sortField, args.sort.direction, limit),
-        buildKeepClause(args, ...columns),
-      ].join('\n'),
-    buildSortQuery,
-    fetchEmptyRows: (args, runQuery, afterId, limit) =>
-      fetchEmptyRowsExcludingValueIds(
-        args,
-        runQuery,
-        buildEntitiesWithValues(args, '| STATS BY `entity.id`', []),
-        { emptyColumns, columns },
-        afterId,
-        limit
-      ),
-  };
+  const ids = getEntityIds(await runQuery(valueIdsQuery));
+  if (ids.length > MAX_VALUE_ROWS) return null;
+  const { emptyColumns, columns } = options;
+  const conditions = ids.length ? [`NOT ${ENTITY_ID_FIELD} IN (${toList(ids)})`] : [];
+  const emptyRowsQuery = buildEmptyRowsQuery(args, { conditions, emptyColumns, columns }, limit);
+  // Long ids can make the excluded list longer than ES|QL parses.
+  if (emptyRowsQuery.join('\n').length > ESQL_MAX_QUERY_LENGTH) return null;
+  return runQuery(emptyRowsQuery);
 };
 
 /**
- * One page of rows plus one, read as value rows and empty rows. Falls back to the general
- * sort query for small views, search, and when the empty rows can't be read.
+ * The rows plus one, read as value rows and empty rows. Falls back to the general sort query
+ * for a search, and when the empty rows can't be read.
  */
 export const fetchSplitSortPage = async (
   plan: SplitSortPlan,
   args: QueryArgs,
-  { runQuery, fetchViewSize }: SortPageContext
+  { runQuery }: SortPageContext
 ): Promise<Row[]> => {
-  const general = () => runQuery(plan.buildSortQuery(args));
-  // Search keeps the general query: KQL can't run after the LOOKUP JOIN of the value rows.
-  if (args.searchExpression || (await fetchViewSize()) < SPLIT_SORT_MIN_VIEW_SIZE) {
-    return general();
-  }
+  const fetchGeneral = () => runQuery(plan.buildSortQuery(args));
+  if (args.searchExpression) return fetchGeneral();
 
-  const limit = args.pageSize + 1;
-  const { cursor } = args;
-  const inEmptyBlock = cursor != null && cursor.sortValue === plan.emptyValue;
-  const emptyRows = async (afterId: string | null, count: number): Promise<Row[] | null> =>
-    plan.fetchEmptyRows(args, runQuery, afterId, count);
-  const valueRows = (valueArgs: QueryArgs, count: number) =>
-    runQuery(plan.buildValueRowsQuery(valueArgs, count));
-
+  const readEmpty = (limit: number) => plan.fetchEmptyRows(args, runQuery, limit);
+  const readValues = (limit: number) => runQuery(plan.buildValueRowsQuery(args, limit));
   // Empty rows come first only for a 0 empty value in ascending order.
   const emptyFirst = plan.emptyValue === 0 && args.sort.direction === 'asc';
+  const [readFirst, readSecond] = emptyFirst ? [readEmpty, readValues] : [readValues, readEmpty];
 
-  if (emptyFirst) {
-    if (cursor != null && !inEmptyBlock) return valueRows(args, limit);
-    const empty = await emptyRows(cursor?.entityId ?? null, limit);
-    if (empty == null) return general();
-    if (empty.length >= limit) return empty;
-    return [...empty, ...(await valueRows({ ...args, cursor: null }, limit - empty.length))];
-  }
-
-  if (inEmptyBlock) {
-    const empty = await emptyRows(cursor.entityId, limit);
-    return empty ?? general();
-  }
-  const values = await valueRows(args, limit);
-  if (values.length >= limit) return values;
-  const empty = await emptyRows(null, limit - values.length);
-  return empty == null ? general() : [...values, ...empty];
+  const limit = args.pageSize + 1;
+  const first = await readFirst(limit);
+  if (first == null) return fetchGeneral();
+  if (first.length >= limit) return first;
+  const second = await readSecond(limit - first.length);
+  return second == null ? fetchGeneral() : [...first, ...second];
 };

@@ -8,18 +8,17 @@
 import type { QueryArgs, Row } from '../common';
 import {
   applyResolvedEntityFilterOverrides,
-  buildResolvedEntityFilterOverridesQuery,
-  buildResolvedEntityValuesQuery,
   fetchResolvedEntityFilterOverrides,
+  getPartsByResolvedEntity,
   needsResolvedEntityFilterOverrides,
+  withEntityAliases,
   withResolvedEntityValues,
-} from './resolved_entity_values';
+} from './resolved_entities';
 
 const ARGS: QueryArgs = {
   namespace: 'default',
   timeRange: '7d',
   sort: { field: 'entity.name', direction: 'desc' },
-  cursor: null,
   pageSize: 25,
   rowsMode: 'resolved',
   concreteEntityIndexName: '.entities.v2.latest.default-00001',
@@ -28,9 +27,21 @@ const ARGS: QueryArgs = {
 
 const row = (id: string, extra: Row = {}): Row => ({ 'entity.id': id, ...extra });
 
+/** A runner that answers nothing, and the text of the queries it was given. */
+const recordQueries = () => {
+  const queries: string[] = [];
+  const runQuery = async (steps: readonly string[]): Promise<Row[]> => {
+    queries.push(steps.join('\n'));
+    return [];
+  };
+  return { runQuery, queries };
+};
+
 describe('buildResolvedEntityValuesQuery', () => {
-  it('reads the aliases of the targets, then joins the targets own values in', () => {
-    expect(buildResolvedEntityValuesQuery(ARGS, ['host:a', 'host:b'])).toMatchSnapshot();
+  it('reads the aliases of the targets, then joins the targets own values in', async () => {
+    const { runQuery, queries } = recordQueries();
+    await withResolvedEntityValues([row('host:a'), row('host:b')], ARGS, runQuery);
+    expect(queries[0]).toMatchSnapshot();
   });
 });
 
@@ -63,12 +74,12 @@ describe('withResolvedEntityValues', () => {
   });
 
   it('reads the groups of every row in one query', async () => {
-    const runQuery = jest.fn(async () => []);
+    const runQuery = jest.fn(async (_steps: readonly string[]) => []);
 
     await withResolvedEntityValues([row('host:a'), row('host:b')], ARGS, runQuery);
 
     expect(runQuery).toHaveBeenCalledTimes(1);
-    expect(runQuery).toHaveBeenCalledWith(expect.stringContaining('IN ("host:a", "host:b")'));
+    expect(runQuery.mock.calls[0][0].join('\n')).toContain('IN ("host:a", "host:b")');
   });
 
   it('splits a long list of rows into several queries', async () => {
@@ -78,20 +89,6 @@ describe('withResolvedEntityValues', () => {
     await withResolvedEntityValues(manyRows, ARGS, runQuery);
 
     expect(runQuery).toHaveBeenCalledTimes(2);
-  });
-
-  it('leaves individual rows as they are, without a query', async () => {
-    const runQuery = jest.fn(async () => [GROUP_VALUES]);
-    const individualRows = [row('host:a', { 'asset.criticality': 'low_impact' })];
-
-    const rows = await withResolvedEntityValues(
-      individualRows,
-      { ...ARGS, rowsMode: 'individual' },
-      runQuery
-    );
-
-    expect(rows).toBe(individualRows);
-    expect(runQuery).not.toHaveBeenCalled();
   });
 
   it('does not query without rows', async () => {
@@ -131,10 +128,13 @@ describe('needsResolvedEntityFilterOverrides', () => {
 });
 
 describe('buildResolvedEntityFilterOverridesQuery', () => {
-  it('compares the resolved entity with its main entity on the filters, and keeps those that differ', () => {
-    expect(
-      buildResolvedEntityFilterOverridesQuery({ ...ARGS, entityExpression: CRITICALITY_FILTER })
-    ).toMatchSnapshot();
+  it('compares the resolved entity with its main entity on the filters, and keeps those that differ', async () => {
+    const { runQuery, queries } = recordQueries();
+    await fetchResolvedEntityFilterOverrides(
+      { ...ARGS, entityExpression: CRITICALITY_FILTER },
+      runQuery
+    );
+    expect(queries[0]).toMatchSnapshot();
   });
 });
 
@@ -209,5 +209,72 @@ describe('applyResolvedEntityFilterOverrides', () => {
         exclude: ['host:a'],
       })
     ).toBe(`((${CRITICALITY_FILTER}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b")`);
+  });
+});
+
+const aliasRow = (id: string, resolvedTo?: string): Row => ({
+  'entity.id': id,
+  ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
+});
+
+describe('withEntityAliases', () => {
+  it('adds the aliases of the rows after them', async () => {
+    const alias = aliasRow('host:a1', 'host:a');
+    const runQuery = jest.fn(async (_steps: readonly string[]) => [alias]);
+    const rows = [aliasRow('host:a'), aliasRow('host:b')];
+
+    expect(await withEntityAliases(rows, ARGS, runQuery)).toEqual([...rows, alias]);
+    expect(runQuery).toHaveBeenCalledTimes(1);
+    expect(runQuery.mock.calls[0][0].join('\n')).toContain('IN ("host:a", "host:b")');
+  });
+
+  it('does not query without rows', async () => {
+    const runQuery = jest.fn(async (_steps: readonly string[]): Promise<Row[]> => []);
+
+    expect(await withEntityAliases([], ARGS, runQuery)).toEqual([]);
+    expect(runQuery).not.toHaveBeenCalled();
+  });
+
+  it('fails when the aliases are more than the query of the read can list', async () => {
+    const runQuery = jest.fn(async (_steps: readonly string[]) =>
+      Array.from({ length: 2_001 }, (_, i) => aliasRow(`host:a${i}`, 'host:a'))
+    );
+
+    await expect(withEntityAliases([aliasRow('host:a')], ARGS, runQuery)).rejects.toThrow(
+      'too many aliases'
+    );
+  });
+});
+
+describe('getPartsByResolvedEntity', () => {
+  const getIdParts = (parts: Row[][]) => parts.map((part) => part.map((r) => r['entity.id']));
+
+  it('cuts the rows into parts of at most the given size', () => {
+    const rows = ['host:a', 'host:b', 'host:c'].map((id) => aliasRow(id));
+
+    expect(getIdParts(getPartsByResolvedEntity(rows, 2))).toEqual([
+      ['host:a', 'host:b'],
+      ['host:c'],
+    ]);
+  });
+
+  it('keeps a resolved entity in one part with its aliases', () => {
+    const rows = [
+      aliasRow('host:a'),
+      aliasRow('host:b'),
+      aliasRow('host:b1', 'host:b'),
+      aliasRow('host:a1', 'host:a'),
+    ];
+
+    expect(getIdParts(getPartsByResolvedEntity(rows, 3))).toEqual([
+      ['host:a', 'host:a1'],
+      ['host:b', 'host:b1'],
+    ]);
+  });
+
+  it('fails for a resolved entity with more aliases than a part holds', () => {
+    const rows = [aliasRow('host:a'), aliasRow('host:a1', 'host:a'), aliasRow('host:a2', 'host:a')];
+
+    expect(() => getPartsByResolvedEntity(rows, 2)).toThrow('too many aliases');
   });
 });

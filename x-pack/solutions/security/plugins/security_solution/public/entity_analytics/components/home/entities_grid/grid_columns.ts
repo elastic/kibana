@@ -12,7 +12,7 @@ import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
-import { withResolvedEntityValues } from './queries/resolved_entity_values';
+import { withResolvedEntityValues } from './queries/resolved_entities';
 import { isOneOf } from './common';
 import type { RowsMode } from './common';
 import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/types';
@@ -72,8 +72,12 @@ export const findSortPageFetcher = (id: string): SortPageFetcher | undefined => 
   const fetchSortPage = getQuerySpec(id)?.fetchSortPage;
   return (
     fetchSortPage &&
-    (async (args, ctx) =>
-      withResolvedEntityValues(await fetchSortPage(args, ctx), args, ctx.runQuery))
+    (async (args, ctx) => {
+      const rows = await fetchSortPage(args, ctx);
+      return args.rowsMode === 'resolved'
+        ? withResolvedEntityValues(rows, args, ctx.runQuery)
+        : rows;
+    })
   );
 };
 

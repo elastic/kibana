@@ -8,7 +8,8 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { QueryArgs, Row } from '../common';
 
-export type EsqlRunner = (q: string) => Promise<Row[]>;
+/** Runs an ES|QL query, given as its steps, and returns its rows. */
+export type EsqlRunner = (steps: readonly string[]) => Promise<Row[]>;
 
 export interface RunContext {
   /** Runs an ES|QL query and returns its rows. */
@@ -30,8 +31,6 @@ export interface PageEnricher {
 export interface SortPageContext {
   /** Runs an ES|QL query and returns its rows. */
   runQuery: EsqlRunner;
-  /** Number of entities in view, from the cached count query. Only large-view plans ask. */
-  fetchViewSize: () => Promise<number>;
 }
 
 /** Fetches one page of rows plus one, sorted by a column. */

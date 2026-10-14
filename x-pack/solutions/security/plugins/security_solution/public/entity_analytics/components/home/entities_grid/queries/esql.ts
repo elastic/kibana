@@ -25,10 +25,10 @@ import {
   RISK_SCORE_NORM_FIELD,
   getEntityId,
 } from '../common';
-import type { PageCursor, QueryArgs, Row, SortDir, TimeRange } from '../common';
+import type { QueryArgs, Row, SortDir, TimeRange } from '../common';
 import type { EsqlRunner } from './types';
 
-// ── index name helpers ────────────────────────────────────────────────────────
+// ── index name helpers ───────────────────────────────────────────────────────
 
 export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
 export const getAlertsIndex = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
@@ -96,7 +96,7 @@ export const ID_LIST_CHUNK_SIZE = 2_000;
 export const fetchPerIdChunk = async (
   runQuery: EsqlRunner,
   ids: readonly string[],
-  buildQuery: (chunk: readonly string[]) => string
+  buildQuery: (chunk: readonly string[]) => string[]
 ): Promise<Row[]> => {
   const chunks: Array<readonly string[]> = [];
   for (let i = 0; i < ids.length; i += ID_LIST_CHUNK_SIZE) {
@@ -142,25 +142,31 @@ const quoteField = (field: string): string =>
   PLAIN_FIELD_NAME.test(field) ? field : `\`${field.replace(/`/g, '``')}\``;
 
 /**
- * The risk score a resolved row shows: its resolved entity's, or its own when it has no resolution score. The
- * resolved entity's score is on the main entity, which is the row.
+ * The risk score of a resolved row: its resolved entity's, which the risk engine stores on the
+ * main entity, the row; or its own when it has none.
  */
-export const buildEffectiveRiskSteps = ({ rowsMode }: Pick<QueryArgs, 'rowsMode'>): string[] =>
-  rowsMode === 'resolved'
-    ? [
-        `| EVAL ${RISK_SCORE_NORM_FIELD} = COALESCE(${RESOLUTION_RISK_SCORE_FIELD}, ${RISK_SCORE_NORM_FIELD})`,
-      ]
-    : [];
+const buildResolvedRiskScoreSteps = (): string[] => [
+  `| EVAL ${RISK_SCORE_NORM_FIELD} = COALESCE(${RESOLUTION_RISK_SCORE_FIELD}, ${RISK_SCORE_NORM_FIELD})`,
+];
 
-export const buildKeepClause = (
-  args: Pick<QueryArgs, 'keepFields' | 'rowsMode'>,
+/** The risk score of a row: an entity's own, or a resolved entity's on resolved rows. */
+export const buildRowRiskScoreSteps = ({ rowsMode }: Pick<QueryArgs, 'rowsMode'>): string[] =>
+  rowsMode === 'resolved' ? buildResolvedRiskScoreSteps() : [];
+
+/** KEEP the grid's fields, the fields picked in Fields, and `extra`. */
+const buildKeepClause = (
+  { keepFields }: Pick<QueryArgs, 'keepFields'>,
   ...extra: string[]
 ): string => {
-  const fields = [...new Set([...ENTITY_FIELDS, ...(args.keepFields ?? []), ...extra])];
-  return [...buildEffectiveRiskSteps(args), `| KEEP ${fields.map(quoteField).join(', ')}`].join(
-    '\n'
-  );
+  const fields = [...new Set([...ENTITY_FIELDS, ...(keepFields ?? []), ...extra])];
+  return `| KEEP ${fields.map(quoteField).join(', ')}`;
 };
+
+/** The steps that make an entity doc a grid row: its risk score, then its fields. */
+export const buildRowFieldsSteps = (
+  args: Pick<QueryArgs, 'keepFields' | 'rowsMode'>,
+  ...extra: string[]
+): string[] => [...buildRowRiskScoreSteps(args), buildKeepClause(args, ...extra)];
 
 export const buildFilterClause = (filterExpression?: string): string[] =>
   filterExpression ? [`| WHERE ${filterExpression}`] : [];
@@ -187,37 +193,6 @@ const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
  */
 export const buildLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
 
-// ── cursors ──────────────────────────────────────────────────────────────────
-
-/**
- * Keeps the rows after the cursor in `SORT field <dir> NULLS LAST, entity.id ASC` order.
- * Null sort values come last, so every page after a non-null cursor also keeps them.
- */
-export const buildCursorClause = (cursor: PageCursor | null): string[] => {
-  if (cursor == null) return [];
-  const { sortField, sortValue, entityId } = cursor;
-  if (sortValue == null) {
-    return [`| WHERE ${sortField} IS NULL AND ${ENTITY_ID_FIELD} > ${escapeStringValue(entityId)}`];
-  }
-  return [`| WHERE ${buildAfterValuePredicate(cursor, sortValue)} OR ${sortField} IS NULL`];
-};
-
-/** Rows after a cursor with a non-null sort value, in `SORT field <dir>, entity.id ASC` order. */
-export const buildAfterValuePredicate = (
-  { sortField, sortDirection, entityId }: PageCursor,
-  sortValue: string | number
-): string => {
-  const op = sortDirection === 'desc' ? '<' : '>';
-  const val = typeof sortValue === 'string' ? escapeStringValue(sortValue) : String(sortValue);
-  return `(${sortField} ${op} ${val}) OR (${sortField} == ${val} AND ${ENTITY_ID_FIELD} > ${escapeStringValue(
-    entityId
-  )})`;
-};
-
-/** Keeps the entities after `afterId`, for pages sorted by `entity.id` alone. */
-export const buildAfterIdClause = (afterId: string | null): string[] =>
-  afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${escapeStringValue(afterId)}`] : [];
-
 /** The order of every grid page, `field <dir> NULLS LAST, entity.id ASC`, and its limit. */
 export const buildSortSuffix = (field: string, direction: SortDir, limit: number): string[] => [
   `| SORT ${field} ${direction.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
@@ -234,10 +209,9 @@ export const buildJoinedPageSteps = (
   sortField: string,
   extraFields: readonly string[] = []
 ): string[] => [
-  ...buildCursorClause(args.cursor),
   ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
   buildLookupJoinClause(args.concreteEntityIndexName),
-  buildKeepClause(args, sortField, ...extraFields),
+  ...buildRowFieldsSteps(args, sortField, ...extraFields),
   // LOOKUP JOIN may not keep the input order.
   ...buildSortSuffix(sortField, args.sort.direction, args.pageSize + 1),
 ];
@@ -278,32 +252,28 @@ export const buildEntityAggregations = (
       : `${field} = ${aggregation}`;
   });
 
+/** `STATS … BY entity.id`; with no aggregations, only the distinct ids. */
+export const buildStatsByEntityClause = (aggregations: readonly string[]): string =>
+  `| STATS ${aggregations.length ? `${aggregations.join(', ')} ` : ''}BY \`entity.id\``;
+
 /** STATS aggregations that give each column of a resolved entity from the rows of its aliases. */
-export const buildResolvedEntityAggregations = (
-  aggregations: readonly EntityAggregation[]
-): string[] =>
+const buildResolvedEntityAggregations = (aggregations: readonly EntityAggregation[]): string[] =>
   aggregations.map(({ field, resolvedEntity }) => `${field} = ${resolvedEntity}(${field})`);
 
 /**
- * After a STATS per entity: on resolved rows, the rows of an alias count for its resolved entity.
- * For a resolved entity with 2 alerts, last at 10:00, and an alias with 3 alerts, last at 11:00,
- * these steps give 5 alerts (`SUM`), last at 11:00 (`MAX`): the rows of the alias get the id of the
- * resolved entity, then `resolvedEntityAggregations` aggregate the rows of both. Individual rows
- * are the entities themselves.
+ * After a STATS per entity, the rows of an alias count for its resolved entity. For a resolved
+ * entity with 2 alerts, last at 10:00, and an alias with 3 alerts, last at 11:00, these steps give
+ * 5 alerts (`SUM`), last at 11:00 (`MAX`): the rows of the alias get the id of the resolved
+ * entity, then `aggregations` aggregate the rows of both.
  */
-export const buildResolvedEntityAggregationSteps = (
-  { rowsMode, concreteEntityIndexName }: Pick<QueryArgs, 'rowsMode' | 'concreteEntityIndexName'>,
-  resolvedEntityAggregations: readonly string[]
-): string[] =>
-  rowsMode === 'resolved'
-    ? [
-        buildLookupJoinClause(concreteEntityIndexName),
-        `| EVAL \`entity.id\` = COALESCE(${RESOLVED_TO_FIELD}, \`entity.id\`)`,
-        `| STATS ${
-          resolvedEntityAggregations.length ? `${resolvedEntityAggregations.join(', ')} ` : ''
-        }BY \`entity.id\``,
-      ]
-    : [];
+export const buildAliasesToResolvedEntitySteps = (
+  concreteEntityIndexName: string,
+  aggregations: readonly EntityAggregation[]
+): string[] => [
+  buildLookupJoinClause(concreteEntityIndexName),
+  `| EVAL \`entity.id\` = COALESCE(${RESOLVED_TO_FIELD}, \`entity.id\`)`,
+  buildStatsByEntityClause(buildResolvedEntityAggregations(aggregations)),
+];
 
 /** Indents the steps of a FORK branch under its parentheses. */
 export const indentForkBranch = (esql: string): string =>
@@ -322,7 +292,8 @@ const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
 
 export const createEsqlRunner =
   (searchService: DataPublicPluginStart['search'], signal?: AbortSignal): EsqlRunner =>
-  async (query) => {
+  async (steps) => {
+    const query = steps.join('\n');
     const { rawResponse } = await lastValueFrom(
       searchService.search<
         IKibanaSearchRequest<{ query: string }>,

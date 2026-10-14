@@ -14,7 +14,6 @@ const ARGS: QueryArgs = {
   namespace: 'default',
   timeRange: '30d',
   sort: { field: 'case_count', direction: 'desc' },
-  cursor: null,
   pageSize: 2,
   rowsMode: 'resolved',
   concreteEntityIndexName: '.entities.v2.latest.default-00001',

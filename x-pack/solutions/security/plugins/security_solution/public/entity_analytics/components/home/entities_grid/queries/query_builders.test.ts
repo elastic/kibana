@@ -7,18 +7,16 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
-  buildKeepClause,
+  buildRowFieldsSteps,
   buildEntityAggregations,
-  buildResolvedEntityAggregations,
-  buildResolvedEntityAggregationSteps,
+  buildAliasesToResolvedEntitySteps,
 } from './esql';
 import type { EntityAggregation } from './esql';
-import type { PageCursor, QueryArgs, Row } from '../common';
+import type { QueryArgs, Row } from '../common';
 import { COLUMN_ENRICHERS, SORT_PAGE_FETCHERS } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import { alertCountQuerySpec } from './alerts';
 import { anomalyCountQuerySpec } from './anomalies';
-import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 import type { RunContext, SortPageFetcher } from './types';
 
 const { enricher: alertsEnricher } = alertCountQuerySpec;
@@ -28,7 +26,6 @@ const BASE_ARGS: QueryArgs = {
   namespace: 'default',
   timeRange: '7d',
   sort: { field: 'entity.name', direction: 'desc' },
-  cursor: null,
   pageSize: 25,
   rowsMode: 'resolved',
   concreteEntityIndexName: '.entities.v2.latest.default-00001',
@@ -44,17 +41,12 @@ const FILTERED_ARGS: Partial<QueryArgs> = {
   keepFields: ['host.os.name'],
 };
 
-const LARGE_VIEW_SIZE = SPLIT_SORT_MIN_VIEW_SIZE;
-
-/** Sorts that read a large view in parts; the others run the same query on every view. */
-const LARGE_VIEW_FETCHERS = SORT_PAGE_FETCHERS.filter(([id]) =>
+/** Sorts that read their rows in parts; the others run one query. */
+const SPLIT_SORT_FETCHERS = SORT_PAGE_FETCHERS.filter(([id]) =>
   ['group_size', 'risk_score_change', 'alert_count', 'last_seen_alert', 'anomaly_count'].includes(
     id
   )
 );
-
-/** Sort value of the rows without a value, per sort page column; null when not listed. */
-const EMPTY_SORT_VALUES: Readonly<Record<string, number>> = { alert_count: 0, group_size: 1 };
 
 const PAGE_ROWS: readonly Row[] = [
   {
@@ -92,29 +84,20 @@ const createRunContext = (runQuery: RunContext['runQuery']): RunContext => {
   return { runQuery, http };
 };
 
-/** The queries a sort page runs, joined; one query on a small view. */
+/** The queries a sort page runs, joined. */
 const recordSortQueries = async (
   fetchSortPage: SortPageFetcher,
-  args: QueryArgs,
-  viewSize: number
+  args: QueryArgs
 ): Promise<string> => {
   const queries: string[] = [];
   await fetchSortPage(args, {
-    runQuery: async (query) => {
-      queries.push(query);
+    runQuery: async (steps) => {
+      queries.push(steps.join('\n'));
       return [];
     },
-    fetchViewSize: async () => viewSize,
   });
   return queries.join('\n\n');
 };
-
-const cursorFor = (sortField: string): PageCursor => ({
-  sortField,
-  sortDirection: 'desc',
-  sortValue: 42,
-  entityId: 'host:h-1',
-});
 
 describe('entities grid query builders', () => {
   describe('count', () => {
@@ -123,7 +106,9 @@ describe('entities grid query builders', () => {
       ['filters', FILTERED_ARGS],
       ['entity filters and no search', { entityExpression: ENTITY_EXPRESSION }],
     ] as const)('builds the count query with %s', (_name, overrides) => {
-      expect(buildEntitiesInViewCountQuery({ ...BASE_ARGS, ...overrides })).toMatchSnapshot();
+      expect(
+        buildEntitiesInViewCountQuery({ ...BASE_ARGS, ...overrides }).join('\n')
+      ).toMatchSnapshot();
     });
   });
 
@@ -131,18 +116,17 @@ describe('entities grid query builders', () => {
     it('builds the sort query', async () => {
       const args: QueryArgs = { ...BASE_ARGS, sort: { field: sortField, direction: 'desc' } };
 
-      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
+      expect(await recordSortQueries(fetchSortPage, args)).toMatchSnapshot();
     });
 
-    it('builds the sort query with filters and a cursor', async () => {
+    it('builds the sort query with filters', async () => {
       const args: QueryArgs = {
         ...BASE_ARGS,
         ...FILTERED_ARGS,
         sort: { field: sortField, direction: 'asc' },
-        cursor: cursorFor(sortField),
       };
 
-      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
+      expect(await recordSortQueries(fetchSortPage, args)).toMatchSnapshot();
     });
 
     it('builds the sort query with entity filters and no search', async () => {
@@ -152,42 +136,22 @@ describe('entities grid query builders', () => {
         sort: { field: sortField, direction: 'desc' },
       };
 
-      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
-    });
-
-    it('builds the sort query with a cursor on an empty value', async () => {
-      const args: QueryArgs = {
-        ...BASE_ARGS,
-        cursor: { ...cursorFor(sortField), sortValue: null },
-        sort: { field: sortField, direction: 'desc' },
-      };
-
-      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
+      expect(await recordSortQueries(fetchSortPage, args)).toMatchSnapshot();
     });
   });
 
-  describe.each(LARGE_VIEW_FETCHERS)(
-    'sort page by %s on a large view',
+  describe.each(SPLIT_SORT_FETCHERS)(
+    'sort page by %s with value rows',
     (sortField, fetchSortPage) => {
-      const emptyCursor: PageCursor = {
-        ...cursorFor(sortField),
-        sortValue: EMPTY_SORT_VALUES[sortField] ?? null,
-      };
-
       it.each([
         ['the first page descending', { sort: { field: sortField, direction: 'desc' } }],
         ['the first page ascending', { sort: { field: sortField, direction: 'asc' } }],
         [
-          'a page after a value with entity filters',
+          'the first page with entity filters',
           {
             sort: { field: sortField, direction: 'desc' },
             entityExpression: ENTITY_EXPRESSION,
-            cursor: cursorFor(sortField),
           },
-        ],
-        [
-          'a page after an empty value',
-          { sort: { field: sortField, direction: 'desc' }, cursor: emptyCursor },
         ],
         [
           'the first page with a search',
@@ -198,40 +162,41 @@ describe('entities grid query builders', () => {
         ],
       ] as const)('runs the queries of %s', async (_name, overrides) => {
         const runQuery = jest.fn(
-          async (_query: string): Promise<Row[]> => [{ 'entity.id': 'host:h-1', [sortField]: 3 }]
+          async (_steps: readonly string[]): Promise<Row[]> => [
+            { 'entity.id': 'host:h-1', [sortField]: 3 },
+          ]
         );
 
-        await fetchSortPage(
-          { ...BASE_ARGS, ...overrides },
-          { runQuery, fetchViewSize: async () => LARGE_VIEW_SIZE }
-        );
+        await fetchSortPage({ ...BASE_ARGS, ...overrides }, { runQuery });
 
-        expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
+        expect(runQuery.mock.calls.map(([steps]) => steps.join('\n'))).toMatchSnapshot();
       });
     }
   );
 
   it('quotes the KEEP fields that are not plain names', () => {
     expect(
-      buildKeepClause({
+      buildRowFieldsSteps({
+        ...BASE_ARGS,
         keepFields: ['host.os.name', 'cloud.account-id', 'labels.a:b', 'we`ird'],
-        rowsMode: 'individual',
-      })
+      }).join('\n')
     ).toContain(', host.os.name, `cloud.account-id`, `labels.a:b`, `we``ird`');
   });
 
   describe('the risk score of a row', () => {
-    const EFFECTIVE_RISK =
+    const RESOLVED_RISK =
       '| EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)';
 
-    it("is the group's for a resolved row, with the main entity's as the fallback", () => {
-      expect(buildKeepClause({ keepFields: [], rowsMode: 'resolved' })).toContain(EFFECTIVE_RISK);
+    it("is the resolved entity's for a resolved row, with the main entity's own as the fallback", () => {
+      expect(buildRowFieldsSteps({ keepFields: [], rowsMode: 'resolved' })).toContain(
+        RESOLVED_RISK
+      );
     });
 
     it("is the entity's own for an individual row", () => {
-      expect(buildKeepClause({ keepFields: [], rowsMode: 'individual' })).not.toContain(
-        'entity.relationships.resolution.risk'
-      );
+      expect(
+        buildRowFieldsSteps({ keepFields: [], rowsMode: 'individual' }).join('\n')
+      ).not.toContain('entity.relationships.resolution.risk');
     });
   });
 
@@ -255,20 +220,9 @@ describe('entities grid query builders', () => {
       ]);
     });
 
-    it('gives each column of a resolved entity from its aliases as the column says', () => {
-      expect(buildResolvedEntityAggregations(AGGREGATIONS)).toEqual([
-        'last_at = MAX(last_at)',
-        'total = SUM(total)',
-        'high = SUM(high)',
-      ]);
-    });
-
     it('gives the rows of an alias to its resolved entity, and aggregates them', () => {
       expect(
-        buildResolvedEntityAggregationSteps(
-          BASE_ARGS,
-          buildResolvedEntityAggregations(AGGREGATIONS)
-        )
+        buildAliasesToResolvedEntitySteps(BASE_ARGS.concreteEntityIndexName, AGGREGATIONS)
       ).toEqual([
         `| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
         '| EVAL `entity.id` = COALESCE(entity.relationships.resolution.resolved_to, `entity.id`)',
@@ -277,17 +231,9 @@ describe('entities grid query builders', () => {
     });
 
     it('keeps only the ids when there is nothing to aggregate', () => {
-      expect(buildResolvedEntityAggregationSteps(BASE_ARGS, []).at(-1)).toBe(
+      expect(buildAliasesToResolvedEntitySteps(BASE_ARGS.concreteEntityIndexName, []).at(-1)).toBe(
         '| STATS BY `entity.id`'
       );
-    });
-
-    it('leaves the rows of individual rows as they are', () => {
-      expect(
-        buildResolvedEntityAggregationSteps({ ...BASE_ARGS, rowsMode: 'individual' }, [
-          'total = SUM(total)',
-        ])
-      ).toEqual([]);
     });
   });
 
@@ -303,7 +249,8 @@ describe('entities grid query builders', () => {
     /** Answers the read of the aliases with `ALIAS`, and the other queries with `rows`. */
     const createRunner = (rows: Row[]) =>
       jest.fn(
-        async (query: string): Promise<Row[]> => (query.includes('resolved_to IN') ? [ALIAS] : rows)
+        async (steps: readonly string[]): Promise<Row[]> =>
+          steps.join('\n').includes('resolved_to IN') ? [ALIAS] : rows
       );
 
     it.each([
@@ -316,7 +263,7 @@ describe('entities grid query builders', () => {
 
         const fields = await enricher.fetch(pageRows, BASE_ARGS, createRunContext(runQuery));
 
-        const [aliasQuery, enrichQuery] = runQuery.mock.calls.map(([query]) => query);
+        const [aliasQuery, enrichQuery] = runQuery.mock.calls.map(([steps]) => steps.join('\n'));
         expect(aliasQuery).toContain('resolved_to IN ("host:h-1")');
         expect(enrichQuery).toContain('host:alias-1');
         expect(enrichQuery).toContain(`${field} = SUM(${field})`);
@@ -338,6 +285,23 @@ describe('entities grid query builders', () => {
       expect(fields.get('host:h-1')).toEqual({ anomaly_count: null });
     });
 
+    it('reads the alerts of many entities in several queries, which ES|QL can parse', async () => {
+      const runQuery = createRunner([]);
+      const manyRows = Array.from({ length: 300 }, (_, i) => ({
+        'entity.id': `host:h-${i}`,
+        'entity.EngineMetadata.Type': 'host',
+        'host.id': `h-${i}`,
+      }));
+
+      await alertsEnricher.fetch(
+        manyRows,
+        { ...BASE_ARGS, rowsMode: 'individual' },
+        createRunContext(runQuery)
+      );
+
+      expect(runQuery).toHaveBeenCalledTimes(2);
+    });
+
     it('reads no aliases for individual rows', async () => {
       const runQuery = createRunner([]);
 
@@ -348,21 +312,21 @@ describe('entities grid query builders', () => {
       );
 
       expect(runQuery).toHaveBeenCalledTimes(1);
-      expect(runQuery.mock.calls[0][0]).not.toContain('LOOKUP JOIN');
+      expect(runQuery.mock.calls[0][0].join('\n')).not.toContain('LOOKUP JOIN');
     });
   });
 
   describe('enrich queries', () => {
     it.each(COLUMN_ENRICHERS)('%s builds its query from the page rows', async (_id, { fetch }) => {
-      const runQuery = jest.fn(async (_query: string) => []);
+      const runQuery = jest.fn(async (_steps: readonly string[]) => []);
 
       await fetch(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery));
 
-      expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
+      expect(runQuery.mock.calls.map(([steps]) => steps.join('\n'))).toMatchSnapshot();
     });
 
     it('does not query for a page without entity ids', async () => {
-      const runQuery = jest.fn(async (_query: string) => []);
+      const runQuery = jest.fn(async (_steps: readonly string[]) => []);
 
       await Promise.all(
         COLUMN_ENRICHERS.map(([, { fetch }]) => fetch([{}], BASE_ARGS, createRunContext(runQuery)))
@@ -372,7 +336,7 @@ describe('entities grid query builders', () => {
     });
 
     it('sets every alert field per entity, 0 or null for entities without alerts', async () => {
-      const runQuery = jest.fn(async (_query: string) => [
+      const runQuery = jest.fn(async (_steps: readonly string[]) => [
         {
           'entity.id': 'host:h-1',
           last_seen_alert: '2026-10-04T11:00:00.000Z',

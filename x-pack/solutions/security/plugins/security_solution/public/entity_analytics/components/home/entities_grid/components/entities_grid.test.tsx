@@ -27,7 +27,6 @@ jest.mock('../hooks/use_entity_analytics_url_state', () => ({
 const GROUP: Row = { 'entity.id': 'host:a', 'entity.name': 'alpha', group_size: 3 };
 const SINGLE_ENTITY: Row = { 'entity.id': 'host:b', 'entity.name': 'beta', group_size: 1 };
 
-const loadMore = jest.fn();
 const toggleExpandedId = jest.fn();
 
 const mockGridData = (data: Partial<ReturnType<typeof useEntityGridData>> = {}) =>
@@ -37,10 +36,7 @@ const mockGridData = (data: Partial<ReturnType<typeof useEntityGridData>> = {}) 
     total: 2,
     updatedAt: null,
     isFetching: false,
-    canLoadMore: false,
     isAtLoadLimit: false,
-    isLoadingMore: false,
-    loadMore,
     prefetch: jest.fn(),
     onRowsInViewChange: jest.fn(),
     ...data,
@@ -120,12 +116,11 @@ describe('EntitiesGrid', () => {
     expect(screen.getByRole('button', { name: 'Reset' })).toBeInTheDocument();
   });
 
-  it('loads more rows on Load more', () => {
-    mockGridData({ canLoadMore: true });
+  it('says in the toolbar how many rows it shows when the view has more', () => {
+    mockGridData({ isAtLoadLimit: true, total: 3789 });
 
-    renderGrid();
-    fireEvent.click(screen.getByRole('button', { name: 'Load more' }));
+    renderGrid({ groupSelectorComponent: <div /> });
 
-    expect(loadMore).toHaveBeenCalled();
+    expect(screen.getByText('Showing 2 of 3,789 resolved entities')).toBeInTheDocument();
   });
 });

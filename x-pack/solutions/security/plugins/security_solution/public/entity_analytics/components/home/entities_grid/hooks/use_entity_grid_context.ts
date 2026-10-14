@@ -17,9 +17,7 @@ import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type {
   ResolvedEntityFilterOverrides,
-  PageCursor,
   QueryArgs,
-  Row,
   RowsMode,
   SortDir,
   TimeRange,
@@ -33,7 +31,7 @@ export interface UseEntityGridDataOptions {
   sortField: string;
   /** The sort order. */
   sortDirection: SortDir;
-  /** Rows per load. */
+  /** Most rows to read. */
   pageSize: number;
   /** The search bar's predicates (KQL, filter pills, group filters), applied to the entity docs. */
   searchExpression?: string;
@@ -54,12 +52,6 @@ export interface UseEntityGridDataOptions {
 /** The scope of a view's queries; the grid rows (`page`) unless told otherwise. */
 export const getKeyScope = ({ keyScope = 'page' }: UseEntityGridDataOptions): EntityGridKeyScope =>
   keyScope;
-
-/** One load of rows, and the cursor of the next one (`null` when there is none). */
-export interface RowsBatch {
-  rows: Row[];
-  nextCursor: PageCursor | null;
-}
 
 const ENTITIES_INDEX_UNAVAILABLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.entitiesIndexUnavailable',
@@ -122,16 +114,14 @@ export const getViewKey = (
   rowsMode,
 });
 
-/** The arguments of the column queries for a view, at a cursor. */
+/** The arguments of the column queries for a view. */
 export const buildQueryArgs = (
   { spaceId, concreteEntityIndexName, anomalyJobIds }: ReadyGridContext,
-  options: UseEntityGridDataOptions,
-  cursor: PageCursor | null
+  options: UseEntityGridDataOptions
 ): QueryArgs => ({
   namespace: spaceId,
   timeRange: options.timeRange,
   sort: { field: options.sortField, direction: options.sortDirection },
-  cursor,
   pageSize: options.pageSize,
   rowsMode: options.rowsMode,
   concreteEntityIndexName,
