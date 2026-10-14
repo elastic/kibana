@@ -56,14 +56,30 @@ export interface RunCustomRulesDeps {
 const asCustomState = (state: PerRuleState | undefined): Partial<CustomRuleState> =>
   (state ?? {}) as Partial<CustomRuleState>;
 
-// Least recently started first, so one heavy rule that keeps reaching the
-// deadline can't starve the rules after it.
-const byLeastRecentAttempt =
-  (rules: Readonly<Record<string, PerRuleState>>) =>
-  (a: CustomResolutionRule, b: CustomResolutionRule): number =>
-    (asCustomState(rules[customRuleStateKey(a.id)]).lastAttemptAt ?? '').localeCompare(
-      asCustomState(rules[customRuleStateKey(b.id)]).lastAttemptAt ?? ''
-    );
+const byCreation = (a: CustomResolutionRule, b: CustomResolutionRule): number =>
+  (a.created_at ?? '').localeCompare(b.created_at ?? '') || a.id.localeCompare(b.id);
+
+/**
+ * Oldest rule first, so the order is stable and explainable. A rule the
+ * deadline cut off last run goes last, so one heavy rule can't starve the
+ * others; among those, the least recently attempted goes first.
+ */
+export const orderForRun = (
+  customRules: CustomResolutionRule[],
+  rules: Readonly<Record<string, PerRuleState>>
+): CustomResolutionRule[] => {
+  const stateOf = (rule: CustomResolutionRule) => asCustomState(rules[customRuleStateKey(rule.id)]);
+  const cutOff = customRules.filter((rule) => stateOf(rule).stoppedAtDeadline === true);
+  const rest = customRules.filter((rule) => stateOf(rule).stoppedAtDeadline !== true);
+  return [
+    ...rest.sort(byCreation),
+    ...cutOff.sort(
+      (a, b) =>
+        (stateOf(a).lastAttemptAt ?? '').localeCompare(stateOf(b).lastAttemptAt ?? '') ||
+        byCreation(a, b)
+    ),
+  ];
+};
 
 const readPriorState = (
   previous: PerRuleState | undefined,
@@ -107,7 +123,7 @@ const compileRule = (
  * Applies saved custom rules after the OOTB rules. Each rule is isolated: an
  * invalid or failing rule is logged and skipped, and nothing here throws.
  *
- * Rules run least recently attempted first, until `deadline`. A rule cut off
+ * Rules run in `orderForRun` order until `deadline`. A rule cut off
  * mid-scan keeps its previous watermark and repeats its query next run; the
  * matcher skips groups it already linked, so the links it made still count as
  * progress.
@@ -153,9 +169,17 @@ async function runEnabledRulesUntilAborted(
 ): Promise<void> {
   const { rules, resolutionRulesClient, index, esClient, logger, signal } = deps;
   const reachedDeadline = () => softSignal.aborted && !signal.aborted;
-  const enabledRules = customRules
-    .filter(({ enabled }) => enabled)
-    .sort(byLeastRecentAttempt(rules));
+  const enabledRules = orderForRun(
+    customRules.filter(({ enabled }) => enabled),
+    rules
+  );
+  if (enabledRules.length > 0) {
+    logger.info(
+      `Custom resolution rules this run, in order: ${enabledRules
+        .map(({ id }) => customRuleStateKey(id))
+        .join(', ')}`
+    );
+  }
 
   for (const [position, listed] of enabledRules.entries()) {
     if (softSignal.aborted) {
@@ -217,16 +241,18 @@ async function runEnabledRulesUntilAborted(
       }
     }
 
-    if (reachedDeadline()) {
+    const stoppedAtDeadline = reachedDeadline();
+    if (stoppedAtDeadline) {
       logger.info(`${stateKey}: stopped at the soft deadline; continues next run`);
     }
 
-    // Written even when the rule failed or stopped early: the attempt time
-    // orders the next run, and the state still holds the previous watermark.
+    // Written even when the rule failed or stopped early: the attempt fields
+    // order the next run, and the state still holds the previous watermark.
     const nextState: CustomRuleState = {
       ...matcherResultState,
       definitionFingerprint,
       lastAttemptAt,
+      stoppedAtDeadline,
     };
     rules[stateKey] = nextState;
   }

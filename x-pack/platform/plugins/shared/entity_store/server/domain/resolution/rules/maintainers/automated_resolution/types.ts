@@ -24,11 +24,13 @@ export interface PerRuleState extends EntityMaintainerState {
 }
 
 // State of a `custom:<id>` rule: the fingerprint of the definition its watermark
-// belongs to, and when it was last attempted. A subtype because the state's index
-// signature can't hold optional fields.
+// belongs to, when it was last attempted, and whether the soft deadline cut that
+// attempt off. A subtype because the state's index signature can't hold optional
+// fields.
 export interface CustomRuleState extends PerRuleState {
   definitionFingerprint: string;
   lastAttemptAt: string;
+  stoppedAtDeadline: boolean;
 }
 
 // `rules` is an open map keyed by rule id rather than a fixed set: a rule with no

@@ -319,12 +319,14 @@ describe('automated-resolution state migration', () => {
             lastRun: null,
             definitionFingerprint: 'abc',
             lastAttemptAt: '2026-10-13T10:00:00.000Z',
+            stoppedAtDeadline: true,
           },
           'custom:b': {
             lastProcessedTimestamp: watermark,
             lastRun: null,
             definitionFingerprint: 42,
             lastAttemptAt: 1760349600000,
+            stoppedAtDeadline: 'yes',
           },
         },
       },
@@ -336,6 +338,7 @@ describe('automated-resolution state migration', () => {
       lastRun: null,
       definitionFingerprint: 'abc',
       lastAttemptAt: '2026-10-13T10:00:00.000Z',
+      stoppedAtDeadline: true,
     });
     expect(output.rules['custom:b']).toEqual({ lastProcessedTimestamp: watermark, lastRun: null });
   });

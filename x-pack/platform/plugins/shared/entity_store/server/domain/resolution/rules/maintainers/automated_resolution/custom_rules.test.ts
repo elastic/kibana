@@ -39,11 +39,16 @@ const rule = (id: string, overrides: Partial<CustomResolutionRule> = {}): Custom
 const fingerprintOf = (customRule: CustomResolutionRule) =>
   fingerprintDefinition(toRuleDefinition(customRule));
 
-const watermarked = (id: string, lastAttemptAt = '2026-10-01T00:00:00Z') => ({
+const watermarked = (
+  id: string,
+  lastAttemptAt = '2026-10-01T00:00:00Z',
+  stoppedAtDeadline = false
+) => ({
   [`custom:${id}`]: {
     ...WATERMARKED,
     definitionFingerprint: fingerprintOf(rule(id)),
     lastAttemptAt,
+    stoppedAtDeadline,
   },
 });
 
@@ -118,6 +123,7 @@ describe('runCustomResolutionRules', () => {
       ...WATERMARKED,
       definitionFingerprint: fingerprintOf(rule('a')),
       lastAttemptAt: expect.any(String),
+      stoppedAtDeadline: false,
     });
   });
 
@@ -298,6 +304,7 @@ describe('runCustomResolutionRules', () => {
       expect(rules['custom:a']).toEqual({
         ...previous['custom:a'],
         lastAttemptAt: '2026-10-13T10:00:00.000Z',
+        stoppedAtDeadline: true,
       });
       expect(rules['custom:b']).toBe(previous['custom:b']);
       expect(logger.info).toHaveBeenCalledWith(
@@ -318,16 +325,55 @@ describe('runCustomResolutionRules', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('starts with the rule that was attempted least recently', async () => {
-      await run([rule('a'), rule('b'), rule('c')], {
-        previous: {
-          ...watermarked('a', '2026-10-13T10:05:00Z'),
-          ...watermarked('b', '2026-10-13T10:00:00Z'),
-          ...watermarked('c', '2026-10-13T09:55:00Z'),
-        },
-      });
+    it('runs the oldest rule first, whatever the attempt times, and logs the order', async () => {
+      const { logger } = await run(
+        [
+          rule('c', { created_at: '2026-10-03T00:00:00Z' }),
+          rule('a', { created_at: '2026-10-01T00:00:00Z' }),
+          rule('b', { created_at: '2026-10-02T00:00:00Z' }),
+        ],
+        {
+          previous: {
+            ...watermarked('a', '2026-10-13T10:05:00Z'),
+            ...watermarked('b', '2026-10-13T10:00:00Z'),
+            ...watermarked('c', '2026-10-13T09:55:00Z'),
+          },
+        }
+      );
 
-      expect(calledRuleIds()).toEqual(['custom:c', 'custom:b', 'custom:a']);
+      expect(calledRuleIds()).toEqual(['custom:a', 'custom:b', 'custom:c']);
+      expect(logger.info).toHaveBeenCalledWith(
+        'Custom resolution rules this run, in order: custom:a, custom:b, custom:c'
+      );
+    });
+
+    it('moves a rule the deadline cut off last run to the end', async () => {
+      await run(
+        [
+          rule('a', { created_at: '2026-10-01T00:00:00Z' }),
+          rule('b', { created_at: '2026-10-02T00:00:00Z' }),
+        ],
+        { previous: { ...watermarked('a', '2026-10-13T10:00:00Z', true), ...watermarked('b') } }
+      );
+
+      expect(calledRuleIds()).toEqual(['custom:b', 'custom:a']);
+    });
+
+    it('alternates between rules the deadline keeps cutting off', async () => {
+      await run(
+        [
+          rule('a', { created_at: '2026-10-01T00:00:00Z' }),
+          rule('b', { created_at: '2026-10-02T00:00:00Z' }),
+        ],
+        {
+          previous: {
+            ...watermarked('a', '2026-10-13T10:05:00Z', true),
+            ...watermarked('b', '2026-10-13T10:00:00Z', true),
+          },
+        }
+      );
+
+      expect(calledRuleIds()).toEqual(['custom:b', 'custom:a']);
     });
 
     it('treats a task abort as an abort, not as reaching the deadline', async () => {
