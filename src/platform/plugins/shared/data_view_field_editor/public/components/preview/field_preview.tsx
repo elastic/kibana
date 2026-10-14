@@ -20,6 +20,11 @@ import { DocumentsNavPreview } from './documents_nav_preview';
 import { FieldPreviewError } from './field_preview_error';
 import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList } from './field_list/field_list';
+import {
+  ITEM_HEIGHT,
+  SHOW_MORE_HEIGHT,
+  INITIAL_MAX_NUMBER_OF_FIELDS,
+} from './field_list/constants';
 import { useStateSelector } from '../../state_utils';
 import type { PreviewState } from './types';
 
@@ -144,13 +149,11 @@ export const FieldPreview = () => {
                   {/* List of other fields in the document */}
                   <EuiResizeObserver onResize={onFieldListResize}>
                     {(resizeRef) => (
-                      <div ref={resizeRef} css={{ flex: 1 }}>
+                      <div ref={resizeRef} css={styles.fieldListContainer}>
                         <PreviewFieldList
                           height={fieldListHeight}
                           clearSearch={() => setSearchValue('')}
                           searchValue={searchValue}
-                          // We add a key to force rerender the virtual list whenever the window height changes
-                          key={fieldListHeight}
                         />
                       </div>
                     )}
@@ -169,6 +172,13 @@ const styles = {
   previewPanel: css({
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
+    // Let the panel scroll when the previewed fields (e.g. composite subfields) overflow the flyout.
+    minHeight: '100%',
+  }),
+  fieldListContainer: css({
+    flex: 1,
+    // The list height is measured from this container, so the container must not be sized by the
+    // list: a fixed min-height prevents a resize loop that makes the panel scrollbar jump.
+    minHeight: INITIAL_MAX_NUMBER_OF_FIELDS * ITEM_HEIGHT + SHOW_MORE_HEIGHT,
   }),
 };

@@ -91,7 +91,7 @@ describe('buildRiskMoversCountQuery', () => {
   it('deduplicates resolved entities and emits both value and entity_ids columns', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
     expect(query).toContain('COALESCE(`entity.relationships.resolution.resolved_to`, entity.id)');
-    expect(query).toContain('value = COUNT_DISTINCT(effective_id)');
+    expect(query).toContain('value = COUNT(effective_id)');
     expect(query).toContain('entity_ids = VALUES(effective_id)');
   });
 });
