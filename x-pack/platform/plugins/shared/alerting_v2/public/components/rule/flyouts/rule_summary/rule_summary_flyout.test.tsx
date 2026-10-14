@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { EuiHealthProps } from '@elastic/eui';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
@@ -154,7 +154,7 @@ describe('RuleSummaryFlyout', () => {
     });
   });
 
-  it('renders the template flyout with header, accordion sections, and take action', () => {
+  it('renders the template flyout with header, accordion sections, and take action', async () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
@@ -165,7 +165,16 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
     expect(screen.getByTestId('ruleSummaryInvestigation')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        within(screen.getByTestId('ruleSummaryInvestigation')).getByRole('button')
+      ).toHaveAttribute('aria-expanded', 'true');
+    });
     expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
+    expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
     expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
     expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleSummaryData } from '../types';
 import { RuleSummaryBody } from './rule_summary_body';
@@ -80,6 +80,23 @@ describe('RuleSummaryArtifactsSection', () => {
       'true'
     );
     expect(mockCanRead).toHaveBeenCalledWith('actionPolicies');
+    expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
+
+  it('opens Artifacts when the rule has a dashboard', async () => {
+    renderSection({
+      ...rule,
+      artifacts: [{ id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } }],
+    });
+
+    await waitFor(() => {
+      expect(
+        within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')
+      ).toHaveAttribute('aria-expanded', 'true');
+    });
   });
 
   it('does not render action policies for signal rules', () => {

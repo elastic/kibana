@@ -31,6 +31,7 @@ describe('RuleSummaryRunbookCard', () => {
 
     const empty = screen.getByTestId('ruleSummaryRunbookEmpty');
     expect(empty).toHaveTextContent('Runbook');
+    expect(screen.getByRole('heading', { name: 'Runbook', level: 4 })).toBeInTheDocument();
     expect(empty).toHaveTextContent('No runbook available for this rule.');
     expect(screen.queryByTestId('ruleSummaryRunbookToggle')).not.toBeInTheDocument();
   });
@@ -48,6 +49,7 @@ describe('RuleSummaryRunbookCard', () => {
       artifacts: [{ id: 'runbook-1', type: 'runbook', data: { content: '# Guide\n\nDetails' } }],
     } as RuleApiResponse);
 
+    expect(screen.getByRole('heading', { name: 'Runbook', level: 4 })).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryRunbookContent')).toHaveTextContent('Guide');
     fireEvent.click(screen.getByTestId('ruleSummaryRunbookToggle'));
     expect(screen.getByTestId('ruleSummaryRunbookToggle')).toHaveTextContent('Hide full guide');

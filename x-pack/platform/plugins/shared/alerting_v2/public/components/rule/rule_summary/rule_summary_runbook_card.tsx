@@ -57,7 +57,7 @@ export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.alertingV2.ruleSummary.runbook.emptyBody', {
+          {i18n.translate('xpack.alertingV2.ruleSummary.runbook.emptyDescription', {
             defaultMessage: 'No runbook available for this rule.',
           })}
         </EuiText>
@@ -72,7 +72,7 @@ export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h5>{RUNBOOK_TITLE}</h5>
+            <h4>{RUNBOOK_TITLE}</h4>
           </EuiTitle>
         </EuiFlexItem>
         {showToggle ? (
@@ -94,7 +94,7 @@ export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <div
         ref={setContentNode}
         css={

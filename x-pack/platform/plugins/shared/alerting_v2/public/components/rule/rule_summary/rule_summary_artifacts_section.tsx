@@ -27,7 +27,7 @@ export const RuleSummaryArtifactsSection: React.FC = () => {
         defaultMessage: 'Artifacts',
       })}
       hasBorder={false}
-      initialIsOpen={hasDashboards || showActionPolicies}
+      initialIsOpen={hasDashboards}
       data-test-subj="ruleSummaryArtifacts"
     >
       <EuiFlexGroup
