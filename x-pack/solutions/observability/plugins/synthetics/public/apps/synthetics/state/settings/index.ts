@@ -19,6 +19,8 @@ import type { ActionConnector } from './api';
 export interface LocationMonitor {
   id: string;
   count: number;
+  /** Browser monitors at this location. They run only on elastic-agent-complete. */
+  browserCount: number;
 }
 
 export interface DynamicSettingsState {
