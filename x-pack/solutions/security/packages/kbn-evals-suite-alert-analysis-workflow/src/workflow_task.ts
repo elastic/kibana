@@ -43,7 +43,7 @@ const isClassificationStep = (step: WorkflowStepExecutionDto): boolean =>
   (step.stepType === undefined && CLASSIFICATION_STEP_ID_FALLBACKS.includes(step.stepId));
 
 /** One verdict, as the workflow's classification step is schema-constrained to return it. */
-interface Verdict {
+export interface Verdict {
   /**
    * Alert id the model echoes back. The agent schema names this `id` (matched in
    * `apply_verdicts` via `where: 'id'`). Do not fall back to `alert_id` — that field is only
@@ -257,5 +257,114 @@ export const runAlertAnalysisWorkflow = async ({
     traceId: execution.traceId,
     toolCallIds,
     toolCallsUnavailable: unavailable,
+  };
+};
+
+/**
+ * Reads the RAW verdict array of the classification step: every verdict the model returned, in the
+ * order it returned them, before the workflow drops foreign ids or pairs verdicts to alerts. This is
+ * the diagnostic `readVerdict` deliberately hides (it matches one id and returns one verdict), and the
+ * only place over-generation, repeated ids and foreign ids are visible. A batch of at most
+ * `batch_size` alerts is a single model call, so exactly one step record carries the array; when
+ * several do (a retried call), the longest array is kept because it is the worst case the post-parse
+ * cap had to handle.
+ */
+export const readRawVerdicts = (stepExecutions: WorkflowStepExecutionDto[]): Verdict[] => {
+  let longest: Verdict[] = [];
+  for (const step of stepExecutions.filter(isClassificationStep)) {
+    const output = step.output as ClassificationStepOutput | null | undefined;
+    const verdicts = output?.structured_output?.verdicts ?? output?.content?.verdicts;
+    if (Array.isArray(verdicts) && verdicts.length > longest.length) {
+      longest = verdicts;
+    }
+  }
+  return longest;
+};
+
+export interface AlertAnalysisBatchResult {
+  /** Alert ids handed to the workflow, in the order given. */
+  alertIds: string[];
+  /** Raw verdicts of the classification step, unfiltered. */
+  rawVerdicts: Verdict[];
+  executionId: string;
+  executionStatus: ExecutionStatus;
+  classificationMethod: ClassificationMethod;
+  traceId?: string;
+}
+
+/**
+ * Runs the managed workflow once for a whole batch of seeded alerts (one rule execution) and returns
+ * the raw verdict array. Uses the same `alert` trigger path as the single-alert runner: the run route
+ * fetches every alert and builds one event, so the workflow chunks them by `consts.batch_size`.
+ */
+export const runAlertAnalysisBatchWorkflow = async ({
+  fetch,
+  log,
+  alertIds,
+  alertIndex,
+  classificationMethod,
+  maxWaitMs = 20 * 60_000,
+  pollIntervalMs = 3_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  alertIds: string[];
+  alertIndex: string;
+  classificationMethod: ClassificationMethod;
+  maxWaitMs?: number;
+  pollIntervalMs?: number;
+}): Promise<AlertAnalysisBatchResult> => {
+  const { workflowExecutionId } = (await fetch(
+    `/api/workflows/workflow/${ALERT_ANALYSIS_WORKFLOW_ID}/run`,
+    {
+      method: 'POST',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      body: JSON.stringify({
+        inputs: {
+          event: {
+            triggerType: 'alert',
+            alertIds: alertIds.map((_id) => ({ _id, _index: alertIndex })),
+          },
+        },
+      }),
+    }
+  )) as { workflowExecutionId: string };
+
+  log.info(
+    `Started alert-analysis workflow execution ${workflowExecutionId} for a batch of ${alertIds.length} alerts`
+  );
+
+  const deadline = Date.now() + maxWaitMs;
+  let execution: WorkflowExecutionDto | undefined;
+  while (Date.now() < deadline) {
+    execution = (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
+      method: 'GET',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      query: { includeOutput: true },
+    })) as WorkflowExecutionDto;
+    if (isTerminal(execution.status)) {
+      break;
+    }
+    await sleep(pollIntervalMs);
+  }
+
+  if (!execution) {
+    throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
+  }
+  if (!isTerminal(execution.status)) {
+    log.warning(
+      `Workflow execution ${workflowExecutionId} did not reach a terminal status within ${maxWaitMs}ms (last status: ${execution.status})`
+    );
+  }
+
+  return {
+    alertIds,
+    rawVerdicts: readRawVerdicts(execution.stepExecutions),
+    executionId: workflowExecutionId,
+    executionStatus: execution.status,
+    classificationMethod,
+    traceId: execution.traceId,
   };
 };

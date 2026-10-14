@@ -54,6 +54,14 @@ export interface LabeledAlert {
   /** Short human-readable summary of why this label is expected (dataset description). */
   description: string;
   doc: Record<string, unknown>;
+  /**
+   * Distinctive field values the model can echo when it explains its verdict (`host.name`,
+   * `process.name`, distinct command-line arguments). Used by the batch evaluators to check that a
+   * verdict's id and its content describe the same alert. Only markers that are unique inside the
+   * batch can discriminate, so the evaluator keeps single-alert markers only. Absent on the
+   * single-alert fixtures, which do not need a correspondence check.
+   */
+  markers?: string[];
 }
 
 const BASE_TIMESTAMP = new Date('2024-06-15T09:00:00Z');
@@ -64,7 +72,7 @@ const ts = (offsetMinutes: number): string => {
   return d.toISOString();
 };
 
-interface BuildAlertParams {
+export interface BuildAlertParams {
   id: string;
   index: number;
   ruleName: string;
@@ -74,6 +82,14 @@ interface BuildAlertParams {
   tactic: { id: string; name: string };
   technique: { id: string; name: string };
   observable: Record<string, unknown>;
+  /**
+   * Rule uuid shared by every alert of one rule execution. Defaults to `<id>-rule`, which is what
+   * the single-alert fixtures use. A multi-alert batch is one rule execution, so all of its alerts
+   * must carry the SAME rule uuid: the workflow anchors rule-scoped enrichment (prevalence, noise
+   * signal, close history, rule metadata) on `event.alerts[0].kibana.alert.rule.uuid` and rejects
+   * multi-rule caller input.
+   */
+  ruleUuid?: string;
 }
 
 /**
@@ -200,7 +216,7 @@ const buildNoiseEnvelope = (id: string, timestamp: string): Record<string, unkno
 // Rule identity shared by every synthetic alert. `rule_type_id`/`consumer`/`producer` mirror a
 // SIEM query rule so the run route resolves a registered rule type when building the event. The
 // noise envelope is spread first so the per-alert signal fields below always win on any overlap.
-const buildDoc = ({
+export const buildDoc = ({
   id,
   index,
   ruleName,
@@ -210,6 +226,7 @@ const buildDoc = ({
   tactic,
   technique,
   observable,
+  ruleUuid = `${id}-rule`,
 }: BuildAlertParams): Record<string, unknown> => ({
   ...buildNoiseEnvelope(id, ts(index)),
   '@timestamp': ts(index),
@@ -219,8 +236,8 @@ const buildDoc = ({
   'kibana.alert.severity': severity,
   'kibana.alert.risk_score': riskScore,
   'kibana.alert.reason': `${ruleName} triggered`,
-  'kibana.alert.rule.uuid': `${id}-rule`,
-  'kibana.alert.rule.rule_id': `${id}-rule`,
+  'kibana.alert.rule.uuid': ruleUuid,
+  'kibana.alert.rule.rule_id': ruleUuid,
   'kibana.alert.rule.name': ruleName,
   'kibana.alert.rule.description': ruleDescription,
   'kibana.alert.rule.category': 'Custom Query Rule',
