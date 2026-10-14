@@ -11,23 +11,28 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Topic } from './topic';
 
 /**
- * Event accepted by the in-process bus.
- * `id` and `acceptedAt` are assigned by the bus. `data` is the caller's reference.
+ * The event a producer writes.
  *
  * @public
  */
-export interface PubSubEvent<TData = unknown> {
+export interface PubSubEventInit<TData> {
+  /**
+   * Stable, source-derived id, unique within the topic. Reuse it when retrying the same delivery
+   * so a durable bus can recognise the duplicate. Phase 1 does not deduplicate.
+   */
   readonly id: string;
-  readonly topic: string;
   readonly data: TData;
-  readonly acceptedAt: string;
 }
 
 /**
+ * Event accepted by the bus: the producer's event plus the fields the bus sets.
+ * `data` is the caller's reference.
+ *
  * @public
  */
-export interface PublishInput<TData> {
-  readonly data: TData;
+export interface PubSubEvent<TData = unknown> extends PubSubEventInit<TData> {
+  readonly topic: string;
+  readonly acceptedAt: string;
 }
 
 /**
@@ -77,7 +82,7 @@ export interface PubSubStart {
    */
   publish<TData>(
     topic: Topic<TData>,
-    input: PublishInput<TData>,
+    event: PubSubEventInit<TData>,
     context?: PubSubHandlerContext
   ): Promise<PubSubEvent<TData>>;
 }

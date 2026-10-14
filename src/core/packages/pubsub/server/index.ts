@@ -15,5 +15,5 @@ export type {
   PubSubHandlerContext,
   PubSubSetup,
   PubSubStart,
-  PublishInput,
+  PubSubEventInit,
 } from './src/contracts';

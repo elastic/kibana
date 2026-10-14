@@ -11,7 +11,7 @@ import type {
   PubSubEvent,
   PubSubHandler,
   PubSubHandlerContext,
-  PublishInput,
+  PubSubEventInit,
   Topic,
 } from '@kbn/core-pubsub-server';
 
@@ -41,7 +41,7 @@ export interface InternalPubSubStart {
   publish<TData>(
     pluginId: string,
     topic: Topic<TData>,
-    input: PublishInput<TData>,
+    event: PubSubEventInit<TData>,
     context?: PubSubHandlerContext
   ): Promise<PubSubEvent<TData>>;
 }

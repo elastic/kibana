@@ -84,7 +84,7 @@ export type {
   PubSubHandlerContext,
   PubSubSetup,
   PubSubStart,
-  PublishInput,
+  PubSubEventInit,
   Topic,
 } from '@kbn/core-pubsub-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';

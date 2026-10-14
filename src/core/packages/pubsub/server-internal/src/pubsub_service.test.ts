@@ -10,12 +10,21 @@
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { defineTopic } from '@kbn/core-pubsub-server';
+import type { PubSubEventInit } from '@kbn/core-pubsub-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { scopeConsumerName } from './consumer_name';
 import type { InternalPubSubStart } from './internal_contracts';
-import { PUBSUB_MAX_DATA_BYTES, PUBSUB_MAX_PENDING_EVENTS, PubSubService } from './pubsub_service';
+import {
+  PUBSUB_MAX_DATA_BYTES,
+  PUBSUB_MAX_ID_LENGTH,
+  PUBSUB_MAX_PENDING_EVENTS,
+  PubSubService,
+} from './pubsub_service';
 
 const PLUGIN = 'ordersPlugin';
+
+let idCounter = 0;
+const nextId = () => `evt-${++idCounter}`;
 
 const flushDispatch = () => new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -146,7 +155,7 @@ describe('PubSubService dispatch', () => {
     });
 
     const { publish } = start(service);
-    const published = publish(PLUGIN, topic, { data: { secret: 'one' } });
+    const published = publish(PLUGIN, topic, { id: nextId(), data: { secret: 'one' } });
 
     await published;
     expect(started).toBe(false);
@@ -175,9 +184,12 @@ describe('PubSubService dispatch', () => {
     });
 
     const { publish } = start(service);
-    const first = await publish(PLUGIN, topic, { data: { secret: 'one' } });
-    const second = await publish('anyPlugin', topic, { data: { secret: 'two' } });
-    const shipment = await publish('shippingPlugin', other, { data: { secret: 'three' } });
+    const first = await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'one' } });
+    const second = await publish('anyPlugin', topic, { id: nextId(), data: { secret: 'two' } });
+    const shipment = await publish('shippingPlugin', other, {
+      id: nextId(),
+      data: { secret: 'three' },
+    });
     await flushDispatch();
 
     expect(seenByOrders).toEqual([first.id, second.id]);
@@ -202,8 +214,8 @@ describe('PubSubService dispatch', () => {
     });
 
     const { publish } = start(service);
-    const first = await publish(PLUGIN, topic, { data: { secret } });
-    const second = await publish(PLUGIN, topic, { data: { secret } });
+    const first = await publish(PLUGIN, topic, { id: nextId(), data: { secret } });
+    const second = await publish(PLUGIN, topic, { id: nextId(), data: { secret } });
     await flushDispatch();
 
     expect(failures).toBe(2);
@@ -256,9 +268,9 @@ describe('PubSubService dispatch', () => {
     });
 
     const { publish } = start(service);
-    await publish(PLUGIN, topic, { data: { secret: 'one' } });
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'one' } });
     await flushDispatch();
-    await publish(PLUGIN, topic, { data: { secret: 'two' } });
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'two' } });
     await flushDispatch();
 
     expect(maxActive).toBe(1);
@@ -288,8 +300,8 @@ describe('PubSubService dispatch', () => {
     });
 
     const { publish } = start(service);
-    await publish(PLUGIN, topic, { data: { secret: 'with-request' } }, { request });
-    await publish(PLUGIN, topic, { data: { secret: 'without-request' } });
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'with-request' } }, { request });
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'without-request' } });
     await flushDispatch();
 
     expect(seenByLeft).toEqual([request, undefined]);
@@ -303,28 +315,59 @@ describe('PubSubService dispatch', () => {
     const definedOnly = defineTopic<{ secret: string }>('shipments');
     const { publish } = start(service);
 
-    await expect(publish(PLUGIN, definedOnly, { data: { secret: 'missing' } })).rejects.toThrow(
-      'Topic "shipments" is not registered.'
-    );
+    await expect(
+      publish(PLUGIN, definedOnly, { id: nextId(), data: { secret: 'missing' } })
+    ).rejects.toThrow('Topic "shipments" is not registered.');
   });
 
   it('throws for oversized or circular data, and for publish before start', async () => {
     const { service, topic } = createHarness();
 
-    await expect(service.publish(PLUGIN, topic, { data: { secret: 'early' } })).rejects.toThrow(
-      /after start/
-    );
+    await expect(
+      service.publish(PLUGIN, topic, { id: nextId(), data: { secret: 'early' } })
+    ).rejects.toThrow(/after start/);
 
     const { publish } = start(service);
 
     const oversized = 'a'.repeat(PUBSUB_MAX_DATA_BYTES);
-    await expect(publish(PLUGIN, topic, { data: { secret: oversized } })).rejects.toThrow(
-      /exceeds/
-    );
+    await expect(
+      publish(PLUGIN, topic, { id: nextId(), data: { secret: oversized } })
+    ).rejects.toThrow(/exceeds/);
 
     const circular: { self?: object; secret: string } = { secret: 'loop' };
     circular.self = circular;
-    await expect(publish(PLUGIN, topic, { data: circular })).rejects.toThrow(/JSON-serializable/);
+    await expect(publish(PLUGIN, topic, { id: nextId(), data: circular })).rejects.toThrow(
+      /JSON-serializable/
+    );
+  });
+
+  it('rejects a missing, empty, or oversized event id', async () => {
+    const { service, topic } = createHarness();
+    const { publish } = start(service);
+    const data = { secret: 'id' };
+
+    const missingId = { data } as PubSubEventInit<typeof data>;
+
+    await expect(publish(PLUGIN, topic, missingId)).rejects.toThrow(/non-empty string/);
+    await expect(publish(PLUGIN, topic, { id: '', data })).rejects.toThrow(/non-empty string/);
+    await expect(
+      publish(PLUGIN, topic, { id: 'a'.repeat(PUBSUB_MAX_ID_LENGTH + 1), data })
+    ).rejects.toThrow(/exceeds/);
+  });
+
+  it('delivers two events with the same id twice: phase 1 does not deduplicate', async () => {
+    const { service, setup, topic } = createHarness();
+    const seen: string[] = [];
+    setup.subscribe(PLUGIN, topic, 'sync', (event) => {
+      seen.push(event.id);
+    });
+
+    const { publish } = start(service);
+    await publish(PLUGIN, topic, { id: 'webhook-1', data: { secret: 'first' } });
+    await publish(PLUGIN, topic, { id: 'webhook-1', data: { secret: 'retry' } });
+    await flushDispatch();
+
+    expect(seen).toEqual(['webhook-1', 'webhook-1']);
   });
 
   it('drops only the consumer whose queue is full and still resolves publish', async () => {
@@ -346,7 +389,8 @@ describe('PubSubService dispatch', () => {
     });
 
     const { publish } = start(service);
-    const publishOne = (value: string) => publish(PLUGIN, topic, { data: { secret: value } });
+    const publishOne = (value: string) =>
+      publish(PLUGIN, topic, { id: nextId(), data: { secret: value } });
 
     await publishOne('first');
     await flushDispatch();
@@ -388,23 +432,23 @@ describe('PubSubService dispatch', () => {
     });
 
     const { publish } = start(service);
-    await publish(PLUGIN, topic, { data: { secret: 'in-flight' } });
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'in-flight' } });
     await flushDispatch();
-    await publish(PLUGIN, topic, { data: { secret: 'queued' } });
+    await publish(PLUGIN, topic, { id: nextId(), data: { secret: 'queued' } });
 
     service.stop();
     gate.resolve();
     await flushDispatch();
 
     expect(calls).toBe(1);
-    await expect(service.publish(PLUGIN, topic, { data: { secret: 'late' } })).rejects.toThrow(
-      /after stop/
-    );
+    await expect(
+      service.publish(PLUGIN, topic, { id: nextId(), data: { secret: 'late' } })
+    ).rejects.toThrow(/after stop/);
   });
 });
 
 describe('PubSubEvent shape', () => {
-  it('assigns an id and acceptedAt and does not replace the data reference', async () => {
+  it('keeps the producer id, assigns acceptedAt, and does not replace the data reference', async () => {
     const service = new PubSubService(mockCoreContext.create());
     const setup = service.setup();
     const topic = defineTopic<{ secret: string }>('orders');
@@ -412,10 +456,10 @@ describe('PubSubEvent shape', () => {
     const { publish } = service.start();
     const data = { secret: 'same' };
 
-    const event = await publish(PLUGIN, topic, { data });
+    const event = await publish(PLUGIN, topic, { id: 'order-42:v7', data });
 
     expect(event).toEqual({
-      id: expect.any(String),
+      id: 'order-42:v7',
       topic: 'orders',
       data,
       acceptedAt: expect.any(String),

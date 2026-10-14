@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { randomUUID } from 'crypto';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type {
   PubSubEvent,
   PubSubHandler,
   PubSubHandlerContext,
-  PublishInput,
+  PubSubEventInit,
   Topic,
 } from '@kbn/core-pubsub-server';
 import { scopeConsumerName } from './consumer_name';
@@ -47,6 +46,9 @@ export const PUBSUB_MAX_PENDING_EVENTS = 1000;
 
 /** UTF-8 byte size of `JSON.stringify(data)`. */
 export const PUBSUB_MAX_DATA_BYTES = 256 * 1024;
+
+/** Characters in a producer-supplied event id. */
+export const PUBSUB_MAX_ID_LENGTH = 256;
 
 /** @internal */
 export class PubSubService implements CoreService<InternalPubSubSetup, InternalPubSubStart> {
@@ -106,7 +108,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   public async publish<TData>(
     pluginId: string,
     topic: Topic<TData>,
-    input: PublishInput<TData>,
+    init: PubSubEventInit<TData>,
     context?: PubSubHandlerContext
   ): Promise<PubSubEvent<TData>> {
     this.assertCanPublish();
@@ -115,12 +117,13 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       throw new Error(`Topic "${topic.name}" is not registered.`);
     }
 
-    this.assertDataSize(input.data);
+    this.assertEventId(init.id);
+    this.assertDataSize(init.data);
 
     const event: PubSubEvent<TData> = Object.freeze({
-      id: randomUUID(),
+      id: init.id,
       topic: topic.name,
-      data: input.data,
+      data: init.data,
       acceptedAt: new Date().toISOString(),
     });
 
@@ -237,6 +240,18 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
 
     if (this.phase !== 'started') {
       throw new Error('Pubsub publish is only available after start.');
+    }
+  }
+
+  private assertEventId(id: unknown): void {
+    if (typeof id !== 'string' || id.length === 0) {
+      throw new Error('Pubsub event id must be a non-empty string.');
+    }
+
+    if (id.length > PUBSUB_MAX_ID_LENGTH) {
+      throw new Error(
+        `Pubsub event id is ${id.length} characters, which exceeds the ${PUBSUB_MAX_ID_LENGTH} character limit.`
+      );
     }
   }
 
