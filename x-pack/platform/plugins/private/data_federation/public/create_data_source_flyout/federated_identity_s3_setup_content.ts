@@ -7,8 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AWS_CLOUDFORMATION_TEMPLATE_URL } from '../../common';
-
 import type { FederatedIdentityDeployConfig } from './federated_identity_deploy_panel';
 import type { FederatedIdentityManualSetupStep } from './federated_identity_manual_setup';
 import { federatedIdentityManualSetupStrings } from './federated_identity_manual_setup_code_block';
@@ -32,6 +30,14 @@ export const s3FederatedIdentitySetupStrings = {
     {
       defaultMessage:
         'After the resources are created, copy RoleArn value from Outputs in CloudFormation and paste it here.',
+    }
+  ),
+
+  cloudFormationRoleWarning: i18n.translate(
+    'xpack.dataFederation.createFlyout.s3.federated.cloudFormationRoleWarning',
+    {
+      defaultMessage:
+        "This doesn't look like a CloudFormation-generated role. The stack's RoleArn is listed in its Outputs.",
     }
   ),
 
@@ -195,13 +201,15 @@ export const getS3FederatedIdentityManualSteps = ({
 export const buildS3CloudFormationLaunchUrl = ({
   jwtIssuer,
   subject,
+  templateUrl,
 }: {
   jwtIssuer: string;
   subject: string;
+  templateUrl: string;
 }): string => {
   const [resourceType, resourceId] = subject.split(':');
   const params = new URLSearchParams({
-    templateURL: AWS_CLOUDFORMATION_TEMPLATE_URL,
+    templateURL: templateUrl,
     // Each deployment or project needs its own stack, so the name has to be unique per resource.
     stackName: `elastic-datasources-federated-identity-${resourceId}`,
   });
@@ -215,9 +223,11 @@ export const buildS3CloudFormationLaunchUrl = ({
 export const getS3FederatedIdentityDeployConfig = ({
   jwtIssuer,
   subject,
+  templateUrl,
 }: {
   jwtIssuer: string;
   subject: string;
+  templateUrl: string;
 }): FederatedIdentityDeployConfig => ({
   title: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.title', {
     defaultMessage: 'Set up AWS access with CloudFormation',
@@ -225,7 +235,7 @@ export const getS3FederatedIdentityDeployConfig = ({
   description: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.description', {
     defaultMessage: 'Open the template in AWS and create the required resources.',
   }),
-  launchUrl: buildS3CloudFormationLaunchUrl({ jwtIssuer, subject }),
+  launchUrl: buildS3CloudFormationLaunchUrl({ jwtIssuer, subject, templateUrl }),
   launchButtonLabel: i18n.translate(
     'xpack.dataFederation.createFlyout.s3.federated.deploy.launchButton',
     {

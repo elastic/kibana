@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer, EuiTextColor } from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
@@ -27,6 +27,11 @@ import {
 } from './federated_identity_s3_setup_content';
 
 const ROLE_ARN_PLACEHOLDER = 'arn:aws:iam::112233445566:role/elastic-data-federation';
+
+// Matches IAM role ARNs only, so the provider, policy or stack ARNs the setup also creates are rejected.
+const IAM_ROLE_ARN_REGEX = /^arn:aws[a-z-]*:iam::[0-9]+:role\/.+$/;
+// Name of the role the CloudFormation stack outputs. Only warned about, so other valid roles still save.
+const CLOUDFORMATION_ROLE_NAME_REGEX = /:role\/(?:.+\/)?ElasticEsqlDataFederation-[^/]+$/;
 
 const SETUP_METHOD_OPTIONS: FederatedIdentitySetupMethodOption[] = [
   {
@@ -229,19 +234,43 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
+  const [setupMethod, setSetupMethod] = useState<FederatedIdentitySetupMethod>('cloudformation');
+
+  const setupValues =
+    cloudInfo?.jwtIssuer && cloudInfo.deploymentId
+      ? {
+          jwtIssuer: cloudInfo.jwtIssuer,
+          subject: cloudInfo.deploymentId,
+          templateUrl: cloudInfo.awsCloudFormationTemplateUrl,
+        }
+      : undefined;
+  // Edit mode keeps roles created before, so only new data sources set up with the stack are checked.
+  const expectsCloudFormationRole =
+    areFieldsRequired && Boolean(setupValues) && setupMethod === 'cloudformation';
+
   const { field: roleArnField, fieldState: roleArnState } = useController({
     name: 'settings.role_arn',
     control,
-    rules: areFieldsRequired
-      ? {
-          validate: (value?: string) =>
-            value?.trim()
-              ? true
-              : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArnRequired', {
-                  defaultMessage: 'Role ARN is required.',
-                }),
+    rules: {
+      validate: (value?: string) => {
+        const roleArn = value?.trim();
+
+        if (!roleArn) {
+          return areFieldsRequired
+            ? i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArnRequired', {
+                defaultMessage: 'Role ARN is required.',
+              })
+            : true;
         }
-      : undefined,
+
+        return IAM_ROLE_ARN_REGEX.test(roleArn)
+          ? true
+          : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArnInvalid', {
+              defaultMessage:
+                'Enter the ARN of an IAM role, for example arn:aws:iam::123456789012:role/role-name.',
+            });
+      },
+    },
   });
 
   useEffect(() => {
@@ -250,10 +279,11 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
     };
   }, [unregister]);
 
-  const [setupMethod, setSetupMethod] = useState<FederatedIdentitySetupMethod>('cloudformation');
-
-  const { jwtIssuer, deploymentId } = cloudInfo ?? {};
-  const setupValues = jwtIssuer && deploymentId ? { jwtIssuer, subject: deploymentId } : undefined;
+  const currentRoleArn = roleArnField.value?.trim() ?? '';
+  const showCloudFormationRoleWarning =
+    expectsCloudFormationRole &&
+    IAM_ROLE_ARN_REGEX.test(currentRoleArn) &&
+    !CLOUDFORMATION_ROLE_NAME_REGEX.test(currentRoleArn);
   const roleArnHelpText =
     setupMethod === 'cloudformation'
       ? s3FederatedIdentitySetupStrings.deployRoleArnHelp
@@ -290,7 +320,24 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
         fullWidth
         isInvalid={Boolean(roleArnState.error)}
         error={roleArnState.error?.message}
-        helpText={setupValues ? roleArnHelpText : undefined}
+        helpText={
+          setupValues
+            ? [
+                roleArnHelpText,
+                ...(showCloudFormationRoleWarning
+                  ? [
+                      <EuiTextColor
+                        color="warning"
+                        key="cloudFormationRoleWarning"
+                        data-test-subj="createDataSourceFlyoutS3FederatedRoleArnWarning"
+                      >
+                        {s3FederatedIdentitySetupStrings.cloudFormationRoleWarning}
+                      </EuiTextColor>,
+                    ]
+                  : []),
+              ]
+            : undefined
+        }
       >
         <EuiFieldText
           data-test-subj="createDataSourceFlyoutS3FederatedRoleArn"

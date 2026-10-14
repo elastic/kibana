@@ -29,10 +29,6 @@ export const PLUGIN_ID = 'data_federation';
 
 export const MINIMUM_LICENSE_TYPE: LicenseType = 'enterprise';
 
-/** Elastic-hosted template the S3 federated identity CloudFormation quick create link loads. */
-export const AWS_CLOUDFORMATION_TEMPLATE_URL =
-  'https://elastic-datasource-cft-816604515500-us-east-1-an.s3.us-east-1.amazonaws.com/aws/v1/datasource-cft.yml';
-
 /** Base path for this plugin's HTTP APIs (internal). */
 export const INTERNAL_API_BASE_PATH = '/internal/data_federation' as const;
 

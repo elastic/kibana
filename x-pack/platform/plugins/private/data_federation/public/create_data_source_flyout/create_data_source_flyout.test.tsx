@@ -88,6 +88,7 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
       jwtIssuer: 'https://issuer.example.com',
       deploymentId: 'deployment:abc123',
       isServerless: false,
+      awsCloudFormationTemplateUrl: 'https://cft.s3.amazonaws.com/aws/v1/datasource-cft.yml',
     },
   };
 
@@ -105,7 +106,10 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
   );
 };
 
-const renderCreateFlyout = (cloudInfo?: DataFederationKibanaServices['cloudInfo']) => {
+const renderCreateFlyout = (
+  cloudInfo?: DataFederationKibanaServices['cloudInfo'],
+  onSave: jest.Mock = jest.fn().mockResolvedValue(null)
+) => {
   const services: DataFederationKibanaServices = {
     dataSourcesClient: createClientMock(),
     datasetsClient: createDatasetsClientMock(),
@@ -118,11 +122,7 @@ const renderCreateFlyout = (cloudInfo?: DataFederationKibanaServices['cloudInfo'
   return render(
     <EuiProvider>
       <KibanaContextProvider services={services}>
-        <CreateDataSourceFlyout
-          onClose={jest.fn()}
-          onSave={jest.fn().mockResolvedValue(null)}
-          existingDataSourceNames={[]}
-        />
+        <CreateDataSourceFlyout onClose={jest.fn()} onSave={onSave} existingDataSourceNames={[]} />
       </KibanaContextProvider>
     </EuiProvider>
   );
@@ -181,6 +181,7 @@ describe('CreateDataSourceFlyout', () => {
         jwtIssuer: 'https://issuer.example.com',
         deploymentId: 'deployment:abc123',
         isServerless: false,
+        awsCloudFormationTemplateUrl: 'https://cft.s3.amazonaws.com/aws/v1/datasource-cft.yml',
       });
 
       expect(
@@ -205,6 +206,7 @@ describe('CreateDataSourceFlyout', () => {
         jwtIssuer: 'https://issuer.example.com',
         deploymentId: 'deployment:abc123',
         isServerless: false,
+        awsCloudFormationTemplateUrl: 'https://cft.s3.amazonaws.com/aws/v1/datasource-cft.yml',
       };
       const { getByTestId, getByText, queryByTestId } = renderCreateFlyout(cloudInfo);
 
@@ -213,6 +215,7 @@ describe('CreateDataSourceFlyout', () => {
         buildS3CloudFormationLaunchUrl({
           jwtIssuer: cloudInfo.jwtIssuer,
           subject: cloudInfo.deploymentId,
+          templateUrl: cloudInfo.awsCloudFormationTemplateUrl,
         })
       );
       expect(getByText(s3FederatedIdentitySetupStrings.deployRoleArnHelp)).toBeInTheDocument();
@@ -226,6 +229,83 @@ describe('CreateDataSourceFlyout', () => {
       expect(queryByTestId('createDataSourceFlyoutS3FederatedDeployPanel')).not.toBeInTheDocument();
       expect(getByTestId('createDataSourceFlyoutS3FederatedManualSteps')).toBeInTheDocument();
       expect(getByText(s3FederatedIdentitySetupStrings.roleArnHelp)).toBeInTheDocument();
+    });
+
+    describe('role ARN', () => {
+      const federatedCloudInfo = {
+        jwtIssuer: 'https://issuer.example.com',
+        deploymentId: 'deployment:abc123',
+        isServerless: false,
+        awsCloudFormationTemplateUrl: 'https://cft.s3.amazonaws.com/aws/v1/datasource-cft.yml',
+      };
+
+      const submitWithRoleArn = (onSave: jest.Mock, roleArn: string, method?: 'manual') => {
+        const utils = renderCreateFlyout(federatedCloudInfo, onSave);
+
+        if (method) {
+          fireEvent.click(
+            within(
+              utils.getByTestId(`createDataSourceFlyoutS3FederatedSetupMethod-${method}`)
+            ).getByRole('radio')
+          );
+        }
+        fireEvent.change(utils.getByTestId('createDataSourceFlyoutName'), {
+          target: { value: 'federated-bucket' },
+        });
+        fireEvent.change(utils.getByTestId('createDataSourceFlyoutS3FederatedRoleArn'), {
+          target: { value: roleArn },
+        });
+        fireEvent.click(utils.getByTestId('createDataSourceFlyoutSubmit'));
+
+        return utils;
+      };
+
+      // The stack creates more than one role, so a different one is flagged, but still saved in
+      // case it is a valid role we did not anticipate.
+      it('warns about a role the CloudFormation stack did not create, but still saves it', async () => {
+        const onSave = jest.fn().mockResolvedValue(null);
+        const { getByTestId } = submitWithRoleArn(
+          onSave,
+          'arn:aws:iam::123456789012:role/elastic-s3-read'
+        );
+
+        expect(getByTestId('createDataSourceFlyoutS3FederatedRoleArnWarning')).toBeInTheDocument();
+        await waitFor(() => {
+          expect(onSave).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      it.each([
+        'arn:aws:iam::123456789012:role/ElasticEsqlDataFederation-a1b2c3',
+        'arn:aws:iam::123456789012:role/elastic/ElasticEsqlDataFederation-a1b2c3',
+      ])('does not warn about the role the CloudFormation stack creates: %s', async (roleArn) => {
+        const onSave = jest.fn().mockResolvedValue(null);
+        const { queryByTestId } = submitWithRoleArn(onSave, roleArn);
+
+        expect(
+          queryByTestId('createDataSourceFlyoutS3FederatedRoleArnWarning')
+        ).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(onSave).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      // Manual setup lets users name the role, so it only has to be a role ARN.
+      it('accepts any role ARN with the manual setup', async () => {
+        const onSave = jest.fn().mockResolvedValue(null);
+        const { queryByTestId } = submitWithRoleArn(
+          onSave,
+          'arn:aws:iam::123456789012:role/elastic-s3-read',
+          'manual'
+        );
+
+        expect(
+          queryByTestId('createDataSourceFlyoutS3FederatedRoleArnWarning')
+        ).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(onSave).toHaveBeenCalledTimes(1);
+        });
+      });
     });
 
     it('hides federated identity when no issuer is present', async () => {
@@ -491,6 +571,43 @@ describe('CreateDataSourceFlyout', () => {
 
       await submitFrom(form, getByTestId('createDataSourceFlyoutSubmit'));
 
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // The setup creates several ARNs (provider, policy, stack), so pasting the wrong one is easy.
+  it.each([
+    'arn:aws:iam::123456789012:oidc-provider/workload-identity-issuer.example/orgs/org-abc123',
+    'arn:aws:iam::123456789012:policy/elastic-s3-read',
+    'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-datasources/0f1e2d3c',
+    'elastic-s3-read',
+  ])('rejects %s as the role ARN', async (roleArn) => {
+    const onSave = jest.fn().mockResolvedValue(null);
+    const { getByTestId, findByText } = renderFederatedS3EditFlyout(onSave);
+
+    fireEvent.change(getByTestId('createDataSourceFlyoutS3FederatedRoleArn'), {
+      target: { value: roleArn },
+    });
+    fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
+
+    expect(await findByText(/Enter the ARN of an IAM role/)).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ' arn:aws:iam::123456789012:role/service-role/elastic-s3-read ',
+    'arn:aws-us-gov:iam::123456789012:role/elastic-s3-read',
+    'arn:aws-cn:iam::123456789012:role/elastic-s3-read',
+  ])('accepts %p as the role ARN', async (roleArn) => {
+    const onSave = jest.fn().mockResolvedValue(null);
+    const { getByTestId } = renderFederatedS3EditFlyout(onSave);
+
+    fireEvent.change(getByTestId('createDataSourceFlyoutS3FederatedRoleArn'), {
+      target: { value: roleArn },
+    });
+    fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
+
+    await waitFor(() => {
       expect(onSave).toHaveBeenCalledTimes(1);
     });
   });

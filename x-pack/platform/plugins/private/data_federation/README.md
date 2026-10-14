@@ -35,3 +35,5 @@ For S3, the user can set up the AWS side either by running the manual AWS CLI st
 ## Config
 
 `xpack.dataFederation.workloadIdentityIssuerUrl` - JWT issuer URL used by federated identity
+
+`xpack.dataFederation.awsCloudFormationTemplateUrl` - HTTPS URL of the CloudFormation template the S3 federated identity setup opens in the AWS console. Defaults to the global production template, which is the same for every environment and region. Not meant to be set by users: it only exists so the template can be moved without a Kibana upgrade

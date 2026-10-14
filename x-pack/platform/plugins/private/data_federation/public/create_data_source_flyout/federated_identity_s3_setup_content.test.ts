@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AWS_CLOUDFORMATION_TEMPLATE_URL } from '../../common';
 import {
   buildS3CloudFormationLaunchUrl,
   getS3FederatedIdentityDeployConfig,
@@ -116,7 +115,12 @@ describe('getS3FederatedIdentityManualSteps', () => {
   });
 });
 
-const launchUrl = buildS3CloudFormationLaunchUrl(setupValues);
+const deployValues = {
+  ...setupValues,
+  templateUrl: 'https://cft.s3.us-east-1.amazonaws.com/aws/v1/datasource-cft.yml',
+};
+
+const launchUrl = buildS3CloudFormationLaunchUrl(deployValues);
 
 const launchParams = (url: string) => new URLSearchParams(url.slice(url.indexOf('?') + 1));
 
@@ -136,14 +140,8 @@ describe('buildS3CloudFormationLaunchUrl', () => {
     );
   });
 
-  // The console rejects a blank templateURL, and the template has to be an S3 object for
-  // quick create to load it.
-  it('points the console at the published S3 template', () => {
-    expect(launchParams(launchUrl).get('templateURL')).toBe(AWS_CLOUDFORMATION_TEMPLATE_URL);
-    expect(AWS_CLOUDFORMATION_TEMPLATE_URL).toMatch(
-      /^https:\/\/[^/]+\.s3[.-][^/]*amazonaws\.com\//
-    );
-    expect(AWS_CLOUDFORMATION_TEMPLATE_URL).toMatch(/\/aws\/v1\/datasource-cft\.yml$/);
+  it('points the console at the configured template', () => {
+    expect(launchParams(launchUrl).get('templateURL')).toBe(deployValues.templateUrl);
   });
 
   // The template takes the resource type and ID as separate parameters, not the trust subject.
@@ -158,7 +156,7 @@ describe('buildS3CloudFormationLaunchUrl', () => {
 
   it('passes project as the resource type for serverless projects', () => {
     const params = launchParams(
-      buildS3CloudFormationLaunchUrl({ ...setupValues, subject: 'project:proj789' })
+      buildS3CloudFormationLaunchUrl({ ...deployValues, subject: 'project:proj789' })
     );
 
     expect(params.get('param_ElasticResourceType')).toBe('project');
@@ -169,7 +167,7 @@ describe('buildS3CloudFormationLaunchUrl', () => {
   // building and parsing share the same URLSearchParams behavior.
   it('encodes values that would otherwise break the parameter list', () => {
     const url = buildS3CloudFormationLaunchUrl({
-      ...setupValues,
+      ...deployValues,
       jwtIssuer: 'https://issuer.example/orgs/org&name=x',
     });
 
@@ -180,7 +178,7 @@ describe('buildS3CloudFormationLaunchUrl', () => {
 });
 
 describe('getS3FederatedIdentityDeployConfig', () => {
-  const config = getS3FederatedIdentityDeployConfig(setupValues);
+  const config = getS3FederatedIdentityDeployConfig(deployValues);
 
   it('launches the template built for this deployment', () => {
     expect(config.launchUrl).toBe(launchUrl);
