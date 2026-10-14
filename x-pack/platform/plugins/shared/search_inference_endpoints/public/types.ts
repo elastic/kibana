@@ -6,7 +6,6 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -46,7 +45,6 @@ export interface AppPluginStartDependencies {
 }
 
 export interface AppPluginSetupDependencies {
-  actions: ActionsPublicPluginSetup;
   cloud?: CloudSetup;
   console?: ConsolePluginSetup;
   features: FeaturesPluginSetup;
