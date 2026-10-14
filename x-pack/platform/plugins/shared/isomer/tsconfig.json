@@ -8,6 +8,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/isomer",
-    "@kbn/isomer-components"
+    "@kbn/isomer-components",
+    "@kbn/isomer-primitives-charts"
   ]
 }
