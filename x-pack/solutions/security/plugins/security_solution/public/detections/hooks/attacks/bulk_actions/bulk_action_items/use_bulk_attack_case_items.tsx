@@ -8,21 +8,15 @@
 import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
-import { useAssistantContext } from '@kbn/elastic-assistant';
-import type { CaseUI } from '@kbn/cases-plugin/common';
-import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 
 import { useAddToCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
 import { APP_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { ATTACK_ADD_TO_CASE_ACTION_ID } from '../../../../../common/constants/action_ids';
 import type { AttackToAttach } from '../../../../../cases/attachments/attack';
-import { buildAttackAttachments } from '../../../../../cases/attachments/attack';
-import { ATTACK_ALERTS_TRUNCATED } from '../translations';
+import { useAttackCaseAttachments } from '../use_attack_case_attachments';
 import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
@@ -56,12 +50,7 @@ export const useBulkAttackCaseItems = ({
   const {
     services: { cases, telemetry },
   } = useKibana();
-  const { alertsIndexPattern } = useAssistantContext();
-  const { addWarning } = useAppToasts();
-  const attackAttachmentsEnabled = useIsExperimentalFeatureEnabled('attackAttachmentsEnabled');
-  // The attack type is unified-only, so fall back to the markdown payload when the framework is off.
-  const canAttachAttack =
-    attackAttachmentsEnabled && cases.config.attachmentsEnabled && attackToAttach != null;
+  const getAttackAttachments = useAttackCaseAttachments(attackToAttach);
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
   const canUserCreateAndReadCases = useCallback(
@@ -88,25 +77,6 @@ export const useBulkAttackCaseItems = ({
     title,
   });
 
-  const buildAttachmentsForCase = useCallback(
-    (theCase?: CaseUI) => {
-      if (!canAttachAttack || attackToAttach == null) {
-        return undefined;
-      }
-
-      return buildAttackAttachments(
-        {
-          ...attackToAttach,
-          alertsIndex: alertsIndexPattern ?? '',
-        },
-        // A case holds at most MAX_ALERTS_PER_CASE alerts in total, so the attack's alerts have to
-        // fit in whatever the chosen case has left. A case created from the flyout has none yet.
-        { maxAlerts: MAX_ALERTS_PER_CASE - (theCase?.totalAlerts ?? 0) }
-      );
-    },
-    [alertsIndexPattern, attackToAttach, canAttachAttack]
-  );
-
   const onAddToCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
     async (alertItems) => {
       const alertIds = extractRelatedDetectionAlertIds(alertItems);
@@ -122,7 +92,7 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
-      if (!canAttachAttack) {
+      if (getAttackAttachments == null) {
         onAddToCase({ alertIds, markdownComments });
       } else {
         onAddToCase({
@@ -130,33 +100,13 @@ export const useBulkAttackCaseItems = ({
           markdownComments: [],
           // Built per case rather than up front: how many of the attack's alerts fit depends on
           // how many the chosen case already holds, which isn't known until the user picks one.
-          getAttachments: (theCase) => {
-            const attackAttachments = buildAttachmentsForCase(theCase);
-
-            if (attackAttachments == null) {
-              return [];
-            }
-
-            if (attackAttachments.truncated) {
-              // Raised as the attachments are posted, so it describes an attach that is actually
-              // happening — but the request may still fail, hence the prospective wording.
-              addWarning({
-                title: ATTACK_ALERTS_TRUNCATED({
-                  alertCount: attackAttachments.alertCount,
-                  attachedAlertCount: attackAttachments.attachedAlertCount,
-                  maxAlertsPerCase: MAX_ALERTS_PER_CASE,
-                }),
-              });
-            }
-
-            return attackAttachments.attachments;
-          },
+          getAttachments: getAttackAttachments,
         });
       }
 
       closePopover?.();
     },
-    [addWarning, buildAttachmentsForCase, canAttachAttack, closePopover, onAddToCase]
+    [closePopover, getAttackAttachments, onAddToCase]
   );
 
   const items = useMemo<BulkActionsConfig[]>(
