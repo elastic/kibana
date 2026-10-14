@@ -123,6 +123,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
+    id: 'alerting.v1.alertStatusChanged',
+    schemaHash: '393ba21ad63d5b65d3b019c299b5f7d9e172d9eea52df67c069413b007c22a7a',
+  },
+  {
     id: 'cases.attachmentsAdded',
     schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
   },
