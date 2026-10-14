@@ -41,7 +41,7 @@ interface WorkflowStep {
     subject_id?: string;
     trigger_type?: string;
     message?: string;
-    stream_names?: string;
+    source_ids?: string;
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
@@ -157,7 +157,9 @@ describe('significant events persistence workflow contracts', () => {
       'on-failure': { continue: true },
     });
     expect(triggerStep.with?.message).toContain('Probable cause:');
-    expect(triggerStep.with?.stream_names).toContain('stream_names');
+    expect(triggerStep.with?.source_ids).toContain('source_ids');
+    // Open investigations are matched by subject; the start step takes no concurrency key.
+    expect(triggerStep.with).not.toHaveProperty('concurrency_key');
   });
 
   it('bounds the discovery investigation message below the trigger input limit', () => {
