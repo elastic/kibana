@@ -181,6 +181,7 @@ export const EmbeddableAlertsTable = ({
           variant: 'transparent',
         }}
         openLinksInNewTab={true}
+        isInteractive={viewMode !== 'non-interactive'}
         renderExpandedAlertView={(props) => (
           <AlertDetailFlyout {...props} ownFocus={true} hasPagination={false} />
         )}

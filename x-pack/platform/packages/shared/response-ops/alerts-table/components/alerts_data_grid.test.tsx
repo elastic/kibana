@@ -181,6 +181,15 @@ describe('AlertsDataGrid', () => {
       expect(mockRenderContext.onPageIndexChange).toHaveBeenCalledWith(1);
     });
 
+    it('should hide the page size selector when not interactive', () => {
+      const { rerender } = render(<TestComponent {...mockDataGridProps} />);
+      expect(screen.getByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
+
+      rerender(<TestComponent {...mockDataGridProps} isInteractive={false} />);
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('pagination-button-1')).toBeInTheDocument();
+    });
+
     it('should show when it was updated', () => {
       render(<TestComponent {...mockDataGridProps} />);
       expect(screen.getByTestId('toolbar-updated-at')).not.toBe(null);

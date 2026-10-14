@@ -646,6 +646,10 @@ export interface PublicAlertsDataGridProps
    * Options to customize the actions menu for each cell
    */
   cellActionsOptions?: CellActionsOptions;
+  /**
+   * When `false`, the page size selector is hidden. Defaults to `true`.
+   */
+  isInteractive?: boolean;
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
