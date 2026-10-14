@@ -14,7 +14,7 @@ import {
   type SignificantEventsMaintenanceSummary,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
-import { getActivityBlockTooltip } from '../utils/activity_block_tooltip';
+import { getActivityBlockTooltip } from '../../common/activity_block_tooltip';
 import { getFormattedError } from '../../common/errors';
 
 const MAINTENANCE_STATUS_QUERY_KEY = ['nightshiftMaintenanceStatus'] as const;
