@@ -41,19 +41,8 @@ interface AppsSectionProps {
 }
 
 export function AppsSection({ canEdit }: AppsSectionProps) {
-  const {
-    isLoading,
-    hasStatusRequestError,
-    available,
-    status,
-    error,
-    workspace,
-    isMutating,
-    retryStatusRequest,
-    connect,
-    confirm,
-    disconnect,
-  } = useRelayAppConnection();
+  const { isLoading, hasStatusRequestError, available, retryStatusRequest } =
+    useRelayAppConnection();
 
   return (
     <>
@@ -115,36 +104,84 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
         {!isLoading && !hasStatusRequestError && available && (
           <EuiFlexGroup gutterSize="l" wrap>
             <EuiFlexItem grow={false} css={{ minWidth: 320, maxWidth: 600 }}>
-              <EuiCard
-                display="subdued"
-                textAlign="left"
-                icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
-                data-test-subj="streamsSlackAppCard"
-                title={i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceTitle', {
-                  defaultMessage: 'Elastic Slack App',
-                })}
-                description={i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
-                  defaultMessage:
-                    'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
-                })}
-                footer={
-                  <SlackCardFooter
-                    status={status}
-                    error={error}
-                    workspace={workspace}
-                    canEdit={canEdit}
-                    isMutating={isMutating}
-                    onConnect={connect}
-                    onConfirm={confirm}
-                    onDisconnect={disconnect}
-                  />
-                }
-              />
+              <SlackAppCard canEdit={canEdit} />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
       </SettingsSection>
     </>
+  );
+}
+
+export interface SlackAppCardProps {
+  canEdit: boolean;
+  /** Replaces the default description. */
+  description?: string;
+  /** Shows the card with a note instead of nothing when the Slack App is unavailable. */
+  showWhenUnavailable?: boolean;
+}
+
+/** The Elastic Slack App card: connect or disconnect the workspace and manage its channels. */
+export function SlackAppCard({
+  canEdit,
+  description,
+  showWhenUnavailable = false,
+}: SlackAppCardProps): React.ReactElement | null {
+  const connection = useRelayAppConnection();
+  const {
+    isLoading,
+    hasStatusRequestError,
+    status,
+    error,
+    workspace,
+    isMutating,
+    connect,
+    confirm,
+    disconnect,
+  } = connection;
+  const available = connection.available && !hasStatusRequestError;
+
+  if (isLoading || (!available && !showWhenUnavailable)) {
+    return null;
+  }
+
+  return (
+    <EuiCard
+      display="subdued"
+      textAlign="left"
+      icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
+      data-test-subj="streamsSlackAppCard"
+      title={i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceTitle', {
+        defaultMessage: 'Elastic Slack App',
+      })}
+      description={
+        description ??
+        i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
+          defaultMessage:
+            'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
+        })
+      }
+      footer={
+        available ? (
+          <SlackCardFooter
+            status={status}
+            error={error}
+            workspace={workspace}
+            canEdit={canEdit}
+            isMutating={isMutating}
+            onConnect={connect}
+            onConfirm={confirm}
+            onDisconnect={disconnect}
+          />
+        ) : (
+          <EuiText size="s" color="subdued" data-test-subj="streamsSlackAppUnavailable">
+            {i18n.translate('xpack.nightshift.settings.apps.slackUnavailable', {
+              defaultMessage: 'The Elastic Slack App is not available on this deployment.',
+            })}
+          </EuiText>
+        )
+      }
+    />
   );
 }
 
