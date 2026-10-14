@@ -41,6 +41,11 @@ interface DeliverInvestigationNotificationsParams {
   routingClient: NotificationRoutingClient;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
+  /**
+   * Called after each confirmed delivery to a destination with a thread, so replies in that thread
+   * can reach the investigation. Its failure is logged and does not fail the delivery.
+   */
+  onThreadConfirmed?: (destination: NotificationDestination) => Promise<void>;
 }
 
 interface PreparedDestinationDelivery {
@@ -76,6 +81,27 @@ const hasDeliveryAttempt = (
       attempt.phase === phase
   );
 
+/**
+ * Only the first execution that notifies a destination announces itself and reports its failure
+ * there. Later executions, such as follow-ups from replies in the thread, only edit the findings,
+ * so a failed follow-up leaves the last findings in place.
+ */
+const isQuietFollowUp = (
+  routing: NotificationRouting,
+  executionId: string,
+  destination: NotificationDestination,
+  phase: NotificationPhase
+): boolean => {
+  if (phase === 'completed') {
+    return false;
+  }
+  const first = routing.executions.find(({ destination_ids: ids }) => ids.includes(destination.id));
+  if (!first || first.id === executionId) {
+    return false;
+  }
+  return phase === 'failed' || destination.thread !== undefined;
+};
+
 const prepareDestinationDelivery = (
   { investigation, investigationUrl, phase, reason }: DeliverInvestigationNotificationsParams,
   routing: NotificationRouting,
@@ -110,6 +136,9 @@ const prepareDestinationDelivery = (
       url: investigationUrl,
       phase,
       reason,
+      ...(phase === 'completed' && destination.thread && destination.findings_ts
+        ? { editMessageTs: destination.findings_ts }
+        : {}),
       notificationDestination: {
         type: destination.type,
         connector_id: destination.connector_id,
@@ -142,15 +171,21 @@ const executeDestinationDelivery = async (
   if (diagnostic || !execute || !delivery) {
     return { status: 'failed', error: diagnostic || 'Notification delivery is unavailable' };
   }
-  try {
+  const send = async (attempt: NotificationDelivery): Promise<NotificationOutcome> => {
     const response = await execute({
       actionId: destination.connector_id,
       signal,
-      params: delivery.params,
+      params: attempt.params,
     });
     return signal.aborted
       ? { status: 'unconfirmed', error: 'Cancelled during notification delivery' }
-      : delivery.getOutcome(response);
+      : attempt.getOutcome(response);
+  };
+  try {
+    const outcome = await send(delivery);
+    return outcome.status === 'failed' && delivery.fallback
+      ? await send(delivery.fallback)
+      : outcome;
   } catch (error) {
     return {
       status: 'unconfirmed',
@@ -164,7 +199,7 @@ const recordDeliveryOutcome = async (
   attemptId: string,
   identity: string,
   outcome: NotificationOutcome
-): Promise<void> => {
+): Promise<NotificationRouting> => {
   if (outcome.error !== undefined) {
     outcome.error = outcome.error.slice(0, MAX_TEXT_LENGTH);
   }
@@ -172,7 +207,7 @@ const recordDeliveryOutcome = async (
     logger.warn(`Notification delivery for ${identity} is ${outcome.status}: ${outcome.error}`);
   }
   try {
-    await routingClient.record(attemptId, outcome);
+    return await routingClient.record(attemptId, outcome);
   } catch (error) {
     logger.warn(
       `Could not persist notification delivery for ${identity}; do not resend: ${
@@ -200,6 +235,9 @@ const deliverToDestination = async (
   const destination = routing.destinations.find(({ id }) => id === destinationId);
   if (!destination) {
     throw new Error('Notification destination disappeared');
+  }
+  if (isQuietFollowUp(routing, executionId, destination, phase)) {
+    return;
   }
   const delivery = prepareDestinationDelivery(params, routing, destination, setupError);
   if (signal.aborted) {
@@ -230,7 +268,20 @@ const deliverToDestination = async (
   }
 
   const outcome = await executeDestinationDelivery(params, destination, delivery, execute);
-  await recordDeliveryOutcome(params, attemptId, identity, outcome);
+  const recorded = await recordDeliveryOutcome(params, attemptId, identity, outcome);
+  const confirmed = recorded.destinations.find(({ id }) => id === destinationId);
+  if (outcome.status !== 'sent' || !confirmed?.thread || !params.onThreadConfirmed) {
+    return;
+  }
+  try {
+    await params.onThreadConfirmed(confirmed);
+  } catch (error) {
+    logger.warn(
+      `Could not link the notification thread for ${identity}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 };
 
 /**
@@ -241,10 +292,12 @@ const deliverToDestination = async (
  * participants. Terminal phases require that snapshot and select one terminal outcome before
  * posting, preventing completion and failure notifications for the same execution.
  *
- * Resolves Actions once, then reads current routing for each destination, skips existing attempts,
- * and prepares a root or thread reply. Each post requires a durable unconfirmed claim before the
- * connector is invoked once; its outcome and any confirmed thread reference are saved immediately.
- * Uncertain root deliveries block automatic root recreation, including in later executions.
+ * Resolves Actions once, then reads current routing for each destination, skips existing attempts
+ * and the started and failed messages of later executions, and prepares a root, a thread reply, or
+ * an edit of the destination's findings message (with a reply as fallback). Each post requires a
+ * durable unconfirmed claim before the connector is invoked; its outcome, any confirmed thread
+ * reference and the findings message are saved immediately. Uncertain root deliveries block
+ * automatic root recreation, including in later executions.
  *
  * Cancellation and inactive attachments stop further delivery. Setup, preparation, and connector
  * error responses are recorded per destination so other destinations can proceed. Posting

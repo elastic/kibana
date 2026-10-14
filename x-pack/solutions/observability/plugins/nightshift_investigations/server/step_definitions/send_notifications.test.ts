@@ -43,7 +43,11 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
   }));
   const urlService = new MockUrlService();
   const investigationLocator = urlService.locators.create(new InvestigationLocatorDefinition());
-  const getInvestigationsClient = jest.fn(() => ({ getInvestigationExecutionContext })) as never;
+  const linkSlackThread = jest.fn(async () => true);
+  const getInvestigationsClient = jest.fn(() => ({
+    getInvestigationExecutionContext,
+    linkSlackThread,
+  })) as never;
   const getRoutingClient = jest.fn(async () => routing.client);
   const definition = sendNotificationsStepDefinition({
     investigationLocator,
@@ -74,6 +78,7 @@ const setup = (spaceId = 'default', connectorId = 'saved-slack') => {
     getActionsClientWithRequestInSpace,
     getInvestigationExecutionContext,
     getRoutingClient,
+    linkSlackThread,
     context,
     routing,
   };
@@ -156,5 +161,46 @@ describe('nightshift.sendNotifications step', () => {
     await expect(definition.handler(context())).rejects.toThrow('Invalid execution');
     expect(getRoutingClient).not.toHaveBeenCalled();
     expect(getActionsClientWithRequestInSpace).not.toHaveBeenCalled();
+  });
+
+  it('links the confirmed Slack thread to the investigation in the workspace Slack reported', async () => {
+    const { definition, execute, linkSlackThread, context } = setup();
+    execute.mockResolvedValue({
+      status: 'ok',
+      data: { ts: '1.2', channel: 'C123', message: { team: 'T123' } },
+    } as never);
+
+    await definition.handler(context());
+
+    expect(linkSlackThread).toHaveBeenCalledWith({
+      investigationId: 'inv-1',
+      workspace: 'T123',
+      channel: 'C123',
+      threadTs: '1.2',
+    });
+  });
+
+  it('warns when another open investigation holds the thread', async () => {
+    const { definition, execute, linkSlackThread, context } = setup();
+    execute.mockResolvedValue({
+      status: 'ok',
+      data: { ts: '1.2', channel: 'C123', team: 'T123' },
+    } as never);
+    linkSlackThread.mockResolvedValue(false);
+    const stepContext = context() as { logger: { warn: jest.Mock } };
+
+    await definition.handler(stepContext as never);
+
+    expect(stepContext.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('already belongs to another open investigation')
+    );
+  });
+
+  it('does not link a thread whose workspace Slack did not report', async () => {
+    const { definition, linkSlackThread, context } = setup();
+
+    await definition.handler(context());
+
+    expect(linkSlackThread).not.toHaveBeenCalled();
   });
 });

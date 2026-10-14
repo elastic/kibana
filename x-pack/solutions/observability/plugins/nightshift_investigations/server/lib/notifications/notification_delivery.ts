@@ -38,6 +38,8 @@ export type ExecuteConnector = (
 export interface NotificationDelivery {
   params: JsonObject;
   getOutcome: (response: ActionTypeExecutorResult<unknown>) => NotificationOutcome;
+  /** Sent instead when this delivery fails, for example because the message to edit is gone. */
+  fallback?: NotificationDelivery;
 }
 
 export interface NotificationDeliveryContext {
@@ -46,6 +48,8 @@ export interface NotificationDeliveryContext {
   url: string;
   phase: NotificationPhase;
   reason?: string;
+  /** A message posted earlier that this delivery edits rather than posting a new one. */
+  editMessageTs?: string;
 }
 
 export interface NotificationHandler {

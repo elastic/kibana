@@ -46,7 +46,16 @@ export const notificationRoutingSchema = z.strictObject({
             name: z.string().max(500).optional(),
           })
         ),
-        thread: z.strictObject({ channel: identifier, thread_ts: messageId }).optional(),
+        thread: z
+          .strictObject({
+            channel: identifier,
+            thread_ts: messageId,
+            /** The Slack workspace (team) the thread is in, when the connector reported it. */
+            workspace: identifier.optional(),
+          })
+          .optional(),
+        /** The message holding the latest findings, which later completions edit. */
+        findings_ts: messageId.optional(),
       })
   ),
   executions: z.array(
@@ -67,6 +76,7 @@ export type NotificationOutcome = Pick<
   'status' | 'message_ts' | 'sent_at' | 'error'
 > & {
   channel?: string;
+  workspace?: string;
 };
 export type NotificationRouting = z.infer<typeof notificationRoutingSchema>;
 export type StoredNotificationRouting = Omit<NotificationRouting, 'id'>;

@@ -1012,6 +1012,49 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
+   * Records a Slack thread that the investigation's notifications post in as its `slack_thread`
+   * subject, so the Slack thread workflow continues this investigation on a reply there. A thread
+   * another open investigation already holds stays with that one, and the call returns false.
+   * Linking again is a no-op, and leaves the events the thread recorded in place.
+   */
+  async linkSlackThread({
+    investigationId,
+    workspace,
+    channel,
+    threadTs,
+  }: {
+    investigationId: string;
+    workspace: string;
+    channel: string;
+    threadTs: string;
+  }): Promise<boolean> {
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const subjectKey = {
+      type: 'slack_thread' as const,
+      id: toSlackThreadKey({ workspace, channel, threadTs }),
+    };
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const claim = await subjectsClient.claimSubjects({
+      conversationId: investigationId,
+      subjects: [subjectKey],
+      isHolderOpen: async (conversationId) => {
+        const [holder] = await findInvestigationConversations(conversations, [conversationId]);
+        return holder?.status === 'open';
+      },
+    });
+    if (!claim.claimed) {
+      return false;
+    }
+    await subjectsClient.upsertSubjects(investigationId, [
+      { ...subjectKey, triggerType: 'automatic', slack: { channel, thread_ts: threadTs } },
+    ]);
+    return true;
+  }
+
+  /**
    * The thread's investigation, found by its `slack_thread` subject: an open one if there is one,
    * otherwise a closed one.
    */

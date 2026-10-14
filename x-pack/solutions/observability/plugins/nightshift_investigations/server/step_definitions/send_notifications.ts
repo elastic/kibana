@@ -88,6 +88,22 @@ export const sendNotificationsStepDefinition = ({
           kibanaUrl
         ).toString(),
         logger: context.logger,
+        onThreadConfirmed: async ({ type, thread }) => {
+          if (type !== 'slack' || !thread?.workspace) {
+            return;
+          }
+          const linked = await client.linkSlackThread({
+            investigationId,
+            workspace: thread.workspace,
+            channel: thread.channel,
+            threadTs: thread.thread_ts,
+          });
+          if (!linked) {
+            context.logger.warn(
+              `Slack thread ${thread.channel}/${thread.thread_ts} already belongs to another open investigation; replies there do not continue investigation "${investigationId}"`
+            );
+          }
+        },
         getExecute: async () => {
           const actions = getActions();
           if (!actions) {

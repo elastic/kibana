@@ -2123,6 +2123,51 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   });
 });
 
+describe('NightshiftInvestigationsClient.linkSlackThread()', () => {
+  const LINK = {
+    investigationId: 'inv-1',
+    workspace: 'T1',
+    channel: 'C1',
+    threadTs: '1712345678.000100',
+  };
+  const subjectKey = { type: 'slack_thread', id: 'team:T1/channel:C1/thread:1712345678.000100' };
+
+  it('claims the thread for the investigation and records it as its subject', async () => {
+    await expect(makeClient().linkSlackThread(LINK)).resolves.toBe(true);
+
+    expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'inv-1', subjects: [subjectKey] })
+    );
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        ...subjectKey,
+        triggerType: 'automatic',
+        slack: { channel: 'C1', thread_ts: LINK.threadTs },
+      },
+    ]);
+  });
+
+  it('leaves a thread another open investigation holds with that investigation', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-other' });
+
+    await expect(makeClient().linkSlackThread(LINK)).resolves.toBe(false);
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it('treats only an open holder as holding the thread', async () => {
+    withConversations(
+      makeConversation({ id: 'inv-open', status: 'open' }),
+      makeConversation({ id: 'inv-closed', status: 'closed' })
+    );
+    await makeClient().linkSlackThread(LINK);
+    const { isHolderOpen } = subjectsClient.claimSubjects.mock.calls[0][0];
+
+    await expect(isHolderOpen('inv-open')).resolves.toBe(true);
+    await expect(isHolderOpen('inv-closed')).resolves.toBe(false);
+  });
+});
+
 describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
   it('attributes lifecycle events to the first recorded subject', async () => {
     subjectsClient.listByConversationIds.mockResolvedValue([

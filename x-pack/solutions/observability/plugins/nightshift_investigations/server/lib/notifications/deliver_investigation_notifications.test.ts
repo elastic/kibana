@@ -11,7 +11,7 @@ import type {
   InvestigationNotificationDestination,
 } from '../../../common';
 import type { NotificationExecution } from './notification_delivery';
-import type { NotificationPhase } from './notification_routing';
+import type { NotificationDestination, NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
 import { createRoutingTestContext } from './notification_routing.mock';
 
@@ -41,6 +41,7 @@ const setup = (spaceId = 'default') => {
   }));
   const getExecute = jest.fn(async () => execute);
   const logger = loggerMock.create();
+  const onThreadConfirmed = jest.fn(async (_destination: NotificationDestination) => {});
   const send = (
     phase: NotificationPhase,
     executionId = 'exec-1',
@@ -58,8 +59,9 @@ const setup = (spaceId = 'default') => {
       getExecute,
       signal: controller.signal,
       logger,
+      onThreadConfirmed,
     });
-  return { ...context, controller, execute, getExecute, logger, send };
+  return { ...context, controller, execute, getExecute, logger, onThreadConfirmed, send };
 };
 
 describe('investigation notification lifecycle', () => {
@@ -91,12 +93,122 @@ describe('investigation notification lifecycle', () => {
     await send('completed');
     await send('started', 'exec-2', []);
     await send('completed', 'exec-2', []);
-    expect(execute).toHaveBeenCalledTimes(4);
-    for (const [call] of execute.mock.calls.slice(1)) {
-      expect(call.params).toMatchObject({
-        subActionParams: { channel: 'C123', threadTs: '1.000001' },
+    expect(execute).toHaveBeenCalledTimes(3);
+    expect(execute.mock.calls[2][0].params).toEqual({
+      subAction: 'updateMessage',
+      subActionParams: expect.objectContaining({ channel: 'C123', messageTs: '1.000001' }),
+    });
+  });
+
+  describe('follow-up executions', () => {
+    const postedAt = (ts: string) => ({
+      actionId: 'saved-slack',
+      status: 'ok' as const,
+      data: { ts, channel: 'C123' },
+    });
+    const runFirstExecution = async ({ send, execute }: ReturnType<typeof setup>) => {
+      execute
+        .mockResolvedValueOnce(postedAt('1.000001'))
+        .mockResolvedValueOnce(postedAt('1.000002'));
+      await send('started');
+      await send('completed');
+    };
+
+    it('edit the findings message and post no started message', async () => {
+      const context = setup();
+      const { send, execute, client } = context;
+      await runFirstExecution(context);
+      execute.mockResolvedValueOnce(postedAt('1.000002'));
+
+      expect(await send('started', 'exec-2', [])).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(await send('completed', 'exec-2', [])).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
+
+      expect(execute).toHaveBeenCalledTimes(3);
+      expect(execute.mock.calls[2][0].params).toEqual({
+        subAction: 'updateMessage',
+        subActionParams: {
+          channel: 'C123',
+          messageTs: '1.000002',
+          text: expect.stringContaining('Investigation completed'),
+        },
       });
-    }
+      expect((await client.get())?.destinations[0].findings_ts).toBe('1.000002');
+    });
+
+    it('leave the findings in place when they fail', async () => {
+      const context = setup();
+      const { send, execute, client } = context;
+      await runFirstExecution(context);
+
+      await send('started', 'exec-2', []);
+      expect(await send('failed', 'exec-2', [])).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect((await client.get())?.destinations[0].findings_ts).toBe('1.000002');
+    });
+
+    it('reply with new findings when the findings message cannot be edited', async () => {
+      const context = setup();
+      const { send, execute, client } = context;
+      await runFirstExecution(context);
+      execute
+        .mockResolvedValueOnce({ status: 'error', message: 'message_not_found' } as never)
+        .mockResolvedValueOnce(postedAt('1.000003'));
+
+      await send('started', 'exec-2', []);
+      expect(await send('completed', 'exec-2', [])).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
+
+      expect(execute.mock.calls[3][0].params).toEqual({
+        subAction: 'sendMessage',
+        subActionParams: {
+          channel: 'C123',
+          threadTs: '1.000001',
+          text: expect.stringContaining('Investigation completed'),
+        },
+      });
+      expect((await client.get())?.destinations[0].findings_ts).toBe('1.000003');
+    });
+  });
+
+  describe('thread linking', () => {
+    it('records the workspace on the thread and reports each confirmed delivery', async () => {
+      const { send, execute, onThreadConfirmed, client } = setup();
+      execute.mockResolvedValue({
+        actionId: 'saved-slack',
+        status: 'ok',
+        data: { ts: '1.000001', channel: 'C123', message: { team: 'T123' } },
+      } as never);
+
+      await send('started');
+      await send('completed');
+
+      const thread = { channel: 'C123', thread_ts: '1.000001', workspace: 'T123' };
+      expect((await client.get())?.destinations[0].thread).toEqual(thread);
+      expect(onThreadConfirmed).toHaveBeenCalledTimes(2);
+      expect(onThreadConfirmed).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'slack', connector_id: 'saved-slack', thread })
+      );
+    });
+
+    it('does not report a delivery that was not confirmed', async () => {
+      const { send, execute, onThreadConfirmed } = setup();
+      execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
+
+      await send('started');
+
+      expect(onThreadConfirmed).not.toHaveBeenCalled();
+    });
+
+    it('logs a failed link without failing the delivery', async () => {
+      const { send, onThreadConfirmed, logger } = setup();
+      onThreadConfirmed.mockRejectedValueOnce(new Error('subjects unavailable'));
+
+      expect(await send('started')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not link the notification thread')
+      );
+    });
   });
 
   it('preserves an explicitly supplied parent timestamp', async () => {

@@ -122,6 +122,36 @@ describe('notification routing attachments', () => {
     await expect(client.record('other', { status: 'failed' })).rejects.toThrow('disappeared');
   });
 
+  it("keeps the thread's workspace and the message holding the latest findings", async () => {
+    const { client } = createRoutingTestContext();
+    const routing = await client.initialize('exec-1', 'workflow', [
+      { ...destination, params: { channel: '#alerts' } },
+    ]);
+    const destinationId = routing.destinations[0].id;
+    await client.claim('exec-1', destinationId, 'started', 'start', true);
+    await client.record('start', {
+      status: 'sent',
+      message_ts: '2.3',
+      channel: 'C123',
+      workspace: 'T123',
+    });
+    await client.selectTerminalPhase('exec-1', 'completed');
+    await client.claim('exec-1', destinationId, 'completed', 'done', false);
+
+    const recorded = await client.record('done', {
+      status: 'sent',
+      message_ts: '2.4',
+      channel: 'C123',
+      workspace: 'T999',
+    });
+
+    expect(recorded.destinations[0]).toMatchObject({
+      thread: { channel: 'C123', thread_ts: '2.3', workspace: 'T123' },
+      findings_ts: '2.4',
+    });
+    expect(notificationRoutingSchema.safeParse(recorded).success).toBe(true);
+  });
+
   it('writes a hidden readonly attachment and only exposes a short agent summary', async () => {
     const { client, create, service } = createRoutingTestContext();
     await client.initialize('exec-1', 'workflow', [destination]);

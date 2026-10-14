@@ -257,20 +257,28 @@ export class NotificationRoutingClient {
     return routing.attempts.find((attempt) => attempt.attempt_id === attemptId);
   }
 
-  /** Saves the matching receipt and confirmed thread in one write, leaving other executions and attempts intact. */
-  async record(attemptId: string, outcome: NotificationOutcome): Promise<void> {
-    await this.write((current) => {
+  /**
+   * Saves the matching receipt in one write, leaving other executions and attempts intact. A
+   * confirmed start records the destination's thread; a confirmed completion records the message
+   * holding the findings, so the next completion edits it.
+   */
+  async record(attemptId: string, outcome: NotificationOutcome): Promise<NotificationRouting> {
+    return this.write((current) => {
       const attempt = current.attempts.find((entry) => entry.attempt_id === attemptId);
       if (!attempt) {
         throw new Error('Notification attempt disappeared');
       }
-      const { channel, ...result } = outcome;
+      const { channel, workspace, ...result } = outcome;
       const destinations = current.destinations.map((destination) => {
-        if (
-          destination.id !== attempt.destination_id ||
-          attempt.phase !== 'started' ||
-          result.status !== 'sent'
-        ) {
+        if (destination.id !== attempt.destination_id || result.status !== 'sent') {
+          return destination;
+        }
+        if (attempt.phase === 'completed') {
+          return result.message_ts
+            ? { ...destination, findings_ts: result.message_ts }
+            : destination;
+        }
+        if (attempt.phase !== 'started') {
           return destination;
         }
         const explicitParent = destination.params.thread_ts;
@@ -281,7 +289,15 @@ export class NotificationRoutingClient {
         if (!threadTs || !channel) {
           throw new Error('Confirmed notification has no thread reference');
         }
-        return { ...destination, thread: { channel, thread_ts: threadTs } };
+        const threadWorkspace = destination.thread?.workspace ?? workspace;
+        return {
+          ...destination,
+          thread: {
+            channel,
+            thread_ts: threadTs,
+            ...(threadWorkspace ? { workspace: threadWorkspace } : {}),
+          },
+        };
       });
       return {
         ...current,

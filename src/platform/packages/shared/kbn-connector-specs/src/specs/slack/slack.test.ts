@@ -1623,7 +1623,12 @@ describe('Slack', () => {
       });
       expect(relayListBindings).not.toHaveBeenCalled();
       expect(mockClient.post).not.toHaveBeenCalled();
-      expect(result).toEqual({ ok: true, channel: 'C0123456789', ts: '1234567890.123456' });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C0123456789',
+        ts: '1234567890.123456',
+        team: 'team-A',
+      });
     });
 
     it('sendMessage forwards a channel name to the relay and returns the resolved id', async () => {
@@ -1645,7 +1650,12 @@ describe('Slack', () => {
       });
       expect(relayListBindings).not.toHaveBeenCalled();
       expect(mockClient.post).not.toHaveBeenCalled();
-      expect(result).toEqual({ ok: true, channel: 'C0123456789', ts: '1234567890.123456' });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C0123456789',
+        ts: '1234567890.123456',
+        team: 'team-A',
+      });
     });
 
     it('updateMessage edits through the relay and never touches the Slack client', async () => {
