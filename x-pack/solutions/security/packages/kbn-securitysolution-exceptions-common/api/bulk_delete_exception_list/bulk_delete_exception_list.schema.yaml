@@ -3,7 +3,7 @@ info:
   title: Bulk action exception lists API endpoint
   version: '1'
 paths:
-  /api/exception_lists/_bulk_action:
+  /internal/api/exception_lists/_bulk_action:
     post:
       x-labels: [serverless, ess]
       x-internal: true
@@ -224,7 +224,7 @@ paths:
                   value:
                     statusCode: 403
                     error: Forbidden
-                    message: 'API [POST /api/exception_lists/_bulk_action] is unauthorized for user, this action is granted by the Kibana privileges [exceptions-all]'
+                    message: 'API [POST /internal/api/exception_lists/_bulk_action] is unauthorized for user, this action is granted by the Kibana privileges [exceptions-all]'
         500:
           description: Internal server error response
           content:

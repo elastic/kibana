@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   EXCEPTION_LIST_BULK_ACTION_SOCKET_TIMEOUT_MS,
-  EXCEPTION_LIST_BULK_ACTION_URL,
+  INTERNAL_EXCEPTION_LIST_BULK_ACTION_URL,
 } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
@@ -30,7 +30,7 @@ export const bulkExceptionListActionRoute = (router: ListsPluginRouter): void =>
           idleSocket: EXCEPTION_LIST_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
       },
-      path: EXCEPTION_LIST_BULK_ACTION_URL,
+      path: INTERNAL_EXCEPTION_LIST_BULK_ACTION_URL,
       security: {
         authz: {
           requiredPrivileges: [EXCEPTIONS_API_ALL],

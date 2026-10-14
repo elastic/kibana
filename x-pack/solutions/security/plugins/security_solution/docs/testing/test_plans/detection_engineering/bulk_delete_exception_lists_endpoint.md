@@ -6,7 +6,7 @@
 
 ## Summary <!-- omit from toc -->
 
-Test plan for the `delete` action on `POST /api/exception_lists/_bulk_action`, an internal API endpoint that deletes up to 100 exception lists (and their items) in a single request. The endpoint accepts saved object `ids`, cascades item deletion per list, checks for rule references before deleting (blocking linked lists with 409), reports per-list success/failure with a summary, and respects existing exception-list RBAC.
+Test plan for the `delete` action on `POST /internal/api/exception_lists/_bulk_action`, an internal API endpoint that deletes up to 100 exception lists (and their items) in a single request. The endpoint accepts saved object `ids`, cascades item deletion per list, checks for rule references before deleting (blocking linked lists with 409), reports per-list success/failure with a summary, and respects existing exception-list RBAC.
 
 The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** changed by this work and is out of scope for this plan.
 
@@ -93,7 +93,7 @@ Functional requirements derived from [#276458](https://github.com/elastic/kibana
 
 ```Gherkin
 Given 2 exception lists exist with saved object ids "so-1" and "so-2"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1", "so-2"] }
 Then the response status is 200
 And "success" is true
@@ -108,7 +108,7 @@ And the "errors" array is empty
 
 ```Gherkin
 Given an exception list exists with saved object id "so-1"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1"] }
 Then the response status is 200
 And "success" is true
@@ -134,7 +134,7 @@ Then each entry in results contains: id, list_id, type, name, description, names
 
 ```Gherkin
 Given an exception list "list-1" exists with 1 exception list item
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["list-1-so-id"] }
 Then the response status is 200
 And the list is in the "results" array
@@ -308,7 +308,7 @@ And no list is deleted
 ```Gherkin
 Given an exception list exists with saved object id "so-1"
 And no exception list exists with id "fake-id"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1", "fake-id"] }
 Then the response status is 200
 And "success" is false
@@ -323,7 +323,7 @@ And the "errors" array contains 1 entry with status_code 404 and lists [{ id: "f
 
 ```Gherkin
 Given no exception lists exist with ids "fake-1" or "fake-2"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["fake-1", "fake-2"] }
 Then the response status is 200
 And "success" is false
@@ -338,7 +338,7 @@ And the "errors" array contains 2 entries, each with status_code 404
 
 ```Gherkin
 Given an exception list "list-1" exists with 1 exception list item (item saved object id "item-so-1")
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["item-so-1"] }
 Then the response status is 200
 And "success" is false
@@ -381,7 +381,7 @@ And summary.failed counts failed lists, not referencing rules
 
 ```Gherkin
 Given 3 exception lists exist
-When the user calls POST /api/exception_lists/_bulk_action with action "delete" and all 3 ids
+When the user calls POST /internal/api/exception_lists/_bulk_action with action "delete" and all 3 ids
 Then the response status is 200
 And "success" is true
 And "summary" is { "total": 3, "succeeded": 3, "failed": 0, "skipped": 0 }
@@ -396,7 +396,7 @@ And the "errors" array is empty
 ```Gherkin
 Given an exception list exists with id "so-1"
 And no exception list exists with id "missing"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1", "missing"] }
 Then the response status is 200
 And "success" is false
@@ -410,7 +410,7 @@ And "summary.failed" is 1
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "unknown", "ids": ["so-1"] }
 Then the response status is 400
 ```
@@ -420,7 +420,7 @@ Then the response status is 400
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "ids": ["so-1"] }
 Then the response status is 400
 ```
@@ -430,7 +430,7 @@ Then the response status is 400
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete" }
 Then the response status is 400
 ```
@@ -440,7 +440,7 @@ Then the response status is 400
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": [] }
 Then the response status is 400
 ```
@@ -450,7 +450,7 @@ Then the response status is 400
 **Automation**: 1 integration test.
 
 ```Gherkin
-When the user calls POST /api/exception_lists/_bulk_action with action "delete" and 101 ids
+When the user calls POST /internal/api/exception_lists/_bulk_action with action "delete" and 101 ids
 Then the response status is 400
 ```
 
@@ -462,7 +462,7 @@ Then the response status is 400
 
 ```Gherkin
 Given an exception list exists with saved object id "so-1"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1", "so-1"] }
 Then the response status is 200
 And "summary.total" is 2
@@ -477,7 +477,7 @@ And the "errors" array is empty
 
 ```Gherkin
 Given an exception list exists with id "so-1"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1"] }
 Then the response status is 200 and "success" is true
 When the user re-issues the same request
@@ -497,7 +497,7 @@ And the "errors" array contains 1 entry for "so-1" with status_code 404
 
 ```Gherkin
 Given an agnostic exception list exists with id "agnostic-so-id"
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["agnostic-so-id"], "namespace_type": "agnostic" }
 Then the response status is 200
 And the "results" array contains 1 entry
@@ -510,7 +510,7 @@ And the "errors" array is empty
 
 ```Gherkin
 Given an exception list exists in the single (space-scoped) namespace
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1"] }
 Then the response status is 200
 And the list is deleted from the current space
@@ -522,7 +522,7 @@ And the list is deleted from the current space
 
 ```Gherkin
 Given an exception list "so-1" exists in the agnostic namespace
-When the user calls POST /api/exception_lists/_bulk_action with body:
+When the user calls POST /internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1"], "namespace_type": "single" }
 Then the response status is 200
 And "success" is false
@@ -539,7 +539,7 @@ And the agnostic list still exists
 ```Gherkin
 Given an exception list "list-1" exists in the default space
 And an exception list "list-2" exists in space "other"
-When the user calls POST /s/other/api/exception_lists/_bulk_action with body:
+When the user calls POST /s/other/internal/api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["list-1-so-id", "list-2-so-id"] }
 Then the response status is 200
 And "success" is false
@@ -561,7 +561,7 @@ And "list-1" still exists in the default space
 ```Gherkin
 Given a user with the "rules_read_exceptions_all" role
 And an exception list exists
-When the user calls POST /api/exception_lists/_bulk_action with a valid delete request
+When the user calls POST /internal/api/exception_lists/_bulk_action with a valid delete request
 Then the response status is 200
 And the "results" array contains 1 entry
 ```
@@ -573,7 +573,7 @@ And the "results" array contains 1 entry
 ```Gherkin
 Given a user with the "rules_read_exceptions_read" role
 And an exception list exists
-When the user calls POST /api/exception_lists/_bulk_action with a valid delete request
+When the user calls POST /internal/api/exception_lists/_bulk_action with a valid delete request
 Then the response status is 403
 ```
 
@@ -583,6 +583,6 @@ Then the response status is 403
 
 ```Gherkin
 Given no authentication credentials are provided
-When the user calls POST /api/exception_lists/_bulk_action
+When the user calls POST /internal/api/exception_lists/_bulk_action
 Then the response status is 401
 ```

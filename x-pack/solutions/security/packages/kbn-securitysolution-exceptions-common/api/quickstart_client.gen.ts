@@ -120,7 +120,7 @@ block the deletion. Cross-space reference checking is deferred to a future relea
     this.log.info(`${new Date().toISOString()} Calling API BulkDeleteExceptionLists`);
     return this.kbnClient
       .request<BulkDeleteExceptionListsResponse>({
-        path: '/api/exception_lists/_bulk_action',
+        path: '/internal/api/exception_lists/_bulk_action',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },

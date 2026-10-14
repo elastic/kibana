@@ -66,7 +66,7 @@ block the deletion. Cross-space reference checking is deferred to a future relea
       */
   bulkDeleteExceptionLists(props: BulkDeleteExceptionListsProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/exception_lists/_bulk_action', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/api/exception_lists/_bulk_action', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

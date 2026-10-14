@@ -145,7 +145,7 @@ block the deletion. Cross-space reference checking is deferred to a future relea
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}/api/exception_lists/_bulk_action`;
+    const path = `${basePath}/internal/api/exception_lists/_bulk_action`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, BulkDeleteExceptionListsResponse>>(
       path,
