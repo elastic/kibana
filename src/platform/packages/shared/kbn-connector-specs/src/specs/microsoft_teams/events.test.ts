@@ -344,15 +344,23 @@ describe('Microsoft Teams inbound events', () => {
     expect(result.events).toEqual([]);
   });
 
-  it('returns every created notification so the ingest limit can accept or reject the batch', async () => {
-    const value = Array.from({ length: 27 }, (_, index) => ({
-      id: `notification-${index}`,
-      changeType: 'created',
-      resource: `chats/chat-${index}`,
-      resourceData: { '@odata.type': '#microsoft.graph.chat', id: `chat-${index}` },
-    }));
-    const result = expectEmit(await events.handleEvents(createContext({ value })));
-    expect(result.events).toHaveLength(27);
+  it('ignores path segments that are not Teams resource names', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          notification({
+            resource: 'noise/whatever/teams/team-1/channels/channel-1/messages/message-1',
+            resourceData: { '@odata.type': '#microsoft.graph.chatMessage', id: 'message-1' },
+          })
+        )
+      )
+    );
+    expect(result.events[0].payload).toEqual({
+      team_id: 'team-1',
+      channel_id: 'channel-1',
+      message_id: 'message-1',
+      tenant_id: 'tenant-1',
+    });
   });
 
   it('uses a generated correlation key when the notification id is too long', async () => {

@@ -34,7 +34,15 @@ const TEAMS_ID_MAX = 1024;
 const ENTRA_GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const GRAPH_RESOURCE_PREFIX = /^https:\/\/graph\.microsoft\.com\/v1\.0\//i;
 const ODATA_SEGMENT = /^([A-Za-z]+)[(](?:'([^']*)'|"([^"]*)")[)]$/;
-const COLLECTION_NAMES = new Set(['teams', 'channels', 'messages', 'chats', 'members', 'users']);
+const RESOURCE_COLLECTIONS = new Set([
+  'teams',
+  'channels',
+  'messages',
+  'replies',
+  'chats',
+  'members',
+  'users',
+]);
 const SKIP_RESOURCE_IDS = new Set(['getAllMessages', 'getAllChannels']);
 
 const teamsId = (description: string) => z.string().min(1).max(TEAMS_ID_MAX).describe(description);
@@ -141,6 +149,23 @@ const odataTypeName = (resourceData: Record<string, unknown>): string | undefine
   return raw.split('.').pop()?.toLowerCase();
 };
 
+const rememberResourceId = (ids: Record<string, string>, name: string, id: string): void => {
+  const collection = name.toLowerCase();
+  if (!RESOURCE_COLLECTIONS.has(collection)) {
+    return;
+  }
+  if (id.length === 0 || id.length > TEAMS_ID_MAX || SKIP_RESOURCE_IDS.has(id)) {
+    return;
+  }
+  ids[collection] = id;
+};
+
+const isResourceIdSegment = (segment: string): boolean =>
+  !RESOURCE_COLLECTIONS.has(segment.toLowerCase()) &&
+  !segment.includes('(') &&
+  segment.length <= TEAMS_ID_MAX &&
+  !SKIP_RESOURCE_IDS.has(segment);
+
 /** Ids from a Graph resource path. Skips subscription wildcards such as getAllMessages. */
 const readResourceIds = (resource: unknown): Record<string, string> => {
   if (typeof resource !== 'string' || resource.length === 0) {
@@ -152,29 +177,22 @@ const readResourceIds = (resource: unknown): Record<string, string> => {
   }
   const segments = path.split('/').filter((segment) => segment.length > 0);
   const ids: Record<string, string> = {};
-  for (let index = 0; index < segments.length; index++) {
+  let index = 0;
+  while (index < segments.length) {
     const segment = segments[index];
     const odata = ODATA_SEGMENT.exec(segment);
     if (odata) {
-      const name = odata[1].toLowerCase();
-      const id = odata[2] ?? odata[3] ?? '';
-      if (id.length > 0 && id.length <= TEAMS_ID_MAX && !SKIP_RESOURCE_IDS.has(id)) {
-        ids[name] = id;
-      }
+      rememberResourceId(ids, odata[1], odata[2] ?? odata[3] ?? '');
+      index += 1;
       continue;
     }
-    const name = segment.toLowerCase();
     const next = segments[index + 1];
-    if (
-      next !== undefined &&
-      !COLLECTION_NAMES.has(next.toLowerCase()) &&
-      !next.includes('(') &&
-      next.length <= TEAMS_ID_MAX &&
-      !SKIP_RESOURCE_IDS.has(next)
-    ) {
-      ids[name] = next;
-      index += 1;
+    if (next !== undefined && isResourceIdSegment(next)) {
+      rememberResourceId(ids, segment, next);
+      index += 2;
+      continue;
     }
+    index += 1;
   }
   return ids;
 };
@@ -276,8 +294,13 @@ const notificationItems = (rawBody: unknown): unknown[] | undefined => {
 const isLifecycleItem = (item: unknown): boolean =>
   isPlainObject(item) && typeof item.lifecycleEvent === 'string' && item.lifecycleEvent.length > 0;
 
-const correlationKeyFor = (item: Record<string, unknown>): string =>
-  readBoundedString(item.id, MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH) ?? uuidv4();
+const correlationKeyFor = (item: Record<string, unknown>): string => {
+  const notificationId = readBoundedString(item.id, MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH);
+  if (notificationId !== undefined) {
+    return notificationId;
+  }
+  return uuidv4();
+};
 
 const handleMicrosoftTeamsEvents = async (
   ctx: ConnectorIngressContext

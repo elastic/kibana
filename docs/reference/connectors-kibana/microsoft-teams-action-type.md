@@ -256,6 +256,12 @@ The connector supports five events. A workflow subscribes to an event by using i
 
 Only `created` starts one of these workflows. Edits, deletes, chat members, and channel members do not. A notification that matches none of these events does not start a workflow. {{kib}} reads the ids from the resource path and `resourceData`. `encryptedContent`, when Graph includes it, is ignored. The event does not include the message body, content type, or sender.
 
+One Graph request can start at most `xpack.actions.inboundEvents.maxEmitted` workflows. The default is 25 and the maximum is 250. {{kib}} rejects a larger batch and starts no workflow from it. The HTTP response is 500, with the body `Unable to process inbound connector event request.` That same response is used for other processing failures, so HTTP 500 alone does not mean the batch was too large. Microsoft Graph retries the request. A subscription to one team, channel, or chat usually stays under the default. For a tenant-wide resource such as `/teams/getAllMessages` or `/chats/getAllMessages`, set the value in `kibana.yml` to the largest batch you expect, up to 250:
+
+```yaml
+xpack.actions.inboundEvents.maxEmitted: 100
+```
+
 ### Webhook URL and authentication [microsoft-teams-inbound-url]
 
 Microsoft Graph sends each notification to the webhook URL of the connector. The **Webhook URL** field does not include the ingest token. Graph does not send an `Authorization` header, so append the token yourself. Use that full URL for both `notificationUrl` and `lifecycleNotificationUrl`.
