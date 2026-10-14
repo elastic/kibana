@@ -13,6 +13,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 
 const request = {} as KibanaRequest;
 
@@ -312,15 +313,20 @@ describe('getFindAuthorizationFilter', () => {
       },
     });
     authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces });
+    const spaces = {
+      getSpaceId: jest.fn().mockReturnValue('space-1'),
+    } as unknown as SpacesServiceSetup;
     const actionsAuthorization = new ActionsAuthorization({
-      request: { ...request, spaceId: 'space-1' } as KibanaRequest,
+      request,
       authorization,
+      spaces,
     });
 
     await expect(actionsAuthorization.getFindAuthorizationFilter({})).resolves.toEqual({
       filter: nodeBuilder.is('kibana.space_ids', 'space-1'),
     });
 
+    expect(spaces.getSpaceId).toHaveBeenCalledWith(request);
     expect(atSpaces).toHaveBeenCalledWith(['space-1'], {
       kibana: [getPrivilege],
     });

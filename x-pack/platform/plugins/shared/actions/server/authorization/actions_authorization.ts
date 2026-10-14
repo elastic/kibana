@@ -7,9 +7,10 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { fromKueryExpression, nodeBuilder, type KueryNode } from '@kbn/es-query';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -18,6 +19,7 @@ import {
 export interface ConstructorOptions {
   request: KibanaRequest;
   authorization?: SecurityPluginSetup['authz'];
+  spaces?: SpacesServiceSetup;
 }
 
 const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz']) => string[]> = {
@@ -33,10 +35,12 @@ const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz'
 export class ActionsAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly spaces?: SpacesServiceSetup;
 
-  constructor({ request, authorization }: ConstructorOptions) {
+  constructor({ request, authorization, spaces }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
+    this.spaces = spaces;
   }
 
   public async ensureAuthorized({
@@ -75,7 +79,7 @@ export class ActionsAuthorization {
     const spaces =
       namespaces && namespaces.length > 0
         ? namespaces.map((space) => (space === undefined ? DEFAULT_SPACE_ID : space))
-        : [this.request.spaceId ?? DEFAULT_SPACE_ID];
+        : [this.spaces?.getSpaceId(this.request) ?? DEFAULT_SPACE_ID];
 
     if (!this.authorization?.mode?.useRbacForRequest(this.request)) {
       return { filter: this.buildFilterForAuthorizedNamespaces(spaces) };
