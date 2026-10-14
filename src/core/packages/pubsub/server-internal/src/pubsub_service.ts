@@ -14,16 +14,11 @@ import type { InternalPubSubSetup } from './internal_contracts';
 
 type Phase = 'created' | 'setup' | 'started' | 'stopped';
 
-interface RegisteredTopic {
-  readonly name: string;
-  /** Plugin that registered the topic. Kept for diagnostics; it does not restrict publishing. */
-  readonly registeredBy: string;
-}
-
 /** @internal */
 export class PubSubService implements CoreService<InternalPubSubSetup, void> {
   private readonly logger: Logger;
-  private readonly topics = new Map<string, RegisteredTopic>();
+  /** Topic name to the plugin that registered it. Kept for diagnostics; it does not restrict publishing. */
+  private readonly topics = new Map<string, string>();
   private phase: Phase = 'created';
 
   constructor(coreContext: CoreContext) {
@@ -36,7 +31,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, void> {
     }
 
     this.phase = 'setup';
-    this.logger.debug('Pubsub setup complete');
+    this.logger.debug('Setting up pubsub service');
 
     return {
       registerTopic: (pluginId, topic) => {
@@ -62,11 +57,11 @@ export class PubSubService implements CoreService<InternalPubSubSetup, void> {
       throw new Error(`Cannot register topic "${topic.name}" outside of setup.`);
     }
 
-    const existing = this.topics.get(topic.name);
-    if (existing) {
-      throw new Error(`Topic "${topic.name}" is already registered by "${existing.registeredBy}".`);
+    const registeredBy = this.topics.get(topic.name);
+    if (registeredBy) {
+      throw new Error(`Topic "${topic.name}" is already registered by "${registeredBy}".`);
     }
 
-    this.topics.set(topic.name, { name: topic.name, registeredBy: pluginId });
+    this.topics.set(topic.name, pluginId);
   }
 }

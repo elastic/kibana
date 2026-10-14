@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PubSubSetup } from '@kbn/core-pubsub-server';
-import type { InternalPubSubSetup, PubSubService } from '@kbn/core-pubsub-server-internal';
+import type { InternalPubSubSetup } from '@kbn/core-pubsub-server-internal';
 
 const createSetupContract = (): jest.Mocked<PubSubSetup> => {
   return {
@@ -23,17 +22,8 @@ const createInternalSetupContract = (): jest.Mocked<InternalPubSubSetup> => {
   };
 };
 
-const createService = (): jest.Mocked<PublicMethodsOf<PubSubService>> => {
-  return {
-    setup: jest.fn().mockImplementation(createInternalSetupContract),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-};
-
 /** @public */
 export const pubSubServiceMock = {
-  create: createService,
   createSetupContract,
   createInternalSetupContract,
 };
