@@ -14,7 +14,6 @@ import {
   DEFAULT_ATTACK_TAB_COLUMN_IDS,
   isAttackAttachment,
   matchesSearchTerm,
-  toReadableAttackIndexPattern,
   toVisibleAttackTabColumnIds,
 } from './utils';
 
@@ -124,29 +123,5 @@ describe('toVisibleAttackTabColumnIds', () => {
     ['null', null],
   ])('falls back to the defaults for %s written under the key', (_label, persisted) => {
     expect(toVisibleAttackTabColumnIds(persisted as unknown as string[])).toEqual(defaults);
-  });
-});
-
-describe('toReadableAttackIndexPattern', () => {
-  it.each([
-    ['.internal.alerts-security.attack.discovery.alerts-default-000001'],
-    ['.alerts-security.attack.discovery.alerts-default'],
-  ])('maps the scheduled index %s to the scheduled alias pattern', (index) => {
-    expect(toReadableAttackIndexPattern(index)).toBe('.alerts-security.attack.discovery.alerts-*');
-  });
-
-  it.each([
-    ['.internal.adhoc.alerts-security.attack.discovery.alerts-default-000001'],
-    ['.adhoc.alerts-security.attack.discovery.alerts-default'],
-  ])('maps the adhoc index %s to the adhoc alias pattern', (index) => {
-    expect(toReadableAttackIndexPattern(index)).toBe(
-      '.adhoc.alerts-security.attack.discovery.alerts-*'
-    );
-  });
-
-  it('passes through an index that belongs to neither attack-discovery family', () => {
-    expect(toReadableAttackIndexPattern('.alerts-security.alerts-default')).toBe(
-      '.alerts-security.alerts-default'
-    );
   });
 });
