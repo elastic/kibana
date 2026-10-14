@@ -90,6 +90,6 @@ describe('useSimilarCasesColumns sortable flags', () => {
       (col) => 'field' in col && (col as { field?: unknown }).field === field
     );
 
-    expect(column?.sortable).not.toBe(true);
+    expect(column).toEqual(expect.not.objectContaining({ sortable: true }));
   });
 });
