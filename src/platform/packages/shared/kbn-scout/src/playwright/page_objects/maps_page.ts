@@ -95,6 +95,12 @@ export class MapsPage {
     });
   }
 
+  async expectOnMapPage() {
+    await expect
+      .poll(() => this.mapContainer.isVisible(), { timeout: DEFAULT_MAP_LOADING_TIMEOUT })
+      .toBe(true);
+  }
+
   async selectLayerWizardByTitle(title: string) {
     const wizardTestSubj = title
       .split(' ')
@@ -155,7 +161,7 @@ export class MapsPage {
 
   /** Waits until map layers are loaded. */
   async waitForLayersToLoad() {
-    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.expectOnMapPage();
 
     // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
     // visible before that, so gate on this signal before checking loading state.
