@@ -83,14 +83,17 @@ describe('DEFAULT_SOURCES approved catalog', () => {
     'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
     'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
     'rss:cert-fr-iocs': 'https://cert.cyber.gouv.fr/ioc/feed/',
+    'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
+    'rss:cert-eu-threat-intelligence':
+      'https://cert.europa.eu/publications/threat-intelligence-rss',
   };
 
   it('contains only the approved source IDs and URLs', () => {
     expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly seven sources enabled', () => {
-    expect(DEFAULT_SOURCES).toHaveLength(7);
+  it('ships exactly nine sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(9);
     expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
   });
 

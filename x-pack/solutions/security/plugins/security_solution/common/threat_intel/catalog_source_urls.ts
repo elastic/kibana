@@ -24,6 +24,8 @@ export const CATALOG_SOURCE_URLS = {
   'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
   'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
   'rss:cert-fr-iocs': 'https://cert.cyber.gouv.fr/ioc/feed/',
+  'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
+  'rss:cert-eu-threat-intelligence': 'https://cert.europa.eu/publications/threat-intelligence-rss',
 } as const satisfies Record<(typeof APPROVED_CATALOG_SOURCE_IDS)[number], string>;
 
 /** Returns the catalog fetch URL for a source id, if it is part of the approved set. */

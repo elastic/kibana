@@ -85,6 +85,8 @@ export const APPROVED_CATALOG_SOURCE_IDS = [
   'rss:cert-fr-alerts',
   'rss:cert-fr-threats',
   'rss:cert-fr-iocs',
+  'rss:cert-eu-advisories',
+  'rss:cert-eu-threat-intelligence',
 ] as const;
 
 export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);
