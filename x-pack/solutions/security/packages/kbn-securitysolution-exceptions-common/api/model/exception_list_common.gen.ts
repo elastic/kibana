@@ -300,7 +300,7 @@ export const BlocklistHashEntry = lazySchema(() =>
     /**
      * Array of hash values
      */
-    value: z.array(z.string()).min(1).describe('Array of hash values'),
+    value: z.array(z.string().min(1).max(4096)).min(1).max(2000).describe('Array of hash values'),
     /**
      * Must be the value "included"
      */
@@ -309,7 +309,33 @@ export const BlocklistHashEntry = lazySchema(() =>
 );
 export type BlocklistHashEntry = z.infer<typeof BlocklistHashEntry>;
 
-export const BlocklistPathOrFileNameEntry = lazySchema(() =>
+export const BlocklistPathOrFileNameMatchAnyEntry = lazySchema(() =>
+  z.object({
+    /**
+     * File path or file name field (available on all OS)
+     */
+    field: z
+      .enum(['file.path', 'file.path.caseless', 'file.name', 'file.name.caseless'])
+      .describe('File path or file name field (available on all OS)'),
+    /**
+     * Must be `match_any` ("is one of")
+     */
+    type: z.literal('match_any').describe('Must be `match_any` ("is one of")'),
+    /**
+     * Array of values
+     */
+    value: z.array(z.string().min(1).max(4096)).min(1).max(2000).describe('Array of values'),
+    /**
+     * Must be the value "included"
+     */
+    operator: z.literal('included').describe('Must be the value "included"'),
+  })
+);
+export type BlocklistPathOrFileNameMatchAnyEntry = z.infer<
+  typeof BlocklistPathOrFileNameMatchAnyEntry
+>;
+
+export const BlocklistPathOrFileNameWildcardEntry = lazySchema(() =>
   z.object({
     /**
       * File path or file name field (available on all OS). `file.name.caseless` is used for
@@ -322,22 +348,24 @@ export const BlocklistPathOrFileNameEntry = lazySchema(() =>
         'File path or file name field (available on all OS). `file.name.caseless` is used for\n`wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.\n'
       ),
     /**
-      * Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)
-
-      */
+     * Must be `wildcard` ("Match", supports `*` and `?` wildcards)
+     */
     type: z
-      .enum(['match_any', 'wildcard'])
-      .describe(
-        'Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)\n'
-      ),
-    value: z.union([z.string(), z.array(z.string()).min(1)]),
+      .literal('wildcard')
+      .describe('Must be `wildcard` ("Match", supports `*` and `?` wildcards)'),
+    /**
+     * Single value
+     */
+    value: z.string().min(1).max(4096).describe('Single value'),
     /**
      * Must be the value "included"
      */
     operator: z.literal('included').describe('Must be the value "included"'),
   })
 );
-export type BlocklistPathOrFileNameEntry = z.infer<typeof BlocklistPathOrFileNameEntry>;
+export type BlocklistPathOrFileNameWildcardEntry = z.infer<
+  typeof BlocklistPathOrFileNameWildcardEntry
+>;
 
 export const BlocklistWindowsCodeSignatureEntry = lazySchema(() =>
   z.object({
@@ -884,7 +912,8 @@ export const BlocklistWindowsProperties = lazySchema(() =>
       .array(
         z.union([
           BlocklistHashEntry,
-          BlocklistPathOrFileNameEntry,
+          BlocklistPathOrFileNameMatchAnyEntry,
+          BlocklistPathOrFileNameWildcardEntry,
           BlocklistWindowsCodeSignatureEntry,
         ])
       )
@@ -915,7 +944,13 @@ export const BlocklistLinuxProperties = lazySchema(() =>
 
       */
     entries: z
-      .array(z.union([BlocklistHashEntry, BlocklistPathOrFileNameEntry]))
+      .array(
+        z.union([
+          BlocklistHashEntry,
+          BlocklistPathOrFileNameMatchAnyEntry,
+          BlocklistPathOrFileNameWildcardEntry,
+        ])
+      )
       .min(1)
       .optional()
       .describe(
@@ -943,7 +978,13 @@ export const BlocklistMacProperties = lazySchema(() =>
 
       */
     entries: z
-      .array(z.union([BlocklistHashEntry, BlocklistPathOrFileNameEntry]))
+      .array(
+        z.union([
+          BlocklistHashEntry,
+          BlocklistPathOrFileNameMatchAnyEntry,
+          BlocklistPathOrFileNameWildcardEntry,
+        ])
+      )
       .min(1)
       .optional()
       .describe(
