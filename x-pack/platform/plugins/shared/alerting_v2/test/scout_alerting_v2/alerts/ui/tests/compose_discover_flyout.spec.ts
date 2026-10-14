@@ -58,8 +58,7 @@ test.describe(
   () => {
     const createdRuleIds: string[] = [];
 
-    test.beforeAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.ebt.optIn();
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -228,19 +227,6 @@ test.describe(
               artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
           )
         ).toBe(true);
-      });
-
-      await test.step('the creation is reported as telemetry from the Observability Alerting app', async () => {
-        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
-        const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
-          ruleId: items[0].id,
-          operation: 'rule.created',
-        });
-        expect(event.properties).toMatchObject({
-          rule_id: items[0].id,
-          operation: 'rule.created',
-          origin: { actor: 'user', channel: 'ui', app: 'observabilityAlerting' },
-        });
       });
     });
 

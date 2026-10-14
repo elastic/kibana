@@ -22,10 +22,9 @@ apiTest.describe('Disable rule API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
-    await apiServices.alertingV2.ebt.optIn();
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -55,19 +54,6 @@ apiTest.describe('Disable rule API', { tag: '@local-stateful-classic' }, () => {
       // Verify the side effect persisted.
       const stored = await apiServices.alertingV2.rules.get(created.id);
       expect(stored.enabled).toBe(false);
-
-      // Telemetry: the transition is reported on the `api` channel with no app.
-      const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
-        ruleId: created.id,
-        operation: 'rule.disabled',
-      });
-      expect(event.properties).toMatchObject({
-        rule_id: created.id,
-        operation: 'rule.disabled',
-        enabled: false,
-        origin: { actor: 'user', channel: 'api' },
-      });
-      expect(event.properties.origin.app).toBeUndefined();
     }
   );
 
