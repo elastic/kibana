@@ -15,7 +15,7 @@ const evaluate = ({
   writtenEvents,
 }: {
   inputRules: string[];
-  expectedEvents?: Array<{ rules: string[] }>;
+  expectedEvents?: Array<{ rules: string[]; status?: string }>;
   writtenEvents: Array<{ rules: string[] }>;
 }) =>
   statusCorrectnessEvaluator.evaluate({
@@ -25,7 +25,8 @@ const evaluate = ({
       steps: [],
     } as never,
     expected: {
-      expected_significant_events: expectedEvents?.map(({ rules }) => ({
+      expected_significant_events: expectedEvents?.map(({ rules, status }) => ({
+        status,
         signals: rules.map(signal),
       })),
     } as never,
@@ -70,6 +71,33 @@ describe('statusCorrectnessEvaluator', () => {
 
     expect(result.score).toBe(0.5);
     expect(result.explanation).toContain('r2');
+  });
+
+  it('does not owe a write for an expected inactive event', async () => {
+    const result = await evaluate({
+      inputRules: ['r1', 'benign'],
+      expectedEvents: [
+        { rules: ['r1'], status: 'active' },
+        { rules: ['benign'], status: 'inactive' },
+      ],
+      writtenEvents: [{ rules: ['r1'] }],
+    });
+
+    expect(result.score).toBe(1);
+  });
+
+  it('fails an event written for an expected inactive event', async () => {
+    const result = await evaluate({
+      inputRules: ['r1', 'benign'],
+      expectedEvents: [
+        { rules: ['r1'], status: 'active' },
+        { rules: ['benign'], status: 'inactive' },
+      ],
+      writtenEvents: [{ rules: ['r1'] }, { rules: ['benign'] }],
+    });
+
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain('benign');
   });
 
   it('scores 0 when nothing is written for an expected event', async () => {

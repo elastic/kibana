@@ -24,7 +24,10 @@ export type EventsWriteInput = Pick<
   Partial<Pick<SignificantEvent, 'severity'>> & {
     event_id?: string;
     conversation_id?: string;
-    /** Omit to let the lifecycle decide from the members' verdicts. */
+    /**
+     * Omit to let the lifecycle decide from the members' verdicts. Only a caller that owns the
+     * decision (`event_create`) sets it; the `events_write` tool schema rejects it.
+     */
     status?: SignificantEvent['status'];
   };
 

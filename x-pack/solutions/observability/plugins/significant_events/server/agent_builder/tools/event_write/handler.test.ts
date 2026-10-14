@@ -712,6 +712,41 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
+  it('sets aside a refuting continuation of an unknown event without failing the batch', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [
+        {
+          ...baseInput,
+          event_id: 'missing-event',
+          status: undefined,
+          signals: [
+            {
+              type: 'detection',
+              source_id: 'logs.checkout',
+              description: 'Healthy',
+              verdict: 'refutes',
+              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+              metadata: {
+                detection_id: 'det-rule-1',
+                rule_uuid: 'rule-1',
+                change_point_type: 'dip',
+                p_value: 0.01,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      reason: 'unknown_event_id',
+      event_id: 'missing-event',
+    });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
   it('writes the status the lifecycle decided, not one the item could carry', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),

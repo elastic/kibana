@@ -194,7 +194,24 @@ const decideStatuses = ({
       stage.kept.push({ ...candidate, status: decision.status });
       return;
     }
+    if (latest === undefined && input.event_id !== undefined) {
+      stage.skipped.push({
+        index: candidate.index,
+        event_id: candidate.eventId,
+        written: false,
+        reason: 'unknown_event_id',
+        error: {
+          type: 'validation_error',
+          reason: `event_id ${JSON.stringify(
+            candidate.eventId
+          )} does not exist, so there is no event to continue. Do not retry this item in the current run.`,
+          status: 404,
+        },
+      });
+      return;
+    }
     if (latest === undefined) {
+      // Invariant: the tool schema rejects this input, so only an internal caller can reach it.
       throw createBulkWriteValidationError(
         `events_write: item ${candidate.index} would open a new event without a breaching member.`
       );

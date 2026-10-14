@@ -30,6 +30,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getBulkWriteToolErrorCode,
@@ -122,9 +123,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
-      const hasOffTopicObservedError = signals.some(
-        (s) => s.evidence != null && s.verdict === 'off_topic'
-      );
+      const hasBreachMember = signals.some(isBreachMemberSignal);
       const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
       if (hasConfirms && hasNotChecked) {
@@ -137,7 +136,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
       // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
       // must be written, never dropped.
-      if (item.event_id === undefined && !hasConfirms && !hasOffTopicObservedError) {
+      if (item.event_id === undefined && !hasBreachMember) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:

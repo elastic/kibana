@@ -31,12 +31,15 @@ export const statusCorrectnessEvaluator: DiscoveryEvaluator = {
       });
     }
 
-    const expectedRuleSets = expectedEvents.map(
-      (event) =>
-        new Set(
-          (event.signals ?? []).map(({ metadata }) => ruleUuidOf(metadata ?? {})).filter(Boolean)
-        )
-    );
+    const ruleSetOf = (event: (typeof expectedEvents)[number]) =>
+      new Set(
+        (event.signals ?? []).map(({ metadata }) => ruleUuidOf(metadata ?? {})).filter(Boolean)
+      );
+    // An expected `inactive` event is a benign case the agent must not write, so only the active
+    // ones are owed; the rules of the inactive ones stay outside the universe and are forbidden.
+    const expectedRuleSets = expectedEvents
+      .filter((event) => event.status !== 'inactive')
+      .map(ruleSetOf);
     const expectedUniverse = new Set(expectedRuleSets.flatMap((rules) => [...rules]));
     const forbiddenRules = new Set(
       (input?.detections ?? [])
