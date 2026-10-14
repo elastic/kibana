@@ -8,12 +8,8 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { isValidTraceId } from '@opentelemetry/api';
 import {
-  createAgentBuilderToolClassifier,
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
-  createTrajectoryEvaluator,
-  createUnclassifiedToolsEvaluator,
-  getAgentBuilderToolCalls,
   getToolCallSteps,
   withEvaluatorSpan,
   type DefaultEvaluators,
@@ -22,6 +18,12 @@ import {
   type Evaluator,
   type TaskOutput,
 } from '@kbn/evals';
+import {
+  createAgentBuilderToolClassifier,
+  createSecurityTrajectoryEvaluator,
+  createUnclassifiedToolsEvaluator,
+  getAgentBuilderToolCalls,
+} from '@kbn/security-evals-matrix';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   PersonaMatrixExample,
@@ -115,7 +117,7 @@ export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => (
 const classifyTool = createAgentBuilderToolClassifier();
 
 export const createPersonaMatrixTrajectoryEvaluator = (): Evaluator => {
-  const inner = createTrajectoryEvaluator({
+  const inner = createSecurityTrajectoryEvaluator({
     extractToolCalls: getAgentBuilderToolCalls,
     goldenPathExtractor: (expected) => {
       const exp = expected as PersonaMatrixDatasetExpected | undefined;

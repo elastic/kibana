@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
-import { createAgentBuilderToolClassifier } from '@kbn/evals';
+import { createAgentBuilderToolClassifier } from '@kbn/security-evals-matrix';
 import {
   internalTools,
   isAttachmentTool,
