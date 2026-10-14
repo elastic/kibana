@@ -7,8 +7,6 @@
 import React from 'react';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
-import { useTimeRange } from '../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../hooks/use_time_range_update';
 import { useTimefilter } from '../hooks/use_timefilter';
 
 export type SignificantEventsSearchBarProps = Omit<StatefulSearchBarProps, 'appName'>;
@@ -17,10 +15,18 @@ export function SignificantEventsSearchBar({
   onQuerySubmit,
   ...props
 }: SignificantEventsSearchBarProps) {
-  const { unifiedSearch } = useKibana().services;
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
-  const { refresh } = useTimefilter();
+  const {
+    unifiedSearch,
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = useKibana().services;
+  const {
+    timeState: { timeRange },
+    refresh,
+  } = useTimefilter();
 
   return (
     <unifiedSearch.ui.SearchBar
@@ -36,15 +42,15 @@ export function SignificantEventsSearchBar({
       isAutoRefreshDisabled={true}
       onQuerySubmit={({ dateRange, query }, isUpdate) => {
         if (dateRange) {
-          updateTimeRange(dateRange);
+          timefilter.setTime(dateRange);
         }
         if (!isUpdate) {
           refresh();
         }
         onQuerySubmit?.({ dateRange, query }, isUpdate);
       }}
-      dateRangeFrom={rangeFrom}
-      dateRangeTo={rangeTo}
+      dateRangeFrom={timeRange.from}
+      dateRangeTo={timeRange.to}
       {...props}
     />
   );

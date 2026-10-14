@@ -179,9 +179,7 @@ export function SourcesView() {
                   query: searchText,
                   language: 'text',
                 }}
-                showDatePicker
                 showQueryInput
-                enableDateRangePicker
                 submitButtonStyle="iconOnly"
                 isClearable
               />
