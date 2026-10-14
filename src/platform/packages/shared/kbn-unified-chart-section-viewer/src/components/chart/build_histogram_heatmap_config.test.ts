@@ -86,7 +86,7 @@ describe('buildHistogramHeatmapConfig', () => {
         y: {
           labels: { visible: true },
           title: { visible: false },
-          sort: 'asc',
+          sort: 'desc',
         },
       },
       legend: { visibility: 'hidden', position: 'right' },

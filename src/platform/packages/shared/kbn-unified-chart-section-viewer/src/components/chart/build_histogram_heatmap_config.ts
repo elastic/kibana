@@ -13,7 +13,6 @@ import type { HeatmapConfigESQL } from '@kbn/lens-embeddable-utils';
 import {
   HISTOGRAM_BUCKET_COLUMN,
   HISTOGRAM_COUNT_COLUMN,
-  HISTOGRAM_TIME_BUCKET_COUNT,
   createTimeBucketAggregation,
 } from '../../common/utils';
 import type { HeatmapValueFormat } from '../../common/utils/metric_unit/get_heatmap_value_format';
@@ -135,7 +134,7 @@ export const buildHistogramHeatmapConfig = ({
       color: buildHistogramHeatmapColor(seriesColor, colorMode, backgroundColor),
     },
     x: {
-      column: createTimeBucketAggregation({ targetBuckets: HISTOGRAM_TIME_BUCKET_COUNT }),
+      column: createTimeBucketAggregation({}),
       label: timeLabel(),
     },
     y: {
@@ -152,7 +151,7 @@ export const buildHistogramHeatmapConfig = ({
       y: {
         labels: { visible: true },
         title: { visible: false },
-        sort: 'asc',
+        sort: 'desc',
       },
     },
     legend: {

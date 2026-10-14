@@ -34,14 +34,17 @@ import {
   createHistogramDistributionQuery,
   firstNonNullable,
   getAggregationLabel,
-  getHistogramFieldExpression,
   getMetricUniqueKey,
   resolveMetricUnit,
 } from '../../../common/utils';
+import { isHistogramMetric } from '../../../common/utils/histogram_metric';
 import { getHeatmapValueFormat } from '../../../common/utils/metric_unit/get_heatmap_value_format';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks';
-import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
+import {
+  readHistogramBounds,
+  type HistogramBoundsByMetricKey,
+} from './hooks/use_fetch_histogram_bounds';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -416,34 +419,35 @@ const ChartItem = React.memo(
       FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
       FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
     );
-    const isDistribution =
-      isHeatmapsEnabled && getHistogramFieldExpression(metricItem) !== undefined;
-    const boundsResult = isDistribution
-      ? histogramBounds.get(getMetricUniqueKey(metricItem))
-      : undefined;
-    const boundsError = boundsResult && 'error' in boundsResult ? boundsResult.error : undefined;
-    const finiteBounds = boundsResult && !('error' in boundsResult) ? boundsResult : undefined;
+    const isHistogramDistribution =
+      isHeatmapsEnabled &&
+      isHistogramMetric(
+        firstNonNullable(metricItem.fieldTypes),
+        firstNonNullable(metricItem.metricTypes)
+      );
+    const { bounds, error: boundsError } = isHistogramDistribution
+      ? readHistogramBounds(histogramBounds.get(getMetricUniqueKey(metricItem)))
+      : {};
     // A breakdown splits the series chart. Heatmaps do not encode that split yet.
     const hasBreakdown = applicableDimensions.length > 0;
-    const hasBounds = finiteBounds !== undefined && finiteBounds.min <= finiteBounds.max;
     // Missing bounds skip the histogram and use the series chart. A point (min === max) still draws.
     // Loading and errors stay on the histogram path so the series chart does not flash first.
     const drawDistribution =
-      isDistribution &&
+      isHistogramDistribution &&
       !hasBreakdown &&
-      (histogramBoundsLoading || boundsError !== undefined || hasBounds);
+      (histogramBoundsLoading || boundsError !== undefined || bounds !== undefined);
 
     const distributionQuery = useMemo(() => {
-      if (!drawDistribution || !finiteBounds || finiteBounds.min > finiteBounds.max) {
+      if (!drawDistribution || !bounds) {
         return undefined;
       }
       return createHistogramDistributionQuery({
         metricItem,
-        bounds: finiteBounds,
+        bounds,
         whereStatements,
         originalSource: userSource,
       });
-    }, [drawDistribution, finiteBounds, metricItem, whereStatements, userSource]);
+    }, [drawDistribution, bounds, metricItem, whereStatements, userSource]);
 
     const esqlQuery = useMemo(() => {
       if (drawDistribution) {

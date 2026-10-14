@@ -12,6 +12,7 @@ import useLatest from 'react-use/lib/useLatest';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type {
+  HistogramBounds,
   HistogramBoundsQuery,
   HistogramBoundsResult,
   ParsedMetricItem,
@@ -48,6 +49,19 @@ const toError = (error: unknown): Error =>
 const isBoundsEntry = (
   entry: readonly [string, HistogramBoundsResult] | undefined
 ): entry is readonly [string, HistogramBoundsResult] => entry !== undefined;
+
+/** Splits a hook entry into bounds the chart can draw, or the request error. */
+export const readHistogramBounds = (
+  result: HistogramBoundsResult | undefined
+): { readonly bounds?: HistogramBounds; readonly error?: Error } => {
+  if (result === undefined) {
+    return {};
+  }
+  if ('error' in result) {
+    return { error: result.error };
+  }
+  return { bounds: result };
+};
 
 /**
  * Fetches one MIN/MAX request per visible histogram chart and keeps finite bounds, including a point where min equals max.

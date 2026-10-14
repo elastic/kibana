@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   HeatmapConfig,
@@ -49,8 +42,6 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     yAxisTitle?: string;
     /** Lens API heatmap. When set, the chart is not an XY series chart. */
     heatmapConfig?: HeatmapConfig;
-    /** Shown when a distribution has no finite range, instead of the loading chart. */
-    emptyMessage?: string;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
@@ -80,7 +71,6 @@ export const Chart = ({
   legend,
   yAxisTitle,
   heatmapConfig,
-  emptyMessage,
   extraDisabledActions,
   quickActionIds,
   isLoading = false,
@@ -139,42 +129,7 @@ export const Chart = ({
       `}
       ref={chartRef}
     >
-      {emptyMessage && !isLoading ? (
-        <EuiFlexGroup
-          css={css`
-            height: 100%;
-            padding: ${euiTheme.size.m};
-          `}
-          direction="column"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h2>{title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              style={{ height: '100%' }}
-              justifyContent="center"
-              alignItems="center"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="s"
-                  textAlign="center"
-                  color="subdued"
-                  data-test-subj="metricsExperienceHistogramEmpty"
-                >
-                  <p>{emptyMessage}</p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : lensProps && !isLoading ? (
+      {lensProps && !isLoading ? (
         <>
           <LensWrapperMemo
             lensProps={lensProps}

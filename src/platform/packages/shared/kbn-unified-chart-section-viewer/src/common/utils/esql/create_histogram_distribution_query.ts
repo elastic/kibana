@@ -8,39 +8,31 @@
  */
 
 import { esql, BasicPrettyPrinter } from '@elastic/esql';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { HistogramBounds, ParsedMetricItem } from '../../../types';
 import { firstNonNullable } from '../first_null_nullable';
+import { isHistogramMetric } from '../histogram_metric';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { createTimeBucketAggregation } from './create_aggregation';
 import { fieldNameToColumn, resolveSource } from './helpers';
 
-const HISTOGRAM_FIELD_TYPES: ReadonlySet<ES_FIELD_TYPES> = new Set([
-  ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
-  ES_FIELD_TYPES.TDIGEST,
-  ES_FIELD_TYPES.HISTOGRAM,
-]);
-
 export const HISTOGRAM_BUCKET_COUNT = 10;
-export const HISTOGRAM_TIME_BUCKET_COUNT = 100;
 export const HISTOGRAM_COUNT_COLUMN = 'count';
 export const HISTOGRAM_BUCKET_COLUMN = 'bucket';
 
 export const getHistogramFieldExpression = (metricItem: ParsedMetricItem): string | undefined => {
   const fieldType = firstNonNullable(metricItem.fieldTypes);
   const instrument = firstNonNullable(metricItem.metricTypes);
-  const column = BasicPrettyPrinter.print(fieldNameToColumn(metricItem.metricName));
+  if (!isHistogramMetric(fieldType, instrument)) {
+    return undefined;
+  }
 
+  const column = BasicPrettyPrinter.print(fieldNameToColumn(metricItem.metricName));
   // `TS` aggregations do not accept the legacy `histogram` type, so cast it to tdigest first.
   if (isLegacyHistogram(fieldType, instrument)) {
     return `TO_TDIGEST(${column})`;
   }
 
-  if (instrument === 'histogram' && HISTOGRAM_FIELD_TYPES.has(fieldType)) {
-    return column;
-  }
-
-  return undefined;
+  return column;
 };
 
 /** Builds the distribution-over-time ES|QL query for a histogram chart, or `undefined` for non-histogram metrics. */
@@ -73,7 +65,7 @@ export const createHistogramDistributionQuery = ({
     }
   }
 
-  const timeBucket = createTimeBucketAggregation({ targetBuckets: HISTOGRAM_TIME_BUCKET_COUNT });
+  const timeBucket = createTimeBucketAggregation({});
   // BUCKET emits a null bucket when from equals to. A tiny span still places the constant value in one bucket.
   const max =
     bounds.min < bounds.max
