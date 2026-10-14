@@ -16,6 +16,7 @@ import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-serve
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   try {
@@ -67,6 +68,7 @@ const nlToEsqlToolSchema = z.object({
     .describe(
       '(optional) Time range to use for named parameters ?_tstart and ?_tend when validating the generated query. If not provided, falls back to the time range from the screen context.'
     ),
+  include_frozen: includeFrozenSchema,
 });
 
 export const generateEsqlTool = ({
@@ -81,8 +83,13 @@ export const generateEsqlTool = ({
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description:
-      'Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    description: `Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
+
+## Writing the \`query\`
+
+Describe the data and the result to return, and whether it is over time (such as for a line chart) or a single value per group, not how to compute it: leave out ES|QL or PromQL syntax, functions, formulas, range selectors such as [5m] and steps, unless the user provided them.
+
+Set the time range with \`time_range\` rather than describing it in \`query\`, unless \`disable_named_params\` is true: \`time_range\` only provides the ?_tstart and ?_tend parameters, so without them, describe the time range in \`query\`.`,
     annotations: {
       title: 'Generate ES|QL',
       readOnlyHint: true,
@@ -99,6 +106,7 @@ export const generateEsqlTool = ({
         execute_query: executeQuery = true,
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
+        include_frozen: includeFrozen = false,
       },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
@@ -113,6 +121,7 @@ export const generateEsqlTool = ({
         timeRange,
         includeDatasets: true,
         includeViews: true,
+        includeFrozen,
         modelProvider,
         esClient: esClient.asCurrentUser,
         internalEsClient: esClient.asInternalUser,

@@ -29,7 +29,7 @@ const mockEvent = (
     '@timestamp': '2026-01-01T00:00:00.000Z',
     event_id: 'evt-1',
     status: 'active',
-    stream_names: ['service-a'],
+    source_ids: ['service-a'],
     title: 'Event',
     summary: 'Summary',
     severity: 'medium',
@@ -39,8 +39,9 @@ const mockEvent = (
 
 describe('significant_event_status', () => {
   it('classifies active as needs-action', () => {
-    expect(NEEDS_ACTION_STATUSES).toEqual(['active']);
+    expect(NEEDS_ACTION_STATUSES).toEqual(['active', 'recovering']);
     expect(isNeedsActionStatus('active')).toBe(true);
+    expect(isNeedsActionStatus('recovering')).toBe(true);
     expect(isNeedsActionStatus('inactive')).toBe(false);
   });
 
@@ -111,6 +112,7 @@ describe('significant_event_status', () => {
 
   it('maps status to list dot color', () => {
     expect(getStatusColor('active')).toBe('danger');
+    expect(getStatusColor('recovering')).toBe('danger');
     expect(getStatusColor('inactive')).toBe('success');
   });
 

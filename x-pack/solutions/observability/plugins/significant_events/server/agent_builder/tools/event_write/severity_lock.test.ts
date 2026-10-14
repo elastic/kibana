@@ -13,7 +13,7 @@ const detectionSignal = (
   verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
 ): SignalEntry => ({
   type: 'detection',
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   description: `Signal for ${ruleUuid}`,
   verdict,
   metadata: {
@@ -31,7 +31,7 @@ const makeEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     event_id: 'event-id',
     status: 'active',
     severity: 'medium',
-    stream_names: ['logs.test'],
+    source_ids: ['logs.test'],
     title: 'Test event',
     summary: 'Test summary',
     signals: [detectionSignal('rule-1')],
@@ -96,6 +96,10 @@ describe('lockSeverityForCompletedInvestigation', () => {
 
   it('accepts the computed severity on inactive status', () => {
     expect(lock({ proposedStatus: 'inactive' })).toBe('high');
+  });
+
+  it('accepts the computed severity when a recovering event returns to active', () => {
+    expect(lock({ latestEvent: makeEvent({ status: 'recovering' }) })).toBe('high');
   });
 
   it('accepts the computed severity when reactivating an inactive event', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getTransactionByName } from '.';
 
 const requiredFieldsForHit = {
@@ -58,7 +59,7 @@ describe('getTransactionByName', () => {
   });
 
   describe('environment filtering', () => {
-    it('includes an environment term filter when environment is provided', async () => {
+    it('includes an environment filter when environment is provided', async () => {
       const apmEventClient = createMockApmEventClient({ hits: { hits: [] } });
 
       await getTransactionByName({
@@ -71,7 +72,7 @@ describe('getTransactionByName', () => {
       });
 
       const calledFilter = apmEventClient.search.mock.calls[0][1].query.bool.filter;
-      expect(calledFilter).toContainEqual({ term: { 'service.environment': 'production' } });
+      expect(calledFilter).toEqual(expect.arrayContaining(environmentQuery('production')));
     });
 
     it('does not apply an environment filter when environment is omitted', async () => {

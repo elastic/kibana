@@ -24,6 +24,7 @@ import {
   ChatEventType,
   ConversationAccessControlMode,
   ConversationOriginType,
+  EventActorType,
   TimelineEventType,
   isRequestAbortedError,
   type ChatAgentEvent,
@@ -282,6 +283,82 @@ describe('handleAgentExecution', () => {
         outputSchema,
         executionMode: AgentExecutionMode.standalone,
       })
+    );
+  });
+
+  it('runs a standalone execution with the reasoning level returned by resolveServices', async () => {
+    resolveServicesMock.mockResolvedValue({
+      selectedConnectorId: 'connector-1',
+      modelProvider: createModelProviderMock(),
+      reasoningLevel: 'high',
+    } as never);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm-1', message_content: '' },
+      } as ChatAgentEvent)
+    );
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.standalone,
+        agentId: 'test-agent',
+        agentParams: {
+          nextInput: { message: 'summarize' },
+          reasoningLevel: 'low',
+        },
+      } as never,
+      deps: createDeps({ conversationClient: createConversationClientMock() }),
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(resolveServicesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
+    );
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reasoningLevel: 'high' })
+    );
+  });
+
+  it('runs a conversation execution with the reasoning level returned by resolveServices', async () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      title: 'Existing conversation',
+      agent_id: 'test-agent',
+    });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.update.mockResolvedValue(conversation);
+    resolveServicesMock.mockResolvedValue({
+      selectedConnectorId: 'connector-1',
+      modelProvider: createModelProviderMock(),
+      reasoningLevel: 'high',
+    } as never);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({}) },
+      } as RoundCompleteEvent)
+    );
+
+    const events$ = await runHandle({
+      agentParams: {
+        agentId: 'test-agent',
+        nextInput: { message: 'Hello' },
+        reasoningLevel: 'low',
+      },
+      conversationClient,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(resolveServicesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
+    );
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reasoningLevel: 'high' })
     );
   });
 
@@ -786,6 +863,59 @@ describe('handleAgentExecution', () => {
       await lastValueFrom(events$.pipe(toArray()));
 
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
+    });
+
+    it('acts as the execution owner, keeping a service account typed', async () => {
+      const owner = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+      const deps = createDeps({ conversationClient });
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          owner,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps,
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+
+      const { conversationService } = deps as unknown as {
+        conversationService: { getScopedClientAsUser: jest.Mock };
+      };
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith(
+        expect.objectContaining({ user: { ...owner, isAdmin: false } })
+      );
     });
   });
 
@@ -1622,7 +1752,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
     const abortController = new AbortController();
     deps.agentService.getRegistry.mockImplementation(async () => {
-      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      abortController.abort({
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      });
       throw new Error('AbortError');
     });
 
@@ -1650,7 +1783,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionAborted]);
     const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
     expect(write.events.at(-1)!.data).toMatchObject({
-      aborted_by: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+      aborted_by: {
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      },
     });
   });
 

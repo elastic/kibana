@@ -93,20 +93,26 @@ export const EntityAlertsCell: React.FC<{
 
   const entityFilters = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
-      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType),
+        entityRecord
+      );
       if (filter != null) {
         return [filter];
       }
     }
     return [{ term: { [filterField]: entityName } }];
-  }, [euidApi?.euid, filterField, entityName, entityType, entityRecord]);
+  }, [euidApi, filterField, entityName, entityType, entityRecord]);
 
   const euidKqlEntityFilter = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
-      return euidApi.euid.kql.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      return euidApi.euid.kql.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType),
+        entityRecord
+      );
     }
     return undefined;
-  }, [euidApi?.euid, entityType, entityRecord]);
+  }, [euidApi, entityType, entityRecord]);
 
   const queryEnabled = Boolean(signalIndexName && entityName && entityType);
   const {
