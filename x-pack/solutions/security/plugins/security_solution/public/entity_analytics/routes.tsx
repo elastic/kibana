@@ -143,7 +143,12 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
     false
   );
 
-  const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
+  // PoC branch only (do not merge): the AI brief lives on the new page, so it forces the new page
+  // on. On Cloud the feature flag comes from LaunchDarkly, so a code fallback isn't enough.
+  const isAiBriefEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAiBriefEnabled');
+
+  const PageComponent =
+    isNewHomePageEnabled || isAiBriefEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
 
   return (
     <Routes>
