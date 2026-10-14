@@ -1691,11 +1691,24 @@ describe('TaskStore', () => {
         ],
       });
 
-      await store.bulkUpdate([task1, task2], { validate: true });
+      const result = await store.bulkUpdate([task1, task2], { validate: true });
 
       expect(logger.error).toHaveBeenCalledWith(
         '[TaskStore] An error occured. Task task:2 will not be updated. Error: [TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.'
       );
+      expect(result).toEqual([
+        expect.objectContaining({ tag: 'ok', value: expect.objectContaining({ id: task1.id }) }),
+        asErr({
+          type: 'task',
+          id: task2.id,
+          error: {
+            error: 'Bad Request',
+            message:
+              '[TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.',
+            statusCode: 400,
+          },
+        }),
+      ]);
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -2228,7 +2241,13 @@ describe('TaskStore', () => {
         },
       ]);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual([
+        asErr({
+          type: 'task',
+          id: 'task:324242',
+          error: { error: 'Bad Request', message: 'validation failed', statusCode: 400 },
+        }),
+      ]);
     });
 
     test('bulk update task with no API key changes when api key, user scope are not available and request and regenerate api key flag are available', async () => {
@@ -2675,7 +2694,18 @@ describe('TaskStore', () => {
           );
           expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
           expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
-          expect(result).toEqual([]);
+          expect(result).toEqual([
+            asErr({
+              type: 'task',
+              id: credentialTaskWithApiKey.id,
+              error: {
+                error: 'Bad Request',
+                message:
+                  'Task has both a credential and an API key, which this version of Kibana cannot update',
+                statusCode: 400,
+              },
+            }),
+          ]);
         }
       );
 
@@ -2692,6 +2722,116 @@ describe('TaskStore', () => {
 
         expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
         expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      });
+
+      test('returns an error for each task of a failed write and keeps the results of the other write', async () => {
+        const failure = new Error('Failure');
+        const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+        const mockScopedClient = {
+          bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [toSavedObject(apiKeyTask)] }),
+        };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockRejectedValue(failure);
+
+        const result = await store.bulkUpdate([apiKeyTask, credentialTask], {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        });
+
+        expect(result).toEqual([
+          expect.objectContaining({
+            tag: 'ok',
+            value: expect.objectContaining({ id: apiKeyTask.id }),
+          }),
+          asErr({
+            type: 'task',
+            id: credentialTask.id,
+            error: { error: 'Internal Server Error', message: 'Failure', statusCode: 500 },
+          }),
+        ]);
+        expect(await firstErrorPromise).toBe(failure);
+      });
+
+      test('invalidates only the regenerated API keys of a failed write', async () => {
+        const unavailable = SavedObjectsErrorHelpers.decorateEsUnavailableError(
+          new Error('Unavailable')
+        );
+        const mockScopedClient = { bulkUpdate: jest.fn().mockRejectedValue(unavailable) };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [toSavedObject(credentialTask)],
+        });
+        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+          new Map([
+            [
+              apiKeyTask.id,
+              {
+                apiKey: Buffer.from('apiKeyIdUpdated:apiKey').toString('base64'),
+                userScope: { ...mockUserScope, apiKeyId: 'apiKeyIdUpdated' },
+              },
+            ],
+          ])
+        );
+
+        const result = await store.bulkUpdate([apiKeyTask, credentialTask], {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest, regenerateApiKey: true },
+        });
+
+        expect(result).toEqual([
+          asErr({ type: 'task', id: apiKeyTask.id, error: unavailable.output.payload }),
+          expect.objectContaining({
+            tag: 'ok',
+            value: expect.objectContaining({ id: credentialTask.id }),
+          }),
+        ]);
+        // The old key must be left alone: the failed task still runs on it.
+        expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+          {
+            attributes: { apiKeyId: 'apiKeyIdUpdated', createdAt: expect.any(String) },
+            type: 'api_key_to_invalidate',
+          },
+        ]);
+      });
+
+      test('throws the first write error when every write fails', async () => {
+        const scopedFailure = new Error('Scoped failure');
+        const mockScopedClient = { bulkUpdate: jest.fn().mockRejectedValue(scopedFailure) };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Plain failure'));
+
+        await expect(
+          store.bulkUpdate([apiKeyTask, credentialTask], {
+            validate: false,
+            mergeAttributes: false,
+            options: { request: mockRequest },
+          })
+        ).rejects.toBe(scopedFailure);
+        expect(savedObjectsClient.bulkUpdate).toHaveBeenCalled();
+      });
+
+      test('throws when the only write with tasks fails', async () => {
+        const failure = new Error('Failure');
+        const mockScopedClient = { bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }) };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockRejectedValue(failure);
+        mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => {
+          if (task.id === apiKeyTask.id) {
+            throw new Error('validation failed');
+          }
+          return task;
+        });
+
+        await expect(
+          store.bulkUpdate([apiKeyTask, credentialTask], {
+            validate: false,
+            mergeAttributes: false,
+            options: { request: mockRequest },
+          })
+        ).rejects.toBe(failure);
+        expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
       });
     });
   });
