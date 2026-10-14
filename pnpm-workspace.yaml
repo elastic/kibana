@@ -1720,5 +1720,11 @@ packages:
   - 'x-pack/solutions/vectordb/test'
 # END GENERATED PACKAGES
 
+# Dependency patches, each with a one-line reason.
+patchedDependencies:
+  # Resolve the browser build under `node`: the Node build's top-level `await import('canvas')` cannot be
+  # required from CommonJS, and headless SVG rendering needs no canvas.
+  vega-canvas@2.0.0: patches/vega-canvas@2.0.0.patch
+
 # Keep a last field entry, because a trailing comment might be removed by some parsers.
 lockfile: true

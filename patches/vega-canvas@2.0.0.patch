@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index aa8f3c72b7b886e14edb39d6fe3d013c1fe90cc3..275ede7e753e3b522d84384cc99fd1d36208f28f 100644
+--- a/package.json
++++ b/package.json
+@@ -14,7 +14,7 @@
+     "url": "https://vega.github.io"
+   },
+   "exports": {
+-    "node": "./build/vega-canvas.node.js",
++    "node": "./build/vega-canvas.browser.js",
+     "default": "./build/vega-canvas.browser.js"
+   },
+   "repository": "vega/vega",
