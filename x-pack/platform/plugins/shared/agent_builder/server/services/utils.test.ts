@@ -31,45 +31,21 @@ const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
 };
 
 describe('toStableUserId', () => {
-  it('prefers profile uid when present', async () => {
+  it('prefers the profile uid attached to the request', async () => {
     await expect(
       toStableUserId({
         authUser: {
           username: 'shareduser',
           profile_uid: 'profile-123',
           authentication_type: 'realm',
-          authentication_realm: { type: 'file', name: 'file1' },
         },
       })
     ).resolves.toBe('profile-123');
   });
 
-  it('falls back to a realm-qualified id when profile uid is missing', async () => {
+  it('returns undefined instead of a username or realm id for non API key auth without a profile', async () => {
     await expect(
-      toStableUserId({
-        authUser: {
-          username: 'shareduser',
-          authentication_type: 'realm',
-          authentication_realm: { type: 'file', name: 'file1' },
-        },
-      })
-    ).resolves.toBe('realm:["file","file1","shareduser"]');
-    await expect(
-      toStableUserId({
-        authUser: {
-          username: 'shareduser',
-          authentication_type: 'realm',
-          authentication_realm: { type: 'native', name: 'native1' },
-        },
-      })
-    ).resolves.toBe('realm:["native","native1","shareduser"]');
-  });
-
-  it('returns undefined when neither profile uid nor realm identity is available', async () => {
-    await expect(
-      toStableUserId({
-        authUser: { username: 'shareduser', authentication_type: 'realm' },
-      })
+      toStableUserId({ authUser: { username: 'shareduser', authentication_type: 'realm' } })
     ).resolves.toBeUndefined();
   });
 
@@ -78,11 +54,7 @@ describe('toStableUserId', () => {
 
     await expect(
       toStableUserId({
-        authUser: {
-          username: 'shareduser',
-          authentication_type: 'api_key',
-          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
-        },
+        authUser: { username: 'shareduser', authentication_type: 'api_key' },
         resolveApiKeyProfileUid,
       })
     ).resolves.toBe('profile-from-api-key');
@@ -102,20 +74,13 @@ describe('toStableUserId', () => {
     expect(resolveApiKeyProfileUid).toHaveBeenCalledTimes(1);
   });
 
-  it('does not use the _es_api_key realm when no profile uid is available', async () => {
-    const resolveApiKeyProfileUid = jest.fn().mockResolvedValue(undefined);
-
+  it('returns undefined for API key auth when the key owner has no profile', async () => {
     await expect(
       toStableUserId({
-        authUser: {
-          username: 'shareduser',
-          authentication_type: 'api_key',
-          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
-        },
-        resolveApiKeyProfileUid,
+        authUser: { username: 'shareduser', authentication_type: 'api_key' },
+        resolveApiKeyProfileUid: jest.fn().mockResolvedValue(undefined),
       })
     ).resolves.toBeUndefined();
-    expect(resolveApiKeyProfileUid).toHaveBeenCalledTimes(1);
   });
 
   it('does not call resolveApiKeyProfileUid when profile uid is already present', async () => {
@@ -127,7 +92,6 @@ describe('toStableUserId', () => {
           username: 'shareduser',
           profile_uid: 'profile-123',
           authentication_type: 'api_key',
-          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
         },
         resolveApiKeyProfileUid,
       })
@@ -161,7 +125,7 @@ describe('getUserFromRequest', () => {
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
 
-  it('uses a realm-qualified id when profile uid is missing for realm auth', async () => {
+  it('leaves the id undefined when profile uid is missing for realm auth', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     security.authc.getCurrentUser.mockReturnValue({
@@ -172,11 +136,7 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({
-      id: 'realm:["file","file1","shareduser"]',
-      username: 'shareduser',
-      isAdmin: false,
-    });
+    expect(result).toEqual({ id: undefined, username: 'shareduser', isAdmin: false });
   });
 
   it('resolves the API key creator profile uid when getCurrentUser omits it', async () => {

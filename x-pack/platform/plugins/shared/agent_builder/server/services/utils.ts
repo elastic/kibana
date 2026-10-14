@@ -22,18 +22,11 @@ interface StableUserIdAuthUser {
   username?: string;
   profile_uid?: string;
   authentication_type?: string;
-  authentication_realm?: { type?: string; name?: string };
 }
 
 /**
- * Builds a stable principal id for Agent Builder ownership checks.
- *
- * Usernames alone are not unique across Elasticsearch authentication realms
- * (e.g. file vs native). Prefer the Kibana user profile uid when present;
- * otherwise encode realm type/name with the username so same-username
- * principals in different realms remain distinct.
- *
- * The `realm:` prefix keeps synthetic ids distinguishable from profile uids.
+ * Resolves the Kibana user profile uid Agent Builder identifies the caller by. There is no
+ * fallback to usernames or synthetic ids: a caller without a profile has no id.
  */
 export const toStableUserId = async ({
   authUser,
@@ -44,34 +37,18 @@ export const toStableUserId = async ({
   request?: KibanaRequest;
   resolveApiKeyProfileUid?: () => Promise<string | undefined>;
 }): Promise<string | undefined> => {
-  const isApiKey = request?.isFakeRequest || authUser.authentication_type === 'api_key';
-  let profileUid = authUser.profile_uid;
+  // A profile uid attached to the request is always the preferred identity.
+  if (authUser.profile_uid) {
+    return authUser.profile_uid;
+  }
 
   // API key auth, including fake requests whose identity hides it: use the key owner's profile uid.
-  if (isApiKey && profileUid === undefined && resolveApiKeyProfileUid) {
-    profileUid = await resolveApiKeyProfileUid();
+  if (request?.isFakeRequest || authUser.authentication_type === 'api_key') {
+    return resolveApiKeyProfileUid?.();
   }
 
-  // A profile uid is always the preferred identity.
-  if (profileUid) {
-    return profileUid;
-  }
-
-  // An API key whose owner has no profile has no stable identity: fail closed.
-  if (isApiKey) {
-    return undefined;
-  }
-
-  const realmType = authUser.authentication_realm?.type;
-  const realmName = authUser.authentication_realm?.name;
-  const { username } = authUser;
-
-  // Without a full realm identity there is nothing stable to build an id from.
-  if (!realmType || !realmName || !username) {
-    return undefined;
-  }
-
-  return `realm:${JSON.stringify([realmType, realmName, username])}`;
+  // Other auth without a profile, e.g. basic credentials: no id rather than a username or realm id.
+  return undefined;
 };
 
 /**
@@ -115,8 +92,8 @@ const resolveApiKeyOwnerProfileUid = async ({
 /**
  * Resolves the current user from a request.
  *
- * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user
- * (including profile_uid, username, and authentication_realm).
+ * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user. API key
+ * requests without a profile_uid resolve the key owner's; other callers without one have no id.
  *
  * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns the
  * originating user's identity when the request was enriched at schedule time (profile_uid and
