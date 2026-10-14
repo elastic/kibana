@@ -143,14 +143,16 @@ export const getUserFromRequest = async ({
     };
   }
 
-  const authResponse = await esClient.security.authenticate();
-  const isApiKey = authResponse.authentication_type === 'api_key';
+  const { username, authentication_type: authenticationType } =
+    await esClient.security.authenticate();
+
+  if (authUser?.profile_uid || authenticationType !== 'api_key') {
+    return { id: authUser?.profile_uid, username, isAdmin };
+  }
 
   return {
-    id:
-      authUser?.profile_uid ??
-      (isApiKey ? await resolveApiKeyOwnerProfileUid({ request, esClient }) : undefined),
-    username: authResponse.username,
+    id: await resolveApiKeyOwnerProfileUid({ request, esClient }),
+    username,
     isAdmin,
   };
 };
