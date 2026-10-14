@@ -20,7 +20,7 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { SecurityAppHeader } from '../../../common/components/app_header';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../common/constants';
-import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
+import { useCapabilities, useKibana, useNavigateTo } from '../../../common/lib/kibana';
 import { useRootNavLink } from '../../../common/links/nav_links';
 import * as i18n from './translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
@@ -50,6 +50,9 @@ const getInitialFilterString = (securityTags: TagReference[] | null | undefined)
 
 export const DashboardsLandingPage = () => {
   const { DashboardsLandingCallout } = useContractComponents();
+  const {
+    services: { docLinks },
+  } = useKibana();
   const { links = [] } = useRootNavLink(SecurityPageName.dashboards) ?? {};
   const urlState = useGlobalQueryString();
   const { show: canReadDashboard, createNew: canCreateDashboard } =
@@ -85,7 +88,12 @@ export const DashboardsLandingPage = () => {
   const initialFilter = useMemo(() => getInitialFilterString(securityTags), [securityTags]);
   return (
     <SecuritySolutionPageWrapper>
-      <SecurityAppHeader title={DASHBOARDS_PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
+      <SecurityAppHeader
+        title={DASHBOARDS_PAGE_TITLE}
+        menu={headerMenu}
+        spacing="largeBleed"
+        docLink={docLinks.links.siem.dashboardsPage}
+      />
       <EuiSpacer size="m" />
 
       {DashboardsLandingCallout && (
