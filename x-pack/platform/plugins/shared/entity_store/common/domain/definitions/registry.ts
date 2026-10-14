@@ -33,7 +33,12 @@ const entitiesDefinitionRegistry = {
 
 const getRegisteredDefinition = (type: EntityType): EntityDefinitionWithoutId => {
   const definition = entitiesDefinitionRegistry[type];
-  assert(definition, `No entity description found for type: ${type}`);
+  assert(
+    definition,
+    `No entity definition found for type: ${type}. Only the Entity Store's built-in types can be ` +
+      `resolved by name; for any other definition, read it from the entity definition registry ` +
+      `and pass it to the euid helper.`
+  );
 
   return definition;
 };
@@ -78,7 +83,7 @@ export function getEntityDefinition(
   extractionMode: ExtractionMode = EXTRACTION_MODE.single,
   options?: EntityDefinitionOptions
 ): GatedEntityDefinition<ManagedEntityDefinition> {
-  const definition = getEntityDefinitionWithoutId(type, extractionMode, options);
+  const definition = getBuiltInEntityDefinition(type, extractionMode, options);
 
   return {
     ...definition,
@@ -88,13 +93,16 @@ export function getEntityDefinition(
 }
 
 /**
- * Resolves an entity definition for an extraction mode. The default `'single'` mode returns the
- * registered definition untouched, which is what every consumer outside log extraction reads.
+ * Resolves one of the Entity Store's built-in definitions (`user`, `host`, `service`, `generic`)
+ * by type name; definitions other plugins register are read from the entity definition registry.
+ *
+ * The default `'single'` mode returns the registered definition untouched, which is what every
+ * consumer outside log extraction reads.
  *
  * The process modes return it with `extractionGate` resolved from `priorityExtractionGate`. Both
  * gates come from that one declaration, so they cannot drift out of being complements.
  */
-export function getEntityDefinitionWithoutId(
+export function getBuiltInEntityDefinition(
   type: EntityType,
   extractionMode: ExtractionMode = EXTRACTION_MODE.single,
   options?: EntityDefinitionOptions

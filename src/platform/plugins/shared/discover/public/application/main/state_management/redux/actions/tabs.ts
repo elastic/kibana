@@ -28,6 +28,7 @@ import {
 import {
   createTabRuntimeState,
   selectCurrentProfileUrlState,
+  getTabDataView,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -240,7 +241,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
-        const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+        const currentDataView = getTabDataView(currentTabRuntimeState);
 
         tab.skipInitialFetch = true;
         const currentRefreshInterval =

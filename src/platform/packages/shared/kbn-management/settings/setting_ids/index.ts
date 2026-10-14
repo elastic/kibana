@@ -8,9 +8,7 @@
  */
 
 // General settings
-export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
 export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticRamen:enabled';
-export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
 export const DATE_FORMAT_ID = 'dateFormat';
@@ -182,12 +180,6 @@ export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
 export const OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS = 'observability:streamsEnableDraftStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CANVAS = 'observability:streamsEnableCanvas';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED =
-  'observability:streamsContinuousKiExtractionEnabled';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS =
-  'observability:streamsContinuousKiExtractionIntervalHours';
-export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS =
-  'observability:streamsSigEventsIndexPatterns';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED =
@@ -213,6 +205,10 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE =
   'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore';
 export const OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE = 'observability:nightshiftDeveloperMode';
+export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED =
+  'observability:nightshiftContinuousOnboardingEnabled';
+export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS =
+  'observability:nightshiftContinuousOnboardingIntervalHours';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

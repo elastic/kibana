@@ -76,13 +76,18 @@ Workers install when a user enables one or saves settings on one. There is no Wa
 
 Managed-workflow ownership remains registered when optional runtime dependencies are missing, so their absence does not cause installed AlertZero workflows to be deleted as orphans.
 
-Each Worker runs as its own `alertzero_<worker>` service account, with a role of the same name. AlertZero creates both from the browser, with the admin's privileges, when a Worker is turned on without an account, and reuses existing ones without changing them.
+Each Worker runs as its own `alertzero_<worker>` service account. AlertZero creates the account from the browser, with the admin's privileges, when a Worker is turned on without one, and reuses existing accounts without changing them. The account gets a built-in role, which users can't edit or delete and which updates with each release. AlertZero never creates a role: it checks that the built-in role exists, and a Worker whose role is missing fails to turn on with an error naming the role. The role's name depends on the deployment:
+
+- **Stateful (self-managed and Elastic Cloud Hosted):** the Elasticsearch reserved role `alertzero_<worker>`, named like the account.
+- **Serverless:** the predefined role `_alertzero_<worker>`. Predefined role names must start with `_`. It is defined in `elasticsearch-controller` (`internal/config/roles/security.yaml`) and mirrored in `kbn-es` (`serverless_resources/project_roles/security/roles.yml`) and Security Solution's Serverless roles.
+
+`WORKER_SERVICE_ACCOUNT_NAMES` and `getWorkerRoleName` in `@kbn/alertzero-common` give each Worker's account and role name. The roles' privileges live outside Kibana: in Elasticsearch (`KibanaOwnedReservedRoleDescriptors`) for stateful, and in elasticsearch-controller for Serverless, with its Kibana mirrors. Changing a Worker's privileges means updating both, plus the mirrors.
 
 The Worker's child workflows run as the same account. Every `workflow.execute` and `workflow.executeAsync` call in a Worker's chain sets `run-as-mode: inherit` and names the child by a literal `workflow-id`. Inheritance requires a literal id, and the step input schema ignores unknown keys, so a misspelled `run-as-mode` silently runs the child as the original caller. Action workflows are the exception: proposals start them by a templated id, so they keep the default identity. `service_account_inheritance.test.ts` enforces both rules.
 
 Inheritance needs a parent that runs as a service account. Running a child workflow such as a review or sweep by hand fails at its first child call, so run the Worker instead. The Attack Discovery pipeline that `security.attack-discovery.run` starts is a known gap: its alert retrieval, generation and validation workflows still run as the user who enabled the Worker, because the step starts them from code. The step itself runs as the Worker's account, so its generation events are attributed to that account and tagged, and every user in the space with access to Attack Discovery sees them in the generations view. The Attack discoveries it persists are attributed to the user who last enabled the Worker or saved its settings.
 
-**Known limitation (MVP):** AlertZero does not detect or repair a Worker whose role or service account was deleted. If the role is deleted, the Worker's runs fail with authorization errors until the role is re-created with the same name and privileges. If the account is deleted (Kibana only allows this with force while Workers are bound to it), the Worker's runs fail until it is re-bound to a new account through the worker API (`PATCH /internal/alertzero/workers/{workerId}` with a new `settings.serviceAccountId` and the Worker's current `settingsRevision`). Detecting and repairing both cases is planned post-MVP.
+**Known limitation (MVP):** AlertZero does not detect or repair a Worker whose service account was deleted (built-in roles can't be deleted). If the account is deleted (Kibana only allows this with force while Workers are bound to it), the Worker's runs fail until it is re-bound to a new account through the worker API (`PATCH /internal/alertzero/workers/{workerId}` with a new `settings.serviceAccountId` and the Worker's current `settingsRevision`). Detecting and repairing this is planned post-MVP.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
@@ -238,9 +243,9 @@ The Workers service owns per-space installation, reading persisted values, enabl
 
 ### Scheduled Workers
 
-Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
+Not every Worker is schedule-driven — some are event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
 
-Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The two Detection Workers also keep a `manual` trigger for on-demand sweeps.
+Scheduled Workers today: `system-security-floor-alert-triage` (default `15m`), `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The Alert Triage and the two Detection Workers also keep a `manual` trigger for on-demand sweeps.
 
 The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
 
@@ -280,6 +285,18 @@ Tests to update:
 - `worker_registry.test.ts` — set the Worker's `EXPECTED_WORKER_SETTINGS` entry with its `scheduleInterval` and add `'scheduled'` to `triggerTypes` (keep `'manual'` if the YAML keeps that trigger).
 - `worker_settings.test.ts` — add the Worker to `SCHEDULED_WORKER_IDS` so the "rejects an interval patch" cases stop running against it.
 - `worker_settings_compat.test.ts` — regenerate the settings contract snapshot (see [Changing Worker settings safely](#changing-worker-settings-safely)).
+
+### Alert Triage sweep
+
+Alert Triage no longer runs once per rule execution, and enabling it attaches nothing to rules. It is a scheduled sweep that plans budgeted, fair batches of waiting alerts and starts one batch workflow per rule, so triage stays a bounded share of Task Manager.
+
+- **Sweep** (`system-security-floor-alert-triage`, per space, concurrency `drop`, max 1): checks Task Manager headroom, reclaims claims whose batch is gone, picks a batch per rule within the budget, claims the alerts with `az:triage_pending`, starts the batches with `workflow.executeAsync`, and records each execution id on that batch's alerts as `az:triage_exec:<id>`. If that tag cannot be stored after retries, the sweep cancels the batch it just started, so the next sweep does not plan the same alerts again while it runs. Every sweep writes `skip_reason` (`none`, `tm_behind`, `tm_unknown`, `live_batches_unreadable`, `in_flight_ceiling`, `nothing_pending`) and its planning numbers to its own execution output, including `aged_out_alerts`, the count of open alerts older than the look-back that were never triaged (`-1` if that count failed).
+- **Batch** (`system-security-floor-alert-triage-batch`, installed once, concurrency `queue`): 4 batches analyse at once per space and the rest wait without holding a Task Manager slot, up to 40 in flight. Each batch opens one Investigation, calls Alert Analysis, writes verdict tags and notes, removes the claim, and hands confident false positives to the closure review as one proposal. `server/alert_triage/batch_concurrency.test.ts` pins the YAML numbers to the planner constants.
+- **Settings:** `scheduleInterval` (default `15m`), `extras.budgetPerHour` (default `1300`) and `extras.lookbackHours` (default `24`), plus the existing confidence floor and autonomy. The look-back is the search window: older alerts are never read or tagged.
+
+**What a cost unit means.** A batch costs 5 units of fixed overhead (the Investigation, the Alert Analysis hop and the review hand-off) plus 1 unit per alert. The hourly budget is scaled to the sweep interval (`floor(budgetPerHour × minutes / 60)`), so changing the interval does not change the hourly total. Units are a planning currency, not tokens or seconds. Each rule gets up to 30 alerts first, then rules are topped up round-robin to 100 until the budget runs out.
+
+**Alert Analysis settings the Worker path uses.** The batch calls `system-security-alert-analysis` with `calledByWorker: true`, `autoCloseEnabled: false` (closing is a proposal, never inline), `autoCloseConfidenceScoreMinThreshold` from this Worker's setting, the `alertzero_reasoning` model feature, and the Investigation id. Its tag prefix comes from the space's Alert Analysis runtime config, so alerts Alert Analysis tagged on its own are left alone. Alert Analysis run on its own keeps reading its own space settings and is unchanged.
 
 ### Worker-specific settings (`extras`)
 
