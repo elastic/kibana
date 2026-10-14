@@ -1165,6 +1165,65 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  describe('anonymization onFailure', () => {
+    const brokenRegexRule: AnonymizationRule = {
+      type: 'RegExp',
+      entityClass: 'EMAIL',
+      pattern: '(unclosed',
+      enabled: true,
+    };
+
+    // Runs the real regex task, so the invalid pattern fails the way it does in production.
+    const chatCompleteWithBrokenRule = (onFailurePromise?: Promise<'block' | 'allow_unsafe'>) => {
+      jest
+        .mocked(regexWorker.run)
+        .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+      const callbackApiWithRules = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([brokenRegexRule]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        anonymization: { onFailurePromise },
+      });
+      return createChatCompleteApi({ callbackApi: callbackApiWithRules })({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'write to claudia@example.com' }],
+        maxRetries: 0,
+      });
+    };
+
+    beforeEach(() => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+    });
+
+    it('fails the request when a rule cannot run and no failure mode is set', async () => {
+      await expect(chatCompleteWithBrokenRule()).rejects.toThrow('invalid regular expression');
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('fails the request when the failure mode is "block"', async () => {
+      await expect(chatCompleteWithBrokenRule(Promise.resolve('block'))).rejects.toThrow(
+        'invalid regular expression'
+      );
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('sends the messages unmasked when the failure mode is "allow_unsafe"', async () => {
+      await chatCompleteWithBrokenRule(Promise.resolve('allow_unsafe'));
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [expect.objectContaining({ content: 'write to claudia@example.com' })],
+        })
+      );
+    });
+  });
+
   describe('NER anonymization', () => {
     const NER_MODEL = 'test-ner-model';
     const nerRule = (overrides: Partial<NamedEntityRecognitionRule> = {}): AnonymizationRule => ({

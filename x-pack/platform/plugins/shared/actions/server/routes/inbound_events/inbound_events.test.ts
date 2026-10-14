@@ -55,6 +55,7 @@ describe('inboundEventsRoute', () => {
             stability: 'experimental',
           },
           body: expect.objectContaining({
+            accepts: expect.arrayContaining(['application/x-www-form-urlencoded']),
             maxBytes: 1024 * 1024,
             accepts: ['application/json', 'application/*+json', 'text/plain', '*/*'],
           }),

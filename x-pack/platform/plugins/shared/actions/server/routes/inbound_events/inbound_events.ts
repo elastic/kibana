@@ -68,7 +68,13 @@ export function inboundEventsRoute({
           stability: 'experimental',
         },
         body: {
-          accepts: ['application/json', 'application/*+json', 'text/plain', '*/*'],
+          accepts: [
+            'application/json',
+            'application/*+json',
+            'application/x-www-form-urlencoded',
+            'text/plain',
+            '*/*',
+          ],
           maxBytes: maxBodyBytes,
         },
       },

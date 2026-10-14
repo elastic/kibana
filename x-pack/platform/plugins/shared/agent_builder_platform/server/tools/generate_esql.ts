@@ -81,8 +81,13 @@ export const generateEsqlTool = ({
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description:
-      'Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    description: `Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
+
+## Writing the \`query\`
+
+Describe the data and the result to return, and whether it is over time (such as for a line chart) or a single value per group, not how to compute it: leave out ES|QL or PromQL syntax, functions, formulas, range selectors such as [5m] and steps, unless the user provided them.
+
+Set the time range with \`time_range\` rather than describing it in \`query\`, unless \`disable_named_params\` is true: \`time_range\` only provides the ?_tstart and ?_tend parameters, so without them, describe the time range in \`query\`.`,
     annotations: {
       title: 'Generate ES|QL',
       readOnlyHint: true,
