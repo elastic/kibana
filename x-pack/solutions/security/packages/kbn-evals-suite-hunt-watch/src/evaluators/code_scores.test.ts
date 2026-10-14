@@ -8,12 +8,15 @@
 import type { HuntResult } from '@kbn/alertzero-common';
 import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
 import type { HuntExpected, HuntReportExpectation } from '../types';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import {
+  actionedSubjectFingerprint,
   scoreCandidateSelection,
   scoreCanaryTripped,
   scoreEvidenceHonesty,
   scoreHitConsistency,
   scoreOutcome,
+  scoreProposalConvergence,
   scoreProposalPresence,
   scoreSseAttachment,
   scoreStageProgression,
@@ -248,6 +251,173 @@ describe('scoreCandidateSelection', () => {
         }
       ).score
     ).toBe(0);
+  });
+});
+
+const actionedProposal = (
+  overrides: Partial<ProposalWithMetadata> & Pick<ProposalWithMetadata, 'id' | 'conversationId'>
+): ProposalWithMetadata =>
+  ({
+    spaceId: 'default',
+    title: 'Mark user extreme impact',
+    comment: 'Raise criticality.',
+    status: 'pending',
+    impact: 'high',
+    confidence: 'medium',
+    origin: 'alertzero',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    actionWorkflowId: 'system-alertzero-action-set-asset-criticality',
+    actionInput: {
+      id_field: 'user.name',
+      id_value: 'dev-user',
+      criticality_level: 'extreme_impact',
+    },
+    ...overrides,
+  } as ProposalWithMetadata);
+
+describe('scoreProposalConvergence', () => {
+  const multiExpected: HuntExpected = {
+    indexScopeBlocked: false,
+    proposalConvergence: true,
+    reports: [
+      {
+        reportId: 'r1',
+        hasConfirmedHit: true,
+        pendingProposals: { min: 0 },
+        evidenceWritten: true,
+        sseAttachment: true,
+        investigationStatus: 'open',
+      },
+      {
+        reportId: 'r2',
+        hasConfirmedHit: true,
+        pendingProposals: { min: 0 },
+        evidenceWritten: true,
+        sseAttachment: true,
+        investigationStatus: 'open',
+      },
+    ],
+  };
+
+  const multiArtifacts = ({
+    proposalsInSpace,
+    r2Summary,
+    r2Narrative,
+  }: {
+    proposalsInSpace: ProposalWithMetadata[];
+    r2Summary?: string;
+    r2Narrative?: string;
+  }): HuntArtifacts => ({
+    spaceId: 'default',
+    workflowExecutionId: 'w',
+    executionStatus: 'completed',
+    selectedIds: ['r1', 'r2'],
+    skipped: [],
+    pendingProposalsInSpace: proposalsInSpace,
+    reports: {
+      r1: {
+        reportId: 'r1',
+        selected: true,
+        stages: {},
+        sseEvents: [],
+        proposals: proposalsInSpace.filter((p) => p.conversationId === 'conv-1'),
+        narrative: '',
+        conversation: { id: 'conv-1' },
+      },
+      r2: {
+        reportId: 'r2',
+        selected: true,
+        stages: {},
+        sseEvents: [],
+        proposals: proposalsInSpace.filter((p) => p.conversationId === 'conv-2'),
+        narrative: r2Narrative ?? '',
+        packaging: r2Summary ? { summary: r2Summary } : undefined,
+        conversation: { id: 'conv-2' },
+      },
+    },
+  });
+
+  it('returns N/A when proposalConvergence is not pinned', () => {
+    expect(scoreProposalConvergence(buildExpected({}), buildArtifacts()).label).toBe('N/A');
+  });
+
+  it('returns 0 when the same actioned subject is pending under two Investigations', () => {
+    expect(
+      scoreProposalConvergence(
+        multiExpected,
+        multiArtifacts({
+          proposalsInSpace: [
+            actionedProposal({ id: 'p1', conversationId: 'conv-1' }),
+            actionedProposal({ id: 'p2', conversationId: 'conv-2' }),
+          ],
+          r2Summary: 'Packaging: no new proposals, 1 already raised by another Investigation',
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('returns 0 when subjects are unique but no convergence note is recorded', () => {
+    expect(
+      scoreProposalConvergence(
+        multiExpected,
+        multiArtifacts({
+          proposalsInSpace: [actionedProposal({ id: 'p1', conversationId: 'conv-1' })],
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('returns 1 when one Investigation owns the subject and another records the convergence note', () => {
+    expect(
+      scoreProposalConvergence(
+        multiExpected,
+        multiArtifacts({
+          proposalsInSpace: [
+            actionedProposal({
+              id: 'p1',
+              conversationId: 'conv-1',
+              comment:
+                'Mark user extreme impact.\n\nAlso raised by [Investigation](/app/alertzero?selectedConversationId=conv-2).',
+            }),
+          ],
+          r2Summary: 'Packaging: no new proposals, 1 already raised by another Investigation',
+        })
+      ).score
+    ).toBe(1);
+  });
+
+  it('returns 1 when the converging Investigation narrative carries the no-second-Proposal line', () => {
+    expect(
+      scoreProposalConvergence(
+        multiExpected,
+        multiArtifacts({
+          proposalsInSpace: [actionedProposal({ id: 'p1', conversationId: 'conv-1' })],
+          r2Narrative:
+            'A Proposal for "Mark user extreme impact" is already awaiting a decision, raised by [another Investigation](/app/alertzero?selectedConversationId=conv-1). This run found the same thing, so no second Proposal was created. This Investigation was added to it.',
+        })
+      ).score
+    ).toBe(1);
+  });
+});
+
+describe('actionedSubjectFingerprint', () => {
+  it('returns undefined for a recommendation with no action workflow', () => {
+    expect(
+      actionedSubjectFingerprint(
+        actionedProposal({
+          id: 'p',
+          conversationId: 'c',
+          actionWorkflowId: undefined,
+          actionInput: undefined,
+        })
+      )
+    ).toBeUndefined();
+  });
+
+  it('returns the same fingerprint for two Proposals on the same user and action', () => {
+    expect(actionedSubjectFingerprint(actionedProposal({ id: 'p1', conversationId: 'c1' }))).toBe(
+      actionedSubjectFingerprint(actionedProposal({ id: 'p2', conversationId: 'c2' }))
+    );
   });
 });
 

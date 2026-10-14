@@ -23,6 +23,7 @@ artifact it needed was absent, which the golden gate treats as a failure.
 | SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
 | Evidence Honesty | CODE | report `evidence[]` written iff the hunt completed (`hunt.output.status === 'success'`) |
 | Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum |
+| Proposal Convergence | CODE | multi-candidate only: each actioned subject is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff a prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
@@ -168,7 +169,7 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
 | D7 incident-fork-integrity | n/a | no Incident fork |
 | D8 approval-identity-rekey | tested | approve path in the approval spec |
 | D9 thread-depth-fork-root-containment | n/a | no threads or forks |
-| D10 proposal-gate-exclusivity | tested | `Proposal Presence`, `Canary Inverted`, approval spec |
+| D10 proposal-gate-exclusivity | tested | `Proposal Presence`, `Proposal Convergence`, `Canary Inverted`, approval spec |
 | D10a watch-tag-grouping | n/a | Worker triggered directly |
 | D10b per-worker-settings-scope | n/a | v1 bridge is space-level |
 | D10c execute-time-revalidation | n/a | no Defend endpoint actions |

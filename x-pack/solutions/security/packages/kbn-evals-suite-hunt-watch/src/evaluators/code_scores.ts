@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
 import type { HuntExpected, HuntReportExpectation, HuntTier1Status } from '../types';
 
@@ -406,6 +407,125 @@ export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifa
     'no reports'
   );
 
+/**
+ * Actioned Proposals only: recommendations are keyed per Investigation and are expected to
+ * duplicate across reports. Target paths match packaging's `holdsSubject` contract.
+ */
+export const actionedSubjectFingerprint = (proposal: ProposalWithMetadata): string | undefined => {
+  if (!proposal.actionWorkflowId) return undefined;
+  const input = proposal.actionInput ?? {};
+  const endpointIds = input.endpoint_ids;
+  const parameters =
+    input.parameters && typeof input.parameters === 'object'
+      ? (input.parameters as Record<string, unknown>)
+      : undefined;
+  return [
+    proposal.actionWorkflowId,
+    typeof input.id_field === 'string' ? input.id_field : '',
+    typeof input.id_value === 'string' ? input.id_value : '',
+    Array.isArray(endpointIds) ? endpointIds.join(',') : '',
+    typeof parameters?.entity_id === 'string' ? parameters.entity_id : '',
+  ].join('|');
+};
+
+const CONVERGENCE_TEXT =
+  /no second Proposal was created|already raised by another Investigation|Also raised by \[Investigation\]/;
+
+const investigationTexts = (report: HuntReportArtifacts): string =>
+  [
+    report.packaging?.summary,
+    report.narrative,
+    ...(report.conversation?.events ?? []).map((e) => e.data?.message),
+  ]
+    .filter((text): text is string => typeof text === 'string' && text.length > 0)
+    .join('\n');
+
+/**
+ * Cross-Investigation Proposal convergence for multi-candidate rows that share principals.
+ * Fails when the same actioned subject is pending under more than one Investigation, or when
+ * no Investigation / Proposal records the packaging convergence note.
+ */
+export const scoreProposalConvergence = (
+  expected: HuntExpected,
+  artifacts: HuntArtifacts
+): CodeScore => {
+  if (!expected.proposalConvergence) {
+    return notApplicable('Proposal convergence not pinned for this row');
+  }
+
+  const hitReports = expected.reports.filter((r) => r.hasConfirmedHit);
+  if (hitReports.length < 2) {
+    return fail('proposalConvergence requires at least two hit reports in the expectation');
+  }
+
+  const reportIds = new Set(hitReports.map((r) => r.reportId));
+  const conversationIds = new Set(
+    [...reportIds]
+      .map((id) => artifacts.reports[id]?.conversation?.id)
+      .filter((id): id is string => typeof id === 'string')
+  );
+  if (conversationIds.size < 2) {
+    return missing(
+      `need Investigations for at least two hit reports, found ${conversationIds.size}`
+    );
+  }
+
+  const pendingActioned = artifacts.pendingProposalsInSpace.filter(
+    (p) =>
+      p.status === 'pending' && Boolean(p.actionWorkflowId) && conversationIds.has(p.conversationId)
+  );
+
+  const bySubject = new Map<string, Set<string>>();
+  for (const proposal of pendingActioned) {
+    const fingerprint = actionedSubjectFingerprint(proposal);
+    if (fingerprint) {
+      const owners = bySubject.get(fingerprint) ?? new Set<string>();
+      owners.add(proposal.conversationId);
+      bySubject.set(fingerprint, owners);
+    }
+  }
+
+  const duplicated = [...bySubject.entries()].filter(([, owners]) => owners.size > 1);
+  if (duplicated.length > 0) {
+    return fail(
+      `same actioned subject pending under ${duplicated.length} duplicate Investigation group(s)`,
+      {
+        subjects: duplicated.map(([subject, owners]) => ({
+          subject,
+          conversationIds: [...owners],
+        })),
+      }
+    );
+  }
+
+  if (bySubject.size === 0) {
+    return missing(
+      'no pending actioned Proposals on the hit Investigations, so convergence cannot be observed'
+    );
+  }
+
+  const noteOnInvestigation = [...reportIds].some((id) => {
+    const report = artifacts.reports[id];
+    return report ? CONVERGENCE_TEXT.test(investigationTexts(report)) : false;
+  });
+  const noteOnProposal = pendingActioned.some((p) => CONVERGENCE_TEXT.test(p.comment ?? ''));
+  if (!noteOnInvestigation && !noteOnProposal) {
+    return fail(
+      'actioned subjects were unique across Investigations, but no convergence note or "Also raised by [Investigation]" line was found',
+      { subjects: [...bySubject.keys()], conversationIds: [...conversationIds] }
+    );
+  }
+
+  return pass(
+    `${bySubject.size} actioned subject(s) minted once across ${conversationIds.size} Investigations; convergence recorded`,
+    {
+      subjects: [...bySubject.keys()],
+      noteOnInvestigation,
+      noteOnProposal,
+    }
+  );
+};
+
 export const CODE_SCORERS = {
   'Outcome Label': scoreOutcome,
   'Index Scope Gate': scoreIndexScope,
@@ -417,5 +537,6 @@ export const CODE_SCORERS = {
   'SSE Attachment': scoreSseAttachment,
   'Evidence Honesty': scoreEvidenceHonesty,
   'Proposal Presence': scoreProposalPresence,
+  'Proposal Convergence': scoreProposalConvergence,
   'Investigation Status': scoreInvestigationStatus,
 } as const;

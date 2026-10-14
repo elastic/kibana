@@ -21,6 +21,7 @@ stays trustworthy.
 | `hunt_result` validates against `huntResultSchema` | `SSE Attachment` (code) | tested |
 | Hit, `has_confirmed_hit` and `hit_sources` agree | `Hit Consistency` (code) | tested |
 | Proposals raised only on confirmed hits, never on canary or clean reports | `Proposal Presence`, `Canary Inverted` (code) | tested |
+| Shared principals across reports mint one actioned Proposal and record convergence | `Proposal Convergence` (code) on multi-candidate | tested |
 | Investigation stays in the triggering space | space-isolation case in `evals/hunt_watch.spec.ts` | tested |
 | Approve executes the action, dismiss does not, and the Investigation closes either way | `evals/hunt_watch_approval.spec.ts` | tested |
 | Report, queries and findings are grounded in the Worker's own tool calls | `Groundedness Analysis` (LLM judge) | tested |

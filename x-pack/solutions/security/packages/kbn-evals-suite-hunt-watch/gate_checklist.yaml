@@ -101,7 +101,7 @@ gates:
     family: D
     name: proposal-gate-exclusivity
     status: tested
-    evidence: "Proposal Presence asserts pending Proposals exist only on the report's Investigation (listed by conversationId) and only when a hit is expected; Canary Inverted asserts a prose-only report produces no Proposal; blocked and clean rows pin zero. The approval spec shows the Proposals are created by the human-input gate (system-create-proposal child with await_decision) and settle only on a decision. The Proposal conversation's template_id is not checked."
+    evidence: "Proposal Presence asserts pending Proposals exist only on the report's Investigation (listed by conversationId) and only when a hit is expected; Proposal Convergence asserts a multi-candidate run that shares principals mints each actioned subject once and records Also raised by / no second Proposal; Canary Inverted asserts a prose-only report produces no Proposal; blocked and clean rows pin zero. The approval spec shows the Proposals are created by the human-input gate (system-create-proposal child with await_decision) and settle only on a decision. The Proposal conversation's template_id is not checked."
   D10a:
     family: D
     name: watch-tag-grouping

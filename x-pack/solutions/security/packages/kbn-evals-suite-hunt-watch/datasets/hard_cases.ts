@@ -18,6 +18,9 @@ import type { HuntWatchExample } from '../src/types';
  */
 export const hardCases: HuntWatchExample[] = [
   {
+    // The three report ids share principals (dev-user, 192.0.2.30/31), so packaging must
+    // mint each actioned subject once and converge the other Investigations onto that Proposal
+    // (`Also raised by [Investigation]` / "no second Proposal was created").
     id: 'hard-multi-candidate',
     cohort: 'hard',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [...HUNT_REPORT_IDS.multiCandidate] },
@@ -25,6 +28,7 @@ export const hardCases: HuntWatchExample[] = [
       expected: {
         outcome: ['completed', 'partial'],
         indexScopeBlocked: false,
+        proposalConvergence: true,
         reports: [
           {
             reportId: HUNT_REPORT_IDS.multiCandidate[0],
@@ -59,6 +63,7 @@ export const hardCases: HuntWatchExample[] = [
       criteria: [
         'Each of the three reports gets its own conclusion; findings from one report are not attributed to another.',
         "Each hit narrative is grounded in that report's IOCs or behaviors.",
+        'When two Investigations find the same principal, only one actioned Proposal is raised and the other Investigation names that Proposal (Also raised by / no second Proposal).',
       ],
     },
   },
