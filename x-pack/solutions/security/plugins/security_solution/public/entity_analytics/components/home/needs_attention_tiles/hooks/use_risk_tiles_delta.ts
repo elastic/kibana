@@ -37,6 +37,8 @@ interface RiskTileDefinition {
   ) => string;
 }
 
+const RISK_HISTORY_GUARD_KEY = 'riskHistory';
+
 const useRiskTileDelta = (
   { tileKey, buildPrevious }: RiskTileDefinition,
   {
@@ -68,6 +70,8 @@ const useRiskTileDelta = (
 
   const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
     tileKey,
+    // Both risk tiles read the same history with the same query: one request.
+    guardKey: RISK_HISTORY_GUARD_KEY,
     guardQuery,
     previousQuery,
     enabled: !skip && isReady && count > 0 && !isIndexLoading && Boolean(index),

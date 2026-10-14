@@ -208,6 +208,17 @@ describe('the risk tile deltas', () => {
     expect(lastOptions().guardQuery).toContain('has_end');
   });
 
+  it('share one history check: the same key and the same query, so it goes out once', () => {
+    renderHook(() => useRiskMoversDelta({ ...base, count: 3 }));
+    const movers = lastOptions();
+    renderHook(() => useNewlyHighCriticalDelta({ ...base, count: 3 }));
+    const newlyHighCritical = lastOptions();
+    expect(movers.guardKey).toBeDefined();
+    expect(newlyHighCritical.guardKey).toBe(movers.guardKey);
+    expect(newlyHighCritical.guardQuery).toBe(movers.guardQuery);
+    expect(newlyHighCritical.tileKey).not.toBe(movers.tileKey);
+  });
+
   it('read the previous period of their own tile', () => {
     renderHook(() => useRiskMoversDelta({ ...base, count: 3 }));
     expect(lastOptions().previousQuery).toContain('current_score - boundary_score >= 10');

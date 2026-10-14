@@ -83,6 +83,11 @@ export const parseReachesBack = (raw: ESQLSearchResponse): boolean => {
 interface PreviousPeriodOptions<T> {
   /** Identifies the tile in the query cache. */
   tileKey: string;
+  /**
+   * Identifies the history check in the query cache, when tiles read the same source with the same
+   * query and should share one request. Defaults to `tileKey`.
+   */
+  guardKey?: string;
   /** The history check of the tile's source, or null while its inputs load. */
   guardQuery: string | null;
   /** The tile's query for the previous period (count only), or null while its inputs load. */
@@ -102,6 +107,7 @@ interface PreviousPeriodOptions<T> {
  */
 export const usePreviousPeriod = <T>({
   tileKey,
+  guardKey = tileKey,
   guardQuery,
   previousQuery,
   enabled,
@@ -115,7 +121,7 @@ export const usePreviousPeriod = <T>({
   isError: boolean;
 } => {
   const guard = usePreviousPeriodQuery({
-    queryKey: `${tileKey}HistoryReachesBack`,
+    queryKey: `${guardKey}HistoryReachesBack`,
     query: guardQuery,
     enabled,
     parse: parseReachesBack,

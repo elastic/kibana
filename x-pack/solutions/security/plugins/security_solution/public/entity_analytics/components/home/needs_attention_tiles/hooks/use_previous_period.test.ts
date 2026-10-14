@@ -64,6 +64,16 @@ describe('usePreviousPeriod', () => {
     expect(callOf('PrevPeriod')[2].enabled).toBe(false);
   });
 
+  it('keys the history check by the tile, or by the guard key when tiles share one check', () => {
+    renderHook(() => usePreviousPeriod(options));
+    expect(callOf('HistoryReachesBack')[0][0]).toBe('tileHistoryReachesBack');
+
+    renderHook(() => usePreviousPeriod({ ...options, guardKey: 'shared' }));
+    expect(callOf('HistoryReachesBack')[0][0]).toBe('sharedHistoryReachesBack');
+    // The previous period stays per tile.
+    expect(callOf('PrevPeriod')[0][0]).toBe('tilePrevPeriod');
+  });
+
   it('checks the history first, and runs the previous period only once the history reaches back', () => {
     renderHook(() => usePreviousPeriod(options));
     expect(callOf('HistoryReachesBack')[2].enabled).toBe(true);
