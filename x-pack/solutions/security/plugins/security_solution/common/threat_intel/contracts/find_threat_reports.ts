@@ -29,8 +29,8 @@ export interface ThreatReportDiamondSummary {
 }
 
 /**
- * Usable-bar summary for find results: identity, title/body, IOCs, severity,
- * and optional Diamond.
+ * Summary projection for find results: identity, title/body, severity, optional
+ * Diamond, and any IOCs present (the list may be empty).
  */
 export interface ThreatReportSummary {
   reportId: string;
@@ -84,6 +84,7 @@ export const findThreatReportsQuerySchema = schema.object({
   from: schema.maybe(schema.string({ maxLength: 64 })),
   to: schema.maybe(schema.string({ maxLength: 64 })),
   usableOnly: schema.maybe(schema.boolean()),
+  indicatorEligibleOnly: schema.maybe(schema.boolean()),
   sort: schema.maybe(
     schema.string({
       maxLength: 32,
@@ -104,5 +105,6 @@ export interface FindThreatReportsQuery {
   from?: string;
   to?: string;
   usableOnly?: boolean;
+  indicatorEligibleOnly?: boolean;
   sort?: ThreatReportSort;
 }

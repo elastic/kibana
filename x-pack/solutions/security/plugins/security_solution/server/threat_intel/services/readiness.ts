@@ -19,7 +19,7 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
-import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
+import { HUNT_USABLE_FILTER } from '../lib/usable_report_filter';
 
 const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
 
@@ -154,7 +154,7 @@ const loadUsableStats = async ({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [buildSpaceFilterTerms(spaceId), USABLE_REPORT_FILTER],
+        filter: [buildSpaceFilterTerms(spaceId), HUNT_USABLE_FILTER],
       },
     },
     aggs: {

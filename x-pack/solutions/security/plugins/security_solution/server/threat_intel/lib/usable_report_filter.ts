@@ -8,12 +8,14 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 /**
- * Usable bar: title or body text, nested IOCs, and severity.level.
- * `extracted.iocs` is nested, so exists on the parent path matches nothing.
+ * Hunt-usable bar: supply finished the report (`lineage.extraction_method` is
+ * present and not `pending`), plus title or body text and severity.level.
+ * Denylist on `pending`, so `seeded` and any future adapter value count as finished.
  */
-export const USABLE_REPORT_FILTER: estypes.QueryDslQueryContainer = {
+export const HUNT_USABLE_FILTER: estypes.QueryDslQueryContainer = {
   bool: {
     filter: [
+      { exists: { field: 'lineage.extraction_method' } },
       {
         bool: {
           should: [
@@ -23,15 +25,22 @@ export const USABLE_REPORT_FILTER: estypes.QueryDslQueryContainer = {
           minimum_should_match: 1,
         },
       },
-      {
-        nested: {
-          path: 'extracted.iocs',
-          query: {
-            exists: { field: 'extracted.iocs.value' },
-          },
-        },
-      },
       { exists: { field: 'severity.level' } },
     ],
+    must_not: [{ term: { 'lineage.extraction_method': 'pending' } }],
+  },
+};
+
+/**
+ * Indicator-eligible bar: at least one nested IOC. Callers AND this with
+ * `HUNT_USABLE_FILTER`. `extracted.iocs` is nested, so exists on the parent
+ * path matches nothing.
+ */
+export const INDICATOR_ELIGIBLE_FILTER: estypes.QueryDslQueryContainer = {
+  nested: {
+    path: 'extracted.iocs',
+    query: {
+      exists: { field: 'extracted.iocs.value' },
+    },
   },
 };
