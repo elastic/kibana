@@ -8,6 +8,7 @@
 import {
   isAllowedBuiltinAttachment,
   isAllowedBuiltinTool,
+  isAllowedCycleHook,
   isAllowedSkillRegistration,
 } from './allow_lists';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
@@ -40,6 +41,7 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('security.alert')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.entity_graph')).toBe(true);
     expect(isAllowedBuiltinAttachment('observability.service-map')).toBe(true);
+    expect(isAllowedBuiltinAttachment('discover.session')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.anomaly_swimlane')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.anomaly_charts')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.single_metric_viewer')).toBe(true);
@@ -73,5 +75,12 @@ describe('isAllowedSkillRegistration', () => {
     expect(
       isAllowedSkillRegistration({ id: 'elasticsearch-esql', basePath: 'skills/search' })
     ).toBe(false);
+  });
+});
+
+describe('isAllowedCycleHook', () => {
+  it('rejects unlisted hook ids', () => {
+    expect(isAllowedCycleHook('not-a-hook')).toBe(false);
+    expect(isAllowedCycleHook('')).toBe(false);
   });
 });

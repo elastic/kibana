@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { HuntIncompleteReason, HuntIoc } from '../components/hunt.gen';
 
 /**
@@ -20,7 +20,7 @@ import { HuntIncompleteReason, HuntIoc } from '../components/hunt.gen';
  * Every timestamp is an ISO 8601 instant. `.datetime()` alone leaves the string unbounded,
  * and these arrive through attachment input, so cap them before the format check runs.
  */
-export const isoDatetimeSchema = lazySchema(() => z.string().max(64).datetime());
+export const isoDatetimeSchema = lazySchema(() => isoDateTime().max(64));
 
 const huntResultPerIndexSchema = lazySchema(() =>
   z.object({

@@ -14,6 +14,23 @@ components:
         Minimum confidence score (0–1) for the Alert Triage Worker to auto-close an alert
         as a false positive. Alerts below this threshold require human review.
 
+    BudgetPerHour:
+      type: integer
+      minimum: 10
+      maximum: 5000
+      description: >-
+        Triage work the sweep may plan per hour, in cost units (a batch costs a fixed overhead
+        plus a cost per alert). Scaled to the sweep interval, so changing the interval does not
+        change the hourly total.
+
+    LookbackHours:
+      type: integer
+      minimum: 1
+      maximum: 168
+      description: >-
+        How many hours back the sweep looks for alerts to triage. Older pending alerts are
+        tagged stale instead of analysed.
+
     AlertTriageWorkerExtras:
       type: object
       additionalProperties: false
@@ -22,6 +39,12 @@ components:
         Sent whole on write; a replacement missing a field is rejected.
       required:
         - autoCloseConfidenceScoreMinThreshold
+        - budgetPerHour
+        - lookbackHours
       properties:
         autoCloseConfidenceScoreMinThreshold:
           $ref: '#/components/schemas/AutoCloseConfidenceScoreMinThreshold'
+        budgetPerHour:
+          $ref: '#/components/schemas/BudgetPerHour'
+        lookbackHours:
+          $ref: '#/components/schemas/LookbackHours'

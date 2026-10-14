@@ -52,6 +52,64 @@ describe('GroupedAttachmentRow', () => {
     );
   });
 
+  it('toggles an expand action and keeps its caret in sync', () => {
+    const onToggle = jest.fn();
+    const { rerender } = render(
+      <GroupedAttachmentRow
+        iconType="storage"
+        iconColor="subdued"
+        title="checkout"
+        action={{ kind: 'expand', isExpanded: false, onToggle }}
+      >
+        <div>Body</div>
+      </GroupedAttachmentRow>
+    );
+
+    const row = screen.getByRole('button');
+    expect(row).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('groupedAttachmentRowAffordance')).toHaveAttribute(
+      'data-euiicon-type',
+      'arrowDown'
+    );
+    expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(row).toHaveAttribute('aria-controls', screen.getByText('Body').parentElement?.id);
+
+    fireEvent.click(row);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <GroupedAttachmentRow
+        iconType="storage"
+        iconColor="subdued"
+        title="checkout"
+        action={{ kind: 'expand', isExpanded: true, onToggle }}
+      />
+    );
+    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('groupedAttachmentRowAffordance')).toHaveAttribute(
+      'data-euiicon-type',
+      'arrowUp'
+    );
+  });
+
+  it('renders a static row with no control or affordance when there is no action', () => {
+    render(
+      <GroupedAttachmentRow
+        iconType="user"
+        iconColor="subdued"
+        title="jsmith"
+        subtitle="user"
+        data-test-subj="staticRow"
+      />
+    );
+
+    expect(screen.getByTestId('staticRow')).toHaveTextContent('jsmith');
+    expect(screen.getByText('user')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('groupedAttachmentRowAffordance')).not.toBeInTheDocument();
+  });
+
   it('shows no tooltip while the title fits', () => {
     render(
       <GroupedAttachmentRow

@@ -112,7 +112,6 @@ export const Default = {
           color: {
             type: 'loop',
           },
-          touched: false,
         },
       ],
       assignments: [],

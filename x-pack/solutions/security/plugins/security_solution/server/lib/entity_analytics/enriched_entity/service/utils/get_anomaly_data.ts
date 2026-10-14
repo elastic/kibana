@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
 import type { MlPluginSetup, MlSummaryJob } from '@kbn/ml-plugin/server';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
@@ -153,7 +153,10 @@ const getAnomalyDataFromMl = async ({
         return [];
       }
 
-      const euidEntityFilter = euid.dsl.getEuidFilterBasedOnDocument(entityType, entity);
+      const euidEntityFilter = euid.dsl.getEuidFilterBasedOnDocument(
+        getBuiltInEntityDefinition(entityType),
+        entity
+      );
       if (!euidEntityFilter) {
         return [];
       }

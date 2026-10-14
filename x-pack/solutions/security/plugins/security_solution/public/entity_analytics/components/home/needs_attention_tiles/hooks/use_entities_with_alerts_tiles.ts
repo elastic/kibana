@@ -28,8 +28,6 @@ interface AlertBasedTilesResult {
   severeAlertsEntityIds: string[];
   watchlistedCount: number;
   watchlistedEntityIds: string[];
-  newAlertingCount: number;
-  newAlertingEntityIds: string[];
 }
 
 const EMPTY_RESULT: AlertBasedTilesResult = {
@@ -37,8 +35,6 @@ const EMPTY_RESULT: AlertBasedTilesResult = {
   severeAlertsEntityIds: [],
   watchlistedCount: 0,
   watchlistedEntityIds: [],
-  newAlertingCount: 0,
-  newAlertingEntityIds: [],
 };
 
 export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
@@ -63,14 +59,12 @@ export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBase
     severeAlertsEntityIds: toIds(col('severe_alerts_entity_ids')),
     watchlistedCount: toCount(col('watchlisted_count')),
     watchlistedEntityIds: toIds(col('watchlisted_entity_ids')),
-    newAlertingCount: toCount(col('new_alerting_count')),
-    newAlertingEntityIds: toIds(col('new_alerting_entity_ids')),
   };
 };
 
 /**
  * Runs a single alerts query that produces counts and entity ID lists for the severely
- * alerting, watchlisted & alerting, and new & alerting tiles.
+ * alerting and the watchlisted & alerting tiles.
  *
  * Running one query rather than one per tile avoids executing the EUID pipeline several
  * times, which is expensive at high alert volumes. See buildAlertBasedTilesQuery for details.
@@ -148,11 +142,9 @@ export const useAlertBasedTiles = ({
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
       : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
-    newAlertingCount: queryResult?.newAlertingCount ?? 0,
-    newAlertingEntityIds: isFetching
-      ? EMPTY_ENTITY_IDS
-      : queryResult?.newAlertingEntityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading || isFetching,
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     error: filteredError ?? indexError,
   };
 };

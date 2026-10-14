@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { eslintCompatPlugin } from '@oxlint/plugins';
 import { StringsShouldBeTranslatedWithI18n } from './rules/strings_should_be_translated_with_i18n';
 import { StringsShouldBeTranslatedWithFormattedMessage } from './rules/strings_should_be_translated_with_formatted_message';
 import { I18nTranslateShouldStartWithTheRightId } from './rules/i18n_translate_should_start_with_the_right_id';
 import { FormattedMessageShouldStartWithTheRightId } from './rules/formatted_message_should_start_with_the_right_id';
 
 /**
- * Custom ESLint rules, add `'@kbn/eslint-plugin-i18n'` to your eslint config to use them
+ * Custom rules run by Oxlint through `oxlint_plugin.js`; `eslintCompatPlugin` keeps them loadable
+ * by ESLint as `'@kbn/eslint-plugin-i18n'`.
  * @internal
  */
-export const rules = {
-  strings_should_be_translated_with_i18n: StringsShouldBeTranslatedWithI18n,
-  strings_should_be_translated_with_formatted_message:
-    StringsShouldBeTranslatedWithFormattedMessage,
-  i18n_translate_should_start_with_the_right_id: I18nTranslateShouldStartWithTheRightId,
-  formatted_message_should_start_with_the_right_id: FormattedMessageShouldStartWithTheRightId,
-};
+export const { meta, rules } = eslintCompatPlugin({
+  meta: { name: '@kbn/i18n' },
+  rules: {
+    strings_should_be_translated_with_i18n: StringsShouldBeTranslatedWithI18n,
+    strings_should_be_translated_with_formatted_message:
+      StringsShouldBeTranslatedWithFormattedMessage,
+    i18n_translate_should_start_with_the_right_id: I18nTranslateShouldStartWithTheRightId,
+    formatted_message_should_start_with_the_right_id: FormattedMessageShouldStartWithTheRightId,
+  },
+});
