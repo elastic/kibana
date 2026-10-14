@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/evals",
+    "@kbn/security-evals-matrix",
     "@kbn/scout",
     "@kbn/agent-builder-common",
     "@kbn/tooling-log",

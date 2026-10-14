@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-endpoint
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/security-evals-matrix'
   - '@kbn/scout'
   - '@kbn/agent-builder-common'
   - '@kbn/tooling-log'

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/security-evals-workflow-traces'
   - '@kbn/evals'
+  - '@kbn/security-evals-matrix'
   - '@kbn/scout'
   - '@kbn/tooling-log'
   - '@kbn/agent-builder-common'

@@ -232,6 +232,42 @@ describe('createTrajectoryEvaluators', () => {
     }
   });
 
+  it('does not count Agent Builder runtime tools toward the call budget or order', async () => {
+    const { client } = esReturning([
+      SKILL,
+      'write_todos',
+      LABS,
+      CREATE,
+      'write_todos',
+      PREVIEW,
+      ATTACH_READ,
+      'sleep',
+      'write_todos',
+      'write_todos',
+    ]);
+    const results = await evaluateAll(client, result());
+    expect(results.map((r) => r.score)).toEqual([1, 1]);
+    expect(results[0].explanation).toContain('5 tool call(s)');
+  });
+
+  it('still scores a data-reaching internal tool explored after drafting', async () => {
+    const { client } = esReturning([SKILL, CREATE, 'execute_api', ATTACH_READ]);
+    const [, order] = await evaluateAll(client, result());
+    expect(order.score).toBe(0);
+    expect(order.explanation).toContain('explored after drafting: execute_api');
+  });
+
+  it('scores N/A on every series when a tool is unclassified, naming it', async () => {
+    const { client } = esReturning([SKILL, CREATE, 'brand_new_ab_tool', ATTACH_READ]);
+    for (const r of await evaluateAll(client, result())) {
+      expect(r).toMatchObject({
+        score: null,
+        label: 'N/A',
+        explanation: 'unclassified-tool:brand_new_ab_tool',
+      });
+    }
+  });
+
   it('scores null, not a number, when the span set never settled', async () => {
     const { client } = esWith((_q, call) => rows(Array(call).fill(SKILL)));
     for (const r of await evaluateAll(client, result(), 2)) {
