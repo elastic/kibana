@@ -14,7 +14,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
@@ -36,8 +36,7 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
 const createFeatureKISchema = lazySchema(() =>
   baseFeatureSchema.extend({
     slug: nightshiftSourceSlugField('The feature belongs to this source.'),
-    expires_at: z.iso
-      .datetime()
+    expires_at: isoDateTime()
       .optional()
       .describe(
         'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
