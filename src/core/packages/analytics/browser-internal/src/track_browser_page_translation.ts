@@ -12,14 +12,13 @@ import type { AnalyticsClient, RootSchema } from '@elastic/ebt/client';
 import type { Logger } from '@kbn/logging';
 
 /**
- * Which browser-translation signal fired. The values match the detectors in
- * translation-resilience (https://github.com/alexspeller/translation-resilience).
- * A page translator runs in an isolated world, so these are signals the shared
- * DOM raises. Nothing here patches Node.prototype.
+ * Which browser-translation signal fired. A page translator runs in an isolated
+ * world, so these are signals the shared DOM raises. Nothing here patches
+ * `Node.prototype` or shadows methods on `<html>`.
  */
 export type BrowserPageTranslationDetector =
   | 'chrome_html_class'
-  | 'firefox_lang'
+  | 'html_lang_changed'
   | 'font_signature';
 
 export interface BrowserPageTranslatedEvent {
@@ -33,9 +32,9 @@ const schema: RootSchema<BrowserPageTranslatedEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'Which signal showed that a browser translator is rewriting the page. ' +
+        'Which signal showed that a browser translator may be rewriting the page. ' +
         '`chrome_html_class`: `<html>` has the class `translated-ltr` or `translated-rtl`. ' +
-        '`firefox_lang`: `<html lang>` was written from outside the page. ' +
+        '`html_lang_changed`: `<html lang>` changed after the page loaded. Kibana sets `lang` in the server render, so that initial value is not reported. A later change can be Firefox or another script. ' +
         '`font_signature`: a translator `<font>` wrapper was inserted (Edge or the Google Translate extension). ' +
         'Reported at most once per page load. Does not include the page URL or any translated text.',
     },
@@ -46,31 +45,22 @@ const schema: RootSchema<BrowserPageTranslatedEvent> = {
 const TRANSLATED_HTML_CLASS = /(?:^|\s)translated-(?:ltr|rtl)(?:\s|$)/;
 
 /**
- * CSS for the same `<font>` signature `isTranslatorFont` checks. Edge and the
- * Google Translate extension never mark `<html>`; they only wrap text in these
- * fonts. A translator's isolated world does not call the page's DOM methods, so
- * the animation is what crosses that boundary. `!important` keeps a page-wide
- * `animation: none` from silencing it, and the keyframes do not change pixels.
+ * Edge and the Google Translate extension never mark `<html>`; they wrap text
+ * in `<font>`. A translator's isolated world does not call the page's DOM
+ * methods, so the animation is what crosses that boundary. The selector is the
+ * element name only: `font[style*="vertical-align"]` makes Chrome restyle the
+ * page on every inline style change, and this sheet stays installed until a
+ * translator is detected. `isTranslatorFont` checks the signature when
+ * `animationstart` fires. `!important` keeps a page-wide `animation: none`
+ * from silencing it, and the keyframes do not change pixels.
  */
-const TRANSLATOR_FONT_SELECTOR =
-  'font[_msttexthash],font[_msthash],font[_mstmutation],font[style*="vertical-align"]';
+const TRANSLATOR_FONT_SELECTOR = 'font';
 
 const DETECTION_ANIMATION_NAME = 'kbn-browser-page-translation-detect';
 
 const DETECTION_CSS =
   `@keyframes ${DETECTION_ANIMATION_NAME}{from{opacity:1}to{opacity:1}}` +
   `${TRANSLATOR_FONT_SELECTOR}{animation-duration:1ms!important;animation-name:${DETECTION_ANIMATION_NAME}!important}`;
-
-const ATTRIBUTE_WRITE_METHODS = [
-  'setAttribute',
-  'setAttributeNS',
-  'removeAttribute',
-  'removeAttributeNS',
-  'toggleAttribute',
-  'setAttributeNode',
-  'setAttributeNodeNS',
-  'removeAttributeNode',
-] as const;
 
 function hasTranslatedClass(html: Element): boolean {
   return TRANSLATED_HTML_CLASS.test(html.getAttribute('class') ?? '');
@@ -95,89 +85,6 @@ function runGuarded(logger: Logger, action: string, fn: () => void): void {
     const reason = error instanceof Error ? error.message : String(error);
     logger.error(`Failed to ${action}: ${reason}`);
   }
-}
-
-/**
- * Page code reaches `<html>` through these own-property wrappers. A browser
- * translator writes from its isolated world and never sees them, so a `lang`
- * change that arrives any other way is Firefox starting a translation.
- * Kibana's own locale is set on `<html>` from the server render and from
- * these same page objects, and must not count.
- */
-function trackPageLangWrites(html: Element, asPageWrite: <T>(write: () => T) => T): () => void {
-  const restore: Array<() => void> = [];
-  const undoAll = () => {
-    for (const undo of restore.splice(0)) {
-      undo();
-    }
-  };
-
-  const shadow = (key: string, descriptor: PropertyDescriptor): void => {
-    const previous = Object.getOwnPropertyDescriptor(html, key);
-    Object.defineProperty(html, key, descriptor);
-    restore.push(() => {
-      if (previous) {
-        Object.defineProperty(html, key, previous);
-      } else {
-        Reflect.deleteProperty(html, key);
-      }
-    });
-  };
-
-  try {
-    for (const methodName of ATTRIBUTE_WRITE_METHODS) {
-      const original = html[methodName] as unknown as (
-        this: Element,
-        ...args: unknown[]
-      ) => unknown;
-      if (typeof original !== 'function') {
-        continue;
-      }
-      const wrapper = function (this: Element, ...args: unknown[]): unknown {
-        const invoke = () => Reflect.apply(original, this, args);
-        return this === html ? asPageWrite(invoke) : invoke();
-      };
-      shadow(methodName, {
-        configurable: true,
-        enumerable: false,
-        writable: true,
-        value: wrapper,
-      });
-    }
-
-    const langDescriptor = inheritedLangDescriptor(html);
-    const getLang = langDescriptor?.get;
-    const setLang = langDescriptor?.set;
-    if (getLang && setLang) {
-      const set = function (this: Element, value: string): void {
-        if (this === html) {
-          asPageWrite(() => {
-            setLang.call(this, value);
-          });
-        } else {
-          setLang.call(this, value);
-        }
-      };
-      shadow('lang', { configurable: true, enumerable: false, get: getLang, set });
-    }
-  } catch (error) {
-    undoAll();
-    throw error;
-  }
-
-  return undoAll;
-}
-
-function inheritedLangDescriptor(html: Element): PropertyDescriptor | undefined {
-  let current: object | null = Object.getPrototypeOf(html);
-  while (current) {
-    const descriptor = Object.getOwnPropertyDescriptor(current, 'lang');
-    if (descriptor?.get && descriptor.set) {
-      return descriptor;
-    }
-    current = Object.getPrototypeOf(current);
-  }
-  return undefined;
 }
 
 /**
@@ -253,7 +160,7 @@ export function trackBrowserPageTranslation(
     });
   };
 
-  const onRecords = (records: MutationRecord[], pageWrite: boolean) => {
+  const onRecords = (records: MutationRecord[]) => {
     if (stopped) {
       return;
     }
@@ -261,8 +168,10 @@ export function trackBrowserPageTranslation(
       report('chrome_html_class');
       return;
     }
-    if (!pageWrite && records.some((record) => record.attributeName === 'lang')) {
-      report('firefox_lang');
+    // Kibana sets `<html lang>` in the server render, before this observer exists.
+    // Any change after load is reported, including Firefox and other scripts.
+    if (records.some((record) => record.attributeName === 'lang')) {
+      report('html_lang_changed');
     }
   };
 
@@ -270,29 +179,13 @@ export function trackBrowserPageTranslation(
     try {
       const sentinel = new MutationObserver((records) => {
         runGuarded(logger, 'read browser translation markers on <html>', () => {
-          onRecords(records, false);
+          onRecords(records);
         });
       });
       teardowns.push(() => {
         sentinel.disconnect();
       });
       sentinel.observe(html, { attributes: true, attributeFilter: ['lang', 'class'] });
-
-      const asPageWrite = <T>(write: () => T): T => {
-        const queued = sentinel.takeRecords();
-        if (queued.length > 0) {
-          onRecords(queued, false);
-        }
-        try {
-          return write();
-        } finally {
-          const own = sentinel.takeRecords();
-          if (own.length > 0) {
-            onRecords(own, true);
-          }
-        }
-      };
-      teardowns.push(trackPageLangWrites(html, asPageWrite));
 
       teardowns.push(installDetectionStylesheet(doc));
 

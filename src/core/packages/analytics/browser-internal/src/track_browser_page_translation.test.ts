@@ -68,14 +68,6 @@ function writeAttributeFromOutside(element: Element, name: string, value: string
   Element.prototype.setAttribute.call(element, name, value);
 }
 
-function writeLangFromOutside(element: Element, value: string): void {
-  const descriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'lang');
-  if (!descriptor?.set) {
-    throw new Error('HTMLElement.prototype.lang setter is missing');
-  }
-  descriptor.set.call(element, value);
-}
-
 describe('trackBrowserPageTranslation', () => {
   const removeChild = Node.prototype.removeChild;
   const insertBefore = Node.prototype.insertBefore;
@@ -137,7 +129,9 @@ describe('trackBrowserPageTranslation', () => {
         detector: {
           type: 'keyword',
           _meta: {
-            description: expect.stringContaining('once per page load'),
+            description: expect.stringMatching(
+              /chrome_html_class[\s\S]*html_lang_changed[\s\S]*font_signature/
+            ),
           },
         },
       },
@@ -152,19 +146,16 @@ describe('trackBrowserPageTranslation', () => {
     expect(Node.prototype.insertBefore).toBe(insertBefore);
     expect(Node.prototype.appendChild).toBe(appendChild);
     expect(Element.prototype.setAttribute).toBe(setAttribute);
-    expect(Object.prototype.hasOwnProperty.call(html, 'setAttribute')).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(html, 'setAttribute')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(html, 'lang')).toBe(false);
   });
 
-  test('does not report Kibana setting its own locale on <html>', async () => {
+  test('does not report the server-rendered locale', async () => {
     html.setAttribute('lang', 'de');
     start();
-    html.setAttribute('lang', 'fr');
-    html.lang = 'ja';
-    html.setAttributeNS(null, 'lang', 'es');
-    html.removeAttribute('lang');
     await flushMutations();
 
-    expect(html.getAttribute('lang')).toBeNull();
+    expect(html.getAttribute('lang')).toBe('de');
     expect(analytics.reportEvent).not.toHaveBeenCalled();
   });
 
@@ -199,13 +190,12 @@ describe('trackBrowserPageTranslation', () => {
     start();
 
     html.setAttribute('class', 'translated-ltr');
+    await flushMutations();
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(analytics.reportEvent).toHaveBeenCalledWith('browser_page_translated', {
       detector: 'chrome_html_class',
     });
-    await flushMutations();
-    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
   });
 
   test('reports chrome_html_class immediately when the page is already translated', () => {
@@ -219,27 +209,27 @@ describe('trackBrowserPageTranslation', () => {
     });
   });
 
-  test('reports firefox_lang when lang is written from outside the page', async () => {
+  test('reports html_lang_changed when lang changes after load', async () => {
     start();
 
-    writeAttributeFromOutside(html, 'lang', 'de');
+    html.setAttribute('lang', 'de');
     await flushMutations();
 
     expect(html.getAttribute('lang')).toBe('de');
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(analytics.reportEvent).toHaveBeenCalledWith('browser_page_translated', {
-      detector: 'firefox_lang',
+      detector: 'html_lang_changed',
     });
   });
 
-  test('reports firefox_lang when the lang setter is called from outside the page', async () => {
+  test('reports html_lang_changed when the lang property changes after load', async () => {
     start();
 
-    writeLangFromOutside(html, 'ja');
+    html.lang = 'ja';
     await flushMutations();
 
     expect(analytics.reportEvent).toHaveBeenCalledWith('browser_page_translated', {
-      detector: 'firefox_lang',
+      detector: 'html_lang_changed',
     });
   });
 
@@ -255,13 +245,14 @@ describe('trackBrowserPageTranslation', () => {
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
   });
 
-  test('installs a stylesheet for translator font signatures', () => {
+  test('installs a font animation that does not depend on the style attribute', () => {
     start();
 
-    expect(detectionCss(doc)).toContain('font[_msttexthash]');
-    expect(detectionCss(doc)).toContain('font[_msthash]');
-    expect(detectionCss(doc)).toContain('font[_mstmutation]');
-    expect(detectionCss(doc)).toContain('vertical-align');
+    const css = detectionCss(doc);
+    expect(css).toContain(detectionAnimationName(doc));
+    expect(css).toMatch(/font\s*\{/);
+    expect(css).not.toContain('vertical-align');
+    expect(css).not.toContain('_mst');
   });
 
   test('does not report when a signature font is inserted without the detection animation', async () => {
@@ -328,7 +319,7 @@ describe('trackBrowserPageTranslation', () => {
     subscription = undefined;
 
     writeAttributeFromOutside(html, 'class', 'translated-ltr');
-    writeLangFromOutside(html, 'de');
+    html.lang = 'de';
     await flushMutations();
 
     expect(Object.prototype.hasOwnProperty.call(html, 'setAttribute')).toBe(false);
