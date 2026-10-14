@@ -7,11 +7,18 @@ This package has no public API; it is a dev-only collection of scripts.
 
 ## Layout
 
-- `lib/` — internal helpers shared by the generators (clearing doc directives).
-- `definitions/` — generate the ES|QL function, command and settings definitions consumed by
+- `generate.ts` — entry point: renders every generated file in one process and writes it.
+- `generated_files.ts` — runs the renderers and formats their output; shared by `generate.ts` and
+  `generated_files.test.ts`.
+- `definitions/` — render the ES|QL function, command and settings definitions consumed by
   `@kbn/esql-language`.
-- `documentation/` — generate the inline ES|QL function and command docs consumed by
+- `documentation/` — render the inline ES|QL function and command docs consumed by
   `@kbn/language-documentation`.
+- `lib/` — internal helpers shared by the generators (the generated file type, license header,
+  prettier formatting and writing; clearing doc directives).
+
+Each generator exports a `render*()` function that returns `{ path, content }[]` without writing
+anything; only `generate.ts` writes to disk.
 
 ## Input
 
@@ -31,12 +38,18 @@ enrichments, and the name enums.
 
 ```sh
 # from this package directory
-pnpm make:defs   # function/command/settings definitions
-pnpm make:docs   # inline function/command documentation
+pnpm generate    # everything
+pnpm make:defs   # only the function/command/settings definitions
+pnpm make:docs   # only the inline function/command documentation
 ```
 
-Both commands run `eslint --fix` on the generated files afterwards. Run
-`node scripts/i18n_check --fix` from the repository root when descriptions change.
+The generated files are written in their final form (license header, prettier formatting), so no
+lint pass is needed afterwards. Run `node scripts/i18n_check --fix` from the repository root when
+descriptions change.
+
+`generated_files.test.ts` renders everything in memory and fails when a committed file differs from
+the generators' output or when an output directory contains a file the generators no longer
+produce. If it fails, run `pnpm generate` and commit the result.
 
 ## Updating the definitions
 
@@ -46,7 +59,7 @@ version in the root `package.json`, matching the `@elastic/esql` suite `catalog:
 
 1. Bump both packages in the root `package.json` and the `catalog:` entries in `pnpm-workspace.yaml`
    to the same version, then run `node scripts/kbn bootstrap`.
-2. Run `pnpm make:defs` and `pnpm make:docs` from this package directory.
+2. Run `pnpm generate` from this package directory.
 3. Run `node scripts/i18n_check --fix` from the repository root and commit the result.
 
 The `esql_generate_function_metadata` Buildkite job

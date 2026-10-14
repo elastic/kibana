@@ -53,13 +53,9 @@ main () {
 
   cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
-  report_main_step "Generate function definitions"
+  report_main_step "Generate function definitions and inline docs"
 
-  pnpm make:defs
-
-  report_main_step "Generate inline function docs"
-
-  pnpm make:docs
+  pnpm generate
 
   report_main_step "Run i18n check"
 
