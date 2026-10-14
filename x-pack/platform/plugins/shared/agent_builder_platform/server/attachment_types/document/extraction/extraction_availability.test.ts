@@ -8,100 +8,97 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DOCUMENT_EXTRACTION_ENDPOINT_ID } from './constants';
+import { createDocumentExtractionAvailability } from './extraction_availability';
 
 jest.mock('./constants', () => ({
   ...jest.requireActual('./constants'),
   USE_FAKE_EXTRACTION: false,
 }));
 
-type ExtractionAvailabilityModule = typeof import('./extraction_availability');
-
-const loadFreshModule = (): ExtractionAvailabilityModule => {
-  let loaded: ExtractionAvailabilityModule | undefined;
-  jest.isolateModules(() => {
-    loaded = jest.requireActual('./extraction_availability');
-  });
-  if (!loaded) throw new Error('Could not load the module');
-  return loaded;
-};
-
 const createEsClient = (get: jest.Mock) =>
   ({ inference: { get } } as unknown as ElasticsearchClient);
 
 describe('document extraction availability', () => {
   const logger = loggingSystemMock.createLogger();
+  const createAvailability = () => createDocumentExtractionAvailability({ logger });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('is not available before the check runs', () => {
-    const { isDocumentExtractionAvailable } = loadFreshModule();
-    expect(isDocumentExtractionAvailable()).toBe(false);
+    const { isAvailable } = createAvailability();
+    expect(isAvailable()).toBe(false);
   });
 
   it('is available when the endpoint is found', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
-      loadFreshModule();
+    const { check, isAvailable } = createAvailability();
     const get = jest.fn(async () => ({
       endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
     }));
 
-    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
+    await check(createEsClient(get));
 
     expect(get).toHaveBeenCalledWith({ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID });
-    expect(isDocumentExtractionAvailable()).toBe(true);
+    expect(isAvailable()).toBe(true);
   });
 
   it('is not available when ES returns no endpoints', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
-      loadFreshModule();
+    const { check, isAvailable } = createAvailability();
     const get = jest.fn(async () => ({ endpoints: [] }));
 
-    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
+    await check(createEsClient(get));
 
-    expect(isDocumentExtractionAvailable()).toBe(false);
+    expect(isAvailable()).toBe(false);
   });
 
   it('is not available when the endpoint is not found (404)', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
-      loadFreshModule();
+    const { check, isAvailable } = createAvailability();
     const get = jest.fn(async () => {
       throw Object.assign(new Error('not found'), { statusCode: 404 });
     });
 
-    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
+    await check(createEsClient(get));
 
-    expect(isDocumentExtractionAvailable()).toBe(false);
+    expect(isAvailable()).toBe(false);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('is not available and logs a warning for any other error', async () => {
-    const { checkDocumentExtractionAvailability, isDocumentExtractionAvailable } =
-      loadFreshModule();
+    const { check, isAvailable } = createAvailability();
     const get = jest.fn(async () => {
       throw Object.assign(new Error('server error'), { statusCode: 500 });
     });
 
-    await checkDocumentExtractionAvailability({ esClient: createEsClient(get), logger });
+    await check(createEsClient(get));
 
-    expect(isDocumentExtractionAvailable()).toBe(false);
+    expect(isAvailable()).toBe(false);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('server error'));
   });
 
   it('checks only once', async () => {
-    const { checkDocumentExtractionAvailability } = loadFreshModule();
+    const { check } = createAvailability();
     const get = jest.fn(async () => ({
       endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
     }));
     const esClient = createEsClient(get);
 
-    await Promise.all([
-      checkDocumentExtractionAvailability({ esClient, logger }),
-      checkDocumentExtractionAvailability({ esClient, logger }),
-    ]);
-    await checkDocumentExtractionAvailability({ esClient, logger });
+    await Promise.all([check(esClient), check(esClient)]);
+    await check(esClient);
 
     expect(get).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the state separate for each instance', async () => {
+    const first = createAvailability();
+    const second = createAvailability();
+    const get = jest.fn(async () => ({
+      endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
+    }));
+
+    await first.check(createEsClient(get));
+
+    expect(first.isAvailable()).toBe(true);
+    expect(second.isAvailable()).toBe(false);
   });
 });

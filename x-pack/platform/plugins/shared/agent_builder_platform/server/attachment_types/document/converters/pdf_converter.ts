@@ -9,19 +9,21 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { documentErrors } from '../errors';
 import { extractDocument } from '../extraction/extract_document';
-import { isDocumentExtractionAvailable } from '../extraction/extraction_availability';
+import type { DocumentExtractionAvailability } from '../extraction/extraction_availability';
 import type { DocumentConverter } from './types';
 
 const PDF_HEADER = '%PDF-';
 
 export const createPdfConverter = ({
   getEsClient,
+  extractionAvailability,
   logger,
 }: {
   getEsClient: () => Promise<ElasticsearchClient>;
+  extractionAvailability: DocumentExtractionAvailability;
   logger: Logger;
 }): DocumentConverter => ({
-  isAvailable: isDocumentExtractionAvailable,
+  isAvailable: extractionAvailability.isAvailable,
   toText: async ({ bytes, fileId, fileName, signal }) => {
     if (bytes.subarray(0, PDF_HEADER.length).toString('latin1') !== PDF_HEADER) {
       throw documentErrors.invalidContent();

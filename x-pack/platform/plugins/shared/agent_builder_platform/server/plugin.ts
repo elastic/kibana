@@ -23,7 +23,8 @@ import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
 import { createDocumentConverters } from './attachment_types/document/converters';
-import { checkDocumentExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
+import type { DocumentExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
+import { createDocumentExtractionAvailability } from './attachment_types/document/extraction/extraction_availability';
 import { registerDocumentSupportedTypesRoute } from './routes/document_supported_types';
 
 export class AgentBuilderPlatformPlugin
@@ -36,6 +37,7 @@ export class AgentBuilderPlatformPlugin
     >
 {
   private logger: Logger;
+  private documentExtractionAvailability?: DocumentExtractionAvailability;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
@@ -53,9 +55,15 @@ export class AgentBuilderPlatformPlugin
       const [coreStart] = await coreSetup.getStartServices();
       return coreStart.elasticsearch.client.asInternalUser;
     };
+    const documentExtractionLogger = this.logger.get('document-extraction');
+    const extractionAvailability = createDocumentExtractionAvailability({
+      logger: documentExtractionLogger,
+    });
+    this.documentExtractionAvailability = extractionAvailability;
     const documentConverters = createDocumentConverters({
       getEsClient,
-      logger: this.logger.get('document-extraction'),
+      extractionAvailability,
+      logger: documentExtractionLogger,
     });
     registerAttachmentTypes({
       coreSetup,
@@ -98,10 +106,7 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
-    void checkDocumentExtractionAvailability({
-      esClient: coreStart.elasticsearch.client.asInternalUser,
-      logger: this.logger.get('document-extraction'),
-    });
+    void this.documentExtractionAvailability?.check(coreStart.elasticsearch.client.asInternalUser);
 
     return {
       tracingFeatures: {
