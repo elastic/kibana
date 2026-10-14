@@ -2558,7 +2558,7 @@ Object {
       },
       "metas": Array [
         Object {
-          "x-oas-max-length": 1024,
+          "x-oas-max-length": 10000,
         },
         Object {
           "x-oas-optional": true,
@@ -2940,7 +2940,7 @@ Object {
       },
       "metas": Array [
         Object {
-          "x-oas-max-length": 1024,
+          "x-oas-max-length": 10000,
         },
         Object {
           "x-oas-optional": true,
