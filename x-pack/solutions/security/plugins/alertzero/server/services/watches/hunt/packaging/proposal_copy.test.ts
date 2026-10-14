@@ -33,6 +33,7 @@ const serviceSubject: Subject = { kind: 'service', value: 'escalated-role', reac
 
 const setAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Set asset criticality',
   category: 'respond',
   subjects: ['user', 'service'],
@@ -40,30 +41,35 @@ const setAssetCriticality: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
 };
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
 };
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
 };
 
 const memoryDump: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-memory-dump',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Dump memory of process',
   category: 'investigate',
 };
 
 const configureSomething: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Configure something',
   category: 'configure',
 };

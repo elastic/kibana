@@ -6,7 +6,7 @@ Consumed by AlertZero (Security) and intended for Nightshift (Observability). No
 
 ## What belongs here, and what does not
 
-This plugin owns the record, the decision, and the guarantee that an approved action runs **as the approver**. It does not decide what to propose, when to propose it, or whether autonomy allows skipping the human gate — a Worker does all three.
+This plugin owns the record, the decision, and the guarantee that an approved action runs under the right identity: **as the approver** when a human approved it, and **as the caller's service account** when it was auto-approved. It does not decide what to propose, when to propose it, or whether autonomy allows skipping the human gate — a Worker does all three.
 
 ## Layout
 
@@ -362,9 +362,11 @@ The flag is a request, not a guarantee. The gate skips the human decision only w
 
 1. `autoApprove` is `true`;
 2. `actionWorkflowId` is set — autonomy governs whether an *action* may run unattended, and a proposal with no action has none to govern, so it is always gated regardless of the flag;
-3. the action does not declare `approvalPolicy: always-gate`.
+3. the action declares `approvalPolicy: autonomy-dependent`.
 
 An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs.
+
+**An auto-approved action runs as the caller's service account.** With no approver to run as, `execute_as_worker` inherits the calling execution's identity (`run-as-mode: inherit`, restricted to workflows tagged `action`). `autoApprove: true` therefore needs a caller that is itself running as a service account: otherwise `execute_as_worker` fails, the failure is recorded, and the clone parks for a human like any other failed action.
 
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
