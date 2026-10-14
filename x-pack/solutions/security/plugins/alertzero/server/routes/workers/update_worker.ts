@@ -28,21 +28,6 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
   WorkerEnableBlockedReason,
   (displayName: string) => string
 > = {
-  alertAnalysisWorkflowDisabled: () =>
-    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
-      defaultMessage:
-        'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
-    }),
-  alertAnalysisRuntimeDisabled: () =>
-    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisRuntimeDisabledErrorMessage', {
-      defaultMessage:
-        'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
-    }),
-  ruleAttachmentUnavailable: () =>
-    i18n.translate('xpack.alertzero.alertTriageRuleAttachmentUnavailableErrorMessage', {
-      defaultMessage:
-        'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
-    }),
   huntSupplyPrerequisitesUnmet: () =>
     i18n.translate('xpack.alertzero.huntSupplyPrerequisitesUnmetErrorMessage', {
       defaultMessage:

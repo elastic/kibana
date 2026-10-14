@@ -27,6 +27,7 @@ const ebtElement = {
   aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
   aiIndexDetailPageKiListPanel: 'contextEngine.aiIndexDetailPage.kiListPanel',
+  viewKiPage: 'contextEngine.viewKiPage',
   aiIndexEditFlyoutSourcePicker: 'contextEngine.aiIndexEditFlyout.sourcePicker',
   aiIndexDetailFlyout: 'contextEngine.aiIndexDetailFlyout',
   aiIndexDetailFlyoutSignalGroup: 'contextEngine.aiIndexDetailFlyout.signalGroup',
@@ -108,6 +109,10 @@ const ebtAction = {
     LOAD_MORE: 'load_more_ki',
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',
     TOGGLE_ROW: 'toggle_row',
+  },
+  viewKi: {
+    TAB_DETAILS: 'tab_details',
+    TAB_DOCUMENT: 'tab_document',
   },
 } as const;
 

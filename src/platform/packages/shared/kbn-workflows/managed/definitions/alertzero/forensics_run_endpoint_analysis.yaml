@@ -355,11 +355,11 @@ steps:
             on-failure:
               continue: true
             agent-id: alertzero-thin-agent
-            # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-            # Agentic rather than reasoning: this is a tool-driven reconstruction that
+            # Keep in sync with ALERTZERO_BALANCED_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+            # Balanced rather than frontier: this is a tool-driven reconstruction that
             # iterates over telemetry and then calls the action catalog, so its cost scales
             # with the round count rather than with one long answer.
-            connector-id-by-feature: alertzero_agentic
+            connector-id-by-feature: alertzero_balanced
             # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
             plugin-id: alertzero_endpoint_analysis
             aggregate-by: alertzero_parent

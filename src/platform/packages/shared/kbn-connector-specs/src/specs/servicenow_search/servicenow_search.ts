@@ -16,6 +16,7 @@
  * - Retrieve individual records by sys_id
  * - List records from any ServiceNow table with filtering
  * - Download attachment content as base64
+ * - Inbound incident, journal, and change-approval events
  *
  * Requires OAuth2 client credentials authentication.
  */
@@ -47,6 +48,7 @@ import {
   QueryUsersInputSchema,
   WhoAmIInputSchema,
 } from './types';
+import { servicenowSearchEvents } from './events';
 import type {
   SearchInput,
   GetRecordInput,
@@ -767,6 +769,8 @@ export const ServicenowSearch: ConnectorSpec = {
     'Use whoAmI to get the sys_id and details of the authenticated connector user.',
     'Useful for populating caller_id with the connector account or verifying permissions.',
   ].join('\n'),
+
+  events: servicenowSearchEvents,
 
   test: {
     enabled: true,

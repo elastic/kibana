@@ -336,6 +336,26 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
+### Choosing the agent's reasoning level
+
+A built-in agent can declare the reasoning level its runs use by default:
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.my_solution.agent',
+  name: 'My solution agent',
+  description: 'Agent specialized in my solution',
+  configuration: {
+    instructions: 'You are a specialist [...]',
+    tools: [{ tool_ids: ['[...]'] }],
+    inference_feature_id: 'my_solution_agent',
+    reasoning_level: 'high',
+  },
+});
+```
+
+`reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.
@@ -1300,7 +1320,7 @@ Pending attachments added through `agentBuilder.addAttachment(...)` can include 
 
 ## Events
 
-The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (currently the active conversation binding).
+The `agentBuilder` start contract exposes observables on the `events` namespace that let plugins react to the chat surface lifecycle through `events.ui` (currently the active conversation binding), follow per-conversation chat event streams, and react to the API state changes the agent makes.
 
 ### Observing sidebar open state
 
@@ -1403,6 +1423,52 @@ All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddabl
 or full-page chat), and the UI generates a client-side conversation UUID before
 each request. Plugins consuming this contract have access to that id via
 `events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
+
+### Reacting to `execute_api` state changes
+
+The agent can create, update and delete resources through the `execute_api` tool. To keep a page
+in sync with those changes without parsing the tool's result, pipe a chat event stream through the
+`filterApiStateChanges({ apis })` operator from `@kbn/agent-builder-browser`.
+
+After each successful call to an API that is not read-only, `execute_api` emits a `tool_ui` event
+whose `custom_event` is `API_STATE_CHANGED_UI_EVENT` (`'api_state_changed'`). The read-only flag
+comes from the API registry in `@elastic/schemas`, so creates, updates, deletes and side-effecting
+`GET`s are reported, while read-only `POST`s such as `esql.query` are not. Only conversation runs
+report changes, while standalone executions (such as workflow steps) that run an agent outside a
+conversation don't emit the event, and sub-agent and background runs don't forward their tool
+events to the browser. The payload is `ApiStateChangedEventData`:
+
+- `target` - `'kibana'` or `'elasticsearch'`
+- `api` - the operation id, e.g. `cases.create-case`
+- `method` - the HTTP method the call was dispatched with
+- `path` - the request path, with path parameters resolved
+
+The operator only filters, so the source stream decides which conversations you hear from. Pipe
+`getChatEvents$(conversationId)` for a known conversation, or the `ui.activeConversation$` and
+`switchMap` pattern above to follow the conversation the user is focused on. Events are live and not
+replayed to late subscribers, so keep fetching fresh data when your view mounts. The `apis` option
+selects operations per target with `*`, a namespace wildcard such as `cases.*`, or an exact
+operation id.
+
+```ts
+import { filterApiStateChanges } from '@kbn/agent-builder-browser';
+
+useEffect(() => {
+  const subscription = agentBuilder.events.ui.activeConversation$
+    .pipe(
+      map((activeConversation) => activeConversation?.id),
+      filter((conversationId): conversationId is string => conversationId != null),
+      distinctUntilChanged(),
+      switchMap((conversationId) => agentBuilder.events.getChatEvents$(conversationId)),
+      filterApiStateChanges({ apis: [{ target: 'kibana', api: 'cases.*' }] })
+    )
+    .subscribe(() => {
+      queryClient.invalidateQueries({ queryKey: ['cases', 'list'], exact: true });
+    });
+
+  return () => subscription.unsubscribe();
+}, [agentBuilder.events, queryClient]);
+```
 
 ## Registering skills
 

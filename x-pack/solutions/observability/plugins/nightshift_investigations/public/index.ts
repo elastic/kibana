@@ -31,5 +31,3 @@ export type {
   NightshiftInvestigationsAPIReturnType,
   NightshiftInvestigationsAPIClientRequestParamsOf,
 } from './api';
-export { InvestigationDetailFlyout, InvestigationRunStatusBadge } from './components';
-export type { InvestigationDetailFlyoutProps } from './components';
