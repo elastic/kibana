@@ -204,11 +204,11 @@ export const createDetectionRulesClient = ({
     },
 
     async bulkDeleteRules({
-      ruleIds,
+      rules,
       changeTracking,
     }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
       return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
-        return bulkDeleteRules({ rulesClient, ruleIds, changeTracking });
+        return bulkDeleteRules({ rulesClient, rules, changeTracking });
       });
     },
 
@@ -274,7 +274,7 @@ export const createDetectionRulesClient = ({
         if (analytics) {
           sendRuleImportTelemetryEvents(
             analytics,
-            result.successes.map(({ telemetry }) => telemetry),
+            result.successes.map(({ telemetry, outcome }) => ({ ...telemetry, outcome })),
             logger
           );
         }

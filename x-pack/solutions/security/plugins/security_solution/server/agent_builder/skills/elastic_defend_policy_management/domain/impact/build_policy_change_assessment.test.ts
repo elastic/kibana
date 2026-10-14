@@ -7,10 +7,13 @@
 
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import moment from 'moment';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import {
+  AntivirusRegistrationModes,
   ProtectionModes,
+  PolicyOperatingSystem,
   DeviceControlAccessLevel,
   type PolicyConfig,
 } from '../../../../../../common/endpoint/types';
@@ -18,6 +21,7 @@ import { createEndpointPolicySnapshot } from '../endpoint_policy_snapshot';
 import { normalizeEndpointPolicy } from '../normalized_endpoint_policy';
 import { buildPolicyChangeAssessment } from './build_policy_change_assessment';
 import type { PolicyChangeCapabilities } from './build_policy_change_assessment';
+import type { ProtectionSettingWeakenedSetting } from './policy_change_operation';
 
 const generator = new FleetPackagePolicyGenerator();
 
@@ -53,7 +57,68 @@ const createPolicy = (
   return normalizeEndpointPolicy(createEndpointPolicySnapshot(packagePolicy));
 };
 
+const weakenedSettingCases: ReadonlyArray<{
+  path: string;
+  value: unknown;
+  setting: ProtectionSettingWeakenedSetting;
+  os: readonly PolicyOperatingSystem[];
+  text: string;
+  stored?: PolicyConfig;
+}> = [
+  {
+    path: 'windows.malware.blocklist',
+    value: false,
+    setting: 'malware.blocklist',
+    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+    text: 'Malware blocklist on Windows, macOS, Linux is turned off.',
+  },
+  {
+    path: 'windows.malware.on_write_scan',
+    value: false,
+    setting: 'malware.on_write_scan',
+    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+    text: 'Scan files upon modification on Windows, macOS, Linux is turned off.',
+  },
+  {
+    path: 'windows.behavior_protection.reputation_service',
+    value: false,
+    setting: 'behavior_protection.reputation_service',
+    os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+    text: 'Reputation service on Windows, macOS, Linux is turned off.',
+    stored: policyFactory({ cloud: true }),
+  },
+  {
+    path: 'windows.attack_surface_reduction.credential_hardening.enabled',
+    value: false,
+    setting: 'attack_surface_reduction.credential_hardening.enabled',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Credential hardening on Windows is turned off.',
+  },
+  {
+    path: 'windows.antivirus_registration.mode',
+    value: AntivirusRegistrationModes.disabled,
+    setting: 'antivirus_registration.mode',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Antivirus registration on Windows changes to Disabled.',
+  },
+];
+
 describe('buildPolicyChangeAssessment', () => {
+  it.each(weakenedSettingCases)(
+    'warns when the weakened protection sub-setting $setting is changed',
+    ({ path, value, setting, os, text, stored }) => {
+      const assessment = buildPolicyChangeAssessment(
+        createPolicy(stored ?? policyFactory()),
+        [{ op: 'set_field', path, value }],
+        capabilities()
+      );
+
+      expect(assessment.advisories).toEqual([
+        { code: 'protection_setting_weakened', setting, os, text },
+      ]);
+    }
+  );
+
   it('attributes a save-blocking manifest to the direct path and one global blocker', () => {
     const stored = policyFactory();
     stored.windows.malware.mode = ProtectionModes.prevent;
@@ -181,5 +246,108 @@ describe('buildPolicyChangeAssessment', () => {
 
     expect(assessment.changes[0]?.eligibility).toEqual({ eligible: true });
     expect(assessment.globalBlockers).toEqual([{ reason: 'managed_policy_not_writable' }]);
+  });
+
+  it('reports only the malware protection advisory when malware is turned off', () => {
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(policyFactory()),
+      [{ op: 'set_protection_enabled', protection: 'malware', enabled: false }],
+      capabilities()
+    );
+
+    expect(assessment.advisories).toEqual([
+      {
+        code: 'protection_weakened',
+        protection: 'malware',
+        os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+        to: 'off',
+        text: 'Malware protection on Windows, macOS, Linux is turned off: this protection no longer detects or blocks threats.',
+      },
+    ]);
+  });
+
+  it('still warns about a weakened sub-setting when its parent protection only changes to Detect', () => {
+    const stored = policyFactory();
+    stored.windows.malware.mode = ProtectionModes.prevent;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [
+        { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect },
+        { op: 'set_field', path: 'windows.malware.blocklist', value: false },
+      ],
+      capabilities()
+    );
+
+    expect(assessment.advisories).toEqual([
+      {
+        code: 'protection_weakened',
+        protection: 'malware',
+        os: [PolicyOperatingSystem.windows],
+        to: 'detect',
+        text: 'Malware protection on Windows changes to Detect: this protection generates alerts but does not block threats.',
+      },
+      {
+        code: 'protection_setting_weakened',
+        setting: 'malware.blocklist',
+        os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+        text: 'Malware blocklist on Windows, macOS, Linux is turned off.',
+      },
+    ]);
+  });
+
+  it('lists only the OS whose protection mode weakens for set_protection_level', () => {
+    const stored = policyFactory();
+    stored.windows.malware.mode = ProtectionModes.prevent;
+    stored.mac.malware.mode = ProtectionModes.off;
+    stored.linux.malware.mode = ProtectionModes.detect;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_protection_level', protection: 'malware', mode: ProtectionModes.detect }],
+      capabilities()
+    );
+
+    expect(assessment.advisories).toEqual([
+      {
+        code: 'protection_weakened',
+        protection: 'malware',
+        os: [PolicyOperatingSystem.windows],
+        to: 'detect',
+        text: 'Malware protection on Windows changes to Detect: this protection generates alerts but does not block threats.',
+      },
+    ]);
+  });
+
+  it('advises a stale protection-updates pin only when the pinned date is at least 30 days old', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-06-15T00:00:00.000Z'));
+    try {
+      const stale = moment.utc().subtract(45, 'days').format('YYYY-MM-DD');
+      const fresh = moment.utc().subtract(10, 'days').format('YYYY-MM-DD');
+
+      const staleAssessment = buildPolicyChangeAssessment(
+        createPolicy(policyFactory()),
+        [{ op: 'set_field', path: 'global_manifest_version', value: stale }],
+        capabilities()
+      );
+      const freshAssessment = buildPolicyChangeAssessment(
+        createPolicy(policyFactory()),
+        [{ op: 'set_field', path: 'global_manifest_version', value: fresh }],
+        capabilities()
+      );
+
+      expect(staleAssessment.advisories).toEqual([
+        {
+          code: 'global_manifest_version_stale',
+          value: stale,
+          ageDays: 45,
+          text: `Protection artifacts pinned to ${stale} are 45 days old. Elastic recommends keeping protection artifacts up to date. After 18 months, protection artifacts expire and cannot be rolled back.`,
+        },
+      ]);
+      expect(freshAssessment.advisories).toEqual([]);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

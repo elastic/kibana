@@ -12,7 +12,11 @@ import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
+import type {
+  AuditLogger,
+  AuditServiceSetup,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
@@ -40,9 +44,8 @@ import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
-  serviceAccountIdSchema,
-  serviceAccountNameSchema,
 } from '../../common/service_accounts';
+import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 import {
@@ -54,16 +57,6 @@ import {
   type UiamServiceAccountDetails,
   type UiamServicePublic,
 } from '../uiam';
-
-/**
- * The fields of UIAM's response that cross the contract boundary. The rest of the payload is
- * deliberately unvalidated: Kibana neither consumes nor reports it, so a shape change there is
- * not Kibana's to detect.
- */
-const serviceAccountSchema = z.object({
-  id: serviceAccountIdSchema,
-  name: serviceAccountNameSchema,
-});
 
 /**
  * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
@@ -152,6 +145,7 @@ export interface UiamServiceAccountsOptions {
   license: SecurityLicense;
   uiam: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  audit: AuditServiceSetup;
   cloudProjectContext: CloudProjectContext;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
@@ -161,6 +155,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  private readonly audit: AuditServiceSetup;
   private readonly cloudProjectContext: CloudProjectContext;
   private readonly getCurrentUser: UiamServiceAccountsOptions['getCurrentUser'];
   private readonly fakeRequests: ServiceAccountFakeRequests;
@@ -171,6 +166,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     license,
     uiam,
     checkPrivilegesWithRequest,
+    audit,
     cloudProjectContext,
     getCurrentUser,
   }: UiamServiceAccountsOptions) {
@@ -178,6 +174,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.license = license;
     this.uiam = uiam;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
+    this.audit = audit;
     this.cloudProjectContext = cloudProjectContext;
     this.getCurrentUser = getCurrentUser;
     this.fakeRequests = new ServiceAccountFakeRequests(
@@ -196,14 +193,23 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     request: KibanaRequest,
     params: CreateServiceAccountParams
   ): Promise<ServiceAccount> {
+    const auditLogger = this.audit.asScoped(request);
     try {
-      const account = await this.createAccount(request, params);
+      const account = await this.createAccount(request, params, auditLogger);
+      auditLogger.log(
+        serviceAccountAuditEvent({
+          action: ServiceAccountAuditAction.CREATE,
+          serviceAccount: { id: account.id, name: account.name },
+        })
+      );
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'success',
         serviceAccountBackend: 'uiam',
       });
       return account;
     } catch (e) {
+      // An authorization refusal is the one failure audited, and `createAccount` logs it where
+      // it happens.
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'failure',
         serviceAccountBackend: 'uiam',
@@ -212,9 +218,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
+  /** `auditLogger` records an authorization refusal. */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountParams,
+    auditLogger: AuditLogger
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -235,6 +243,14 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       logger: this.logger,
       privilege: 'manage_security',
       action: 'create a service account',
+      onRefused: (error) =>
+        auditLogger.log(
+          serviceAccountAuditEvent({
+            action: ServiceAccountAuditAction.CREATE,
+            serviceAccount: { name },
+            error,
+          })
+        ),
     });
 
     this.logger.debug('Attempting to create a service account');
@@ -263,22 +279,17 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       throw getCreateRefusal(e) ?? e;
     }
 
-    // Validated outside the block above, so a refusal to report the account is not logged a
-    // second time as a failure to create it. By this point the account does exist.
-    const parsed = serviceAccountSchema.safeParse(result);
-    if (!parsed.success) {
-      // Returning an id or a name Kibana just rejected would be worse than failing, so name the
-      // account in the log: nothing else can find it now.
-      this.logger.error(
-        `UIAM reported the created service account [${name}] in an unrecognized shape. It may ` +
-          `need to be removed manually: ${parsed.error.message}`
-      );
-      throw Boom.badGateway('The service account was created but could not be reported back.');
-    }
-
-    // The roles are echoed from the request rather than read back. UIAM stores them as sent, and
-    // the directory reads the same roles out of its role assignments on list and get.
-    return { ...parsed.data, roles, ...toDescriptionField(result.description) };
+    // By this point the account exists, so the response is taken as typed rather than re-checked:
+    // refusing to report an account Kibana just created would leave the audit event, and the
+    // caller, describing a failure that did not happen. The roles are echoed from the request
+    // rather than read back. UIAM stores them as sent, and the directory reads the same roles out
+    // of its role assignments on list and get.
+    return {
+      id: result.id,
+      name: result.name,
+      roles,
+      ...toDescriptionField(result.description),
+    };
   }
 
   async list(

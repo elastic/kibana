@@ -14,7 +14,7 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
-CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
+. "$DIR/bin/kibana_env"
 
 test_node() {
   test -x "$NODE"
@@ -59,9 +59,6 @@ BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
 # Opt out by setting KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false.
 if [ "$KBN_DISALLOW_CODE_GEN_FROM_STRINGS" != 'false' ]; then
   BASE_NODE_OPTIONS="$BASE_NODE_OPTIONS --disallow-code-generation-from-strings"
-fi
-if [ -f "${CONFIG_DIR}/node.options" ]; then
-  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 # Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 # For now only on POSIX platforms, term signals work differently on Windows.

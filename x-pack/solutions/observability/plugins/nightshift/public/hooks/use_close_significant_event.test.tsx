@@ -27,7 +27,7 @@ const event: SignificantEvent = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
   event_id: 'event-1',
   status: 'active',
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   title: 'Checkout latency',
   summary: 'Checkout latency increased.',
   severity: 'critical',

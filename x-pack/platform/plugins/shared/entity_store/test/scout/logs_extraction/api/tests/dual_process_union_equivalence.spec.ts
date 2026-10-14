@@ -26,6 +26,7 @@ import {
   forceLogExtraction,
   getStatus,
   installAllEntityTypes,
+  installEntityStoreSuiteWithKbnClient,
   LOGS_TEST_INDEX,
   setupLogsTestDataStream,
   startAllEntityTypes,
@@ -154,6 +155,32 @@ const countByIdPrefix = async (esClient: EsClient, prefix: string): Promise<numb
   const response = await esClient.count({
     index: LATEST_ALIAS,
     query: { prefix: { 'entity.id': prefix } },
+  });
+  return response.count;
+};
+
+/**
+ * Counts entities of `idPrefix` whose single log's timestamp is at or after `sinceISO`. Each
+ * sampling-corpus local user has a distinct, strictly increasing timestamp by index, so this
+ * isolates users by index range without relying on lexicographic prefix matching (which does not
+ * sort numeric suffixes in numeric order - e.g. "dp-sample-local-9" also matches "...-900").
+ */
+const countByIdPrefixSince = async (
+  esClient: EsClient,
+  prefix: string,
+  sinceISO: string
+): Promise<number> => {
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
+  const response = await esClient.count({
+    index: LATEST_ALIAS,
+    query: {
+      bool: {
+        filter: [
+          { prefix: { 'entity.id': prefix } },
+          { range: { 'entity.lifecycle.last_seen': { gte: sinceISO } } },
+        ],
+      },
+    },
   });
   return response.count;
 };
@@ -326,14 +353,22 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
   });
 
   apiTest.afterAll(async ({ apiClient, apiServices, esClient, kbnClient }) => {
-    await uninstallAllEntityTypes(apiClient, publicHeaders).catch(() => {});
-    await clearEntityStoreIndices(esClient);
-    await teardownLogsTestDataStream(esClient);
-    // `null` removes the override, see per_process_config.spec.ts.
-    await apiServices.core.settings({
-      'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
-    });
-    await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+    try {
+      await uninstallAllEntityTypes(apiClient, publicHeaders).catch(() => {});
+      await waitForStoreNotInstalled(apiClient, publicHeaders);
+      await clearEntityStoreIndices(esClient);
+      await teardownLogsTestDataStream(esClient);
+      // `null` removes the override, see per_process_config.spec.ts.
+      await apiServices.core.settings({
+        'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
+      });
+    } finally {
+      // This spec uninstalls the shared suite install so it can assert a fresh
+      // install. Put that install back before the rest of the logs suite runs.
+      await installEntityStoreSuiteWithKbnClient({ kbnClient });
+      const start = await startAllEntityTypes(apiClient, publicHeaders);
+      expect(start.statusCode).toBe(200);
+    }
   });
 
   apiTest(
@@ -431,7 +466,9 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
   // first run, not of the newest and oldest log. Priority then non-priority over an activity log
   // older than the asset log swaps this user's lifecycle and takes the older name. Accepted in
   // https://github.com/elastic/kibana/issues/294432; this pins it so a merge change shows up here.
-  apiTest(
+  // Failing: See https://github.com/elastic/kibana/issues/296316
+  // eslint-disable-next-line playwright/no-skipped-test
+  apiTest.skip(
     'dual-process: run order decides newest and oldest values',
     async ({ apiClient, apiServices, esClient }) => {
       await setDualProcess(apiServices, false);
@@ -498,6 +535,57 @@ apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_ST
         (await setUserConfig(apiClient, { nonPriorityOverride: { samplingRate: null } })).statusCode
       ).toBe(200);
       expect((await userEngine(apiClient)).nonPriority?.samplingRate).toBeNull();
+
+      await uninstall(apiClient, esClient);
+    }
+  );
+
+  // No `samplingRate` override here - the dynamic trigger alone must engage, confirming it
+  // tracks the configured `maxLogsPerWindow` rather than a hardcoded default.
+  apiTest(
+    'flag on: a lowered maxLogsPerWindow engages sampling dynamically, without an override',
+    async ({ apiClient, apiServices, esClient }) => {
+      await setDualProcess(apiServices, true);
+      await install(apiClient, true);
+
+      expect(
+        (await setUserConfig(apiClient, { nonPriorityOverride: { maxLogsPerWindow: 400 } }))
+          .statusCode
+      ).toBe(200);
+      expect((await userEngine(apiClient)).nonPriority?.samplingRate).toBeNull();
+
+      await extract(apiClient, 'user', 'priority', SAMPLING_WINDOW);
+      await extract(apiClient, 'user', 'nonPriority', SAMPLING_WINDOW);
+
+      // Priority never samples, regardless of the non-priority cap.
+      expect(await countByIdPrefix(esClient, 'user:dp-sample-okta-')).toBe(SAMPLING_ASSET_USERS);
+
+      // A 400 cap over ~1000 projected logs should sample about 40% (~400 users). SAMPLE is
+      // random, so exact counts vary - but far outside this range means sampling either didn't
+      // engage at all (~1000, rate stuck at 1) or dropped to the 0.1 floor (~100) instead of
+      // tracking the 400 cap.
+      const sampled = await countByIdPrefix(esClient, 'user:dp-sample-local-');
+      expect(sampled).toBeGreaterThanOrEqual(150);
+      expect(sampled).toBeLessThanOrEqual(650);
+      expect(sampled).toBeLessThan(SAMPLING_LOCAL_USERS);
+
+      // The count alone does not prove sampling ran: the 400 cap also bounds page size, so an
+      // unsampled extraction would stop after ingesting the first ~400 users in order and land
+      // in the same [150, 650] range by coincidence. Local users are indexed by a strictly
+      // increasing timestamp, so a sequential cutoff at ~400 could never include index 500+.
+      // Finding some here only happens if SAMPLE genuinely picked users at random from across
+      // the whole corpus.
+      const sampledPastIndex500 = await countByIdPrefixSince(
+        esClient,
+        'user:dp-sample-local-',
+        '2026-02-10T15:08:20.000Z'
+      );
+      expect(sampledPastIndex500).toBeGreaterThan(0);
+
+      expect(
+        (await setUserConfig(apiClient, { nonPriorityOverride: { maxLogsPerWindow: null } }))
+          .statusCode
+      ).toBe(200);
 
       await uninstall(apiClient, esClient);
     }

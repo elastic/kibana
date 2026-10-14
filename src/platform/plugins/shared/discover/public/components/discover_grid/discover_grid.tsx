@@ -15,7 +15,6 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { DataSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -27,8 +26,8 @@ import {
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
+  filters?: DiscoverAppState['filters'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
-  dataSource?: DataSource;
 }
 
 /**
@@ -38,6 +37,8 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
+    filters,
+    queryContext: providedQueryContext,
     cascadedDocumentsContext,
     dataSource,
     externalAdditionalControls: customExternalAdditionalControls,
@@ -46,6 +47,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     ...props
   }) => {
     const { dataView } = props;
+    const queryContext = useMemo(
+      () => providedQueryContext ?? { query, filters },
+      [providedQueryContext, query, filters]
+    );
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
       return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView, dataSource });
@@ -91,7 +96,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     });
 
     const isCascadedDocumentsAvailable =
-      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+      dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls: ReactNode[] = [];
@@ -146,6 +151,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        queryContext={queryContext}
+        dataSource={dataSource}
         getRowIndicator={getRowIndicator}
       />
     );

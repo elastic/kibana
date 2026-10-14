@@ -349,11 +349,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe.skip('propagates context for TSVB visualizations', () => {
+      describe('propagates context for Vega visualizations', () => {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId('agg_based:metrics:bcb63b50-4c89-11e8-b3d7-01146121b73d'),
+            predicate: checkHttpRequestId('agg_based:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'),
           });
         });
 
@@ -361,129 +361,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await logContains({
             description: 'execution context propagates to Kibana logs',
             predicate: checkExecutionContextEntry({
+              type: 'dashboard',
               name: 'dashboards',
               url: '/app/dashboards',
-              type: 'application',
               page: 'app',
+              id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
               description: '[Flights] Global Flight Dashboard',
+              space: 'default',
               child: {
                 type: 'agg_based',
-                name: 'metrics',
-                id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
-                description: '[Flights] Delays & Cancellations',
-                url: '/app/visualize#/edit/bcb63b50-4c89-11e8-b3d7-01146121b73d',
-              },
-            }),
-          });
-        });
-      });
-
-      describe.skip('propagates context for Vega visualizations', () => {
-        // CHECKPOINT this is the test that failed and caused the global .skip()
-        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await logContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId(
-              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:vega:ed78a660-53a0-11e8-acbd-0be0ad9d822b'
-            ),
-          });
-        });
-
-        it('propagates to Kibana logs', async () => {
-          await logContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: checkExecutionContextEntry({
-              name: 'dashboards',
-              url: '/app/dashboards',
-              type: 'application',
-              child: {
-                name: 'dashboards',
-                url: '/app/dashboards',
-                type: 'dashboard',
-                page: 'app',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                child: {
-                  type: 'agg_based',
-                  name: 'vega',
-                  id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
-                  description: '[Flights] Airport Connections (Hover Over Airport)',
-                  url: '/app/visualize#/edit/ed78a660-53a0-11e8-acbd-0be0ad9d822b',
-                },
-              },
-            }),
-          });
-        });
-      });
-
-      describe.skip('propagates context for Tag Cloud visualization', () => {
-        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await logContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId(
-              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:tagcloud:293b5a30-4c8f-11e8-b3d7-01146121b73d'
-            ),
-          });
-        });
-
-        it('propagates to Kibana logs', async () => {
-          await logContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: checkExecutionContextEntry({
-              name: 'dashboards',
-              url: '/app/dashboards',
-              type: 'application',
-              child: {
-                name: 'dashboards',
-                url: '/app/dashboards',
-                type: 'dashboard',
-                page: 'app',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                child: {
-                  type: 'agg_based',
-                  name: 'tagcloud',
-                  id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Destination Weather',
-                  url: '/app/visualize#/edit/293b5a30-4c8f-11e8-b3d7-01146121b73d',
-                },
-              },
-            }),
-          });
-        });
-      });
-
-      describe.skip('propagates context for Vertical bar visualization', () => {
-        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await logContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId(
-              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;agg_based:histogram:9886b410-4c8b-11e8-b3d7-01146121b73d'
-            ),
-          });
-        });
-
-        it('propagates to Kibana logs', async () => {
-          await logContains({
-            description: 'execution context propagates to Kibana logs',
-            predicate: checkExecutionContextEntry({
-              type: 'application',
-              name: 'dashboards',
-              url: '/app/dashboards',
-              child: {
-                type: 'dashboard',
-                name: 'dashboards',
-                url: '/app/dashboards',
-                page: 'app',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                child: {
-                  type: 'agg_based',
-                  name: 'histogram',
-                  id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Delay Buckets',
-                  url: '/app/visualize#/edit/9886b410-4c8b-11e8-b3d7-01146121b73d',
-                },
+                name: 'vega',
+                id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
+                description: '[Flights] Airport Connections (Hover Over Airport)',
               },
             }),
           });
