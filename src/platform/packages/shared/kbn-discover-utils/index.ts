@@ -33,6 +33,7 @@ export {
   buildDataTableRecord,
   buildDataTableRecordList,
   convertValueToString,
+  convertSourceToString,
   createLogsContextService,
   createApmContextService,
   createDegradedDocsControl,

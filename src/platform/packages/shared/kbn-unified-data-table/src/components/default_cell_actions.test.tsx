@@ -13,6 +13,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import {
   buildCellActions,
+  buildSummaryColumnCellActions,
   buildCopyValueButton,
   FilterInBtn,
   FilterOutBtn,
@@ -308,7 +309,6 @@ describe('Default cell actions ', () => {
         >
           <ReverseCategorizeBtn
             cellActionProps={createCellActionProps({ columnId: SOURCE_COLUMN })}
-            field={{ name: SOURCE_COLUMN } as unknown as DataViewField}
             uiActions={
               { executeTriggerActions, hasAction: () => true } as unknown as UiActionsStart
             }
@@ -337,13 +337,10 @@ describe('Default cell actions ', () => {
     });
 
     it('is added to the cell actions of the summary column', () => {
-      const cellActions = buildCellActions(
-        { name: SOURCE_COLUMN, esTypes: [] } as unknown as DataViewField,
+      const cellActions = buildSummaryColumnCellActions(
         servicesMock.toastNotifications,
         dataTableContextMock.valueToStringConverter,
         'table',
-        undefined,
-        undefined,
         undefined,
         { hasAction: () => true } as unknown as UiActionsStart,
         { isTimeBased: () => true } as never

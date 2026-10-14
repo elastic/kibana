@@ -32,7 +32,7 @@ import type {
   UnifiedDataTableSettings,
 } from '../types';
 import type { ValueToStringConverter } from '../types';
-import { buildCellActions } from './default_cell_actions';
+import { buildCellActions, buildSummaryColumnCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, getSelectAllButton } from './data_table_document_selection';
 import {
@@ -204,19 +204,6 @@ function buildEuiGridColumn({
 
   const isSorted = sortedColumns?.some((column) => column.id === columnName);
 
-  // The summary column is not backed by a data view field in every data view, e.g. an ES|QL
-  // one. It still shows the cell actions of the document.
-  const cellActionsField =
-    dataViewField ??
-    (columnName === SOURCE_COLUMN
-      ? dataView.fields.create({
-          name: SOURCE_COLUMN,
-          type: '_source',
-          searchable: false,
-          aggregatable: false,
-        })
-      : undefined);
-
   let cellActions: EuiDataGridColumnCellAction[];
 
   if (disableCellActions) {
@@ -225,19 +212,32 @@ function buildEuiGridColumn({
     if (columnCellActions?.length && cellActionsHandling === 'replace') {
       cellActions = columnCellActions;
     } else {
-      cellActions = cellActionsField
-        ? buildCellActions(
-            cellActionsField,
-            toastNotifications,
-            valueToStringConverter,
-            documentsDisplayMode,
-            onFilter,
-            dataGridRef,
-            hideFilteringOnComputedColumns,
-            uiActions,
-            dataView
-          )
-        : EMPTY_CELL_ACTIONS;
+      // The summary column represents the whole document. It is not backed by a data view
+      // field in every data view, e.g. an ES|QL one, so it has its own cell actions.
+      if (columnName === SOURCE_COLUMN) {
+        cellActions = buildSummaryColumnCellActions(
+          toastNotifications,
+          valueToStringConverter,
+          documentsDisplayMode,
+          dataGridRef,
+          uiActions,
+          dataView
+        );
+      } else {
+        cellActions = dataViewField
+          ? buildCellActions(
+              dataViewField,
+              toastNotifications,
+              valueToStringConverter,
+              documentsDisplayMode,
+              onFilter,
+              dataGridRef,
+              hideFilteringOnComputedColumns,
+              uiActions,
+              dataView
+            )
+          : EMPTY_CELL_ACTIONS;
+      }
 
       if (columnCellActions?.length && cellActionsHandling === 'append') {
         cellActions.push(...columnCellActions);

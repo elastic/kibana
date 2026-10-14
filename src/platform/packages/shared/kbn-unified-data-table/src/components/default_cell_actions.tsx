@@ -138,7 +138,8 @@ export const ReverseCategorizeBtn = ({
   uiActions,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
-  field: DataViewField;
+  /** The field of the column. Not needed for the summary column, which uses its message field. */
+  field?: DataViewField;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   uiActions?: UiActionsStart;
 }) => {
@@ -230,6 +231,35 @@ export function buildCopyValueButton(
   );
 }
 
+export function buildSummaryColumnCellActions(
+  toastNotifications: ToastsStart,
+  valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
+  uiActions?: UiActionsStart,
+  dataView?: DataView
+) {
+  const showReverseCategorize =
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
+    dataView?.isTimeBased() === true;
+
+  return [
+    ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
+      buildCopyValueButton(
+        { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
+        toastNotifications,
+        valueToStringConverter,
+        documentsDisplayMode
+      ),
+    ...(showReverseCategorize
+      ? [
+          (cellActionProps: EuiDataGridColumnCellActionProps) =>
+            ReverseCategorizeBtn({ cellActionProps, dataGridRef, uiActions }),
+        ]
+      : []),
+  ];
+}
+
 export function buildCellActions(
   field: DataViewField,
   toastNotifications: ToastsStart,
@@ -248,7 +278,7 @@ export function buildCellActions(
   });
 
   const showReverseCategorize =
-    (field.esTypes?.includes('text') === true || field.name === SOURCE_COLUMN) &&
+    field.esTypes?.includes('text') === true &&
     uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
     dataView?.isTimeBased() === true;
 
